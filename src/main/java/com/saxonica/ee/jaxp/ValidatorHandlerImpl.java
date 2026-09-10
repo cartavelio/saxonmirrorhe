@@ -4,11 +4,11 @@ import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.sdoc.LSSchemaResolver;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.ReceivingContentHandler;
+import net.sf.saxon.lib.ErrorReporter;
 import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.*;
 import org.xml.sax.ext.LexicalHandler;
 
-import javax.xml.transform.ErrorListener;
 import javax.xml.transform.URIResolver;
 import javax.xml.validation.TypeInfoProvider;
 import javax.xml.validation.ValidatorHandler;
@@ -97,6 +97,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
      *
      * @param receiver A {@link org.xml.sax.ContentHandler} or a null value.
      */
+    @Override
     public void setContentHandler(ContentHandler receiver) {
         finalProxy.setUnderlyingContentHandler(receiver);
     }
@@ -111,6 +112,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
      *         has created.
      * @see #setContentHandler(org.xml.sax.ContentHandler)
      */
+    @Override
     public ContentHandler getContentHandler() {
         return finalProxy.getUnderlyingContentHandler();
     }
@@ -122,12 +124,13 @@ public class ValidatorHandlerImpl extends ValidatorHandler
      * @param errorHandler A new error handler to be set. This parameter can be null.
      */
 
+    @Override
     public void setErrorHandler(ErrorHandler errorHandler) {
         if (errorHandler == null) {
             errorHandler = SchemaFactoryImpl.DRACONIAN_ERROR_HANDLER;
         }
-        ErrorListener el = new SchemaFactoryImpl.ErrorListenerWrappingErrorHandler(errorHandler);
-        pipe.setErrorListener(el);
+        ErrorReporter el = new SchemaFactoryImpl.ErrorReporterWrappingErrorHandler(errorHandler);
+        pipe.setErrorReporter(el);
     }
 
     /**
@@ -138,10 +141,11 @@ public class ValidatorHandlerImpl extends ValidatorHandler
      *         if that method has never been called
      * @see #setErrorHandler(org.xml.sax.ErrorHandler)
      */
+    @Override
     public ErrorHandler getErrorHandler() {
-        ErrorListener el = pipe.getErrorListener();
-        if (el instanceof SchemaFactoryImpl.ErrorListenerWrappingErrorHandler) {
-            ErrorHandler eh = ((SchemaFactoryImpl.ErrorListenerWrappingErrorHandler) el).getErrorHandler();
+        ErrorReporter el = pipe.getErrorReporter();
+        if (el instanceof SchemaFactoryImpl.ErrorReporterWrappingErrorHandler) {
+            ErrorHandler eh = ((SchemaFactoryImpl.ErrorReporterWrappingErrorHandler) el).getErrorHandler();
             return eh == SchemaFactoryImpl.DRACONIAN_ERROR_HANDLER ? null : eh;
         } else {
             return null;
@@ -154,6 +158,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
      *
      * @param resourceResolver A new resource resolver to be set. This parameter can be null.
      */
+    @Override
     public void setResourceResolver(LSResourceResolver resourceResolver) {
         pipe.setURIResolver(new URIResourceResolver(resourceResolver));
         pipe.setSchemaURIResolver(new LSSchemaResolver(resourceResolver, pipe.getConfiguration()));
@@ -167,6 +172,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
      *         if that method has never been called
      */
     /*@Nullable*/
+    @Override
     public LSResourceResolver getResourceResolver() {
         URIResolver u = pipe.getURIResolver();
         if (u instanceof URIResourceResolver) {
@@ -184,6 +190,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
      *
      * @return A non-null valid {@link javax.xml.validation.TypeInfoProvider}.
      */
+    @Override
     public TypeInfoProvider getTypeInfoProvider() {
         return finalProxy.getTypeInfoProvider();
     }
@@ -195,6 +202,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
      *                any SAX document event
      * @see org.xml.sax.Locator
      */
+    @Override
     public void setDocumentLocator(Locator locator) {
         next.setDocumentLocator(locator);
     }
@@ -226,6 +234,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
      * @see #setProperty(String, Object)
      */
 
+    @Override
     public Object getProperty(String name) throws SAXNotRecognizedException, SAXNotSupportedException {
         try {
             return pipe.getConfiguration().getConfigurationProperty(name);
@@ -258,6 +267,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
      *                              cannot set the requested value.
      * @throws NullPointerException When the name parameter is null.
      */
+    @Override
     public void setProperty(String name, Object object) throws SAXNotRecognizedException, SAXNotSupportedException {
         try {
             pipe.getConfiguration().setConfigurationProperty(name, object);
@@ -286,6 +296,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
      *                                  wrapping another exception
      * @see #endDocument
      */
+    @Override
     public void startDocument() throws SAXException {
         next.startDocument();
     }
@@ -296,6 +307,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
      * @throws org.xml.sax.SAXException any SAX exception, possibly
      *                                  wrapping another exception
      */
+    @Override
     public void endDocument() throws SAXException {
         next.endDocument();
     }
@@ -314,6 +326,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
      * @see #endPrefixMapping
      * @see #startElement
      */
+    @Override
     public void startPrefixMapping(String prefix, String uri) throws SAXException {
         next.startPrefixMapping(prefix, uri);
     }
@@ -326,6 +339,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
      * @throws org.xml.sax.SAXException the client may throw
      *                                  an exception during processing
      */
+    @Override
     public void endPrefixMapping(String prefix) throws SAXException {
         next.endPrefixMapping(prefix);
     }
@@ -348,6 +362,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
      * @throws org.xml.sax.SAXException any SAX exception, possibly
      *                                  wrapping another exception
      */
+    @Override
     public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
         next.startElement(uri, localName, qName, atts);
     }
@@ -355,6 +370,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
     /**
      * Receive notification of the end of an element.
      */
+    @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
         next.endElement(uri, localName, qName);
     }
@@ -363,6 +379,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
      * Receive notification of character data.
      */
 
+    @Override
     public void characters(char ch[], int start, int length) throws SAXException {
         next.characters(ch, start, length);
     }
@@ -370,6 +387,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
     /**
      * Receive notification of ignorable whitespace in element content.
      */
+    @Override
     public void ignorableWhitespace(char ch[], int start, int length) throws SAXException {
         next.ignorableWhitespace(ch, start, length);
     }
@@ -377,6 +395,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
     /**
      * Receive notification of a processing instruction.
      */
+    @Override
     public void processingInstruction(String target, String data) throws SAXException {
         next.processingInstruction(target, data);
     }
@@ -384,6 +403,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
     /**
      * Receive notification of a skipped entity.
      */
+    @Override
     public void skippedEntity(String name) throws SAXException {
         next.skippedEntity(name);
     }
@@ -391,6 +411,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
     /**
      * Report the start of DTD declarations, if any.
      */
+    @Override
     public void startDTD(String name, String publicId, String systemId) throws SAXException {
         next.startDTD(name, publicId, systemId);
     }
@@ -398,6 +419,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
     /**
      * Report the end of DTD declarations.
      */
+    @Override
     public void endDTD() throws SAXException {
         next.endDTD();
     }
@@ -405,6 +427,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
     /**
      * Report the beginning of some internal and external XML entities.
      */
+    @Override
     public void startEntity(String name) throws SAXException {
         next.startEntity(name);
     }
@@ -412,6 +435,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
     /**
      * Report the end of an entity.
      */
+    @Override
     public void endEntity(String name) throws SAXException {
         next.endEntity(name);
     }
@@ -419,6 +443,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
     /**
      * Report the start of a CDATA section.
      */
+    @Override
     public void startCDATA() throws SAXException {
         next.startCDATA();
     }
@@ -426,6 +451,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
     /**
      * Report the end of a CDATA section.
      */
+    @Override
     public void endCDATA() throws SAXException {
         next.endCDATA();
     }
@@ -433,6 +459,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
     /**
      * Report an XML comment anywhere in the document.
      */
+    @Override
     public void comment(char ch[], int start, int length) throws SAXException {
         next.comment(ch, start, length);
     }
@@ -440,6 +467,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
     /**
      * Receive notification of a notation declaration event.
      */
+    @Override
     public void notationDecl(String name, String publicId, String systemId) throws SAXException {
         next.notationDecl(name, publicId, systemId);
     }
@@ -447,9 +475,10 @@ public class ValidatorHandlerImpl extends ValidatorHandler
     /**
      * Receive notification of an unparsed entity declaration event.
      */
+    @Override
     public void unparsedEntityDecl(String name, String publicId, String systemId, String notationName) throws SAXException {
         next.unparsedEntityDecl(name, publicId, systemId, notationName);
     }
 }
 
-// Copyright (c) 2004-6 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

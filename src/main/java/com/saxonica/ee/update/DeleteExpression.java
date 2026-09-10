@@ -65,6 +65,7 @@ public class DeleteExpression extends BasicUpdatingExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         typeCheckChildren(visitor, contextInfo);
 
@@ -85,6 +86,7 @@ public class DeleteExpression extends BasicUpdatingExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         DeleteExpression d2 = new DeleteExpression(getTargetExp().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, d2);
@@ -98,6 +100,7 @@ public class DeleteExpression extends BasicUpdatingExpression {
      * @param out the expression presenter used to display the structure
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("delete", this);
         getTargetExp().export(out);
@@ -114,6 +117,7 @@ public class DeleteExpression extends BasicUpdatingExpression {
      * @param pul     the pending update list to which the results should be written
      */
 
+    @Override
     public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
         SequenceIterator iter = getTargetExp().iterate(context);
         NodeInfo node;
@@ -159,4 +163,4 @@ public class DeleteExpression extends BasicUpdatingExpression {
 
 }
 
-// Copyright (c) 2008-2009 Saxonica Limited.
+// Copyright (c) 2008-2020 Saxonica Limited

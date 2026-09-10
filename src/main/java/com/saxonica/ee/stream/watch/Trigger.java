@@ -1,13 +1,13 @@
 package com.saxonica.ee.stream.watch;
 
-import com.saxonica.ee.stream.feed.Feed;
+import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.om.FleetingNode;
 import com.saxonica.ee.stream.om.FleetingParentNode;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.QuitParsingException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
@@ -19,12 +19,12 @@ import net.sf.saxon.type.Type;
 
 public class Trigger extends PatternWatch {
 
-    private Feed action;
+    private ItemFeed action;
     private XPathContext selectionContext;
     private boolean matchCurrentGroup = false;
 
 
-    public Trigger(Pattern selection, Feed action, XPathContext selectionContext) {
+    public Trigger(Pattern selection, ItemFeed action, XPathContext selectionContext) {
         this.action = action;
         this.selectionContext = selectionContext;
         setSelection(selection);
@@ -44,7 +44,7 @@ public class Trigger extends PatternWatch {
      * @return the Feed through which matched items are processed
      */
 
-    public Feed getAction() {
+    public ItemFeed getAction() {
         return action;
     }
 
@@ -54,6 +54,7 @@ public class Trigger extends PatternWatch {
      * @param terminator the callback to be used to signal early exit
      */
 
+    @Override
     public void open(Terminator terminator) throws XPathException {
         final FleetingParentNode anchor = getAnchorNode();
         if (anchor != null && anchor.getNodeKind() == Type.DOCUMENT) {
@@ -81,6 +82,7 @@ public class Trigger extends PatternWatch {
      * @throws net.sf.saxon.trans.XPathException
      *          May be raised if a dynamic error occurs
      */
+    @Override
     public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
         return action.startSelectedParentNode(node, locationId);
     }
@@ -94,6 +96,7 @@ public class Trigger extends PatternWatch {
      *          May be raised if a constraint implemented by this
      *          Watch is violated
      */
+    @Override
     public void endSelectedParentNode(Location locationId) throws XPathException {
         action.endSelectedParentNode(locationId);
     }
@@ -106,8 +109,9 @@ public class Trigger extends PatternWatch {
      *
      */
 
-    public void processItem(Item<?> item) throws XPathException {
-        action.processItem(item);
+    @Override
+    public void processItem(Item item) throws XPathException {
+        action.append(item);
     }
 
     /**
@@ -116,6 +120,7 @@ public class Trigger extends PatternWatch {
      * Watch goes out of scope. The default implementation does nothing.
      */
 
+    @Override
     public void close() throws XPathException {
         action.close();
     }
@@ -139,6 +144,7 @@ public class Trigger extends PatternWatch {
      * @param selection the streamable XPath expression
      */
 
+    @Override
     public void setSelection(Pattern selection) {
         super.setSelection(selection);
         if (selection.matchesCurrentGroup()) {
@@ -158,4 +164,4 @@ public class Trigger extends PatternWatch {
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited. No warranty.
+// Copyright (c) 2018-2020 Saxonica Limited No warranty.

@@ -1,7 +1,7 @@
 package com.saxonica.expr;
 
 import com.saxonica.functions.extfn.ObjectMap;
-import com.saxonica.functions.hof.CurriedFunction;
+import net.sf.saxon.functions.hof.CurriedFunction;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
@@ -27,6 +27,7 @@ public class ObjectLookupExpression extends LookupExpression {
         super(start, step);
     }
 
+    @Override
     public final ItemType getItemType() {
         ItemType objectType = getLhsExpression().getItemType();
         if (objectType instanceof JavaExternalObjectType && getRhsExpression() instanceof StringLiteral) {
@@ -96,6 +97,7 @@ public class ObjectLookupExpression extends LookupExpression {
      */
 
     /*@NotNull*/
+    @Override
     public LookupExpression copy(RebindingMap rebindings) {
         ObjectLookupExpression exp = new ObjectLookupExpression(
                 getLhsExpression().copy(rebindings), getRhsExpression().copy(rebindings));
@@ -111,6 +113,7 @@ public class ObjectLookupExpression extends LookupExpression {
      * Determine the static cardinality of the expression
      */
 
+    @Override
     public int computeCardinality() {
         if (isSingleContainer && isSingleEntry) {
             return StaticProperty.ALLOWS_ZERO_OR_ONE;
@@ -126,21 +129,22 @@ public class ObjectLookupExpression extends LookupExpression {
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(final XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(final XPathContext context) throws XPathException {
         Configuration config = context.getConfiguration();
 
-        SequenceIterator<?> baseIterator = getLhsExpression().iterate(context);
+        SequenceIterator baseIterator = getLhsExpression().iterate(context);
         if (reflexiveFunction != null) {
-            return new ItemMappingIterator<>(baseIterator, item -> {
+            return new ItemMappingIterator(baseIterator, item -> {
                 Sequence[] boundArgs = new Sequence[reflexiveFunction.getArity()];
                 boundArgs[0] = item;
                 return new CurriedFunction(reflexiveFunction, boundArgs);
             });
         } else {
-            GroundedValue<?> rhs = getRhsExpression().iterate(context).materialize();
+            GroundedValue rhs = getRhsExpression().iterate(context).materialize();
             String key = rhs.getStringValue();
-            return new ItemMappingIterator<>(baseIterator,
-                                             item -> (Item<?>) config.externalObjectAsMap((ObjectValue) item, key).get((StringValue) rhs));
+            return new ItemMappingIterator(baseIterator,
+                                             item -> (Item) config.externalObjectAsMap((ObjectValue) item, key).get((StringValue) rhs));
         }
 
     }
@@ -148,4 +152,4 @@ public class ObjectLookupExpression extends LookupExpression {
 
 }
 
-// Copyright (c) 2019 Saxonica Ltd
+// Copyright (c) 2018-2020 Saxonica Limited

@@ -1,5 +1,6 @@
 package com.saxonica.xsltextn.instruct;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Instruction;
 import net.sf.saxon.expr.instruct.TailCall;
@@ -31,6 +32,7 @@ public class DoInstr extends Instruction  {
         return actionOp;
     }
 
+    @Override
     public int getIntrinsicDependencies() {
         return StaticProperty.HAS_SIDE_EFFECTS;
     }
@@ -53,13 +55,15 @@ public class DoInstr extends Instruction  {
      * Get the name of this instruction for diagnostic and tracing purposes
      */
 
+    @Override
     public int getInstructionNameCode() {
         return StandardNames.SAXON_DO;
     }
 
 
     /*@Nullable*/
-    public TailCall processLeavingTail(XPathContext context) throws XPathException {
+    @Override
+    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
         GroundedValue value = getActionExpr().iterate(context).materialize();
         return null;
     }
@@ -69,6 +73,7 @@ public class DoInstr extends Instruction  {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("do", this);
         getActionExpr().export(out);
@@ -76,4 +81,4 @@ public class DoInstr extends Instruction  {
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

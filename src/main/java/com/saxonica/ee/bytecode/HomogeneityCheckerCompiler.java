@@ -5,7 +5,7 @@ import com.saxonica.ee.bytecode.util.CompilerService;
 import com.saxonica.ee.bytecode.util.Generator;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.HomogeneityChecker;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.tree.iter.HomogeneityCheckerIterator;
 
@@ -26,4 +26,4 @@ public class HomogeneityCheckerCompiler extends ToIteratorCompiler {
 
 }
 
-//Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

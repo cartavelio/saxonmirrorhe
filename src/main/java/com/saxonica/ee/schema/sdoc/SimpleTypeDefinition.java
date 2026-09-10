@@ -7,6 +7,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -20,7 +21,8 @@ import static net.sf.saxon.type.SchemaComponent.ValidationStatus.*;
 /**
  * A simple type definition holds all the information about a simpleType
  * during the course of schema processing. On completion
- * of schema processing, more specific objects are created, for example
+ * of schema processing, a more specific SimpleType object is created,
+ * called the WorkingType: this will be for example a
  * {@link UserListType}, {@link UserAtomicType}, or {@link UserUnionType}, and the SimpleTypeDefinition is then
  * discarded.
  */
@@ -42,13 +44,20 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
     private TypeReference itemTypeReference = null;
 
     /**
+     * The token separator (saxon:separator) used for a list type. Null if this is not a list type,
+     * or if no separator is specified.
+     */
+
+    private RegularExpression tokenSeparator = null;
+
+    /**
      * The member types of a union are represented by a list whose items are
      * objects of type TypeReference
      */
 
     private List<TypeReference> members = null; // used for union types only
 
-    private UserSimpleType simpleType = null;     // the actual SimpleType object created
+    private UserSimpleType workingType = null;     // the actual SimpleType object created
 
     /**
      * Create a SimpleTypeDefinition
@@ -76,6 +85,7 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
      *
      * @return true if this type is known to be atomic
      */
+    @Override
     public boolean isAtomicType() {
         return !(isListType() || isUnionType());
     }
@@ -88,6 +98,7 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
      * @return true if this type is "derived by List"
      */
 
+    @Override
     public boolean isListType() {
         return itemTypeReference != null ||
                 getDerivationMethod() == SchemaType.DERIVATION_RESTRICTION &&
@@ -103,6 +114,7 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
      * @return true if this type is "derived by Union"
      */
 
+    @Override
     public boolean isUnionType() {
         return members != null ||
                 getDerivationMethod() == SchemaType.DERIVATION_RESTRICTION &&
@@ -133,6 +145,9 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
         members.add(memberType);
     }
 
+    public void setTokenSeparator(RegularExpression separator) {
+        tokenSeparator = separator;
+    }
 
     /**
      * Get the simple type created for this definition
@@ -141,8 +156,8 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
      */
 
     /*@Nullable*/
-    public UserSimpleType getSimpleType() {
-        return simpleType;
+    public UserSimpleType getWorkingType() {
+        return workingType;
     }
 
     /**
@@ -152,6 +167,7 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
      * @return true if all is well, false if errors found
      */
 
+    @Override
     public boolean fixup(SchemaCompiler compiler) throws SchemaException {
         if (getFixupStatus() == UNVALIDATED) {
             setFixupStatus(VALIDATING);
@@ -182,7 +198,7 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
                     return false;
                 }
                 if (typeDef instanceof SimpleTypeDefinition) {
-                    SchemaType s = ((SimpleTypeDefinition) typeDef).getSimpleType();
+                    SchemaType s = ((SimpleTypeDefinition) typeDef).getWorkingType();
                     if (s != null) {
                         baseRef.setTarget(s);
                     }
@@ -205,6 +221,7 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
                                     Err.wrap(typeDef.getDescription()) +
                                     " cannot have a type with complex content as its base type", this);
                             setFixupStatus(INVALID);
+                            setValidationStatus(INVALID); // to prevent further processing
                             return false;
                         }
                     } else {
@@ -232,28 +249,32 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
         // If this is a list type, resolve the item type
 
         if (itemTypeReference != null) {
+            boolean badItemType = false;
             SchemaType type = (SchemaType) PreparedSchema.validateReference(itemTypeReference, compiler, false);
             if (type == null) {
-                setFixupStatus(INVALID);
-                return true;
+                badItemType = true;
             } else if (type instanceof UserSchemaComponent) {
                 boolean r = ((UserSchemaComponent) type).fixup(compiler);
                 if (!r) {
-                    setFixupStatus(INVALID);
-                    return false;
-                }
-                if (type instanceof SimpleTypeDefinition) {
-                    SchemaType s = ((SimpleTypeDefinition) type).getSimpleType();
+                    badItemType = true;
+                } else if (type instanceof SimpleTypeDefinition) {
+                    SchemaType s = ((SimpleTypeDefinition) type).getWorkingType();
                     if (s != null) {
                         itemTypeReference.setTarget(s);
                     }
                 } else if (type.isComplexType()) {
+                    badItemType = true;
                     compiler.error("A list type cannot have a complex type " +
                             Err.wrap(type.getDescription()) +
                             " as its item type", this);
-                    setFixupStatus(INVALID);
-                    return false;
                 }
+            }
+            if (badItemType) {
+                UserListType list = makeListType();
+                list.setItemTypeReference(new TypeReference(StandardNames.XS_ERROR, getConfiguration(), this));
+                workingType = list;
+                setFixupStatus(INVALID);
+                return false;
             }
         }
 
@@ -270,7 +291,7 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
                         setFixupStatus(INVALID);
                         return false;
                     }
-                    SchemaType s = ((SimpleTypeDefinition) typeDef).getSimpleType();
+                    SchemaType s = ((SimpleTypeDefinition) typeDef).getWorkingType();
                     if (s != null) {
                         o.setTarget(s);
                     }
@@ -284,7 +305,7 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
         }
 
         //lookForCycles(new Stack(), compiler);   //  this does nothing!
-        boolean result = makeSimpleTypeObject(compiler);
+        boolean result = makeWorkingType(compiler);
         if (result) {
             setFixupStatus(VALIDATED);
             return true;
@@ -295,63 +316,51 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
         }
     }
 
-    private boolean makeSimpleTypeObject(SchemaCompiler compiler) throws SchemaException {
+    private boolean makeWorkingType(SchemaCompiler compiler) throws SchemaException {
 
         // Now create a SimpleType object containing the relevant information,
         // for use at run-time
 
         if (getDerivationMethod() == SchemaType.DERIVATION_LIST) {
+            boolean badItemType = false;
             boolean b = checkFacetsForListType(compiler);
-            if (!b) {
-                setFixupStatus(INVALID);
-                return false;
+            if (b) {
+                SimpleType itemType = (SimpleType) itemTypeReference.getTarget();
+                if (!itemType.allowsDerivation(SchemaType.DERIVATION_LIST)) {
+                    badItemType = true;
+                    compiler.error("The item type of the list type " +
+                                           getDescription() + " disallows derivation by list", this);
+                }
+                if (itemType instanceof ListType) {
+                    badItemType = true;
+                    compiler.error("The item type of the list type " +
+                                           getDescription() + " is itself a list type", this);
+                }
+                if (itemType == BuiltInAtomicType.ANY_ATOMIC || itemType == AnySimpleType.getInstance()) {
+                    badItemType = true;
+                    compiler.error("The item type of the list type " +
+                                           getDescription() + " must not be xs:anySimpleType or xs:anyAtomicType", this);
+                }
+            } else {
+                badItemType = true;
             }
-
-            SimpleType itemType = (SimpleType) itemTypeReference.getTarget();
-            if (!itemType.allowsDerivation(SchemaType.DERIVATION_LIST)) {
-                compiler.error("The item type of the list type " +
-                        getDescription() + " disallows derivation by list", this);
-                setFixupStatus(INVALID);
+            UserListType list = makeListType();
+            workingType = list;
+            if (badItemType) {
+                list.setItemTypeReference(new TypeReference(StandardNames.XS_ERROR, getConfiguration(), this));
                 return false;
+            } else {
+                list.setItemTypeReference(itemTypeReference);
             }
-            if (itemType instanceof ListType) {
-                compiler.error("The item type of the list type " +
-                        getDescription() + " is itself a list type", this);
-                setFixupStatus(INVALID);
-                return false;
-            }
-            if (itemType == BuiltInAtomicType.ANY_ATOMIC || itemType == AnySimpleType.getInstance()) {
-                compiler.error("The item type of the list type " +
-                        getDescription() + " must not be xs:anySimpleType or xs:anyAtomicType", this);
-                setFixupStatus(INVALID);
-                return false;
-            }
-            UserListType list = new UserListType(getConfiguration());
-            list.setBaseTypeReference(getBaseTypeReference());
-            list.setItemTypeReference(itemTypeReference);
-            list.setDerivationMethod(getDerivationMethod());
-            list.setTypeName(getStructuredQName(), getFingerprint());
-            list.setFacetList(getLocalFacetList());
-            list.convertFacetValues();
-            list.setFinalProhibitions(finalProhibitions);
-            list.setSystemId(getSystemId());
-            list.setLineNumber(getLineNumber());
-            list.setGeneratedId(getGeneratedId());
-            list.setContainingDeclaration(getContainingDeclarationName(), containingDeclarationIsElement());
-            list.setExtendedTypes(extendedTypes);
-            list.setRedefinitionLevel(getRedefinitionLevel());
-            list.setSchemaDocumentURI(getSchemaDocumentURI());
-            simpleType = list;
 
         } else if (getDerivationMethod() == SchemaType.DERIVATION_UNION) {
             if (members == null) {
                 members = Collections.emptyList();
             }
             if (members.isEmpty()) {
-                compiler.error("The union type " +
-                        getDescription() + " has no members", this);
+                compiler.error("The union type " + getDescription() + " has no members", this);
                 setFixupStatus(INVALID);
-                return false;
+                members.add(new TypeReference(StandardNames.XS_ERROR, getConfiguration(), this));
             }
             for (TypeReference member : members) {
                 SimpleType mem = (SimpleType) member.getTarget();
@@ -360,30 +369,18 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
                             " of the type " + getDescription() +
                             " disallows derivation by union", this);
                     setFixupStatus(INVALID);
-                    return false;
+                    member.setTarget(ErrorType.getInstance());
                 }
 
             }
             boolean b = checkFacetsForUnionType(compiler);
             if (!b) {
-                return false;
+                setFixupStatus(INVALID);
             }
-            UserUnionType union = new UserUnionType(getConfiguration());
-            union.setBaseTypeReference(getBaseTypeReference());
+            UserUnionType union = makeUnionType();
             union.setMemberTypeReferences(members);
-            union.setDerivationMethod(getDerivationMethod());
-            union.setTypeName(getStructuredQName(), getFingerprint());
-            union.setFacetList(getLocalFacetList());
-            union.convertFacetValues();
-            union.setFinalProhibitions(finalProhibitions);
-            union.setSystemId(getSystemId());
-            union.setLineNumber(getLineNumber());
-            union.setGeneratedId(getGeneratedId());
-            union.setContainingDeclaration(getContainingDeclarationName(), containingDeclarationIsElement());
-            union.setExtendedTypes(extendedTypes);
-            union.setRedefinitionLevel(getRedefinitionLevel());
-            union.setSchemaDocumentURI(getSchemaDocumentURI());
-            simpleType = union;
+            workingType = union;
+            return getFixupStatus() != INVALID;
 
         } else {
             // derivation by restriction. We create a list type, union type, or atomic
@@ -394,34 +391,36 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
                 compiler.error("The base type of the type " +
                         getDescription() + " disallows derivation by restriction", this);
                 setFixupStatus(INVALID);
-                return false;
+                //return false;
             }
             if (base instanceof SimpleTypeDefinition) {
-                if (((SimpleTypeDefinition) base).simpleType != null) {
-                    base = ((SimpleTypeDefinition) base).simpleType;
+                if (((SimpleTypeDefinition) base).workingType != null) {
+                    base = ((SimpleTypeDefinition) base).workingType;
                 } else if (base.getValidationStatus() == INVALID || ((SimpleTypeDefinition) base).getFixupStatus() == INVALID) {
                     setFixupStatus(INVALID);
-                    return false;
+                    //return false;
                 } else {
-                    ((SimpleTypeDefinition) base).makeSimpleTypeObject(compiler);
-                    base = ((SimpleTypeDefinition) base).simpleType;
+                    ((SimpleTypeDefinition) base).makeWorkingType(compiler);
+                    base = ((SimpleTypeDefinition) base).workingType;
                 }
             }
             if (base != null && base.getFingerprint() == StandardNames.XS_ANY_SIMPLE_TYPE &&
-                    !getStructuredQName().hasURI(NamespaceConstant.SCHEMA)) {
-                // XSDL 1.1 makes clear that you can't derive a type directly from XS_ANY_SIMPLE_TYPE
+                    !getTypeName().hasURI(NamespaceConstant.SCHEMA)) {
+                // XSD 1.1 makes clear that you can't derive a type directly from XS_ANY_SIMPLE_TYPE
                 // We make an exception for types in the schema namespace, the S4S has special privileges
                 compiler.error("A simple type cannot be derived by restricting xs:anySimpleType", this);
                 setFixupStatus(INVALID);
-                return false;
+                setBaseTypeReference(new TypeReference(BuiltInAtomicType.STRING.getFingerprint(), getConfiguration(), this));
+                //return false;
             }
             if (base != null && base.getFingerprint() == StandardNames.XS_ANY_ATOMIC_TYPE &&
-                    !getStructuredQName().hasURI(NamespaceConstant.SCHEMA)) {
+                    !getTypeName().hasURI(NamespaceConstant.SCHEMA)) {
                 // XSDL 1.1 makes clear that you can't derive a type directly from XS_ANY_ATOMIC_TYPE
                 // We make an exception for types in the schema namespace, the S4S has special privileges
                 compiler.error("A simple type cannot be derived by restricting xs:anyAtomicType", this);
                 setFixupStatus(INVALID);
-                return false;
+                setBaseTypeReference(new TypeReference(BuiltInAtomicType.STRING.getFingerprint(), getConfiguration(), this));
+                //return false;
             }
             if (base instanceof SimpleType) {
                 try {
@@ -429,69 +428,47 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
                 } catch (SchemaException | ValidationException err) {
                     compiler.error(err.getMessage(), this);
                     setFixupStatus(INVALID);
-                    return false;
+                    setFacetList(Collections.emptyList()); // recovery action
+                    //return false;
                 }
                 if (base instanceof ListType || ((SimpleType) base).isListType()) {
                     boolean b = checkFacetsForListType(compiler);
                     if (!b) {
                         setFixupStatus(INVALID);
-                        return false;
+                        //return false;
                     }
-                    UserListType list = new UserListType(getConfiguration());
-                    list.setBaseTypeReference(getBaseTypeReference());
+                    UserListType list = makeListType();
                     if (base instanceof UserListType) {
                         list.setItemTypeReference(((UserListType) base).getItemTypeReference());
+                        list.inheritSeparator((UserListType)base);
                     } else {
+                        assert base instanceof ListType;
                         list.setItemTypeReference(
                                 new TypeReference(((ListType) base).getItemType().getFingerprint(),
                                         compiler.getConfiguration(), this));
                     }
-                    list.setDerivationMethod(getDerivationMethod());
-                    list.setTypeName(getStructuredQName(), getFingerprint());
-                    list.setFacetList(getLocalFacetList());
-                    list.convertFacetValues();
-                    list.setFinalProhibitions(finalProhibitions);
-                    list.setSystemId(getSystemId());
-                    list.setLineNumber(getLineNumber());
-                    list.setGeneratedId(getGeneratedId());
-                    list.setContainingDeclaration(getContainingDeclarationName(), containingDeclarationIsElement());
-                    list.setExtendedTypes(extendedTypes);
-                    list.setRedefinitionLevel(getRedefinitionLevel());
-                    list.setSchemaDocumentURI(getSchemaDocumentURI());
-                    simpleType = list;
+                    workingType = list;
+
                 } else if (base instanceof UserUnionType || ((SimpleType) base).isUnionType()) {
                     boolean b = checkFacetsForUnionType(compiler);
                     if (!b) {
                         setFixupStatus(INVALID);
-                        return false;
+                        //return false;
                     }
-                    UserUnionType union = new UserUnionType(getConfiguration());
-                    union.setBaseTypeReference(getBaseTypeReference());
+                    UserUnionType union = makeUnionType();
                     if (base instanceof UserUnionType) {
                         union.setMemberTypeReferences(((UserUnionType) base).getMemberTypeReferences());
                     } else if (base instanceof SimpleTypeDefinition) {
                         union.setMemberTypeReferences(((SimpleTypeDefinition) base).members);
                     }
-                    union.setDerivationMethod(getDerivationMethod());
-                    union.setTypeName(getStructuredQName(), getFingerprint());
-                    union.setFacetList(getLocalFacetList());
-                    union.convertFacetValues();
-                    union.setFinalProhibitions(finalProhibitions);
-                    union.setSystemId(getSystemId());
-                    union.setLineNumber(getLineNumber());
-                    union.setGeneratedId(getGeneratedId());
-                    union.setContainingDeclaration(getContainingDeclarationName(), containingDeclarationIsElement());
-                    union.setExtendedTypes(extendedTypes);
-                    union.setRedefinitionLevel(getRedefinitionLevel());
-                    union.setSchemaDocumentURI(getSchemaDocumentURI());
-                    simpleType = union;
+                    workingType = union;
                 }
             }
-            if (simpleType == null) {
+            if (workingType == null) {
                 UserAtomicType atomic = new UserAtomicType(getConfiguration());
                 atomic.setBaseTypeReference(getBaseTypeReference());
                 atomic.setDerivationMethod(getDerivationMethod());
-                atomic.setTypeName(getStructuredQName(), getFingerprint());
+                atomic.setTypeName(getTypeName(), getFingerprint());
                 atomic.setFacetList(getLocalFacetList());
                 atomic.convertFacetValues();
                 atomic.setFinalProhibitions(finalProhibitions);
@@ -502,14 +479,14 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
                 atomic.setExtendedTypes(extendedTypes);
                 atomic.setRedefinitionLevel(getRedefinitionLevel());
                 atomic.setSchemaDocumentURI(getSchemaDocumentURI());
-                simpleType = atomic;
+                workingType = atomic;
             }
         }
 
-        simpleType.mergeEnumerationFacets(compiler);
-        simpleType.getExtendedFacetList();
-        simpleType.setContextComponent(getContextComponent());
-        if (simpleType.getValidationStatus() == INVALID) {
+        workingType.mergeEnumerationFacets(compiler);
+        workingType.getExtendedFacetList();
+        workingType.setContextComponent(getContextComponent());
+        if (workingType.getValidationStatus() == INVALID || getFixupStatus() == INVALID) {
             setFixupStatus(INVALID);
             return false;
         } else {
@@ -518,9 +495,46 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
 
         if (getName() == null) {
             // the type is anonymous
-            getConfiguration().getSuperSchema().addAnonymousType(simpleType);
+            getConfiguration().getSuperSchema().addAnonymousType(workingType);
         }
         return true;
+    }
+
+    private UserUnionType makeUnionType() throws SchemaException {
+        UserUnionType union = new UserUnionType(getConfiguration());
+        union.setBaseTypeReference(getBaseTypeReference());
+        union.setDerivationMethod(getDerivationMethod());
+        union.setTypeName(getTypeName(), getFingerprint());
+        union.setFacetList(getLocalFacetList());
+        union.convertFacetValues();
+        union.setFinalProhibitions(finalProhibitions);
+        union.setSystemId(getSystemId());
+        union.setLineNumber(getLineNumber());
+        union.setGeneratedId(getGeneratedId());
+        union.setContainingDeclaration(getContainingDeclarationName(), containingDeclarationIsElement());
+        union.setExtendedTypes(extendedTypes);
+        union.setRedefinitionLevel(getRedefinitionLevel());
+        union.setSchemaDocumentURI(getSchemaDocumentURI());
+        return union;
+    }
+
+    private UserListType makeListType() throws SchemaException {
+        UserListType list = new UserListType(getConfiguration());
+        list.setBaseTypeReference(getBaseTypeReference());
+        list.setDerivationMethod(getDerivationMethod());
+        list.setTypeName(getTypeName(), getFingerprint());
+        list.setFacetList(getLocalFacetList());
+        list.convertFacetValues();
+        list.setFinalProhibitions(finalProhibitions);
+        list.setSystemId(getSystemId());
+        list.setLineNumber(getLineNumber());
+        list.setGeneratedId(getGeneratedId());
+        list.setContainingDeclaration(getContainingDeclarationName(), containingDeclarationIsElement());
+        list.setExtendedTypes(extendedTypes);
+        list.setRedefinitionLevel(getRedefinitionLevel());
+        list.setSchemaDocumentURI(getSchemaDocumentURI());
+        list.setTokenSeparator(tokenSeparator);
+        return list;
     }
 
     private boolean checkFacetsForListType(SchemaCompiler compiler) throws SchemaException {
@@ -573,9 +587,10 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
      *
      * @throws SchemaException when this SimpleType definition is invalid.
      */
+    @Override
     public boolean validate(SchemaCompiler compiler) throws SchemaException {
-        if (simpleType != null) {
-            return simpleType.validate(compiler);
+        if (workingType != null) {
+            return workingType.validate(compiler);
         }
         // otherwise we're on an error recovery path
         return false;
@@ -592,10 +607,11 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
      * @throws ValidationException if the supplied value is invalid against this simple type
      */
 
+    @Override
     public AtomicSequence getTypedValue(CharSequence value, NamespaceResolver resolver, ConversionRules rules)
             throws ValidationException {
-        if (simpleType != null) {
-            return simpleType.getTypedValue(value, resolver, rules);
+        if (workingType != null) {
+            return workingType.getTypedValue(value, resolver, rules);
         } else {
             throw new UnsupportedOperationException(getUnresolvedMessage());
         }
@@ -605,6 +621,7 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
      * Determine whether this is a built-in type or a user-defined type
      */
 
+    @Override
     public boolean isBuiltInType() {
         return false;
     }
@@ -617,6 +634,7 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
      * @return true if the type is namespace-sensitive
      */
 
+    @Override
     public boolean isNamespaceSensitive() {
         throw new UnsupportedOperationException(getUnresolvedMessage());
     }
@@ -633,9 +651,10 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
      *                                       resolver is supplied
      */
 
+    @Override
     public ValidationFailure validateContent(/*@NotNull*/ CharSequence value, NamespaceResolver nsResolver, /*@NotNull*/ ConversionRules rules) {
-        if (simpleType != null) {
-            return simpleType.validateContent(value, nsResolver, rules);
+        if (workingType != null) {
+            return workingType.validateContent(value, nsResolver, rules);
         } else if (getValidationStatus() == INVALID) {
             return new ValidationFailure("Cannot validate value, because simple type definition is invalid");
         } else {
@@ -647,14 +666,16 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
      * Serialize the schema component
      */
 
+    @Override
     public void serialize(SchemaModelSerializer serializer) throws XPathException {
-        if (simpleType == null) {
+        if (workingType == null) {
             throw new UnsupportedOperationException(getUnresolvedMessage());
         } else {
-            simpleType.serialize(serializer);
+            workingType.serialize(serializer);
         }
     }
     
+    @Override
     protected void serializeVariety(SchemaModelSerializer serializer) {
         throw new UnsupportedOperationException(getUnresolvedMessage());
     }
@@ -666,5 +687,5 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
 
 }
 
-// Copyright (c) 2004-2009 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited
 

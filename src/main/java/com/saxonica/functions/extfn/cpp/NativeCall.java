@@ -62,7 +62,7 @@ public class NativeCall extends SystemFunction {
 
 
     @Override
-    public Sequence<?> call(XPathContext context, Sequence[] args) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] args) throws XPathException {
         String phpFuncName = args[0].head().getStringValue();
         int len = args.length;
         Object[] funcArgs = null;
@@ -74,7 +74,7 @@ public class NativeCall extends SystemFunction {
         int seqLength = seqArray.arrayLength();
         funcArgs = new Object[seqLength];
         funcArgTypes = new String[seqLength];
-        Sequence<?> seq = null;
+        Sequence seq = null;
 
         for (int i = 0; i < seqLength; i++) {
             seq = seqArray.get(i);
@@ -142,7 +142,7 @@ public class NativeCall extends SystemFunction {
 
     }
 
-    public static Sequence<?> convertValueObject(Object obj, String phpFuncName) throws XPathException {
+    public static Sequence convertValueObject(Object obj, String phpFuncName) throws XPathException {
         if (obj instanceof String) {
             return new StringValue((String) obj);
         } else if (obj instanceof Integer) {
@@ -170,5 +170,7 @@ public class NativeCall extends SystemFunction {
 
 
 }
+
+// Copyright (c) 2020 Saxonica Limited
 
 

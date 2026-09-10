@@ -6,6 +6,7 @@ import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.type.Type;
 
+import java.util.EnumSet;
 import java.util.function.IntPredicate;
 
 /**
@@ -17,7 +18,7 @@ import java.util.function.IntPredicate;
  * using NodeInfo#iterateAxis()
  */
 
-final class SiblingIterator implements AxisIterator, LookaheadIterator<NodeInfo> {
+final class SiblingIterator implements AxisIterator, LookaheadIterator {
 
     // NOTE: have experimented with a dedicated iterator for the child axis matching against
     // elements only, by fingerprint - no measurable improvement obtained.
@@ -84,6 +85,7 @@ final class SiblingIterator implements AxisIterator, LookaheadIterator<NodeInfo>
      */
 
     /*@Nullable*/
+    @Override
     public NodeInfo next() {
         if (needToAdvance) {
             final int thisNode = nextNodeNr;
@@ -123,6 +125,7 @@ final class SiblingIterator implements AxisIterator, LookaheadIterator<NodeInfo>
      * @return true if there are more items in the sequence
      */
 
+    @Override
     public boolean hasNext() {
         int n = nextNodeNr;
         if (needToAdvance) {
@@ -146,11 +149,12 @@ final class SiblingIterator implements AxisIterator, LookaheadIterator<NodeInfo>
         return n != -1;
     }
 
-    public int getProperties() {
-        return LOOKAHEAD;
+    @Override
+    public EnumSet<Property> getProperties() {
+        return EnumSet.of(Property.LOOKAHEAD);
     }
 
 }
 
-// Copyright (c) 2017 Saxonica Ltd
+// Copyright (c) 2017-2020 Saxonica Limited
 

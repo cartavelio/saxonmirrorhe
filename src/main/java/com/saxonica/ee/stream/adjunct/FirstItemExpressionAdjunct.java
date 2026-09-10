@@ -2,9 +2,9 @@ package com.saxonica.ee.stream.adjunct;
 
 import com.saxonica.ee.stream.Posture;
 import com.saxonica.ee.stream.PostureAndSweep;
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
 import com.saxonica.ee.stream.feed.FilteringFeed;
+import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
@@ -47,8 +47,9 @@ public class FirstItemExpressionAdjunct extends FilteringAdjunct implements Feed
      *          if a dynamic evaluation error occurs
      */
     @Override
-    public FilteringFeed.Filter makeFilter(XPathContext context, Feed out) throws XPathException {
+    public FilteringFeed.Filter makeFilter(XPathContext context, ItemFeed out) throws XPathException {
         return new FilteringFeed.Filter() {
+            @Override
             public int matches(Item item, int position) {
                 return position == 1 ? MATCHES : DONE;
             }
@@ -57,4 +58,4 @@ public class FirstItemExpressionAdjunct extends FilteringAdjunct implements Feed
 
 }
 
-// Copyright (c) 2012-2013 Saxonica Limited.
+// Copyright (c) 2012-2020 Saxonica Limited

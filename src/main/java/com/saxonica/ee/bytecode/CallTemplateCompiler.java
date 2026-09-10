@@ -1,6 +1,7 @@
 package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.*;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.*;
 
@@ -77,8 +78,9 @@ public class CallTemplateCompiler extends ToPushCompiler {
 //            TailCall tc = t.expand(c2);
 
         ga.loadLocal(templateVar);
+        compiler.generateGetOutputter();
         ga.loadLocal(context2Var);
-        ga.invokeInstanceMethod(NamedTemplate.class, "expand", XPathContext.class);
+        ga.invokeInstanceMethod(NamedTemplate.class, "expand", Outputter.class, XPathContext.class);
 
 //            while (tc != null) {
 //                tc = tc.processLeavingTail();
@@ -99,7 +101,7 @@ public class CallTemplateCompiler extends ToPushCompiler {
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited
 
 
 

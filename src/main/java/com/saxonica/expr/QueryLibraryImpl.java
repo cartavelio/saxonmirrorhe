@@ -22,6 +22,7 @@ public class QueryLibraryImpl extends QueryLibrary {
      * @param importer the importing module (a user of the library)
      */
 
+    @Override
     public void link(QueryModule importer) throws XPathException {
         // Import the global functions and variables from this library to the importing module
         XQueryFunctionLibrary lib = getGlobalFunctionLibrary();
@@ -36,7 +37,7 @@ public class QueryLibraryImpl extends QueryLibrary {
             newvar.setPackageData(importer.getPackageData());
             newvar.setVariableQName(libvar.getVariableQName());
             newvar.setRequiredType(libvar.getRequiredType());
-            newvar.setSelectExpression(libvar.getSelectExpression());
+            newvar.setBody(libvar.getBody());
             newvar.setLineNumber(libvar.getLineNumber());
             newvar.setSystemId(libvar.getSystemId());
             newvar.setOriginalVariable(libvar);
@@ -46,6 +47,6 @@ public class QueryLibraryImpl extends QueryLibrary {
 
 }
 
-// Copyright (c) 2009-2010 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited
 
 

@@ -3,11 +3,9 @@ package com.saxonica.ee.schema.sdoc;
 import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.ee.schema.TypeReference;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.om.AttributeCollection;
-import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.linked.NodeImpl;
 import net.sf.saxon.type.SchemaException;
 
 import java.util.StringTokenizer;
@@ -42,11 +40,12 @@ public class XSDUnion extends SchemaElement {
      * @throws SchemaException if any errors are found in the attributes
      */
 
+    @Override
     public void prepareAttributes() throws SchemaException {
 
         typeDefinition = getContainingSimpleType();
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         String[] allowed = {"id", "memberTypes"};
         allowAttributes(atts, allowed);
 
@@ -67,12 +66,11 @@ public class XSDUnion extends SchemaElement {
      * @throws SchemaException if any XML representation constraints are violated
      */
 
+    @Override
     public void validate(SchemaCompiler compiler) throws SchemaException {
         boolean foundAnnotation = false;
         boolean foundSimpleType = false;
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while ((child = (NodeImpl)iter.next()) != null) {
+        for (NodeInfo child : children()) {
             int fp = child.getFingerprint();
 
             if (fp == StandardNames.XS_ANNOTATION) {
@@ -102,10 +100,9 @@ public class XSDUnion extends SchemaElement {
      * @param compiler
      */
 
+    @Override
     public void postValidate(SchemaCompiler compiler) throws SchemaException {
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while ((child = (NodeImpl) iter.next()) != null) {
+        for (NodeInfo child : children()) {
             if (child.getFingerprint() == StandardNames.XS_SIMPLE_TYPE) {
                 SimpleTypeDefinition memberType = ((XSDSimpleType) child).getSimpleTypeDefinition();
                 int fp = ((XSDSimpleType) child).getSimpleTypeDefinition().getFingerprint();
@@ -159,4 +156,4 @@ public class XSDUnion extends SchemaElement {
     }
 }
 
-// Copyright (c) 2004 - 2007 Saxonica Limited
+// Copyright (c) 2004-2020 Saxonica Limited

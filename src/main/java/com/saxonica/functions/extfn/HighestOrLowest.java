@@ -47,7 +47,8 @@ public class HighestOrLowest extends SystemFunction {
      *          code will add information about the error location.
      */
 
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Configuration config = context.getConfiguration();
         Function function;
         if (arguments.length == 2) {
@@ -72,7 +73,7 @@ public class HighestOrLowest extends SystemFunction {
         Item next;
         while ((next = iter.next()) != null) {
             args[0] = next;
-            Sequence<?> key = dynamicCall(function, context, args);
+            Sequence key = dynamicCall(function, context, args);
             Item head = key.head();
             if (head != null) {
                 if (!(head instanceof AtomicValue)) {
@@ -84,7 +85,13 @@ public class HighestOrLowest extends SystemFunction {
                 AtomicValue keyVal = (AtomicValue)key.head();
                 if (keyVal instanceof UntypedAtomicValue) {
                     StringToDouble converter = context.getConfiguration().getConversionRules().getStringToDoubleConverter();
-                    keyVal = new DoubleValue(converter.stringToNumber(keyVal.getStringValueCS()));
+                    try {
+                        keyVal = new DoubleValue(converter.stringToNumber(keyVal.getStringValueCS()));
+                    } catch (NumberFormatException e) {
+                        XPathException de = new XPathException("Failed to convert key to xs:double: " + e.getMessage(), "FORG0001");
+                        de.setXPathContext(context);
+                        throw de;
+                    }
                 }
                 if (keyVal.isNaN()) {
                     continue;
@@ -123,4 +130,4 @@ public class HighestOrLowest extends SystemFunction {
 
 }
 
-// Copyright (c) 2009 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

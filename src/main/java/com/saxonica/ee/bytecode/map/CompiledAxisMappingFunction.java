@@ -1,7 +1,7 @@
 package com.saxonica.ee.bytecode.map;
 
 import net.sf.saxon.expr.MappingFunction;
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 
@@ -11,13 +11,14 @@ import net.sf.saxon.tree.iter.AxisIterator;
  * classes used to implement path expressions where the RHS is an AxisExpression:
  * these can be evaluated without creating a new context or FocusIterator.
  */
-public abstract class CompiledAxisMappingFunction implements MappingFunction<NodeInfo, NodeInfo> {
+public abstract class CompiledAxisMappingFunction implements MappingFunction {
 
     public CompiledAxisMappingFunction() {
     }
 
-    public abstract AxisIterator map(NodeInfo origin) throws XPathException;
+    @Override
+    public abstract AxisIterator map(Item origin) throws XPathException;
 
 }
 
-//Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

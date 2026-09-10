@@ -3,7 +3,8 @@ package com.saxonica.xsltextn.style;
 import com.saxonica.xsltextn.instruct.DoInstr;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.style.StyleElement;
@@ -28,6 +29,7 @@ public class SaxonDo extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
@@ -38,26 +40,29 @@ public class SaxonDo extends StyleElement {
      * @return false: no, it may not contain a template-body
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return false;
     }
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
         String actionAtt = null;
 
-        AttributeCollection atts = getAttributeList();
-
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
+            String value = att.getValue();
             if (f.equals("action")) {
-                actionAtt = atts.getValue(a);
-                action = makeExpression(actionAtt, a);
+                actionAtt = value;
+                action = makeExpression(actionAtt, att);
             } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+                checkUnknownAttribute(attName);
             }
         }
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         getConfiguration().checkLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION,
                                                 "saxon:while",
@@ -65,6 +70,7 @@ public class SaxonDo extends StyleElement {
         action = typeCheck("action", action);
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
 //        Expression action = compileSequenceConstructor(exec, decl, true);
 //        if (action == null) {
@@ -75,4 +81,4 @@ public class SaxonDo extends StyleElement {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

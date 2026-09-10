@@ -39,10 +39,12 @@ public class PreprocessFacet extends Facet {
      * @return true if this is a constraining facet
      */
 
+    @Override
     public boolean isConstraining() {
         return false;
     }
 
+    @Override
     public String getName() {
         return "preprocess";
     }
@@ -54,6 +56,7 @@ public class PreprocessFacet extends Facet {
      */
 
     /*@Nullable*/
+    @Override
     public String getValue() {
         return null;
     }
@@ -103,6 +106,7 @@ public class PreprocessFacet extends Facet {
      *          if the facet is not legal
      */
 
+    @Override
     public void checkFacetRestriction(UserSimpleType type, SimpleType base, SchemaCompiler compiler) throws SchemaException, ValidationException {
         // TODO: do we need any rules here? What happens if there is a preprocess facet on the base type?
     }
@@ -159,10 +163,12 @@ public class PreprocessFacet extends Facet {
      *         fails
      */
 
+    @Override
     public boolean testAtomicValue(AtomicValue value) {
         return true;
     }
 
+    @Override
     public void serializeFacet(SchemaModelSerializer serializer) throws XPathException {
         serializer.startElement(getName());
         if (isFixed()) {
@@ -178,7 +184,8 @@ public class PreprocessFacet extends Facet {
     @Override
     public Function getFacetAsFunctionItem() {
         Callable callable = new Callable() {
-            public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+            @Override
+            public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
@@ -200,4 +207,4 @@ public class PreprocessFacet extends Facet {
     }
 }
 
-// Copyright (c) 2008 Saxonica Limited. All Rights Reserved
+// Copyright (c) 2008-2020 Saxonica Limited

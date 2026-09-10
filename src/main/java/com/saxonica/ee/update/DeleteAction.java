@@ -38,13 +38,14 @@ public class DeleteAction extends PendingUpdateAction {
      *          if any error occurs applying the update
      */
 
-    public void apply(XPathContext context, Set affectedRootSet) throws XPathException {
+    @Override
+    public void apply(XPathContext context, Set<MutableNodeInfo> affectedRootSet) throws XPathException {
 
         if (!((MutableNodeInfo) targetNode).isDeleted()) {
             // This check means we do nothing if the node has already been deleted or detached from its tree
             int kind = targetNode.getNodeKind();
             MutableNodeInfo parent = (MutableNodeInfo) targetNode.getParent();
-            affectedRootSet.add(targetNode.getRoot());
+            affectedRootSet.add((MutableNodeInfo)targetNode.getRoot());
             ((MutableNodeInfo) targetNode).delete();
             if (kind == Type.ELEMENT || kind == Type.ATTRIBUTE || kind == Type.TEXT) {
                 parent.removeTypeAnnotation();
@@ -58,6 +59,7 @@ public class DeleteAction extends PendingUpdateAction {
      * @return the target node, the node to which this update action applies.
      */
 
+    @Override
     public NodeInfo getTargetNode() {
         return targetNode;
     }
@@ -71,6 +73,7 @@ public class DeleteAction extends PendingUpdateAction {
      *         in the specification
      */
 
+    @Override
     public int getApplyPhase() {
         return PHASE;
     }
@@ -78,5 +81,5 @@ public class DeleteAction extends PendingUpdateAction {
     public final static int PHASE = 5;
 }
 
-// Copyright (c) 2008-2009 Saxonica Limited.
+// Copyright (c) 2008-2020 Saxonica Limited
 

@@ -36,6 +36,7 @@ public class TemplateRuleEE extends TemplateRule {
      *                   to non-streaming has been requested.
      */
 
+    @Override
     public void setDeclaredStreamable(boolean streamable) {
         this.declaredStreamable = streamable;
     }
@@ -48,6 +49,7 @@ public class TemplateRuleEE extends TemplateRule {
      * to non-streaming has been requested.
      */
 
+    @Override
     public boolean isDeclaredStreamable() {
         return declaredStreamable;
     }
@@ -95,6 +97,7 @@ public class TemplateRuleEE extends TemplateRule {
      * the end of the compilation process we update all the slave copies to match the properties of the original.
      */
 
+    @Override
     public TemplateRule copy() {
         TemplateRule tr = new TemplateRuleEE();
         if (body == null || matchPattern == null) {
@@ -135,7 +138,7 @@ public class TemplateRuleEE extends TemplateRule {
         }
         ContextItemStaticInfoEE info =
                 (ContextItemStaticInfoEE)body.getConfiguration().makeContextItemStaticInfo(matchPattern.getItemType(), false);
-        Posture contextPosture;
+
         if (matchPattern.getItemType().getUType().overlaps(UType.ANY_NODE)) {
             info.setContextPostureStriding();
         } else {
@@ -147,7 +150,12 @@ public class TemplateRuleEE extends TemplateRule {
         // expression is already in effect type-adjusted, as a consequence of the type-checking process
         // performed earlier.
         PostureAndSweep s = Streamability.getStreamability(body, info, reasons);
-        return s.getPosture() == Posture.GROUNDED;
+        if (s.getPosture() == Posture.GROUNDED) {
+            return true;
+        } else {
+            reasons.add("The result of the template rule can contain streamed nodes");
+            return false;
+        }
     }
 
 
@@ -184,4 +192,4 @@ public class TemplateRuleEE extends TemplateRule {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

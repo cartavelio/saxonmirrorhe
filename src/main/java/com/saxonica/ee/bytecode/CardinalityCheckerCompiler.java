@@ -1,16 +1,18 @@
 package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.*;
-import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.TypeCheckingFilter;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.DocumentNodeTest;
 import net.sf.saxon.type.ItemType;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
+
+import java.util.EnumSet;
 
 public class CardinalityCheckerCompiler extends ToIteratorCompiler {
 
@@ -129,9 +131,9 @@ public class CardinalityCheckerCompiler extends ToIteratorCompiler {
             // assert stack : iterator iterator
             ga.invokeInstanceMethod(SequenceIterator.class, "getProperties");
             // assert stack : iterator properties
-            ga.push(SequenceIterator.LAST_POSITION_FINDER);
-            ga.math(GeneratorAdapter.AND, Type.INT_TYPE);
-            ga.ifZCmp(GeneratorAdapter.EQ, notLastFinder.label());
+            allocateStatic(compiler, SequenceIterator.Property.LAST_POSITION_FINDER);
+            ga.invokeInstanceMethod(EnumSet.class, "contains", Object.class);
+            ga.ifFalse(notLastFinder);
             // assert stack : iterator
             ga.dup();
             // assert stack : iterator iterator
@@ -222,9 +224,9 @@ public class CardinalityCheckerCompiler extends ToIteratorCompiler {
             ga.newInstance(TypeCheckingFilter.class);
             ga.dup();
             //Stack: TypeCheckingFilter TypeCheckingFilter
-            compiler.generateGetReceiver();
+            compiler.generateGetOutputter();
             //Stack: TypeCheckingFilter TypeCheckingFilter Receiver
-            ga.invokeConstructor(TypeCheckingFilter.class, Receiver.class);
+            ga.invokeConstructor(TypeCheckingFilter.class, Outputter.class);
             //Stack: TypeCheckingFilter
             int filterVar = methodInfo.allocateLocal(TypeCheckingFilter.class);
             ga.storeLocal(filterVar);
@@ -237,12 +239,12 @@ public class CardinalityCheckerCompiler extends ToIteratorCompiler {
             ga.invokeInstanceMethod(TypeCheckingFilter.class, "setRequiredType", ItemType.class, Integer.TYPE, RoleDiagnostic.class, Location.class);
             ga.loadLocal(filterVar);
             //Stack: Receiver
-            compiler.pushNewReceiverInfo(ga);
+            compiler.pushNewOutputterInfo(ga);
 
             compiler.compileToPush(next);
             ga.loadLocal(filterVar);
-            ga.invokeInstanceMethod(TypeCheckingFilter.class, "close");
-            compiler.popReceiverInfo();
+            ga.invokeInstanceMethod(TypeCheckingFilter.class, "finalCheck");
+            compiler.popOutputterInfo();
 
         } else {
             super.compileToPush(compiler, expression);
@@ -250,4 +252,4 @@ public class CardinalityCheckerCompiler extends ToIteratorCompiler {
     }
 }
 
-//Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

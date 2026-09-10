@@ -5,18 +5,18 @@ import com.saxonica.xsltextn.ExtensionElementFactory;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.accum.AccumulatorRegistry;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.NamespaceBinding;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.style.*;
+import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.SaxonErrorCode;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.linked.ElementImpl;
 import net.sf.saxon.tree.linked.NodeFactory;
-import net.sf.saxon.tree.util.AttributeCollectionImpl;
 import net.sf.saxon.type.SchemaType;
 
 import javax.xml.transform.TransformerFactoryConfigurationError;
@@ -28,7 +28,6 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
  * This version differs from the parent class in allowing extension elements to be constructed
  * if the URI corresponds to an extension element factory registered in the Configuration
  *
- * @author Michael H. Kay
  */
 
 public class StyleNodeFactoryPE extends StyleNodeFactory implements NodeFactory {
@@ -54,14 +53,14 @@ public class StyleNodeFactoryPE extends StyleNodeFactory implements NodeFactory 
      * one error from a single compilation.
      */
 
+    @Override
     public ElementImpl makeElementNode(
             NodeInfo parent,
             NodeName elementName,
             SchemaType elementType,
             boolean isNilled,
-            AttributeCollectionImpl attlist,
-            NamespaceBinding[] namespaces,
-            int namespacesUsed,
+            AttributeMap attlist,
+            NamespaceMap namespaces,
             PipelineConfiguration pipe,
             Location location,
             int sequence) {
@@ -70,7 +69,7 @@ public class StyleNodeFactoryPE extends StyleNodeFactory implements NodeFactory 
                 !allowExtensions ||
                 parent instanceof DataElement) {
             return super.makeElementNode(parent, elementName, elementType, isNilled, attlist, namespaces,
-                    namespacesUsed, pipe, location, sequence);
+                    pipe, location, sequence);
         }
 
         Class extensionClass = null;
@@ -83,7 +82,7 @@ public class StyleNodeFactoryPE extends StyleNodeFactory implements NodeFactory 
 
         if (extensionClass == null) {
             ElementImpl instr = super.makeElementNode(parent, elementName, elementType, isNilled, attlist, namespaces,
-                    namespacesUsed, pipe, location, sequence);
+                    pipe, location, sequence);
             if (instr instanceof StyleElement) {
                 ((StyleElement)instr).setCompilation(getCompilation());
             }
@@ -119,12 +118,12 @@ public class StyleNodeFactoryPE extends StyleNodeFactory implements NodeFactory 
             }
         } else {
             temp = new AbsentExtensionElement();
-            XPathException reason = new XPathException("Extension instructions are disabled");
-            temp.setValidationError(reason, StyleElement.REPORT_IF_INSTANTIATED);
+            XmlProcessingIncident reason = new XmlProcessingIncident("Extension instructions are disabled");
+            temp.setValidationError(reason, StyleElement.OnFailure.REPORT_IF_INSTANTIATED);
             requiredClass = AbsentExtensionElement.class;
         }
 
-        temp.setNamespaceDeclarations(namespaces, namespacesUsed);
+        temp.setNamespaceMap(namespaces);
         temp.initialise(elementName, elementType, attlist, parent, sequence);
         temp.setLocation(baseURI, lineNumber, columnNumber);
         temp.processStandardAttributes(NamespaceConstant.XSLT);
@@ -136,11 +135,11 @@ public class StyleNodeFactoryPE extends StyleNodeFactory implements NodeFactory 
                 // We've got an element such as saxon:call-template but the
                 // user didn't declare the Saxon namespace as an extension element
                 // namespace. Chances are he just forgot.
-                XPathException te = new XPathException("saxon:" + localname +
+                XmlProcessingIncident te = new XmlProcessingIncident("saxon:" + localname +
                         " is not being treated as an extension instruction because the namespace " +
                         " http://saxon.sf.net/ has not been declared in extension-element-prefixes",
-                    SaxonErrorCode.SXWN9008, temp);
-                pipe.getErrorListener().warning(te);
+                                                                     SaxonErrorCode.SXWN9008, temp).asWarning();
+                pipe.getErrorReporter().report(te);
                 requiredClass = LiteralResultElement.class;
             }
         }
@@ -173,6 +172,7 @@ public class StyleNodeFactoryPE extends StyleNodeFactory implements NodeFactory 
      * @return true if an extension element of this name is recognized
      */
 
+    @Override
     public boolean isElementAvailable(String uri, String localName, boolean instructionsOnly) {
         boolean b = super.isElementAvailable(uri, localName, instructionsOnly);
         if (b) {
@@ -194,6 +194,7 @@ public class StyleNodeFactoryPE extends StyleNodeFactory implements NodeFactory 
         }
     }
 
+    @Override
     public AccumulatorRegistry makeAccumulatorManager() {
         return new AccumulatorRegistry();
     }
@@ -203,4 +204,4 @@ public class StyleNodeFactoryPE extends StyleNodeFactory implements NodeFactory 
 
 }
 
-// Copyright (c) 2009-2014 Saxonica Limited
+// Copyright (c) 2009-2020 Saxonica Limited

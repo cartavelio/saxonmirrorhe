@@ -32,7 +32,6 @@ public abstract class CompiledBlockIterator implements SequenceIterator {
         this.context = context;
     }
 
-
     /**
      * Get the next item in the sequence. <BR>
      *
@@ -41,26 +40,10 @@ public abstract class CompiledBlockIterator implements SequenceIterator {
      *          if an error occurs retrieving the next item
      */
 
+    @Override
     public abstract Item next() throws XPathException;
 
-
-    public void close() {
-    }
-
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link SequenceIterator#GROUNDED}, {@link SequenceIterator#LAST_POSITION_FINDER},
-     *         and {@link SequenceIterator#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     */
-
-    public int getProperties() {
-        return 0;
-    }
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 

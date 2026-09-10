@@ -1,27 +1,28 @@
 package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
+import com.saxonica.ee.schema.fsa.FiniteStateMachine;
 import com.saxonica.ee.schema.sdoc.*;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.instruct.GlobalParam;
 import net.sf.saxon.expr.instruct.GlobalParameterSet;
-import net.sf.saxon.expr.instruct.SavedNamespaceContext;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.lib.ErrorReporter;
+import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.SchemaURIResolver;
-import net.sf.saxon.lib.StandardErrorListener;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.HostLanguage;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.NamespaceIterator;
-import net.sf.saxon.type.ISchemaCompiler;
+import net.sf.saxon.trans.XmlProcessingException;
+import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.AnyURIValue;
 
-import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
-import javax.xml.transform.TransformerException;
 import java.util.*;
 
 /**
@@ -33,28 +34,28 @@ import java.util.*;
  * @since 8.9
  */
 
-public class SchemaCompiler implements ISchemaCompiler {
+public class SchemaCompiler {
 
     private EnterpriseConfiguration config;
     // During a schema validation episode, the SchemaCompiler knows which schema it is validating
     private PreparedSchema preparedSchema;
     private int[] occurrenceLimits;
     private SchemaURIResolver schemaURIResolver;
-    private ErrorListener listener;
+    private ErrorReporter errorReporter;
     private HashMap<IdentityConstraintReference, SchemaType> identityConstraintsAwaitingTypeChecking = null;
     private int errorCount = 0;
     private int xsdlVersion = Configuration.XSD10;
-    private boolean deferValidation;
+    private boolean allowDanglingReferences;
 
 
-    private HashMap<String, XSDSchema> documentsAlreadyRead = new HashMap<String, XSDSchema>(10);
-    private HashSet<String> documentsBeingRead = new HashSet<String>(10);
+    private HashMap<String, XSDSchema> documentsAlreadyRead = new HashMap<>(10);
+    private HashSet<String> documentsBeingRead = new HashSet<>(10);
     private PipelineConfiguration pipelineConfiguration;
     private SchemaDocumentTransformer chameleonTransformer = null;
     private SchemaDocumentTransformer overrideTransformer = null;
-    private Set<String> componentsReportedMissing = new HashSet<String>();
-
-    private SavedNamespaceContext latestNamespaceContext;
+    private Set<String> componentsReportedMissing = new HashSet<>();
+    private Set<UserComplexType> scheduledForAutomaton = new HashSet<>();
+    private Set<UserComplexType[]> scheduledForAutomatonCheck = new HashSet<>();
 
     /**
      * Create a SchemaCompiler
@@ -63,9 +64,10 @@ public class SchemaCompiler implements ISchemaCompiler {
      */
     public SchemaCompiler(EnterpriseConfiguration config) {
         this.config = config;
-        listener = config.getErrorListener();
+        errorReporter = config.makeErrorReporter();
         schemaURIResolver = config.getSchemaURIResolver();
         occurrenceLimits = config.getOccurrenceLimits();
+        allowDanglingReferences = config.getBooleanProperty(Feature.ALLOW_UNRESOLVED_SCHEMA_COMPONENTS);
     }
 
     /**
@@ -111,31 +113,6 @@ public class SchemaCompiler implements ISchemaCompiler {
     }
 
     /**
-     * Set deferred validation mode. In this mode, schema documents loaded using the readSchema()
-     * interfaces are not fully compiled and validated until the compile() method is called.
-     *
-     * @param defer set to true to select deferred validation mode
-     * @deprecated since 9.9. Deferred validation is underspecified and undertested and will
-     * be dropped in a future release.
-     */
-
-    public void setDeferredValidationMode(boolean defer) {
-        deferValidation = defer;
-    }
-
-    /**
-     * Ask if deferred validation mode is currently set
-     *
-     * @return true if deferred validation mode has been set
-     * @deprecated since 9.9. Deferred validation is underspecified and undertested and will
-     * be dropped in a future release.
-     */
-
-    public boolean isDeferredValidationMode() {
-        return deferValidation;
-    }
-
-    /**
      * Set the PreparedSchema. Used when validating a schema loaded using the SchemaModelLoader
      *
      * @param schema the schema that has been loaded
@@ -156,31 +133,30 @@ public class SchemaCompiler implements ISchemaCompiler {
     }
 
     /**
-     * Get the ErrorListener used in this configuration. If no ErrorListener
-     * has been supplied explicitly, the default ErrorListener is used.
+     * Get the ErrorReporter used in this configuration. If no ErrorReporter
+     * has been supplied explicitly, the default ErrorReporter is used.
      *
-     * @return the ErrorListener.
-     * @since 8.9
+     * @return the ErrorReporter.
+     * @since 8.9. Changed in 10.0 to use ErrorReporter rather than ErrorListener
      */
 
-    public ErrorListener getErrorListener() {
-        if (listener == null) {
-            listener = new StandardErrorListener();
-            ((StandardErrorListener) listener).setLogger(config.getLogger());
+    public ErrorReporter getErrorReporter() {
+        if (errorReporter == null) {
+            errorReporter = config.makeErrorReporter();
         }
-        return listener;
+        return errorReporter;
     }
 
     /**
-     * Set the ErrorListener to be used in this compiler. The ErrorListener
+     * Set the ErrorReporter to be used in this compiler. The ErrorReporter
      * is informed of all errors detected during schema processing.
      *
-     * @param listener the ErrorListener to be used
-     * @since 8.9
+     * @param reporter the ErrorReporter to be used
+     * @since 8.9. Changed in 10.0 to use ErrorReporter rather than ErrorListener
      */
 
-    public void setErrorListener(ErrorListener listener) {
-        this.listener = listener;
+    public void setErrorReporter(ErrorReporter reporter) {
+        this.errorReporter = reporter;
     }
 
     /**
@@ -255,6 +231,19 @@ public class SchemaCompiler implements ISchemaCompiler {
     public void markAsRead(String systemId, XSDSchema schema) {
         documentsBeingRead.remove(systemId);
         documentsAlreadyRead.put(systemId + "##" + schema.getTargetNamespace(), schema);
+    }
+
+    /**
+     * Ask whether dangling references are allowed. Returns false by default; returns true
+     * if the configuration property {@link Feature#ALLOW_UNRESOLVED_SCHEMA_COMPONENTS} is set.
+     * @return true if the presence of unresolved schema components should not cause the
+     * schema to be treated as invalid. Instead, the schema is "repaired" such that it can
+     * be used for validation, provided that the absent schema components are not actually
+     * required for a particular validation episode.
+     */
+
+    public boolean isAllowDanglingReferences() {
+        return allowDanglingReferences;
     }
 
     /**
@@ -365,13 +354,9 @@ public class SchemaCompiler implements ISchemaCompiler {
         }
 
         PreparedSchema ps = schemadoc.getXSDSchema().getSchema();
-        if (deferValidation) {
-            retainSchemaComponents(ps);
-        } else {
-            preparedSchema = ps;
-            validate(schemadoc);
-            preparedSchema = null;
-        }
+        preparedSchema = ps;
+        validate(schemadoc);
+        preparedSchema = null;
 
         Collection<GlobalParam> globalParams = schemadoc.getXSDSchema().getGlobalParams();
         for (GlobalParam param : globalParams) {
@@ -442,7 +427,9 @@ public class SchemaCompiler implements ISchemaCompiler {
 
             } catch (SchemaException e) {
                 if (e.getException() instanceof java.io.IOException) {
-                    pipe.getErrorListener().warning(e);
+                    XmlProcessingException ee = new XmlProcessingException(e);
+                    ee.setWarning(true);
+                    pipe.getErrorReporter().report(ee);
                 } else {
                     lastException = e;
                 }
@@ -456,14 +443,11 @@ public class SchemaCompiler implements ISchemaCompiler {
             throw new SchemaException("No valid schema was found");
         }
 
-        if (deferValidation) {
-            retainSchemaComponents(mergedSchema);
-        } else {
-            preparedSchema = mergedSchema;
-            mergedSchema.validate(this);
-            preparedSchema = null;
-        }
-
+        preparedSchema = mergedSchema;
+        mergedSchema.validate(this);
+        makeAllAutomata();
+        checkAllAutomata();
+        preparedSchema = null;
 
     }
 
@@ -473,25 +457,24 @@ public class SchemaCompiler implements ISchemaCompiler {
      * @param root          the xs:schema element in the stylesheet
      * @param expected      the target namespace expected; "" if there is no
      *                      expectation
-     * @param errorListener The destination for error messages. May be null, in which case
+     * @param errorReporter The destination for error messages. May be null, in which case
      *                      the errorListener registered with this Configuration is used.
      * @return the actual target namespace of the schema
      * @throws SchemaException if the inline schema is in error
      */
 
-    public String readInlineSchema(NodeInfo root, String expected, ErrorListener errorListener)
+    public String readInlineSchema(NodeInfo root, String expected, ErrorReporter errorReporter)
             throws SchemaException {
-        ErrorListener listener = errorListener == null ? getErrorListener() : errorListener;
-        setErrorListener(listener);
+        ErrorReporter listener = errorReporter == null ? getErrorReporter() : errorReporter;
+        setErrorReporter(listener);
         PipelineConfiguration pipe = config.makePipelineConfiguration();
-        pipe.setErrorListener(listener);
-        pipe.setHostLanguage(Configuration.XML_SCHEMA);
+        pipe.setErrorReporter(listener);
+        pipe.setHostLanguage(HostLanguage.XML_SCHEMA);
         SchemaDocument schemadoc = SchemaReader.read(root, this, pipe, null);
         return processSchemaDocument(schemadoc, null, expected);
     }
 
     /**
-     * y
      * In deferred validation mode, validate and compile the accumulated schema components. If validation
      * succeeds, the schema components will be added to the cache held by the Configuration.
      *
@@ -536,6 +519,8 @@ public class SchemaCompiler implements ISchemaCompiler {
         }
 
         compile();
+        makeAllAutomata();
+        checkAllAutomata();
         PreparedSchema ps = preparedSchema;
         preparedSchema = null;
         return ps;
@@ -558,26 +543,11 @@ public class SchemaCompiler implements ISchemaCompiler {
      *
      * @param message the error message
      * @param locator the location of the error
-     * @throws SchemaException if the supplied ErrorListener throws an exception
      */
 
-    public void error(String message, Location locator)
-            throws SchemaException {
-        ErrorListener errorListener = getErrorListener();
-        SchemaException exception = new SchemaException(message, locator);
-        if (errorListener == null) {
-            errorListener = config.getErrorListener();
-        }
+    public void error(String message, Location locator) {
         errorCount++;
-        try {
-            errorListener.fatalError(exception);
-        } catch (TransformerException err) {
-            if (err instanceof SchemaException) {
-                throw (SchemaException) err;
-            } else {
-                throw new SchemaException(err);
-            }
-        }
+        getErrorReporter().report(new XmlProcessingIncident(message, SaxonErrorCode.SXXP0006, locator));
     }
 
     /**
@@ -589,14 +559,10 @@ public class SchemaCompiler implements ISchemaCompiler {
 
     public void warning(String message, Location locator) {
         if (locator.getSystemId() !=null && locator.getSystemId().endsWith("override.xsl")) {
-            locator = new ExplicitLocation("schema_document_resulting_from_override_processing", -1, -1);
+            locator = new Loc("schema_document_resulting_from_override_processing", -1, -1);
         }
-        SchemaException exception = new SchemaException(message, locator);
-        try {
-            getErrorListener().warning(exception);
-        } catch (TransformerException err) {
-            // no action
-        }
+        XmlProcessingIncident exception = new XmlProcessingIncident(message, SaxonErrorCode.SXWN9000, locator).asWarning();
+        getErrorReporter().report(exception);
     }
 
     /**
@@ -675,22 +641,69 @@ public class SchemaCompiler implements ISchemaCompiler {
     }
 
     /**
-     * Make a namespace resolver for a particular element in the schema. Makes a copy, to avoid
-     * preventing the schema document tree being garbage-collected. Reuses the most recent one
-     * if the namespace context is the same, to reduce memory usage
-     * @param node the node in the schema document whose namespace context is required
+     * Schedule the task of creating a finite state automaton for a given complex type.
+     * This is done at the end, because there may be multiple requests for the same complex type,
+     * and doing it once saves effort
+     * @param type the complex type for which an FSA is needed
      */
 
-    public NamespaceResolver makeNamespaceResolver(NodeInfo node) {
-        SavedNamespaceContext nc = new SavedNamespaceContext(NamespaceIterator.iterateNamespaces(node));
-        if (!nc.equals(latestNamespaceContext)) {
-            latestNamespaceContext = nc;
-        }
-        return latestNamespaceContext;
+    public void scheduleAutomaton(UserComplexType type) {
+        scheduledForAutomaton.add(type);
     }
 
+    /**
+     * Schedule a subsumption check: that is, checking that the finite state automaton for one
+     * complex type subsumes the FSA for another complex type
+     *
+     * @param base the base (super-) complex type
+     * @param sub the derived complex type
+     */
+    public void scheduleAutomatonCheck(UserComplexType base, UserComplexType sub) {
+        scheduledForAutomatonCheck.add(new UserComplexType[]{base, sub});
+    }
+
+    /**
+     * Create determinized finite state automata for all complex types for which this has
+     * been previously requested
+     * @throws SchemaException if creation of any FSA fails
+     */
+
+    public void makeAllAutomata() throws SchemaException {
+        for (UserComplexType type : scheduledForAutomaton) {
+            type.makeAutomaton(this);
+        }
+    }
+
+    /**
+     * Perform all subsumption checks that have been previously requested. This can only
+     * be done after the determinized FSA's have been constructed.
+     * @throws SchemaException if any restricted type is not validly derived from its base type
+     */
+    public void checkAllAutomata() throws SchemaException {
+        for (UserComplexType[] pair : scheduledForAutomatonCheck) {
+            UserComplexType sub = pair[1];
+            UserComplexType base = pair[0];
+            String subsumeError = FiniteStateMachine.subsumesMachine(
+                    base.getFiniteStateMachine(), sub.getFiniteStateMachine(), this);
+            if (subsumeError != null) {
+                String message;
+                if (subsumeError.startsWith("?")) {
+                    message = "Saxon is unable to determine whether or not the" +
+                                           " content model of the complex type " + sub.getDescription() +
+                                           " is a valid restriction of the content model of the type " + base.getDescription() + ". "
+                                           + subsumeError.substring(1);
+                } else {
+                    message = "The content model of the complex type " + sub.getDescription() +
+                                           " is not a valid restriction of the content model of the type " + base.getDescription()
+                                           + ". " + subsumeError;
+                }
+                error(message, sub);
+                throw new SchemaException(message);
+            }
+        }
+    }
 
 }
 
 
-// Copyright (c) 2006 - 2012 Saxonica Limited
+// Copyright (c) 2006-2020 Saxonica Limited

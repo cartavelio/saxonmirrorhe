@@ -3,13 +3,12 @@ package com.saxonica.ee.stream.watch;
 
 import com.saxonica.ee.stream.Inversion;
 import com.saxonica.ee.stream.feed.DecomposingFeed;
-import com.saxonica.ee.stream.feed.Feed;
+import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.om.FleetingNode;
 import com.saxonica.ee.stream.om.FleetingParentNode;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Location;
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.type.Type;
@@ -37,6 +36,7 @@ public class StreamWatch extends AbstractWatch {
      * @throws net.sf.saxon.trans.XPathException
      *          if a dynamic error occurs
      */
+    @Override
     public boolean matchesNode(FleetingNode node, XPathContext context) throws XPathException {
         return node.getNodeKind() == Type.DOCUMENT;
     }
@@ -46,6 +46,7 @@ public class StreamWatch extends AbstractWatch {
      *
      * @param kind the node kind
      */
+    @Override
     public boolean matchesNodesOfKind(UType kind) {
         return kind.subsumes(UType.DOCUMENT);
     }
@@ -57,6 +58,7 @@ public class StreamWatch extends AbstractWatch {
      *
      * @param anchor The anchor node within which the watch is scoped
      */
+    @Override
     public void setAnchorNode(FleetingParentNode anchor) {
     }
 
@@ -67,6 +69,7 @@ public class StreamWatch extends AbstractWatch {
      *
      * @return The anchor node within which the watch is scoped
      */
+    @Override
     public FleetingParentNode getAnchorNode() {
         return null;
     }
@@ -85,11 +88,12 @@ public class StreamWatch extends AbstractWatch {
      * @throws net.sf.saxon.trans.XPathException
      *          May be raised if a dynamic error occurs
      */
+    @Override
     public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
         Inversion inversion = action;
-        ManualIterator<? extends NodeInfo> iter = new ManualIterator<>(node);
+        ManualIterator iter = new ManualIterator(node);
         context.setCurrentIterator(iter);
-        Feed parentFeed = new DecomposingFeed(context.getReceiver());
+        ItemFeed parentFeed = new DecomposingFeed(watchManager.getOutputter(), context);
         Watch watch = inversion.getWatch(watchManager, parentFeed, context);
         watch.setAnchorNode(node);
         watchManager.addWatch(watch, true);
@@ -105,8 +109,9 @@ public class StreamWatch extends AbstractWatch {
      *          May be raised if a constraint implemented by this
      *          Watch is violated
      */
+    @Override
     public void endSelectedParentNode(Location locationId) throws XPathException {
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

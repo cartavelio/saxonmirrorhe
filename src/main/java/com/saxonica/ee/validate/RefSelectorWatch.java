@@ -1,8 +1,7 @@
 package com.saxonica.ee.validate;
 
 import com.saxonica.ee.schema.KeyRef;
-import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -53,6 +52,7 @@ public class RefSelectorWatch extends SelectorWatch {
      * levels of hierarchy.
      */
 
+    @Override
     public void close() throws XPathException {
         int errorCount = 0;
         for (Map.Entry<ValueEntry, Integer> e : table.entrySet()) {
@@ -72,12 +72,7 @@ public class RefSelectorWatch extends SelectorWatch {
                                     Err.wrap(identityConstraint.getName()) +
                                     ": " + entry);
                     ve.setConstraintReference(1, "cvc-identity-constraint", "4.3");
-                    int hostLanguage = getPipelineConfiguration().getHostLanguage();
-                    if (hostLanguage == Configuration.XSLT) {
-                        ve.setErrorCode("XTTE1555");
-                    } else if (hostLanguage == Configuration.XQUERY) {
-                        ve.setErrorCode("XQDY0027");
-                    }
+                    ve.setErrorCode(getPipelineConfiguration().isXSLT() ? "XTTE1555" : "XQDY0027");
                     reportValidationError(ve, lastLocation);
                     if (errorCount++ > 100) {
                         break;
@@ -88,4 +83,4 @@ public class RefSelectorWatch extends SelectorWatch {
     }
 }
 
-// Copyright (c) 2004-2014 Saxonica Limited. No warranty.
+// Copyright (c) 2004-2020 Saxonica Limited No warranty.

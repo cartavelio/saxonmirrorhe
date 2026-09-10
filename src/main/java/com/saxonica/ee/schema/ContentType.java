@@ -18,7 +18,7 @@ public class ContentType {
     public SimpleType simpleTypeDefinition;
 }
 
-// Copyright (c) Saxonica 2008
+// Copyright (c) 2008-2020 Saxonica Limited
 
 
 

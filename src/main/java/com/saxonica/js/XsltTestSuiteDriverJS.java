@@ -43,9 +43,6 @@ public class XsltTestSuiteDriverJS extends Xslt30TestSuiteDriverEE {
     @Override
     public void go(String[] args) throws Exception {
         for (int i = 2; i < args.length; i++) {
-            if (args[i].startsWith("-js2")) {
-                targetVersion = "JS2";
-            }
             if (args[i].startsWith("-nodeJS")) {
                 nodeJS = true;
             }
@@ -58,10 +55,11 @@ public class XsltTestSuiteDriverJS extends Xslt30TestSuiteDriverEE {
         return false;
     }
 
+    @Override
     protected void setDependencyData() {
         // TODO: revise this list
         alwaysOff.add("feature/disabling_output_escaping");
-        alwaysOff.add("feature/serialization");
+        alwaysOn.add("feature/serialization"); // off for JS1, on for JS2
         alwaysOn.add("feature/namespace_axis");
         alwaysOn.add("feature/backwards_compatibility");
         alwaysOn.add("feature/built_in_derived_types");
@@ -76,10 +74,15 @@ public class XsltTestSuiteDriverJS extends Xslt30TestSuiteDriverEE {
         alwaysOn.add("feature/XSD_1.1"); // TODO try with this on & off
         alwaysOff.add("recognize_id_as_uri_fragment");
 
-        alwaysOff.add("feature/higher_order_functions");
+        alwaysOn.add("feature/higher_order_functions"); // off for JS1, on for JS2
         alwaysOff.add("feature/XML_1.1");
         alwaysOff.add("feature/dtd");
-        alwaysOff.add("feature/simple-uca-fallback");
+        alwaysOff.add("feature/HTML4");
+        alwaysOn.add("feature/HTML5");
+
+        // simple-uca-fallback and advanced-uca-fallback not used in XSLT30 test suite
+        // but may be used in converted QT3 test suite
+        alwaysOff.add("feature/simple-uca-fallback"); // off for JS1, on for JS2
         alwaysOff.add("feature/advanced-uca-fallback");
 
         needsEE.add("languages_for_numbering");
@@ -139,12 +142,15 @@ public class XsltTestSuiteDriverJS extends Xslt30TestSuiteDriverEE {
         if ("XSD_1.1".equals(value)) {
             return !inverse;
         }
+        if ("default_HTML_version".equals(type) && !"5".equals(value)) {
+            return false;
+        }
         return super.ensureDependencySatisfied(dependency, env);
     }
 
     @Override
     protected String getNameOfExceptionsFile() {
-        return "exceptions-js.xml";
+        return "exceptions.xml";
     }
 
     @Override
@@ -160,10 +166,7 @@ public class XsltTestSuiteDriverJS extends Xslt30TestSuiteDriverEE {
         try {
             File sourceFile = new File(filename);
             String localName = sourceFile.getName();
-            File exportLoc = new File(resultsDir + "/export/" + localName + ".sef");
-            if (targetVersion.equals("JS2")) {
-                exportLoc = new File(resultsDir + "/export/" + localName + ".sef.json");
-            }
+            File exportLoc = new File(resultsDir + "/export/" + localName + ".sef.json");
             System.err.println("Exporting to " + exportLoc);
             XsltPackage compiledPack = compiler.compilePackage(new StreamSource(filename));
             compiledPack.save(exportLoc, targetVersion);
@@ -178,12 +181,10 @@ public class XsltTestSuiteDriverJS extends Xslt30TestSuiteDriverEE {
         }
     }
 
+    @Override
     protected XsltExecutable exportStylesheet(String testName, String testSetName, XsltCompiler compiler, XsltExecutable sheet, Source styleSource) throws SaxonApiException {
         try {
-            File exportFile = new File(resultsDir + "/export/" + testSetName + "/" + testName + ".sef");
-            if (targetVersion.equals("JS2")) {
-                exportFile = new File(resultsDir + "/export/" + testSetName + "/" + testName + ".sef.json");
-            }
+            File exportFile = new File(resultsDir + "/export/" + testSetName + "/" + testName + ".sef.json");
             System.err.println("Exporting to " + exportFile);
             XsltPackage compiledPack = compiler.compilePackage(styleSource);
             compiledPack.save(exportFile, targetVersion);
@@ -234,12 +235,7 @@ public class XsltTestSuiteDriverJS extends Xslt30TestSuiteDriverEE {
         }
         if (initialTemplateName != null || initialFunctionName != null || env.streamedFile != null || env.streamedContent != null) {
             try {
-                RunJSTransform t;
-                if (targetVersion.equals("JS2")) {
-                    t = new RunJS2Transform(jsBase);
-                } else {
-                    t = new RunJSTransform(jsBase);
-                }
+                RunJSTransform t = new RunJS2Transform(jsBase);
                 if (initialFunctionName != null) {
                     t.setInitialFunctionDetails(initialFunctionName, initialFunctionArgs);
                 }
@@ -322,7 +318,7 @@ public class XsltTestSuiteDriverJS extends Xslt30TestSuiteDriverEE {
                 }
                 outcome.addXslMessage(new XdmNode(new ProcInstImpl("trust", "me")));
             } catch (SaxonApiException e) {
-                outcome.setException(e);
+                outcome.setException(e.getErrorCode());
                 if (e.getErrorCode() != null) {
                     outcome.addReportedError(e.getErrorCode().getLocalName());
                 }

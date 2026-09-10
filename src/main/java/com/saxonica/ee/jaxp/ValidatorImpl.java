@@ -11,7 +11,6 @@ import net.sf.saxon.event.Sink;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.serialize.SerializationProperties;
-import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.ValidationException;
@@ -52,10 +51,12 @@ public class ValidatorImpl extends Validator {
         }
     }
 
+    @Override
     public void reset() {
         //
     }
 
+    @Override
     public void validate(Source source, Result result) throws SAXException, IOException {
         Receiver out;
         try {
@@ -68,7 +69,7 @@ public class ValidatorImpl extends Validator {
             ParseOptions options = pipe.getParseOptions();
             options.setSchemaValidationMode(Validation.STRICT);
             options.setContinueAfterValidationErrors(true);
-            pipe.setErrorListener(new SchemaFactoryImpl.ErrorListenerWrappingErrorHandler(getErrorHandler()));
+            pipe.setErrorReporter(new SchemaFactoryImpl.ErrorReporterWrappingErrorHandler(getErrorHandler()));
             Sender.send(source, out, options);
 
         } catch (TransformerException e) {
@@ -78,13 +79,6 @@ public class ValidatorImpl extends Validator {
                 throw (IOException) e.getException();
             } else {
                 throw new SAXException(e);
-            }
-        } catch (UncheckedXPathException e) {
-            XPathException xe = e.getXPathException();
-            if (xe.getCause() instanceof SAXException) {
-                throw (SAXException)xe.getCause();
-            } else {
-                throw new SAXException(xe);
             }
         }
     }
@@ -140,6 +134,7 @@ public class ValidatorImpl extends Validator {
      *      A new error handler to be set. This parameter can be null.
      */
 
+    @Override
     public void setErrorHandler(ErrorHandler errorHandler) {
         if (errorHandler == null) {
             errorHandler = SchemaFactoryImpl.DRACONIAN_ERROR_HANDLER;
@@ -169,10 +164,12 @@ public class ValidatorImpl extends Validator {
          * @param systemId optional; may be used to represent the destination of any report produced
          * @throws XPathException if initialization of the invalidity handler fails for any reason
          */
+        @Override
         public void startReporting(String systemId) throws XPathException {
             // no action
         }
 
+        @Override
         public void reportInvalidity(Invalidity failure) throws XPathException {
             try {
                 ValidationException exception = ((ValidationFailure) failure).makeException();
@@ -194,7 +191,8 @@ public class ValidatorImpl extends Validator {
          * @return a value (or null). This will be the value returned as the value of
          * the variable $err:value during try/catch processing
          */
-        public Sequence<?> endReporting() {
+        @Override
+        public Sequence endReporting() {
             return null;
         }
     }
@@ -211,14 +209,15 @@ public class ValidatorImpl extends Validator {
      * @see #setErrorHandler(ErrorHandler)
      */
 
+    @Override
     public ErrorHandler getErrorHandler() {
         InvalidityHandler handler = pipe.getParseOptions().getInvalidityHandler();
         if (handler instanceof InvalidityHandlerWrappingErrorHandler) {
             return ((InvalidityHandlerWrappingErrorHandler)handler).getErrorHandler();
         }
-        ErrorListener listener = pipe.getErrorListener();
-        if (listener instanceof SchemaFactoryImpl.ErrorListenerWrappingErrorHandler) {
-            ErrorHandler eh = ((SchemaFactoryImpl.ErrorListenerWrappingErrorHandler) listener).getErrorHandler();
+        ErrorReporter listener = pipe.getErrorReporter();
+        if (listener instanceof SchemaFactoryImpl.ErrorReporterWrappingErrorHandler) {
+            ErrorHandler eh = ((SchemaFactoryImpl.ErrorReporterWrappingErrorHandler) listener).getErrorHandler();
             return eh == SchemaFactoryImpl.DRACONIAN_ERROR_HANDLER ? null : eh;
         }
         return null;
@@ -230,6 +229,7 @@ public class ValidatorImpl extends Validator {
      *
      * @param resourceResolver A new resource resolver to be set. This parameter can be null.
      */
+    @Override
     public void setResourceResolver(LSResourceResolver resourceResolver) {
         pipe.setURIResolver(new URIResourceResolver(resourceResolver));
         pipe.setSchemaURIResolver(new LSSchemaResolver(resourceResolver, pipe.getConfiguration()));
@@ -243,6 +243,7 @@ public class ValidatorImpl extends Validator {
      *         if that method has never been called
      */
     /*@Nullable*/
+    @Override
     public LSResourceResolver getResourceResolver() {
         URIResolver u = pipe.getURIResolver();
         if (u instanceof URIResourceResolver) {
@@ -276,22 +277,25 @@ public class ValidatorImpl extends Validator {
      * in the class {@link net.sf.saxon.lib.FeatureKeys}. In addition, the following properties
      * are recognized:</p>
      * <ul>
-     * <li>{@link XMLConstants#FEATURE_SECURE_PROCESSING}</li>
-     * <li>{@link XMLConstants#ACCESS_EXTERNAL_DTD}</li>
-     * <li>{@link XMLConstants#ACCESS_EXTERNAL_SCHEMA}</li>
+     *     <li>{@link XMLConstants#FEATURE_SECURE_PROCESSING}</li>
+     *     <li>{@link XMLConstants#ACCESS_EXTERNAL_DTD}</li>
+     *     <li>{@link XMLConstants#ACCESS_EXTERNAL_SCHEMA}</li>
      * </ul>
      *
      * @param name The property name, which is a non-null fully-qualified URI.
      * @return The current value of the property.
-     * @throws org.xml.sax.SAXNotRecognizedException If the property
-     *                                               value can't be assigned or retrieved.
-     * @throws org.xml.sax.SAXNotSupportedException  When the
-     *                                               XMLReader recognizes the property name but
-     *                                               cannot determine its value at this time.
-     * @throws NullPointerException                  When the name parameter is null.
+     * @throws org.xml.sax.SAXNotRecognizedException
+     *                              If the property
+     *                              value can't be assigned or retrieved.
+     * @throws org.xml.sax.SAXNotSupportedException
+     *                              When the
+     *                              XMLReader recognizes the property name but
+     *                              cannot determine its value at this time.
+     * @throws NullPointerException When the name parameter is null.
      * @see #setProperty(String, Object)
      */
 
+    @Override
     public Object getProperty(String name) throws SAXNotRecognizedException, SAXNotSupportedException {
         switch (name) {
             case XMLConstants.FEATURE_SECURE_PROCESSING:
@@ -320,20 +324,23 @@ public class ValidatorImpl extends Validator {
      * in the class {@link net.sf.saxon.lib.FeatureKeys}. In addition, the following properties
      * are recognized, and passed directly to the underlying XML parser:</p>
      * <ul>
-     * <li>{@link XMLConstants#FEATURE_SECURE_PROCESSING}</li>
-     * <li>{@link XMLConstants#ACCESS_EXTERNAL_DTD}</li>
-     * <li>{@link XMLConstants#ACCESS_EXTERNAL_SCHEMA}</li>
+     *      <li>{@link XMLConstants#FEATURE_SECURE_PROCESSING}</li>
+     *      <li>{@link XMLConstants#ACCESS_EXTERNAL_DTD}</li>
+     *      <li>{@link XMLConstants#ACCESS_EXTERNAL_SCHEMA}</li>
      * </ul>
      *
      * @param name   The property name, which is a non-null fully-qualified URI.
      * @param object The requested value for the property.
-     * @throws org.xml.sax.SAXNotRecognizedException If the property
-     *                                               value can't be assigned or retrieved.
-     * @throws org.xml.sax.SAXNotSupportedException  When the
-     *                                               {@link javax.xml.validation.Validator} recognizes the property name but
-     *                                               cannot set the requested value.
-     * @throws NullPointerException                  When the name parameter is null.
+     * @throws org.xml.sax.SAXNotRecognizedException
+     *                              If the property
+     *                              value can't be assigned or retrieved.
+     * @throws org.xml.sax.SAXNotSupportedException
+     *                              When the
+     *                              {@link javax.xml.validation.Validator} recognizes the property name but
+     *                              cannot set the requested value.
+     * @throws NullPointerException When the name parameter is null.
      */
+    @Override
     public void setProperty(String name, Object object) throws SAXNotRecognizedException, SAXNotSupportedException {
         switch (name) {
             case XMLConstants.FEATURE_SECURE_PROCESSING:
@@ -355,6 +362,7 @@ public class ValidatorImpl extends Validator {
         }
     }
 
+
 }
 
-// Copyright (c) 2004-2007 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

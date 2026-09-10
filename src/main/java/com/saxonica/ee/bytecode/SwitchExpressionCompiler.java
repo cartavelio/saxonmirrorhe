@@ -2,6 +2,7 @@ package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.*;
 import com.saxonica.ee.optim.SwitchExpression;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Operand;
 import net.sf.saxon.expr.XPathContext;
@@ -115,6 +116,9 @@ public class SwitchExpressionCompiler extends ToIteratorCompiler {
 
         methodInfo.placeLabel(foundCase);
         ga.checkClass(Expression.class);
+        if (evaluationMode == Expression.PROCESS_METHOD) {
+            compiler.generateGetOutputter();
+        }
         compiler.generateGetContext();
         switch (evaluationMode) {
             case Expression.EVALUATE_METHOD:
@@ -124,7 +128,7 @@ public class SwitchExpressionCompiler extends ToIteratorCompiler {
                 ga.invokeInstanceMethod(Expression.class, "iterate", XPathContext.class);
                 break;
             case Expression.PROCESS_METHOD:
-                ga.invokeInstanceMethod(Expression.class, "process", XPathContext.class);
+                ga.invokeInstanceMethod(Expression.class, "process", Outputter.class, XPathContext.class);
                 break;
         }
 
@@ -177,4 +181,4 @@ public class SwitchExpressionCompiler extends ToIteratorCompiler {
     }
 }
 
-//Copyright (c) 2011-2018 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

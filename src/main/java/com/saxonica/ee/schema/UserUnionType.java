@@ -45,8 +45,19 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
         return Genre.ATOMIC;
     }
 
-    public StructuredQName getTypeName() {
-        return new StructuredQName("", getTargetNamespace(), getName());
+//    public StructuredQName getTypeName() {
+//        return new StructuredQName("", getTargetNamespace(), getName());
+//    }
+
+    /**
+     * Get the name of the type as a StructuredQName
+     *
+     * @return a StructuredQName identifying the type.  In the case of an anonymous type, an internally-generated
+     * name is returned
+     */
+    @Override
+    public StructuredQName getStructuredQName() {
+        return getTypeName();
     }
 
     /**
@@ -120,6 +131,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
      * @return false, this is not an atomic type
      */
 
+    @Override
     public boolean isAtomicType() {
         return false;
     }
@@ -128,6 +140,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
      * Ask whether this union type includes any list types among its members
      */
 
+    @Override
     public boolean containsListType() throws MissingComponentException {
         for (TypeReference ref : getMemberTypeReferences()) {
             SimpleType type = (SimpleType) ref.getTarget();
@@ -148,6 +161,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
      * a non-plain union type
      */
 
+    @Override
     public boolean isPlainType() {
         // implemented as a memo function
         if (isPlainUnion == -1) {
@@ -182,6 +196,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
      * @return the most precise SequenceType for the result of casting
      */
 
+    @Override
     public SequenceType getResultTypeOfCast() {
         try {
             if (isPlainType()) {
@@ -205,6 +220,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
      * node, however, can still allow a list or union. This changes in XSD 1.1, where a list of IDs is allowed.
      */
 
+    @Override
     public boolean isIdType() throws MissingComponentException {
         for (TypeReference ref : getMemberTypeReferences()) {
             SimpleType st = (SimpleType) ref.getTarget();
@@ -222,6 +238,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
      * from IDREF or IDREFS by restriction, list, or union
      */
 
+    @Override
     public boolean isIdRefType() throws MissingComponentException {
         for (TypeReference ref : getMemberTypeReferences()) {
             SimpleType st = (SimpleType) ref.getTarget();
@@ -236,6 +253,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
      * Determine whether this is a built-in type or a user-defined type
      */
 
+    @Override
     public boolean isBuiltInType() {
         return false;
     }
@@ -244,6 +262,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
      * Determine whether this is a list type
      */
 
+    @Override
     public boolean isListType() {
         return false;
     }
@@ -254,6 +273,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
      * @return true for a union type
      */
 
+    @Override
     public boolean isUnionType() {
         return true;
     }
@@ -264,6 +284,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
      *
      * @return the smallest UType that subsumes this item type
      */
+    @Override
     public UType getUType() {
         UType u = UType.VOID;
         for (TypeReference ref : getMemberTypeReferences()) {
@@ -289,7 +310,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
      * @return the alphacode for the nearest containing built-in type
      */
     @Override
-    public String getAlphaCode() {
+    public String getBasicAlphaCode() {
         return "A";
     }
 
@@ -302,6 +323,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
      * cannot be determined because there are components missing from the schema.
      */
 
+    @Override
     public boolean isNamespaceSensitive() {
         try {
             for (TypeReference ref : getMemberTypeReferences()) {
@@ -323,6 +345,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
      * @throws SchemaException if the definition is invalid
      */
 
+    @Override
     public boolean validate(SchemaCompiler compiler)
             throws SchemaException {
 
@@ -351,6 +374,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
         return result;
     }
 
+    @Override
     public void elaborate(SchemaCompiler compiler) throws SchemaException {
         // before elaborating a union type we must elaborate its member types
         for (TypeReference ref : getMemberTypeReferences()) {
@@ -374,6 +398,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
      * @throws SchemaException if cycles are found
      */
 
+    @Override
     public void lookForCycles(Stack references, SchemaCompiler compiler) throws SchemaException {
         for (Object reference : references) {
             if (((SchemaType) reference).isSameType(this)) {
@@ -384,12 +409,12 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
         }
         references.push(this);
         for (TypeReference ref : getMemberTypeReferences()) {
-            ref.tryToResolve(compiler);
+            ref.tryToResolve(compiler, false);
             if (ref.isResolved()) {
                 SchemaType st = (SchemaType) ref.getTarget();
                 if (st instanceof SimpleTypeDefinition) {
                     ((SimpleTypeDefinition) st).fixup(compiler);
-                    st = ((SimpleTypeDefinition) st).getSimpleType();
+                    st = ((SimpleTypeDefinition) st).getWorkingType();
                 }
                 if (st instanceof UserUnionType) {
                     ((UserUnionType) st).lookForCycles(references, compiler);
@@ -406,7 +431,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
                     SimpleType it = ((UserListType) st).getItemType();
                     if (it instanceof SimpleTypeDefinition) {
                         ((SimpleTypeDefinition) it).fixup(compiler);
-                        it = ((SimpleTypeDefinition) it).getSimpleType();
+                        it = ((SimpleTypeDefinition) it).getWorkingType();
                     }
                     if (it.isSameType(this)) {
                         compiler.error("The definition of the union type " + getDescription() +
@@ -447,6 +472,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
      */
 
     /*@Nullable*/
+    @Override
     public ValidationFailure validateContent(/*@NotNull*/ CharSequence value, NamespaceResolver nsResolver, /*@NotNull*/ ConversionRules rules) {
         ValidationFailure result = null;
         SimpleType matchingType = null;
@@ -530,6 +556,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
     }
 
 
+    @Override
     public AtomicSequence getTypedValue(CharSequence value, NamespaceResolver resolver, ConversionRules rules)
             throws ValidationException {
         AtomicSequence result = null;
@@ -586,6 +613,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
      * Serialize the schema component
      */
 
+    @Override
     public void serializeVariety(SchemaModelSerializer serializer) throws XPathException {
         serializer.emitAttribute("variety", "union");
         FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C64);
@@ -608,6 +636,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
      * @param th   The type hierarchy
      * @return true if the item is an instance of this type; false otherwise
      */
+    @Override
     public boolean matches(Item item, TypeHierarchy th) {
         if (!(item instanceof AtomicValue)) {
             return false;
@@ -633,6 +662,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
      */
 
     /*@NotNull*/
+    @Override
     public AtomicType getPrimitiveItemType() {
         return BuiltInAtomicType.ANY_ATOMIC;
     }
@@ -643,15 +673,18 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
      * @return StandardNames.XS_ANY_ATOMIC_TYPE
      */
 
+    @Override
     public int getPrimitiveType() {
         return StandardNames.XS_ANY_ATOMIC_TYPE;
     }
 
     /*@NotNull*/
+    @Override
     public PlainType getAtomizedItemType() {
         return this;
     }
 
+    @Override
     public boolean isAtomizable(TypeHierarchy th) {
         return true;
     }
@@ -662,6 +695,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
      * @return for an atomic type, the type itself; for a plain union type, the list of plain types
      *         in its transitive membership, in declaration order
      */
+    @Override
     public Iterable<PlainType> getPlainMemberTypes() throws MissingComponentException {
         List<PlainType> s = new ArrayList<>(10);
         gatherPlainMemberTypes(s);
@@ -677,6 +711,26 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
             if (pt instanceof UserUnionType) {
                 ((UserUnionType) pt).gatherPlainMemberTypes(s);
             }
+        }
+    }
+
+    /**
+     * Get the default priority when this ItemType is used as an XSLT pattern
+     *
+     * @return the default priority. For a union type this is defined as the product
+     * of the default priorities of the member types. Because the priorities of member
+     * types are in the range 0 to 1, their product is also in the range 0 to 1.
+     */
+    @Override
+    public double getDefaultPriority() {
+        try {
+            double result = 1;
+            for (PlainType t : getPlainMemberTypes()) {
+                 result *= t.getDefaultPriority();
+            }
+            return result;
+        } catch (MissingComponentException e) {
+            return -1;
         }
     }
 
@@ -704,6 +758,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
         }
     }
 
+    @Override
     public String toExportString() {
         if (isAnonymousType()) {
             FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C256);
@@ -742,4 +797,4 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
     }
 }
 
-// Copyright (c) 2004-2006 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

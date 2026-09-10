@@ -6,7 +6,8 @@ import net.sf.saxon.expr.ContextItemExpression;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.style.StyleElement;
@@ -28,6 +29,7 @@ public class SaxonInsert extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
@@ -38,32 +40,34 @@ public class SaxonInsert extends StyleElement {
      * @return true: yes, it may contain a template-body
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return true;
     }
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
         String selectAtt = null;
         String contentAtt = null;
 
-        AttributeCollection atts = getAttributeList();
-
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String value = att.getValue();
+            String f = attName.getDisplayName();
             switch (f) {
                 case "select":
-                    selectAtt = atts.getValue(a);
-                    select = makeExpression(selectAtt, a);
+                    selectAtt = value;
+                    select = makeExpression(selectAtt, att);
                     break;
                 case "position":
-                    String val = Whitespace.trim(atts.getValue(a));
+                    String val = Whitespace.trim(value);
                     if (!(val.equals("after") || val.equals("before") || val.equals("first") || val.equals("last"))) {
                         invalidAttribute("position", "after|before|first|last");
                     }
                     positionAtt = val;
                     break;
                 default:
-                    checkUnknownAttribute(atts.getNodeName(a));
+                    checkUnknownAttribute(attName);
                     break;
             }
         }
@@ -79,6 +83,7 @@ public class SaxonInsert extends StyleElement {
 
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         getConfiguration().checkLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XSLT,
                                                 "saxon:insert",
@@ -88,13 +93,14 @@ public class SaxonInsert extends StyleElement {
         SaxonUpdate.checkContainment(this);
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         Expression content = compileSequenceConstructor(exec, decl, false);
         int pos = interpretPosition(positionAtt);
         return new InsertExpression(content, select, pos, Validation.PRESERVE, true, true);
     }
 
-    private int interpretPosition(String p) {
+    public static int interpretPosition(String p) {
         switch (p) {
             case "first": return Token.FIRST_INTO;
             case "last": return Token.LAST_INTO;
@@ -104,7 +110,22 @@ public class SaxonInsert extends StyleElement {
         }
     }
 
+    public static String encodePosition(int p) {
+        switch (p) {
+            case Token.FIRST_INTO:
+                return "first";
+            case Token.LAST_INTO:
+                return "last";
+            case Token.BEFORE:
+                return "before";
+            case Token.AFTER:
+                return "after";
+            default:
+                return "??";
+        }
+    }
+
 }
 
-// Copyright (c) 2018 Saxonica Ltd
+// Copyright (c) 2018-2020 Saxonica Limited
 

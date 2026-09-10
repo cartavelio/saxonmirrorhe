@@ -30,6 +30,7 @@ public class AssertionFacet extends Facet {
         this.assertion = assertion;
     }
 
+    @Override
     public String getName() {
         return "assertion";
     }
@@ -39,6 +40,7 @@ public class AssertionFacet extends Facet {
         return "cvc-assertions-valid";
     }
 
+    @Override
     public String getValue() {
         return assertion.getConditionText();
     }
@@ -64,6 +66,7 @@ public class AssertionFacet extends Facet {
      *         fails
      */
 
+    @Override
     public boolean testAtomicValue(AtomicValue value) {
         throw new UnsupportedOperationException("Validation context required");
     }
@@ -90,6 +93,7 @@ public class AssertionFacet extends Facet {
      * @return true if the value conforms; false if it doesn't conform, or if the test fails
      */
 
+    @Override
     public boolean testListValue(AtomicSequence value) {
         throw new UnsupportedOperationException("Validation context required");
     }
@@ -114,6 +118,7 @@ public class AssertionFacet extends Facet {
      * @param serializer receives the content for serialization
      */
 
+    @Override
     public void serializeFacet(SchemaModelSerializer serializer) throws XPathException {
         serializer.startElement("assert");
         if (isFixed()) {
@@ -145,4 +150,4 @@ public class AssertionFacet extends Facet {
 
 }
 
-// Copyright (c) 2009-2017 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

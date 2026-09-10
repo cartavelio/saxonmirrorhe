@@ -19,6 +19,7 @@ public class SaxonElementFactoryEE extends SaxonElementFactory {
      */
 
     /*@Nullable*/
+    @Override
     public Class<? extends StyleElement> getExtensionClass(String localname) {
         if (localname.equals("array")) {
             return SaxonArray.class;
@@ -47,11 +48,17 @@ public class SaxonElementFactoryEE extends SaxonElementFactory {
         if (localname.equals("entity-ref")) {
             return SaxonEntityRef.class;
         }
+        if (localname.equals("for-each-member")) {
+            return SaxonForEachMember.class;
+        }
         if (localname.equals("import-query")) {
             return SaxonImportQuery.class;
         }
         if (localname.equals("insert")) {
             return SaxonInsert.class;
+        }
+        if (localname.equals("item-type")) {
+            return SaxonItemType.class;
         }
         if (localname.equals("rename")) {
             return SaxonRename.class;
@@ -62,9 +69,7 @@ public class SaxonElementFactoryEE extends SaxonElementFactory {
         if (localname.equals("tabulate-maps")) {
             return SaxonTabulateMaps.class;
         }
-        if (localname.equals("type-alias")) {
-            return SaxonTypeAlias.class;
-        }
+
         if (localname.equals("update")) {
             return SaxonUpdate.class;
         }
@@ -76,4 +81,4 @@ public class SaxonElementFactoryEE extends SaxonElementFactory {
 
 }
 
-// Copyright (c) 2009 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

@@ -4,25 +4,26 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.event.NamespaceReducer;
+import net.sf.saxon.event.PushToReceiver;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.StreamWriterToReceiver;
 import net.sf.saxon.lib.Invalidity;
 import net.sf.saxon.lib.InvalidityReportGenerator;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.s9api.Destination;
+import net.sf.saxon.s9api.Push;
 import net.sf.saxon.s9api.SaxonApiException;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.ValidationFailure;
 import net.sf.saxon.value.DateTimeValue;
 
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+
 
 
 /**
@@ -39,8 +40,11 @@ public class InvalidityReportGeneratorEE  extends InvalidityReportGenerator {
     private String systemId = null;
     private String schemaName = null;
     private Builder builder;
-    private XMLStreamWriter writer;
+    //private XMLStreamWriter writer;
     private boolean closed = false;
+
+    private Push.Document doc;
+    private Push.Element report;
 
     public InvalidityReportGeneratorEE(Configuration config){
         super(config);
@@ -57,8 +61,9 @@ public class InvalidityReportGeneratorEE  extends InvalidityReportGenerator {
         super(config);
         this.destination = destination;
         Receiver r = destination.getReceiver(config.makePipelineConfiguration(), config.obtainDefaultSerializationProperties());
-        r = new NamespaceReducer(r);
-        writer = new StreamWriterToReceiver(r);
+//        r = new NamespaceReducer(r);
+//        writer = new StreamWriterToReceiver(r);
+        doc = new PushToReceiver(r).document(true);
     }
 
     /**
@@ -73,7 +78,12 @@ public class InvalidityReportGeneratorEE  extends InvalidityReportGenerator {
             builder = (Builder) receiver;
         }
         Receiver r = new NamespaceReducer(receiver);
-        writer = new StreamWriterToReceiver(r);
+        try {
+            doc = new PushToReceiver(r).document(true);
+        } catch (SaxonApiException e) {
+            throw XPathException.makeXPathException(e);
+        }
+        //writer = new StreamWriterToReceiver(r);
     }
 
     public void setReceiver(Receiver receiver){
@@ -81,7 +91,12 @@ public class InvalidityReportGeneratorEE  extends InvalidityReportGenerator {
             builder = (Builder) receiver;
         }
         Receiver r = new NamespaceReducer(receiver);
-        writer = new StreamWriterToReceiver(r);
+        try {
+            doc = new PushToReceiver(r).document(true);
+        } catch (SaxonApiException e) {
+            throw new UncheckedXPathException(XPathException.makeXPathException(e));
+        }
+        //writer = new StreamWriterToReceiver(r);
     }
 
 
@@ -95,8 +110,9 @@ public class InvalidityReportGeneratorEE  extends InvalidityReportGenerator {
         Receiver r = destination.getReceiver(
                 getConfiguration().makePipelineConfiguration(),
                 getConfiguration().obtainDefaultSerializationProperties());
-        r = new NamespaceReducer(r);
-        writer = new StreamWriterToReceiver(r);
+        doc = new PushToReceiver(r).document(true);
+//        r = new NamespaceReducer(r);
+//        writer = new StreamWriterToReceiver(r);
     }
 
     /**
@@ -104,6 +120,7 @@ public class InvalidityReportGeneratorEE  extends InvalidityReportGenerator {
      *
      * @param id of the source document
      */
+    @Override
     public void setSystemId(String id) {
         systemId = id;
     }
@@ -113,26 +130,30 @@ public class InvalidityReportGeneratorEE  extends InvalidityReportGenerator {
      *
      * @param name of xsd file
      */
+    @Override
     public void setSchemaName(String name) {
         schemaName = name;
     }
 
 
+    @Override
     public int getErrorCount() {
         return errorCount;
     }
 
+    @Override
     public int getWarningCount() {
         return warningCount;
     }
 
+    @Override
     public void setXsdVersion(String version) {
         xsdversion = version;
     }
 
-    public XMLStreamWriter getWriter() {
-        return writer;
-    }
+//    public XMLStreamWriter getWriter() {
+//        return writer;
+//    }
 
 
     /**
@@ -147,62 +168,46 @@ public class InvalidityReportGeneratorEE  extends InvalidityReportGenerator {
         }
         errorCount++;
         try {
-            writer.writeStartElement(REPORT_NS, "error");
-            if (failure.getLineNumber() != -1) {
-                writer.writeAttribute("line", String.valueOf(failure.getLineNumber()));
-            }
-            if (failure.getColumnNumber() > -1) {
-                writer.writeAttribute("column", String.valueOf(failure.getColumnNumber()));
-            }
-            if (failure.getPath() != null) {
-                writer.writeAttribute("path", failure.getPath().toString());
-            }
-            if (failure.getSystemId() != null && !failure.getSystemId().equals(systemId)) {
-                writer.writeAttribute("system-id", failure.getSystemId());
-            }
-
-            if(failure.getSchemaPart() != -1){
-                writer.writeAttribute("xsd-part", String.valueOf(failure.getSchemaPart()));
-            }
-//            if (failure.getConstraintClauseNumber() != null) {
-//                writer.writeAttribute("clause", failure.getConstraintClauseNumber());
-//            }
-            if (failure.getConstraintName() != null) {
-                writer.writeAttribute("constraint", failure.getConstraintReference());
-            }
-            if (failure.getContextPath() != null) {
-                writer.writeAttribute("context-path", failure.getContextPath().toString());
-            }
-            writer.writeCharacters(failure.getMessage());
-            writer.writeEndElement();
+            Push.Element error = report.element("error")
+                    .attribute("line", ifPositive(failure.getLineNumber()))
+                    .attribute("column", ifPositive(failure.getColumnNumber()))
+                    .attribute("path", failure.getPath().toString())
+                    .attribute("system-id",
+                               failure.getSystemId() != null && !failure.getSystemId().equals(systemId) ? failure.getSystemId() : null)
+                    .attribute("xsd-part", ifPositive(failure.getSchemaPart()))
+                    .attribute("constraint", failure.getConstraintReference())
+                    .attribute("context-path", failure.getContextPath() == null ? null : failure.getContextPath().toString())
+                    .text(failure.getMessage());
 
             if (failure instanceof ValidationFailure) {
                 List<NodeInfo> offenders = ((ValidationFailure) failure).getOffendingNodes();
                 for (NodeInfo node : offenders) {
-                    writer.writeStartElement(REPORT_NS, "contributing-node");
-                    writer.writeAttribute("type", Type.displayTypeName(node));
-                    if (node.getNodeKind() == Type.TEXT && node.getStringValue().length() < 200) {
-                        writer.writeAttribute("content", node.getStringValue());
-                    }
-                    if (node.getLineNumber() != -1) {
-                        writer.writeAttribute("line", String.valueOf(node.getLineNumber()));
-                    }
-                    if (node.getColumnNumber() > -1) {
-                        writer.writeAttribute("column", String.valueOf(node.getColumnNumber()));
-                    }
-                    writer.writeAttribute("path", Navigator.getPath(node));
-                    if (node.getSystemId() != null && !node.getSystemId().equals(systemId)) {
-                        writer.writeAttribute("system-id", node.getSystemId());
-                    }
-                    writer.writeEndElement();
+                    error.element("contributing-node")
+                            .attribute("type",
+                                       Type.displayTypeName(node))
+                            .attribute("content",
+                                       node.getNodeKind() == Type.TEXT && node.getStringValue().length() < 200 ? node.getStringValue() : null)
+                            .attribute("line",
+                                       ifPositive(node.getLineNumber()))
+                            .attribute("column",
+                                       ifPositive(node.getColumnNumber()))
+                            .attribute("path",
+                                       Navigator.getPath(node))
+                            .attribute("system-id",
+                                       node.getSystemId() != null && !node.getSystemId().equals(systemId) ? node.getSystemId() : null)
+                            .close();
                 }
             }
+            error.close();
 
-        } catch (XMLStreamException e) {
+        } catch (SaxonApiException e) {
             throw new XPathException(e);
         }
     }
 
+    private String ifPositive(int value) {
+        return value < 0 ? null : String.valueOf(value);
+    }
 
     public Destination getDestination() {
         return destination;
@@ -210,6 +215,7 @@ public class InvalidityReportGeneratorEE  extends InvalidityReportGenerator {
 
     boolean started = false;
 
+    @Override
     public void startReporting(String systemId) throws XPathException {
         if (closed) {
             return;
@@ -225,21 +231,24 @@ public class InvalidityReportGeneratorEE  extends InvalidityReportGenerator {
         if (!started) {
             try {
                 started = true;
-                writer.writeStartDocument();
-                writer.setDefaultNamespace(REPORT_NS);
-                writer.writeStartElement(REPORT_NS, "validation-report");
+//                writer.writeStartDocument();
+//                writer.setDefaultNamespace(REPORT_NS);
+//                writer.writeStartElement(REPORT_NS, "validation-report");
+                doc.setDefaultNamespace(REPORT_NS);
+                report = doc.element("validation-report");
 
                 if (this.systemId != null) {
 
-                    writer.writeAttribute("system-id", this.systemId);
+                    report.attribute("system-id", this.systemId);
                 }
-            } catch (XMLStreamException e) {
+            } catch (SaxonApiException e) {
                 throw new XPathException(e);
             }
         }
     }
 
-    public Sequence<?> endReporting() throws XPathException {
+    @Override
+    public Sequence endReporting() throws XPathException {
         if (closed) {
             return null;
         }
@@ -248,11 +257,13 @@ public class InvalidityReportGeneratorEE  extends InvalidityReportGenerator {
             if (!started) {
                 throw new IllegalStateException("Reporting not started");
             }
-            writer.writeEndElement();//</validation-report>
-            writer.writeEndDocument();
-            writer.close();
+//            writer.writeEndElement();//</validation-report>
+//            writer.writeEndDocument();
+            report.close();
+            doc.close();
+
             closed = true;
-        } catch (XMLStreamException e) {
+        } catch (SaxonApiException e) {
             throw new XPathException(e);
         }
         if (builder != null) {
@@ -270,32 +281,27 @@ public class InvalidityReportGeneratorEE  extends InvalidityReportGenerator {
      * @throws XPathException
      */
 
+    @Override
     public void createMetaData() throws XPathException {
         try {
-            writer.writeStartElement(REPORT_NS, "meta-data");
-            writer.writeStartElement(REPORT_NS,"validator");
-            writer.writeAttribute("name", Version.getProductName() + "-" + getConfiguration().getEditionCode());
-            writer.writeAttribute("version", Version.getProductVersion());
-            writer.writeEndElement(); //</validator>
-            writer.writeStartElement(REPORT_NS,"results");
-            writer.writeAttribute("errors", "" + errorCount);
-            writer.writeAttribute("warnings", "" + warningCount);
-            writer.writeEndElement(); //</results>
-            writer.writeStartElement(REPORT_NS,"schema");
-            if (schemaName != null) {
-                writer.writeAttribute("file", schemaName);
-            }
-            writer.writeAttribute("xsd-version", xsdversion);
-            writer.writeEndElement(); //</schema>
-            writer.writeStartElement(REPORT_NS,"run");
-            writer.writeAttribute("at", DateTimeValue.getCurrentDateTime(null).getStringValue());
-            writer.writeEndElement(); //</run>
-            writer.writeEndElement(); //</meta-data>
-        } catch (XMLStreamException ex) {
+            Push.Element metadata = report.element("meta-data");
+            metadata.element("validator")
+                    .attribute("name", Version.getProductName() + "-" + getConfiguration().getEditionCode())
+                    .attribute("version", Version.getProductVersion());
+            metadata.element("results")
+                    .attribute("errors", "" + errorCount)
+                    .attribute("warnings", "" + warningCount);
+            metadata.element("schema")
+                    .attribute("file", schemaName)
+                    .attribute("xsd-version", xsdversion);
+            metadata.element("run")
+                    .attribute("at", DateTimeValue.getCurrentDateTime(null).getStringValue());
+            metadata.close();
+        } catch (SaxonApiException ex) {
             throw new XPathException(ex);
         }
     }
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

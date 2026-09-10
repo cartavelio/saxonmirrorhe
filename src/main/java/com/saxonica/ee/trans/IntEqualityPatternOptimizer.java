@@ -23,6 +23,7 @@ public class IntEqualityPatternOptimizer extends PatternOptimizer {
         return THE_INSTANCE;
     }
 
+    @Override
     public boolean appliesTo(Pattern pattern) {
         if (pattern instanceof PatternWithPredicate) {
             Expression exp = ((PatternWithPredicate) pattern).getPredicate();
@@ -31,6 +32,7 @@ public class IntEqualityPatternOptimizer extends PatternOptimizer {
         return false;
     }
 
+    @Override
     public void process(RuleEE rule, Pattern pattern, Map<Precondition, List<RuleEE>> preconditions, Map<Characteristic, Characteristic> characteristics) {
         Expression exp = ((PatternWithPredicate) pattern).getPredicate();
         Expression lhs = ((CompareToIntegerConstant) exp).getLhsExpression();
@@ -47,4 +49,4 @@ public class IntEqualityPatternOptimizer extends PatternOptimizer {
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited

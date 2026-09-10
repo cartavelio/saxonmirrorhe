@@ -2,23 +2,22 @@
 package com.saxonica.ee.stream.feed;
 
 import com.saxonica.ee.stream.om.FleetingDocumentNode;
-import com.saxonica.ee.stream.om.FleetingElementNode;
 import com.saxonica.ee.stream.om.FleetingParentNode;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.SequenceReceiver;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.ItemChecker;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
+import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.tree.util.Orphan;
+import net.sf.saxon.type.*;
 
 /**
  * A Feed to go on the streaming pipeline that checks the item type of the items in the sequence represented
@@ -27,15 +26,21 @@ import net.sf.saxon.type.TypeHierarchy;
  */
 public class ItemCheckingFeed extends ItemFeed {
 
+    // TODO: simplify this by using a DelegatingFeed that delegates to a TypeCheckingFilter
+
     private ItemType requiredType;
     private RoleDiagnostic role;
     private Configuration config;
+    private int level = 0;
+    private boolean allowAnyElement;
 
-    public ItemCheckingFeed(Expression checker, Feed result, XPathContext context) {
+    public ItemCheckingFeed(Expression checker, ItemFeed result, XPathContext context) {
         super(checker, result, context);
         requiredType = ((ItemChecker) checker).getRequiredType();
         role = ((ItemChecker) checker).getRoleLocator();
         config = context.getConfiguration();
+        Affinity aff = config.getTypeHierarchy().relationship(requiredType, NodeKindTest.ELEMENT);
+        allowAnyElement = aff == Affinity.SAME_TYPE || aff == Affinity.SUBSUMES;
     }
 
     @Override
@@ -62,10 +67,11 @@ public class ItemCheckingFeed extends ItemFeed {
      *          to report any failure
      */
 
-    public void processItem(Item<?> item) throws XPathException {
+    @Override
+    public void append(Item item) throws XPathException {
         if (!hasFailed()) {
             checkItemType(item);
-            getResult().processItem(item);
+            getNextOutputter().append(item);
         }
     }
 
@@ -94,6 +100,7 @@ public class ItemCheckingFeed extends ItemFeed {
      *          to report any failure
      */
 
+    @Override
     public void close() throws XPathException {
         if (!hasFailed()) {
             getResult().close();
@@ -106,52 +113,55 @@ public class ItemCheckingFeed extends ItemFeed {
         dynamicError(e);
     }
 
+
     @Override
-    public SequenceReceiver getReceiver() {
-        // Unlike most expressions, an item checker needs to take note of start/end element/document
-        // events sent by the Receiver route, since these may be subject to type checking (typically,
-        // when the consuming pipeline is within xsl:variable and the variable has a required type).
-        // See test cases such as si-copy-130. Top-level nodes sent to the target receiver are checked,
-        // and all events are passed on unchanged.
-        Receiver next = getResult().getReceiver();
-
-        final FleetingDocumentNode root = new FleetingDocumentNode(-1);
-        root.setConfiguration(config);
-
-        return new ProxyReceiver(next) {
-            int level = 0;
-            @Override
-            public void startDocument(int properties) throws XPathException {
-                if (level++ == 0) {
-                    checkItemType(new FleetingDocumentNode(-1));
-                }
-                super.startDocument(properties);
-            }
-
-            @Override
-            public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties) throws XPathException {
-                if (level++ == 0) {
-                    FleetingElementNode node = new FleetingElementNode(elemName, typeCode);
-                    node.setParent(root);  // needed to provide access to a namepool
-                    checkItemType(node);
-                }
-                super.startElement(elemName, typeCode, location, properties);
-            }
-
-            @Override
-            public void endElement() throws XPathException {
-                level--;
-                super.endElement();
-            }
-
-            @Override
-            public void endDocument() throws XPathException {
-                level--;
-                super.endDocument();
-            }
-        };
+    public void startDocument(int properties) throws XPathException {
+        if (level++ == 0) {
+            checkItemType(new FleetingDocumentNode(-1));
+        }
+        super.startDocument(properties);
     }
+
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             Location location, int properties) throws XPathException {
+        if (level++ == 0 && !allowAnyElement) {
+            Orphan node = new Orphan(config);
+            node.setNodeKind(Type.ELEMENT);
+            node.setNodeName(elemName);
+            node.setTypeAnnotation(type);
+            checkItemType(node);
+        }
+        super.startElement(elemName, type, location, properties);
+    }
+
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
+        if (level++ == 0 && !allowAnyElement) {
+            Orphan node = new Orphan(config);
+            node.setNodeKind(Type.ELEMENT);
+            node.setNodeName(elemName);
+            node.setTypeAnnotation(type);
+            checkItemType(node);
+        }
+        super.startElement(elemName, type, attributes, namespaces, location, properties);
+    }
+
+    @Override
+    public void endElement() throws XPathException {
+        level--;
+        super.endElement();
+    }
+
+    @Override
+    public void endDocument() throws XPathException {
+        level--;
+        super.endDocument();
+    }
+
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 

@@ -2,7 +2,7 @@ package com.saxonica.functions.extfn;
 
 import com.saxonica.config.JavaExtensionLibrary;
 import com.saxonica.config.ProfessionalConfiguration;
-import com.saxonica.functions.hof.CurriedFunction;
+import net.sf.saxon.functions.hof.CurriedFunction;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.StaticContext;
@@ -25,7 +25,6 @@ import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.ObjectValue;
 import net.sf.saxon.value.SequenceType;
 
-import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
@@ -59,6 +58,7 @@ public class ObjectMap extends SystemFunction {
      *                                           code will add information about the error location.
      */
 
+    @Override
     public MapItem call(XPathContext context, Sequence[] arguments) throws XPathException {
         ObjectValue<?> value = (ObjectValue)arguments[0].head();
         return toMap(context.getConfiguration(), value, null);
@@ -113,17 +113,12 @@ public class ObjectMap extends SystemFunction {
     public static Map<String, Function> makeMethodMap(Configuration config, Class javaClass, String required) {
         HashMap<String, Function> methodMap = new HashMap<>();
 
-        Exception theException = null;
-        ArrayList<AccessibleObject> candidateMethods = new ArrayList<>(10);
-        Class resultClass = null;
-
         Set<String> methodsFound = new HashSet<>();
         Map<String, Method> retainedMethods = new HashMap<>();
 
         // look through the methods of this class adding map entries for each one
 
         Method[] methods = javaClass.getMethods();
-        boolean consistentReturnType = true;
         for (Method theMethod : methods) {
             if (Modifier.isPublic(theMethod.getModifiers()) &&
                     !Modifier.isStatic(theMethod.getModifiers()) &&
@@ -141,7 +136,7 @@ public class ObjectMap extends SystemFunction {
                     }
                 }
             }
-            
+
         }
         JavaExtensionLibrary lib = new JavaExtensionLibrary((ProfessionalConfiguration) config);
         StaticContext env = new IndependentContext(config);
@@ -194,4 +189,4 @@ public class ObjectMap extends SystemFunction {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

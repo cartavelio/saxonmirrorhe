@@ -4,21 +4,21 @@ import com.saxonica.ee.bytecode.iter.CompiledFilterIterator;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.om.*;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.GroundedIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
-import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.NumericType;
-import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.*;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
+
+import java.util.EnumSet;
 
 /**
  * Generate bytecode to evaluate a filter expression
@@ -35,15 +35,17 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
         visitLineNumber(compiler, ga, expression);
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         visitAnnotation(compiler, "FilterExpressionCompiler-Itr");
+        LabelInfo phase2Lab = methodInfo.newLabel("phaseTwoLab");
         LabelInfo endLab = methodInfo.newLabel("endFilterExp");
         LabelInfo notNullLab = methodInfo.newLabel("notNullLab");
         LabelInfo emptyIterLab = methodInfo.newLabel("emptyIterLab");
         int firstVar = ga.newLocal(Item.class);
         int seqItrVar = ga.newLocal(SequenceIterator.class);
         int posVar = ga.newLocal(Integer.TYPE);
+        int boolVar = ga.newLocal(Boolean.TYPE);
         boolean seqItrVarCreated = false;
 
-        GroundedValue literalValue;
+        GroundedValue literalValue = null;
         LabelInfo notNumericLab = null;
         if (filterExpr.isIndependentFilter()) {
 
@@ -68,7 +70,7 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
                             throw new CannotCompileException();
 
                         } else if (start instanceof VariableReference) {
-                            VariableReferenceCompiler.genEvaluateVariable(compiler, ga, (VariableReference)start);
+                            VariableReferenceCompiler.genEvaluateVariable(compiler, ga, (VariableReference) start);
                             // Stack: Sequence
                             ga.dup();
                             // Stack: Sequence Sequence
@@ -162,6 +164,7 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
 
                         }
 
+
                     } else {
                         ga.invokeStaticMethod(EmptyIterator.class, "emptyIterator");
                         return;
@@ -217,12 +220,12 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
                 methodInfo.placeLabel(notNullLab);
 
             }
-            int relToNumeric = th.relationship(filter.getItemType(), NumericType.getInstance());
+            Affinity relToNumeric = th.relationship(filter.getItemType(), NumericType.getInstance());
 
 
-            if (relToNumeric != TypeHierarchy.DISJOINT) {
+            if (relToNumeric != Affinity.DISJOINT) {
                 // possibly numeric
-                if (!(relToNumeric == TypeHierarchy.SAME_TYPE || relToNumeric == TypeHierarchy.SUBSUMED_BY)) {
+                if (!(relToNumeric == Affinity.SAME_TYPE || relToNumeric == Affinity.SUBSUMED_BY)) {
                     // possibly non-numeric
                     notNumericLab = methodInfo.newLabel("notNumericLab");
                     ga.loadLocal(firstVar);
@@ -243,9 +246,9 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
                     ga.goTo(endLab);
                     methodInfo.placeLabel(singleSeqLab);
                 }
-                int relToInteger = th.relationship(filter.getItemType(), BuiltInAtomicType.INTEGER);
+                Affinity relToInteger = th.relationship(filter.getItemType(), BuiltInAtomicType.INTEGER);
                 // possibly an integer
-                if (!(relToInteger == TypeHierarchy.SAME_TYPE || relToNumeric == TypeHierarchy.SUBSUMED_BY)) {
+                if (!(relToInteger == Affinity.SAME_TYPE || relToNumeric == Affinity.SUBSUMED_BY)) {
                     ga.loadLocal(firstVar);
                     ga.checkClass(NumericValue.class);
                     ga.invokeInstanceMethod(NumericValue.class, "isWholeNumber");
@@ -327,10 +330,10 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
                     ga.dup();
 
                     ga.invokeInstanceMethod(SequenceIterator.class, "getProperties");
-                    ga.push(SequenceIterator.GROUNDED);
-                    ga.math(GeneratorAdapter.AND, Type.INT_TYPE);
+                    allocateStatic(compiler,SequenceIterator.Property.GROUNDED);
+                    ga.invokeInstanceMethod(EnumSet.class, "contains", Object.class);
                     LabelInfo notGrounded = methodInfo.newLabel("notGrounded");
-                    ga.ifZCmp(GeneratorAdapter.EQ, notGrounded.label());
+                    ga.ifFalse(notGrounded);
                     ga.checkClass(GroundedIterator.class);
                     ga.invokeInstanceMethod(GroundedIterator.class, "materialize");
                     ga.checkClass(GroundedValue.class);
@@ -449,7 +452,7 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
         m = Method.getMethod("boolean matches()");
         ga = new Generator(Opcodes.ACC_PUBLIC, m, true, cv);
         int contextVar = ga.newLocal(XPathContext.class);
-        compiler.pushNewMethodInfo(ga, false, contextVar);
+        compiler.pushNewMethodInfo(ga, false, contextVar, -1);
         visitLineNumber(compiler, ga, predicate);
         ga.loadThis();
         ga.getField(Type.getType(CompiledFilterIterator.class), "filterContext", Type.getType(XPathContext.class));
@@ -637,11 +640,11 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
 
 
     private void compileBooleanCheck(CompilerService compiler, Generator ga, TypeHierarchy th, ItemType predicateItemType, LabelInfo checkNoMoreItems, int resultVar, int itemVar) {
-        int relToBoolean = th.relationship(predicateItemType, BuiltInAtomicType.BOOLEAN);
-        if (relToBoolean != TypeHierarchy.DISJOINT) {
+        Affinity relToBoolean = th.relationship(predicateItemType, BuiltInAtomicType.BOOLEAN);
+        if (relToBoolean != Affinity.DISJOINT) {
             Label notBoolean = null;
             visitAnnotation(compiler, "FilterExpressionCompiler.compilePredicate(): test boolean value");
-            if (!(relToBoolean == TypeHierarchy.SAME_TYPE || relToBoolean == TypeHierarchy.SUBSUMED_BY)) {
+            if (!(relToBoolean == Affinity.SAME_TYPE || relToBoolean == Affinity.SUBSUMED_BY)) {
                 notBoolean = new Label();
                 ga.loadLocal(itemVar);
                 ga.instanceOf(Type.getType(BooleanValue.class));
@@ -659,21 +662,21 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
     }
 
     private void compileNumericCheck(CompilerService compiler, Generator ga, TypeHierarchy th, ItemType predicateItemType, LabelInfo end, LabelInfo checkNoMoreItems, int resultVar, int itemVar) {
-        int relToNumeric = th.relationship(predicateItemType, NumericType.getInstance());
+        Affinity relToNumeric = th.relationship(predicateItemType, NumericType.getInstance());
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         LabelInfo isZero = methodInfo.newLabel("isZeroLab");
-        if (relToNumeric != TypeHierarchy.DISJOINT) {
+        if (relToNumeric != Affinity.DISJOINT) {
             visitAnnotation(compiler, "FilterExpressionCompiler.compilePredicate(): test numeric value");
             LabelInfo notNumeric = null;
-            if (!(relToNumeric == TypeHierarchy.SAME_TYPE || relToNumeric == TypeHierarchy.SUBSUMED_BY)) {
+            if (!(relToNumeric == Affinity.SAME_TYPE || relToNumeric == Affinity.SUBSUMED_BY)) {
                 notNumeric = methodInfo.newLabel("notNumeric");
                 ga.loadLocal(itemVar);
                 ga.instanceOf(Type.getType(NumericValue.class));
                 ga.ifFalse(notNumeric);
             }
 
-            if (th.relationship(predicateItemType, BuiltInAtomicType.DOUBLE) != TypeHierarchy.DISJOINT ||
-                    th.relationship(predicateItemType, BuiltInAtomicType.FLOAT) != TypeHierarchy.DISJOINT) {
+            if (th.relationship(predicateItemType, BuiltInAtomicType.DOUBLE) != Affinity.DISJOINT ||
+                    th.relationship(predicateItemType, BuiltInAtomicType.FLOAT) != Affinity.DISJOINT) {
 
                 // check for NaN
                 visitAnnotation(compiler, "FilterExpressionCompiler.compilePredicate(): test for NaN");
@@ -709,11 +712,11 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
     }
 
     private void compileStringCheck(CompilerService compiler, Generator ga, TypeHierarchy th, ItemType predicateItemType, LabelInfo checkNoMoreItems, int resultVar, int itemVar) {
-        int relToString = th.relationship(predicateItemType, BuiltInAtomicType.STRING);
-        if (relToString != TypeHierarchy.DISJOINT) {
+        Affinity relToString = th.relationship(predicateItemType, BuiltInAtomicType.STRING);
+        if (relToString != Affinity.DISJOINT) {
             visitAnnotation(compiler, "FilterExpressionCompiler.compilePredicate: test string value");
             Label notString = null;
-            if (!(relToString == TypeHierarchy.SAME_TYPE || relToString == TypeHierarchy.SUBSUMED_BY)) {
+            if (!(relToString == Affinity.SAME_TYPE || relToString == Affinity.SUBSUMED_BY)) {
                 notString = new Label();
                 ga.loadLocal(itemVar);
                 ga.instanceOf(Type.getType(StringValue.class));
@@ -732,13 +735,13 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
     }
 
     private void compileNodeCheck(CompilerService compiler, Generator ga, TypeHierarchy th, ItemType predicateItemType, LabelInfo end, LabelInfo error, int resultVar, int itemVar) {
-        int relToNode = th.relationship(predicateItemType, AnyNodeTest.getInstance());
-        if (relToNode == TypeHierarchy.SAME_TYPE || relToNode == TypeHierarchy.SUBSUMED_BY) {
+        Affinity relToNode = th.relationship(predicateItemType, AnyNodeTest.getInstance());
+        if (relToNode == Affinity.SAME_TYPE || relToNode == Affinity.SUBSUMED_BY) {
             visitAnnotation(compiler, "FilterExpressionCompiler.compilePredicate(): node exists");
             ga.push(true);
             ga.storeLocal(resultVar);
             ga.goTo(end);
-        } else if (relToNode != TypeHierarchy.DISJOINT) {
+        } else if (relToNode != Affinity.DISJOINT) {
             visitAnnotation(compiler, "FilterExpressionCompiler.compilePredicate(): test node existence");
             ga.loadLocal(itemVar);
             ga.instanceOf(Type.getType(NodeInfo.class));
@@ -751,11 +754,11 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
 
     private void compileBooleanCheck2(CompilerService compiler, Generator ga, TypeHierarchy th, ItemType predicateItemType, LabelInfo end, boolean oneOrMoreCheck, int seqItrVar, int resultVar, int itemVar) {
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
-        int relToBoolean = th.relationship(predicateItemType, BuiltInAtomicType.BOOLEAN);
-        if (relToBoolean != TypeHierarchy.DISJOINT) {
+        Affinity relToBoolean = th.relationship(predicateItemType, BuiltInAtomicType.BOOLEAN);
+        if (relToBoolean != Affinity.DISJOINT) {
             LabelInfo notBoolean = null;
             visitAnnotation(compiler, "FilterExpressionCompiler.compilePredicate(): test boolean value2");
-            if (relToBoolean == TypeHierarchy.SAME_TYPE || relToBoolean == TypeHierarchy.SUBSUMED_BY) {
+            if (relToBoolean == Affinity.SAME_TYPE || relToBoolean == Affinity.SUBSUMED_BY) {
                 ga.loadLocal(itemVar);
                 ga.checkClass(BooleanValue.class);
                 ga.invokeInstanceMethod(BooleanValue.class, "getBooleanValue");
@@ -789,11 +792,11 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
 
     private void compileStringCheck2(CompilerService compiler, Generator ga, TypeHierarchy th, ItemType predicateItemType, LabelInfo end, boolean oneOrMoreCheck, int seqItrVar, int resultVar, int firstVar) {
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
-        int relToString = th.relationship(predicateItemType, BuiltInAtomicType.STRING);
-        if (relToString != TypeHierarchy.DISJOINT) {
+        Affinity relToString = th.relationship(predicateItemType, BuiltInAtomicType.STRING);
+        if (relToString != Affinity.DISJOINT) {
             visitAnnotation(compiler, "FilterExpressionCompiler.compilePredicate: test string value");
             LabelInfo notString = null;
-            if (!(relToString == TypeHierarchy.SAME_TYPE || relToString == TypeHierarchy.SUBSUMED_BY)) {
+            if (!(relToString == Affinity.SAME_TYPE || relToString == Affinity.SUBSUMED_BY)) {
                 notString = methodInfo.newLabel("notString_compileStringCheck2");
                 ga.loadLocal(firstVar);
                 ga.instanceOf(Type.getType(StringValue.class));
@@ -819,15 +822,15 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
     }
 
     private void compileNodeCheck2(CompilerService compiler, Generator ga, TypeHierarchy th, ItemType predicateItemType, LabelInfo end, int resultVar, int itemVar) {
-        int relToNode = th.relationship(predicateItemType, AnyNodeTest.getInstance());
+        Affinity relToNode = th.relationship(predicateItemType, AnyNodeTest.getInstance());
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         LabelInfo nextCheck = methodInfo.newLabel("nextcheck");
-        if (relToNode == TypeHierarchy.SAME_TYPE || relToNode == TypeHierarchy.SUBSUMED_BY) {
+        if (relToNode == Affinity.SAME_TYPE || relToNode == Affinity.SUBSUMED_BY) {
             visitAnnotation(compiler, "FilterExpressionCompiler.compilePredicate(): node exists");
             ga.push(true);
             ga.storeLocal(resultVar);
             ga.goTo(end);
-        } else if (relToNode != TypeHierarchy.DISJOINT) {
+        } else if (relToNode != Affinity.DISJOINT) {
             visitAnnotation(compiler, "FilterExpressionCompiler.compilePredicate(): test node existence");
             ga.loadLocal(itemVar);
             ga.ifNotInstance(NodeInfo.class, nextCheck);
@@ -841,6 +844,6 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited
 
 

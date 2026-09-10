@@ -14,7 +14,6 @@ import net.sf.saxon.option.axiom.AxiomObjectModel;
 import net.sf.saxon.option.dom4j.DOM4JObjectModel;
 import net.sf.saxon.option.exslt.Random;
 import net.sf.saxon.option.exslt.Sets;
-import net.sf.saxon.option.jdom.JDOMObjectModel;
 import net.sf.saxon.option.jdom2.JDOM2ObjectModel;
 import net.sf.saxon.option.xom.XOMObjectModel;
 import net.sf.saxon.trans.XPathException;
@@ -30,6 +29,7 @@ public class JavaPlatformPE extends JavaPlatform {
      * Is an ICU collator loaded?
      * @return  true if ICU collations appear loaded
      */
+    @Override
     public boolean hasICUCollator() {
         return ICULibrary.isICUCollatorAvailable();
     }
@@ -37,6 +37,7 @@ public class JavaPlatformPE extends JavaPlatform {
      * Is an ICU numberer loaded?
      * @return  true if ICU numberers appear loaded
      */
+    @Override
     public boolean hasICUNumberer() {
         return ICULibrary.hasNumberer();
     }
@@ -52,6 +53,7 @@ public class JavaPlatformPE extends JavaPlatform {
      * Perform platform-specific initialization of the configuration
      */
 
+    @Override
     public void initialize(Configuration config) {
         super.initialize(config);
         if (config instanceof ProfessionalConfiguration) {
@@ -82,7 +84,6 @@ public class JavaPlatformPE extends JavaPlatform {
             jlf.setLocalizationClass("nl-BE", "net.sf.saxon.option.local.Numberer_nlBE");
             jlf.setLocalizationClass("sv", "net.sf.saxon.option.local.Numberer_sv");
             config.setLocalizerFactory(jlf);
-            //config.setCollectionURIResolver(new StandardCollectionURIResolver());
 
 //#if EE==true
 //            if (config instanceof EnterpriseConfiguration && config.getBooleanProperty(Feature.ALLOW_MULTITHREADING)) {
@@ -101,6 +102,7 @@ public class JavaPlatformPE extends JavaPlatform {
      * @param hostLanguage the host language, for example Configuration.XQUERY
      */
 
+    @Override
     public void addFunctionLibraries(FunctionLibraryList list, Configuration config, int hostLanguage) {
         super.addFunctionLibraries(list, config, hostLanguage);
         if (config instanceof ProfessionalConfiguration) {
@@ -122,12 +124,6 @@ public class JavaPlatformPE extends JavaPlatform {
             config.registerExternalObjectModel(AxiomObjectModel.getInstance());
         } catch (NoClassDefFoundError err) {
             // This happens if Axiom is not on the classpath
-        }
-
-        try {
-            config.registerExternalObjectModel(JDOMObjectModel.getInstance());
-        } catch (NoClassDefFoundError err) {
-            // This happens if JDOM is not on the classpath
         }
 
         try {
@@ -158,6 +154,7 @@ public class JavaPlatformPE extends JavaPlatform {
      * @throws net.sf.saxon.trans.XPathException if the URI is malformed in some way
      */
 
+    @Override
     public StringCollator makeUcaCollator(String uri, Configuration config) throws XPathException {
         StringCollator collator = ICULibrary.makeICUCollator(uri, config);
         if (collator == null) {
@@ -178,4 +175,4 @@ public class JavaPlatformPE extends JavaPlatform {
 
 }
 
-// Copyright (c) 2009-2014 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

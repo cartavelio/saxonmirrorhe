@@ -117,12 +117,14 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
      * @param visitor an expression visitor
      */
 
+    @Override
     public Expression preEvaluate(ExpressionVisitor visitor) {
         return this;
     }
 
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         Expression e2 = super.typeCheck(visitor, contextInfo);
         if (e2 != this) {
@@ -172,7 +174,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
                                 getArg(0), st, role, visitor));
                     } catch (XPathException err) {
                         if ("XPTY0004".equals(err.getErrorCodeLocalPart()) &&
-                                visitor.getStaticContext().getPackageData().getHostLanguage() == Configuration.XSLT) {
+                                visitor.getStaticContext().getPackageData().isXSLT()) {
                             err.setErrorCode("XTDE1420");
                         }
                         throw err;
@@ -202,7 +204,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
                             getArg(i), st, role, visitor));
                 } catch (XPathException err) {
                     if ("XPTY0004".equals(err.getErrorCodeLocalPart()) &&
-                            visitor.getStaticContext().getPackageData().getHostLanguage() == Configuration.XSLT) {
+                            visitor.getStaticContext().getPackageData().isXSLT()) {
                         err.setErrorCode("XTDE1420");
                     }
                     // prevent repeated errors
@@ -314,6 +316,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
      * @return Ok if the type has been successfully adjusted
      */
 
+    @Override
     public boolean adjustRequiredType(JavaExternalObjectType requiredType) throws XPathException {
         Class<?> unconvertedResult = getReturnClass();
         if (requiredType.getJavaClass().isAssignableFrom(unconvertedResult)) {
@@ -337,6 +340,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         JavaExtensionFunctionCall j = new JavaExtensionFunctionCall();
         j.name = getFunctionName();
@@ -364,6 +368,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
      * XPathContext.CURRENT_NODE
      */
 
+    @Override
     public int getIntrinsicDependencies() {
         int depend = StaticProperty.HAS_SIDE_EFFECTS;
         if (theMethod instanceof Method) {
@@ -387,6 +392,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
      *         axes.
      */
 
+    @Override
     public boolean isSubtreeExpression() {
         return false;
     }
@@ -411,6 +417,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
      *         expressions, it is the same as the input pathMapNode.
      */
 
+    @Override
     public PathMap.PathMapNodeSet addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
         return addExternalFunctionCallToPathMap(pathMap, pathMapNodeSet);
     }
@@ -436,8 +443,9 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
-        Sequence<?>[] argValues = SequenceTool.makeSequenceArray(getArity());
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
+        Sequence[] argValues = SequenceTool.makeSequenceArray(getArity());
         for (int i = 0; i < argValues.length; i++) {
             Expression argument = getArg(i);
             argValues[i] = ExpressionTool.lazyEvaluator(argument, false).evaluate(argument, context);
@@ -486,7 +494,8 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
      * @return The value returned by the extension function
      */
 
-    public Sequence<?> call(XPathContext context, Sequence[] argValues) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] argValues) throws XPathException {
 
         if (theMethod instanceof Constructor) {
             Constructor constructor = (Constructor) theMethod;
@@ -544,7 +553,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
                 }
                 try {
                     argValues[0] = argValues[0].materialize(); // bug 3723
-                    theInstance = getTargetInstance((Sequence<?>)argValues[0], context);
+                    theInstance = getTargetInstance((Sequence)argValues[0], context);
                     // this fails if the first argument is not of a suitable class
                 } catch (XPathException err) {
                     err.maybeSetLocation(getLocation());
@@ -568,7 +577,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
                 Object result = invokeMethod(method, theInstance, params);
                 if (method.getReturnType() == Void.TYPE) {
                     if (returnVoidAsThis) {
-                        return (Sequence<?>)argValues[0];
+                        return (Sequence)argValues[0];
                     } else {
                         return EmptySequence.getInstance();
                     }
@@ -616,7 +625,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
                     throw new XPathException("Must supply an argument for a non-static extension function");
                 }
                 try {
-                    theInstance = getTargetInstance((Sequence<?>)argValues[0], context);
+                    theInstance = getTargetInstance((Sequence)argValues[0], context);
                     // this fails if the first argument is not of a suitable class
                 } catch (XPathException err) {
                     err.maybeSetLocation(getLocation());
@@ -639,7 +648,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
 
     }
 
-    private Object getTargetInstance(Sequence<?> arg0, XPathContext context) throws XPathException {
+    private Object getTargetInstance(Sequence arg0, XPathContext context) throws XPathException {
         PJConverter converter = argumentConverters[0];
         return converter.convert(arg0, theClass, context);
     }
@@ -654,23 +663,23 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
      *
      */
 
-    private Sequence<?> asSequence(Object result, XPathContext context) throws XPathException {
+    private Sequence asSequence(Object result, XPathContext context) throws XPathException {
         if (result == null) {
             return EmptySequence.getInstance();
         }
-        SequenceIterator<?> resultIterator;
+        SequenceIterator resultIterator;
         if (result instanceof SequenceIterator) {
-            resultIterator = (SequenceIterator<?>) result;
+            resultIterator = (SequenceIterator) result;
         } else {
-            Sequence<?> resultSeq = resultConverter.convert(result, context);
+            Sequence resultSeq = resultConverter.convert(result, context);
             if (!checkForNodes) {
                 return resultSeq;
             }
             resultIterator = resultSeq.iterate();
         }
         if (checkForNodes) {
-            return SequenceTool.toLazySequence(new ItemMappingIterator<>(resultIterator,
-                                                                         new IntegratedFunctionCall.ConfigurationCheckingFunction(context.getConfiguration()), true));
+            return SequenceTool.toLazySequence(new ItemMappingIterator(resultIterator,
+                                                                       new IntegratedFunctionCall.ConfigurationCheckingFunction(context.getConfiguration()), true));
         } else {
             return SequenceTool.toLazySequence(resultIterator);
         }
@@ -700,7 +709,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
 
         try {
             for (int i = firstArg; i < argValues.length; i++) {
-                params[j] = argumentConverters[i].convert((Sequence<?>)argValues[i], paramTypes[j], context);
+                params[j] = argumentConverters[i].convert((Sequence)argValues[i], paramTypes[j], context);
                 j++;
             }
         } catch (XPathException e) {
@@ -722,6 +731,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         if (resultConverter == null) {
             return AnyItemType.getInstance();
@@ -737,6 +747,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
         }
     }
 
+    @Override
     public int computeCardinality() {
         Class resultClass = getReturnClass();
         if (resultClass.equals(Void.TYPE)) {
@@ -866,14 +877,14 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
      * @throws XPathException if type checking fails
      */
 
-    public static Sequence<?> applyFunctionConversionRules(
-            Sequence<?> suppliedValue, SequenceType requiredType,
+    public static Sequence applyFunctionConversionRules(
+            Sequence suppliedValue, SequenceType requiredType,
             StructuredQName functionName, int argPosition, XPathContext context)
     throws XPathException {
         TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
         RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.FUNCTION, functionName.getDisplayName(), argPosition);
         return th.applyFunctionConversionRules(
-                suppliedValue.materialize(), requiredType, role, ExplicitLocation.UNKNOWN_LOCATION);
+                suppliedValue.materialize(), requiredType, role, Loc.NONE);
     }
 
     /**
@@ -896,9 +907,9 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
                     afterHyphen = true;
                 } else {
                     if (afterHyphen) {
-                        buff.append(Character.toUpperCase(c));
+                        buff.cat(Character.toUpperCase(c));
                     } else {
-                        buff.append(c);
+                        buff.cat(c);
                     }
                     afterHyphen = false;
                 }
@@ -932,7 +943,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
         for (Operand o : operands()) {
             Expression child = o.getChildExpression();
             SequenceType st = SequenceType.makeSequenceType(child.getItemType(), child.getCardinality());
-            out.emitAttribute("arg" + i++ + "type", st.toExportString());
+            out.emitAttribute("arg" + i++ + "type", st.toAlphaCode());
         }
         for (Operand o : operands()) {
             o.getChildExpression().export(out);
@@ -942,4 +953,4 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
 
 }
 
-// Copyright (c) 2009 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

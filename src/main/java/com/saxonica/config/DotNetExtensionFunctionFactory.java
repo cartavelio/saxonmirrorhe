@@ -66,4 +66,4 @@ public class DotNetExtensionFunctionFactory implements ExtensionFunctionFactory 
 
 }
 
-// Copyright (c) 2009 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

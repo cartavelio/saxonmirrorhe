@@ -276,8 +276,7 @@ public abstract class Facet {
 
     public static Facet makeFacet(String name, String value,
                                   EnterpriseConfiguration config,
-                                  NamespaceResolver resolver,
-                                  SchemaCompiler compiler
+                                  NamespaceResolver resolver
     ) throws SchemaException {
         switch (name) {
             case "pattern": {
@@ -341,14 +340,26 @@ public abstract class Facet {
                 ExplicitTimezoneFacet tf = new ExplicitTimezoneFacet();
                 tf.setValue(value);
                 return tf;
+
             case "whiteSpace":
                 WhitespaceFacet wf = new WhitespaceFacet();
                 wf.setValue(value);
                 return wf;
+
+            case "order":
+                OrderFacet of = new OrderFacet();
+                of.setValue(value);
+                return of;
+
+            case "distinct":
+                DistinctFacet df = new DistinctFacet();
+                df.setValue(value);
+                return df;
+
             default:
                 throw new SchemaException("Unknown facet: " + name);
         }
     }
 }
 
-// Copyright (c) 2004-2017 Saxonica Limited. All Rights Reserved
+// Copyright (c) 2004-2020 Saxonica Limited

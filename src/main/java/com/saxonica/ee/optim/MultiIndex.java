@@ -17,6 +17,7 @@ import net.sf.saxon.value.UntypedAtomicValue;
 import net.sf.saxon.z.*;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 
@@ -41,9 +42,9 @@ import java.util.List;
  * note all the primitive types that occur in ./A, and then we convert the search term $B to each of these types in turn
  * before doing the index lookup. In practice, of course, it is very rare for the index to be heterogeneous.</p>
  */
-public class MultiIndex<T extends Item<?>> {
+public class MultiIndex {
 
-    private GroundedValue<T> indexedValue;
+    private GroundedValue indexedValue;
 
     private List<ValueIndex> indexList = new ArrayList<>(4);
     // An list of sub-indexes: the entries are ValueIndex objects. Each sub-index handles one primitive
@@ -58,7 +59,7 @@ public class MultiIndex<T extends Item<?>> {
      * @param indexedValue the sequence to be indexed
      */
 
-    public MultiIndex(GroundedValue<T> indexedValue) {
+    public MultiIndex(GroundedValue indexedValue) {
         this.indexedValue = indexedValue;
     }
 
@@ -97,7 +98,7 @@ public class MultiIndex<T extends Item<?>> {
         // iterate over all the values in the population
         while (iter.next() != null) {
             // iterate over the result of the use expression
-            SequenceIterator<?> vals = use.iterate(c2);
+            SequenceIterator vals = use.iterate(c2);
             AtomicValue val;
             while ((val = (AtomicValue) vals.next()) != null) {
                 // if the "use" value is untyped, convert it to the target type
@@ -177,7 +178,7 @@ public class MultiIndex<T extends Item<?>> {
      */
 
     /*@Nullable*/
-    public SequenceIterator<T> findItems(Expression use, SequenceIterator<? extends AtomicValue> values,
+    public SequenceIterator findItems(Expression use, SequenceIterator values,
                                       boolean convertUntypedToOther, boolean firstOnly,
                                       StringCollator collator, XPathContext context) throws XPathException {
         //System.err.println("*** Using index");
@@ -189,7 +190,7 @@ public class MultiIndex<T extends Item<?>> {
 
         // iterate over all the values being sought
         AtomicValue value;
-        while ((value = values.next()) != null) {
+        while ((value = (AtomicValue)values.next()) != null) {
             BuiltInAtomicType prim;
             if (convertUntypedToOther) {
                 prim = value.getPrimitiveType();
@@ -343,13 +344,11 @@ public class MultiIndex<T extends Item<?>> {
                 return singletonIterator(it.next());
             }
         }
-        return new SelectedItemsIterator<>(indexedValue, selectedItems);
+        return new SelectedItemsIterator(indexedValue, selectedItems);
     }
 
-    private UnfailingIterator<T> singletonIterator(int pos) throws XPathException{
-        T item = SequenceTool.itemAt(indexedValue, pos);
-        GroundedValue<T> gv = (GroundedValue<T>) item;
-        return gv.iterate();
+    private UnfailingIterator singletonIterator(int pos) throws XPathException{
+        return SequenceTool.itemAt(indexedValue, pos).iterate();
     }
 
     /**
@@ -357,15 +356,15 @@ public class MultiIndex<T extends Item<?>> {
      * the positions of the items in the selected subset (zero-based)
      */
 
-    public static class SelectedItemsIterator<T extends Item<?>>
-            implements SequenceIterator<T>, LastPositionFinder, LookaheadIterator<T> {
+    public static class SelectedItemsIterator
+            implements SequenceIterator, LastPositionFinder, LookaheadIterator {
 
         IntSet selection;
         IntIterator iter;
         int current = 0;
-        GroundedValue<T> indexedValue;
+        GroundedValue indexedValue;
 
-        public SelectedItemsIterator(GroundedValue<T> indexedValue, IntSet selection) {
+        public SelectedItemsIterator(GroundedValue indexedValue, IntSet selection) {
             this.indexedValue = indexedValue;
             this.selection = selection;
             iter = selection.iterator();
@@ -377,11 +376,12 @@ public class MultiIndex<T extends Item<?>> {
          * next(). It is used only when there is an explicit need to tell if we
          * are at the last element.
          * <p>This method must not be called unless the result of getProperties() on the iterator
-         * includes the bit setting {@link #LOOKAHEAD}</p>
+         * includes the bit setting {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}</p>
          *
          * @return true if there are more items in the sequence
          */
 
+        @Override
         public boolean hasNext() {
             return iter.hasNext();
         }
@@ -400,7 +400,8 @@ public class MultiIndex<T extends Item<?>> {
          * @since 8.4
          */
 
-        public T next() throws XPathException {
+        @Override
+        public Item next() throws XPathException {
             if (iter.hasNext()) {
                 current = iter.next();
                 return SequenceTool.itemAt(indexedValue, current);
@@ -409,17 +410,15 @@ public class MultiIndex<T extends Item<?>> {
             }
         }
 
-        public void close() {
-        }
-
         /**
          * Get the last position (that is, the number of items in the sequence). This method is
          * non-destructive: it does not change the state of the iterator.
          * The result is undefined if the next() method of the iterator has already returned null.
          * This method must not be called unless the result of getProperties() on the iterator
-         * includes the bit setting {@link #LAST_POSITION_FINDER}
+         * includes the bit setting {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER}
          */
 
+        @Override
         public int getLength() throws XPathException {
             return selection.size();
         }
@@ -428,15 +427,16 @@ public class MultiIndex<T extends Item<?>> {
          * Get properties of this iterator, as a bit-significant integer.
          *
          * @return the properties of this iterator. This will be some combination of
-         *         properties such as {@link #GROUNDED}, {@link #LAST_POSITION_FINDER},
-         *         and {@link #LOOKAHEAD}. It is always
+         *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED}, {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
+         *         and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
          *         acceptable to return the value zero, indicating that there are no known special properties.
          *         It is acceptable for the properties of the iterator to change depending on its state.
          * @since 8.6
          */
 
-        public int getProperties() {
-            return LAST_POSITION_FINDER | LOOKAHEAD;
+        @Override
+        public EnumSet<Property> getProperties() {
+            return EnumSet.of(Property.LOOKAHEAD, Property.LAST_POSITION_FINDER);
         }
     }
 
@@ -470,4 +470,4 @@ public class MultiIndex<T extends Item<?>> {
 
 }
 
-// Copyright (c) 2006-2008 Saxonica Limited. All Rights Reserved
+// Copyright (c) 2006-2020 Saxonica Limited

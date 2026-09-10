@@ -5,7 +5,8 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.ContextItemExpression;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.style.StyleElement;
@@ -25,6 +26,7 @@ public class SaxonReplace extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
@@ -35,23 +37,24 @@ public class SaxonReplace extends StyleElement {
      * @return true: yes, it may contain a template-body
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return true;
     }
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
         String selectAtt = null;
         String contentAtt = null;
 
-        AttributeCollection atts = getAttributeList();
-
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
             if (f.equals("select")) {
-                selectAtt = atts.getValue(a);
-                select = makeExpression(selectAtt, a);
+                selectAtt = att.getValue();
+                select = makeExpression(selectAtt, att);
             } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+                checkUnknownAttribute(attName);
             }
         }
 
@@ -62,6 +65,7 @@ public class SaxonReplace extends StyleElement {
 
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         getConfiguration().checkLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XSLT,
                                                 "saxon:replace",
@@ -70,6 +74,7 @@ public class SaxonReplace extends StyleElement {
         SaxonUpdate.checkContainment(this);
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         Expression content = compileSequenceConstructor(exec, decl, false);
         return new ReplaceNodeExpression(select, content, Validation.PRESERVE);
@@ -77,6 +82,6 @@ public class SaxonReplace extends StyleElement {
 
 }
 
-// Copyright (c) 2018 Saxonica Ltd
+// Copyright (c) 2018-2020 Saxonica Limited
 
 

@@ -17,11 +17,11 @@ public abstract class SimpleNodeConstructorCompiler extends ToPushCompiler {
             throws CannotCompileException {
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
-        visitAnnotation(compiler, "SimpleNodeConstructorCompiler-Push");
+        visitAnnotation(compiler, "SimpleNodeConstructorCompiler-Push " + expression.getExpressionName());
         SimpleNodeConstructor simpleNode = (SimpleNodeConstructor) expression;
 
         // push the receiver onto the stack
-        compiler.generateGetReceiver();
+        compiler.generateGetOutputter();
 
         // push the node name if any onto the stack
         compileNodeName(compiler, expression);
@@ -29,6 +29,7 @@ public abstract class SimpleNodeConstructorCompiler extends ToPushCompiler {
         Expression content = simpleNode.getSelect();
 
         // push the content onto the stack
+        visitAnnotation(compiler, "SimpleNodeConstructor-Push-content");
         compiler.compileToPrimitive(content, CharSequence.class, OnEmpty.RETURN_NULL);
         LabelInfo done = null;
         if (Cardinality.allowsZero(content.getCardinality())) {
@@ -171,4 +172,4 @@ public abstract class SimpleNodeConstructorCompiler extends ToPushCompiler {
     }
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

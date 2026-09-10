@@ -1,6 +1,6 @@
 package com.saxonica.ee.stream.watch;
 
-import com.saxonica.ee.stream.feed.Feed;
+import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.om.FleetingNode;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
@@ -14,14 +14,15 @@ import net.sf.saxon.trans.XPathException;
  */
 public class NextMatchAction extends ApplyTemplatesAction {
 
-    public NextMatchAction(Expression expression, Feed result, XPathContext context)
+    public NextMatchAction(Expression expression, ItemFeed result, XPathContext context)
             throws XPathException {
         super(expression, result, context);
     }
 
+    @Override
     protected Rule getRule(FleetingNode node) throws XPathException {
         return ((Mode)getMode().getActor()).getNextMatchRule(node, getLocalContext().getCurrentTemplateRule(), getContext());
     }
 }
 
-// Copyright (c) 2009-2015 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

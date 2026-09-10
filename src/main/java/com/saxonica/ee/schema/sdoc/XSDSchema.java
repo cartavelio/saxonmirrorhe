@@ -7,9 +7,10 @@ import net.sf.saxon.expr.instruct.Executable;
 import net.sf.saxon.expr.instruct.GlobalParam;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.*;
-import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.linked.NodeImpl;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SchemaType;
 
@@ -133,6 +134,7 @@ public class XSDSchema extends SchemaElement {
      * @return the PreparedSchema containing the compiled schema components
      */
 
+    @Override
     public SingleNamespaceSchema getSchema() {
         return schema;
     }
@@ -216,12 +218,13 @@ public class XSDSchema extends SchemaElement {
      * @throws SchemaException if any errors are found in the attributes
      */
 
+    @Override
     public void prepareAttributes() throws SchemaException {
 
         Configuration config = getConfiguration();
         this.executable = new Executable(config);
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         String[] allowed = {"attributeFormDefault", "blockDefault", "defaultAttributes", "elementFormDefault",
                 "finalDefault", "id", "targetNamespace", "version", "xpathDefaultNamespace"};
         allowAttributes(atts, allowed);
@@ -365,9 +368,7 @@ public class XSDSchema extends SchemaElement {
                 return true;
             }
             importedNamespaces = new HashSet<>(10);
-            AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-            NodeInfo child;
-            while ((child = kids.next()) != null) {
+            for (NodeInfo child : children()) {
                 if (child instanceof XSDImport) {
                     String targetNamespace = ((XSDImport) child).getTargetNamespace();
                     importedNamespaces.add(targetNamespace);
@@ -384,6 +385,7 @@ public class XSDSchema extends SchemaElement {
      * @throws SchemaException if any XML representation constraints are violated
      */
 
+    @Override
     public void validate(SchemaCompiler compiler) throws SchemaException {
 
 //        if (getParent() == null || !(getParent().getNodeKind() == Type.DOCUMENT)) {
@@ -425,15 +427,10 @@ public class XSDSchema extends SchemaElement {
     protected void validateChildren(SchemaCompiler compiler) throws SchemaException {
         // The usual order of processing is changed to handle defaultOpenContent first (before any xs:redefine)
         // - see test open042
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-        NodeInfo child;
-        while ((child = kids.next()) != null) {
-            if (child instanceof XSDDefaultOpenContent) {
-                ((SchemaElement) child).validateSubtree(compiler);
-            }
+        for (NodeInfo child : children(XSDDefaultOpenContent.class::isInstance)) {
+            ((SchemaElement) child).validateSubtree(compiler);
         }
-        kids = iterateAxis(AxisInfo.CHILD);
-        while ((child = kids.next()) != null) {
+        for (NodeInfo child : children()) {
             if (child instanceof SchemaElement && !(child instanceof XSDDefaultOpenContent)) {
                 ((SchemaElement) child).validateSubtree(compiler);
             }
@@ -485,6 +482,7 @@ public class XSDSchema extends SchemaElement {
     private final static int[][] stateTargets = {
             state0targets, state1targets, state2targets, state3targets, state4targets, state5targets};
 
+    @Override
     protected boolean isFinalState(int state) {
         return state == 0 || state == 1 || state == 2 || state == 3 || state == 4 || state == 5;
     }
@@ -495,10 +493,9 @@ public class XSDSchema extends SchemaElement {
      * @param compiler used for reporting errors
      */
 
+    @Override
     public void postValidate(SchemaCompiler compiler) throws SchemaException {
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while ((child = (NodeImpl)iter.next()) != null) {
+        for (NodeInfo child : children()) {
             int childfp = child.getFingerprint();
 
             switch (childfp) {
@@ -530,7 +527,7 @@ public class XSDSchema extends SchemaElement {
                 case StandardNames.XS_COMPLEX_TYPE:
                     UserComplexType complexType = ((XSDComplexType) child).getComplexType();
                     int fpt = complexType.getFingerprint();
-                    if (schema.getSchemaType(complexType.getStructuredQName()) != null && fpt > 1023) {
+                    if (schema.getSchemaType(complexType.getTypeName()) != null && fpt > 1023) {
                         duplicate("complex type", complexType.getName());
                     } else {
                         schema.addType(complexType);
@@ -549,7 +546,7 @@ public class XSDSchema extends SchemaElement {
                         return;
                     }
                     int fingerprint = typeDef.getFingerprint();
-                    if (schema.getSchemaType(typeDef.getStructuredQName()) != null && fingerprint > 1023) {
+                    if (schema.getSchemaType(typeDef.getTypeName()) != null && fingerprint > 1023) {
                         duplicate("simple type", typeDef.getDisplayName());
                     } else {
                         schema.addType(typeDef);
@@ -873,4 +870,4 @@ public class XSDSchema extends SchemaElement {
     }
 }
 
-// Copyright (c) 2004-2010 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

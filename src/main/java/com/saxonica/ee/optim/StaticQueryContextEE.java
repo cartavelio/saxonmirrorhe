@@ -12,6 +12,7 @@ import net.sf.saxon.query.QueryLibrary;
 import net.sf.saxon.query.QueryReader;
 import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.query.XQueryParser;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 
 import java.io.IOException;
@@ -51,6 +52,7 @@ public class StaticQueryContextEE extends StaticQueryContextPE {
     }
 
 
+    @Override
     public void copyFrom(/*@NotNull*/ StaticQueryContext c) {
         super.copyFrom(c);
         if (c instanceof StaticQueryContextEE) {
@@ -66,6 +68,7 @@ public class StaticQueryContextEE extends StaticQueryContextPE {
      * @since 9.2.1.2
      */
 
+    @Override
     public void setSchemaAware(boolean aware) {
         if (aware) {
             getConfiguration().checkLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XQUERY, "schema-awareness", -1);
@@ -80,6 +83,7 @@ public class StaticQueryContextEE extends StaticQueryContextPE {
      * @since 9.2.1.2
      */
 
+    @Override
     public boolean isSchemaAware() {
         return schemaAware;
     }
@@ -98,6 +102,7 @@ public class StaticQueryContextEE extends StaticQueryContextPE {
      * @since 9.6
      */
 
+    @Override
     public void setStreaming(boolean option) {
         streaming = option;
         if (option) {
@@ -114,6 +119,7 @@ public class StaticQueryContextEE extends StaticQueryContextPE {
      * @since 9.6
      */
 
+    @Override
     public boolean isStreaming() {
         return streaming;
     }
@@ -136,26 +142,31 @@ public class StaticQueryContextEE extends StaticQueryContextPE {
      * @since 9.2 (changed in 9.3 to return void)
      */
 
+    @Override
     public void compileLibrary(String query) throws XPathException {
-        Configuration config = getConfiguration();
-        Executable executable = makeExecutable();
-        FunctionLibraryList libList = new FunctionLibraryList();
-        libList.addFunctionLibrary(new ExecutableFunctionLibrary(config));
-        executable.setFunctionLibrary(libList);
-        XQueryParser qp = (XQueryParser) config.newExpressionParser("XQ", isUpdating(), 31);
-        if (getCodeInjector() != null) {
-            qp.setCodeInjector(getCodeInjector());
+        try {
+            Configuration config = getConfiguration();
+            Executable executable = makeExecutable();
+            FunctionLibraryList libList = new FunctionLibraryList();
+            libList.addFunctionLibrary(new ExecutableFunctionLibrary(config));
+            executable.setFunctionLibrary(libList);
+            XQueryParser qp = (XQueryParser) config.newExpressionParser("XQ", isUpdating(), 31);
+            if (getCodeInjector() != null) {
+                qp.setCodeInjector(getCodeInjector());
+            }
+            QueryLibrary topModule = new QueryLibraryImpl(this);
+            executable.setTopLevelPackage(topModule.getPackageData());
+            topModule.setExecutable(executable);
+            topModule.setIsMainModule(false);
+            qp.parseLibraryModule(query, topModule);
+            topModule.bindUnboundFunctionCalls();
+            topModule.bindUnboundVariables();
+            compiledLibraries.put(topModule.getModuleNamespace(), topModule);
+            executable.fixupQueryModules(topModule);
+            executable.addQueryLibraryModule(topModule);
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
         }
-        QueryLibrary topModule = new QueryLibraryImpl(this);
-        executable.setTopLevelPackage(topModule.getPackageData());
-        topModule.setExecutable(executable);
-        topModule.setIsMainModule(false);
-        qp.parseLibraryModule(query, topModule);
-        topModule.bindUnboundFunctionCalls();
-        topModule.bindUnboundVariables();
-        compiledLibraries.put(topModule.getModuleNamespace(), topModule);
-        executable.fixupQueryModules(topModule);
-        executable.addQueryLibraryModule(topModule);
     }
 
     /**
@@ -178,10 +189,11 @@ public class StaticQueryContextEE extends StaticQueryContextPE {
      * @since 9.2 (changed in 9.3 to return void)
      */
 
+    @Override
     public void compileLibrary(Reader source)
             throws XPathException, IOException {
         char[] buffer = new char[4096];
-        StringBuffer sb = new StringBuffer(4096);
+        StringBuilder sb = new StringBuilder(4096);
         while (true) {
             int n = source.read(buffer);
             if (n > 0) {
@@ -217,6 +229,7 @@ public class StaticQueryContextEE extends StaticQueryContextPE {
      * @since 9.2 (changed in 9.3 to return void)
      */
 
+    @Override
     public void compileLibrary(InputStream source, /*@Nullable*/ String encoding)
             throws XPathException, IOException {
         String query = QueryReader.readInputStream(source, encoding, getConfiguration().getValidCharacterChecker());
@@ -232,14 +245,16 @@ public class StaticQueryContextEE extends StaticQueryContextPE {
      * @since 9.3
      */
 
+    @Override
     public QueryLibrary getCompiledLibrary(String namespace) {
         return compiledLibraries.get(namespace);
     }
 
+    @Override
     public Collection<QueryLibrary> getCompiledLibraries() {
         return compiledLibraries.values();
     }
 
 }
 
-// Copyright (c) 2009 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

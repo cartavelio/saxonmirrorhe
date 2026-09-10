@@ -1,7 +1,6 @@
 package com.saxonica.ee.config;
 
 import com.saxonica.ee.validate.SchemaElementTest;
-import com.saxonica.functions.hof.TypeHierarchyPE;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.pattern.DocumentNodeTest;
 import net.sf.saxon.pattern.NodeTest;
@@ -11,16 +10,19 @@ import net.sf.saxon.z.IntSet;
 
 import java.util.Optional;
 
+import static net.sf.saxon.type.Affinity.*;
+
 /**
  * Refinement of the TypeHierarchy class to handle function items and schema-aware types such as schema-element(A).
  */
 
-public class TypeHierarchyEE extends TypeHierarchyPE {
+public class TypeHierarchyEE extends TypeHierarchy {
 
     public TypeHierarchyEE(Configuration config) {
         super(config);
     }
 
+    @Override
     public ItemType getGenericFunctionItemType() {
         return AnyFunctionType.getInstance();
     }
@@ -35,8 +37,9 @@ public class TypeHierarchyEE extends TypeHierarchyPE {
      * @param on2 the set of element names allowed by the second type
      * @return the relationship (same type, subsumes, overlaps, subsumed-by)
      */
-    protected int computeContentRelationship(ItemType t1, ItemType t2, Optional<IntSet> on1, Optional<IntSet> on2) {
-        int contentRelationship = DISJOINT;
+    @Override
+    protected Affinity computeContentRelationship(ItemType t1, ItemType t2, Optional<IntSet> on1, Optional<IntSet> on2) {
+        Affinity contentRelationship = DISJOINT;
         boolean nillable1 = true;
         boolean nillable2 = true;
 
@@ -137,4 +140,4 @@ public class TypeHierarchyEE extends TypeHierarchyPE {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

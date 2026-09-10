@@ -7,10 +7,8 @@ import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
-import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.NumericValue;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.GeneratorAdapter;
 
 import java.math.BigDecimal;
 
@@ -27,7 +25,6 @@ public class CompareToIntegerConstantCompiler extends ToBooleanCompiler {
         Expression exp = ((CompareToIntegerConstant) expression).getBaseExpression();
         int operator = ((CompareToIntegerConstant) expression).getComparisonOperator();
         long comparand = ((CompareToIntegerConstant) expression).getComparand();
-        boolean allowsEmpty = Cardinality.allowsZero(expression.getCardinality());
 
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
@@ -53,7 +50,7 @@ public class CompareToIntegerConstantCompiler extends ToBooleanCompiler {
 
             compiler.compileToPrimitive(exp, Integer.TYPE, new OnEmpty.UnwindAndJump(returnFalse));
             ga.push((int) comparand);
-            ga.ifCmp(Type.INT_TYPE, translateOperator(operator), returnTrue.label());
+            ga.ifCmp(Type.INT_TYPE, ValueComparisonCompiler.translateOperator(operator), returnTrue.label());
 
         } else if (isInteger && compiler.isInRangeForLong(exp)) {
 
@@ -61,7 +58,7 @@ public class CompareToIntegerConstantCompiler extends ToBooleanCompiler {
 
             compiler.compileToPrimitive(exp, Long.TYPE, new OnEmpty.UnwindAndJump(returnFalse));
             ga.push(comparand);
-            ga.ifCmp(Type.LONG_TYPE, translateOperator(operator), returnTrue.label());
+            ga.ifCmp(Type.LONG_TYPE, ValueComparisonCompiler.translateOperator(operator), returnTrue.label());
 
         } else {
 
@@ -86,17 +83,17 @@ public class CompareToIntegerConstantCompiler extends ToBooleanCompiler {
                 ga.loadLocal(numericVar);
                 ga.invokeInstanceMethod(NumericValue.class, "getDoubleValue");
                 ga.push(value);
-                ga.ifCmp(Type.getType(Double.TYPE), translateOperator(operator), returnTrue.label());
+                ga.ifCmp(Type.getType(Double.TYPE), ValueComparisonCompiler.translateOperator(operator), returnTrue.label());
             } else if (isInteger) {
                 if (comparand == 0) {
                     ga.loadLocal(numericVar);
                     ga.invokeInstanceMethod(NumericValue.class, "signum");
-                    ga.ifZCmp(translateOperator(operator), returnTrue.label());
+                    ga.ifZCmp(ValueComparisonCompiler.translateOperator(operator), returnTrue.label());
                 } else {
                     ga.loadLocal(numericVar);
                     ga.push(comparand);
                     ga.invokeInstanceMethod(NumericValue.class, "compareTo", Long.TYPE);
-                    ga.ifZCmp(translateOperator(operator), returnTrue.label());
+                    ga.ifZCmp(ValueComparisonCompiler.translateOperator(operator), returnTrue.label());
                 }
             } else if (th.isSubType(operandType, BuiltInAtomicType.DECIMAL)) {
                 ga.loadLocal(numericVar);
@@ -106,13 +103,13 @@ public class CompareToIntegerConstantCompiler extends ToBooleanCompiler {
                 ga.push(comparand);
                 ga.invokeConstructor(BigDecimal.class, Long.TYPE);
                 ga.invokeInstanceMethod(BigDecimal.class, "compareTo", BigDecimal.class);
-                ga.ifZCmp(translateOperator(operator), returnTrue.label());
+                ga.ifZCmp(ValueComparisonCompiler.translateOperator(operator), returnTrue.label());
             } else {
                 // type not known statically - generate polymorphic code
                 ga.loadLocal(numericVar);
                 ga.push(comparand);
                 ga.invokeInstanceMethod(NumericValue.class, "compareTo", Long.TYPE);
-                ga.ifZCmp(translateOperator(operator), returnTrue.label());
+                ga.ifZCmp(ValueComparisonCompiler.translateOperator(operator), returnTrue.label());
             }
             methodInfo.placeLabel(returnFalse);
             methodInfo.releaseLocal(numericVar);
@@ -124,24 +121,6 @@ public class CompareToIntegerConstantCompiler extends ToBooleanCompiler {
         methodInfo.placeLabel(end);
     }
 
-    private int translateOperator(int op) {
-        switch (op) {
-            case Token.FEQ:
-                return GeneratorAdapter.EQ;
-            case Token.FNE:
-                return GeneratorAdapter.NE;
-            case Token.FGT:
-                return GeneratorAdapter.GT;
-            case Token.FLT:
-                return GeneratorAdapter.LT;
-            case Token.FGE:
-                return GeneratorAdapter.GE;
-            case Token.FLE:
-                return GeneratorAdapter.LE;
-            default:
-                throw new UnsupportedOperationException("Unknown operator " + op);
-        }
-    }
 }
 
-//Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

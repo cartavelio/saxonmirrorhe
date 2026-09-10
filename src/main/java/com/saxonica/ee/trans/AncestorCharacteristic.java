@@ -36,6 +36,7 @@ public class AncestorCharacteristic extends Characteristic<Boolean> {
      * @throws XPathException if pattern matching fails with a dynamic error
      */
 
+    @Override
     public Boolean evaluate(XPathContext context) throws XPathException {
         Item item = context.getContextItem();
         if (!(item instanceof NodeInfo)) {
@@ -80,4 +81,4 @@ public class AncestorCharacteristic extends Characteristic<Boolean> {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited

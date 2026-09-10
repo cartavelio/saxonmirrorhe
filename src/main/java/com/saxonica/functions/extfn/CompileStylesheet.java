@@ -30,11 +30,12 @@ public class CompileStylesheet extends SystemFunction {
      *                                           code will add information about the error location.
      */
 
+    @Override
     public ExternalObject<PreparedStylesheet> call(XPathContext context, Sequence[] arguments) throws XPathException {
         NodeInfo doc = (NodeInfo) arguments[0].head();
         Configuration config = context.getConfiguration();
         CompilerInfo compilerInfo = new CompilerInfo(config.getDefaultXsltCompilerInfo());
-        compilerInfo.setErrorListener(context.getErrorListener());
+        compilerInfo.setErrorReporter(context.getErrorReporter());
         compilerInfo.setURIResolver(context.getURIResolver());
         PreparedStylesheet pss = Compilation.compileSingletonPackage(config, compilerInfo, doc);
         return new ObjectValue<>(pss);
@@ -43,4 +44,4 @@ public class CompileStylesheet extends SystemFunction {
 
 }
 
-// Copyright (c) 2009-2016 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

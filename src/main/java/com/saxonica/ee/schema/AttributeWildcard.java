@@ -42,6 +42,7 @@ public class AttributeWildcard extends SchemaStructure implements UserSchemaComp
      *                         the error as fatal.
      */
 
+    @Override
     public boolean validate(SchemaCompiler compiler) throws SchemaException {
         if (!wildcard.validate(compiler)) {
             return false;
@@ -77,6 +78,7 @@ public class AttributeWildcard extends SchemaStructure implements UserSchemaComp
      *
      * @return the schema component represented as a function from property names to property values.
      */
+    @Override
     public Function getComponentAsFunction() {
         return wildcard.getComponentAsFunction();
     }
@@ -87,6 +89,7 @@ public class AttributeWildcard extends SchemaStructure implements UserSchemaComp
      * @return the value {@link net.sf.saxon.type.SchemaComponent.ValidationStatus#UNVALIDATED}
      */
 
+    @Override
     public ValidationStatus getValidationStatus() {
         return ValidationStatus.UNVALIDATED;
     }
@@ -94,4 +97,4 @@ public class AttributeWildcard extends SchemaStructure implements UserSchemaComp
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

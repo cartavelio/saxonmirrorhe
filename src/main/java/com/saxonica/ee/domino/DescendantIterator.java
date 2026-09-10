@@ -40,6 +40,7 @@ final class DescendantIterator implements AxisIterator {
     }
 
     /*@Nullable*/
+    @Override
     public NodeInfo next() {
         do {
             nextNodeNr++;
@@ -63,4 +64,4 @@ final class DescendantIterator implements AxisIterator {
 
 }
 
-// Copyright (c) 2017 Saxonica Ltd
+// Copyright (c) 2017-2020 Saxonica Limited

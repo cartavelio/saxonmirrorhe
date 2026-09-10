@@ -1,12 +1,13 @@
 package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.*;
-import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.tree.iter.SingletonIterator;
+import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.NumericType;
 import net.sf.saxon.type.TypeHierarchy;
@@ -47,7 +48,7 @@ public abstract class ToItemCompiler extends ExpressionCompiler {
             methodInfo.placeLabel(lab);
         }
 
-        if (th.relationship(expression.getItemType(), BuiltInAtomicType.BOOLEAN) != TypeHierarchy.DISJOINT) {
+        if (th.relationship(expression.getItemType(), BuiltInAtomicType.BOOLEAN) != Affinity.DISJOINT) {
             ga.loadLocal(itemVar);
             ga.instanceOf(org.objectweb.asm.Type.getType(BooleanValue.class));
             LabelInfo notBoolean = methodInfo.newLabel("notBoolean");
@@ -59,7 +60,7 @@ public abstract class ToItemCompiler extends ExpressionCompiler {
             methodInfo.placeLabel(notBoolean);
         }
 
-        if (th.relationship(expression.getItemType(), NumericType.getInstance()) != TypeHierarchy.DISJOINT) {
+        if (th.relationship(expression.getItemType(), NumericType.getInstance()) != Affinity.DISJOINT) {
             ga.loadLocal(itemVar);
             ga.instanceOf(org.objectweb.asm.Type.getType(NumericValue.class));
 
@@ -73,7 +74,9 @@ public abstract class ToItemCompiler extends ExpressionCompiler {
             methodInfo.placeLabel(notNumeric);
         }
 
-        if (th.relationship(expression.getItemType(), BuiltInAtomicType.STRING) != TypeHierarchy.DISJOINT || th.relationship(expression.getItemType(), BuiltInAtomicType.UNTYPED_ATOMIC) != TypeHierarchy.DISJOINT || th.relationship(expression.getItemType(), BuiltInAtomicType.ANY_URI) != TypeHierarchy.DISJOINT) {
+        if (th.relationship(expression.getItemType(), BuiltInAtomicType.STRING) != Affinity.DISJOINT
+                || th.relationship(expression.getItemType(), BuiltInAtomicType.UNTYPED_ATOMIC) != Affinity.DISJOINT
+                || th.relationship(expression.getItemType(), BuiltInAtomicType.ANY_URI) != Affinity.DISJOINT) {
             ga.loadLocal(itemVar);
             ga.instanceOf(org.objectweb.asm.Type.getType(StringValue.class));
             LabelInfo notString = methodInfo.newLabel("notString");
@@ -86,7 +89,7 @@ public abstract class ToItemCompiler extends ExpressionCompiler {
             methodInfo.placeLabel(notString);
         }
 
-        if (th.relationship(expression.getItemType(), AnyNodeTest.getInstance()) != TypeHierarchy.DISJOINT) {
+        if (th.relationship(expression.getItemType(), AnyNodeTest.getInstance()) != Affinity.DISJOINT) {
             ga.loadLocal(itemVar);
             ga.instanceOf(org.objectweb.asm.Type.getType(NodeInfo.class));
             LabelInfo notNode = methodInfo.newLabel("notNode");
@@ -111,9 +114,9 @@ public abstract class ToItemCompiler extends ExpressionCompiler {
 
         Generator ga = compiler.getCurrentGenerator();
         visitAnnotation(compiler, "ToItemCompilerPush");
-        compiler.generateGetReceiver();
+        compiler.generateGetOutputter();
         compileToItem(compiler, expression);
-        ga.invokeInstanceMethod(Receiver.class, "append", Item.class);
+        ga.invokeInstanceMethod(Outputter.class, "append", Item.class);
 
     }
 
@@ -148,7 +151,7 @@ public abstract class ToItemCompiler extends ExpressionCompiler {
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited
 
 
 

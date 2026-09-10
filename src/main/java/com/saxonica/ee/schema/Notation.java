@@ -137,6 +137,7 @@ public class Notation extends SchemaStructure implements UserSchemaComponent, Se
      * Always returns true for this implementation.
      */
 
+    @Override
     public boolean validate(SchemaCompiler compiler) {
         return true;
     }
@@ -148,6 +149,7 @@ public class Notation extends SchemaStructure implements UserSchemaComponent, Se
      * @return true if all is well, false if errors found
      */
 
+    @Override
     public boolean fixup(SchemaCompiler compiler) {
         setFixupStatus(VALIDATED);
         return true;
@@ -177,6 +179,7 @@ public class Notation extends SchemaStructure implements UserSchemaComponent, Se
      * @param compiler The schema compiler
      */
 
+    @Override
     public void elaborate(SchemaCompiler compiler) {
         // no action
     }
@@ -185,6 +188,7 @@ public class Notation extends SchemaStructure implements UserSchemaComponent, Se
      * Serialize the schema component
      */
 
+    @Override
     public void serialize(SchemaModelSerializer serializer) throws XPathException {
         String id = serializer.getId(this, true);
         serializer.startElement("notation");
@@ -203,9 +207,11 @@ public class Notation extends SchemaStructure implements UserSchemaComponent, Se
 
     }
 
+    @Override
     public Function getComponentAsFunction() {
         Callable callable = new Callable() {
-            public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+            @Override
+            public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
@@ -239,4 +245,4 @@ public class Notation extends SchemaStructure implements UserSchemaComponent, Se
 
 }
 
-// Copyright (c) 2004-2012 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

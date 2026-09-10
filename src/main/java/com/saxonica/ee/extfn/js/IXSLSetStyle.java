@@ -1,13 +1,11 @@
 package com.saxonica.ee.extfn.js;
 
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.om.AttributeCollection;
-import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.style.StyleElement;
-import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Whitespace;
 
@@ -32,6 +30,7 @@ public class IXSLSetStyle extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
@@ -42,31 +41,36 @@ public class IXSLSetStyle extends StyleElement {
      * @return true: no, the element must be empty
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return false;
     }
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
-        AttributeCollection atts = getAttributeList();
-
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
-            if (f.equals("name")) {
-                String nameAtt = Whitespace.trim(atts.getValue(a));
-                name = makeAttributeValueTemplate(nameAtt, a);
-            } else if (f.equals("select")) {
-                String selectAtt = atts.getValue(a);
-                select = makeExpression(selectAtt, a);
-            } else if (f.equals("object")) {
-                String objectAtt = atts.getValue(a);
-                object = makeExpression(objectAtt, a);
-            } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
+            String value = att.getValue();
+            switch (f) {
+                case "name":
+                    String nameAtt = Whitespace.trim(value);
+                    name = makeAttributeValueTemplate(nameAtt, att);
+                    break;
+                case "select":
+                    select = makeExpression(value, att);
+                    break;
+                case "object":
+                    object = makeExpression(value, att);
+                    break;
+                default:
+                    checkUnknownAttribute(attName);
+                    break;
             }
         }
         if (object == null) {
-            object = makeExpression(".", -1);
+            object = makeExpression(".", null);
         }
 
         if (name == null) {
@@ -77,12 +81,14 @@ public class IXSLSetStyle extends StyleElement {
         }
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         name = typeCheck("name", name);
         select = typeCheck("select", select);
         object = typeCheck("object", object);
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         Expression e = IXSLFunctionSet.getInstance().makeFunction("set-style", 3).makeFunctionCall(name, select, object);
         e.setRetainedStaticContext(makeRetainedStaticContext());
@@ -91,4 +97,4 @@ public class IXSLSetStyle extends StyleElement {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

@@ -7,7 +7,6 @@ import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
@@ -64,6 +63,7 @@ public abstract class UserSimpleType extends UserDefinedType
      * @return true (always)
      */
 
+    @Override
     public final boolean isSimpleType() {
         return true;
     }
@@ -74,6 +74,7 @@ public abstract class UserSimpleType extends UserDefinedType
      * @return the default implementation returns false
      */
 
+    @Override
     public boolean isAtomicType() {
         return false;
     }
@@ -86,6 +87,7 @@ public abstract class UserSimpleType extends UserDefinedType
      * node, however, can still allow a list.
      */
 
+    @Override
     public boolean isIdType() throws MissingComponentException {
         return false;
     }
@@ -96,6 +98,7 @@ public abstract class UserSimpleType extends UserDefinedType
      * from IDREF or IDREFS by restriction, list, or union
      */
 
+    @Override
     public boolean isIdRefType() throws MissingComponentException {
         return false;
     }
@@ -107,6 +110,7 @@ public abstract class UserSimpleType extends UserDefinedType
      * @return true if this is a list type
      */
 
+    @Override
     public boolean isListType() {
         return false;
     }
@@ -119,6 +123,7 @@ public abstract class UserSimpleType extends UserDefinedType
      * @return true for a union type
      */
 
+    @Override
     public boolean isUnionType() {
         return false;
     }
@@ -191,6 +196,7 @@ public abstract class UserSimpleType extends UserDefinedType
      * @return an EQName identifying the type. In the case of an anonymous type, an internally-generated
      *         name is returned
      */
+    @Override
     public String getEQName() {
         return "Q{" + getTargetNamespace() + "}" + getName();
     }
@@ -339,6 +345,7 @@ public abstract class UserSimpleType extends UserDefinedType
      *                               whitespace facet is not yet known.
      */
 
+    @Override
     public int getWhitespaceAction() {
         int action = -1;
         Facet ws = getFacet(WhitespaceFacet.class);
@@ -383,6 +390,7 @@ public abstract class UserSimpleType extends UserDefinedType
      * @return the first built-in type found when searching up the type hierarchy
      */
     /*@NotNull*/
+    @Override
     public SchemaType getBuiltInBaseType() {
         SchemaType base = this;
         do {
@@ -402,6 +410,7 @@ public abstract class UserSimpleType extends UserDefinedType
      *          if the derivation is not allowed
      */
 
+    @Override
     public void checkTypeDerivationIsOK(SchemaType type, int block) throws SchemaException {
         String s = isTypeDerivationOK(this, type, block);
         if (s != null) {
@@ -416,6 +425,7 @@ public abstract class UserSimpleType extends UserDefinedType
      * @throws SchemaException if this SimpleType definition is invalid.
      */
 
+    @Override
     public boolean validate(SchemaCompiler compiler) throws SchemaException {
 
         // check for previous validation
@@ -461,6 +471,7 @@ public abstract class UserSimpleType extends UserDefinedType
      *          if the expression will never deliver a value of the correct type
      */
 
+    @Override
     public void analyzeContentExpression(Expression expression, int kind) throws XPathException {
         BuiltInAtomicType.analyzeContentExpression(this, expression, kind);
     }
@@ -473,14 +484,17 @@ public abstract class UserSimpleType extends UserDefinedType
      * @since 8.5
      */
 
+    @Override
     public AtomicSequence atomize(NodeInfo node) throws XPathException {
         if (node.isNilled()) {
             return EmptyAtomicSequence.getInstance();
         }
         try {
-            return getTypedValue(node.getStringValueCS(),
-                    isNamespaceSensitive() ? new InscopeNamespaceResolver(node) : null,
-                    getConfiguration().getConversionRules());
+            NamespaceResolver resolver = null;
+            if (isNamespaceSensitive()) {
+                resolver = node.getNodeKind() == Type.ELEMENT ? node.getAllNamespaces() : node.getParent().getAllNamespaces();
+            }
+            return getTypedValue(node.getStringValueCS(), resolver, getConfiguration().getConversionRules());
         } catch (ValidationException err) {
             throw new XPathException("Internal error: value doesn't match its type annotation. " + err.getMessage());
         }
@@ -503,11 +517,6 @@ public abstract class UserSimpleType extends UserDefinedType
      */
 
     public static String isTypeDerivationOK(SimpleType d, SchemaType b, int derivation) throws MissingComponentException {
-
-        // rule 0 (Saxon-specific)
-        if (d.isExternalType()) {
-            return "External types cannot be used in schema validation";
-        }
 
         // rule 1
         if (d == b) {
@@ -597,6 +606,7 @@ public abstract class UserSimpleType extends UserDefinedType
      * @return the value after preprocessing
      */
 
+    @Override
     public CharSequence preprocess(CharSequence input) throws ValidationException {
         for (Facet f : getExtendedFacetList()) {
             if (f instanceof PreprocessFacet) {
@@ -616,6 +626,7 @@ public abstract class UserSimpleType extends UserDefinedType
      * @return the value after postprocessing
      */
 
+    @Override
     public CharSequence postprocess(CharSequence input) throws ValidationException {
         for (Facet f : getExtendedFacetList()) {
             if (f instanceof PreprocessFacet) {
@@ -726,6 +737,7 @@ public abstract class UserSimpleType extends UserDefinedType
      * @throws SchemaException if a fatal error occurs
      */
 
+    @Override
     public void elaborate(SchemaCompiler compiler) throws SchemaException {
         if (getValidationStatus() == ValidationStatus.UNVALIDATED) {
             if (getBaseType() instanceof UserSchemaComponent) {
@@ -744,6 +756,7 @@ public abstract class UserSimpleType extends UserDefinedType
     /**
      * Serialize the schema component
      */
+    @Override
     public void serialize(SchemaModelSerializer serializer) throws XPathException {
         String id = serializer.getId(this, true);
         serializer.startElement("simpleType");
@@ -758,7 +771,7 @@ public abstract class UserSimpleType extends UserDefinedType
         if (finalProhibitions != 0) {
             String ex = "";
             if ((finalProhibitions & SchemaType.DERIVATION_RESTRICTION) != 0) {
-                ex = (ex.isEmpty() ? "" : " ") + "restriction";
+                ex = "restriction";
             }
             if ((finalProhibitions & SchemaType.DERIVATION_LIST) != 0) {
                 ex += (ex.isEmpty() ? "" : " ") + "list";
@@ -785,6 +798,7 @@ public abstract class UserSimpleType extends UserDefinedType
 
     protected abstract void serializeVariety(SchemaModelSerializer serializer) throws XPathException;
 
+    @Override
     public Function getComponentAsFunction() {
         return getComponentAsFunction(this);
     }
@@ -991,38 +1005,6 @@ public abstract class UserSimpleType extends UserDefinedType
             list.add(etf);
         }
         return list;
-    }
-
-    /**
-     * Generate Javascript code to test whether an item conforms to this item type
-     *
-     * @return a Javascript instruction or sequence of instructions, which can be used as the body
-     * of a Javascript function, and which returns a boolean indication whether the value of the
-     * variable "item" is an instance of this item type.
-     * @throws XPathException if JS code cannot be generated for this item type, for example because
-     *                        the test is schema-aware.
-     * @param knownToBe An item type that the supplied item is known to conform to; the generated code
-     *                  can assume that the item is an instance of this type.
-     * @param targetVersion The version of Saxon-JS for which code is being generated. Currently either 1 or 2.
-     */
-
-    public String generateJavaScriptItemTypeTest(ItemType knownToBe, int targetVersion) throws XPathException {
-        throw new XPathException("Cannot generate JS code for schema-aware types", SaxonErrorCode.SXJS0001);
-    }
-
-    /**
-     * Generate Javascript code to convert a supplied Javascript value to this item type,
-     * if conversion is possible, or throw an error otherwise.
-     *
-     * @param errorCode the error to be thrown if conversion is not possible
-     * @param targetVersion the version of Saxon-JS for which code is to be generated
-     * @return a Javascript instruction or sequence of instructions, which can be used as the body
-     * of a Javascript function, and which returns the result of conversion to this type, or throws
-     * an error if conversion is not possible. The variable "val" will hold the supplied Javascript
-     * value.
-     */
-    public String generateJavaScriptItemTypeAcceptor(String errorCode, int targetVersion) throws XPathException {
-        throw new XPathException("Cannot generate JS code for schema-aware types", SaxonErrorCode.SXJS0001);
     }
 
 }

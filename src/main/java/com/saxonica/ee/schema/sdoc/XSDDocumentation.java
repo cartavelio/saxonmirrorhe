@@ -6,11 +6,9 @@ import com.saxonica.ee.schema.SchemaCompiler;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardURIChecker;
-import net.sf.saxon.om.AttributeCollection;
-import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.StringConverter;
 import net.sf.saxon.type.ValidationFailure;
@@ -30,15 +28,14 @@ public class XSDDocumentation extends SchemaElement {
      * Process the attributes of this element and all its children
      */
 
+    @Override
     public void processAllAttributes() throws SchemaException {
         prepareAttributes();
         // Suppress validation of the subtree for these elements, except for saxon:param elements within xs:appInfo
         // Technically we should check that if the element contains elements such as xs:element, then
         // these are valid according to the schema for schemas.
         if (getFingerprint() == StandardNames.XS_APPINFO) {
-            AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-            NodeInfo child;
-            while ((child = kids.next()) != null) {
+            for (NodeInfo child : children()) {
                 if (child instanceof SaxonParam) {
                     ((SchemaElement) child).processAllAttributes();
                 }
@@ -54,9 +51,10 @@ public class XSDDocumentation extends SchemaElement {
      *          if any errors are found in the attributes
      */
 
+    @Override
     public void prepareAttributes() throws SchemaException {
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         String[] allowed = {"source"};
         // Note that no id attribute is permitted
         // Note also that we don't handle xml:lang specially. It's permitted automatically
@@ -87,6 +85,7 @@ public class XSDDocumentation extends SchemaElement {
      * @param compiler the schema compiler
      */
 
+    @Override
     public void validateSubtree(SchemaCompiler compiler) {
         // Suppress validation of the subtree for these elements. This has the side-effect of permitting
         // character data where all other elements prohibit it.
@@ -101,10 +100,11 @@ public class XSDDocumentation extends SchemaElement {
      * @param compiler the schema compiler
      */
 
+    @Override
     public void validate(SchemaCompiler compiler) {
         // This method is not called, because validateSubtree() suppresses it
     }
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

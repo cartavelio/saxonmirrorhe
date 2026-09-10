@@ -29,6 +29,7 @@ public class XMLIndenterPE extends XMLIndenter {
      * @param props the serialization properties
      */
 
+    @Override
     public void setOutputProperties(Properties props) {
         super.setOutputProperties(props);
         String s = props.getProperty(SaxonOutputKeys.INDENT_SPACES);
@@ -53,11 +54,11 @@ public class XMLIndenterPE extends XMLIndenter {
 
         s = props.getProperty(SaxonOutputKeys.DOUBLE_SPACE);
         if (s != null) {
-            doubleSpacedElements = new HashSet<NodeName>(8);
+            doubleSpacedElements = new HashSet<>(8);
             StringTokenizer st = new StringTokenizer(s, " \t\r\n");
             while (st.hasMoreTokens()) {
-                String clarkName = st.nextToken();
-                doubleSpacedElements.add(FingerprintedQName.fromClarkName(clarkName));
+                String eqName = st.nextToken();
+                doubleSpacedElements.add(FingerprintedQName.fromEQName(eqName));
             }
         }
 
@@ -79,4 +80,4 @@ public class XMLIndenterPE extends XMLIndenter {
     }
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

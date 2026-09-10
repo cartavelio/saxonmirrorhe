@@ -27,7 +27,6 @@ public class AccumulatorRegistryEE extends AccumulatorRegistry {
      * pass over a source document
      *
      * @param watchManager the WatchManager with which the rules are to be registered
-     * @return a map from accumulators to accumulator watches
      * @throws XPathException if an error occurs
      */
 
@@ -37,12 +36,14 @@ public class AccumulatorRegistryEE extends AccumulatorRegistry {
 
         for (Accumulator acc : accumulators) {
             AccumulatorWatch watch = new AccumulatorWatch(acc);
+            watch.setPipelineConfiguration(watchManager.getPipelineConfiguration());
             watch.setWatchManager(watchManager);
             watchMap.put(acc, watch);
         }
         MultiAccumulatorWatch maw = new MultiAccumulatorWatch(watchMap);
         watchManager.watchAccumulators(maw);
     }
+
     /**
      * Get the run-time value of a streamed accumulator
      *
@@ -54,7 +55,8 @@ public class AccumulatorRegistryEE extends AccumulatorRegistry {
      */
 
 
-    public Sequence<?> getStreamingAccumulatorValue(NodeInfo node, Accumulator accumulator, AccumulatorFn.Phase phase) throws XPathException {
+    @Override
+    public Sequence getStreamingAccumulatorValue(NodeInfo node, Accumulator accumulator, AccumulatorFn.Phase phase) throws XPathException {
         if (node instanceof FleetingNode) {
             if (!accumulator.isDeclaredStreamable()) {
                 throw new XPathException("Cannot get accumulator value for a streamed node unless the accumulator is declared streamable", "XTDE3362");
@@ -64,20 +66,20 @@ public class AccumulatorRegistryEE extends AccumulatorRegistry {
             AccumulatorWatch accumulatorWatch = watchMap == null ? null : watchMap.get(accumulator);
             if (accumulatorWatch == null) {
                 throw new XPathException("The accumulator " + accumulator.getAccumulatorName().getDisplayName() +
-                                                 " is not in use for the current streamed document (check @use-accumulators)", "XTDE3362");
+                    " is not in use for the current streamed document (check @use-accumulators)", "XTDE3362");
             }
             if (phase == AccumulatorFn.Phase.BEFORE) {
-                if (accumulatorWatch.isBeingComputed()) {
+                if (accumulatorWatch.isBeingComputed(AccumulatorFn.Phase.BEFORE)) {
                     throw new XPathException("Evaluation of accumulator " + accumulator.getAccumulatorName().getDisplayName() +
-                                                     " requires access to its own value", "XTDE3400");
+                            " requires access to its own value", "XTDE3400");
                 }
                 return accumulatorWatch.getPreDescentValue((FleetingNode) node);
             } else {
-                if (accumulatorWatch.isBeingComputed()) {
+                if (accumulatorWatch.isBeingComputed(AccumulatorFn.Phase.AFTER)) {
                     throw new XPathException("Evaluation of accumulator " + accumulator.getAccumulatorName().getDisplayName() +
                                                      " requires access to its own value", "XTDE3400");
                 }
-                return accumulatorWatch.getPostDescentValue((FleetingNode) node);
+                return accumulatorWatch.getPostDescentValue((FleetingNode)node);
             }
         } else {
             return null;
@@ -87,4 +89,4 @@ public class AccumulatorRegistryEE extends AccumulatorRegistry {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

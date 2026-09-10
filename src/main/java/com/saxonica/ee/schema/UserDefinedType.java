@@ -1,6 +1,7 @@
 package com.saxonica.ee.schema;
 
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.DocumentKey;
 import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.type.*;
@@ -78,8 +79,9 @@ public abstract class UserDefinedType extends SchemaStructure
      */
 
     /*@NotNull*/
+    @Override
     public String getName() {
-        return getStructuredQName().getLocalPart();
+        return getTypeName().getLocalPart();
     }
 
     /**
@@ -90,19 +92,9 @@ public abstract class UserDefinedType extends SchemaStructure
      */
 
     /*@NotNull*/
+    @Override
     public String getTargetNamespace() {
-        return getStructuredQName().getURI();
-    }
-
-    /**
-     * Return true if this is an external object type, that is, a Saxon-defined type for external
-     * Java or .NET objects
-     *
-     * @return false (for this class)
-     */
-
-    public boolean isExternalType() {
-        return false;
+        return getTypeName().getURI();
     }
 
     /**
@@ -111,6 +103,7 @@ public abstract class UserDefinedType extends SchemaStructure
      * @return the fingerprint. Returns an invented fingerprint for an anonymous type.
      */
 
+    @Override
     public int getFingerprint() {
         return fingerprint;
     }
@@ -121,6 +114,11 @@ public abstract class UserDefinedType extends SchemaStructure
      * @return a StructuredQName identifying the type.  In the case of an anonymous type, an internally-generated
      * name is returned
      */
+    public StructuredQName getTypeName() {
+        return qName;
+    }
+
+    @Override
     public StructuredQName getStructuredQName() {
         return qName;
     }
@@ -131,6 +129,7 @@ public abstract class UserDefinedType extends SchemaStructure
      * @return an EQName identifying the type. In the case of an anonymous type, an internally-generated
      * name is returned
      */
+    @Override
     public String getEQName() {
         return null;
     }
@@ -141,6 +140,7 @@ public abstract class UserDefinedType extends SchemaStructure
      * @return true if this SchemaType is an anonymous type
      */
 
+    @Override
     public boolean isAnonymousType() {
         return fingerprint == -1 || getTargetNamespace().equals(NamespaceConstant.ANONYMOUS);
     }
@@ -187,8 +187,9 @@ public abstract class UserDefinedType extends SchemaStructure
      * @return a lexical QName identifying the type
      */
 
+    @Override
     public String getDisplayName() {
-        return getStructuredQName().getDisplayName();
+        return getTypeName().getDisplayName();
     }
 
 
@@ -198,6 +199,7 @@ public abstract class UserDefinedType extends SchemaStructure
      * @return true if this SchemaType is a complex type
      */
 
+    @Override
     public final boolean isComplexType() {
         return !isSimpleType();
     }
@@ -209,6 +211,7 @@ public abstract class UserDefinedType extends SchemaStructure
      * @return the value of the 'block' attribute for this type
      */
 
+    @Override
     public int getBlock() {
         return 0;
     }
@@ -234,6 +237,7 @@ public abstract class UserDefinedType extends SchemaStructure
      */
 
     /*@NotNull*/
+    @Override
     public SchemaType getBaseType() {
         if (baseTypeReference == null) {
             if (isSimpleType()) {
@@ -266,6 +270,7 @@ public abstract class UserDefinedType extends SchemaStructure
      * @return a numeric code representing the derivation method, for example {@link SchemaType#DERIVATION_RESTRICTION}
      */
 
+    @Override
     public int getDerivationMethod() {
         return derivation;
     }
@@ -278,6 +283,7 @@ public abstract class UserDefinedType extends SchemaStructure
      * @return true if this kind of derivation is allowed
      */
 
+    @Override
     public boolean allowsDerivation(int derivation) {
         return (finalProhibitions & derivation) == 0;
     }
@@ -288,6 +294,7 @@ public abstract class UserDefinedType extends SchemaStructure
      * @return the types of derivation that are not permitted, as a bit-significant integer
      *         containing bits such as {@link net.sf.saxon.type.SchemaType#DERIVATION_EXTENSION}
      */
+    @Override
     public int getFinalProhibitions() {
         return finalProhibitions;
     }
@@ -301,16 +308,21 @@ public abstract class UserDefinedType extends SchemaStructure
      */
 
     public void setDerivationMethodName(String method) throws SchemaException {
-        if (method.equals("restriction")) {
-            derivation = SchemaType.DERIVATION_RESTRICTION;
-        } else if (method.equals("union")) {
-            derivation = SchemaType.DERIVATION_UNION;
-        } else if (method.equals("list")) {
-            derivation = SchemaType.DERIVATION_LIST;
-        } else if (method.equals("extension")) {
-            derivation = SchemaType.DERIVATION_EXTENSION;
-        } else {
-            throw new SchemaException("Unknown derivation method: " + method);
+        switch (method) {
+            case "restriction":
+                derivation = SchemaType.DERIVATION_RESTRICTION;
+                break;
+            case "union":
+                derivation = SchemaType.DERIVATION_UNION;
+                break;
+            case "list":
+                derivation = SchemaType.DERIVATION_LIST;
+                break;
+            case "extension":
+                derivation = SchemaType.DERIVATION_EXTENSION;
+                break;
+            default:
+                throw new SchemaException("Unknown derivation method: " + method);
         }
     }
 
@@ -343,6 +355,7 @@ public abstract class UserDefinedType extends SchemaStructure
      *          if the derivation is not allowed
      */
 
+    @Override
     public void checkTypeDerivationIsOK(SchemaType type, int block) throws SchemaException {
         UserComplexType.checkTypeDerivation((ComplexType) this, type, block);
     }
@@ -370,11 +383,12 @@ public abstract class UserDefinedType extends SchemaStructure
      * in a context such as "the type X is ..."
      */
 
+    @Override
     public String getDescription() {
         int fp = getFingerprint();
         NamePool pool = getNamePool();
-        if (fp != -1 && !getStructuredQName().hasURI(NamespaceConstant.ANONYMOUS)) {
-            return getStructuredQName().getEQName();
+        if (fp != -1 && !getTypeName().hasURI(NamespaceConstant.ANONYMOUS)) {
+            return getTypeName().getEQName();
         }
         if (containingDeclarationName != null) {
             return "of " +
@@ -420,6 +434,7 @@ public abstract class UserDefinedType extends SchemaStructure
      * can happen when there are multiple includes of the same file)
      */
 
+    @Override
     public boolean isSameType(SchemaType other) {
         if (this == other) {
             return true;
@@ -447,12 +462,8 @@ public abstract class UserDefinedType extends SchemaStructure
         if (s1.equals(s2)) {
             return true;
         }
-        if (s1.startsWith("file:///")) {
-            s1 = "file:/" + s1.substring(8);
-        }
-        if (s2.startsWith("file:///")) {
-            s2 = "file:/" + s2.substring(8);
-        }
+        s1 = DocumentKey.normalizeURI(s1);
+        s2 = DocumentKey.normalizeURI(s2);
         return s1.equals(s2);
     }
 
@@ -495,4 +506,4 @@ public abstract class UserDefinedType extends SchemaStructure
     }
 }
 
-// Copyright (c) 2004-2011 Saxonica Limited. All Rights Reserved
+// Copyright (c) 2004-2020 Saxonica Limited

@@ -1,14 +1,13 @@
 package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.*;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.event.SequenceReceiver;
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
-import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -168,8 +167,8 @@ public class LiteralCompiler extends ExpressionCompiler {
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         visitLineNumber(compiler, ga, expression);
-        compiler.generateGetReceiver();
-        int outVar = methodInfo.allocateLocal(SequenceReceiver.class);
+        compiler.generateGetOutputter();
+        int outVar = methodInfo.allocateLocal(Outputter.class);
         ga.storeLocal(outVar);
 //		compileToItem(compiler, expression);
 //		ga.invokeInstanceMethod(SequenceReceiver.class , "append", Item.class);
@@ -187,9 +186,9 @@ public class LiteralCompiler extends ExpressionCompiler {
         ga.ifNull(end.label());
         ga.loadLocal(outVar);
         ga.swap();
-        allocateStatic(compiler, ExplicitLocation.UNKNOWN_LOCATION);
-        ga.push(ReceiverOptions.ALL_NAMESPACES);
-        ga.invokeInstanceMethod(Receiver.class, "append", Item.class, Location.class, Integer.TYPE);
+        allocateStatic(compiler, Loc.NONE);
+        ga.push(ReceiverOption.ALL_NAMESPACES);
+        ga.invokeInstanceMethod(Outputter.class, "append", Item.class, Location.class, Integer.TYPE);
         ga.goTo(loop);
 
 
@@ -212,4 +211,4 @@ public class LiteralCompiler extends ExpressionCompiler {
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

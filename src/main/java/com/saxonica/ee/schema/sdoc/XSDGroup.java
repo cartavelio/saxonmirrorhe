@@ -2,12 +2,13 @@ package com.saxonica.ee.schema.sdoc;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.*;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.linked.NodeImpl;
-import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.MissingComponentException;
+import net.sf.saxon.type.SchemaException;
 
 import java.util.List;
 
@@ -58,12 +59,13 @@ public class XSDGroup extends SchemaElement {
      * @throws SchemaException if any errors are found in the attributes
      */
 
+    @Override
     public void prepareAttributes() throws SchemaException {
 
         PreparedSchema schema = getSchema();
         isRedefinition = (getParent() instanceof XSDRedefine);
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         if (isTopLevel()) {
             groupDeclaration = new ModelGroupDefinition((EnterpriseConfiguration) getConfiguration(), this);
             groupDeclaration.setSchemaDocumentURI(getParent().getSystemId());
@@ -182,13 +184,12 @@ public class XSDGroup extends SchemaElement {
      * @throws SchemaException if any XML representation constraints are violated
      */
 
+    @Override
     public void validate(SchemaCompiler compiler) throws SchemaException {
 
         boolean foundAnnotation = false;
         NodeInfo foundCompositor = null;
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while ((child = (NodeImpl)iter.next()) != null) {
+        for (NodeInfo child : children()) {
             int fp = child.getFingerprint();
             switch (fp) {
                 case StandardNames.XS_ANNOTATION:
@@ -234,15 +235,14 @@ public class XSDGroup extends SchemaElement {
      * @param compiler used for reporting errors and warnings
      */
 
+    @Override
     public void postValidate(SchemaCompiler compiler) throws SchemaException {
 
         if (groupDeclaration == null) {
             return;
         }
 
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while ((child = (NodeImpl)iter.next()) != null) {
+        for (NodeInfo child : children()) {
             int fp = child.getFingerprint();
 
             switch (fp) {
@@ -340,4 +340,4 @@ public class XSDGroup extends SchemaElement {
 
 }
 
-// Copyright (c) 2004-2006 Saxonica Limited
+// Copyright (c) 2004-2020 Saxonica Limited

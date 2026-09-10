@@ -11,9 +11,7 @@ import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.MissingComponentException;
-import net.sf.saxon.type.SchemaException;
-import net.sf.saxon.type.SimpleType;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
@@ -39,7 +37,7 @@ public final class AttributeUse extends SimpleComponentReference
      * The current value of the 'use' property. The value
      * is OPTIONAL by default.
      */
-    private short useFlag = OPTIONAL;
+    private Optionality useFlag = Optionality.OPTIONAL;
 
     /**
      * The value constraint (fixed or default value), if any
@@ -67,19 +65,6 @@ public final class AttributeUse extends SimpleComponentReference
     private int inheritable = -1;
 
     /**
-     * Value representing use="optional"
-     */
-    public static final short OPTIONAL = 3;
-    /**
-     * Value representing use="prohibited"
-     */
-    public static final short PROHIBITED = 4;
-    /**
-     * Value representing use="required"
-     */
-    public static final short REQUIRED = 5;
-
-    /**
      * Creates a new Attribute Use in the given schema. For system use only.
      *
      * @param config the Configuration that contains the new attributeUse
@@ -91,12 +76,23 @@ public final class AttributeUse extends SimpleComponentReference
     }
 
     @Override
-    public void tryToResolve(SchemaCompiler compiler) {
-        super.tryToResolve(compiler);
+    public void tryToResolve(SchemaCompiler compiler, boolean fatal) throws SchemaException {
+        super.tryToResolve(compiler, fatal);
         if (isResolved()) {
             AttributeDecl decl = (AttributeDecl)target;
             if (!decl.isGlobal()) {
                 decl.setContainingAttributeGroup(getContainingAttributeGroupDecl());
+            }
+        } else {
+            String name = getTargetComponentName().getEQName();
+            if (compiler.isAllowDanglingReferences() && !fatal) {
+                compiler.warning("Unknown attribute declaration " + name + " (substituting dummy declaration)", this);
+                AttributeDecl decl = new AttributeDecl(compiler.getConfiguration(), false);
+                decl.setAttributeName(getTargetComponentName());
+                decl.setSimpleType(BuiltInAtomicType.STRING);
+                target = decl;
+            } else {
+                throw new SchemaException("Unknown attribute declaration " + name, this);
             }
         }
     }
@@ -202,6 +198,7 @@ public final class AttributeUse extends SimpleComponentReference
      * @return the applicable value constraint if there is one, or null otherwise
      */
 
+    @Override
     public ValueConstraint getValueConstraint() {
         return valueConstraint;
     }
@@ -269,7 +266,7 @@ public final class AttributeUse extends SimpleComponentReference
      * @return true if the use attribute is equal to "optional".
      */
     public boolean isOptional() {
-        return useFlag == OPTIONAL;
+        return useFlag == Optionality.OPTIONAL;
     }
 
     /**
@@ -281,7 +278,7 @@ public final class AttributeUse extends SimpleComponentReference
      */
 
     public boolean isProhibited() {
-        return useFlag == PROHIBITED;
+        return useFlag == Optionality.PROHIBITED;
     }
 
     /**
@@ -296,7 +293,7 @@ public final class AttributeUse extends SimpleComponentReference
      */
 
     public boolean isRequired() {
-        return useFlag == REQUIRED;
+        return useFlag == Optionality.REQUIRED;
     }
 
     /**
@@ -306,7 +303,7 @@ public final class AttributeUse extends SimpleComponentReference
      *              ("prohibited" | "optional" | "required")
      */
 
-    public void setUse(short value) {
+    public void setUse(Optionality value) {
         useFlag = value;
     }
 
@@ -317,6 +314,7 @@ public final class AttributeUse extends SimpleComponentReference
      * @param vc the value constraint
      */
 
+    @Override
     public void setValueConstraint(ValueConstraint vc) {
         this.valueConstraint = vc;
     }
@@ -358,6 +356,7 @@ public final class AttributeUse extends SimpleComponentReference
      * @return true if successful.
      */
 
+    @Override
     public boolean fixup(SchemaCompiler compiler) throws SchemaException {
         PreparedSchema.validateReference(this, compiler, false);
         setValidationStatus(VALIDATED);
@@ -370,10 +369,11 @@ public final class AttributeUse extends SimpleComponentReference
      * @throws net.sf.saxon.type.SchemaException
      *          if the error listener decides an error is fatal
      */
+    @Override
     public boolean validate(SchemaCompiler compiler) throws SchemaException {
         boolean result;
 
-        tryToResolve(compiler);
+        tryToResolve(compiler, false);
         if (!isResolved()) {
             return false;
         }
@@ -444,6 +444,7 @@ public final class AttributeUse extends SimpleComponentReference
         }
     }
 
+    @Override
     public Function getComponentAsFunction() {
         Callable callable = (context, arguments) -> {
             String key = arguments[0].head().getStringValue();
@@ -469,4 +470,4 @@ public final class AttributeUse extends SimpleComponentReference
 
 }
 
-// Copyright (c) 2004-2018 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

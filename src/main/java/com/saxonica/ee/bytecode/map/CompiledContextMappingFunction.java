@@ -15,8 +15,9 @@ public abstract class CompiledContextMappingFunction implements ContextMappingFu
     public CompiledContextMappingFunction() {
     }
 
+    @Override
     public abstract SequenceIterator map(XPathContext context) throws XPathException;
 
 }
 
-//Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

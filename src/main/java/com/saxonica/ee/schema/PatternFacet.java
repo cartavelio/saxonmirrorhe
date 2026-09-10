@@ -37,10 +37,12 @@ public class PatternFacet extends Facet {
         this.config = config;
     }
 
+    @Override
     public String getName() {
         return "pattern";
     }
 
+    @Override
     public String getValue() {
         return requiredValue.getStringValue();
     }
@@ -120,6 +122,7 @@ public class PatternFacet extends Facet {
      * @param compiler the schema compiler
      */
 
+    @Override
     public void checkFacetRestriction(UserSimpleType type, SimpleType base, SchemaCompiler compiler)  {
         // no restrictions
     }
@@ -132,6 +135,7 @@ public class PatternFacet extends Facet {
      *         fails
      */
 
+    @Override
     public boolean testAtomicValue(AtomicValue value) {
         return regex.matches(value.getCanonicalLexicalRepresentation());
     }
@@ -158,4 +162,4 @@ public class PatternFacet extends Facet {
 
 }
 
-// Copyright (c) 2004-2017 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

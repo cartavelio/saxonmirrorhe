@@ -1,23 +1,24 @@
 package com.saxonica.ee.stream.adjunct;
 
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.om.FleetingParentNode;
 import com.saxonica.ee.stream.watch.Terminator;
 import com.saxonica.ee.stream.watch.WatchMaker;
 import com.saxonica.ee.stream.watch.WatchManager;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.SignificantItemDetector;
+import net.sf.saxon.event.*;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.ConditionalBlock;
 import net.sf.saxon.expr.instruct.OnEmptyExpr;
 import net.sf.saxon.expr.instruct.OnNonEmptyExpr;
-import net.sf.saxon.expr.parser.Location;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.type.SimpleType;
+import net.sf.saxon.value.StringValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,28 +51,45 @@ public class ConditionalBlockAdjunct extends TransmissionAdjunct implements Feed
 
     public static class ConditionalBlockFeed extends ItemFeed {
 
-        int consumingArg;
-        boolean empty = true;
-        private boolean consumingArgIsOnEmpty = false;
-        List<OnEmptyExpr> emptyPendingList = new ArrayList<OnEmptyExpr>();
-        List<OnNonEmptyExpr> nonEmptyPendingList = new ArrayList<OnNonEmptyExpr>();
-        List<Item> tentativeContent = null;
+        private int consumingArg;
+        private boolean empty = true;
+        private int level = 0;
+        private boolean watchForDocumentChildren;
 
-        public ConditionalBlockFeed(ConditionalBlock exp, int arg, Feed result, XPathContext context) {
+        private boolean consumingArgIsOnEmpty;
+        private List<OnNonEmptyExpr> nonEmptyPendingList = new ArrayList<>();
+        private List<OutputterEvent> tentativeContent = new ArrayList<>();
+
+        ConditionalBlockFeed(ConditionalBlock exp, int arg, ItemFeed result, XPathContext context) {
             super(exp, result, context);
             this.consumingArg = arg;
             consumingArgIsOnEmpty = exp.getChildExpression(arg) instanceof OnEmptyExpr;
         }
 
-        public boolean isEmpty() {
-            return empty;
+        public List<OutputterEvent> getTentativeContent() {
+            return tentativeContent;
         }
 
-        public void addTentativeContent(Item item) {
-            if (tentativeContent == null) {
-                tentativeContent = new ArrayList<>();
+        public void flushIfNonEmpty() throws XPathException {
+            if (!empty && !tentativeContent.isEmpty()) {
+                Outputter out = getNextOutputter();
+                for (OutputterEvent event : tentativeContent) {
+                    event.replay(out);
+                }
+                tentativeContent.clear();
             }
-            tentativeContent.add(item);
+        }
+
+        private void action() throws XPathException {
+            if (level == 0 || (level == 1 && watchForDocumentChildren)) {
+                empty = false;
+            }
+            flushIfNonEmpty();
+        }
+
+
+        public boolean isEmpty() {
+            return empty;
         }
 
         private boolean isSignificant(Item item) {
@@ -84,33 +102,32 @@ public class ConditionalBlockAdjunct extends TransmissionAdjunct implements Feed
          * @param terminator used for early exit
          */
 
+        @Override
         public void open(Terminator terminator) throws XPathException {
             super.open(terminator);
             ConditionalBlock block = (ConditionalBlock)getExpression();
-            Feed result = getResult();
+            Outputter result = getNextOutputter();
             for (int i = 0; i < consumingArg; i++) {
                 Expression child = block.getChildExpression(i);
                 if (child instanceof OnEmptyExpr) {
-                    if (empty) {
-                        emptyPendingList.add((OnEmptyExpr)child);
-                    }
+                    // No action until close
                 } else if (child instanceof OnNonEmptyExpr) {
                     if (empty) {
-                        nonEmptyPendingList.add((OnNonEmptyExpr) child);
+                        OutputterEventBuffer temp = new OutputterEventBuffer();
+                        temp.setBuffer(tentativeContent);
+                        SequenceIterator iter = child.iterate(getContext());
+                        processItems(iter, temp);
                     } else {
-                        SequenceIterator<?> iter = child.iterate(getContext());
+                        SequenceIterator iter = child.iterate(getContext());
                         processItems(iter, result);
                     }
                 } else {
                     child.iterate(getContext()).forEachOrFail(item -> {
                         if (empty && isSignificant(item)) {
                             empty = false;
-                            for (OnNonEmptyExpr e : nonEmptyPendingList) {
-                                SequenceIterator<?> si = e.iterate(getContext());
-                                processItems(si, result);
-                            }
+                            flushIfNonEmpty();
                         }
-                        result.processItem(item);
+                        result.append(item);
                     });
                 }
             }
@@ -122,6 +139,7 @@ public class ConditionalBlockAdjunct extends TransmissionAdjunct implements Feed
          * Watch goes out of scope. The default implementation does nothing.
          */
 
+        @Override
         public void close() throws XPathException {
             if (consumingArgIsOnEmpty) {
                 // In assessing whether any items have been written, disregard any items written
@@ -129,70 +147,71 @@ public class ConditionalBlockAdjunct extends TransmissionAdjunct implements Feed
                 empty = true;
             }
             ConditionalBlock block = (ConditionalBlock)getExpression();
-            Feed result = getResult();
+            Outputter result = getNextOutputter();
             for (int i = consumingArg + 1; i < block.size(); i++) {
                 Expression child = block.getChildExpression(i);
                 if (child instanceof OnEmptyExpr) {
                     if (empty) {
-                        emptyPendingList.add((OnEmptyExpr) child);
+                        //emptyPendingList.add((OnEmptyExpr) child);
+                        SequenceIterator si = child.iterate(getContext());
+                        processItems(si, result);
                     }
                 } else if (child instanceof OnNonEmptyExpr) {
                     if (empty) {
-                        nonEmptyPendingList.add((OnNonEmptyExpr) child);
+                        if (i != block.size() - 1) {
+                            OutputterEventBuffer temp = new OutputterEventBuffer();
+                            temp.setBuffer(tentativeContent);
+                            SequenceIterator iter = child.iterate(getContext());
+                            processItems(iter, temp);
+                        }
                     } else {
-                        processItems(child.iterate(getContext()), getResult());
+                        processItems(child.iterate(getContext()), result);
                     }
                 } else {
                     child.iterate(getContext()).forEachOrFail(item -> {
                         if (isSignificant(item)) {
-                            flushTentativeContent(result);
                             empty = false;
+                            flushIfNonEmpty();
                         }
-                        result.processItem(item);
+                        result.append(item);
                     });
-                }
-            }
-            if (empty) {
-                for (OnEmptyExpr e : emptyPendingList) {
-                    SequenceIterator<?> si = e.iterate(getContext());
-                    processItems(si, result);
                 }
             }
             result.close();
         }
 
-        private void flushTentativeContent(Feed out) throws XPathException {
-            if (tentativeContent != null && !tentativeContent.isEmpty()) {
-                for (Item it : tentativeContent) {
-                    out.processItem(it);
-                }
-                tentativeContent = null;
-                empty = false;
-            }
-            for (Expression e : nonEmptyPendingList) {
-                processItems(e.iterate(getContext()), getResult());
-            }
-        }
+//        private void flushTentativeContent(Outputter out) throws XPathException {
+//            if (tentativeContent != null && !tentativeContent.isEmpty()) {
+//                for (Item it : tentativeContent) {
+//                    out.append(it);
+//                }
+//                tentativeContent = null;
+//                empty = false;
+//            }
+//            for (Expression e : nonEmptyPendingList) {
+//                processItems(e.iterate(getContext()), out);
+//            }
+//        }
 
-        /**
-         * Signal that a node (other than a document or element node) that matches the selection
-         * has been found, or that a grounded item is being passed to the next expression in the
-         * evaluation pipeline.
-         *
-         * @param item the node that was matched.
-         * @throws net.sf.saxon.trans.XPathException
-         *          May be raised if a dynamic error occurs
-         */
-        public void processItem(Item<?> item) throws XPathException {
-            if (empty && isSignificant(item)) {
-                empty = false;
-                for (OnNonEmptyExpr e : nonEmptyPendingList) {
-                    SequenceIterator<?> si = e.iterate(getContext());
-                    processItems(si, getResult());
-                }
-            }
-            getResult().processItem(item);
-        }
+//        /**
+//         * Signal that a node (other than a document or element node) that matches the selection
+//         * has been found, or that a grounded item is being passed to the next expression in the
+//         * evaluation pipeline.
+//         *
+//         * @param item the node that was matched.
+//         * @throws net.sf.saxon.trans.XPathException
+//         *          May be raised if a dynamic error occurs
+//         */
+//        public void append(Item item) throws XPathException {
+//            if (empty && isSignificant(item)) {
+//                empty = false;
+//                for (OnNonEmptyExpr e : nonEmptyPendingList) {
+//                    SequenceIterator si = e.iterate(getContext());
+//                    processItems(si, getNextOutputter());
+//                }
+//            }
+//            getNextOutputter().append(item);
+//        }
 
         /**
          * Signal that an element or document node has been found that matches the selection that this
@@ -208,12 +227,13 @@ public class ConditionalBlockAdjunct extends TransmissionAdjunct implements Feed
          * @throws net.sf.saxon.trans.XPathException
          *          May be raised if a dynamic error occurs
          */
+        @Override
         public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
             if (empty) {
                 empty = false;
                 for (OnNonEmptyExpr e : nonEmptyPendingList) {
-                    SequenceIterator<?> si = e.iterate(getContext());
-                    processItems(si, getResult());
+                    SequenceIterator si = e.iterate(getContext());
+                    processItems(si, getNextOutputter());
                 }
             }
             return getResult().startSelectedParentNode(node, locationId);
@@ -228,29 +248,98 @@ public class ConditionalBlockAdjunct extends TransmissionAdjunct implements Feed
          *          May be raised if a constraint implemented by this
          *          Watch is violated
          */
+        @Override
         public void endSelectedParentNode(Location locationId) throws XPathException {
             getResult().endSelectedParentNode(locationId);
         }
 
-        /**
-         * Get a receiver to which start and end events for documents and elements can be
-         * written. By default this will be the same as the receiver for the result feed,
-         * because very few XSLT constructs (specifically, variables and functions) allow
-         * the results of document and element constructors to be captured for further
-         * processing. A construct that does need to process these events will intercept
-         * them by providing its own receiver, typically a SequenceOutputter.
-         */
         @Override
-        public Receiver getReceiver() {
-            return new SignificantItemDetector(super.getReceiver(), () -> {
-                flushTentativeContent(getResult());
-                //empty = false;
-            });
+        public void startDocument(int properties) throws XPathException {
+            if (level == 0) {
+                watchForDocumentChildren = true;
+            }
+            level++;
+            getNextOutputter().startDocument(properties);
         }
+
+        @Override
+        public void endDocument() throws XPathException {
+            level--;
+            watchForDocumentChildren = false;
+            getNextOutputter().endDocument();
+        }
+
+        @Override
+        public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties) throws XPathException {
+            action();
+            level++;
+            getNextOutputter().startElement(elemName, typeCode, location, properties);
+        }
+
+        @Override
+        public void startElement(NodeName elemName, SchemaType type, AttributeMap attributes, NamespaceMap namespaces, Location location, int properties) throws XPathException {
+            action();
+            level++;
+            getNextOutputter().startElement(elemName, type, attributes, namespaces, location, properties);
+        }
+
+        @Override
+        public void namespace(String prefix, String namespaceUri, int properties) throws XPathException {
+            action();
+            getNextOutputter().namespace(prefix, namespaceUri, properties);
+        }
+
+        @Override
+        public void endElement() throws XPathException {
+            level--;
+            getNextOutputter().endElement();
+        }
+
+        @Override
+        public void characters(CharSequence chars, Location location, int properties) throws XPathException {
+            if (ReceiverOption.contains(properties,ReceiverOption.SEPARATOR) && isEmpty() && chars.toString().equals(" ")) {
+                // A whitespace separator between atomic values does not constitute significant
+                // content for assessing xsl:on-empty and xsl:on-non-empty. Treat it as if generated
+                // using xsl:on-non-empty. Test case si-on-non-empty-044
+                tentativeContent.add(new OutputterEvent.Text(" ", location, properties));
+            } else {
+                action();
+                getNextOutputter().characters(chars, location, properties);
+            }
+        }
+
+        @Override
+        public void comment(CharSequence content, Location location, int properties) throws XPathException {
+            action();
+            getNextOutputter().comment(content, location, properties);
+        }
+
+        @Override
+        public void attribute(NodeName attName, SimpleType typeCode, CharSequence value, Location location, int properties) throws XPathException {
+            action();
+            getNextOutputter().attribute(attName, typeCode, value, location, properties);
+        }
+
+        @Override
+        public void append(Item item) throws XPathException {
+            if (item instanceof StringValue && ((StringValue) item).isZeroLength()) {
+                if (isEmpty()) {
+                    tentativeContent.add(new OutputterEvent.Append(item, Loc.NONE, ReceiverOption.NONE));
+                } else {
+                    getNextOutputter().append(item);
+                }
+            } else {
+                action();
+                getNextOutputter().append(item);
+            }
+        }
+
+
     }
 
 
-    public Feed makeItemFeed(final WatchManager watchManager, Feed out, final XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(final WatchManager watchManager, ItemFeed out, final XPathContext context) throws XPathException {
         consumingArg = findConsumingArg(getExpression(), consumingArg);
         return new ConditionalBlockFeed((ConditionalBlock)getExpression(),  consumingArg, out, context);
     }
@@ -259,4 +348,4 @@ public class ConditionalBlockAdjunct extends TransmissionAdjunct implements Feed
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

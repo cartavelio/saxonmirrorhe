@@ -3,7 +3,6 @@ package com.saxonica.ee.stream.adjunct;
 import com.saxonica.ee.stream.Posture;
 import com.saxonica.ee.stream.PostureAndSweep;
 import com.saxonica.ee.stream.Streamability;
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.watch.Terminator;
 import com.saxonica.ee.stream.watch.Trigger;
@@ -45,12 +44,13 @@ public class CurrentMergeGroupStreamer extends TransmissionAdjunct {
     }
 
     @Override
-    public Trigger makeTransmissionFlow(WatchManager watchManager, Expression exp, Feed out, XPathContext context) throws XPathException {
+    public Trigger makeTransmissionFlow(WatchManager watchManager, Expression exp, ItemFeed out, XPathContext context) throws XPathException {
         final Pattern selection = AnchorPattern.getInstance();
         return new Trigger(selection, makeItemFeed(watchManager, out, context), context);
     }
 
-    public Feed makeItemFeed(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
         if (Streamability.getPosture(getExpression()) == Posture.GROUNDED) {
             return new GroupingFeed(out, context);
         } else {
@@ -62,7 +62,7 @@ public class CurrentMergeGroupStreamer extends TransmissionAdjunct {
 
         private List<Item> group;
 
-        public GroupingFeed(Feed out, XPathContext context) {
+        public GroupingFeed(ItemFeed out, XPathContext context) {
             super(out, context);
         }
 
@@ -84,7 +84,7 @@ public class CurrentMergeGroupStreamer extends TransmissionAdjunct {
          * @param item the item to be supplied
          */
         @Override
-        public void processItem(Item<?> item) throws XPathException {
+        public void append(Item item) throws XPathException {
             group.add(item);
         }
 
@@ -97,12 +97,12 @@ public class CurrentMergeGroupStreamer extends TransmissionAdjunct {
         @Override
         public void close() throws XPathException {
             getResult().open(getTerminator());
-            getResult().processItem(group.get(0));
-            getResult().close();
+            getNextOutputter().append(group.get(0));
+            getNextOutputter().close();
         }
     }
 
 
 }
 
-// Copyright (c) 2012-2014 Saxonica Limited.
+// Copyright (c) 2012-2020 Saxonica Limited

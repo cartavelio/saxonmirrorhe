@@ -30,10 +30,11 @@ public class PullTracer extends PullFilter {
      * copies it to the branch Receiver, and then returns the event to the caller.
      *
      * @return an integer code indicating the type of event. The code
-     *         {@link #END_OF_INPUT} is returned at the end of the sequence.
+     *         {@link net.sf.saxon.pull.PullProvider.Event#END_OF_INPUT} is returned at the end of the sequence.
      */
 
-    public int next() throws XPathException {
+    @Override
+    public Event next() throws XPathException {
         currentEvent = super.next();
         traceEvent(currentEvent);
         return currentEvent;
@@ -44,7 +45,7 @@ public class PullTracer extends PullFilter {
      * Copy a pull event to a Receiver
      */
 
-    private void traceEvent(int event) {
+    private void traceEvent(PullProvider.Event event) {
         if (pool == null) {
             pool = getPipelineConfiguration().getConfiguration().getNamePool();
         }
@@ -63,11 +64,11 @@ public class PullTracer extends PullFilter {
                 try {
                     CharSequence cs = this.getStringValue();
                     FastStringBuffer sb = new FastStringBuffer(cs.length() * 5);
-                    sb.append('(');
+                    sb.cat('(');
                     for (int i = 0; i < cs.length(); i++) {
                         sb.append((int) cs.charAt(i) + " ");
                     }
-                    sb.append(')');
+                    sb.cat(')');
                     System.err.println(sb);
                 } catch (XPathException err) {
                     // no-op
@@ -104,4 +105,4 @@ public class PullTracer extends PullFilter {
     }
 }
 
-// Copyright (c) 2009 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

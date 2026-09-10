@@ -12,7 +12,6 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.ItemType;
-import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
 
 /**
@@ -23,11 +22,11 @@ import net.sf.saxon.value.EmptySequence;
 
 public final class IndexedFilterExpression extends Expression {
 
-    Operand baseOp;
-    Operand useOp;
-    Operand searchOp;
-    AtomicComparer comparer;
-    boolean convertUntypedToOther;
+    private Operand baseOp;
+    private Operand useOp;
+    private Operand searchOp;
+    private AtomicComparer comparer;
+    private boolean convertUntypedToOther;
 
     /**
      * Constructor
@@ -84,6 +83,7 @@ public final class IndexedFilterExpression extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return getBaseExpression().getItemType();
     }
@@ -147,6 +147,7 @@ public final class IndexedFilterExpression extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         baseOp.typeCheck(visitor, contextInfo);
 
@@ -173,6 +174,7 @@ public final class IndexedFilterExpression extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         // if the variable reference has been inlined, replace by an ordinary filter expression,
         // and pre-evaluate if possible
@@ -208,6 +210,7 @@ public final class IndexedFilterExpression extends Expression {
      * {@link #PROCESS_METHOD}
      */
 
+    @Override
     public int getImplementationMethod() {
         return ITERATE_METHOD;
     }
@@ -220,6 +223,7 @@ public final class IndexedFilterExpression extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         IndexedFilterExpression ife = new IndexedFilterExpression(
                 getBaseExpression().copy(rebindings),
@@ -238,6 +242,7 @@ public final class IndexedFilterExpression extends Expression {
      * filter predicate is guaranteed to select at most one item from the sequence being filtered
      */
 
+    @Override
     public int computeCardinality() {
         return StaticProperty.ALLOWS_ZERO_OR_MORE;
     }
@@ -250,6 +255,7 @@ public final class IndexedFilterExpression extends Expression {
      * @return the static properties of the expression, as a bit-significant value
      */
 
+    @Override
     public int computeSpecialProperties() {
         return getBaseExpression().getSpecialProperties();
     }
@@ -264,6 +270,7 @@ public final class IndexedFilterExpression extends Expression {
      * expression is the first operand of a path expression or filter expression
      */
 
+    @Override
     public PathMap.PathMapNodeSet addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
         PathMap.PathMapNodeSet target = getBaseExpression().addToPathMap(pathMap, pathMapNodeSet);
         getUseExpression().addToPathMap(pathMap, target);
@@ -297,6 +304,7 @@ public final class IndexedFilterExpression extends Expression {
      * @return the hash code
      */
 
+    @Override
     public int computeHashCode() {
         return "IndexedFilterExpression".hashCode() +
                 getBaseExpression().hashCode() ^
@@ -313,12 +321,13 @@ public final class IndexedFilterExpression extends Expression {
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
 
         Expression baseExp = getBaseExpression();
         SearchableValue indexedValue;
         if (baseExp instanceof VariableReference) {
-            Sequence<?> base = ((VariableReference) baseExp).evaluateVariable(context);
+            Sequence base = ((VariableReference) baseExp).evaluateVariable(context);
             if (base instanceof EmptySequence) {
                 return EmptyIterator.emptyIterator();
             } else if (base instanceof SearchableValue) {
@@ -343,8 +352,7 @@ public final class IndexedFilterExpression extends Expression {
             return EmptyIterator.emptyIterator();
         }
         AtomicComparer comparer = this.comparer.provideContext(context);
-        SequenceIterator<? extends AtomicValue> values =
-                (SequenceIterator<? extends AtomicValue>)getSearchExpression().iterate(context);
+        SequenceIterator values = getSearchExpression().iterate(context);
         return indexedValue.findItems(getUseExpression(), values, convertUntypedToOther,
                                       false, comparer, context);
 
@@ -358,6 +366,7 @@ public final class IndexedFilterExpression extends Expression {
      * @return the dependencies
      */
 
+    @Override
     public int computeDependencies() {
         // not all dependencies in the filter expression matter, because the context node,
         // position, and size are not dependent on the outer context.
@@ -386,6 +395,7 @@ public final class IndexedFilterExpression extends Expression {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("indexedFilter2", this);
         //out.startElement("indexedFilter", this);
@@ -411,4 +421,4 @@ public final class IndexedFilterExpression extends Expression {
 }
 
 
-// Copyright (c) 2006-2017 Saxonica Limited. All Rights Reserved
+// Copyright (c) 2006-2020 Saxonica Limited

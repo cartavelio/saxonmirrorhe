@@ -1,0 +1,50 @@
+package com.saxonica.ee.bytecode;
+
+import com.saxonica.ee.bytecode.util.*;
+import net.sf.saxon.expr.CompareToConstant;
+import net.sf.saxon.expr.CompareToStringConstant;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.sort.CodepointCollator;
+import net.sf.saxon.value.StringValue;
+
+
+/**
+ * Generate code for a CompareToStringConstant
+ */
+public class CompareToStringConstantCompiler extends ToBooleanCompiler {
+
+    @Override
+    public void compileToBoolean(CompilerService compiler, /*@NotNull*/ Expression expression)
+            throws CannotCompileException {
+
+        Expression exp = ((CompareToConstant) expression).getBaseExpression();
+        int operator = ((CompareToConstant) expression).getComparisonOperator();
+        String comparand = ((CompareToStringConstant) expression).getComparand();
+
+        Generator ga = compiler.getCurrentGenerator();
+        GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
+        visitAnnotation(compiler, "CompareToStringCompiler");
+        visitLineNumber(compiler, ga, expression);
+
+        LabelInfo returnTrue = methodInfo.newLabel("returnTrue");
+        LabelInfo returnFalse = methodInfo.newLabel("returnFalse");
+        LabelInfo end = methodInfo.newLabel("endCmpToString");
+
+        compiler.compileToItem(exp);
+        ga.checkClass(StringValue.class);
+        ga.invokeInstanceMethod(StringValue.class, "getStringValue");
+        ga.push(comparand);
+        ga.invokeStaticMethod(CodepointCollator.class, "compareCS", CharSequence.class, CharSequence.class);
+        ga.ifZCmp(ValueComparisonCompiler.translateOperator(operator), returnTrue.label());
+
+        methodInfo.placeLabel(returnFalse);
+        ga.push(false);
+        ga.goTo(end);
+        methodInfo.placeLabel(returnTrue);
+        ga.push(true);
+        methodInfo.placeLabel(end);
+    }
+
+}
+
+// Copyright (c) 2018-2020 Saxonica Limited

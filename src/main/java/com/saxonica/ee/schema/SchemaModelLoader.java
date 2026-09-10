@@ -6,10 +6,11 @@ import com.saxonica.ee.schema.fsa.Edge;
 import com.saxonica.ee.schema.fsa.FiniteStateMachine;
 import com.saxonica.ee.schema.sdoc.SelectionParser;
 import com.saxonica.ee.schema.sdoc.XSDAssert;
+import com.saxonica.ee.stream.Sweep;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.*;
-import net.sf.saxon.expr.instruct.SavedNamespaceContext;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.HostLanguage;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.Validation;
@@ -21,7 +22,6 @@ import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.sxpath.XPathVariable;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.AttributeCollectionImpl;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.NotationValue;
@@ -47,7 +47,6 @@ public class SchemaModelLoader extends ProxyReceiver {
     private final Stack<SCMNodeHandler> handlerStack = new Stack<>();
     private NamespaceResolver namespaceResolver;
     private NodeName elementName;
-    private final AttributeCollectionImpl attributes;
     private final List<PendingEdge> pendingEdges = new ArrayList<>();
     private String dmk = null;
 
@@ -66,7 +65,6 @@ public class SchemaModelLoader extends ProxyReceiver {
         //config.checkLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION, "schema processing", -1);
         this.config = (EnterpriseConfiguration) config;
         schema = new PreparedSchema((EnterpriseConfiguration) config);
-        attributes = new AttributeCollectionImpl(config);
     }
 
     /**
@@ -80,7 +78,7 @@ public class SchemaModelLoader extends ProxyReceiver {
     public PreparedSchema load(Source source) throws XPathException {
         PipelineConfiguration pipe = config.makePipelineConfiguration();
         pipe.getParseOptions().setSchemaValidationMode(Validation.SKIP);
-        pipe.setHostLanguage(Configuration.XML_SCHEMA);
+        pipe.setHostLanguage(HostLanguage.XML_SCHEMA);
         NamespaceReducer reducer = new NamespaceReducer(this);
         namespaceResolver = reducer;
         compiler = config.newSchemaCompiler();
@@ -152,74 +150,38 @@ public class SchemaModelLoader extends ProxyReceiver {
 
     /**
      * Notify the start of an element
-     * @param nameCode   integer code identifying the name of the element within the name pool.
-     * @param typeCode   integer code identifying the element's type within the name pool.
-     * @param location   originating location of the event
-     * @param properties for future use. Should be set to zero.
      */
 
-    public void startElement(NodeName nameCode, SchemaType typeCode, Location location, int properties) throws XPathException {
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
 //        System.err.println("start " + config.getNamePool().getDisplayName(nameCode));
-        elementName = nameCode;
-        attributes.clear();
+        elementName = elemName;
+        SCMNodeHandler handler;
         if (handlerStack.isEmpty()) {
-            handlerStack.push(new SchemaHandler());
+            handler = new SchemaHandler();
         } else {
-            SCMNodeHandler next = handlerStack.peek().handleChildElement(elementName.getLocalPart());
-            if (next == null) {
+            handler = handlerStack.peek().handleChildElement(elementName.getLocalPart());
+            if (handler == null) {
                 throw new XPathException("No handler defined for element " + elementName.getLocalPart() +
                         " in " + handlerStack.peek().getClass().getName());
             }
-            handlerStack.push(next);
         }
-    }
-
-
-    /**
-     * Notify the start of the content, that is, the completion of all attributes and namespaces.
-     * Note that the initial receiver of output from XSLT instructions will not receive this event,
-     * it has to detect it itself. Note that this event is reported for every element even if it has
-     * no attributes, no namespaces, and no content.
-     */
-
-
-    public void startContent() throws XPathException {
-        //System.err.println("startContent ");
+        handlerStack.push(handler);
         try {
-            handlerStack.peek().processElementStart(
-                    elementName.getLocalPart(), attributes);
+            handler.processElementStart(elementName.getLocalPart(), attributes);
         } catch (SchemaException e) {
             throw new XPathException(e);
         }
-    }
 
-    /**
-     * Notify an attribute. Attributes are notified after the startElement event, and before any
-     * children. Namespaces and attributes may be intermingled.
-     *
-     * @param nameCode   The name of the attribute
-     * @param typeCode   The type of the attribute
-     * @param locationId the location of the node in the source, or of the instruction that created it
-     * @param properties Bit significant value. The following bits are defined:
-     *                   <dl>
-     *                   <dd>DISABLE_ESCAPING</dd>    <dt>Disable escaping for this attribute</dt>
-     *                   <dd>NO_SPECIAL_CHARACTERS</dd>      <dt>Attribute value contains no special characters</dt>
-     *                   </dl>
-     * @throws IllegalStateException: attempt to output an attribute when there is no open element
-     *                                start tag
-     */
-
-    public void attribute(NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties) {
-//        if (config.getNamePool().getLocalName(nameCode).equals("id")) {
-//            System.err.println("id = " + value);
-//        }
-        attributes.addAttribute(nameCode, typeCode, value.toString(), locationId, properties);
     }
 
     /**
      * Character data
      */
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         if (!Whitespace.isWhite(chars)) {
             throw new XPathException("Character content not allowed in SCM document");
@@ -230,6 +192,7 @@ public class SchemaModelLoader extends ProxyReceiver {
      * End of element
      */
 
+    @Override
     public void endElement() throws XPathException {
         SCMNodeHandler handler = handlerStack.pop();
         handler.processElementEnd();
@@ -250,7 +213,7 @@ public class SchemaModelLoader extends ProxyReceiver {
          * @throws SchemaException if the data is invalid
          */
 
-        void processElementStart(String localName, AttributeCollection attributes) throws SchemaException;
+        void processElementStart(String localName, AttributeMap attributes) throws SchemaException;
 
         /**
          * Handle a child element of the element currently being processed.
@@ -275,7 +238,8 @@ public class SchemaModelLoader extends ProxyReceiver {
 
     private class SchemaHandler implements SCMNodeHandler {
 
-        public void processElementStart(String localName, AttributeCollection attributes) throws SchemaException {
+        @Override
+        public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
             String xsdVersion = attributes.getValue("", "xsdVersion");
             if (xsdVersion != null &&
                     xsdVersion.compareTo(config.getConfigurationProperty(Feature.XSD_VERSION)) > 0) {
@@ -287,6 +251,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             }
         }
 
+        @Override
         public SCMNodeHandler handleChildElement(String localName) {
             switch (localName) {
                 case "element":
@@ -315,6 +280,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             return null;
         }
 
+        @Override
         public void processElementEnd() {
         }
     }
@@ -328,6 +294,7 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         private ElementDecl elementDecl;
 
+        @Override
         public SCMNodeHandler handleChildElement(String localName) {
             switch (localName) {
                 case "identityConstraint":
@@ -344,7 +311,8 @@ public class SchemaModelLoader extends ProxyReceiver {
             }
         }
 
-        public void processElementStart(String localName, AttributeCollection attributes) throws SchemaException {
+        @Override
+        public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
             String id = attributes.getValue("", "id");
             String name = attributes.getValue("", "name");
             String namespace = attributes.getValue("", "targetNamespace");
@@ -391,6 +359,7 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         }
 
+        @Override
         public void processElementEnd() {
         }
     }
@@ -413,17 +382,20 @@ public class SchemaModelLoader extends ProxyReceiver {
             elementDecl = decl;
         }
 
+        @Override
         public SCMNodeHandler handleChildElement(String localName) {
             return null;
         }
 
-        public void processElementStart(String localName, AttributeCollection attributes) {
+        @Override
+        public void processElementStart(String localName, AttributeMap attributes) {
             String head = attributes.getValue("", "ref");
             if (head != null) {
                 fixups.add(new Fixup(elementDecl, head, FIXUP_ELEMENT_SUBSTITUTION_GROUP));
             }
         }
 
+        @Override
         public void processElementEnd() {
         }
     }
@@ -446,11 +418,13 @@ public class SchemaModelLoader extends ProxyReceiver {
             elementDecl = decl;
         }
 
+        @Override
         public SCMNodeHandler handleChildElement(String localName) {
             return null;
         }
 
-        public void processElementStart(String localName, AttributeCollection attributes) throws SchemaException {
+        @Override
+        public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
             String xpathText = attributes.getValue("", "test");
             String xmlBase = attributes.getValue(NamespaceConstant.XML, "base");
             String defaultNamespace = attributes.getValue("", "defaultNamespace");
@@ -469,7 +443,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             TypeAlternative alt = new TypeAlternative(config, condition, xpathText);
             alt.setBaseURI(xmlBase);
             alt.setDefaultElementNamespace(defaultNamespace);
-            alt.setNamespaceContext(new SavedNamespaceContext(namespaceResolver));
+            alt.setNamespaceContext(NamespaceMap.fromNamespaceResolver(namespaceResolver));
             alt.setParameters(new HashMap<>());
             if (type.startsWith("#")) {
                 int fp = config.getNamePool().getFingerprint(NamespaceConstant.SCHEMA, type.substring(1));
@@ -480,6 +454,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             elementDecl.addTypeAlternative(alt);
         }
 
+        @Override
         public void processElementEnd() {
         }
     }
@@ -497,11 +472,13 @@ public class SchemaModelLoader extends ProxyReceiver {
             this.container = container;
         }
 
+        @Override
         public SCMNodeHandler handleChildElement(String localName) {
             return null;
         }
 
-        public void processElementStart(String localName, AttributeCollection attributes) {
+        @Override
+        public void processElementStart(String localName, AttributeMap attributes) {
 
             String ref = attributes.getValue("", "ref");
 
@@ -511,6 +488,7 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         }
 
+        @Override
         public void processElementEnd() {
         }
     }
@@ -531,6 +509,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         public IdentityConstraintHandler() {
         }
 
+        @Override
         public SCMNodeHandler handleChildElement(String localName) {
             switch (localName) {
                 case "selector":
@@ -542,7 +521,8 @@ public class SchemaModelLoader extends ProxyReceiver {
             }
         }
 
-        public void processElementStart(String localName, AttributeCollection attributes) {
+        @Override
+        public void processElementStart(String localName, AttributeMap attributes) {
             String id = attributes.getValue("", "id");
             String name = attributes.getValue("", "name");
             String namespace = attributes.getValue("", "targetNamespace");
@@ -575,6 +555,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             identityConstraint = ic;
         }
 
+        @Override
         public void processElementEnd() {
         }
     }
@@ -597,16 +578,18 @@ public class SchemaModelLoader extends ProxyReceiver {
             this.identityConstraint = identityConstraint;
         }
 
+        @Override
         public SCMNodeHandler handleChildElement(String localName) {
             return null;
         }
 
-        public void processElementStart(String localName, AttributeCollection attributes) throws SchemaException {
+        @Override
+        public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
             String xpath = attributes.getValue("", "xpath");
             boolean isField = localName.equals("field");
             String defaultNamespace = attributes.getValue("", "defaultNamespace");
             IndependentContext env = new IndependentContext(config);
-            env.setNamespaceResolver(new SavedNamespaceContext(namespaceResolver));
+            env.setNamespaceResolver(NamespaceMap.fromNamespaceResolver(namespaceResolver));
             env.setDefaultElementNamespace(defaultNamespace);
             //env.setBaseURI(xmlBase);
             Pattern selector;
@@ -618,18 +601,19 @@ public class SchemaModelLoader extends ProxyReceiver {
             if (isField) {
                 IdentityField idf = new IdentityField(xpath);
                 idf.setSelection(selector);
-                idf.setNamespaceContext(new SavedNamespaceContext(namespaceResolver));
+                idf.setNamespaceContext(NamespaceMap.fromNamespaceResolver(namespaceResolver));
                 idf.setXPathDefaultNamespace(defaultNamespace);
                 identityConstraint.addField(idf);
             } else {
                 IdentitySelector ids = new IdentitySelector(xpath);
                 ids.setSelection(selector);
-                ids.setNamespaceContext(new SavedNamespaceContext(namespaceResolver));
+                ids.setNamespaceContext(NamespaceMap.fromNamespaceResolver(namespaceResolver));
                 ids.setXPathDefaultNamespace(defaultNamespace);
                 identityConstraint.setSelector(ids);
             }
         }
 
+        @Override
         public void processElementEnd() {
         }
     }
@@ -643,6 +627,7 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         private AttributeDecl attributeDecl;
 
+        @Override
         public SCMNodeHandler handleChildElement(String localName) {
             if (localName.equals("fixed") || localName.equals("default")) {
                 return new ValueConstraintHandler(attributeDecl, localName);
@@ -651,7 +636,8 @@ public class SchemaModelLoader extends ProxyReceiver {
             }
         }
 
-        public void processElementStart(String localName, AttributeCollection attributes) {
+        @Override
+        public void processElementStart(String localName, AttributeMap attributes) {
             String id = attributes.getValue("", "id");
             String name = attributes.getValue("", "name");
             String namespace = attributes.getValue("", "targetNamespace");
@@ -689,6 +675,7 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         }
 
+        @Override
         public void processElementEnd() {
         }
 
@@ -703,6 +690,7 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         UserComplexType complexType;
 
+        @Override
         public SCMNodeHandler handleChildElement(String localName) {
             switch (localName) {
                 case "openContent":
@@ -728,7 +716,8 @@ public class SchemaModelLoader extends ProxyReceiver {
             }
         }
 
-        public void processElementStart(String localName, AttributeCollection attributes) throws SchemaException {
+        @Override
+        public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
             String id = attributes.getValue("", "id");
             String name = attributes.getValue("", "name");
             String namespace = attributes.getValue("", "targetNamespace");
@@ -803,6 +792,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             complexType.setFinalProhibitions(finalSet);
         }
 
+        @Override
         public void processElementEnd() {
         }
 
@@ -817,6 +807,7 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         private UserSimpleType simpleType;
 
+        @Override
         public SCMNodeHandler handleChildElement(String localName) {
             if (Facet.isFacetName(localName, getConfiguration().getXsdVersion()) || localName.equals("assert")) {
                 return new FacetHandler(simpleType);
@@ -827,7 +818,8 @@ public class SchemaModelLoader extends ProxyReceiver {
             }
         }
 
-        public void processElementStart(String localName, AttributeCollection attributes) throws SchemaException {
+        @Override
+        public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
             String id = attributes.getValue("", "id");
             String name = attributes.getValue("", "name");
             String namespace = attributes.getValue("", "targetNamespace");
@@ -894,6 +886,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             }
         }
 
+        @Override
         public void processElementEnd() {
         }
 
@@ -911,6 +904,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             group = new AttributeGroupDecl(config);
         }
 
+        @Override
         public SCMNodeHandler handleChildElement(String localName) {
             switch (localName) {
                 case "attributeUse":
@@ -922,7 +916,8 @@ public class SchemaModelLoader extends ProxyReceiver {
             }
         }
 
-        public void processElementStart(String localName, AttributeCollection attributes) {
+        @Override
+        public void processElementStart(String localName, AttributeMap attributes) {
             String id = attributes.getValue("", "id");
             String name = attributes.getValue("", "name");
             String namespace = attributes.getValue("", "targetNamespace");
@@ -936,6 +931,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             schema.addAttributeGroup(group);
         }
 
+        @Override
         public void processElementEnd() {
         }
 
@@ -947,11 +943,13 @@ public class SchemaModelLoader extends ProxyReceiver {
 
     private class NotationHandler implements SCMNodeHandler {
 
+        @Override
         public SCMNodeHandler handleChildElement(String localName) {
             return null;
         }
 
-        public void processElementStart(String localName, AttributeCollection attributes) {
+        @Override
+        public void processElementStart(String localName, AttributeMap attributes) {
             Notation notation = new Notation(config, null);
             String id = attributes.getValue("", "id");
             String name = attributes.getValue("", "name");
@@ -972,6 +970,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             schema.addNotation(notation);
         }
 
+        @Override
         public void processElementEnd() {
         }
 
@@ -983,7 +982,8 @@ public class SchemaModelLoader extends ProxyReceiver {
 
     private class ModelGroupDefinitionHandler extends ModelGroupHandler {
 
-        public void processElementStart(String localName, AttributeCollection attributes) {
+        @Override
+        public void processElementStart(String localName, AttributeMap attributes) {
             String id = attributes.getValue("", "id");
             String name = attributes.getValue("", "name");
             String namespace = attributes.getValue("", "targetNamespace");
@@ -995,6 +995,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             group = mgd;
         }
 
+        @Override
         public void processElementEnd() {
         }
 
@@ -1013,6 +1014,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             this.container = container;
         }
 
+        @Override
         public SCMNodeHandler handleChildElement(String localName) {
             if (localName.equals("fixed") || localName.equals("default")) {
                 return new ValueConstraintHandler(attributeUse, localName);
@@ -1021,7 +1023,8 @@ public class SchemaModelLoader extends ProxyReceiver {
             }
         }
 
-        public void processElementStart(String localName, AttributeCollection attributes) {
+        @Override
+        public void processElementStart(String localName, AttributeMap attributes) {
 
             boolean required = toBoolean(attributes.getValue("", "required"));
             boolean isInheritable = toBoolean(attributes.getValue("", "inheritable"));
@@ -1036,7 +1039,7 @@ public class SchemaModelLoader extends ProxyReceiver {
                 ((AttributeGroupDecl) container).addAttributeUse(attributeUse);
             }
 
-            attributeUse.setUse(required ? AttributeUse.REQUIRED : AttributeUse.OPTIONAL);
+            attributeUse.setUse(required ? Optionality.REQUIRED : Optionality.OPTIONAL);
 
             if (defaultValue != null) {
                 ValueConstraint vc = new ValueConstraint(ValueConstraint.Variety.DEFAULT, defaultValue);
@@ -1046,6 +1049,7 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         }
 
+        @Override
         public void processElementEnd() {
         }
     }
@@ -1062,6 +1066,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             this.simpleType = simpleType;
         }
 
+        @Override
         public SCMNodeHandler handleChildElement(String localName) {
             if (localName.equals("assertion")) {
                 return new AssertionHandler(simpleType);
@@ -1069,15 +1074,16 @@ public class SchemaModelLoader extends ProxyReceiver {
             return null;
         }
 
-        public void processElementStart(String localName, AttributeCollection attributes) throws SchemaException {
+        @Override
+        public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
             if (!localName.equals("assert")) {
                 String value = attributes.getValue("", "value");
                 boolean namespaceSensitive = toBoolean(attributes.getValue("", "namespaceSensitive"));
                 NamespaceResolver resolver = null;
                 if (namespaceSensitive) {
-                    resolver = new SavedNamespaceContext(namespaceResolver);
+                    resolver = NamespaceMap.fromNamespaceResolver(namespaceResolver);
                 }
-                Facet facet = Facet.makeFacet(localName, value, config, resolver, compiler);
+                Facet facet = Facet.makeFacet(localName, value, config, resolver);
                 String fixed = attributes.getValue("", "fixed");
                 if (fixed != null) {
                     facet.setFixed(toBoolean(fixed));
@@ -1094,6 +1100,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             }
         }
 
+        @Override
         public void processElementEnd() {
         }
     }
@@ -1113,6 +1120,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             simpleType.addFacet(facet);
         }
 
+        @Override
         public SCMNodeHandler handleChildElement(String localName) {
             if (localName.equals("assertion")) {
                 return new AssertionHandler(facet);
@@ -1120,7 +1128,8 @@ public class SchemaModelLoader extends ProxyReceiver {
             return null;
         }
 
-        public void processElementStart(String localName, AttributeCollection attributes) {
+        @Override
+        public void processElementStart(String localName, AttributeMap attributes) {
 
             String fixed = attributes.getValue("", "fixed");
             if (fixed != null) {
@@ -1128,6 +1137,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             }
         }
 
+        @Override
         public void processElementEnd() {
         }
     }
@@ -1149,6 +1159,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             this.container = container;
         }
 
+        @Override
         public SCMNodeHandler handleChildElement(String localName) {
             switch (localName) {
                 case "sequence":
@@ -1162,7 +1173,8 @@ public class SchemaModelLoader extends ProxyReceiver {
             }
         }
 
-        public void processElementStart(String localName, AttributeCollection attributes) throws SchemaException {
+        @Override
+        public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
             switch (localName) {
                 case "elementParticle":
                     particle = new ElementParticle(config, null);
@@ -1219,6 +1231,7 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         }
 
+        @Override
         public void processElementEnd() {
         }
     }
@@ -1240,6 +1253,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             this.referrer = referrer;
         }
 
+        @Override
         public SCMNodeHandler handleChildElement(String localName) {
             switch (localName) {
                 case "elementParticle":
@@ -1253,7 +1267,8 @@ public class SchemaModelLoader extends ProxyReceiver {
             }
         }
 
-        public void processElementStart(String localName, AttributeCollection attributes) throws SchemaException {
+        @Override
+        public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
             switch (localName) {
                 case "sequence":
                     group = new SequenceModelGroup();
@@ -1274,6 +1289,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             anonComponents.add(group);
         }
 
+        @Override
         public void processElementEnd() {
         }
     }
@@ -1290,14 +1306,17 @@ public class SchemaModelLoader extends ProxyReceiver {
             this.container = container;
         }
 
+        @Override
         public SCMNodeHandler handleChildElement(String localName) {
             return null;
         }
 
-        public void processElementStart(String localName, AttributeCollection attributes) throws SchemaException {
+        @Override
+        public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
             String xpathText = attributes.getValue("", "test");
             String xmlBase = attributes.getValue(NamespaceConstant.XML, "base");
             String defaultNamespace = attributes.getValue("", "defaultNamespace");
+            String sweep = attributes.getValue("", "sweep");
 
             XPathEvaluator evaluator;
             if (container instanceof UserComplexType) {
@@ -1306,7 +1325,7 @@ public class SchemaModelLoader extends ProxyReceiver {
                 evaluator = new XPathEvaluator(config);
             }
             IndependentContext env = (IndependentContext) evaluator.getStaticContext();
-            env.setNamespaceResolver(new SavedNamespaceContext(namespaceResolver));
+            env.setNamespaceResolver(NamespaceMap.fromNamespaceResolver(namespaceResolver));
             env.setBaseURI(xmlBase);
             env.setDefaultElementNamespace(defaultNamespace);
             env.getPackageData().setLocalLicenseId(schema.getLocalLicenseId());
@@ -1325,6 +1344,10 @@ public class SchemaModelLoader extends ProxyReceiver {
             }
             Assertion assertion = new Assertion(config, condition, valueVariable, new HashMap<>(), xpathText);
             assertion.setStaticContext(env);
+            if (sweep != null) {
+                assertion.setSweep(Sweep.valueOf(sweep));
+            }
+            assertion.setReturnsFailingNodes(container instanceof UserComplexType && sweep == null);
             if (container instanceof UserComplexType) {
                 ((UserComplexType) container).addAssertion(assertion);
             } else if (container instanceof UserSimpleType) {
@@ -1341,6 +1364,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             }
         }
 
+        @Override
         public void processElementEnd() {
         }
     }
@@ -1358,6 +1382,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             this.container = container;
         }
 
+        @Override
         public SCMNodeHandler handleChildElement(String localName) {
             //if (localName.equals("wildcard")) {
             //    return new WildcardHandler(container, mode);
@@ -1366,7 +1391,8 @@ public class SchemaModelLoader extends ProxyReceiver {
             //}
         }
 
-        public void processElementStart(String localName, AttributeCollection attributes) {
+        @Override
+        public void processElementStart(String localName, AttributeMap attributes) {
             String mode = attributes.getValue("", "mode");
             String wildcardRef = attributes.getValue("", "wildcard");
             if (mode.equals("suffix")) {
@@ -1376,6 +1402,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             }
         }
 
+        @Override
         public void processElementEnd() {
         }
     }
@@ -1392,11 +1419,13 @@ public class SchemaModelLoader extends ProxyReceiver {
             this.container = container;
         }
 
+        @Override
         public SCMNodeHandler handleChildElement(String localName) {
             return null;
         }
 
-        public void processElementStart(String localName, AttributeCollection attributes) {
+        @Override
+        public void processElementStart(String localName, AttributeMap attributes) {
             AttributeWildcard awc = new AttributeWildcard((EnterpriseConfiguration) getConfiguration());
             if (container instanceof AttributeGroupDecl) {
                 ((AttributeGroupDecl) container).setAnyAttribute(awc);
@@ -1409,6 +1438,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             fixups.add(new Fixup(awc, ref, FIXUP_ATTRIBUTE_WILDCARD_REF));
         }
 
+        @Override
         public void processElementEnd() {
         }
     }
@@ -1429,6 +1459,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             this.variety = variety;
         }
 
+        @Override
         public SCMNodeHandler handleChildElement(String localName) {
             if (localName.equals("item")) {
                 return new ItemHandler(this);
@@ -1437,10 +1468,12 @@ public class SchemaModelLoader extends ProxyReceiver {
             }
         }
 
-        public void processElementStart(String localName, AttributeCollection attributes) {
+        @Override
+        public void processElementStart(String localName, AttributeMap attributes) {
             lexicalForm = attributes.getValue("", "lexicalForm");
         }
 
+        @Override
         public void processElementEnd() {
             AtomicSequence v;
             if (atomicValues.size() == 1) {
@@ -1473,11 +1506,13 @@ public class SchemaModelLoader extends ProxyReceiver {
             this.container = container;
         }
 
+        @Override
         public SCMNodeHandler handleChildElement(String localName) {
             return null;
         }
 
-        public void processElementStart(String localName, AttributeCollection attributes) throws SchemaException {
+        @Override
+        public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
             String type = attributes.getValue("", "type");
             BuiltInAtomicType t = (BuiltInAtomicType) config.getSchemaType(
                 new StructuredQName("", NamespaceConstant.SCHEMA, type.substring(1)));
@@ -1503,6 +1538,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             container.appendAtomicValue(typedValue);
         }
 
+        @Override
         public void processElementEnd() {
         }
     }
@@ -1517,11 +1553,13 @@ public class SchemaModelLoader extends ProxyReceiver {
         public WildcardHandler() {
         }
 
+        @Override
         public SCMNodeHandler handleChildElement(String localName) {
             return null;
         }
 
-        public void processElementStart(String localName, AttributeCollection attributes) throws SchemaException {
+        @Override
+        public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
 
             Wildcard wildcard = new Wildcard();
             wildcard.setConfiguration((EnterpriseConfiguration) getConfiguration());
@@ -1576,6 +1614,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             }
         }
 
+        @Override
         public void processElementEnd() {
         }
     }
@@ -1599,6 +1638,7 @@ public class SchemaModelLoader extends ProxyReceiver {
 //            }
         }
 
+        @Override
         public SCMNodeHandler handleChildElement(String localName) {
             if (localName.equals("state")) {
                 return new FiniteStateMachineStateHandler(this);
@@ -1607,7 +1647,8 @@ public class SchemaModelLoader extends ProxyReceiver {
             }
         }
 
-        public void processElementStart(String localName, AttributeCollection attributes) {
+        @Override
+        public void processElementStart(String localName, AttributeMap attributes) {
             //
         }
 
@@ -1615,6 +1656,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             return fsm;
         }
 
+        @Override
         public void processElementEnd() {
         }
 
@@ -1633,6 +1675,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             this.fsmHandler = fsmHandler;
         }
 
+        @Override
         public SCMNodeHandler handleChildElement(String localName) {
             if (localName.equals("edge")) {
                 return new FiniteStateMachineEdgeHandler(fsmHandler, state);
@@ -1641,7 +1684,8 @@ public class SchemaModelLoader extends ProxyReceiver {
             }
         }
 
-        public void processElementStart(String localName, AttributeCollection attributes) {
+        @Override
+        public void processElementStart(String localName, AttributeMap attributes) {
             String stateNumber = attributes.getValue("", "nr");
             FiniteStateMachine fsm = fsmHandler.getFiniteStateMachine();
             if (stateNumber.equals("0")) {
@@ -1667,6 +1711,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             }
         }
 
+        @Override
         public void processElementEnd() {
         }
     }
@@ -1685,11 +1730,13 @@ public class SchemaModelLoader extends ProxyReceiver {
             this.state = state;
         }
 
+        @Override
         public SCMNodeHandler handleChildElement(String localName) {
             return null;
         }
 
-        public void processElementStart(String localName, AttributeCollection attributes) {
+        @Override
+        public void processElementStart(String localName, AttributeMap attributes) {
             String term = attributes.getValue("", "term");
             int targetState = Integer.parseInt(attributes.getValue("", "to"));
             PendingEdge pe = new PendingEdge();
@@ -1700,6 +1747,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             pendingEdges.add(pe);
         }
 
+        @Override
         public void processElementEnd() {
         }
     }
@@ -1953,4 +2001,4 @@ public class SchemaModelLoader extends ProxyReceiver {
 
 }
 
-// Copyright (c) 2007 Saxonica Limited. All rights reserved
+// Copyright (c) 2007-2020 Saxonica Limited

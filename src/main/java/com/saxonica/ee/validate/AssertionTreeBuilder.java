@@ -1,9 +1,6 @@
 package com.saxonica.ee.validate;
 
-import net.sf.saxon.event.CommentStripper;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.Sink;
-import net.sf.saxon.event.TeeOutputter;
+import net.sf.saxon.event.*;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.tree.tiny.TinyNodeImpl;
 import net.sf.saxon.tree.tiny.TinyTree;
@@ -41,6 +38,12 @@ public class AssertionTreeBuilder extends TeeOutputter {
         setSecondDestination(sink);
     }
 
+    /**
+     *  Mark all ancestor elements of the current node as untyped (actually, as xs:anyType). This is
+     *  invoked when a validation failure is encountered, because when a subtree contains invalid
+     *  nodes, type annotations on ancestor elements are invalidated.
+     */
+
     void markAncestorNodesUntyped() {
         if (builder != null) {
             TinyTree tree = builder.getTree();
@@ -55,6 +58,7 @@ public class AssertionTreeBuilder extends TeeOutputter {
         }
     }
 
+
 }
 
-// Copyright (c) 2010-2019 Saxonica Limited
+// Copyright (c) 2010-2020 Saxonica Limited

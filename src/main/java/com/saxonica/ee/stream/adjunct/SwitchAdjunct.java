@@ -4,7 +4,6 @@ import com.saxonica.ee.optim.SwitchExpression;
 import com.saxonica.ee.stream.Inversion;
 import com.saxonica.ee.stream.Streamability;
 import com.saxonica.ee.stream.Sweep;
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.feed.NoOpenFeed;
 import com.saxonica.ee.stream.watch.Terminator;
@@ -77,7 +76,7 @@ public class SwitchAdjunct extends TransmissionAdjunct {
                 return actionInversion.getWatch(watchManager, out, context);
 
             } else {
-                action.iterate(context).forEachOrFail(out::processItem);
+                action.iterate(context).forEachOrFail(out::append);
             }
 
             // if no condition matches, or if a matching condition has been processed without reference to the
@@ -85,7 +84,7 @@ public class SwitchAdjunct extends TransmissionAdjunct {
             return new Trigger(new NodeTestPattern(ErrorType.getInstance()), new ItemFeed(out, context) {
 
                 @Override
-                public void processItem(Item<?> item) {
+                public void append(Item item) {
                     //
                 }
             }, context);
@@ -93,7 +92,7 @@ public class SwitchAdjunct extends TransmissionAdjunct {
     }
 
     @Override
-    public Trigger makeTransmissionFlow(WatchManager watchManager, Expression exp, Feed out, XPathContext context) throws XPathException {
+    public Trigger makeTransmissionFlow(WatchManager watchManager, Expression exp, ItemFeed out, XPathContext context) throws XPathException {
         WatchMaker wm = getWatchMaker(false);
         if (wm != null) {
             return wm.makeWatch(watchManager, out, context);
@@ -104,7 +103,8 @@ public class SwitchAdjunct extends TransmissionAdjunct {
         }
     }
 
-    public Feed makeItemFeed(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
         return getFeedMaker(-1).makeItemFeed(watchManager, out, context);
     }
 

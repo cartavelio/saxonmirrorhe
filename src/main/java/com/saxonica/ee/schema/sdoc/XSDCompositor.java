@@ -2,11 +2,10 @@ package com.saxonica.ee.schema.sdoc;
 
 import com.saxonica.ee.schema.*;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.om.AttributeCollection;
-import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.linked.NodeImpl;
 import net.sf.saxon.type.SchemaException;
 
@@ -38,9 +37,10 @@ public class XSDCompositor extends SchemaElement {
      * @throws SchemaException if any errors are found in the attributes
      */
 
+    @Override
     public void prepareAttributes() throws SchemaException {
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         String[] allowed = {"id", "maxOccurs", "minOccurs"};
         allowAttributes(atts, allowed);
 
@@ -152,17 +152,14 @@ public class XSDCompositor extends SchemaElement {
      * @throws SchemaException if any XML representation constraints are violated
      */
 
+    @Override
     public void validate(SchemaCompiler compiler) throws SchemaException {
         boolean foundElement = false;
         boolean foundCompositor = false;
         boolean foundGroup = false;
         boolean foundAnnotation = false;
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while ((child = (NodeImpl)iter.next()) != null) {
-
+        for (NodeInfo child : children()) {
             switch (child.getFingerprint()) {
-
                 case StandardNames.XS_ANNOTATION:
                     if (foundElement || foundCompositor || foundGroup) {
                         mustBeFirstElement("annotation");
@@ -210,13 +207,11 @@ public class XSDCompositor extends SchemaElement {
      * @param compiler used for error reporting
      */
 
+    @Override
     public void postValidate(SchemaCompiler compiler)
             throws SchemaException {
 
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while ((child = (NodeImpl)iter.next()) != null) {
-
+        for (NodeInfo child : children()) {
             switch (child.getFingerprint()) {
 
                 case StandardNames.XS_ANY:
@@ -258,4 +253,4 @@ public class XSDCompositor extends SchemaElement {
 
 }
 
-// Copyright (c) 2004 - 2012 Saxonica Limited
+// Copyright (c) 2004-2020 Saxonica Limited

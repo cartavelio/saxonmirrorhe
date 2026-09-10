@@ -15,6 +15,7 @@ public class DecimalCharacterReferenceGenerator implements CharacterReferenceGen
     private DecimalCharacterReferenceGenerator() {
     }
 
+    @Override
     public void outputCharacterReference(int charval, Writer writer) throws java.io.IOException {
         writer.write("&#");
         writer.write(Integer.toString(charval));
@@ -22,4 +23,4 @@ public class DecimalCharacterReferenceGenerator implements CharacterReferenceGen
     }
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

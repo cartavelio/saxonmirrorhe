@@ -5,7 +5,7 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.ItemMappingFunction;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
 
@@ -15,10 +15,10 @@ import net.sf.saxon.trans.XPathException;
  * (otherwise an UnsupportedOperationException is likely).
  */
 
-public class ItemMappingFeed extends ItemFeed {
+public class ItemMappingFeed extends GroundedItemFeed {
     private ItemMappingFunction function;
 
-    public ItemMappingFeed(Expression expr, Feed result, XPathContext context,
+    public ItemMappingFeed(Expression expr, ItemFeed result, XPathContext context,
                            ItemMappingFunction function) {
         super(expr, result, context);
         this.function = function;
@@ -59,7 +59,8 @@ public class ItemMappingFeed extends ItemFeed {
      *          to report any failure
      */
 
-    public void processItem(Item<?> item) throws XPathException {
+    @Override
+    public void append(Item item) throws XPathException {
         if (!hasFailed()) {
             Item mapped = null;
             try {
@@ -68,7 +69,7 @@ public class ItemMappingFeed extends ItemFeed {
                 dynamicError(err);
             }
             if (mapped != null) {
-                getResult().processItem(mapped);
+                getResult().append(mapped);
             }
         }
     }
@@ -87,6 +88,6 @@ public class ItemMappingFeed extends ItemFeed {
     }
 }
 
-// Copyright (c) 2009-2014 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited
 
 

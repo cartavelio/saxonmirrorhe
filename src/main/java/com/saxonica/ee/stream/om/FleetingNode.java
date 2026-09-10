@@ -1,19 +1,18 @@
 package com.saxonica.ee.stream.om;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.iter.SingletonIterator;
-import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
+
+import java.util.function.Predicate;
 
 /**
  * A FleetingNode is a node that exists transiently in the course of streaming processing. The node has
@@ -41,19 +40,9 @@ public class FleetingNode implements NodeInfo {
      * @return this item
      */
 
+    @Override
     public NodeInfo head() {
         return this;
-    }
-
-    /**
-     * To implement {@link Sequence}, this method returns a singleton iterator
-     * that delivers this item in the form of a sequence
-     *
-     * @return a singleton iterator that returns this item
-     */
-
-    public UnfailingIterator<NodeInfo> iterate() {
-        return SingletonIterator.makeIterator(this);
     }
 
     /**
@@ -62,6 +51,7 @@ public class FleetingNode implements NodeInfo {
      * @return the TreeInfo
      * @since 9.7
      */
+    @Override
     public TreeInfo getTreeInfo() {
         return root;
     }
@@ -118,6 +108,7 @@ public class FleetingNode implements NodeInfo {
      * @since 8.4
      */
 
+    @Override
     public final int getNodeKind() {
         return nodeKind;
     }
@@ -167,6 +158,7 @@ public class FleetingNode implements NodeInfo {
      * @since 8.4
      */
 
+    @Override
     public String getSystemId() {
         return root.getSystemId();
     }
@@ -180,6 +172,7 @@ public class FleetingNode implements NodeInfo {
      * @since 8.4
      */
 
+    @Override
     public String getBaseURI() {
         return Navigator.getBaseURI(this);
     }
@@ -189,6 +182,7 @@ public class FleetingNode implements NodeInfo {
      * should not be saved for later use. The result of this operation holds the same location information,
      * but in an immutable form.
      */
+    @Override
     public Location saveLocation() {
         return this;
     }
@@ -209,6 +203,7 @@ public class FleetingNode implements NodeInfo {
      * @since 8.4
      */
 
+    @Override
     public final int compareOrder(NodeInfo other) {
         // We work on the assumption that both nodes are nodes that are remembered during a streaming pass
         // (that is, ancestors of the context node and their attributes and namespaces)
@@ -242,9 +237,10 @@ public class FleetingNode implements NodeInfo {
                     if (getParent().equals(other.getParent())) {
                         // the relative position of attributes is determined by their position in the
                         // attribute collection of the containing element
-                        int i0 = ((FleetingElementNode)getParent()).getAttributeIndex(getURI(), getLocalPart());
-                        int i1 = ((FleetingElementNode)getParent()).getAttributeIndex(other.getURI(), other.getLocalPart());
-                        return i0 < i1 ? -1 : +1;
+                        return ((FleetingElementNode)getParent()).compareAttributeOrder(NameOfNode.makeName(this), NameOfNode.makeName(other));
+//                        int i0 = ((FleetingElementNode)getParent()).getAttributeIndex(getURI(), getLocalPart());
+//                        int i1 = ((FleetingElementNode)getParent()).getAttributeIndex(other.getURI(), other.getLocalPart());
+//                        return i0 < i1 ? -1 : +1;
                     } else {
                         return getParent().compareOrder(other.getParent());
                     }
@@ -300,6 +296,7 @@ public class FleetingNode implements NodeInfo {
      * @since 8.4
      */
 
+    @Override
     public final String getStringValue() {
         if (stringValue == null) {
             throw new UnsupportedOperationException("The string value of a streamed node is not available");
@@ -336,6 +333,7 @@ public class FleetingNode implements NodeInfo {
      * @since 8.4
      */
 
+    @Override
     public final int getFingerprint() {
         if (nodeName == null) {
             return -1;
@@ -344,7 +342,9 @@ public class FleetingNode implements NodeInfo {
         }
     }
 
-
+    public final NodeName getNodeName() {
+        return nodeName;
+    }
 
     /**
      * Get the local part of the name of this node. This is the name after the ":" if any.
@@ -354,6 +354,7 @@ public class FleetingNode implements NodeInfo {
      * @since 8.4
      */
 
+    @Override
     public final String getLocalPart() {
         return nodeName == null ? "" : nodeName.getLocalPart();
     }
@@ -368,6 +369,7 @@ public class FleetingNode implements NodeInfo {
      * @since 8.4
      */
 
+    @Override
     public final String getURI() {
         return nodeName == null ? "" : nodeName.getURI();
     }
@@ -382,6 +384,7 @@ public class FleetingNode implements NodeInfo {
      * @since 8.4
      */
 
+    @Override
     public final String getDisplayName() {
         return nodeName == null ? "" : nodeName.getDisplayName();
     }
@@ -394,6 +397,7 @@ public class FleetingNode implements NodeInfo {
      * @since 8.4
      */
 
+    @Override
     public final String getPrefix() {
         return nodeName == null ? "" : nodeName.getPrefix();
     }
@@ -405,6 +409,7 @@ public class FleetingNode implements NodeInfo {
      * @since 8.4
      */
 
+    @Override
     public Configuration getConfiguration() {
         return root.getConfiguration();
     }
@@ -432,6 +437,7 @@ public class FleetingNode implements NodeInfo {
      *         xs:anyType if it has.
      * @since 9.4
      */
+    @Override
     public final SchemaType getSchemaType() {
         return typeAnnotation;
     }
@@ -443,6 +449,7 @@ public class FleetingNode implements NodeInfo {
      *         atomic values.
      */
 
+    @Override
     public AtomicSequence atomize() throws XPathException {
         return typeAnnotation.atomize(this);
     }
@@ -453,6 +460,7 @@ public class FleetingNode implements NodeInfo {
      * @return the parent of this node; null if this node has no parent
      */
 
+    @Override
     public final NodeInfo getParent() {
         return parent;
     }
@@ -462,7 +470,7 @@ public class FleetingNode implements NodeInfo {
      * that match a given NodeTest
      *
      * @param axisNumber an integer identifying the axis; one of the constants
-     *                   defined in class {@link net.sf.saxon.om.AxisInfo}
+     *                   defined in class {@link AxisInfo}
      * @param nodeTest   A condition to be satisfied by the returned nodes; nodes
      *                   that do not satisfy this condition are not included in the result
      * @return an AxisIterator that delivers the nodes reached by the axis in
@@ -472,14 +480,15 @@ public class FleetingNode implements NodeInfo {
      *                                       requested and this axis is not supported for this implementation.
      */
 
-    public AxisIterator iterateAxis(byte axisNumber, NodeTest nodeTest) {
+    @Override
+    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> nodeTest) {
         if (AxisInfo.isAlwaysEmpty(axisNumber, nodeKind)) {
-            return EmptyIterator.OfNodes.THE_INSTANCE;
+            return EmptyIterator.ofNodes();
         }
         switch (axisNumber) {
             case AxisInfo.ANCESTOR:
                 if (nodeKind == Type.DOCUMENT) {
-                    return EmptyIterator.OfNodes.THE_INSTANCE;
+                    return EmptyIterator.ofNodes();
                 }
                 return new Navigator.AxisFilter(
                         new Navigator.AncestorEnumeration(this, false),
@@ -500,10 +509,10 @@ public class FleetingNode implements NodeInfo {
                 return Navigator.filteredSingleton(this, nodeTest);
 
             case AxisInfo.ATTRIBUTE:
-                return EmptyIterator.OfNodes.THE_INSTANCE;
+                return EmptyIterator.ofNodes();
 
             case AxisInfo.NAMESPACE:
-                return EmptyIterator.OfNodes.THE_INSTANCE;
+                return EmptyIterator.ofNodes();
 
             default:
                 XPathException err = new XPathException("Navigation using " + AxisInfo.axisName[axisNumber] +
@@ -524,6 +533,7 @@ public class FleetingNode implements NodeInfo {
      *         if this node is not an element.
      * @since 9.4
      */
+    @Override
     public String getAttributeValue(/*@NotNull*/ String uri, /*@NotNull*/ String local) {
         return null;
     }
@@ -537,6 +547,7 @@ public class FleetingNode implements NodeInfo {
      * @since 8.4
      */
 
+    @Override
     public NodeInfo getRoot() {
         return root;
     }
@@ -550,6 +561,7 @@ public class FleetingNode implements NodeInfo {
      * @since 8.4
      */
 
+    @Override
     public boolean hasChildNodes() {
         return false;
     }
@@ -564,16 +576,17 @@ public class FleetingNode implements NodeInfo {
      *        <p>Changed in Saxon 8.7 to generate the ID value in a client-supplied buffer</p>
      */
 
+    @Override
     public void generateId(FastStringBuffer buffer) {
         switch (getNodeKind()) {
             case Type.ATTRIBUTE:
                 getParent().generateId(buffer);
-                buffer.append('a');
+                buffer.cat('a');
                 buffer.append(((FleetingElementNode)getParent()).getAttributeIndex(getURI(), getLocalPart())+"");
                 break;
             case Type.NAMESPACE:
                 getParent().generateId(buffer);
-                buffer.append('n');
+                buffer.cat('n');
                 buffer.append(((FleetingElementNode) getParent()).getNamespaceNodeIndex(getLocalPart()) + "");
                 break;
             case Type.DOCUMENT:
@@ -586,26 +599,14 @@ public class FleetingNode implements NodeInfo {
     }
 
     /**
-     * Get all namespace declarations and undeclarations defined on this element.
-     * <p>This method is intended primarily for internal use. User applications needing
-     * information about the namespace context of a node should use <code>iterateAxis(Axis.NAMESPACE)</code>.
-     * (However, not all implementations support the namespace axis, whereas all implementations are
-     * required to support this method.)</p>
-     *
-     * @param buffer If this is non-null, and the result array fits in this buffer, then the result
-     *               may overwrite the contents of this array, to avoid the cost of allocating a new array on the heap.
-     * @return An array of integers representing the namespace declarations and undeclarations present on
-     *         this element. For a node other than an element, return null. Otherwise, the returned array is a
-     *         sequence of namespace codes, whose meaning may be interpreted by reference to the name pool. The
-     *         top half word of each namespace code represents the prefix, the bottom half represents the URI.
-     *         If the bottom half is zero, then this is a namespace undeclaration rather than a declaration.
-     *         The XML namespace is never included in the list. If the supplied array is larger than required,
-     *         then the first unused entry will be set to -1.
-     *         <p>For a node other than an element, the method returns null.</p>
+     * Get all in-scope namespaces defined on this element.
+     * @return a {@code NamespaceMap} containing all the in-scope namespaces for an element (not just
+     * those declared locally on the element itself). Returns null if the node is
+     * not an element.
      */
 
     /*@Nullable*/
-    public NamespaceBinding[] getDeclaredNamespaces(NamespaceBinding[] buffer) {
+    public NamespaceMap getInScopeNamespaces() {
         return null;
     }
 
@@ -629,6 +630,7 @@ public class FleetingNode implements NodeInfo {
      * @param systemId The system identifier as a URL string.
      */
 
+    @Override
     public void setSystemId(String systemId) {
         // no action
     }
@@ -648,10 +650,31 @@ public class FleetingNode implements NodeInfo {
      * @since 8.4
      */
 
+    @Override
     public CharSequence getStringValueCS() {
         return stringValue.toString(); // ensure that we get an immutable value
     }
 
+
+    @Override
+    public NamespaceBinding[] getDeclaredNamespaces(NamespaceBinding[] buffer) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Get all the namespace bindings that are in-scope for this element.
+     * <p>For an element return all the prefix-to-uri bindings that are in scope. This may include
+     * a binding to the default namespace (represented by a prefix of ""). It will never include
+     * "undeclarations" - that is, the namespace URI will never be empty; the effect of an undeclaration
+     * is to remove a binding from the in-scope namespaces, not to add anything.</p>
+     * <p>For a node other than an element, returns null.</p>
+     *
+     * @return the in-scope namespaces for an element, or null for any other kind of node.
+     */
+    @Override
+    public NamespaceMap getAllNamespaces() {
+        return null;
+    }
 }
 
-// Copyright (c) 2009 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

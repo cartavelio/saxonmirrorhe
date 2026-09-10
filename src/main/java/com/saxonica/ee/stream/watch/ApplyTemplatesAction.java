@@ -8,23 +8,20 @@ import com.saxonica.ee.stream.feed.*;
 import com.saxonica.ee.stream.om.FleetingNode;
 import com.saxonica.ee.stream.om.FleetingParentNode;
 import com.saxonica.ee.trans.TemplateRuleEE;
+import net.sf.saxon.event.ComplexContentOutputter;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.SequenceWriter;
 import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.expr.instruct.*;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.TraceListener;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.pattern.AncestorQualifiedPattern;
-import net.sf.saxon.pattern.AnchorPattern;
-import net.sf.saxon.pattern.AnyChildNodeTest;
-import net.sf.saxon.pattern.NodeTestPattern;
-import net.sf.saxon.trans.Mode;
+import net.sf.saxon.pattern.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.rules.BuiltInRuleSet;
 import net.sf.saxon.trans.rules.Rule;
@@ -56,11 +53,12 @@ public class ApplyTemplatesAction extends ItemFeed {
     boolean tracing;
 
 
-    public ApplyTemplatesAction(Expression expression, Feed result, XPathContext context) {
+    public ApplyTemplatesAction(Expression expression, ItemFeed result, XPathContext context) {
         super(expression, result, context);
         tracing = context.getController().isTracing();
     }
 
+    @Override
     public void open(Terminator terminator) throws XPathException {
         super.open(terminator);
         // TODO: make tracing work
@@ -74,7 +72,7 @@ public class ApplyTemplatesAction extends ItemFeed {
             computeTunnelParams(exp.getTunnelParams());
         }
         localContext = getContext().newContext();
-        ManualIterator<?> iter = new ManualIterator<>();
+        ManualIterator iter = new ManualIterator();
         localContext.setCurrentIterator(iter);
         localContext.setCurrentComponent(mode);
         localContext.setLocalParameters(actualParams);
@@ -93,11 +91,11 @@ public class ApplyTemplatesAction extends ItemFeed {
         this.tunnelParams = Instruction.assembleTunnelParams(getContext(), params);
     }
 
-    public void setActualParams(ParameterSet params) throws XPathException {
+    public void setActualParams(ParameterSet params) {
         this.actualParams = params;
     }
 
-    public void setTunnelParams(ParameterSet params) throws XPathException {
+    public void setTunnelParams(ParameterSet params) {
         this.tunnelParams = params;
     }
 
@@ -132,6 +130,7 @@ public class ApplyTemplatesAction extends ItemFeed {
      * @throws XPathException May be raised if a dynamic error occurs
      */
 
+    @Override
     public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
         if (tracing) {
             TraceListener listener = getContext().getController().getTraceListener();
@@ -143,8 +142,9 @@ public class ApplyTemplatesAction extends ItemFeed {
 
         ComponentInversion inversion = null;
         Rule rule = getRule(node);
+        final StreamingSequenceWriter streamingSequenceWriter = new StreamingSequenceWriter(getPipelineConfiguration(), getNextOutputter());
         if (rule == null) {
-            BuiltInRuleSet builtInRuleSet = ((Mode)mode.getActor()).getBuiltInRuleSet();
+            BuiltInRuleSet builtInRuleSet = mode.getActor().getBuiltInRuleSet();
             if (builtInRuleSet instanceof RuleSetWithWarnings) {
                 ((RuleSetWithWarnings)builtInRuleSet).outputWarning(node, localContext);
             }
@@ -152,7 +152,7 @@ public class ApplyTemplatesAction extends ItemFeed {
             switch (action[0]) {
                 case BuiltInRuleSet.DEEP_COPY: {
                     //currentActivation.isSkipped = true;
-                    Feed out = new NoOpenOrCloseFeed(getResult(), getContext());
+                    ItemFeed out = new NoOpenOrCloseFeed(getResult(), getContext());
                     Watch copyWatch = CopyOfFeed.getWatch(out, AnchorPattern.getInstance(), watchManager, getContext());
                     watchManager.addWatch(copyWatch, true);
                     return null;
@@ -174,8 +174,8 @@ public class ApplyTemplatesAction extends ItemFeed {
                     //activation.template = inversion;
                     //currentActivation.context = context;
                     //currentActivation.isDocumentNode = (node instanceof FleetingDocumentNode);
-                    Receiver receiver = getResult().getReceiver();
-                    ShallowCopyEventFeed copyFeed = new ShallowCopyEventFeed(mode.getActor(), new DecomposingFeed(receiver), context);
+                    Outputter cco = getNextOutputter();
+                    ShallowCopyEventFeed copyFeed = new ShallowCopyEventFeed(mode.getActor(), new DecomposingFeed(cco, context), context);
                     ApplyTemplatesAction actor = new ApplyTemplatesAction(null, copyFeed, context);
                     actor.setMode(mode);
                     actor.setWatchManager(watchManager);
@@ -198,12 +198,11 @@ public class ApplyTemplatesAction extends ItemFeed {
                         AxisIterator atts = node.iterateAxis(AxisInfo.ATTRIBUTE);  // See bug 2874
                         XPathContextMajor c2 = localContext.newContext();
                         c2.trackFocus(atts);
-                        SequenceWriter sw = new StreamingSequenceWriter(getPipelineConfiguration(), getResult());
-                        c2.setReceiver(sw);
-                        mode.getActor().applyTemplates(actualParams, tunnelParams, c2, locationId);
+                        mode.getActor().applyTemplates(actualParams, tunnelParams,
+                                                       null, new ComplexContentOutputter(streamingSequenceWriter), c2, locationId);
                     }
                     if (applyTemplatesToChildren) {
-                        Feed out = new NoOpenOrCloseFeed(getResult(), localContext);
+                        ItemFeed out = new NoOpenOrCloseFeed(getResult(), localContext);
                         ApplyTemplatesAction actor = new ApplyTemplatesAction(null, out, getContext());
                         actor.setMode(mode);
                         actor.setWatchManager(watchManager);
@@ -228,8 +227,7 @@ public class ApplyTemplatesAction extends ItemFeed {
                 localContext.setCurrentMode(mode);
                 localContext.setCurrentComponent(mode);
                 localContext.setCurrentMergeGroupIterator(null);
-                localContext.setReceiver(new StreamingSequenceWriter(getPipelineConfiguration(), getResult()));
-                body.process(localContext);
+                body.process(new ComplexContentOutputter(streamingSequenceWriter), localContext);
             } else {
                 inversion = template.getInversion();
                 localContext.openStackFrame(inversion.getStackFrame());
@@ -271,7 +269,8 @@ public class ApplyTemplatesAction extends ItemFeed {
      *
      */
 
-    public void processItem(Item<?> item) throws XPathException {
+    @Override
+    public void append(Item item) throws XPathException {
         if (!hasFailed()) {
             if (tracing) {
                 TraceListener listener = getContext().getController().getTraceListener();
@@ -288,12 +287,13 @@ public class ApplyTemplatesAction extends ItemFeed {
             localContext.setCurrentMode(mode);
 
 
+            final StreamingSequenceWriter streamingSequenceWriter =
+                    new StreamingSequenceWriter(getPipelineConfiguration(), getNextOutputter());
+            ComplexContentOutputter output = new ComplexContentOutputter(streamingSequenceWriter);
             if (rule == null) {
                 BuiltInRuleSet rules = mode.getActor().getBuiltInRuleSet();
-                XPathContext c2 = localContext.newMinorContext();
-                c2.setReceiver(new StreamingSequenceWriter(getPipelineConfiguration(), getResult()));
                 try {
-                    rules.process(item, actualParams, tunnelParams, c2, ExplicitLocation.UNKNOWN_LOCATION);
+                    rules.process(item, actualParams, tunnelParams, output, localContext, Loc.NONE);
                 } catch (XPathException e) {
                     dynamicError(e);
                     return;
@@ -303,9 +303,8 @@ public class ApplyTemplatesAction extends ItemFeed {
                 TemplateRule template = (TemplateRule) rule.getAction();
                 template.initialize();
                 localContext.openStackFrame(template.getStackFrameMap());
-                localContext.setReceiver(new StreamingSequenceWriter(getPipelineConfiguration(), getResult()));
                 try {
-                    template.apply(localContext);
+                    template.apply(output, localContext);
                 } catch (XPathException e) {
                     dynamicError(e);
                     return;
@@ -328,6 +327,7 @@ public class ApplyTemplatesAction extends ItemFeed {
      * @param locationId the location of the node in the source, or of the instruction that created it
      */
 
+    @Override
     public void endSelectedParentNode(Location locationId) throws XPathException {
         if (tracing) {
             TraceListener listener = getContext().getController().getTraceListener();
@@ -336,6 +336,7 @@ public class ApplyTemplatesAction extends ItemFeed {
 
     }
 
+    @Override
     public void close() throws XPathException {
         // TODO: make tracing work
 //        if (tracing && getExpression() != null) {
@@ -346,8 +347,8 @@ public class ApplyTemplatesAction extends ItemFeed {
 
     private static AncestorQualifiedPattern CHILD_NODE_SELECTION =
             new AncestorQualifiedPattern(
-                new NodeTestPattern(AnyChildNodeTest.getInstance()), AnchorPattern.getInstance(), AxisInfo.PARENT);
+                    new NodeTestPattern(MultipleNodeKindTest.CHILD_NODE), AnchorPattern.getInstance(), AxisInfo.PARENT);
 
 }
 
-// Copyright (c) 2009 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

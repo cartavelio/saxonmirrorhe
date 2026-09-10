@@ -14,10 +14,11 @@ public class MessageFromStack implements MessageBuilder {
     private MessageFromStack() {
     }
 
+    @Override
     public void generateErrorMessage() {
         // null action: the message is already on the stack
     }
 
 }
 
-//Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

@@ -31,6 +31,7 @@ public class StreamFn extends SystemFunction {
     @Override
     public Expression makeFunctionCall(Expression... arguments) {
         return new SystemFunctionCall(this, arguments) {
+            @Override
             public Expression optimize(/*@NotNull*/ ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
                 visitor.setOptimizeForStreaming(true);
                 return super.optimize(visitor, contextItemType);
@@ -86,11 +87,12 @@ public class StreamFn extends SystemFunction {
      */
 
         /*@Nullable*/
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         throw new XPathException("The function saxon:stream() cannot be called dynamically");
     }
 
 
 }
 
-// Copyright (c) 2013-2016 Saxonica Limited.
+// Copyright (c) 2013-2020 Saxonica Limited

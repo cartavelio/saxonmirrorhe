@@ -1,11 +1,11 @@
 package com.saxonica.serialize;
 
 import com.saxonica.config.ProfessionalConfiguration;
-import com.saxonica.ptree.PTreeEmitter;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.PreparedStylesheet;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.instruct.GlobalParameterSet;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.lib.SerializerFactory;
 import net.sf.saxon.query.SequenceWrapper;
@@ -33,6 +33,7 @@ public class SerializerFactoryPE extends SerializerFactory {
         super(config);
     }
 
+    @Override
     protected SequenceReceiver createSaxonSerializationMethod(
             String method, SerializationProperties serProps,
             PipelineConfiguration pipe,
@@ -42,12 +43,12 @@ public class SerializerFactoryPE extends SerializerFactory {
         Properties props = serProps.getProperties();
         pipe.getConfiguration().checkLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION, "custom serialization", -1);
         if (SaxonOutputKeys.SAXON_XQUERY_METHOD.equals(method)) {
-            Emitter emitter = new XQueryEmitter();
+            XMLEmitter emitter = new XQueryEmitter();
             emitter.setPipelineConfiguration(pipe);
             emitter.setStreamResult(result);
             props.setProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
             emitter.setOutputProperties(props);
-            return createXMLSerializer((XMLEmitter) emitter, serProps);
+            return createXMLSerializer(emitter, serProps);
 
         } else if (SaxonOutputKeys.SAXON_BASE64_BINARY_METHOD.equals(method)) {
             Emitter emitter = new Base64BinaryEmitter();
@@ -65,8 +66,13 @@ public class SerializerFactoryPE extends SerializerFactory {
             emitter.setOutputProperties(props);
             return emitter;
 
-        } else if (SaxonOutputKeys.SAXON_PTREE_METHOD.equals(method)) {
-            return new PTreeEmitter(pipe);
+        } else if (SaxonOutputKeys.SAXON_XML_TO_JSON_METHOD.equals(method)) {
+            Emitter emitter = new TEXTEmitter();
+            emitter.setPipelineConfiguration(pipe);
+            emitter.setStreamResult(result);
+            props.setProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+            emitter.setOutputProperties(props);
+            return emitter;
 
         } else {
             XPathException err = new XPathException("Unknown serialization method " + method);
@@ -137,6 +143,7 @@ public class SerializerFactoryPE extends SerializerFactory {
      * @return the newly created attribute sorter.
      */
 
+    @Override
     protected ProxyReceiver newAttributeSorter(Receiver next, Properties outputProperties) {
         AttributeSorter r = new AttributeSorter(next);
         r.setOutputProperties(outputProperties);
@@ -151,8 +158,10 @@ public class SerializerFactoryPE extends SerializerFactory {
      * @return the newly created filter.
      */
 
+    @Override
     protected Receiver newNamespaceSorter(Receiver next, Properties outputProperties) {
-        return new NamespaceSorter(next);
+        return next; // Namespaces are automatically sorted by the NamespaceMap.iterator()
+        //return new NamespaceSorter(next);
     }
 
     private void setCharacterRepresention(XMLEmitter emitter, Properties properties) {
@@ -195,6 +204,7 @@ public class SerializerFactoryPE extends SerializerFactory {
      * @return the newly created XHTML emitter.
      */
 
+    @Override
     protected Emitter newXHTMLEmitter(Properties properties) {
         boolean is5 = SaxonOutputKeys.isXhtmlHtmlVersion5(properties);
         XMLEmitter emitter = is5 ? new XHTML5Emitter() : new XHTML1Emitter();
@@ -211,6 +221,7 @@ public class SerializerFactoryPE extends SerializerFactory {
      * @return the receiver to be used in place of the "next" receiver
      */
 
+    @Override
     public Receiver addTextOutputFilter(Receiver next, Properties properties) throws XPathException {
         boolean recognize = "yes".equals(properties.getProperty(SaxonOutputKeys.RECOGNIZE_BINARY));
         if (recognize) {
@@ -234,6 +245,7 @@ public class SerializerFactoryPE extends SerializerFactory {
      * @throws XPathException if any dynamic error occurs
      */
 
+    @Override
     public SequenceReceiver prepareNextStylesheet(PipelineConfiguration pipe, String href, String baseURI, Result result)
             throws XPathException {
 
@@ -255,7 +267,7 @@ public class SerializerFactoryPE extends SerializerFactory {
                 throw XPathException.makeXPathException(e);
             }
             CompilerInfo compilerInfo = new CompilerInfo(config.getDefaultXsltCompilerInfo());
-            compilerInfo.setGenerateByteCode(config.isGenerateByteCode(Configuration.XSLT));
+            compilerInfo.setGenerateByteCode(config.isGenerateByteCode(HostLanguage.XSLT));
             compilerInfo.setTargetEdition(config.getEditionCode());
             compilerInfo.setJustInTimeCompilation(config.isJITEnabled());
             next = Compilation.compileSingletonPackage(config, compilerInfo, source);
@@ -283,7 +295,9 @@ public class SerializerFactoryPE extends SerializerFactory {
      * etc. There are variants for Saxon-HE and Saxon-PE
      */
 
+    @Override
     public SequenceWrapper newSequenceWrapper(Receiver destination) {
+        // TODO: PE version no longer needed
         return new SequenceWrapperPE(destination);
     }
 
@@ -300,105 +314,73 @@ public class SerializerFactoryPE extends SerializerFactory {
 
     @Override
     public String checkOutputProperty(String key, String value) throws XPathException {
-        Configuration config = getConfiguration();
         if (key.startsWith("{http://saxon.sf.net/}")) {
-
             switch (key) {
-                case SaxonOutputKeys.NEWLINE:
-                    // no constraints
+                case SaxonOutputKeys.STYLESHEET_VERSION:
+                    // allowed in HE
                     break;
-                case SaxonOutputKeys.ATTRIBUTE_ORDER:
-                    if (value != null) {
-                        checkListOfClarkNamesAllowingStar(key, value);
-                    }
+                case SaxonOutputKeys.PARAMETER_DOCUMENT_BASE_URI:
+                    // allowed in HE
                     break;
-                case SaxonOutputKeys.CANONICAL:
+                case SaxonOutputKeys.SUPPLY_SOURCE_LOCATOR:
+                case SaxonOutputKeys.UNFAILING:
+                    // allowed in HE
                     if (value != null) {
                         value = checkYesOrNo(key, value);
                     }
                     break;
-                case SaxonOutputKeys.STYLESHEET_VERSION:
+                case SaxonOutputKeys.NEWLINE:
+                case SaxonOutputKeys.NEXT_IN_CHAIN:
+                case SaxonOutputKeys.CHARACTER_REPRESENTATION:
+                case SaxonOutputKeys.NEXT_IN_CHAIN_BASE_URI:
+                case SaxonOutputKeys.PROPERTY_ORDER:
                     // no constraints
-                    break;
-                case SaxonOutputKeys.INDENT_SPACES:
                     if (value != null) {
                         checkExtensions(key);
-                        checkNonNegativeInteger(key, value);
                     }
                     break;
+                case SaxonOutputKeys.ATTRIBUTE_ORDER:
+                    if (value != null) {
+                        checkExtensions(key);
+                        value= checkListOfEQNamesAllowingStar(key, value);
+                    }
+                    break;
+                case SaxonOutputKeys.CANONICAL:
+                case SaxonOutputKeys.REQUIRE_WELL_FORMED:
+                case SaxonOutputKeys.RECOGNIZE_BINARY:
+                case SaxonOutputKeys.WRAP:
+                case SaxonOutputKeys.SINGLE_QUOTES:
+                    if (value != null) {
+                        checkExtensions(key);
+                        value = checkYesOrNo(key, value);
+                    }
+                    break;
+
+                case SaxonOutputKeys.INDENT_SPACES:
                 case SaxonOutputKeys.LINE_LENGTH:
                     if (value != null) {
                         checkExtensions(key);
                         checkNonNegativeInteger(key, value);
                     }
                     break;
-                case SaxonOutputKeys.CHARACTER_REPRESENTATION:
-                    checkExtensions(key);
-                    break;
-                case SaxonOutputKeys.NEXT_IN_CHAIN:
-                    checkExtensions(key);
-                    break;
-                case SaxonOutputKeys.NEXT_IN_CHAIN_BASE_URI:
-                    // no validation performed
-                    break;
-                case SaxonOutputKeys.REQUIRE_WELL_FORMED:
-                    if (value != null) {
-                        value = checkYesOrNo(key, value);
-                    }
-                    break;
-                case SaxonOutputKeys.RECOGNIZE_BINARY:
-                    if (value != null) {
-                        checkExtensions(key);
-                        value = checkYesOrNo(key, value);
-                    }
 
-                    break;
                 case SaxonOutputKeys.DOUBLE_SPACE:
                     if (value != null) {
                         checkExtensions(key);
-                        checkListOfClarkNames(key, value);
+                        checkListOfEQNames(key, value);
                     }
+                    break;
 
-                    break;
-                case SaxonOutputKeys.WRAP:
-                    if (value != null) {
-                        checkExtensions(key);
-                        value = checkYesOrNo(key, value);
-                    }
-                    break;
-                case SaxonOutputKeys.SUPPLY_SOURCE_LOCATOR:
-                    if (value != null) {
-                        value = checkYesOrNo(key, value);
-                    }
-                    break;
-                case SaxonOutputKeys.SINGLE_QUOTES:
-                    if (value != null) {
-                        checkExtensions(key);
-                        value = checkYesOrNo(key, value);
-                    }
-
-                    break;
-                case SaxonOutputKeys.UNFAILING:
-                    if (value != null) {
-                        value = checkYesOrNo(key, value);
-                    }
-                    break;
-                case SaxonOutputKeys.PROPERTY_ORDER:
-                    // no checking
-                    break;
-                case SaxonOutputKeys.PARAMETER_DOCUMENT:
-                case SaxonOutputKeys.PARAMETER_DOCUMENT_BASE_URI:
-                    // no checking
-                    break;
                 default:
                     throw new XPathException("Unknown serialization parameter " + Err.wrap(key), "XQST0109");
             }
         } else {
-            return super.checkOutputProperty(key, value);
+            value = super.checkOutputProperty(key, value);
         }
         return value;
     }
 
+    @Override
     protected void checkExtensions(String key)  {
         getConfiguration().checkLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION, "custom serialization " + key, -1);
     }
@@ -410,6 +392,7 @@ public class SerializerFactoryPE extends SerializerFactory {
      * @return a Comparator that implements the requested property order
      */
 
+    @Override
     protected Comparator<AtomicValue> getPropertySorter(String propertyOrder) {
         final int MIDDLE_GROUND = 10000000;
         final Map<String, Integer> knownKeys = new HashMap<>();
@@ -445,7 +428,7 @@ public class SerializerFactoryPE extends SerializerFactory {
 
 }
 
-// Copyright (c) 2010-2017 Saxonica Limited.
+// Copyright (c) 2010-2020 Saxonica Limited
 
 
 

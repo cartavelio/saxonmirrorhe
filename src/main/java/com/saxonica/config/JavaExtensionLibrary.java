@@ -19,8 +19,8 @@ import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.FastStringBuffer;
-import net.sf.saxon.type.*;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
 import java.lang.reflect.*;
@@ -28,8 +28,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.URL;
-import java.time.Instant;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.*;
 
 /**
@@ -126,8 +125,6 @@ public class JavaExtensionLibrary implements FunctionLibrary {
     }
 
 
-//#ifdefined HOF
-
     /**
      * Test whether a function with a given name and arity is available; if so, return a function
      * item that can be dynamically called.
@@ -141,7 +138,9 @@ public class JavaExtensionLibrary implements FunctionLibrary {
      * @throws net.sf.saxon.trans.XPathException in the event of certain errors, for example attempting to get a function
      *                                           that is private
      */
+    @Override
     public Function getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) throws XPathException {
+        Configuration config = staticContext.getConfiguration();
         int arity = functionName.getArity();
         SuppliedParameterReference[] params = new SuppliedParameterReference[arity];
         Arrays.fill(params, new SuppliedParameterReference(-1));
@@ -151,7 +150,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
             Arrays.fill(argTypes, SequenceType.ANY_SEQUENCE);
             SpecificFunctionType ftype =
                     new SpecificFunctionType(argTypes, SequenceType.ANY_SEQUENCE);
-            ((JavaExtensionFunctionCall) call).prepareForDynamicCall(staticContext.getConfiguration());
+            ((JavaExtensionFunctionCall) call).prepareForDynamicCall(config);
             return new CallableFunction(functionName, (Callable) call, ftype);
         } else if (call instanceof UnresolvedExtensionFunctionCall) {
             SequenceType[] argTypes = new SequenceType[arity];
@@ -162,7 +161,6 @@ public class JavaExtensionLibrary implements FunctionLibrary {
         }
         return null;
     }
-//#endif
 
     /**
      * Test whether a function with a given name and arity is available
@@ -171,6 +169,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
      * @param functionName the qualified name of the function being called
      * @return true if a function of this name and arity is available for calling
      */
+    @Override
     public boolean isAvailable(SymbolicName.F functionName) {
         SuppliedParameterReference[] params = new SuppliedParameterReference[functionName.getArity()];
         Arrays.fill(params, new SuppliedParameterReference(-1));
@@ -196,6 +195,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
      * null if no extension function was found matching the required name, arity, or signature.
      */
 
+    @Override
     public Expression bind(SymbolicName.F symbolicName, Expression[] staticArgs, StaticContext env, List<String> reasons) {
         boolean debug = config.getBooleanProperty(Feature.TRACE_EXTERNAL_FUNCTIONS);
         StructuredQName functionName = symbolicName.getComponentName();
@@ -485,7 +485,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
                 diag.info("Finding best fit method for arguments");
             }
 
-            boolean eliminated[] = new boolean[candidates];
+            boolean[] eliminated = new boolean[candidates];
             Arrays.fill(eliminated, false);
 
             if (debug) {
@@ -497,7 +497,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
                         diag.info("Arguments cannot be converted to required types");
                     } else {
                         FastStringBuffer fsb = new FastStringBuffer(100);
-                        fsb.append('[');
+                        fsb.cat('[');
                         for (int p = 0; p < pref_i.length; p++) {
                             if (p != 0) {
                                 fsb.append(", ");
@@ -611,7 +611,6 @@ public class JavaExtensionLibrary implements FunctionLibrary {
 
         Class[] params;
         int firstArg;
-        TypeHierarchy th = config.getTypeHierarchy();
         if (method instanceof Constructor) {
             firstArg = 0;
             params = ((Constructor) method).getParameterTypes();
@@ -854,42 +853,60 @@ public class JavaExtensionLibrary implements FunctionLibrary {
                 if (required.isAssignableFrom(DateValue.class)) {
                     return 50;
                 }
-                if (required.isAssignableFrom(ZonedDateTime.class)) {
+                if (required.isAssignableFrom(LocalDate.class)) {
                     return 51;
                 }
-                if (required.isAssignableFrom(Instant.class)) {
+                if (required.isAssignableFrom(OffsetDateTime.class)) {
                     return 52;
                 }
-                if (required.isAssignableFrom(Date.class)) {
+                if (required.isAssignableFrom(LocalDateTime.class)) {
                     return 53;
+                }
+                if (required.isAssignableFrom(ZonedDateTime.class)) {
+                    return 54;
+                }
+                if (required.isAssignableFrom(Instant.class)) {
+                    return 55;
+                }
+                if (required.isAssignableFrom(Date.class)) {
+                    return 56;
                 }
                 return -1;
             case StandardNames.XS_DATE_TIME:
                 if (required.isAssignableFrom(DateTimeValue.class)) {
                     return 50;
                 }
-                if (required.isAssignableFrom(ZonedDateTime.class)) {
+                if (required.isAssignableFrom(OffsetDateTime.class)) {
                     return 51;
                 }
-                if (required.isAssignableFrom(Instant.class)) {
+                if (required.isAssignableFrom(LocalDateTime.class)) {
                     return 52;
                 }
-                if (required.isAssignableFrom(Date.class)) {
+                if (required.isAssignableFrom(ZonedDateTime.class)) {
                     return 53;
+                }
+                if (required.isAssignableFrom(Instant.class)) {
+                    return 54;
+                }
+                if (required.isAssignableFrom(Date.class)) {
+                    return 55;
                 }
                 return -1;
             case StandardNames.XS_TIME:
                 if (required.isAssignableFrom(TimeValue.class)) {
                     return 50;
                 }
-                if (required.isAssignableFrom(ZonedDateTime.class)) {
+                if (required.isAssignableFrom(OffsetDateTime.class)) {
                     return 51;
                 }
-                if (required.isAssignableFrom(Instant.class)) {
+                if (required.isAssignableFrom(ZonedDateTime.class)) {
                     return 52;
                 }
-                if (required.isAssignableFrom(Date.class)) {
+                if (required.isAssignableFrom(Instant.class)) {
                     return 53;
+                }
+                if (required.isAssignableFrom(Date.class)) {
+                    return 54;
                 }
                 return -1;
             case StandardNames.XS_DURATION:
@@ -1095,6 +1112,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
          */
 
         /*@NotNull*/
+        @Override
         public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
             typeCheckChildren(visitor, contextInfo);
             SequenceType[] argTypes = new SequenceType[getArity()];
@@ -1166,12 +1184,13 @@ public class JavaExtensionLibrary implements FunctionLibrary {
          * @return the result of the evaluation, in the form of a Sequence
          * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs during the evaluation of the expression
          */
-        public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             Literal[] args = new Literal[arguments.length];
             TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
             SequenceType[] argTypes = new SequenceType[arguments.length];
             for (int i = 0; i < arguments.length; i++) {
-                GroundedValue<?> val = arguments[i].materialize();
+                GroundedValue val = arguments[i].materialize();
                 ItemType itemType = SequenceTool.getItemType(val, th);
                 int cardinality = SequenceTool.getCardinality(val);
                 argTypes[i] = SequenceType.makeSequenceType(itemType, cardinality);
@@ -1260,6 +1279,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
      * @return a copy of this function library. This must be an instance of the original class.
      */
 
+    @Override
     public FunctionLibrary copy() {
         JavaExtensionLibrary jel = new JavaExtensionLibrary(config);
         jel.explicitMappings = new HashMap<>(explicitMappings);
@@ -1268,4 +1288,4 @@ public class JavaExtensionLibrary implements FunctionLibrary {
 
 }
 
-// Copyright (c) 2009 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

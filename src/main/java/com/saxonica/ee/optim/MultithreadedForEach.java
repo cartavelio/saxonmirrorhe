@@ -1,7 +1,7 @@
 package com.saxonica.ee.optim;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.ForEach;
 import net.sf.saxon.expr.instruct.TailCall;
@@ -10,7 +10,6 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.FocusIterator;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -62,24 +61,24 @@ public class MultithreadedForEach extends ForEach {
      * process() method natively.
      */
 
+    @Override
     public int getImplementationMethod() {
         return PROCESS_METHOD;
     }
 
     /*@Nullable*/
     @Override
-    public TailCall processLeavingTail(XPathContext context) throws XPathException {
-        Receiver out = context.getReceiver();
+    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
         final XPathContextMajor c2 = context.newContext();
-        FocusIterator<?> fit = c2.getController().getFocusTrackerFactory(true).apply(getSelect().iterate(context));
+        FocusIterator fit = c2.getController().getFocusTrackerFactory(true).apply(getSelect().iterate(context));
         c2.setCurrentIterator(fit);
         int maxThreads = evaluateThreads(context);
         if (maxThreads <= 1) {
-            return super.processLeavingTail(context);
+            return super.processLeavingTail(output, context);
         } else {
             MultithreadedContextMappingIterator mapper =
                     new MultithreadedContextMappingIterator(getAction(), c2, maxThreads);
-            mapper.forEachOrFail(out::append);
+            mapper.forEachOrFail(output::append);
             mapper.close();
             return null;
         }
@@ -124,7 +123,7 @@ public class MultithreadedForEach extends ForEach {
 
     /*@NotNull*/
     @Override
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         int threads = evaluateThreads(context);
         XPathContextMinor c2 = context.newMinorContext();
         c2.trackFocus(getSelect().iterate(context));
@@ -150,11 +149,12 @@ public class MultithreadedForEach extends ForEach {
      * @param out the destination for explain output
      */
 
+    @Override
     protected void explainThreads(ExpressionPresenter out) throws XPathException {
         out.setChildRole("threads");
         getThreads().export(out);
     }
 }
 
-// Copyright (c) 2010-2015 Saxonica Limited
+// Copyright (c) 2010-2020 Saxonica Limited
 

@@ -5,14 +5,12 @@ import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.ee.schema.SingleNamespaceSchema;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.tree.linked.ElementImpl;
 import net.sf.saxon.tree.linked.NodeFactory;
-import net.sf.saxon.tree.linked.NodeImpl;
 import net.sf.saxon.tree.linked.TextImpl;
-import net.sf.saxon.tree.util.AttributeCollectionImpl;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SchemaType;
 
@@ -23,7 +21,6 @@ import java.util.HashMap;
  * A Factory for nodes in the schema document tree. <br>
  * Currently only allows Element nodes to be user-constructed.
  *
- * @author Michael H. Kay
  */
 
 public class SchemaNodeFactory implements NodeFactory {
@@ -74,9 +71,10 @@ public class SchemaNodeFactory implements NodeFactory {
      * Create an Element node.
      */
 
+    @Override
     public ElementImpl makeElementNode(
             NodeInfo parent, NodeName elemName, SchemaType elemType, boolean isNilled,
-            AttributeCollectionImpl attlist, NamespaceBinding[] namespaces, int namespacesUsed,
+            AttributeMap attlist, NamespaceMap namespaces,
             PipelineConfiguration pipe, Location locationId, int sequence) {
         String baseURI = null;
         int lineNumber = -1;
@@ -88,14 +86,14 @@ public class SchemaNodeFactory implements NodeFactory {
 
         int f = elemName.obtainFingerprint(pipe.getConfiguration().getNamePool());
 
-        SchemaElement e = makeXSDElement(f, ((NodeImpl)parent).getFingerprint());
+        SchemaElement e = makeXSDElement(f, parent.getFingerprint());
 
         if (e instanceof XSDSchema) {
             config.checkLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION, "schema processing", -1);
         }
 
         e.setSchemaNodeFactory(this);
-        e.setNamespaceDeclarations(namespaces, namespacesUsed);
+        e.setNamespaceMap(namespaces);
         e.initialise(elemName, elemType, attlist, parent, sequence);
         e.setLocation(baseURI, lineNumber, columnNumber);
         return e;
@@ -217,6 +215,9 @@ public class SchemaNodeFactory implements NodeFactory {
                 return new SaxonParam();
             case StandardNames.SAXON_PREPROCESS:
                 return new SaxonPreprocess();
+            case StandardNames.SAXON_DISTINCT:
+            case StandardNames.SAXON_ORDER:
+                return new XSDFacet();
 
             default:
 
@@ -231,6 +232,7 @@ public class SchemaNodeFactory implements NodeFactory {
      * @param content the content of the text node
      * @return the constructed text node
      */
+    @Override
     public TextImpl makeTextNode(NodeInfo parent, CharSequence content) {
         return new TextImpl(content.toString());
     }
@@ -259,4 +261,4 @@ public class SchemaNodeFactory implements NodeFactory {
 
 }
 
-// Copyright (c) 2004-2007 Saxonica Limited. All Rights Reserved
+// Copyright (c) 2004-2020 Saxonica Limited

@@ -958,4 +958,4 @@ public class EXPathBinary {
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited

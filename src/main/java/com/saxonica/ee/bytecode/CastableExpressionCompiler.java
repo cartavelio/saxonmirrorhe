@@ -28,8 +28,8 @@ public class CastableExpressionCompiler extends ToBooleanCompiler {
         Configuration config = compiler.getConfiguration();
         TypeHierarchy th = config.getTypeHierarchy();
         ItemType itemType = operand.getItemType();
-        boolean maybeNode = th.relationship(itemType, AnyNodeTest.getInstance()) != TypeHierarchy.DISJOINT;
-        boolean maybeAtomic = th.relationship(itemType, BuiltInAtomicType.ANY_ATOMIC) != TypeHierarchy.DISJOINT;
+        boolean maybeNode = th.relationship(itemType, AnyNodeTest.getInstance()) != Affinity.DISJOINT;
+        boolean maybeAtomic = th.relationship(itemType, BuiltInAtomicType.ANY_ATOMIC) != Affinity.DISJOINT;
 
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
@@ -204,4 +204,4 @@ public class CastableExpressionCompiler extends ToBooleanCompiler {
 
 }
 
-//Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

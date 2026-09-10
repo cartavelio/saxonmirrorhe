@@ -3,13 +3,10 @@ package com.saxonica.ee.stream.feed;
 
 import com.saxonica.ee.stream.om.FleetingParentNode;
 import com.saxonica.ee.stream.watch.Terminator;
-import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.event.SequenceReceiver;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 
 import java.util.Stack;
@@ -20,11 +17,12 @@ import java.util.Stack;
  * matched since the watch was activated).
  */
 
-public class FilteringFeed extends ItemFeed {
+public class FilteringFeed extends GroundedItemFeed {
 
     private Filter filter;
     private int position;
     private Stack<Boolean> matchStack = new Stack<>();
+    //private Stack<Integer> nodeKindStack = new Stack<>();
     private boolean terminated;
 
     /**
@@ -34,25 +32,29 @@ public class FilteringFeed extends ItemFeed {
      * position is to be selected
      */
 
-    public FilteringFeed(Feed nextFeed, XPathContext context, Filter filter) {
+    public FilteringFeed(ItemFeed nextFeed, XPathContext context, Filter filter) {
         super(nextFeed, context);
         this.filter = filter;
     }
 
+    @Override
     public void open(Terminator terminator) throws XPathException {
         getResult().open(terminator);
         position = 0;
         this.terminated = false;
     }
 
+    @Override
     public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
         if (!terminated) {
             int match = filter.matches(node, ++position);
             matchStack.push(match == Filter.MATCHES);
+            //nodeKindStack.push(node.getNodeKind());
             if (match == Filter.MATCHES) {
                 return getResult().startSelectedParentNode(node, locationId);
+                //node.notify(getNextOutputter());
             } else if (match == Filter.DONE && getTerminator() != null) {
-                getResult().close();
+                getNextOutputter().close();
                 terminated = true;
                 getTerminator().terminate();
             }
@@ -60,20 +62,26 @@ public class FilteringFeed extends ItemFeed {
         return null;
     }
 
+    @Override
     public void endSelectedParentNode(Location locationId) throws XPathException {
-        if (!terminated && matchStack.pop()) {
-            getResult().endSelectedParentNode(locationId);
+        if (!terminated) {
+            boolean matches = matchStack.pop();
+            //int kind = nodeKindStack.pop();
+            if (matches) {
+                getResult().endSelectedParentNode(locationId);
+            }
         }
     }
 
-    public void processItem(Item<?> item) throws XPathException {
+    @Override
+    public void append(Item item) throws XPathException {
         if (!terminated && !hasFailed()) {
             try {
                 int match = filter.matches(item, ++position);
                 if (match == Filter.MATCHES) {
-                    getResult().processItem(item);
+                    getNextOutputter().append(item);
                 } else if (match == Filter.DONE && getTerminator() != null) {
-                    getResult().close();
+                    getNextOutputter().close();
                     terminated = true;
                     getTerminator().terminate();
                 }
@@ -83,35 +91,11 @@ public class FilteringFeed extends ItemFeed {
         }
     }
 
+    @Override
     public void close() throws XPathException {
         if (!terminated && !hasFailed()) {
-            getResult().close();
+            getNextOutputter().close();
         }
-    }
-
-    /**
-     * Get a receiver to which start and end events for documents and elements can be
-     * written.
-     */
-    @Override
-    public SequenceReceiver getReceiver() {
-        Receiver next = getResult().getReceiver();
-        return new ProxyReceiver(next) {
-            /**
-             * Append an arbitrary item (node or atomic value) to the output
-             *
-             * @param item           the item to be appended
-             * @param locationId     the location of the calling instruction, for diagnostics
-             * @param copyNamespaces if the item is an element node, this indicates whether its namespaces
-             *                       need to be copied. Values are {@link ReceiverOptions#ALL_NAMESPACES},
-             *                       {@link ReceiverOptions#LOCAL_NAMESPACES}; the default (0) means
-             *                       no namespaces
-             */
-            @Override
-            public void append(Item item, Location locationId, int copyNamespaces) throws XPathException {
-                processItem(item);
-            }
-        };
     }
 
     /**
@@ -147,6 +131,7 @@ public class FilteringFeed extends ItemFeed {
          * DONE if this and all future items are to be excluded
          * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs
          */
+        @Override
         public int matches(Item item, int position) throws XPathException {
             return MATCHES;
         }
@@ -166,6 +151,7 @@ public class FilteringFeed extends ItemFeed {
          * DONE if this and all future items are to be excluded
          * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs
          */
+        @Override
         public int matches(Item item, int position) throws XPathException {
             return DONE;
         }
@@ -173,4 +159,4 @@ public class FilteringFeed extends ItemFeed {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited. All rights reserved
+// Copyright (c) 2018-2020 Saxonica Limited

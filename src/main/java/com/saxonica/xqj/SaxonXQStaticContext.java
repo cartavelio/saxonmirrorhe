@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -106,6 +106,7 @@ public class SaxonXQStaticContext implements XQStaticContext {
     }
 
 
+    @Override
     public void declareNamespace(String prefix, String uri) throws XQException {
         checkNotNull(prefix);
         checkNotNull(uri);
@@ -116,21 +117,25 @@ public class SaxonXQStaticContext implements XQStaticContext {
         }
     }
 
+    @Override
     public String getBaseURI() {
         return baseURI;
     }
 
 
+    @Override
     public int getBindingMode() {
         return bindingMode;
     }
 
+    @Override
     public int getBoundarySpacePolicy() {
         return preserveBoundarySpace
                 ? XQConstants.BOUNDARY_SPACE_PRESERVE
                 : XQConstants.BOUNDARY_SPACE_STRIP;
     }
 
+    @Override
     public int getConstructionMode() {
         return constructionModeIsPreserve
                 ? XQConstants.CONSTRUCTION_MODE_PRESERVE
@@ -139,34 +144,41 @@ public class SaxonXQStaticContext implements XQStaticContext {
 
 
     /*@Nullable*/
+    @Override
     public XQItemType getContextItemStaticType() {
         return contextItemStaticType;
     }
 
+    @Override
     public int getCopyNamespacesModeInherit() {
         return inheritNamespaces ?
                 XQConstants.COPY_NAMESPACES_MODE_INHERIT :
                 XQConstants.COPY_NAMESPACES_MODE_NO_INHERIT;
     }
 
+    @Override
     public int getCopyNamespacesModePreserve() {
         return preserveNamespaces ?
                 XQConstants.COPY_NAMESPACES_MODE_PRESERVE :
                 XQConstants.COPY_NAMESPACES_MODE_NO_PRESERVE;
     }
 
+    @Override
     public String getDefaultCollation() {
         return defaultCollationName;
     }
 
+    @Override
     public String getDefaultElementTypeNamespace() {
         return defaultElementNamespace;
     }
 
+    @Override
     public String getDefaultFunctionNamespace() {
         return defaultFunctionNamespace;
     }
 
+    @Override
     public int getDefaultOrderForEmptySequences() {
         return emptyLeast ?
                 XQConstants.DEFAULT_ORDER_FOR_EMPTY_SEQUENCES_LEAST :
@@ -174,6 +186,7 @@ public class SaxonXQStaticContext implements XQStaticContext {
     }
 
     /*@NotNull*/
+    @Override
     public String[] getNamespacePrefixes() {
         String[] result = new String[namespaces.size()];
         Iterator iter = namespaces.keySet().iterator();
@@ -185,6 +198,7 @@ public class SaxonXQStaticContext implements XQStaticContext {
         return result;
     }
 
+    @Override
     public String getNamespaceURI(String prefix) throws XQException {
         checkNotNull(prefix);
         String uri = namespaces.get(prefix);
@@ -194,34 +208,41 @@ public class SaxonXQStaticContext implements XQStaticContext {
         return uri;
     }
 
+    @Override
     public int getOrderingMode() {
         return isOrdered
                 ? XQConstants.ORDERING_MODE_ORDERED
                 : XQConstants.ORDERING_MODE_UNORDERED;
     }
 
+    @Override
     public int getHoldability() {
         return holdability;
     }
 
+    @Override
     public int getQueryLanguageTypeAndVersion() {
         return XQConstants.LANGTYPE_XQUERY;
     }
 
+    @Override
     public int getQueryTimeout() {
         return 0;
     }
 
+    @Override
     public int getScrollability() {
         return scrollability;
     }
 
 
+    @Override
     public void setBaseURI(String baseUri) throws XQException {
         checkNotNull(baseUri);
         this.baseURI = baseUri;
     }
 
+    @Override
     public void setBindingMode(int bindingMode) throws XQException {
         switch (bindingMode) {
             case XQConstants.BINDING_MODE_IMMEDIATE:
@@ -233,6 +254,7 @@ public class SaxonXQStaticContext implements XQStaticContext {
         }
     }
 
+    @Override
     public void setBoundarySpacePolicy(int policy) throws XQException {
         switch (policy) {
             case XQConstants.BOUNDARY_SPACE_PRESERVE:
@@ -246,6 +268,7 @@ public class SaxonXQStaticContext implements XQStaticContext {
         }
     }
 
+    @Override
     public void setConstructionMode(int mode) throws XQException {
         switch (mode) {
             case XQConstants.CONSTRUCTION_MODE_PRESERVE:
@@ -259,10 +282,12 @@ public class SaxonXQStaticContext implements XQStaticContext {
         }
     }
 
+    @Override
     public void setContextItemStaticType(/*@Nullable*/ XQItemType contextItemType) {
         this.contextItemStaticType = (SaxonXQItemType) contextItemType;
     }
 
+    @Override
     public void setCopyNamespacesModeInherit(int mode) throws XQException {
         switch (mode) {
             case XQConstants.COPY_NAMESPACES_MODE_INHERIT:
@@ -276,6 +301,7 @@ public class SaxonXQStaticContext implements XQStaticContext {
         }
     }
 
+    @Override
     public void setCopyNamespacesModePreserve(int mode) throws XQException {
         switch (mode) {
             case XQConstants.COPY_NAMESPACES_MODE_PRESERVE:
@@ -289,21 +315,25 @@ public class SaxonXQStaticContext implements XQStaticContext {
         }
     }
 
+    @Override
     public void setDefaultCollation(String uri) throws XQException {
         checkNotNull(uri);
         defaultCollationName = uri;
     }
 
+    @Override
     public void setDefaultElementTypeNamespace(String uri) throws XQException {
         checkNotNull(uri);
         defaultElementNamespace = uri;
     }
 
+    @Override
     public void setDefaultFunctionNamespace(String uri) throws XQException {
         checkNotNull(uri);
         defaultFunctionNamespace = uri;
     }
 
+    @Override
     public void setDefaultOrderForEmptySequences(int order) throws XQException {
         switch (order) {
             case XQConstants.DEFAULT_ORDER_FOR_EMPTY_SEQUENCES_GREATEST:
@@ -317,6 +347,7 @@ public class SaxonXQStaticContext implements XQStaticContext {
         }
     }
 
+    @Override
     public void setOrderingMode(int mode) throws XQException {
         switch (mode) {
             case XQConstants.ORDERING_MODE_ORDERED:
@@ -330,6 +361,7 @@ public class SaxonXQStaticContext implements XQStaticContext {
         }
     }
 
+    @Override
     public void setQueryTimeout(int seconds) throws XQException {
         if (seconds < 0) {
             throw new XQException("Query timeout must not be negative");
@@ -337,6 +369,7 @@ public class SaxonXQStaticContext implements XQStaticContext {
         // no-op
     }
 
+    @Override
     public void setHoldability(int holdability) throws XQException {
         switch (holdability) {
             case XQConstants.HOLDTYPE_HOLD_CURSORS_OVER_COMMIT:
@@ -348,12 +381,14 @@ public class SaxonXQStaticContext implements XQStaticContext {
         }
     }
 
+    @Override
     public void setQueryLanguageTypeAndVersion(int langtype) throws XQException {
         if (langtype != XQConstants.LANGTYPE_XQUERY) {
             throw new XQException("XQueryX is not supported");
         }
     }
 
+    @Override
     public void setScrollability(int scrollability) throws XQException {
         switch (scrollability) {
             case XQConstants.SCROLLTYPE_FORWARD_ONLY:

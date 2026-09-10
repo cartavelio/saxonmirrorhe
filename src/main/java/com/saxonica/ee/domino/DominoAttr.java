@@ -1,8 +1,7 @@
 package com.saxonica.ee.domino;
 
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -15,6 +14,8 @@ import net.sf.saxon.type.Type;
 import net.sf.saxon.value.UntypedAtomicValue;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Node;
+
+import java.util.function.Predicate;
 
 /**
  * An attribute node in the Domino tree
@@ -305,13 +306,13 @@ public class DominoAttr implements NodeInfo {
      * @since 8.4
      */
     @Override
-    public AxisIterator iterateAxis(byte axisNumber, NodeTest nodeTest) {
+    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> nodeTest) {
         switch (axisNumber) {
             case AxisInfo.ANCESTOR:
                 return parent.iterateAxis(AxisInfo.ANCESTOR_OR_SELF, nodeTest);
 
             case AxisInfo.ANCESTOR_OR_SELF:
-                if (nodeTest.matchesNode(this)) {
+                if (nodeTest.test(this)) {
                     return new PrependAxisIterator(this, parent.iterateAxis(AxisInfo.ANCESTOR_OR_SELF, nodeTest));
                 } else {
                     return parent.iterateAxis(AxisInfo.ANCESTOR_OR_SELF, nodeTest);
@@ -324,7 +325,7 @@ public class DominoAttr implements NodeInfo {
             case AxisInfo.FOLLOWING_SIBLING:
             case AxisInfo.NAMESPACE:
             case AxisInfo.PRECEDING_SIBLING:
-                return EmptyIterator.OfNodes.THE_INSTANCE;
+                return EmptyIterator.ofNodes();
 
             case AxisInfo.FOLLOWING:
                 return new Navigator.AxisFilter(
@@ -430,6 +431,21 @@ public class DominoAttr implements NodeInfo {
     }
 
     /**
+     * Get all the namespace bindings that are in-scope for this element.
+     * <p>For an element return all the prefix-to-uri bindings that are in scope. This may include
+     * a binding to the default namespace (represented by a prefix of ""). It will never include
+     * "undeclarations" - that is, the namespace URI will never be empty; the effect of an undeclaration
+     * is to remove a binding from the in-scope namespaces, not to add anything.</p>
+     * <p>For a node other than an element, returns null.</p>
+     *
+     * @return the in-scope namespaces for an element, or null for any other kind of node.
+     */
+    @Override
+    public NamespaceMap getAllNamespaces() {
+        return null;
+    }
+
+    /**
      * Get the value of the item as a string. For nodes, this is the string value of the
      * node as defined in the XPath 2.0 data model, except that all nodes are treated as being
      * untyped: it is not an error to get the string value of a node with a complex type.
@@ -508,6 +524,6 @@ public class DominoAttr implements NodeInfo {
     }
 }
 
-// Copyright (c) 2017 Saxonica Ltd
+// Copyright (c) 2017-2020 Saxonica Limited
 
 

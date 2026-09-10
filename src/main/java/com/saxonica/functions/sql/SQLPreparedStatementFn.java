@@ -33,6 +33,7 @@ import java.sql.SQLException;
 
 public class SQLPreparedStatementFn extends SystemFunction {
 
+    @Override
     public Function call(XPathContext context, Sequence[] arguments) throws XPathException {
         Connection connection = SQLFunctionSet.expectConnection(arguments[0], context);
         String statement = arguments[1].head().getStringValue();
@@ -77,4 +78,4 @@ public class SQLPreparedStatementFn extends SystemFunction {
 }
 
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

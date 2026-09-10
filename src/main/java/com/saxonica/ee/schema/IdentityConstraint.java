@@ -4,7 +4,7 @@ import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.NameChecker;
@@ -53,6 +53,13 @@ public abstract class IdentityConstraint extends SchemaStructure
      */
 
     public abstract String getConstraintCategory();
+
+    /**
+     * Boolean set to true if this is an ordered constraint (currently true
+     * only for xs:unique; indicated by saxon:ordered="true")
+     */
+
+    private boolean ordered;
 
     /**
      * Constructor used by sub-classes. Creates a new IdentityConstraint.
@@ -144,6 +151,14 @@ public abstract class IdentityConstraint extends SchemaStructure
         return constraintName;
     }
 
+    public void setOrdered(boolean ordered) {
+        this.ordered = ordered;
+    }
+
+    public boolean isOrdered() {
+        return ordered;
+    }
+
     /**
      * Check references from this component to other components
      *
@@ -151,16 +166,18 @@ public abstract class IdentityConstraint extends SchemaStructure
      * @return true if all is well, false if errors found
      */
 
+    @Override
     public boolean fixup(SchemaCompiler compiler) throws SchemaException {
         setFixupStatus(VALIDATED);
         return true;
     }
 
     /**
-     * Checks the validity of this Schema defintion.
+     * Checks the validity of this Schema definition.
      *
      * @throws SchemaException if the definition is invalid
      */
+    @Override
     public boolean validate(SchemaCompiler compiler) throws SchemaException {
         String err = null;
 
@@ -198,6 +215,10 @@ public abstract class IdentityConstraint extends SchemaStructure
     public void typeCheck(final SchemaCompiler compiler, SchemaType contextType) throws XPathException {
         final EnterpriseConfiguration config = compiler.getConfiguration();
         IndependentContext env = new IndependentContext(config) {
+            {
+                setSchemaAware(true);
+            }
+            @Override
             public void issueWarning(String s, Location locator) {
                 compiler.warning(s, IdentityConstraint.this);
             }
@@ -218,7 +239,7 @@ public abstract class IdentityConstraint extends SchemaStructure
                     compiler.warning("The field expression (" + field.getXPath() + ") may select no nodes, which would make the instance document invalid", field);
                 }
                 NodeTest fieldType = (NodeTest) field.getSelectExpression().getItemType();
-                PlainType atomizedType = fieldType.getAtomizedItemType();
+                AtomicType atomizedType = fieldType.getAtomizedItemType();
                 if (atomizedType == null) {
                     compiler.warning("The node selected by the field expression cannot be atomized", field);
                 }
@@ -229,7 +250,7 @@ public abstract class IdentityConstraint extends SchemaStructure
                 }
                 boolean listValued = contentType.isSimpleType() && ((SimpleType)contentType).isListType();
                 if (atomizedType != null && atomizedType.isAtomicType() && contentType != BuiltInAtomicType.ANY_ATOMIC) {
-                    field.setBuiltInBaseType((BuiltInAtomicType) ((AtomicType) atomizedType).getBuiltInBaseType(), listValued);
+                    field.setBuiltInBaseType((BuiltInAtomicType) atomizedType.getBuiltInBaseType(), listValued);
                 }
             }
         }
@@ -258,6 +279,7 @@ public abstract class IdentityConstraint extends SchemaStructure
      * @param compiler the schema compiler
      */
 
+    @Override
     public void elaborate(SchemaCompiler compiler) {
         // no action
     }
@@ -266,6 +288,7 @@ public abstract class IdentityConstraint extends SchemaStructure
      * Serialize the identity constraint as part of the serialized Schema Component Model
      */
 
+    @Override
     public void serialize(SchemaModelSerializer serializer) throws XPathException {
         serializer.setIsSerialized(this);
         String kind = getConstraintCategory();
@@ -299,6 +322,7 @@ public abstract class IdentityConstraint extends SchemaStructure
         serializer.endElement();
     }
 
+    @Override
     public Function getComponentAsFunction() {
         Callable callable = (context, arguments) -> {
             String key = arguments[0].head().getStringValue();
@@ -339,4 +363,4 @@ public abstract class IdentityConstraint extends SchemaStructure
     }
 }
 
-// Copyright (c) 2004 - 2018 Saxonica Limited. All Rights Reserved
+// Copyright (c) 2004-2020 Saxonica Limited

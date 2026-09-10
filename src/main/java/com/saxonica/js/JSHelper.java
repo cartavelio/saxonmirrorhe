@@ -221,7 +221,7 @@ public class JSHelper {
                     ch(start[2]) == 'x' && ch(start[3]) == 'm' && ch(start[4]) == 'l') {
                 FastStringBuffer sb = new FastStringBuffer(read);
                 for (int b = 0; b < read; b++) {
-                    sb.append((char) start[b]);
+                    sb.cat((char) start[b]);
                 }
                 String p = sb.toString();
                 int v = p.indexOf("encoding");
@@ -232,7 +232,7 @@ public class JSHelper {
                     }
                     sb.setLength(0);
                     while (v < p.length() && p.charAt(v) != '"' && p.charAt(v) != '\'') {
-                        sb.append(p.charAt(v++));
+                        sb.cat(p.charAt(v++));
                     }
                     return sb.toString();
                 }

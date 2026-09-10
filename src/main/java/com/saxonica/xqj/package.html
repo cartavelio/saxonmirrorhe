@@ -1,5 +1,5 @@
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-<!-- Copyright (c) 2014 Saxonica Limited. -->
+<!-- Copyright (c) 2014-2020 Saxonica Limited. -->
 <!-- This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. -->
 <!-- If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 <!-- This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0. -->
@@ -12,8 +12,8 @@
 </head>
 <body>
 <p>This package contains an implementation of the XQJ specification
-    defined in JSR 225. This API is not yet part of the Java Standard Edition platform, but it
-    is widely supported by a variety of Java-based XQuery engines.</p>
+    defined in JSR 225. This API never became part of the Java Standard Edition platform, but it
+    is supported by a variety of Java-based XQuery engines.</p>
 
 <p>Saxon's implementation of the {@link javax.xml.xquery.XQDataSource} class is
     {@link net.sf.saxon.xqj.SaxonXQDataSource}. Generally, this is the only class
@@ -30,10 +30,22 @@
 
 <p>Although this implementation of XQJ is issued under the open source Mozilla Public License,
 users should be aware of the terms and conditions included in the XQJ specification (JSR 225)
-which may (under some interpretations) restrict the right to make modifications. Because the
+which may (under some interpretations) restrict the right to make modifications. In particular,
+    the terms and conditions published in JSR 225 require implementations to pass the
+    compatibility tests, and to contain no extensions. Because the
 terms and conditions for the XQJ specification do not comply with some definitions of "open
 source", the XQJ module is not included in the standard Saxon-HE jar files, but is issued
 separately.</p>
+
+<p>JSR 225 was published to work with XQuery 1.0, and as a result, it does not support the
+richer type system of XQuery 3.1. For example, there are no mechanisms to supply maps and arrays
+as input to a query, or to handle maps and arrays in the query result. It is possible to work
+around some of these limitations by customizing the {@link net.sf.saxon.xqj.SaxonXQDataSource}
+with a user-written {@link net.sf.saxon.xqj.ObjectConverter}, provided you are confident that
+you are not thereby violating Oracle's licensing rules.</p>
+
+<p>Despite the prohibitions on extending the JSR 225 interface, Saxonica's implementation of XQJ does allow
+XQuery 3.1 syntax to be used within the queries submitted for execution.</p>
 
 </body>
 </html>

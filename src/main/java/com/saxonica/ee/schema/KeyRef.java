@@ -61,6 +61,7 @@ public class KeyRef extends IdentityConstraint implements ComponentReference {
      *
      * @return the component name
      */
+    @Override
     public StructuredQName getTargetComponentName() {
         return targetQName;
     }
@@ -91,9 +92,11 @@ public class KeyRef extends IdentityConstraint implements ComponentReference {
      *
      * @param compiler The schema containing the candidate target components for the reference. If
      *                 null, the schema containing the reference is used.
+     * @param fatal
      */
 
-    public void tryToResolve(SchemaCompiler compiler) {
+    @Override
+    public void tryToResolve(SchemaCompiler compiler, boolean fatal) {
         if (!dangling) {
             target = compiler.getPreparedSchema().getIdentityConstraint(getTargetComponentName());
             if (target == null) {
@@ -109,6 +112,7 @@ public class KeyRef extends IdentityConstraint implements ComponentReference {
      * Determine whether this reference has been resolved
      */
 
+    @Override
     public boolean isResolved() {
         return target != null;
     }
@@ -119,6 +123,7 @@ public class KeyRef extends IdentityConstraint implements ComponentReference {
      * @return true if the target of this component reference is known to be absent, and if a warning has
      * been issued to this effect
      */
+    @Override
     public boolean isDangling() {
         return dangling;
     }
@@ -132,6 +137,7 @@ public class KeyRef extends IdentityConstraint implements ComponentReference {
      */
 
     /*@Nullable*/
+    @Override
     public SchemaComponent getTarget() throws MissingComponentException {
         if (target == null) {
             throw new MissingComponentExceptionImpl(this);
@@ -143,6 +149,7 @@ public class KeyRef extends IdentityConstraint implements ComponentReference {
      * Get the symbol space of the target of this reference
      */
 
+    @Override
     public int getSymbolSpace() {
         return SymbolSpace.IDENTITY_CONSTRAINT;
     }
@@ -154,6 +161,7 @@ public class KeyRef extends IdentityConstraint implements ComponentReference {
      * @return true if all is well, false if errors found
      */
 
+    @Override
     public boolean fixup(SchemaCompiler compiler) throws SchemaException {
         if (getFixupStatus() == UNVALIDATED) {
             setFixupStatus(VALIDATING);
@@ -182,10 +190,11 @@ public class KeyRef extends IdentityConstraint implements ComponentReference {
      * @throws SchemaException when this Schema definition is invalid.
      */
 
+    @Override
     public boolean validate(SchemaCompiler compiler) throws SchemaException {
 
         boolean result = super.validate(compiler);
-        tryToResolve(compiler);
+        tryToResolve(compiler, false);
         if (target == null) {
             compiler.error("Identity constraint " +
                     Err.wrap(getTargetComponentName().getDisplayName()) +
@@ -210,4 +219,4 @@ public class KeyRef extends IdentityConstraint implements ComponentReference {
 
 }
 
-// Copyright (c) 2004-2018 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

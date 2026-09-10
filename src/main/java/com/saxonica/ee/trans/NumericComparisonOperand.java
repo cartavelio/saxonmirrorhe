@@ -17,6 +17,7 @@ public class NumericComparisonOperand extends Characteristic<NumericValue> {
         this.exp = exp;
     }
 
+    @Override
     public NumericValue evaluate(XPathContext context) throws XPathException {
         return (NumericValue)exp.evaluateItem(context);
     }
@@ -39,4 +40,4 @@ public class NumericComparisonOperand extends Characteristic<NumericValue> {
 
 }
 
-// Copyright (c) Saxonica Limited
+// Copyright (c) 2009-2020 Saxonica Limited

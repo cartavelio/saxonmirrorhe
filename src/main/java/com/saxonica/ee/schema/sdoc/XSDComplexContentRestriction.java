@@ -2,11 +2,9 @@ package com.saxonica.ee.schema.sdoc;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.*;
-import net.sf.saxon.om.AttributeCollection;
-import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.linked.NodeImpl;
 import net.sf.saxon.type.ComplexType;
 import net.sf.saxon.type.SchemaException;
 
@@ -33,6 +31,7 @@ public class XSDComplexContentRestriction extends SchemaElement {
      * @throws SchemaException if any errors are found in the attributes
      */
 
+    @Override
     public void prepareAttributes() throws SchemaException {
 
         try {
@@ -45,7 +44,7 @@ public class XSDComplexContentRestriction extends SchemaElement {
         complexType.setDerivationMethodName("restriction");
         complexType.setRestriction(true);
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         String[] allowed = {"base", "id"};
         allowAttributes(atts, allowed);
 
@@ -81,6 +80,7 @@ public class XSDComplexContentRestriction extends SchemaElement {
      * @throws SchemaException if any XML representation constraints are violated
      */
 
+    @Override
     public void validate(SchemaCompiler compiler) throws SchemaException {
         checkContentModel(stateTerms, stateTargets, false);
     }
@@ -122,6 +122,7 @@ public class XSDComplexContentRestriction extends SchemaElement {
     private final static int[][] stateTargets = {
             state0targets, state1targets, state2targets, state3targets, state4targets, state5targets, state6targets};
 
+    @Override
     protected boolean isFinalState(int state) {
         return true;
     }
@@ -142,6 +143,7 @@ public class XSDComplexContentRestriction extends SchemaElement {
      *
      * @param compiler used for error reporting
      */
+    @Override
     public void postValidate(SchemaCompiler compiler)
             throws SchemaException {
 
@@ -149,9 +151,7 @@ public class XSDComplexContentRestriction extends SchemaElement {
             return; // error already reported
         }
 
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while (((child = (NodeImpl)iter.next()) != null)) {
+        for (NodeInfo child : children()) {
             switch (child.getFingerprint()) {
                 case StandardNames.XS_ANY_ATTRIBUTE: {
                     AttributeWildcard wildcard = ((XSDAnyAttribute) child).getWildcard();
@@ -200,4 +200,4 @@ public class XSDComplexContentRestriction extends SchemaElement {
 
 }
 
-// Copyright (c) 2004-2008 Saxonica Limited
+// Copyright (c) 2004-2020 Saxonica Limited

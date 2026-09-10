@@ -75,6 +75,7 @@ public class IdentityConstraintReference extends SchemaStructure implements Comp
      * Determine whether this reference has been resolved
      */
 
+    @Override
     public boolean isResolved() {
         return target != null;
     }
@@ -85,6 +86,7 @@ public class IdentityConstraintReference extends SchemaStructure implements Comp
      * @return true if the target of this component reference is known to be absent, and if a warning has
      * been issued to this effect
      */
+    @Override
     public boolean isDangling() {
         return dangling;
     }
@@ -115,6 +117,7 @@ public class IdentityConstraintReference extends SchemaStructure implements Comp
      *
      * @return the component name of the target component
      */
+    @Override
     public StructuredQName getTargetComponentName() {
         return targetQName;
     }
@@ -123,6 +126,7 @@ public class IdentityConstraintReference extends SchemaStructure implements Comp
      * Get the symbol space of the target of this reference
      */
 
+    @Override
     public int getSymbolSpace() {
         return SymbolSpace.IDENTITY_CONSTRAINT;
     }
@@ -136,6 +140,7 @@ public class IdentityConstraintReference extends SchemaStructure implements Comp
      *          if the reference has not been resolved.
      */
 
+    @Override
     public IdentityConstraint getTarget() throws MissingComponentException {
         if (target == null) {
             throw new MissingComponentExceptionImpl(this);
@@ -148,7 +153,8 @@ public class IdentityConstraintReference extends SchemaStructure implements Comp
      * No error results if the reference cannot be resolved.
      */
 
-    public void tryToResolve(SchemaCompiler compiler) {
+    @Override
+    public void tryToResolve(SchemaCompiler compiler, boolean fatal) {
         if (!dangling) {
             if (target == null) {
                 target = compiler.getPreparedSchema().getIdentityConstraint(getTargetComponentName());
@@ -164,4 +170,4 @@ public class IdentityConstraintReference extends SchemaStructure implements Comp
 
 }
 
-// Copyright (c) 2010 Saxonica Limited.
+// Copyright (c) 2010-2020 Saxonica Limited

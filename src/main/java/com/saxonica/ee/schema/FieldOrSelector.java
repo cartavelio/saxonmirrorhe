@@ -3,7 +3,6 @@ package com.saxonica.ee.schema;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.pattern.Pattern;
-import net.sf.saxon.type.SchemaException;
 
 /**
  * The selector of an IdentityConstraint
@@ -143,4 +142,4 @@ public abstract class FieldOrSelector extends SchemaStructure {
 
 }
 
-// Copyright (c) 2004 - 2007 Saxonica Limited. All Rights Reserved 
+// Copyright (c) 2004-2020 Saxonica Limited

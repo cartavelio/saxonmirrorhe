@@ -48,6 +48,7 @@ public class DotNetLocalizerFactory extends LocalizerFactory {
      * @since 9.2
      */
 
+    @Override
     public void setLanguageProperties(String lang, Properties properties) {
         // no action
     }
@@ -64,6 +65,7 @@ public class DotNetLocalizerFactory extends LocalizerFactory {
      */
 
     /*@Nullable*/
+    @Override
     public Numberer getNumberer(String language, String country) {
 
         String defaultLanguage = config.getDefaultLanguage();
@@ -131,6 +133,7 @@ public class DotNetLocalizerFactory extends LocalizerFactory {
      * Copy the state of this factory to create a new LocalizerFactory
      */
 
+    @Override
     public DotNetLocalizerFactory copy() {
         DotNetLocalizerFactory f = new DotNetLocalizerFactory(config);
         f.numbererClasses = numbererClasses;
@@ -139,4 +142,4 @@ public class DotNetLocalizerFactory extends LocalizerFactory {
 }
 
 
-// Copyright (c) 2009 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

@@ -6,6 +6,7 @@ import net.sf.saxon.lib.Feature;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.ExternalObject;
@@ -24,11 +25,14 @@ import java.sql.SQLException;
 
 public class SQLConnectFn extends SystemFunction {
 
+    @Override
     public ExternalObject<Connection> call(XPathContext context, Sequence[] arguments) throws XPathException {
 
         if (context.getConfiguration().getBooleanProperty(Feature.ALLOW_MULTITHREADING)) {
-            context.getConfiguration().getErrorListener().warning(
-                    new XPathException("SQL JDBC Connections are not thread-safe, so Saxon multithreading should be disabled by setting Feature.ALLOW_MULTITHREADING to false"));
+            context.getController().getErrorReporter().report(
+                    new XmlProcessingIncident("SQL JDBC Connections are not thread-safe, "
+                                         + "so Saxon multithreading should be disabled by setting "
+                                         + "Feature.ALLOW_MULTITHREADING to false").asWarning());
 
         }
 
@@ -84,7 +88,7 @@ public class SQLConnectFn extends SystemFunction {
 
     }
 
-    private String str(Sequence<?> iterator) throws XPathException {
+    private String str(Sequence iterator) throws XPathException {
         Item item = iterator.head();
         return item == null ? "" : item.getStringValue();
     }
@@ -93,4 +97,4 @@ public class SQLConnectFn extends SystemFunction {
 
 
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

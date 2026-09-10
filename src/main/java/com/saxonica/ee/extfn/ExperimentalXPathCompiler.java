@@ -19,13 +19,12 @@ import net.sf.saxon.expr.instruct.LocalParam;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.functions.Current;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
 import net.sf.saxon.functions.registry.XSLT30FunctionSet;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.lib.StandardErrorListener;
+import net.sf.saxon.lib.StandardDiagnostics;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
@@ -35,13 +34,14 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.option.exslt.Random;
 import net.sf.saxon.option.exslt.Sets;
 import net.sf.saxon.pattern.*;
+import net.sf.saxon.s9api.HostLanguage;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.DecimalFormatManager;
 import net.sf.saxon.trans.KeyManager;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
@@ -59,13 +59,11 @@ public class ExperimentalXPathCompiler {
 
     private Configuration config;
     private FunctionLibrary globalFunctionLibrary;
-    private Map<StructuredQName, GroundedValue<?>> globalVariables = new HashMap<>();
+    private Map<StructuredQName, GroundedValue> globalVariables = new HashMap<>();
     private SEFStaticContext uniformStaticContext;
     private Map<String, Map<String, String>> namespaceBindingsCache = new HashMap<>();
     private NodeInfo mostRecentNsAttribute = null;
     private Map<String, String> mostRecentNsBindings = null;
-
-    private final static SymbolicName.F CURRENT_FN = new SymbolicName.F(Current.FN_CURRENT, 0);
 
     private ExperimentalXPathCompiler() {
 
@@ -86,7 +84,7 @@ public class ExperimentalXPathCompiler {
         compiler.config = context.getConfiguration();
         for (KeyValuePair entry : globalVariables.keyValuePairs()) {
             String name = entry.key.getStringValue();
-            GroundedValue<?> value = entry.value;
+            GroundedValue value = entry.value;
             compiler.globalVariables.put(StructuredQName.fromEQName(name), value);
         }
 
@@ -105,7 +103,7 @@ public class ExperimentalXPathCompiler {
         libraryList.addFunctionLibrary(MapFunctionSet.getInstance());
         libraryList.addFunctionLibrary(ArrayFunctionSet.getInstance());
         libraryList.addFunctionLibrary(new ConstructorFunctionLibrary(context.getConfiguration()));
-        libraryList.addFunctionLibrary(new VendorFunctionSetEE((EnterpriseConfiguration)context.getConfiguration()));
+        libraryList.addFunctionLibrary(new VendorFunctionSetEE((EnterpriseConfiguration) context.getConfiguration()));
         libraryList.addFunctionLibrary(javaLib);
         libraryList.addFunctionLibrary(compiler.setupUserFunctionLibrary(globalFunctions));
         compiler.globalFunctionLibrary = libraryList;
@@ -124,7 +122,7 @@ public class ExperimentalXPathCompiler {
     private static Optional<Map<String, String>> makeNamespaceMap(MapItem namespaceContext) {
         Map<String, String> bindings = new HashMap<>();
         for (KeyValuePair kvp : namespaceContext.keyValuePairs()) {
-            bindings.put(kvp.key.getStringValue(), ((StringValue)kvp.value).getStringValue());
+            bindings.put(kvp.key.getStringValue(), ((StringValue) kvp.value).getStringValue());
         }
         bindings.put("xml", NamespaceConstant.XML);
         return Optional.of(bindings);
@@ -134,17 +132,14 @@ public class ExperimentalXPathCompiler {
 
         Map<SymbolicName.F, UserFunction> library = new HashMap<>();
         if (globalFunctions != null) {
-            NameTest argTest = new NameTest(Type.ELEMENT, NamespaceConstant.SAXON_XSLT_EXPORT,
-                                            "arg", config.getNamePool());
-            AtomicIterator keys = globalFunctions.keys();
             for (KeyValuePair kvp : globalFunctions.keyValuePairs()) {
                 AtomicValue key = kvp.key;
                 String nameArity = key.getStringValue();
                 String[] parts = nameArity.split("#");
                 int arity = Integer.parseInt(parts[1]);
                 StructuredQName name = StructuredQName.fromEQName(parts[0]);
-                MapItem typeAsMap = (MapItem)kvp.value;
-                SpecificFunctionType ft = (SpecificFunctionType)fromMap(typeAsMap).getPrimaryType();
+                MapItem typeAsMap = (MapItem) kvp.value;
+                SpecificFunctionType ft = (SpecificFunctionType) fromMap(typeAsMap).getPrimaryType();
                 library.put(new SymbolicName.F(name, arity),
                             new ProvisionalSEFFunction(name, arity, ft));
             }
@@ -152,13 +147,6 @@ public class ExperimentalXPathCompiler {
 
 
         return new FunctionLibrary() {
-
-            private NodeInfo getEntry(SymbolicName.F functionName) {
-                String eqName = functionName.getComponentName().getEQName();
-                int arity = functionName.getArity();
-                String key = eqName + "#" + arity;
-                return (NodeInfo)globalFunctions.get(new StringValue(key));
-            }
 
             @Override
             public boolean isAvailable(SymbolicName.F functionName) {
@@ -196,20 +184,18 @@ public class ExperimentalXPathCompiler {
 
     }
 
-    private static long parseTime = 0;
-    private static long sefTime = 0;
-
     /**
      * Compile an XPath expression on behalf of the XX XSLT compiler
-     * @param context the evaluation context
-     * @param exprText the text of the XPath expression
-     * @param sefElement the element node in the SEF tree containing the XPath expression
+     *
+     * @param context          the evaluation context
+     * @param exprText         the text of the XPath expression
+     * @param sefElement       the element node in the SEF tree containing the XPath expression
      * @param localVariableMap map containing information about local variables in the static context.
      *                         The key of the map is the name of the variable as a QName. The associated
      *                         value is a sequence of three items: the declaring element in the SEF
      *                         tree, the slot number, and the declared type of the variable.
-     * @param nsAttribute the nearest in-scope ns attribute, containing a whitespace-separated
-     *                    list of prefix=uri namespace bindings
+     * @param nsAttribute      the nearest in-scope ns attribute, containing a whitespace-separated
+     *                         list of prefix=uri namespace bindings
      * @return a map representing the compiled expression, with two entries: "expr" for the SEF
      * tree of the expression, and "type" for the static type of the expression.
      * @throws XPathException if XPath parsing fails with a static error
@@ -274,13 +260,8 @@ public class ExperimentalXPathCompiler {
             result.initialPut("expr", node);
             result.initialPut("type", st);
 
-        //System.err.println("Done compiling: " + exprText);   // KILROY
-//        if (exprText.contains("map:get($namespaces, $prefix)")) {
-//            System.err.println(QueryResult.serialize(node));
-//        }
             return result;
         } catch (Throwable e) {
-            //e.printStackTrace();  // TODO: temporary for development
             throw e;
         }
     }
@@ -294,10 +275,10 @@ public class ExperimentalXPathCompiler {
      * function definitions, and it performs context-independent expression rewriting for
      * optimization purposes.
      *
-     * @param expression   The expression (as a character string)
-     * @param env          An object giving information about the compile-time
-     *                     context of the expression
-     * @param inCatch      The Xpath is considered to be in the context of an xsl:catch
+     * @param expression The expression (as a character string)
+     * @param env        An object giving information about the compile-time
+     *                   context of the expression
+     * @param inCatch    The Xpath is considered to be in the context of an xsl:catch
      * @param allowEmpty
      * @return an object of type Expression
      * @throws XPathException if the expression contains a static error
@@ -340,7 +321,7 @@ public class ExperimentalXPathCompiler {
             this.localVariableMap = localVariableMap;
             this.nsAttribute = nsAttribute;
             PackageData pd = new PackageData(config);
-            pd.setHostLanguage(Configuration.XPATH);
+            pd.setHostLanguage(HostLanguage.XPATH);
             pd.setSchemaAware(false);
             packageData = pd;
         }
@@ -397,12 +378,12 @@ public class ExperimentalXPathCompiler {
         public Expression bindVariable(StructuredQName qName) throws XPathException {
             String eqName = qName.getEQName();
             StringValue eqNameVal = new StringValue(eqName);
-            GroundedValue<?> localVariableDetails = localVariableMap.get(eqNameVal);
+            GroundedValue localVariableDetails = localVariableMap.get(eqNameVal);
             if (localVariableDetails != null) {
-                NumericValue slotVal = (NumericValue)localVariableDetails.itemAt(1);
+                NumericValue slotVal = (NumericValue) localVariableDetails.itemAt(1);
                 SEFLocalVariableReference var = new SEFLocalVariableReference(qName);
-                var.setSlotNumber((int)slotVal.longValue());
-                StringValue type = (StringValue)localVariableDetails.itemAt(2);
+                var.setSlotNumber((int) slotVal.longValue());
+                StringValue type = (StringValue) localVariableDetails.itemAt(2);
                 var.setDeclaredType(type.getStringValue());
                 NodeInfo decl = (NodeInfo) localVariableDetails.itemAt(0);
                 if (decl.getLocalPart().equals("accRule") &&
@@ -470,9 +451,7 @@ public class ExperimentalXPathCompiler {
 
         private void makeNamespaceBindings() {
             if (staticNamespaceBindings == null) {
-                if (nsAttribute == null) {
-                    assert nsAttribute != null;
-                }
+                assert nsAttribute != null;
                 if (mostRecentNsAttribute != null && nsAttribute.isSameNodeInfo(mostRecentNsAttribute)) {
                     staticNamespaceBindings = mostRecentNsBindings;
                 } else {
@@ -497,7 +476,7 @@ public class ExperimentalXPathCompiler {
                         }
                         namespaceBindingsCache.put(ns, staticNamespaceBindings);
                     }
-                } 
+                }
             }
         }
 
@@ -522,7 +501,7 @@ public class ExperimentalXPathCompiler {
         @Override
         public DecimalFormatManager getDecimalFormatManager() {
             if (decimalFormatManager == null) {
-                decimalFormatManager = new DecimalFormatManager(Configuration.XSLT, 30);
+                decimalFormatManager = new DecimalFormatManager(HostLanguage.XSLT, 30);
             }
             return decimalFormatManager;
         }
@@ -554,6 +533,7 @@ public class ExperimentalXPathCompiler {
             this.arity = arity;
             this.functionType = functionType;
         }
+
         @Override
         public FunctionItemType getFunctionItemType() {
             return functionType;
@@ -570,7 +550,7 @@ public class ExperimentalXPathCompiler {
         }
 
         @Override
-        public Sequence<?> call(XPathContext context, Sequence[] args) throws XPathException {
+        public Sequence call(XPathContext context, Sequence[] args) throws XPathException {
             return null;
         }
 
@@ -581,7 +561,7 @@ public class ExperimentalXPathCompiler {
 
         @Override
         public void export(ExpressionPresenter out) throws XPathException {
-            //no action 
+            //no action
         }
     }
 
@@ -677,6 +657,7 @@ public class ExperimentalXPathCompiler {
 
     /**
      * Method that can be called from the XSLT code to trigger a debugger breakpoint
+     *
      * @param s an identifying string
      */
     public static void breakpoint(String s) {
@@ -688,7 +669,7 @@ public class ExperimentalXPathCompiler {
      */
 
     public static void stackTrace(XPathContext context) {
-        StandardErrorListener.printStackTrace(context,context.getConfiguration().getLogger(), 2);
+        new StandardDiagnostics().printStackTrace(context, context.getConfiguration().getLogger(), 2);
     }
 
     /**
@@ -697,12 +678,13 @@ public class ExperimentalXPathCompiler {
 
     public static MapItem parseSequenceType(
             XPathContext context, String input, NodeInfo nsContext, String xpathDefaultNamespace)
-    throws XPathException {
+            throws XPathException {
         try {
             IndependentContext env = new IndependentContext(context.getConfiguration());
             env.setNamespaceResolver(new NamespaceResolver() {
                 String defaultNS = xpathDefaultNamespace == null ? "" : xpathDefaultNamespace;
-                NamespaceResolver supplied = new InscopeNamespaceResolver(nsContext);
+                NamespaceResolver supplied = nsContext.getAllNamespaces();
+
                 @Override
                 public String getURIForPrefix(String prefix, boolean useDefault) {
                     if (prefix.isEmpty() && useDefault) {
@@ -718,7 +700,7 @@ public class ExperimentalXPathCompiler {
                 }
             });
             XPathParser parser = new XPathParser();
-            parser.setLanguage(XPathParser.XPATH, 31);
+            parser.setLanguage(XPathParser.ParsedLanguage.XPATH, 31);
             SequenceType st = parser.parseSequenceType(input, env);
             return makeMap(st);
 
@@ -742,14 +724,14 @@ public class ExperimentalXPathCompiler {
             return result;
         }
 
-        String alphaCode = st.getPrimaryType().getAlphaCode();
+        String alphaCode = primary.getBasicAlphaCode();
         result.initialPut("p", new StringValue(alphaCode));
 
         if (primary instanceof UserAtomicType) {
             result.initialPut("t", new StringValue(((UserAtomicType) primary).getEQName()));
         } else if (primary instanceof UnionType) {
             try {
-                List<GroundedValue<?>> memberMaps = new ArrayList<>();
+                List<GroundedValue> memberMaps = new ArrayList<>();
                 for (PlainType pt : ((UnionType) primary).getPlainMemberTypes()) {
                     memberMaps.add(makeMap(SequenceType.makeSequenceType(pt, StaticProperty.EXACTLY_ONE)));
                 }
@@ -766,19 +748,22 @@ public class ExperimentalXPathCompiler {
             result.initialPut("n", new StringValue("Q{" + ((NamespaceTest) primary).getNamespaceURI() + "}*"));
         } else if (primary instanceof CombinedNodeTest) {
             ((CombinedNodeTest) primary).addTypeDetails(result);
+        } else if (primary instanceof ContentTypeTest) {
+            String annotation = ((ContentTypeTest)primary).getContentType().getEQName();
+            result.initialPut("c", new StringValue(annotation));
         } else if (primary instanceof DocumentNodeTest) {
             ItemType content = ((DocumentNodeTest) primary).getElementTest();
             MapItem contentMap = makeMap(SequenceType.makeSequenceType(content, StaticProperty.EXACTLY_ONE));
             result.initialPut("e", contentMap);
         } else if (primary instanceof FunctionItemType) {
             if (primary instanceof ArrayItemType) {
-                SequenceType memberType = ((ArrayItemType)primary).getMemberType();
+                SequenceType memberType = ((ArrayItemType) primary).getMemberType();
                 if (memberType != SequenceType.ANY_SEQUENCE) {
                     MapItem contentMap = makeMap(memberType);
                     result.initialPut("v", contentMap);
                 }
             } else if (primary instanceof MapType) {
-                AtomicType keyType = ((MapType)primary).getKeyType();
+                AtomicType keyType = ((MapType) primary).getKeyType();
                 if (keyType != BuiltInAtomicType.ANY_ATOMIC) {
                     MapItem keyMap = makeMap(new SequenceType(keyType, StaticProperty.EXACTLY_ONE));
                     result.initialPut("k", keyMap);
@@ -796,7 +781,7 @@ public class ExperimentalXPathCompiler {
                 }
                 SequenceType[] argTypes = ((FunctionItemType) primary).getArgumentTypes();
                 if (argTypes != null) {
-                    List<GroundedValue<?>> argMaps = new ArrayList<>();
+                    List<GroundedValue> argMaps = new ArrayList<>();
                     for (SequenceType at : argTypes) {
                         argMaps.add(makeMap(at));
                     }
@@ -809,47 +794,37 @@ public class ExperimentalXPathCompiler {
         return result;
     }
 
-    /**
-     * Generate a SequenceType object from the map representation of a type
-     * @param typeAsMap the type supplied as a map
-     * @return the corresponding SequenceType
-     */
-
     public static SequenceType fromMap(MapItem typeAsMap) {
         // TODO: this is incomplete, for example it doesn't handle union types, array member types, etc
-        String occ = ((StringValue)typeAsMap.get(new StringValue("o"))).getStringValue();
-        int cardinality = Cardinality.fromOccurrenceIndicator(occ.charAt(0));
+        String occ = ((StringValue) typeAsMap.get(new StringValue("o"))).getStringValue();
+        int cardinality = Cardinality.fromOccurrenceIndicator(occ.substring(0, 1));
         String primary = ((StringValue) typeAsMap.get(new StringValue("p"))).getStringValue();
         if (primary.isEmpty()) {
             return SequenceType.makeSequenceType(AnyItemType.getInstance(), cardinality);
         }
         switch (primary.charAt(0)) {
             case 'A':
-                BuiltInAtomicType bat = BuiltInAtomicType.getTypeWithAlphaCode(primary);
+                BuiltInAtomicType bat = BuiltInAtomicType.fromAlphaCode(primary);
                 assert bat != null;
                 return SequenceType.makeSequenceType(bat, cardinality);
             case 'N':
                 return SequenceType.makeSequenceType(nodeTestFromAlphaCode(primary), cardinality);
             case 'F':
                 if (primary.length() == 1) {
-                    MapItem resultType = (MapItem)typeAsMap.get(new StringValue("r"));
-                    ArrayItem argTypes = (ArrayItem)typeAsMap.get(new StringValue("a"));
+                    MapItem resultType = (MapItem) typeAsMap.get(new StringValue("r"));
+                    ArrayItem argTypes = (ArrayItem) typeAsMap.get(new StringValue("a"));
                     assert resultType != null;
                     assert argTypes != null;
                     SequenceType resultType1 = fromMap(resultType);
                     int arity = argTypes.arrayLength();
                     SequenceType[] argTypeArray = new SequenceType[arity];
-                    for (int i=0; i<arity; i++) {
-                        try {
-                            argTypeArray[i] = fromMap((MapItem)argTypes.get(i));
-                        } catch (XPathException e) {
-                            throw new AssertionError(e);
-                        }
+                    for (int i = 0; i < arity; i++) {
+                        argTypeArray[i] = fromMap((MapItem) argTypes.get(i));
                     }
                     SpecificFunctionType sft = new SpecificFunctionType(argTypeArray, resultType1);
                     return SequenceType.makeSequenceType(sft, cardinality);
                 } else if (primary.charAt(1) == 'M') {
-                    return SequenceType.makeSequenceType(MapType.ANY_MAP_TYPE,cardinality);
+                    return SequenceType.makeSequenceType(MapType.ANY_MAP_TYPE, cardinality);
                 } else if (primary.charAt(1) == 'A') {
                     return SequenceType.makeSequenceType(ArrayItemType.ANY_ARRAY_TYPE, cardinality);
                 } else {
@@ -883,4 +858,6 @@ public class ExperimentalXPathCompiler {
     }
 
 }
+
+// Copyright (c) 2020 Saxonica Limited
 

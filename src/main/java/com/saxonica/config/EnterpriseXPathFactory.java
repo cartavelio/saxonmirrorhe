@@ -5,6 +5,7 @@ import com.saxonica.ee.schema.sdoc.SchemaDocument;
 import com.saxonica.ee.schema.sdoc.SchemaReader;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.xpath.XPathFactoryImpl;
 
@@ -57,11 +58,11 @@ public class EnterpriseXPathFactory extends XPathFactoryImpl {
         EnterpriseConfiguration config = (EnterpriseConfiguration) getConfiguration();
         SchemaCompiler compiler = config.newSchemaCompiler();
         PipelineConfiguration pipe = config.makePipelineConfiguration();
-        pipe.setHostLanguage(Configuration.XML_SCHEMA);
+        pipe.setHostLanguage(HostLanguage.XML_SCHEMA);
         SchemaDocument schemadoc = SchemaReader.read(schemaSource, compiler, pipe, null);
         compiler.validate(schemadoc);
     }
 
 }
 
-// Copyright (c) 2005-2009 Saxonica Limited.
+// Copyright (c) 2005-2020 Saxonica Limited

@@ -6,7 +6,6 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.linked.NodeImpl;
 import net.sf.saxon.type.*;
 
 /**
@@ -43,11 +42,10 @@ public class XSDAttribute extends SchemaElement {
      * @throws SchemaException if any errors are found in the attributes
      */
 
+    @Override
     public void prepareAttributes() throws SchemaException {
 
-        //PreparedSchema schema = getSchema();
-
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         if (isTopLevel()) {
             String[] allowed = {"default", "fixed", "id", "inheritable", "name", "type"};
             allowAttributes(atts, allowed);
@@ -232,20 +230,20 @@ public class XSDAttribute extends SchemaElement {
                 error("When @fixed is present, the @use attribute must not have the value \"prohibited\"");
                 attValue = "optional";  // error recovery
             }
-            short useFlag;
+            Optionality useFlag;
             switch (attValue) {
                 case "required":
-                    useFlag = AttributeUse.REQUIRED;
+                    useFlag = Optionality.REQUIRED;
                     break;
                 case "optional":
-                    useFlag = AttributeUse.OPTIONAL;
+                    useFlag = Optionality.OPTIONAL;
                     break;
                 case "prohibited":
-                    useFlag = AttributeUse.PROHIBITED;
+                    useFlag = Optionality.PROHIBITED;
                     break;
                 default:
                     invalidAttributeValue("use", attValue, "Must be required|optional|prohibited");
-                    useFlag = AttributeUse.OPTIONAL; // error recovery
+                    useFlag = Optionality.OPTIONAL; // error recovery
 
                     break;
             }
@@ -323,6 +321,7 @@ public class XSDAttribute extends SchemaElement {
      * @throws SchemaException if any XML representation constraints are violated
      */
 
+    @Override
     public void validate(SchemaCompiler compiler) throws SchemaException {
 
         String localTargetNamespace = getAttributeValue("", "targetNamespace");
@@ -343,9 +342,7 @@ public class XSDAttribute extends SchemaElement {
             }
         }
 
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while ((child = (NodeImpl)iter.next()) != null) {
+        for (NodeInfo child : children()) {
             int fp = child.getFingerprint();
             if (fp == StandardNames.XS_ANNOTATION) {
 
@@ -380,11 +377,10 @@ public class XSDAttribute extends SchemaElement {
      * @param compiler user for reporting error messages
      */
 
+    @Override
     public void postValidate(SchemaCompiler compiler) throws SchemaException {
 
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while ((child = (NodeImpl)iter.next()) != null) {
+        for (NodeInfo child : children()) {
             int fp = child.getFingerprint();
 
             if (fp == StandardNames.XS_SIMPLE_TYPE && attributeDecl != null) {
@@ -403,4 +399,4 @@ public class XSDAttribute extends SchemaElement {
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

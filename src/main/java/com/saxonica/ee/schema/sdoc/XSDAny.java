@@ -3,7 +3,7 @@ package com.saxonica.ee.schema.sdoc;
 import com.saxonica.ee.schema.ElementWildcard;
 import com.saxonica.ee.schema.SchemaCompiler;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.type.SchemaException;
 
 /**
@@ -27,11 +27,12 @@ public class XSDAny extends AnnotationParent {
      * @throws SchemaException if any errors are found in the attributes
      */
 
+    @Override
     public void prepareAttributes() throws SchemaException {
         wildcard = new ElementWildcard(getSchema().getConfiguration());
         wildcard.setLocator(this);
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         if (getParent() instanceof XSDDefaultOpenContent || getParent() instanceof XSDOpenContent) {
             String[] allowed = {"id", "namespace", "notNamespace", "notQName", "processContents"};
             allowAttributes(atts, allowed);
@@ -109,6 +110,7 @@ public class XSDAny extends AnnotationParent {
      *          if any XML representation constraints are violated
      */
 
+    @Override
     public void validate(SchemaCompiler compiler) throws SchemaException {
         super.validate(compiler);
         if (getAttributeValue("", "notNamespace") != null && compiler.getLanguageVersion() != Configuration.XSD11) {
@@ -143,4 +145,4 @@ public class XSDAny extends AnnotationParent {
     }
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

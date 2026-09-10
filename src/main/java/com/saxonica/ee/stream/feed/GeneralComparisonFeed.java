@@ -1,6 +1,7 @@
 package com.saxonica.ee.stream.feed;
 
 import com.saxonica.ee.stream.watch.Terminator;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.GeneralComparison;
 import net.sf.saxon.expr.XPathContext;
@@ -31,7 +32,7 @@ import java.util.Set;
  */
 
 
-public class GeneralComparisonFeed extends ItemFeed {
+public class GeneralComparisonFeed extends AtomicItemFeed {
 
     private StringCollator collator;
     /*@Nullable*/ private IntHashMap<Set<AtomicMatchKey>> lookupTable;
@@ -41,7 +42,7 @@ public class GeneralComparisonFeed extends ItemFeed {
     private Expression pullOperand;
     private int implicitTimezone;
 
-    public GeneralComparisonFeed(Expression expr, int pushedArg, Feed result, XPathContext context) {
+    public GeneralComparisonFeed(Expression expr, int pushedArg, ItemFeed result, XPathContext context) {
         super(expr, result, context);
         final GeneralComparison gc = (GeneralComparison) getExpression();
         collator = gc.getAtomicComparer().getCollator();
@@ -53,6 +54,7 @@ public class GeneralComparisonFeed extends ItemFeed {
         implicitTimezone = context.getImplicitTimezone();
     }
 
+    @Override
     public void open(Terminator terminator) throws XPathException {
         super.open(terminator);
         done = false;
@@ -68,7 +70,8 @@ public class GeneralComparisonFeed extends ItemFeed {
      *          to report any failure
      */
 
-    public void processItem(Item<?> item) throws XPathException {
+    @Override
+    public void append(Item item) throws XPathException {
         if (!done) {
             // If we haven't already reported a result of true
             XPathContext context = getContext();
@@ -174,20 +177,21 @@ public class GeneralComparisonFeed extends ItemFeed {
     }
 
     private void testValue(Set<AtomicMatchKey> lookup, AtomicMatchKey k) throws XPathException {
+        Outputter out = getNextOutputter();
         if (operator == Token.FEQ) {
             if (lookup.contains(k)) {
                 //System.err.println("Matched on " + k);
                 done = true;
-                getResult().processItem(BooleanValue.TRUE);
-                getResult().close();
+                out.append(BooleanValue.TRUE);
+                out.close();
                 lookupTable = null;
                 getTerminator().terminate();
             }
         } else if (operator == Token.FNE) {
             if (lookup.size() > 1 || !lookup.contains(k)) {
                 done = true;
-                getResult().processItem(BooleanValue.TRUE);
-                getResult().close();
+                out.append(BooleanValue.TRUE);
+                out.close();
                 lookupTable = null;
                 getTerminator().terminate();
             }
@@ -213,8 +217,8 @@ public class GeneralComparisonFeed extends ItemFeed {
                 }
                 if (result) {
                     done = true;
-                    getResult().processItem(BooleanValue.TRUE);
-                    getResult().close();
+                    out.append(BooleanValue.TRUE);
+                    out.close();
                     lookupTable = null;
                     getTerminator().terminate();
                     break;
@@ -223,10 +227,11 @@ public class GeneralComparisonFeed extends ItemFeed {
         }
     }
 
+    @Override
     public void close() throws XPathException {
         if (!done) {
             // If we've come to the end without finding an item that meets the conditions, report the result false
-            getResult().processItem(BooleanValue.FALSE);
+            getNextOutputter().append(BooleanValue.FALSE);
             super.close();
             lookupTable = null;
         }
@@ -234,4 +239,4 @@ public class GeneralComparisonFeed extends ItemFeed {
     }
 }
 
-// Copyright (c) 2010 Saxonica Limited.
+// Copyright (c) 2010-2020 Saxonica Limited

@@ -218,6 +218,7 @@ public class HTMLEntityReferenceGenerator implements CharacterReferenceGenerator
         this.fallback = fallback;
     }
 
+    @Override
     public void outputCharacterReference(int c, Writer writer) throws java.io.IOException {
         if (c > 160 && c <= 255) {
             // if chararacter in iso-8859-1, use an entity reference
@@ -230,4 +231,4 @@ public class HTMLEntityReferenceGenerator implements CharacterReferenceGenerator
     }
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

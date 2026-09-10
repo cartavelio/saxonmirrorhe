@@ -17,7 +17,8 @@ import java.sql.Statement;
 
 public class SQLExecuteFn extends SystemFunction {
 
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Connection connection = SQLFunctionSet.expectConnection(arguments[0], context);
         String statementText = arguments[1].head().getStringValue();
 
@@ -44,4 +45,4 @@ public class SQLExecuteFn extends SystemFunction {
 
 
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

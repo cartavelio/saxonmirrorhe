@@ -73,7 +73,7 @@ public class ChooseAdjunct extends TransmissionAdjunct {
                             return actionInversion.getWatch(watchManager, out, context);
 
                         } else {
-                            action.iterate(context).forEachOrFail(out::processItem);
+                            action.iterate(context).forEachOrFail(out::append);
                             break;
                         }
                     }
@@ -83,7 +83,7 @@ public class ChooseAdjunct extends TransmissionAdjunct {
                 return new Trigger(new NodeTestPattern(ErrorType.getInstance()), new ItemFeed(out, context) {
 
                     @Override
-                    public void processItem(Item<?> item) {
+                    public void append(Item item) {
                         //
                     }
                 }, context);
@@ -94,7 +94,7 @@ public class ChooseAdjunct extends TransmissionAdjunct {
     }
 
     @Override
-    public Trigger makeTransmissionFlow(WatchManager watchManager, Expression exp, Feed out, XPathContext context) throws XPathException {
+    public Trigger makeTransmissionFlow(WatchManager watchManager, Expression exp, ItemFeed out, XPathContext context) throws XPathException {
         WatchMaker wm = getWatchMaker(false);
         if (wm != null) {
             return wm.makeWatch(watchManager, out, context);
@@ -105,7 +105,8 @@ public class ChooseAdjunct extends TransmissionAdjunct {
         }
     }
 
-    public Feed makeItemFeed(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
         return getFeedMaker(-1).makeItemFeed(watchManager, out, context);
     }
 
@@ -124,7 +125,7 @@ public class ChooseAdjunct extends TransmissionAdjunct {
 //
 //        final Choose exp = (Choose) getExpression();
 //
-//        public Feed makeItemFeed(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+//        public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
 //            for (int i=0; i<exp.size(); i++) {
 //                if (exp.getCondition(i).effectiveBooleanValue(context)) {
 //                    Expression action = exp.getAction(i);
@@ -145,8 +146,9 @@ public class ChooseAdjunct extends TransmissionAdjunct {
 
         final Choose exp = (Choose) getExpression();
 
-        public Feed makeItemFeed(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
-            Feed action = new ItemFeed(getExpression(), out, context) {
+        @Override
+        public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
+            ItemFeed action = new ItemFeed(getExpression(), out, context) {
                 private boolean matched = false;
 
                 /**
@@ -161,15 +163,16 @@ public class ChooseAdjunct extends TransmissionAdjunct {
                     for (int i = 0; i < consumingCondition; i++) {
                         boolean truth = exp.getCondition(i).effectiveBooleanValue(getContext());
                         if (truth) {
-                            SequenceIterator<?> iter = exp.getAction(i).iterate(getContext());
-                            processItems(iter, getResult());
+                            SequenceIterator iter = exp.getAction(i).iterate(getContext());
+                            processItems(iter, getNextOutputter());
                             matched = true;
                             break;
                         }
                     }
                 }
 
-                public void processItem(Item<?> item) throws XPathException {
+                @Override
+                public void append(Item item) throws XPathException {
                     boolean truth = ((BooleanValue) item).getBooleanValue();
                     Expression selectedAction = null;
                     if (!matched) {
@@ -185,8 +188,8 @@ public class ChooseAdjunct extends TransmissionAdjunct {
                         }
                     }
                     if (selectedAction != null) {
-                        SequenceIterator<?> iter = selectedAction.iterate(getContext());
-                        processItems(iter, getResult());
+                        SequenceIterator iter = selectedAction.iterate(getContext());
+                        processItems(iter, getNextOutputter());
                     }
                 }
 
@@ -194,7 +197,7 @@ public class ChooseAdjunct extends TransmissionAdjunct {
 
             // Now construct an input feed that computes the EBV. May be unnecessary since
             // the optimizer will have already inserted a call of boolean() in the expression tree.
-            return new BooleanFnStreamer.BooleanFnFeed(getExpression(), action, context);
+            return new BooleanFnFeed.Positive(getExpression(), action, context);
 
         }
     }

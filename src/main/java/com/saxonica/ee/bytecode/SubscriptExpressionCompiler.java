@@ -10,13 +10,14 @@ import net.sf.saxon.om.MemoSequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.GroundedIterator;
-import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.NumericValue;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
+
+import java.util.EnumSet;
 
 /**
  * Bytecode generator for the saxon:item-at() function
@@ -57,12 +58,11 @@ public class SubscriptExpressionCompiler extends ToItemCompiler {
                 ga.dup();
                 // assert stack SequenceIterator SequenceIterator
                 ga.invokeInstanceMethod(SequenceIterator.class, "getProperties");
-                // assert stack SequenceIterator int
-                ga.push(SequenceIterator.GROUNDED);
-                // assert stack SequenceIterator int int
-                ga.math(GeneratorAdapter.AND, Type.INT_TYPE);
-                // assert stack SequenceIterator int
-                ga.ifZCmp(GeneratorAdapter.NE, grounded.label());
+                // assert stack SequenceIterator EnumSet
+                allocateStatic(compiler, SequenceIterator.Property.GROUNDED);
+                // assert stack SequenceIterator EnumSet Enum
+                ga.invokeInstanceMethod(EnumSet.class, "contains", Object.class);
+                ga.ifTrue(grounded);
                 // assert stack SequenceIterator
                 ga.push(i);
                 // assert stack SequenceIterator int
@@ -104,35 +104,9 @@ public class SubscriptExpressionCompiler extends ToItemCompiler {
         LabelInfo popAndReturnEmpty = methodInfo.newLabel("popAndReturnEmpty");
         LabelInfo end = methodInfo.newLabel("end");
 
-        if (th.isSubType(index.getItemType(), BuiltInAtomicType.INTEGER)) {
-            IntegerValue[] bounds = index.getIntegerBounds();
-            if (bounds != null && bounds[1].compareTo(Integer.MAX_VALUE) <= 0) {
-                compiler.compileToPrimitive(index, Integer.TYPE, new OnEmpty.UnwindAndJump(returnEmpty));
-            } else {
-                compiler.compileToItem(index);
-                // Stack: Item
-                if (Cardinality.allowsZero(index.getCardinality())) {
-                    ga.dup();
-                    // Stack: Item Item
-                    ga.ifNull(end.label());
-                }
-                // Stack: Item
-                ga.checkClass(NumericValue.class);
-                // Stack: NumericValue
-                ga.dup();
-                // Stack: NumericValue NumericValue
-                ga.push((long) Integer.MAX_VALUE);
-                // Stack: NumericValue NumericValue long
-                ga.invokeInstanceMethod(NumericValue.class, "compareTo", Long.TYPE);
-                // Stack: NumericValue int
-                ga.ifZCmp(GeneratorAdapter.GT, popAndReturnEmpty.label());
-                // Stack: NumericValue
-                ga.invokeInstanceMethod(NumericValue.class, "longValue");
-                // Stack: long
-                ga.cast(Type.LONG_TYPE, Type.INT_TYPE);
-                // Stack: int
-
-            }
+        IntegerValue[] bounds = index.getIntegerBounds();
+        if (bounds != null && bounds[1].compareTo(Integer.MAX_VALUE) <= 0) {
+            compiler.compileToPrimitive(index, Integer.TYPE, new OnEmpty.UnwindAndJump(returnEmpty));
         } else {
             compiler.compileToItem(index);
             // Stack: Item
@@ -144,25 +118,14 @@ public class SubscriptExpressionCompiler extends ToItemCompiler {
             // Stack: Item
             ga.checkClass(NumericValue.class);
             // Stack: NumericValue
+            ga.invokeInstanceMethod(NumericValue.class, "asSubscript");
+            // Stack: int
             ga.dup();
-            // Stack: NumericValue NumericValue
-            ga.push((long) Integer.MAX_VALUE);
-            // Stack: NumericValue NumericValue long
-            ga.invokeInstanceMethod(NumericValue.class, "compareTo", Long.TYPE);
-            // Stack: NumericValue int
-            ga.ifZCmp(GeneratorAdapter.GT, popAndReturnEmpty.label());
-            // Stack: NumericValue
-            ga.dup();
-            // Stack: NumericValue NumericValue
-            ga.invokeInstanceMethod(NumericValue.class, "isWholeNumber");
-            // Stack: NumericValue int
-            ga.ifFalse(popAndReturnEmpty);
-            // Stack: NumericValue
-            ga.invokeInstanceMethod(NumericValue.class, "longValue");
-            // Stack: long
-            ga.cast(Type.LONG_TYPE, Type.INT_TYPE);
+            // Stack: int int
+            ga.ifZCmp(GeneratorAdapter.LT, popAndReturnEmpty.label());
             // Stack: int
         }
+
 
         // We now have an int on the stack containing the evaluated subscript
 
@@ -195,11 +158,10 @@ public class SubscriptExpressionCompiler extends ToItemCompiler {
         ga.dup();
         // Stack: baseIter baseIter
         ga.invokeInstanceMethod(SequenceIterator.class, "getProperties");
-        // Stack: baseIter int
-        ga.push(SequenceIterator.GROUNDED);
-        ga.math(GeneratorAdapter.AND, Type.INT_TYPE);
-        // Stack: baseIter int
-        ga.ifZCmp(GeneratorAdapter.NE, grounded.label());
+        // Stack: baseIter EnumSet
+        allocateStatic(compiler, SequenceIterator.Property.GROUNDED);
+        ga.invokeInstanceMethod(EnumSet.class, "contains", Object.class);
+        ga.ifTrue(grounded);
         // Stack: baseIter
         ga.loadLocal(indexVar);
         ga.push(1);
@@ -252,7 +214,7 @@ public class SubscriptExpressionCompiler extends ToItemCompiler {
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited
 
 
 

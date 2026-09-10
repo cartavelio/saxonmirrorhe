@@ -1,8 +1,8 @@
 package com.saxonica.ee.stream.adjunct;
 
 import com.saxonica.ee.stream.StreamingPatternMaker;
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
+import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.feed.SnapshotFeed;
 import com.saxonica.ee.stream.watch.Trigger;
 import com.saxonica.ee.stream.watch.WatchMaker;
@@ -22,17 +22,19 @@ public class SnapshotFnStreamer extends ComposingAdjunct implements FeedMaker {
 
 
     @Override
-    public Feed makeComposingAction(WatchManager watchManager, Feed out, XPathContext context) {
+    public ItemFeed makeComposingAction(WatchManager watchManager, ItemFeed out, XPathContext context) {
         return new SnapshotFeed(watchManager, out, context);
     }
 
     /*@Nullable*/
+    @Override
     public WatchMaker getWatchMaker(boolean forGrouping) {
         Expression select = ((SystemFunctionCall) getExpression()).getArg(0);
         final Pattern selection = StreamingPatternMaker.makeStreamingPattern(select, getConfiguration(), null);
         if (selection != null) {
             return new WatchMaker() {
-                public Trigger makeWatch(WatchManager watchManager, Feed out, XPathContext context) {
+                @Override
+                public Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context) {
                     SnapshotFeed actor = new SnapshotFeed(watchManager, out, context);
                     return new Trigger(selection, actor, context);
                 }
@@ -41,10 +43,11 @@ public class SnapshotFnStreamer extends ComposingAdjunct implements FeedMaker {
         return null;
     }
 
-    public Feed makeItemFeed(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
         return new SnapshotFeed(watchManager, out, context);
     }
 
 }
 
-// Copyright (c) 2014-2015 Saxonica Limited.
+// Copyright (c) 2014-2020 Saxonica Limited

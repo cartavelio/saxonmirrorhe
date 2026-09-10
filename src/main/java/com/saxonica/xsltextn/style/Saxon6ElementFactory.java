@@ -20,6 +20,7 @@ public class Saxon6ElementFactory implements ExtensionElementFactory {
      */
 
     /*@Nullable*/
+    @Override
     public Class<? extends StyleElement> getExtensionClass(String localname) {
         if (localname.equals("output")) {
             // reinstated in 9.9 for docbook purposes
@@ -30,4 +31,4 @@ public class Saxon6ElementFactory implements ExtensionElementFactory {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

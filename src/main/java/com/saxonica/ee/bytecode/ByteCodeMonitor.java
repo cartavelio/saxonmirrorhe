@@ -60,7 +60,7 @@ public class ByteCodeMonitor {
      * <p>The following attributes are output for each candidate expression. Timings are in microseconds:</p>
      * <ul>
      * <li><code>text</code> Abbreviated text of the expression</li>
-     * <li><code>intCout</code> Number of times the expression was evaluated in the interpreter</li>
+     * <li><code>intCount</code> Number of times the expression was evaluated in the interpreter</li>
      * <li><code>intTime</code> Cumulative time spent evaluating the expression (including subexpressions) in the interpreter</li>
      * <li><code>bcCount</code> Number of times the expression was evaluated as byte-code</li>
      * <li><code>bcTime</code> Cumulative time spent evaluating the expression (including subexpressions) as byte-code</li>
@@ -129,4 +129,4 @@ public class ByteCodeMonitor {
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited

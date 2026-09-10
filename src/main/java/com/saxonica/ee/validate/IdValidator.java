@@ -6,11 +6,9 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.instruct.DummyNamespaceResolver;
 import net.sf.saxon.expr.number.AbstractNumberer;
 import net.sf.saxon.expr.number.Numberer_en;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
-import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.NodeName;
-import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.*;
@@ -45,7 +43,7 @@ public class IdValidator extends ValidatingFilter {
     private HashSet<String> unresolvedRefs = new HashSet<>(100);
     /*@Nullable*/ private IdValueChecker currentElementChecker = null;
     private FastStringBuffer buffer = new FastStringBuffer(FastStringBuffer.C64);
-    private Location textLocationId = ExplicitLocation.UNKNOWN_LOCATION;
+    private Location textLocationId = Loc.NONE;
     private Map<SchemaType, IdValueChecker> checkerMap = new HashMap<>(10);
 
     /**
@@ -60,13 +58,13 @@ public class IdValidator extends ValidatingFilter {
 
     /**
      * Notify the start of an element
-     * @param nameCode  the name of the element.
-     * @param typeCode the element's type.
-     * @param location  the element's location (or the location of the instruction that created it)
-     * @param properties for future use. Should be set to zero.
      */
 
-    public void startElement(NodeName nameCode, SchemaType typeCode, Location location, int properties) throws XPathException {
+    @Override
+    public void startElement(NodeName elemName, SchemaType typeCode,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties)
+            throws XPathException {
         currentElementChecker = checkerMap.get(typeCode);
         if (currentElementChecker == null) {
             currentElementChecker = allocateChecker(typeCode);
@@ -77,16 +75,28 @@ public class IdValidator extends ValidatingFilter {
         }
         stack.push(new HashSet<>(4));
         level++;
-        nextReceiver.startElement(nameCode, typeCode, location, properties);
+
+        for (AttributeInfo att : attributes) {
+            SimpleType type = att.getType();
+            IdValueChecker checker = checkerMap.get(type);
+            if (checker == null) {
+                checker = allocateChecker(type);
+                checkerMap.put(type, checker);
+            }
+            checker.checkValue(att.getValue(), att.getLocation());
+        }
+
+        nextReceiver.startElement(elemName, typeCode, attributes, namespaces, location, properties);
     }
 
     /**
      * Character data
      */
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         if (currentElementChecker != null) {
-            buffer.append(chars);
+            buffer.cat(chars);
         }
         nextReceiver.characters(chars, locationId, properties);
         textLocationId = locationId;
@@ -96,6 +106,7 @@ public class IdValidator extends ValidatingFilter {
      * End of element
      */
 
+    @Override
     public void endElement() throws XPathException {
         level--;
         stack.pop();
@@ -107,26 +118,25 @@ public class IdValidator extends ValidatingFilter {
         nextReceiver.endElement();
     }
 
-    /**
-     * Handle an attribute
-     *
-     * @param nameCode   integer identifying the name of the attribute
-     * @param type       the type annotation
-     * @param value      the value of the attribute
-     * @param locationId the location of the node in the source, or of the instruction that created it
-     *@param properties additional properties of the attribute  @throws XPathException On any failure to write the attribute
-     */
-
-    public void attribute(NodeName nameCode, SimpleType type, CharSequence value, Location locationId, int properties)
-            throws XPathException {
-        IdValueChecker checker = checkerMap.get(type);
-        if (checker == null) {
-            checker = allocateChecker(type);
-            checkerMap.put(type, checker);
-        }
-        checker.checkValue(value, locationId);
-        nextReceiver.attribute(nameCode, type, value, locationId, properties);
-    }
+//    /**
+//     * Handle an attribute
+//     * @param nameCode   integer identifying the name of the attribute
+//     * @param type       the type annotation
+//     * @param value      the value of the attribute
+//     * @param locationId the location of the node in the source, or of the instruction that created it
+//     * @param properties additional properties of the attribute  @throws XPathException On any failure to write the attribute
+//     */
+//
+//    public void attribute(NodeName nameCode, SimpleType type, CharSequence value, Location locationId, int properties)
+//            throws XPathException {
+//        IdValueChecker checker = checkerMap.get(type);
+//        if (checker == null) {
+//            checker = allocateChecker(type);
+//            checkerMap.put(type, checker);
+//        }
+//        checker.checkValue(value, locationId);
+//        nextReceiver.attribute(nameCode, type, value, locationId, properties);
+//    }
 
     /**
      * Classify a type as one of ID, IDREF, IDREFS, or other.
@@ -208,6 +218,7 @@ public class IdValidator extends ValidatingFilter {
     }
 
 
+    @Override
     public void close() throws XPathException {
         //checkUnresolvedRefs();
         nextReceiver.close();
@@ -243,14 +254,9 @@ public class IdValidator extends ValidatingFilter {
                 }
             }
             ValidationFailure ve = new ValidationFailure(err.toString());
-            int hostLanguage = getPipelineConfiguration().getHostLanguage();
-            if (hostLanguage == Configuration.XSLT) {
-                ve.setErrorCode("XTTE1555");
-            } else if (hostLanguage == Configuration.XQUERY) {
-                ve.setErrorCode("XQDY0027");
-            }
+            ve.setErrorCode(getPipelineConfiguration().isXSLT() ? "XTTE1555" : "XQDY0027");
             ve.setConstraintReference(1, "cvc-id", "1");
-            reportValidationError(ve, ExplicitLocation.UNKNOWN_LOCATION);
+            reportValidationError(ve, Loc.NONE);
             throw ve.makeException();
         }
     }
@@ -263,6 +269,7 @@ public class IdValidator extends ValidatingFilter {
      *         may supply untyped nodes instead of supplying the type annotation
      */
 
+    @Override
     public boolean usesTypeAnnotations() {
         return true;
     }
@@ -278,31 +285,9 @@ public class IdValidator extends ValidatingFilter {
     protected void reportValidationError(ValidationFailure err, Location locationId)
             throws XPathException {
         PipelineConfiguration pipe = getPipelineConfiguration();
-        if (err.getErrorCodeQName() == null) {
-            int language = pipe.getHostLanguage();
-            if (language == Configuration.XSLT) {
-                err.setErrorCode("XTTE1555");
-            } else if (language == Configuration.XQUERY) {
-                err.setErrorCode("XQDY0027");
-            }
-        }
+        err.setErrorCode(pipe.isXSLT() ? "XTTE1555" : "XQDY0027");
         super.reportValidationError(err, false, locationId);
 
-        /*err.setLocator(locationId.saveLocation());
-        ErrorListener listener = pipe.getErrorListener();
-        try {
-            listener.fatalError(err);
-            err.setHasBeenReported(true);
-        } catch (TransformerException e) {
-            err.setHasBeenReported(true);
-            if (e instanceof ValidationException) {
-                throw (ValidationException) e;
-            } else if (e.getException() instanceof ValidationException) {
-                throw (ValidationException) e.getException();
-            } else {
-                throw new ValidationException(e);
-            }
-        } */
     }
 
     /**
@@ -319,12 +304,7 @@ public class IdValidator extends ValidatingFilter {
             // bug 9922, this is considered to be invalid.
             ValidationFailure ve = new ValidationFailure(
                     "An element of type xs:ID must have a parent element within the tree being validated");
-            int hostLanguage = getPipelineConfiguration().getHostLanguage();
-            if (hostLanguage == Configuration.XSLT) {
-                ve.setErrorCode("XTTE1555");
-            } else if (hostLanguage == Configuration.XQUERY) {
-                ve.setErrorCode("XQDY0027");
-            }
+            ve.setErrorCode(getPipelineConfiguration().isXSLT() ? "XTTE1555" : "XQDY0027");
             ve.setConstraintReference(1, "cvc-id", "2");
             reportValidationError(ve, locationId);
             throw ve.makeException();
@@ -334,15 +314,10 @@ public class IdValidator extends ValidatingFilter {
             Set<String> idsForElement = stack.get(level - 1);
             if (getConfiguration().getXsdVersion() == Configuration.XSD10 || !idsForElement.contains(id)) {
                 ValidationFailure ve = new ValidationFailure("ID value '" + id + "' is not unique");
-                int hostLanguage = getPipelineConfiguration().getHostLanguage();
-                if (hostLanguage == Configuration.XSLT) {
-                    ve.setErrorCode("XTTE1555");
-                } else if (hostLanguage == Configuration.XQUERY) {
-                    ve.setErrorCode("XQDY0027");
-                }
+                ve.setErrorCode(getPipelineConfiguration().isXSLT() ? "XTTE1555" : "XQDY0027");
                 ve.setConstraintReference(1, "cvc-id", "2");
                 reportValidationError(ve, locationId);
-                throw ve.makeException();
+                //throw ve.makeException();
             }
         } else {
             idValues.add(id);
@@ -372,6 +347,7 @@ public class IdValidator extends ValidatingFilter {
      */
 
     private class SimpleIdChecker implements IdValueChecker {
+        @Override
         public void checkValue(CharSequence value, Location locationId) throws XPathException {
             String id = Whitespace.trimWhitespace(value).toString();
             processId(id, locationId);
@@ -383,6 +359,7 @@ public class IdValidator extends ValidatingFilter {
      */
 
     private class SimpleIdrefChecker implements IdValueChecker {
+        @Override
         public void checkValue(CharSequence value, Location locationId) {
             String id = Whitespace.trimWhitespace(value).toString();
             // If the value is empty, it must be nilled: see bug #2301
@@ -398,6 +375,7 @@ public class IdValidator extends ValidatingFilter {
      */
 
     private class IdListChecker implements IdValueChecker {
+        @Override
         public void checkValue(CharSequence value, Location locationId) throws XPathException {
             String ids = value.toString();
             StringTokenizer tok = new StringTokenizer(ids, " \t\n\r", false);
@@ -414,6 +392,7 @@ public class IdValidator extends ValidatingFilter {
      */
 
     private class IdrefListChecker implements IdValueChecker {
+        @Override
         public void checkValue(CharSequence value, Location locationId) {
             String ids = value.toString();
             StringTokenizer tok = new StringTokenizer(ids, " \t\n\r", false);
@@ -434,10 +413,11 @@ public class IdValidator extends ValidatingFilter {
     private class UnionChecker implements IdValueChecker {
         private SimpleType type;
 
-        public UnionChecker(SimpleType type) {
+        UnionChecker(SimpleType type) {
             this.type = type;
         }
 
+        @Override
         public void checkValue(CharSequence value, Location locationId) throws XPathException {
             Configuration config = getConfiguration();
             TypeHierarchy th = config.getTypeHierarchy();
@@ -462,6 +442,7 @@ public class IdValidator extends ValidatingFilter {
      */
 
     private static class NonIdChecker implements IdValueChecker {
+        @Override
         public void checkValue(CharSequence value, Location locationId) {
             // do nothing
         }
@@ -471,6 +452,6 @@ public class IdValidator extends ValidatingFilter {
 
 }
 
-// Copyright (c) 2004-2014 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited
 
 

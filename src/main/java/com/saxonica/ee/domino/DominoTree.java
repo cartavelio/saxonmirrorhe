@@ -1,10 +1,7 @@
 package com.saxonica.ee.domino;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.om.GenericTreeInfo;
-import net.sf.saxon.om.NamePool;
-import net.sf.saxon.om.NamespaceBinding;
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.ListIterator;
@@ -67,8 +64,8 @@ public final class DominoTree extends GenericTreeInfo implements NodeVectorTree 
 
     protected Node[] domNodes;
 
-    // for element nodes with namespace declarations, the set of declarations
-    private IntHashMap<NamespaceBinding[]> namespaceDeclarations = new IntHashMap<>();
+    // the namespaces array holds, for element nodes only, a reference to the in-scope namespaces of the element
+    private NamespaceMap[] namespaces;
 
     // when a parent has a large number of children, we keep occasional links from children to parents to reduce searching
     private IntToIntHashMap extraParentPointers = new IntToIntHashMap();
@@ -97,6 +94,7 @@ public final class DominoTree extends GenericTreeInfo implements NodeVectorTree 
         depth = new short[nodes];
         next = new int[nodes];
         nameCode = new int[nodes];
+        namespaces = new NamespaceMap[nodes];
         domNodes = new Node[nodes];
 
         setConfiguration(config);
@@ -124,17 +122,6 @@ public final class DominoTree extends GenericTreeInfo implements NodeVectorTree 
         }
     }
 
-    /**
-     * Set the Configuration that contains this document
-     *
-     * @param config the Saxon configuration
-     */
-
-    public void setConfiguration(/*@NotNull*/ Configuration config) {
-        super.setConfiguration(config);
-        addNamespace(0, NamespaceBinding.XML);
-    }
-
     private void ensureNodeCapacity(short kind) {
         if (nodeKind.length < numberOfNodes + 1) {
             //System.err.println("Number of nodes = " + numberOfNodes);
@@ -144,6 +131,7 @@ public final class DominoTree extends GenericTreeInfo implements NodeVectorTree 
             depth = Arrays.copyOf(depth, k);
             nameCode = Arrays.copyOf(nameCode, k);
             domNodes = Arrays.copyOf(domNodes, k);
+            namespaces = Arrays.copyOf(namespaces, k);
 
         }
     }
@@ -172,6 +160,11 @@ public final class DominoTree extends GenericTreeInfo implements NodeVectorTree 
 
         return numberOfNodes++;
     }
+    
+    @Override
+    public boolean isTyped() {
+        return false;
+    }
 
     public void setCurrentNode(Node node) {
         domNodes[numberOfNodes - 1] = node;
@@ -181,7 +174,7 @@ public final class DominoTree extends GenericTreeInfo implements NodeVectorTree 
         return domNodes[nodeNr];
     }
 
-    public void addParentPointer(int node, int parent) {
+    void addParentPointer(int node, int parent) {
         extraParentPointers.put(node, parent);
     }
 
@@ -216,7 +209,7 @@ public final class DominoTree extends GenericTreeInfo implements NodeVectorTree 
      * @param publicId the public identifier of the entity
      */
 
-    public void addUnparsedEntity(String name, String systemId, String publicId) {
+    void addUnparsedEntity(String name, String systemId, String publicId) {
         if (unparsedEntities == null) {
             unparsedEntities = new HashMap<>(4);
         }
@@ -231,6 +224,7 @@ public final class DominoTree extends GenericTreeInfo implements NodeVectorTree 
      * information is not available then an empty iterator is returned
      */
 
+    @Override
     public Iterator<String> getUnparsedEntityNames() {
         if (unparsedEntities == null) {
             List<String> e = Collections.emptyList();
@@ -252,6 +246,7 @@ public final class DominoTree extends GenericTreeInfo implements NodeVectorTree 
      * be extended in the future to provide additional information.
      */
 
+    @Override
     public String[] getUnparsedEntity(String name) {
         if (unparsedEntities == null) {
             return null;
@@ -280,6 +275,7 @@ public final class DominoTree extends GenericTreeInfo implements NodeVectorTree 
      * @return the node kind
      */
 
+    @Override
     public int getNodeKind(int nodeNr) {
         return nodeKind[nodeNr];
     }
@@ -292,6 +288,7 @@ public final class DominoTree extends GenericTreeInfo implements NodeVectorTree 
      * @return the fingerprint, identifying the node name in the name pool
      */
 
+    @Override
     public int getFingerprint(int nodeNr) {
         int fp = nameCode[nodeNr] & NamePool.FP_MASK;
         return fp == NamePool.FP_MASK ? -1 : fp;
@@ -347,28 +344,12 @@ public final class DominoTree extends GenericTreeInfo implements NodeVectorTree 
         }
     }
 
-
-    /**
-     * Add a namespace node to the current element
-     *
-     * @param parent  the node number of the element
-     * @param binding namespace identifying the prefix and uri
-     */
-    void addNamespace(int parent, /*@NotNull*/ NamespaceBinding binding) {
-
-        NamespaceBinding[] bindings = namespaceDeclarations.get(parent);
-        if (bindings == null) {
-            bindings = new NamespaceBinding[]{binding};
-            namespaceDeclarations.put(parent, bindings);
-        } else {
-            NamespaceBinding[] b2 = Arrays.copyOf(bindings, bindings.length + 1);
-            b2[bindings.length] = binding;
-            namespaceDeclarations.put(parent, b2);
-        }
+    void setNamespaceMap(int element, NamespaceMap namespaceMap) {
+        namespaces[element] = namespaceMap;
     }
 
-    NamespaceBinding[] getNamespaceBindings(int nodeNr) {
-        return namespaceDeclarations.get(nodeNr);
+    NamespaceMap getNamespaceMap(int nodeNr) {
+        return namespaces[nodeNr];
     }
 
     /**
@@ -378,6 +359,7 @@ public final class DominoTree extends GenericTreeInfo implements NodeVectorTree 
      * @return the node at the given position
      */
 
+    @Override
     public final DominoNode getNode(int nr) {
         return new DominoNode(this, nr);
     }
@@ -388,6 +370,7 @@ public final class DominoTree extends GenericTreeInfo implements NodeVectorTree 
      * @return the root node
      */
 
+    @Override
     public DominoNode getRootNode() {
         if (getNodeKind(0) == Type.DOCUMENT) {
             if (root != null) {
@@ -429,6 +412,7 @@ public final class DominoTree extends GenericTreeInfo implements NodeVectorTree 
      */
 
     /*@Nullable*/
+    @Override
     public DominoNode selectID(String id, boolean getParent) {
         if (idTable == null) {
             return null;            // no ID values found
@@ -453,17 +437,6 @@ public final class DominoTree extends GenericTreeInfo implements NodeVectorTree 
 
     public NamePool getNamePool() {
         return getConfiguration().getNamePool();
-    }
-
-
-    /**
-     * Ask whether the document contains any nodes whose type annotation is anything other than
-     * UNTYPED
-     *
-     * @return true if the document contains elements whose type is other than UNTYPED
-     */
-    public boolean isTyped() {
-        return false;
     }
 
     /**
@@ -542,5 +515,5 @@ public final class DominoTree extends GenericTreeInfo implements NodeVectorTree 
     }
 }
 
-// Copyright (c) 2017 Saxonica Ltd
+// Copyright (c) 2017-2020 Saxonica Limited
 

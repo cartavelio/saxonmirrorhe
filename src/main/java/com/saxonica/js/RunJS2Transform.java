@@ -39,9 +39,6 @@ public class RunJS2Transform extends RunJSTransform {
             jsbase = jsbase.replaceAll("\\\\","/");
             JSHelper.jsBase = "file://" + jsbase + "/src/js/src/";
 
-            //engine.eval("load('" + jsbase + "/src/js/nashorn/xmldom/dom.js');");
-            //engine.eval("load('" + jsbase + "/src/js/nashorn/xmldom/sax2.js');");
-            //engine.eval("load('" + jsbase + "/src/js/nashorn/NashornPlatform.js');");
             engine.eval("load('" + jsbase + "/releases/js/2.0/nashorn/SaxonJS.min.js');");
             engine.eval("var SaxonJS = HostPlatform['entryPoint']");
             engine.eval("load('" + jsbase + "/src/js/nashorn/JSTestDriver.js');");
@@ -59,6 +56,7 @@ public class RunJS2Transform extends RunJSTransform {
 
     }
 
+    @Override
     public XdmValue deliverPrincipalResult(Object principalResult, boolean nativeResult, ScriptObjectMirror options) {
         if (nativeResult) {
             try {

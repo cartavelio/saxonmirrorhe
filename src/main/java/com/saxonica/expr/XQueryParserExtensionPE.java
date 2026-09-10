@@ -9,11 +9,9 @@ import net.sf.saxon.type.ItemType;
 
 /**
  * Parser extension for syntax in XQuery Update and/or XQuery 3.0 that is supported
- * only in Saxon-PE or -EE. This includes all syntax needed for the HOF feature. Other XQuery 3.0
- * extensions, such as the switch expression and FLWOR extensions, are moved into the
- * (HE) QueryParser from Saxon 9.6.
+ * only in Saxon-PE or -EE.
  */
-public class XQueryParserExtensionPE extends HofParserExtension {
+public class XQueryParserExtensionPE extends SaxonSyntaxExtension {
 
 
     public XQueryParserExtensionPE() {
@@ -46,6 +44,7 @@ public class XQueryParserExtensionPE extends HofParserExtension {
      * @throws XPathException if parsing fails
      */
 
+    @Override
     public void parseTypeAliasDeclaration(XQueryParser p) throws XPathException {
         p.nextToken();
         p.expect(Token.NAME);
@@ -61,6 +60,6 @@ public class XQueryParserExtensionPE extends HofParserExtension {
 
 }
 
-// Copyright (c) 2008-2014 Saxonica Limited.
+// Copyright (c) 2020 Saxonica Limited
 
 

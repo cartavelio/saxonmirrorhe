@@ -4,12 +4,12 @@ import com.saxonica.ee.schema.*;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.AttributeLocation;
@@ -62,7 +62,7 @@ public abstract class AttributeValidator extends ContentValidator {
      * @throws MissingComponentException if an unresolved reference is found
      */
 
-    public void setAttributeGroup(AttributeGroupDecl attributeGroup) throws MissingComponentException {
+    public void setAttributeGroup(AttributeGroupDecl attributeGroup) {
         if (attributeGroup != null) {
             attributeWildcard = attributeGroup.getAttributeWildcard(null);
             declaredAttributes = attributeGroup.getDeclaredAttributes();
@@ -73,234 +73,143 @@ public abstract class AttributeValidator extends ContentValidator {
 
 
     /**
-     * Handle an attribute
+     * Handle the attributes
      *
-     * @param attName   integer identifying the name of the attribute
-     * @param typeCode   integer identifying the type annotation (ignored)
-     * @param value      the value of the attribute
-     * @param location   location of the originator of the attribute
-     *@param properties additional properties of the attribute  @throws net.sf.saxon.trans.XPathException
-     *          On any failure to write the attribute
+     * @param in                   the supplied attribute collection
+     * @param additionalNamespaces a mutable list to which additional namespace bindings can be added
+     *                             in the event that validation of attributes requires new namespaces
+     *                             (to support fixed or default values of QName-valued attributes)
+     * @return the validated attribute collection
      */
 
+    @Override
     @SuppressWarnings({"ThrowableResultOfMethodCallIgnored"})
-    public void attribute(NodeName attName, SimpleType typeCode, CharSequence value, Location location, int properties)
-            throws XPathException {
-        int fingerprint = attName.obtainFingerprint(getNamePool());
+    public AttributeMap validateAttributes(AttributeMap in, List<NamespaceBinding> additionalNamespaces) throws XPathException {
+        PipelineConfiguration pipe = getPipelineConfiguration();
+        AttributeMap result = EmptyAttributeMap.getInstance();
 
-        if (fingerprint == StandardNames.XSI_NIL) {
-            if (getNillability() == Nillability.DISALLOWED) {
-                String message = "The element is not nillable, so xsi:nil must not be present";
-                ValidationFailure ve = new ValidationFailure(message);
-                ve.setConstraintReference(1, "cvc-elt", "3.1");
-                ve.setSchemaType(getSchemaType());
-                reportValidationError(ve, true, makeAttributeLocation(attName, location));
-            }
-            String b = Whitespace.trim(value.toString());
-            if (getNillability() != Nillability.IGNORED && (b.equals("true") || b.equals("1"))) {
-                nil = true;
-            }
-        }
-        SimpleType annotation = typeCode;
+        for (AttributeInfo att : in) {
+            //System.err.println("AttValidator " + this + "attribute " + attName.getDisplayName());
+            NodeName attName = att.getNodeName();
+            String value = att.getValue();
+            Location location = att.getLocation();
+            SimpleType type = att.getType();
+            int properties = att.getProperties();
+            int fingerprint = att.getNodeName().obtainFingerprint(getNamePool());
 
-        AttributeUse use = declaredAttributes == null ? null : declaredAttributes.get(fingerprint);
-        AttributeDecl decl = null;
-        if (use != null && !use.isProhibited()) {
-            decl = (AttributeDecl) use.getTarget();
-            int counter = attributeCounterMap.get(fingerprint);
-            if (counter != attributeCounterMap.getDefaultValue()) {
-                found[counter] = true;
+            if (fingerprint == StandardNames.XSI_NIL) {
+                if (getNillability() == Nillability.DISALLOWED) {
+                    reportNotNillable(attName, location);
+                }
+                String b = Whitespace.trim(value);
+                if (getNillability() != Nillability.IGNORED && (b.equals("true") || b.equals("1"))) {
+                    nilled = true;
+                }
             }
-        } else {
-            // There is no declaration of this attribute.
-            // Certain XSI attributes are always allowed...
-            boolean implicitlyAllowed = false;
-            String uri = attName.getURI();
-            if (uri.equals(NamespaceConstant.SCHEMA_INSTANCE) &&
-                    (fingerprint == StandardNames.XSI_TYPE ||
-                            fingerprint == StandardNames.XSI_NIL ||
-                            fingerprint == StandardNames.XSI_SCHEMA_LOCATION ||
-                            fingerprint == StandardNames.XSI_NO_NAMESPACE_SCHEMA_LOCATION)) {
-                implicitlyAllowed = true;
-            }
-            if (!implicitlyAllowed) {
-                if (attributeWildcard != null) {
-                    // See if the attribute matches a wildcard
-                    if (!attributeWildcard.getWildcard().matches(attName, false, getConfiguration(), null)) {
-                        String reason = attributeWildcard.getWildcard().reasonForNonMatch(
-                                attName, false, getConfiguration(), null);
-                        String message = "Attribute " +
-                                Err.wrap(attName.getDisplayName(), Err.ATTRIBUTE) +
-                                " is not allowed on " + getContainingElementName() + ". " + reason;
-                        ValidationFailure ve = new ValidationFailure(message);
-                        ve.setConstraintReference(1, "cvc-complex-type", "3.2.1");
-                        ve.setSchemaType(getSchemaType());
-                        reportValidationError(ve, false, makeAttributeLocation(attName, location));
-                    }
-                    String process = attributeWildcard.getWildcard().getProcessContents();
-                    if (process.equals("skip")) {
-                        // do nothing
-                    } else {
-                        decl = (AttributeDecl)
-                                getConfiguration().getAttributeDeclaration(attName.getStructuredQName());
-                        if (decl == null && process.equals("strict")) {
-                            String message = "The <xs:anyAttribute> that matches attribute " +
-                                    Err.wrap(attName.getDisplayName(), Err.ATTRIBUTE) +
-                                    " requires strict validation, but no attribute declaration is available";
-                            ValidationFailure ve = new ValidationFailure(message);
-                            ve.setConstraintReference(1, "cvc-wildcard", "2");
-                            ve.setSchemaType(getSchemaType());
-                            reportValidationError(ve, false, makeAttributeLocation(attName, location));
+            SimpleType annotation = type;
+
+            AttributeUse use = declaredAttributes == null ? null : declaredAttributes.get(fingerprint);
+            AttributeDecl decl = null;
+            if (use != null && !use.isProhibited()) {
+                decl = (AttributeDecl) use.getTarget();
+                int counter = attributeCounterMap.get(fingerprint);
+                if (counter != attributeCounterMap.getDefaultValue()) {
+                    found[counter] = true;
+                }
+            } else {
+                // There is no declaration of this attribute.
+                // Certain XSI attributes are always allowed...
+                boolean implicitlyAllowed = false;
+                String uri = attName.getURI();
+                if (uri.equals(NamespaceConstant.SCHEMA_INSTANCE) &&
+                        (fingerprint == StandardNames.XSI_TYPE ||
+                                 fingerprint == StandardNames.XSI_NIL ||
+                                 fingerprint == StandardNames.XSI_SCHEMA_LOCATION ||
+                                 fingerprint == StandardNames.XSI_NO_NAMESPACE_SCHEMA_LOCATION)) {
+                    implicitlyAllowed = true;
+                }
+                if (!implicitlyAllowed) {
+                    if (attributeWildcard != null) {
+                        // See if the attribute matches a wildcard
+                        if (!attributeWildcard.getWildcard().matches(attName, false, getConfiguration(), null)) {
+                            attributeDoesNotMatchWildcard(attName, location);
                         }
-                    }
-                } else {
-                    String possibleNamespaceMessage = "";
-                    if (declaredAttributes != null) {
-                        for (Iterator<AttributeUse> ii = declaredAttributes.valueIterator(); ii.hasNext(); ) {
-                            AttributeUse au = ii.next();
-                            if (au.getTargetComponentName().getLocalPart().equals(attName.getLocalPart())) {
-                                String ns = au.getTargetComponentName().getURI();
-                                if (ns.isEmpty()) {
-                                    possibleNamespaceMessage = " (it would be allowed in no namespace)";
-                                } else {
-                                    possibleNamespaceMessage = " (it would be allowed in namespace " + ns + ")";
-                                }
-                                break;
+                        String process = attributeWildcard.getWildcard().getProcessContents();
+                        if (process.equals("skip")) {
+                            // do nothing
+                        } else {
+                            decl = (AttributeDecl)
+                                    getConfiguration().getAttributeDeclaration(attName.getStructuredQName());
+                            if (decl == null && process.equals("strict")) {
+                                noAttributeDeclarationAvailable(attName, location);
                             }
                         }
-                    }
-                    String message = "Attribute " + Err.wrap(attName.getDisplayName(), Err.ATTRIBUTE) +
-                            " is not allowed on " + getContainingElementName() + possibleNamespaceMessage;
-                    ValidationFailure ve = new ValidationFailure(message);
-                    ve.setConstraintReference(1, "cvc-complex-type", "3");
-                    ve.setSchemaType(getSchemaType());
-                    reportValidationError(ve, true, makeAttributeLocation(attName, location));
-                }
-            }
-        }
-        // We have found an attribute declaration (either from the declared attributes for this type,
-        // or a global attribute declaration matching a wildcard with process = strict
-        if (decl != null) {
-            SimpleType type = decl.getSimpleType();
-            latestAttributeType = type;
-            if (type.getBuiltInBaseType().getFingerprint() == StandardNames.XS_ID) {
-                idAttributes++;
-                if (idAttributes == 2 && getConfiguration().getXsdVersion() == Configuration.XSD10) {
-                    // we can't always detect this as a schema validity error, because multiple attributes
-                    // may be IDs as a result of wildcard matching
-                    String message = "Element has more than one ID attribute";
-                    ValidationFailure ve = new ValidationFailure(message);
-                    ve.setConstraintReference(1, "cvc-complex-type", "5");
-                    ve.setSchemaType(getSchemaType());
-                    reportValidationError(ve, false, makeAttributeLocation(attName, location));
-                    // Note: in XSD 1.0, cvc-complex-type rule 5 also says that if the type includes a declared
-                    // attribute of type ID, and this attribute is omitted in the instance, then the element must
-                    // not have an ID attribute supplied by means of a wildcard.
-                }
-            }
-            if (type.getFingerprint() == StandardNames.XS_NOTATION) {
-                String message = "Cannot validate against type xs:NOTATION (only against a subtype defining an enumeration of values)";
-                ValidationFailure ve = new ValidationFailure(message);
-                ve.setConstraintReference(1, "enumeration-required-notation", "0");
-                ve.setSchemaType(getSchemaType());
-                reportValidationError(ve, false, location);
-            }
-            ValidationFailure err = type.validateContent(
-                    value, getNamespaceResolver(), getConfiguration().getConversionRules());
-            if (err != null) {
-                err.setConstraintReference(2, "cvc-complex-type", "3");
-//                String elName = getContainingElement() != null ? getContainingElement() + "/" : "";
-//                String message =
-//                        "Validating " + elName + "@" + attName.getDisplayName() + ": " + err.getMessage();
-//                err.setMessage(message);
-//                err.setSchemaType(getSchemaType());
-                Location attLocation = makeAttributeLocation(attName, location);
-                reportValidationError(err, false, attLocation);
-            } else {
-                // if the attribute declaration has an enumeration facet, economize on storage by
-                // passing on the reference to the value already held in the schema.
-                if (type instanceof UserAtomicType) {
-                    value = ((UserAtomicType) type).getSharedInstance(value.toString());
-                }
-
-                annotation = type;
-
-                // Check the value if it is fixed
-
-                boolean matchesFixed = true;
-                if (use != null && use.getFixedValueConstraint() != null) {
-                    matchesFixed = use.getFixedValueConstraint().testFixedValue(
-                            getConfiguration(), value, type, getNamespaceResolver());
-                }
-                if (decl.getFixedValueConstraint() != null) {
-                    matchesFixed = matchesFixed && decl.getFixedValueConstraint().testFixedValue(
-                            getConfiguration(), value, type, getNamespaceResolver());
-                }
-
-                if (!matchesFixed) {
-                    AtomicSequence fixed;
-                    if (use != null) {
-                        fixed = use.getUnderlyingFixedValue();
                     } else {
-                        fixed = decl.getFixedValue();
+                        attributeIsNotAllowed(attName, location);
                     }
-                    String message = "The actual value " + Err.wrap(value, Err.VALUE) +
-                            " of attribute " + Err.wrap(attName.getDisplayName(), Err.ATTRIBUTE) +
-                            " does not match the required fixed value " +
-                            (fixed instanceof AtomicValue ? Err.wrap(fixed.getStringValue(), Err.VALUE) : "");
-                    ValidationFailure ve = new ValidationFailure(message);
-                    ve.setConstraintReference(1, "cvc-au", "0");
-                    ve.setSchemaType(getSchemaType());
-                    reportValidationError(ve, false, makeAttributeLocation(attName, location));
                 }
             }
+            // We have found an attribute declaration (either from the declared attributes for this type,
+            // or a global attribute declaration matching a wildcard with process = strict
+            if (decl != null) {
+                SimpleType declaredType = decl.getSimpleType();
+                latestAttributeType = declaredType;
+                if (declaredType.getBuiltInBaseType().getFingerprint() == StandardNames.XS_ID) {
+                    idAttributes++;
+                    if (idAttributes == 2 && getConfiguration().getXsdVersion() == Configuration.XSD10) {
+                        // we can't always detect this as a schema validity error, because multiple attributes
+                        // may be IDs as a result of wildcard matching
+                        multipleIdAttributes(attName, location);
+                    }
+                }
+                if (declaredType.getFingerprint() == StandardNames.XS_NOTATION) {
+                    notationIsAbstract(location);
+                }
+                ValidationFailure err = declaredType.validateContent(
+                        value, getNamespaceResolver(), getConfiguration().getConversionRules());
+                if (err != null) {
+                    err.setConstraintReference(2, "cvc-complex-type", "3");
+                    //                String elName = getContainingElement() != null ? getContainingElement() + "/" : "";
+                    //                String message =
+                    //                        "Validating " + elName + "@" + attName.getDisplayName() + ": " + err.getMessage();
+                    //                err.setMessage(message);
+                    //                err.setSchemaType(getSchemaType());
+                    Location attLocation = makeAttributeLocation(attName, location);
+                    reportValidationError(err, false, attLocation);
+                } else {
+                    // if the attribute declaration has an enumeration facet, economize on storage by
+                    // passing on the reference to the value already held in the schema.
+                    if (declaredType instanceof UserAtomicType) {
+                        value = ((UserAtomicType) declaredType).getSharedInstance(value);
+                    }
+
+                    annotation = declaredType;
+
+                    // Check the value if it is fixed
+
+                    boolean matchesFixed = true;
+                    if (use != null && use.getFixedValueConstraint() != null) {
+                        matchesFixed = use.getFixedValueConstraint().testFixedValue(
+                                getConfiguration(), value, declaredType, getNamespaceResolver());
+                    }
+                    if (decl.getFixedValueConstraint() != null) {
+                        matchesFixed = matchesFixed && decl.getFixedValueConstraint().testFixedValue(
+                                getConfiguration(), value, declaredType, getNamespaceResolver());
+                    }
+
+                    if (!matchesFixed) {
+                        mismatchWithFixedValue(attName, value, location, use, decl);
+                    }
+                }
+            }
+
+            if ((use != null && use.isInheritable()) || use == null && decl != null && decl.isInheritable()) {
+                getAttributeInheritor().notifyInheritableAttribute(attName, value, location, properties);
+            }
+
+            result = result.put(new AttributeInfo(attName, annotation, value, location, properties));
+            //nextReceiver.attribute(attName, annotation, value, location, properties);
         }
-
-        if ((use != null && use.isInheritable()) || use == null && decl != null && decl.isInheritable()) {
-            getStartTagBuffer().notifyInheritableAttribute(attName, value.toString(), location, properties);
-        }
-
-        nextReceiver.attribute(attName, annotation, value, location, properties);
-    }
-
-    private AttributeLocation makeAttributeLocation(NodeName attName, Location location) {
-        return new AttributeLocation(getContainingElement(), attName.getStructuredQName(), location);
-    }
-
-    /**
-     * Get the SimpleType used for validating the most recent attribute, if any
-     *
-     * @return the SimpleType of the most recent attribute
-     */
-
-    /*@Nullable*/
-    public SimpleType getMostRecentAttributeType() {
-        return latestAttributeType;
-    }
-
-    /**
-     * Handle the start tag for a child element of the element being validated
-     */
-
-    public void startElement(NodeName nameCode, SchemaType typeCode, Location location, int properties)
-            throws XPathException {
-        idAttributes = 0;
-        checkNoChildrenWhenNil(location);
-        super.startElement(nameCode, typeCode, location, properties);
-    }
-
-    /**
-     * Notify the start of the content, that is, the completion of all attributes and namespaces.
-     * The ValidationStack class is responsible for detecting this event and calling this method.
-     * Note that this event is reported for every element even if it has
-     * no attributes, no namespaces, and no content.
-     */
-
-    public final void startContent() throws XPathException {
-
-        // Supply default values for missing attributes, and check that required attributes are present
-
-        final PipelineConfiguration pipe = getPipelineConfiguration();
 
         if (declaredAttributes != null) {
             IntIterator iter2 = declaredAttributes.keyIterator();
@@ -327,22 +236,7 @@ public abstract class AttributeValidator extends ContentValidator {
                         if (value != null) {
                             if (use.getAttributeDeclaration().getSimpleType().isNamespaceSensitive()) {
                                 // If the default value is namespace-sensitive, we need to validate it
-                                ValidationFailure err =
-                                        use.getAttributeDeclaration().getSimpleType().validateContent(
-                                                value,
-                                                getNamespaceResolver(),
-                                                getConfiguration().getConversionRules());
-                                if (err != null) {
-                                    String message = "The namespace-sensitive default value is invalid in the " +
-                                            "namespace context where it is being used";
-                                    ValidationFailure ve = new ValidationFailure(message);
-                                    ve.setSchemaType(getSchemaType());
-                                    // Note: Schema 1.0 says nothing about this case. 1.1 leans towards performing
-                                    // namespace fixup, that is, generating a namespace declaration to make the
-                                    // default value valid. This implies that the default is to be treated as a typed
-                                    // value, not as a string. See 3.4.5.1 Attribute Default Value
-                                    reportValidationError(ve, true, getContainingElementLocationId());
-                                }
+                                checkNamespaceSensitiveDefaultValue(use, value);
                             }
                             // If the attribute is in a namespace, we need to ensure that the name has
                             // a prefix and that the prefix is declared
@@ -377,29 +271,174 @@ public abstract class AttributeValidator extends ContentValidator {
                                         }
                                         prefix = prefix + "1";
                                     }
-                                    nextReceiver.namespace(new NamespaceBinding(prefix, uri), 0);
+                                    additionalNamespaces.add(new NamespaceBinding(prefix, uri));
                                 }
                             }
-
-                            nextReceiver.attribute(new CodedName(key, prefix, getNamePool()),
-                                    use.getAttributeDeclaration().getSimpleType(),
-                                    value,
-                                    ExplicitLocation.UNKNOWN_LOCATION,
-                                    ReceiverOptions.DEFAULTED_ATTRIBUTE);
+                            result = result.put(new AttributeInfo(new CodedName(key, prefix, getNamePool()),
+                                                use.getAttributeDeclaration().getSimpleType(),
+                                                value,
+                                                Loc.NONE,
+                                                ReceiverOption.DEFAULTED_VALUE));
                         }
                     }
                 }
             }
         }
 
-        nextReceiver.startContent();
+        return result;
+    }
+
+    private void checkNamespaceSensitiveDefaultValue(AttributeUse use, String value) throws XPathException {
+        ValidationFailure err =
+                use.getAttributeDeclaration().getSimpleType().validateContent(
+                        value,
+                        getNamespaceResolver(),
+                        getConfiguration().getConversionRules());
+        if (err != null) {
+            String message = "The namespace-sensitive default value is invalid in the " +
+                    "namespace context where it is being used";
+            ValidationFailure ve = new ValidationFailure(message);
+            ve.setSchemaType(getSchemaType());
+            // Note: Schema 1.0 says nothing about this case. 1.1 leans towards performing
+            // namespace fixup, that is, generating a namespace declaration to make the
+            // default value valid. This implies that the default is to be treated as a typed
+            // value, not as a string. See 3.4.5.1 Attribute Default Value
+            reportValidationError(ve, true, getContainingElementLocationId());
+        }
+    }
+
+    private void mismatchWithFixedValue(NodeName attName, String value, Location location, AttributeUse use, AttributeDecl decl) throws XPathException {
+        AtomicSequence fixed;
+        if (use != null) {
+            fixed = use.getUnderlyingFixedValue();
+        } else {
+            fixed = decl.getFixedValue();
+        }
+        String message = "The actual value " + Err.wrap(value, Err.VALUE) +
+                " of attribute " + Err.wrap(attName.getDisplayName(), Err.ATTRIBUTE) +
+                " does not match the required fixed value " +
+                (fixed instanceof AtomicValue ? Err.wrap(fixed.getStringValue(), Err.VALUE) : "");
+        ValidationFailure ve = new ValidationFailure(message);
+        ve.setConstraintReference(1, "cvc-au", "0");
+        ve.setSchemaType(getSchemaType());
+        reportValidationError(ve, false, makeAttributeLocation(attName, location));
+    }
+
+    private void notationIsAbstract(Location location) throws XPathException {
+        String message = "Cannot validate against type xs:NOTATION (only against a subtype defining an enumeration of values)";
+        ValidationFailure ve = new ValidationFailure(message);
+        ve.setConstraintReference(1, "enumeration-required-notation", "0");
+        ve.setSchemaType(getSchemaType());
+        reportValidationError(ve, false, location);
+    }
+
+    private void multipleIdAttributes(NodeName attName, Location location) throws XPathException {
+        String message = "Element has more than one ID attribute";
+        ValidationFailure ve = new ValidationFailure(message);
+        ve.setConstraintReference(1, "cvc-complex-type", "5");
+        ve.setSchemaType(getSchemaType());
+        reportValidationError(ve, false, makeAttributeLocation(attName, location));
+        // Note: in XSD 1.0, cvc-complex-type rule 5 also says that if the type includes a declared
+        // attribute of type ID, and this attribute is omitted in the instance, then the element must
+        // not have an ID attribute supplied by means of a wildcard.
+    }
+
+    private void attributeIsNotAllowed(NodeName attName, Location location) throws XPathException {
+        String possibleNamespaceMessage = "";
+        if (declaredAttributes != null) {
+            for (Iterator<AttributeUse> ii = declaredAttributes.valueIterator(); ii.hasNext(); ) {
+                AttributeUse au = ii.next();
+                if (au.getTargetComponentName().getLocalPart().equals(attName.getLocalPart())) {
+                    String ns = au.getTargetComponentName().getURI();
+                    if (ns.isEmpty()) {
+                        possibleNamespaceMessage = " (it would be allowed in no namespace)";
+                    } else {
+                        possibleNamespaceMessage = " (it would be allowed in namespace " + ns + ")";
+                    }
+                    break;
+                }
+            }
+        }
+        String message = "Attribute " + Err.wrap(attName.getDisplayName(), Err.ATTRIBUTE) +
+                " is not allowed on " + getContainingElementName() + possibleNamespaceMessage;
+        ValidationFailure ve = new ValidationFailure(message);
+        ve.setConstraintReference(1, "cvc-complex-type", "3");
+        ve.setSchemaType(getSchemaType());
+        reportValidationError(ve, true, makeAttributeLocation(attName, location));
+    }
+
+    private void reportNotNillable(NodeName attName, Location location) throws XPathException {
+        String message = "The element is not nillable, so xsi:nil must not be present";
+        ValidationFailure ve = new ValidationFailure(message);
+        ve.setConstraintReference(1, "cvc-elt", "3.1");
+        ve.setSchemaType(getSchemaType());
+        reportValidationError(ve, true, makeAttributeLocation(attName, location));
+    }
+
+    private void noAttributeDeclarationAvailable(NodeName attName, Location location) throws XPathException {
+        String message = "The <xs:anyAttribute> that matches attribute " +
+                Err.wrap(attName.getDisplayName(), Err.ATTRIBUTE) +
+                " requires strict validation, but no attribute declaration is available";
+        ValidationFailure ve = new ValidationFailure(message);
+        ve.setConstraintReference(1, "cvc-wildcard", "2");
+        ve.setSchemaType(getSchemaType());
+        reportValidationError(ve, false, makeAttributeLocation(attName, location));
+    }
+
+    private void attributeDoesNotMatchWildcard(NodeName attName, Location location) throws XPathException {
+        String reason = attributeWildcard.getWildcard().reasonForNonMatch(
+                attName, false, getConfiguration(), null);
+        String message = "Attribute " +
+                Err.wrap(attName.getDisplayName(), Err.ATTRIBUTE) +
+                " is not allowed on " + getContainingElementName() + ". " + reason;
+        ValidationFailure ve = new ValidationFailure(message);
+        ve.setConstraintReference(1, "cvc-complex-type", "3.2.1");
+        ve.setSchemaType(getSchemaType());
+        reportValidationError(ve, false, makeAttributeLocation(attName, location));
+    }
+
+    private AttributeLocation makeAttributeLocation(NodeName attName, Location location) {
+        return new AttributeLocation(getContainingElement(), attName.getStructuredQName(), location);
+    }
+
+    /**
+     * Get the SimpleType used for validating the most recent attribute, if any
+     *
+     * @return the SimpleType of the most recent attribute
+     */
+
+    /*@Nullable*/
+    public SimpleType getMostRecentAttributeType() {
+        return latestAttributeType;
+    }
+
+    /**
+     * Handle the start tag for a child element of the element being validated
+     */
+
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
+
+        //System.err.println("AttValidator " + this + "startElement");
+        idAttributes = 0;
+        checkNoChildrenWhenNil(location);
+        //AttributeCollectionImpl validatedAtts = validateAttributes(attributes);
+
+        final PipelineConfiguration pipe = getPipelineConfiguration();
+
+        NamespaceMap nsMap = namespaces;
+
+        super.startElement(elemName, type, attributes, namespaces, location, properties);
 
         if (locallyInvalid && pendingMessages != null) {
             for (String pendingMessage : pendingMessages) {
-                nextReceiver.comment(pendingMessage, ExplicitLocation.UNKNOWN_LOCATION, 0);
+                nextReceiver.comment(pendingMessage, Loc.NONE, ReceiverOption.NONE);
             }
         }
     }
+
 
     /**
      * Handle character data appearing as a child of the element being validated
@@ -407,9 +446,9 @@ public abstract class AttributeValidator extends ContentValidator {
      * @param chars      The character content
      * @param locationId the location of the node in the source, or of the instruction that created it
      * @param properties Additional properties  @throws net.sf.saxon.trans.XPathException
-     *          If this element does not allow character data
      */
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         checkNoCharactersWhenNil(locationId);
         nextReceiver.characters(chars, locationId, properties);
@@ -423,12 +462,11 @@ public abstract class AttributeValidator extends ContentValidator {
      * be a matching global element declaration), and (b) to allocate a childValidator for the
      * child element.
      *
-     * @param card       the Wildcard that has been matched
-     * @param elementName   the name of the child element
-     * @param locationId the location of the child element
+     * @param card        the Wildcard that has been matched
+     * @param elementName the name of the child element
+     * @param locationId  the location of the child element
      * @return the type annotation to be used for the child element
-     * @throws net.sf.saxon.trans.XPathException
-     *          if the content is invalid
+     * @throws net.sf.saxon.trans.XPathException if the content is invalid
      */
 
     protected SchemaType processWildcardTerm(Wildcard card, NodeName elementName, Location locationId) throws XPathException {
@@ -534,4 +572,4 @@ public abstract class AttributeValidator extends ContentValidator {
 
 }
 
-// Copyright (c) 2004-2018 Saxonica Limited. No warranty.
+// Copyright (c) 2004-2020 Saxonica Limited No warranty.

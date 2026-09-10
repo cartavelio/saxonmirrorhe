@@ -1,7 +1,9 @@
 package com.saxonica.ee.extfn.js;
 
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.style.StyleElement;
@@ -12,13 +14,15 @@ import net.sf.saxon.value.Whitespace;
 /**
  * Handler for ixsl:set-attribute elements in stylesheet.
  * The ixsl:set-attribute element has mandatory attributes name (the name of the attribute to be set)
- * and select (the new value)
+ * and select (the new value), and optional attribute object (the element to set the attribute on, when no object attribute
+ * is present, the current element node is used)
  */
 
 public class IXSLSetAttribute extends StyleElement {
 
     private Expression name;
     private Expression select;
+    private Expression object;
 
     /**
      * Determine whether this node is an instruction.
@@ -26,6 +30,7 @@ public class IXSLSetAttribute extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
@@ -36,25 +41,34 @@ public class IXSLSetAttribute extends StyleElement {
      * @return true: no, the element must be empty
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return false;
     }
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
 
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : atts) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
             if (f.equals("name")) {
-                String nameAtt = Whitespace.trim(atts.getValue(a));
-                name = makeAttributeValueTemplate(nameAtt, a);
+                String nameAtt = Whitespace.trim(att.getValue());
+                name = makeAttributeValueTemplate(nameAtt, att);
             } else if (f.equals("select")) {
-                String selectAtt = atts.getValue(a);
-                select = makeExpression(selectAtt, a);
+                String selectAtt = att.getValue();
+                select = makeExpression(selectAtt, att);
+            } else if (f.equals("object")) {
+                String objectAtt = att.getValue();
+                object = makeExpression(objectAtt, att);
             } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+                checkUnknownAttribute(attName);
             }
+        }
+        if (object == null) {
+            object = makeExpression(".", null);
         }
         if (name == null) {
             reportAbsence("name");
@@ -64,17 +78,20 @@ public class IXSLSetAttribute extends StyleElement {
         }
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         name = typeCheck("name", name);
         select = typeCheck("select", select);
+        object = typeCheck("object", object);
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
-        Expression e = IXSLFunctionSet.getInstance().makeFunction("set-attribute", 2).makeFunctionCall(name, select);
+        Expression e = IXSLFunctionSet.getInstance().makeFunction("set-attribute", 3).makeFunctionCall(name, select, object);
         e.setRetainedStaticContext(makeRetainedStaticContext());
         return e;
     }
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

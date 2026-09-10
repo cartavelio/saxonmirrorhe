@@ -9,7 +9,10 @@ import com.saxonica.ee.stream.watch.WatchManager;
 import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
-import net.sf.saxon.event.*;
+import net.sf.saxon.event.ComplexContentOutputter;
+import net.sf.saxon.event.PipelineConfiguration;
+import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.Sender;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.GlobalContextRequirement;
 import net.sf.saxon.expr.instruct.GlobalVariable;
@@ -17,16 +20,21 @@ import net.sf.saxon.expr.parser.ExpressionAction;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.Optimizer;
 import net.sf.saxon.expr.parser.PathMap;
-import net.sf.saxon.lib.*;
+import net.sf.saxon.lib.Feature;
+import net.sf.saxon.lib.Logger;
+import net.sf.saxon.lib.SerializerFactory;
+import net.sf.saxon.lib.StandardLogger;
 import net.sf.saxon.om.MutableNodeInfo;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.query.DynamicQueryContext;
 import net.sf.saxon.query.QueryModule;
 import net.sf.saxon.query.UpdateAgent;
 import net.sf.saxon.query.XQueryExpression;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.QuitParsingException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
@@ -58,6 +66,7 @@ public class XQueryExpressionEE extends XQueryExpression {
         if (config.isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XQUERY)) {
             final PackageData pd = mainModule.getPackageData();
             ExpressionTool.processExpressionTree(expression, null, new ExpressionAction() {
+                @Override
                 public boolean process(Expression exp, Object result) throws XPathException {
                     if (exp instanceof StreamInstr) {
                         Expression fallback = ((StreamInstr) exp).prepareForStreaming(pd);
@@ -88,7 +97,7 @@ public class XQueryExpressionEE extends XQueryExpression {
             Iterator<GlobalVariable> it = mainModule.getModuleVariables();
             while (it.hasNext()) {
                 GlobalVariable gVar = it.next();
-                if (gVar.getSelectExpression() != null && ExpressionTool.dependsOnFocus(gVar.getSelectExpression())) {
+                if (gVar.getBody() != null && ExpressionTool.dependsOnFocus(gVar.getBody())) {
                     throw new XPathException("Streaming is not possible because a variable $" +
                                                      gVar.getObjectName().getDisplayName() + " depends on the context item");
                 }
@@ -125,9 +134,9 @@ public class XQueryExpressionEE extends XQueryExpression {
             Expression cexp;
             if (config.getCountDown() == 0) {
                 if (config.isTiming()) {
-                    config.getStandardErrorOutput().println("Generating byte code...");
+                    config.getLogger().info("Generating byte code...");
                 }
-                CompilerService compilerService = new CompilerService(config, Configuration.XQUERY);
+                CompilerService compilerService = new CompilerService(config, HostLanguage.XQUERY);
                 cexp = optimizer.compileToByteCode(compilerService, getExpression(), "main",
                                                    Expression.PROCESS_METHOD | Expression.ITERATE_METHOD);
             } else {
@@ -153,6 +162,7 @@ public class XQueryExpressionEE extends XQueryExpression {
      * (notably the copy-modify syntax) without being an updating expression.
      */
 
+    @Override
     public boolean isUpdateQuery() {
         return isUpdating;
     }
@@ -163,6 +173,7 @@ public class XQueryExpressionEE extends XQueryExpression {
      * @param allowed true if projection is allowed
      */
 
+    @Override
     public void setAllowDocumentProjection(boolean allowed) {
         allowDocumentProjection = allowed;
     }
@@ -173,6 +184,7 @@ public class XQueryExpressionEE extends XQueryExpression {
      * @return true if document projection is allowed
      */
 
+    @Override
     public boolean isDocumentProjectionAllowed() {
         return allowDocumentProjection;
     }
@@ -191,7 +203,7 @@ public class XQueryExpressionEE extends XQueryExpression {
         for (PackageData pack : getExecutable().getPackages()) {
             for (GlobalVariable var : pack.getGlobalVariableList()) {
                 if (!var.isUnused()) {
-                    Expression select = var.getSelectExpression();
+                    Expression select = var.getBody();
                     if (select != null) {
                         select.addToPathMap(pathMap, null);
                     }
@@ -214,9 +226,10 @@ public class XQueryExpressionEE extends XQueryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Controller newController(DynamicQueryContext env) throws XPathException {
         Controller controller = new Controller(executable.getConfiguration(), executable);
-        if (isUpdateQuery() && controller.getModel() == TreeModel.TINY_TREE) {
+        if (isUpdateQuery() && !controller.getModel().isMutable()) {
             controller.setModel(TreeModel.LINKED_TREE);
         }
         env.initializeController(controller);
@@ -245,6 +258,7 @@ public class XQueryExpressionEE extends XQueryExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Set<MutableNodeInfo> runUpdate(/*@NotNull*/ DynamicQueryContext dynamicEnv) throws XPathException {
         if (!isUpdating) {
             throw new XPathException("Calling runUpdate() on a non-updating query");
@@ -261,7 +275,8 @@ public class XQueryExpressionEE extends XQueryExpression {
             return pul.getAffectedTrees();
         } catch (XPathException e) {
             if (!e.hasBeenReported()) {
-                controller.getErrorListener().fatalError(e);
+                XmlProcessingException error = new XmlProcessingException(e);
+                controller.getErrorReporter().report(error);
             }
             throw e;
         } finally {
@@ -288,6 +303,7 @@ public class XQueryExpressionEE extends XQueryExpression {
      * @throws XPathException if evaluation of the update query fails, or it this is not an updating query
      */
 
+    @Override
     public void runUpdate(/*@NotNull*/ DynamicQueryContext dynamicEnv, /*@NotNull*/ UpdateAgent agent) throws XPathException {
         if (!isUpdating) {
             throw new XPathException("Calling runUpdate() on a non-updating query");
@@ -306,7 +322,7 @@ public class XQueryExpressionEE extends XQueryExpression {
             }
         } catch (XPathException e) {
             if (!e.hasBeenReported()) {
-                controller.getErrorListener().fatalError(e);
+                controller.getErrorReporter().report(new XmlProcessingException(e));
             }
             throw e;
         } finally {
@@ -326,6 +342,7 @@ public class XQueryExpressionEE extends XQueryExpression {
      * @throws XPathException if streamed evaluation of the query fails
      */
 
+    @Override
     public void runStreamed(DynamicQueryContext dynamicEnv, Source source, Result result, Properties outputProperties) throws XPathException {
         if (inversion == null) {
             throw new XPathException("Query was not compiled for streaming");
@@ -335,7 +352,7 @@ public class XQueryExpressionEE extends XQueryExpression {
         Controller controller = newController(dynamicEnv);
         XPathContextMajor context = controller.newXPathContext();
         PipelineConfiguration pipe = controller.makePipelineConfiguration();
-        pipe.setHostLanguage(Configuration.XQUERY);
+        pipe.setHostLanguage(HostLanguage.XQUERY);
 
 
         SerializerFactory sf = context.getConfiguration().getSerializerFactory();
@@ -343,27 +360,23 @@ public class XQueryExpressionEE extends XQueryExpression {
 
 
         Receiver receiver = sf.getReceiver(result, new SerializationProperties(actualProperties), pipe);
-        context.setReceiver(receiver);
-        String itemSeparator = actualProperties.getProperty(SaxonOutputKeys.ITEM_SEPARATOR);
-        if (receiver instanceof ComplexContentOutputter && itemSeparator != null && !"#absent".equals(itemSeparator)) {
-            receiver = new SequenceNormalizerWithItemSeparator(receiver, itemSeparator);
-            context.setReceiver(receiver);
-        }
+        //context.setReceiver(new ComplexContentOutputter(receiver));
+//        String itemSeparator = actualProperties.getProperty(SaxonOutputKeys.ITEM_SEPARATOR);
+//        if (receiver instanceof ComplexContentOutputter && itemSeparator != null && !"#absent".equals(itemSeparator)) {
+//            receiver = new SequenceNormalizerWithItemSeparator(receiver, itemSeparator);
+//            context.setReceiver(receiver);
+//        }
         receiver.open();
 
 
         WatchManager wm = new WatchManager(pipe);
         wm.setXPathContext(context);
-
-        StartTagBuffer stb = new StartTagBuffer(wm);
-        wm.setStartTagBuffer(stb);
+        wm.setOutputter(new ComplexContentOutputter(receiver));
 
         Watch streamWatch = new StreamWatch(inversion, wm, context);
         wm.addWatch(streamWatch, true);
 
-        stb.setUnderlyingReceiver(wm);
-
-        ContentDetector cd = new ContentDetector(stb);
+        ContentDetector cd = new ContentDetector(wm);
 
 
         context.openStackFrame(stackFrameMap);
@@ -395,6 +408,7 @@ public class XQueryExpressionEE extends XQueryExpression {
      * Output the path map of the query for diagnostics
      */
 
+    @Override
     public void explainPathMap() {
         PathMap map = getPathMap();
         Logger pw = new StandardLogger();
@@ -404,4 +418,4 @@ public class XQueryExpressionEE extends XQueryExpression {
 
 
 }
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

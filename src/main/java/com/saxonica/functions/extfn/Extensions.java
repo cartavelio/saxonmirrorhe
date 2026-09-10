@@ -4,11 +4,14 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.instruct.ParameterSet;
 import net.sf.saxon.expr.number.NamedTimeZone;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.lib.StandardErrorListener;
+import net.sf.saxon.lib.StandardDiagnostics;
 import net.sf.saxon.lib.StandardLogger;
+import net.sf.saxon.ma.map.HashTrieMap;
+import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.serialize.charcode.UTF8CharacterSet;
@@ -24,6 +27,12 @@ import net.sf.saxon.value.*;
 
 import java.io.*;
 import java.net.URL;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -146,6 +155,22 @@ public class Extensions {
     }
 
     /**
+     * Get the values of all tunnel parameters (whether declared in the current template or not).
+     * Returns a value of type {@code map(xs:QName, item()*)}.
+     */
+
+    public static One<MapItem> tunnelParams(XPathContext context) throws XPathException {
+        ParameterSet params = context.getTunnelParameters();
+        params.materializeValues();
+        StructuredQName[] names = params.getParameterNames();
+        HashTrieMap map = new HashTrieMap();
+        for (int i=0; i<params.size(); i++) {
+            map.initialPut(new QNameValue(names[i], BuiltInAtomicType.QNAME), params.getValue(i).materialize());
+        }
+        return new One<>(map);
+    }
+
+    /**
      * Remove a document from the document pool. The effect is that the document becomes eligible for
      * garbage collection, allowing memory to be released when processing of the document has finished.
      * The downside is that a subsequent call on document() with the same URI causes the document to be
@@ -165,7 +190,7 @@ public class Extensions {
         Controller c = context.getController();
         String uri = c.getDocumentPool().getDocumentURI(doc);
         if (uri != null && c instanceof XsltController) {
-            ((XsltController)c).removeUnavailableOutputDestination(new DocumentURI(uri));
+            ((XsltController)c).removeUnavailableOutputDestination(new DocumentKey(uri));
         }
         c.getDocumentPool().discard(doc.getTreeInfo());
         return new ZeroOrOne<>(doc);
@@ -245,8 +270,8 @@ public class Extensions {
      *         comments, processing instructions
      */
 
-    public static ZeroOrOne<QNameValue> typeAnnotation(XPathContext context, ZeroOrOne<Item<?>> value) {
-        Item<?> item = value.head();
+    public static ZeroOrOne<QNameValue> typeAnnotation(XPathContext context, ZeroOrOne<Item> value) {
+        Item item = value.head();
         if (item == null) {
             return ZeroOrOne.empty();
         } else if (item instanceof NodeInfo) {
@@ -283,7 +308,7 @@ public class Extensions {
      *         comments, processing instructions
      */
 
-    public static ZeroOrOne<Function> type(ZeroOrOne<Item<?>> value) {
+    public static ZeroOrOne<Function> type(ZeroOrOne<Item> value) {
         Item item = value.head();
         if (item == null) {
             return ZeroOrOne.empty();
@@ -349,7 +374,7 @@ public class Extensions {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(1000);
         StandardLogger logger = new StandardLogger();
         logger.setPrintStream(new PrintStream(baos));
-        StandardErrorListener.printStackTrace(c, logger, 2);
+        new StandardDiagnostics().printStackTrace(c, logger, 2);
         return One.string(baos.toString().replace("\r", ""));
     }
 
@@ -361,7 +386,7 @@ public class Extensions {
      * of dynamic evaluation errors when the value is used.
      */
 
-    public static ZeroOrMore<Item<?>> eager(ZeroOrMore<Item<?>> value) {
+    public static ZeroOrMore<Item> eager(ZeroOrMore<Item> value) {
         // the work of eagerly evaluating the argument expression is done by the function calling mechanism
         return value;
     }
@@ -388,7 +413,7 @@ public class Extensions {
         }
         // we'll assume it's a PI, it doesn't matter if it isn't...
         final String value = ProcInstParser.getPseudoAttribute(pi.getStringValue(), name.head().getStringValue());
-        return new ZeroOrOne<StringValue>(value == null ? null : new StringValue(value));
+        return new ZeroOrOne<>(value==null ? null : new StringValue(value));
     }
 
     /**
@@ -659,7 +684,7 @@ public class Extensions {
     public static boolean validCharacter(XPathContext c, int in) {
         return c.getConfiguration().getValidCharacterChecker().test(in);
     }
-
+    
     /**
      * Create a parentless namespace node. This function is useful in XQuery when namespaces need to be created
      * dynamically. The effect is the same as that of the xsl:namespace instruction in XSLT.
@@ -731,6 +756,78 @@ public class Extensions {
             return ZeroOrOne.empty();
         }
         return new ZeroOrOne<>(BooleanValue.get(b));
+    }
+
+    /**
+     * Parse a date/time value in a non-standard format
+     * @param input the input string
+     * @param format defines the input format, using the notation of the Java DateTimeFormatter class.
+     *               For example "MM/dd/yyyy" for the popular US format.
+     * @return the date time value represented
+     * @throws XPathException if parsing fails
+     */
+
+    public static ZeroOrOne<CalendarValue> parseDateTime(ZeroOrOne<StringValue> input, One<StringValue> format) throws XPathException {
+        DateTimeFormatter formatter;
+        try {
+            formatter = new DateTimeFormatterBuilder()
+                    .parseCaseInsensitive()
+                    .appendPattern(format.getStringValue())
+                    .toFormatter()
+                    .withResolverStyle(ResolverStyle.SMART);
+        } catch (IllegalArgumentException e) {
+            throw new XPathException("Invalid date/time pattern " + format.getStringValue() + ": " + e.getMessage());
+        }
+        StringValue in = input.head();
+        if (in == null) {
+            return ZeroOrOne.empty();
+        } else {
+            TemporalAccessor ta;
+            try {
+                ta = formatter.parse(in.getStringValueCS());
+            } catch (DateTimeParseException e) {
+                throw new XPathException("Supplied date/time value " + in.getStringValue() + " cannot be parsed using pattern " + format.getStringValue() + ": " + e.getMessage());
+
+            }
+            boolean hasYear = ta.isSupported(ChronoField.YEAR);
+            boolean hasMonth = ta.isSupported(ChronoField.MONTH_OF_YEAR);
+            boolean hasDay = ta.isSupported(ChronoField.DAY_OF_MONTH);
+            boolean hasHour = ta.isSupported(ChronoField.HOUR_OF_DAY);
+            boolean hasMinute = ta.isSupported(ChronoField.MINUTE_OF_HOUR);
+            boolean hasSecond = ta.isSupported(ChronoField.SECOND_OF_MINUTE);
+            boolean hasNano = ta.isSupported(ChronoField.NANO_OF_SECOND);
+            boolean hasTZ = ta.isSupported(ChronoField.OFFSET_SECONDS);
+            int tz = hasTZ ? ta.get(ChronoField.OFFSET_SECONDS) / 60 : CalendarValue.NO_TIMEZONE;
+            int year = hasYear ? ta.get(ChronoField.YEAR) : 0;
+            byte month = hasMonth ? (byte)ta.get(ChronoField.MONTH_OF_YEAR) : 0;
+            byte day = hasDay ? (byte)ta.get(ChronoField.DAY_OF_MONTH) : 0;
+            byte hour = hasHour ? (byte)ta.get(ChronoField.HOUR_OF_DAY) : 0;
+            byte minute = hasMinute ? (byte)ta.get(ChronoField.MINUTE_OF_HOUR) : 0;
+            byte second = hasSecond ? (byte)ta.get(ChronoField.SECOND_OF_MINUTE) : 0;
+            int nano = hasNano ? ta.get(ChronoField.NANO_OF_SECOND) : 0;
+            CalendarValue result = null;
+            if (hasYear && hasMonth && hasDay) {
+                if (hasHour && hasMinute) {
+                    result = new DateTimeValue(year, month, day, hour, minute, second, nano, tz);
+                } else {
+                    result = new DateValue(year, month, day, tz, false);
+                }
+            } else if (hasHour && hasMinute) {
+                result = new TimeValue(hour, minute, second, nano, tz, "");
+            } else if (hasYear && hasMonth) {
+                result = new GYearMonthValue(year, month, tz, false);
+            } else if (hasYear) {
+                result = new GYearValue(year, tz, false);
+            } else if (hasMonth && hasDay) {
+                result = new GMonthDayValue(month, day, tz);
+            } else if (hasMonth) {
+                result = new GMonthValue(month, tz);
+            } else if (hasDay) {
+                result = new GDayValue(day, tz);
+            }
+
+            return new ZeroOrOne<>(result);
+        }
     }
 
     /**
@@ -814,4 +911,4 @@ public class Extensions {
 
 }
 
-// Copyright (c) 2009-2015 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

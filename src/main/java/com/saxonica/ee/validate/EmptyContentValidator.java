@@ -3,8 +3,11 @@ package com.saxonica.ee.validate;
 import com.saxonica.ee.schema.ElementDecl;
 import com.saxonica.ee.schema.UserComplexType;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -50,10 +53,12 @@ public class EmptyContentValidator extends AttributeValidator {
      * @return the schema type that this validator is validating against, or null
      */
 
+    @Override
     public SchemaType getSchemaType() {
         return schemaType;
     }
 
+    @Override
     public ContentValidator getChildValidator() {
         // error paths only
         return new AnyTypeValidator(getNextReceiver());
@@ -63,24 +68,27 @@ public class EmptyContentValidator extends AttributeValidator {
      * Output element start tag (for a child of the element being validated)
      */
 
-    public void startElement(NodeName nameCode, SchemaType typeCode, Location location, int properties)
-            throws XPathException {
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
         this.locationId = location.saveLocation();
         String message = "Invalid child element " +
-                Err.wrap(nameCode.getDisplayName(), Err.ELEMENT) +
+                Err.wrap(elemName.getDisplayName(), Err.ELEMENT) +
                 ", " + getContainingElementName() + " has an empty content model";
         ValidationFailure ve = new ValidationFailure(message);
         ve.setConstraintReference(1, "cvc-complex-type", "2.1");
         ve.setSchemaType(getSchemaType());
         reportValidationError(ve, true, location);
         buffer = null;
-        super.startElement(nameCode, AnyType.getInstance(), location, properties);
+        super.startElement(elemName, AnyType.getInstance(), attributes, namespaces, location, properties);
     }
 
     /**
      * Character data
      */
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         checkNoCharactersWhenNil(locationId);
         if (allowTextNodes) {
@@ -89,7 +97,7 @@ public class EmptyContentValidator extends AttributeValidator {
                 if (buffer == null) {
                     buffer = new FastStringBuffer(chars.length());
                 }
-                buffer.append(chars);
+                buffer.cat(chars);
             }
         } else {
             String message = "Character data is not allowed: " + getContainingElementName() +
@@ -106,8 +114,9 @@ public class EmptyContentValidator extends AttributeValidator {
      * End of element
      */
 
+    @Override
     public void endElement() throws XPathException {
-        if (isNil()) {
+        if (isNilled()) {
             ElementDecl decl = getElementDeclaration();
             if (decl != null && decl.getFixedValue() != null) {
                 String message = "An element with xsi:nil='true' must not have a fixed value";
@@ -123,12 +132,12 @@ public class EmptyContentValidator extends AttributeValidator {
                 String defaultValue = decl.getDefaultValueLexicalForm();
                 CharSequence fixedValue = decl.getFixedValueLexicalForm();
                 if (defaultValue != null && (buffer == null || buffer.isEmpty())) {
-                    characters(defaultValue, ExplicitLocation.UNKNOWN_LOCATION, 0);
+                    characters(defaultValue, Loc.NONE, ReceiverOption.NONE);
                 } else if (fixedValue != null) {
                     FastStringBuffer fsb = buffer;
                     if (fsb == null || fsb.isEmpty()) {
                         // if no value was supplied, "fixed" is treated as "default"
-                        characters(fixedValue, ExplicitLocation.UNKNOWN_LOCATION, 0);
+                        characters(fixedValue, Loc.NONE, ReceiverOption.NONE);
                     } else if (!fsb.toString().equals(fixedValue)) {
                         String message = "The content " + Err.wrap(buffer, Err.VALUE) + " of " +
                                 getContainingElementName() +
@@ -147,4 +156,4 @@ public class EmptyContentValidator extends AttributeValidator {
 
 }
 
-// Copyright � 2004-2012 Saxonica Limited. No warranty.
+// Copyright (c) 2004-2020 Saxonica Limited

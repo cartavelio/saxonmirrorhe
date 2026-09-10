@@ -40,6 +40,7 @@ public class JavaLocalizerFactory extends LocalizerFactory {
      * @since 9.2
      */
 
+    @Override
     public void setLanguageProperties(String lang, Properties properties) {
         String className = properties.getProperty("class");
         if (className != null) {
@@ -74,6 +75,7 @@ public class JavaLocalizerFactory extends LocalizerFactory {
      * numberer will be used)
      */
 
+    @Override
     public Numberer getNumberer(/*@Nullable*/ String language, String country) {
 
         String key;
@@ -100,8 +102,8 @@ public class JavaLocalizerFactory extends LocalizerFactory {
             // We emulate some of the JDK7 features for handling private extension keys.
             // and pass the private keys separately from the Locale
             // We also have to deconstruct the language-country pairing.
-            String parts[] = language.split("-x-");
-            String langRegion[] = parts[0].split("-");
+            String[] parts = language.split("-x-");
+            String[] langRegion = parts[0].split("-");
             String privateKeys = null;
             if (parts.length == 2) {
                 privateKeys = parts[1];
@@ -164,6 +166,7 @@ public class JavaLocalizerFactory extends LocalizerFactory {
      * Copy the state of this factory to create a new LocalizerFactory
      */
 
+    @Override
     public JavaLocalizerFactory copy() {
         JavaLocalizerFactory f = new JavaLocalizerFactory(config);
         f.numbererClassNames = new HashMap<>(numbererClassNames);
@@ -172,7 +175,7 @@ public class JavaLocalizerFactory extends LocalizerFactory {
     }
 }
 
-// Copyright (c) 2009 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited
 
 
 

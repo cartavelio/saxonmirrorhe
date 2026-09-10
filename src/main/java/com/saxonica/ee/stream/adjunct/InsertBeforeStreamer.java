@@ -1,18 +1,19 @@
 package com.saxonica.ee.stream.adjunct;
 
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
+import com.saxonica.ee.stream.feed.GroundedItemFeed;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.om.FleetingParentNode;
 import com.saxonica.ee.stream.watch.Terminator;
 import com.saxonica.ee.stream.watch.WatchMaker;
 import com.saxonica.ee.stream.watch.WatchManager;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.NumericValue;
 
@@ -42,7 +43,8 @@ public class InsertBeforeStreamer extends TransmissionAdjunct implements FeedMak
         return super.getWatchMaker(forGrouping);
     }
 
-    public Feed makeItemFeed(final WatchManager watchManager, Feed out, final XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(final WatchManager watchManager, ItemFeed out, final XPathContext context) throws XPathException {
         consumingArg = findConsumingArg(getExpression(), consumingArg);
         switch (consumingArg) {
             case 0:
@@ -58,12 +60,12 @@ public class InsertBeforeStreamer extends TransmissionAdjunct implements FeedMak
      * Streamed insert-before feed where the streamed argument is the first argument
      */
 
-    private static class InsertBeforeFeed1 extends ItemFeed {
+    private static class InsertBeforeFeed1 extends GroundedItemFeed {
 
         int position;
         int insertPosition;
 
-        public InsertBeforeFeed1(SystemFunctionCall exp, Feed result, XPathContext context) {
+        public InsertBeforeFeed1(SystemFunctionCall exp, ItemFeed result, XPathContext context) {
             super(exp, result, context);
         }
 
@@ -75,6 +77,7 @@ public class InsertBeforeStreamer extends TransmissionAdjunct implements FeedMak
          *          May be raised if a dynamic error occurs
          * @param terminator used for early exit
          */
+        @Override
         public void open(Terminator terminator) throws XPathException {
             super.open(terminator);
             SystemFunctionCall call = (SystemFunctionCall)getExpression();
@@ -93,17 +96,18 @@ public class InsertBeforeStreamer extends TransmissionAdjunct implements FeedMak
          * @throws net.sf.saxon.trans.XPathException
          *          May be raised if a dynamic error occurs
          */
-        public void processItem(Item<?> item) throws XPathException {
+        @Override
+        public void append(Item item) throws XPathException {
             if (++position == insertPosition) {
                 doInsertion();
             }
-            getResult().processItem(item);
+            getNextOutputter().append(item);
         }
 
         private void doInsertion() throws XPathException {
             SystemFunctionCall function = (SystemFunctionCall)getExpression();
             SequenceIterator iter = function.getArg(2).iterate(getContext());
-            processItems(iter, getResult());
+            processItems(iter, getNextOutputter());
         }
 
         /**
@@ -112,11 +116,12 @@ public class InsertBeforeStreamer extends TransmissionAdjunct implements FeedMak
          * Watch goes out of scope. The default implementation does nothing.
          */
 
+        @Override
         public void close() throws XPathException {
             if (++position <= insertPosition) {
                 doInsertion();
             }
-            getResult().close();
+            getNextOutputter().close();
         }
 
         /**
@@ -133,6 +138,7 @@ public class InsertBeforeStreamer extends TransmissionAdjunct implements FeedMak
          * @throws net.sf.saxon.trans.XPathException
          *          May be raised if a dynamic error occurs
          */
+        @Override
         public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
             if (++position == insertPosition) {
                 doInsertion();
@@ -149,6 +155,7 @@ public class InsertBeforeStreamer extends TransmissionAdjunct implements FeedMak
          *          May be raised if a constraint implemented by this
          *          Watch is violated
          */
+        @Override
         public void endSelectedParentNode(Location locationId) throws XPathException {
             getResult().endSelectedParentNode(locationId);
         }
@@ -158,11 +165,11 @@ public class InsertBeforeStreamer extends TransmissionAdjunct implements FeedMak
      * Streamed insert-before feed where the streamed argument is the third argument
      */
 
-    private static class InsertBeforeFeed3 extends ItemFeed {
+    private static class InsertBeforeFeed3 extends GroundedItemFeed {
 
         private SequenceIterator arg0iter;
 
-        public InsertBeforeFeed3(SystemFunctionCall exp, Feed result, XPathContext context) {
+        public InsertBeforeFeed3(SystemFunctionCall exp, ItemFeed result, XPathContext context) {
             super(exp, result, context);
         }
 
@@ -174,18 +181,20 @@ public class InsertBeforeStreamer extends TransmissionAdjunct implements FeedMak
          *          May be raised if a dynamic error occurs
          * @param terminator used for early exit
          */
+        @Override
         public void open(Terminator terminator) throws XPathException {
             super.open(terminator);
             SystemFunctionCall call = (SystemFunctionCall)getExpression();
             int insertPosition = (int) ((NumericValue) call.getArg(1).evaluateItem(getContext())).longValue();
             arg0iter = call.getArg(0).iterate(getContext());
+            Outputter out = getNextOutputter();
             for (int i=1; i<insertPosition; i++) {
                 Item it = arg0iter.next();
                 if (it == null) {
                     arg0iter = null;
                     break;
                 }
-                getResult().processItem(it);
+                out.append(it);
             }
         }
 
@@ -198,8 +207,9 @@ public class InsertBeforeStreamer extends TransmissionAdjunct implements FeedMak
          * @throws net.sf.saxon.trans.XPathException
          *          May be raised if a dynamic error occurs
          */
-        public void processItem(Item<?> item) throws XPathException {
-            getResult().processItem(item);
+        @Override
+        public void append(Item item) throws XPathException {
+            getNextOutputter().append(item);
         }
 
         /**
@@ -208,8 +218,9 @@ public class InsertBeforeStreamer extends TransmissionAdjunct implements FeedMak
          * Watch goes out of scope. The default implementation does nothing.
          */
 
+        @Override
         public void close() throws XPathException {
-            processItems(arg0iter, getResult());
+            processItems(arg0iter, getNextOutputter());
             super.close();
         }
 
@@ -227,6 +238,7 @@ public class InsertBeforeStreamer extends TransmissionAdjunct implements FeedMak
          * @throws net.sf.saxon.trans.XPathException
          *          May be raised if a dynamic error occurs
          */
+        @Override
         public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
             return getResult().startSelectedParentNode(node, locationId);
         }
@@ -240,6 +252,7 @@ public class InsertBeforeStreamer extends TransmissionAdjunct implements FeedMak
          *          May be raised if a constraint implemented by this
          *          Watch is violated
          */
+        @Override
         public void endSelectedParentNode(Location locationId) throws XPathException {
             getResult().endSelectedParentNode(locationId);
         }
@@ -249,4 +262,4 @@ public class InsertBeforeStreamer extends TransmissionAdjunct implements FeedMak
 
 }
 
-// Copyright (c) 2010 Saxonica Limited - 2015.
+// Copyright (c) 2010-2020 Saxonica Limited - 2015.

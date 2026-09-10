@@ -55,4 +55,4 @@ public class JSFunctionLibrary implements FunctionLibrary {
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited

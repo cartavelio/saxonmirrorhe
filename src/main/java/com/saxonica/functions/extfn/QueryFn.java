@@ -7,7 +7,6 @@ import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.query.DynamicQueryContext;
 import net.sf.saxon.query.XQueryExpression;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.ExternalObject;
 
@@ -38,7 +37,8 @@ public class QueryFn extends SystemFunction {
          */
 
         /*@Nullable*/
-        public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             ExternalObject queryExpression = (ExternalObject) arguments[0].head();
             if (queryExpression == null) {
                 return null;
@@ -72,12 +72,7 @@ public class QueryFn extends SystemFunction {
                                 dqc.setParameter(NameOfNode.makeName((NodeInfo) param).getStructuredQName(), val);
                                 break;
                             case Type.DOCUMENT:
-                                AxisIterator kids = ((NodeInfo) param).iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
-                                while (true) {
-                                    NodeInfo kid = kids.next();
-                                    if (kid == null) {
-                                        break;
-                                    }
+                                for (NodeInfo kid : ((NodeInfo) param).children(NodeKindTest.ELEMENT)) {
                                     AtomicSequence val2 = kid.atomize();
                                     dqc.setParameter(NameOfNode.makeName(kid).getStructuredQName(), val2);
                                 }
@@ -98,4 +93,4 @@ public class QueryFn extends SystemFunction {
 
 }
 
-// Copyright (c) 2009-2016 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

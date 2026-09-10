@@ -29,5 +29,5 @@ public class DynamicLoaderPE extends DynamicLoader {
 }
 
 //
-// Copyright (c) 2010 Saxonica Limited
+// Copyright (c) 2010-2020 Saxonica Limited
 //

@@ -2,7 +2,7 @@ package com.saxonica.ee.schema;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Callable;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.AtomicSequence;
@@ -128,7 +128,7 @@ public class ValueConstraint {
      * @return a function whose result gives details of the value constraint
      */
 
-    public Sequence<?> asFunction() {
+    public Sequence asFunction() {
         Callable constraintFunction = (context, arguments) -> {
             String key = arguments[0].head().getStringValue();
             switch (key) {
@@ -225,4 +225,4 @@ public class ValueConstraint {
 
 }
 
-// Copyright (c) 2018 Saxonica Ltd
+// Copyright (c) 2018-2020 Saxonica Limited

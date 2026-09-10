@@ -1,8 +1,6 @@
 package com.saxonica.ee.stream.adjunct;
 
 import com.saxonica.ee.stream.*;
-import com.saxonica.ee.stream.feed.CopyOfFeed;
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.om.FleetingParentNode;
@@ -11,19 +9,20 @@ import com.saxonica.ee.stream.watch.Trigger;
 import com.saxonica.ee.stream.watch.WatchMaker;
 import com.saxonica.ee.stream.watch.WatchManager;
 import com.saxonica.ee.trans.ContextItemStaticInfoEE;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Operand;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.Block;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.ma.map.HashTrieMap;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.pattern.AnchorPattern;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 
@@ -110,7 +109,8 @@ public class NewMapStreamer extends StreamingAdjunct implements FeedMaker {
 
     }
 
-    public Feed makeItemFeed(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
         return new NewMapSimpleFeed(getExpression(), out, context);
     }
 
@@ -121,11 +121,10 @@ public class NewMapStreamer extends StreamingAdjunct implements FeedMaker {
 
     private class NewMapForkingFeed extends ItemFeed {
 
-        WatchManager watchManager;
-        HashTrieMap resultMap;
-        //List<ItemFeed> prongs;
+        private WatchManager watchManager;
+        private HashTrieMap resultMap;
 
-        public NewMapForkingFeed(Expression exp, Feed result, XPathContext context, WatchManager watchManager) {
+        NewMapForkingFeed(Expression exp, ItemFeed result, XPathContext context, WatchManager watchManager) {
             super(exp, result, context);
             this.watchManager = watchManager;
         }
@@ -140,7 +139,6 @@ public class NewMapStreamer extends StreamingAdjunct implements FeedMaker {
         public void open(Terminator terminator) throws XPathException {
             super.open(terminator);
             resultMap = new HashTrieMap();
-            //prongs = new ArrayList<ItemFeed>();
             final Operand[] actions = getChildren();
             for (int i = 0; i < actions.length; i++) {
                 Expression action = actions[i].getChildExpression();
@@ -155,7 +153,7 @@ public class NewMapStreamer extends StreamingAdjunct implements FeedMaker {
                         }
 
                         @Override
-                        public void processItem(Item<?> item) throws XPathException {
+                        public void append(Item item) throws XPathException {
                             for (KeyValuePair pair : ((MapItem) item).keyValuePairs()) {
                                 // there will only be one key/value pair, created by map:entry
                                 if (resultMap.get(pair.key) != null) {
@@ -178,11 +176,10 @@ public class NewMapStreamer extends StreamingAdjunct implements FeedMaker {
                             NewMapForkingFeed.this.setHasFailed();
                         }
                     };
-                    if (Streamability.getPosture(action) != Posture.GROUNDED) {
-                        // test si-fork-006
-                        feed = new CopyOfFeed(watchManager, feed, getContext());
-                    }
-                    //prongs.add(feed);
+//                    if (Streamability.getPosture(action) != Posture.GROUNDED) {
+//                        // test si-fork-006
+//                        feed = new CopyOfFeed(watchManager, feed, getContext());
+//                    }
                     watchManager.addWatch(actionInversions[i].getWatch(watchManager, feed, getContext()), true);
                 } else {
                     MapItem sm = (MapItem) action.evaluateItem(getContext());
@@ -224,7 +221,7 @@ public class NewMapStreamer extends StreamingAdjunct implements FeedMaker {
          * @param item the item to be supplied
          */
         @Override
-        public void processItem(Item<?> item) throws XPathException {
+        public void append(Item item) throws XPathException {
             throw new UnsupportedOperationException();
         }
 
@@ -236,8 +233,8 @@ public class NewMapStreamer extends StreamingAdjunct implements FeedMaker {
         @Override
         public void close() throws XPathException {
             if (!hasFailed()) {
-                Feed out = getResult();
-                out.processItem(resultMap);
+                Outputter out = getNextOutputter();
+                out.append(resultMap);
                 out.close();
             }
             resultMap = null;
@@ -254,7 +251,7 @@ public class NewMapStreamer extends StreamingAdjunct implements FeedMaker {
 
         HashTrieMap resultMap;
 
-        public NewMapSimpleFeed(Expression exp, Feed result, XPathContext context) {
+        NewMapSimpleFeed(Expression exp, ItemFeed result, XPathContext context) {
             super(exp, result, context);
         }
 
@@ -268,7 +265,6 @@ public class NewMapStreamer extends StreamingAdjunct implements FeedMaker {
         @Override
         public void open(Terminator terminator) throws XPathException {
             super.open(terminator);
-            //System.err.println("NMA open() " + toString());
             resultMap = new HashTrieMap();
         }
 
@@ -278,8 +274,7 @@ public class NewMapStreamer extends StreamingAdjunct implements FeedMaker {
          * @param item the item to be supplied
          */
         @Override
-        public void processItem(Item<?> item) throws XPathException {
-            //System.err.println("NMA item() " + toString());
+        public void append(Item item) throws XPathException {
             if (item instanceof MapItem) {
                 for (KeyValuePair pair : ((MapItem) item).keyValuePairs()) {
                     boolean existing = resultMap.initialPut(pair.key, pair.value);
@@ -306,8 +301,8 @@ public class NewMapStreamer extends StreamingAdjunct implements FeedMaker {
         public void close() throws XPathException {
             //System.err.println("NMA close() " + toString());
             if (!hasFailed()) {
-                Feed out = getResult();
-                out.processItem(resultMap);
+                Outputter out = getNextOutputter();
+                out.append(resultMap);
                 out.close();
             }
             resultMap = null;

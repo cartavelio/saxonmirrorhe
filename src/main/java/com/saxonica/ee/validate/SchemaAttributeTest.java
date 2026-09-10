@@ -8,8 +8,6 @@ import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.pattern.SchemaNodeTest;
-import net.sf.saxon.trans.SaxonErrorCode;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.*;
 import net.sf.saxon.z.IntSet;
@@ -22,7 +20,6 @@ import java.util.function.IntPredicate;
 /**
  * A NodeTest of the form schema-attribute(attribute-name)
  *
- * @author Michael H. Kay
  * @since 9.3
  */
 
@@ -49,12 +46,18 @@ public class SchemaAttributeTest extends NodeTest implements SchemaNodeTest {
         requiredType = attributeDecl.getType();
     }
 
+    @Override
+    public StructuredQName getNodeName() {
+        return declaration.getComponentName();
+    }
+
     /**
      * Get the corresponding {@link net.sf.saxon.type.UType}. A UType is a union of primitive item
      * types.
      *
      * @return the smallest UType that subsumes this item type
      */
+    @Override
     public UType getUType() {
         return UType.ATTRIBUTE;
     }
@@ -106,7 +109,8 @@ public class SchemaAttributeTest extends NodeTest implements SchemaNodeTest {
      * @param node the node to be matched
      */
 
-    public boolean matchesNode(/*@NotNull*/ NodeInfo node) {
+    @Override
+    public boolean test(/*@NotNull*/ NodeInfo node) {
         if (node.hasFingerprint()) {
             return node.getNodeKind() == Type.ATTRIBUTE &&
                 node.getFingerprint() == declaration.getFingerprint() &&
@@ -123,6 +127,7 @@ public class SchemaAttributeTest extends NodeTest implements SchemaNodeTest {
      * Determine the default priority of this node test when used on its own as a Pattern
      */
 
+    @Override
     public final double getDefaultPriority() {
         return 0.0;
     }
@@ -134,6 +139,7 @@ public class SchemaAttributeTest extends NodeTest implements SchemaNodeTest {
      * @return the type of node matched by this pattern. e.g. Type.ELEMENT or Type.TEXT
      */
 
+    @Override
     public int getPrimitiveType() {
         return Type.ATTRIBUTE;
     }
@@ -145,6 +151,7 @@ public class SchemaAttributeTest extends NodeTest implements SchemaNodeTest {
      */
 
     /*@NotNull*/
+    @Override
     public Optional<IntSet> getRequiredNodeNames() {
         return Optional.of(new IntSingletonSet(declaration.getFingerprint()));
     }
@@ -154,6 +161,7 @@ public class SchemaAttributeTest extends NodeTest implements SchemaNodeTest {
      * Return AnyType if there are no restrictions. The default implementation returns AnyType.
      */
 
+    @Override
     public SchemaType getContentType() {
         return requiredType;
     }
@@ -175,20 +183,9 @@ public class SchemaAttributeTest extends NodeTest implements SchemaNodeTest {
                 ((SchemaAttributeTest) other).declaration == declaration;
     }
 
-    /**
-     * Generate Javascript code to test whether an item conforms to this item type
-     *
-     * @return a Javascript instruction or sequence of instructions, which can be used as the body
-     * of a Javascript function, and which returns a boolean indication whether the value of the
-     * variable "item" is an instance of this item type.
-     * @throws XPathException if JS code cannot be generated for this item type, for example because
-     *                        the test is schema-aware.
-     * @param knownToBe
-     * @param targetVersion
-     */
     @Override
-    public String generateJavaScriptItemTypeTest(ItemType knownToBe, int targetVersion) throws XPathException {
-        throw new XPathException("Cannot generate JS code for a SchemaAttributeTest", SaxonErrorCode.SXJS0001);
+    public String getBasicAlphaCode() {
+        return "NAS";
     }
 
     /**
@@ -224,4 +221,4 @@ public class SchemaAttributeTest extends NodeTest implements SchemaNodeTest {
 
 }
 
-// Copyright (c) 2005-2016 Saxonica Limited.
+// Copyright (c) 2005-2020 Saxonica Limited

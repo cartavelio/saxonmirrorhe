@@ -1,14 +1,14 @@
 package com.saxonica.ee.stream.adjunct;
 
-import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import com.saxonica.ee.stream.Posture;
 import com.saxonica.ee.stream.PostureAndSweep;
 import com.saxonica.ee.stream.Streamability;
-import com.saxonica.ee.stream.feed.Feed;
+import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.watch.ApplyImportsAction;
 import com.saxonica.ee.stream.watch.Trigger;
 import com.saxonica.ee.stream.watch.WatchMaker;
 import com.saxonica.ee.stream.watch.WatchManager;
+import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.pattern.AnchorPattern;
@@ -40,9 +40,11 @@ public class ApplyImportsAdjunct extends StreamingAdjunct {
         return Streamability.generalStreamabilityRules(getExpression(), list, contextInfo, reasons);
     }
 
+    @Override
     public WatchMaker getWatchMaker(boolean forGrouping) throws XPathException {
         return new WatchMaker() {
-            public Trigger makeWatch(WatchManager watchManager, Feed out, XPathContext context)
+            @Override
+            public Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context)
                     throws XPathException {
                 Component.M actualMode = context.getCurrentMode();
                 ApplyImportsAction actor = new ApplyImportsAction(getExpression(), out, context);
@@ -55,4 +57,4 @@ public class ApplyImportsAdjunct extends StreamingAdjunct {
 
 }
 
-// Copyright (c) 2010-2013 Saxonica Limited.
+// Copyright (c) 2010-2020 Saxonica Limited

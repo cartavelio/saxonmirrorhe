@@ -25,6 +25,7 @@ public class HTMLIndenterPE extends HTMLIndenter {
      * @param props the serialization properties
      */
 
+    @Override
     public void setOutputProperties(Properties props) {
         super.setOutputProperties(props);
         String s = props.getProperty(SaxonOutputKeys.INDENT_SPACES);
@@ -62,4 +63,4 @@ public class HTMLIndenterPE extends HTMLIndenter {
     }
 }
 
-// Copyright (c) 2011 Saxonica Limited
+// Copyright (c) 2011-2020 Saxonica Limited

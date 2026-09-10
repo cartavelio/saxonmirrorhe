@@ -56,6 +56,7 @@ public class NonDeterminizedState extends AutomatonState {
         return lambdaTransitions;
     }
 
+    @Override
     public void displayLambdaTransitions() {
         if (lambdaTransitions != null) {
             FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C64);
@@ -70,5 +71,5 @@ public class NonDeterminizedState extends AutomatonState {
 
 }
 
-// Copyright (c) 2006 Saxonica Limited
+// Copyright (c) 2006-2020 Saxonica Limited
 

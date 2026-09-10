@@ -1,8 +1,8 @@
 package com.saxonica.ee.jaxp;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import net.sf.saxon.Configuration;
 import net.sf.saxon.event.*;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.NoElementsSpaceStrippingRule;
@@ -74,6 +74,7 @@ public class ValidatingReader implements XMLReader {
      * @return the value of the feature if the name is recognized
      * @throws SAXNotRecognizedException if the feature name is not recognized
      */
+    @Override
     public boolean getFeature(String name) throws SAXNotRecognizedException, SAXNotSupportedException {
         if (name.startsWith("http://saxon.sf.net/")) {
             try {
@@ -102,6 +103,7 @@ public class ValidatingReader implements XMLReader {
      * @throws SAXNotRecognizedException if the feature name is not recognized, or if it is the name of a
      *                                   Saxon configuration property whose value is not boolean
      */
+    @Override
     public void setFeature(String name, boolean value) throws SAXNotRecognizedException, SAXNotSupportedException {
         //System.err.println("Set feature " + name + " = " + value);
         if (name.startsWith("http://saxon.sf.net/")) {
@@ -133,6 +135,7 @@ public class ValidatingReader implements XMLReader {
      * @return the value of the property if the name is recognized
      * @throws SAXNotRecognizedException if the property name is not recognized
      */
+    @Override
     public Object getProperty(String name) throws SAXNotRecognizedException, SAXNotSupportedException {
         if (name.startsWith("http://saxon.sf.net/")) {
             try {
@@ -163,6 +166,7 @@ public class ValidatingReader implements XMLReader {
      * @param value the value of the property
      * @throws SAXNotRecognizedException if the property name is not recognized, or if the value is inappropriate
      */
+    @Override
     public void setProperty(String name, Object value) throws SAXNotRecognizedException, SAXNotSupportedException {
         //System.err.println("Set property " + name + " = " + value);
         if (name.startsWith("http://saxon.sf.net/")) {
@@ -206,6 +210,7 @@ public class ValidatingReader implements XMLReader {
      * @param resolver The entity resolver.
      * @see #getEntityResolver
      */
+    @Override
     public void setEntityResolver(EntityResolver resolver) {
         parser.setEntityResolver(resolver);
     }
@@ -217,6 +222,7 @@ public class ValidatingReader implements XMLReader {
      *         has been registered.
      * @see #setEntityResolver
      */
+    @Override
     public EntityResolver getEntityResolver() {
         return parser.getEntityResolver();
     }
@@ -232,6 +238,7 @@ public class ValidatingReader implements XMLReader {
      * @param handler The DTD handler.
      * @see #getDTDHandler
      */
+    @Override
     public void setDTDHandler(DTDHandler handler) {
         parser.setDTDHandler(handler);
     }
@@ -243,6 +250,7 @@ public class ValidatingReader implements XMLReader {
      *         has been registered.
      * @see #setDTDHandler
      */
+    @Override
     public DTDHandler getDTDHandler() {
         return parser.getDTDHandler();
     }
@@ -259,6 +267,7 @@ public class ValidatingReader implements XMLReader {
      * @param handler The content handler.
      * @see #getContentHandler
      */
+    @Override
     public void setContentHandler(ContentHandler handler) {
         this.contentHandler = handler;
     }
@@ -270,6 +279,7 @@ public class ValidatingReader implements XMLReader {
      *         has been registered.
      * @see #setContentHandler
      */
+    @Override
     public ContentHandler getContentHandler() {
         return contentHandler;
     }
@@ -288,6 +298,7 @@ public class ValidatingReader implements XMLReader {
      * @param handler The error handler.
      * @see #getErrorHandler
      */
+    @Override
     public void setErrorHandler(ErrorHandler handler) {
         parser.setErrorHandler(handler);
     }
@@ -299,13 +310,14 @@ public class ValidatingReader implements XMLReader {
      *         has been registered.
      * @see #setErrorHandler
      */
+    @Override
     public ErrorHandler getErrorHandler() {
         return parser.getErrorHandler();
     }
 
     /**
      * Parse an XML document.
-     * <p>The application can use this method to instruct the XML
+     * <p>The application can use this method to component the XML
      * reader to begin parsing an XML document from any valid input
      * source (a character stream, a byte stream, or a URI).</p>
      * <p>Applications may not invoke this method while a parse is in
@@ -340,6 +352,7 @@ public class ValidatingReader implements XMLReader {
      * @see #setContentHandler
      * @see #setErrorHandler
      */
+    @Override
     public void parse(InputSource input) throws IOException, SAXException {
         setValidator(input.getSystemId());
         parser.parse(input);
@@ -364,6 +377,7 @@ public class ValidatingReader implements XMLReader {
      *                                  supplied by the application.
      * @see #parse(org.xml.sax.InputSource)
      */
+    @Override
     public void parse(String systemId) throws IOException, SAXException {
         setValidator(systemId);
         parser.parse(systemId);
@@ -371,8 +385,8 @@ public class ValidatingReader implements XMLReader {
 
     private void setValidator(String systemId) {
         PipelineConfiguration pipe = config.makePipelineConfiguration();
-        pipe.setHostLanguage(Configuration.XML_SCHEMA);
-        pipe.setErrorListener(new SchemaFactoryImpl.ErrorListenerWrappingErrorHandler(parser.getErrorHandler()));
+        pipe.setHostLanguage(HostLanguage.XML_SCHEMA);
+        pipe.setErrorReporter(new SchemaFactoryImpl.ErrorReporterWrappingErrorHandler(parser.getErrorHandler()));
 
         Receiver output;
         if (contentHandler == null) {
@@ -401,5 +415,5 @@ public class ValidatingReader implements XMLReader {
 }
 
 //
-// Copyright (c) 2010 Saxonica Limited.
+// Copyright (c) 2010-2020 Saxonica Limited
 

@@ -5,9 +5,9 @@ import com.saxonica.ee.stream.watch.WatchManager;
 import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.StartTagBuffer;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.SourceDocument;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
@@ -21,6 +21,7 @@ import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.style.StylesheetPackage;
+import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.QuitParsingException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyItemType;
@@ -83,8 +84,7 @@ public class StreamInstr extends SourceDocument implements PushToPull.Pusher {
             }
         } else { */
             List<String> reasons = new ArrayList<>();
-            int streamability = config.getStreamability();
-            Expression doc = checkStreamability(reasons, streamability, false);
+            Expression doc = checkStreamability(reasons, config.isStreamabilityEnabled(), false);
             if (doc != null) {
                 return doc;
             }
@@ -101,10 +101,10 @@ public class StreamInstr extends SourceDocument implements PushToPull.Pusher {
         }
     }
 
-    public Expression checkStreamability(List<String> reasons, int streamability, boolean strict) throws XPathException {
+    public Expression checkStreamability(List<String> reasons, boolean enabled, boolean strict) throws XPathException {
         Configuration config = getConfiguration();
         boolean streamable;
-        if (streamability == Streamability.OFF) {
+        if (!enabled) {
             reasons.add("Streaming is disabled for this Saxon Configuration");
             streamable = false;
         } else {
@@ -129,13 +129,13 @@ public class StreamInstr extends SourceDocument implements PushToPull.Pusher {
             for (String r : reasons) {
                 message.append("\n  *  ").append(r);
             }
-            XPathException err = new XPathException(message.toString(), "XTSE3430", this.getLocation());
-            err.setIsStaticError(true);
+            XmlProcessingIncident err = new XmlProcessingIncident(message.toString(), "XTSE3430", this.getLocation()).asWarning();
+            err.setStaticError(true);
             if (fallback) {
-                config.getErrorListener().warning(err);
+                config.makeErrorReporter().report(err);
                 return new SourceDocument(getHref(), getBody(), parseOptions);
             } else {
-                throw err;
+                throw XPathException.fromXmlProcessingError(err);
             }
         }
         return null;
@@ -162,6 +162,7 @@ public class StreamInstr extends SourceDocument implements PushToPull.Pusher {
      * @return the depencies, as a bit-mask
      */
 
+    @Override
     public int computeDependencies() {
         // Focus-dependency in the body is not relevant.
         int dependencies = 0;
@@ -217,16 +218,19 @@ public class StreamInstr extends SourceDocument implements PushToPull.Pusher {
 
     /**
      * Evaluate the instruction in push mode
+     *
+     * @param output the final destination for the output of the instruction
      * @param context the evaluation context
      * @throws XPathException in the event of a failure
      * @throws QuitParsingException if there was an early exit, that is, if the instruction was evaluated
      * without reading the input to completion
      */
 
-    public void push(XPathContext context) throws XPathException {
+    @Override
+    public void push(Outputter output, XPathContext context) throws XPathException {
         PackageData pd = getPackageData();
         if (pd instanceof StylesheetPackage && ((StylesheetPackage)pd).isFallbackToNonStreaming()) {
-            super.push(context);
+            super.push(output, context);
         } else {
             Controller controller = context.getController();
             XPathContextMajor c2 = context.newContext();
@@ -235,6 +239,7 @@ public class StreamInstr extends SourceDocument implements PushToPull.Pusher {
 
             WatchManager wm = new WatchManager(pipe);
             wm.setXPathContext(context);
+            wm.setOutputter(output);
 
             AccumulatorRegistryEE am = (AccumulatorRegistryEE)
                     getRetainedStaticContext().getPackageData().getAccumulatorRegistry();
@@ -243,15 +248,10 @@ public class StreamInstr extends SourceDocument implements PushToPull.Pusher {
                 AccumulatorRegistryEE.registerSelectedAccumulators(wm, accumulators);
             }
 
-            StartTagBuffer stb = new StartTagBuffer(wm);
-            wm.setStartTagBuffer(stb);
-
-            stb.setUnderlyingReceiver(wm);
-
-            Receiver out = new ContentDetector(stb);
+            Receiver stream = new ContentDetector(wm);
 
             if (getPackageData() instanceof StylesheetPackage && ((StylesheetPackage) getPackageData()).isStripsTypeAnnotations()) {
-                out = getConfiguration().getAnnotationStripper(out);
+                stream = getConfiguration().getAnnotationStripper(stream);
             }
             if (action == null) {
                 prepareForStreaming(getPackageData());
@@ -270,7 +270,7 @@ public class StreamInstr extends SourceDocument implements PushToPull.Pusher {
                 }
             }
             try {
-                DocumentFn.sendDoc(href, getStaticBaseURIString(), context, getLocation(), out, parseOptions);
+                DocumentFn.sendDoc(href, getStaticBaseURIString(), context, getLocation(), stream, parseOptions);
             } catch (QuitParsingException q) {
                 // This is an early exit indicating success
                 if (verbose) {
@@ -297,10 +297,11 @@ public class StreamInstr extends SourceDocument implements PushToPull.Pusher {
      */
 
     @Override
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         return new PushToPull(this, context).getIterator();
     }
 
+    @Override
     public String getExportTag() {
         return "stream";
     }
@@ -308,4 +309,4 @@ public class StreamInstr extends SourceDocument implements PushToPull.Pusher {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

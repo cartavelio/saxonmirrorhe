@@ -1,12 +1,15 @@
 package com.saxonica.ee.stream.om;
 
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.pattern.NameTest;
-import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.type.Type;
+
+import java.util.EnumSet;
+import java.util.Iterator;
+import java.util.function.BiFunction;
 
 
 /**
@@ -15,55 +18,26 @@ import net.sf.saxon.type.Type;
  * in a streamed document.
  */
 
-final class AttributeIterator implements AxisIterator, LookaheadIterator<NodeInfo> {
+final public class AttributeIterator implements AxisIterator, LookaheadIterator {
 
-    private FleetingElementNode element;
-    private AttributeCollection attributes;
-    private NodeTest nodeTest;
-    private FleetingNode next;
-    private int index;
-    private int length;
+    private final NodeInfo element;
+    private final Iterator<AttributeInfo> attributeIter;
+    private final BiFunction<NodeInfo, AttributeInfo, NodeInfo> attributeMaker;
 
     /**
      * Constructor
      *
      * @param element:  the element whose attributes are required. This may be any type of node,
      *                  but if it is not an element the enumeration will be empty
-     * @param nodeTest: condition to be applied to the names of the attributes selected
      */
 
-    public AttributeIterator(FleetingElementNode element, AttributeCollection attributes, NodeTest nodeTest) {
-
-        this.nodeTest = nodeTest;
-
-        if (element.getNodeKind() == Type.ELEMENT) {
-            this.element = element;
-            this.attributes = attributes;
-            index = 0;
-
-            if (nodeTest instanceof NameTest) {
-                NameTest test = (NameTest) nodeTest;
-                index = attributes.getIndexByFingerprint(test.getFingerprint());
-
-                if (index < 0) {
-                    next = null;
-                } else {
-                    next = makeAttributeNode(element, attributes, index);
-                    index = 0;
-                    length = 0; // force iteration to select one node only
-                }
-
-            } else {
-                index = 0;
-                length = attributes.getLength();
-                advance();
-            }
-        } else {      // if it's not an element, or if we're not looking for attributes,
-            // then there's nothing to find
-            next = null;
-            index = 0;
-            length = 0;
+    public AttributeIterator(NodeInfo element, AttributeMap attributes, BiFunction<NodeInfo, AttributeInfo, NodeInfo> attributeMaker) {
+        if (element.getNodeKind() != Type.ELEMENT) {
+            throw new IllegalArgumentException("Not an element node");
         }
+        this.element = element;
+        this.attributeMaker = attributeMaker;
+        attributeIter = attributes.iterator();
     }
 
     /**
@@ -71,8 +45,9 @@ final class AttributeIterator implements AxisIterator, LookaheadIterator<NodeInf
      * ("elements" is used here in the sense of the Java enumeration class, not in the XML sense)
      */
 
+    @Override
     public boolean hasNext() {
-        return next != null;
+        return attributeIter.hasNext();
     }
 
     /**
@@ -80,32 +55,13 @@ final class AttributeIterator implements AxisIterator, LookaheadIterator<NodeInf
      */
 
     /*@Nullable*/
+    @Override
     public NodeInfo next() {
-        if (next == null) {
-            return null;
+        if (attributeIter.hasNext()) {
+            AttributeInfo info = attributeIter.next();
+            return attributeMaker.apply(element, info);
         } else {
-            NodeInfo current = next;
-            advance();
-            return current;
-        }
-    }
-
-    /**
-     * Move to the next node in the enumeration.
-     */
-
-    private void advance() {
-        while (true) {
-            if (index >= length) {
-                next = null;
-                return;
-            } else {
-                next = makeAttributeNode(element, attributes, index);
-                index++;
-                if (nodeTest.matchesNode(next)) {
-                    return;
-                }
-            }
+            return null;
         }
     }
 
@@ -113,34 +69,18 @@ final class AttributeIterator implements AxisIterator, LookaheadIterator<NodeInf
      * Get properties of this iterator, as a bit-significant integer.
      *
      * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link #GROUNDED}, {@link #LAST_POSITION_FINDER},
-     *         and {@link #LOOKAHEAD}. It is always
+     *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED}, {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
+     *         and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
      *         acceptable to return the value zero, indicating that there are no known special properties.
      *         It is acceptable for the properties of the iterator to change depending on its state.
      */
 
-    public int getProperties() {
-        return LOOKAHEAD;
+    @Override
+    public EnumSet<Property> getProperties() {
+        return EnumSet.of(Property.LOOKAHEAD);
     }
 
-    /**
-     * Make an attribute node
-     *
-     * @param element    the containing element
-     * @param attributes
-     * @param index
-     * @return the attribute node
-     */
 
-    private static FleetingNode makeAttributeNode(FleetingElementNode element, AttributeCollection attributes, int index) {
-        FleetingNode attr = new FleetingNode();
-        attr.setParent(element);
-        attr.setNodeKind(Type.ATTRIBUTE);
-        attr.setNodeName(attributes.getNodeName(index));
-        attr.setTypeAnnotation(attributes.getTypeAnnotation(index));
-        attr.setStringValue(attributes.getValue(index));
-        return attr;
-    }
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

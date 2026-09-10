@@ -5,7 +5,8 @@ import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.expr.instruct.UserFunction;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.query.*;
 import net.sf.saxon.style.*;
 import net.sf.saxon.trans.CompilerInfo;
@@ -29,23 +30,24 @@ public class SaxonImportQuery extends StyleElement {
     private String href;
     private String moduleURI;
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
         // Avoid reporting errors twice
         if (href != null || moduleURI != null) {
             return;
         }
 
-        AttributeCollection atts = getAttributeList();
-
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
+            String value = att.getValue();
             if (f.equals("href")) {
-                href = Whitespace.trim(atts.getValue(a));
+                href = Whitespace.trim(value);
             } else if (f.equals("namespace")) {
-                moduleURI = Whitespace.trim(atts.getValue(a));
+                moduleURI = Whitespace.trim(value);
             } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+                checkUnknownAttribute(attName);
                 moduleURI = "";   // for error recovery path
             }
         }
@@ -56,6 +58,7 @@ public class SaxonImportQuery extends StyleElement {
 
     }
 
+    @Override
     public void index(ComponentDeclaration decl, PrincipalStylesheetModule top) throws XPathException {
         prepareAttributes();
 
@@ -108,6 +111,7 @@ public class SaxonImportQuery extends StyleElement {
         }
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         checkEmpty();
         checkTopLevel("XTSE0010", false);
@@ -141,7 +145,7 @@ public class SaxonImportQuery extends StyleElement {
         StaticQueryContext sqc = getConfiguration().newStaticQueryContext();
         //sqc.setExecutable(getExecutable());
         sqc.setBaseURI(getBaseURI());
-        sqc.setErrorListener(getCompilation().getCompilerInfo().getErrorListener());
+        sqc.setErrorReporter(getCompilation().getCompilerInfo().getErrorReporter());
         String mainModule = "import module namespace m = \"" + moduleURI + "\" at \"" + href + "\"; ()";
         XQueryExpression exp = sqc.compileQuery(mainModule);
         return exp.getMainModule();
@@ -157,9 +161,10 @@ public class SaxonImportQuery extends StyleElement {
      */
 
     /*@Nullable*/
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         return null;
     }
 }
 
-// Copyright (c) 2009-2017 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

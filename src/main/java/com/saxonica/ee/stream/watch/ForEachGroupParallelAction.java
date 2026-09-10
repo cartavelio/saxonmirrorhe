@@ -1,10 +1,12 @@
 package com.saxonica.ee.stream.watch;
 
 import com.saxonica.ee.stream.ManualGroupIterator;
-import com.saxonica.ee.stream.adjunct.ForkAdjunct;
-import com.saxonica.ee.stream.feed.*;
+import com.saxonica.ee.stream.adjunct.FeedToEventBuffer;
+import com.saxonica.ee.stream.feed.FilteringFeed;
+import com.saxonica.ee.stream.feed.ItemFeed;
+import com.saxonica.ee.stream.feed.NoCloseFeed;
+import com.saxonica.ee.stream.feed.NoOpenOrCloseFeed;
 import com.saxonica.ee.stream.om.FleetingParentNode;
-import net.sf.saxon.event.EventBuffer;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.TeeOutputter;
@@ -13,13 +15,13 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.expr.XPathContextMinor;
 import net.sf.saxon.expr.instruct.ForEachGroup;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AncestorQualifiedPattern;
 import net.sf.saxon.pattern.AnchorPattern;
 import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.value.AtomicValue;
@@ -55,7 +57,7 @@ public class ForEachGroupParallelAction extends ForEachAction {
     private XPathContext populationContext;
     private StringCollator collator;
     private int implicitTimezone;
-    private Feed currentItemFeed;
+    private ItemFeed currentItemFeed;
     private boolean compositeKeys;
     private NodeInfo anchorNode;
 
@@ -63,13 +65,13 @@ public class ForEachGroupParallelAction extends ForEachAction {
 
     private static class GroupInfo {
         public XPathContext bodyContext;    // context used for evaluating the for-each-group action, for a given group
-        public Feed feed;                   // feed used for evaluating the for-each-group action, for a given group
-        public EventBuffer outputter; // destination of the result of processing the for-each-group action, for a given group
+        public ItemFeed feed;                   // feed used for evaluating the for-each-group action, for a given group
+        public FeedToEventBuffer outputter; // destination of the result of processing the for-each-group action, for a given group
         public List<Watch> watchList;
         public WatchManager.GroupingScope scope;
     }
 
-    public ForEachGroupParallelAction(WatchManager watchManager, ForEachGroup expression, Feed result, XPathContext context) {
+    public ForEachGroupParallelAction(WatchManager watchManager, ForEachGroup expression, ItemFeed result, XPathContext context) {
         super(watchManager, expression, result, context);
         populationContext = context.newMinorContext();
         collator = expression.getCollation();
@@ -78,6 +80,7 @@ public class ForEachGroupParallelAction extends ForEachAction {
     }
 
 
+    @Override
     public void open(Terminator terminator) throws XPathException {
         super.open(terminator);
         populationContext.setCurrentIterator(new ManualIterator());
@@ -117,9 +120,11 @@ public class ForEachGroupParallelAction extends ForEachAction {
      * any attributes selected by the last step in the selection are ignored
      *
      * @throws XPathException if a dynamic error occurs while processing the start-element event
+     * @return a receiver that collects the contents of the selected node, or null
      */
 
     /*@Nullable*/
+    @Override
     public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
         List<AtomicMatchKey> comparisonKey = new ArrayList<AtomicMatchKey>();
         AtomicArray key = getGroupingKey(node, comparisonKey);
@@ -127,11 +132,11 @@ public class ForEachGroupParallelAction extends ForEachAction {
         List<List<AtomicMatchKey>> separateKeys;
         List<AtomicValue> distinctKeys = null;
         if (compositeKeys) {
-            separateKeys = new ArrayList<List<AtomicMatchKey>>(1);
+            separateKeys = new ArrayList<>(1);
             separateKeys.add(comparisonKey);
         } else {
-            separateKeys = new ArrayList<List<AtomicMatchKey>>(comparisonKey.size());
-            distinctKeys = new ArrayList<AtomicValue>();
+            separateKeys = new ArrayList<>(comparisonKey.size());
+            distinctKeys = new ArrayList<>();
             Set<AtomicMatchKey> duplicates = new HashSet<AtomicMatchKey>(separateKeys.size());
             int k = 0;
             for (AtomicMatchKey oneKey : comparisonKey) {
@@ -146,7 +151,7 @@ public class ForEachGroupParallelAction extends ForEachAction {
         }
 
         Receiver result = null;
-        List<Feed> groupFeeds = new ArrayList<Feed>();
+        List<ItemFeed> groupFeeds = new ArrayList<>();
         int k = 0;
 
         for (List<AtomicMatchKey> groupingKey : separateKeys) {
@@ -165,11 +170,11 @@ public class ForEachGroupParallelAction extends ForEachAction {
 
             if (isActionConsuming()) {
                 if (newGroup) {
-                    ItemFeed toOutputter = new ForkAdjunct.FeedToEventBuffer(gp.outputter, getResult(), getContext());
-                    Feed thisFeed = new NoOpenOrCloseFeed(toOutputter, gp.bodyContext);
+                    ItemFeed toOutputter = gp.outputter;
+                    ItemFeed thisFeed = new NoOpenOrCloseFeed(toOutputter, gp.bodyContext);
                     Trigger watch = getInversion().getWatch(getWatchManager(), thisFeed, gp.bodyContext);
                     final Pattern pattern = watch.getSelection();
-                    Feed actionFeed = watch.getAction();
+                    ItemFeed actionFeed = watch.getAction();
                     if (pattern instanceof AnchorPattern) {
                         gp.feed = actionFeed;
                         gp.feed.open(getTerminator());
@@ -200,8 +205,8 @@ public class ForEachGroupParallelAction extends ForEachAction {
             } else {
                 if (newGroup) {
                     Expression action = ((ForEachGroup) getExpression()).getActionExpression();
-                    EventBuffer out = gp.outputter;
-                    action.process(gp.bodyContext);
+                    FeedToEventBuffer out = gp.outputter;
+                    action.process(out, gp.bodyContext);
                 }
             }
 //            if (newGroup) {
@@ -219,7 +224,7 @@ public class ForEachGroupParallelAction extends ForEachAction {
                 currentItemFeed = groupFeeds.get(0);
                 result = currentItemFeed.startSelectedParentNode(node, locationId);
             } else {
-                currentItemFeed = new ForkingFeed(groupFeeds, getResult());
+                currentItemFeed = new ForkingFeed(groupFeeds, getResult(), getContext());
                 result = currentItemFeed.startSelectedParentNode(node, locationId);
             }
         }
@@ -228,7 +233,8 @@ public class ForEachGroupParallelAction extends ForEachAction {
 
     private GroupInfo makeNewGroup(Item node, List<AtomicMatchKey> comparisonKey, AtomicSequence key) {
         GroupInfo gp = new GroupInfo();
-        gp.outputter = new EventBuffer(getPipelineConfiguration());
+        gp.outputter = new FeedToEventBuffer(getNextOutputter(), this, getContext());
+        gp.outputter.setPipelineConfiguration(getPipelineConfiguration());
 
         // Because execution of the for-each-group body processes multiple groups effectively in parallel,
         // or at least interleaved, each needs its own copy of the local variables. Local variables declared
@@ -240,7 +246,7 @@ public class ForEachGroupParallelAction extends ForEachAction {
         mgi.startNewCurrentGroup(node);
         bodyContext.setCurrentIterator(mgi);
         bodyContext.setCurrentGroupIterator(mgi);
-        bodyContext.setReceiver(gp.outputter);
+        //bodyContext.setReceiver(gp.outputter);
         gp.bodyContext = bodyContext;
 
         groups.put(comparisonKey, gp);
@@ -257,7 +263,8 @@ public class ForEachGroupParallelAction extends ForEachAction {
      *
      */
 
-    public void processItem(Item<?> node) throws XPathException {
+    @Override
+    public void append(Item node) throws XPathException {
         List<AtomicMatchKey> comparisonKey = new ArrayList<AtomicMatchKey>();
         AtomicArray key = getGroupingKey(node, comparisonKey);
 
@@ -289,16 +296,16 @@ public class ForEachGroupParallelAction extends ForEachAction {
 
             if (isActionConsuming()) {
                 if (newGroup) {
-                    Feed thisFeed = new NoOpenOrCloseFeed(getResult(), getBodyContext());
+                    ItemFeed thisFeed = new NoOpenOrCloseFeed(getResult(), getBodyContext());
                     Trigger watch = getInversion().getWatch(getWatchManager(), thisFeed, gp.bodyContext);
                     gp.feed = watch.getAction();
                     gp.feed.open(getTerminator());
                 }
-                gp.feed.processItem(node);
+                gp.feed.append(node);
             } else {
                 if (newGroup) {
                     Expression action = ((ForEachGroup) getExpression()).getActionExpression();
-                    action.iterate(gp.bodyContext).forEachOrFail(getResult()::processItem);
+                    action.iterate(gp.bodyContext).forEachOrFail(getResult()::append);
                 }
             }
         }
@@ -314,6 +321,7 @@ public class ForEachGroupParallelAction extends ForEachAction {
      * @param locationId the location of the node in the source, or of the instruction that created it
      */
 
+    @Override
     public void endSelectedParentNode(Location locationId) throws XPathException {
         if (isActionConsuming()) {
             currentItemFeed.endSelectedParentNode(locationId);
@@ -332,8 +340,8 @@ public class ForEachGroupParallelAction extends ForEachAction {
             if (gp.feed != null) {
                 gp.feed.close();
             }
-            EventBuffer out = gp.outputter;
-            out.replay(getResult().getReceiver());
+            FeedToEventBuffer out = gp.outputter;
+            out.replay(getNextOutputter());
 //            out.close();
 //            for (Item item : out.getList()) {
 //                getResult().processItem(item);
@@ -342,18 +350,18 @@ public class ForEachGroupParallelAction extends ForEachAction {
         super.close();
     }
 
-    private static class ForkingFeed implements Feed {
+    private static class ForkingFeed extends ItemFeed {
 
-        private List<Feed> prongs;
-        private Feed result;
+        private List<ItemFeed> prongs;
 
-        public ForkingFeed(List<Feed> prongs, Feed result) {
+        public ForkingFeed(List<ItemFeed> prongs, ItemFeed result, XPathContext context) {
+            super(result, context);
             this.prongs = prongs;
         }
 
         @Override
         public void close() throws XPathException {
-            for (Feed prong : prongs) {
+            for (ItemFeed prong : prongs) {
                 prong.close();
             }
         }
@@ -365,7 +373,7 @@ public class ForEachGroupParallelAction extends ForEachAction {
 
         @Override
         public void open(Terminator terminator) throws XPathException {
-            for (Feed prong : prongs) {
+            for (ItemFeed prong : prongs) {
                 prong.open(terminator);
             }
         }
@@ -373,7 +381,7 @@ public class ForEachGroupParallelAction extends ForEachAction {
         @Override
         public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
             Receiver result = null;
-            for (Feed prong : prongs) {
+            for (ItemFeed prong : prongs) {
                 Receiver r = prong.startSelectedParentNode(node, locationId);
                 if (r != null) {
                     result = result == null ? r : new TeeOutputter(result, r);
@@ -384,23 +392,23 @@ public class ForEachGroupParallelAction extends ForEachAction {
 
         @Override
         public void endSelectedParentNode(Location locationId) throws XPathException {
-            for (Feed prong : prongs) {
+            for (ItemFeed prong : prongs) {
                 prong.endSelectedParentNode(locationId);
             }
         }
 
         @Override
-        public void processItem(Item<?> item) throws XPathException {
-            for (Feed prong : prongs) {
-                prong.processItem(item);
+        public void append(Item item) throws XPathException {
+            for (ItemFeed prong : prongs) {
+                prong.append(item);
             }
         }
 
-        @Override
-        public Receiver getReceiver() {
-            return result.getReceiver();
-        }
+//        @Override
+//        public Outputter getOutputter() {
+//            return getResult().getOutputter();
+//        }
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

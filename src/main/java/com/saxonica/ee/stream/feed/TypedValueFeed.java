@@ -3,14 +3,17 @@ package com.saxonica.ee.stream.feed;
 import com.saxonica.ee.stream.om.FleetingParentNode;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.ma.arrays.ArrayItem;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.FastStringBuffer;
+import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.StringValue;
 
 /**
  * This class is used when a streamed template requests evaluation of the typed value
@@ -21,7 +24,7 @@ import net.sf.saxon.value.AtomicValue;
 public class TypedValueFeed extends AbsorptionFeed {
 
 
-    public TypedValueFeed(Feed result, XPathContext context) {
+    public TypedValueFeed(ItemFeed result, XPathContext context) {
         super(result, context);
     }
 
@@ -31,7 +34,7 @@ public class TypedValueFeed extends AbsorptionFeed {
     }
 
     @Override
-    protected Sequence<?> processGroundedItem(Item item) throws XPathException {
+    protected Sequence processGroundedItem(Item item) throws XPathException {
         if (item instanceof AtomicValue) {
             return item;
         } else if (item instanceof NodeInfo) {
@@ -43,6 +46,96 @@ public class TypedValueFeed extends AbsorptionFeed {
             return null;
         }
     }
+
+
+    // Following methods are to handle document and element nodes constructed by a consuming expression,
+    // and then atomized: see for example sx-treat-as-108. Ideally we would integrate this case with the
+    // handling of events coming directly from the source document.
+
+    private int depth = 0;
+    private FastStringBuffer buffer;
+
+
+    @Override
+    public void startDocument(int properties) throws XPathException {
+        if (depth == 0) {
+            buffer = new FastStringBuffer(256);
+        }
+        depth++;
+    }
+
+    @Override
+    public void endDocument() throws XPathException {
+        depth--;
+        if (depth == 0) {
+            append(new StringValue(buffer));
+        }
+    }
+
+    @Override
+    public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties) throws XPathException {
+        if (depth == 0) {
+            buffer = new FastStringBuffer(256);
+        }
+        depth++;
+    }
+
+    @Override
+    public void startElement(NodeName elemName, SchemaType type, AttributeMap attributes, NamespaceMap namespaces, Location location, int properties) throws XPathException {
+        startElement(elemName, type, location, properties);
+    }
+
+    @Override
+    public void namespace(String prefix, String namespaceUri, int properties) throws XPathException {
+        if (depth == 0) {
+            characters(namespaceUri, Loc.NONE, properties);
+        }
+    }
+
+    @Override
+    public void attribute(NodeName attName, SimpleType typeCode, CharSequence value, Location location, int properties) throws XPathException {
+        if (depth == 0) {
+            characters(value, location, properties);
+        }
+    }
+
+    @Override
+    public void startContent()  {
+        // no action
+    }
+
+    @Override
+    public void endElement() throws XPathException {
+        depth--;
+        if (depth == 0) {
+            append(new StringValue(buffer));
+        }
+    }
+
+    @Override
+    public void characters(CharSequence chars, Location location, int properties) throws XPathException {
+        if (depth == 0) {
+            append(new StringValue(chars));
+        } else {
+            buffer.cat(chars);
+        }
+    }
+
+    @Override
+    public void processingInstruction(String name, CharSequence data, Location location, int properties) throws XPathException {
+        if (depth == 0) {
+            characters(data, location, properties);
+        }
+    }
+
+    @Override
+    public void comment(CharSequence content, Location location, int properties) throws XPathException {
+        if (depth == 0) {
+            characters(content, Loc.NONE, properties);;
+        }
+    }
+
+
 
     /**
      * A pending item represents a tree under construction.
@@ -60,12 +153,13 @@ public class TypedValueFeed extends AbsorptionFeed {
             this.node = node;
         }
 
+        @Override
         public Receiver getGatherer() {
             return new StringValueGatherer(buffer);
         }
 
         @Override
-        public Sequence<?> deliver() throws XPathException {
+        public Sequence deliver() throws XPathException {
             node.setStringValue(buffer);
             return node.atomize();
         }
@@ -77,4 +171,4 @@ public class TypedValueFeed extends AbsorptionFeed {
     }
 }
 
-// Copyright (c) 2009-2014 Saxonica Limited
+// Copyright (c) 2009-2020 Saxonica Limited

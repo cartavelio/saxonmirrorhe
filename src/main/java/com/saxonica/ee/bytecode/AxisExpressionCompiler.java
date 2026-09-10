@@ -12,6 +12,8 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.TypeHierarchy;
 
+import java.util.function.Predicate;
+
 /**
  * Generate bytecode for evaluation of an AxisExpression
  */
@@ -82,7 +84,7 @@ public class AxisExpressionCompiler extends ToIteratorCompiler {
         visitAnnotation(compiler, "AxisExpressionCompiler - static method: iterate");
         if (test == null || test == AnyNodeTest.getInstance()) {
             ga.push(axis);
-            ga.invokeInstanceMethod(NodeInfo.class, "iterateAxis", Byte.TYPE);
+            ga.invokeInstanceMethod(NodeInfo.class, "iterateAxis", Integer.TYPE);
 
         } else if (test instanceof NodeKindTest) {
             int kind = test.getPrimitiveType();
@@ -112,20 +114,18 @@ public class AxisExpressionCompiler extends ToIteratorCompiler {
                 default:
                     throw new AssertionError();
             }
-            ga.invokeInstanceMethod(NodeInfo.class, "iterateAxis", Byte.TYPE, NodeTest.class);
+            ga.invokeInstanceMethod(NodeInfo.class, "iterateAxis", Integer.TYPE, Predicate.class);
 
         } else {
-            //ga.checkClass(NodeInfo.class);
+
             ga.push(axis);
             allocateStatic(compiler, test);
-            ga.showMessage(compiler, "calling iterateAxis");
-            ga.invokeInstanceMethod(NodeInfo.class, "iterateAxis", Byte.TYPE, NodeTest.class);
-            ga.showMessage(compiler, "returning axis iterator");
+            ga.invokeInstanceMethod(NodeInfo.class, "iterateAxis", Integer.TYPE, Predicate.class);
         }
     }
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited
 
 

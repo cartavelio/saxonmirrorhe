@@ -3,8 +3,6 @@ package com.saxonica.xsltextn.pedigree;
 import net.sf.saxon.ma.arrays.AbstractArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.z.IntSet;
 
 /**
@@ -25,12 +23,12 @@ public abstract class DelegatingArrayItem extends AbstractArrayItem {
     }
 
     @Override
-    public GroundedValue<?> get(int index) throws XPathException {
+    public GroundedValue get(int index) {
         return base.get(index);
     }
 
     @Override
-    public ArrayItem put(int index, GroundedValue<?> newValue) throws XPathException {
+    public ArrayItem put(int index, GroundedValue newValue) {
         return base.put(index, newValue);
     }
 
@@ -45,7 +43,7 @@ public abstract class DelegatingArrayItem extends AbstractArrayItem {
     }
 
     @Override
-    public Iterable<GroundedValue<?>> members() {
+    public Iterable<GroundedValue> members() {
         return base.members();
     }
 
@@ -70,7 +68,7 @@ public abstract class DelegatingArrayItem extends AbstractArrayItem {
     }
 
     @Override
-    public ArrayItem insert(int position, GroundedValue<?> member) {
+    public ArrayItem insert(int position, GroundedValue member) {
         return base.insert(position, member);
     }
 
@@ -79,5 +77,5 @@ public abstract class DelegatingArrayItem extends AbstractArrayItem {
     }
 }
 
-// Copyright (c) 2018 Saxonica Ltd.
+// Copyright (c) 2018-2020 Saxonica Limited
 

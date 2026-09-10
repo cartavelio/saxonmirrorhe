@@ -48,6 +48,6 @@ public class ExistsCompiler extends ToBooleanCompiler {
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited
 
 

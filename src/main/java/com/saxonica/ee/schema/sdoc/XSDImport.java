@@ -10,7 +10,7 @@ import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.SchemaURIResolver;
 import net.sf.saxon.lib.StandardEntityResolver;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaException;
 import org.xml.sax.InputSource;
@@ -18,7 +18,6 @@ import org.xml.sax.SAXException;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
-import java.io.IOException;
 import java.net.URISyntaxException;
 
 /**
@@ -38,9 +37,10 @@ public class XSDImport extends AnnotationParent {
      * @throws SchemaException if any errors are found in the attributes
      */
 
+    @Override
     public void prepareAttributes() throws SchemaException {
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         String[] allowed = {"id", "namespace", "schemaLocation"};
         allowAttributes(atts, allowed);
 
@@ -126,7 +126,7 @@ public class XSDImport extends AnnotationParent {
             // process is loading a schema with this namespace...
             if (source == null
                     || (!manager.isBeingRead(source.getSystemId())
-                        && !config.getBooleanProperty(Feature.MULTIPLE_SCHEMA_IMPORTS))) {
+                                && !config.getBooleanProperty(Feature.MULTIPLE_SCHEMA_IMPORTS))) {
                 if (schemaLocation != null) {
                     String message = "The schema document at " + schemaLocation +
                             " is not being read because schema components for this namespace are already being processed";
@@ -176,16 +176,14 @@ public class XSDImport extends AnnotationParent {
             } else if (namespace.equals(NamespaceConstant.FN)) {
                 if (!config.isSchemaAvailable(NamespaceConstant.FN)) {
                     try {
-                        InputSource is = StandardEntityResolver.getInstance().resolveEntity(null, "http://www.w3.org/2005/xpath-functions.xsd");
+                        InputSource is = new StandardEntityResolver(config).resolveEntity(null, "http://www.w3.org/2005/xpath-functions.xsd");
                         if (config.isTiming()) {
                             config.getLogger().info("Loading schema from resources for: " + NamespaceConstant.FN);
                         }
                         source = new SAXSource(is);
                     } catch (SAXException e) {
                         throw new SchemaException(e);
-                    } catch (IOException e) {
-                        throw new SchemaException(e);
-                    }
+                    } 
                 }
             } else {
                 PipelineConfiguration pipe = getSchemaNodeFactory().getPipelineConfiguration();
@@ -286,7 +284,7 @@ public class XSDImport extends AnnotationParent {
      */
 
     public String getTargetNamespace() {
-        String uri = getAttributeList().getValue("", "namespace");
+        String uri = attributes().getValue("", "namespace");
         if (uri == null) {
             return "";
         } else {
@@ -296,4 +294,4 @@ public class XSDImport extends AnnotationParent {
 
 }
 
-// Copyright (c) 2004-6 Saxonica Limited. All rights reserved
+// Copyright (c) 2004-6 Saxonica Limited

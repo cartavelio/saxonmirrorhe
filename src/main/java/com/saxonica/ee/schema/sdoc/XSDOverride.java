@@ -4,11 +4,9 @@ import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.*;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.om.AttributeCollection;
-import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.linked.NodeImpl;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SchemaException;
@@ -33,17 +31,17 @@ public class XSDOverride extends SchemaElement {
     /**
      * Validate and process the attributes on this element in the schema document
      *
-     * @throws net.sf.saxon.type.SchemaException
-     *          if any errors are found in the attributes
+     * @throws net.sf.saxon.type.SchemaException if any errors are found in the attributes
      */
 
+    @Override
     public void prepareAttributes() throws SchemaException {
 
         if (getXSDSchema().getSchemaCompiler().getLanguageVersion() == Configuration.XSD10) {
             error("The xs:override element requires XSD 1.1 to be enabled");
         }
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         String[] allowed = {"id", "schemaLocation"};
         allowAttributes(atts, allowed);
 
@@ -54,7 +52,7 @@ public class XSDOverride extends SchemaElement {
         String schemaLocation = atts.getValue("", "schemaLocation");
         if (schemaLocation == null) {
             missingAttribute("schemaLocation");
-            error("Processing abandoned");
+            return;
         }
 
         String documentBase = getBaseURI();
@@ -63,84 +61,81 @@ public class XSDOverride extends SchemaElement {
         SchemaCompiler manager = getXSDSchema().getSchemaCompiler();
 
         Source source = SchemaReader.getSource(documentBase,
-                schemaLocation,
-                pipe,
-                null);
+                                               schemaLocation,
+                                               pipe,
+                                               null);
 
-        //-- Have we already imported this XML Schema file? We can't handle
-        //   this at present.
+        //-- Have we already imported this XML Schema file? We can't handle this at present.
 
-        if (source.getSystemId() == null) {
+        if (source == null || source.getSystemId() == null) {
             throw new SchemaException("The xsl:override/@schemaLocation resolves to a source with no known system ID");
         }
 
-        if (source != null) {
-            FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
-            fsb.append(source.getSystemId());
-            fsb.append("?referrer=");
-            fsb.append(documentBase);
-            fsb.append(";index=");
-            fsb.append(Navigator.getNumberSimple(this, null) + "");
-            String key = fsb.toString();
-            if (manager.isBeingRead(key)) {
-                replacementSchema = null;
-                return;
-            }
-            //System.err.println("Processing override " + key);
-            manager.setBeingRead(key);
-            if (manager.getExistingSchemaDocument(schemaLocation, getXSDSchema().getTargetNamespace()) != null) {
-                error("Saxon can't handle overriding of a schema document that has already been loaded by a different route");
-                return;
-            }
+        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
+        fsb.append(source.getSystemId());
+        fsb.append("?referrer=");
+        fsb.append(documentBase);
+        fsb.append(";index=");
+        fsb.append(Navigator.getNumberSimple(this, null) + "");
+        String key = fsb.toString();
+        if (manager.isBeingRead(key)) {
+            replacementSchema = null;
+            return;
+        }
+        //System.err.println("Processing override " + key);
+        manager.setBeingRead(key);
+        if (manager.getExistingSchemaDocument(schemaLocation, getXSDSchema().getTargetNamespace()) != null) {
+            error("Saxon can't handle overriding of a schema document that has already been loaded by a different route");
+            return;
+        }
 
-            try {
-                SchemaCompiler compiler = getSchemaNodeFactory().getSchemaCompiler();
-                SchemaDocument schemaDoc = SchemaReader.buildSchemaDocument(source, compiler, pipe, this);
-                originalSchemaDocument = schemaDoc;
-                originalSchema = schemaDoc.getXSDSchema().getSchema();
-                String originalTargetNS = schemaDoc.getXSDSchema().getTargetNamespace();
-                if (!getSchema().getTargetNamespace().equals(originalTargetNS)) {
-                    if (originalTargetNS.isEmpty()) {
-                        // chameleon override
-                        originalSchemaDocument = schemaDoc = compiler.doChameleonTransformation(
+        try {
+            SchemaCompiler compiler = getSchemaNodeFactory().getSchemaCompiler();
+            SchemaDocument schemaDoc = SchemaReader.buildSchemaDocument(source, compiler, pipe, this);
+            originalSchemaDocument = schemaDoc;
+            originalSchema = schemaDoc.getXSDSchema().getSchema();
+            String originalTargetNS = schemaDoc.getXSDSchema().getTargetNamespace();
+            if (!getSchema().getTargetNamespace().equals(originalTargetNS)) {
+                if (originalTargetNS.isEmpty()) {
+                    // chameleon override
+                    originalSchemaDocument = schemaDoc = compiler.doChameleonTransformation(
                             schemaDoc.getDocument().getRootNode(), this);
-                        originalSchema = schemaDoc.getXSDSchema().getSchema();
-                        try {
-                            XSDSchema overridden = schemaDoc.getXSDSchema();
-                            overridden.processAllAttributes();
-                            overridden.validateSubtree(compiler);
-                        } catch (SchemaException err) {
-                            compiler.warning("The target of the xs:override is not a valid schema", this);
-                        }
+                    originalSchema = schemaDoc.getXSDSchema().getSchema();
+                    try {
+                        XSDSchema overridden = schemaDoc.getXSDSchema();
+                        overridden.processAllAttributes();
+                        overridden.validateSubtree(compiler);
+                    } catch (SchemaException err) {
+                        compiler.warning("The target of the xs:override is not a valid schema", this);
+                    }
 //                        try {
 //                            System.err.println("After chameleon: ");
 //                            System.err.println(QueryResult.serialize(schemaDoc.getXSDSchema()));
 //                        } catch (XPathException e) {
 //                            //
 //                        }
-                    } else {
-                        error("The targetNamespace of the overridden schema document differs from that of the overriding schema document");
-                        originalSchema = null;
-                    }
-                }
-                SchemaDocument convertedSchemaDocument = compiler.doOverrideTransformation(
-                    schemaDoc.getDocument().getRootNode(), this);
-                XSDSchema top = convertedSchemaDocument.getXSDSchema();
-
-                top.processAllAttributes();
-                top.validateSubtree(compiler);
-                replacementSchema = top.getSchema();
-
-            } catch (SchemaException e) {
-                Throwable cause = e.getException();
-                if (cause instanceof java.io.IOException) {
-                    warning("Failed to locate overridden schema document " + schemaLocation);
-                    originalSchema = new SingleNamespaceSchema((EnterpriseConfiguration) getConfiguration(), "");
-                    // We will get a hard error if any components are actually redefined
                 } else {
-                    // the error has already been reported
-                    throw e;
+                    error("The targetNamespace of the overridden schema document differs from that of the overriding schema document");
+                    originalSchema = null;
                 }
+            }
+            SchemaDocument convertedSchemaDocument = compiler.doOverrideTransformation(
+                    schemaDoc.getDocument().getRootNode(), this);
+            XSDSchema top = convertedSchemaDocument.getXSDSchema();
+
+            top.processAllAttributes();
+            top.validateSubtree(compiler);
+            replacementSchema = top.getSchema();
+
+        } catch (SchemaException e) {
+            Throwable cause = e.getException();
+            if (cause instanceof java.io.IOException) {
+                warning("Failed to locate overridden schema document " + schemaLocation);
+                originalSchema = new SingleNamespaceSchema((EnterpriseConfiguration) getConfiguration(), "");
+                // We will get a hard error if any components are actually redefined
+            } else {
+                // the error has already been reported
+                throw e;
             }
         }
     }
@@ -165,10 +160,10 @@ public class XSDOverride extends SchemaElement {
      * Validate this schema element, checking all document-level constraints
      *
      * @param compiler the schema compiler
-     * @throws net.sf.saxon.type.SchemaException
-     *          if any XML representation constraints are violated
+     * @throws net.sf.saxon.type.SchemaException if any XML representation constraints are violated
      */
 
+    @Override
     public void validate(SchemaCompiler compiler) throws SchemaException {
         if (compiler.getLanguageVersion() == Configuration.XSD10) {
             error("xs:override requires XML Schema 1.1 to be enabled");
@@ -185,9 +180,7 @@ public class XSDOverride extends SchemaElement {
         HashSet<String> redefinedAttributes = new HashSet<String>();
         HashSet<String> redefinedNotations = new HashSet<String>();
 
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while ((child = (NodeImpl)iter.next()) != null) {
+        for (NodeInfo child : children()) {
             int fp = child.getFingerprint();
             switch (fp) {
                 case StandardNames.XS_ANNOTATION: {
@@ -252,14 +245,13 @@ public class XSDOverride extends SchemaElement {
      * @param compiler used for reporting errors
      */
 
+    @Override
     public void postValidate(SchemaCompiler compiler) throws SchemaException {
         if (originalSchema == null || replacementSchema == null) {
             // previous error
             return;
         }
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while ((child = (NodeImpl)iter.next()) != null) {
+        for (NodeInfo child : children()) {
             int childfp = child.getFingerprint();
 
             switch (childfp) {
@@ -292,7 +284,7 @@ public class XSDOverride extends SchemaElement {
                         // error already reported
                         break;
                     }
-                    SchemaType existing = originalSchema.getType(typeDef.getStructuredQName());
+                    SchemaType existing = originalSchema.getType(typeDef.getTypeName());
                     if (existing != null) {
                         typeDef.setRedefinitionLevel(existing.getRedefinitionLevel() + 1);
                     }
@@ -311,7 +303,7 @@ public class XSDOverride extends SchemaElement {
                         // error already reported
                         break;
                     }
-                    SimpleType existing = originalSchema.getSimpleType(typeDef.getStructuredQName());
+                    SimpleType existing = originalSchema.getSimpleType(typeDef.getTypeName());
                     if (existing != null) {
                         typeDef.setRedefinitionLevel(existing.getRedefinitionLevel() + 1);
                     }
@@ -364,4 +356,4 @@ public class XSDOverride extends SchemaElement {
 
 }
 
-// Copyright (c) 2009-2012 Saxonica Limited. All rights reserved
+// Copyright (c) 2009-2020 Saxonica Limited

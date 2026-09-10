@@ -117,7 +117,7 @@ public class IndexedFilterExpressionCompiler extends ToIteratorCompiler {
         //		int comparer_var =  ga.newLocal(Type.getType(AtomicComparer.class));
         //		ga.storeLocal(comparer_var);
         compiler.generateGetContext();
-        // abstract SequenceIterator<?> findItems(Expression use, SequenceIterator<? extends AtomicValue> values,
+        // abstract SequenceIterator findItems(Expression use, SequenceIterator<? extends AtomicValue> values,
         //                                               boolean convertUntypedToOther,
         //                                               boolean firstOnly, AtomicComparer comparer, XPathContext context) throws XPathException;
         ga.invokeInstanceMethod(SearchableValue.class, "findItems", Expression.class, SequenceIterator.class, Boolean.TYPE, Boolean.TYPE, AtomicComparer.class, XPathContext.class);
@@ -128,5 +128,5 @@ public class IndexedFilterExpressionCompiler extends ToIteratorCompiler {
 
 }
 
-// Copyright (c) 2011-2018 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited
 

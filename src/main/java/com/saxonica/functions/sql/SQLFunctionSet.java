@@ -40,6 +40,7 @@ public class SQLFunctionSet extends BuiltInFunctionSet {
     public SQLFunctionSet() {
     }
 
+    @Override
     public void setConfiguration(Configuration config) {
         this.config = config;
         init();
@@ -153,7 +154,7 @@ public class SQLFunctionSet extends BuiltInFunctionSet {
         }
     }
 
-    public static Connection expectConnection(Sequence<?> arg, XPathContext context) throws XPathException {
+    public static Connection expectConnection(Sequence arg, XPathContext context) throws XPathException {
         Item conn = arg.head();
         if (!(conn instanceof ExternalObject && ((ExternalObject) conn).getObject() instanceof Connection)) {
             throw new XPathException("Value of connection argument is not a JDBC Connection", SaxonErrorCode.SXSQ0001, context);
@@ -165,43 +166,43 @@ public class SQLFunctionSet extends BuiltInFunctionSet {
 
         JavaExternalObjectType connectionType = config.getJavaExternalObjectType(Connection.class);
 
-        register("connect", 1, SQLConnectFn.class, connectionType, ONE, 0, LATE)
+        register("connect", 1, SQLConnectFn.class, connectionType, ONE, LATE)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE, null);
 
-        register("delete", 3, SQLDeleteFn.class, AnyItemType.getInstance(), OPT, 0, SIDE|LATE)
+        register("delete", 3, SQLDeleteFn.class, AnyItemType.getInstance(), OPT, SIDE|LATE)
                 .arg(0, connectionType, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, ONE, null);
 
-        register("execute", 2, SQLExecuteFn.class, AnyItemType.getInstance(), OPT, 0, SIDE|LATE)
+        register("execute", 2, SQLExecuteFn.class, AnyItemType.getInstance(), OPT, SIDE|LATE)
                 .arg(0, connectionType, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
 
-        register("insert", 3, SQLInsertFn.class, AnyItemType.getInstance(), OPT, 0, SIDE|LATE)
+        register("insert", 3, SQLInsertFn.class, AnyItemType.getInstance(), OPT, SIDE|LATE)
                 .arg(0, connectionType, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, MapType.ANY_MAP_TYPE, ONE, null);
 
-        register("prepared-statement", 2, SQLPreparedStatementFn.class, AnyItemType.getInstance(), OPT, 0, LATE)
+        register("prepared-statement", 2, SQLPreparedStatementFn.class, AnyItemType.getInstance(), OPT, LATE)
                 .arg(0, connectionType, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
 
-        register("prepared-query", 2, SQLPreparedQueryFn.class, AnyFunctionType.getInstance(), ONE, 0, LATE)
+        register("prepared-query", 2, SQLPreparedQueryFn.class, AnyFunctionType.getInstance(), ONE, LATE)
                 .arg(0, connectionType, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
 
-        register("query", 3, SQLQueryFn.class, MapType.ANY_MAP_TYPE, STAR, 0, LATE)
+        register("query", 3, SQLQueryFn.class, MapType.ANY_MAP_TYPE, STAR, LATE)
                 .arg(0, connectionType, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, STAR, null);
 
-        register("query", 4, SQLQueryFn.class, MapType.ANY_MAP_TYPE, STAR, 0, LATE)
+        register("query", 4, SQLQueryFn.class, MapType.ANY_MAP_TYPE, STAR, LATE)
                 .arg(0, connectionType, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, STAR, null)
                 .arg(3, BuiltInAtomicType.STRING, ONE, null);
 
-        register("update", 4, SQLUpdateFn.class, AnyItemType.getInstance(), OPT, 0, SIDE|LATE)
+        register("update", 4, SQLUpdateFn.class, AnyItemType.getInstance(), OPT, SIDE|LATE)
                 .arg(0, connectionType, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, ONE, null)
@@ -227,4 +228,4 @@ public class SQLFunctionSet extends BuiltInFunctionSet {
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

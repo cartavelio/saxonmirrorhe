@@ -38,11 +38,11 @@ public class FunctionAnnotations extends SystemFunction {
         returnTypeTypes.add(SequenceType.ATOMIC_SEQUENCE);
     }
 
-    public final static TupleItemType RETURN_TYPE = new TupleItemType(returnTypeNames, returnTypeTypes);
+    public final static TupleItemType RETURN_TYPE = new TupleItemType(returnTypeNames, returnTypeTypes, false);
 
 
     @Override
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Function fn = (Function) arguments[0].head();
         AnnotationList annotations = fn.getAnnotations();
 
@@ -58,4 +58,4 @@ public class FunctionAnnotations extends SystemFunction {
 
 }
 
-// Copyright (c) 2012 Saxonica Limited.
+// Copyright (c) 2012-2020 Saxonica Limited

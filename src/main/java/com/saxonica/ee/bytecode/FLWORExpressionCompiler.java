@@ -4,10 +4,7 @@ import com.saxonica.ee.bytecode.util.CannotCompileException;
 import com.saxonica.ee.bytecode.util.CompilerService;
 import com.saxonica.ee.bytecode.util.GeneratedMethodInfo;
 import com.saxonica.ee.bytecode.util.Generator;
-import net.sf.saxon.expr.flwor.WindowClause;
-import net.sf.saxon.Controller;
-import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.event.SequenceOutputter;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.flwor.*;
@@ -26,28 +23,6 @@ public class FLWORExpressionCompiler extends ToIteratorCompiler {
         visitAnnotation(compiler, "FLWORExpressionCompiler-Iter");
         FLWORExpression flworExpr = (FLWORExpression) expression;
         List<Clause> clauses = flworExpr.getClauseList();
-
-        //force push mode if there is a window clause that is not the first clause
-        for (int i = 1; i < clauses.size(); i++) {
-            if (clauses.get(i) instanceof WindowClause) {
-                compiler.generateGetContext();
-                ga.invokeInstanceMethod(XPathContext.class, "getController");
-                ga.invokeInstanceMethod(Controller.class, "allocateSequenceOutputter");
-                ga.dup();
-                ga.invokeInstanceMethod(SequenceOutputter.class, "getPipelineConfiguration");
-                ga.push(expression.getPackageData().getHostLanguage());
-                ga.invokeInstanceMethod(PipelineConfiguration.class, "setHostLanguage", Integer.TYPE);
-                compiler.pushNewReceiverInfo(ga);
-                compiler.compileToPush(expression);
-                compiler.generateGetReceiver();
-                compiler.popReceiverInfo();
-                ga.dup();
-                ga.invokeInstanceMethod(SequenceOutputter.class, "close");
-                ga.invokeInstanceMethod(SequenceOutputter.class, "iterate");
-                return;
-            }
-
-        }
 
 
         ga.newInstance(ReturnClauseIterator.class);
@@ -77,14 +52,16 @@ public class FLWORExpressionCompiler extends ToIteratorCompiler {
 
         ga.newInstance(ReturnClausePush.class);
         ga.dup();
+        compiler.generateGetOutputter();
         allocateStatic(compiler, flworExpr.getReturnClause());
-        ga.invokeConstructor(ReturnClausePush.class, Expression.class);
+        ga.invokeConstructor(ReturnClausePush.class, Outputter.class, Expression.class);
 
         for (int i = clauses.size() - 1; i >= 0; i--) {
             ExpressionCompiler.allocateStatic(compiler, clauses.get(i));
             ga.swap();
+            compiler.generateGetOutputter();
             compiler.generateGetContext();
-            ga.invokeInstanceMethod(Clause.class, "getPushStream", TuplePush.class, XPathContext.class);
+            ga.invokeInstanceMethod(Clause.class, "getPushStream", TuplePush.class, Outputter.class, XPathContext.class);
         }
         ga.dup();
         compiler.generateGetContext();
@@ -94,5 +71,5 @@ public class FLWORExpressionCompiler extends ToIteratorCompiler {
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited
 

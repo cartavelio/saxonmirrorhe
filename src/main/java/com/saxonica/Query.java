@@ -10,4 +10,4 @@ public class Query extends net.sf.saxon.Query {
 
 }
 
-// Copyright (c) 2004-2009 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

@@ -3,7 +3,8 @@ package com.saxonica.xsltextn.style;
 import com.saxonica.xsltextn.instruct.TabulateMaps;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.style.StyleElement;
@@ -25,6 +26,7 @@ public class SaxonTabulateMaps extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
@@ -35,27 +37,27 @@ public class SaxonTabulateMaps extends StyleElement {
      * @return false: no, it may not contain a template-body
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return false;
     }
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
-        AttributeCollection atts = getAttributeList();
-
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
+            String value = att.getValue();
             switch (f) {
                 case "root":
-                    String rootAtt = atts.getValue(a);
-                    root = makeExpression(rootAtt, a);
+                    root = makeExpression(value, att);
                     break;
                 case "select":
-                    String selectAtt = atts.getValue(a);
-                    select = makeExpression(selectAtt, a);
+                    select = makeExpression(value, att);
                     break;
                 default:
-                    checkUnknownAttribute(atts.getNodeName(a));
+                    checkUnknownAttribute(attName);
                     break;
             }
         }
@@ -68,6 +70,7 @@ public class SaxonTabulateMaps extends StyleElement {
         }
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         getConfiguration().checkLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION,
                                                 "saxon:tabulate",
@@ -76,10 +79,11 @@ public class SaxonTabulateMaps extends StyleElement {
         select = typeCheck("select", select);
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         return new TabulateMaps(root, select);
     }
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

@@ -2,7 +2,7 @@ package com.saxonica.config;
 
 import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.FastStringBuffer;
 
@@ -16,18 +16,19 @@ public class EvaluationNuisance extends ProxyReceiver {
         super(next);
     }
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         FastStringBuffer fsb = new FastStringBuffer(chars.length());
         for (int i = 0; i < chars.length(); i++) {
-            fsb.append(chars.charAt(i));
+            fsb.cat(chars.charAt(i));
             if (i % 10 == 9) {
-                fsb.append('*');
+                fsb.cat('*');
             }
         }
         super.characters(fsb, locationId, properties);
     }
 }
 
-// Copyright (c) 2009 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited
 
 

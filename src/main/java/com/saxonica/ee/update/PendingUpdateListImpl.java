@@ -2,6 +2,7 @@ package com.saxonica.ee.update;
 
 import com.saxonica.ee.validate.InSituValidator;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.PackageData;
 import net.sf.saxon.expr.PendingUpdateList;
@@ -13,7 +14,6 @@ import net.sf.saxon.pattern.SameNameTest;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.util.NamespaceIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.z.IntHashMap;
@@ -34,9 +34,7 @@ public class PendingUpdateListImpl implements PendingUpdateList {
     private Set<NodeInfo> replacedNodes = new HashSet<>();
     private Set<NodeInfo> replacedValueNodes = new HashSet<>();
 
-    private Map<NodeInfo, Map<String, String>> newNamespaceBindings = new HashMap<>();
-    // the key is an element node that is to acquire a new namespace binding
-    // the value is an IntToIntMap whose key is a prefix code and whose value is a namespace URI code
+    private Map<NodeInfo, NamespaceMap> newNamespaceBindings = new HashMap<>();
 
     private Set<String> putURIs = new HashSet<>();
 
@@ -64,7 +62,6 @@ public class PendingUpdateListImpl implements PendingUpdateList {
      */
 
     public void add(PendingUpdateAction action) throws XPathException {
-        NamePool pool = config.getNamePool();
         int phase = action.getApplyPhase();
         if (lists.get(phase) == null) {
             lists.put(phase, new ArrayList<>(4));
@@ -105,10 +102,10 @@ public class PendingUpdateListImpl implements PendingUpdateList {
             }
             addAttributeAction(element, action);
             SameNameTest test = new SameNameTest(oldAtt);
-            AttributeCollection newAtts = ((ReplaceAttributeAction) action).getNewAttributes();
-            for (int i = 0; i < newAtts.getLength(); i++) {
-                if (!test.matches(newAtts.getNodeName(i).getStructuredQName())) {
-                    NamespaceBinding nsBinding = new NamespaceBinding(newAtts.getPrefix(i), newAtts.getURI(i));
+            AttributeMap newAtts = ((ReplaceAttributeAction) action).getNewAttributes();
+            for (AttributeInfo att : newAtts) {
+                if (!test.matches(att.getNodeName().getStructuredQName())) {
+                    NamespaceBinding nsBinding = new NamespaceBinding(att.getNodeName().getPrefix(), att.getNodeName().getURI());
                     checkForNamespaceConflict(element, Type.ATTRIBUTE, nsBinding, action);
                 }
             }
@@ -157,6 +154,7 @@ public class PendingUpdateListImpl implements PendingUpdateList {
      * @param uri  (the second argument of put())
      */
 
+    @Override
     public void addPutAction(NodeInfo node, String uri, Expression originator) throws XPathException {
         if (!putURIs.add(uri)) {
             XPathException err1 = new XPathException(
@@ -186,33 +184,31 @@ public class PendingUpdateListImpl implements PendingUpdateList {
         if (targetNode != null && (nodeKind == Type.ELEMENT || !nsCode.getPrefix().isEmpty())) {
             String prefix = nsCode.getPrefix();
             String uri = nsCode.getURI();
-//            int prefixCode = nsCode >> 16;
-//            int uriCode = nsCode & 0xffff;
 
             // Check that the namespace prefix is not already declared on the element
-            Iterator<NamespaceBinding> iter = NamespaceIterator.iterateNamespaces(targetNode);
-            while (iter.hasNext()) {
-                NamespaceBinding oldNsCode = iter.next();
-                if (oldNsCode.getPrefix().equals(prefix) && !oldNsCode.getURI().isEmpty() && !oldNsCode.getURI().equals(uri)) {
-                    XPathException err1 = new XPathException(
-                            "An update action creates a namespace binding that conflicts with an existing " +
-                                    "namespace binding on the same target element");
-                    err1.setErrorCode("XUDY0023");
-                    err1.setIsTypeError(false);
-                    err1.setLocation(action.getOriginator().getLocation());
-                    throw err1;
-                }
+            NamespaceMap map = targetNode.getAllNamespaces();
+            String existingURI = map.getURI(prefix);
+
+            if (existingURI != null && !existingURI.isEmpty() && !existingURI.equals(uri)) {
+                XPathException err1 = new XPathException(
+                        "An update action creates a namespace binding that conflicts with an existing " +
+                                "namespace binding on the same target element");
+                err1.setErrorCode("XUDY0023");
+                err1.setIsTypeError(false);
+                err1.setLocation(action.getOriginator().getLocation());
+                throw err1;
             }
 
-            Map<String, String> nsmap = newNamespaceBindings.get(targetNode);
+
+            NamespaceMap nsmap = newNamespaceBindings.get(targetNode);
             if (nsmap == null) {
-                nsmap = new HashMap<>();
+                nsmap = NamespaceMap.of(prefix, uri);
                 newNamespaceBindings.put(targetNode, nsmap);
-                nsmap.put(prefix, uri);
             } else {
-                String existingUri = nsmap.get(prefix);
+                String existingUri = nsmap.getURI(prefix);
                 if (existingUri == null) {
-                    nsmap.put(prefix, uri);
+                    nsmap = nsmap.put(prefix, uri);
+                    newNamespaceBindings.put(targetNode, nsmap);
                 } else if (!existingUri.equals(uri)) {
                     XPathException err1 = new XPathException(
                             "Two updates create conflicting namespace bindings on the same target node");
@@ -275,6 +271,7 @@ public class PendingUpdateListImpl implements PendingUpdateList {
      * @param validationMode the revalidation mode from the static context
      */
 
+    @Override
     public synchronized void apply(XPathContext context, int validationMode) throws XPathException {
         finalCheck();
         // Do everything except the put() actions
@@ -381,9 +378,9 @@ public class PendingUpdateListImpl implements PendingUpdateList {
                 if (count > 0) {
                     names.put(nameOfNode, count - 1);
                 }
-                AttributeCollection newNodes = ((ReplaceAttributeAction) action).getNewAttributes();
-                for (int i = 0; i < newNodes.getLength(); i++) {
-                    nameOfNode = newNodes.getNodeName(i);
+                AttributeMap newNodes = ((ReplaceAttributeAction) action).getNewAttributes();
+                for (AttributeInfo a : newNodes) {
+                    nameOfNode = a.getNodeName();
                     countVal = names.get(nameOfNode);
                     count = countVal == null ? 0 : countVal;
                     names.put(nameOfNode, count + 1);
@@ -463,13 +460,13 @@ public class PendingUpdateListImpl implements PendingUpdateList {
         // Create any attributes that result from replacements
         for (PendingUpdateAction action : actions) {
             if (action instanceof ReplaceAttributeAction) {
-                AttributeCollection content = ((ReplaceAttributeAction) action).getNewAttributes();
-                for (int i = 0; i < content.getLength(); i++) {
+                AttributeMap content = ((ReplaceAttributeAction) action).getNewAttributes();
+                for (AttributeInfo a : content) {
                     element.addAttribute(
-                            content.getNodeName(i),
-                            content.getTypeAnnotation(i),
-                            content.getValue(i),
-                            0);
+                            a.getNodeName(),
+                            a.getType(),
+                            a.getValue(),
+                            ReceiverOption.NONE);
                 }
             }
         }
@@ -482,7 +479,7 @@ public class PendingUpdateListImpl implements PendingUpdateList {
                         a.getAttributeName(),
                         a.getNewTypeCode(),
                         a.getNewStringValue(),
-                        0);
+                        ReceiverOption.NONE);
             }
         }
         element.removeTypeAnnotation();
@@ -498,9 +495,10 @@ public class PendingUpdateListImpl implements PendingUpdateList {
      */
 
 
+    @Override
     public Set<MutableNodeInfo> getAffectedTrees() {
         return affectedTrees;
     }
 }
 
-// Copyright (c) 2008 Saxonica Limited.
+// Copyright (c) 2008-2020 Saxonica Limited

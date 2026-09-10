@@ -3,31 +3,34 @@ package com.saxonica.ee.stream.adjunct;
 import com.saxonica.ee.stream.Streamability;
 import com.saxonica.ee.stream.StreamingPatternMaker;
 import com.saxonica.ee.stream.Sweep;
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.feed.SimpleContentFeed;
-import com.saxonica.ee.stream.om.FleetingParentNode;
-import com.saxonica.ee.stream.watch.*;
-import net.sf.saxon.event.Receiver;
+import com.saxonica.ee.stream.watch.Trigger;
+import com.saxonica.ee.stream.watch.WatchMaker;
+import com.saxonica.ee.stream.watch.WatchManager;
 import net.sf.saxon.expr.AdjacentTextNodeMerger;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceMap;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.tree.util.Orphan;
+import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 
 /**
- * Compile an AdjacentTextNodeMerger expression to Java source code
- * Needed only for streaming - this class is not used in XQuery
+ * Streaming implementation of an AdjacentTextNodeMerger expression
  */
 
 public class AdjacentTextNodeMergerAdjunct extends TransmissionAdjunct implements FeedMaker {
 
+    @Override
     public WatchMaker getWatchMaker(boolean forGrouping) {
         final AdjacentTextNodeMerger scc = (AdjacentTextNodeMerger) getExpression();
         if (Streamability.getSweep(scc) == Sweep.CONSUMING) {
@@ -35,7 +38,8 @@ public class AdjacentTextNodeMergerAdjunct extends TransmissionAdjunct implement
             final Pattern selection = StreamingPatternMaker.makeStreamingPattern(select, getConfiguration(), null);
             if (selection != null) {
                 return new WatchMaker() {
-                    public Trigger makeWatch(WatchManager watchManager, Feed out, final XPathContext context) {
+                    @Override
+                    public Trigger makeWatch(WatchManager watchManager, ItemFeed out, final XPathContext context) {
                         SimpleContentFeed action = new SimpleContentFeed(out);
                         Trigger watch = new Trigger(selection, action, context);
                         watch.setPipelineConfiguration(watchManager.getPipelineConfiguration());
@@ -50,7 +54,8 @@ public class AdjacentTextNodeMergerAdjunct extends TransmissionAdjunct implement
     }
 
 
-    public Feed makeItemFeed(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
         return new AdjacentTextNodeMergerFeed(getExpression(), out, context);
     }
 
@@ -59,7 +64,7 @@ public class AdjacentTextNodeMergerAdjunct extends TransmissionAdjunct implement
      * in streaming mode (that is, when it constructs a text, attribute, comment, or PI node based on the
      * contents of the streamed document). It removes empty text nodes arriving on the input, and concatenates
      * adjacent text nodes into a single text node.
-     * <p>Both a Feed and a Watch are needed because a simple content constructor operates on a sequence of nodes without
+     * <p>Both a ItemFeed and a Watch are needed because a simple content constructor operates on a sequence of nodes without
      * simply atomizing the sequence.</p>
      */
 
@@ -67,22 +72,10 @@ public class AdjacentTextNodeMergerAdjunct extends TransmissionAdjunct implement
     private static class AdjacentTextNodeMergerFeed extends ItemFeed {
 
         private FastStringBuffer buffer = new FastStringBuffer(100);
-        boolean prevText = false;
+        private boolean prevText = false;
 
-        public AdjacentTextNodeMergerFeed(Expression exp, Feed result, XPathContext context) {
+        AdjacentTextNodeMergerFeed(Expression exp, ItemFeed result, XPathContext context) {
             super(exp, result, context);
-        }
-
-        @Override
-        public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
-            flush();
-            return getResult().startSelectedParentNode(node, locationId);
-        }
-
-        @Override
-        public void endSelectedParentNode(Location locationId) throws XPathException {
-            flush();
-            getResult().endSelectedParentNode(locationId);
         }
 
         /**
@@ -93,16 +86,25 @@ public class AdjacentTextNodeMergerAdjunct extends TransmissionAdjunct implement
          *          to report any failure
          */
 
-        public void processItem(Item<?> item) throws XPathException {
+        @Override
+        public void append(Item item) throws XPathException {
             if (AdjacentTextNodeMerger.isTextNode(item)) {
                 CharSequence s = item.getStringValueCS();
                 if (s.length() > 0) {
-                    buffer.append(s);
+                    buffer.cat(s);
                     prevText = true;
                 }
             } else {
                 flush();
-                getResult().processItem(item);
+                getNextOutputter().append(item);
+            }
+        }
+
+        @Override
+        public void characters(CharSequence chars, Location location, int properties) throws XPathException {
+            if (chars.length() > 0) {
+                buffer.cat(chars);
+                prevText = true;
             }
         }
 
@@ -111,11 +113,41 @@ public class AdjacentTextNodeMergerAdjunct extends TransmissionAdjunct implement
                 Orphan o = new Orphan(getPipelineConfiguration().getConfiguration());
                 o.setNodeKind(Type.TEXT);
                 o.setStringValue(buffer.toString());
-                getResult().processItem(o);
+                getNextOutputter().append(o);
                 buffer.setLength(0);
             }
             prevText = false;
 
+        }
+
+        @Override
+        public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties) throws XPathException {
+            prevText = false;
+            super.startElement(elemName, typeCode, location, properties);
+        }
+
+        @Override
+        public void startElement(NodeName elemName, SchemaType type, AttributeMap attributes, NamespaceMap namespaces, Location location, int properties) throws XPathException {
+            prevText = false;
+            super.startElement(elemName, type, attributes, namespaces, location, properties);
+        }
+
+        @Override
+        public void endElement() throws XPathException {
+            prevText = false;
+            super.endElement();
+        }
+
+        @Override
+        public void processingInstruction(String name, CharSequence data, Location location, int properties) throws XPathException {
+            prevText = false;
+            super.processingInstruction(name, data, location, properties);
+        }
+
+        @Override
+        public void comment(CharSequence content, Location location, int properties) throws XPathException {
+            prevText = false;
+            super.comment(content, location, properties);
         }
 
         /**
@@ -125,10 +157,11 @@ public class AdjacentTextNodeMergerAdjunct extends TransmissionAdjunct implement
          *          to report any failure
          */
 
+        @Override
         public void close() throws XPathException {
 //        getContextStack().pop();
             flush();
-            getResult().close();
+            getNextOutputter().close();
         }
 
     }
@@ -136,4 +169,4 @@ public class AdjacentTextNodeMergerAdjunct extends TransmissionAdjunct implement
 
 }
 
-// Copyright (c) 2010-2013 Saxonica Limited.
+// Copyright (c) 2010-2020 Saxonica Limited

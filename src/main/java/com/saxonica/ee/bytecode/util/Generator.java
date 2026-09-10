@@ -571,4 +571,4 @@ public class Generator extends GeneratorAdapter {
 
 }
 
-// Copyright (c) 2011-2018 Saxonica Limited. All rights reserved
+// Copyright (c) 2011-2020 Saxonica Limited

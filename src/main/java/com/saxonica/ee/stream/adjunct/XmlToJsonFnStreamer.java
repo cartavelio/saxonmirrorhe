@@ -1,7 +1,6 @@
 package com.saxonica.ee.stream.adjunct;
 
 import com.saxonica.ee.stream.StreamingPatternMaker;
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.om.FleetingParentNode;
@@ -10,12 +9,11 @@ import com.saxonica.ee.stream.watch.Trigger;
 import com.saxonica.ee.stream.watch.WatchMaker;
 import com.saxonica.ee.stream.watch.WatchManager;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.StartTagBuffer;
 import net.sf.saxon.expr.CardinalityChecker;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.ma.json.JsonReceiver;
 import net.sf.saxon.ma.json.XMLToJsonFn;
 import net.sf.saxon.ma.map.MapItem;
@@ -24,7 +22,6 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.StringValue;
 
 import java.util.Map;
 
@@ -33,6 +30,7 @@ import java.util.Map;
  */
 public class XmlToJsonFnStreamer extends StreamingAdjunct implements FeedMaker {
 
+    @Override
     public WatchMaker getWatchMaker(boolean forGrouping) throws XPathException {
         final SystemFunctionCall instruction = (SystemFunctionCall) getExpression();
         Expression select = instruction.getArg(0);
@@ -49,10 +47,10 @@ public class XmlToJsonFnStreamer extends StreamingAdjunct implements FeedMaker {
 
         if (selection != null) {
             return new WatchMaker() {
-                public Trigger makeWatch(WatchManager watchManager, Feed out, XPathContext context)
+                @Override
+                public Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context)
                         throws XPathException {
                     ToJsonAction action = new ToJsonAction(getExpression(), out, context);
-                    action.setWatchManager(watchManager);
                     return new Trigger(selection, action, context);
                 }
             };
@@ -61,23 +59,22 @@ public class XmlToJsonFnStreamer extends StreamingAdjunct implements FeedMaker {
     }
 
     @Override
-    public Feed makeItemFeed(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+    public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
         ToJsonAction action = new ToJsonAction(getExpression(), out, context);
-        action.setWatchManager(watchManager);
         return action;
     }
 
     private static class ToJsonAction extends ItemFeed {
 
-        private WatchManager watchManager;
         private JsonReceiver receiver;
         private boolean indenting;
         private boolean foundOneNode;
 
-        public ToJsonAction(Expression functionCall, Feed out, XPathContext context) {
+        public ToJsonAction(Expression functionCall, ItemFeed out, XPathContext context) {
             super(functionCall, out, context);
         }
 
+        @Override
         public void open(Terminator terminator) throws XPathException {
             super.open(terminator);
             SystemFunctionCall exp = (SystemFunctionCall) getExpression();
@@ -85,13 +82,9 @@ public class XmlToJsonFnStreamer extends StreamingAdjunct implements FeedMaker {
 
             if (exp.getArity() > 1) {
                 MapItem suppliedOptions = (MapItem) exp.getArg(1).evaluateItem(getContext());
-                Map<String, Sequence<?>> options = target.getDetails().optionDetails.processSuppliedOptions(suppliedOptions, getContext());
+                Map<String, Sequence> options = target.getDetails().optionDetails.processSuppliedOptions(suppliedOptions, getContext());
                 indenting = ((BooleanValue) options.get("indent").head()).getBooleanValue();
             }
-        }
-
-        public void setWatchManager(WatchManager watchManager) {
-            this.watchManager = watchManager;
         }
 
         /**
@@ -108,6 +101,7 @@ public class XmlToJsonFnStreamer extends StreamingAdjunct implements FeedMaker {
          * @throws XPathException May be raised if a dynamic error occurs
          */
 
+        @Override
         public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
             if (foundOneNode) {
                 XPathException err = new XPathException("Supplied argument to xml-to-json contains more than one node", "XPTY0004");
@@ -115,8 +109,7 @@ public class XmlToJsonFnStreamer extends StreamingAdjunct implements FeedMaker {
                 return null;
             } else {
                 foundOneNode = true;
-                getPipelineConfiguration().setComponent(StartTagBuffer.class.getName(), watchManager.getStartTagBuffer());
-                receiver = new JsonReceiver(getPipelineConfiguration());
+                receiver = new JsonReceiver(getPipelineConfiguration(), getNextOutputter().getStringReceiver(false));
                 receiver.setIndenting(indenting);
                 receiver.open();
                 return receiver;
@@ -130,7 +123,8 @@ public class XmlToJsonFnStreamer extends StreamingAdjunct implements FeedMaker {
          * @param item the item that was matched.
          */
 
-        public void processItem(Item<?> item) throws XPathException {
+        @Override
+        public void append(Item item) throws XPathException {
             throw new AssertionError();
         }
 
@@ -143,14 +137,16 @@ public class XmlToJsonFnStreamer extends StreamingAdjunct implements FeedMaker {
          *                                               Watch is violated @param locationId the location of the node in the source, or of the instruction that created it
          */
 
+        @Override
         public void endSelectedParentNode(Location locationId) throws XPathException {
             //
         }
 
+        @Override
         public void close() throws XPathException {
             receiver.close();
-            String json = receiver.getJsonString();
-            getResult().processItem(StringValue.makeStringValue(json));
+//            String json = receiver.getJsonString();
+//            getResult().append(StringValue.makeStringValue(json));
             super.close();
         }
 
@@ -160,4 +156,4 @@ public class XmlToJsonFnStreamer extends StreamingAdjunct implements FeedMaker {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

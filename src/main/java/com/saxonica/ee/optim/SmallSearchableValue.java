@@ -19,9 +19,14 @@ import net.sf.saxon.value.AtomicValue;
 import java.util.ArrayList;
 import java.util.List;
 
-class SmallSearchableValue<T extends Item<?>> extends SearchableValue<T> {
+/**
+ * A SearchableValue that is sufficiently small that construction of an index is
+ * not worthwhile
+ */
 
-    SmallSearchableValue(T[] array, int end) {
+class SmallSearchableValue extends SearchableValue {
+
+    SmallSearchableValue(Item[] array, int end) {
         this.value = array;
         this.end = end;
     }
@@ -32,17 +37,17 @@ class SmallSearchableValue<T extends Item<?>> extends SearchableValue<T> {
     }
 
     @Override
-    public SequenceIterator<T> findItems(Expression use, SequenceIterator<? extends AtomicValue> values,
+    public SequenceIterator findItems(Expression use, SequenceIterator values,
                                                boolean convertUntypedToOther, boolean firstOnly,
                                                AtomicComparer comparer, XPathContext context) throws XPathException {
-        List<T> selected = new ArrayList<>();
+        List<Item> selected = new ArrayList<>();
 
         XPathContext c2 = context.newContext();
         ManualIterator manual = new ManualIterator();
         c2.setCurrentIterator(manual);
 
         List<AtomicValue> soughtValues = new ArrayList<>();
-        values.forEachOrFail(soughtValues::add);
+        values.forEachOrFail(item -> soughtValues.add((AtomicValue)item));
         if (soughtValues.isEmpty()) {
             return EmptyIterator.emptyIterator();
         }
@@ -79,7 +84,6 @@ class SmallSearchableValue<T extends Item<?>> extends SearchableValue<T> {
 
     }
 
-
 }
 
-// Copyright (c) Saxonica Ltd 2018
+// Copyright (c) 2018-2020 Saxonica Limited

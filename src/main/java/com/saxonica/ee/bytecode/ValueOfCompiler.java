@@ -2,11 +2,11 @@ package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.ValueOf;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -95,6 +95,7 @@ public class ValueOfCompiler extends SimpleNodeConstructorCompiler {
      * @return true if the rules for this instruction are that when the content is empty, no node is generated
      */
 
+    @Override
     protected boolean isNoNodeIfEmpty(Expression expr) {
         return ((ValueOf) expr).isNoNodeIfEmpty();
     }
@@ -112,8 +113,8 @@ public class ValueOfCompiler extends SimpleNodeConstructorCompiler {
         Generator ga = compiler.getCurrentGenerator();
         allocateStatic(compiler, expr.getLocation());
         ga.push(expr.getOptions());
-        ga.invokeInstanceMethod(Receiver.class, "characters", CharSequence.class, Location.class, Integer.TYPE);
+        ga.invokeInstanceMethod(Outputter.class, "characters", CharSequence.class, Location.class, Integer.TYPE);
     }
 }
 
-//Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

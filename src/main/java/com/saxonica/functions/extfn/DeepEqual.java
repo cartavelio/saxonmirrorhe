@@ -52,7 +52,8 @@ public class DeepEqual extends SystemFunction {
      *                                           code will add information about the error location.
      */
 
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         String flags = arguments[3].head().getStringValue();
         if (flags.indexOf('!') >= 0) {
             // undocumented diagnostic option
@@ -120,5 +121,5 @@ public class DeepEqual extends SystemFunction {
 
 }
 
-// Copyright (c) 2009-2016 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited
 

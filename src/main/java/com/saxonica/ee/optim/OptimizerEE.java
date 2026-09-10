@@ -17,10 +17,7 @@ import net.sf.saxon.expr.compat.GeneralComparison10;
 import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.*;
-import net.sf.saxon.functions.Doc;
-import net.sf.saxon.functions.DocumentFn;
-import net.sf.saxon.functions.KeyFn;
-import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.registry.VendorFunctionSetHE;
 import net.sf.saxon.functions.registry.XSLT30FunctionSet;
 import net.sf.saxon.lib.*;
@@ -58,6 +55,381 @@ public class OptimizerEE extends Optimizer {
     }
 
     /**
+     * Ask whether an item type is "string-like" in its comparison semantics
+     *
+     * @param type the item type
+     * @return true if the item type is xs:string, xs:anyURI, or xs:untypedAtomic
+     */
+
+    private boolean isStringLike(ItemType type) {
+        int fp = type.getPrimitiveType();
+        return fp == StandardNames.XS_STRING ||
+                fp == StandardNames.XS_ANY_URI ||
+                fp == StandardNames.XS_UNTYPED_ATOMIC;
+    }
+
+    /**
+     * Optimize a value comparison
+     * @param vc the value comparison expression
+     * @param visitor the expression visitor
+     * @param contextInfo static context item information
+     * @return either the original value comparison, or an optimized equivalent
+     * @throws XPathException if things go wrong
+     */
+
+    @Override
+    public Expression optimizeValueComparison(
+            ValueComparison vc, ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) 
+            throws XPathException {
+
+        Expression lhs = vc.getLhsExpression();
+        Expression rhs = vc.getRhsExpression();
+        int operator = vc.getOperator();
+        AtomicComparer comparer = vc.getAtomicComparer();
+
+        Expression e1 = super.optimizeValueComparison(vc, visitor, contextInfo);
+        if (e1 != null && e1 != vc) {
+            return e1;
+        }
+
+        Sequence value0 = null;
+        Sequence value1 = null;
+
+        if (lhs instanceof Literal) {
+            value0 = ((Literal) lhs).getValue();
+        }
+
+        if (rhs instanceof Literal) {
+            value1 = ((Literal) rhs).getValue();
+        }
+
+        if (isOptionSet(OptimizerOptions.CONSTANT_FOLDING)) {
+
+            // evaluate the expression now if both arguments are constant
+
+            if ((value0 != null) && (value1 != null)) {
+                try {
+                    AtomicValue r = vc.evaluateItem(visitor.getStaticContext().makeEarlyEvaluationContext());
+                    return Literal.makeLiteral(r == null ? EmptySequence.getInstance() : r, vc);
+                } catch (NoDynamicContextException e) {
+                    // early evaluation failed, typically because the implicit context isn't available.
+                    // Try again at run-time
+                    return vc;
+                }
+            }
+        }
+
+        if (!isOptionSet(OptimizerOptions.MISCELLANEOUS)) {
+            return vc;
+        }
+
+        // optimise count(x) eq N (or gt N, ne N, eq N, etc)
+        // TODO: extend this to cases where N is not a literal
+
+        if (lhs.isCallOn(Count.class) && Literal.isAtomic(rhs)) {
+            Expression e2 = optimizeCount(vc, visitor, false);
+            if (e2 != null) {
+                return e2.optimize(visitor, contextInfo);
+            }
+        } else if (rhs.isCallOn(Count.class) && Literal.isAtomic(lhs)) {
+            Expression e2 = optimizeCount(vc, visitor, true);
+            if (e2 != null) {
+                return e2.optimize(visitor, contextInfo);
+            }
+        }
+
+        // optimise string-length(x) = 0, >0, !=0 etc
+
+        if (lhs.isCallOn(StringLength_1.class) && isZero(value1)) {
+            assert lhs instanceof SystemFunctionCall;
+            Expression arg = ((SystemFunctionCall) lhs).getArg(0);
+            switch (vc.getOperator()) {
+                case Token.FEQ:
+                case Token.FLE:
+                    return SystemFunction.makeCall("not", vc.getRetainedStaticContext(), arg);
+                case Token.FNE:
+                case Token.FGT:
+                    return SystemFunction.makeCall("boolean", vc.getRetainedStaticContext(), arg);
+                case Token.FGE:
+                    return Literal.makeLiteral(BooleanValue.TRUE, vc);
+                case Token.FLT:
+                    return Literal.makeLiteral(BooleanValue.FALSE, vc);
+            }
+        }
+
+        // optimise (0 = string-length(x)), etc
+
+        if (rhs.isCallOn(StringLength_1.class) && isZero(value0)) {
+            assert rhs instanceof SystemFunctionCall;
+            Expression arg = ((SystemFunctionCall) rhs).getArg(0);
+            switch (vc.getOperator()) {
+                case Token.FEQ:
+                case Token.FGE:
+                    return SystemFunction.makeCall("not", vc.getRetainedStaticContext(), arg);
+                case Token.FNE:
+                case Token.FLT:
+                    return SystemFunction.makeCall("boolean", vc.getRetainedStaticContext(), arg);
+                case Token.FLE:
+                    return Literal.makeLiteral(BooleanValue.TRUE, vc);
+                case Token.FGT:
+                    return Literal.makeLiteral(BooleanValue.FALSE, vc);
+            }
+        }
+
+        // optimise string="" etc
+        // Note we can change S!="" to boolean(S) for cardinality zero-or-one, but we can only
+        // change S="" to not(S) for cardinality exactly-one.
+
+        int p0 = lhs.getItemType().getPrimitiveType();
+        if ((p0 == StandardNames.XS_STRING ||
+                     p0 == StandardNames.XS_ANY_URI ||
+                     p0 == StandardNames.XS_UNTYPED_ATOMIC) &&
+                vc.getResultWhenEmpty() != BooleanValue.TRUE &&
+                rhs instanceof Literal &&
+                ((Literal) rhs).getValue() instanceof StringValue &&
+                ((StringValue) ((Literal) rhs).getValue()).isZeroLength() &&
+                comparer instanceof CodepointCollatingComparer) {
+
+            switch (vc.getOperator()) {
+                case Token.FNE:
+                case Token.FGT:
+                    return SystemFunction.makeCall("boolean", vc.getRetainedStaticContext(), lhs);
+                case Token.FEQ:
+                case Token.FLE:
+                    if (lhs.getCardinality() == StaticProperty.EXACTLY_ONE) {
+                        return SystemFunction.makeCall("not", vc.getRetainedStaticContext(), lhs);
+                    }
+            }
+        }
+
+        // optimize "" = string etc
+
+        int p1 = rhs.getItemType().getPrimitiveType();
+        if ((p1 == StandardNames.XS_STRING ||
+                     p1 == StandardNames.XS_ANY_URI ||
+                     p1 == StandardNames.XS_UNTYPED_ATOMIC) &&
+                vc.getResultWhenEmpty() != BooleanValue.TRUE &&
+                lhs instanceof Literal &&
+                ((Literal) lhs).getValue() instanceof StringValue &&
+                ((StringValue) ((Literal) lhs).getValue()).isZeroLength() &&
+                comparer instanceof CodepointCollatingComparer) {
+
+            switch (vc.getOperator()) {
+                case Token.FNE:
+                case Token.FLT:
+                    return SystemFunction.makeCall("boolean", vc.getRetainedStaticContext(), rhs);
+                case Token.FEQ:
+                case Token.FGE:
+                    if (rhs.getCardinality() == StaticProperty.EXACTLY_ONE) {
+                        return SystemFunction.makeCall("not", vc.getRetainedStaticContext(), rhs);
+                    }
+            }
+        }
+
+        // optimize comparison against an integer or string constant
+
+        if (value1 instanceof StringValue &&
+                lhs.getCardinality() == StaticProperty.EXACTLY_ONE &&
+                vc.getResultWhenEmpty() != BooleanValue.TRUE &&
+                comparer instanceof CodepointCollatingComparer &&
+                isStringLike(lhs.getItemType())) {
+            return new CompareToStringConstant(lhs, vc.getOperator(), ((StringValue) value1).getStringValue());
+        }
+
+        if (value0 instanceof StringValue &&
+                rhs.getCardinality() == StaticProperty.EXACTLY_ONE &&
+                vc.getResultWhenEmpty() != BooleanValue.TRUE &&
+                comparer instanceof CodepointCollatingComparer &&
+                isStringLike(rhs.getItemType())) {
+            return new CompareToStringConstant(rhs, Token.inverse(vc.getOperator()), ((StringValue) value0).getStringValue());
+        }
+
+        // optimize comparison against an integer literal
+
+        if (value1 instanceof Int64Value &&
+                lhs.getCardinality() == StaticProperty.EXACTLY_ONE &&
+                NumericType.isNumericType(lhs.getItemType())) {
+            return new CompareToIntegerConstant(lhs, vc.getOperator(), ((Int64Value) value1).longValue());
+        }
+
+        if (value0 instanceof Int64Value &&
+                rhs.getCardinality() == StaticProperty.EXACTLY_ONE &&
+                NumericType.isNumericType(rhs.getItemType())) {
+            return new CompareToIntegerConstant(rhs, Token.inverse(vc.getOperator()), ((Int64Value) value0).longValue());
+        }
+
+        // optimize (boolean expression) == (boolean literal)
+
+        if (p0 == StandardNames.XS_BOOLEAN &&
+                p1 == StandardNames.XS_BOOLEAN &&
+                (operator == Token.FEQ || operator == Token.FNE) &&
+                lhs.getCardinality() == StaticProperty.EXACTLY_ONE &&
+                rhs.getCardinality() == StaticProperty.EXACTLY_ONE &&
+                (lhs instanceof Literal || rhs instanceof Literal)) {
+            Literal literal = (Literal) (lhs instanceof Literal ? lhs : rhs);
+            Expression other = lhs instanceof Literal ? rhs : lhs;
+            boolean negate = (operator == Token.FEQ) != ((BooleanValue) literal.getValue()).getBooleanValue();
+            if (negate) {
+                Expression fn = SystemFunction.makeCall("not", vc.getRetainedStaticContext(), other);
+                assert fn != null;
+                ExpressionTool.copyLocationInfo(vc, fn);
+                return fn.optimize(visitor, contextInfo);
+            } else {
+                return other;
+            }
+        }
+
+
+        // optimize generate-id(X) = generate-id(Y) as "X is Y"
+        // This construct is often used in XSLT 1.0 stylesheets.
+        // Only do this if we know the arguments are singletons, because "is" doesn't
+        // do first-value extraction.
+
+        if (lhs.isCallOn(GenerateId_1.class) && rhs.isCallOn(GenerateId_1.class)) {
+            assert lhs instanceof SystemFunctionCall;
+            SystemFunctionCall f0 = (SystemFunctionCall) lhs;
+            assert rhs instanceof SystemFunctionCall;
+            SystemFunctionCall f1 = (SystemFunctionCall) rhs;
+            if (!Cardinality.allowsMany(f0.getArg(0).getCardinality()) &&
+                    !Cardinality.allowsMany(f1.getArg(0).getCardinality()) &&
+                    (operator == Token.FEQ)) {
+                IdentityComparison id =
+                        new IdentityComparison(f0.getArg(0),
+                                               Token.IS,
+                                               f1.getArg(0));
+                id.setGenerateIdEmulation(true);
+                ExpressionTool.copyLocationInfo(vc, id);
+                return id.typeCheck(visitor, contextInfo).optimize(visitor, contextInfo);
+            }
+        }
+
+        return vc;
+    }
+
+    /**
+     * Test whether an expression is constant zero
+     *
+     * @param v the value to be tested
+     * @return true if the operand is the constant zero (of any numeric data type)
+     */
+
+    private static boolean isZero(Sequence v) {
+        return v instanceof NumericValue && ((NumericValue) v).compareTo(0) == 0;
+    }
+
+
+    /**
+     * Optimize comparisons of count(X) to a literal value. The objective here is to count items in the sequence only
+     * until the result of the comparison is deducible; for example to evaluate (count(X)>2) we can stop at the third
+     * item in the sequence.
+     *
+     * @param inverted true if the call to count(X) is the right-hand operand
+     * @return the optimized expression, or null if no optimization is possible
+     * @throws XPathException if an error occurs
+     */
+
+    /*@Nullable*/
+    private Expression optimizeCount(ValueComparison vc, ExpressionVisitor visitor, boolean inverted) throws XPathException {
+        SystemFunctionCall countFn = (SystemFunctionCall) (inverted ? vc.getRhsExpression() : vc.getLhsExpression());
+        Expression sequence = countFn.getArg(0);
+        sequence = sequence.unordered(true, false);
+
+        AtomicValue literalOperand = (AtomicValue) ((Literal) (inverted ? vc.getLhsExpression() : vc.getRhsExpression())).getValue();
+        int op = inverted ? Token.inverse(vc.getOperator()) : vc.getOperator();
+
+        if (isZero(literalOperand)) {
+            if (op == Token.FEQ || op == Token.FLE) {
+                // rewrite count(x)=0 as empty(x)
+                Expression result = SystemFunction.makeCall("empty", vc.getRetainedStaticContext(), sequence);
+                trace("Rewrite count()=0 as:", result);
+                return result;
+            } else if (op == Token.FNE || op == Token.FGT) {
+                // rewrite count(x)!=0, count(x)>0 as exists(x)
+                Expression result = SystemFunction.makeCall("exists", vc.getRetainedStaticContext(), sequence);
+                trace("Rewrite count()>0 as:", result);
+                return result;
+            } else if (op == Token.FGE) {
+                // rewrite count(x)>=0 as true()
+                return Literal.makeLiteral(BooleanValue.TRUE, vc);
+            } else {  // singletonOperator == Token.FLT
+                // rewrite count(x)<0 as false()
+                return Literal.makeLiteral(BooleanValue.FALSE, vc);
+            }
+        } else if (literalOperand instanceof NumericValue) {
+            long operand;
+            if (literalOperand instanceof IntegerValue) {
+                operand = ((IntegerValue) literalOperand).longValue();
+            } else if (literalOperand.isNaN()) {
+                return Literal.makeLiteral(BooleanValue.get(op == Token.FNE), vc);
+            } else if (((NumericValue) literalOperand).isWholeNumber()) {
+                operand = ((NumericValue) literalOperand).longValue();
+            } else if (op == Token.FEQ) {
+                return Literal.makeLiteral(BooleanValue.FALSE, vc);
+            } else if (op == Token.FNE) {
+                return Literal.makeLiteral(BooleanValue.TRUE, vc);
+            } else if (op == Token.FGT || op == Token.FGE) {
+                operand = ((NumericValue) literalOperand).ceiling().longValue();
+                op = Token.FGE;
+            } else /*if (op == Token.FLT || op == Token.FLE)*/ {
+                operand = ((NumericValue) literalOperand).floor().longValue();
+                op = Token.FLE;
+            }
+            if (operand < 0) {
+                switch (op) {
+                    case Token.FEQ:
+                    case Token.FLT:
+                    case Token.FLE:
+                        return Literal.makeLiteral(BooleanValue.FALSE, vc);
+                    default:
+                        return Literal.makeLiteral(BooleanValue.TRUE, vc);
+                }
+            }
+            if (operand > Integer.MAX_VALUE) {
+                switch (op) {
+                    case Token.FEQ:
+                    case Token.FGT:
+                    case Token.FGE:
+                        return Literal.makeLiteral(BooleanValue.FALSE, vc);
+                    default:
+                        return Literal.makeLiteral(BooleanValue.TRUE, vc);
+                }
+            }
+            if (sequence instanceof TailExpression || sequence.isCallOn(Subsequence_2.class)) {
+                // it's probably the result of a previous optimization
+                return null;
+            }
+            switch (op) {
+                case Token.FEQ:
+                case Token.FNE:
+                case Token.FLE:
+                case Token.FLT:
+                    // rewrite count(E) op N as count(subsequence(E, 1, N+1)) op N
+                    Expression ss = SystemFunction.makeCall("subsequence",
+                                                            vc.getRetainedStaticContext(), sequence,
+                                                            Literal.makeLiteral(Int64Value.PLUS_ONE, vc),
+                                                            Literal.makeLiteral(Int64Value.makeIntegerValue(operand + 1), vc));
+                    Expression ct = SystemFunction.makeCall("count", vc.getRetainedStaticContext(), ss);
+                    CompareToIntegerConstant ctic = new CompareToIntegerConstant(ct, op, operand);
+                    trace("Rewrite count()~N as:", ctic);
+                    ExpressionTool.copyLocationInfo(vc, ctic);
+                    return ctic;
+                case Token.FGE:
+                case Token.FGT:
+                    // rewrite count(x) gt n as exists(x[n+1])
+                    //     and count(x) ge n as exists(x[n])
+                    TailExpression tail = new TailExpression(sequence, (int) (op == Token.FGE ? operand : operand + 1));
+                    ExpressionTool.copyLocationInfo(vc, tail);
+                    Expression result = SystemFunction.makeCall("exists", vc.getRetainedStaticContext(), tail);
+                    ExpressionTool.copyLocationInfo(vc, result);
+                    trace("Rewrite count()>=N as:", result);
+                    return result;
+            }
+        }
+        return null;
+    }
+
+
+    /**
      * Optimize a GeneralComparison expression. Saxon-EE has a number of strategies for handling these;
      * for example when comparing against a constant set of values, the expression is turned into
      * a call on map:contains().
@@ -68,6 +440,7 @@ public class OptimizerEE extends Optimizer {
      * @return the simplified expression
      */
 
+    @Override
     public Expression optimizeGeneralComparison(ExpressionVisitor visitor,
                                                 GeneralComparison gc, boolean backwardsCompatible, ContextItemStaticInfo contextItemType) {
         if (gc instanceof GeneralComparisonEE) {
@@ -123,7 +496,7 @@ public class OptimizerEE extends Optimizer {
         try {
             boolean allStrings = true;
             MapItem map;
-            for (Item item : literal.getValue()) {
+            for (Item item : literal.getValue().asIterable()) {
                 if (!(item instanceof StringValue)) {
                     allStrings = false;
                     break;
@@ -131,13 +504,13 @@ public class OptimizerEE extends Optimizer {
             }
             if (allStrings) {
                 DictionaryMap dict = new DictionaryMap();
-                for (Item item : literal.getValue()) {
+                for (Item item : literal.getValue().asIterable()) {
                     dict.initialPut(item.getStringValue(), BooleanValue.TRUE);
                 }
                 map = dict;
             } else {
                 HashTrieMap trie = new HashTrieMap();
-                for (Item item : literal.getValue()) {
+                for (Item item : literal.getValue().asIterable()) {
                     if (item instanceof AtomicValue) {
                         // if the values have complex comparison semantics, give up
                         if (item instanceof CalendarValue && !((CalendarValue) item).hasTimezone()) {
@@ -159,7 +532,7 @@ public class OptimizerEE extends Optimizer {
             Expression e2;
             TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
             SystemFunction containsFn;
-            if (allStrings || th.relationship(exp.getItemType(), BuiltInAtomicType.UNTYPED_ATOMIC) == TypeHierarchy.DISJOINT) {
+            if (allStrings || th.relationship(exp.getItemType(), BuiltInAtomicType.UNTYPED_ATOMIC) == Affinity.DISJOINT) {
                 containsFn = MapFunctionSet.getInstance().makeFunction("contains", 2);
             } else {
                 containsFn = VendorFunctionSetHE.getInstance().makeFunction("map-untyped-contains", 2);
@@ -194,6 +567,7 @@ public class OptimizerEE extends Optimizer {
      */
 
     /*@Nullable*/
+    @Override
     public Expression optimizeSaxonStreamFunction(ExpressionVisitor visitor, ContextItemStaticInfo cisi, Expression select) throws XPathException {
         Expression e = super.optimizeSaxonStreamFunction(visitor, cisi, select);
         if (e != null) {
@@ -302,12 +676,13 @@ public class OptimizerEE extends Optimizer {
      * @throws XPathException if the template is declared streamable but does not satisfy the straming rules
      */
 
+    @Override
     public void checkStreamability(XSLTemplate sourceTemplate, TemplateRule compiledTemplate) throws XPathException {
         if (compiledTemplate.isDeclaredStreamable()) {
             boolean actuallyStreamable;
             List<String> reasons = new ArrayList<>();
-            int streamabilityRules = getConfiguration().getStreamability();
-            if (streamabilityRules == Streamability.OFF) {
+            boolean enabled = getConfiguration().isStreamabilityEnabled();
+            if (!enabled) {
                 reasons.add("Streaming is disabled for this Saxon Configuration");
                 actuallyStreamable = false;
             } else {
@@ -347,6 +722,7 @@ public class OptimizerEE extends Optimizer {
      * @return the optimized expression, or the original expression if no optimization was possible.
      */
 
+    @Override
     public Expression optimizeForExpressionForStreaming(ForExpression expr) {
         Expression e2 = Streamability.rewriteForExpressionAsMappingExpression(expr);
         if (e2 != null) {
@@ -378,6 +754,7 @@ public class OptimizerEE extends Optimizer {
      * @return the optimized expression, or the original expression if no optimization was possible.
      */
 
+    @Override
     public Expression optimizeQuantifiedExpressionForStreaming(QuantifiedExpression expr) throws XPathException {
         Expression rewrite = Streamability.rewriteQuantifiedExpressionAsFilterExpression(expr);
         if (rewrite != null) {
@@ -462,6 +839,7 @@ public class OptimizerEE extends Optimizer {
      * @param pathExp The path expression to be converted.
      */
 
+    @Override
     public Expression convertPathExpressionToKey(SlashExpression pathExp, ExpressionVisitor visitor) {
         if (!isOptionSet(OptimizerOptions.CREATE_KEYS)) {
             return null;
@@ -500,6 +878,7 @@ public class OptimizerEE extends Optimizer {
      * @param indexFirstOperand true if the first operand of the filter comparison is to be indexed;
      * @param contextIsDoc      true if the context item is known to be a document node
      */
+    @Override
     public Expression tryIndexedFilter(FilterExpression f, ExpressionVisitor visitor,
                                        boolean indexFirstOperand, boolean contextIsDoc) {
         if ("EE".equals(visitor.getTargetEdition())) {
@@ -537,31 +916,63 @@ public class OptimizerEE extends Optimizer {
     }
 
     /**
-     * Consider reordering the predicates in a filter expression based on cost estimates
-     * @param f the filter expression (which is known to have more than one predicate)
+     * Consider reordering the predicates in a filter expression based on cost estimates and other criteria
+     * @param f the filter expression
      * @param visitor expression visitor
      * @param cisi information about the context item type
      * @return either the original expression, or an optimized replacement
-     * @throws XPathException if things go wrong
      */
 
-    public Expression reorderPredicates(FilterExpression f, ExpressionVisitor visitor, ContextItemStaticInfo cisi)
-            throws XPathException {
-        Expression base = ((FilterExpression) f.getLhsExpression()).getLhsExpression();
-        Expression predicate1 = ((FilterExpression) f.getLhsExpression()).getRhsExpression();
-        Expression predicate2 = f.getRhsExpression();
-        if (predicate1.getCost() > 2 * predicate2.getCost()) {
-            FilterExpression fe1 = new FilterExpression(base, predicate2);
-            FilterExpression fe2 = new FilterExpression(fe1, predicate1);
-            ExpressionTool.copyLocationInfo(f, fe2);
-            if (tracing) {
-                trace("Reordered predicates in filter expression", fe2);
-            }
-            return fe2.optimize(visitor, cisi);
+    @Override
+    public FilterExpression reorderPredicates(FilterExpression f, ExpressionVisitor visitor, ContextItemStaticInfo cisi) throws XPathException {
+        Expression base = f.getBase();
+        if (!(base instanceof FilterExpression)) {
+            return f;
         }
-        return f;
+        List<Expression> filters = new ArrayList<>();
+        addTerms(f.getFilter(), filters);
+        while (base instanceof FilterExpression && !((FilterExpression)base).isFilterIsPositional()) {
+            Expression predicate = ((FilterExpression) base).getFilter();
+            addTerms(predicate, filters);
+            base = ((FilterExpression)base).getBase();
+        }
+
+        filters.sort((f0, f1) -> {
+            if (f0 == f1) {
+                return 0;
+            }
+            // A filter that has no dependencies takes precedence over one that does (because it gives
+            // a better chance of loop lifting or promotion to global
+            boolean d0 = (f0.getDependencies() & ~StaticProperty.DEPENDS_ON_FOCUS) == 0;
+            boolean d1 = (f1.getDependencies() & ~StaticProperty.DEPENDS_ON_FOCUS) == 0;
+            if (d0 != d1) {
+                return d0 ? -1 : +1;
+            }
+            // An indexable filter takes precedence over a non-indexable filter
+            boolean i0 = isIndexableFilter(f0) != 0;
+            boolean i1 = isIndexableFilter(f1) != 0;
+            if (i0 != i1) {
+                return i0 ? -1 : +1;
+            }
+            // Otherwise, compare estimated cost
+            return f0.getCost() < f1.getCost() ? -1 : +1;
+        });
+
+        for (Expression e : filters) {
+            base = new FilterExpression(base, e);
+        }
+        return (FilterExpression) base;
     }
 
+    private static void addTerms(Expression predicate, List<Expression> filters) {
+        if (predicate instanceof AndExpression) {
+            addTerms(((AndExpression) predicate).getRhsExpression(), filters);
+            addTerms(((AndExpression) predicate).getLhsExpression(), filters);
+        } else {
+            filters.add(0, predicate);
+        }
+    }
+    
     private Expression tryToConvertFilterExpressionToKey(FilterExpression f, ExpressionVisitor visitor, boolean contextIsDoc) {
         Expression base = f.getSelectExpression();
         while (true) {
@@ -708,9 +1119,6 @@ public class OptimizerEE extends Optimizer {
             }
             ExpressionTool.copyLocationInfo(f, use);
             useType = use.getItemType();
-            if (((AtomicType) useType).isExternalType()) {
-                return null;
-            }
         }
 
         // If the operator is eq, keys have the correct type-matching semantics, except that they
@@ -735,7 +1143,7 @@ public class OptimizerEE extends Optimizer {
             } else if ((useType.equals(BuiltInAtomicType.ANY_ATOMIC) || useType.equals(BuiltInAtomicType.UNTYPED_ATOMIC)) &&
                     !(valueType.equals(BuiltInAtomicType.UNTYPED_ATOMIC) || th.isSubType(valueType, BuiltInAtomicType.STRING) || th.isSubType(valueType, BuiltInAtomicType.ANY_ATOMIC))) {
                 AtomicType targetType = (AtomicType) valueType;
-                if (th.isSubType(targetType, NumericType.getInstance())) {
+                if (NumericType.isNumericType(targetType)) {
                     targetType = BuiltInAtomicType.DOUBLE;
                 }
                 use = new AtomicSequenceConverter(use, targetType);
@@ -743,7 +1151,7 @@ public class OptimizerEE extends Optimizer {
             } else if ((valueType.equals(BuiltInAtomicType.ANY_ATOMIC) || valueType.equals(BuiltInAtomicType.UNTYPED_ATOMIC)) &&
                     !(useType.equals(BuiltInAtomicType.UNTYPED_ATOMIC) || th.isSubType(useType, BuiltInAtomicType.STRING) || th.isSubType(valueType, BuiltInAtomicType.ANY_ATOMIC))) {
                 AtomicType targetType = (AtomicType) valueType;
-                if (th.isSubType(targetType, NumericType.getInstance())) {
+                if (NumericType.isNumericType(targetType)) {
                     targetType = BuiltInAtomicType.DOUBLE;
                 }
                 value = new AtomicSequenceConverter(value, targetType);
@@ -864,6 +1272,7 @@ public class OptimizerEE extends Optimizer {
      * @return the resulting filterexpression if conversion is possible, or null if not
      */
 
+    @Override
     public FilterExpression convertToFilterExpression(SlashExpression pathExp, TypeHierarchy th) {
         Expression head = pathExp.getFirstStep();
         Expression tail = pathExp.getRemainingSteps();
@@ -936,6 +1345,7 @@ public class OptimizerEE extends Optimizer {
      * the form value=expression
      */
 
+    @Override
     public int isIndexableFilter(Expression filter) {
         if (filter instanceof ComparisonExpression &&
                 ((ComparisonExpression) filter).getSingletonOperator() == Token.FEQ) {
@@ -991,8 +1401,20 @@ public class OptimizerEE extends Optimizer {
      * Create an indexed value
      */
 
-    public <T extends Item<?>> GroundedValue<T> makeIndexedValue(SequenceIterator<? extends T> iter) throws XPathException {
+    @Override
+    public GroundedValue makeIndexedValue(SequenceIterator iter) throws XPathException {
         return SearchableValue.makeSearchableValue(iter);
+    }
+
+    @Override
+    public void optimizeNodeSetPattern(NodeSetPattern pattern) {
+        Expression selection = pattern.getSelectionExpression();
+        if (selection instanceof GlobalVariableReference) {
+            Binding var = ((GlobalVariableReference)selection).getBinding();
+            if (var instanceof GlobalVariable) {
+                ((GlobalVariable)var).setIndexedVariable();
+            }
+        }
     }
 
     /**
@@ -1001,6 +1423,7 @@ public class OptimizerEE extends Optimizer {
      * @param exp the expression to be prepared
      */
 
+    @Override
     public void prepareForStreaming(Expression exp) throws XPathException {
         ExpressionTool.processExpressionTree(exp, new Object(), (expr, obj) -> {
             expr.prepareForStreaming();
@@ -1016,7 +1439,8 @@ public class OptimizerEE extends Optimizer {
      * @return the (nominal) result of the evaluation
      */
 
-    public Sequence<?> evaluateStreamingArgument(Expression expr, XPathContext context) throws XPathException {
+    @Override
+    public Sequence evaluateStreamingArgument(Expression expr, XPathContext context) throws XPathException {
         PostureAndSweep ps = Streamability.getPostureAndSweepIfKnown(expr);
         if (ps == null) {
             return super.evaluateStreamingArgument(expr, context);
@@ -1040,6 +1464,7 @@ public class OptimizerEE extends Optimizer {
      * item in the path expression contains more than one item
      */
 
+    @Override
     public Expression makeConditionalDocumentSorter(DocumentSorter sorter, SlashExpression path) {
         // if the path expression has the form $a/b/c/d, where b/c/d is naturally sorted, then
         // we add a run-time condition to the sorter: the sort is only necessary if $a is not
@@ -1078,6 +1503,7 @@ public class OptimizerEE extends Optimizer {
      * function body, with all function parameters bound as required.
      */
 
+    @Override
     public Expression tryInlineFunctionCall(
             UserFunctionCall functionCall, ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) {
         if (!isOptionSet(OptimizerOptions.INLINE_FUNCTIONS)) {
@@ -1128,7 +1554,6 @@ public class OptimizerEE extends Optimizer {
             newBody = function.getBody().copy(new RebindingMap());
             newBody.setRetainedStaticContext(function.getRetainedStaticContext());
 
-
             UserFunctionParameter[] params = function.getParameterDefinitions();
             for (int p = params.length - 1; p >= 0; p--) {
                 UserFunctionParameter param = params[p];
@@ -1172,6 +1597,7 @@ public class OptimizerEE extends Optimizer {
      * @return the result of optimizing this (the original expression if no optimization was possible)
      */
 
+    @Override
     public Expression trySwitch(Choose choose, ExpressionVisitor visitor) {
         if (!"EE".equals(visitor.getTargetEdition()) || !isOptionSet(OptimizerOptions.SWITCH)) {
             return choose;
@@ -1237,12 +1663,12 @@ public class OptimizerEE extends Optimizer {
         }
         Expression lhs = ((ComparisonExpression) condition).getLhsExpression();
         Expression rhs = ((ComparisonExpression) condition).getRhsExpression();
+        if (!Literal.isAtomic(rhs)) {
+            return false;
+        }
         if (((ComparisonExpression) condition).getAtomicComparer() instanceof UntypedNumericComparer) {
             // Bug 4738
             lhs = new UntypedSequenceConverter(lhs, BuiltInAtomicType.DOUBLE);
-        }
-        if (!Literal.isAtomic(rhs)) {
-            return false;
         }
         if (switchCaseInfo.commonlhs == null) {
             switchCaseInfo.commonlhs = lhs;
@@ -1307,8 +1733,8 @@ public class OptimizerEE extends Optimizer {
                     op = exprBin.getOperator();
 
 
-                } else if (compExpr instanceof CompareToIntegerConstant) {
-                    CompareToIntegerConstant intConst = (CompareToIntegerConstant) expr;
+                } else if (compExpr instanceof CompareToConstant) {
+                    CompareToConstant intConst = (CompareToConstant) expr;
                     op = intConst.getSingletonOperator();
 
                 } else {
@@ -1355,6 +1781,7 @@ public class OptimizerEE extends Optimizer {
      * @return the result of optimizing the Or expression (the original expression if no optimization was possible)
      */
 
+    @Override
     public Expression tryGeneralComparison(
             ExpressionVisitor visitor, ContextItemStaticInfo contextItemType, OrExpression orExpr) throws XPathException {
 
@@ -1432,13 +1859,14 @@ public class OptimizerEE extends Optimizer {
         boolean checkSecondExpr = second instanceof ValueComparison;
 
         boolean checkOperands = checkSecondExpr && (left.getSpecialProperties() & StaticProperty.NOT_UNTYPED_ATOMIC) == 0 &&
-                th.relationship(left.getItemType(), BuiltInAtomicType.UNTYPED_ATOMIC) != TypeHierarchy.DISJOINT &&
-                ((th.relationship(right.getItemType(), BuiltInAtomicType.STRING) != TypeHierarchy.DISJOINT) ||
-                        (th.relationship(right.getItemType(), BuiltInAtomicType.UNTYPED_ATOMIC) != TypeHierarchy.DISJOINT));
+                th.relationship(left.getItemType(), BuiltInAtomicType.UNTYPED_ATOMIC) != Affinity.DISJOINT &&
+                ((th.relationship(right.getItemType(), BuiltInAtomicType.STRING) != Affinity.DISJOINT) ||
+                        (th.relationship(right.getItemType(), BuiltInAtomicType.UNTYPED_ATOMIC) != Affinity.DISJOINT));
 
         checkOperands = checkSecondExpr && (checkOperands || ((right.getSpecialProperties() & StaticProperty.NOT_UNTYPED_ATOMIC) == 0 &&
-                th.relationship(right.getItemType(), BuiltInAtomicType.UNTYPED_ATOMIC) != TypeHierarchy.DISJOINT &&
-                ((th.relationship(left.getItemType(), BuiltInAtomicType.STRING) != TypeHierarchy.DISJOINT) || (th.relationship(left.getItemType(), BuiltInAtomicType.UNTYPED_ATOMIC) != TypeHierarchy.DISJOINT))));
+                th.relationship(right.getItemType(), BuiltInAtomicType.UNTYPED_ATOMIC) != Affinity.DISJOINT &&
+                ((th.relationship(left.getItemType(), BuiltInAtomicType.STRING) != Affinity.DISJOINT) ||
+                         (th.relationship(left.getItemType(), BuiltInAtomicType.UNTYPED_ATOMIC) != Affinity.DISJOINT))));
 
         if (checkOperands) {
             otherExp.add(second);
@@ -1464,6 +1892,7 @@ public class OptimizerEE extends Optimizer {
      * if no action was taken
      */
 
+    @Override
     public Expression promoteExpressionsToGlobal(
             Expression expr, GlobalVariableManager globalVariableManager, ExpressionVisitor visitor) throws XPathException {
         if (isOptionSet(OptimizerOptions.EXTRACT_GLOBALS)) {
@@ -1492,6 +1921,7 @@ public class OptimizerEE extends Optimizer {
      * @return the multi-threaded version of the instruction
      */
 
+    @Override
     public Expression generateMultithreadedInstruction(Expression instruction) {
         if (instruction instanceof ForEach && config.getBooleanProperty(Feature.ALLOW_MULTITHREADING)) {
             ForEach base = (ForEach) instruction;
@@ -1543,6 +1973,7 @@ public class OptimizerEE extends Optimizer {
      * or the supplied target expression otherwise.
      */
 
+    @Override
     public Expression makeByteCodeCandidate(ExpressionOwner owner, Expression expr, String objectName, int requiredEvaluationModes) {
         if (!isOptionSet(OptimizerOptions.BYTE_CODE) || !config.getBooleanProperty(Feature.GENERATE_BYTE_CODE)) {
             return expr;
@@ -1627,10 +2058,10 @@ public class OptimizerEE extends Optimizer {
                 return null;
             }
             TypeHierarchy th = getConfiguration().getTypeHierarchy();
-            if (th.relationship(contextInfo.getItemType(), NodeKindTest.ATTRIBUTE) != TypeHierarchy.DISJOINT) {
+            if (th.relationship(contextInfo.getItemType(), NodeKindTest.ATTRIBUTE) != Affinity.DISJOINT) {
                 return null;
             }
-            if (th.relationship(contextInfo.getItemType(), NodeKindTest.NAMESPACE) != TypeHierarchy.DISJOINT) {
+            if (th.relationship(contextInfo.getItemType(), NodeKindTest.NAMESPACE) != Affinity.DISJOINT) {
                 return null;
             }
             // Create an accumulator that maintains the value of the xsl:number result
@@ -1653,7 +2084,7 @@ public class OptimizerEE extends Optimizer {
                 rule = new Rule(from, ruleTarget, 1, 0, 1, 0, 0);
                 rules.addRule(from, rule);
 
-                if (th.relationship(count.getItemType(), from.getItemType()) != TypeHierarchy.DISJOINT) {
+                if (th.relationship(count.getItemType(), from.getItemType()) != Affinity.DISJOINT) {
                     // A node might match both the count and the from patterns: in this case set the accumulator to 1
                     Pattern both = new IntersectPattern(from, count);
                     ruleTarget = new AccumulatorRule(Literal.makeLiteral(Int64Value.PLUS_ONE, ni), slots, false);
@@ -1712,6 +2143,7 @@ public class OptimizerEE extends Optimizer {
      */
 
 
+    @Override
     public void assessFunctionStreamability(XSLFunction sourceFunction, UserFunction compiledFunction) {
         FunctionStreamability ability = compiledFunction.getDeclaredStreamability();
         if (ability == FunctionStreamability.UNCLASSIFIED) {
@@ -1812,4 +2244,4 @@ public class OptimizerEE extends Optimizer {
 
 }
 
-// Copyright (c) 2004-2016 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

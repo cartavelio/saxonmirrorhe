@@ -47,6 +47,7 @@ public class AllModelGroup extends ModelGroup {
      * @param particle the Particle to be added
      */
 
+    @Override
     public void addParticle(Particle particle) {
         super.addParticle(particle);
         if (particle instanceof ElementWildcard) {
@@ -76,6 +77,7 @@ public class AllModelGroup extends ModelGroup {
      * @return true (always)
      */
 
+    @Override
     public boolean containsAll(boolean simplified) {
         return true;
     }
@@ -87,6 +89,7 @@ public class AllModelGroup extends ModelGroup {
      * @return true if this content model permits empty content
      */
 
+    @Override
     public boolean isEmptiable() throws MissingComponentException {
         for (Particle aContentModel : contentModel) {
             if (!aContentModel.isEmptiable()) {
@@ -101,6 +104,7 @@ public class AllModelGroup extends ModelGroup {
      * Schema Component Constraint: Particle Valid (Restriction)
      */
 
+    @Override
     public boolean isPointless(ModelGroup container) {
         // Can't treat an *all* group as pointless because it affects the rules for extension
         return false;
@@ -188,6 +192,7 @@ public class AllModelGroup extends ModelGroup {
      * Get the name of this compositor
      */
 
+    @Override
     public String getCompositorName() {
         return "all";
     }
@@ -199,6 +204,7 @@ public class AllModelGroup extends ModelGroup {
      * @return the simplified content model
      */
 
+    @Override
     public List<Particle> getSimplifiedContentModel() throws MissingComponentException {
         if (simplifiedContentModel == null) {
             List<Particle> s1 = super.getSimplifiedContentModel();
@@ -226,6 +232,7 @@ public class AllModelGroup extends ModelGroup {
      *          when the error listener decides an error is fatal
      */
 
+    @Override
     public boolean validate(SchemaCompiler compiler) throws SchemaException {
         if (!super.validate(compiler)) {
             return false;
@@ -270,6 +277,7 @@ public class AllModelGroup extends ModelGroup {
      * @param compiler the schema compiler
      */
 
+    @Override
     public void elaborate(SchemaCompiler compiler) throws SchemaException {
         List<Particle> particles = getSimplifiedContentModel();
         int len = particles.size();
@@ -717,4 +725,4 @@ public class AllModelGroup extends ModelGroup {
     }
 }
 
-// Copyright (c) 2004-2010 Saxonica Limited
+// Copyright (c) 2004-2020 Saxonica Limited

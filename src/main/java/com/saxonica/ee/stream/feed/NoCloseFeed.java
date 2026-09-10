@@ -4,7 +4,7 @@ import com.saxonica.ee.stream.om.FleetingParentNode;
 import com.saxonica.ee.stream.watch.Terminator;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
 
@@ -13,7 +13,7 @@ import net.sf.saxon.trans.XPathException;
  */
 public class NoCloseFeed extends ItemFeed {
 
-    public NoCloseFeed(Feed parentFeed, XPathContext context) {
+    public NoCloseFeed(ItemFeed parentFeed, XPathContext context) {
         super(parentFeed, context);
     }
 
@@ -21,6 +21,7 @@ public class NoCloseFeed extends ItemFeed {
     // but we only want to pass them up the pipeline once at the beginning and end
     // of the instruction evaluation. So we insert a feed into the pipeline whose
     // effect is to suppress the repeated open/close calls. Test case stream-agg-018.
+    @Override
     public void open(Terminator terminator) throws XPathException {
         getResult().open(terminator);
     }
@@ -30,8 +31,9 @@ public class NoCloseFeed extends ItemFeed {
         return getResult().startSelectedParentNode(node, locationId);
     }
 
-    public void processItem(Item<?> item) throws XPathException {
-        getResult().processItem(item);
+    @Override
+    public void append(Item item) throws XPathException {
+        getNextOutputter().append(item);
     }
 
     @Override
@@ -39,9 +41,10 @@ public class NoCloseFeed extends ItemFeed {
         getResult().endSelectedParentNode(locationId);
     }
 
+    @Override
     public void close() {
         // no action
     }
 }
 
-// Copyright (c) 2012-2013 Saxonica Limited
+// Copyright (c) 2012-2020 Saxonica Limited

@@ -12,24 +12,28 @@ import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ArrayIterator;
 import net.sf.saxon.tree.iter.UnfailingIterator;
-import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceExtent;
 
 import java.util.Arrays;
 
-public abstract class SearchableValue<T extends Item<?>> implements GroundedValue<T> {
+/**
+ * A sequence that is held in a form that permits rapid searching, typically by use of indexes.
+ * This is an abstract class with several implementations
+ */
 
-    protected T[] value = null;
+public abstract class SearchableValue implements GroundedValue {
+
+    protected Item[] value = null;
     protected int end;
 
-    public static <T extends Item<?>> SearchableValue<T> makeSearchableValue(SequenceIterator<? extends T> iter) throws XPathException {
-        T[] array;
+    public static SearchableValue makeSearchableValue(SequenceIterator iter) throws XPathException {
+        Item[] array;
         int end;
-        if ((iter.getProperties() & SequenceIterator.LAST_POSITION_FINDER) == 0) {
+        if (!iter.getProperties().contains(SequenceIterator.Property.LAST_POSITION_FINDER)) {
             int used = 0;
-            array = (T[])new Item[20];
-            T it;
+            array = new Item[20];
+            Item it;
             while ((it = iter.next()) != null) {
                 if (used >= array.length - 1) {
                     array = Arrays.copyOf(array, used * 2);
@@ -43,17 +47,17 @@ public abstract class SearchableValue<T extends Item<?>> implements GroundedValu
             end = used;
         } else {
             end = ((LastPositionFinder) iter).getLength();
-            array = (T[])new Item[end];
+            array = new Item[end];
             int i = 0;
-            T it;
+            Item it;
             while ((it = iter.next()) != null) {
                 array[i++] = it;
             }
         }
         if (end < 8) {
-            return new SmallSearchableValue<>(array, end);
+            return new SmallSearchableValue(array, end);
         } else {
-            return new IndexedValue<>(array, end);
+            return new IndexedValue(array, end);
         }
 
     }
@@ -70,7 +74,8 @@ public abstract class SearchableValue<T extends Item<?>> implements GroundedValu
      */
 
     /*@NotNull*/
-    public UnfailingIterator<T> iterate() {
+    @Override
+    public UnfailingIterator iterate() {
         return new ArrayIterator<>(value, 0, end);
     }
 
@@ -84,7 +89,8 @@ public abstract class SearchableValue<T extends Item<?>> implements GroundedValu
      *         numbered zero. If n is negative or &gt;= the length of the sequence, returns null.
      */
 
-    public T itemAt(int n) {
+    @Override
+    public Item itemAt(int n) {
         if (n < 0 || n >= end) {
             return null;
         }
@@ -95,6 +101,7 @@ public abstract class SearchableValue<T extends Item<?>> implements GroundedValu
      * Get the length of the sequence
      */
 
+    @Override
     public int getLength() {
         return end;
     }
@@ -114,7 +121,7 @@ public abstract class SearchableValue<T extends Item<?>> implements GroundedValu
      * @throws XPathException if an error occurs
      */
 
-    public abstract SequenceIterator<T> findItems(Expression use, SequenceIterator<? extends AtomicValue> values,
+    public abstract SequenceIterator findItems(Expression use, SequenceIterator values,
                                                boolean convertUntypedToOther,
                                                boolean firstOnly, AtomicComparer comparer, XPathContext context) throws XPathException;
 
@@ -130,22 +137,26 @@ public abstract class SearchableValue<T extends Item<?>> implements GroundedValu
      *               of the sequence
      * @return the required subsequence. If min is
      */
-    public GroundedValue<T> subsequence(int start, int length) {
+    @Override
+    public GroundedValue subsequence(int start, int length) {
         // Method is not actually used
         if (length > end) {
             length = end;
         }
-        return new SequenceExtent<>(Arrays.asList(value).subList(start, start + length));
+        return new SequenceExtent(Arrays.asList(value).subList(start, start + length));
     }
 
+    @Override
     public boolean effectiveBooleanValue() throws XPathException {
         return ExpressionTool.effectiveBooleanValue(iterate());
     }
 
+    @Override
     public String getStringValue() throws XPathException {
         return SequenceTool.getStringValue(this);
     }
 
+    @Override
     public CharSequence getStringValueCS() throws XPathException {
         return SequenceTool.getStringValue(this);
     }
@@ -156,7 +167,8 @@ public abstract class SearchableValue<T extends Item<?>> implements GroundedValu
      * @return the first item in the sequence if there is one, or null if the sequence
      *         is empty
      */
-    public T head() {
+    @Override
+    public Item head() {
         return value.length > 0 ? value[0] : null;
     }
 
@@ -168,16 +180,18 @@ public abstract class SearchableValue<T extends Item<?>> implements GroundedValu
      *
      * @return the simplified sequence
      */
-    public GroundedValue<T> reduce() {
+    @Override
+    public GroundedValue reduce() {
         int len = getLength();
         if (len == 0) {
             return EmptySequence.getInstance();
         } else if (len == 1) {
-            return (GroundedValue<T>)itemAt(0);
+            return (GroundedValue)itemAt(0);
         } else {
             return this;
         }
     }
+
 }
 
-// Copyright (c) Saxonica Ltd 2018
+// Copyright (c) 2018-2020 Saxonica Limited

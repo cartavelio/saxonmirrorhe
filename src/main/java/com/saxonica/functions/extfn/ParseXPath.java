@@ -1,30 +1,15 @@
-// Copyright (c) 2017. Saxonica Limited.
+// Copyright (c) 2017. Saxonica Limited
 
 package com.saxonica.functions.extfn;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
-import net.sf.saxon.event.Builder;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.Sender;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.functions.TreatFn;
-import net.sf.saxon.lib.ParseOptions;
-import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.ZeroOrOne;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.tiny.Statistics;
-import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.Whitespace;
-import org.xml.sax.InputSource;
-
-import javax.xml.transform.Source;
-import javax.xml.transform.sax.SAXSource;
-import java.io.StringReader;
 
 
 /**
@@ -54,6 +39,7 @@ public class ParseXPath extends SystemFunction {
      *                                           code will add information about the error location.
      */
 
+    @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Controller controller = context.getController();
         Configuration configuration = controller.getConfiguration();
@@ -74,7 +60,7 @@ public class ParseXPath extends SystemFunction {
         Receiver s = b;
         ParseOptions options = new ParseOptions();
         options.setStripSpace(Whitespace.XSLT);
-        options.setErrorListener(context.getConfiguration().getErrorListener());
+        options.setErrorReporter(context.getConfiguration().getErrorReporter());
         setXMLReader(configuration, options);
         if (controller.getExecutable().stripsInputTypeAnnotations()) {
             s = configuration.getAnnotationStripper(s);

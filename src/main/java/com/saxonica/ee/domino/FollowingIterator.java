@@ -43,6 +43,7 @@ final class FollowingIterator implements AxisIterator {
     }
 
     /*@Nullable*/
+    @Override
     public NodeInfo next() {
         int nodeNr;
         if (position <= 0) {
@@ -93,5 +94,5 @@ final class FollowingIterator implements AxisIterator {
 
 }
 
-// Copyright (c) 2017 Saxonica Ltd
+// Copyright (c) 2017-2020 Saxonica Limited
 

@@ -3,28 +3,29 @@ package com.saxonica.ee.validate;
 
 import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.parser.Location;
-import net.sf.saxon.lib.UnfailingErrorListener;
+import net.sf.saxon.lib.ErrorReporter;
+import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NamespaceBindingSet;
+import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SimpleType;
 
 /**
  * This class catches all errors thrown by a Receiver pipeline, and reports them to a specified
- * ErrorListener; after an error has occurred, all further events are ignored. The class is added
+ * ErrorReporter; after an error has occurred, all further events are ignored. The class is added
  * to a validation pipeline when validation of a streamed input document is requested, to allow
  * a try/catch expression to catch validation errors.
  */
 
 public class CatchingReceiver extends ProxyReceiver {
 
-    private UnfailingErrorListener listener;
+    private ErrorReporter listener;
     private boolean failed = false;
 
-    public CatchingReceiver(Receiver next, UnfailingErrorListener listener) {
+    public CatchingReceiver(Receiver next, ErrorReporter listener) {
         super(next);
         this.listener = listener;
     }
@@ -36,7 +37,7 @@ public class CatchingReceiver extends ProxyReceiver {
                 super.open();
             } catch (XPathException err) {
                 failed = true;
-                listener.error(err);
+                listener.report(new XmlProcessingException(err));
             }
         }
     }
@@ -48,7 +49,7 @@ public class CatchingReceiver extends ProxyReceiver {
                 super.close();
             } catch (XPathException err) {
                 failed = true;
-                listener.error(err);
+                listener.report(new XmlProcessingException(err));
             }
         }
     }
@@ -60,7 +61,7 @@ public class CatchingReceiver extends ProxyReceiver {
                 super.startDocument(properties);
             } catch (XPathException err) {
                 failed = true;
-                listener.error(err);
+                listener.report(new XmlProcessingException(err));
             }
         }
     }
@@ -72,55 +73,21 @@ public class CatchingReceiver extends ProxyReceiver {
                 super.endDocument();
             } catch (XPathException err) {
                 failed = true;
-                listener.error(err);
+                listener.report(new XmlProcessingException(err));
             }
         }
     }
 
     @Override
-    public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties)  {
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) {
         if (!failed) {
             try {
-                super.startElement(elemName, typeCode, location, properties);
+                super.startElement(elemName, type, attributes, namespaces, location, properties);
             } catch (XPathException err) {
                 failed = true;
-                listener.error(err);
-            }
-        }
-    }
-
-    @Override
-    public void namespace(NamespaceBindingSet namespaceBindings, int properties) {
-         if (!failed) {
-            try {
-                super.namespace(namespaceBindings, properties);
-            } catch (XPathException err) {
-                failed = true;
-                listener.error(err);
-            }
-        }
-    }
-
-    @Override
-    public void attribute(NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties) {
-        if (!failed) {
-            try {
-                super.attribute(nameCode, typeCode, value, locationId, properties);
-            } catch (XPathException err) {
-                failed = true;
-                listener.error(err);
-            }
-        }
-    }
-
-    @Override
-    public void startContent()  {
-        if (!failed) {
-            try {
-                super.startContent();
-            } catch (XPathException err) {
-                failed = true;
-                listener.error(err);
+                listener.report(new XmlProcessingException(err));
             }
         }
     }
@@ -132,7 +99,7 @@ public class CatchingReceiver extends ProxyReceiver {
                 super.endElement();
             } catch (XPathException err) {
                 failed = true;
-                listener.error(err);
+                listener.report(new XmlProcessingException(err));
             }
         }
     }
@@ -144,7 +111,7 @@ public class CatchingReceiver extends ProxyReceiver {
                 super.characters(chars, locationId, properties);
             } catch (XPathException err) {
                 failed = true;
-                listener.error(err);
+                listener.report(new XmlProcessingException(err));
             }
         }
     }
@@ -156,7 +123,7 @@ public class CatchingReceiver extends ProxyReceiver {
                 super.processingInstruction(target, data, locationId, properties);
             } catch (XPathException err) {
                 failed = true;
-                listener.error(err);
+                listener.report(new XmlProcessingException(err));
             }
         }
     }
@@ -168,7 +135,7 @@ public class CatchingReceiver extends ProxyReceiver {
                 super.comment(chars, locationId, properties);
             } catch (XPathException err) {
                 failed = true;
-                listener.error(err);
+                listener.report(new XmlProcessingException(err));
             }
         }
     }
@@ -180,10 +147,10 @@ public class CatchingReceiver extends ProxyReceiver {
                 super.append(item, locationId, copyNamespaces);
             } catch (XPathException err) {
                 failed = true;
-                listener.error(err);
+                listener.report(new XmlProcessingException(err));
             }
         }
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited

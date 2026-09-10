@@ -193,6 +193,7 @@ public final class AttributeGroupDecl extends SchemaStructure
      * @throws SchemaException if a circularity is detected.
      */
 
+    @Override
     public void lookForCycles(Stack references, SchemaCompiler compiler) throws SchemaException {
         if (compiler.getLanguageVersion() == Configuration.XSD11) {
             // circular attribute groups are not an error in XSD 1.1
@@ -237,12 +238,11 @@ public final class AttributeGroupDecl extends SchemaStructure
      *          if a required component contains a reference
      *          to another component that is not present in the schema
      */
-    public AttributeWildcard getAttributeWildcard(/*@Nullable*/ SchemaCompiler compiler) throws MissingComponentException {
+    public AttributeWildcard getAttributeWildcard(/*@Nullable*/ SchemaCompiler compiler) {
         return getAttributeWildcard(compiler, new Stack<>());
     }
 
-    protected AttributeWildcard getAttributeWildcard(/*@Nullable*/ SchemaCompiler compiler, Stack<AttributeGroupDecl> stack)
-            throws MissingComponentException {
+    protected AttributeWildcard getAttributeWildcard(/*@Nullable*/ SchemaCompiler compiler, Stack<AttributeGroupDecl> stack) {
         AttributeWildcard awc = getLocalAttributeWildcard();
         Wildcard wat = awc == null ? null : awc.getWildcard();
         if (stack.contains(this)) {
@@ -347,6 +347,7 @@ public final class AttributeGroupDecl extends SchemaStructure
      * @return true if all is well, false if errors found
      */
 
+    @Override
     public boolean fixup(SchemaCompiler compiler) throws SchemaException {
         if (getFixupStatus() == UNVALIDATED) {
             setFixupStatus(VALIDATING);
@@ -396,6 +397,7 @@ public final class AttributeGroupDecl extends SchemaStructure
      *                         as fatal.
      */
 
+    @Override
     public boolean validate(SchemaCompiler compiler) throws SchemaException {
 
         boolean result = true;
@@ -704,6 +706,7 @@ public final class AttributeGroupDecl extends SchemaStructure
      * Serialize the schema component
      */
 
+    @Override
     public void serialize(SchemaModelSerializer serializer) throws XPathException {
         String id = serializer.getId(this, true);
         serializer.startElement("attributeGroup");
@@ -741,13 +744,16 @@ public final class AttributeGroupDecl extends SchemaStructure
      * @param compiler the schema compiler
      */
 
+    @Override
     public void elaborate(SchemaCompiler compiler) throws SchemaException {
         buildCounterMap();
     }
 
+    @Override
     public Function getComponentAsFunction() {
         Callable callable = new Callable() {
-            public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+            @Override
+            public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
@@ -779,4 +785,4 @@ public final class AttributeGroupDecl extends SchemaStructure
     }
 }
 
-// Copyright (c) 2004-2018 Saxonica Limited
+// Copyright (c) 2004-2020 Saxonica Limited

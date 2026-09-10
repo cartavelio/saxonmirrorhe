@@ -29,6 +29,7 @@ public class ContainsTokenPatternOptimizer extends PatternOptimizer {
         return THE_INSTANCE;
     }
 
+    @Override
     public boolean appliesTo(Pattern pattern) {
         if (pattern instanceof PatternWithPredicate) {
             Expression exp = ((PatternWithPredicate) pattern).getPredicate();
@@ -45,6 +46,7 @@ public class ContainsTokenPatternOptimizer extends PatternOptimizer {
         return false;
     }
 
+    @Override
     public void process(RuleEE rule, Pattern pattern, Map<Precondition, List<RuleEE>> preconditions, Map<Characteristic, Characteristic> characteristics) {
         Expression exp = ((BasePatternWithPredicate) pattern).getPredicate();
         SystemFunctionCall call = (SystemFunctionCall) exp;
@@ -59,5 +61,5 @@ public class ContainsTokenPatternOptimizer extends PatternOptimizer {
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited
 

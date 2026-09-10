@@ -6,7 +6,6 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.linked.NodeImpl;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SchemaException;
@@ -48,11 +47,12 @@ public class XSDElement extends SchemaElement {
      * @throws SchemaException if any errors are found in the attributes
      */
 
+    @Override
     public void prepareAttributes() throws SchemaException {
 
         PreparedSchema schema = getSchema();
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         isReference = atts.getValue("", "ref") != null;
 
         if (isTopLevel()) {
@@ -130,11 +130,10 @@ public class XSDElement extends SchemaElement {
                     if (!existsAsTopLevel) {
                         String localName = nc.getLocalPart();
                         XSDSchema s = getXSDSchema();
-                        AxisIterator top = s.iterateAxis(AxisInfo.CHILD, new NameTest(Type.ELEMENT, StandardNames.XS_ELEMENT, getNamePool()));
-                        Item decl;
-                        while ((decl = top.next()) != null) {
-                            if (localName.equals(((NodeInfo) decl).getAttributeValue("", "name"))) {
+                        for (NodeInfo decl : s.children(new NameTest(Type.ELEMENT, StandardNames.XS_ELEMENT, getNamePool()))) {
+                            if (localName.equals(decl.getAttributeValue("", "name"))) {
                                 existsAsTopLevel = true;
+                                break;
                             }
                         }
                     }
@@ -183,7 +182,7 @@ public class XSDElement extends SchemaElement {
             FastStringBuffer buff = new FastStringBuffer(FastStringBuffer.C64);
             generateId(buff);
             element.setGeneratedId(buff.toString());
-            element.setNamespaceResolver(new InscopeNamespaceResolver(this));
+            element.setNamespaceResolver(getAllNamespaces());
             element.setElementName(new StructuredQName("", "", "unnamed-error-element-at-line-" + getLineNumber()));
         }
         if (elementParticle == null && !isTopLevel()) {
@@ -191,7 +190,7 @@ public class XSDElement extends SchemaElement {
             FastStringBuffer buff = new FastStringBuffer(FastStringBuffer.C64);
             generateId(buff);
             element.setGeneratedId(buff.toString());
-            element.setNamespaceResolver(new InscopeNamespaceResolver(this));
+            element.setNamespaceResolver(getAllNamespaces());
             StructuredQName nameCode = new StructuredQName("", "", "unnamed-error-element-at-line-" + getLineNumber());
             element.setElementName(nameCode);
             elementParticle = new ElementParticle((EnterpriseConfiguration) getConfiguration(), this);
@@ -362,6 +361,7 @@ public class XSDElement extends SchemaElement {
      * @throws SchemaException if any XML representation constraints are violated
      */
 
+    @Override
     public void validate(SchemaCompiler compiler) throws SchemaException {
 
         String localTargetNamespace = getAttributeValue("", "targetNamespace");
@@ -388,9 +388,7 @@ public class XSDElement extends SchemaElement {
         }
 
         XSDAlternative lastAlternative = null;
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while ((child = (NodeImpl)iter.next()) != null) {
+        for (NodeInfo child : children()) {
             String childName = child.getLocalPart();
             int childfp = child.getFingerprint();
             switch (childfp) {
@@ -472,6 +470,7 @@ public class XSDElement extends SchemaElement {
     private final static int[][] stateTargets = {
             state0targets, state1targets, state2targets, state3targets, state4targets};
 
+    @Override
     protected boolean isFinalState(int state) {
         return state == 0 || state == 1 || state == 2 || state == 3 || state == 4;
     }
@@ -482,15 +481,14 @@ public class XSDElement extends SchemaElement {
      * @param compiler used primarily for reporting errors
      */
 
+    @Override
     public void postValidate(SchemaCompiler compiler) throws SchemaException {
 
         if (isReference) {
             return;
         }
         TypeAlternative lastAlternative = null;
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while ((child = (NodeImpl)iter.next()) != null) {
+        for (NodeInfo child : children()) {
             int childfp = child.getFingerprint();
             switch (childfp) {
                 case StandardNames.XS_COMPLEX_TYPE: {
@@ -542,4 +540,4 @@ public class XSDElement extends SchemaElement {
 
 }
 
-// Copyright (c) 2004-2007 Saxonica Limited
+// Copyright (c) 2004-2020 Saxonica Limited

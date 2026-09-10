@@ -39,13 +39,12 @@ public class InsertAction extends PendingUpdateAction {
 
     /**
      * Apply the pending update action to the affected nodes
-     *
-     * @param context         the XPath evaluation context
+     *  @param context         the XPath evaluation context
      * @param affectedRootSet the set of roots of trees that have been modified, which
-     *                        this action should add to as necessary
      */
 
-    public void apply(XPathContext context, Set affectedRootSet) {
+    @Override
+    public void apply(XPathContext context, Set<MutableNodeInfo> affectedRootSet) {
         boolean affectsType = false;
         for (NodeInfo node : content) {
             int kind = node.getNodeKind();
@@ -83,7 +82,7 @@ public class InsertAction extends PendingUpdateAction {
             default:
                 throw new UnsupportedOperationException("Unknown insert position " + position);
         }
-        affectedRootSet.add(targetNode.getRoot());
+        affectedRootSet.add((MutableNodeInfo)targetNode.getRoot());
     }
 
     /**
@@ -93,6 +92,7 @@ public class InsertAction extends PendingUpdateAction {
      *         case of a delete action, which affects multiple nodes.
      */
 
+    @Override
     public NodeInfo getTargetNode() {
         return targetNode;
     }
@@ -105,9 +105,10 @@ public class InsertAction extends PendingUpdateAction {
      *         in the specification
      */
 
+    @Override
     public int getApplyPhase() {
         return (position == Token.INTO ? 1 : 2);
     }
 }
 
-// Copyright (c) 2008 Saxonica Limited.
+// Copyright (c) 2008-2020 Saxonica Limited

@@ -1,6 +1,8 @@
 package com.saxonica.ee.stream.feed;
 
 import com.saxonica.ee.stream.StreamingSequenceWriter;
+import net.sf.saxon.event.ComplexContentOutputter;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.SequenceWriter;
 import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.XPathContext;
@@ -9,11 +11,11 @@ import net.sf.saxon.expr.instruct.ApplyTemplates;
 import net.sf.saxon.expr.instruct.Instruction;
 import net.sf.saxon.expr.instruct.ParameterSet;
 import net.sf.saxon.expr.instruct.TemplateRule;
-import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.Mode;
-import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.tree.iter.ManualIterator;
 
 /**
@@ -24,11 +26,11 @@ import net.sf.saxon.tree.iter.ManualIterator;
 
 public class ApplyTemplatesFeed extends ItemFeed {
 
-    XPathContext localContext;
-    ManualIterator manual;
-    Component.M targetMode;
+    private XPathContext localContext;
+    private ManualIterator manual;
+    private Component.M targetMode;
 
-    public ApplyTemplatesFeed(ApplyTemplates expr, Feed result, XPathContext context) {
+    public ApplyTemplatesFeed(ApplyTemplates expr, ItemFeed result, XPathContext context) {
         super(expr, result, context);
         localContext = context.newMinorContext();
         manual = new ManualIterator();
@@ -44,12 +46,14 @@ public class ApplyTemplatesFeed extends ItemFeed {
      *          to report any failure
      */
 
-    public void processItem(Item<?> item) throws XPathException {
+    @Override
+    public void append(Item item) throws XPathException {
         manual.setContextItem(item);
         manual.incrementPosition();
 
         // handle parameters if any
 
+        // TODO: reuse these for each item in the input sequence?
         ParameterSet actualParams =
                 Instruction.assembleParams(localContext, ((ApplyTemplates) getExpression()).getActualParams());
         ParameterSet tunnelParams =
@@ -62,24 +66,24 @@ public class ApplyTemplatesFeed extends ItemFeed {
         c2.setLocalParameters(actualParams);
         c2.setTunnelParameters(tunnelParams);
         c2.setCurrentMergeGroupIterator(null);
-        SequenceWriter writer = new StreamingSequenceWriter(getPipelineConfiguration(), getResult());
-        c2.setReceiver(writer);
+        SequenceWriter writer = new StreamingSequenceWriter(getPipelineConfiguration(), getNextOutputter());
+        Outputter output = new ComplexContentOutputter(writer);
 
-        Mode mode = (Mode)targetMode.getActor();
+        Mode mode = targetMode.getActor();
         Rule rule = mode.getRule(item, c2);
 
         if (rule == null) {
-            mode.getBuiltInRuleSet().process(item, actualParams, tunnelParams, c2, ExplicitLocation.UNKNOWN_LOCATION);
+            mode.getBuiltInRuleSet().process(item, actualParams, tunnelParams, output, c2, Loc.NONE);
         } else {
             TemplateRule template = (TemplateRule) rule.getAction();
             template.initialize();
             c2.openStackFrame(template.getStackFrameMap());
             c2.setCurrentTemplateRule(rule);
-            template.apply(c2);
+            template.apply(output, c2);
         }
 
     }
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

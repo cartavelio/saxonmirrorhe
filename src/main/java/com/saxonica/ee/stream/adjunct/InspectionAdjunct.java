@@ -2,8 +2,8 @@ package com.saxonica.ee.stream.adjunct;
 
 import com.saxonica.ee.stream.Streamability;
 import com.saxonica.ee.stream.Sweep;
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
+import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.watch.Trigger;
 import com.saxonica.ee.stream.watch.WatchMaker;
 import net.sf.saxon.expr.Expression;
@@ -18,6 +18,7 @@ import net.sf.saxon.trans.XPathException;
 public abstract class InspectionAdjunct extends StreamingAdjunct {
 
     /*@Nullable*/
+    @Override
     public WatchMaker getWatchMaker(boolean forGrouping) throws XPathException {
         Operand consumer = null;
         for (Operand o : getExpression().operands()) {
@@ -36,8 +37,7 @@ public abstract class InspectionAdjunct extends StreamingAdjunct {
             return null;
         }
     }
-
-
+    
     /**
      * This is a utility method for subclasses;
      * it provides a WatchMaker suitable for all constructs that perform inspection on a sequence,
@@ -58,7 +58,7 @@ public abstract class InspectionAdjunct extends StreamingAdjunct {
         final FeedMaker feedMaker = getFeedMaker(0);
         if (selection != null) {
             return (watchManager, out, context) -> {
-                Feed feed = feedMaker.makeItemFeed(watchManager, out, context);
+                ItemFeed feed = feedMaker.makeItemFeed(watchManager, out, context);
                 return new Trigger(selection, feed, context);
             };
         } else {
@@ -68,12 +68,59 @@ public abstract class InspectionAdjunct extends StreamingAdjunct {
                 throw new XPathException("No watch found for " + select.toShortString());
             }
             return (watchManager, out, context) -> {
-                Feed feed = feedMaker.makeItemFeed(watchManager, out, context);
+                ItemFeed feed = feedMaker.makeItemFeed(watchManager, out, context);
                 return selectWM.makeWatch(watchManager, feed, context);
             };
         }
     }
 
+//    public static class InspectionTrigger extends Trigger {
+//
+//        private Stack<Integer> nodeKindStack = new Stack<>();
+//
+//        InspectionTrigger(Pattern selection, ItemFeed action, XPathContext selectionContext) {
+//            super(selection, action, selectionContext);
+//        }
+//
+//        /**
+//         * Signal that an element or document node has been found that matches the selection that this
+//         * Watch is looking for. This method is called by the WatchManager while
+//         * processing the startElement or startDocument event that matches the selection.
+//         *
+//         * @param node       the element or document node whose start event has been matched
+//         * @param locationId the location associated with the element or document node (may be
+//         *                   the location of the instruction that created it)
+//         * @return a Receiver to be notified of all events starting with the startElement/startDocument event
+//         * for the matched element, and ending with the endElement event for that element; or null if this
+//         * feature is not required.
+//         * @throws XPathException May be raised if a dynamic error occurs
+//         */
+//        @Override
+//        public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
+//            nodeKindStack.push(node.getNodeKind());
+//            node.notify(getAction());
+//            return null;
+//        }
+//
+//        /**
+//         * Signal that the endElement event has occurred for the element whose startElement
+//         * event caused the Watch to be activated.
+//         *
+//         * @param locationId the location of the element
+//         * @throws XPathException May be raised if a constraint implemented by this
+//         *                        Watch is violated
+//         */
+//        @Override
+//        public void endSelectedParentNode(Location locationId) throws XPathException {
+//            int kind = nodeKindStack.pop();
+//            if (kind == Type.DOCUMENT) {
+//                getAction().endDocument();
+//            } else {
+//                getAction().endElement();
+//            }
+//        }
+//    }
+
 }
 
-// Copyright (c) 2013 Saxonica Limited.
+// Copyright (c) 2013-2020 Saxonica Limited

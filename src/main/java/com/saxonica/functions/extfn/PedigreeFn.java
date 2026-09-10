@@ -30,6 +30,7 @@ import net.sf.saxon.value.Int64Value;
 
 public class PedigreeFn extends SystemFunction {
 
+    @Override
     public ZeroOrOne<MapItem> call(XPathContext context, Sequence[] arguments) throws XPathException {
         Item in = arguments[0].head();
         if (in instanceof PedigreeValue) {
@@ -52,4 +53,4 @@ public class PedigreeFn extends SystemFunction {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited

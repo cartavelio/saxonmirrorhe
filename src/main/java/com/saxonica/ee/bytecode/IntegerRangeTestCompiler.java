@@ -30,7 +30,7 @@ public class IntegerRangeTestCompiler extends ToBooleanCompiler {
         Expression minExp = test.getMin();
         Expression maxExp = test.getMax();
         TypeHierarchy th = compiler.getConfiguration().getTypeHierarchy();
-        boolean maybeUntypedAtomic = th.relationship(valExp.getItemType(), BuiltInAtomicType.UNTYPED_ATOMIC) != TypeHierarchy.DISJOINT;
+        boolean maybeUntypedAtomic = th.relationship(valExp.getItemType(), BuiltInAtomicType.UNTYPED_ATOMIC) != Affinity.DISJOINT;
 
 
         Generator ga = compiler.getCurrentGenerator();
@@ -208,4 +208,4 @@ public class IntegerRangeTestCompiler extends ToBooleanCompiler {
 }
 
 //
-// Copyright (c) 2001 - 2016 Saxonica Limited.
+// Copyright (c) 2001-2020 Saxonica Limited

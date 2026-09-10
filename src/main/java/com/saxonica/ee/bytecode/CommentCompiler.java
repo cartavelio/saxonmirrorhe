@@ -2,11 +2,12 @@ package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.CompilerService;
 import com.saxonica.ee.bytecode.util.Generator;
-import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.Comment;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.s9api.Location;
 
 
 /**
@@ -23,6 +24,7 @@ public class CommentCompiler extends SimpleNodeConstructorCompiler {
      * @param expression    the expression to be compiled
      */
 
+    @Override
     public void checkContent(CompilerService compiler, Expression expression) {
         Comment comment = (Comment) expression;
         Generator ga = compiler.getCurrentGenerator();
@@ -44,10 +46,10 @@ public class CommentCompiler extends SimpleNodeConstructorCompiler {
     @Override
     protected void pushNode(/*@NotNull*/ CompilerService compiler, Expression expression) {
         Generator ga = compiler.getCurrentGenerator();
-        allocateStatic(compiler, ExplicitLocation.UNKNOWN_LOCATION);
-        ga.push(0);
-        ga.invokeInstanceMethod(Receiver.class, "comment", CharSequence.class, Location.class, Integer.TYPE);
+        allocateStatic(compiler, Loc.NONE);
+        ga.push(ReceiverOption.NONE);
+        ga.invokeInstanceMethod(Outputter.class, "comment", CharSequence.class, Location.class, Integer.TYPE);
     }
 }
 
-//Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

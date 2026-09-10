@@ -52,11 +52,13 @@ public class CountingState implements State {
 
 
     /*@Nullable*/
+    @Override
     public Edge getTransition(int token, UserComplexType type) {
         return automatonState.getTransition(token, type);
     }
 
 
+    @Override
     public boolean isFinalState() {
         return automatonState.isConditionallyFinalState() && counter >= automatonState.getMinOccurs();
     }
@@ -65,6 +67,7 @@ public class CountingState implements State {
         return automatonState;
     }
 
+    @Override
     public CharSequence listAllowedElements() {
         return automatonState.listAllowedElements();
     }
@@ -76,6 +79,7 @@ public class CountingState implements State {
      *         returned by this Iterator are {@link Edge} objects.
      */
 
+    @Override
     public Edge[] getWildcardEdges() {
         Edge[] baseEdges = automatonState.getWildcardEdges();
         if (counter < automatonState.getMinOccurs()) {
@@ -133,6 +137,7 @@ public class CountingState implements State {
      */
 
     /*@NotNull*/
+    @Override
     public Iterator<Edge> getEdges() {
         Iterator<Edge> baseEdges = automatonState.getEdges();
         List<Edge> newEdges = new ArrayList<Edge>();
@@ -170,6 +175,6 @@ public class CountingState implements State {
     }
 }
 
-// Copyright (c) 2008 Saxonica Limited.
+// Copyright (c) 2008-2020 Saxonica Limited
 
 

@@ -23,21 +23,20 @@ public class RenameAction extends PendingUpdateAction {
      * @param newName the new name
      */
 
-    public RenameAction(NodeInfo node, NodeName newName) {
+    RenameAction(NodeInfo node, NodeName newName) {
         this.node = node;
         this.newName = fixNodeName(newName);
     }
 
     /**
      * Apply the pending update action to the affected nodes
-     *
-     * @param context         the XPath evaluation context
+     *  @param context         the XPath evaluation context
      * @param affectedRootSet the set of roots of trees that have been modified, which
-     *                        this action should add to as necessary
      */
 
-    public void apply(XPathContext context, Set affectedRootSet) {
-        affectedRootSet.add(node.getRoot());
+    @Override
+    public void apply(XPathContext context, Set<MutableNodeInfo> affectedRootSet) {
+        affectedRootSet.add((MutableNodeInfo)node.getRoot());
         ((MutableNodeInfo) node).rename(newName);
         int kind = node.getNodeKind();
         if (kind == Type.ELEMENT || kind == Type.ATTRIBUTE) {
@@ -52,6 +51,7 @@ public class RenameAction extends PendingUpdateAction {
      *         case of a delete action, which affects multiple nodes.
      */
 
+    @Override
     public NodeInfo getTargetNode() {
         return node;
     }
@@ -76,12 +76,13 @@ public class RenameAction extends PendingUpdateAction {
      *         in the specification
      */
 
+    @Override
     public int getApplyPhase() {
         return PHASE;
     }
 
-    public final static int PHASE = 0;
+    private final static int PHASE = 0;
 }
 
-// Copyright (c) 2008 Saxonica Limited.
+// Copyright (c) 2008-2020 Saxonica Limited
 

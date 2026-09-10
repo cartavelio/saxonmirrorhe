@@ -21,6 +21,7 @@ import net.sf.saxon.trans.XPathException;
 
 public class WithPedigree extends SystemFunction {
 
+    @Override
     public Item call(XPathContext context, Sequence[] arguments) throws XPathException {
         Item in = arguments[0].head();
         Item out = makeRootWithPedigree(in);
@@ -39,4 +40,4 @@ public class WithPedigree extends SystemFunction {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited

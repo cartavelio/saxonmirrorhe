@@ -14,9 +14,10 @@ public class ICUNumbererEnUnhyphenated extends ICUNumbererPE {
      * @param s the word string to process
      * @return processed string
      */
+    @Override
     public String postProcess(String s) {
         return s.replaceAll("-", " ");
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

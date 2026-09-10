@@ -1,14 +1,17 @@
 package com.saxonica.ee.stream.adjunct;
 
 import com.saxonica.ee.stream.*;
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
-import com.saxonica.ee.stream.watch.*;
+import com.saxonica.ee.stream.feed.ItemFeed;
+import com.saxonica.ee.stream.watch.IterateAction;
+import com.saxonica.ee.stream.watch.Trigger;
+import com.saxonica.ee.stream.watch.WatchMaker;
+import com.saxonica.ee.stream.watch.WatchManager;
 import com.saxonica.ee.trans.ContextItemStaticInfoEE;
-import net.sf.saxon.expr.instruct.IterateInstr;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.instruct.IterateInstr;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.XPathException;
 
@@ -43,6 +46,7 @@ public class IterateAdjunct extends TransmissionAdjunct implements FeedMaker {
 
 
     /*@Nullable*/
+    @Override
     public WatchMaker getWatchMaker(boolean forGrouping) throws XPathException {
         final Expression select = ((IterateInstr) getExpression()).getSelectExpression();
         Expression action = ((IterateInstr) getExpression()).getActionExpression();
@@ -62,7 +66,8 @@ public class IterateAdjunct extends TransmissionAdjunct implements FeedMaker {
         final Pattern selection = StreamingPatternMaker.makeStreamingPattern(select, config, null);
         final StreamingAdjunct sa = StreamingAdjunct.makeStreamingAdjunct(config, select);
         return new WatchMaker() {
-            public Trigger makeWatch(WatchManager watchManager, Feed out, XPathContext context)
+            @Override
+            public Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context)
                     throws XPathException {
                 IterateAction actor = new IterateAction(watchManager, getExpression(), out, context);
                 actor.setInversion(actionInversion);
@@ -76,10 +81,11 @@ public class IterateAdjunct extends TransmissionAdjunct implements FeedMaker {
 
     }
 
-    public Feed makeItemFeed(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
         return new IterateAction(watchManager, getExpression(), out, context);
     }
 
 }
 
-// Copyright (c) 2010-2013 Saxonica Limited.
+// Copyright (c) 2010-2020 Saxonica Limited

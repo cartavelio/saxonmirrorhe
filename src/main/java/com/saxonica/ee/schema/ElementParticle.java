@@ -123,6 +123,7 @@ public class ElementParticle extends Particle {
      *         element declaration.
      */
 
+    @Override
     public boolean isEmptiable() {
         return getMinOccurs() == 0;
     }
@@ -132,13 +133,14 @@ public class ElementParticle extends Particle {
      * Schema Component Constraint: Particle Valid (Restriction)
      */
 
+    @Override
     public boolean isPointless(ModelGroup container) {
         return false;
     }
 
     @Override
     public void lookForCycles(Stack references, SchemaCompiler compiler) throws SchemaException, MissingComponentException {
-        tryToResolve(compiler);
+        tryToResolve(compiler, false);
     }
 
 
@@ -149,6 +151,7 @@ public class ElementParticle extends Particle {
      * @return true if all is well, false if errors found
      */
 
+    @Override
     public boolean fixup(SchemaCompiler compiler) throws SchemaException {
         boolean result = true;
         if (getFixupStatus() == UNVALIDATED) {
@@ -175,6 +178,7 @@ public class ElementParticle extends Particle {
      *          error listener decides that the error is fatal
      */
 
+    @Override
     public boolean validate(SchemaCompiler compiler) throws SchemaException {
 
         switch (getValidationStatus()) {
@@ -194,7 +198,7 @@ public class ElementParticle extends Particle {
         //-- If this element merely references another element definition
         //-- just check that we can resolve the reference
         if (!isResolved()) {
-            tryToResolve(compiler);
+            tryToResolve(compiler, false);
             if (!isResolved()) {
                 // already reported during fixup()
 //                String err = "Element " + Err.wrap(getDisplayName()) + " is referenced, but has not been declared";
@@ -218,6 +222,7 @@ public class ElementParticle extends Particle {
      *          if compilation fails.
      */
 
+    @Override
     public void compile(SchemaCompiler compiler) throws SchemaException {
         if (getValidationStatus() != VALIDATED) {
             return;     // errors already reported
@@ -235,6 +240,7 @@ public class ElementParticle extends Particle {
      * @return the corresponding term. For an Element particle, the corresponding term is the element declaration.
      */
 
+    @Override
     public Term getTerm() throws MissingComponentException {
         return getDeclaration();
     }
@@ -249,6 +255,7 @@ public class ElementParticle extends Particle {
      * @param elementFingerprint Identifies the name of the child element within this content model
      */
 
+    @Override
     public SchemaType getElementParticleType(int elementFingerprint) {
         try {
             ElementDecl decl = (ElementDecl) getTarget();
@@ -279,6 +286,7 @@ public class ElementParticle extends Particle {
      * @param elementName Identifies the name of the child element within this content model
      */
 
+    @Override
     public int getElementParticleCardinality(int elementName) throws MissingComponentException {
         if (elementName == getTargetFingerprint()) {
             return Particle.computeParticleCardinality(getMinOccurs(), getMaxOccurs());
@@ -299,6 +307,7 @@ public class ElementParticle extends Particle {
      * @return true if the particle is an element wildcard, or contains one
      */
 
+    @Override
     public boolean containsElementWildcard() {
         return false;
     }
@@ -311,6 +320,7 @@ public class ElementParticle extends Particle {
      *                        a set containing the value XS_INVALID, meaning that it is not possible to enumerate
      */
 
+    @Override
     public void gatherAllPermittedElements(IntHashSet result, boolean ignoreWildcards) throws MissingComponentException {
         ElementDecl decl = (ElementDecl) getTarget();
         result.add(decl.getFingerprint());
@@ -329,6 +339,7 @@ public class ElementParticle extends Particle {
      * Serialize the particle
      */
 
+    @Override
     public void serializeParticle(SchemaModelSerializer serializer) throws XPathException, MissingComponentException {
         serializer.startElement("elementParticle");
         serializer.emitAttribute("minOccurs", "" + getMinOccurs());
@@ -339,4 +350,4 @@ public class ElementParticle extends Particle {
 
 }
 
-// Copyright (c) 2004-2007 Saxonica Limited
+// Copyright (c) 2004-2020 Saxonica Limited

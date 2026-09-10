@@ -2,10 +2,10 @@ package com.saxonica.ee.validate;
 
 import com.saxonica.ee.schema.ElementDecl;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
-import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.FastStringBuffer;
@@ -67,19 +67,19 @@ public class AnyTypeValidator extends LaxValidator {
      * Handle the start tag for a child element of the element being validated
      */
 
-    public void startElement(NodeName nodeName, SchemaType typeCode, Location location, int properties)
-            throws XPathException {
+    @Override
+    public void startElement(NodeName elemName, SchemaType type, AttributeMap attributes, NamespaceMap namespaces, Location location, int properties) throws XPathException {
 
         if (locallyInvalid) {
             // already found errors and warned about them
             childValidator = new SkipValidator(nextReceiver);
-            nextReceiver.startElement(nodeName, AnyType.getInstance(), location, properties);
+            nextReceiver.startElement(elemName, AnyType.getInstance(), attributes, namespaces, location, properties);
             return;
         }
 
         if (fixedValue != null) {
             String message = "Element " +
-                    Err.wrap(nodeName.getDisplayName(), Err.ELEMENT) +
+                    Err.wrap(elemName.getDisplayName(), Err.ELEMENT) +
                     " cannot appear here, because the containing " +
                     getContainingElementName() +
                     " element has fixed content";
@@ -90,23 +90,23 @@ public class AnyTypeValidator extends LaxValidator {
         }
 
         foundChildren = true;
-        super.startElement(nodeName, typeCode, location, properties);
+        super.startElement(elemName, type, attributes, namespaces, location, properties);
     }
 
     /**
      * Handle character data appearing as a child of the element being validated
-     *
      * @param chars      The character content
      * @param locationId the location of the node in the source, or of the instruction that created it
-     *@param properties Additional properties  @throws XPathException If this element does not allow character data
+     * @param properties Additional properties  @throws XPathException If this element does not allow character data
      */
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         if (fixedValue != null || defaultValue != null) {
             if (buffer == null) {
                 buffer = new FastStringBuffer(chars.length());
             }
-            buffer.append(chars);
+            buffer.cat(chars);
         }
         super.characters(chars, locationId, properties);
     }
@@ -118,10 +118,11 @@ public class AnyTypeValidator extends LaxValidator {
      * @throws XPathException if the element is invalid
      */
 
+    @Override
     public void endElement() throws XPathException {
         if (fixedValue != null) {
             if (buffer == null || buffer.isEmpty()) {
-                characters(fixedValue, ExplicitLocation.UNKNOWN_LOCATION, 0);
+                characters(fixedValue, Loc.NONE, ReceiverOption.NONE);
             } else if (!buffer.toString().equals(fixedValue)) {
                 String message = "The content of " +
                         getContainingElementName() +
@@ -137,7 +138,7 @@ public class AnyTypeValidator extends LaxValidator {
         }
         if (defaultValue != null && !foundChildren) {
             if (buffer == null || buffer.isEmpty()) {
-                characters(defaultValue, ExplicitLocation.UNKNOWN_LOCATION, 0);
+                characters(defaultValue, Loc.NONE, ReceiverOption.NONE);
             }
         }
 
@@ -146,4 +147,4 @@ public class AnyTypeValidator extends LaxValidator {
 
 }
 
-// Copyright � 2004-2012 Saxonica Limited. No warranty.
+// Copyright (c) 2004-2020 Saxonica Limited

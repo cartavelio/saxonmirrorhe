@@ -2,6 +2,7 @@ package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.CompilerService;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.instruct.TailCallReturner;
@@ -9,6 +10,8 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.s9api.HostLanguage;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 
@@ -103,6 +106,7 @@ public class ByteCodeCandidate extends UnaryExpression implements TailCallReturn
         getBaseExpression().evaluatePendingUpdates(context, pul);
     }
 
+    @Override
     public int getImplementationMethod() {
         return getBaseExpression().getImplementationMethod();
     }
@@ -117,6 +121,7 @@ public class ByteCodeCandidate extends UnaryExpression implements TailCallReturn
         return t;
     }
 
+    @Override
     public boolean effectiveBooleanValue(XPathContext context) throws XPathException {
         Expression body = targetExpression(context, Expression.EFFECTIVE_BOOLEAN_VALUE);
         if (byteCodeMonitor != null) {
@@ -130,17 +135,18 @@ public class ByteCodeCandidate extends UnaryExpression implements TailCallReturn
         }
     }
 
-    public void process(XPathContext context) throws XPathException {
+    @Override
+    public void process(Outputter output, XPathContext context) throws XPathException {
         Expression body = targetExpression(context, Expression.PROCESS_METHOD);
 
         try {
             if (byteCodeMonitor != null) {
                 long time = System.nanoTime();
-                body.process(context);
+                body.process(output, context);
                 time = System.nanoTime() - time;
                 byteCodeMonitor.logExecution(this, "process", time);
             } else {
-                body.process(context);
+                body.process(output, context);
             }
 
         } catch (XPathException e) {
@@ -158,12 +164,12 @@ public class ByteCodeCandidate extends UnaryExpression implements TailCallReturn
     }
 
     @Override
-    public TailCall processLeavingTail(XPathContext context) throws XPathException { // bug3838
+    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException { // bug3838
         Expression body = targetExpression(context, Expression.PROCESS_METHOD);
         if (body instanceof TailCallReturner) {
             if (byteCodeMonitor != null) {
                 long time = System.nanoTime();
-                TailCall tc = ((TailCallReturner) body).processLeavingTail(context);
+                TailCall tc = ((TailCallReturner) body).processLeavingTail(output, context);
                 // if tc==null, we're returning a tail-call, so no real work has been done, so
                 // there's no point capturing the timing.
                 // Also, if the body returns a tail-call, then we don't want to generate bytecode,
@@ -176,7 +182,7 @@ public class ByteCodeCandidate extends UnaryExpression implements TailCallReturn
                 byteCodeMonitor.logExecution(this, "process", time);
                 return null;
             } else {
-                TailCall tc = ((TailCallReturner) body).processLeavingTail(context);
+                TailCall tc = ((TailCallReturner) body).processLeavingTail(output, context);
                 if (tc != null) {
                     // If the body returns a tail-call, then we don't want to generate bytecode,
                     // because the bytecode won't be a TailCallReturner. So forcibly suppress bytecode generation.
@@ -185,7 +191,7 @@ public class ByteCodeCandidate extends UnaryExpression implements TailCallReturn
                 return tc;
             }
         } else {
-            process(context);
+            process(output, context);
             return null;
         }
     }
@@ -216,18 +222,16 @@ public class ByteCodeCandidate extends UnaryExpression implements TailCallReturn
                 long startTime = 0;
                 if (byteCodeMonitor != null) {
                     startTime = System.nanoTime();
-                    //if (config.isTiming()) {
-                        config.getLogger().info(
-                                "Generating hotspot byte code (" + evaluationMethodName(evaluationMethods) + ") for {" +
-                                        getBaseExpression().toShortString() +
-                                        "} at " + getBaseExpression().getLocation().getSystemId() +
-                                        "#" + getBaseExpression().getLocation().getLineNumber());
-                        compiledMode = evaluationMethods;
-                    //}
+                    config.getLogger().info(
+                            "Generating hotspot byte code (" + evaluationMethodName(evaluationMethods) + ") for {" +
+                                    getBaseExpression().toShortString() +
+                                    "} at " + getBaseExpression().getLocation().getSystemId() +
+                                    "#" + getBaseExpression().getLocation().getLineNumber());
+                    compiledMode = evaluationMethods;
                 }
 
                 Optimizer opt = config.obtainOptimizer();
-                int lang = getPackageData().getHostLanguage();
+                HostLanguage lang = getPackageData().getHostLanguage();
                 CompilerService compilerService = (CompilerService) config.makeCompilerService(lang);
                 Expression body = getBaseExpression();
                 Expression temp = opt.compileToByteCode(compilerService, body, body.getExpressionName(), evaluationMethods);
@@ -282,6 +286,7 @@ public class ByteCodeCandidate extends UnaryExpression implements TailCallReturn
      *                                           expression
      */
 
+    @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
         Expression body = targetExpression(context, Expression.EVALUATE_METHOD);
         if (byteCodeMonitor != null) {
@@ -310,11 +315,12 @@ public class ByteCodeCandidate extends UnaryExpression implements TailCallReturn
      */
 
      /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         Expression body = targetExpression(context, Expression.ITERATE_METHOD);
         if (byteCodeMonitor != null) {
             long time = System.nanoTime();
-            SequenceIterator<?> iter = body.iterate(context);
+            SequenceIterator iter = body.iterate(context);
             time = System.nanoTime() - time;
             byteCodeMonitor.logExecution(this, "iterate", time);
             return iter;
@@ -323,6 +329,7 @@ public class ByteCodeCandidate extends UnaryExpression implements TailCallReturn
         }
     }
 
+    @Override
     public String getExpressionName() {
         return "bytecode";
     }
@@ -330,4 +337,4 @@ public class ByteCodeCandidate extends UnaryExpression implements TailCallReturn
 
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited

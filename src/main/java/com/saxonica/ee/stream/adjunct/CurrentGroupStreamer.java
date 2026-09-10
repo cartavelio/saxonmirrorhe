@@ -31,7 +31,7 @@ public class CurrentGroupStreamer extends StreamingAdjunct {
         if (ps.getPosture() == Posture.GROUNDED) {
             // spec bug 24455, test case si-group-026
             return PostureAndSweep.GROUNDED_AND_MOTIONLESS;
-        } else if (exp.isInLoop()) {
+        } else if (exp.isInHigherOrderOperand()) {
             if (reasons != null) {
                 reasons.add("The current-group() function is evaluated repeatedly");
             }
@@ -58,4 +58,4 @@ public class CurrentGroupStreamer extends StreamingAdjunct {
 
 }
 
-// Copyright (c) 2012-2014 Saxonica Limited.
+// Copyright (c) 2012-2020 Saxonica Limited

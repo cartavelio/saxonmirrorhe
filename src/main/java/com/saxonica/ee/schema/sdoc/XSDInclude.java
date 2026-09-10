@@ -5,7 +5,7 @@ import com.saxonica.ee.schema.PreparedSchema;
 import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.ee.schema.SingleNamespaceSchema;
 import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.type.SchemaException;
 
 import javax.xml.transform.Source;
@@ -31,9 +31,10 @@ public class XSDInclude extends AnnotationParent {
      * @throws SchemaException if any errors are found in the attributes
      */
 
+    @Override
     public void prepareAttributes() throws SchemaException {
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         String[] allowed = {"id", "schemaLocation"};
         allowAttributes(atts, allowed);
 
@@ -110,4 +111,4 @@ public class XSDInclude extends AnnotationParent {
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

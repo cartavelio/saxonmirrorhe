@@ -3,13 +3,14 @@ package com.saxonica.ee.schema.sdoc;
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.*;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.tree.linked.NodeImpl;
-import net.sf.saxon.z.IntHashSet;
-import net.sf.saxon.z.IntSet;
-import net.sf.saxon.om.*;
-import net.sf.saxon.tree.iter.AxisIterator;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.z.IntHashSet;
+import net.sf.saxon.z.IntSet;
 
 /**
  * An xs:restriction element in an XML Schema document that appears as a child of
@@ -41,6 +42,7 @@ public class XSDSimpleContentRestriction extends SchemaElement {
      * @throws SchemaException if any errors are found in the attributes
      */
 
+    @Override
     public void prepareAttributes() throws SchemaException {
 
         PreparedSchema schema = getSchema();
@@ -73,7 +75,7 @@ public class XSDSimpleContentRestriction extends SchemaElement {
         ref.setTarget(simpleTypeDef);
         complexType.setSimpleContentTypeReference(ref);
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
 
         //-- @id
         processId();
@@ -106,15 +108,14 @@ public class XSDSimpleContentRestriction extends SchemaElement {
      * @throws SchemaException if any XML representation constraints are violated
      */
 
+    @Override
     public void validate(SchemaCompiler compiler) throws SchemaException {
 
         checkContentModel(stateTerms, stateTargets, true);
 
         boolean foundSimpleType = false;
 
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeInfo child;
-        while ((child = iter.next()) != null) {
+        for (NodeInfo child : children()) {
             String name = child.getLocalPart();
             if ("simpleType".equals(name)) {
                 foundSimpleType = true;
@@ -193,6 +194,7 @@ public class XSDSimpleContentRestriction extends SchemaElement {
     private final static int[][] stateTargets = {
             state0targets, state1targets, state2targets, state3targets, state4targets, state5targets, state6targets};
 
+    @Override
     protected boolean isFinalState(int state) {
         return state == 0 || state == 1 || state == 2 || state == 3 || state == 4 || state == 5 || state == 6;
     }
@@ -202,12 +204,11 @@ public class XSDSimpleContentRestriction extends SchemaElement {
      *
      * @param compiler
      */
+    @Override
     public void postValidate(SchemaCompiler compiler)
             throws SchemaException {
         IntSet facetsSeen = new IntHashSet();
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while ((child = (NodeImpl) iter.next()) != null) {
+        for (NodeInfo child : children()) {
             int fp = child.getFingerprint();
             switch (fp) {
                 case StandardNames.XS_ANNOTATION:
@@ -287,4 +288,4 @@ public class XSDSimpleContentRestriction extends SchemaElement {
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

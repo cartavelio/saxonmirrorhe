@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -48,7 +48,7 @@ import java.util.regex.Pattern;
 
 /**
  * This class runs the W3C XQuery Update Test Suite, driven from the test catalog. It includes options to
- * run the tests intepretively or by compilation (not yet supported).
+ * run the tests interpretively or by compilation (not yet supported).
  */
 public class UpdateTestSuiteDriver {
     /**
@@ -92,6 +92,7 @@ public class UpdateTestSuiteDriver {
     private int successes = 0;
     private int failures = 0;
     private int wrongErrorResults = 0;
+    private List<String> failingTests = new ArrayList<>();
 
     /**
      * Some tests use schemas that conflict with others, so they can't use the common schema cache.
@@ -114,7 +115,7 @@ public class UpdateTestSuiteDriver {
     }
 
     private NodeInfo getChildElement(NodeInfo parent, NameTest child) {
-        return (NodeInfo) parent.iterateAxis(AxisInfo.CHILD, child).next();
+        return parent.iterateAxis(AxisInfo.CHILD, child).next();
     }
 
 //    public void setTestDriverForm(TestDriverForm gui){
@@ -192,12 +193,14 @@ public class UpdateTestSuiteDriver {
             resultParser = saConfig.getSourceParser();
             resultParser.setEntityResolver(
                     new EntityResolver() {
+                        @Override
                         public InputSource resolveEntity(String publicId, String systemId) {
                             return new InputSource(new StringReader(""));
                         }
                     }
             );
             fragmentParser = saConfig.getSourceParser();
+            fragmentParser.setEntityResolver(new StandardEntityResolver(saConfig));
 
             //Configuration config11 = new Configuration();
             //config11.setXMLVersion(Configuration.XML11);
@@ -207,9 +210,7 @@ public class UpdateTestSuiteDriver {
                     new File(saxonDir + "/results" + Version.getProductVersion() + ".xml"));
             log = new StandardLogger(
                     new File(saxonDir + "/results" + Version.getProductVersion() + ".log"));
-
-            UpdateTestSuiteDriver.MyErrorListener errorListener = new UpdateTestSuiteDriver.MyErrorListener(log);
-            saConfig.setErrorListener(errorListener);
+            
 
             NameTest testCaseNT = elementNameTest(pool, "test-case");
             NameTest inputUriNT = elementNameTest(pool, "input-URI");
@@ -408,6 +409,7 @@ public class UpdateTestSuiteDriver {
                     env.setUpdatingEnabled(true);
                     env.setModuleURIResolver(new XQTSModuleURIResolver(testCase));
                     env.setBaseURI(new File(absQueryName).toURI().toString());
+                    env.setErrorReporter(new StandardErrorReporter());  // TODO: use custom error reporter
                     XQueryExpression xqe;
 
                     try {
@@ -465,9 +467,9 @@ public class UpdateTestSuiteDriver {
                     if (defaultCollection != null) {
                         String docName = defaultCollection.getStringValue();
                         NodeInfo collectionElement = getCollectionElement(catalog, docName, collectionNT);
-                        CollectionURIResolver r =
-                                new XQTSCollectionURIResolver(catalog, collectionElement, true);
-                        saConfig.setCollectionURIResolver(r);
+                        CollectionFinder r =
+                                new XQTSCollectionFinder(catalog, collectionElement, true);
+                        saConfig.setCollectionFinder(r);
                     }
 
                     // Allocate a filename for the Saxon results. Use the name of the test, with a suffix
@@ -575,9 +577,11 @@ public class UpdateTestSuiteDriver {
                                 failures++;
                                 results.write("  <test-case name='" + testName + "' result='fail' comment='" +
                                         "expected " + expectedError.getStringValue() + ", got success'/>\n");
+                                failingTests.add(testName);
                             } else if (foundExpectedResults) {
                                 failures++;
                                 results.write("  <test-case name='" + testName + "' result='fail'/>\n");
+                                failingTests.add(testName);
                             }
                         }
 
@@ -596,6 +600,10 @@ public class UpdateTestSuiteDriver {
             }
             monitor.println("Results: " + successes + " passed, " + failures + " failed, " +
                     wrongErrorResults + " wrong error code");
+            monitor.println("Failing tests (max 30):");
+            for (int i=0; i<Integer.min(failures, failingTests.size()); i++) {
+                monitor.println("  " + failingTests.get(i));
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -617,9 +625,9 @@ public class UpdateTestSuiteDriver {
                     dqc.setParameter(new StructuredQName("", "", variableName), new AnyURIValue(uri));
                 } else if (docName.startsWith("collection")) {
                     NodeInfo collectionElement = getCollectionElement(catalog, docName, collectionNT);
-                    CollectionURIResolver r =
-                            new XQTSCollectionURIResolver(catalog, collectionElement, false);
-                    saConfig.setCollectionURIResolver(r);
+                    CollectionFinder r =
+                            new XQTSCollectionFinder(catalog, collectionElement, false);
+                    saConfig.setCollectionFinder(r);
                     dqc.setParameter(new StructuredQName("", "", variableName), new AnyURIValue(docName));
                 } else {
                     String uri = loadDocument(docName).getRootNode().getSystemId();
@@ -669,7 +677,7 @@ public class UpdateTestSuiteDriver {
                 StaticQueryContext sqc2 = saConfig.newStaticQueryContext();
                 XQueryExpression subQuery = sqc2.compileQuery(new FileReader(subQueryFile));
                 SequenceIterator subQueryResult = subQuery.iterator(new DynamicQueryContext(saConfig));
-                dqc.setParameter(new StructuredQName("", "", variableName), ((SequenceIterator<Item<?>>) subQueryResult).materialize());
+                dqc.setParameter(new StructuredQName("", "", variableName), subQueryResult.materialize());
             }
         }
     }
@@ -773,6 +781,7 @@ public class UpdateTestSuiteDriver {
             failures++;
             results.write("  <test-case name='" + testName + "' result='fail'" +
                     " comment='expected success, got " + actualError + "'/>\n");
+            failingTests.add(testName);
         }
 
     }
@@ -1102,6 +1111,7 @@ public class UpdateTestSuiteDriver {
          * Receive notification of a recoverable error.
          */
 
+        @Override
         public void error(TransformerException exception) {
             if (exception instanceof XPathException) {
                 String code = ((XPathException) exception).getErrorCodeLocalPart();
@@ -1119,6 +1129,7 @@ public class UpdateTestSuiteDriver {
          * Receive notification of a non-recoverable error.
          */
 
+        @Override
         public void fatalError(TransformerException exception) {
             if (exception instanceof XPathException) {
                 String code = ((XPathException) exception).getErrorCodeLocalPart();
@@ -1133,6 +1144,7 @@ public class UpdateTestSuiteDriver {
          * Receive notification of a warning.
          */
 
+        @Override
         public void warning(TransformerException exception) {
             if (showWarnings) {
                 super.warning(exception);

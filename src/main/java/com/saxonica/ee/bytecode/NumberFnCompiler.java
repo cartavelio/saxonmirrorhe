@@ -100,7 +100,7 @@ public class NumberFnCompiler extends ToItemCompiler {
             methodInfo.placeLabel(nonNull);
         }
         ItemType type = arg.getItemType();
-        if (th.relationship(type, BuiltInAtomicType.BOOLEAN) != TypeHierarchy.DISJOINT) {
+        if (th.relationship(type, BuiltInAtomicType.BOOLEAN) != Affinity.DISJOINT) {
             LabelInfo nonBoolean = methodInfo.newLabel("nonBoolean");
             ga.loadLocal(valueVar);
             ga.ifNotInstance(BooleanValue.class, nonBoolean);
@@ -114,7 +114,7 @@ public class NumberFnCompiler extends ToItemCompiler {
             ga.goTo(numberFnReturn);
             methodInfo.placeLabel(nonBoolean);
         }
-        if (th.relationship(type, BuiltInAtomicType.DOUBLE) != TypeHierarchy.DISJOINT) {
+        if (th.relationship(type, BuiltInAtomicType.DOUBLE) != Affinity.DISJOINT) {
             LabelInfo nonDouble = methodInfo.newLabel("nonDouble");
             ga.loadLocal(valueVar);
             ga.ifNotInstance(DoubleValue.class, nonDouble);
@@ -122,7 +122,7 @@ public class NumberFnCompiler extends ToItemCompiler {
             ga.goTo(numberFnReturn);
             methodInfo.placeLabel(nonDouble);
         }
-        if (th.relationship(type, NumericType.getInstance()) != TypeHierarchy.DISJOINT) {
+        if (th.relationship(type, NumericType.getInstance()) != Affinity.DISJOINT) {
             LabelInfo nonNumeric = methodInfo.newLabel("nonNumeric");
             ga.loadLocal(valueVar);
             ga.ifNotInstance(NumericValue.class, nonNumeric);
@@ -136,8 +136,8 @@ public class NumberFnCompiler extends ToItemCompiler {
             methodInfo.placeLabel(nonNumeric);
         }
 
-        if (th.relationship(type, BuiltInAtomicType.STRING) != TypeHierarchy.DISJOINT ||
-                th.relationship(type, BuiltInAtomicType.UNTYPED_ATOMIC) != TypeHierarchy.DISJOINT) {
+        if (th.relationship(type, BuiltInAtomicType.STRING) != Affinity.DISJOINT ||
+                th.relationship(type, BuiltInAtomicType.UNTYPED_ATOMIC) != Affinity.DISJOINT) {
             LabelInfo nonString = methodInfo.newLabel("nonString");
             ga.loadLocal(valueVar);
             ga.ifNotInstance(net.sf.saxon.value.StringValue.class, nonString);
@@ -173,6 +173,6 @@ public class NumberFnCompiler extends ToItemCompiler {
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited
 
 

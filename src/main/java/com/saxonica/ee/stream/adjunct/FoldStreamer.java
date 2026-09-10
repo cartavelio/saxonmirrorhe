@@ -1,9 +1,10 @@
 package com.saxonica.ee.stream.adjunct;
 
-import com.saxonica.ee.stream.feed.Feed;
+import com.saxonica.ee.stream.feed.AtomicItemFeed;
 import com.saxonica.ee.stream.feed.FeedMaker;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.watch.WatchManager;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.Fold;
@@ -19,22 +20,24 @@ import net.sf.saxon.trans.XPathException;
  */
 public class FoldStreamer extends StreamingAdjunct implements FeedMaker {
 
+    @Override
     public FeedMaker getFeedMaker(int arg) throws XPathException {
         return arg==0 ? this : getDefaultFeedMaker(arg);
     }
 
-    public Feed makeItemFeed(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
         SystemFunctionCall call = (SystemFunctionCall)getExpression();
         return new FoldFeed(call, out, context);
     }
 
-    private static class FoldFeed extends ItemFeed {
+    private static class FoldFeed extends AtomicItemFeed {
 
         private Fold fold;
 
-        public FoldFeed(SystemFunctionCall expression, Feed result, XPathContext context) throws XPathException {
+        public FoldFeed(SystemFunctionCall expression, ItemFeed result, XPathContext context) throws XPathException {
             super(expression, result, context);
-            Sequence<?>[] additionalArgs = SequenceTool.makeSequenceArray(expression.getArity() - 1);
+            Sequence[] additionalArgs = SequenceTool.makeSequenceArray(expression.getArity() - 1);
             for (int i=1; i<expression.getArity(); i++) {
                 additionalArgs[i-1] = SequenceTool.toLazySequence(expression.getArg(i).iterate(context));
             }
@@ -50,7 +53,8 @@ public class FoldStreamer extends StreamingAdjunct implements FeedMaker {
          *          to report any failure
          */
 
-        public void processItem(Item<?> item) throws XPathException {
+        @Override
+        public void append(Item item) throws XPathException {
             if (!hasFailed()) {
                 try {
                     fold.processItem(item);
@@ -71,10 +75,11 @@ public class FoldStreamer extends StreamingAdjunct implements FeedMaker {
          *          to report any failure
          */
 
+        @Override
         public void close() throws XPathException {
             if (!hasFailed()) {
-                Sequence<?> value = fold.result();
-                Feed out = getResult();
+                Sequence value = fold.result();
+                Outputter out = getNextOutputter();
                 processItems(value.iterate(), out);
                 out.close();
             }
@@ -84,4 +89,4 @@ public class FoldStreamer extends StreamingAdjunct implements FeedMaker {
 
 }
 
-// Copyright (c) 2014 Saxonica Limited.
+// Copyright (c) 2014-2020 Saxonica Limited

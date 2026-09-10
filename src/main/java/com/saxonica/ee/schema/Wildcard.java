@@ -387,6 +387,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
      *
      * @throws SchemaException
      */
+    @Override
     public boolean validate(SchemaCompiler compiler) throws SchemaException {
         //only do the validation on the namespace
         return true;
@@ -436,7 +437,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
             if (first) {
                 first = false;
             } else {
-                sb.append(' ');
+                sb.cat(' ');
             }
             String s = (String) iter.next();
             sb.append(s.isEmpty() ? "##local" : s);
@@ -810,6 +811,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
      * Serialize this schema component
      */
 
+    @Override
     public void serialize(SchemaModelSerializer serializer) throws XPathException {
         serializer.startElement("wildcard");
         serializer.emitAttribute("id", serializer.getId(this, true));
@@ -838,7 +840,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
                 int nc = intit.next();
                 String name = pool.getClarkName(nc);
                 disallowedNames.append(name);
-                disallowedNames.append(' ');
+                disallowedNames.cat(' ');
             }
         }
         if (disallowedNames.length() > 0) {
@@ -848,9 +850,11 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
         serializer.endElement();
     }
 
+    @Override
     public Function getComponentAsFunction() {
         Callable callable = new Callable() {
-            public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+            @Override
+            public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
@@ -859,7 +863,8 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
                         return new ObjectValue<>(Wildcard.this);
                     case "namespace constraint":
                         Callable constraintFunction = new Callable() {
-                            public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+                            @Override
+                            public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
                                 String key = arguments[0].head().getStringValue();
                                 switch (key) {
                                     case "class":
@@ -918,4 +923,4 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
     }
 }
 
-// Copyright (c) 2004-2012 Saxonica Limited
+// Copyright (c) 2004-2020 Saxonica Limited

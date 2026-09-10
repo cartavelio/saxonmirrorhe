@@ -1,5 +1,6 @@
 package com.saxonica.ee.update;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
@@ -20,6 +21,7 @@ public abstract class BasicUpdatingExpression extends Expression {
      * @return true if this is an updating expression (which it is)
      */
 
+    @Override
     public final boolean isUpdatingExpression() {
         return true;
     }
@@ -36,6 +38,7 @@ public abstract class BasicUpdatingExpression extends Expression {
      *         information).
      */
 
+    @Override
     public int computeCardinality() {
         return StaticProperty.ALLOWS_ONE;
     }
@@ -53,6 +56,7 @@ public abstract class BasicUpdatingExpression extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return AnyItemType.getInstance();
     }
@@ -88,6 +92,7 @@ public abstract class BasicUpdatingExpression extends Expression {
 
 
 
+    @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
         throw new UnsupportedOperationException("Cannot evaluate an updating expression");
     }
@@ -109,7 +114,8 @@ public abstract class BasicUpdatingExpression extends Expression {
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         throw new UnsupportedOperationException("Cannot evaluate an updating expression");
     }
 
@@ -117,13 +123,14 @@ public abstract class BasicUpdatingExpression extends Expression {
     /**
      * Process the instruction, without returning any tail calls
      *
+     * @param output the destination for the result
      * @param context The dynamic context, giving access to the current node,
-     *                the current variables, etc.
      */
 
-    public void process(XPathContext context) throws XPathException {
+    @Override
+    public void process(Outputter output, XPathContext context) throws XPathException {
         throw new UnsupportedOperationException("Cannot evaluate an updating expression");
     }
 }
 
-// Copyright (c) 2008 Saxonica Limited.
+// Copyright (c) 2008-2020 Saxonica Limited

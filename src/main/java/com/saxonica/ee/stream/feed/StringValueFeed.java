@@ -19,17 +19,18 @@ import net.sf.saxon.value.StringValue;
 public class StringValueFeed extends AbsorptionFeed {
 
 
-    public StringValueFeed(Feed result, XPathContext context) {
+    public StringValueFeed(ItemFeed result, XPathContext context) {
         super(result, context);
     }
 
+    @Override
     protected PendingItem makePendingItem(int sequenceNr, FleetingParentNode node) {
         return new PendingStringValue(valuesReadyToBeOutput.size(), node);
 
     }
 
     @Override
-    protected Sequence<?> processGroundedItem(Item item) throws XPathException {
+    protected Sequence processGroundedItem(Item item) throws XPathException {
         return StringValue.makeStringValue(item.getStringValueCS());
     }
 
@@ -41,9 +42,10 @@ public class StringValueFeed extends AbsorptionFeed {
      * @throws net.sf.saxon.trans.XPathException
      *          May be raised if a dynamic error occurs
      */
+    @Override
     public void close() throws XPathException {
         if (!hasFailed()) {
-            getResult().close();
+            getNextOutputter().close();
         }
     }
 
@@ -63,6 +65,7 @@ public class StringValueFeed extends AbsorptionFeed {
             this.node = node;
         }
 
+        @Override
         public Receiver getGatherer() {
             return new StringValueGatherer(buffer);
         }
@@ -79,4 +82,4 @@ public class StringValueFeed extends AbsorptionFeed {
     }
 }
 
-// Copyright (c) 2009-2014 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

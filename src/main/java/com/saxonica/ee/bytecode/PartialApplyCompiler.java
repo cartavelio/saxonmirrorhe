@@ -1,11 +1,11 @@
 package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.*;
-import com.saxonica.functions.hof.CurriedFunction;
-import com.saxonica.functions.hof.PartialApply;
+import net.sf.saxon.functions.hof.CurriedFunction;
+import net.sf.saxon.functions.hof.PartialApply;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
@@ -93,4 +93,4 @@ public class PartialApplyCompiler extends ToItemCompiler {
     }
 }
 
-//Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

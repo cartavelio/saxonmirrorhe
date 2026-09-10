@@ -7,8 +7,10 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.Sender;
 import net.sf.saxon.expr.PackageData;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.Doc_2;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.ParseOptions;
+import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.IgnorableSpaceStrippingRule;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
@@ -21,6 +23,8 @@ import org.xml.sax.InputSource;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import java.io.StringReader;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -50,6 +54,7 @@ public class Parse extends SystemFunction {
      *                                           code will add information about the error location.
      */
 
+    @Override
     public NodeInfo call(XPathContext context, Sequence[] arguments) throws XPathException {
         Controller controller = context.getController();
         Configuration config = controller.getConfiguration();
@@ -58,26 +63,43 @@ public class Parse extends SystemFunction {
         InputSource is = new InputSource(sr);
         is.setSystemId(getStaticBaseUriString());
         Source source = new SAXSource(is);
-        source.setSystemId(getStaticBaseUriString());
+        Map<String, Sequence> checkedOptions;
+        ParseOptions parseOptions;
+        if (arguments.length == 1) {
+            checkedOptions = new HashMap<>();
+            parseOptions = new ParseOptions();
+        } else {
+            checkedOptions =
+                    getDetails().optionDetails.processSuppliedOptions((MapItem) arguments[1].head(), context);
+            parseOptions = Doc_2.setParseOptions(getRetainedStaticContext(), checkedOptions, context);
+
+        }
+        Sequence suppliedBaseUriVal = checkedOptions.get("base-uri");
+        if (suppliedBaseUriVal == null || suppliedBaseUriVal.head() == null) {
+            source.setSystemId(getStaticBaseUriString());
+        } else {
+            source.setSystemId(suppliedBaseUriVal.head().getStringValue());
+        }
         Builder b = controller.makeBuilder();
         if (b instanceof TinyBuilder) {
             ((TinyBuilder) b).setStatistics(config.getTreeStatistics().FN_PARSE_STATISTICS);
         }
         Receiver s = b;
-        ParseOptions options = new ParseOptions();
         PackageData pd = getRetainedStaticContext().getPackageData();
-        if (pd instanceof StylesheetPackage) {
-            options.setSpaceStrippingRule(((StylesheetPackage) pd).getSpaceStrippingRule());
-            if (((StylesheetPackage) pd).isStripsTypeAnnotations()) {
-                s = config.getAnnotationStripper(s);
+        if (checkedOptions.get("strip-space") == null) {
+            if (pd instanceof StylesheetPackage) {
+                parseOptions.setSpaceStrippingRule(((StylesheetPackage) pd).getSpaceStrippingRule());
+                if (((StylesheetPackage) pd).isStripsTypeAnnotations()) {
+                    s = config.getAnnotationStripper(s);
+                }
+            } else {
+                parseOptions.setSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
             }
-        } else {
-            options.setSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
         }
-        options.setErrorListener(context.getConfiguration().getErrorListener());
-        setXMLReader(config, options);
+        parseOptions.setErrorReporter(context.getController().getErrorReporter());
+        setXMLReader(config, parseOptions);
         s.setPipelineConfiguration(b.getPipelineConfiguration());
-        Sender.send(source, s, options);
+        Sender.send(source, s, parseOptions);
         NodeInfo node = b.getCurrentRoot();
         b.reset();
         return node;
@@ -98,4 +120,4 @@ public class Parse extends SystemFunction {
 
 }
 
-// Copyright (c) 2009-2016 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

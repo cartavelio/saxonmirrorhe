@@ -2,15 +2,14 @@ package com.saxonica.ee.stream;
 
 import com.saxonica.ee.stream.adjunct.StreamingAdjunct;
 import com.saxonica.ee.stream.feed.CopyOfFeed;
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
+import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.feed.MotionlessFeed;
 import com.saxonica.ee.stream.watch.Trigger;
 import com.saxonica.ee.stream.watch.WatchMaker;
 import com.saxonica.ee.stream.watch.WatchManager;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.functions.AccumulatorFn;
 import net.sf.saxon.functions.CurrentGroupCall;
 import net.sf.saxon.pattern.AnchorPattern;
 import net.sf.saxon.pattern.NodeTestPattern;
@@ -67,11 +66,9 @@ public class Inversion {
         route = new Inversion();
         if (Streamability.getSweep(exp) == Sweep.CONSUMING) {
             PushAction action = makePushAction(exp, forGrouping);
-            if (action != null) {
-                route.append(action);
-                if (action.watchMaker == null) {
-                    processChildExpressions(exp, action, route, forGrouping);
-                }
+            route.append(action);
+            if (action.watchMaker == null) {
+                processChildExpressions(exp, action, route, forGrouping);
             }
 
             // The last thing on the route must be a Watch
@@ -84,15 +81,6 @@ public class Inversion {
 
         } else if (Streamability.getSweep(exp) == Sweep.MOTIONLESS) {
             if (route.getRoute().isEmpty()) {
-                // the template does not consume the input subtree
-                if (dependsOnPostDescentAccumulator(exp)) {
-                    // TODO: error XTDE3420 no longer exists
-                    XPathException err = new XPathException(
-                            "Call to post-descent accumulator function occurs within a template that does not consume the input",
-                            "XTDE3420");
-                    err.setLocator(exp.getLocation());
-                    throw err;
-                }
                 PushAction action = new PushAction();
                 action.watchMaker = (watchManager, out, context) -> {
                     // return a Watch that matches the anchor node only
@@ -107,6 +95,7 @@ public class Inversion {
             throw new IllegalStateException();
         }
         exp.setExtraProperty("inversion", route);
+        //route.explain(exp.getConfiguration());
         return route;
     }
 
@@ -164,15 +153,7 @@ public class Inversion {
                     parentAction.feedMaker = parentAction.adjunct.getFeedMaker(i);
                     parentAction.streamingChildSequence = i;
                 } else if (sweep == Sweep.MOTIONLESS) {
-                    // a non-consuming expression; check for calls on post-descent accumulator functions
-                    if (firstStreamingChild == null && dependsOnPostDescentAccumulator(child)) {
-                        // TODO: error XTDE3420 no longer exists
-                        XPathException err = new XPathException(
-                                "Call to post-descent accumulator function occurs within an instruction that is not a post-descent instruction",
-                                "XTDE3420");
-                        err.setLocator(child.getLocation());
-                        throw err;
-                    }
+                    // a non-consuming expression; no action
                 } else {
                     throw new IllegalStateException();
                 }
@@ -182,23 +163,8 @@ public class Inversion {
 
     }
 
-    private static boolean dependsOnPostDescentAccumulator(Expression exp) {
-        if (exp.isCallOn(AccumulatorFn.AccumulatorAfter.class)) {
-            return true;
-        }
-        for (Operand o : exp.operands()) {
-            if (dependsOnPostDescentAccumulator(o.getChildExpression())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     /**
      * Make a PushAction object representing the strategy for evaluating an expression in push mode
-     *
-     *
-     *
      * @param exp the expression to be evaluated
      * @param forGrouping true if this is a grouping operation
      * @return the corresponding PushAction object, or null if the expression is motioness
@@ -309,7 +275,7 @@ public class Inversion {
      * @throws XPathException if an error occurs, e.g. if streaming is not possible.
      */
 
-    public Trigger getWatch(WatchManager watchManager, Feed parentFeed, XPathContext context) throws XPathException {
+    public Trigger getWatch(WatchManager watchManager, ItemFeed parentFeed, XPathContext context) throws XPathException {
         List<PushAction> route = getRoute();
         for (PushAction action : route) {
             int pushMethod = action.pushMethod;
@@ -360,6 +326,12 @@ public class Inversion {
         }
     }
 
+    public void explain(Configuration config) {
+        ExpressionPresenter out = new ExpressionPresenter(config);
+        explain(out);
+        out.close();
+    }
+
     /**
      * Display the streaming route for diagnostic purposes
      *
@@ -390,6 +362,6 @@ public class Inversion {
     }
 }
 
-// Copyright (c) 2009-2018 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited
 
 

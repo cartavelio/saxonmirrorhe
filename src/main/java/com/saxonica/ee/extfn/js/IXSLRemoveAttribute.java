@@ -2,7 +2,9 @@ package com.saxonica.ee.extfn.js;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StringLiteral;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.style.StyleElement;
@@ -13,13 +15,14 @@ import net.sf.saxon.value.Whitespace;
 /**
  * Handler for ixsl:remove-attribute elements in stylesheet.
  * The ixsl:remove-attribute element has mandatory attribute name (the name of the attribute to be removed)
- * and optional attribute namespace (the namespace of the attribute to be removed)
+ * and optional attribute object (the element from which the attribute is removed, when no object attribute
+ * is present, the current element node is used)
  */
 
 public class IXSLRemoveAttribute extends StyleElement {
 
     private Expression name;
-    private Expression namespace;
+    private Expression object;
 
     /**
      * Determine whether this node is an instruction.
@@ -27,6 +30,7 @@ public class IXSLRemoveAttribute extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
@@ -37,45 +41,50 @@ public class IXSLRemoveAttribute extends StyleElement {
      * @return true: no, the element must be empty
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return false;
     }
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
 
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : atts) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
             if (f.equals("name")) {
-                String nameAtt = Whitespace.trim(atts.getValue(a));
-                name = makeAttributeValueTemplate(nameAtt, a);
-            } else if (f.equals("namespace")) {
-                String namespaceAtt = Whitespace.trim(atts.getValue(a));
-                namespace = makeAttributeValueTemplate(namespaceAtt, a);
+                String nameAtt = Whitespace.trim(att.getValue());
+                name = makeAttributeValueTemplate(nameAtt, att);
+            } else if (f.equals("object")) {
+                String objectAtt = att.getValue();
+                object = makeExpression(objectAtt, att);
             } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+                checkUnknownAttribute(attName);
             }
         }
-        if (namespace == null) {
-            namespace = new StringLiteral("");
+        if (object == null) {
+            object = makeExpression(".", null);
         }
         if (name == null) {
             reportAbsence("name");
         }
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         name = typeCheck("name", name);
-        namespace = typeCheck("namespace", namespace);
+        object = typeCheck("object", object);
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
-        Expression e = IXSLFunctionSet.getInstance().makeFunction("remove-attribute", 2).makeFunctionCall(name, namespace);
+        Expression e = IXSLFunctionSet.getInstance().makeFunction("remove-attribute", 2).makeFunctionCall(name, object);
         e.setRetainedStaticContext(makeRetainedStaticContext());
         return e;
     }
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

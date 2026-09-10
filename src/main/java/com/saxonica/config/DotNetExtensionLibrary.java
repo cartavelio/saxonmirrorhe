@@ -122,6 +122,7 @@ public class DotNetExtensionLibrary implements FunctionLibrary {
      *         null if no extension function was found matching the required name, arity, or signature.
      */
 
+    @Override
     public Expression bind(SymbolicName.F functionName, Expression[] staticArgs, StaticContext env, List<String> reasons) {
 
         boolean debug = config.getBooleanProperty(Feature.TRACE_EXTERNAL_FUNCTIONS);
@@ -257,10 +258,11 @@ public class DotNetExtensionLibrary implements FunctionLibrary {
 
                     if (significantArgs >= 0) {
 
-                        boolean allParamsAreInParams = false;
+                        boolean allParamsAreInParams = true;
                         for (ParameterInfo theParameterType : theParameterTypes) {
-                            if (!theParameterType.get_IsIn()) {
-                                allParamsAreInParams = true;
+                            if (theParameterType.get_IsOut() || theParameterType.get_IsOptional()) {
+                                allParamsAreInParams = false;
+                                break;
                             }
                         }
 
@@ -273,7 +275,8 @@ public class DotNetExtensionLibrary implements FunctionLibrary {
                             }
                         }
 
-                        if (allParamsAreInParams) {
+                        if (theParameterTypes.length == significantArgs &&
+                                (significantArgs == 0 || allParamsAreInParams)){
                             boolean usesContext = theParameterTypes.length > 0 &&
                                     theParameterTypes[0].get_ParameterType()
                                             .get_FullName().equals("net.sf.saxon.expr.XPathContext");
@@ -446,6 +449,7 @@ public class DotNetExtensionLibrary implements FunctionLibrary {
      * @return if a function of this name and arity is available for calling, then a corresponding
      *         function item; or null if the function does not exist
      */
+    @Override
     public Function getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) {
         int arity = functionName.getArity();
         SuppliedParameterReference[] params = new SuppliedParameterReference[arity];
@@ -467,6 +471,7 @@ public class DotNetExtensionLibrary implements FunctionLibrary {
      * @param functionName the qualified name of the function being called
      * @return true if a function of this name and arity is available for calling
      */
+    @Override
     public boolean isAvailable(SymbolicName.F functionName) {
         SuppliedParameterReference[] params = new SuppliedParameterReference[functionName.getArity()];
         Arrays.fill(params, new SuppliedParameterReference(-1));
@@ -1094,6 +1099,7 @@ public class DotNetExtensionLibrary implements FunctionLibrary {
      * @return a copy of this function library. This must be an instance of the original class.
      */
 
+    @Override
     public FunctionLibrary copy() {
         DotNetExtensionLibrary jel = new DotNetExtensionLibrary(config);
         jel.explicitMappings = new HashMap<>(explicitMappings);
@@ -1102,4 +1108,4 @@ public class DotNetExtensionLibrary implements FunctionLibrary {
 
 }
 
-// Copyright (c) 2009-2010 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

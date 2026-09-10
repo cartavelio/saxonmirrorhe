@@ -41,21 +41,22 @@ public class GroupStarting extends SystemFunction {
      *                        code will add information about the error location.
      */
 
-    public Sequence<ArrayItem> call(XPathContext context, Sequence[] arguments) throws XPathException {
-        Sequence<?> input = arguments[0];
+    @Override
+    public ZeroOrMore<ArrayItem> call(XPathContext context, Sequence[] arguments) throws XPathException {
+        Sequence input = arguments[0];
         Function function = (Function) arguments[1].head();
-        return new LazySequence<>(new GroupStartingFunctionIterator(input.iterate(), function, context));
+        return new ZeroOrMore<>(new GroupStartingFunctionIterator(input.iterate(), function, context));
     }
 
-    private static class GroupStartingFunctionIterator implements SequenceIterator<ArrayItem> {
+    private static class GroupStartingFunctionIterator implements SequenceIterator {
 
-        private SequenceIterator<?> baseIterator;
+        private SequenceIterator baseIterator;
         private Function function;
         private XPathContext context;
         private Item pending = null;
         private boolean finished = false;
 
-        public GroupStartingFunctionIterator(SequenceIterator<?> in, Function f, XPathContext context) {
+        public GroupStartingFunctionIterator(SequenceIterator in, Function f, XPathContext context) {
             this.baseIterator = in;
             this.function = f;
             this.context = context;
@@ -66,13 +67,13 @@ public class GroupStarting extends SystemFunction {
             if (finished) {
                 return null;
             }
-            List<Item<?>> group = new ArrayList<>();
+            List<Item> group = new ArrayList<>();
             if (pending != null) {
                 group.add(pending);
             }
-            Item<?> item;
+            Item item;
             while ((item = baseIterator.next()) != null) {
-                Sequence<?> test = function.call(context, SequenceTool.fromItems(item));
+                Sequence test = function.call(context, SequenceTool.fromItems(item));
                 boolean match = ExpressionTool.effectiveBooleanValue(test.head());
                 if (match) {
                     pending = item;
@@ -86,7 +87,7 @@ public class GroupStarting extends SystemFunction {
             return makeSimpleArray(group);
         }
 
-        private SimpleArrayItem makeSimpleArray(List<Item<?>> group) {
+        private SimpleArrayItem makeSimpleArray(List<Item> group) {
             try {
                 return SimpleArrayItem.makeSimpleArrayItem(new ListIterator<>(group));
             } catch (XPathException e) {
@@ -99,10 +100,6 @@ public class GroupStarting extends SystemFunction {
             baseIterator.close();
         }
 
-        @Override
-        public int getProperties() {
-            return 0;
-        }
     }
 
 
@@ -111,4 +108,4 @@ public class GroupStarting extends SystemFunction {
 
 }
 
-// Copyright (c) 2005-2018 Saxonica Limited.
+// Copyright (c) 2005-2020 Saxonica Limited

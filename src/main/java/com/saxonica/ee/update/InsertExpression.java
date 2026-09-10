@@ -1,6 +1,7 @@
 package com.saxonica.ee.update;
 
 import com.saxonica.ee.validate.SkipValidator;
+import com.saxonica.ee.xtupdate.SaxonInsert;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
@@ -12,6 +13,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
+import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.Type;
@@ -111,6 +113,7 @@ public class InsertExpression extends BasicUpdatingExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         typeCheckChildren(visitor, contextInfo);
 
@@ -135,10 +138,11 @@ public class InsertExpression extends BasicUpdatingExpression {
      * Copy an expression. This makes a deep copy.
      *
      * @return the copy of the original expression
-     * @param rebindings
+     * @param rebindings variables that need to be re-bound
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         InsertExpression exp = new InsertExpression(getSourceExpression().copy(rebindings), getTargetExpression().copy(rebindings),
                                                     position, constructionMode, inheritNamespaces, preserveNamespaces);
@@ -165,10 +169,19 @@ public class InsertExpression extends BasicUpdatingExpression {
      * @param out the expression presenter used to display the structure
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("insert", this);
-        out.emitAttribute("position", Token.tokens[position]);
-        out.emitAttribute("constructionMode", Validation.toString(constructionMode));
+        out.emitAttribute("position", SaxonInsert.encodePosition(position));
+        out.emitAttribute("constructionMode", constructionMode + "");
+        FastStringBuffer fsb = new FastStringBuffer(2);
+        if (inheritNamespaces) {
+            fsb.append("i");
+        }
+        if (preserveNamespaces) {
+            fsb.append("p");
+        }
+        out.emitAttribute("flags", fsb.toString());
         getSourceExpression().export(out);
         getTargetExpression().export(out);
         out.endElement();
@@ -183,8 +196,9 @@ public class InsertExpression extends BasicUpdatingExpression {
      * @param pul     the pending update list to which the results should be written
      */
 
+    @Override
     public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
-        List<Item> content = new ArrayList<Item>();
+        List<Item> content = new ArrayList<>();
         NodeInfo target = (NodeInfo) getTargetExpression().evaluateItem(context);
         if (target == null) {
             XPathException e = new XPathException("Target of insert expression must not be empty", "XUDY0027");
@@ -261,22 +275,22 @@ public class InsertExpression extends BasicUpdatingExpression {
                 NodeInfo copiedNode = (NodeInfo) item;
 
                 SimpleType attributeType;
-                int properties = 0;
+                int properties = ReceiverOption.NONE;
                 if (constructionMode == Validation.SKIP || Untyped.getInstance().equals(parent.getSchemaType())) {
                     attributeType = BuiltInAtomicType.UNTYPED_ATOMIC;
                 } else {
                     attributeType = (SimpleType) copiedNode.getSchemaType();
                     if (copiedNode.isId() || ("id".equals(copiedNode.getLocalPart()) && NamespaceConstant.XML.equals(copiedNode.getURI()))) {
-                        properties |= ReceiverOptions.IS_ID;
+                        properties |= (ReceiverOption.IS_ID);
                     }
                     if (copiedNode.isIdref()) {
-                        properties |= ReceiverOptions.IS_IDREF;
+                        properties |= (ReceiverOption.IS_IDREF);
                     }
                 }
 
                 try {
                     InsertAttributeAction action = new InsertAttributeAction(
-                            parent,
+                            (MutableNodeInfo)parent,
                             NameOfNode.makeName(copiedNode),
                             attributeType,
                             copiedNode.getStringValue(),
@@ -316,11 +330,11 @@ public class InsertExpression extends BasicUpdatingExpression {
             out.setPipelineConfiguration(pipe);
 
             out.open();
-            out.startDocument(0);
+            out.startDocument(ReceiverOption.NONE);
 
-            int copyNs = preserveNamespaces ? ReceiverOptions.ALL_NAMESPACES : 0;
+            int copyNs = preserveNamespaces ? ReceiverOption.ALL_NAMESPACES : ReceiverOption.NONE;
             for (Item n : content) {
-                out.append(n, ExplicitLocation.UNKNOWN_LOCATION, copyNs);
+                out.append(n, Loc.NONE, copyNs);
             }
 
             out.endDocument();
@@ -332,7 +346,7 @@ public class InsertExpression extends BasicUpdatingExpression {
             int len = extent.getLength();
             NodeInfo[] array = new NodeInfo[len];
             for (int i = 0; i < len; i++) {
-                array[i] = (NodeInfo) extent.itemAt(i);
+                array[i] = (NodeInfo)extent.itemAt(i);
             }
             InsertAction action = new InsertAction(array, (MutableNodeInfo) target, position, inheritNamespaces);
             action.setOriginator(this);
@@ -343,4 +357,4 @@ public class InsertExpression extends BasicUpdatingExpression {
 
 }
 
-// Copyright (c) 2008-2014 Saxonica Limited.
+// Copyright (c) 2008-2020 Saxonica Limited

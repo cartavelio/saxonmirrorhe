@@ -3,14 +3,15 @@ package com.saxonica.functions.extfn;
 import net.sf.saxon.Query;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.URIQueryParameters;
 import net.sf.saxon.functions.UnparsedTextFunction;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.SerializerFactory;
 import net.sf.saxon.om.*;
-import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.serialize.SerializationParamsHandler;
+import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.serialize.charcode.XMLCharacterData;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.TextLinesIterator;
@@ -52,7 +53,7 @@ public class EXPathFile {
 
     private static final One<StringValue> UTF8 = new One<StringValue>(new StringValue("UTF-8"));
 
-    public static final String NEWLINE = System.getProperty("line.separator"); 
+    public static final String NEWLINE = System.getProperty("line.separator");
 
     // file:version()
     // as xs:decimal
@@ -110,7 +111,7 @@ public class EXPathFile {
 //        $items as item()*)
 //        as empty-sequence()
 
-    public static void append(XPathContext context, One<StringValue> file, ZeroOrMore<Item<?>> contents) throws XPathException {
+    public static void append(XPathContext context, One<StringValue> file, ZeroOrMore<Item> contents) throws XPathException {
         Properties props = new Properties();
         props.setProperty("method", "xml");
         serialize(context, file.head().getStringValue(), true, contents, new SerializationProperties(props));
@@ -123,14 +124,14 @@ public class EXPathFile {
 //        $params element(output:serialization-parameters))
 //        as empty-sequence()
 
-    public static void append(XPathContext context, One<StringValue> file, ZeroOrMore<Item<?>> contents, One<NodeInfo> params) throws XPathException {
+    public static void append(XPathContext context, One<StringValue> file, ZeroOrMore<Item> contents, One<NodeInfo> params) throws XPathException {
         SerializationParamsHandler sph = new SerializationParamsHandler();
         sph.setSerializationParams(params.head());
         SerializationProperties props = sph.getSerializationProperties();
         serialize(context, file.head().getStringValue(), true, contents, props);
     }
 
-    private static void serialize(XPathContext context, String path, boolean append, ZeroOrMore<Item<?>> contents, SerializationProperties properties) throws XPathException {
+    private static void serialize(XPathContext context, String path, boolean append, ZeroOrMore<Item> contents, SerializationProperties properties) throws XPathException {
         SerializerFactory factory = context.getConfiguration().getSerializerFactory();
         PipelineConfiguration pipe = context.getController().makePipelineConfiguration();
         pipe.setXPathContext(context);
@@ -147,7 +148,7 @@ public class EXPathFile {
         Result result = new StreamResult(stream);
         Receiver sr = factory.getReceiver(result, properties, pipe);
         sr.open();
-        sr.startDocument(0);
+        sr.startDocument(ReceiverOption.NONE);
         for (Item item : contents) {
             sr.append(item);
         }
@@ -468,6 +469,7 @@ public class EXPathFile {
             error("File " + dir + " is not a directory", ERROR_PATH_NOT_DIRECTORY);
         }
         FilenameFilter all = new FilenameFilter() {
+            @Override
             public boolean accept(File dir, String name) {
                 return true;
             }
@@ -553,8 +555,9 @@ public class EXPathFile {
             }
             boolean result = from.renameTo(to);
             if (!result) {
-                throw new XPathException("Renaming " + source + " to " + target + " failed");
+                throw new XPathException("Renaming " + source + " to " + target + " failed ");
             }
+            //
         }
     }
 
@@ -760,12 +763,14 @@ public class EXPathFile {
             reader = new LineNumberReader(getInputStreamReader(file, encoding));
             uri = file.toURI();
             checker = new IntPredicate() {
+                @Override
                 public boolean test(int value) {
                     return XMLCharacterData.isValid11(value);
                 }
             };
         }
 
+        @Override
         public StringValue next() throws XPathException {
             StringValue result = null;
             try {
@@ -782,7 +787,7 @@ public class EXPathFile {
 //        $contents as item()*)
 //        as empty-sequence()
 
-    public static void write(XPathContext context, One<StringValue> file, ZeroOrMore<Item<?>> contents) throws XPathException {
+    public static void write(XPathContext context, One<StringValue> file, ZeroOrMore<Item> contents) throws XPathException {
         serialize(context, file.head().getStringValue(), false, contents, context.getConfiguration().obtainDefaultSerializationProperties());
     }
 //
@@ -791,7 +796,7 @@ public class EXPathFile {
 //        $params as element(output:serialization-parameters))
 //        as empty-sequence()
 
-    public static void write(XPathContext context, One<StringValue> file, ZeroOrMore<Item<?>> contents, One<NodeInfo> params) throws XPathException {
+    public static void write(XPathContext context, One<StringValue> file, ZeroOrMore<Item> contents, One<NodeInfo> params) throws XPathException {
         SerializationParamsHandler sph = new SerializationParamsHandler();
         sph.setSerializationParams(params.head());
         SerializationProperties props = sph.getSerializationProperties();
@@ -1251,5 +1256,5 @@ public class EXPathFile {
 
 }
 
-// Copyright (c) 2014-2015 Saxonica Limited
+// Copyright (c) 2014-2020 Saxonica Limited
 

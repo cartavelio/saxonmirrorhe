@@ -1,9 +1,9 @@
 package com.saxonica.ee.stream.adjunct;
 
 
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
 import com.saxonica.ee.stream.feed.FilteringFeed;
+import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.watch.WatchManager;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.trans.XPathException;
@@ -21,14 +21,15 @@ public abstract class FilteringAdjunct extends TransmissionAdjunct implements Fe
      * Make a filter for the event stream
      *
      * @param context the XPath dyamic context
-     * @param out
+     * @param out the destination for the filtered events
      * @return a filter that can be added to the event stream
      * @throws net.sf.saxon.trans.XPathException if a dynamic evaluation error occurs
      */
 
-    public abstract FilteringFeed.Filter makeFilter(XPathContext context, Feed out) throws XPathException;
+    public abstract FilteringFeed.Filter makeFilter(XPathContext context, ItemFeed out) throws XPathException;
 
-    public Feed makeItemFeed(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
         final FilteringFeed.Filter filter = makeFilter(context, out);
         return new FilteringFeed(out, context, filter);
     }
@@ -37,4 +38,4 @@ public abstract class FilteringAdjunct extends TransmissionAdjunct implements Fe
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

@@ -1,7 +1,7 @@
 package com.saxonica.ee.validate;
 
 import net.sf.saxon.Controller;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.InvalidityHandler;
 import net.sf.saxon.om.Sequence;
@@ -21,7 +21,7 @@ public class ValidationContext extends ConversionRules {
     private Controller controller;
     private InvalidityHandler invalidityHandler;
     private SchemaType xsiType;
-    private StartTagBufferEE startTagBuffer;
+    private AttributeInheritor attributeInheritor;
     private ConstraintChecker constraintChecker;
     private String errorCode;
     private int errorCount = 0;
@@ -73,10 +73,19 @@ public class ValidationContext extends ConversionRules {
         this.invalidityHandler = invalidityHandler;
     }
 
+    /**
+     * Get the tree builder used for XSD 1.1 assertion evaluation
+     * @return the tree builder used for assertions
+     */
 
     public AssertionTreeBuilder getAssertionTreeBuilder() {
         return assertionTreeBuilder;
     }
+
+    /**
+     * Set the tree builder used for XSD 1.1 assertion evaluation
+     * @param assertionTreeBuilder the tree builder used for assertions
+     */
 
     public void setAssertionTreeBuilder(AssertionTreeBuilder assertionTreeBuilder) {
         this.assertionTreeBuilder = assertionTreeBuilder;
@@ -99,7 +108,7 @@ public class ValidationContext extends ConversionRules {
      * the value of the $err:value variable within a catch clause.
      */
 
-    public Sequence<?> getValidationErrorObject() {
+    public Sequence getValidationErrorObject() {
         if (invalidityHandler != null) {
             try {
                 return invalidityHandler.endReporting();
@@ -163,21 +172,22 @@ public class ValidationContext extends ConversionRules {
      * Set the StartTagBuffer, which buffers attributes on the element start tag, and also acts as
      * the namespaceResolver to be used for resolving QName-valued attributes
      *
-     * @param startTag the namespace resolver
+     * @param inheritor the namespace resolver
      */
 
-    public void setStartTagBuffer(StartTagBufferEE startTag) {
-        startTagBuffer = startTag;
+    public void setAttributeInheritor(AttributeInheritor inheritor) {
+        attributeInheritor = inheritor;
     }
 
     /**
-     * Get the startTagBuffer
+     * Get the AttributeInheritor, which keeps track of inherited attributes for use
+     * in conditional type assignment.
      *
-     * @return the startTagBuffer
+     * @return the AttributeInheritor
      */
 
-    public StartTagBufferEE getStartTagBuffer() {
-        return startTagBuffer;
+    public AttributeInheritor getAttributeInheritor() {
+        return attributeInheritor;
     }
 
     /**
@@ -270,4 +280,4 @@ public class ValidationContext extends ConversionRules {
 
 }
 
-// Copyright (c) 2012 Saxonica Limited.
+// Copyright (c) 2012-2020 Saxonica Limited

@@ -2,12 +2,13 @@ package com.saxonica.ee.jaxp;
 
 import net.sf.saxon.dom.TypeInfoImpl;
 import net.sf.saxon.event.ContentHandlerProxy;
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyType;
-import net.sf.saxon.type.MissingComponentException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
 import org.w3c.dom.TypeInfo;
@@ -23,6 +24,7 @@ import javax.xml.validation.TypeInfoProvider;
 
 public class TypedContentHandler extends ContentHandlerProxy {
     private SchemaType pendingElementTypeCode = null;
+    private AttributeMap pendingAttributes = null;
 
     /**
      * Get a TypeInfoProvider to provide type information for the current element or attribute
@@ -41,6 +43,7 @@ public class TypedContentHandler extends ContentHandlerProxy {
      *         may supply untyped nodes instead of supplying the type annotation
      */
 
+    @Override
     public boolean usesTypeAnnotations() {
         return true;
     }
@@ -49,9 +52,13 @@ public class TypedContentHandler extends ContentHandlerProxy {
      * Notify the start of an element
      */
 
-    public void startElement(NodeName nameCode, SchemaType typeCode, Location location, int properties) throws XPathException {
-        pendingElementTypeCode = typeCode;
-        super.startElement(nameCode, typeCode, location, properties);
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
+        pendingElementTypeCode = type;
+        pendingAttributes = attributes;
+        super.startElement(elemName, type, attributes, namespaces, location, properties);
     }
 
 
@@ -72,6 +79,7 @@ public class TypedContentHandler extends ContentHandlerProxy {
          *         determine the type of the current element for some reason</p>
          */
 
+        @Override
         public TypeInfo getElementTypeInfo() {
             if (pendingElementTypeCode == null) {
                 return new TypeInfoImpl(getConfiguration(), AnyType.getInstance());
@@ -100,11 +108,12 @@ public class TypedContentHandler extends ContentHandlerProxy {
          * @throws IllegalStateException     If this method is called from other {@link org.xml.sax.ContentHandler}
          *                                   methods.
          */
+        @Override
         public TypeInfo getAttributeTypeInfo(int index) {
-            if (index < 0 || index > pendingAttributes.getLength()) {
+            if (index < 0 || index > pendingAttributes.size()) {
                 throw new IndexOutOfBoundsException("" + index);
             }
-            SimpleType type = pendingAttributes.getTypeAnnotation(index);
+            SimpleType type = pendingAttributes.itemAt(index).getType();
             return new TypeInfoImpl(getConfiguration(), type);
         }
 
@@ -118,13 +127,9 @@ public class TypedContentHandler extends ContentHandlerProxy {
          * @return true
          *         if the type of the specified attribute is ID.
          */
+        @Override
         public boolean isIdAttribute(int index) {
-            try {
-                SimpleType type = pendingAttributes.getTypeAnnotation(index);
-                return type.isIdType();
-            } catch (MissingComponentException e) {
-                return false;
-            }
+            return pendingAttributes.itemAt(index).isId();
         }
 
         /**
@@ -138,11 +143,12 @@ public class TypedContentHandler extends ContentHandlerProxy {
          *         by the validator.
          */
 
+        @Override
         public boolean isSpecified(int index) {
-            return (pendingAttributes.getProperties(index) & ReceiverOptions.DEFAULTED_ATTRIBUTE) == 0;
+            return !ReceiverOption.contains(pendingAttributes.itemAt(index).getProperties(), ReceiverOption.DEFAULTED_VALUE);
         }
 
     }
 }
 
-// Copyright (c) 2004-6 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

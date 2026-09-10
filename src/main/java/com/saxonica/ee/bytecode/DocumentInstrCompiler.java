@@ -7,7 +7,8 @@ import net.sf.saxon.event.*;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.DocumentInstr;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.HostLanguage;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
@@ -37,12 +38,12 @@ public class DocumentInstrCompiler extends ToPushCompiler {
         final DocumentInstr instr = (DocumentInstr) expression;
 
         if (instr.isPreservingTypes() && !instr.isTextOnly()) {
-            compiler.generateGetReceiver();
-            ga.push(0);
-            ga.invokeInstanceMethod(Receiver.class, "startDocument", Integer.TYPE);
+            compiler.generateGetOutputter();
+            ga.push(ReceiverOption.NONE);
+            ga.invokeInstanceMethod(Outputter.class, "startDocument", Integer.TYPE);
             compiler.compileToPush(instr.getContentExpression());
-            compiler.generateGetReceiver();
-            ga.invokeInstanceMethod(Receiver.class, "endDocument");
+            compiler.generateGetOutputter();
+            ga.invokeInstanceMethod(Outputter.class, "endDocument");
         } else {
             LabelInfo nonNull = methodInfo.newLabel("docNonNull");
             LabelInfo docDone = methodInfo.newLabel("docDone");
@@ -53,11 +54,11 @@ public class DocumentInstrCompiler extends ToPushCompiler {
             ga.goTo(docDone);
             methodInfo.placeLabel(nonNull);
             // out.append(item, locationId, NodeInfo.ALL_NAMESPACES);
-            compiler.generateGetReceiver();
+            compiler.generateGetOutputter();
             ga.swap();
             allocateStatic(compiler, instr.getLocation());
-            ga.push(ReceiverOptions.ALL_NAMESPACES);
-            ga.invokeInstanceMethod(Receiver.class, "append", Item.class, Location.class, Integer.TYPE);
+            ga.push(ReceiverOption.ALL_NAMESPACES);
+            ga.invokeInstanceMethod(Outputter.class, "append", Item.class, Location.class, Integer.TYPE);
             methodInfo.placeLabel(docDone);
         }
     }
@@ -65,7 +66,6 @@ public class DocumentInstrCompiler extends ToPushCompiler {
     @Override
     public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         Configuration config = compiler.getConfiguration();
-        TypeHierarchy th = config.getTypeHierarchy();
         final Generator ga = compiler.getCurrentGenerator();
         final GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         visitAnnotation(compiler, "DocumentInstrCompiler-Item");
@@ -76,6 +76,8 @@ public class DocumentInstrCompiler extends ToPushCompiler {
 
         if (instr.isTextOnly()) {
 //            CharSequence textValue;
+//            ga.newInstance(TextFragmentValue.class);
+//            ga.dup();
             allocateStatic(compiler, compiler.getConfiguration());
             if (instr.getConstantText() != null) {
 //                textValue = constantText;
@@ -121,10 +123,10 @@ public class DocumentInstrCompiler extends ToPushCompiler {
                 methodInfo.releaseLocal(fsbVar);
                 methodInfo.releaseLocal(iterVar);
             }
-//            root = new TextFragmentValue(config, textValue, getBaseURI());
+
+//            root = TextFragmentValue.makeTextFragment(config, textValue, getBaseURI());
             ga.push(instr.getStaticBaseURIString());
             ga.invokeStaticMethod(TextFragmentValue.class, "makeTextFragment", Configuration.class, CharSequence.class, String.class);
-
 ////            ((TextFragmentValue)root).setConfiguration(controller.getConfiguration());
 //            ga.dup();
 //            allocateStatic(compiler, compiler.getConfiguration());
@@ -166,8 +168,8 @@ public class DocumentInstrCompiler extends ToPushCompiler {
             ga.invokeInstanceMethod(Controller.class, "makePipelineConfiguration");
             // assert stack: Builder Builder PipelineConfiguration
             ga.dup();
-            ga.push(instr.getPackageData().getHostLanguage());
-            ga.invokeInstanceMethod(PipelineConfiguration.class, "setHostLanguage", Integer.TYPE);
+            allocateStatic(compiler, instr.getPackageData().getHostLanguage());
+            ga.invokeInstanceMethod(PipelineConfiguration.class, "setHostLanguage", HostLanguage.class);
             // assert stack: Builder Builder PipelineConfiguration
             ga.invokeInstanceMethod(Receiver.class, "setPipelineConfiguration", PipelineConfiguration.class);
             // assert stack: Builder
@@ -190,46 +192,45 @@ public class DocumentInstrCompiler extends ToPushCompiler {
 
             ga.invokeStaticMethod(ComplexContentOutputter.class, "makeComplexContentReceiver", Receiver.class, ParseOptions.class);
 
-            // assert stack : Builder SequenceReceiver
+            // assert stack : Builder ComplexContentOutputter
 
-            compiler.generateGetContext();
+//            compiler.generateGetContext();
+//
+//            // assert stack : Builder ComplexContentOutputter XPathContext
+//
+//            ga.swap();
+//
+//            // assert stack : Builder XPathContext ComplexContentOutputter
+//            ga.invokeInstanceMethod(XPathContext.class, "setReceiver", ComplexContentOutputter.class);
 
-            // assert stack : Builder SequenceReceiver XPathContext
-
-            ga.swap();
-
-            // assert stack : Builder XPathContext SequenceReceiver
-            ga.invokeInstanceMethod(XPathContext.class, "setReceiver", Receiver.class);
-
-//            ga.invokeInstanceMethod(XPathContext.class, "changeOutputDestination", Receiver.class, ParseOptions.class);
             // assert stack: Builder
 
-            compiler.generateGetContext();
-            ga.invokeInstanceMethod(XPathContext.class, "getReceiver");
-            compiler.pushNewReceiverInfo(ga);
+//            compiler.generateGetContext();
+//            ga.invokeInstanceMethod(XPathContext.class, "getReceiver");
+            compiler.pushNewOutputterInfo(ga);
             // assert stack: Builder
 
 //            Receiver out = context.getReceiver();
 //            out.open();
 //            out.startDocument(0);
 
-            compiler.generateGetReceiver();
-            ga.invokeInstanceMethod(Receiver.class, "open");
-            compiler.generateGetReceiver();
-            ga.push(0);
-            ga.invokeInstanceMethod(Receiver.class, "startDocument", Integer.TYPE);
+            compiler.generateGetOutputter();
+            ga.invokeInstanceMethod(Outputter.class, "open");
+            compiler.generateGetOutputter();
+            ga.push(ReceiverOption.NONE);
+            ga.invokeInstanceMethod(Outputter.class, "startDocument", Integer.TYPE);
 //
 //            content.process(context);
             compiler.compileToPush(instr.getContentExpression());
 //
 //            out.endDocument();
 //            out.close();
-            compiler.generateGetReceiver();
-            ga.invokeInstanceMethod(Receiver.class, "endDocument");
-            compiler.generateGetReceiver();
-            ga.invokeInstanceMethod(Receiver.class, "close");
+            compiler.generateGetOutputter();
+            ga.invokeInstanceMethod(Outputter.class, "endDocument");
+            compiler.generateGetOutputter();
+            ga.invokeInstanceMethod(Outputter.class, "close");
 
-            compiler.popReceiverInfo();
+            compiler.popOutputterInfo();
 //            context.setReceiver(saved);
 
             // assert stack: Builder 
@@ -277,23 +278,24 @@ public class DocumentInstrCompiler extends ToPushCompiler {
             compiler.generateGetContext();
             ga.invokeInstanceMethod(XPathContext.class, "getController");
             ga.invokeInstanceMethod(Controller.class, "allocateSequenceOutputter");
-            int seqReceiverVar = methodInfo.allocateLocal(SequenceOutputter.class);
-            ga.storeLocal(seqReceiverVar);
-            ga.loadLocal(seqReceiverVar);
-            ga.invokeInstanceMethod(SequenceOutputter.class, "getPipelineConfiguration");
-            ga.push(documentInstr.getPackageData().getHostLanguage());
-            ga.invokeInstanceMethod(PipelineConfiguration.class, "setHostLanguage", Integer.TYPE);
-            ga.loadLocal(seqReceiverVar);
-            compiler.pushNewReceiverInfo(ga);
+            int seqCollectorVar = methodInfo.allocateLocal(SequenceCollector.class);
+            ga.storeLocal(seqCollectorVar);
+            ga.loadLocal(seqCollectorVar);
+            ga.invokeInstanceMethod(SequenceCollector.class, "getPipelineConfiguration");
+            allocateStatic(compiler, documentInstr.getPackageData().getHostLanguage());
+            ga.invokeInstanceMethod(PipelineConfiguration.class, "setHostLanguage", HostLanguage.class);
+            ga.loadLocal(seqCollectorVar);
+            compiler.pushNewOutputterInfo(ga);
             compileToPush(compiler, documentInstr.getContentExpression());
-            compiler.popReceiverInfo();
-            ga.loadLocal(seqReceiverVar);
-            ga.invokeInstanceMethod(SequenceOutputter.class, "close");
-            ga.invokeInstanceMethod(SequenceOutputter.class, "iterate");
+            compiler.popOutputterInfo();
+            ga.loadLocal(seqCollectorVar);
+            ga.invokeInstanceMethod(SequenceCollector.class, "close");
+            ga.loadLocal(seqCollectorVar);
+            ga.invokeInstanceMethod(SequenceCollector.class, "iterate");
         }
 
     }
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

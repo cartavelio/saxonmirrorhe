@@ -4,6 +4,7 @@ import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.type.MissingComponentException;
 import net.sf.saxon.type.SchemaComponent;
+import net.sf.saxon.type.SchemaException;
 
 /**
  * A reference to a named schema group within the content model of a complex type
@@ -67,6 +68,7 @@ public class SimpleComponentReference extends SchemaStructure implements Compone
      * Determine whether this reference has been resolved
      */
 
+    @Override
     public boolean isResolved() {
         return target != null;
     }
@@ -75,6 +77,7 @@ public class SimpleComponentReference extends SchemaStructure implements Compone
         this.targetComponentName = name;
     }
 
+    @Override
     public StructuredQName getTargetComponentName() {
         return targetComponentName;
     }
@@ -92,6 +95,7 @@ public class SimpleComponentReference extends SchemaStructure implements Compone
      * Get the symbol space of the target of this reference
      */
 
+    @Override
     public int getSymbolSpace() {
         return symbolSpace;
     }
@@ -104,6 +108,7 @@ public class SimpleComponentReference extends SchemaStructure implements Compone
      *                                      this is an unchecked exception.
      */
 
+    @Override
     public SchemaComponent getTarget() throws MissingComponentException {
         if (target == null) {
             throw new MissingComponentExceptionImpl(this);
@@ -125,7 +130,8 @@ public class SimpleComponentReference extends SchemaStructure implements Compone
      * No error results if the reference cannot be resolved.
      */
 
-    public void tryToResolve(SchemaCompiler compiler) {
+    @Override
+    public void tryToResolve(SchemaCompiler compiler, boolean fatal) throws SchemaException {
         if (!dangling) {
             if (target == null) {
                 tryToResolve(compiler.getPreparedSchema());
@@ -158,9 +164,10 @@ public class SimpleComponentReference extends SchemaStructure implements Compone
      * @return true if the target of this component reference is known to be absent, and if a warning has
      * been issued to this effect
      */
+    @Override
     public boolean isDangling() {
         return dangling;
     }
 }
 
-// Copyright (c) 2011-2015 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

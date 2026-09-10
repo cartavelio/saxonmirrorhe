@@ -8,10 +8,7 @@ import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
-import net.sf.saxon.type.AnyFunctionType;
-import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.ObjectValue;
@@ -53,10 +50,10 @@ public class SingletonAtomizerCompiler extends ToItemCompiler {
 
             boolean allowEmpty = ((SingletonAtomizer) expression).isAllowEmpty();
 
-            boolean maybeNode = th.relationship(baseType, AnyNodeTest.getInstance()) != TypeHierarchy.DISJOINT;
-            boolean maybeAtomic = th.relationship(baseType, BuiltInAtomicType.ANY_ATOMIC) != TypeHierarchy.DISJOINT;
-            boolean maybeFunction = th.relationship(baseType, AnyFunctionType.getInstance()) != TypeHierarchy.DISJOINT;
-            boolean maybeExternal = th.relationship(baseType, config.getJavaExternalObjectType(Object.class)) != TypeHierarchy.DISJOINT;
+            boolean maybeNode = th.relationship(baseType, AnyNodeTest.getInstance()) != Affinity.DISJOINT;
+            boolean maybeAtomic = th.relationship(baseType, BuiltInAtomicType.ANY_ATOMIC) != Affinity.DISJOINT;
+            boolean maybeFunction = th.relationship(baseType, AnyFunctionType.getInstance()) != Affinity.DISJOINT;
+            boolean maybeExternal = th.relationship(baseType, config.getJavaExternalObjectType(Object.class)) != Affinity.DISJOINT;
 
             boolean alwaysNode = th.isSubType(baseType, AnyNodeTest.getInstance());
             boolean alwaysAtomic = th.isSubType(baseType, BuiltInAtomicType.ANY_ATOMIC);
@@ -222,9 +219,9 @@ public class SingletonAtomizerCompiler extends ToItemCompiler {
 
         boolean allowEmpty = ((SingletonAtomizer) expression).isAllowEmpty();
 
-        boolean maybeNode = th.relationship(baseType, AnyNodeTest.getInstance()) != TypeHierarchy.DISJOINT;
+        boolean maybeNode = th.relationship(baseType, AnyNodeTest.getInstance()) != Affinity.DISJOINT;
         boolean maybeTypedNode = maybeNode && expression.getPackageData().isSchemaAware();
-        boolean maybeArray = th.relationship(baseType, ArrayItemType.getInstance()) != TypeHierarchy.DISJOINT;
+        boolean maybeArray = th.relationship(baseType, ArrayItemType.getInstance()) != Affinity.DISJOINT;
 
         LabelInfo done = methodInfo.newLabel("doneAtomizer");
         LabelInfo isEmpty = methodInfo.newLabel("isEmpty");
@@ -383,4 +380,4 @@ public class SingletonAtomizerCompiler extends ToItemCompiler {
     }
 }
 
-//Copyright (c) 2011-2014 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

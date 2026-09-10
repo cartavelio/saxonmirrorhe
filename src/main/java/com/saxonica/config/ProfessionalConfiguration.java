@@ -4,16 +4,15 @@ package com.saxonica.config;
 import com.saxonica.config.pe.ConfigurationReaderPE;
 import com.saxonica.config.pe.DynamicLoaderPE;
 import com.saxonica.config.pe.StyleNodeFactoryPE;
-import com.saxonica.expr.*;
+import com.saxonica.expr.ObjectLookupExpression;
+import com.saxonica.expr.SaxonSyntaxExtension;
+import com.saxonica.expr.StaticQueryContextPE;
+import com.saxonica.expr.XQueryParserExtensionPE;
 import com.saxonica.functions.extfn.EXPathFileFunctionSet;
 import com.saxonica.functions.extfn.ObjectMap;
 import com.saxonica.functions.extfn.VendorFunctionSetPE;
-import com.saxonica.functions.hof.FunctionSequenceCoercer;
-import com.saxonica.functions.hof.TypeHierarchyPE;
-import com.saxonica.functions.registry.*;
-import com.saxonica.ptree.PTreeSource;
+import com.saxonica.functions.registry.XQUpdate10FunctionSet;
 import com.saxonica.serialize.SerializerFactoryPE;
-import com.saxonica.trans.EvaluateInstr;
 import com.saxonica.trans.ModePE;
 import com.saxonica.trans.PackageLoaderPE;
 import com.saxonica.xsltextn.ExtensionElementFactory;
@@ -25,13 +24,11 @@ import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.PackageData;
-import net.sf.saxon.expr.instruct.UserFunction;
-import net.sf.saxon.expr.instruct.WithParam;
-import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.MathFunctionSet;
+import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.*;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.FeatureKeys;
@@ -48,16 +45,12 @@ import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.query.XQueryParser;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.style.Compilation;
-import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.style.StyleNodeFactory;
-import net.sf.saxon.style.XSLEvaluate;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.type.JavaExternalObjectType;
-import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.ObjectValue;
-import net.sf.saxon.value.SequenceType;
 
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
@@ -141,6 +134,7 @@ public class ProfessionalConfiguration extends Configuration {
         declareBuiltInExtensionFunctions();
         setSerializerFactory(new SerializerFactoryPE(this));
         setStaticQueryContextFactory(new StaticQueryContextFactory() {
+            @Override
             public StaticQueryContext newStaticQueryContext(Configuration config, boolean copyFromDefault) {
                 return new StaticQueryContextPE(ProfessionalConfiguration.this, copyFromDefault);
             }
@@ -148,6 +142,7 @@ public class ProfessionalConfiguration extends Configuration {
         internalSetBooleanProperty(Feature.DISABLE_XSL_EVALUATE, false);
     }
 
+    @Override
     protected ConfigurationReader makeConfigurationReader() {
         return new ConfigurationReaderPE();
     }
@@ -185,10 +180,23 @@ public class ProfessionalConfiguration extends Configuration {
         }
     }
 
+//#if DOTNET==true
+    /**
+     * Declare a mapping from a specific namespace URI to a .NET class
+     * @param uri - the namespace URI of the function name
+     * @param type - the .NET class that implements the functions in this namespace
+     */
+    @Override
+    public void bindExtensions(String uri , cli.System.Type type) {
+        ((DotNetExtensionLibrary)getExtensionBinder("clitype")).declareDotNetType(uri, type);
+    }
+//#endif
+
     /**
      * Get the edition code identifying this configuration: "HE", "PE" or "EE"
      */
 
+    @Override
     public String getEditionCode() {
         return "PE";
     }
@@ -202,16 +210,10 @@ public class ProfessionalConfiguration extends Configuration {
     @Override
     public TypeHierarchy getTypeHierarchy() {
         if (typeHierarchy == null) {
-            typeHierarchy = new TypeHierarchyPE(this);
+            typeHierarchy = new TypeHierarchy(this);
         }
         return typeHierarchy;
     }
-
-//#if DOTNET==true
-    /*public void bindExtensions(String uri , cli.System.Type type) {
-        ((DotNetExtensionLibrary)getExtensionBinder("clitype")).declareDotNetType(uri, type);
-    }  */
-//#endif
 
     /**
      * Make a TypeAliasManager appropriate to the type of Configuration
@@ -250,6 +252,7 @@ public class ProfessionalConfiguration extends Configuration {
      *                                  a valid value for the named property
      */
 
+    @Override
     @SuppressWarnings("unchecked")
     public void setConfigurationProperty(String name, Object value) {
         if (name.equals("http://saxonica.com/oem-data")) {
@@ -266,6 +269,7 @@ public class ProfessionalConfiguration extends Configuration {
         }
     }
 
+    @Override
     public <T> void setConfigurationProperty(Feature<T> feature, T value) {
         if (feature == Feature.ALLOW_OLD_JAVA_URI_FORMAT) {
             internalSetBooleanProperty(Feature.ALLOW_OLD_JAVA_URI_FORMAT, value);
@@ -310,6 +314,7 @@ public class ProfessionalConfiguration extends Configuration {
      * @param other another Configuration, whose license information will be imported into this Configuration.
      */
 
+    @Override
     public void importLicenseDetails(Configuration other) {
         if (other instanceof ProfessionalConfiguration) {
             ProfessionalConfiguration pc = (ProfessionalConfiguration)other;
@@ -349,6 +354,7 @@ public class ProfessionalConfiguration extends Configuration {
      *          if the feature is not licensed
      */
 
+    @Override
     public void checkLicensedFeature(int feature, String name, int localLicenseId) throws LicenseException {
         if (feature != LicenseFeature.PROFESSIONAL_EDITION) {
             throw new LicenseException("Requested feature (" + name + ") requires Saxon-EE, " +
@@ -394,6 +400,7 @@ public class ProfessionalConfiguration extends Configuration {
         licenseFound = false;
     }
 
+    @Override
     public boolean isFeatureAllowedBySecondaryLicense(int localLicenseId, int feature) {
         return verifier.isFeatureAllowedBySecondaryLicense(localLicenseId, feature);
     }
@@ -416,6 +423,7 @@ public class ProfessionalConfiguration extends Configuration {
      * @return true if the feature is available for use.
      */
 
+    @Override
     public final boolean isLicensedFeature(int feature) throws LicenseException {
         if (licenseNotFound) {
             return false;
@@ -467,6 +475,7 @@ public class ProfessionalConfiguration extends Configuration {
         if (System.currentTimeMillis() % 100 == 42 && "yes".equals(verifier.getFeature("Evaluation", this))) {
             SerializerFactoryPE sf = new SerializerFactoryPE(this) {
 
+                @Override
                 public Receiver getReceiver(Result result, SerializationProperties params, PipelineConfiguration pipe) throws XPathException {
                     Receiver r = super.getReceiver(result, params, pipe);
                     if (r instanceof EvaluationNuisance) {
@@ -534,10 +543,11 @@ public class ProfessionalConfiguration extends Configuration {
      * Display a message about the license status. Used from command-line tools only.
      */
 
+    @Override
     public void displayLicenseMessage() {
         if (licenseNotFound) {
             if (isTiming()) {
-                getStandardErrorOutput().println(
+                getLogger().warning(
                         "No license file found - running with licensable features disabled");
             }
         } else {
@@ -549,7 +559,7 @@ public class ProfessionalConfiguration extends Configuration {
                 licenseFound = false;
                 licenseNotFound = true;
                 if (err.getReason() == LicenseException.NOT_FOUND) {
-                    getStandardErrorOutput().println(
+                    getLogger().warning(
                             "No license file found - running with licensable features disabled");
                     //new NullPointerException().printStackTrace();
                 } else {
@@ -568,6 +578,7 @@ public class ProfessionalConfiguration extends Configuration {
      * @param compilation the XSLT compilation object
      */
 
+    @Override
     public StyleNodeFactory makeStyleNodeFactory(Compilation compilation) {
         PackageData pack = compilation.getPackageData();
         if (pack != null) {
@@ -578,27 +589,6 @@ public class ProfessionalConfiguration extends Configuration {
             }
         }
         return new StyleNodeFactoryPE(this, compilation);
-    }
-
-    /**
-     * Make an instruction to implement xsl:evaluate
-     */
-
-    public Expression makeEvaluateInstruction(XSLEvaluate source, ComponentDeclaration decl) throws XPathException {
-        Expression xpath = source.getTargetExpression();
-        SequenceType requiredType = source.getRequiredType();
-        Expression contextItem = source.getContextItemExpression();
-        Expression baseUri = source.getBaseUriExpression();
-        Expression namespaceContext = source.getNamespaceContextExpression();
-        Expression schemaAware = source.getSchemaAwareExpression();
-        Expression withParams = source.getWithParamsExpression();
-        EvaluateInstr inst = new EvaluateInstr(xpath, requiredType, contextItem, baseUri, namespaceContext, schemaAware);
-        WithParam[] params = source.getWithParamInstructions(inst, source.getCompilation(), decl, false);
-        inst.setActualParams(params);
-        inst.setDynamicParams(withParams);
-        inst.setDefaultXPathNamespace(source.getDefaultXPathNamespace());
-        inst.setOptionsExpression(source.getOptionsExpression());
-        return inst;
     }
 
     /**
@@ -624,7 +614,7 @@ public class ProfessionalConfiguration extends Configuration {
         if ("XQ".equals(language)) {
             if (languageVersion == 31 || languageVersion == 30 || languageVersion == 10) {
                 XQueryParser parser = new XQueryParser();
-                parser.setLanguage(XPathParser.XQUERY, 31);
+                parser.setLanguage(XPathParser.ParsedLanguage.XQUERY, 31);
                 if (isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
                     parser.setParserExtension(new XQueryParserExtensionPE());
                 }
@@ -635,13 +625,13 @@ public class ProfessionalConfiguration extends Configuration {
         } else if ("XP".equals(language)) {
             XPathParser parser = super.newExpressionParser(language, updating, languageVersion);
             if (languageVersion > 20 && isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
-                parser.setParserExtension(new HofParserExtension());
+                parser.setParserExtension(new SaxonSyntaxExtension());
             }
             return parser;
         } else if ("PATTERN".equals(language)) {
             PatternParser30 parser = new PatternParser30();
             if (isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
-                parser.setParserExtension(new HofParserExtension());
+                parser.setParserExtension(new SaxonSyntaxExtension());
             }
             return parser;
         } else {
@@ -650,54 +640,8 @@ public class ProfessionalConfiguration extends Configuration {
     }
 
 
-    /**
-     * Generate a function sequence coercer, that is, an expression which converts a sequence of function
-     * items to a sequence of function items satisfying a given required type; the coerced functions call the
-     * original function with arguments converted as necessary, or fail if conversion is not possible
-     *
-     * @param type the required function type
-     * @param exp  the expression that delivers a sequence of function items
-     * @param role diagnostic information
-     * @return an expression that converts the supplied sequence of functions to the required function type
-     */
 
-    public Expression makeFunctionSequenceCoercer(SpecificFunctionType type, Expression exp,
-                                                  RoleDiagnostic role) {
-        return new FunctionSequenceCoercer(exp, type, role);
-    }
-
-    public BuiltInFunctionSet getXSLT30FunctionSet() {
-        if (isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
-            return XSLT30HOFunctionSet.getInstance();
-        } else {
-            return XSLT30FunctionSet.getInstance();
-        }
-    }
-
-    public BuiltInFunctionSet getUseWhenFunctionSet() {
-        if (isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
-            return UseWhen30HOFunctionSet.getInstance();
-        } else {
-            return UseWhen30FunctionSet.getInstance();
-        }
-    }
-
-    public BuiltInFunctionSet getXPath30FunctionSet() {
-        if (isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
-            return XPath30HOFunctionSet.getInstance();
-        } else {
-            return XPath30FunctionSet.getInstance();
-        }
-    }
-
-    public BuiltInFunctionSet getXPath31FunctionSet() {
-        if (isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
-            return XPath31HOFunctionSet.getInstance();
-        } else {
-            return XPath31FunctionSet.getInstance();
-        }
-    }
-
+    @Override
     public BuiltInFunctionSet getXQueryUpdateFunctionSet() {
         return XQUpdate10FunctionSet.getInstance();
     }
@@ -757,10 +701,25 @@ public class ProfessionalConfiguration extends Configuration {
     }
 
     /**
+     * Instantiate a Saxon extension function. This generally requires Saxon-PE or higher,
+     * so it will fail with this Configuration
+     *
+     * @param localName the local name of the function in the Saxon namespace
+     * @param arity     the function arity
+     */
+
+    @Override
+    public SystemFunction bindSaxonExtensionFunction(String localName, int arity) throws XPathException {
+        checkLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION, "saxon:" + localName + "#" + arity, -1);
+        return getVendorFunctionSet().makeFunction(localName, arity);
+    }
+
+    /**
      * Add the registered extension binders to a function library.
      * This method is intended primarily for internal use
      */
 
+    @Override
     public void addExtensionBinders(FunctionLibraryList list) {
         if (getBooleanProperty(Feature.ALLOW_EXTERNAL_FUNCTIONS) && extensionBinders != null) {
             for (FunctionLibrary functionLibrary : extensionBinders.values()) {
@@ -778,34 +737,28 @@ public class ProfessionalConfiguration extends Configuration {
      * @param arity the arity of the required function
      * @return the requested function, or null if there is no such function. Note that some functions
      * (those with particular context dependencies) may be unsuitable for dynamic calling.
-     * @throws XPathException if dynamic function calls are not permitted by this Saxon Configuration
      */
 
-    public Function getSystemFunction(StructuredQName name, int arity) throws XPathException {
-        if (isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
-            try {
-                if (staticContextForSystemFunctions == null) {
-                    staticContextForSystemFunctions = new IndependentContext(this);
-                }
-                FunctionLibraryList lib = new FunctionLibraryList();
-                lib.addFunctionLibrary(XPath31FunctionSet.getInstance());
-                lib.addFunctionLibrary(getBuiltInExtensionLibraryList());
-                lib.addFunctionLibrary(new ConstructorFunctionLibrary(this));
-                lib.addFunctionLibrary(getIntegratedFunctionLibrary());
-                lib.addFunctionLibrary(getExtensionBinder("java"));
-                SymbolicName.F symbolicName = new SymbolicName.F(name, arity);
-                return lib.getFunctionItem(symbolicName, staticContextForSystemFunctions);
-            } catch (XPathException e) {
-                return null;
+    @Override
+    public Function getSystemFunction(StructuredQName name, int arity) {
+        try {
+            if (staticContextForSystemFunctions == null) {
+                staticContextForSystemFunctions = new IndependentContext(this);
             }
-        } else {
-            throw new XPathException("Dynamic function calls require a licensed Saxon Configuration");
+            FunctionLibraryList lib = new FunctionLibraryList();
+            lib.addFunctionLibrary(XPath31FunctionSet.getInstance());
+            lib.addFunctionLibrary(getBuiltInExtensionLibraryList());
+            lib.addFunctionLibrary(new ConstructorFunctionLibrary(this));
+            lib.addFunctionLibrary(getIntegratedFunctionLibrary());
+            lib.addFunctionLibrary(getExtensionBinder("java"));
+            SymbolicName.F symbolicName = new SymbolicName.F(name, arity);
+            return lib.getFunctionItem(symbolicName, staticContextForSystemFunctions);
+        } catch (XPathException e) {
+            return null;
         }
     }
 
-    private IndependentContext staticContextForSystemFunctions;
-
-
+    @Override
     public FunctionLibraryList getBuiltInExtensionLibraryList() {
         if (!isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
             return super.getBuiltInExtensionLibraryList();
@@ -831,24 +784,6 @@ public class ProfessionalConfiguration extends Configuration {
     public BuiltInFunctionSet getVendorFunctionSet() {
         return vendorFunctionSet;
     }
-
-    /**
-     * Make a UserFunction object.
-     * This method is for internal use.
-     *
-     * @param memoFunction true if the function is to be a memo function, This option is ignored
-     *                     in Saxon-HE.
-     * @param streamability the declared streamability of the function
-     */
-
-    public UserFunction newUserFunction(boolean memoFunction, FunctionStreamability streamability) {
-        if (memoFunction) {
-            return new MemoFunction();
-        } else {
-            return new UserFunction();
-        }
-    }
-
 
     /**
      * Declare built-in extension functions
@@ -929,6 +864,7 @@ public class ProfessionalConfiguration extends Configuration {
      * @return true if the extension element is available
      */
 
+    @Override
     public boolean isExtensionElementAvailable(StructuredQName qName) {
         ExtensionElementFactory eef = getExtensionElementFactory(qName.getURI());
         return eef != null && eef.getExtensionClass(qName.getLocalPart()) != null;
@@ -941,6 +877,7 @@ public class ProfessionalConfiguration extends Configuration {
      * @return the corresponding JavaExternalObjectType
      */
 
+    @Override
     public synchronized JavaExternalObjectType getJavaExternalObjectType(Class theClass) {
         JavaExternalObjectType jeot = externalObjectTypeCache.get(theClass);
         if (jeot == null) {
@@ -964,6 +901,7 @@ public class ProfessionalConfiguration extends Configuration {
      * to the extent that these methods have unique names.
      */
 
+    @Override
     public Map<String, Function> makeMethodMap(Class javaClass, String required) {
         return ObjectMap.makeMethodMap(this, javaClass, required);
     }
@@ -979,11 +917,23 @@ public class ProfessionalConfiguration extends Configuration {
      * available in the object, to the extent that they have unique names.
      */
 
+    @Override
     public MapItem externalObjectAsMap(ObjectValue value, String required) {
         return ObjectMap.toMap(this, value, required);
     }
 
-    public Expression makeObjectLookupExpression(Expression lhs, Expression rhs) {
+    /**
+     * Make an object lookup expression: supports the construct X?Y where X is an external Java object.
+     * Requires Saxon-PE or higher
+     *
+     * @param lhs the left-hand operand
+     * @param rhs the right-hand operand
+     * @return the constructed expression
+     * @throws XPathException if anything goes wrong
+     */
+
+    @Override
+    public Expression makeObjectLookupExpression(Expression lhs, Expression rhs) throws XPathException {
         return new ObjectLookupExpression(lhs, rhs);
     }
 
@@ -1004,14 +954,11 @@ public class ProfessionalConfiguration extends Configuration {
      * @throws XPathException if the Source object is recognized but cannot be processed
      */
 
+    @Override
     public Source resolveSource(Source source, Configuration config) throws XPathException {
         Source s = super.resolveSource(source, config);
         if (s != null) {
             return s;
-        }
-        if (source instanceof PTreeSource) {
-            checkLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION, "PTree", -1);
-            return ((PTreeSource) source).load(this).getRootNode();
         }
         if (source instanceof PullProvider) {
             checkLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION, "pull processing", -1);
@@ -1026,10 +973,11 @@ public class ProfessionalConfiguration extends Configuration {
      * @param compilerInfo  information on the compiler, that can alter rule optimization
      * @return  an instantiated Mode
      */
+    @Override
     public SimpleMode makeMode(StructuredQName modeName, CompilerInfo compilerInfo) {
         return new ModePE(modeName);
     }
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

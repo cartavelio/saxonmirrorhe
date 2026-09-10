@@ -22,6 +22,7 @@ public class TimestampFn extends SystemFunction {
      * subtype {@code xs:dateTimeStamp}
      */
 
+    @Override
     public DateTimeValue call(XPathContext context, Sequence[] arguments) {
         return DateTimeValue.now();
     }
@@ -29,4 +30,4 @@ public class TimestampFn extends SystemFunction {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

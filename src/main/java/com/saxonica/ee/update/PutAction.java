@@ -1,6 +1,7 @@
 package com.saxonica.ee.update;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.om.MutableNodeInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.query.QueryResult;
 import net.sf.saxon.trans.XPathException;
@@ -34,7 +35,8 @@ public class PutAction extends PendingUpdateAction {
      *          if any error occurs applying the update
      */
 
-    public void apply(XPathContext context, Set affectedRootSet) throws XPathException {
+    @Override
+    public void apply(XPathContext context, Set<MutableNodeInfo> affectedRootSet) throws XPathException {
         Result result = new StreamResult(outputUri);
         Properties props = context.getController().getExecutable().getPrimarySerializationProperties().getProperties();
         QueryResult.serialize(node, result, props);
@@ -47,6 +49,7 @@ public class PutAction extends PendingUpdateAction {
      *         case of a delete action, which affects multiple nodes.
      */
 
+    @Override
     public NodeInfo getTargetNode() {
         return node;
     }
@@ -59,6 +62,7 @@ public class PutAction extends PendingUpdateAction {
      *         in the specification, or 6 for a PutAction.
      */
 
+    @Override
     public int getApplyPhase() {
         return PHASE;
     }
@@ -66,4 +70,4 @@ public class PutAction extends PendingUpdateAction {
     public final static int PHASE = 6;
 }
 
-// Copyright (c) 2008 Saxonica Limited.
+// Copyright (c) 2008-2020 Saxonica Limited

@@ -1,7 +1,7 @@
 package com.saxonica.ee.stream.adjunct;
 
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
+import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.feed.ItemMappingFeed;
 import com.saxonica.ee.stream.watch.WatchManager;
 import net.sf.saxon.expr.AtomicSequenceConverter;
@@ -15,7 +15,8 @@ import net.sf.saxon.trans.XPathException;
 
 public class AtomicSequenceConverterAdjunct extends StreamingAdjunct implements FeedMaker {
 
-    public Feed makeItemFeed(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
         AtomicSequenceConverter.AtomicSequenceMappingFunction mapper =
                 new AtomicSequenceConverter.AtomicSequenceMappingFunction();
         mapper.setConverter(((AtomicSequenceConverter) getExpression()).getConverter());
@@ -23,4 +24,4 @@ public class AtomicSequenceConverterAdjunct extends StreamingAdjunct implements 
     }
 }
 
-// Copyright (c) 2010-2013 Saxonica Limited.
+// Copyright (c) 2010-2020 Saxonica Limited

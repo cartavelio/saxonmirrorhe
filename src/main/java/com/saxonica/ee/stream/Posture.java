@@ -14,6 +14,7 @@ public enum Posture implements PostureGetter {
     CRAWLING,
     ROAMING;
 
+    @Override
     public Posture getPosture() {
         return this;
     }
@@ -76,6 +77,6 @@ public enum Posture implements PostureGetter {
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 
 

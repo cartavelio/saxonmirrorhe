@@ -21,8 +21,8 @@ import javax.xml.transform.stream.StreamSource;
 public class StandardSchemaResolver implements SchemaURIResolver {
 
     private EnterpriseConfiguration config;
-    private URIResolver uriResolver;
     private static final StreamSource[] EMPTY_SOURCE_ARRAY = new StreamSource[0];
+    private URIResolver uriResolver;
 
     /**
      * Default constructor. Must be followed by a call of setConfiguration()
@@ -34,16 +34,12 @@ public class StandardSchemaResolver implements SchemaURIResolver {
     /**
      * Create a StandardSchemaResolver and set the Configuration
      *
-     * @param config the Configuration
+     * @param config the Configuration, which must be
      */
 
     public StandardSchemaResolver(EnterpriseConfiguration config) {
-        this.config = config;
-    }
-
-    public StandardSchemaResolver(EnterpriseConfiguration config, URIResolver resolver) {
-        this.config = config;
-        this.uriResolver = resolver;
+        setConfiguration(config);
+        //setURIResolver(config.getURIResolver());
     }
 
     /**
@@ -52,6 +48,7 @@ public class StandardSchemaResolver implements SchemaURIResolver {
      * @param config the Saxon Configuration
      */
 
+    @Override
     public void setConfiguration(Configuration config) {
         this.config = (EnterpriseConfiguration) config;
     }
@@ -63,6 +60,15 @@ public class StandardSchemaResolver implements SchemaURIResolver {
 
     public Configuration getConfiguration() {
         return config;
+    }
+
+    /**
+     * Set the URIResolver to be used. Defaults to the URIResolver associated with the {@link Configuration}
+     * @param resolver the URIResolver to be used
+     */
+
+    public void setURIResolver(URIResolver resolver) {
+        this.uriResolver = resolver;
     }
 
     /**
@@ -91,6 +97,7 @@ public class StandardSchemaResolver implements SchemaURIResolver {
      *          module resolver is not required.
      */
 
+    @Override
     public Source[] resolve(String targetNamespace, String baseURI, String[] locations) throws XPathException {
         if (config == null) {
             throw new NullPointerException("No configuration supplied to schema URI resolver");
@@ -112,7 +119,6 @@ public class StandardSchemaResolver implements SchemaURIResolver {
                 for (int i = 0; i < locations.length; i++) {
 
                     // Now try a JAXP URIResolver if available
-
                     if (uriResolver == null) {
                         uriResolver = config.getURIResolver();
                     }
@@ -136,4 +142,4 @@ public class StandardSchemaResolver implements SchemaURIResolver {
 }
 
 
-// Copyright (c) 2006-2012 Saxonica Limited.
+// Copyright (c) 2006-2020 Saxonica Limited

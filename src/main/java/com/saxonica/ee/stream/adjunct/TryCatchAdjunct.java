@@ -1,12 +1,11 @@
 package com.saxonica.ee.stream.adjunct;
 
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.watch.Terminator;
 import com.saxonica.ee.stream.watch.WatchManager;
-import net.sf.saxon.event.SequenceOutputter;
-import net.sf.saxon.event.SequenceReceiver;
+import net.sf.saxon.event.ComplexContentOutputter;
+import net.sf.saxon.event.SequenceCollector;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.TryCatch;
 import net.sf.saxon.expr.XPathContext;
@@ -18,49 +17,39 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
 
 /**
- * Generate streaming code for a try/catch expression
+ * Streaming code for a try/catch expression
  */
 public class TryCatchAdjunct extends TransmissionAdjunct implements FeedMaker {
 
-    public Feed makeItemFeed(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
         return new TryCatchFeed(getExpression(), out, context);
     }
 
     public static class TryCatchFeed extends ItemFeed {
 
-        private SequenceOutputter collector;
+        private ItemFeed originalResult;
         private boolean done = false;
         private boolean open = false;
 
-        public TryCatchFeed(Expression exp, Feed out, XPathContext context) {
-            super(exp, out, context);
+        TryCatchFeed(Expression exp, ItemFeed out, XPathContext context) {
+            super(new ComplexContentOutputter(new SequenceCollector(out.getPipelineConfiguration())), context, true);
+            setExpression(exp);
+            originalResult = out;
         }
 
         /**
          * Start evaluating the expression. The default implementation does nothing.
          *
-         * @param terminator
+         * @param terminator used to achieve early exit
          * @throws net.sf.saxon.trans.XPathException
          *          if a dynamic error occurs
          */
         @Override
         public void open(Terminator terminator) throws XPathException {
-            super.open(terminator);
-            collector = new SequenceOutputter(getPipelineConfiguration());
+            originalResult.open(terminator);
+            getNextOutputter().open();
             open = true;
-        }
-
-        /**
-         * Get a receiver to which start and end events for documents and elements can be
-         * written. By default this will be the same as the receiver for the result feed,
-         * because very few XSLT constructs (specifically, variables and functions) allow
-         * the results of document and element constructors to be captured for further
-         * processing. A construct that does need to process these events will intercept
-         * them by providing its own receiver, typically a SequenceOutputter.
-         */
-        @Override
-        public SequenceReceiver getReceiver() {
-            return collector;
         }
 
         /**
@@ -69,26 +58,32 @@ public class TryCatchAdjunct extends TransmissionAdjunct implements FeedMaker {
          * @param item the item to be supplied
          */
         @Override
-        public void processItem(Item<?> item) throws XPathException {
-            collector.append(item);
-            //getResult().processItem(item);
+        public void append(Item item) throws XPathException {
+            getNextOutputter().append(item);
         }
 
         /**
-         * Finish evaluating the expression. The default implementation does nothing.
+         * Finish evaluating the expression.
          *
          * @throws net.sf.saxon.trans.XPathException
          *          if a dynamic error occurs
          */
         @Override
         public void close() throws XPathException {
+            ComplexContentOutputter out = (ComplexContentOutputter)getNextOutputter();
+            SequenceCollector collector = (SequenceCollector)out.getReceiver();
             collector.close();
-            for (Item i : collector.getList()) {
-                getResult().processItem(i);
+            try {
+                for (Item i : collector.getList()) {
+                    originalResult.append(i);
+                }
+            } catch (XPathException e) {
+                dynamicError(e);
             }
-            super.close();
+            originalResult.close();
         }
 
+        @Override
         public void dynamicError(XPathException err) throws XPathException {
             if (err.isGlobalError()) {
                 err.setIsGlobalError(false);
@@ -111,8 +106,8 @@ public class TryCatchAdjunct extends TransmissionAdjunct implements FeedMaker {
                         XPathContextMajor c2 = getContext().newContext();
                         c2.setCurrentException(err);
                         SequenceIterator iter = caught.iterate(c2);
-                        processItems(iter, getResult());
-                        getResult().close();
+                        processItems(iter, originalResult);
+                        originalResult.close();
                         return;
                     }
                 }
@@ -123,4 +118,4 @@ public class TryCatchAdjunct extends TransmissionAdjunct implements FeedMaker {
     }
 }
 
-// Copyright (c) 2010-13 Saxonica Limited.
+// Copyright (c) 2010-19 Saxonica Limited

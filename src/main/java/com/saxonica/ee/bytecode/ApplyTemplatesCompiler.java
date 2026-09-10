@@ -2,12 +2,13 @@ package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.ApplyTemplates;
 import net.sf.saxon.expr.instruct.ParameterSet;
 import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.instruct.WithParam;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Mode;
 import org.objectweb.asm.Type;
@@ -97,9 +98,12 @@ public class ApplyTemplatesCompiler extends ToPushCompiler {
             ga.pushNull();
         }
         ga.loadLocal(tunnelsVar);
+        ga.pushNull(); // TODO: add separator text node
+        ga.loadArgOrLocal(methodInfo.getOutputterPosition());
         ga.loadLocal(context2Var);
         allocateStatic(compiler, apply.getLocation());
-        ga.invokeInstanceMethod(Mode.class, "applyTemplates", ParameterSet.class, ParameterSet.class, XPathContextMajor.class, Location.class);
+        ga.invokeInstanceMethod(Mode.class, "applyTemplates", ParameterSet.class, ParameterSet.class,
+                                NodeInfo.class, Outputter.class, XPathContextMajor.class, Location.class);
 
         LabelInfo applyEnd = methodInfo.newLabel("applyEnd");
         LabelInfo tailCallLoop = methodInfo.placeNewLabel("loop");
@@ -222,7 +226,7 @@ public class ApplyTemplatesCompiler extends ToPushCompiler {
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited
 
 
 

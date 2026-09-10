@@ -1,4 +1,3 @@
-// Copyright (c) 2018. Saxonica Limited. All rights reserved.
 
 package com.saxonica.js;
 
@@ -64,6 +63,7 @@ public class RunNodeJSTransform extends RunJSTransform {
 
     }
 
+    @Override
     public XdmValue deliverPrincipalResult(Object principalResult, boolean nativeResult, ScriptObjectMirror options) {
         if (nativeResult) {
             try {
@@ -80,3 +80,6 @@ public class RunNodeJSTransform extends RunJSTransform {
     }
 
 }
+
+// Copyright (c) 2018-2020 Saxonica Limited
+

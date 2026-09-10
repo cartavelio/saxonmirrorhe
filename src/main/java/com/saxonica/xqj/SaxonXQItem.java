@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -14,9 +14,10 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.dom.NodeOverNodeInfo;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.instruct.ResultDocument;
-import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.lib.SerializerFactory;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
@@ -72,11 +73,13 @@ public class SaxonXQItem extends Closable implements XQResultItem, SaxonXQItemAc
     }
 
     /*@Nullable*/
-    public Item<?> getSaxonItem() {
+    @Override
+    public Item getSaxonItem() {
         return item;
     }
 
     /*@Nullable*/
+    @Override
     public XQConnection getConnection() throws XQException {
         checkNotClosed();
         if (dataFactory instanceof XQConnection) {
@@ -86,6 +89,7 @@ public class SaxonXQItem extends Closable implements XQResultItem, SaxonXQItemAc
         }
     }
 
+    @Override
     public String getAtomicValue() throws XQException {
         checkNotClosed();
         if (item instanceof AtomicValue) {
@@ -94,6 +98,7 @@ public class SaxonXQItem extends Closable implements XQResultItem, SaxonXQItemAc
         throw new XQException("Failed to getAtomicValue: item is a node, or is closed");
     }
 
+    @Override
     public boolean getBoolean() throws XQException {
         checkNotClosed();
         if (item instanceof BooleanValue) {
@@ -102,6 +107,7 @@ public class SaxonXQItem extends Closable implements XQResultItem, SaxonXQItemAc
         throw new XQException("Failed in getBoolean: item is not a boolean, or is closed");
     }
 
+    @Override
     public byte getByte() throws XQException {
         checkNotClosed();
         if (item instanceof AtomicValue) {
@@ -135,6 +141,7 @@ public class SaxonXQItem extends Closable implements XQResultItem, SaxonXQItemAc
         throw new XQException("Value is not numeric");
     }
 
+    @Override
     public double getDouble() throws XQException {
         checkNotClosed();
         if (item instanceof DoubleValue) {
@@ -143,6 +150,7 @@ public class SaxonXQItem extends Closable implements XQResultItem, SaxonXQItemAc
         throw new XQException("Failed in getDouble: item is not a double, or is closed");
     }
 
+    @Override
     public float getFloat() throws XQException {
         checkNotClosed();
         if (item instanceof FloatValue) {
@@ -151,6 +159,7 @@ public class SaxonXQItem extends Closable implements XQResultItem, SaxonXQItemAc
         throw new XQException("Failed in getFloat: item is not a float, or is closed");
     }
 
+    @Override
     public int getInt() throws XQException {
         checkNotClosed();
         if (item instanceof AtomicValue) {
@@ -161,12 +170,13 @@ public class SaxonXQItem extends Closable implements XQResultItem, SaxonXQItemAc
     }
 
     /*@NotNull*/
+    @Override
     public XMLStreamReader getItemAsStream() throws XQException {
         // The spec (section 12.1) requires that the item be converted into a document, and we
         // then read events corresponding to this document
         checkNotClosed();
         PipelineConfiguration pipe = config.makePipelineConfiguration();
-        pipe.setHostLanguage(Configuration.XQUERY);
+        pipe.setHostLanguage(HostLanguage.XQUERY);
         if (item instanceof NodeInfo) {
             PullProvider provider;
             if (((NodeInfo) item).getNodeKind() == Type.DOCUMENT) {
@@ -207,6 +217,7 @@ public class SaxonXQItem extends Closable implements XQResultItem, SaxonXQItemAc
         }
     }
 
+    @Override
     public String getItemAsString(/*@Nullable*/ Properties props) throws XQException {
         checkNotClosed();
         if (props == null) {
@@ -241,6 +252,7 @@ public class SaxonXQItem extends Closable implements XQResultItem, SaxonXQItemAc
     }
 
     /*@NotNull*/
+    @Override
     public XQItemType getItemType() throws XQException {
         checkNotClosed();
         if (item instanceof AtomicValue) {
@@ -254,6 +266,7 @@ public class SaxonXQItem extends Closable implements XQResultItem, SaxonXQItemAc
         }
     }
 
+    @Override
     public long getLong() throws XQException {
         checkNotClosed();
         if (item instanceof AtomicValue) {
@@ -263,6 +276,7 @@ public class SaxonXQItem extends Closable implements XQResultItem, SaxonXQItemAc
         throw new XQException("Failed in getLong: item is not an atomic value, or is closed");
     }
 
+    @Override
     public Node getNode() throws XQException {
         checkNotClosed();
         if (!(item instanceof NodeInfo)) {
@@ -278,6 +292,7 @@ public class SaxonXQItem extends Closable implements XQResultItem, SaxonXQItemAc
     }
 
     /*@NotNull*/
+    @Override
     public URI getNodeUri() throws XQException {
         checkNotClosed();
         if (item instanceof NodeInfo) {
@@ -294,11 +309,13 @@ public class SaxonXQItem extends Closable implements XQResultItem, SaxonXQItemAc
         throw new XQException("Item is not a node");
     }
 
+    @Override
     public Object getObject() throws XQException {
         checkNotClosed();
         return dataFactory.getObjectConverter().toObject(this);
     }
 
+    @Override
     public short getShort() throws XQException {
         checkNotClosed();
         if (item instanceof AtomicValue) {
@@ -308,6 +325,7 @@ public class SaxonXQItem extends Closable implements XQResultItem, SaxonXQItemAc
         throw new XQException("Failed in getShort: item is not an atomic value, or is closed");
     }
 
+    @Override
     public boolean instanceOf(/*@NotNull*/ XQItemType type) throws XQException {
         try {
             checkNotClosed();
@@ -320,18 +338,21 @@ public class SaxonXQItem extends Closable implements XQResultItem, SaxonXQItemAc
         }
     }
 
+    @Override
     public void writeItem(OutputStream os, Properties props) throws XQException {
         checkNotClosed();
         checkNotNull(os);
         writeItemToResult(new StreamResult(os), props);
     }
 
+    @Override
     public void writeItem(Writer ow, Properties props) throws XQException {
         checkNotClosed();
         checkNotNull(ow);
         writeItemToResult(new StreamResult(ow), props);
     }
 
+    @Override
     public void writeItemToResult(Result result) throws XQException {
         checkNotClosed();
         checkNotNull(result);
@@ -349,7 +370,7 @@ public class SaxonXQItem extends Closable implements XQResultItem, SaxonXQItemAc
             SerializerFactory sf = config.getSerializerFactory();
             Receiver tr = sf.getReceiver(result, new SerializationProperties(props));
             tr.open();
-            tr.append(item, ExplicitLocation.UNKNOWN_LOCATION, ReceiverOptions.ALL_NAMESPACES);
+            tr.append(item, Loc.NONE, ReceiverOption.ALL_NAMESPACES);
             tr.close();
         } catch (XPathException e) {
             XQException xqe = new XQException(e.getMessage());
@@ -358,6 +379,7 @@ public class SaxonXQItem extends Closable implements XQResultItem, SaxonXQItemAc
         }
     }
 
+    @Override
     public void writeItemToSAX(ContentHandler saxHandler) throws XQException {
         checkNotClosed();
         checkNotNull(saxHandler);

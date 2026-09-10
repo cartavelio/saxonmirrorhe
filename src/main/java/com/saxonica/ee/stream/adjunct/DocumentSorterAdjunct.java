@@ -4,7 +4,6 @@ import com.saxonica.ee.stream.Posture;
 import com.saxonica.ee.stream.PostureAndSweep;
 import com.saxonica.ee.stream.Streamability;
 import com.saxonica.ee.stream.Sweep;
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.om.FleetingNode;
@@ -13,10 +12,10 @@ import com.saxonica.ee.stream.watch.WatchMaker;
 import com.saxonica.ee.stream.watch.WatchManager;
 import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.expr.sort.DocumentOrderIterator;
 import net.sf.saxon.expr.sort.DocumentSorter;
 import net.sf.saxon.expr.sort.GlobalOrderComparer;
@@ -24,6 +23,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.util.Navigator;
@@ -104,6 +104,7 @@ public class DocumentSorterAdjunct extends TransmissionAdjunct implements FeedMa
      * @return the equivalent pattern if conversion succeeds; otherwise null
      */
 
+    @Override
     public Pattern toStreamingPattern(Configuration config) {
         return Streamability.toStreamingPattern(((DocumentSorter) getExpression()).getBaseExpression(), config);
     }
@@ -119,7 +120,8 @@ public class DocumentSorterAdjunct extends TransmissionAdjunct implements FeedMa
         }
     }
 
-    public Feed makeItemFeed(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
         if (Streamability.getPosture(((DocumentSorter) getExpression()).getBaseExpression()) == Posture.STRIDING) {
             return new MixedPostureSorter(out, context);
         } else {
@@ -128,6 +130,7 @@ public class DocumentSorterAdjunct extends TransmissionAdjunct implements FeedMa
     }
 
 
+    @Override
     public FeedMaker getFeedMaker(int arg) throws XPathException {
         return arg == 0 ? this : super.getFeedMaker(arg);
     }
@@ -145,12 +148,12 @@ public class DocumentSorterAdjunct extends TransmissionAdjunct implements FeedMa
         public IntHashMap<NodeInfo> mostRecentAtDepth = new IntHashMap<>();
         public Stack<NodeInfo> stack = new Stack<>();
 
-        public AncestorArrangingFeed(Feed out, XPathContext context) {
+        public AncestorArrangingFeed(ItemFeed out, XPathContext context) {
             super(out, context);
         }
 
         @Override
-        public void processItem(Item<?> item) throws XPathException {
+        public void append(Item item) throws XPathException {
             NodeInfo node = (NodeInfo)item;
             if (!stack.isEmpty() && Navigator.isAncestorOrSelf(node, stack.peek())) {
                 // this node is an ancestor of the previous node; add it to the stack
@@ -172,13 +175,13 @@ public class DocumentSorterAdjunct extends TransmissionAdjunct implements FeedMa
         }
 
         private void flush() throws XPathException {
-            Feed out = getResult();
+            Outputter out = getNextOutputter();
             while (!stack.isEmpty()) {
                 NodeInfo n = stack.pop();
                 int depth = depthOfNode(n);
                 NodeInfo prev = mostRecentAtDepth.get(depth);
                 if (prev == null || prev != n) {
-                    out.processItem(n);
+                    out.append(n);
                     mostRecentAtDepth.put(depth, n);
                 }
             }
@@ -204,9 +207,9 @@ public class DocumentSorterAdjunct extends TransmissionAdjunct implements FeedMa
 
     private static class MixedPostureSorter extends ItemFeed {
 
-        public List<Item<?>> groundedItems = new ArrayList<>();
+        public List<Item> groundedItems = new ArrayList<>();
 
-        public MixedPostureSorter(Feed out, XPathContext context) {
+        public MixedPostureSorter(ItemFeed out, XPathContext context) {
             super(out, context);
         }
 
@@ -216,9 +219,9 @@ public class DocumentSorterAdjunct extends TransmissionAdjunct implements FeedMa
         }
 
         @Override
-        public void processItem(Item<?> item) throws XPathException {
+        public void append(Item item) throws XPathException {
             if (item instanceof FleetingNode) {
-                getResult().processItem(item);
+                getNextOutputter().append(item);
             } else {
                 groundedItems.add(item);
             }
@@ -231,9 +234,10 @@ public class DocumentSorterAdjunct extends TransmissionAdjunct implements FeedMa
 
         @Override
         public void close() throws XPathException {
-            SequenceIterator<Item<?>> grounded = new ListIterator<>(groundedItems);
-            SequenceIterator<NodeInfo> sorted = new DocumentOrderIterator(grounded, GlobalOrderComparer.getInstance());
-            sorted.forEachOrFail(it -> getResult().processItem(it));
+            SequenceIterator grounded = new ListIterator<>(groundedItems);
+            SequenceIterator sorted = new DocumentOrderIterator(grounded, GlobalOrderComparer.getInstance());
+            Outputter out = getNextOutputter();
+            sorted.forEachOrFail(out::append);
             super.close();
         }
 
@@ -241,4 +245,4 @@ public class DocumentSorterAdjunct extends TransmissionAdjunct implements FeedMa
 
 }
 
-// Copyright (c) 2013-2016 Saxonica Limited.
+// Copyright (c) 2013-2020 Saxonica Limited

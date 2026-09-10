@@ -14,6 +14,7 @@ import net.sf.saxon.value.ObjectValue;
 
 public class ExpressionFn extends Evaluate {
 
+    @Override
     public ExternalObject<PreparedExpression> call(XPathContext context, Sequence[] arguments) throws XPathException {
         XPathContextMajor c2 = context.newCleanContext();
         String exprText = arguments[0].head().getStringValue();
@@ -27,4 +28,4 @@ public class ExpressionFn extends Evaluate {
 
 }
 
-// Copyright (c) 2009-2016 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

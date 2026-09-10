@@ -21,6 +21,7 @@ public class SlotManagerEE extends SlotManager {
      * @param logger  the destination for the output
      */
 
+    @Override
     public void showStackFrame(XPathContext context, Logger logger) {
         try {
             if (context != null) {
@@ -49,7 +50,7 @@ public class SlotManagerEE extends SlotManager {
                 }
                 StackFrame stack = context.getStackFrame();
                 SlotManager map = stack.getStackFrameMap();
-                Sequence<?>[] values = stack.getStackFrameValues();
+                Sequence[] values = stack.getStackFrameValues();
                 if (map.getNumberOfVariables() > 0) {
                     logger.info("     Local variables");
                     boolean foundOne = false;
@@ -87,4 +88,6 @@ public class SlotManagerEE extends SlotManager {
 
 
 }
+
+// Copyright (c) 2020 Saxonica Limited
 

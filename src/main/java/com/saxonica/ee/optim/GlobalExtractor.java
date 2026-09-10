@@ -140,7 +140,7 @@ public class GlobalExtractor {
         gvd.setLineNumber(expr.getLocation().getLineNumber());
         gvd.setRequiredType(SequenceType.makeSequenceType(
                 expr.getItemType(), expr.getCardinality()));
-        gvd.setSelectExpression(expr);
+        gvd.setBody(expr);
         expr.setRetainedStaticContext(rsc);
         StructuredQName varName = new StructuredQName(
                 "vv", NamespaceConstant.SAXON_GENERATED_VARIABLE, "gg" + gvd.hashCode());
@@ -172,4 +172,4 @@ public class GlobalExtractor {
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited

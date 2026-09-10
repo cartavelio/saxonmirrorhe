@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -52,6 +52,7 @@ public class Xslt30TestSuiteDriverEE extends Xslt30TestSuiteDriverPE {
      * @param s The name of the tree model required
      * @return The tree model - null if model requested is unrecognised
      */
+    @Override
     protected TreeModel getTreeModel(String s) {
         if (s.equalsIgnoreCase("DOMINO")) {
             return new DominoTreeModel();
@@ -83,7 +84,6 @@ public class Xslt30TestSuiteDriverEE extends Xslt30TestSuiteDriverPE {
     public boolean ensureDependencySatisfied(XdmNode dependency, Environment env) {
         String type = dependency.getNodeName().getLocalName();
         String value = dependency.attribute("value");
-
         boolean inverse = "false".equals(dependency.attribute("satisfied"));
         boolean needed = !"false".equals(dependency.attribute("satisfied"));
 
@@ -99,7 +99,6 @@ public class Xslt30TestSuiteDriverEE extends Xslt30TestSuiteDriverPE {
                 return !needed;
             }
         }
-
 
         if ("feature".equals(type)) {
             if ("schema_aware".equals(value)) {
@@ -201,6 +200,7 @@ public class Xslt30TestSuiteDriverEE extends Xslt30TestSuiteDriverPE {
      * Run streamability tests
      */
 
+    @Override
     public void runStreamabilityTests(XPathCompiler xpc, XdmNode testCase) {
         try {
             String //contextPostureStr = xpc.evaluateSingle("test/posture-and-sweep/@context-posture", testCase).getStringValue();

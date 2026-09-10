@@ -21,4 +21,4 @@ public class IdentitySelector extends FieldOrSelector {
 
 }
 
-// Copyright (c) 2004 - 2018 Saxonica Limited. All Rights Reserved
+// Copyright (c) 2004-2020 Saxonica Limited

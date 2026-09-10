@@ -2,7 +2,7 @@ package com.saxonica.ee.stream.adjunct;
 
 import com.saxonica.ee.stream.Streamability;
 import com.saxonica.ee.stream.StreamingPatternMaker;
-import com.saxonica.ee.stream.feed.Feed;
+import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.watch.Trigger;
 import com.saxonica.ee.stream.watch.WatchMaker;
 import com.saxonica.ee.stream.watch.WatchManager;
@@ -27,12 +27,13 @@ public abstract class ComposingAdjunct extends StreamingAdjunct {
      * @param watchManager the watch manager
      * @param out the destination of composed items
      * @param context XPath evaluation context
-     * @return a the relevant Feed
+     * @return a the relevant ItemFeed
      */
 
-    public abstract Feed makeComposingAction(WatchManager watchManager, Feed out, XPathContext context);
+    public abstract ItemFeed makeComposingAction(WatchManager watchManager, ItemFeed out, XPathContext context);
 
     /*@Nullable*/
+    @Override
     public WatchMaker getWatchMaker(boolean forGrouping) throws XPathException {
         final Operand consumingChild = Streamability.getConsumingOperand(getExpression());
         final Expression select = consumingChild == null ? null :
@@ -43,9 +44,10 @@ public abstract class ComposingAdjunct extends StreamingAdjunct {
         final Pattern selection = StreamingPatternMaker.makeStreamingPattern(select, getConfiguration(), null);
         if (selection != null) {
             return new WatchMaker() {
-                public Trigger makeWatch(WatchManager watchManager, Feed out, XPathContext context) {
+                @Override
+                public Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context) {
                     PipelineConfiguration pipe = watchManager.getPipelineConfiguration();
-                    Feed action = makeComposingAction(watchManager, out, context);
+                    ItemFeed action = makeComposingAction(watchManager, out, context);
                     Trigger watch = new Trigger(selection, action, context);
                     watch.setPipelineConfiguration(pipe);
                     return watch;
@@ -56,8 +58,9 @@ public abstract class ComposingAdjunct extends StreamingAdjunct {
             final StreamingAdjunct adjunct = StreamingAdjunct.makeStreamingAdjunct(getConfiguration(), select);
             if (adjunct instanceof TransmissionAdjunct) {
                 return new WatchMaker() {
-                    public Trigger makeWatch(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
-                        Feed action = makeComposingAction(watchManager, out, context);
+                    @Override
+                    public Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
+                        ItemFeed action = makeComposingAction(watchManager, out, context);
                         return ((TransmissionAdjunct)adjunct).makeTransmissionFlow(watchManager, select, action, context);
                     }
                 };
@@ -69,4 +72,4 @@ public abstract class ComposingAdjunct extends StreamingAdjunct {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

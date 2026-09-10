@@ -4,7 +4,7 @@ import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.functions.Sum;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.value.Int64Value;
@@ -45,4 +45,4 @@ public class SumCompiler extends ToItemCompiler {
 
 }
 
-//Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

@@ -11,6 +11,7 @@ import net.sf.saxon.expr.UserFunctionCall;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.oper.OperandArray;
 import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.TypeHierarchy;
 
 import java.util.ArrayList;
@@ -65,7 +66,7 @@ public class AscentFunctionCallAdjunct extends StreamingAdjunct {
 
         // Rule 6 (amended)
         TypeHierarchy th = getConfiguration().getTypeHierarchy();
-        if (th.relationship(target.getResultType().getPrimaryType(), AnyNodeTest.getInstance()) != TypeHierarchy.DISJOINT) {
+        if (th.relationship(target.getResultType().getPrimaryType(), AnyNodeTest.getInstance()) != Affinity.DISJOINT) {
             return new PostureAndSweep(Posture.CLIMBING, Sweep.MOTIONLESS);
         } else {
             return PostureAndSweep.GROUNDED_AND_MOTIONLESS;
@@ -77,4 +78,4 @@ public class AscentFunctionCallAdjunct extends StreamingAdjunct {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

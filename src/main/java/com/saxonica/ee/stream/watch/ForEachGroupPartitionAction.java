@@ -1,23 +1,22 @@
 package com.saxonica.ee.stream.watch;
 
-import com.saxonica.ee.stream.*;
+import com.saxonica.ee.stream.Inversion;
+import com.saxonica.ee.stream.ManualGroupIterator;
+import com.saxonica.ee.stream.Streamability;
+import com.saxonica.ee.stream.Sweep;
 import com.saxonica.ee.stream.adjunct.ForEachGroupAdjunct;
 import com.saxonica.ee.stream.adjunct.GroupAdjacentTester;
 import com.saxonica.ee.stream.adjunct.GroupBoundaryTester;
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FilteringFeed;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.feed.NoOpenOrCloseFeed;
 import com.saxonica.ee.stream.om.FleetingNode;
 import com.saxonica.ee.stream.om.FleetingParentNode;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.SequenceReceiver;
-import net.sf.saxon.event.SequenceWriter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.expr.instruct.ForEachGroup;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.functions.CurrentGroupCall;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
@@ -25,6 +24,7 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.AncestorQualifiedPattern;
 import net.sf.saxon.pattern.AnchorPattern;
 import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ManualIterator;
 
@@ -49,14 +49,13 @@ public class ForEachGroupPartitionAction extends ItemFeed {
     // bodyContext contains the iterator over the nodes selected by the for-each instruction,
     // and is the context in which the inner inverted expression is evaluated
     protected XPathContext bodyContext;
-    private WatchManager watchManager;
+    private final WatchManager watchManager;
     private GroupBoundaryTester boundaryTester;
-    private Feed currentGroupFeed;
-    private XPathContext populationContext;
-    private Expression action;
+    private ItemFeed currentGroupFeed;
+    private final XPathContext populationContext;
+    private final Expression action;
     private Inversion inversion;
-    private boolean actionIsConsuming;
-    private SequenceWriter sequenceWriter;
+    private final boolean actionIsConsuming;
     private boolean closed = true;
     private List<Watch> currentGroupWatches;
     public boolean feedAppliesToWholeGroup = false;
@@ -65,7 +64,7 @@ public class ForEachGroupPartitionAction extends ItemFeed {
     private Watch thisGroupWatch = null;
     private WatchManager.GroupingScope currentGroupingScope = null;
 
-    public ForEachGroupPartitionAction(WatchManager watchManager, ForEachGroup expression, Feed result, XPathContext context) {
+    public ForEachGroupPartitionAction(WatchManager watchManager, ForEachGroup expression, ItemFeed result, XPathContext context) {
         super(expression, result, context);
         this.watchManager = watchManager;
         action = expression.getActionExpression();
@@ -82,13 +81,6 @@ public class ForEachGroupPartitionAction extends ItemFeed {
     }
 
     @Override
-    public SequenceReceiver getReceiver() {
-        if (sequenceWriter == null) {
-            sequenceWriter = new StreamingSequenceWriter(getPipelineConfiguration(), this);
-        }
-        return sequenceWriter;
-    }
-
     public void open(Terminator terminator) throws XPathException {
         super.open(terminator);
         makeBodyContext();
@@ -112,9 +104,11 @@ public class ForEachGroupPartitionAction extends ItemFeed {
      * any attributes selected by the last step in the selection are ignored
      *
      * @throws XPathException if a dynamic error occurs while processing the start-element event
+     * @return a receiver that collects the contents of the selected node, or null
      */
 
     /*@Nullable*/
+    @Override
     public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
         ManualIterator popIter = (ManualIterator) populationContext.getCurrentIterator();
         popIter.setContextItem(node);
@@ -158,7 +152,7 @@ public class ForEachGroupPartitionAction extends ItemFeed {
 
             //localContext.setCurrentTemplateRule(rule);     // TODO: clear current template rule
             SequenceIterator stepIter = action.iterate(bodyContext);
-            processItems(stepIter, getResult());
+            processItems(stepIter, getNextOutputter());
         }
     }
 
@@ -169,7 +163,8 @@ public class ForEachGroupPartitionAction extends ItemFeed {
      * @param node the item that was matched.
      */
 
-    public void processItem(Item<?> node) throws XPathException {
+    @Override
+    public void append(Item node) throws XPathException {
         ManualIterator popIter = (ManualIterator) populationContext.getCurrentIterator();
         popIter.setContextItem(node);
         popIter.incrementPosition();
@@ -178,7 +173,7 @@ public class ForEachGroupPartitionAction extends ItemFeed {
             if (startNewGroup) {
                 startNewGroup(node);
             }
-            currentGroupFeed.processItem(node);
+            currentGroupFeed.append(node);
         } else {
             maybeStartNewGroup(node, startNewGroup);
         }
@@ -203,10 +198,10 @@ public class ForEachGroupPartitionAction extends ItemFeed {
             firstItemsIter.setCurrentGroupingKey(((GroupAdjacentTester) boundaryTester).getCurrentGroupingKey());
         }
         if (node instanceof FleetingNode) {
-            Feed thisFeed = new NoOpenOrCloseFeed(getResult(), bodyContext);
+            ItemFeed thisFeed = new NoOpenOrCloseFeed(getResult(), bodyContext);
             Trigger watch = getInversion().getWatch(watchManager, thisFeed, bodyContext);
             final Pattern pattern = watch.getSelection();
-            Feed actionFeed = watch.getAction();
+            ItemFeed actionFeed = watch.getAction();
             if (pattern.matchesCurrentGroup()) {
                 feedAppliesToWholeGroup = true;
             }
@@ -214,12 +209,10 @@ public class ForEachGroupPartitionAction extends ItemFeed {
             if (pattern instanceof AnchorPattern) {
                 currentGroupFeed = actionFeed;
             } else {
-                FilteringFeed.Filter filter = new FilteringFeed.Filter() {
-                    @Override
-                    public int matches(Item item, int position) throws XPathException {
-                        return pattern.matchesBeneathAnchor((NodeInfo)item, anchorNode, bodyContext) ? MATCHES : SKIP;
-                    }
-                };
+                FilteringFeed.Filter filter =
+                        (item, position) -> pattern.matchesBeneathAnchor((NodeInfo)item, anchorNode, bodyContext)
+                                ? FilteringFeed.Filter.MATCHES
+                                : FilteringFeed.Filter.SKIP;
                 currentGroupFeed = new FilteringFeed(actionFeed, getContext(), filter);
                 if (pattern instanceof AncestorQualifiedPattern) {
                     // This typically means we need to watch for ./xxx or current-group()/xxx
@@ -241,12 +234,12 @@ public class ForEachGroupPartitionAction extends ItemFeed {
         currentGroupingScope.isActive = false;
     }
 
-    private Feed findCurrentGroupFeed() throws XPathException {
-        Feed thisFeed = new NoOpenOrCloseFeed(getResult(), bodyContext);
+    private ItemFeed findCurrentGroupFeed() throws XPathException {
+        ItemFeed thisFeed = new NoOpenOrCloseFeed(getResult(), bodyContext);
         Trigger watch = getInversion().getWatch(watchManager, thisFeed, bodyContext);
-        Feed feed = watch.getAction();
-        while (feed instanceof ItemFeed && !(((ItemFeed) feed).getExpression() instanceof CurrentGroupCall)) {
-            feed = ((ItemFeed) feed).getResult();
+        ItemFeed feed = watch.getAction();
+        while (!(feed.getExpression() instanceof CurrentGroupCall)) {
+            feed = feed.getResult();
         }
         return feed;
 
@@ -261,6 +254,7 @@ public class ForEachGroupPartitionAction extends ItemFeed {
      *                                               Watch is violated @param locationId the location of the node in the source, or of the instruction that created it
      */
 
+    @Override
     public void endSelectedParentNode(Location locationId) throws XPathException {
         if (currentGroupFeed != null && closeAtEndElement) {
             currentGroupFeed.endSelectedParentNode(locationId);
@@ -279,4 +273,4 @@ public class ForEachGroupPartitionAction extends ItemFeed {
     }
 }
 
-// Copyright (c) 2009-2016 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

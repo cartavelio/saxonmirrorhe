@@ -12,7 +12,7 @@ import java.io.Reader;
 import java.io.StringReader;
 
 /**
- * This class implements the JAXP URIResourceResolver as a wrapper around
+ * This class implements the JAXP URIResolver as a wrapper around
  * a DOM Level 3 LSResourceResolver. This serves two purposes: it allows the
  * same underlying object to be used in both roles, and it allows an LSResourceResolver
  * to be passed around the system in places where a URIResolver is expected, for
@@ -45,6 +45,7 @@ public class URIResourceResolver implements URIResolver {
      *          resolve the URI.
      */
     /*@Nullable*/
+    @Override
     public Source resolve(String href, String base) throws TransformerException {
         LSInput lsin = resolver.resolveResource(
                 "http://www.w3.org/TR/REC-xml", null, null, href, base);
@@ -73,4 +74,4 @@ public class URIResourceResolver implements URIResolver {
     }
 }
 
-// Copyright (c) 2005 Saxonica Limited. All Rights Reserved
+// Copyright (c) 2005-2020 Saxonica Limited

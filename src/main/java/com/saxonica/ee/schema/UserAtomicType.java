@@ -7,6 +7,7 @@ import com.saxonica.ee.bytecode.util.CompilerService;
 import com.saxonica.ee.schema.sdoc.SimpleTypeDefinition;
 import com.saxonica.ee.validate.ValidationContext;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.*;
@@ -38,11 +39,11 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
     private int thresholdForCompilation = 100;
     private boolean uncompilable = false;
 
-    private final static Set<Class> STRING_FACETS = new HashSet<Class>(16);
-    private final static Set<Class> BOOLEAN_FACETS = new HashSet<Class>(16);
-    private final static Set<Class> ORDERED_FACETS = new HashSet<Class>(16);
-    private final static Set<Class> CALENDAR_FACETS = new HashSet<Class>(16);
-    private final static Set<Class> DECIMAL_FACETS = new HashSet<Class>(16);
+    private final static Set<Class> STRING_FACETS = new HashSet<>(16);
+    private final static Set<Class> BOOLEAN_FACETS = new HashSet<>(16);
+    private final static Set<Class> ORDERED_FACETS = new HashSet<>(16);
+    private final static Set<Class> CALENDAR_FACETS = new HashSet<>(16);
+    private final static Set<Class> DECIMAL_FACETS = new HashSet<>(16);
 
     static {
         STRING_FACETS.add(LengthFacet.class);
@@ -115,6 +116,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      * @return true, this is an atomic type
      */
 
+    @Override
     public boolean isAtomicType() {
         return true;
     }
@@ -125,6 +127,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      * @return true
      */
 
+    @Override
     public boolean isPlainType() {
         return true;
     }
@@ -137,8 +140,9 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      * node, however, can still allow a list.
      */
 
-    public boolean isIdType() throws MissingComponentException {
-        return getBaseType().isIdType();
+    @Override
+    public boolean isIdType() {
+        return getBuiltInBaseType().isIdType();
     }
 
     /**
@@ -147,6 +151,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      * from IDREF or IDREFS by restriction, list, or union
      */
 
+    @Override
     public boolean isIdRefType() throws MissingComponentException {
         return getBaseType().isIdRefType();
     }
@@ -155,9 +160,12 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      * Determine whether this is a built-in type or a user-defined type
      */
 
+    @Override
     public boolean isBuiltInType() {
         return false;
     }
+
+
 
     /**
      * Get an alphabetic code representing the type, or at any rate, the nearest built-in type
@@ -167,8 +175,8 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      * @return the alphacode for the nearest containing built-in type
      */
     @Override
-    public String getAlphaCode() {
-        return ((AtomicType)getBuiltInBaseType()).getAlphaCode();
+    public String getBasicAlphaCode() {
+        return ((AtomicType)getBuiltInBaseType()).getBasicAlphaCode();
     }
 
     /**
@@ -178,13 +186,13 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      * @return the name of the atomic type, or null if the type is anonymous.
      */
 
-    public StructuredQName getTypeName() {
-        if (isAnonymousType()) {
-            return null;
-        } else {
-            return getStructuredQName();
-        }
-    }
+//    public StructuredQName getTypeName() {
+//        if (isAnonymousType()) {
+//            return null;
+//        } else {
+//            return this.getTypeName();
+//        }
+//    }
 
     /**
      * Determine whether the atomic type is a primitive type.  The primitive types are
@@ -194,6 +202,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      * @return true if the type is considered primitive under the above rules
      */
 
+    @Override
     public boolean isPrimitiveType() {
         return false;
     }
@@ -204,6 +213,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      *
      * @return the smallest UType that subsumes this item type
      */
+    @Override
     public UType getUType() {
         return getPrimitiveItemType().getUType();
     }
@@ -218,6 +228,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      * @return true if ordering operations are permitted
      */
 
+    @Override
     public boolean isOrdered(boolean optimistic) {
         return ((AtomicType) getPrimitiveItemType()).isOrdered(false);
     }
@@ -230,6 +241,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      * @return false (always)
      */
 
+    @Override
     public boolean isAbstract() {
         return false;
     }
@@ -241,11 +253,12 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      * @param rules the conversion rules to be used
      * @return a StringConverter to do the conversion, or null if no built-in converter is available.
      */
+    @Override
     public StringConverter getStringConverter(ConversionRules rules) {
         if (stringConverter == null) {
             StringConverter sc;
-            ItemType prim = getPrimitiveItemType();
-            if (((AtomicType)prim).getFingerprint() == StandardNames.XS_STRING) {
+            AtomicType prim = getPrimitiveItemType();
+            if (prim.getFingerprint() == StandardNames.XS_STRING) {
                 if (getBuiltInBaseType() == BuiltInAtomicType.STRING) {
                     // converter to user-defined subtypes of xs:string
                     sc = new StringConverter.StringToStringSubtype(rules, this);
@@ -276,12 +289,13 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      *          when this SimpleType definition
      *          is invalid.
      */
+    @Override
     public boolean validate(SchemaCompiler compiler) throws SchemaException {
         if (!super.validate(compiler)) {
             return false;
         }
         if (getBaseType() instanceof SimpleTypeDefinition) {
-            SimpleType simpleType = ((SimpleTypeDefinition) getBaseType()).getSimpleType();
+            SimpleType simpleType = ((SimpleTypeDefinition) getBaseType()).getWorkingType();
             getBaseTypeReference().setTarget(simpleType);
         }
         AtomicType prim = getPrimitiveItemType();
@@ -340,6 +354,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      * @param th
      * @return true if the item is an instance of this type; false otherwise
      */
+    @Override
     public boolean matches(Item item, TypeHierarchy th) {
         return item instanceof AtomicValue && Type.isSubType(((AtomicValue) item).getItemType(), this);
     }
@@ -380,6 +395,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      */
 
     /*@Nullable*/
+    @Override
     public ValidationFailure validateContent(
             /*@NotNull*/ CharSequence value, /*@Nullable*/ NamespaceResolver nsResolver, /*@NotNull*/ ConversionRules rules) {
 //#if BYTECODE == true
@@ -395,7 +411,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
             if (config.isLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION) &&
                     config.getBooleanProperty(Feature.GENERATE_BYTE_CODE)) {
                 try {
-                    compiledValidator = new CompilerService(config, Configuration.XSLT).compileAtomicValidator(this, rules);
+                    compiledValidator = new CompilerService(config, HostLanguage.XSLT).compileAtomicValidator(this, rules);
                     compiledConversionRules = rules;
                     if (compiledValidator != null) {
                         if (config.getBooleanProperty(Feature.DEBUG_BYTE_CODE)) {
@@ -404,6 +420,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
                         return compiledValidator.validate(value);
                     }
                 } catch (CannotCompileException e) {
+                    //assert false;
                     thresholdForCompilation = Integer.MAX_VALUE;
                     uncompilable = true;
                 }
@@ -432,6 +449,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      * @return an iterator over the atomic sequence comprising the typed value
      */
 
+    @Override
     public AtomicValue getTypedValue(CharSequence value, NamespaceResolver resolver, ConversionRules rules)
             throws ValidationException {
         StringConverter converter = getStringConverter(rules);
@@ -450,6 +468,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      */
 
     /*@NotNull*/
+    @Override
     public AtomicType getPrimitiveItemType() {
         try {
             ItemType s = (ItemType) getBaseType();
@@ -467,7 +486,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
             if (Type.isPrimitiveAtomicType(getFingerprint())) {
                 return this;
             }
-            getConfiguration().getStandardErrorOutput().println("Internal failure on type " + getDescription());
+            getConfiguration().getLogger().warning("Internal failure on type " + getDescription());
             throw err;
         }
     }
@@ -479,6 +498,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      *
      * @return the type code of the primitive type
      */
+    @Override
     public int getPrimitiveType() {
         SchemaType s = getBaseType();
         if (s.isAtomicType()) {
@@ -495,6 +515,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      * @return true if this type is derived from xs:QName or xs:NOTATION
      */
 
+    @Override
     public boolean isNamespaceSensitive() {
         // This is implemented as a memo function
         Boolean sensitive = namespaceSensitive;
@@ -528,6 +549,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      */
 
     /*@NotNull*/
+    @Override
     public AtomicType getAtomizedItemType() {
         return this;
     }
@@ -540,6 +562,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      * @param th The type hierarchy cache
      */
 
+    @Override
     public boolean isAtomizable(TypeHierarchy th) {
         return true;
     }
@@ -568,7 +591,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      */
 
     public String toString() {
-        return getStructuredQName().getEQName();
+        return this.getTypeName().getEQName();
     }
 
     /**
@@ -610,6 +633,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      * @throws UnsupportedOperationException in the case of an external object type
      */
 
+    @Override
     public ValidationFailure validate(AtomicValue primValue, CharSequence lexicalValue, ConversionRules rules) {
         BuiltInAtomicType base = (BuiltInAtomicType) getBuiltInBaseType();
         if (!base.isPrimitiveType()) {
@@ -625,6 +649,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      * Serialize the schema component
      */
 
+    @Override
     public void serializeVariety(SchemaModelSerializer serializer) throws XPathException {
         serializer.emitAttribute("variety", "atomic");
         serializer.emitAttribute("primitiveType", "#" + ((AtomicType) getPrimitiveItemType()).getName());
@@ -636,6 +661,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      * @return for an atomic type, the type itself; for a union type, the set of atomic types
      *         in its transitive membership
      */
+    @Override
     public Set<? extends PlainType> getPlainMemberTypes() {
         return Collections.singleton(this);
     }
@@ -652,4 +678,4 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
 
 }
 
-// Copyright (c) 2004-2016 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

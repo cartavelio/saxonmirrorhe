@@ -8,13 +8,13 @@ import com.saxonica.ee.stream.om.FleetingParentNode;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.QuitParsingException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.AttributeCollectionImpl;
+import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.type.*;
 
 import java.util.*;
@@ -39,7 +39,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
     private int startDocumentProperties;
     private FleetingDocumentNode documentNode;
 
-    private StartTagBuffer startTagBuffer;
+    //private StartTagBuffer startTagBuffer;
 
     private FleetingParentNode[] elementStack = new FleetingParentNode[20];
     // stack holding element nodes. If the document node is watched, then the zeroth entry is the document node
@@ -48,21 +48,13 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
     // stack holding, for each nested element, the number of Receivers
     // on the activeReceiverStack that were allocated at that level of nesting
 
-    private int[] namespaceCountStack = new int[20];
-    // stack holding, for each nested element, the number of namespaces declared or undeclared
-    // on that element start tag
-
     protected int elementStackTop = 0;
     // stacktop for the preceding stacks. During processing of startElement and endElement events
     // for the outermost element that is actually processed, this has the value zero; during
     // processing of the contents of that element (including attributes) it has the value 1, and
     // so on.
 
-    private NamespaceBinding[] namespaceStack = new NamespaceBinding[20];
-    // stack holding the current namespace declarations and undeclarations, as namespace codes
-
-    private int namespaceStackTop = 0;
-    // stacktop for the namespace stack
+    private Stack<NamespaceMap> namespaceStack = new Stack<>();
 
     protected List<Watch> watchList = new ArrayList<>(10);
     // list of Watch objects interested in seeing what comes along...
@@ -75,9 +67,10 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
     // stack of Receiver objects that are listening to events. The number of recievers added at each
     // level of element nesting is recorded in receiverCountStack
 
-    private Location lastLocationId = ExplicitLocation.UNKNOWN_LOCATION;
+    private Location lastLocationId = Loc.NONE;
 
     private XPathContext context;
+    private Outputter outputter;
 
     //private Map<Accumulator, AccumulatorWatch> accumulatorWatchMap;
     private MultiAccumulatorWatch multiAccumulatorWatch;
@@ -114,15 +107,8 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
         long docNr = config.getDocumentNumberAllocator().allocateStreamedDocumentNumber();
         documentNode = new FleetingDocumentNode(docNr);
         documentNode.setConfiguration(config);
+        pipe.setComponent(WatchManager.class.getName(), this);
 
-    }
-
-    public void setStartTagBuffer(StartTagBuffer stb) {
-        this.startTagBuffer = stb;
-    }
-
-    public StartTagBuffer getStartTagBuffer() {
-        return startTagBuffer;
     }
 
     public void setXPathContext(XPathContext context) {
@@ -133,15 +119,23 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
         return context;
     }
 
+    public void setOutputter(Outputter outputter) {
+        outputter.setPipelineConfiguration(getPipelineConfiguration());
+        this.outputter = outputter;
+
+    }
+
+    public Outputter getOutputter() {
+        return outputter;
+    }
+
     /**
      * Append an arbitrary item (node or atomic value) to the output
-     *
      * @param item           the item to be appended
      * @param locationId     the location of the calling instruction, for diagnostics
      * @param copyNamespaces if the item is an element node, this indicates whether its namespaces
-     *                       need to be copied. Values are {@link ReceiverOptions#ALL_NAMESPACES},
-     *                       {@link ReceiverOptions#LOCAL_NAMESPACES}; the default (0) means
-     *                       no namespaces
+*                       need to be copied. Values are {@link ReceiverOption#ALL_NAMESPACES};
+     *                            the default (0) means
      */
     @Override
     public void append(Item item, Location locationId, int copyNamespaces) throws XPathException {
@@ -154,19 +148,26 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
      * @throws net.sf.saxon.trans.XPathException
      *          if an error occurs
      */
+    @Override
     public void close() throws XPathException {
         //No action
     }
 
     /**
      * Start of a document node.
+     * @param properties
      */
 
+    @Override
     public void startDocument(int properties) throws XPathException {
         // Don't start the document immediately, because we want unparsed entities to be available while
         // processing the document node
-        startDocumentPending = true;
-        startDocumentProperties = properties;
+        //("startDocument");
+        if (elementStackTop == 0) {
+            startDocumentPending = true;
+            startDocumentProperties = properties;
+            namespaceStack = new Stack<>();
+        }
     }
 
     private void deferredStartDocument() throws XPathException {
@@ -176,7 +177,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
         documentNode.setMultiAccumulatorWatch(multiAccumulatorWatch);
         elementStack[elementStackTop] = documentNode;
         receiverCountStack[elementStackTop] = 0;
-        namespaceCountStack[elementStackTop++] = 0;
+        elementStackTop++;
 
         List<ClosedownAction> activeWatchList = new ArrayList<>(4);
         activeWatchStack.push(activeWatchList);
@@ -189,7 +190,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
             if (matches) {
                 ClosedownAction action = new ClosedownAction(watch, ClosedownAction.DEACTIVATE);
                 activeWatchList.add(action);
-                Receiver out = watch.startSelectedParentNode(documentNode, ExplicitLocation.UNKNOWN_LOCATION);
+                Receiver out = watch.startSelectedParentNode(documentNode, Loc.NONE);
                 if (out != null) {
                     out.open();
                     activeReceiverStack.push(out);
@@ -230,29 +231,31 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
      * Output element start tag
      */
 
-    public void startElement(NodeName elementName, SchemaType typeCode, Location location, int properties)
+    @Override
+    public void startElement(NodeName elementName, SchemaType typeCode,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties)
             throws XPathException {
         //trace("startElement " + elementName);
-        if (startDocumentPending) {
-            startDocumentPending = false;
-            deferredStartDocument();
-        }
-
         try {
+            if (startDocumentPending) {
+                startDocumentPending = false;
+                deferredStartDocument();
+            }
             ValidationException ve = null;
             ensureStackSpace();
 
             FleetingElementNode element = new FleetingElementNode(elementName, typeCode);
             FleetingParentNode parent = elementStackTop > 0 ? elementStack[elementStackTop - 1] : documentNode;
             element.setParent(parent);
-            element.setLocalNamespaces(startTagBuffer.getLocalNamespaces());
-            element.setAttributes(AttributeCollectionImpl.copy(
-                    (AttributeCollectionImpl) startTagBuffer.getAllAttributes()));
-            element.setHasChildren((properties & ReceiverOptions.HAS_CHILDREN) != 0);
+            element.setNamespaceMap(namespaces);
+            element.setAttributes(attributes);
+            element.setHasChildren(ReceiverOption.contains(properties, ReceiverOption.HAS_CHILDREN));
 
             elementStack[elementStackTop] = element;
             receiverCountStack[elementStackTop] = 0;
-            namespaceCountStack[elementStackTop++] = 0;
+            namespaceStack.push(namespaces);
+            elementStackTop++;
 
             List<ClosedownAction> activeWatchList = new ArrayList<>(4);
             activeWatchStack.push(activeWatchList);
@@ -280,37 +283,122 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
                 }
             }
 
-            final int totalReceivers = activeReceiverStack.size();
             for (Receiver out : activeReceiverStack) {
                 try {
-                    out.startElement(elementName, typeCode, location, properties);
+                    out.startElement(elementName, typeCode, attributes, namespaces, location, properties);
                 } catch (ValidationException err) {
                     ve = err;
                 }
             }
 
-            // Newly-added receivers need to catch up on namespaces declared at outer levels
-            final int newReceivers = receiverCountStack[elementStackTop - 1];
-            for (int i = totalReceivers - newReceivers; i < totalReceivers; i++) {
-                Receiver out = activeReceiverStack.get(i);
-                for (int n = 0; n < namespaceStackTop; n++) {
-                    out.namespace(namespaceStack[n], 0);
-                }
-            }
-
-            // Now pass the event to the next thing in the pipeline
-            //nextReceiver.startElement(elementName, typeCode, locationId, properties);
             if (ve != null) {
                 throw ve;
             }
 
             lastLocationId = location.saveLocation();
         } catch (QuitParsingException quit) {
-            while (!activeWatchStack.isEmpty()) {
+            while (!namespaceStack.isEmpty()) {
                 endElement();
             }
-            getPipelineConfiguration().getErrorListener().warning(quit);
+            endDocument();
+            warning(quit);
             throw quit;
+        }
+
+        processAttributes(attributes);
+    }
+
+    /**
+     * During schema validation, the startElement() event is emitted before we can
+     * examine all the streamed assertions that might apply to that element. So this
+     * method can be used to process a Watch against the most recent start element event,
+     * on the basis that we might have missed it the first time round.
+     */
+
+    public void restartElement(Watch watch)
+            throws XPathException {
+        //trace("startElement " + elementName);
+        try {
+            if (startDocumentPending) {
+                startDocumentPending = false;
+                deferredStartDocument();
+            }
+            ValidationException ve = null;
+            ensureStackSpace();
+
+            FleetingElementNode element = (FleetingElementNode)elementStack[elementStackTop - 1];
+            List<ClosedownAction> activeWatchList = activeWatchStack.peek();
+
+            boolean matches = watch.matchesNode(element, context);
+            if (matches) {
+                //System.err.println("WatchManager matches");
+                // The order here is important. We add the closedown action to the list now, because
+                // activating the watch may have the side-effect of adding further closedown actions to
+                // the list, and we want those to come after the closedown action for this watch.
+                ClosedownAction action = new ClosedownAction(watch, ClosedownAction.DEACTIVATE);
+                activeWatchList.add(action);
+                Receiver out = watch.startSelectedParentNode(element, element);
+                if (out != null) {
+                    out.open();
+                    try {
+                        out.startElement(element.getNodeName(), element.getSchemaType(),
+                                         element.getAttributes(), element.getAllNamespaces(), lastLocationId, 0);
+                    } catch (ValidationException err) {
+                        ve = err;
+                    }
+                    activeReceiverStack.push(out);
+                    receiverCountStack[elementStackTop - 1]++;
+                }
+            }
+
+            if (ve != null) {
+                throw ve;
+            }
+
+        } catch (QuitParsingException quit) {
+            while (!namespaceStack.isEmpty()) {
+                endElement();
+            }
+            endDocument();
+            warning(quit);
+            throw quit;
+        }
+
+    }
+
+
+    private void processAttributes(AttributeMap attributes) throws XPathException {
+        for (AttributeInfo attribute : attributes) {
+            try {
+                FleetingNode att = null;
+                NodeName nameCode = attribute.getNodeName();
+                //trace("attribute " + nameCode.getDisplayName());
+                for (Watch watch : watchList) {
+                    if (watch.matchesNodesOfKind(UType.ATTRIBUTE)) {
+                        if (att == null) {
+                            att = new FleetingNode();
+                            att.setNodeKind(Type.ATTRIBUTE);
+                            att.setNodeName(nameCode);
+                            att.setTypeAnnotation(attribute.getType());
+                            att.setParent(elementStack[elementStackTop - 1]);
+                            att.setStringValue(attribute.getValue());
+                        }
+                        boolean matches = watch.matchesNode(att, context);
+                        if (matches) {
+                            watch.processItem(att);
+                        }
+                    }
+                }
+
+                lastLocationId = attribute.getLocation();
+            } catch (QuitParsingException quit) {
+                while (!namespaceStack.isEmpty()) {
+                    endElement();
+                }
+                endDocument();
+                warning(quit);
+                throw quit;
+            }
         }
     }
 
@@ -322,8 +410,11 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
         if (elementStackTop + 1 > elementStack.length) {
             elementStack = Arrays.copyOf(elementStack, elementStackTop*2);
             receiverCountStack = Arrays.copyOf(receiverCountStack, elementStackTop*2);
-            namespaceCountStack = Arrays.copyOf(namespaceCountStack, elementStackTop*2);
         }
+    }
+
+    public FleetingParentNode getCurrentNode() {
+        return elementStack[elementStackTop - 1];
     }
 
     protected void addPrearrangedWatches() throws XPathException {
@@ -331,81 +422,10 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
     }
 
     /**
-     * Notify an attribute
-     *
-     * @param nameCode   integer identifying the name of the attribute
-     * @param typeCode   integer identifying the type annotation (ignored)
-     * @param value      the value of the attribute
-     * @param locationId the location of the node in the source, or of the instruction that created it
-     *@param properties additional properties of the attribute  @throws net.sf.saxon.trans.XPathException
-     *          On any failure to write the attribute
-     */
-
-    public void attribute(NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties)
-            throws XPathException {
-
-        try {
-            FleetingNode att = null;
-            //trace("attribute " + nameCode.getDisplayName());
-            for (Watch watch : watchList) {
-                if (watch.matchesNodesOfKind(UType.ATTRIBUTE)) {
-                    if (att == null) {
-                        att = new FleetingNode();
-                        att.setNodeKind(Type.ATTRIBUTE);
-                        att.setNodeName(nameCode);
-                        att.setTypeAnnotation(typeCode);
-                        att.setParent(elementStack[elementStackTop - 1]);
-                        att.setStringValue(value);
-                    }
-                    boolean matches = watch.matchesNode(att, context);
-                    if (matches) {
-                        watch.processItem(att);
-                    }
-                }
-            }
-
-            for (Receiver out : activeReceiverStack) {
-                out.attribute(nameCode, typeCode, value, locationId, properties);
-            }
-
-            //nextReceiver.attribute(nameCode, typeCode, value, locationId, properties);
-            lastLocationId = locationId;
-        } catch (QuitParsingException quit) {
-            while (!activeWatchStack.isEmpty()) {
-                endElement();
-            }
-            getPipelineConfiguration().getErrorListener().warning(quit);
-            throw quit;
-        }
-    }
-
-    /**
-     * Notify a namespace
-     *
-     * @param namespaceBindings the prefix/uri pair being notified
-     * @param properties       properties of this event
-     * @throws XPathException if any error occurs
-     */
-
-    public void namespace(NamespaceBindingSet namespaceBindings, int properties) throws XPathException {
-
-        for (NamespaceBinding ns : namespaceBindings) {
-            namespaceCountStack[elementStackTop - 1]++;
-            if (namespaceStackTop >= namespaceStack.length) {
-                namespaceStack = Arrays.copyOf(namespaceStack, namespaceStackTop*2);
-            }
-            namespaceStack[namespaceStackTop++] = ns;
-        }
-
-        for (Receiver out : activeReceiverStack) {
-            out.namespace(namespaceBindings, properties);
-        }
-    }
-
-    /**
      * Text node
      */
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
 
         try {
@@ -438,20 +458,28 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
             //nextReceiver.characters(chars, locationId, properties);
             lastLocationId = locationId;
         } catch (QuitParsingException quit) {
-            while (!activeWatchStack.isEmpty()) {
+            while (!namespaceStack.isEmpty()) {
                 endElement();
             }
-            getPipelineConfiguration().getErrorListener().warning(quit);
+            endDocument();
+            warning(quit);
             throw quit;
         }
+    }
+
+    private void warning(QuitParsingException exception) {
+        XmlProcessingException err = new XmlProcessingException(exception);
+        err.setWarning(true);
+        getPipelineConfiguration().getErrorReporter().report(err);
     }
 
     /**
      * Notify end of element
      */
 
+    @Override
     public void endElement() throws XPathException {
-        //trace("endElement");
+        //trace("endElement " + elementStack[elementStackTop - 1].getDisplayName());
         for (Receiver out : activeReceiverStack) {
             out.endElement();
         }
@@ -459,7 +487,9 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
         elementStackTop--;
 
         // undeclare namespaces declared at this level
-        namespaceStackTop -= namespaceCountStack[elementStackTop];
+        if (!namespaceStack.isEmpty()) { // can happen during recovery from early exit
+            namespaceStack.pop();
+        }
 
         // drop any receivers that were registered at this level
 
@@ -511,10 +541,11 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
         }
 
         if (quit != null) {
-            while (!activeWatchStack.isEmpty()) {
+            while (!namespaceStack.isEmpty()) {     // but see bug #4493
                 endElement();
             }
-            //getPipelineConfiguration().getErrorListener().warning(quit);
+            endDocument();
+            warning(quit);
             throw quit;
         }
 
@@ -524,33 +555,36 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
      * Notify the end of a document node
      */
 
+    @Override
     public void endDocument() throws XPathException {
         //trace("endDocument");
-        for (Receiver out : activeReceiverStack) {
-            out.endDocument();
-        }
-
         elementStackTop--;
 
-        // drop any receivers that were registered at this level
+        if (elementStackTop == 0) {
+            for (Receiver out : activeReceiverStack) {
+                out.endDocument();
+            }
 
-        int drop = receiverCountStack[elementStackTop];
-        receiverCountStack[elementStackTop] = 0;
-        for (int i = 0; i < drop; i++) {
-            Receiver out = activeReceiverStack.pop();
-            out.close();
-        }
+            // drop any receivers that were registered at this level
 
-        // deactivate/close any watches that need to be actioned at this level, in reverse order
+            int drop = receiverCountStack[elementStackTop];
+            receiverCountStack[elementStackTop] = 0;
+            for (int i = 0; i < drop; i++) {
+                Receiver out = activeReceiverStack.pop();
+                out.close();
+            }
 
-        List<ClosedownAction> activeWatchList = activeWatchStack.pop();
-        for (int i = activeWatchList.size() - 1; i >= 0; i--) {
-            ClosedownAction action = activeWatchList.get(i);
-            if (action.action == ClosedownAction.DEACTIVATE) {
-                action.watch.endSelectedParentNode(lastLocationId);
-            } else {
-                action.watch.close();
-                watchList.remove(action.watch);
+            // deactivate/close any watches that need to be actioned at this level, in reverse order
+
+            List<ClosedownAction> activeWatchList = activeWatchStack.pop();
+            for (int i = activeWatchList.size() - 1; i >= 0; i--) {
+                ClosedownAction action = activeWatchList.get(i);
+                if (action.action == ClosedownAction.DEACTIVATE) {
+                    action.watch.endSelectedParentNode(lastLocationId);
+                } else {
+                    action.watch.close();
+                    watchList.remove(action.watch);
+                }
             }
         }
 
@@ -561,6 +595,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
      * Output a comment
      */
 
+    @Override
     public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
 
         ensureStackSpace();
@@ -598,6 +633,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
      * Processing Instruction
      */
 
+    @Override
     public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
         ensureStackSpace();
 
@@ -632,19 +668,6 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
     }
 
     /**
-     * Start element content (called after all the attributes and namespaces have been processed)
-     *
-     * @throws XPathException if a failure occurs
-     */
-
-    public void startContent() throws XPathException {
-        for (Receiver out : activeReceiverStack) {
-            out.startContent();
-        }
-        //nextReceiver.startContent();
-    }
-
-    /**
      * Notify an unparsed entity URI.
      *
      * @param name     The name of the unparsed entity
@@ -652,6 +675,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
      * @param publicID The public identifier of the unparsed entity
      */
 
+    @Override
     public void setUnparsedEntity(String name, String systemID, String publicID) throws XPathException {
         if (documentNode != null) {
             documentNode.setUnparsedEntity(name, systemID, publicID);
@@ -724,45 +748,17 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
      */
 
     /*@Nullable*/
+    @Override
     public String getURIForPrefix(String prefix, boolean useDefault) {
         if (!useDefault && prefix.isEmpty()) {
             return NamespaceConstant.NULL;
         }
-        for (int i = namespaceStackTop - 1; i >= 0; i--) {
-            if (namespaceStack[i].getPrefix().equals(prefix)) {
-                //int uriCode = namespaceStack[i] & 0xffff;
-                String uri = namespaceStack[i].getURI();
-                if (uri.isEmpty()) {
-                    if (prefix.isEmpty()) {
-                        // default namespace has been undeclared
-                        return "";
-                    } else {
-                        // specific prefix has been undeclared
-                        return null;
-                    }
-                } else {
-                    return uri;
-                }
-            }
-        }
-        return prefix.isEmpty() ? NamespaceConstant.NULL : null;
+        return namespaceStack.peek().getURIForPrefix(prefix, useDefault);
     }
 
+    @Override
     public Iterator<String> iteratePrefixes() {
-        Set<String> declaredPrefixes = new HashSet<>(5);
-        HashSet<String> undeclaredPrefixes = new HashSet<>(5);
-        for (int i = namespaceStackTop - 1; i >= 0; i--) {
-            String prefixCode = namespaceStack[i].getPrefix();
-            String uriCode = namespaceStack[i].getURI();
-            if (uriCode.isEmpty()) {
-                undeclaredPrefixes.add(prefixCode);
-            } else {
-                if (!undeclaredPrefixes.contains(prefixCode)) {
-                    declaredPrefixes.add(namespaceStack[i].getPrefix());
-                }
-            }
-        }
-        return declaredPrefixes.iterator();
+        return namespaceStack.peek().iteratePrefixes();
     }
 
     /**
@@ -773,6 +769,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
      *         may supply untyped nodes instead of supplying the type annotation
      */
 
+    @Override
     public boolean usesTypeAnnotations() {
         return true;
     }
@@ -781,13 +778,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
         return documentNode;
     }
 
-    /**
-     * Get a map from accumulators to AccumulatorWatch instances
-     * @return the map for all accumulators that apply to this stream. Return null if there are no
-     * accumulators
-     */
-
-    //    /**
+//    /**
 //     * Get a map from accumulators to AccumulatorWatch instances
 //     * @return the map for all accumulators that apply to this stream. Return null if there are no
 //     * accumulators
@@ -800,6 +791,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
 //    public void setAccumulatorWatchMap(Map<Accumulator, AccumulatorWatch> accumulatorWatchMap) {
 //        this.accumulatorWatchMap = accumulatorWatchMap;
 //    }
+
     public MultiAccumulatorWatch getMultiAccumulatorWatch() {
         return multiAccumulatorWatch;
     }
@@ -851,4 +843,4 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
 
 }
 
-// Copyright (c) 2004-2018 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

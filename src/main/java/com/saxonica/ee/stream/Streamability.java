@@ -30,10 +30,6 @@ import java.util.Set;
 
 public class Streamability {
 
-    public static final int OFF = 0;
-    public static final int STANDARD = 1;
-    public static final int EXTENDED = 2;
-
     /**
      * Get the consuming (or potentially consuming) operand of an expression, assuming there is exactly one
      * @param exp the expression
@@ -498,4 +494,4 @@ public class Streamability {
 
 }
 
-// Copyright (c) 2012-2016 Saxonica Limited.
+// Copyright (c) 2012-2020 Saxonica Limited

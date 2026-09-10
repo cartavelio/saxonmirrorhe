@@ -37,13 +37,14 @@ public class StreamableUserFunction extends UserFunction {
         return inversion;
     }
 
+    @Override
     public void prepareForStreaming() throws XPathException {
         // Done on reloading from export file, so shouldn't fail
         if (getDeclaredStreamability().isStreaming()) {
-            Streamability.getStreamability(getBody(), ContextItemStaticInfoEE.ABSENT, new ArrayList<String>());
+            Streamability.getStreamability(getBody(), ContextItemStaticInfoEE.ABSENT, new ArrayList<>());
             makeInversion();
         }
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited

@@ -1,13 +1,12 @@
 package com.saxonica.ee.validate;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.expr.parser.Location;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.HostLanguage;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 
@@ -16,22 +15,22 @@ import net.sf.saxon.type.*;
  * except that it removes all type annotations from element and attribute nodes.
  * It implements validation="strip" or in schema terms, skip validation
  *
- * @author Michael Kay
  */
 
 
 public class SkipValidator extends ContentValidator {
 
-    boolean stripIdProperty = false;        // indicates whether the is-id and is-idref properties should be stripped
-    TypeHierarchy typeHierarchy;
+    private boolean stripIdProperty = false;        // indicates whether the is-id and is-idref properties should be stripped
+    private TypeHierarchy typeHierarchy;
 
     public SkipValidator(Receiver next) {
         super(next);
     }
 
+    @Override
     public void setPipelineConfiguration(/*@NotNull*/ PipelineConfiguration pipe) {
         super.setPipelineConfiguration(pipe);
-        stripIdProperty = pipe.getHostLanguage() == Configuration.XQUERY;
+        stripIdProperty = pipe.getHostLanguage() == HostLanguage.XQUERY;
         typeHierarchy = pipe.getConfiguration().getTypeHierarchy();
     }
 
@@ -42,6 +41,7 @@ public class SkipValidator extends ContentValidator {
      */
 
     /*@Nullable*/
+    @Override
     public SchemaType getSchemaType() {
         return null;
     }
@@ -55,18 +55,52 @@ public class SkipValidator extends ContentValidator {
      * Output element start tag
      */
 
-    public void startElement(NodeName nameCode, SchemaType typeCode, Location location, int properties) throws XPathException {
-        if (!stripIdProperty && typeCode != Untyped.getInstance() &&
-                ((properties & ReceiverOptions.ID_IDREF_CHECKED) == 0)) {
-            if (typeCode.isIdType()) {
-                properties |= ReceiverOptions.IS_ID;
-            } else if (typeCode.isIdRefType()) {
-                properties |= ReceiverOptions.IS_IDREF;
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
+        int p2 = properties;
+        if (!stripIdProperty && type != Untyped.getInstance() &&
+                (!ReceiverOption.contains(properties, ReceiverOption.ID_IDREF_CHECKED))) {
+            if (type.isIdType()) {
+                p2 |= (ReceiverOption.IS_ID);
+            } else if (type.isIdRefType()) {
+                p2 |= (ReceiverOption.IS_IDREF);
             }
-            properties |= ReceiverOptions.ID_IDREF_CHECKED;
+            p2 |= (ReceiverOption.ID_IDREF_CHECKED);
         }
-        properties &= ~ReceiverOptions.NILLED_ELEMENT;
-        super.startElement(nameCode, Untyped.getInstance(), location, properties);
+        p2 &= ~ReceiverOption.NILLED_ELEMENT;
+
+        AttributeMap atts2;
+        try {
+            atts2 = attributes.apply(att -> {
+                //try {
+                    int prop = att.getProperties();
+                    if (!stripIdProperty && (!ReceiverOption.contains(properties, ReceiverOption.ID_IDREF_CHECKED))) {
+                        SimpleType attType = att.getType();
+                        if (attType.isIdType()) {
+                            prop |= (ReceiverOption.IS_ID);
+                        } else if (attType.isIdRefType()) {
+                            prop |= (ReceiverOption.IS_IDREF);
+                        }
+                        prop |= (ReceiverOption.ID_IDREF_CHECKED);
+                    }
+                    if (stripIdProperty) {
+                        prop &= ~(ReceiverOption.IS_ID | ReceiverOption.IS_IDREF);
+                        prop |= ReceiverOption.ID_IDREF_CHECKED;
+                    }
+                    return new AttributeInfo(
+                            att.getNodeName(), BuiltInAtomicType.UNTYPED_ATOMIC, att.getValue(), att.getLocation(), prop);
+//                } catch (MissingComponentException e) {
+//                    throw new UncheckedXPathException(e);
+//                }
+            });
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
+        }
+        //AttributeMap atts2 = attributes;
+        //int p2 = properties;
+        getNextReceiver().startElement(elemName, Untyped.getInstance(), atts2, namespaces, location, p2);
     }
 
     /**
@@ -75,39 +109,10 @@ public class SkipValidator extends ContentValidator {
      * this element.
      */
 
+    @Override
     protected ContentValidator getChildValidator() {
         return this;
         // use the same validator at each level
-    }
-
-    /**
-     * Handle an attribute
-     *
-     * @param nameCode   integer identifying the name of the attribute
-     * @param type   integer identifying the type annotation of the
-     *                   attribute
-     * @param value      the value of the attribute
-     * @param locationId the location of the node in the source, or of the instruction that created it
-     *@param properties bit-significant flags indicating special action to
-     *                   be taken  @throws XPathException On any failure to write the attribute
-     */
-
-    public void attribute(NodeName nameCode, SimpleType type, CharSequence value, Location locationId, int properties)
-            throws XPathException {
-
-        if (!stripIdProperty && ((properties & ReceiverOptions.ID_IDREF_CHECKED) == 0)) {
-            if (type.isIdType()) {
-                properties |= ReceiverOptions.IS_ID;
-            } else if (type.isIdRefType()) {
-                properties |= ReceiverOptions.IS_IDREF;
-            }
-            properties |= ReceiverOptions.ID_IDREF_CHECKED;
-        }
-        if (stripIdProperty) {
-            properties = properties & ~(ReceiverOptions.IS_ID | ReceiverOptions.IS_IDREF);
-            properties |= ReceiverOptions.ID_IDREF_CHECKED;
-        }
-        nextReceiver.attribute(nameCode, BuiltInAtomicType.UNTYPED_ATOMIC, value, locationId, properties);
     }
 
     @Override
@@ -120,4 +125,4 @@ public class SkipValidator extends ContentValidator {
     }
 }
 
-// Copyright � 2004-2006 Saxonica Limited. No warranty.
+// Copyright (c) 2004-2020 Saxonica Limited

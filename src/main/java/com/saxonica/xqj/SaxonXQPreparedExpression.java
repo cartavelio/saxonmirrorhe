@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -53,6 +53,7 @@ public class SaxonXQPreparedExpression extends SaxonXQDynamicContext implements 
         setClosableContainer(connection);
     }
 
+    @Override
     protected DynamicQueryContext getDynamicContext() {
         return context;
     }
@@ -61,6 +62,7 @@ public class SaxonXQPreparedExpression extends SaxonXQDynamicContext implements 
         return connection;
     }
 
+    @Override
     protected SaxonXQDataFactory getDataFactory() throws XQException {
         if (connection.isClosed()) {
             close();
@@ -77,17 +79,19 @@ public class SaxonXQPreparedExpression extends SaxonXQDynamicContext implements 
         return staticContext;
     }
 
+    @Override
     public void cancel() throws XQException {
         checkNotClosed();
     }
 
     /*@NotNull*/
+    @Override
     public XQResultSequence executeQuery() throws XQException {
         checkNotClosed();
         try {
-            SequenceIterator<?> iter = expression.iterator(context);
+            SequenceIterator iter = expression.iterator(context);
             if (scrollable) {
-                GroundedValue<?> value = iter.materialize();
+                GroundedValue value = iter.materialize();
                 return new SaxonXQSequence(value, this);
             } else {
                 return new SaxonXQForwardSequence(new FocusTrackingIterator(iter), this);
@@ -100,6 +104,7 @@ public class SaxonXQPreparedExpression extends SaxonXQDynamicContext implements 
     }
 
     /*@NotNull*/
+    @Override
     public QName[] getAllExternalVariables() throws XQException {
         checkNotClosed();
         List<GlobalVariable> vars = expression.getPackageData().getGlobalVariableList();
@@ -124,6 +129,7 @@ public class SaxonXQPreparedExpression extends SaxonXQDynamicContext implements 
     /*@NotNull*/ private static QName[] EMPTY_QNAME_ARRAY = new QName[0];
 
     /*@NotNull*/
+    @Override
     public QName[] getAllUnboundExternalVariables() throws XQException {
         checkNotClosed();
         java.util.Collection<StructuredQName> boundParameters = getDynamicContext().getParameters().getKeys();
@@ -145,6 +151,7 @@ public class SaxonXQPreparedExpression extends SaxonXQDynamicContext implements 
         return unboundq;
     }
 
+    @Override
     public XQStaticContext getStaticContext() throws XQException {
         checkNotClosed();
         return staticContext;   // a snapshot of the static context at the time the expression was created
@@ -153,6 +160,7 @@ public class SaxonXQPreparedExpression extends SaxonXQDynamicContext implements 
     }
 
     /*@NotNull*/
+    @Override
     public XQSequenceType getStaticResultType() throws XQException {
         checkNotClosed();
         Expression exp = expression.getExpression();    // unwrap two layers!
@@ -163,6 +171,7 @@ public class SaxonXQPreparedExpression extends SaxonXQDynamicContext implements 
     }
 
     /*@NotNull*/
+    @Override
     public XQSequenceType getStaticVariableType(QName name) throws XQException {
         checkNotClosed();
         checkNotNull(name);
@@ -177,6 +186,7 @@ public class SaxonXQPreparedExpression extends SaxonXQDynamicContext implements 
     }
 
 
+    @Override
     protected boolean externalVariableExists(QName name) {
         StructuredQName qn = new StructuredQName(
                 name.getPrefix(), name.getNamespaceURI(), name.getLocalPart());

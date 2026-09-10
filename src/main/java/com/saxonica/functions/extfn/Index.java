@@ -30,29 +30,30 @@ public class Index extends SystemFunction {
          *          code will add information about the error location.
          */
 
-        public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             Item arg1 = arguments[1].head();
             if (arg1 instanceof ExternalObject && ((ExternalObject) arg1).getObject() instanceof Evaluate.PreparedExpression) {
                 throw new XPathException("The function saxon:index() has changed to expect a function as its second argument");
             } else if (arg1 instanceof Function) {
                 Function function = (Function) arg1;
                 HashTrieMap imap = new HashTrieMap();
-                Sequence<?>[] functionArgs = SequenceTool.makeSequenceArray(1);
-                SequenceIterator<?> iter = arguments[0].iterate();
-                Item<?> next;
+                Sequence[] functionArgs = SequenceTool.makeSequenceArray(1);
+                SequenceIterator iter = arguments[0].iterate();
+                Item next;
                 while ((next = iter.next()) != null) {
                     functionArgs[0] = next;
-                    Sequence<?> keys = dynamicCall(function, context, functionArgs);
-                    SequenceIterator<AtomicValue> keyIterator = new AtomizingIterator(keys.iterate());
+                    Sequence keys = dynamicCall(function, context, functionArgs);
+                    SequenceIterator keyIterator = new AtomizingIterator(keys.iterate());
                     AtomicValue key;
-                    while ((key = keyIterator.next()) != null) {
-                        Sequence<?> existingVal = imap.get(key);
+                    while ((key = (AtomicValue)keyIterator.next()) != null) {
+                        Sequence existingVal = imap.get(key);
                         if (existingVal == null) {
                             imap.initialPut(key, next);
                         } else if (existingVal instanceof Chain) {
                             ((Chain) existingVal).append(next);
                         } else {
-                            List<GroundedValue<?>> list = new ArrayList<>();
+                            List<GroundedValue> list = new ArrayList<>();
                             list.add(existingVal.materialize());
                             list.add(next.materialize());
                             imap.initialPut(key, new Chain(list));
@@ -72,4 +73,4 @@ public class Index extends SystemFunction {
 
 }
 
-// Copyright (c) 2005-2016 Saxonica Limited.
+// Copyright (c) 2005-2020 Saxonica Limited

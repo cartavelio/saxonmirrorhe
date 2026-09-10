@@ -30,6 +30,7 @@ public abstract class PatternWatch extends AbstractWatch {
      * @param node    the node to be tested
      * @param context the XPath dynamic context
      */
+    @Override
     public boolean matchesNode(FleetingNode node, XPathContext context) throws XPathException {
         return getSelection().matchesBeneathAnchor(node, getAnchorNode(), context);
     }
@@ -39,6 +40,7 @@ public abstract class PatternWatch extends AbstractWatch {
      *
      * @param kind the node kind as a UType
      */
+    @Override
     public boolean matchesNodesOfKind(UType kind) {
         return getSelection().getUType().overlaps(kind);
     }
@@ -73,6 +75,7 @@ public abstract class PatternWatch extends AbstractWatch {
      * @param anchor The anchor node within which the watch is scoped
      */
 
+    @Override
     public void setAnchorNode(FleetingParentNode anchor) {
         this.anchor = anchor;
     }
@@ -85,6 +88,7 @@ public abstract class PatternWatch extends AbstractWatch {
      * @return The anchor node within which the watch is scoped
      */
 
+    @Override
     public final FleetingParentNode getAnchorNode() {
         return anchor;
     }
@@ -95,6 +99,7 @@ public abstract class PatternWatch extends AbstractWatch {
      * @param terminator
      */
 
+    @Override
     public void open(Terminator terminator) throws XPathException {
         //
     }
@@ -107,7 +112,8 @@ public abstract class PatternWatch extends AbstractWatch {
      *
      */
 
-    public void processItem(Item<?> item) throws XPathException {
+    @Override
+    public void processItem(Item item) throws XPathException {
         //
     }
 
@@ -117,6 +123,7 @@ public abstract class PatternWatch extends AbstractWatch {
      * Watch goes out of scope. The default implementation does nothing.
      */
 
+    @Override
     public void close() throws XPathException {
         //
     }
@@ -124,4 +131,4 @@ public abstract class PatternWatch extends AbstractWatch {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited. No warranty.
+// Copyright (c) 2018-2020 Saxonica Limited No warranty.

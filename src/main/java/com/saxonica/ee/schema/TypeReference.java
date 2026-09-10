@@ -4,10 +4,7 @@ import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.sdoc.SimpleTypeDefinition;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.type.BuiltInType;
-import net.sf.saxon.type.SchemaComponent;
-import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.MissingComponentException;
+import net.sf.saxon.type.*;
 
 import javax.xml.transform.SourceLocator;
 
@@ -54,6 +51,7 @@ public class TypeReference extends SchemaStructure implements ComponentReference
      * Determine whether this reference has been resolved
      */
 
+    @Override
     public boolean isResolved() {
         return target != null;
     }
@@ -66,6 +64,7 @@ public class TypeReference extends SchemaStructure implements ComponentReference
         return fingerprint;
     }
 
+    @Override
     public StructuredQName getTargetComponentName() {
         return qName;
     }
@@ -76,6 +75,7 @@ public class TypeReference extends SchemaStructure implements ComponentReference
      * @return true if the target of this component reference is known to be absent, and if a warning has
      * been issued to this effect
      */
+    @Override
     public boolean isDangling() {
         return dangling;
     }
@@ -84,6 +84,7 @@ public class TypeReference extends SchemaStructure implements ComponentReference
      * Get the symbol space of the target of this reference
      */
 
+    @Override
     public int getSymbolSpace() {
         return SymbolSpace.TYPE;
     }
@@ -102,18 +103,14 @@ public class TypeReference extends SchemaStructure implements ComponentReference
     /**
      * Returns the type that this type reference is a reference to
      *
-     * @return the schema component if the reference has been resolved.
-     * @throws MissingComponentException if the reference has not been resolved. Note that
-     *                                      this is an unchecked exception.
+     * @return the schema component if the reference has been resolved, or null otherwise
      */
 
     /*@NotNull*/
-    public SchemaComponent getTarget() throws MissingComponentException {
-        if (target == null) {
-            throw new MissingComponentExceptionImpl(this);
-        }
+    @Override
+    public SchemaComponent getTarget()  {
         if (target instanceof SimpleTypeDefinition) {
-            UserSimpleType ust = ((SimpleTypeDefinition) target).getSimpleType();
+            UserSimpleType ust = ((SimpleTypeDefinition) target).getWorkingType();
             if (ust != null) {
                 target = ust;
             }
@@ -122,11 +119,19 @@ public class TypeReference extends SchemaStructure implements ComponentReference
     }
 
     /**
-     * Attempt to resolve this reference using the types defined in a given schema.
-     * No error results if the reference cannot be resolved.
+     * Try to resolve the reference if possible, relative to components present in a given schema.
+     * If the reference cannot be resolved, the action depends on whether the compiler service allows
+     * dangling references to absent components. If it does, we try to patch the schema up with a dummy
+     * component (where possible). If not, the method throws an exception
+     *
+     * @param compiler The compiler being used to compile the referring component.
+     * @param fatal
+     * @throws SchemaException if the reference cannot be resolved or repaired.
      */
 
-    public void tryToResolve(SchemaCompiler compiler) {
+
+    @Override
+    public void tryToResolve(SchemaCompiler compiler, boolean fatal) throws SchemaException {
         if (!dangling) {
             if (target == null) {
                 target = compiler.getPreparedSchema().getType(qName);
@@ -135,11 +140,18 @@ public class TypeReference extends SchemaStructure implements ComponentReference
                 target = getConfiguration().getSuperSchema().getType(qName);
             }
             if (target == null) {
-                dangling = true;
+                if (compiler.isAllowDanglingReferences() && !fatal) {
+                    dangling = true;
+                    compiler.warning("Unknown type " + qName.getEQName() + " (substituting xs:error)", this);
+                    target = ErrorType.getInstance();
+                } else {
+                    dangling = true;
+                    compiler.error("Unknown type " + qName.getEQName(), this);
+                }
             }
         }
     }
 
 }
 
-// Copyright (c) 2004-2015 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

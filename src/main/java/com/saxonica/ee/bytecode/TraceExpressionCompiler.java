@@ -3,13 +3,18 @@ package com.saxonica.ee.bytecode;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.UnaryExpression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.instruct.ComponentTracer;
 import net.sf.saxon.expr.instruct.TraceExpression;
 import net.sf.saxon.lib.TraceListener;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.trace.InstructionInfo;
+import net.sf.saxon.trace.Traceable;
 import org.objectweb.asm.commons.GeneratorAdapter;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class TraceExpressionCompiler extends ToIteratorCompiler {
 
@@ -24,21 +29,32 @@ public class TraceExpressionCompiler extends ToIteratorCompiler {
         ga.invokeInstanceMethod(XPathContext.class, "getController");
         int controllerVar = methodInfo.allocateLocal(Controller.class);
         ga.storeLocal(controllerVar);
-        InstructionInfo instrInfo = (TraceExpression) expression;
 
-        enterTrace(compiler, ga, controllerVar, instrInfo);
-        Expression expr0 = ((TraceExpression) expression).getChild();
+        enterTrace(compiler, ga, controllerVar, expression);
+        Expression expr0 = getTracedExpression(expression);
         compiler.compileToIterator(expr0);
         int itrVar = methodInfo.allocateLocal(SequenceIterator.class);
         ga.storeLocal(itrVar);
         visitLineNumber(compiler, ga, expression);
-        leaveTrace(compiler, ga, controllerVar, instrInfo);
+        leaveTrace(compiler, ga, controllerVar, expression);
 
         ga.loadLocal(itrVar);
 
         methodInfo.releaseLocal(controllerVar);
         methodInfo.releaseLocal(itrVar);
 
+    }
+
+    private static Expression getTracedExpression(Expression wrapper) throws CannotCompileException {
+        if (wrapper instanceof ComponentTracer) {
+            return ((ComponentTracer)wrapper).getChild();
+        } else if (wrapper instanceof TraceExpression) {
+            return ((TraceExpression)wrapper).getChild();
+        } else if (wrapper instanceof UnaryExpression) {
+            return ((UnaryExpression)wrapper).getBaseExpression();
+        } else {
+            throw new CannotCompileException();
+        }
     }
 
     @Override
@@ -52,15 +68,13 @@ public class TraceExpressionCompiler extends ToIteratorCompiler {
         ga.invokeInstanceMethod(XPathContext.class, "getController");
         int controllerVar = methodInfo.allocateLocal(Controller.class);
         ga.storeLocal(controllerVar);
-        InstructionInfo instrInfo = (TraceExpression) expression;
-
-        enterTrace(compiler, ga, controllerVar, instrInfo);
-        Expression expr0 = ((TraceExpression) expression).getChild();
+        enterTrace(compiler, ga, controllerVar, expression);
+        Expression expr0 = getTracedExpression(expression);
         compiler.compileToItem(expr0);
         int itemVar = methodInfo.allocateLocal(Item.class);
         ga.storeLocal(itemVar);
         visitLineNumber(compiler, ga, expression);
-        leaveTrace(compiler, ga, controllerVar, instrInfo);
+        leaveTrace(compiler, ga, controllerVar, expression);
 
         ga.loadLocal(itemVar);
 
@@ -79,18 +93,17 @@ public class TraceExpressionCompiler extends ToIteratorCompiler {
         ga.invokeInstanceMethod(XPathContext.class, "getController");
         int controllerVar = methodInfo.allocateLocal(Controller.class);
         ga.storeLocal(controllerVar);
-        InstructionInfo instrInfo = (TraceExpression) expression;
 
-        enterTrace(compiler, ga, controllerVar, instrInfo);
-        Expression expr0 = ((TraceExpression) expression).getChild();
+        enterTrace(compiler, ga, controllerVar, expression);
+        Expression expr0 = getTracedExpression(expression);
         compiler.compileToPush(expr0);
         visitLineNumber(compiler, ga, expression);
-        leaveTrace(compiler, ga, controllerVar, instrInfo);
+        leaveTrace(compiler, ga, controllerVar, expression);
 
         methodInfo.releaseLocal(controllerVar);
     }
 
-    public void enterTrace(CompilerService compiler, Generator ga, int controllerVar, InstructionInfo instrInfo) throws CannotCompileException {
+    public void enterTrace(CompilerService compiler, Generator ga, int controllerVar, Traceable instrInfo) throws CannotCompileException {
 
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         LabelInfo notTracing1 = methodInfo.newLabel("notTracing1");
@@ -100,13 +113,14 @@ public class TraceExpressionCompiler extends ToIteratorCompiler {
         ga.loadLocal(controllerVar);
         ga.invokeInstanceMethod(Controller.class, "getTraceListener");
         allocateStatic(compiler, instrInfo);
+        allocateStatic(compiler, new HashMap()); // TODO: put something useful here
         compiler.generateGetContext();
-        ga.invokeInstanceMethod(TraceListener.class, "enter", InstructionInfo.class, XPathContext.class);
+        ga.invokeInstanceMethod(TraceListener.class, "enter", Traceable.class, Map.class, XPathContext.class);
 
         methodInfo.placeLabel(notTracing1);
     }
 
-    public void leaveTrace(CompilerService compiler, Generator ga, int controllerVar, InstructionInfo instrInfo) throws CannotCompileException {
+    public void leaveTrace(CompilerService compiler, Generator ga, int controllerVar, Traceable instrInfo) throws CannotCompileException {
 
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         LabelInfo notTracing2 = methodInfo.newLabel("notTracing2");
@@ -116,10 +130,10 @@ public class TraceExpressionCompiler extends ToIteratorCompiler {
         ga.loadLocal(controllerVar);
         ga.invokeInstanceMethod(Controller.class, "getTraceListener");
         allocateStatic(compiler, instrInfo);
-        ga.invokeInstanceMethod(TraceListener.class, "leave", InstructionInfo.class);
+        ga.invokeInstanceMethod(TraceListener.class, "leave", Traceable.class);
 
         methodInfo.placeLabel(notTracing2);
     }
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

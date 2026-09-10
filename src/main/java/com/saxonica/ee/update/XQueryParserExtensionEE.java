@@ -52,6 +52,7 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
      * @throws XPathException
      *
      */
+    @Override
     public void parseRevalidationDeclaration(XQueryParser p) throws XPathException {
         checkXQueryUpdate(p);
         if (foundRevalidationDeclaration) {
@@ -80,6 +81,7 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
      * Parse an updating function declaration (allowed in XQuery Update only)
      */
 
+    @Override
     public void parseUpdatingFunctionDeclaration(XQueryParser p) throws XPathException {
         p.parseFunctionDeclaration(AnnotationList.singleton(new Annotation(Annotation.UPDATING)));
     }
@@ -93,6 +95,7 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
      */
 
     /*@NotNull*/
+    @Override
     protected Expression parseExtendedExprSingle(XPathParser p) throws XPathException {
         if (acceptUpdateSyntax) {
             Tokenizer t = p.getTokenizer();
@@ -124,6 +127,6 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
     
 }
 
-// Copyright (c) 2008-2016 Saxonica Limited.
+// Copyright (c) 2008-2020 Saxonica Limited
 
 

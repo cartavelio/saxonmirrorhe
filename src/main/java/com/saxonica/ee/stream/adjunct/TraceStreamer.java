@@ -1,6 +1,5 @@
 package com.saxonica.ee.stream.adjunct;
 
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.om.FleetingParentNode;
@@ -10,7 +9,7 @@ import net.sf.saxon.Controller;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.functions.Trace;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.om.Item;
@@ -25,11 +24,13 @@ import java.util.Stack;
  */
 public class TraceStreamer extends TransmissionAdjunct implements FeedMaker {
 
+    @Override
     public FeedMaker getFeedMaker(int arg) throws XPathException {
         return arg == 0 ? this : super.getFeedMaker(arg);
     }
 
-    public Feed makeItemFeed(final WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(final WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
         return new TraceFeed((SystemFunctionCall)getExpression(), out, context);
     }
 
@@ -43,9 +44,9 @@ public class TraceStreamer extends TransmissionAdjunct implements FeedMaker {
 
         String label;
         String seq = "trace " + sequenceNr++ + ": ";
-        Stack<FleetingParentNode> stack = new Stack<FleetingParentNode>();
+        Stack<FleetingParentNode> stack = new Stack<>();
 
-        public TraceFeed(SystemFunctionCall exp, Feed result, XPathContext context) {
+        public TraceFeed(SystemFunctionCall exp, ItemFeed result, XPathContext context) {
             super(exp, result, context);
         }
 
@@ -57,6 +58,7 @@ public class TraceStreamer extends TransmissionAdjunct implements FeedMaker {
          *          May be raised if a dynamic error occurs
          * @param terminator
          */
+        @Override
         public void open(Terminator terminator) throws XPathException {
             super.open(terminator);
             SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
@@ -74,9 +76,10 @@ public class TraceStreamer extends TransmissionAdjunct implements FeedMaker {
          * @throws net.sf.saxon.trans.XPathException
          *          May be raised if a dynamic error occurs
          */
-        public void processItem(Item<?> item) throws XPathException {
+        @Override
+        public void append(Item item) throws XPathException {
             emit("item", item);
-            getResult().processItem(item);
+            getNextOutputter().append(item);
         }
 
         /**
@@ -85,9 +88,10 @@ public class TraceStreamer extends TransmissionAdjunct implements FeedMaker {
          * Watch goes out of scope. The default implementation does nothing.
          */
 
+        @Override
         public void close() throws XPathException {
             emit("close", null);
-            getResult().close();
+            getNextOutputter().close();
         }
 
         /**
@@ -104,6 +108,7 @@ public class TraceStreamer extends TransmissionAdjunct implements FeedMaker {
          * @throws net.sf.saxon.trans.XPathException
          *          May be raised if a dynamic error occurs
          */
+        @Override
         public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
             if (node.getNodeKind() == Type.DOCUMENT) {
                 emit("startDocument", node);
@@ -123,6 +128,7 @@ public class TraceStreamer extends TransmissionAdjunct implements FeedMaker {
          *          May be raised if a constraint implemented by this
          *          Watch is violated
          */
+        @Override
         public void endSelectedParentNode(Location locationId) throws XPathException {
             FleetingParentNode node = stack.pop();
             if (node.getNodeKind() == Type.DOCUMENT) {
@@ -139,7 +145,7 @@ public class TraceStreamer extends TransmissionAdjunct implements FeedMaker {
             if (controller.isTracing()) {
                 SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
                 Trace function = (Trace) fnc.getTargetFunction();
-                function.notifyListener(message, val, getExpression().getLocation(), getContext());
+                function.notifyListener(message, val, getContext());
             } else {
                 Logger out = controller.getTraceFunctionDestination();
                 if (out != null) {
@@ -152,4 +158,4 @@ public class TraceStreamer extends TransmissionAdjunct implements FeedMaker {
 
 }
 
-// Copyright (c) 2010 Saxonica Limited - 2013.
+// Copyright (c) 2010-2020 Saxonica Limited - 2013.

@@ -12,7 +12,8 @@ import net.sf.saxon.value.ExternalObject;
 
 public class Eval extends Evaluate {
 
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         XPathContextMajor c2 = context.newCleanContext();
         Item head = arguments[0].head();
         ExternalObject oval = (ExternalObject)head;
@@ -29,4 +30,4 @@ public class Eval extends Evaluate {
 
 }
 
-// Copyright (c) 2009-2016 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

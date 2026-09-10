@@ -1,6 +1,5 @@
 package com.saxonica.ee.stream.adjunct;
 
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.watch.Terminator;
@@ -26,11 +25,13 @@ import java.util.HashSet;
 public class DistinctValuesStreamer
         extends StreamingAdjunct implements FeedMaker {
 
-    public FeedMaker getFeedMaker(int arg) throws XPathException {
+    @Override
+    public FeedMaker getFeedMaker(int arg) {
         return arg == 0 ? this : getDefaultFeedMaker(arg);
     }
 
-    public Feed makeItemFeed(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
         return new DistinctValuesFeed(getExpression(), out, context);
     }
 
@@ -38,9 +39,9 @@ public class DistinctValuesStreamer
 
         private StringCollator collator;
         private HashSet<AtomicMatchKey> lookup;
-        int implicitTimezone;
+        private int implicitTimezone;
 
-        public DistinctValuesFeed(Expression expr, Feed result, XPathContext context) {
+        DistinctValuesFeed(Expression expr, ItemFeed result, XPathContext context) {
             super(expr, result, context);
             implicitTimezone = context.getImplicitTimezone();
             SystemFunctionCall call = (SystemFunctionCall)expr;
@@ -50,8 +51,9 @@ public class DistinctValuesStreamer
             }
         }
 
+        @Override
         public void open(Terminator terminator) throws XPathException {
-            lookup = new HashSet<AtomicMatchKey>(40);
+            lookup = new HashSet<>(40);
             if (collator == null) {
                 SystemFunctionCall call = (SystemFunctionCall) getExpression();
                 Expression collationArg = call.getArg(call.getArity()-1);
@@ -72,13 +74,14 @@ public class DistinctValuesStreamer
          *          to report any failure
          */
 
-        public void processItem(Item<?> item) throws XPathException {
+        @Override
+        public void append(Item item) throws XPathException {
             if (!hasFailed()) {
                 AtomicValue next = (AtomicValue) item;
                 AtomicMatchKey key = next.getXPathComparable(false, collator, implicitTimezone);
                 if (lookup.add(key)) {
                     // returns true if newly added
-                    getResult().processItem(item);
+                    getNextOutputter().append(item);
                 }
             }
         }
@@ -88,4 +91,4 @@ public class DistinctValuesStreamer
 
 }
 
-// Copyright (c) 2009-2013 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

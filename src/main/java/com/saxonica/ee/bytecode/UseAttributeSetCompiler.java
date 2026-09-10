@@ -1,6 +1,7 @@
 package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.*;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.AttributeSet;
 import net.sf.saxon.expr.instruct.SlotManager;
@@ -98,9 +99,13 @@ public class UseAttributeSetCompiler extends ToPushCompiler {
         // Stack: contextMajor AttributeSet
         ga.swap();
         // Stack: AttributeSet contextMajor
-        ga.invokeInstanceMethod(AttributeSet.class, "expand", XPathContext.class);
+        compiler.generateGetOutputter();
+        // Stack: AttributeSet contextMajor Outputter
+        ga.swap();
+        // Stack: AttributeSet Outputter contextMajor
+        ga.invokeInstanceMethod(AttributeSet.class, "expand", Outputter.class, XPathContext.class);
     }
 
 }
 
-//Copyright (c) 2011-2015 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

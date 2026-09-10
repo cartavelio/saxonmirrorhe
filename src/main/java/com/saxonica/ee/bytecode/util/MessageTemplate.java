@@ -24,6 +24,7 @@ public class MessageTemplate implements MessageBuilder {
         this.ga = ga;
     }
 
+    @Override
     public void generateErrorMessage() {
         ga.push(messageTemplate);
         if (instanceVar == -1) {
@@ -36,4 +37,4 @@ public class MessageTemplate implements MessageBuilder {
 
 }
 
-//Copyright (c) 2011-2014 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

@@ -27,6 +27,7 @@ public class SaxonWhile extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
@@ -37,17 +38,20 @@ public class SaxonWhile extends StyleElement {
      * @return true: yes, it may contain a template-body
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return true;
     }
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
         test = XSLIf.prepareTestAttribute(this);
         if (test == null) {
             reportAbsence("test");
         }
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         getConfiguration().checkLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION,
                                                 "saxon:while",
@@ -55,6 +59,7 @@ public class SaxonWhile extends StyleElement {
         test = typeCheck("test", test);
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         Expression action = compileSequenceConstructor(exec, decl, true);
         if (action == null) {
@@ -65,4 +70,4 @@ public class SaxonWhile extends StyleElement {
 
 }
 
-// Copyright (c) 2009 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

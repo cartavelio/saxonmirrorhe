@@ -15,13 +15,14 @@ import net.sf.saxon.expr.accum.Accumulator;
 import net.sf.saxon.expr.accum.AccumulatorManager;
 import net.sf.saxon.expr.accum.IAccumulatorData;
 import net.sf.saxon.expr.instruct.CopyOf;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.ParseOptions;
-import net.sf.saxon.lib.UnfailingErrorListener;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.s9api.XmlProcessingError;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.tree.tiny.TinyBuilder;
@@ -33,7 +34,6 @@ import net.sf.saxon.type.Type;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.z.IntHashMap;
 
-import javax.xml.transform.TransformerException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,7 +51,7 @@ public class CopyOfFeed extends AbsorptionFeed {
     private int validation = Validation.PRESERVE;
     private SchemaType type = null;
     private XPathException validationError;
-    private SequenceReceiver proxy;
+    private ComplexContentOutputter proxy;
 
     /**
      * Create a Watch whose effect is to create copies of the selected (streamed) nodes and pass
@@ -64,14 +64,14 @@ public class CopyOfFeed extends AbsorptionFeed {
      * @return the new Watch
      */
 
-    public static Trigger getWatch(Feed result, Pattern selection, WatchManager wm, XPathContext context) {
+    public static Trigger getWatch(ItemFeed result, Pattern selection, WatchManager wm, XPathContext context) {
         CopyOfFeed action = new CopyOfFeed(wm, result, context);
         Trigger watch = new Trigger(selection, action, context);
         watch.setPipelineConfiguration(wm.getPipelineConfiguration());
         return watch;
     }
 
-    public CopyOfFeed(WatchManager watchManager, Feed result, XPathContext context) {
+    public CopyOfFeed(WatchManager watchManager, ItemFeed result, XPathContext context) {
         super(result, context);
         this.watchManager = watchManager;
 
@@ -81,7 +81,8 @@ public class CopyOfFeed extends AbsorptionFeed {
         // an edge case and proved tricky to achieve in practice (8/2014). Note that the output of the subexpression
         // can't bypass this copy operation, because this copy operation might be stripping namespaces or performing
         // validation.
-        proxy = new StreamingSequenceWriter(getPipelineConfiguration(), result);
+        Receiver writer = new StreamingSequenceWriter(getPipelineConfiguration(), result);
+        proxy = new ComplexContentOutputter(writer);
     }
 
     @Override
@@ -133,27 +134,14 @@ public class CopyOfFeed extends AbsorptionFeed {
         this.type = type;
     }
 
-    /**
-     * Get a receiver to which start and end events for documents and elements can be
-     * written. By default this will be the same as the receiver for the result feed,
-     * because very few XSLT constructs (specifically, variables and functions) allow
-     * the results of document and element constructors to be captured for further
-     * processing. A construct that does need to process these events will intercept
-     * them by providing its own receiver, typically a SequenceOutputter.
-     */
-    @Override
-    public SequenceReceiver getReceiver() {
-        return proxy;
-    }
-
     @Override
     protected PendingItem makePendingItem(int sequenceNr, FleetingParentNode node) {
         return new PendingCopyAction(sequenceNr, node);
     }
 
     @Override
-    protected Sequence<?> processGroundedItem(Item item) throws XPathException {
-        final Location loc = ExplicitLocation.UNKNOWN_LOCATION;
+    protected Sequence processGroundedItem(Item item) throws XPathException {
+        final Location loc = Loc.NONE;
         if (item instanceof NodeInfo) {
             int kind = ((NodeInfo) item).getNodeKind();
             if (kind == Type.ATTRIBUTE) {
@@ -174,7 +162,7 @@ public class CopyOfFeed extends AbsorptionFeed {
                 return orphan;
             } else if (kind == Type.ELEMENT || kind == Type.DOCUMENT) {
                 if (!copyNamespaces) {
-                    SequenceOutputter writer = new SequenceOutputter(getPipelineConfiguration());
+                    SequenceCollector writer = new SequenceCollector(getPipelineConfiguration());
                     ((NodeInfo) item).copy(writer, 0, loc);
                     return writer.getFirstItem();
                 }
@@ -184,7 +172,7 @@ public class CopyOfFeed extends AbsorptionFeed {
                     validationOptions.setSchemaValidationMode(validation);
                     validationOptions.setTopLevelType(type);
                     Configuration config = getPipelineConfiguration().getConfiguration();
-                    SequenceOutputter writer = new SequenceOutputter(getPipelineConfiguration());
+                    SequenceCollector writer = new SequenceCollector(getPipelineConfiguration());
                     Receiver copier;
                     if (kind == Type.DOCUMENT) {
                         copier = config.getDocumentValidator(writer, node.getBaseURI(), validationOptions, loc);
@@ -211,9 +199,72 @@ public class CopyOfFeed extends AbsorptionFeed {
     @Override
     public void dynamicError(XPathException error) throws XPathException {
         super.dynamicError(error);
-        proxy = new Sink(getPipelineConfiguration());
+        proxy = new ComplexContentOutputter(new Sink(getPipelineConfiguration()));
     }
 
+    // Following methods handle nodes constructed by consuming expressions on the pipeline,
+    // see for example su-absorbing-008.
+
+
+    @Override
+    public void startDocument(int properties) throws XPathException {
+        getNextOutputter().startDocument(properties);
+    }
+
+    @Override
+    public void endDocument() throws XPathException {
+        getNextOutputter().endDocument();
+    }
+
+    @Override
+    public void setUnparsedEntity(String name, String systemID, String publicID) throws XPathException {
+        getNextOutputter().setUnparsedEntity(name, systemID, publicID);
+    }
+
+    @Override
+    public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties) throws XPathException {
+        getNextOutputter().startElement(elemName, typeCode, location, properties);
+    }
+
+    @Override
+    public void namespace(String prefix, String namespaceUri, int properties) throws XPathException {
+        getNextOutputter().namespace(prefix, namespaceUri, properties);
+    }
+
+    @Override
+    public void attribute(NodeName attName, SimpleType typeCode, CharSequence value, Location location, int properties) throws XPathException {
+        getNextOutputter().attribute(attName, typeCode, value, location, properties);
+    }
+
+    @Override
+    public void startContent() throws XPathException {
+        getNextOutputter().startContent();
+    }
+
+    @Override
+    public void endElement() throws XPathException {
+        getNextOutputter().endElement();
+    }
+
+    @Override
+    public void characters(CharSequence chars, Location location, int properties) throws XPathException {
+        getNextOutputter().characters(chars, location, properties);
+    }
+
+    @Override
+    public void processingInstruction(String name, CharSequence data, Location location, int properties) throws XPathException {
+        getNextOutputter().processingInstruction(name, data, location, properties);
+    }
+
+    @Override
+    public void comment(CharSequence content, Location location, int properties) throws XPathException {
+        getNextOutputter().comment(content, location, properties);
+    }
+
+    @Override
+    public void startElement(NodeName elemName, SchemaType type, AttributeMap attributes, NamespaceMap namespaces, Location location, int properties) throws XPathException {
+        getNextOutputter().startElement(elemName, type, attributes, namespaces, location, properties);
+    }
 
     /**
      * A pending item represents a tree under construction.
@@ -232,8 +283,8 @@ public class CopyOfFeed extends AbsorptionFeed {
             PipelineConfiguration pipe = getPipelineConfiguration();
             if (valuesReadyToBeOutput.isEmpty() &&
                 (getResult() instanceof DecomposingFeed || getResult() instanceof ComplexNodeEventFeed)) {
-                Receiver r = getResult().getReceiver();
-                destination = new ProxyReceiver(r) {
+                Outputter r = getNextOutputter();
+                destination = new ProxyOutputter(r) {
                     @Override
                     public void open() {
                         // no action
@@ -258,7 +309,7 @@ public class CopyOfFeed extends AbsorptionFeed {
                 builder = new TinyBuilder(pipe);
                 builder.setStatistics(pipe.getConfiguration().getTreeStatistics().TEMPORARY_TREE_STATISTICS);
                 destination = builder;
-                if (copyAccumulators) {
+                if (copyAccumulators) {     
                     destination = new AccumulatorCopier(watchManager, builder, builder);
                 }
             }
@@ -277,11 +328,20 @@ public class CopyOfFeed extends AbsorptionFeed {
         public Receiver getGatherer() throws XPathException {
             Receiver copier = destination;
             if (!copyNamespaces) {
-                copier = new NamespaceReducer(copier);
                 copier = new ProxyReceiver(copier) {
                     @Override
-                    public void namespace(NamespaceBindingSet namespaceBindings, int properties) {
-                        // do nothing
+                    public void startElement(NodeName elemName, SchemaType type, AttributeMap attributes, NamespaceMap namespaces, Location location, int properties) throws XPathException {
+                        NamespaceMap map = NamespaceMap.emptyMap();
+                        if (!elemName.getURI().isEmpty()) {
+                            map = map.put(elemName.getPrefix(), elemName.getURI());
+                        }
+                        for (AttributeInfo att : attributes) {
+                            NodeName name = att.getNodeName();
+                            if (!name.getURI().isEmpty()) {
+                                map = map.put(name.getPrefix(), name.getURI());
+                            }
+                        }
+                        super.startElement(elemName, type, attributes, map, location, properties);
                     }
                 };
             }
@@ -290,65 +350,44 @@ public class CopyOfFeed extends AbsorptionFeed {
                 validationOptions.setSchemaValidationMode(validation);
                 validationOptions.setTopLevelType(type);
                 Configuration config = getPipelineConfiguration().getConfiguration();
-                Location loc = getExpression() == null ? ExplicitLocation.UNKNOWN_LOCATION : getExpression().getLocation();
+                Location loc = getExpression() == null ? Loc.NONE : getExpression().getLocation();
                 if (rootOfCopy.getNodeKind() == Type.DOCUMENT) {
-                    copier = config.getDocumentValidator(copier, rootOfCopy.getBaseURI(), validationOptions, loc);
+                    copier = new ComplexContentOutputter(
+                            config.getDocumentValidator(copier, rootOfCopy.getBaseURI(), validationOptions, loc));
                 } else {
-                    if (!(copier instanceof SequenceReceiver)) {
-                        copier = new TreeReceiver(copier);
-                    }
                     validationOptions.setTopLevelElement(NameOfNode.makeName(rootOfCopy).getStructuredQName());
                     try {
-                        copier = config.getElementValidator(copier, validationOptions, loc);
+                        copier = new ComplexContentOutputter(
+                                config.getElementValidator(copier, validationOptions, loc));
                     } catch (XPathException e) {
                         dynamicError(e);
                         return null;
                     }
                 }
                 PipelineConfiguration newPipe = new PipelineConfiguration(getPipelineConfiguration());
-                newPipe.setErrorListener(new UnfailingErrorListener() {
-
+                newPipe.setErrorReporter(new ErrorReporter() {
                     private int errorCount = 0;
-
-                    public void warning(TransformerException exception) {
-                        //
-                    }
-
-                    public void error(TransformerException exception) {
-                        if (errorCount++ == 0) {
+                    @Override
+                    public void report(XmlProcessingError error) {
+                        if (!error.isWarning() && errorCount++ == 0) {
+                            validationError = XPathException.fromXmlProcessingError(error);
                             try {
-                                //noinspection ThrowableResultOfMethodCallIgnored
-                                final XPathException xe = XPathException.makeXPathException(exception);
-                                validationError = xe;
-                                dynamicError(xe);
+                                dynamicError(validationError);
                             } catch (XPathException e) {
-                                //
-                            }
-                        }
-                    }
-
-                    public void fatalError(TransformerException exception) {
-                        if (errorCount++ == 0) {
-                            try {
-                                //noinspection ThrowableResultOfMethodCallIgnored
-                                final XPathException xe = XPathException.makeXPathException(exception);
-                                validationError = xe;
-                                dynamicError(xe);
-                            } catch (XPathException e) {
-                                //
+                                // no action
                             }
                         }
                     }
                 });
                 copier.setPipelineConfiguration(newPipe);
-                copier = new CatchingReceiver(copier, newPipe.getErrorListener());
+                copier = new CatchingReceiver(copier, newPipe.getErrorReporter());
             }
             return copier;
         }
 
 
         @Override
-        public Sequence<?> deliver() throws XPathException {
+        public Sequence deliver() throws XPathException {
             if (hasFailed()) {
                 if (validationError != null) {
                     throw validationError;
@@ -390,9 +429,11 @@ public class CopyOfFeed extends AbsorptionFeed {
         int depth = 0;
 
         @Override
-        public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties) throws XPathException {
+        public void startElement(NodeName elemName, SchemaType type,
+                                 AttributeMap attributes, NamespaceMap namespaces,
+                                 Location location, int properties) throws XPathException {
             //System.err.println("CopyOfFeed.startElement(" + elemName.getDisplayName() + ")");
-            super.startElement(elemName, typeCode, location, properties);
+            super.startElement(elemName, type, attributes, namespaces, location, properties);
             depth = watchManager.getDepth();
         }
 
@@ -438,27 +479,29 @@ public class CopyOfFeed extends AbsorptionFeed {
     private static class CopiedAccumulatorData implements IAccumulatorData {
 
         private Accumulator accumulator;
-        private IntHashMap<Sequence<?>> preDescentValues = new IntHashMap<>();
-        private IntHashMap<Sequence<?>> postDescentValues = new IntHashMap<>();
+        private IntHashMap<Sequence> preDescentValues = new IntHashMap<>();
+        private IntHashMap<Sequence> postDescentValues = new IntHashMap<>();
 
         public CopiedAccumulatorData(Accumulator acc) {
             this.accumulator = acc;
         }
 
-        public void addValues(TinyNodeImpl node, Sequence<?> preDescent, Sequence<?> postDescent) {
+        public void addValues(TinyNodeImpl node, Sequence preDescent, Sequence postDescent) {
             preDescentValues.put(node.getNodeNumber(), preDescent);
             postDescentValues.put(node.getNodeNumber(), postDescent);
         }
 
+        @Override
         public Accumulator getAccumulator() {
             return accumulator;
         }
 
-        public Sequence<?> getValue(NodeInfo node, boolean postDescent) {
+        @Override
+        public Sequence getValue(NodeInfo node, boolean postDescent) {
             int nodeNr = ((TinyNodeImpl)node).getNodeNumber();
             return postDescent ? postDescentValues.get(nodeNr) : preDescentValues.get(nodeNr);
         }
     }
 }
 
-// Copyright (c) 2005-2014 Saxonica Limited
+// Copyright (c) 2005-2020 Saxonica Limited

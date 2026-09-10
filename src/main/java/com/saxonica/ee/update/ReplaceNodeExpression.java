@@ -13,7 +13,6 @@ import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.linked.NodeImpl;
-import net.sf.saxon.tree.util.AttributeCollectionImpl;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.Type;
@@ -105,6 +104,7 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         typeCheckChildren(visitor, contextInfo);
 
@@ -132,6 +132,7 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         ReplaceNodeExpression exp =
                 new ReplaceNodeExpression(getTargetExp().copy(rebindings), getReplacementExp().copy(rebindings), constructionMode);
@@ -147,8 +148,10 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
      * @param out the expression presenter used to display the structure
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("replaceNodes", this);
+        out.emitAttribute("constructionMode", constructionMode+"");
         getTargetExp().export(out);
         getReplacementExp().export(out);
         out.endElement();
@@ -164,6 +167,7 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
      * @param pul     the pending update list to which the results should be written
      */
 
+    @Override
     public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
         List<Item> content = new ArrayList<Item>();
         NodeInfo target = (NodeInfo) getTargetExp().evaluateItem(context);
@@ -200,7 +204,7 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
         }
         if (kind == Type.ATTRIBUTE) {
             SequenceIterator iter = getReplacementExp().iterate(context);
-            AttributeCollectionImpl atts = new AttributeCollectionImpl(context.getConfiguration());
+            AttributeMap atts = EmptyAttributeMap.getInstance();
             Item item;
             while ((item = iter.next()) != null) {
                 boolean isAttribute = item instanceof NodeInfo && ((NodeInfo) item).getNodeKind() == Type.ATTRIBUTE;
@@ -214,20 +218,21 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
 
                 NodeInfo att = (NodeInfo) item;
                 SimpleType attributeType;
-                int properties = 0;
+                int properties = ReceiverOption.NONE;
                 if (constructionMode == Validation.SKIP || Untyped.getInstance().equals(parent.getSchemaType())) {
                     attributeType = BuiltInAtomicType.UNTYPED_ATOMIC;
                 } else {
                     attributeType = (SimpleType) att.getSchemaType();
                     if (att.isId() || (att.getLocalPart().equals("id") && att.getURI().equals(NamespaceConstant.XML)) ) {
-                        properties |= ReceiverOptions.IS_ID;
+                        properties |= (ReceiverOption.IS_ID);
                     }
                     if (att.isIdref()) {
-                        properties |= ReceiverOptions.IS_IDREF;
+                        properties |= (ReceiverOption.IS_IDREF);
                     }
                 }
 
-                atts.addAttribute(NameOfNode.makeName(att), attributeType, att.getStringValue(), ExplicitLocation.UNKNOWN_LOCATION, properties);
+                atts = atts.put(new AttributeInfo(NameOfNode.makeName(att), attributeType, att.getStringValue(),
+                                  Loc.NONE, properties));
             }
 
             ReplaceAttributeAction action = new ReplaceAttributeAction(parent, target, atts);
@@ -281,11 +286,11 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
                 out.setPipelineConfiguration(pipe);
 
                 out.open();
-                out.startDocument(0);
+                out.startDocument(ReceiverOption.NONE);
 
                 for (Object aContent : content) {
                     Item n = (Item) aContent;
-                    out.append(n, ExplicitLocation.UNKNOWN_LOCATION, ReceiverOptions.ALL_NAMESPACES);
+                    out.append(n, Loc.NONE, ReceiverOption.ALL_NAMESPACES);
                 }
 
                 out.endDocument();
@@ -328,4 +333,4 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
 
 }
 
-// Copyright (c) 2008-2009 Saxonica Limited.
+// Copyright (c) 2008-2020 Saxonica Limited

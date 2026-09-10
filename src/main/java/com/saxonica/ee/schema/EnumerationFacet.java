@@ -35,6 +35,7 @@ public class EnumerationFacet extends Facet {
      * @return "enumeration"
      */
 
+    @Override
     public String getName() {
         return "enumeration";
     }
@@ -45,6 +46,7 @@ public class EnumerationFacet extends Facet {
      * @return the value of this facet
      */
 
+    @Override
     public String getValue() {
         return value;
     }
@@ -102,6 +104,7 @@ public class EnumerationFacet extends Facet {
      * @throws SchemaException if the facet value is not legal given the base type
      */
 
+    @Override
     public void checkFacetRestriction(UserSimpleType type, SimpleType base, SchemaCompiler compiler)
             throws SchemaException, MissingComponentException {
         ConversionRules rules = type.getConfiguration().getConversionRules();
@@ -145,6 +148,7 @@ public class EnumerationFacet extends Facet {
      *         themselves conform to the type, so it always returns true.
      */
 
+    @Override
     public boolean testAtomicValue(AtomicValue value) {
         return true;
     }
@@ -156,4 +160,4 @@ public class EnumerationFacet extends Facet {
 
 }
 
-// Copyright (c) 2004-2012 Saxonica Limited. See Terms and Conditions.
+// Copyright (c) 2004-2020 Saxonica Limited See Terms and Conditions.

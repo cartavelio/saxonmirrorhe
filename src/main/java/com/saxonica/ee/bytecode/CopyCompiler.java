@@ -2,25 +2,24 @@ package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.*;
+import net.sf.saxon.event.ComplexContentOutputter;
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.Copy;
 import net.sf.saxon.expr.instruct.DummyNamespaceResolver;
 import net.sf.saxon.expr.instruct.Instruction;
 import net.sf.saxon.expr.instruct.ValidatingInstruction;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
-import net.sf.saxon.tree.util.NamespaceIterator;
-import net.sf.saxon.tree.util.Navigator;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.Whitespace;
 import org.objectweb.asm.Label;
-import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.TableSwitchGenerator;
 
 import java.util.ArrayList;
@@ -73,8 +72,8 @@ public class CopyCompiler extends ToPushCompiler {
             compileCopyNonNode(compiler, copyInstr, selectedItemVar);
         } else {
 
-            if (th.relationship(resultItemType, BuiltInAtomicType.ANY_ATOMIC) != TypeHierarchy.DISJOINT ||
-                    th.relationship(resultItemType, AnyFunctionType.getInstance()) != TypeHierarchy.DISJOINT) {
+            if (th.relationship(resultItemType, BuiltInAtomicType.ANY_ATOMIC) != Affinity.DISJOINT ||
+                    th.relationship(resultItemType, AnyFunctionType.getInstance()) != Affinity.DISJOINT) {
                 LabelInfo copyNode = mi.newLabel("copyNode");
                 ga.loadLocal(selectedItemVar);
                 ga.ifInstance(NodeInfo.class, copyNode);
@@ -99,6 +98,7 @@ public class CopyCompiler extends ToPushCompiler {
                             net.sf.saxon.type.Type.DOCUMENT,
                             net.sf.saxon.type.Type.NAMESPACE},
                     new TableSwitchGenerator() {
+                        @Override
                         public void generateCase(int key, Label end) {
                             try {
                                 switch (key) {
@@ -130,6 +130,8 @@ public class CopyCompiler extends ToPushCompiler {
                                         compileCopyNamespace(compiler, copyInstr, selectedItemVar);
                                         ga.goTo(end);
                                         break;
+                                    case 123:
+                                        throw new CannotCompileException();
 
                                 }
                             } catch (CannotCompileException e) {
@@ -140,6 +142,7 @@ public class CopyCompiler extends ToPushCompiler {
                         /**
                          * Generates the code for the default switch case.
                          */
+                        @Override
                         public void generateDefault() {
                             ga.goTo(copyEnd);
                         }
@@ -160,116 +163,109 @@ public class CopyCompiler extends ToPushCompiler {
     private void compileCopyDocument(CompilerService compiler, Copy expression, int selectedItemVar) throws CannotCompileException {
 
         Generator ga = compiler.getCurrentGenerator();
-        GeneratedMethodInfo mi = compiler.getCurrentMethod();
+        GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         visitAnnotation(compiler, "Copy - Document");
 
-
-        if (expression.isPreservingTypes()) {
-            compiler.generateGetReceiver();
-            ga.push(0);
-            ga.invokeInstanceMethod(Receiver.class, "startDocument", Integer.TYPE);
-            compileCopyUnparsedEntities(compiler, selectedItemVar);
-            compiler.compileToPush(expression.getContentExpression());
-            compiler.generateGetReceiver();
-            ga.invokeInstanceMethod(Receiver.class, "endDocument");
-        } else {
-            compiler.generateGetReceiver();
-            ga.invokeInstanceMethod(Receiver.class, "getPipelineConfiguration");
-            // assert stack : pipe
-//            boolean pop = false;
+//        if (!preservingTypes) {
+//            ParseOptions options = new ParseOptions(getValidationOptions());
+//            options.setSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
+//            controller.getConfiguration().prepareValidationReporting(context, options);
 //            Receiver val = controller.getConfiguration().
-//                    getDocumentValidator(out, source.getBaseURI(),
-//                            validation, Whitespace.NONE, getSchemaType(), -1);
-            allocateStatic(compiler, compiler.getConfiguration());
-            compiler.generateGetReceiver();
+//                    getDocumentValidator(out, source.getBaseURI(), options, getLocation());
+//            out = new ComplexContentOutputter(val);
+//        }
+//        if (out.getSystemId() == null) {
+//            out.setSystemId(source.getBaseURI());
+//        }
+//        out.startDocument(ReceiverOption.NONE);
+//        copyUnparsedEntities(source, out);
+//        getContentExpression().process(out, context);
+//        out.endDocument();
+
+
+        if (!expression.isPreservingTypes()) {
+            ga.newInstance(ParseOptions.class);
+            //-- ParseOptions
+            ga.dup();
+            //-- ParseOptions ParseOptions
+            allocateStatic(compiler, expression.getValidationOptions());
+            //-- ParseOptions ParseOptions ValidationOptions
+            ga.invokeConstructor(ParseOptions.class, ParseOptions.class);
+            //-- ParseOptions
+            int optionsVar = ga.newLocal(ParseOptions.class);
+            ga.storeLocal(optionsVar);
+            ga.loadLocal(optionsVar);
+            //-- ParseOptions
+            allocateStatic(compiler, NoElementsSpaceStrippingRule.getInstance());
+            //-- ParseOptions SpaceStrippingRule
+            ga.invokeInstanceMethod(ParseOptions.class,"setSpaceStrippingRule", SpaceStrippingRule.class);
+            compiler.generateGetContext();
+            //-- context
+            ga.dup();
+            //-- context
+            ga.invokeInstanceMethod(XPathContext.class, "getConfiguration");
+            //-- context config
+            ga.swap();
+            //-- config context
+            ga.loadLocal(optionsVar);
+            //-- config context options
+            // TODO: this calls a method that doesn't actually do anything...
+            ga.invokeInstanceMethod(Configuration.class, "prepareValidationReporting", XPathContext.class, ParseOptions.class);
+            //Receiver val = controller.getConfiguration().
+            //          getDocumentValidator(out, source.getBaseURI(), options, getLocation());
+            compiler.generateGetContext();
+            //-- context
+            ga.invokeInstanceMethod(XPathContext.class, "getConfiguration");
+            //-- config
+            compiler.generateGetOutputter();
+            //-- config out
             ga.loadLocal(selectedItemVar);
-            ga.checkClass(NodeInfo.class);
-            ga.invokeInstanceMethod(NodeInfo.class, "getBaseURI");
-
-//        ParseOptions options = new ParseOptions();
-//        options.setSchemaValidationMode(validation);
-//        options.setStripSpace(Whitespace.NONE);
-//        options.setTopLevelType(schemaType);
-
-            ga.invokeDefaultConstructor(ParseOptions.class);
-            ga.dup();
-            ga.push(expression.getValidationAction());
-            ga.invokeInstanceMethod(ParseOptions.class, "setSchemaValidationMode", Integer.TYPE);
-            ga.dup();
-            ga.push(Whitespace.NONE);
-            ga.invokeInstanceMethod(ParseOptions.class, "setStripSpace", Integer.TYPE);
-
-            if (expression.getSchemaType() != null) {
-                ga.dup();
-                allocateStatic(compiler, expression.getSchemaType());
-                ga.invokeInstanceMethod(ParseOptions.class, "setTopLevelType", SchemaType.class);
-            }
+            //-- config out source
+            ga.invokeInstanceMethod(NodeInfo.class, "getBaseURI" );
+            //-- config out baseURI
+            ga.loadLocal(optionsVar);
+            //-- config out baseURI options
             allocateStatic(compiler, expression.getLocation());
-//        call getDocumentValidator (Receiver receiver,
-//                String systemId,
-//                ParseOptions validationOptions, Location initiatingLocation){
-
+            //-- config out baseURI options location
             ga.invokeInstanceMethod(Configuration.class, "getDocumentValidator",
-                    Receiver.class, String.class, ParseOptions.class, Location.class);
-
-            // assert stack pipe Receiver(val)
-            ga.dup();
-            // assert stack pipe Receiver(val) Receiver(val)
-            compiler.generateGetReceiver();
-            // assert stack pipe Receiver(val) Receiver(val) Receiver(out)
-            LabelInfo differentReceiver = mi.newLabel("differentReceiver");
-            LabelInfo startDocument = mi.newLabel("startDocument");
-            ga.ifNotSameObject(differentReceiver);
-            // assert stack pipe Receiver(val)
-            ga.swap();
-            ga.pop();
-            // assert stack Receiver(val)
-            ga.goTo(startDocument);
-
-            mi.placeLabel(differentReceiver);
-            // assert stack pipe Receiver(val)
-//            if (val != out) {
-//                SequenceReceiver sr = new TreeReceiver(val);
-//                sr.setPipelineConfiguration(out.getPipelineConfiguration());
-//                context.setReceiver(sr);
-//                pop = true;
-//                out = sr;
-            ga.newInstance(TreeReceiver.class);
-            // assert stack pipe Receiver(val) TreeReceiver
+                                    Receiver.class, String.class, ParseOptions.class, Location.class);
+            //-- receiver
+            ga.newInstance(ComplexContentOutputter.class);
+            //-- receiver CCO
             ga.dupX1();
-            // assert stack pipe TreeReceiver Receiver(val) TreeReceiver
+            //-- CCO receiver CCO
             ga.swap();
-            // assert stack pipe TreeReceiver TreeReceiver Receiver(val)
-            ga.invokeConstructor(TreeReceiver.class, Receiver.class);
-            // assert stack pipe TreeReceiver
-            ga.swap();
-            // assert stack TreeReceiver pipe
-            ga.dup2();
-            // assert stack TreeReceiver pipe TreeReceiver pipe
-            ga.invokeInstanceMethod(Receiver.class, "setPipelineConfiguration", PipelineConfiguration.class);
-            // assert stack TreeReceiver pipe
-            ga.pop();
+            //-- CCO CCO receiver
+            ga.invokeConstructor(ComplexContentOutputter.class, Receiver.class);
+            //-- CCO
+            compiler.pushNewOutputterInfo(ga);
+            
+        }
 
-            mi.placeLabel(startDocument);
-            // assert stack TreeReceiver
-            ga.checkClass(SequenceReceiver.class);
-            compiler.pushNewReceiverInfo(ga);
-            // assert stack (empty)
-            compiler.generateGetReceiver();
-            // assert stack Receiver
+//        if (out.getSystemId() == null) {
+////            out.setSystemId(source.getBaseURI());
+////        }
 
-//            out.startDocument(0);
-//            content.process(context);
-//            out.endDocument();
-            ga.push(0);
-            ga.invokeInstanceMethod(Receiver.class, "startDocument", Integer.TYPE);
-            compileCopyUnparsedEntities(compiler, selectedItemVar);
-
-            compiler.compileToPush(expression.getContentExpression());
-
-            compiler.generateGetReceiver();
-            ga.invokeInstanceMethod(Receiver.class, "endDocument");
-            compiler.popReceiverInfo();
+        LabelInfo baseUriOk = methodInfo.newLabel("baseUriOk");
+        compiler.generateGetOutputter();
+        ga.invokeInstanceMethod(Outputter.class, "getSystemId");
+        ga.ifNonNull(baseUriOk.label());
+        compiler.generateGetOutputter();
+        ga.loadLocal(selectedItemVar);
+        ga.invokeInstanceMethod(NodeInfo.class, "getBaseURI");
+        ga.invokeInstanceMethod(Outputter.class, "setSystemId", String.class);
+        methodInfo.placeLabel(baseUriOk);
+        
+        compiler.generateGetOutputter();
+        ga.push(ReceiverOption.NONE);
+        ga.invokeInstanceMethod(Outputter.class, "startDocument", Integer.TYPE);
+        compileCopyUnparsedEntities(compiler, selectedItemVar);
+        compiler.compileToPush(expression.getContentExpression());
+        compiler.generateGetOutputter();
+        ga.invokeInstanceMethod(Outputter.class, "endDocument");
+            
+        if (!expression.isPreservingTypes()) {
+            compiler.popOutputterInfo();
         }
 
     }
@@ -277,8 +273,8 @@ public class CopyCompiler extends ToPushCompiler {
     private void compileCopyUnparsedEntities(CompilerService compiler, int selectedItemVar) {
         Generator ga = compiler.getCurrentGenerator();
         ga.loadLocal(selectedItemVar);
-        compiler.generateGetReceiver();
-        ga.invokeStaticMethod(Copy.class, "copyUnparsedEntities", NodeInfo.class, Receiver.class);
+        compiler.generateGetOutputter();
+        ga.invokeStaticMethod(Copy.class, "copyUnparsedEntities", NodeInfo.class, Outputter.class);
     }
 
     private void compileCopyElement(CompilerService compiler, Copy expression, int selectedItemVar) throws CannotCompileException {
@@ -288,92 +284,94 @@ public class CopyCompiler extends ToPushCompiler {
         visitAnnotation(compiler, "Copy - Element");
         Expression content = expression.getContentExpression();
         Location locationId = expression.getLocation();
-        int properties = expression.isInheritNamespacesToChildren() ? 0 : ReceiverOptions.DISINHERIT_NAMESPACES;
-        if (!expression.isInheritNamespacesFromParent()) {
-            properties |= ReceiverOptions.REFUSE_NAMESPACES;
-        }
 
-        boolean needsNameCodeVar = true; //!expression.isCopyNamespaces() || !expression.isPreservingTypes();
+        int properties = ReceiverOption.NONE;
+        if (!expression.isBequeathNamespacesToChildren()) {
+            properties |= ReceiverOption.DISINHERIT_NAMESPACES;
+        }
+        if (!expression.isInheritNamespacesFromParent()) {
+            properties |= ReceiverOption.REFUSE_NAMESPACES;
+        }
+        properties |= ReceiverOption.ALL_NAMESPACES;
+
         int nodeNameVar = ga.newLocal(NodeName.class);
         ga.loadLocal(selectedItemVar);
         ga.checkClass(NodeInfo.class);
         ga.invokeStaticMethod(NameOfNode.class, "makeName", NodeInfo.class);
         ga.storeLocal(nodeNameVar);
 
+        int elemOutVar = ga.newLocal(Receiver.class);
+        compiler.generateGetOutputter();
+        ga.storeLocal(elemOutVar);
+
         if (!expression.isPreservingTypes()) {
-//                Receiver validator = context.getConfiguration().getElementValidator(
-//                        out, nameCode, locationId, getSchemaType(), validation);
-//                if (validator != out) {
-//                    context.setReceiver(new TreeReceiver(validator));
-//                }
+//            ParseOptions options = new ParseOptions(getValidationOptions());
+//            options.setTopLevelElement(elemName.getStructuredQName());
+//            context.getConfiguration().prepareValidationReporting(context, options);
+//            Receiver validator = context.getConfiguration().getElementValidator(elemOut, options, getLocation());
+//
+//            if (validator != elemOut) {
+//                out = new ComplexContentOutputter(validator);
+//            }
+//            elemOut = validator;
 
-            if (expression.getValidationAction() == Validation.STRIP) {
-                // Save existing receiver on stack
-                ElementCreatorCompiler.addTypeStripper(compiler);
-            } else {
 
-                // ParseOptions options = new ParseOptions();
-                // options.setSchemaValidationMode(validation);
-                // options.setTopLevelType(schemaType);
-                // options.setTopLevelElement(NameOfNode.makeName(source));
-                // Configuration.getElementValidator(receiver, options, locationId)
-                compiler.generateGetContext();
-                ga.invokeInstanceMethod(XPathContext.class, "getConfiguration");
-                compiler.generateGetReceiver();
+            compiler.generateGetContext();
+            ga.invokeInstanceMethod(XPathContext.class, "getConfiguration");
+            //-- config
+            compiler.generateGetOutputter();
+            //-- config outputter
+            ga.newInstance(ParseOptions.class);
+            ga.dup();
+            allocateStatic(compiler, expression.getValidationOptions());
+            //-- config outputter options options validationOptions
+            ga.invokeConstructor(ParseOptions.class, ParseOptions.class);
+            //-- config outputter options
+            ga.dup();
+            //-- config outputter options options
+            ga.loadLocal(nodeNameVar);
+            //-- config outputter options options nodename
+            ga.invokeInstanceMethod(NodeName.class, "getStructuredQName");
+            //-- config outputter options options qname
+            ga.invokeInstanceMethod(ParseOptions.class, "setTopLevelElement", StructuredQName.class);
+            allocateStatic(compiler, locationId);
+            //-- config outputter options location
+            ga.invokeInstanceMethod(Configuration.class, "getElementValidator",
+                                    Receiver.class, ParseOptions.class, Location.class);
+            //-- validator
+            int validatorVar = methodInfo.allocateLocal(Receiver.class);
+            ga.storeLocal(validatorVar);
+            //-- (empty)
 
-                ga.invokeDefaultConstructor(ParseOptions.class);
-                ga.dup();
-                ga.push(expression.getValidationAction());
-                ga.invokeInstanceMethod(ParseOptions.class, "setSchemaValidationMode", Integer.TYPE);
-                if (expression.getSchemaType() != null) {
-                    ga.dup();
-                    allocateStatic(compiler, expression.getSchemaType());
-                    ga.invokeInstanceMethod(ParseOptions.class, "setTopLevelType", SchemaType.class);
-                }
-                ga.dup();
-                ga.loadLocal(selectedItemVar);
-                ga.checkClass(NodeInfo.class);
-                ga.invokeStaticMethod(Navigator.class, "getNodeName", NodeInfo.class);
-                ga.invokeInstanceMethod(ParseOptions.class, "setTopLevelElement", StructuredQName.class);
-                allocateStatic(compiler, expression.getLocation());
-
-                ga.invokeInstanceMethod(Configuration.class, "getElementValidator",
-                        Receiver.class, ParseOptions.class, Location.class);
-
-                int validatorVar = methodInfo.allocateLocal(Receiver.class);
-                ga.storeLocal(validatorVar);
-
-                ga.loadLocal(validatorVar);
-                compiler.generateGetReceiver();
-                LabelInfo sameReceiver = methodInfo.newLabel("sameReceiver");
-                LabelInfo doneReceiver = methodInfo.newLabel("doneReceiver");
-                ga.ifSameObject(sameReceiver);
-                ga.newInstance(Type.getType(TreeReceiver.class));
-                ga.dup();
-                ga.loadLocal(validatorVar);
-                ga.invokeConstructor(TreeReceiver.class, Receiver.class);
-                ga.goTo(doneReceiver);
-                methodInfo.placeLabel(sameReceiver);
-                compiler.generateGetReceiver();
-                methodInfo.placeLabel(doneReceiver);
-                compiler.pushNewReceiverInfo(ga);
-                methodInfo.releaseLocal(validatorVar);
-            }
+            ga.loadLocal(validatorVar);
+            ga.loadLocal(elemOutVar);
+            LabelInfo sameReceiver = methodInfo.newLabel("sameReceiver");
+            ga.ifSameObject(sameReceiver);
+            //-- (empty)
+            ga.newInstance(ComplexContentOutputter.class);
+            ga.dup();
+            ga.loadLocal(validatorVar);
+            ga.invokeConstructor(ComplexContentOutputter.class, Receiver.class);
+            ga.storeLocal(elemOutVar);
+            methodInfo.placeLabel(sameReceiver);
+            //-- (empty)
+            ga.loadLocal(elemOutVar);
+            compiler.pushNewOutputterInfo(ga);
         }
 
         LabelInfo nonNullSystemId = methodInfo.newLabel("nonNullSystemId");
         visitAnnotation(compiler, "Copy - Element - Base URI");
-        compiler.generateGetReceiver();
-        ga.invokeInstanceMethod(Receiver.class, "getSystemId");
+        compiler.generateGetOutputter();
+        ga.invokeInstanceMethod(Outputter.class, "getSystemId");
         ga.ifNonNull(nonNullSystemId.label());
-        compiler.generateGetReceiver();
+        compiler.generateGetOutputter();
         ga.loadLocal(selectedItemVar);
         ga.checkClass(NodeInfo.class);
         ga.invokeInstanceMethod(NodeInfo.class, "getBaseURI");
-        ga.invokeInstanceMethod(Receiver.class, "setSystemId", String.class);
+        ga.invokeInstanceMethod(Outputter.class, "setSystemId", String.class);
         methodInfo.placeLabel(nonNullSystemId);
 
-        compiler.generateGetReceiver();
+        compiler.generateGetOutputter();
         visitAnnotation(compiler, "Copy - Element - NameOfNode");
         ga.loadLocal(nodeNameVar);
 
@@ -382,34 +380,58 @@ public class CopyCompiler extends ToPushCompiler {
         allocateStatic(compiler, typeCode);
         allocateStatic(compiler, locationId);
         ga.push(properties);
-        ga.invokeInstanceMethod(Receiver.class, "startElement", NodeName.class, SchemaType.class, Location.class, Integer.TYPE);
+        ga.invokeInstanceMethod(Outputter.class, "startElement", NodeName.class, SchemaType.class, Location.class, Integer.TYPE);
         if (expression.isCopyNamespaces()) {
-            // NamespaceIterator.sendNamespaces(copiedNode, receiver);
+//            receiver.namespaces(copiedNode.getAllNamespaces(), ReceiverOption.NAMESPACE_OK);
+            compiler.generateGetOutputter();
             ga.loadLocal(selectedItemVar);
-            compiler.generateGetReceiver();
-            ga.invokeStaticMethod(NamespaceIterator.class, "sendNamespaces", NodeInfo.class, Receiver.class);
+            ga.invokeInstanceMethod(NodeInfo.class, "getAllNamespaces");
+            ga.push(ReceiverOption.NONE);
+            ga.invokeInstanceMethod(Outputter.class, "namespaces", NamespaceBindingSet.class, Integer.TYPE);
         } else {
-            // receiver.namespace(nodeName.getNamespaceBinding(), 0);
-            compiler.generateGetReceiver();
+//            NamespaceBinding ns = nodeName.getNamespaceBinding();
+//            if (!ns.isDefaultUndeclaration()) {
+//                receiver.namespace(ns.getPrefix(), ns.getURI(), ReceiverOption.NONE);
+//            }
+            compiler.generateGetOutputter();
+            //-- out
+            LabelInfo defaultUndecl = methodInfo.newLabel("defaultUndecl");
+            LabelInfo fi = methodInfo.newLabel("fi");
             ga.loadLocal(nodeNameVar);
+            //-- out name
             ga.invokeInstanceMethod(NodeName.class, "getNamespaceBinding");
-            ga.push(0);
-            ga.invokeInstanceMethod(Receiver.class, "namespace", NamespaceBindingSet.class, Integer.TYPE);
+            //-- out binding
+            ga.dup();
+            //-- out binding binding
+            ga.invokeInstanceMethod(NamespaceBinding.class, "isDefaultUndeclaration");
+            //-- out binding boolean
+            ga.ifTrue(defaultUndecl);
+            //-- out binding
+            ga.push(ReceiverOption.NONE);
+            //-- out binding int
+            ga.invokeInstanceMethod(Outputter.class, "namespaces", NamespaceBindingSet.class, Integer.TYPE);
+            //-- (empty)
+            ga.goTo(fi);
+            methodInfo.placeLabel(defaultUndecl);
+            //-- out binding
+            ga.pop2();
+            //-- (empty)
+            methodInfo.placeLabel(fi);
         }
 
         compiler.compileToPush(content);
 
-        compiler.generateGetReceiver();
-        ga.invokeInstanceMethod(Receiver.class, "endElement");
+        compiler.generateGetOutputter();
+        ga.invokeInstanceMethod(Outputter.class, "endElement");
 
         if (!expression.isPreservingTypes()) {
-            compiler.popReceiverInfo();
+            compiler.popOutputterInfo();
         }
 
         methodInfo.releaseLocal(nodeNameVar);
     }
 
-    protected static void compileCopyAttribute(CompilerService compiler, ValidatingInstruction expression, int selectedItemVar, boolean preserveTypes) {
+    private static void compileCopyAttribute(CompilerService compiler, ValidatingInstruction expression, int selectedItemVar, boolean preserveTypes) {
         Generator ga = compiler.getCurrentGenerator();
 
         // out.attribute(namecode, typecode, value, locationId, properties)
@@ -417,9 +439,7 @@ public class CopyCompiler extends ToPushCompiler {
         int nodeNameVar = mi.allocateLocal(NodeName.class);
         visitAnnotation(compiler, "Copy_Attribute");
 
-        LabelInfo nonEmptyFi = mi.newLabel("nonEmptyFi");
-
-        compiler.generateGetReceiver();
+        compiler.generateGetOutputter();
         ga.loadLocal(selectedItemVar);
         ga.checkClass(NodeInfo.class);
         ga.invokeStaticMethod(NameOfNode.class, "makeName", NodeInfo.class);
@@ -468,8 +488,9 @@ public class CopyCompiler extends ToPushCompiler {
                     ga.loadLocal(selectedItemVar);
                     ga.invokeInstanceMethod(Item.class, "getStringValueCS");
                     allocateStatic(compiler, ((Expression) expression).getLocation());
-                    ga.push(0);
-                    ga.invokeInstanceMethod(Receiver.class, "attribute", NodeName.class, SimpleType.class, CharSequence.class, Location.class, Integer.TYPE);
+                    ga.push(ReceiverOption.NONE);
+                    ga.invokeInstanceMethod(Outputter.class, "attribute", NodeName.class, SimpleType.class,
+                                            CharSequence.class, Location.class, Integer.TYPE);
                 }
             } else {
                 compiler.generateDynamicError("Cannot validate an attribute against a complex type",
@@ -491,7 +512,7 @@ public class CopyCompiler extends ToPushCompiler {
             ga.invokeInstanceMethod(SimpleType.class, "isNamespaceSensitive");
             ga.ifFalse(notSensitive);
             compiler.generateDynamicError("Cannot preserve type annotation when copying an attribute with namespace-sensitive content",
-                                          ((Instruction) expression).getPackageData().getHostLanguage() == Configuration.XSLT ? "XTTE0950" : "XQTY0086",
+                                          ((Instruction) expression).getPackageData().isXSLT() ? "XTTE0950" : "XQTY0086",
                                           ((Expression) expression).getLocation(), true);
             mi.placeLabel(notSensitive);
             ga.checkClass(SimpleType.class);
@@ -502,21 +523,33 @@ public class CopyCompiler extends ToPushCompiler {
         ga.invokeInstanceMethod(Item.class, "getStringValueCS");
         FixedAttributeCompiler.generateAttributeValidationPushCode(compiler, expression, null, nodeNameVar);
         allocateStatic(compiler, ((Expression) expression).getLocation());
-        ga.push(0);
-        ga.invokeInstanceMethod(Receiver.class, "attribute", NodeName.class, SimpleType.class, CharSequence.class, Location.class, Integer.TYPE);
+        ga.push(ReceiverOption.NONE);
+        ga.invokeInstanceMethod(Outputter.class, "attribute", NodeName.class, SimpleType.class,
+                                CharSequence.class, Location.class, Integer.TYPE);
 
     }
 
     protected static void compileCopyNamespace(CompilerService compiler, Expression expression, int selectedItemVar) {
-        // source.copy(out, 0, locationId);
+
         Generator ga = compiler.getCurrentGenerator();
         visitAnnotation(compiler, "Copy - Namespace");
+//        ga.loadLocal(selectedItemVar);
+//        ga.checkClass(NodeInfo.class);
+        compiler.generateGetOutputter();
         ga.loadLocal(selectedItemVar);
         ga.checkClass(NodeInfo.class);
-        compiler.generateGetReceiver();
-        ga.push(0);
-        allocateStatic(compiler, expression.getLocation());
-        ga.invokeInstanceMethod(NodeInfo.class, "copy", Receiver.class, Integer.TYPE, Location.class);
+        ga.dup();
+        // Outputter NodeInfo NodeInfo
+        ga.invokeInstanceMethod(NodeInfo.class, "getLocalPart");
+        // Outputter NodeInfo String
+        ga.swap();
+        // Outputter String NodeInfo
+        ga.invokeInstanceMethod(NodeInfo.class, "getStringValue");
+        // Outputter String String
+        ga.push(ReceiverOption.NONE);
+        ga.invokeInstanceMethod(Outputter.class, "namespace", String.class, String.class, Integer.TYPE);
+
+
     }
 
     protected static void compileCopyText(CompilerService compiler, Expression expression, int selectedItemVar) {
@@ -524,62 +557,60 @@ public class CopyCompiler extends ToPushCompiler {
         final Generator ga = compiler.getCurrentGenerator();
         final GeneratedMethodInfo mi = compiler.getCurrentMethod();
         visitAnnotation(compiler, "Copy - Text");
-        compiler.generateGetReceiver();
+        compiler.generateGetOutputter();
         ga.loadLocal(selectedItemVar);
         ga.checkClass(NodeInfo.class);
         ga.invokeInstanceMethod(NodeInfo.class, "getStringValueCS");
         LabelInfo nonEmptyFi = mi.newLabel("nonEmptyFi");
         allocateStatic(compiler, expression.getLocation());
-        ga.push(0);
-        ga.invokeInstanceMethod(Receiver.class, "characters", CharSequence.class, Location.class, Integer.TYPE);
+        ga.push(ReceiverOption.NONE);
+        ga.invokeInstanceMethod(Outputter.class, "characters", CharSequence.class, Location.class, Integer.TYPE);
 
     }
 
-    protected static void compileCopyComment(CompilerService compiler, Expression expression, int selectedItemVar) {
+    private static void compileCopyComment(CompilerService compiler, Expression expression, int selectedItemVar) {
         // out.comment(source.getStringValueCS(), locationId, 0);
         final Generator ga = compiler.getCurrentGenerator();
-        final GeneratedMethodInfo mi = compiler.getCurrentMethod();
         visitAnnotation(compiler, "Copy - Comment");
-        compiler.generateGetReceiver();
+        compiler.generateGetOutputter();
         ga.loadLocal(selectedItemVar);
         ga.checkClass(NodeInfo.class);
         ga.invokeInstanceMethod(NodeInfo.class, "getStringValueCS");
         allocateStatic(compiler, expression.getLocation());
-        ga.push(0);
-        ga.invokeInstanceMethod(Receiver.class, "comment", CharSequence.class, Location.class, Integer.TYPE);
+        ga.push(ReceiverOption.NONE);
+        ga.invokeInstanceMethod(Outputter.class, "comment", CharSequence.class, Location.class, Integer.TYPE);
 
     }
 
-    protected static void compileCopyProcessingInstruction(CompilerService compiler, Expression expression, int selectedItemVar) {
+    private static void compileCopyProcessingInstruction(CompilerService compiler, Expression expression, int selectedItemVar) {
         // out.processingInstruction(source.getDisplayName(), source.getStringValueCS(), locationId, 0);
         final Generator ga = compiler.getCurrentGenerator();
         final GeneratedMethodInfo mi = compiler.getCurrentMethod();
         visitAnnotation(compiler, "Copy - PI");
-        compiler.generateGetReceiver();
+        compiler.generateGetOutputter();
         ga.loadLocal(selectedItemVar);
         ga.checkClass(NodeInfo.class);
         ga.invokeInstanceMethod(NodeInfo.class, "getDisplayName");
         ga.loadLocal(selectedItemVar);
         ga.checkClass(NodeInfo.class);
         ga.invokeInstanceMethod(NodeInfo.class, "getStringValueCS");
-        LabelInfo nonEmptyFi = mi.newLabel("nonEmptyFi");
         allocateStatic(compiler, expression.getLocation());
-        ga.push(0);
-        ga.invokeInstanceMethod(Receiver.class, "processingInstruction", String.class, CharSequence.class, Location.class, Integer.TYPE);
+        ga.push(ReceiverOption.NONE);
+        ga.invokeInstanceMethod(Outputter.class, "processingInstruction", String.class, CharSequence.class, Location.class, Integer.TYPE);
 
     }
 
-    protected static void compileCopyNonNode(CompilerService compiler, Expression expression, int selectedItemVar) {
+    private static void compileCopyNonNode(CompilerService compiler, Expression expression, int selectedItemVar) {
         // out.append(item, locationId, NodeInfo.ALL_NAMESPACES);
         Generator ga = compiler.getCurrentGenerator();
         visitAnnotation(compiler, "Copy_NonNode");
-        compiler.generateGetReceiver();
+        compiler.generateGetOutputter();
         ga.loadLocal(selectedItemVar);
         allocateStatic(compiler, expression.getLocation());
-        ga.push(ReceiverOptions.ALL_NAMESPACES);
-        ga.invokeInstanceMethod(Receiver.class, "append", Item.class, Location.class, Integer.TYPE);
+        ga.push(ReceiverOption.ALL_NAMESPACES);
+        ga.invokeInstanceMethod(Outputter.class, "append", Item.class, Location.class, Integer.TYPE);
     }
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

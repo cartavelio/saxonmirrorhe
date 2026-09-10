@@ -148,6 +148,7 @@ public class StreamingAdjunct {
         } else if (exp instanceof StreamInstr) {
             final StreamInstr stream = (StreamInstr)exp;
             return new StreamingAdjunct() {
+                @Override
                 public PostureAndSweep computeStreamability(ContextItemStaticInfoEE contextInfo, List<String> reasons) {
                     Streamability.getStreamability(stream.getHref(), contextInfo, reasons);
                     return new PostureAndSweep(Posture.GROUNDED, Streamability.getSweep(stream.getHref()));
@@ -419,4 +420,4 @@ public class StreamingAdjunct {
 }
 
 
-// Copyright (c) 2010-2015 Saxonica Limited.
+// Copyright (c) 2010-2020 Saxonica Limited

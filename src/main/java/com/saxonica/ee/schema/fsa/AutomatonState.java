@@ -69,6 +69,7 @@ public abstract class AutomatonState implements State {
      * @return true if this is a final state
      */
 
+    @Override
     public boolean isFinalState() {
         return isFinalState && min < 1;
     }
@@ -292,6 +293,7 @@ public abstract class AutomatonState implements State {
      *         or null if this token is not accepted when in this State (which implies a validation error).
      */
 
+    @Override
     public Edge getTransition(int token, UserComplexType type) {
         // assert determinized;
 
@@ -338,9 +340,8 @@ public abstract class AutomatonState implements State {
                 }
             } else {
                 Edge edge = (Edge) ((IntHashMap) specificTransitions).get(token);
-                if (edge != null) {
-                    return edge;
-                }
+                return edge;
+                
             }
         }
         return null;
@@ -406,6 +407,7 @@ public abstract class AutomatonState implements State {
      * @return the list of permitted elements as a string containing comma-separated element names
      */
 
+    @Override
     public CharSequence listAllowedElements() {
         List<String> allowed = new ArrayList<String>(10);
         getAllowedElements(allowed);
@@ -483,6 +485,7 @@ public abstract class AutomatonState implements State {
      *         returned by this Iterator are {@link Edge} objects.
      */
 
+    @Override
     public Edge[] getWildcardEdges() {
         return wildcardEdges == null ?
                 EMPTY_EDGE_ARRAY :
@@ -497,6 +500,7 @@ public abstract class AutomatonState implements State {
      */
 
     /*@NotNull*/
+    @Override
     public Iterator<Edge> getEdges() {
         if (specificTransitions == null) {
             if (wildcardEdges == null) {
@@ -650,6 +654,7 @@ public abstract class AutomatonState implements State {
             which = 0;
         }
 
+        @Override
         public boolean hasNext() {
             while (true) {
                 if (iter[which].hasNext()) {
@@ -662,10 +667,12 @@ public abstract class AutomatonState implements State {
             }
         }
 
+        @Override
         public Edge next() {
             return iter[which].next();
         }
 
+        @Override
         public void remove() {
             throw new UnsupportedOperationException("remove() not supported on EdgeIterator");
         }
@@ -707,4 +714,4 @@ public abstract class AutomatonState implements State {
 
 }
 
-// Copyright (c) 2004-2006 Saxonica Limited. See Terms and Conditions.
+// Copyright (c) 2004-2020 Saxonica Limited See Terms and Conditions.

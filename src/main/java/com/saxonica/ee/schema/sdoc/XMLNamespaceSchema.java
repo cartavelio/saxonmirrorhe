@@ -105,6 +105,6 @@ public class XMLNamespaceSchema {
 }
 
 //
-// Copyright (c) Saxonica 2006
+// Copyright (c) 2006-2020 Saxonica Limited
 //
 

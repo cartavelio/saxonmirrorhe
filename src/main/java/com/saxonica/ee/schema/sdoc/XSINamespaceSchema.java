@@ -62,7 +62,5 @@ public class XSINamespaceSchema {
 
 }
 
-//
-// Copyright (c) Saxonica 2010.
-//
+// Copyright (c) 2010-2020 Saxonica Limited
 

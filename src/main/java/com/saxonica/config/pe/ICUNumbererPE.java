@@ -31,15 +31,13 @@ public class ICUNumbererPE extends AbstractNumberer {
     private String useCardinal;
     private String useOrdinal;
     private String useNumberOrdinal;
-    private Map<String, String> ordinalParamIndex = new ConcurrentHashMap<String, String>();
-    ArrayList<String> spelloutCardinalRulesets = new ArrayList<String>();
-    ArrayList<String> spelloutOrdinalRulesets = new ArrayList<String>();
-    ArrayList<String> spelloutNumberingRulesets = new ArrayList<String>();
-    ArrayList<String> numberOrdinalRulesets = new ArrayList<String>();
-    //private com.ibm.icu.util.GregorianCalendar cal;
+    private Map<String, String> ordinalParamIndex = new ConcurrentHashMap<>();
+    private ArrayList<String> spelloutCardinalRulesets = new ArrayList<>();
+    private ArrayList<String> spelloutOrdinalRulesets = new ArrayList<>();
+    private ArrayList<String> spelloutNumberingRulesets = new ArrayList<>();
+    private ArrayList<String> numberOrdinalRulesets = new ArrayList<>();
     private Locale locale;
     private Locale defaultedLocale;
-    //private boolean englishSpacing = false; // Using "Twenty Two" rather than "Twenty-Two"
 
     private final static String DAY_FULL = "EEEE",
         DAY_SHORT = "EEE",
@@ -49,15 +47,13 @@ public class ICUNumbererPE extends AbstractNumberer {
         MONTH_SHORT = "MMM",
         MONTH_NARROW = "MMMMM";
 
-    private static String preferences[] = {"-verbose", "", "-native", "-neuter", "-feminine", "-masculine"};
-    private static String formats[] = {MONTH_FULL, MONTH_SHORT, MONTH_NARROW,
-        DAY_FULL, DAY_SHORT, DAY_NARROW, DAY_SHORT2};
+    private static String[] preferences = {"-verbose", "", "-native", "-neuter", "-feminine", "-masculine"};
 
     private RuleBasedNumberFormat rbnf = null;
     private RuleBasedNumberFormat rbnfNumber = null;
-    private ThreadLocal<HashMap<String, SimpleDateFormat>> simpleDateFormats = new ThreadLocal<HashMap<String, SimpleDateFormat>>();
+    private ThreadLocal<HashMap<String, SimpleDateFormat>> simpleDateFormats = new ThreadLocal<>();
 
-    private static HashMap<String, String> schemeCodes = new HashMap<String, String>();
+    private static HashMap<String, String> schemeCodes = new HashMap<>();
 
     static {
         schemeCodes.put("do", "%digits-ordinal");
@@ -103,7 +99,7 @@ public class ICUNumbererPE extends AbstractNumberer {
         // See bug 2436.
         HashMap<String, SimpleDateFormat> map = simpleDateFormats.get();
         if (map == null) {
-            map = new HashMap<String, SimpleDateFormat>();
+            map = new HashMap<>();
             simpleDateFormats.set(map);
         }
         SimpleDateFormat s = map.get(pattern);
@@ -114,11 +110,7 @@ public class ICUNumbererPE extends AbstractNumberer {
         return s;
     }
 
-    public ICUNumbererPE() {
-    }
- /*   public ICUNumbererPE(Locale locale, String privateUseExtension, Configuration config) {
-        config(locale,privateUseExtension,config);
-    }*/
+    ICUNumbererPE() { }
 
     /**
      * Returns a suitable configured ICU numberer or a specialist subclass thereof.
@@ -170,7 +162,7 @@ public class ICUNumbererPE extends AbstractNumberer {
         rbnfNumber = new RuleBasedNumberFormat(locale, RuleBasedNumberFormat.ORDINAL);
         this.locale = locale;
 
-        String rules[] = rbnf.getRuleSetNames();
+        String[] rules = rbnf.getRuleSetNames();
         for (String s : rules) {
             if (s.startsWith(spelloutCardinalPattern)) {
                 spelloutCardinalRulesets.add(s);
@@ -256,6 +248,7 @@ public class ICUNumbererPE extends AbstractNumberer {
      *
      * @return the locale actually used, null if no default was required.
      */
+    @Override
     public Locale defaultedLocale() {
         return defaultedLocale;
     }
@@ -276,11 +269,11 @@ public class ICUNumbererPE extends AbstractNumberer {
      * @return The set of locales as 'code';'display name' pairs
      */
     public static String[] getLocales() {
-        ArrayList<String> locales = new ArrayList<String>();
+        ArrayList<String> locales = new ArrayList<>();
         for (Locale l : RuleBasedCollator.getAvailableLocales()) {
             locales.add(ICULibrary.getLanguageTag(l) + ";" + l.getDisplayName());
         }
-        return locales.toArray(new String[locales.size()]);
+        return locales.toArray(new String[0]);
     }
 
     public static String[] getPreferences() {
@@ -327,8 +320,8 @@ public class ICUNumbererPE extends AbstractNumberer {
      */
     public static String getICUVersion() {
         VersionInfo icu = VersionInfo.ICU_VERSION;
-        return Integer.toString(icu.getMajor()) + "." + Integer.toString(icu.getMinor())
-            + "." + Integer.toString(icu.getMilli()) + "." + Integer.toString(icu.getMicro());
+        return icu.getMajor() + "." + icu.getMinor()
+            + "." + icu.getMilli() + "." + icu.getMicro();
     }
 
     @Override
@@ -450,11 +443,11 @@ public class ICUNumbererPE extends AbstractNumberer {
                 && Character.isLowerCase(s.charAt(1))) {
                 return s;
             }
-            String result = "";
+            StringBuilder result = new StringBuilder();
             boolean precedingLetter = false;
             for (char c : s.toCharArray()) {
                 boolean isLetter = Character.isLetter(c);
-                result += isLetter ? precedingLetter ? Character.toLowerCase(c) : Character.toUpperCase(c) : c;
+                result.append(isLetter ? precedingLetter ? Character.toLowerCase(c) : Character.toUpperCase(c) : c);
                 precedingLetter = isLetter;
             }
             /* Lower case all the 'and' words - note that this may not be correct for all languages,
@@ -467,35 +460,56 @@ public class ICUNumbererPE extends AbstractNumberer {
              * so the replacement includes a trailing space
              **/
             String lang = locale.getLanguage();
-            if (lang.equals("en")) {
-                result = result.replaceAll("And", "and");
-            } else if (lang.equals("de")) {
-                result = result.replaceAll("Und", "und");
-            } else if (lang.equals("nl")) {
-                result = result.replaceAll("Ën", "ën");
-            } else if (lang.equals("af")) {
-                result = result.replaceAll("En", "en");
-            } else if (lang.equals("da") || lang.equals("fo") || lang.equals("is")
-                || lang.equals("nb") || lang.equals("nn")) {
-                result = result.replaceAll("Og", "og");
-            } else if (lang.equals("ga")) {
-                result = result.replaceAll("A ", "a ");
-            } else if (lang.equals("hr") || lang.equals("ca")) {
-                result = result.replaceAll("I", "i");
-            } else if (lang.equals("bg") || lang.equals("mk") || lang.equals("sr")) {
-                result = result.replaceAll("И ", "и ");
-            } else if (lang.equals("mt")) {
-                result = result.replaceAll("U", "u");
-            } else if (lang.equals("pt") || lang.equals("sq")) {
-                result = result.replaceAll("E", "e");
-            } else if (lang.equals("ro")) {
-                result = result.replaceAll("Şi", "şi");
-            } else if (lang.equals("ee")) {
-                result = result.replaceAll("Vɔ", "vɔ");
-            } else if (lang.equals("fi")) {
-                result = result.replaceAll("At", "at");
+            switch (lang) {
+                case "en":
+                    result = new StringBuilder(result.toString().replaceAll("And", "and"));
+                    break;
+                case "de":
+                    result = new StringBuilder(result.toString().replaceAll("Und", "und"));
+                    break;
+                case "nl":
+                    result = new StringBuilder(result.toString().replaceAll("Ën", "ën"));
+                    break;
+                case "af":
+                    result = new StringBuilder(result.toString().replaceAll("En", "en"));
+                    break;
+                case "da":
+                case "fo":
+                case "is":
+                case "nb":
+                case "nn":
+                    result = new StringBuilder(result.toString().replaceAll("Og", "og"));
+                    break;
+                case "ga":
+                    result = new StringBuilder(result.toString().replaceAll("A ", "a "));
+                    break;
+                case "hr":
+                case "ca":
+                    result = new StringBuilder(result.toString().replaceAll("I", "i"));
+                    break;
+                case "bg":
+                case "mk":
+                case "sr":
+                    result = new StringBuilder(result.toString().replaceAll("И ", "и "));
+                    break;
+                case "mt":
+                    result = new StringBuilder(result.toString().replaceAll("U", "u"));
+                    break;
+                case "pt":
+                case "sq":
+                    result = new StringBuilder(result.toString().replaceAll("E", "e"));
+                    break;
+                case "ro":
+                    result = new StringBuilder(result.toString().replaceAll("Şi", "şi"));
+                    break;
+                case "ee":
+                    result = new StringBuilder(result.toString().replaceAll("Vɔ", "vɔ"));
+                    break;
+                case "fi":
+                    result = new StringBuilder(result.toString().replaceAll("At", "at"));
+                    break;
             }
-            return result;
+            return result.toString();
         } else {
             return s;
         }
@@ -555,4 +569,4 @@ public class ICUNumbererPE extends AbstractNumberer {
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

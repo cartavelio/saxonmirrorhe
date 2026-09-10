@@ -19,10 +19,10 @@ import java.util.List;
  * purpose of taking a snapshot is to ensure that changes to the base iterator in one thread do not
  * affect the focus of another thread.
  */
-public class ManualGroupIterator extends ManualIterator<Item<?>> implements GroupIterator {
+public class ManualGroupIterator extends ManualIterator implements GroupIterator {
 
     private AtomicSequence currentGroupingKey;
-    private List<Item<?>> currentGroupItems = new ArrayList<>();
+    private List<Item> currentGroupItems = new ArrayList<>();
 
     /**
      * Create a manual grouping iterator
@@ -36,6 +36,7 @@ public class ManualGroupIterator extends ManualIterator<Item<?>> implements Grou
     }
 
 
+    @Override
     public ManualGroupIterator getSnapShot(XPathContext context) {
         return this;
     }
@@ -45,12 +46,13 @@ public class ManualGroupIterator extends ManualIterator<Item<?>> implements Grou
         currentGroupingKey = key;
     }
 
+    @Override
     public AtomicSequence getCurrentGroupingKey() {
         //System.err.println("MGI " + this + " GET KEY = " + currentGroupingKey);
         return currentGroupingKey;
     }
     
-    public void setCurrentGroup(List<Item<?>> group) {
+    public void setCurrentGroup(List<Item> group) {
         this.currentGroupItems = group;
     }
 
@@ -64,7 +66,8 @@ public class ManualGroupIterator extends ManualIterator<Item<?>> implements Grou
         this.currentGroupItems.add(item);
     }
 
-    public SequenceIterator<?> iterateCurrentGroup() throws XPathException {
+    @Override
+    public SequenceIterator iterateCurrentGroup() throws XPathException {
         return new ListIterator<>(currentGroupItems);
     }
 
@@ -74,4 +77,4 @@ public class ManualGroupIterator extends ManualIterator<Item<?>> implements Grou
 }
 
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

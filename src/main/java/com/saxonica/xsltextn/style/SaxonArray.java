@@ -20,6 +20,7 @@ import net.sf.saxon.trans.XPathException;
 public class SaxonArray extends XSLSequence {
 
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         if (getSelectExpression() == null) {
             setSelectExpression(compileSequenceConstructor(exec, decl, false));
@@ -34,5 +35,5 @@ public class SaxonArray extends XSLSequence {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 

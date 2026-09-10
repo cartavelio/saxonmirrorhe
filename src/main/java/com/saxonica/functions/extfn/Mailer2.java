@@ -130,6 +130,7 @@ public class Mailer2 {
     }
 
     private class MyAuthenticator extends Authenticator {
+        @Override
         protected PasswordAuthentication getPasswordAuthentication() {
             //System.err.println("Callback to password authentication");
             return new PasswordAuthentication(user, password);
@@ -138,5 +139,5 @@ public class Mailer2 {
 
 }
 
-// Copyright (c) 2012 Saxonica Limited
+// Copyright (c) 2012-2020 Saxonica Limited
 

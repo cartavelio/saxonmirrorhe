@@ -2,6 +2,9 @@ package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.CannotCompileException;
 import com.saxonica.ee.bytecode.util.CompilerService;
+import com.saxonica.ee.bytecode.util.GeneratedMethodInfo;
+import com.saxonica.ee.bytecode.util.Generator;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 
@@ -52,14 +55,17 @@ public class InterpretedExpressionCompiler extends ToIteratorCompiler {
      */
     @Override
     public void compileToPush(CompilerService compiler, Expression expression) throws CannotCompileException {
+        Generator ga = compiler.getCurrentGenerator();
+        GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         allocateStatic(compiler, expression);
+        ga.loadArgOrLocal(methodInfo.getOutputterPosition());
         compiler.generateGetContext();
-        compiler.getCurrentGenerator().invokeInstanceMethod(Expression.class, "process", XPathContext.class);
+        ga.invokeInstanceMethod(Expression.class, "process", Outputter.class, XPathContext.class);
     }
 
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited
 
 

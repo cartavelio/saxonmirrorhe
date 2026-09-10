@@ -1,19 +1,16 @@
 package com.saxonica.ee.stream.feed;
 
 import com.saxonica.ee.stream.watch.Terminator;
-import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NameOfNode;
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Mode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.util.NamespaceIterator;
 import net.sf.saxon.type.AnyType;
 import net.sf.saxon.type.Type;
 
@@ -27,53 +24,57 @@ import net.sf.saxon.type.Type;
  */
 public class ShallowCopyEventFeed extends ItemFeed {
 
-    Mode mode;
+    private Mode mode;
 
-    public ShallowCopyEventFeed(Mode mode, Feed parentExpressionFeed, XPathContext context) {
+    public ShallowCopyEventFeed(Mode mode, ItemFeed parentExpressionFeed, XPathContext context) {
         super(null, parentExpressionFeed, context);
         this.mode = mode;
     }
 
+    @Override
     public void open(Terminator terminator) throws XPathException {
         super.open(terminator);
         XPathContext context = getContext();
-        Receiver receiver = getResult().getReceiver();
+        Outputter receiver = getNextOutputter();
+        XPathContextMajor c2;
         NodeInfo node = (NodeInfo) context.getContextItem();
         if (node.getNodeKind() == Type.DOCUMENT) {
-            receiver.startDocument(0);
+            receiver.startDocument(ReceiverOption.NONE);
         } else {
-            receiver.startElement(NameOfNode.makeName(node), AnyType.getInstance(), ExplicitLocation.UNKNOWN_LOCATION, 0);
-            NamespaceIterator.sendNamespaces(node, receiver);
-
+            c2 = context.newContext();
+            receiver.startElement(NameOfNode.makeName(node), AnyType.getInstance(),
+                                  Loc.NONE, ReceiverOption.NONE);
+            for (NamespaceBinding ns : node.getAllNamespaces()) {
+                receiver.namespace(ns.getPrefix(), ns.getURI(), ReceiverOption.NONE);
+            }
             AxisIterator attributes = node.iterateAxis(AxisInfo.ATTRIBUTE);
-            if (attributes != EmptyIterator.OfNodes.THE_INSTANCE) {
-                XPathContextMajor c2 = context.newContext();
-                c2.setReceiver(getResult().getReceiver());
-                c2.trackFocus(node.iterateAxis(AxisInfo.ATTRIBUTE));
+            if (attributes != EmptyIterator.ofNodes()) {
+                c2.trackFocus(attributes);
                 mode.applyTemplates(context.getLocalParameters(), context.getTunnelParameters(),
-                                    c2, ExplicitLocation.UNKNOWN_LOCATION);
+                                    null, receiver, c2, Loc.NONE);
             }
         }
     }
 
-    public void processItem(Item<?> item) throws XPathException {
-        getResult().getReceiver().append(item);
+    @Override
+    public void append(Item item) throws XPathException {
+        getNextOutputter().append(item);
     }
 
+    @Override
     public void close() throws XPathException {
         XPathContext context = getContext();
-        Receiver receiver = getResult().getReceiver();
         NodeInfo node = (NodeInfo) context.getContextItem();
         if (node.getNodeKind() == Type.DOCUMENT) {
-            receiver.endDocument();
+            getNextOutputter().endDocument();
         } else {
-            receiver.endElement();
+            getNextOutputter().endElement();
         }
         super.close();
     }
 }
 
-// Copyright (c) 2012 Saxonica Limited.
+// Copyright (c) 2012-2020 Saxonica Limited
 
 
 

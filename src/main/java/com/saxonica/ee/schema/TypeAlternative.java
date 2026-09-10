@@ -189,6 +189,7 @@ public class TypeAlternative extends SchemaStructure implements SchemaComponent 
      * @return true if all references were fixed up successfully, false if dangling references were found
      */
 
+    @Override
     public boolean fixup(SchemaCompiler compiler) throws SchemaException {
         SchemaType type = (SchemaType) PreparedSchema.validateReference(typeReference, compiler, false);
         if (type == null) {
@@ -217,6 +218,7 @@ public class TypeAlternative extends SchemaStructure implements SchemaComponent 
         serializer.endElement();
     }
 
+    @Override
     public Function getComponentAsFunction() {
         Callable callable = (context, arguments) -> {
             String key = arguments[0].head().getStringValue();
@@ -237,4 +239,4 @@ public class TypeAlternative extends SchemaStructure implements SchemaComponent 
     }
 }
 
-// Copyright (c) 2007-2018 Saxonica Limited.
+// Copyright (c) 2007-2020 Saxonica Limited

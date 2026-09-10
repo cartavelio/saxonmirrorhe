@@ -2,11 +2,9 @@ package com.saxonica.ee.bytecode;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.event.SequenceOutputter;
+import net.sf.saxon.event.*;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
@@ -70,13 +68,10 @@ public abstract class GeneratedCode {
      * @throws XPathException if any dynamic error occurs during the evaluation
      */
 
-    public SequenceIterator<Item<?>> iterate(XPathContext context) throws XPathException {
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         Controller controller = context.getController();
-        Receiver saved = context.getReceiver();
-        SequenceOutputter seq = controller.allocateSequenceOutputter(20);
-        context.setReceiver(seq);
-        process(context);
-        context.setReceiver(saved);
+        SequenceCollector seq = controller.allocateSequenceOutputter();
+        process(new ComplexContentOutputter(seq), context);
         seq.close();
         return seq.iterate();
     }
@@ -89,10 +84,9 @@ public abstract class GeneratedCode {
      * @throws XPathException if any dynamic error occurs during the evaluation
      */
 
-    public void process(XPathContext context) throws XPathException {
-        Receiver out = context.getReceiver();
+    public void process(Outputter output, XPathContext context) throws XPathException {
         iterate(context).forEachOrFail(
-                it -> out.append(it, ExplicitLocation.UNKNOWN_LOCATION, ReceiverOptions.ALL_NAMESPACES));
+                it -> output.append(it, Loc.NONE, ReceiverOption.ALL_NAMESPACES));
     }
 
     /**
@@ -103,7 +97,7 @@ public abstract class GeneratedCode {
      * @throws XPathException if any dynamic error occurs during the evaluation
      */
 
-    public Item<?> evaluateItem(XPathContext context) throws XPathException {
+    public Item evaluateItem(XPathContext context) throws XPathException {
         return iterate(context).next();
     }
 
@@ -122,5 +116,5 @@ public abstract class GeneratedCode {
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited
 

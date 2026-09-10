@@ -28,6 +28,7 @@ public class DecimalDivide extends SystemFunction {
      *                                           code will add information about the error location.
      */
 
+    @Override
     public ZeroOrOne<BigDecimalValue> call(XPathContext context, Sequence[] arguments) throws XPathException {
         NumericValue d1 = (NumericValue)arguments[0].head();
         NumericValue d2 = (NumericValue)arguments[1].head();
@@ -43,5 +44,5 @@ public class DecimalDivide extends SystemFunction {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 

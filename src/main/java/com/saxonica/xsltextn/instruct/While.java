@@ -1,5 +1,6 @@
 package com.saxonica.xsltextn.instruct;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Instruction;
 import net.sf.saxon.expr.instruct.TailCall;
@@ -56,6 +57,7 @@ public class While extends Instruction {
      * @return the string "saxon:while"
      */
 
+    @Override
     public int getInstructionNameCode() {
         return StandardNames.SAXON_WHILE;
     }
@@ -76,6 +78,7 @@ public class While extends Instruction {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         While exp = new While(getTest().copy(rebindings), getAction().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, exp);
@@ -89,6 +92,7 @@ public class While extends Instruction {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return getAction().getItemType();
     }
@@ -99,15 +103,17 @@ public class While extends Instruction {
      * (Nodes created by the condition can't contribute to the result).
      */
 
+    @Override
     public final boolean mayCreateNewNodes() {
         return !getAction().hasSpecialProperty(StaticProperty.NO_NODES_NEWLY_CREATED);
     }
 
 
     /*@Nullable*/
-    public TailCall processLeavingTail(XPathContext context) throws XPathException {
+    @Override
+    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
         while (getTest().effectiveBooleanValue(context)) {
-            getAction().process(context);
+            getAction().process(output, context);
         }
         return null;
     }
@@ -118,6 +124,7 @@ public class While extends Instruction {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("while", this);
         getTest().export(out);
@@ -127,4 +134,4 @@ public class While extends Instruction {
 
 }
 
-// Copyright (c) 2011-2014 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

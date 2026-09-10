@@ -2,11 +2,9 @@ package com.saxonica.ee.schema.sdoc;
 
 import com.saxonica.ee.schema.*;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.om.AttributeCollection;
-import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.linked.NodeImpl;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.z.IntHashSet;
 import net.sf.saxon.z.IntSet;
@@ -37,11 +35,12 @@ public class XSDSimpleTypeRestriction extends SchemaElement {
      * @throws SchemaException if any errors are found in the attributes
      */
 
+    @Override
     public void prepareAttributes() throws SchemaException {
 
         typeDefinition = getContainingSimpleType();
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         String[] allowed = {"base", "id"};
         allowAttributes(atts, allowed);
 
@@ -72,14 +71,13 @@ public class XSDSimpleTypeRestriction extends SchemaElement {
      * @throws SchemaException if any XML representation constraints are violated
      */
 
+    @Override
     public void validate(SchemaCompiler compiler) throws SchemaException {
 
         checkContentModel(stateTerms, stateTargets, false);
 
         boolean foundSimpleType = false;
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while ((child = (NodeImpl) iter.next()) != null) {
+        for (NodeInfo child : children()) {
             int fp = child.getFingerprint();
             if (fp == StandardNames.XS_SIMPLE_TYPE) {
                 foundSimpleType = true;
@@ -97,7 +95,7 @@ public class XSDSimpleTypeRestriction extends SchemaElement {
     // Generated using Transform s4s11.scm generate-s4s-code.xsl type=C266
     // where C266 is the id of the type referenced from &lt;scm:element name="restriction"&gt;
 
-    // and modified by hand to allow saxon:preprocess
+    // and modified by hand to allow saxon:preprocess and saxon:separator
 
     private final static int[] state0terms = {StandardNames.XS_MIN_LENGTH, StandardNames.XS_FRACTION_DIGITS,
             StandardNames.XS_MAX_LENGTH, StandardNames.XS_SIMPLE_TYPE, StandardNames.XS_ANNOTATION,
@@ -105,27 +103,30 @@ public class XSDSimpleTypeRestriction extends SchemaElement {
             StandardNames.XS_MIN_INCLUSIVE, StandardNames.XS_LENGTH, StandardNames.XS_WHITE_SPACE,
             StandardNames.XS_MAX_EXCLUSIVE, StandardNames.XS_MIN_EXCLUSIVE, StandardNames.XS_EXPLICIT_TIMEZONE,
             StandardNames.XS_TOTAL_DIGITS, StandardNames.XS_ASSERTION, StandardNames.SAXON_PREPROCESS,
+            StandardNames.SAXON_DISTINCT, StandardNames.SAXON_ORDER,
             StandardNames.XS_MIN_SCALE, StandardNames.XS_MAX_SCALE};
 
-    private final static int[] state0targets = {1, 1, 1, 2, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+    private final static int[] state0targets = {1, 1, 1, 2, 3,  1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1};
 
     private final static int[] state1terms = {StandardNames.XS_MIN_LENGTH, StandardNames.XS_FRACTION_DIGITS,
             StandardNames.XS_MAX_LENGTH, StandardNames.XS_PATTERN, StandardNames.XS_ENUMERATION,
             StandardNames.XS_MAX_INCLUSIVE, StandardNames.XS_MIN_INCLUSIVE, StandardNames.XS_LENGTH,
             StandardNames.XS_WHITE_SPACE, StandardNames.XS_MAX_EXCLUSIVE, StandardNames.XS_MIN_EXCLUSIVE,
             StandardNames.XS_EXPLICIT_TIMEZONE, StandardNames.XS_TOTAL_DIGITS, StandardNames.XS_ASSERTION,
-            StandardNames.XS_MIN_SCALE, StandardNames.XS_MAX_SCALE, StandardNames.SAXON_PREPROCESS};
+            StandardNames.XS_MIN_SCALE, StandardNames.XS_MAX_SCALE, StandardNames.SAXON_PREPROCESS,
+            StandardNames.SAXON_DISTINCT, StandardNames.SAXON_ORDER,};
 
-    private final static int[] state1targets = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+    private final static int[] state1targets = {1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1, 1, 1, 1};
 
     private final static int[] state2terms = {StandardNames.XS_MIN_LENGTH, StandardNames.XS_FRACTION_DIGITS,
             StandardNames.XS_MAX_LENGTH, StandardNames.XS_PATTERN, StandardNames.XS_ENUMERATION,
             StandardNames.XS_MAX_INCLUSIVE, StandardNames.XS_MIN_INCLUSIVE, StandardNames.XS_LENGTH,
             StandardNames.XS_WHITE_SPACE, StandardNames.XS_MAX_EXCLUSIVE, StandardNames.XS_MIN_EXCLUSIVE,
             StandardNames.XS_EXPLICIT_TIMEZONE, StandardNames.XS_TOTAL_DIGITS, StandardNames.XS_ASSERTION,
-            StandardNames.XS_MIN_SCALE, StandardNames.XS_MAX_SCALE, StandardNames.SAXON_PREPROCESS};
+            StandardNames.XS_MIN_SCALE, StandardNames.XS_MAX_SCALE, StandardNames.SAXON_PREPROCESS,
+            StandardNames.SAXON_DISTINCT, StandardNames.SAXON_ORDER,};
 
-    private final static int[] state2targets = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+    private final static int[] state2targets = {1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1, 1, 1, 1};
 
     private final static int[] state3terms = {StandardNames.XS_MIN_LENGTH, StandardNames.XS_FRACTION_DIGITS,
             StandardNames.XS_MAX_LENGTH, StandardNames.XS_SIMPLE_TYPE, StandardNames.XS_PATTERN,
@@ -133,15 +134,16 @@ public class XSDSimpleTypeRestriction extends SchemaElement {
             StandardNames.XS_LENGTH, StandardNames.XS_WHITE_SPACE, StandardNames.XS_MAX_EXCLUSIVE,
             StandardNames.XS_MIN_EXCLUSIVE, StandardNames.XS_EXPLICIT_TIMEZONE, StandardNames.XS_TOTAL_DIGITS,
             StandardNames.XS_ASSERTION, StandardNames.XS_MIN_SCALE, StandardNames.XS_MAX_SCALE,
-            StandardNames.SAXON_PREPROCESS};
+            StandardNames.SAXON_PREPROCESS, StandardNames.SAXON_DISTINCT, StandardNames.SAXON_ORDER,};
 
-    private final static int[] state3targets = {1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+    private final static int[] state3targets = {1, 1, 1, 2, 1,  1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1, 1, 1, 1, 1};
 
     private final static int[][] stateTerms = {
             state0terms, state1terms, state2terms, state3terms};
     private final static int[][] stateTargets = {
             state0targets, state1targets, state2targets, state3targets};
 
+    @Override
     protected boolean isFinalState(int state) {
         return state == 0 || state == 1 || state == 2 || state == 3;
     }
@@ -151,12 +153,11 @@ public class XSDSimpleTypeRestriction extends SchemaElement {
      *
      * @param compiler used for error reporting
      */
+    @Override
     public void postValidate(SchemaCompiler compiler) throws SchemaException {
 
         IntSet facetsSeen = new IntHashSet();
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while ((child = (NodeImpl)iter.next()) != null) {
+        for (NodeInfo child : children()) {
             if (typeDefinition != null) {
                 int fp = child.getFingerprint();
                 switch (fp) {
@@ -194,6 +195,8 @@ public class XSDSimpleTypeRestriction extends SchemaElement {
                     case StandardNames.XS_MIN_SCALE:
                     case StandardNames.XS_EXPLICIT_TIMEZONE:
                     case StandardNames.XS_TOTAL_DIGITS:
+                    case StandardNames.SAXON_DISTINCT:
+                    case StandardNames.SAXON_ORDER:
                         if (facetsSeen.contains(fp)) {
                             error("The " + child.getDisplayName() + " facet must not appear more than once");
                         }
@@ -226,4 +229,4 @@ public class XSDSimpleTypeRestriction extends SchemaElement {
 
 }
 
-// Copyright (c) 2004 - 2008 Saxonica Limited
+// Copyright (c) 2004-2020 Saxonica Limited

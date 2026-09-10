@@ -47,5 +47,5 @@ public interface PedigreeValue {
 
 }
 
-// Copyright (c) 2018 Saxonica Ltd.
+// Copyright (c) 2018-2020 Saxonica Limited
 

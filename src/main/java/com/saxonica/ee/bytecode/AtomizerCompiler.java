@@ -121,4 +121,4 @@ public class AtomizerCompiler extends ToIteratorCompiler {
 
 }
 
-// Copyright (c) 2011-2015 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

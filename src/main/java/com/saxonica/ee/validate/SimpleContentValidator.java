@@ -4,12 +4,11 @@ import com.saxonica.ee.schema.ElementDecl;
 import com.saxonica.ee.schema.UserComplexType;
 import com.saxonica.ee.schema.ValueConstraint;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.ConversionRules;
-import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.FastStringBuffer;
@@ -78,6 +77,7 @@ public class SimpleContentValidator extends AttributeValidator {
      * @return the schema type
      */
 
+    @Override
     public SchemaType getSchemaType() {
         return schemaType;
     }
@@ -107,17 +107,20 @@ public class SimpleContentValidator extends AttributeValidator {
      * Output element start tag (for a child of the element being validated)
      */
 
-    public void startElement(NodeName nameCode, SchemaType typeCode, Location location, int properties)
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties)
             throws XPathException {
         String message =
                 "Invalid child element " +
-                        Err.wrap(nameCode.getDisplayName(), Err.ELEMENT) +
+                        Err.wrap(elemName.getDisplayName(), Err.ELEMENT) +
                         ", " + getContainingElementName() + " must have simple content";
         ValidationFailure ve = new ValidationFailure(message);
         ve.setConstraintReference(1, "cvc-type", "3.1.2");
         ve.setSchemaType(schemaType);
         reportValidationError(ve, true, location);
-        super.startElement(nameCode, AnyType.getInstance(), location, properties);
+        super.startElement(elemName, AnyType.getInstance(), attributes, namespaces, location, properties);
     }
 
     /**
@@ -126,6 +129,7 @@ public class SimpleContentValidator extends AttributeValidator {
      * the element was started
      */
 
+    @Override
     protected ContentValidator getChildValidator() {
         // called on error paths only
         return new AnyTypeValidator(getNextReceiver());
@@ -133,19 +137,18 @@ public class SimpleContentValidator extends AttributeValidator {
 
     /**
      * Handle character data appearing as a child of the element being validated
-     *
      * @param chars      The character content
      * @param locationId the location of the node in the source, or of the instruction that created it
-     *@param properties Additional properties  @throws net.sf.saxon.trans.XPathException
-     *          If the character data is invalid
+     * @param properties Additional properties  @throws net.sf.saxon.trans.XPathException
      */
 
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         checkNoCharactersWhenNil(locationId);
-        buffer.append(chars);
+        buffer.cat(chars);
         if (getNillability() == Nillability.ALLOWED) {
-            properties |= ReceiverOptions.NILLABLE_ELEMENT;
+            properties |= (ReceiverOption.NILLABLE_ELEMENT);
         }
         nextReceiver.characters(chars, locationId, properties);
     }
@@ -154,10 +157,11 @@ public class SimpleContentValidator extends AttributeValidator {
      * End of element being validated
      */
 
+    @Override
     public void endElement() throws XPathException {
 
         // Expand the fixed/default value if appropriate
-        if (isNil()) {
+        if (isNilled()) {
             if (!buffer.isEmpty()) {
                 String message = "The " + getContainingElementName() +
                         " has xsi:nil='true' so it cannot have character content";
@@ -195,7 +199,8 @@ public class SimpleContentValidator extends AttributeValidator {
                         return;
                     }
                 }
-                characters(defaultValue.getLexicalForm(), ExplicitLocation.UNKNOWN_LOCATION, ReceiverOptions.DEFAULTED_ATTRIBUTE);
+                characters(defaultValue.getLexicalForm(), Loc.NONE,
+                           ReceiverOption.DEFAULTED_VALUE);
             } else if (fixedValue != null) {
                 if (buffer.isEmpty()) {
                     // if no value was supplied, "fixed" is treated as "default"
@@ -216,7 +221,7 @@ public class SimpleContentValidator extends AttributeValidator {
                             return;
                         }
                     }
-                    characters(fixedValueLexicalForm, ExplicitLocation.UNKNOWN_LOCATION, 0);
+                    characters(fixedValueLexicalForm, Loc.NONE, ReceiverOption.NONE);
                 } else {
                     // if a value was supplied check that it matches the fixed value
                     AtomicSequence actual =
@@ -253,5 +258,5 @@ public class SimpleContentValidator extends AttributeValidator {
 
 }
 
-// Copyright (c) 2004-2012 Saxonica Limited. No warranty.
+// Copyright (c) 2004-2020 Saxonica Limited No warranty.
 

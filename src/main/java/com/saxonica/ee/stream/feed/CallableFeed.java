@@ -5,7 +5,9 @@ import com.saxonica.ee.stream.Sweep;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.EmptySequence;
 
@@ -32,7 +34,7 @@ public class CallableFeed extends ItemFeed {
      *     and it then evaluates the other (non-streamed) arguments by calling iterate() on them.
      */
 
-    public CallableFeed(Callable function, Feed result, XPathContext context, Expression[] arguments) {
+    public CallableFeed(Callable function, ItemFeed result, XPathContext context, Expression[] arguments) {
         super(result, context);
         this.function = function;
         this.arguments = arguments;
@@ -46,7 +48,8 @@ public class CallableFeed extends ItemFeed {
      *          to report any failure
      */
 
-    public void processItem(Item<?> item) throws XPathException {
+    @Override
+    public void append(Item item) throws XPathException {
         if (!hasFailed()) {
             if (done) {
                 String msg = "A sequence of more than one item must not be supplied as the streaming argument";
@@ -56,7 +59,8 @@ public class CallableFeed extends ItemFeed {
                         msg += " of function " + fName.getDisplayName();
                     }
                 }
-                throw new XPathException(msg, "XPTY0004", getExpression().getLocation());
+                Location loc = getExpression() == null ? Loc.NONE : getExpression().getLocation();
+                throw new XPathException(msg, "XPTY0004", loc);
             }
             doCall(item);
             done = true;
@@ -81,26 +85,26 @@ public class CallableFeed extends ItemFeed {
      */
 
     private void doCall(Item item) throws XPathException {
-        Sequence<?>[] args = SequenceTool.makeSequenceArray(arguments.length);
+        Sequence[] args = SequenceTool.makeSequenceArray(arguments.length);
         int i=0;
         for (Expression exp : arguments) {
             if (Streamability.getSweep(exp) == Sweep.CONSUMING) {
                 args[i++] = item == null ? EmptySequence.getInstance() : item;
             } else {
-                args[i++] = new LazySequence<>(exp.iterate(getContext()));
+                args[i++] = new LazySequence(exp.iterate(getContext()));
             }
         }
-        Sequence<?> result;
+        Sequence result;
         try {
             result = function.call(getContext(), args);
         } catch (XPathException e) {
             dynamicError(e);
             return;
         }
-        processItems(result.iterate(), getResult());
+        processItems(result.iterate(), getNextOutputter());
     }
 
 
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited

@@ -9,13 +9,14 @@ import net.sf.saxon.Controller;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.sxpath.XPathDynamicContext;
 import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.sxpath.XPathVariable;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 
@@ -23,9 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.saxonica.ee.validate.ContentValidator.Nillability.ALLOWED;
-import static com.saxonica.ee.validate.ContentValidator.Nillability.DISALLOWED;
-import static com.saxonica.ee.validate.ContentValidator.Nillability.IGNORED;
+import static com.saxonica.ee.validate.ContentValidator.Nillability.*;
 
 
 /**
@@ -59,12 +58,13 @@ public abstract class ContentValidator extends ValidatingFilter {
 
     private StructuredQName containingElement = null;
     private Location containingElementLocation;
-    protected boolean nil = false;
+    protected boolean nilled = false;
     private Nillability nillability = IGNORED;
     private ElementDecl elementDecl;
 
     private SchemaType annotation = Untyped.getInstance();
     protected List<String> pendingMessages;
+    private NamespaceResolver namespaceResolver;
 
 
     public ContentValidator(Receiver next) {
@@ -140,6 +140,10 @@ public abstract class ContentValidator extends ValidatingFilter {
         }
     }
 
+    void setNamespaceResolver(NamespaceResolver resolver) {
+        this.namespaceResolver = resolver;
+    }
+
     /**
      * Get the schema type against which we are validating, if any
      *
@@ -176,7 +180,7 @@ public abstract class ContentValidator extends ValidatingFilter {
      */
 
     public NamespaceResolver getNamespaceResolver() {
-        return getStartTagBuffer();
+        return namespaceResolver;
     }
 
     /**
@@ -201,29 +205,50 @@ public abstract class ContentValidator extends ValidatingFilter {
     }
 
     /**
+     * Tell this validator whether xsi:nil="true" was specified on the element
+     * being validated
+     * @param nilled true if xsi:nil="true" was specified on the element
+     * being validated
+     */
+
+    public void setNilled(boolean nilled) {
+        this.nilled = nilled;
+    }
+
+    /**
      * Determine whether xsi:nil = true was set on this element
      *
      * @return true if xsi:nil="true" was set
      */
 
-    public boolean isNil() {
-        return nil;
+    public boolean isNilled() {
+        return nilled;
     }
 
     /**
      * Handle the start tag for a child element of the element being validated
      */
 
-    public void startElement(NodeName nameCode, SchemaType typeCode, Location location, int properties)
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties)
             throws XPathException {
+        ContentValidator childValidator = getChildValidator();
         if (getConstraintChecker() != null) {
-            ElementDecl element = getChildValidator().getElementDeclaration();
+            ElementDecl element = childValidator.getElementDeclaration();
             if (element != null) {
                 getConstraintChecker().setElementDeclaration(element);
             }
         }
+        List<NamespaceBinding> additionalNamespaces = new ArrayList<>();
+        childValidator.setNamespaceResolver(namespaces);
+        AttributeMap validatedAtts = childValidator.validateAttributes(attributes, additionalNamespaces);
+        for (NamespaceBinding ns : additionalNamespaces) {
+            namespaces = namespaces.put(ns.getPrefix(), ns.getURI());
+        }
         try {
-            nextReceiver.startElement(nameCode, typeCode, location, properties);
+            nextReceiver.startElement(elemName, type, validatedAtts, namespaces, location, properties);
         } catch (ValidationException ve) {
             reportValidationError(ve.getValidationFailure(), true, location);
         }
@@ -279,11 +304,7 @@ public abstract class ContentValidator extends ValidatingFilter {
                             ": no element declaration available";
                     ValidationFailure ve = new ValidationFailure(message);
                     ve.setConstraintReference(1, "cvc-elt", "1");
-                    if (pipe.getHostLanguage() == Configuration.XSLT) {
-                        ve.setErrorCode("XTTE1512");
-                    } else {
-                        ve.setErrorCode("XQDY0084");
-                    }
+                    ve.setErrorCode(pipe.isXSLT() ? "XTTE1512" : "XQDY0084");
                     failures.add(ve);
                     return null;
                 }
@@ -307,7 +328,7 @@ public abstract class ContentValidator extends ValidatingFilter {
                 return null;
             }
             SchemaType elType = decl.getType();
-            StartTagBufferEE startTagBuffer = validationContext.getStartTagBuffer();
+            AttributeInheritor startTagBuffer = validationContext.getAttributeInheritor();
             if (startTagBuffer != null && decl.hasTypeAlternatives()) {
                 try {
                     elType = getConditionalType(validationContext, decl);
@@ -389,7 +410,7 @@ public abstract class ContentValidator extends ValidatingFilter {
     private static SchemaType getConditionalType(ValidationContext validationContext, ElementDecl decl)
             throws XPathException {
         // Conditional Type Assignment
-        StartTagBufferEE startTagBuffer = validationContext.getStartTagBuffer();
+        AttributeInheritor startTagBuffer = validationContext.getAttributeInheritor();
         SchemaType eltype = decl.getType();
         NodeInfo element = startTagBuffer.createSkeletonElementNode();
         for (TypeAlternative alt : decl.getTypeAlternatives()) {
@@ -415,9 +436,10 @@ public abstract class ContentValidator extends ValidatingFilter {
                     // However, it could mean something, so we log a warning (and treat it as fatal if
                     // the error listener bombs out)
                     PipelineConfiguration pipe = startTagBuffer.getPipelineConfiguration();
-                    XPathException warning = new XPathException(
-                        "Dynamic error occurred during evaluation of Conditional Type Alternative test: " + err.getMessage(), err);
-                    pipe.getErrorListener().warning(warning);
+                    XmlProcessingIncident warning = new XmlProcessingIncident(
+                        "Dynamic error occurred during evaluation of Conditional Type Alternative test: " + err.getMessage()).asWarning();
+                    warning.setCause(err);
+                    pipe.getErrorReporter().report(warning);
                 }
             }
         }
@@ -491,6 +513,7 @@ public abstract class ContentValidator extends ValidatingFilter {
      * Notify the end of a document node
      */
 
+    @Override
     public void endDocument() throws XPathException {
         reportIfInvalid();
         nextReceiver.endDocument();
@@ -524,13 +547,17 @@ public abstract class ContentValidator extends ValidatingFilter {
         }
     }
 
+    public AttributeMap validateAttributes(AttributeMap attributes, List<NamespaceBinding> additionalNamespaces) throws XPathException {
+        return attributes;
+    }
+
     /**
      * A child element was encountered; check that this does not conflict with an xsi:nil=true attribute
      * @param location the location to be used in any error report
      * @throws XPathException  if processing should terminate, for example because of too many errors
      */
     protected void checkNoChildrenWhenNil(Location location) throws XPathException {
-        if (nil) {
+        if (nilled) {
             reportContentWhenNil("No child elements are allowed when xsi:nil is true", location);
         }
     }
@@ -541,7 +568,7 @@ public abstract class ContentValidator extends ValidatingFilter {
      * @throws XPathException if processing should terminate, for example because of too many errors
      */
     protected void checkNoCharactersWhenNil(Location location) throws XPathException {
-        if (nil) {
+        if (nilled) {
             reportContentWhenNil("No character content is allowed when xsi:nil is true", location);
         }
     }
@@ -563,5 +590,5 @@ public abstract class ContentValidator extends ValidatingFilter {
 
 }
 
-// Copyright (c) 2004-2018 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited
 

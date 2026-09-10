@@ -85,6 +85,19 @@ public class VariableReferenceAdjunct extends StreamingAdjunct {
                 switch (ability) {
                     case ABSORBING:
                         if (Cardinality.allowsMany(binding.getRequiredType().getCardinality())) {
+                            Expression e = var;
+                            Expression parent = e.getParentExpression();
+                            while (parent != null) {
+                                for (Operand o : parent.operands()) {
+                                    if (o.getChildExpression() == e && o.isHigherOrder()) {
+                                        reasons.add("A reference to the streaming parameter $" + var.getDisplayName() +
+                                                " appears in a higher-order context (that is, it needs to be evaluated repeatedly)");
+                                        return PostureAndSweep.ROAMING_AND_FREE_RANGING;
+                                    }
+                                }
+                                e = parent;
+                                parent = e.getParentExpression();
+                            }
                             return new PostureAndSweep(Posture.STRIDING, Sweep.CONSUMING);
                         } else {
                             return new PostureAndSweep(Posture.STRIDING, Sweep.MOTIONLESS);
@@ -133,4 +146,4 @@ public class VariableReferenceAdjunct extends StreamingAdjunct {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

@@ -40,6 +40,7 @@ public class DotNetPlatformPE extends DotNetPlatform {
      * Perform platform-specific initialization of the configuration
      */
 
+    @Override
     public void initialize(Configuration config) {
         super.initialize(config);
         if (config instanceof ProfessionalConfiguration) {
@@ -65,6 +66,7 @@ public class DotNetPlatformPE extends DotNetPlatform {
      * Is an ICU collator loaded?
      * @return  true if ICU collations appear loaded
      */
+    @Override
     public boolean hasICUCollator() {
         return ICULibrary.isICUCollatorAvailable();
     }
@@ -72,6 +74,7 @@ public class DotNetPlatformPE extends DotNetPlatform {
      * Is an ICU numberer loaded?
      * @return  true if ICU numberers appear loaded
      */
+    @Override
     public boolean hasICUNumberer() {
         return ICULibrary.hasNumberer();
     }
@@ -85,9 +88,10 @@ public class DotNetPlatformPE extends DotNetPlatform {
      * @throws net.sf.saxon.trans.XPathException if the URI is malformed in some way
      */
 
+    @Override
     public StringCollator makeUcaCollator(String uri, Configuration config) throws XPathException {
         return ICULibrary.makeICUCollator(uri, config);
     }
 }
 
-// Copyright (c) 2009 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

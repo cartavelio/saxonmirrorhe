@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -42,6 +42,7 @@ public class SaxonXQItemType implements XQItemType {
         itemType = Type.getItemType(node, config.getTypeHierarchy());
     }
 
+    @Override
     public int getBaseType() throws XQException {
         if (itemType instanceof AtomicType) {
             AtomicType at = (AtomicType) itemType;
@@ -87,6 +88,7 @@ public class SaxonXQItemType implements XQItemType {
         }
     }
 
+    @Override
     public int getItemKind() {
         if (itemType instanceof AtomicType) {
             return XQITEMKIND_ATOMIC;
@@ -115,11 +117,13 @@ public class SaxonXQItemType implements XQItemType {
         return XQITEMKIND_ITEM;
     }
 
+    @Override
     public int getItemOccurrence() {
         return XQSequenceType.OCC_EXACTLY_ONE;
     }
 
     /*@Nullable*/
+    @Override
     public QName getNodeName() throws XQException {
         ItemType type = itemType;
         if (type instanceof DocumentNodeTest) {
@@ -141,6 +145,7 @@ public class SaxonXQItemType implements XQItemType {
     }
 
     /*@Nullable*/
+    @Override
     public String getPIName() throws XQException {
         if (itemType instanceof NameTest && itemType.getPrimitiveType() == Type.PROCESSING_INSTRUCTION) {
             StructuredQName match = ((NameTest) itemType).getMatchingNodeName();
@@ -153,6 +158,7 @@ public class SaxonXQItemType implements XQItemType {
     }
 
     /*@Nullable*/
+    @Override
     public URI getSchemaURI() {
         try {
             if (itemType instanceof NodeTest) {
@@ -182,6 +188,7 @@ public class SaxonXQItemType implements XQItemType {
     }
 
     /*@NotNull*/
+    @Override
     public QName getTypeName() throws XQException {
         ItemType type = itemType;
         if (type instanceof AtomicType) {
@@ -204,6 +211,7 @@ public class SaxonXQItemType implements XQItemType {
         throw new XQException("getTypeName() failed: itemType is not a document, element, or attribute test");
     }
 
+    @Override
     public boolean isAnonymousType() {
         ItemType type = itemType;
         if (type instanceof DocumentNodeTest) {
@@ -218,12 +226,14 @@ public class SaxonXQItemType implements XQItemType {
         return false;
     }
 
+    @Override
     public boolean isElementNillable() {
         return (itemType instanceof NodeTest) && itemType.getUType() == UType.ELEMENT && ((NodeTest) itemType).isNillable();
     }
 
 
     /*@NotNull*/
+    @Override
     public XQItemType getItemType() {
         return this;
     }

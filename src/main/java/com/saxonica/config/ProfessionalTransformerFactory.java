@@ -50,6 +50,7 @@ public class ProfessionalTransformerFactory extends TransformerFactoryImpl {
      * @see net.sf.saxon.lib.FeatureKeys
      */
 
+    @Override
     public void setAttribute(String name, Object value) throws IllegalArgumentException {
         if (name.equals(FeatureKeys.CONFIGURATION_FILE)) {
             ConfigurationReaderPE reader = new ConfigurationReaderPE();
@@ -67,4 +68,4 @@ public class ProfessionalTransformerFactory extends TransformerFactoryImpl {
 
 }
 
-// Copyright (c) 2004-2013 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

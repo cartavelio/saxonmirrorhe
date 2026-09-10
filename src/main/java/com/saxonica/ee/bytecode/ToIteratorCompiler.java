@@ -1,14 +1,15 @@
 package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.*;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.NumericType;
 import net.sf.saxon.type.TypeHierarchy;
@@ -49,11 +50,11 @@ public abstract class ToIteratorCompiler extends ExpressionCompiler {
         ga.invokeInstanceMethod(SequenceIterator.class, "next");
         ga.dup();
         ga.ifNull(done.label());
-        compiler.generateGetReceiver();
+        compiler.generateGetOutputter();
         ga.swap();
         allocateStatic(compiler, expression.getLocation());
-        ga.push(ReceiverOptions.ALL_NAMESPACES);
-        ga.invokeInstanceMethod(Receiver.class, "append", Item.class, Location.class, Integer.TYPE);
+        ga.push(ReceiverOption.ALL_NAMESPACES);
+        ga.invokeInstanceMethod(Outputter.class, "append", Item.class, Location.class, Integer.TYPE);
         ga.goTo(loop);
 
         methodInfo.placeLabel(done);
@@ -107,7 +108,7 @@ public abstract class ToIteratorCompiler extends ExpressionCompiler {
 
         // if (itemVar is boolean) {checkNoMore(); return itemVar.asBoolean()}
 
-        if (th.relationship(expression.getItemType(), BuiltInAtomicType.BOOLEAN) != TypeHierarchy.DISJOINT) {
+        if (th.relationship(expression.getItemType(), BuiltInAtomicType.BOOLEAN) != Affinity.DISJOINT) {
             visitAnnotation(compiler, "ToIteratorCompiler.compileToBoolean(): test boolean value");
             ga.loadLocal(itemVar);
             LabelInfo notBoolean = methodInfo.newLabel("notBoolean");
@@ -129,15 +130,15 @@ public abstract class ToIteratorCompiler extends ExpressionCompiler {
 
         // if (itemVar is numeric) {checkNoMore(); return (!itemVar.isNaN() && itemVar != 0}
 
-        if (th.relationship(expression.getItemType(), NumericType.getInstance()) != TypeHierarchy.DISJOINT) {
+        if (th.relationship(expression.getItemType(), NumericType.getInstance()) != Affinity.DISJOINT) {
             visitAnnotation(compiler, "ToIteratorCompiler.compileToBoolean(): test numeric value");
             // assert stack - (empty)
             ga.loadLocal(itemVar);
             LabelInfo notNumeric = methodInfo.newLabel("notNumeric");
             ga.ifNotInstance(NumericValue.class, notNumeric);
 
-            if (th.relationship(expression.getItemType(), BuiltInAtomicType.DOUBLE) != TypeHierarchy.DISJOINT ||
-                    th.relationship(expression.getItemType(), BuiltInAtomicType.FLOAT) != TypeHierarchy.DISJOINT) {
+            if (th.relationship(expression.getItemType(), BuiltInAtomicType.DOUBLE) != Affinity.DISJOINT ||
+                    th.relationship(expression.getItemType(), BuiltInAtomicType.FLOAT) != Affinity.DISJOINT) {
 
                 // assert stack - (empty)
                 // check for NaN
@@ -189,9 +190,9 @@ public abstract class ToIteratorCompiler extends ExpressionCompiler {
 
         // if (itemVar is string) {checkNoMore(); return (itemVar.asString().length() != 0}
 
-        if (th.relationship(expression.getItemType(), BuiltInAtomicType.STRING) != TypeHierarchy.DISJOINT ||
-                th.relationship(expression.getItemType(), BuiltInAtomicType.ANY_URI) != TypeHierarchy.DISJOINT ||
-                th.relationship(expression.getItemType(), BuiltInAtomicType.UNTYPED_ATOMIC) != TypeHierarchy.DISJOINT) {
+        if (th.relationship(expression.getItemType(), BuiltInAtomicType.STRING) != Affinity.DISJOINT ||
+                th.relationship(expression.getItemType(), BuiltInAtomicType.ANY_URI) != Affinity.DISJOINT ||
+                th.relationship(expression.getItemType(), BuiltInAtomicType.UNTYPED_ATOMIC) != Affinity.DISJOINT) {
             visitAnnotation(compiler, "ToIteratorCompiler.compileToBoolean(): test string value");
             ga.loadLocal(itemVar);
             LabelInfo notString = methodInfo.newLabel("notString");
@@ -213,13 +214,13 @@ public abstract class ToIteratorCompiler extends ExpressionCompiler {
 
         // if (itemVar is node) return true;
 
-        int relToNode = th.relationship(expression.getItemType(), AnyNodeTest.getInstance());
-        if (relToNode == TypeHierarchy.SAME_TYPE || relToNode == TypeHierarchy.SUBSUMED_BY) {
+        Affinity relToNode = th.relationship(expression.getItemType(), AnyNodeTest.getInstance());
+        if (relToNode == Affinity.SAME_TYPE || relToNode == Affinity.SUBSUMED_BY) {
             visitAnnotation(compiler, "ToIteratorCompiler.compileToBoolean(): node exists");
             // assert stack - boolean
             ga.push(true);
             ga.goTo(end);
-        } else if (relToNode != TypeHierarchy.DISJOINT) {
+        } else if (relToNode != Affinity.DISJOINT) {
             visitAnnotation(compiler, "ToIteratorCompiler.compileToBoolean(): test node existence");
             ga.loadLocal(itemVar);
             ga.ifNotInstance(NodeInfo.class, error);
@@ -261,7 +262,7 @@ public abstract class ToIteratorCompiler extends ExpressionCompiler {
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited
 
 
 

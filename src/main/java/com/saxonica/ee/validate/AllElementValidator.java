@@ -4,12 +4,9 @@ import com.saxonica.ee.schema.*;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.om.NamePool;
-import net.sf.saxon.om.NoElementsSpaceStrippingRule;
-import net.sf.saxon.om.NodeName;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -34,26 +31,26 @@ public class AllElementValidator extends AttributeValidator {
 
     // Boolean to indicate whether mixed content is allowed. If not, all non-whitespace
     // character data is rejected
-    boolean mixed;
+    private boolean mixed;
 
     // Boolean to indicate whether any child elements have been encountered
-    boolean empty = true;
+    private boolean empty = true;
 
     // Boolean to indicate whether empty content is allowed
-    boolean emptiable;
+    private boolean emptiable;
 
     // Maintains a count for each particle that needs to be counted, including wildcards
     // For wildcards, the n'th wildcard uses the n'th counter.
     // For element particles, the counter map associated with the all model group maps the
     // element fingerprint to a position in the counter array
-    int[] counters;
+    private int[] counters;
 
     // Boolean to indicate whether whitespace in element-only content is to be stripped
-    boolean ignoreIgnorable;
+    private boolean ignoreIgnorable;
 
     // Boolean to indicate that we are processing open content in mode="suffix" and that
     // instances of the "regular" content model are therefore no longer accepted.
-    boolean inOpenSuffix;
+    private boolean inOpenSuffix;
 
     /**
      * Create an AllElementValidator
@@ -63,7 +60,7 @@ public class AllElementValidator extends AttributeValidator {
      * @throws MissingComponentException if the schema is incomplete
      */
 
-    protected AllElementValidator(UserComplexType type, Receiver next) throws MissingComponentException {
+    AllElementValidator(UserComplexType type, Receiver next) throws MissingComponentException {
         super(next);
         this.type = type;
         mixed = type.isMixedContent();
@@ -78,6 +75,7 @@ public class AllElementValidator extends AttributeValidator {
         counters = new int[allGroup.getMinima().length];
     }
 
+    @Override
     public void setPipelineConfiguration(/*@NotNull*/ PipelineConfiguration pipe) {
         super.setPipelineConfiguration(pipe);
         ignoreIgnorable = getConfiguration().getParseOptions().getSpaceStrippingRule() != NoElementsSpaceStrippingRule.getInstance();
@@ -89,6 +87,7 @@ public class AllElementValidator extends AttributeValidator {
      * @return the schema type that this validator is validating against, or null
      */
 
+    @Override
     public SchemaType getSchemaType() {
         return type;
     }
@@ -97,8 +96,10 @@ public class AllElementValidator extends AttributeValidator {
      * Handle the start tag for a child element of the element being validated
      */
 
-    public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties)
-            throws XPathException {
+    @Override
+    public void startElement(NodeName elemName, SchemaType suppliedType,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
 
         Configuration config = getConfiguration();
         NamePool pool = config.getNamePool();
@@ -182,7 +183,7 @@ public class AllElementValidator extends AttributeValidator {
 //            }
             annotation = childValidator.getAnnotation();
         }
-        super.startElement(elemName, annotation, location, properties);
+        super.startElement(elemName, annotation, attributes, namespaces, location, properties);
     }
 
     private void reportExcess(NodeName elemName, Location locationId, int maxAllowed) throws XPathException {
@@ -218,18 +219,19 @@ public class AllElementValidator extends AttributeValidator {
      * this element.
      */
 
+    @Override
     protected ContentValidator getChildValidator() {
         return childValidator;
     }
 
     /**
      * Handle character data appearing as a child of the element being validated
-     *
      * @param chars      The character content
      * @param locationId the location of the node in the source, or of the instruction that created it
-     *@param properties Additional properties  @throws XPathException If this element does not allow character data
+     * @param properties Additional properties  @throws XPathException If this element does not allow character data
      */
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         checkNoCharactersWhenNil(locationId);
         if (mixed) {
@@ -254,8 +256,9 @@ public class AllElementValidator extends AttributeValidator {
      * @throws XPathException if the element is invalid
      */
 
+    @Override
     public void endElement() throws XPathException {
-        if ((empty && emptiable) || isNil()) {
+        if ((empty && emptiable) || isNilled()) {
             // do nothing, all is well
         } else {
             List<ElementWildcard> wildcards = allGroup.getWildcards();
@@ -309,4 +312,4 @@ public class AllElementValidator extends AttributeValidator {
     }
 }
 
-// Copyright � 2004 - 2012 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

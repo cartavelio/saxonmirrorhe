@@ -106,6 +106,7 @@ public abstract class Precondition {
             this.hash = required.hashCode();
         }
 
+        @Override
         public boolean testPrecondition(PreconditionMatcher matcher) throws XPathException {
             IntSet comparand = matcher.obtainCharacteristic(characteristic);
             return comparand.contains(hash);
@@ -152,6 +153,7 @@ public abstract class Precondition {
             this.required = required;
         }
 
+        @Override
         public boolean testPrecondition(PreconditionMatcher matcher) throws XPathException {
             NumericValue comparand = matcher.obtainCharacteristic(characteristic);
             return !comparand.isNaN() && comparand.compareTo(required) == 0;
@@ -208,6 +210,7 @@ public abstract class Precondition {
          * @throws XPathException if evaluation of the precondition fails with a dynamic error
          */
 
+        @Override
         public boolean testPrecondition(PreconditionMatcher matcher) throws XPathException {
             return matcher.obtainCharacteristic(characteristic);
         }
@@ -237,4 +240,4 @@ public abstract class Precondition {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited

@@ -1,10 +1,12 @@
 package com.saxonica.functions.extfn;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.event.RepairingContentHandler;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.NoElementsSpaceStrippingRule;
 import net.sf.saxon.trans.XPathException;
+import org.xml.sax.XMLFilter;
 import org.xml.sax.XMLReader;
 
 /**
@@ -21,12 +23,18 @@ public class ParseHtml extends Parse {
      * @throws XPathException if the selected parser cannot be loaded
      */
 
+    @Override
     protected void setXMLReader(Configuration config, ParseOptions options) throws XPathException {
         Object parser = config.getInstance("org.ccil.cowan.tagsoup.Parser", null);
         if (!(parser instanceof XMLReader)) {
             throw new XPathException("Loaded org.ccil.cowan.tagsoup.Parser, but it is not an XMLReader");
         }
-        options.setXMLReader((XMLReader) parser);
+        // TagSoup issues a startElement() event using the XHTML namespace URI, and no namespace prefix,
+        // but it does not declare a default namespace using startPrefixMapping(). Saxon doesn't like this,
+        // so we inject a filter that supplies the missing startPrefixMapping() call
+        XMLFilter filter = new RepairingContentHandler();
+        filter.setParent((XMLReader) parser);
+        options.setXMLReader(filter);
         options.setDTDValidationMode(Validation.SKIP);
         options.setSchemaValidationMode(Validation.SKIP);
         options.setSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
@@ -34,4 +42,4 @@ public class ParseHtml extends Parse {
 
 }
 
-// Copyright (c) 2009-2016 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

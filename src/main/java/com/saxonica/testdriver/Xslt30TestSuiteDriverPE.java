@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -13,7 +13,6 @@ import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.option.axiom.AxiomObjectModel;
 import net.sf.saxon.option.dom4j.DOM4JObjectModel;
-import net.sf.saxon.option.jdom.JDOMObjectModel;
 import net.sf.saxon.option.jdom2.JDOM2ObjectModel;
 import net.sf.saxon.option.xom.XOMObjectModel;
 import net.sf.saxon.s9api.Processor;
@@ -61,10 +60,9 @@ public class Xslt30TestSuiteDriverPE extends Xslt30TestSuiteDriverHE {
      * @param s The name of the tree model required
      * @return The tree model - null if model requested is unrecognised
      */
+    @Override
     protected TreeModel getTreeModel(String s) {
-        if (s.equalsIgnoreCase("jdom")) {
-            return new JDOMObjectModel();
-        } else if (s.equalsIgnoreCase("jdom2")) {
+        if (s.equalsIgnoreCase("jdom2")) {
             return new JDOM2ObjectModel();
         } else if (s.equalsIgnoreCase("dom4j")) {
             return new DOM4JObjectModel();

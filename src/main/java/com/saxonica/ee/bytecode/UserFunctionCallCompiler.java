@@ -1,6 +1,7 @@
 package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.*;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.Evaluator;
@@ -68,7 +69,7 @@ public class UserFunctionCallCompiler extends ToIteratorCompiler {
             ga.loadLocal(arrVar);
             ga.push(i);
             // TODO: change this to use the new Evaluator mechanism natively
-            LetExpressionCompiler.compileCommonExpr(compiler, userFunctionCall.getArg(i), argumentEvaluators[i].getCode(), refs);
+            LetExpressionCompiler.compileCommonExpr(compiler, userFunctionCall.getArg(i), argumentEvaluators[i].getEvaluationMode(), refs);
             ga.dup();
             ga.ifNonNull(notNull.label());
             ga.pop();
@@ -133,9 +134,9 @@ public class UserFunctionCallCompiler extends ToIteratorCompiler {
             if (pull) {
                 ga.invokeInstanceMethod(UserFunction.class, "call", XPathContext.class, Sequence[].class);
             } else {
-                ga.swap();
-                // Stack: UserFunction actualArgs c2
-                ga.invokeInstanceMethod(UserFunction.class, "process", Sequence[].class, XPathContextMajor.class);
+                // Stack: UserFunction actualArgs c2 Outputter
+                compiler.generateGetOutputter();
+                ga.invokeInstanceMethod(UserFunction.class, "process", XPathContextMajor.class, Sequence[].class, Outputter.class);
             }
 
 
@@ -154,9 +155,9 @@ public class UserFunctionCallCompiler extends ToIteratorCompiler {
             } else {
                 ga.loadLocal(arrVar);
                 // stack: function newcontext args
-                ga.swap();
-                // stack: function args newcontext
-                ga.invokeInstanceMethod(UserFunction.class, "process", Sequence[].class, XPathContextMajor.class);
+                compiler.generateGetOutputter();
+                // stack: function newcontext args outputter
+                ga.invokeInstanceMethod(UserFunction.class, "process", XPathContextMajor.class, Sequence[].class, Outputter.class);
             }
 
         }
@@ -167,4 +168,4 @@ public class UserFunctionCallCompiler extends ToIteratorCompiler {
     }
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

@@ -2,18 +2,15 @@ package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.Instruction;
 import net.sf.saxon.expr.instruct.NamespaceConstructor;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardURIChecker;
 import net.sf.saxon.om.NameChecker;
-import net.sf.saxon.om.NamespaceBinding;
-import net.sf.saxon.om.NamespaceBindingSet;
 import net.sf.saxon.value.*;
-import net.sf.saxon.value.StringValue;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 
@@ -28,6 +25,7 @@ public class NamespaceConstructorCompiler extends SimpleNodeConstructorCompiler 
      * @return true if the instruction generates a kind of node that is named
      */
 
+    @Override
     protected boolean isNamedNodeKind() {
         return true;
     }
@@ -156,6 +154,7 @@ public class NamespaceConstructorCompiler extends SimpleNodeConstructorCompiler 
         // assert stack : Receiver prefix uri
         methodInfo.placeLabel(xmlTestOk);
         // check for uri==xmlns namespace
+        ga.invokeInstanceMethod(CharSequence.class, "toString");
         ga.dup();
         ga.push(NamespaceConstant.XMLNS);
         ga.invokeInstanceMethod(Object.class, "equals", Object.class);
@@ -177,11 +176,9 @@ public class NamespaceConstructorCompiler extends SimpleNodeConstructorCompiler 
             methodInfo.placeLabel(validURI);
         }
 
-
-        ga.invokeStaticMethod(NamespaceBinding.class, "makeNamespaceBinding", CharSequence.class, CharSequence.class);
-        ga.push(ReceiverOptions.REJECT_DUPLICATES);
-        ga.invokeInstanceMethod(Receiver.class, "namespace", NamespaceBindingSet.class, Integer.TYPE);
+        ga.push(ReceiverOption.REJECT_DUPLICATES);
+        ga.invokeInstanceMethod(Outputter.class, "namespace", String.class, String.class, Integer.TYPE);
     }
 }
 
-//Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

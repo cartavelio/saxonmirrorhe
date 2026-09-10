@@ -2,7 +2,7 @@ package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.expr.Callable;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.NamespaceResolver;
@@ -66,6 +66,7 @@ public abstract class SchemaStructure implements Location {
      * @return the URI of the containing module.
      */
 
+    @Override
     public String getSystemId() {
         return systemId;
     }
@@ -76,6 +77,7 @@ public abstract class SchemaStructure implements Location {
      * @return This information is not currently maintained, the method
      *         always returns null.
      */
+    @Override
     public String getPublicId() {
         return null;
     }
@@ -88,6 +90,7 @@ public abstract class SchemaStructure implements Location {
      * @return the line number where the relevant element can be found.
      */
 
+    @Override
     public int getLineNumber() {
         return lineNumber;
     }
@@ -98,6 +101,7 @@ public abstract class SchemaStructure implements Location {
      * @return -1: this information is not maintained.
      */
 
+    @Override
     public int getColumnNumber() {
         return -1;
     }
@@ -107,6 +111,7 @@ public abstract class SchemaStructure implements Location {
      * should not be saved for later use. The result of this operation holds the same location information,
      * but in an immutable form.
      */
+    @Override
     public Location saveLocation() {
         return this;
     }
@@ -395,4 +400,4 @@ public abstract class SchemaStructure implements Location {
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

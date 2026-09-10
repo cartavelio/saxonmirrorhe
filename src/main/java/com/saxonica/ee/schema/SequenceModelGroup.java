@@ -13,6 +13,7 @@ public class SequenceModelGroup extends ModelGroup {
      * Determine if empty content is allowed
      */
 
+    @Override
     public boolean isEmptiable() throws MissingComponentException {
         for (Particle aContentModel : contentModel) {
             if (!aContentModel.isEmptiable()) {
@@ -27,6 +28,7 @@ public class SequenceModelGroup extends ModelGroup {
      * Schema Component Constraint: Particle Valid (Restriction)
      */
 
+    @Override
     public boolean isPointless(ModelGroup container) {
         return contentModel.size() == 0 || contentModel.size() == 1 || container instanceof SequenceModelGroup;
     }
@@ -37,6 +39,7 @@ public class SequenceModelGroup extends ModelGroup {
      * @throws SchemaException when the error listener decides an error is fatal
      */
 
+    @Override
     public boolean validate(SchemaCompiler compiler) throws SchemaException {
         if (containsAll(false)) {
             compiler.error("An <xs:sequence> model group must not contain an <xs:all> model group", this);
@@ -49,10 +52,11 @@ public class SequenceModelGroup extends ModelGroup {
      * Get the name of this compositor
      */
 
+    @Override
     public String getCompositorName() {
         return "sequence";
     }
 }
 
-// Copyright (c) 2004-2006 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited
 

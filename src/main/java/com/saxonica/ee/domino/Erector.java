@@ -4,16 +4,12 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.dom.DOMSender;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.NamePool;
-import net.sf.saxon.om.NamespaceBinding;
-import net.sf.saxon.om.NamespaceBindingSet;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.Type;
 import org.w3c.dom.Document;
 
@@ -98,6 +94,7 @@ public class Erector implements Receiver {
      * Open the event stream
      */
 
+    @Override
     public void open() {
         if (tree == null) {
             tree = new DominoTree(config);
@@ -108,8 +105,10 @@ public class Erector implements Receiver {
 
     /**
      * Write a document node to the tree
+     * @param properties
      */
 
+    @Override
     public void startDocument(int properties) throws XPathException {
 
         if (tree == null) {
@@ -137,6 +136,7 @@ public class Erector implements Receiver {
      * Callback interface for SAX: not for application use
      */
 
+    @Override
     public void endDocument() throws XPathException {
 //        System.err.println("TinyBuilder: " + this + " End document");
 
@@ -167,6 +167,7 @@ public class Erector implements Receiver {
         ended = false;
     }
 
+    @Override
     public void close() throws XPathException {
         DominoTree tt = tree;
         if (tt != null) {
@@ -179,7 +180,10 @@ public class Erector implements Receiver {
      * Notify the start tag of an element
      */
 
-    public void startElement(/*@NotNull*/ NodeName elemName, SchemaType type, Location location, int properties) throws XPathException {
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
 
         // if the number of siblings exceeds a certain threshold, add a parent pointer, in the form
         // of a pseudo-node
@@ -225,32 +229,26 @@ public class Erector implements Receiver {
         prevAtDepth[currentDepth] = -1;
         siblingsAtDepth[currentDepth] = 0;
 
-    }
+        tree.setNamespaceMap(nodeNr, namespaces);
+        tree.nameCode[nodeNr] |= DominoTree.HAS_NAMESPACES;
 
-    public void namespace(NamespaceBindingSet namespaceBindings, int properties) throws XPathException {
-        assert tree != null;
-        for (NamespaceBinding ns : namespaceBindings) {
-            tree.addNamespace(nodeNr, ns);
-            tree.nameCode[nodeNr] |= DominoTree.HAS_NAMESPACES;
+        for (AttributeInfo att : attributes) {
+            tree.nameCode[nodeNr] |= DominoTree.HAS_ATTRIBUTES;
+            NodeName attName = att.getNodeName();
+            if (ReceiverOption.contains(properties, ReceiverOption.IS_ID) || (attName.getLocalPart().equals("id") && attName.hasURI(NamespaceConstant.XML))) {
+                tree.registerID(nodeNr, att.getValue());
+            }
         }
-    }
 
-    public void attribute(/*@NotNull*/ NodeName attName, SimpleType type, CharSequence value, Location locationId, int properties)
-            throws XPathException {
-        tree.nameCode[nodeNr] |= DominoTree.HAS_ATTRIBUTES;
-        if ((properties & ReceiverOptions.IS_ID) != 0 || (attName.getLocalPart().equals("id") && attName.hasURI(NamespaceConstant.XML))) {
-            tree.registerID(nodeNr, value.toString());
-        }
-    }
-
-    public void startContent() {
         nodeNr++;
+
     }
 
     /**
      * Notify the end of an element node
      */
 
+    @Override
     public void endElement() throws XPathException {
         DominoTree tt = tree;
         assert tt != null;
@@ -283,24 +281,8 @@ public class Erector implements Receiver {
      * Notify a text node
      */
 
+    @Override
     public void characters(/*@NotNull*/ CharSequence chars, Location locationId, int properties) throws XPathException {
-//        if (chars instanceof CompressedWhitespace &&
-//                (properties & ReceiverOptions.WHOLE_TEXT_NODE) != 0) {
-//            DomIndex tt = tree;
-//            assert tt != null;
-//            long lvalue = ((CompressedWhitespace) chars).getCompressedValue();
-//            nodeNr = tt.addNode(Type.WHITESPACE_TEXT, currentDepth, (int) (lvalue >> 32), (int) lvalue, -1);
-//
-//            int prev = prevAtDepth[currentDepth];
-//            if (prev > 0) {
-//                tt.next[prev] = nodeNr;
-//            }
-//            tt.next[nodeNr] = prevAtDepth[currentDepth - 1];   // *O* owner pointer in last sibling
-//            prevAtDepth[currentDepth] = nodeNr;
-//            siblingsAtDepth[currentDepth]++;
-//            return;
-//        }
-
         final int len = chars.length();
         if (len > 0) {
             nodeNr = makeTextNode(chars, len);
@@ -344,6 +326,7 @@ public class Erector implements Receiver {
      * Callback interface for SAX: not for application use<BR>
      */
 
+    @Override
     public void processingInstruction(String piname, /*@NotNull*/ CharSequence remainder, Location locationId, int properties) throws XPathException {
         DominoTree tt = tree;
         int fp = namePool.allocateFingerprint("", piname);
@@ -364,6 +347,7 @@ public class Erector implements Receiver {
      * Callback interface for SAX: not for application use
      */
 
+    @Override
     public void comment(/*@NotNull*/ CharSequence chars, Location locationId, int properties) throws XPathException {
 
         DominoTree tt = tree;
@@ -383,6 +367,7 @@ public class Erector implements Receiver {
      * Set an unparsed entity in the document
      */
 
+    @Override
     public void setUnparsedEntity(String name, String uri, String publicId) {
         tree.addUnparsedEntity(name, uri, publicId);
     }
@@ -447,5 +432,5 @@ public class Erector implements Receiver {
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited
 

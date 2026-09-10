@@ -4,9 +4,11 @@ package com.saxonica.ee.schema.sdoc;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.*;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.SchemaException;
 
 import java.util.List;
@@ -50,11 +52,12 @@ public class XSDAttributeGroup extends SchemaElement {
      * @throws SchemaException if any errors are found in the attributes
      */
 
+    @Override
     public void prepareAttributes() throws SchemaException {
 
         isRedefinition = (getParent() instanceof XSDRedefine);
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         if (isTopLevel()) {
             String[] allowed = {"id", "name"};
             allowAttributes(atts, allowed);
@@ -140,6 +143,7 @@ public class XSDAttributeGroup extends SchemaElement {
      * @throws SchemaException if any XML representation constraints are violated
      */
 
+    @Override
     public void validate(SchemaCompiler compiler) throws SchemaException {
         if (isRef) {
             checkOnlyChildIsAnnotation();
@@ -172,6 +176,7 @@ public class XSDAttributeGroup extends SchemaElement {
     private final static int[][] stateTargets = {
             state0targets, state1targets, state2targets, state3targets};
 
+    @Override
     protected boolean isFinalState(int state) {
         return true;
     }
@@ -182,11 +187,10 @@ public class XSDAttributeGroup extends SchemaElement {
      * @param compiler the schema compiler
      */
 
+    @Override
     public void postValidate(SchemaCompiler compiler) throws SchemaException {
 
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeInfo child;
-        while (((child = iter.next()) != null)) {
+        for (NodeInfo child : children()) {
             String name = child.getLocalPart();
 
             //-- <anyAttribute>
@@ -330,4 +334,4 @@ public class XSDAttributeGroup extends SchemaElement {
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

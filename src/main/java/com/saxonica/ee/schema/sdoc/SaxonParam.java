@@ -7,6 +7,7 @@ import net.sf.saxon.expr.instruct.GlobalParam;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SchemaException;
@@ -27,6 +28,7 @@ import net.sf.saxon.value.SequenceType;
  */
 public class SaxonParam extends AnnotationParent {
 
+    @Override
     public void prepareAttributes() throws SchemaException {
 
         Configuration config = getConfiguration();
@@ -35,7 +37,7 @@ public class SaxonParam extends AnnotationParent {
             error("The saxon:param element is allowed only as a child of xs:appinfo");
         }
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         String[] allowed = {"as", "name", "select"};
         allowAttributes(atts, allowed);
         requireAttribute(atts, "name");
@@ -60,7 +62,7 @@ public class SaxonParam extends AnnotationParent {
         env.setBaseURI(getBaseURI());
         env.setXPathLanguageLevel(31);
         SequenceType requiredType = makeSequenceType(as, env);
-        GroundedValue<?> defaultValue = EmptySequence.getInstance();
+        GroundedValue defaultValue = EmptySequence.getInstance();
         try {
             Expression expr = ExpressionTool.make(select, env,
                 0, Token.EOF, null);
@@ -82,14 +84,14 @@ public class SaxonParam extends AnnotationParent {
         }
 
         PackageData pd = new PackageData(getConfiguration());
-        pd.setHostLanguage(Configuration.XSD11);
+        pd.setHostLanguage(HostLanguage.XML_SCHEMA);
         pd.setSchemaAware(true);
 
         GlobalParam param = new GlobalParam();
         param.setPackageData(pd);
         param.setVariableQName(qName);
         param.setRequiredType(requiredType);
-        param.setSelectExpression(Literal.makeLiteral(defaultValue));
+        param.setBody(Literal.makeLiteral(defaultValue));
         getXSDSchema().addGlobalParam(param);
 
 
@@ -109,7 +111,7 @@ public class SaxonParam extends AnnotationParent {
             throws SchemaException {
         try {
             XPathParser parser = new XPathParser();
-            parser.setLanguage(XPathParser.XPATH, 31);
+            parser.setLanguage(XPathParser.ParsedLanguage.XPATH, 31);
             return parser.parseSequenceType(sequenceType, env);
         } catch (XPathException err) {
             error(err.getMessage());
@@ -157,4 +159,4 @@ public class SaxonParam extends AnnotationParent {
 }
 
 //
-// Copyright (c) 2010 Saxonica Limited
+// Copyright (c) 2010-2020 Saxonica Limited

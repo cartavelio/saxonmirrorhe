@@ -25,6 +25,7 @@ public class RuleEE extends Rule {
         super(p, o, prec, min, prio, seq, part);
     }
 
+    @Override
     public Rule copy(boolean copyChain) {
         RuleEE r2 = new RuleEE();
         r2.copyFrom(this, copyChain);
@@ -47,7 +48,7 @@ public class RuleEE extends Rule {
 
     public void addPrecondition(Precondition condition) {
         if (preconditions.isEmpty()) {
-            preconditions = new ArrayList<Precondition>();
+            preconditions = new ArrayList<>();
         }
         preconditions.add(condition);
     }
@@ -71,6 +72,7 @@ public class RuleEE extends Rule {
 
 
 
+    @Override
     public void exportOtherProperties(ExpressionPresenter out) throws XPathException {
 //        int[] preconditionIndexes = getPreconditionIndexes();
 //        if (preconditionIndexes != null && preconditionIndexes.length > 0) {
@@ -95,4 +97,4 @@ public class RuleEE extends Rule {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

@@ -9,13 +9,13 @@ import net.sf.saxon.expr.instruct.Executable;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
 import net.sf.saxon.functions.registry.XPath20FunctionSet;
+import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.sxpath.IndependentContext;
-import net.sf.saxon.trans.Err;
-import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.*;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.linked.ElementImpl;
 import net.sf.saxon.tree.linked.NodeImpl;
@@ -24,8 +24,6 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.Whitespace;
 
-import javax.xml.transform.ErrorListener;
-import javax.xml.transform.TransformerException;
 import java.util.Arrays;
 import java.util.StringTokenizer;
 
@@ -129,12 +127,8 @@ public abstract class SchemaElement extends ElementImpl {
 
     public void processAllAttributes() throws SchemaException {
         prepareAttributes();
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-        NodeInfo child;
-        while ((child = kids.next()) != null) {
-            if (child instanceof SchemaElement) {
-                ((SchemaElement) child).processAllAttributes();
-            }
+        for (NodeInfo child : children(SchemaElement.class::isInstance)) {
+            ((SchemaElement) child).processAllAttributes();
         }
     }
 
@@ -155,14 +149,15 @@ public abstract class SchemaElement extends ElementImpl {
      *                be listed in alphabetical order
      */
 
-    public void allowAttributes(AttributeCollection atts, String[] allowed) throws SchemaException {
-        for (int i = 0; i < atts.getLength(); i++) {
-            if ("".equals(atts.getURI(i))) {
-                if (Arrays.binarySearch(allowed, atts.getLocalName(i)) < 0) {
-                    error("Attribute " + Err.wrap(atts.getLocalName(i), Err.ATTRIBUTE) +
+    public void allowAttributes(AttributeMap atts, String[] allowed) throws SchemaException {
+        for (AttributeInfo att : atts) {
+            NodeName attName = att.getNodeName();
+            if (attName.hasURI("")) {
+                if (Arrays.binarySearch(allowed, attName.getLocalPart()) < 0) {
+                    error("Attribute " + Err.wrap(attName.getLocalPart(), Err.ATTRIBUTE) +
                             " is not allowed on element " + Err.wrap(getDisplayName(), Err.ELEMENT));
                 }
-            } else if (NamespaceConstant.SCHEMA.equals(atts.getURI(i))) {
+            } else if (attName.hasURI(NamespaceConstant.SCHEMA)) {
                 error("Attributes in the XML Schema namespace are not allowed");
             }
         }
@@ -175,7 +170,7 @@ public abstract class SchemaElement extends ElementImpl {
      * @param required the local name of the required attribute, which must be in the null namespace
      */
 
-    public void requireAttribute(AttributeCollection atts, String required) throws SchemaException {
+    public void requireAttribute(AttributeMap atts, String required) throws SchemaException {
         if (atts.getValue("", required) == null) {
             missingAttribute(required);
         }
@@ -201,10 +196,8 @@ public abstract class SchemaElement extends ElementImpl {
      */
 
     private void checkNoTextNodes() throws SchemaException {
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
         SchemaElement prev = this;
-        NodeInfo n;
-        while ((n = iter.next()) != null) {
+        for (NodeInfo n : children()) {
             if (n instanceof SchemaElement) {
                 // This is to get a reasonable line number for the error
                 prev = (SchemaElement) n;
@@ -224,12 +217,8 @@ public abstract class SchemaElement extends ElementImpl {
      */
 
     protected void validateChildren(SchemaCompiler compiler) throws SchemaException {
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-        NodeInfo child;
-        while ((child = kids.next()) != null) {
-            if (child instanceof SchemaElement) {
-                ((SchemaElement) child).validateSubtree(compiler);
-            }
+        for (NodeInfo child : children(SchemaElement.class::isInstance)) {
+            ((SchemaElement) child).validateSubtree(compiler);
         }
     }
 
@@ -339,7 +328,7 @@ public abstract class SchemaElement extends ElementImpl {
      */
 
     protected NamespaceResolver makeNamespaceContext() {
-        return getSchemaNodeFactory().getSchemaCompiler().makeNamespaceResolver(this);
+        return getAllNamespaces();
     }
 
     /**
@@ -393,8 +382,17 @@ public abstract class SchemaElement extends ElementImpl {
      */
 
     protected void error(String err) throws SchemaException {
-        SchemaException exception = new SchemaException(err, this);
-        error(exception);
+        ErrorReporter reporter = getSchemaNodeFactory().getPipelineConfiguration().getErrorReporter();
+        try {
+            getXSDSchema().incrementErrorCount();
+        } catch (SchemaException e2) {
+            throw new IllegalStateException("Schema document contains no xs:schema element. " +
+                                                    "Problem occurred while reporting error: " + e2.getMessage());
+        }
+
+        if (reporter != null) {
+            reporter.report(new XmlProcessingIncident(err, SaxonErrorCode.SXSQ0001, this));
+        }
     }
 
     /**
@@ -404,8 +402,7 @@ public abstract class SchemaElement extends ElementImpl {
      */
 
     protected void error(SchemaException exception) throws SchemaException {
-        ErrorListener errorListener = getSchemaNodeFactory().getPipelineConfiguration().getErrorListener();
-
+        ErrorReporter reporter = getSchemaNodeFactory().getPipelineConfiguration().getErrorReporter();
         try {
             getXSDSchema().incrementErrorCount();
         } catch (SchemaException e2) {
@@ -413,16 +410,8 @@ public abstract class SchemaElement extends ElementImpl {
                     "Problem occurred while reporting error: " + exception.getMessage());
         }
 
-        if (errorListener != null) {
-            try {
-                errorListener.error(exception);
-            } catch (TransformerException e) {
-                if (e instanceof SchemaException) {
-                    throw (SchemaException) e;
-                } else {
-                    throw new SchemaException(e);
-                }
-            }
+        if (reporter != null) {
+            reporter.report(new XmlProcessingException(exception));
         } else {
             throw exception;
         }
@@ -435,13 +424,9 @@ public abstract class SchemaElement extends ElementImpl {
      */
 
     protected void warning(String err) {
-        SchemaException exception = new SchemaException(err, this);
-        ErrorListener errorListener = getSchemaNodeFactory().getPipelineConfiguration().getErrorListener();
-        try {
-            errorListener.warning(exception);
-        } catch (TransformerException e2) {
-            // ignore secondary errors
-        }
+        XmlProcessingIncident exception = new XmlProcessingIncident(err, SaxonErrorCode.SXWN9009, this).asWarning();
+        ErrorReporter reporter = getSchemaNodeFactory().getPipelineConfiguration().getErrorReporter();
+        reporter.report(exception);
     }
 
 
@@ -538,11 +523,8 @@ public abstract class SchemaElement extends ElementImpl {
 
     protected void checkOnlyChildIsAnnotation() throws SchemaException {
         boolean foundAnnotation = false;
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while ((child = (NodeImpl)iter.next()) != null) {
+        for (NodeInfo child : children()) {
             int fp = child.getFingerprint();
-
             if (fp == StandardNames.XS_ANNOTATION) {
                 if (foundAnnotation) {
                     duplicateElement("annotation");
@@ -674,7 +656,7 @@ public abstract class SchemaElement extends ElementImpl {
      */
 
     protected void checkMutuallyExclusiveAttributes(String name1, String name2) throws SchemaException {
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         if (atts.getValue("", name1) != null && atts.getValue("", name2) != null) {
             mutuallyExclusiveAttributes(name1, name2);
         }
@@ -726,20 +708,6 @@ public abstract class SchemaElement extends ElementImpl {
             article += "n";
         }
         return article;
-    }
-
-    /**
-     * This method is called when a child element is required to be the first
-     * child, but is found elsewhere
-     *
-     * @param name the name of the illegal element
-     * @throws net.sf.saxon.type.SchemaException
-     *          thrown if the errorListener
-     *          decides that it's a fatal error.
-     */
-    public void mustBeLastElement(String name) throws SchemaException {
-        error(indefiniteArticle(name, "A") + ' ' + Err.wrap(name, Err.ELEMENT) +
-                " is allowed only as the last child of " + Err.wrap(getDisplayName(), Err.ELEMENT));
     }
 
     /**
@@ -813,21 +781,27 @@ public abstract class SchemaElement extends ElementImpl {
             while (tokenizer.hasMoreTokens()) {
                 String token = tokenizer.nextToken();
                 int v;
-                if (token.equals("union")) {
-                    v = SchemaType.DERIVATION_UNION;
-                } else if (token.equals("list")) {
-                    v = SchemaType.DERIVATION_LIST;
-                } else if (token.equals("restriction")) {
-                    v = SchemaType.DERIVATION_RESTRICTION;
-                } else if (token.equals("extension")) {
-                    v = SchemaType.DERIVATION_EXTENSION;
-                } else if (token.equals("substitution")) {
-                    v = SchemaType.DERIVE_BY_SUBSTITUTION;
-                } else {
-                    String err = "Invalid " + Err.wrap(attrName, Err.ATTRIBUTE) + " value " +
-                            Err.wrap(token, Err.VALUE);
-                    error(err);
-                    return 0;
+                switch (token) {
+                    case "union":
+                        v = SchemaType.DERIVATION_UNION;
+                        break;
+                    case "list":
+                        v = SchemaType.DERIVATION_LIST;
+                        break;
+                    case "restriction":
+                        v = SchemaType.DERIVATION_RESTRICTION;
+                        break;
+                    case "extension":
+                        v = SchemaType.DERIVATION_EXTENSION;
+                        break;
+                    case "substitution":
+                        v = SchemaType.DERIVE_BY_SUBSTITUTION;
+                        break;
+                    default:
+                        String err = "Invalid " + Err.wrap(attrName, Err.ATTRIBUTE) + " value " +
+                                Err.wrap(token, Err.VALUE);
+                        error(err);
+                        return 0;
                 }
                 if ((v & ~allowed) != 0) {
                     String err = "The " + Err.wrap(attrName, Err.ATTRIBUTE) + " value " +
@@ -848,7 +822,7 @@ public abstract class SchemaElement extends ElementImpl {
      * @throws SchemaException if the id is present and is invalid or is a duplicate
      */
     public void processId() throws SchemaException {
-        String id = getAttributeList().getValue("", "id");
+        String id = attributes().getValue("", "id");
         if (id != null) {
             SchemaException err = getSchemaNodeFactory().registerId(id, this);
             if (err != null) {
@@ -861,7 +835,7 @@ public abstract class SchemaElement extends ElementImpl {
 
     /**
      * Allocate a name to an anonymous type. It's important that the name allocated
-     * should be repeatable, because it can be referenced as a type annotation in a PTree document.
+     * should be repeatable, because it can be referenced as a type annotation in a SEF document.
      *
      * @return the name code of the allocated name
      */
@@ -891,7 +865,7 @@ public abstract class SchemaElement extends ElementImpl {
                 break;
             }
             if (node.isTopLevel()) {
-                AttributeCollection atts = node.getAttributeList();
+                AttributeMap atts = node.attributes();
                 topname = atts.getValue("", "name");
                 if (topname == null) {
                     topname = "";
@@ -1099,7 +1073,7 @@ public abstract class SchemaElement extends ElementImpl {
                     wildcard.addDisallowedNamespace(getXSDSchema().getTargetNamespace());
                 } else if (ns.equals(NAMESPACE_ANY)) {
                     // do nothing, this is the default
-                } else if (ns.indexOf("##") >= 0) {
+                } else if (ns.contains("##")) {
                     // the rules say it must be an anyURI. But we don't want to be
                     // over-restrictive. But we do want to catch mis-spellings (and
                     // pass the test suite...)
@@ -1129,7 +1103,7 @@ public abstract class SchemaElement extends ElementImpl {
                 wildcard.addDisallowedNamespace(getXSDSchema().getTargetNamespace());
             } else if (ns.equals(XSDAny.NAMESPACE_LOCAL)) {
                 wildcard.addDisallowedNamespace("");
-            } else if (ns.indexOf("##") >= 0) {
+            } else if (ns.contains("##")) {
                 // the rules say it must be an anyURI. But we don't want to be
                 // over-restrictive. But we do want to catch mis-spellings (and
                 // pass the test suite...)
@@ -1232,8 +1206,9 @@ public abstract class SchemaElement extends ElementImpl {
          *         in the schema document
          */
 
+        @Override
         public NamespaceResolver getNamespaceResolver() {
-            return new InscopeNamespaceResolver(SchemaElement.this);
+            return getAllNamespaces();
         }
 
         /*@Nullable*/
@@ -1248,4 +1223,4 @@ public abstract class SchemaElement extends ElementImpl {
     }
 }
 
-// Copyright (c) 2004-10 Saxonica Limited. All rights reserved
+// Copyright (c) 2004-19 Saxonica Limited

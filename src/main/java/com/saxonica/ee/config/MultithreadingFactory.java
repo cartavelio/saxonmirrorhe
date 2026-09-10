@@ -5,7 +5,6 @@ import com.saxonica.ee.optim.MultithreadedItemMappingIterator;
 import com.saxonica.ee.trans.ThreadManagerEE;
 import net.sf.saxon.expr.ItemMappingFunction;
 import net.sf.saxon.expr.XPathContextMajor;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
 
@@ -21,7 +20,7 @@ import java.util.concurrent.Executors;
 
 public class MultithreadingFactory {
 
-    EnterpriseConfiguration config;
+    private EnterpriseConfiguration config;
 
     /**
      * Create a <tt>MultithreadingFactory</tt>
@@ -44,9 +43,9 @@ public class MultithreadingFactory {
      * @return an iterator over the result sequence
      */
 
-    public <F extends Item<?>, T extends Item<?>> SequenceIterator<T> makeMultithreadedItemMappingIterator(
-            SequenceIterator<F> base, ItemMappingFunction<F, T> action) throws XPathException {
-        return new MultithreadedItemMappingIterator<>(base, action);
+    public SequenceIterator makeMultithreadedItemMappingIterator(
+            SequenceIterator base, ItemMappingFunction action) throws XPathException {
+        return new MultithreadedItemMappingIterator(base, action, this);
     }
 
     /**
@@ -80,4 +79,4 @@ public class MultithreadingFactory {
 
 }
 
-// Copyright (c) 2018 Saxonica Ltd
+// Copyright (c) 2018-2020 Saxonica Limited

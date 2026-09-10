@@ -52,6 +52,7 @@ public class ElementWildcard extends Particle {
      * Determine if this particle can be empty
      */
 
+    @Override
     public boolean isEmptiable() {
         return (getMinOccurs() == 0);
     }
@@ -61,6 +62,7 @@ public class ElementWildcard extends Particle {
      * Schema Component Constraint: Particle Valid (Restriction)
      */
 
+    @Override
     public boolean isPointless(ModelGroup container) {
         return false;
     }
@@ -69,6 +71,7 @@ public class ElementWildcard extends Particle {
      * Get the term represented by this particle
      */
 
+    @Override
     public Term getTerm() {
         return wildcard;
     }
@@ -80,11 +83,13 @@ public class ElementWildcard extends Particle {
      * @return true if all is well, false if errors found
      */
 
+    @Override
     public boolean fixup(SchemaCompiler compiler) {
         setFixupStatus(VALIDATED);
         return true;
     }
 
+    @Override
     public void compile(SchemaCompiler compiler) {
     }
 
@@ -99,6 +104,7 @@ public class ElementWildcard extends Particle {
      */
 
     /*@Nullable*/
+    @Override
     public SchemaType getElementParticleType(int elementName) {
         EnterpriseConfiguration config = getConfiguration();
         if (wildcard.matches(elementName, true, config, null)) {
@@ -142,6 +148,7 @@ public class ElementWildcard extends Particle {
      * @param elementName Identifies the name of the child element within this content model
      */
 
+    @Override
     public int getElementParticleCardinality(int elementName) {
         EnterpriseConfiguration config = getConfiguration();
         if (wildcard.matches(elementName, true, config, null)) {
@@ -156,6 +163,7 @@ public class ElementWildcard extends Particle {
      * @return true if the particle is an element wildcard, or contains one
      */
 
+    @Override
     public boolean containsElementWildcard() {
         return true;
     }
@@ -167,6 +175,7 @@ public class ElementWildcard extends Particle {
      * @param ignoreWildcards true if wildcards are to be ignored. If false, the value XS_INVALID_NAME is added
      */
 
+    @Override
     public void gatherAllPermittedElements(IntHashSet result, boolean ignoreWildcards) throws SchemaException {
         if (!ignoreWildcards) {
             result.add(-1);
@@ -183,6 +192,7 @@ public class ElementWildcard extends Particle {
      *          error listener decides that the error is fatal
      */
 
+    @Override
     public boolean validate(SchemaCompiler compiler) throws SchemaException {
         return wildcard.validate(compiler);
     }
@@ -191,6 +201,7 @@ public class ElementWildcard extends Particle {
      * Serialize the particle
      */
 
+    @Override
     public void serializeParticle(SchemaModelSerializer serializer) throws XPathException {
         String id = serializer.getId(wildcard, false);
         serializer.startElement("elementWildcard");
@@ -205,4 +216,4 @@ public class ElementWildcard extends Particle {
     }
 }
 
-// Copyright (c) 2004-2006 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

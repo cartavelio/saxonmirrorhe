@@ -75,6 +75,7 @@ public class StreamingTransformerFactory extends EnterpriseTransformerFactory {
      *                                                               TransformerHandler can not be created.
      */
 
+    @Override
     public TransformerHandler newTransformerHandler(Templates templates)
             throws TransformerConfigurationException {
         if (!(templates instanceof TemplatesImpl)) {
@@ -90,4 +91,4 @@ public class StreamingTransformerFactory extends EnterpriseTransformerFactory {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

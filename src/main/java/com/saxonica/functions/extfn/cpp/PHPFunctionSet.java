@@ -38,7 +38,7 @@ public class PHPFunctionSet extends BuiltInFunctionSet {
     }
 
     private void init() {
-        register("function", 2, PHPFunction.class, AnyItemType.getInstance(), OPT, 0, SIDE | LATE)
+        register("function", 2, PHPFunction.class, AnyItemType.getInstance(), OPT, SIDE | LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, ArrayItemType.getInstance(), STAR, null);
 
@@ -56,7 +56,7 @@ public class PHPFunctionSet extends BuiltInFunctionSet {
         public native Object _phpCall(String name, Object[] args, String[] types);
 
         @Override
-        public Sequence<?> call(XPathContext context, Sequence[] args) throws XPathException {
+        public Sequence call(XPathContext context, Sequence[] args) throws XPathException {
             String phpFuncName = args[0].head().getStringValue();
             int len = args.length;
             Object[] funcArgs = null;
@@ -70,7 +70,7 @@ public class PHPFunctionSet extends BuiltInFunctionSet {
 
             funcArgs = new Object[seqLength];
             funcArgTypes = new String[seqLength];
-            Sequence<?> seq = null;
+            Sequence seq = null;
 
             for (int i = 0; i < seqLength; i++) {
                 seq = seqArray.get(i);
@@ -119,12 +119,7 @@ public class PHPFunctionSet extends BuiltInFunctionSet {
             if (SaxonCAPI.debug) {
                 System.err.println("Phpcall.call: Before call to _phpCall ");
             }
-            Object obj;
-            try {
-                obj = _phpCall(phpFuncName, funcArgs, funcArgTypes);
-            } catch (UnsatisfiedLinkError ex){
-                throw new XPathException("UnsatisfiedLinkError: "+ex.getLocalizedMessage());
-            }
+            Object obj = _phpCall(phpFuncName, funcArgs, funcArgTypes);
             if (SaxonCAPI.debug) {
                 System.err.println("Phpcall.call: After call to _phpCall ");
             }
@@ -146,3 +141,5 @@ public class PHPFunctionSet extends BuiltInFunctionSet {
 
 
 }
+
+// Copyright (c) 2020 Saxonica Limited

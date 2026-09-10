@@ -92,6 +92,7 @@ public class TestDriverGui extends TestDriverShell implements ActionListener, Mo
     private String resultsDir = "";
     private String testDriverVersion = "4.1";
 
+    @Override
     public void mouseClicked(MouseEvent mouseEvent) {
         if (mouseEvent.getSource() == resultsDirBtn) {
             String os = System.getProperty("os.name").toLowerCase();
@@ -109,18 +110,22 @@ public class TestDriverGui extends TestDriverShell implements ActionListener, Mo
         }
     }
 
+    @Override
     public void mousePressed(MouseEvent mouseEvent) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
+    @Override
     public void mouseReleased(MouseEvent mouseEvent) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
+    @Override
     public void mouseEntered(MouseEvent mouseEvent) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
+    @Override
     public void mouseExited(MouseEvent mouseEvent) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
@@ -410,6 +415,7 @@ public class TestDriverGui extends TestDriverShell implements ActionListener, Mo
     class RunThread implements Runnable {
 
 
+        @Override
         public void run() {
 
         }
@@ -639,6 +645,7 @@ public class TestDriverGui extends TestDriverShell implements ActionListener, Mo
     }
 
 
+    @Override
     public void actionPerformed(ActionEvent actionEvent) {
         Object source = actionEvent.getSource();
         resultLabel.setVisible(false);
@@ -924,6 +931,7 @@ public class TestDriverGui extends TestDriverShell implements ActionListener, Mo
 
         class RunThread1 extends RunThread {
 
+            @Override
             public void run() {
                 try {
                     xmark.go(options);
@@ -966,6 +974,7 @@ public class TestDriverGui extends TestDriverShell implements ActionListener, Mo
 
         class RunThread1 extends RunThread {
 
+            @Override
             public void run() {
                 try {
                     updateDriver.go(options);
@@ -1012,6 +1021,7 @@ public class TestDriverGui extends TestDriverShell implements ActionListener, Mo
 
         class RunThread1 extends RunThread {
 
+            @Override
             public void run() {
                 try {
                     schema.go(options);
@@ -1048,6 +1058,7 @@ public class TestDriverGui extends TestDriverShell implements ActionListener, Mo
 
         class RunThread1 extends RunThread {
 
+            @Override
             public void run() {
                 try {
                     fots.go(options);
@@ -1085,6 +1096,7 @@ public class TestDriverGui extends TestDriverShell implements ActionListener, Mo
 
         class RunThread1 extends RunThread {
 
+            @Override
             public void run() {
                 try {
                     xslt30.go(options);
@@ -1109,6 +1121,7 @@ public class TestDriverGui extends TestDriverShell implements ActionListener, Mo
     }
 
 
+    @Override
     public void printResults(String data, String resultFileStr, String resultsDir) {
         resultLabel.setVisible(true);
         /*resultsFileBtn.setVisible(true);*/
@@ -1118,10 +1131,12 @@ public class TestDriverGui extends TestDriverShell implements ActionListener, Mo
         this.resultsDir = resultsDir;
     }
 
+    @Override
     public void alert(String error) {
         JOptionPane.showMessageDialog(null, error, "Setup Error", JOptionPane.YES_NO_OPTION);
     }
 
+    @Override
     public void println(String data) {
         setResultTextArea(data);
     }
@@ -1129,4 +1144,4 @@ public class TestDriverGui extends TestDriverShell implements ActionListener, Mo
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

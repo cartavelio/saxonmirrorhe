@@ -46,6 +46,7 @@ public class GeneralComparisonEE extends GeneralComparison {
     }
 
     /*@NotNull*/
+    @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         // if either operand is an indexed variable, replace the comparison A=V by the indexed filter
         // expression exists(V[.=A])
@@ -86,6 +87,7 @@ public class GeneralComparisonEE extends GeneralComparison {
     }
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         GeneralComparisonEE gc = new GeneralComparisonEE(getLhsExpression().copy(rebindings), operator, getRhsExpression().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, gc);
@@ -104,6 +106,7 @@ public class GeneralComparisonEE extends GeneralComparison {
      * @return a boolean representing the result of the numeric comparison of the two operands
      */
 
+    @Override
     public boolean effectiveBooleanValue(XPathContext context) throws XPathException {
         // Avoid the general hash join routine if either sequence is empty or a singleton
 
@@ -149,8 +152,8 @@ public class GeneralComparisonEE extends GeneralComparison {
         return hashJoin(prependTwo(lhsFirst, lhsSecond, lhsIter), prependTwo(rhsFirst, rhsSecond, rhsIter), context, comparer);
     }
 
-    private static SequenceIterator<?> prependTwo(Item first, Item second, SequenceIterator rest) {
-        Item<?>[] first2 = new Item[]{first, second};
+    private static SequenceIterator prependTwo(Item first, Item second, SequenceIterator rest) {
+        Item[] first2 = new Item[]{first, second};
         return new InsertBefore.InsertIterator(rest, new ArrayIterator<>(first2), 1);
     }
 
@@ -471,6 +474,7 @@ public class GeneralComparisonEE extends GeneralComparison {
         }
     }
 
+    @Override
     protected GeneralComparison getInverseComparison() {
         GeneralComparisonEE gc = new GeneralComparisonEE(getRhsExpression(), Token.inverse(operator), getLhsExpression());
         gc.setRetainedStaticContext(getRetainedStaticContext());
@@ -483,4 +487,4 @@ public class GeneralComparisonEE extends GeneralComparison {
     }
 }
 
-// Copyright (c) 2004-2014 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

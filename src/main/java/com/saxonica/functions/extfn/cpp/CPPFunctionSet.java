@@ -24,7 +24,7 @@ public class CPPFunctionSet extends BuiltInFunctionSet {
           }
 
       private void init() {
-          register("native", 2, NativeCall.class, AnyItemType.getInstance(), OPT, 0, SIDE|LATE)
+          register("native", 2, NativeCall.class, AnyItemType.getInstance(), OPT, SIDE|LATE)
                   .arg(0, BuiltInAtomicType.STRING, ONE, null)
                   .arg(1, ArrayItemType.getInstance(), STAR, null);
 
@@ -38,3 +38,5 @@ public class CPPFunctionSet extends BuiltInFunctionSet {
 
 
 }
+
+// Copyright (c) 2020 Saxonica Limited

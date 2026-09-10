@@ -5,13 +5,15 @@ package com.saxonica.ee.schema;
  */
 public class MinInclusiveFacet extends ValueRangeFacet {
 
+    @Override
     public String getName() {
         return "minInclusive";
     }
 
+    @Override
     protected boolean testComparisonOK(int comparisonResult) {
         return comparisonResult >= 0;
     }
 }
 
-// Copyright (c) Saxonica 2009. All rights reserved
+// Copyright (c) Saxonica 2009.

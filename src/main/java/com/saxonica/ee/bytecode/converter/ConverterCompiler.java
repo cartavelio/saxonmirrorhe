@@ -25,6 +25,7 @@ public abstract class ConverterCompiler {
 
     public static class GenericConverterCompiler extends ConverterCompiler {
 
+        @Override
         public void compileToPrimitive(CompilerService compiler, Expression expression, Class requiredClass, OnEmpty onEmpty) throws CannotCompileException {
             throw new UnsupportedOperationException("compileToPrimitive for generic target type");
 
@@ -101,4 +102,4 @@ public abstract class ConverterCompiler {
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

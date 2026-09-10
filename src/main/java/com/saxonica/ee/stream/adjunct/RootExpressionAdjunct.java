@@ -79,4 +79,4 @@ public class RootExpressionAdjunct extends StreamingAdjunct {
 
 }
 
-// Copyright (c) 2014 Saxonica Limited.
+// Copyright (c) 2014-2020 Saxonica Limited

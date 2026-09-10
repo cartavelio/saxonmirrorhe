@@ -3,15 +3,22 @@ package com.saxonica.ee.jaxp;
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.sdoc.LSSchemaResolver;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.FeatureKeys;
+import net.sf.saxon.lib.ProtocolRestricter;
+import net.sf.saxon.lib.StandardURIResolver;
+import net.sf.saxon.s9api.XmlProcessingError;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaException;
 import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.*;
 
 import javax.xml.XMLConstants;
-import javax.xml.transform.*;
+import javax.xml.transform.Source;
+import javax.xml.transform.SourceLocator;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.URIResolver;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import java.util.function.Supplier;
@@ -22,9 +29,9 @@ import java.util.function.Supplier;
 
 public class SchemaFactoryImpl extends SchemaFactory implements Configuration.ApiProvider {
 
-    public static final String XSD_LANGUAGE_IDENTIFIER = "http://www.w3.org/XML/XMLSchema";
-    public static final String XSD10_LANGUAGE_IDENTIFIER = "http://www.w3.org/XML/XMLSchema/v1.0";
-    public static final String XSD11_LANGUAGE_IDENTIFIER = "http://www.w3.org/XML/XMLSchema/v1.1";
+    private static final String XSD_LANGUAGE_IDENTIFIER = "http://www.w3.org/XML/XMLSchema";
+    private static final String XSD10_LANGUAGE_IDENTIFIER = "http://www.w3.org/XML/XMLSchema/v1.0";
+    private static final String XSD11_LANGUAGE_IDENTIFIER = "http://www.w3.org/XML/XMLSchema/v1.1";
 
     /**
      * A mutable static variable (horrible but useful) allowing the use of this SchemaFactory to
@@ -45,21 +52,24 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
     private static Supplier<EnterpriseConfiguration> configurationFactory = EnterpriseConfiguration::new;
 
     static ErrorHandler DRACONIAN_ERROR_HANDLER = new ErrorHandler() {
+        @Override
         public void warning(SAXParseException exception) throws SAXException {
             // no action
         }
 
+        @Override
         public void error(SAXParseException exception) throws SAXException {
             throw exception;
         }
 
+        @Override
         public void fatalError(SAXParseException exception) throws SAXException {
             throw exception;
         }
     };
 
-    EnterpriseConfiguration config;
-    ErrorListener errorListener;
+    private EnterpriseConfiguration config;
+    private ErrorReporter errorReporter;
 
     /**
      * Default constructor. This is designed to be invoked via the JAXP SchemaFactory.newInstance()
@@ -89,7 +99,7 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
     public SchemaFactoryImpl(EnterpriseConfiguration config) {
         this.config = config;
         config.checkLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION, "schema processing", -1);
-        errorListener = config.getErrorListener();
+        errorReporter = config.makeErrorReporter();
     }
 
     /**
@@ -118,19 +128,20 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
      * <p>Always returns false if no Saxon Enterprise license can be found.</p>
      */
 
+    @Override
     public boolean isSchemaLanguageSupported(String language) {
         if (!ENABLED) {
             return false;
         }
         boolean b = isSchemaLanguageSupportedX(language);
         if (System.getProperty("jaxp.debug") != null) {
-            config.getStandardErrorOutput().println(
+            config.getLogger().info(
                     "Calling com.saxonica.SchemaFactoryImpl.isSchemaLanguageSupported(\"" + language + "\"); language supported? " + b);
         }
         if (b) {
             boolean licensed = config.isLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION);
             if (System.getProperty("jaxp.debug") != null) {
-                config.getStandardErrorOutput().println(
+                config.getLogger().info(
                         "Is Saxon-EE schema validation licensed? " + licensed);
             }
             return licensed;
@@ -163,11 +174,12 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
      * this does not change the error listener used by the Configuration.
      */
 
+    @Override
     public void setErrorHandler(ErrorHandler errorHandler) {
         if (errorHandler == null) {
             errorHandler = DRACONIAN_ERROR_HANDLER;
         }
-        errorListener = new ErrorListenerWrappingErrorHandler(errorHandler);
+        errorReporter = new ErrorReporterWrappingErrorHandler(errorHandler);
     }
 
     /**
@@ -177,9 +189,10 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
      *         null.
      */
 
+    @Override
     public ErrorHandler getErrorHandler() {
-        if (errorListener instanceof ErrorListenerWrappingErrorHandler) {
-            ErrorHandler eh = ((ErrorListenerWrappingErrorHandler)errorListener).getErrorHandler();
+        if (errorReporter instanceof ErrorReporterWrappingErrorHandler) {
+            ErrorHandler eh = ((ErrorReporterWrappingErrorHandler)errorReporter).getErrorHandler();
             return eh == DRACONIAN_ERROR_HANDLER ? null : eh;
         }
         return null;
@@ -195,6 +208,7 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
      *                           this method.
      */
 
+    @Override
     public void setResourceResolver(LSResourceResolver lsResourceResolver) {
         config.setURIResolver(new URIResourceResolver(lsResourceResolver));
         config.setSchemaURIResolver(new LSSchemaResolver(lsResourceResolver, config));
@@ -208,6 +222,7 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
      */
 
     /*@Nullable*/
+    @Override
     public LSResourceResolver getResourceResolver() {
         URIResolver resolver = config.getURIResolver();
         if (resolver instanceof URIResourceResolver) {
@@ -265,10 +280,11 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
      * @throws IllegalArgumentException If any item in the array is not recognized by this method.
      */
 
+    @Override
     public Schema newSchema(Source[] sources) throws SAXException {
         try {
             for (Source source : sources) {
-                config.addSchemaSource(source, errorListener);
+                config.addSchemaSource(source, errorReporter);
             }
         } catch (SchemaException e) {
             throw toSAXException(e);
@@ -294,6 +310,7 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
      * @return Always return a non-null valid {@link Schema} object.
      */
 
+    @Override
     public Schema newSchema() {
         return new SchemaReference(config.getSuperSchema());
     }
@@ -323,6 +340,7 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
      * @see #setProperty(String, Object)
      */
 
+    @Override
     public Object getProperty(String name) throws SAXNotSupportedException {
         try {
             return config.getConfigurationProperty(name);
@@ -352,7 +370,17 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
      *                              cannot set the requested value.
      * @throws NullPointerException if the name parameter is null.
      */
+    @Override
     public void setProperty(String name, Object object) throws SAXNotRecognizedException, SAXNotSupportedException {
+        switch (name) {
+            case XMLConstants.ACCESS_EXTERNAL_SCHEMA:
+                URIResolver resolver = config.getURIResolver();
+                if (resolver instanceof StandardURIResolver) {
+                    ((StandardURIResolver)resolver).setAllowedUriTest(ProtocolRestricter.make(object.toString()));
+                }
+                return;
+            default:
+        }
         try {
             config.setConfigurationProperty(name, object);
         } catch (IllegalArgumentException err) {
@@ -433,7 +461,7 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
         } else {
             SourceLocator loc = err.getLocator();
             if (loc != null && !(loc instanceof Locator)) {
-                loc = new ExplicitLocation(loc);
+                loc = new Loc(loc);
             }
             return new SAXParseException(err.getMessage(), (Locator) loc, err);
         }
@@ -452,7 +480,7 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
      * A JAXP ErrorListener that wraps a SAX ErrorHandler
      */
 
-    public static class ErrorListenerWrappingErrorHandler implements ErrorListener {
+    public static class ErrorReporterWrappingErrorHandler implements ErrorReporter {
 
         private ErrorHandler handler;
 
@@ -462,55 +490,21 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
          * @param handler the SAX error handler to be wrapped
          */
 
-        public ErrorListenerWrappingErrorHandler(ErrorHandler handler) {
+        public ErrorReporterWrappingErrorHandler(ErrorHandler handler) {
             this.handler = handler;
         }
 
-        /**
-         * Receive notification of a warning.
-         */
-        public void warning(TransformerException exception) throws TransformerException {
+        @Override
+        public void report(XmlProcessingError error) {
+            final SAXParseException exception = toSAXException(XPathException.fromXmlProcessingError(error));
             try {
-                //noinspection ThrowableResultOfMethodCallIgnored
-                handler.warning(toSAXException(exception));
-            } catch (SAXException e) {
-                throw toTransformerException(e);
-            }
-        }
-
-        /**
-         * Receive notification of a recoverable error.
-         */
-        public void error(TransformerException exception) throws TransformerException {
-            try {
-                //noinspection ThrowableResultOfMethodCallIgnored
-                if (exception instanceof XPathException) {
-                    if (((XPathException) exception).hasBeenReported()) {
-                        return;
-                    }
-                    ((XPathException) exception).setHasBeenReported(true);
+                if (error.isWarning()) {
+                    handler.warning(exception);
+                } else {
+                    handler.error (exception);
                 }
-                handler.error(toSAXException(exception));
             } catch (SAXException e) {
-                throw toTransformerException(e);
-            }
-        }
-
-        /**
-         * Receive notification of a non-recoverable error.
-         */
-        public void fatalError(TransformerException exception) throws TransformerException {
-            try {
-                //noinspection ThrowableResultOfMethodCallIgnored
-                if (exception instanceof XPathException) {
-                    if (((XPathException)exception).hasBeenReported()) {
-                        return;
-                    }
-                    ((XPathException) exception).setHasBeenReported(true);
-                }
-                handler.fatalError(toSAXException(exception));
-            } catch (SAXException e) {
-                throw toTransformerException(e);
+                error.setFatal(e.getMessage());
             }
         }
 
@@ -526,4 +520,4 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
     }
 }
 
-// Copyright (c) 2004-9 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

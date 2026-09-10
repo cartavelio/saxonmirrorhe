@@ -34,14 +34,15 @@ public class CompileQuery extends SystemFunction {
      *                                           code will add information about the error location.
      */
 
+    @Override
     public ExternalObject<XQueryExpression> call(XPathContext context, Sequence[] arguments) throws XPathException {
         String query = arguments[0].head().getStringValue();
         StaticQueryContext sqc = context.getConfiguration().newStaticQueryContext();
-        sqc.setLanguageVersion(31);
+        //sqc.setLanguageVersion(31);
         XQueryExpression exp = sqc.compileQuery(query);
         return new ObjectValue<>(exp);
     }
 }
 
 
-// Copyright (c) 2009-2016 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

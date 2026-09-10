@@ -31,14 +31,17 @@ public class SuffixState implements State {
      */
 
     /*@Nullable*/
+    @Override
     public Edge getTransition(int token, UserComplexType type) {
         return null;
     }
 
+    @Override
     public boolean isFinalState() {
         return true;
     }
 
+    @Override
     public CharSequence listAllowedElements() {
         return "";
     }
@@ -50,6 +53,7 @@ public class SuffixState implements State {
      *         returned by this Iterator are {@link com.saxonica.ee.schema.fsa.Edge} objects.
      */
 
+    @Override
     public Edge[] getWildcardEdges() {
         return new Edge[0];
     }
@@ -62,12 +66,13 @@ public class SuffixState implements State {
      */
 
     /*@NotNull*/
+    @Override
     public Iterator<Edge> getEdges() {
         return Collections.EMPTY_LIST.iterator();
     }
 }
 
-// Copyright (c) 2009 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited
 
 
 

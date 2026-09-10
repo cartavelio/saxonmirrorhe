@@ -21,22 +21,26 @@ public class IXSLElementFactory implements ExtensionElementFactory {
      */
 
     /*@Nullable*/
+    @Override
     public Class<? extends StyleElement> getExtensionClass(String localname) {
-        if (localname.equals("schedule-action")) {
-            return IXSLScheduleAction.class;
-        } else if (localname.equals("set-attribute")) {
-            return IXSLSetAttribute.class;
-        } else if (localname.equals("remove-attribute")) {
-            return IXSLRemoveAttribute.class;
-        } else if (localname.equals("set-property")) {
-            return IXSLSetProperty.class;
-        } else if (localname.equals("set-style")) {
-            return IXSLSetStyle.class;
+        switch (localname) {
+            case "schedule-action":
+                return IXSLScheduleAction.class;
+            case "set-attribute":
+                return IXSLSetAttribute.class;
+            case "remove-attribute":
+                return IXSLRemoveAttribute.class;
+            case "set-property":
+                return IXSLSetProperty.class;
+            case "remove-property":
+                return IXSLRemoveProperty.class;
+            case "set-style":
+                return IXSLSetStyle.class;
         }
         return null;
     }
 
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited
 

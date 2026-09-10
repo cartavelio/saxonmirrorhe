@@ -231,4 +231,4 @@ public class IdentityComparisonCompiler extends ToItemCompiler {
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

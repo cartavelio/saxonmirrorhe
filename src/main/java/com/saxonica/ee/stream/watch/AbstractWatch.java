@@ -1,7 +1,6 @@
 package com.saxonica.ee.stream.watch;
 
 import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.event.SequenceReceiver;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.trans.XPathException;
@@ -26,6 +25,7 @@ public abstract class AbstractWatch implements Watch {
      * @param pipe the PipelineConfiguration in use
      */
 
+    @Override
     public final void setPipelineConfiguration(PipelineConfiguration pipe) {
         this.pipe = pipe;
     }
@@ -36,6 +36,7 @@ public abstract class AbstractWatch implements Watch {
      * @return the pipeline configuration
      */
 
+    @Override
     public final PipelineConfiguration getPipelineConfiguration() {
         return pipe;
     }
@@ -44,6 +45,7 @@ public abstract class AbstractWatch implements Watch {
      * Set a NamespaceResolver for use by the Watch
      */
 
+    @Override
     public final void setNamespaceResolver(NamespaceResolver resolver) {
         namespaceResolver = resolver;
     }
@@ -54,6 +56,7 @@ public abstract class AbstractWatch implements Watch {
      * @return the namespace resolver
      */
 
+    @Override
     public final NamespaceResolver getNamespaceResolver() {
         return namespaceResolver;
     }
@@ -64,6 +67,7 @@ public abstract class AbstractWatch implements Watch {
      * @param terminator
      */
 
+    @Override
     public void open(Terminator terminator) throws XPathException {
         //
     }
@@ -76,7 +80,8 @@ public abstract class AbstractWatch implements Watch {
      *
      */
 
-    public void processItem(Item<?> item) throws XPathException {
+    @Override
+    public void processItem(Item item) throws XPathException {
         //
     }
 
@@ -86,21 +91,11 @@ public abstract class AbstractWatch implements Watch {
      * Watch goes out of scope. The default implementation does nothing.
      */
 
+    @Override
     public void close() throws XPathException {
         //
     }
 
-    /**
-     * Get a receiver to which start and end events for documents and elements can be
-     * written. By default this will be the same as the receiver for the result feed,
-     * because very few XSLT constructs (specifically, variables and functions) allow
-     * the results of document and element constructors to be captured for further
-     * processing. A construct that does need to process these events will intercept
-     * them by providing its own receiver, typically a SequenceOutputter.
-     */
-    public SequenceReceiver getReceiver() {
-        throw new UnsupportedOperationException();
-    }
 }
 
-// Copyright (c) 2009 Saxonica Limited. No warranty.
+// Copyright (c) 2009-2020 Saxonica Limited

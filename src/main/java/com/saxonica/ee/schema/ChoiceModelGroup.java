@@ -16,6 +16,7 @@ public class ChoiceModelGroup extends ModelGroup {
      *         as a whole has minOccurs=0, or if any of the choices allows empty content.
      */
 
+    @Override
     public boolean isEmptiable() throws MissingComponentException {
         for (Particle aContentModel : contentModel) {
             if (aContentModel.isEmptiable()) {
@@ -30,6 +31,7 @@ public class ChoiceModelGroup extends ModelGroup {
      * Schema Component Constraint: Particle Valid (Restriction)
      */
 
+    @Override
     public boolean isPointless(ModelGroup container) {
         return contentModel.isEmpty() ||
                 contentModel.size() == 1 ||
@@ -44,6 +46,7 @@ public class ChoiceModelGroup extends ModelGroup {
      * @param isRepeatable set to true if this part of the content model can be repeated
      */
 
+    @Override
     public void markVulnerableSubParticles(boolean isRepeatable) throws MissingComponentException {
         // in a repeated choice, all particles are vulnerable
         if (isRepeatable) {
@@ -65,6 +68,7 @@ public class ChoiceModelGroup extends ModelGroup {
      * @throws SchemaException when the error listener decides an error is fatal
      */
 
+    @Override
     public boolean validate(SchemaCompiler compiler) throws SchemaException {
         if (containsAll(false)) {
             compiler.error("An <xs:choice> model group must not contain an <xs:all> model group", this);
@@ -77,11 +81,12 @@ public class ChoiceModelGroup extends ModelGroup {
      * Get the name of this compositor
      */
 
+    @Override
     public String getCompositorName() {
         return "choice";
     }
 
 }
 
-// Copyright (c) 2004-2006 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited
 

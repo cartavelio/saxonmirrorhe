@@ -4,7 +4,8 @@ import com.saxonica.ee.update.ReplaceValueExpression;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.ContextItemExpression;
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.style.StyleElement;
@@ -25,6 +26,7 @@ public class SaxonChange extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
@@ -35,26 +37,28 @@ public class SaxonChange extends StyleElement {
      * @return false: no, it may not contain a template-body
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return false;
     }
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
         String selectAtt = null;
         String toAtt = null;
 
-        AttributeCollection atts = getAttributeList();
-
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String value = att.getValue();
+            String f = attName.getDisplayName();
             if (f.equals("select")) {
-                selectAtt = atts.getValue(a);
-                select = makeExpression(selectAtt, a);
+                selectAtt = value;
+                select = makeExpression(selectAtt, att);
             } else if (f.equals("to")) {
-                toAtt = atts.getValue(a);
-                newValue = makeExpression(toAtt, a);
+                toAtt = value;
+                newValue = makeExpression(toAtt, att);
             } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+                checkUnknownAttribute(attName);
             }
         }
 
@@ -68,6 +72,7 @@ public class SaxonChange extends StyleElement {
         }
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         getConfiguration().checkLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XSLT,
                                                 "saxon:change",
@@ -77,12 +82,13 @@ public class SaxonChange extends StyleElement {
         SaxonUpdate.checkContainment(this);
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         return new ReplaceValueExpression(select, newValue);
     }
 
 }
 
-// Copyright (c) 2018 Saxonica Ltd
+// Copyright (c) 2018-2020 Saxonica Limited
 
 

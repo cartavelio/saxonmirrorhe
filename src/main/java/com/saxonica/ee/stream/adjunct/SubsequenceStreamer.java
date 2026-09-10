@@ -1,8 +1,8 @@
 package com.saxonica.ee.stream.adjunct;
 
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
 import com.saxonica.ee.stream.feed.FilteringFeed;
+import com.saxonica.ee.stream.feed.ItemFeed;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.Subsequence_3;
@@ -18,12 +18,13 @@ import net.sf.saxon.value.NumericValue;
 public class SubsequenceStreamer extends FilteringAdjunct implements FeedMaker {
 
 
+    @Override
     public FeedMaker getFeedMaker(int arg) throws XPathException {
         return arg == 0 ? this : getDefaultFeedMaker(arg);
     }
 
     @Override
-    public FilteringFeed.Filter makeFilter(XPathContext context, Feed out) throws XPathException {
+    public FilteringFeed.Filter makeFilter(XPathContext context, ItemFeed out) throws XPathException {
         SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
         Subsequence_3 fn = (Subsequence_3) fnc.getTargetFunction();
         int first, last;
@@ -51,6 +52,7 @@ public class SubsequenceStreamer extends FilteringAdjunct implements FeedMaker {
             this.last = last;
         }
 
+        @Override
         public int matches(Item item, int position) throws XPathException {
             if (position < first) {
                 return SKIP;
@@ -65,4 +67,4 @@ public class SubsequenceStreamer extends FilteringAdjunct implements FeedMaker {
 
 }
 
-// Copyright (c) 2013 Saxonica Limited.
+// Copyright (c) 2013-2020 Saxonica Limited

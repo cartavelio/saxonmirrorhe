@@ -24,6 +24,7 @@ public class XQueryEmitter extends XMLEmitter {
      * @param inAttribute Set to true if the text is in an attribute value
      */
 
+    @Override
     protected void writeEscape(final CharSequence chars, final boolean inAttribute) throws IOException, XPathException {
         boolean inBraces = false;
         FastStringBuffer buff = new FastStringBuffer(chars.length());
@@ -31,33 +32,33 @@ public class XQueryEmitter extends XMLEmitter {
             char c = chars.charAt(i);
             if (!inBraces && c == '{' && chars.charAt(i + 1) != '{') {
                 inBraces = true;
-                buff.append((char) 0);   // switch disable-output-escaping on
+                buff.cat((char) 0);   // switch disable-output-escaping on
             } else if (inBraces && c == '}') {
                 inBraces = false;
-                buff.append((char) 0);   // switch disable-output-escaping off
+                buff.cat((char) 0);   // switch disable-output-escaping off
             } else if (inBraces && c == '"') {
-                buff.append((char) 0);
+                buff.cat((char) 0);
                 i++;
                 do {
-                    buff.append(c);
+                    buff.cat(c);
                     c = chars.charAt(i++);
                 } while (c != '"');
-                buff.append((char) 0);
+                buff.cat((char) 0);
                 i--;
             } else if (inBraces && c == '\'') {
-                buff.append((char) 0);
+                buff.cat((char) 0);
                 i++;
                 do {
-                    buff.append(c);
+                    buff.cat(c);
                     c = chars.charAt(i++);
                 } while (c != '\'');
-                buff.append((char) 0);
+                buff.cat((char) 0);
                 i--;
             }
-            buff.append(c);
+            buff.cat(c);
         }
         super.writeEscape(buff, inAttribute);
     }
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

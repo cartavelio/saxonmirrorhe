@@ -15,11 +15,7 @@ import net.sf.saxon.value.*;
  */
 public class ExplicitTimezoneFacet extends Facet {
 
-    public static final int OPTIONAL = 0;
-    public static final int REQUIRED = 1;
-    public static final int PROHIBITED = 2;
-
-    int facetValue;
+    private Optionality facetValue;
 
     /**
      * Create an explicitTimezone facet
@@ -28,10 +24,12 @@ public class ExplicitTimezoneFacet extends Facet {
     public ExplicitTimezoneFacet() {
     }
 
+    @Override
     public String getName() {
         return "explicitTimezone";
     }
 
+    @Override
     public String getValue() {
         switch (facetValue) {
             case REQUIRED:
@@ -47,13 +45,13 @@ public class ExplicitTimezoneFacet extends Facet {
     public void setValue(String value) throws SchemaException {
         switch (value) {
             case "required":
-                this.facetValue = REQUIRED;
+                this.facetValue = Optionality.REQUIRED;
                 break;
             case "optional":
-                this.facetValue = OPTIONAL;
+                this.facetValue = Optionality.OPTIONAL;
                 break;
             case "prohibited":
-                this.facetValue = PROHIBITED;
+                this.facetValue = Optionality.PROHIBITED;
                 break;
             default:
                 throw new SchemaException("Value of explicitTimezone facet must be required, optional, or prohibited");
@@ -69,6 +67,7 @@ public class ExplicitTimezoneFacet extends Facet {
      *          if the facet is not legal
      */
 
+    @Override
     public void checkFacetRestriction(UserSimpleType type, SimpleType base, SchemaCompiler compiler) throws SchemaException {
 
         if (base instanceof UserAtomicType) {
@@ -80,17 +79,17 @@ public class ExplicitTimezoneFacet extends Facet {
                     throw new SchemaException(
                             "The explicitTimezone facet is fixed in the base type and cannot be varied");
                 }
-                if (baseFacet.facetValue == PROHIBITED && facetValue != PROHIBITED) {
+                if (baseFacet.facetValue == Optionality.PROHIBITED && facetValue != Optionality.PROHIBITED) {
                     throw new SchemaException(
                             "The explicitTimezone is prohibited in the base type so it must be prohibited in the derived type");
                 }
-                if (baseFacet.facetValue == REQUIRED && facetValue != REQUIRED) {
+                if (baseFacet.facetValue == Optionality.REQUIRED && facetValue != Optionality.REQUIRED) {
                     throw new SchemaException(
                             "The explicitTimezone is required in the base type so it must be required in the derived type");
                 }
             }
         } else if (base.getFingerprint() == StandardNames.XS_DATE_TIME_STAMP) {
-            if (facetValue != REQUIRED) {
+            if (facetValue != Optionality.REQUIRED) {
                 throw new SchemaException(
                         "The explicitTimezone is required in the base type so it must be required in the derived type");
             }
@@ -105,10 +104,11 @@ public class ExplicitTimezoneFacet extends Facet {
      *         fails
      */
 
+    @Override
     public boolean testAtomicValue(AtomicValue value) {
-        if (facetValue != OPTIONAL) {
+        if (facetValue != Optionality.OPTIONAL) {
             if (value instanceof CalendarValue) {
-                return (facetValue == REQUIRED) == ((CalendarValue) value).hasTimezone();
+                return (facetValue == Optionality.REQUIRED) == ((CalendarValue) value).hasTimezone();
             } else {
                 return false;
             }
@@ -140,4 +140,4 @@ public class ExplicitTimezoneFacet extends Facet {
 
 }
 
-// Copyright (c) 2008-2012 Saxonica Limited. No warranty.
+// Copyright (c) 2008-2020 Saxonica Limited No warranty.

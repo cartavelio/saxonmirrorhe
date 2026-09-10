@@ -91,6 +91,7 @@ public class ModelGroupDefinition extends ModelGroup implements SerializableSche
      * Determine if empty content is allowed
      */
 
+    @Override
     public boolean isEmptiable() throws MissingComponentException {
         for (Particle p : getParticles()) {
             if (!p.isEmptiable()) {
@@ -108,6 +109,7 @@ public class ModelGroupDefinition extends ModelGroup implements SerializableSche
      * @return true if this compositor is pointless
      */
 
+    @Override
     public boolean isPointless(ModelGroup container) {
         return contentModel.isEmpty() || contentModel.size() == 1;
     }
@@ -124,6 +126,7 @@ public class ModelGroupDefinition extends ModelGroup implements SerializableSche
      * @throws SchemaException
      */
 
+    @Override
     public void lookForCycles(Stack references, SchemaCompiler compiler)
             throws SchemaException {
         if (references.contains(this)) {
@@ -143,6 +146,7 @@ public class ModelGroupDefinition extends ModelGroup implements SerializableSche
      *
      * @throws SchemaException
      */
+    @Override
     public boolean validate(SchemaCompiler compiler) throws SchemaException {
         boolean result = true;
         // check for previous validation
@@ -211,6 +215,7 @@ public class ModelGroupDefinition extends ModelGroup implements SerializableSche
      * Serialize the schema component
      */
 
+    @Override
     public void serialize(SchemaModelSerializer serializer) throws XPathException {
         String id = serializer.getId(this, true);
         serializer.startElement("modelGroupDefinition");
@@ -225,13 +230,16 @@ public class ModelGroupDefinition extends ModelGroup implements SerializableSche
         serializer.endElement();
     }
 
+    @Override
     public String getCompositorName() {
         return "modelGroupDefinition";
     }
 
+    @Override
     public Function getComponentAsFunction() {
         Callable callable = new Callable() {
-            public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+            @Override
+            public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
@@ -254,4 +262,4 @@ public class ModelGroupDefinition extends ModelGroup implements SerializableSche
 
 }
 
-// Copyright (c) 2004-2006 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

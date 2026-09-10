@@ -1,6 +1,6 @@
 package com.saxonica.ee.stream;
 
-import com.saxonica.ee.stream.feed.Feed;
+import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.watch.Watch;
 import com.saxonica.ee.stream.watch.WatchManager;
 import net.sf.saxon.expr.Expression;
@@ -44,7 +44,7 @@ public class ComponentInversion {
      * @throws XPathException if an error occurs
      */
 
-    public Watch getWatch(WatchManager wm, Feed result, XPathContext context) throws XPathException {
+    public Watch getWatch(WatchManager wm, ItemFeed result, XPathContext context) throws XPathException {
         return inversion.getWatch(wm, result, context);
     }
 
@@ -111,6 +111,6 @@ public class ComponentInversion {
 
 }
 
-// Copyright (c) 2009-2016 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited
 
 

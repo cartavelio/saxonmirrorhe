@@ -6,7 +6,7 @@ import com.saxonica.ee.schema.PatternFacet;
 import com.saxonica.ee.schema.SchemaCompiler;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.type.SchemaException;
 
 import java.util.ArrayList;
@@ -35,9 +35,10 @@ public class XSDFacet extends AnnotationParent {
      * @throws SchemaException if any errors are found in the attributes
      */
 
+    @Override
     public void prepareAttributes() throws SchemaException {
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         //-- handle attributes
 
         if (getLocalPart().equals("enumeration") || getLocalPart().equals("pattern")) {
@@ -50,15 +51,19 @@ public class XSDFacet extends AnnotationParent {
 
         String value = atts.getValue("", "value");
         if (value == null) {
-            missingAttribute("value");
-            value = "";
+            if (getLocalPart().equals("distinct")) {
+                value = "true";
+            } else {
+                missingAttribute("value");
+                value = "";
+            }
         }
 
         try {
             facet = Facet.makeFacet(getLocalPart(), value,
                     getSchema().getConfiguration(),
-                    makeNamespaceContext(),
-                    getXSDSchema().getSchemaCompiler());
+                    makeNamespaceContext()
+            );
         } catch (SchemaException err) {
             error(err.getMessage());
             return;
@@ -78,7 +83,7 @@ public class XSDFacet extends AnnotationParent {
             if (flags != null) {
                 ((PatternFacet) facet).setFlags(flags);
             }
-            List<String> warnings = new ArrayList<String>();
+            List<String> warnings = new ArrayList<>();
             try {
                 ((PatternFacet) facet).compile(warnings);
             } catch (SchemaException e) {
@@ -111,6 +116,7 @@ public class XSDFacet extends AnnotationParent {
      *          if any XML representation constraints are violated
      */
 
+    @Override
     public void validate(SchemaCompiler compiler) throws SchemaException {
         super.validate(compiler);
         if (compiler.getLanguageVersion() == Configuration.XSD10) {
@@ -134,4 +140,4 @@ public class XSDFacet extends AnnotationParent {
 
 }
 
-// Copyright (c) 2004-2008 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

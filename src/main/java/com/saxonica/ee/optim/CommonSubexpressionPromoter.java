@@ -77,7 +77,7 @@ public class CommonSubexpressionPromoter {
             let.setVariableQName(new StructuredQName("vv", NamespaceConstant.SAXON_GENERATED_VARIABLE, "cc" + topCandidate.hashCode()));
             let.setRequiredType(type);
             let.setNeedsLazyEvaluation(true);
-            let.setEvaluationMode(Cardinality.allowsMany(topCandidate.getCardinality()) ? ExpressionTool.MAKE_MEMO_CLOSURE : ExpressionTool.MAKE_SINGLETON_CLOSURE);
+            let.setEvaluationMode(Cardinality.allowsMany(topCandidate.getCardinality()) ? EvaluationMode.MAKE_MEMO_CLOSURE : EvaluationMode.MAKE_SINGLETON_CLOSURE);
             for (Operand o : equivalents) {
                 o.setChildExpression(new LocalVariableReference(let));
             }
@@ -151,4 +151,4 @@ public class CommonSubexpressionPromoter {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited

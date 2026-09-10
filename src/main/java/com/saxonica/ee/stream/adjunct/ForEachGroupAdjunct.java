@@ -1,12 +1,10 @@
 package com.saxonica.ee.stream.adjunct;
 
 import com.saxonica.ee.stream.*;
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.watch.*;
 import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.ComplexContentOutputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.XPathContext;
@@ -41,6 +39,7 @@ public class ForEachGroupAdjunct extends ForEachAdjunct  {
      * @param reasons          return parameter to hold reasons for non-streamability  @return the posture and sweep
      */
 
+    @Override
     public PostureAndSweep computeStreamability(ContextItemStaticInfoEE contextInfo, List<String> reasons) {
         ForEachGroup exp = (ForEachGroup)getExpression();
         Expression select = exp.getSelectExpression();
@@ -155,6 +154,7 @@ public class ForEachGroupAdjunct extends ForEachAdjunct  {
      */
 
     /*@Nullable*/
+    @Override
     public WatchMaker getWatchMaker(boolean forGrouping) throws XPathException {
 
         final Configuration config = getConfiguration();
@@ -171,7 +171,8 @@ public class ForEachGroupAdjunct extends ForEachAdjunct  {
 
         if (((ForEachGroup) getExpression()).getAlgorithm() == ForEachGroup.GROUP_BY) {
             return new WatchMaker() {
-                public Trigger makeWatch(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+                @Override
+                public Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
                     ForEachGroupParallelAction actor = new ForEachGroupParallelAction(watchManager, (ForEachGroup) getExpression(), out, context);
                     if (actionInversion != null) {
                         actor.setInversion(actionInversion);
@@ -185,7 +186,8 @@ public class ForEachGroupAdjunct extends ForEachAdjunct  {
             };
         } else {
             return new WatchMaker() {
-                public Trigger makeWatch(WatchManager watchManager, Feed out, XPathContext context)
+                @Override
+                public Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context)
                         throws XPathException {
                     ForEachGroupPartitionAction actor = new ForEachGroupPartitionAction(watchManager, (ForEachGroup) getExpression(), out, context);
                     if (actionInversion != null) {
@@ -203,7 +205,8 @@ public class ForEachGroupAdjunct extends ForEachAdjunct  {
 
     }
 
-    public Feed makeItemFeed(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
         ForEachGroup instruction = (ForEachGroup)getExpression();
         if (Streamability.getPosture(instruction.getSelectExpression()) == Posture.GROUNDED) {
             if (instruction.getAlgorithm() == ForEachGroup.GROUP_BY) {
@@ -247,18 +250,18 @@ public class ForEachGroupAdjunct extends ForEachAdjunct  {
 
     private static class GroupedGroundedFeed extends ItemFeed {
 
-        private List<Item<?>> currentGroup = new ArrayList<>();
+        private List<Item> currentGroup = new ArrayList<>();
         private int groupCounter = 0;
         private GroupBoundaryTester boundaryTester;
         private AtomicSequence currentGroupingKey;
 
-        public GroupedGroundedFeed(ForEachGroup instruction, Feed result, XPathContext context) {
+        public GroupedGroundedFeed(ForEachGroup instruction, ItemFeed result, XPathContext context) {
             super(instruction, result, context);
             boundaryTester = makeBoundaryTester(instruction, context);
         }
 
         @Override
-        public void processItem(Item<?> item) throws XPathException {
+        public void append(Item item) throws XPathException {
             ManualIterator popIter = (ManualIterator)getContext().getCurrentIterator();
             popIter.setContextItem(item);
             popIter.incrementPosition();
@@ -283,14 +286,14 @@ public class ForEachGroupAdjunct extends ForEachAdjunct  {
         private void processCompletedGroup() throws XPathException {
             if (!currentGroup.isEmpty()) {
                 XPathContextMajor c2 = getContext().newContext();
-                ManualIterator<Item<?>> popIter = new ManualIterator<>(currentGroup.get(0), groupCounter);
+                ManualIterator popIter = new ManualIterator(currentGroup.get(0), groupCounter);
                 c2.setCurrentIterator(popIter);
                 ManualGroupIterator gi = new ManualGroupIterator(currentGroup.get(0), 1);
                 gi.setCurrentGroup(currentGroup);
                 gi.setCurrentGroupingKey(currentGroupingKey);
                 c2.setCurrentGroupIterator(gi);
-                c2.setReceiver(ComplexContentOutputter.makeComplexContentReceiver(getReceiver(), null));
-                ((ForEachGroup)getExpression()).getActionExpression().process(c2);
+                //c2.setReceiver(getOutputter());
+                ((ForEachGroup)getExpression()).getActionExpression().process(getNextOutputter(), c2);
             }
         }
     }
@@ -306,14 +309,14 @@ public class ForEachGroupAdjunct extends ForEachAdjunct  {
         // In some cases we have no choice. But there are cases where we could do better, notably
         // if the for-each-group action is to create a new result document.
 
-        private List<Item<?>> population = new ArrayList<>();
+        private List<Item> population = new ArrayList<>();
 
-        public GroupedGroundedDistributedFeed(ForEachGroup instruction, Feed result, XPathContext context) {
+        public GroupedGroundedDistributedFeed(ForEachGroup instruction, ItemFeed result, XPathContext context) {
             super(instruction, result, context);
         }
 
         @Override
-        public void processItem(Item<?> item) throws XPathException {
+        public void append(Item item) throws XPathException {
             population.add(item);
         }
 
@@ -326,10 +329,10 @@ public class ForEachGroupAdjunct extends ForEachAdjunct  {
             FocusIterator focusIterator = c2.trackFocus(groupIterator);
             c2.setCurrentGroupIterator(groupIterator);
             c2.setCurrentTemplateRule(null);
-            c2.setReceiver(getResult().getReceiver());
+            //c2.setReceiver(getResult().getOutputter());
 
             while (focusIterator.next() != null) {
-                inst.getActionExpression().process(c2);
+                inst.getActionExpression().process(getNextOutputter(), c2);
             }
 
             super.close();
@@ -342,4 +345,4 @@ public class ForEachGroupAdjunct extends ForEachAdjunct  {
 
 }
 
-// Copyright (c) 2009-2015 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

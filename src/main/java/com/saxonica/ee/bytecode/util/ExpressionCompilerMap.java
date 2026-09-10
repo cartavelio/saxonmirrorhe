@@ -35,6 +35,7 @@ public class ExpressionCompilerMap {
         map.put("choose", new ChooseCompiler());
         map.put("xsl:comment", new CommentCompiler());
         map.put("compareToInt", new CompareToIntegerConstantCompiler());
+        map.put("compareToString", new CompareToStringConstantCompiler());
         map.put("xsl:attribute", new ComputedAttributeCompiler());
         map.put("xsl:element", new ComputedElementCompiler());
         map.put("conditionalSort", new ConditionalSorterCompiler());
@@ -153,5 +154,5 @@ public class ExpressionCompilerMap {
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited
 

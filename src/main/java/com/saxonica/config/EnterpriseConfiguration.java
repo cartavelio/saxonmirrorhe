@@ -15,15 +15,16 @@ import com.saxonica.ee.schema.sdoc.XSINamespaceSchema;
 import com.saxonica.ee.stream.*;
 import com.saxonica.ee.stream.feed.DecomposingFeed;
 import com.saxonica.ee.stream.om.FleetingNode;
-import com.saxonica.ee.stream.watch.*;
+import com.saxonica.ee.stream.watch.ApplyTemplatesAction;
+import com.saxonica.ee.stream.watch.Trigger;
+import com.saxonica.ee.stream.watch.Watch;
+import com.saxonica.ee.stream.watch.WatchManager;
 import com.saxonica.ee.trans.*;
 import com.saxonica.ee.update.PendingUpdateListImpl;
 import com.saxonica.ee.update.XQueryParserExtensionEE;
 import com.saxonica.ee.validate.*;
-import com.saxonica.expr.MemoFunction;
 import com.saxonica.expr.XQueryParserExtensionPE;
 import com.saxonica.functions.extfn.EXPathFileFunctionSet;
-import com.saxonica.ptree.PTreeURIResolver;
 import com.saxonica.trans.ModePE;
 import com.saxonica.xsltextn.style.Saxon6ElementFactory;
 import net.sf.saxon.Configuration;
@@ -53,6 +54,8 @@ import net.sf.saxon.query.XQueryExpression;
 import net.sf.saxon.query.XQueryParser;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.regex.RegularExpression;
+import net.sf.saxon.s9api.HostLanguage;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.JSONEmitter;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.StyleNodeFactory;
@@ -69,7 +72,6 @@ import net.sf.saxon.value.SequenceExtent;
 import net.sf.saxon.value.StringValue;
 import org.xml.sax.InputSource;
 
-import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.sax.SAXSource;
@@ -105,7 +107,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     private int thresholdForCompilingTypes = 100;
     private int thresholdForInliningFunctions = 100;
     private int maxCompiledClasses = 10000;
-    private int streamability = -1;
+    private Boolean streamabilityEnabled = null;
     private ConcurrentHashMap<String, RegularExpression> regexCache = new ConcurrentHashMap<>();
     private long regexAttempts = 0;
     private MultithreadingFactory multithreadingFactory = new MultithreadingFactory(this);
@@ -124,6 +126,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         internalSetBooleanProperty(Feature.ALLOW_MULTITHREADING, true);
         internalSetBooleanProperty(Feature.GENERATE_BYTE_CODE, true);
         setStaticQueryContextFactory(new StaticQueryContextFactory() {
+            @Override
             public StaticQueryContext newStaticQueryContext(Configuration config, boolean copyFromDefault) {
                 return new StaticQueryContextEE(EnterpriseConfiguration.this, copyFromDefault);
             }
@@ -132,6 +135,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         defaultXsltCompilerInfo.setOptimizerOptions(optimizerOptions);
     }
 
+    @Override
     protected StaticQueryContext makeStaticQueryContext(boolean copyFromDefault) {
         StaticQueryContext sqc = super.makeStaticQueryContext(copyFromDefault);
         if (defaultStaticQueryContext != null) {
@@ -228,13 +232,12 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
                 break;
             case FeatureCode.STREAMABILITY: {
                 String s = requireString(feature.name, value);
-                int ival;
                 switch (s) {
                     case "off":
-                        ival = Streamability.OFF;
+                        setStreamabilityEnabled(false);
                         break;
                     case "standard":
-                        ival = Streamability.STANDARD;
+                        setStreamabilityEnabled(true);
                         break;
                     case "extended":
                         throw new IllegalArgumentException("The value STREAMABILITY = 'extended' is no longer recognized");
@@ -243,7 +246,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
                                 "Unrecognized value STREAMABILITY = '" + value +
                                         "': must be 'off' or 'standard'");
                 }
-                setStreamability(ival);
                 break;
             }
             case FeatureCode.THRESHOLD_FOR_COMPILING_TYPES:
@@ -285,7 +287,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
     @SuppressWarnings("unchecked")
     @Override
-    //noinspection unchecked
     public <T> T getConfigurationProperty(Feature<T> feature) {
         if (booleanFeatures.contains(feature)) {
             return (T) Boolean.valueOf(getBooleanProperty(feature));
@@ -311,14 +312,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             case FeatureCode.SCHEMA_URI_RESOLVER_CLASS:
                 return (T) getSchemaURIResolver().getClass().getName();
             case FeatureCode.STREAMABILITY:
-                switch (streamability) {
-                    case Streamability.OFF:
-                        return (T) "off";
-                    case Streamability.STANDARD:
-                        return (T) "standard";
-                    default:
-                        return (T) "standard";
-                }
+                return (T) (isStreamabilityEnabled() ? "standard" : "off");
             default:
                 return super.getConfigurationProperty(feature);
         }
@@ -438,6 +432,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     }
 
 
+    @Override
     public FunctionLibraryList getBuiltInExtensionLibraryList() {
         if (!isLicensedFeature(LicenseFeature.SCHEMA_VALIDATION)) {
             return super.getBuiltInExtensionLibraryList();
@@ -468,6 +463,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      * @param streamability the declared streamability of the function
      */
 
+    @Override
     public UserFunction newUserFunction(boolean memoFunction, FunctionStreamability streamability) {
         if (memoFunction) {
             return new MemoFunction();
@@ -492,18 +488,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         return typeHierarchy;
     }
 
-
-    /**
-     * Set the URIResolver to a URI resolver that allows query parameters after the URI,
-     * and in the case of Saxon-EE, that inteprets the file extension .ptree
-     */
-
-    @Override
-    public void setParameterizedURIResolver() {
-        PTreeURIResolver resolver = new PTreeURIResolver();
-        setURIResolver(resolver);
-    }
-
     /**
      * Set a user-defined SchemaURIResolver for resolving URIs used in "import schema"
      * declarations.
@@ -516,8 +500,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         resolver.setConfiguration(this);
     }
 
+    @Override
     public InvalidityReportGeneratorEE createValidityReporter() {
-        //throw new AssertionError("Need to fix commit problem 2016-02-27");
         return new InvalidityReportGeneratorEE(this);
     }
 
@@ -607,10 +591,13 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             int status = getNamespaceStatus(expected);
             if (status == PreparedSchema.NAMESPACE_UNKNOWN || (status == PreparedSchema.NAMESPACE_KNOWN && getConfigurationProperty(Feature.MULTIPLE_SCHEMA_IMPORTS))) {
                 SchemaCompiler schemaCompiler = newSchemaCompiler();
-                if (pipe.getErrorListener() != null) {
-                    schemaCompiler.setErrorListener(pipe.getErrorListener());
+                if (pipe.getErrorReporter() != null) {
+                    schemaCompiler.setErrorReporter(pipe.getErrorReporter());
                 }
-                return schemaCompiler.readSchema(pipe, baseURI, schemaLocation, expected);
+                String ns = schemaCompiler.readSchema(pipe, baseURI, schemaLocation, expected);
+                schemaCompiler.makeAllAutomata();
+                schemaCompiler.checkAllAutomata();
+                return ns;
             } else {
                 return expected;
             }
@@ -639,15 +626,15 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      * @param root          the xs:schema element in the stylesheet
      * @param expected      the target namespace expected; "" if there is no
      *                      expectation
-     * @param errorListener The destination for error messages. May be null, in which case
+     * @param errorReporter The destination for error messages. May be null, in which case
      *                      the errorListener registered with this Configuration is used.
      * @return the actual target namespace of the schema
      */
 
     @Override
-    public String readInlineSchema(NodeInfo root, String expected, ErrorListener errorListener)
+    public String readInlineSchema(NodeInfo root, String expected, ErrorReporter errorReporter)
             throws SchemaException {
-        return newSchemaCompiler().readInlineSchema(root, expected, errorListener);
+        return newSchemaCompiler().readInlineSchema(root, expected, errorReporter);
     }
 
     /**
@@ -656,46 +643,46 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      *
      * @param schemaSource  the JAXP Source object identifying the schema document to be loaded. This may be either
      *                      a source schema document in XSD format, or a compiled schema in Saxon's SCM format
-     * @param errorListener the ErrorListener to be notified of any errors in the schema. If null,
+     * @param errorReporter the ErrorListener to be notified of any errors in the schema. If null,
      *                      the configuration's errorListener is used
      * @throws SchemaException if the schema cannot be read or parsed or if it is invalid
      */
 
     @Override
-    public void addSchemaSource(Source schemaSource, /*@Nullable*/ ErrorListener errorListener) throws SchemaException {
-        if (schemaSource instanceof SAXSource && getBooleanProperty(Feature.IGNORE_SAX_SOURCE_PARSER)) {
-            // This option is provided to allow the parser set by applications such as Ant to be overridden by
-            // the parser requested using FeatureKeys.SOURCE_PARSER or FeatureKeys.STYLE_PARSER
-            ((SAXSource) schemaSource).setXMLReader(null);
-        }
-        SchemaCompiler compiler = newSchemaCompiler();
-        if (errorListener != null) {
-            compiler.setErrorListener(errorListener);
-        }
-        final PipelineConfiguration pipe = makePipelineConfiguration();
-        pipe.setErrorListener(errorListener == null ? getErrorListener() : errorListener);
-        pipe.setHostLanguage(XML_SCHEMA);
-        SchemaDocument schemadoc;
+    public void addSchemaSource(Source schemaSource, /*@Nullable*/ ErrorReporter errorReporter) throws SchemaException {
         try {
-            schemadoc = SchemaReader.read(schemaSource, compiler, pipe, null);
+            if (schemaSource instanceof SAXSource && getBooleanProperty(Feature.IGNORE_SAX_SOURCE_PARSER)) {
+                // This option is provided to allow the parser set by applications such as Ant to be overridden by
+                // the parser requested using FeatureKeys.SOURCE_PARSER or FeatureKeys.STYLE_PARSER
+                ((SAXSource) schemaSource).setXMLReader(null);
+            }
+            SchemaCompiler compiler = newSchemaCompiler();
+            if (errorReporter != null) {
+                compiler.setErrorReporter(errorReporter);
+            }
+            final PipelineConfiguration pipe = makePipelineConfiguration();
+            pipe.setErrorReporter(errorReporter == null ? makeErrorReporter() : errorReporter);
+            pipe.setHostLanguage(HostLanguage.XML_SCHEMA);
+            SchemaDocument schemadoc = SchemaReader.read(schemaSource, compiler, pipe, null);
+            if (schemadoc.isCompiledSchemaDocument()) {
+                try {
+                    importComponents(schemadoc.getDocument());
+                } catch (XPathException e) {
+                    throw new SchemaException(e);
+                }
+            } else {
+                compiler.validate(schemadoc);
+                setNamespaceStatus(schemadoc.getTargetNamespace(), PreparedSchema.NAMESPACE_KNOWN);
+            }
+
         } catch (UncheckedXPathException e) {
-            // Thrown when there is a draconian error handler
+            // indicates that the error reporter asked for termination
             XPathException xe = e.getXPathException();
             if (xe instanceof SchemaException) {
                 throw (SchemaException)xe;
             } else {
                 throw new SchemaException(xe);
             }
-        }
-        if (schemadoc.isCompiledSchemaDocument()) {
-            try {
-                importComponents(schemadoc.getDocument());
-            } catch (XPathException e) {
-                throw new SchemaException(e);
-            }
-        } else {
-            compiler.validate(schemadoc);
-            setNamespaceStatus(schemadoc.getTargetNamespace(), PreparedSchema.NAMESPACE_KNOWN);
         }
     }
 
@@ -722,8 +709,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 //                } else {
 //                    message = "Schema for namespace " + targetNamespace + " ignored, because already present in cache";
 //                }
-//                SchemaException err = new SchemaException(message);
-//                getErrorListener().warning(err);
+//                Incident incident = new Incident(message).asWarning();
+//                makeErrorReporter().accept(incident);
 //                return;
 //            }
             setNamespaceStatus(targetNamespace, PreparedSchema.NAMESPACE_KNOWN);
@@ -774,7 +761,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
                     throw new IllegalStateException("Failed to read internal copy of xpath-functions.scm");
                 }
                 try {
-                    addSchemaSource(new StreamSource(is.getByteStream()), getErrorListener());
+                    addSchemaSource(new StreamSource(is.getByteStream()), makeErrorReporter());
                 } catch (SchemaException e) {
                     throw new IllegalStateException("Failed to load internal copy of xpath-functions.scm");
                 }
@@ -954,7 +941,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      * document are added to the cache of schema components maintained by this SchemaManager
      *
      * @param source the XML file containing the schema component model, as generated by a previous call on
-     *               {@link #exportComponents}
+     *               {@link Configuration#exportComponents}
      */
 
     @Override
@@ -1228,10 +1215,11 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      * @return the union type with these member types
      */
 
+    @Override
     public UserUnionType makeUserUnionType(List<AtomicType> memberTypes) {
         List<TypeReference> memberRefs = new ArrayList<>(memberTypes.size());
         for (AtomicType at : memberTypes) {
-            TypeReference ref = new TypeReference(at.getFingerprint(), this, ExplicitLocation.UNKNOWN_LOCATION);
+            TypeReference ref = new TypeReference(at.getFingerprint(), this, Loc.NONE);
             memberRefs.add(ref);
         }
         UserUnionType uut = new UserUnionType(this);
@@ -1379,8 +1367,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
                         topLevelElementName.getURI(),
                         topLevelElementName.getLocalPart()));
             }
-            int hostLanguage = pipe.getHostLanguage();
-            if (hostLanguage == XSLT) {
+            HostLanguage hostLanguage = pipe.getHostLanguage();
+            if (hostLanguage == HostLanguage.XSLT) {
                 if (schemaType != null) {
                     vc.setErrorCode("XTTE1540");
                 } else if (validationMode == Validation.STRICT) {
@@ -1388,24 +1376,23 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
                 } else {
                     vc.setErrorCode("XTTE1515");
                 }
-            } else if (hostLanguage == XQUERY) {
+            } else if (hostLanguage == HostLanguage.XQUERY) {
                 vc.setErrorCode("XQDY0027");
-            } else if (hostLanguage == XML_SCHEMA) {
+            } else if (hostLanguage == HostLanguage.XML_SCHEMA) {
                 vc.setErrorCode(null);
             }
 
             XSIAttributeHandler xsi = new XSIAttributeHandler(val);
             xsi.setSystemId(systemId);
 
-            StartTagBufferEE stb = new StartTagBufferEE(xsi);
-            vc.setStartTagBuffer(stb);
+            AttributeInheritor stb = new AttributeInheritor(xsi);
+            vc.setAttributeInheritor(stb);
             xsi.setValidationContext(vc);
-            checker.setStartTagBuffer(stb);
 
             PathMaintainer pathMaintainer = new PathMaintainer(stb);
             pipe.setComponent(PathMaintainer.class.getName(), pathMaintainer);
 
-            DocumentValidator dv = new DocumentValidator(pathMaintainer, hostLanguage == XSLT ? "XTTE1550" : "XQDY0061");
+            DocumentValidator dv = new DocumentValidator(pathMaintainer, hostLanguage == HostLanguage.XSLT ? "XTTE1550" : "XQDY0061");
 
             LocationCopier copier = new LocationCopier(true);
             pipe.setComponent(CopyInformee.class.getName(), copier);
@@ -1428,16 +1415,16 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
     private void allocateInvalidityHandler(ParseOptions validationOptions, ValidationContext vc) {
         if (validationOptions.getInvalidityHandler() == null) {
-            ErrorListener listener = validationOptions.getErrorListener();
-            if (listener == null) {
+            ErrorReporter reporter = validationOptions.getErrorReporter();
+            if (reporter == null) {
                 Controller controller = vc.getController();
                 if (controller != null) {
-                    listener = controller.getErrorListener();
+                    reporter = controller.getErrorReporter();
                 } else {
-                    listener = getErrorListener();
+                    reporter = makeErrorReporter();
                 }
             }
-            vc.setInvalidityHandler(new InvalidityHandlerWrappingErrorListener(listener));
+            vc.setInvalidityHandler(new InvalidityHandlerWrappingErrorReporter(reporter));
         } else {
             vc.setInvalidityHandler(validationOptions.getInvalidityHandler());
         }
@@ -1460,8 +1447,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
     @Override
     public Receiver getElementValidator(Receiver receiver,
-                                                ParseOptions options,
-                                                Location location) throws XPathException {
+                                        ParseOptions options,
+                                        Location location) throws XPathException {
 
 //        if (isLicenseNotFound()) {
 //            return receiver;
@@ -1515,11 +1502,10 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             contentValidator.setValidationContext(vc);
 
         } else if (validation != Validation.PRESERVE) {
-            ElementDecl decl = null;
             if (elemName == null) {
                 throw new IllegalArgumentException("When validating an element, either a type or an element name must be supplied");
             }
-            decl = (ElementDecl) getElementDeclaration(elemName);
+            ElementDecl decl = (ElementDecl) getElementDeclaration(elemName);
             if (decl == null || !decl.hasTypeAlternatives()) {
                 List<ValidationFailure> failures = new ArrayList<>(1);
                 contentValidator = ContentValidator.makeValidator(decl, elemName, location,
@@ -1535,8 +1521,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         ValidationStack vs = new ValidationStack(destination, Validation.STRICT, null);
         vs.setValidationContext(vc);
         vs.setPipelineConfiguration(pipe);
-        int hostLanguage = pipe.getHostLanguage();
-        if (hostLanguage == XSLT) {
+        HostLanguage hostLanguage = pipe.getHostLanguage();
+        if (hostLanguage == HostLanguage.XSLT) {
             if (validation == Validation.BY_TYPE) {
                 vc.setErrorCode("XTTE1540");
             } else if (validation == Validation.STRICT) {
@@ -1544,9 +1530,9 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             } else {
                 vc.setErrorCode("XTTE1515");
             }
-        } else if (hostLanguage == XQUERY) {
+        } else if (hostLanguage == HostLanguage.XQUERY) {
             vc.setErrorCode("XQDY0027");
-        } else if (hostLanguage == XML_SCHEMA) {
+        } else if (hostLanguage == HostLanguage.XML_SCHEMA) {
             vc.setErrorCode(null);
         }
 
@@ -1555,14 +1541,12 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         }
 
         XSIAttributeHandler xsi = new XSIAttributeHandler(vs);
-        StartTagBufferEE startTagBuffer = new StartTagBufferEE(xsi);
+        AttributeInheritor inheritor = new AttributeInheritor(xsi);
 
-        vc.setStartTagBuffer(startTagBuffer);
+        vc.setAttributeInheritor(inheritor);
         xsi.setValidationContext(vc);
 
-        checker.setStartTagBuffer(startTagBuffer);
-
-        destination = startTagBuffer;
+        destination = inheritor;
         vc.startValidation(location.getSystemId());
         return destination;
     }
@@ -1572,9 +1556,9 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             boolean retainComments = getBooleanProperty(Feature.ASSERTIONS_CAN_SEE_COMMENTS);
             AssertionTreeBuilder atb = new AssertionTreeBuilder(destination, retainComments);
             atb.setPipelineConfiguration(pipe);
+            vc.setAssertionTreeBuilder(atb);
             pipe.setComponent(AssertionTreeBuilder.class.getName(), atb);
             destination = atb;
-            vc.setAssertionTreeBuilder(atb);
         }
         return destination;
     }
@@ -1629,6 +1613,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      * Add to a pipeline a receiver that strips all type annotations. This
      * has a null implementation in the Saxon-HE product, because type annotations
      * can never arise.
+     * @param destination the destination for events after stripping type annotations
+     * @return the type-stripping receiver
      */
 
     @Override
@@ -1679,7 +1665,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     /**
      * Get a new ExpressionPresenter capable of exporting a compiled stylesheet
      *
-     * @param target      the target environment, e.g. EE, JS, JS2
+     * @param target      the target environment, e.g. EE, JS
      * @param destination the destination for the output file
      * @param rootPackage the compiled stylesheet package
      * @return a suitable Expression Presenter
@@ -1697,11 +1683,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         presenter.setOptions(options);
         switch (target) {
             case "JS":
-                options.target = "JS";
-                options.targetVersion = 1;
-                presenter.init(this, new StreamResult(destination), true);
-                break;
-            case "JS2":
                 options.target = "JS";
                 options.targetVersion = 2;
                 PipelineConfiguration pipe = makePipelineConfiguration();
@@ -1739,9 +1720,18 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         return pipe;
     }
 
+    /**
+     * Make a SchemaURIResolver that wraps a supplied URIResolver
+     * @return a new SchemaURIResolver (or null if this is not an EnterpriseConfiguration)
+     * @since 10.0
+     */
+    @Override
     public SchemaURIResolver makeSchemaURIResolver(URIResolver resolver) {
-        return new StandardSchemaResolver(this, resolver);
+        StandardSchemaResolver schemaResolver = new StandardSchemaResolver(this);
+        schemaResolver.setURIResolver(resolver);
+        return schemaResolver;
     }
+
 
     /**
      * Create a document projector for a given path map root. Document projection is available only
@@ -1801,7 +1791,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      */
 
 
-    public java.util.function.Function<SequenceIterator<?>, FocusTrackingIterator<?>> getFocusTrackerFactory(
+    @Override
+    public java.util.function.Function<SequenceIterator, FocusTrackingIterator> getFocusTrackerFactory(
             Executable exec, boolean multithreaded) {
         if (multithreaded || (getBooleanProperty(Feature.ALLOW_MULTITHREADING) &&
                 exec.createsSecondaryResult() &&
@@ -1815,53 +1806,45 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     /**
      * Set the streamability rules to be applied. Requires an EET license.
      *
-     * @param streamability the streamability rules. With a plain Saxon-HE Configuration,
-     *                      any value other than 0 causes an IllegalArgumentException
-     * @since 9.6. Changed in 9.8 to drop support for streamability="extended"
+     * @param enabled set to true if streamability checking (using W3C standard rules)
+     *                is enabled for this configuration. Must be false under Saxon-HE
+     * @since 9.6. Changed in 9.8 to drop support for streamability="extended".
+     * Simplified and renamed (from {@code setStreamability}) in 10.0
      */
 
-    public void setStreamability(int streamability) {
-        if (streamability != 0) {
-            checkLicensedFeature(LicenseFeature.ENTERPRISE_XSLT, "streaming", -1);
-        }
-        if (!(streamability == Streamability.STANDARD || streamability == Streamability.OFF)) {
-            throw new IllegalArgumentException("The optional streamability='extended' is no longer recognized");
-        }
-        this.streamability = streamability;
+    public void setStreamabilityEnabled(boolean enabled) {
+        this.streamabilityEnabled = enabled;
     }
 
     /**
-     * Get the streamability rules to be applied.
-     *
-     * @return {@link Streamability#OFF}, or {@link Streamability#STANDARD}
-     * @since 9.6. Changed in 9.8 to drop support for streamability="extended"
+     * Ask whether streamability checking is enabled for this configuration
+     * @return always false for Saxon-HE; for Saxon-EE, true if an appropriate license is installed
      */
+
     @Override
-    public int getStreamability() {
-        if (streamability == -1) {
-            // not yet defined
-            if (isLicensedFeature(LicenseFeature.ENTERPRISE_XSLT) || isLicensedFeature(LicenseFeature.ENTERPRISE_XQUERY)) {
-                streamability = Streamability.STANDARD;
-            } else {
-                streamability = Streamability.OFF;
-            }
+    public boolean isStreamabilityEnabled() {
+        if (streamabilityEnabled == null) {
+            streamabilityEnabled = isLicensedFeature(LicenseFeature.ENTERPRISE_XSLT)
+                    || isLicensedFeature(LicenseFeature.ENTERPRISE_XQUERY);
         }
-        return streamability;
+        return streamabilityEnabled;
     }
 
     /**
      * Create a streaming transformer
      *
-     * @param context the initial XPath context
      * @param mode    the initial mode, which must be a streaming mode
      * @param ordinaryParams the parameters that are not tunnel parameters
      * @param tunnelParams the tunnel parameters
+     * @param out the destination for the transformed document
+     * @param context the initial XPath context
      * @return a Receiver to which the streamed input document will be pushed
      */
 
     /*@NotNull*/
     @Override
-    public Receiver makeStreamingTransformer(XPathContext context, Mode mode, ParameterSet ordinaryParams, ParameterSet tunnelParams) throws XPathException {
+    public Receiver makeStreamingTransformer(Mode mode, ParameterSet ordinaryParams, ParameterSet tunnelParams,
+                                             Outputter out, XPathContext context) throws XPathException {
         checkLicensedFeature(LicenseFeature.ENTERPRISE_XSLT, "streaming", -1);
         PipelineConfiguration pipe = context.getController().makePipelineConfiguration();
 
@@ -1883,18 +1866,14 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
         WatchManager wm = new WatchManager(pipe);
         wm.setXPathContext(context);
+        wm.setOutputter(out);
 
         if (am != null) {
             AccumulatorRegistryEE.registerSelectedAccumulators(wm, accumulators);
         }
 
-        StartTagBuffer stb = new StartTagBuffer(wm);
-        wm.setStartTagBuffer(stb);
 
-
-        Receiver out = context.getReceiver();
-//        Watch docWatch = new ApplyTemplatesWatch(mode, new NodeTestPattern(NodeKindTest.DOCUMENT), wm, context, out.getPipelineConfiguration(), out);
-        DecomposingFeed feed = new DecomposingFeed(out);
+        DecomposingFeed feed = new DecomposingFeed(out, context);
         ApplyTemplatesAction docWatch = new ApplyTemplatesAction(null, feed, context);
         docWatch.setMode(mode.getDeclaringComponent());
         docWatch.setWatchManager(wm);
@@ -1903,11 +1882,11 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
         Watch watch = new Trigger(new NodeTestPattern(NodeKindTest.DOCUMENT), docWatch, context);
         wm.addWatch(watch, true);
-        stb.setUnderlyingReceiver(wm);
 
-        return new ContentDetector(stb);
+        return new ContentDetector(wm);
     }
 
+    @Override
     public Expression makeStreamInstruction(Expression hrefExp, Expression body, boolean streaming, ParseOptions options,
                                             PackageData packageData, Location location, RetainedStaticContext rsc) throws XPathException {
         if (streaming && isLicensedFeature(LicenseFeature.ENTERPRISE_XSLT)) {
@@ -1916,7 +1895,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             si.setRetainedStaticContext(rsc);
             if (getBooleanProperty(Feature.STRICT_STREAMABILITY)) {
                 List<String> reasons = new ArrayList<>();
-                si.checkStreamability(reasons, getStreamability(), true);
+                si.checkStreamability(reasons, isStreamabilityEnabled(), true);
                 ExpressionTool.clearStreamabilityData(si);
             }
             if (packageData != null) {
@@ -1933,6 +1912,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      * Check the streamability of a template rule
      */
 
+    @Override
     public void checkStrictStreamability(XSLTemplate template, Expression body) throws XPathException {
         ContextItemStaticInfoEE info = (ContextItemStaticInfoEE)makeContextItemStaticInfo(template.getMatch().getItemType(), false);
         info.setContextPostureStriding();
@@ -1957,6 +1937,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      * @return true if the node is a node in a streamed document
      */
 
+    @Override
     public boolean isStreamedNode(NodeInfo node) {
         return node instanceof FleetingNode;
     }
@@ -1967,6 +1948,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      * @return the configured optimization options
      */
 
+    @Override
     public OptimizerOptions getOptimizerOptions() {
         return optimizerOptions.intersect(OptimizerOptions.FULL_EE_OPTIMIZATION);
     }
@@ -1999,6 +1981,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      */
 
     /*@NotNull*/
+    @Override
     public Optimizer obtainOptimizer(OptimizerOptions options) {
         if (!isLicensedFeature(LicenseFeature.SCHEMA_VALIDATION)) {
             return super.obtainOptimizer(options);
@@ -2022,9 +2005,10 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      * @return true if the option is switched on
      */
 
-    public boolean isGenerateByteCode(int hostLanguage) {
+    @Override
+    public boolean isGenerateByteCode(HostLanguage hostLanguage) {
         return getBooleanProperty(Feature.GENERATE_BYTE_CODE) &&
-                isLicensedFeature(hostLanguage == XSLT ?
+                isLicensedFeature(hostLanguage == HostLanguage.XSLT ?
                                           LicenseFeature.ENTERPRISE_XSLT :
                                           LicenseFeature.ENTERPRISE_XQUERY);
     }
@@ -2039,13 +2023,15 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      * @param hostLanguage one of XSLT or XQUERY
      * @return true if the option is switched on
      */
-    public boolean isDeferredByteCode(int hostLanguage) {
+    @Override
+    public boolean isDeferredByteCode(HostLanguage hostLanguage) {
         return byteCodeThreshold > 0 &&
-                isLicensedFeature(hostLanguage == XSLT ?
+                isLicensedFeature(hostLanguage == HostLanguage.XSLT ?
                                           LicenseFeature.ENTERPRISE_XSLT :
                                           LicenseFeature.ENTERPRISE_XQUERY);
     }
 
+    @Override
     public boolean isJITEnabled() {
         return optimizerOptions.isSet(OptimizerOptions.JIT) && isLicensedFeature(LicenseFeature.ENTERPRISE_XSLT);
     }
@@ -2057,7 +2043,15 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
     @Override
     public XQueryExpression makeXQueryExpression(Expression exp, QueryModule mainModule, boolean streaming) throws XPathException {
-        return new XQueryExpressionEE(exp, mainModule, streaming);
+        if (!isLicensedFeature(LicenseFeature.ENTERPRISE_XQUERY)) {
+            return super.makeXQueryExpression(exp, mainModule, streaming);
+        } else {
+            XQueryExpressionEE xqe = new XQueryExpressionEE(exp, mainModule, streaming);
+            if (mainModule.getCodeInjector() != null) {
+                mainModule.getCodeInjector().process(xqe);
+            }
+            return xqe;
+        }
     }
 
     @Override
@@ -2065,10 +2059,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         if (optimizerOptions.isSet(OptimizerOptions.REGEX_CACHE)) {
             regexAttempts++;
             FastStringBuffer buff = new FastStringBuffer(regex.length()+flags.length()+hostLanguage.length()+1);
-            buff.append(hostLanguage);
-            buff.append(flags);
-            buff.append('=');
-            buff.append(regex);
+            buff.cat(hostLanguage).cat(flags).cat('=').cat(regex);
             String key = buff.toString();
             RegularExpression re = regexCache.get(key);
             if (re == null) {
@@ -2140,9 +2131,10 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         final ThreadManagerEE manager = (ThreadManagerEE) context.getThreadManager();
         final XPathContextMajor c3 = XPathContextMajor.newThreadContext((XPathContextMinor) context);
         c3.setOrigin(instruction);
+
         if (context.getCurrentIterator() != null) {
-            ManualIterator<?> manualIterator =
-                    new ManualIterator<>(context.getContextItem(), context.getCurrentIterator().position());
+            ManualIterator manualIterator =
+                    new ManualIterator(context.getContextItem(), context.getCurrentIterator().position());
             LastPositionFinder positionFinder = context::getLast;
             manualIterator.setLastPositionFinder(positionFinder);
             c3.setCurrentIterator(manualIterator);
@@ -2215,8 +2207,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      */
 
     @Override
-    public <F extends Item<?>, T extends Item<?>> SequenceIterator<T> getMultithreadedItemMappingIterator(
-            SequenceIterator<F> base, ItemMappingFunction<F, T> action) throws XPathException {
+    public SequenceIterator getMultithreadedItemMappingIterator(
+            SequenceIterator base, ItemMappingFunction action) throws XPathException {
         if (isLicensedFeature(LicenseFeature.SCHEMA_VALIDATION) && getBooleanProperty(Feature.ALLOW_MULTITHREADING)) {
             return multithreadingFactory.makeMultithreadedItemMappingIterator(base, action);
         }
@@ -2229,7 +2221,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      */
 
     @Override
-    public Sequence<?> makeClosure(Expression expression, int ref, XPathContext context) throws XPathException {
+    public Sequence makeClosure(Expression expression, int ref, XPathContext context) throws XPathException {
         if (ref == FilterExpression.FILTERED) {
             return SearchableValue.makeSearchableValue(expression.iterate(context));
         } else {
@@ -2247,7 +2239,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      */
 
     @Override
-    public GroundedValue<?> makeSequenceExtent(Expression expression, int ref, XPathContext context) throws XPathException {
+    public GroundedValue makeSequenceExtent(Expression expression, int ref, XPathContext context) throws XPathException {
         if (ref == FilterExpression.FILTERED) {
             return SearchableValue.makeSearchableValue(expression.iterate(context));
         } else {
@@ -2280,6 +2272,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      * @return the ContextItemStaticInfo
      */
 
+    @Override
     public ContextItemStaticInfo makeContextItemStaticInfo(ItemType itemType, boolean maybeUndefined) {
         if (isLicensedFeature(LicenseFeature.ENTERPRISE_XSLT) || isLicensedFeature(LicenseFeature.ENTERPRISE_XQUERY)) {
             ContextItemStaticInfoEE cit = new ContextItemStaticInfoEE(itemType, maybeUndefined);
@@ -2297,6 +2290,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      * @return the default ContextItemStaticInfo
      */
 
+    @Override
     public ContextItemStaticInfo getDefaultContextItemStaticInfo() {
         return ContextItemStaticInfoEE.DEFAULT;
     }
@@ -2327,6 +2321,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      * @return a new TemplateRule appropriate to this Configuration
      */
 
+    @Override
     public TemplateRuleEE makeTemplateRule() {
         return new TemplateRuleEE();
     }
@@ -2371,7 +2366,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      * @param hostLanguage for example Configuration.XSLT
      * @return a CompilerService, or null
      */
-    public CompilerService makeCompilerService(int hostLanguage) {
+    @Override
+    public CompilerService makeCompilerService(HostLanguage hostLanguage) {
         return new CompilerService(this, hostLanguage);
     }
 
@@ -2394,6 +2390,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      * @param fileName the specified file name
      */
 
+    @Override
     public void createByteCodeReport(String fileName) {
         try {
             PrintWriter w = new PrintWriter(new File(fileName));
@@ -2404,12 +2401,12 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             }
             w.close();
         } catch (FileNotFoundException e) {
-            System.err.println("Unable to produce bytecode monitoring report: " + e.getMessage());
+            getLogger().warning("Unable to produce bytecode monitoring report: " + e.getMessage());
         }
     }
 //#endif
 
 }
 
-// Copyright (C) 2009-2017 Saxonica Limited.
+// Copyright (C) 2009-2020 Saxonica Limited
 

@@ -38,6 +38,7 @@ public class LastModified extends SystemFunction {
      *                                           code will add information about the error location.
      */
 
+    @Override
     public ZeroOrOne<DateTimeValue> call(XPathContext context, Sequence[] arguments) throws XPathException {
         Item item = arguments[0].head();
         if (item == null) {
@@ -91,4 +92,4 @@ public class LastModified extends SystemFunction {
 
 }
 
-// Copyright (c) 2009-2016 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

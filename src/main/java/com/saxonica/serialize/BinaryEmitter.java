@@ -1,12 +1,12 @@
 package com.saxonica.serialize;
 
-import net.sf.saxon.expr.parser.Location;
-import net.sf.saxon.om.NamespaceBindingSet;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.serialize.Emitter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SimpleType;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -24,42 +24,38 @@ public abstract class BinaryEmitter extends Emitter {
      * @return false: this Emitter uses an OutputStream
      */
 
+    @Override
     public boolean usesWriter() {
         return false;
     }
 
+    @Override
     public void open() throws XPathException {
 
     }
 
+    @Override
     public void startDocument(int properties) throws XPathException {
 
     }
 
+    @Override
     public void endDocument() throws XPathException {
 
     }
 
-    public void startElement(NodeName nameCode, SchemaType typeCode, Location location, int properties) throws XPathException {
-
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
     }
 
-    public void namespace(NamespaceBindingSet namespaceBindings, int properties) throws XPathException {
-
-    }
-
-    public void attribute(NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties) throws XPathException {
-
-    }
-
-    public void startContent() throws XPathException {
-
-    }
-
+    @Override
     public void endElement() throws XPathException {
 
     }
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         if (outputStream == null) {
             if (streamResult == null) {
@@ -85,17 +81,20 @@ public abstract class BinaryEmitter extends Emitter {
 
     protected abstract byte[] textNodeToBinary(CharSequence chars) throws XPathException;
 
+    @Override
     public void processingInstruction(String name, CharSequence data, Location locationId, int properties) throws XPathException {
 
     }
 
+    @Override
     public void comment(CharSequence content, Location locationId, int properties) throws XPathException {
 
     }
 
+    @Override
     public boolean usesTypeAnnotations() {
         return false;
     }
 }
 
-// Copyright (c) 2010 Saxonica Limited.
+// Copyright (c) 2010-2020 Saxonica Limited

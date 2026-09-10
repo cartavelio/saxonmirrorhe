@@ -4,7 +4,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.DummyNamespaceResolver;
-import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.Invalidity;
 import net.sf.saxon.lib.InvalidityHandler;
@@ -57,7 +57,8 @@ public class ValidateFn extends SystemFunction {
          */
 
         /*@Nullable*/
-        public ZeroOrOne<MapItem> call(XPathContext context, Sequence[] arguments) throws XPathException {
+        @Override
+        public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
             final List<Invalidity> errorList = new ArrayList<>(5);
             boolean returnTreeOnFailure = false;
             NodeInfo resultNode = null;
@@ -75,7 +76,7 @@ public class ValidateFn extends SystemFunction {
 
             if (arguments.length >= 2) {
                 MapItem options = (MapItem) arguments[1].head();
-                Sequence<?> val;
+                Sequence val;
 
                 // buildTree = true() | false() | ()
                 val = options.get(new StringValue("buildTree"));
@@ -182,6 +183,7 @@ public class ValidateFn extends SystemFunction {
                  *
                  * @param systemId optional; may be used to represent the destination of any report produced
                  */
+                @Override
                 public void startReporting(String systemId) {
                     // no action
                 }
@@ -192,6 +194,7 @@ public class ValidateFn extends SystemFunction {
                  *
                  * @param failure details of the validation error
                  */
+                @Override
                 public void reportInvalidity(Invalidity failure) {
                     if (!currentErrorNode.isEmpty()) {
                         ((ValidationFailure) failure).setSourceLocator(currentErrorNode.get(0));
@@ -209,7 +212,8 @@ public class ValidateFn extends SystemFunction {
                  * @return a value (or null). This will be the value returned as the value of
                  * the variable $err:value during try/catch processing
                  */
-                public Sequence<?> endReporting() {
+                @Override
+                public Sequence endReporting() {
                     return null;
                 }
             });
@@ -218,22 +222,22 @@ public class ValidateFn extends SystemFunction {
             switch (kind) {
 
                 case Type.DOCUMENT: {
-                    Receiver out = buildTree ? new SequenceOutputter(pipe) : new Sink(pipe);
+                    Receiver out = buildTree ? new SequenceCollector(pipe) : new Sink(pipe);
                     Receiver val = config.getDocumentValidator(out, input.getBaseURI(), options, null);
                     val.setPipelineConfiguration(out.getPipelineConfiguration());
                     val.setSystemId(input.getBaseURI());
-                    input.copy(val, CopyOptions.ALL_NAMESPACES, ExplicitLocation.UNKNOWN_LOCATION);
-                    resultNode = buildTree ? (NodeInfo) ((SequenceOutputter) out).getFirstItem() : null;
+                    input.copy(val, CopyOptions.ALL_NAMESPACES, Loc.NONE);
+                    resultNode = buildTree ? (NodeInfo) ((SequenceCollector) out).getFirstItem() : null;
                     break;
                 }
                 case Type.ELEMENT: {
-                    SequenceReceiver out = buildTree ? new SequenceOutputter(pipe) : new Sink(pipe);
+                    SequenceReceiver out = buildTree ? new SequenceCollector(pipe) : new Sink(pipe);
                     options.setTopLevelElement(NameOfNode.makeName(input).getStructuredQName());
-                    Receiver val = config.getElementValidator(out, options, ExplicitLocation.UNKNOWN_LOCATION);
+                    Receiver val = config.getElementValidator(out, options, Loc.NONE);
                     val.setPipelineConfiguration(out.getPipelineConfiguration());
                     val.setSystemId(input.getBaseURI());
-                    input.copy(val, CopyOptions.ALL_NAMESPACES, ExplicitLocation.UNKNOWN_LOCATION);
-                    resultNode = buildTree ? (NodeInfo) ((SequenceOutputter) out).getFirstItem() : null;
+                    input.copy(val, CopyOptions.ALL_NAMESPACES, Loc.NONE);
+                    resultNode = buildTree ? (NodeInfo) ((SequenceCollector) out).getFirstItem() : null;
                     break;
                 }
                 case Type.ATTRIBUTE:
@@ -291,7 +295,7 @@ public class ValidateFn extends SystemFunction {
                     result.initialPut("node", resultNode);
                 }
                 result.initialPut("valid", BooleanValue.TRUE);
-                return new ZeroOrOne<>(result);
+                return new ZeroOrOne(result);
 
             } else {
 
@@ -340,7 +344,7 @@ public class ValidateFn extends SystemFunction {
                     errors.add(im);
                 }
                 result.initialPut("errors", SequenceExtent.makeSequenceExtent(errors));
-                return new ZeroOrOne<>(result);
+                return new ZeroOrOne(result);
 
 
             }
@@ -351,4 +355,4 @@ public class ValidateFn extends SystemFunction {
 }
 
 
-// Copyright (c) 2009-2016 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

@@ -2,7 +2,7 @@ package com.saxonica.ee.stream.adjunct;
 
 import com.saxonica.ee.stream.*;
 import com.saxonica.ee.stream.feed.CopyOfFeed;
-import com.saxonica.ee.stream.feed.Feed;
+import com.saxonica.ee.stream.feed.DecomposingFeed;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.om.FleetingParentNode;
 import com.saxonica.ee.stream.watch.Terminator;
@@ -10,15 +10,14 @@ import com.saxonica.ee.stream.watch.Trigger;
 import com.saxonica.ee.stream.watch.WatchMaker;
 import com.saxonica.ee.stream.watch.WatchManager;
 import com.saxonica.ee.trans.ContextItemStaticInfoEE;
-import net.sf.saxon.event.EventBuffer;
-import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.*;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Operand;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.Fork;
-import net.sf.saxon.expr.parser.Location;
-import net.sf.saxon.om.Item;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnchorPattern;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 
 import java.util.List;
@@ -104,9 +103,9 @@ public class ForkAdjunct extends StreamingAdjunct {
     private class ForkFeed extends ItemFeed {
 
         WatchManager watchManager;
-        EventBuffer[] writers;
+        FeedToEventBuffer[] writers;
 
-        public ForkFeed(Expression exp, Feed result, XPathContext context, WatchManager watchManager) {
+        public ForkFeed(Expression exp, ItemFeed result, XPathContext context, WatchManager watchManager) {
             super(exp, result, context);
             this.watchManager = watchManager;
         }
@@ -122,24 +121,22 @@ public class ForkAdjunct extends StreamingAdjunct {
         public void open(Terminator terminator) throws XPathException {
             super.open(terminator);
             final Fork fork = (Fork) getExpression();
-            writers = new EventBuffer[fork.getSize()];
+            writers = new FeedToEventBuffer[fork.getSize()];
             int i = 0;
             for (Operand o : fork.operands()) {
                 // TODO: PERF: no need to buffer the result of the first prong
-                final EventBuffer writer = new EventBuffer(getPipelineConfiguration());
+                final FeedToEventBuffer writer = new FeedToEventBuffer(getNextOutputter(), this, getContext());
+                writer.setPipelineConfiguration(getPipelineConfiguration());
                 writers[i] = writer;
                 if (Streamability.getSweep(o.getChildExpression()) == Sweep.CONSUMING) {
-                    ItemFeed feed = new FeedToEventBuffer(writer, ForkFeed.this, getContext());
+                    ItemFeed feed = new DecomposingFeed(writer, getContext());
                     if (Streamability.getPosture(o.getChildExpression()) != Posture.GROUNDED) {
                         // test si-fork-006
                         feed = new CopyOfFeed(watchManager, feed, getContext());
                     }
                     watchManager.addWatch(actionInversions[i].getWatch(watchManager, feed, getContext()), true);
                 } else {
-                    Receiver saved = getContext().getReceiver();
-                    getContext().setReceiver(writer);
-                    o.getChildExpression().process(getContext());
-                    getContext().setReceiver(saved);
+                    o.getChildExpression().process(writer, getContext());
                 }
                 i++;
             }
@@ -169,7 +166,7 @@ public class ForkAdjunct extends StreamingAdjunct {
          * @param item the item to be supplied
          */
         @Override
-        public void processItem(Item<?> item) throws XPathException {
+        public void append(Item item) throws XPathException {
             throw new UnsupportedOperationException();
         }
 
@@ -194,9 +191,9 @@ public class ForkAdjunct extends StreamingAdjunct {
         @Override
         public void close() throws XPathException {
             if (!hasFailed()) {
-                Feed out = getResult();
-                for (EventBuffer writer : writers) {
-                    writer.replay(out.getReceiver());
+                Outputter out = getNextOutputter();
+                for (FeedToEventBuffer writer : writers) {
+                    writer.replay(out);
                 }
                 out.close();
             }
@@ -205,54 +202,7 @@ public class ForkAdjunct extends StreamingAdjunct {
 
     }
 
-    public static final class FeedToEventBuffer extends ItemFeed {
-
-        EventBuffer buffer;
-        Feed notifyOnFailure;
-
-        public FeedToEventBuffer(EventBuffer buffer, Feed notifyOnFailure, XPathContext context) {
-            super(notifyOnFailure, context);
-            this.buffer = buffer;
-            this.notifyOnFailure = notifyOnFailure;
-        }
-
-        @Override
-        public Receiver getReceiver() {
-            return buffer;
-        }
-
-        @Override
-        public void open(Terminator terminator) {
-            //super.open(terminator);
-        }
-
-        @Override
-        public void processItem(Item<?> item) throws XPathException {
-            if (!hasFailed()) {
-                buffer.append(item);
-            }
-        }
-
-        @Override
-        public void close() throws XPathException {
-            if (!hasFailed()) {
-                buffer.close();
-            }
-            //super.close();
-        }
-
-        public EventBuffer getEventBuffer() {
-            return buffer;
-        }
-
-        @Override
-        public void setHasFailed() {
-            if (notifyOnFailure instanceof ItemFeed) {
-                ((ItemFeed) notifyOnFailure).setHasFailed();
-            }
-            // TODO: failure handling needs work...
-        }
-    };
+    ;
 }
 
-// Copyright Saxonica 2014-2016.
+// Copyright Saxonica 2014-2019.

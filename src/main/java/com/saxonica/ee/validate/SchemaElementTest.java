@@ -4,8 +4,6 @@ import com.saxonica.ee.schema.ElementDecl;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.pattern.SchemaNodeTest;
-import net.sf.saxon.trans.SaxonErrorCode;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.tree.tiny.TinyTree;
 import net.sf.saxon.type.*;
@@ -22,7 +20,6 @@ import java.util.function.IntPredicate;
 /**
  * A NodeTest of the form schema-element(element-name)
  *
- * @author Michael H. Kay
  * @since 9.3
  */
 
@@ -67,12 +64,18 @@ public class SchemaElementTest extends NodeTest implements SchemaNodeTest {
         return head;
     }
 
+    @Override
+    public StructuredQName getNodeName() {
+        return head.getComponentName();
+    }
+
     /**
      * Get the corresponding {@link net.sf.saxon.type.UType}. A UType is a union of primitive item
      * types.
      *
      * @return the smallest UType that subsumes this item type
      */
+    @Override
     public UType getUType() {
         return UType.ELEMENT;
     }
@@ -141,7 +144,8 @@ public class SchemaElementTest extends NodeTest implements SchemaNodeTest {
      * @param node the node to be matched
      */
 
-    public boolean matchesNode(/*@NotNull*/ NodeInfo node) {
+    @Override
+    public boolean test(/*@NotNull*/ NodeInfo node) {
         if (node.getNodeKind() != Type.ELEMENT) {
             return false;
         }
@@ -175,14 +179,15 @@ public class SchemaElementTest extends NodeTest implements SchemaNodeTest {
             return true;
         }
 
-        int rel = th.schemaTypeRelationship(required, actual);
-        return rel == TypeHierarchy.SAME_TYPE || rel == TypeHierarchy.SUBSUMES;
+        Affinity rel = th.schemaTypeRelationship(required, actual);
+        return rel == Affinity.SAME_TYPE || rel == Affinity.SUBSUMES;
     }
 
     /**
      * Determine the default priority of this node test when used on its own as a Pattern
      */
 
+    @Override
     public final double getDefaultPriority() {
         return 0.0;
     }
@@ -194,6 +199,7 @@ public class SchemaElementTest extends NodeTest implements SchemaNodeTest {
      * @return the type of node matched by this pattern. e.g. Type.ELEMENT or Type.TEXT
      */
 
+    @Override
     public int getPrimitiveType() {
         return Type.ELEMENT;
     }
@@ -205,6 +211,7 @@ public class SchemaElementTest extends NodeTest implements SchemaNodeTest {
      */
 
     /*@NotNull*/
+    @Override
     public Optional<IntSet> getRequiredNodeNames() {
         return Optional.of(groupByFingerprint.keySet());
     }
@@ -214,6 +221,7 @@ public class SchemaElementTest extends NodeTest implements SchemaNodeTest {
      * Return AnyType if there are no restrictions. The default implementation returns AnyType.
      */
 
+    @Override
     public SchemaType getContentType() {
         return requiredType;
     }
@@ -267,20 +275,9 @@ public class SchemaElementTest extends NodeTest implements SchemaNodeTest {
                 ((SchemaElementTest) other).head == head;
     }
 
-    /**
-     * Generate Javascript code to test whether an item conforms to this item type
-     *
-     * @return a Javascript instruction or sequence of instructions, which can be used as the body
-     * of a Javascript function, and which returns a boolean indication whether the value of the
-     * variable "item" is an instance of this item type.
-     * @throws XPathException if JS code cannot be generated for this item type, for example because
-     *                        the test is schema-aware.
-     * @param knownToBe not used by this override
-     * @param targetVersion not used by this override
-     */
     @Override
-    public String generateJavaScriptItemTypeTest(ItemType knownToBe, int targetVersion) throws XPathException {
-        throw new XPathException("Cannot generate JS code for a SchemaElementTest", SaxonErrorCode.SXJS0001);
+    public String getBasicAlphaCode() {
+        return "NES";
     }
 
     /**
@@ -323,4 +320,4 @@ public class SchemaElementTest extends NodeTest implements SchemaNodeTest {
 
 }
 
-// Copyright (c) 2005-2015 Saxonica Limited.
+// Copyright (c) 2005-2020 Saxonica Limited

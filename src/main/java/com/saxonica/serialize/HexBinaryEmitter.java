@@ -12,9 +12,10 @@ import net.sf.saxon.value.Whitespace;
  */
 public class HexBinaryEmitter extends BinaryEmitter {
 
+    @Override
     protected byte[] textNodeToBinary(CharSequence chars) throws XPathException {
         return new HexBinaryValue(Whitespace.trimWhitespace(chars)).getBinaryValue();
     }
 }
 
-// Copyright (c) 2010 Saxonica Limited.
+// Copyright (c) 2010-2020 Saxonica Limited

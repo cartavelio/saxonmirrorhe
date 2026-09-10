@@ -2,10 +2,10 @@ package com.saxonica.ee.jaxp;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.PreparedSchema;
-import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceivingContentHandler;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.NoElementsSpaceStrippingRule;
@@ -51,9 +51,10 @@ public class SchemaReference extends Schema {
      * @return Always return a non-null valid object.
      */
 
+    @Override
     public Validator newValidator() {
         PipelineConfiguration pipe = schema.getConfiguration().makePipelineConfiguration();
-        pipe.setHostLanguage(Configuration.XML_SCHEMA);
+        pipe.setHostLanguage(HostLanguage.XML_SCHEMA);
         return new ValidatorImpl(pipe, schema);
     }
 
@@ -63,10 +64,11 @@ public class SchemaReference extends Schema {
      * @return Always return a non-null valid object.
      */
 
+    @Override
     public ValidatorHandler newValidatorHandler() {
         EnterpriseConfiguration config = schema.getConfiguration();
         PipelineConfiguration pipe = config.makePipelineConfiguration();
-        pipe.setHostLanguage(Configuration.XML_SCHEMA);
+        pipe.setHostLanguage(HostLanguage.XML_SCHEMA);
 
         TypedContentHandler proxy = new TypedContentHandler();
         proxy.setPipelineConfiguration(pipe);
@@ -93,4 +95,4 @@ public class SchemaReference extends Schema {
     }
 }
 
-// Copyright (c) 2004-8 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

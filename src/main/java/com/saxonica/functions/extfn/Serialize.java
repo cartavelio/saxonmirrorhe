@@ -5,7 +5,7 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.PackageData;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.ResultDocument;
-import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.SerializerFactory;
@@ -47,6 +47,7 @@ public class Serialize extends SystemFunction {
      *                                           code will add information about the error location.
      */
 
+    @Override
     public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         NodeInfo node = (NodeInfo) arguments[0].head();
         if (node == null) {
@@ -90,15 +91,12 @@ public class Serialize extends SystemFunction {
         }
 
         StringWriter result = new StringWriter();
-        XPathContext c2 = context.newMinorContext();
-
         SerializerFactory sf = context.getConfiguration().getSerializerFactory();
         PipelineConfiguration pipe = context.getController().makePipelineConfiguration();
         pipe.setXPathContext(context);
         Receiver out = sf.getReceiver(new StreamResult(result), outputProps, pipe);
-        c2.setReceiver(out);
         out.open();
-        node.copy(out, CopyOptions.ALL_NAMESPACES | CopyOptions.TYPE_ANNOTATIONS, ExplicitLocation.UNKNOWN_LOCATION);
+        node.copy(out, CopyOptions.ALL_NAMESPACES | CopyOptions.TYPE_ANNOTATIONS, Loc.NONE);
         out.close();
         return new StringValue(result.toString());
     }
@@ -106,4 +104,4 @@ public class Serialize extends SystemFunction {
 
 }
 
-// Copyright (c) 2009-2018 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

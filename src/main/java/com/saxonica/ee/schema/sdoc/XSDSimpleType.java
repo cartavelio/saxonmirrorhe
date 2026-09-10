@@ -6,8 +6,6 @@ import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.ee.schema.TypeReference;
 import com.saxonica.ee.schema.UserSimpleType;
 import net.sf.saxon.om.*;
-import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.linked.NodeImpl;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
@@ -44,12 +42,13 @@ public class XSDSimpleType extends SchemaElement {
      * @throws SchemaException if any errors are found in the attributes
      */
 
+    @Override
     public void prepareAttributes() throws SchemaException {
 
         PreparedSchema schema = getSchema();
         isRedefinition = getParent() instanceof XSDRedefine;
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         if (isTopLevel()) {
             String[] allowed = {"final", "id", "name"};
             allowAttributes(atts, allowed);
@@ -80,7 +79,7 @@ public class XSDSimpleType extends SchemaElement {
             int fp = getNamePool().allocateFingerprint(typeName.getURI(), typeName.getLocalPart());
             simpleTypeDef.setTypeName(typeName, fp);
             if (!isRedefinition) {
-                if (schema.getSchemaType(simpleTypeDef.getStructuredQName()) != null && fp > 1023) {
+                if (schema.getSchemaType(simpleTypeDef.getTypeName()) != null && fp > 1023) {
                     // don't report duplicates for built-in types: this might be the schema for schemas
                     duplicate("type", name);
                 }
@@ -125,13 +124,12 @@ public class XSDSimpleType extends SchemaElement {
      * @throws SchemaException if any XML representation constraints are violated
      */
 
+    @Override
     public void validate(SchemaCompiler compiler) throws SchemaException {
 
         checkContentModel(stateTerms, stateTargets, false);
 
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while ((child = (NodeImpl) iter.next()) != null) {
+        for (NodeInfo child : children()) {
             switch (child.getFingerprint()) {
                 case StandardNames.XS_RESTRICTION:
                     foundRestriction = true;
@@ -166,6 +164,7 @@ public class XSDSimpleType extends SchemaElement {
     private final static int[][] stateTargets = {
             state0targets, state1targets, state2targets};
 
+    @Override
     protected boolean isFinalState(int state) {
         return state == 1;
     }
@@ -177,6 +176,7 @@ public class XSDSimpleType extends SchemaElement {
      * @param compiler
      */
 
+    @Override
     public void postValidate(SchemaCompiler compiler) throws SchemaException {
         if (isRedefinition) {
             PreparedSchema externalSchema = ((XSDRedefine) getParent()).getExternalSchema();
@@ -192,7 +192,7 @@ public class XSDSimpleType extends SchemaElement {
                 error("A redefined simple type must be based on the type with the same name");
                 return;
             }
-            SimpleType oldSType = externalSchema.getSimpleType(simpleTypeDef.getStructuredQName());
+            SimpleType oldSType = externalSchema.getSimpleType(simpleTypeDef.getTypeName());
             if (oldSType == null) {
                 error("Cannot redefine the simple type " + simpleTypeDef.getDescription() +
                         " because it is not present in the redefined schema");
@@ -214,7 +214,7 @@ public class XSDSimpleType extends SchemaElement {
             String uri = getXSDSchema().getTargetNamespace();
             NamePool pool = getNamePool();
             String localName = simpleTypeDef.getName();
-            String prefix = simpleTypeDef.getStructuredQName().getPrefix();
+            String prefix = simpleTypeDef.getTypeName().getPrefix();
             String newLocalName = localName + '_' + simpleTypeDef.hashCode();
             int newFingerprint = pool.allocateFingerprint(uri, newLocalName);
             oldType.setTypeName(new StructuredQName(prefix, uri, newLocalName), newFingerprint);
@@ -236,4 +236,4 @@ public class XSDSimpleType extends SchemaElement {
 
 }
 
-// Copyright (c) 2004-2007 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

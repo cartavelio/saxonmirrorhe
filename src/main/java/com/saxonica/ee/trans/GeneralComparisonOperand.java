@@ -28,9 +28,10 @@ public class GeneralComparisonOperand extends Characteristic<IntSet> {
         this.multiValued = Cardinality.allowsMany(exp.getCardinality());
     }
 
+    @Override
     public IntSet evaluate(XPathContext context) throws XPathException {
         if (multiValued) {
-            SequenceIterator<?> iter = exp.iterate(context);
+            SequenceIterator iter = exp.iterate(context);
             IntHashSet keys = new IntHashSet();
             iter.forEachOrFail(item -> {
                 keys.add(collator.getCollationKey(item.getStringValueCS()).hashCode());
@@ -65,4 +66,4 @@ public class GeneralComparisonOperand extends Characteristic<IntSet> {
 
 }
 
-// Copyright (c) Saxonica Limited
+// Copyright (c) 2009-2020 Saxonica Limited

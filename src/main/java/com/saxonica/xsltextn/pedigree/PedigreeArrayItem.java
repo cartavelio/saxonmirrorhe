@@ -3,8 +3,6 @@ package com.saxonica.xsltextn.pedigree;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.trans.XPathException;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -43,12 +41,12 @@ public class PedigreeArrayItem extends DelegatingArrayItem implements PedigreeVa
      * @param index the zero-based subscript of the selected member of the array
      * @return the requested array member, which will itself have a pedigree if it is
      * a singleton map or array.
-     * @throws XPathException if the index is out of bounds
+     * @throws IndexOutOfBoundsException if the index is out of bounds
      */
 
     @Override
-    public GroundedValue<?> get(int index) throws XPathException {
-        GroundedValue<?> value = super.get(index);
+    public GroundedValue get(int index) {
+        GroundedValue value = super.get(index);
         Pedigree ped = new Pedigree(this, index);
         return ped.makePedigreeValue(value);
     }
@@ -66,9 +64,9 @@ public class PedigreeArrayItem extends DelegatingArrayItem implements PedigreeVa
 
     @Override
     public ArrayItem remove(int index) {
-        List<GroundedValue<?>> list = new ArrayList<>(arrayLength()-1);
+        List<GroundedValue> list = new ArrayList<>(arrayLength()-1);
         int i = 0;
-        for (GroundedValue<?> seq : super.remove(index).members()) {
+        for (GroundedValue seq : super.remove(index).members()) {
             if (i==index) {
                 i++;
             }
@@ -80,9 +78,9 @@ public class PedigreeArrayItem extends DelegatingArrayItem implements PedigreeVa
 
     @Override
     public ArrayItem subArray(int start, int end) {
-        List<GroundedValue<?>> list = new ArrayList<>(end-start);
+        List<GroundedValue> list = new ArrayList<>(end-start);
         int index = start;
-        for (GroundedValue<?> seq : super.subArray(start, end).members()) {
+        for (GroundedValue seq : super.subArray(start, end).members()) {
             Pedigree ped = new Pedigree(this, index++);
             list.add(ped.makePedigreeValue(seq));
         }
@@ -97,9 +95,9 @@ public class PedigreeArrayItem extends DelegatingArrayItem implements PedigreeVa
      */
 
     @Override
-    public Iterable<GroundedValue<?>> members() {
-        Iterator<GroundedValue<?>> base = super.members().iterator();
-        return () -> new Iterator<GroundedValue<?>>() {
+    public Iterable<GroundedValue> members() {
+        Iterator<GroundedValue> base = super.members().iterator();
+        return () -> new Iterator<GroundedValue>() {
 
             int index = 0;
 
@@ -109,8 +107,8 @@ public class PedigreeArrayItem extends DelegatingArrayItem implements PedigreeVa
             }
 
             @Override
-            public GroundedValue<?> next() {
-                GroundedValue<?> val = base.next();
+            public GroundedValue next() {
+                GroundedValue val = base.next();
                 Pedigree ped = new Pedigree(PedigreeArrayItem.this, index++);
                 return ped.makePedigreeValue(val);
             }
@@ -129,5 +127,5 @@ public class PedigreeArrayItem extends DelegatingArrayItem implements PedigreeVa
     }
 }
 
-// Copyright (c) 2018 Saxonica Ltd.
+// Copyright (c) 2018-2020 Saxonica Limited
 

@@ -33,8 +33,9 @@ public class SquareArrayConstructorCompiler extends ToItemCompiler {
      * @param expression the expression to be compiled
      */
     //@Override
+    @Override
     public void compileToItem(CompilerService compiler,
-                                  Expression expression) throws CannotCompileException {
+                              Expression expression) throws CannotCompileException {
 
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
@@ -73,4 +74,4 @@ public class SquareArrayConstructorCompiler extends ToItemCompiler {
 
 }
 
-//Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

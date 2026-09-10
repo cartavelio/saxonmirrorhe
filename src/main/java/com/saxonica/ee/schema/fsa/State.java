@@ -2,7 +2,6 @@ package com.saxonica.ee.schema.fsa;
 
 import com.saxonica.ee.schema.UserComplexType;
 
-import java.io.Serializable;
 import java.util.Iterator;
 
 /**
@@ -21,9 +20,21 @@ public interface State {
      *         or null if this token is not accepted when in this State (which implies a validation error).
      */
 
-    public Edge getTransition(int token, UserComplexType type);
+    Edge getTransition(int token, UserComplexType type);
+
+    /**
+     * Ask whether this state is a valid final state, that is, no further transitions are needed
+     * to complete a successful path through the finite state machine
+     * @return true if this is a valid final state
+     */
 
     boolean isFinalState();
+
+    /**
+     * Construct a human-readable message explaining what elements are permitted
+     * as transitions from this state
+     * @return A message indicating what elements may come next
+     */
 
     CharSequence listAllowedElements();
 
@@ -33,7 +44,7 @@ public interface State {
      * @return an array containing all the edges that represent element wildcards.
      */
 
-    public Edge[] getWildcardEdges();
+    Edge[] getWildcardEdges();
 
     /**
      * Get an iterator over all the transitions (edges) allowed from this state
@@ -43,8 +54,8 @@ public interface State {
      */
 
     /*@NotNull*/
-    public Iterator<Edge> getEdges();
+    Iterator<Edge> getEdges();
 }
 
-// Copyright (c) 2008 Saxonica Limited.
+// Copyright (c) 2008-2020 Saxonica Limited
 

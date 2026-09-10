@@ -2,7 +2,7 @@ package com.saxonica.ee.stream.adjunct;
 
 import com.saxonica.ee.stream.Streamability;
 import com.saxonica.ee.stream.feed.ElementCreatorFeed;
-import com.saxonica.ee.stream.feed.Feed;
+import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.feed.FeedMaker;
 import com.saxonica.ee.stream.watch.WatchManager;
 import net.sf.saxon.expr.XPathContext;
@@ -15,6 +15,7 @@ import net.sf.saxon.trans.XPathException;
  */
 public class ElementCreatorAdjunct extends ParentConstructorAdjunct implements FeedMaker {
 
+    @Override
     public FeedMaker getFeedMaker(final int arg) throws XPathException {
         ElementCreator exp = (ElementCreator)getExpression();
         if (Streamability.getConsumingOperand(exp).getChildExpression() == exp.getContentExpression()) {
@@ -24,11 +25,12 @@ public class ElementCreatorAdjunct extends ParentConstructorAdjunct implements F
         }
     }
 
-    public Feed makeItemFeed(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
         return new ElementCreatorFeed(getExpression(), out, context);
     }
 
 
 }
 
-// Copyright (c) 2010-2013 Saxonica Limited.
+// Copyright (c) 2010-2020 Saxonica Limited

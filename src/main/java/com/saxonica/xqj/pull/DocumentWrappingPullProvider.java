@@ -19,17 +19,17 @@ public class DocumentWrappingPullProvider extends PullFilter {
     }
 
     @Override
-    public int next() throws XPathException {
+    public Event next() throws XPathException {
         if (atStart) {
             atStart = false;
-            return START_DOCUMENT;
+            return Event.START_DOCUMENT;
         } else if (atEnd) {
-            return END_OF_INPUT;
+            return Event.END_OF_INPUT;
         } else {
-            int event = getUnderlyingProvider().next();
-            if (event == END_OF_INPUT) {
+            Event event = getUnderlyingProvider().next();
+            if (event == Event.END_OF_INPUT) {
                 atEnd = true;
-                return END_DOCUMENT;
+                return Event.END_DOCUMENT;
             } else {
                 return event;
             }
@@ -37,5 +37,5 @@ public class DocumentWrappingPullProvider extends PullFilter {
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited
 

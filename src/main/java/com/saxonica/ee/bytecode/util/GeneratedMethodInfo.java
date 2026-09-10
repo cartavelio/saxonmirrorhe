@@ -13,18 +13,18 @@ public class GeneratedMethodInfo {
     }
 
     private static class ContextVariableInfo {
-        public int contextVariablePosition;
-        public boolean contextIsArgument;
+        int contextVariablePosition;
+        boolean contextIsArgument;
     }
 
-    private static class SequenceReceiverInfo {
-        public int receiverPosition;
+    private static class OutputterInfo {
+        int outputterPosition;
     }
 
     public static class LocalSlotInfo {
         public int slotNumber;
         public Class theClass;
-        public boolean inUse;
+        boolean inUse;
     }
 
     public Generator currentGenerator;
@@ -32,13 +32,13 @@ public class GeneratedMethodInfo {
 
     /*@Nullable*/ private LabelInfo tailCallLabel = null;
 
-    private Stack<ContextVariableInfo> contextVariableStack = new Stack<ContextVariableInfo>();
-    private Stack<SequenceReceiverInfo> sequenceReceiverStack = new Stack<SequenceReceiverInfo>();
-    public Set<LabelInfo> labelMap = new HashSet<LabelInfo>();
-    public List<LocalSlotInfo> slotList = new ArrayList<LocalSlotInfo>(20);
+    private Stack<ContextVariableInfo> contextVariableStack = new Stack<>();
+    private Stack<OutputterInfo> outputterStack = new Stack<>();
+    public Set<LabelInfo> labelMap = new HashSet<>();
+    public List<LocalSlotInfo> slotList = new ArrayList<>(20);
 
-    private Stack<LabelInfo> xslIterateLoopLabelStack = new Stack<LabelInfo>();
-    private Stack<LabelInfo> xslIterateBreakLabelStack = new Stack<LabelInfo>();
+    private Stack<LabelInfo> xslIterateLoopLabelStack = new Stack<>();
+    private Stack<LabelInfo> xslIterateBreakLabelStack = new Stack<>();
 
     public void pushContextVariableInfo(int position, boolean isArgument) {
         ContextVariableInfo info = new ContextVariableInfo();
@@ -50,10 +50,10 @@ public class GeneratedMethodInfo {
 //        }
     }
 
-    public void pushSequenceReceiverInfo(int position) {
-        SequenceReceiverInfo info = new SequenceReceiverInfo();
-        info.receiverPosition = position;
-        sequenceReceiverStack.push(info);
+    public void pushOutputterInfo(int position) {
+        OutputterInfo info = new OutputterInfo();
+        info.outputterPosition = position;
+        outputterStack.push(info);
     }
 
     public void popContextVariableInfo() {
@@ -64,20 +64,20 @@ public class GeneratedMethodInfo {
 //        }
     }
 
-    public void popSequenceReceiverInfo() {
-        sequenceReceiverStack.pop();
+    public void popOutputterInfo() {
+        outputterStack.pop();
     }
 
     public int getContextVariablePosition() {
         return contextVariableStack.peek().contextVariablePosition;
     }
 
-    public int getSequenceReceiverPosition() {
-        return sequenceReceiverStack.peek().receiverPosition;
+    public int getOutputterPosition() {
+        return outputterStack.peek().outputterPosition;
     }
 
-    public boolean isSequenceReceiverInitialized() {
-        return sequenceReceiverStack.get(0).receiverPosition != -1;
+    public boolean isOutputterInitialized() {
+        return outputterStack.get(0).outputterPosition != -1;
     }
 
     public boolean isContextVariableAnArgument() {
@@ -252,6 +252,6 @@ public class GeneratedMethodInfo {
     }
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited
 
 

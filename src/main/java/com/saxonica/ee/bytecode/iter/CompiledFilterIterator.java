@@ -12,7 +12,7 @@ import net.sf.saxon.trans.XPathException;
 
 public abstract class CompiledFilterIterator implements SequenceIterator {
 
-    protected FocusIterator<?> base;
+    protected FocusIterator base;
     protected XPathContext filterContext = null;
 
     /**
@@ -29,7 +29,7 @@ public abstract class CompiledFilterIterator implements SequenceIterator {
      * @param context the context in which the (outer) filter expression is evaluated
      */
 
-    public final void setSequence(SequenceIterator<?> base, XPathContext context) {
+    public final void setSequence(SequenceIterator base, XPathContext context) {
         filterContext = context.newMinorContext();
         filterContext.trackFocus(base);
         this.base = filterContext.getCurrentIterator();
@@ -39,6 +39,7 @@ public abstract class CompiledFilterIterator implements SequenceIterator {
      * Get the next item if there is one
      */
 
+    @Override
     public final Item next() throws XPathException {
         Item next;
         while ((next = base.next()) != null) {
@@ -58,25 +59,13 @@ public abstract class CompiledFilterIterator implements SequenceIterator {
 
     protected abstract boolean matches() throws XPathException;
 
+    @Override
     public void close() {
         base.close();
     }
 
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link net.sf.saxon.om.SequenceIterator#GROUNDED}, {@link net.sf.saxon.om.SequenceIterator#LAST_POSITION_FINDER},
-     *         and {@link net.sf.saxon.om.SequenceIterator#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     */
-
-    public int getProperties() {
-        return 0;
-    }
 
 
 }
 
-// Copyright (c) 2011-2014 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

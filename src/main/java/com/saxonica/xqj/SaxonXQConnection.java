@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -50,19 +50,23 @@ public class SaxonXQConnection extends SaxonXQDataFactory implements XQConnectio
      * @return the configuration in use.
      */
 
+    @Override
     public Configuration getConfiguration() {
         return config;
     }
 
+    @Override
     public void commit() throws XQException {
         checkNotClosed();
     }
 
+    @Override
     public XQExpression createExpression() throws XQException {
         checkNotClosed();
         return new SaxonXQExpression(this);
     }
 
+    @Override
     public XQExpression createExpression(XQStaticContext properties) throws XQException {
         checkNotClosed();
         SaxonXQDataSource.checkNotNull(properties, "properties");
@@ -70,25 +74,30 @@ public class SaxonXQConnection extends SaxonXQDataFactory implements XQConnectio
     }
 
 
+    @Override
     public boolean getAutoCommit() {
         return false;
     }
 
+    @Override
     public XQMetaData getMetaData() throws XQException {
         checkNotClosed();
         return new SaxonXQMetaData(this);
     }
 
 
+    @Override
     public XQStaticContext getStaticContext() throws XQException {
         checkNotClosed();
         return new SaxonXQStaticContext(staticContext);
     }
 
+    @Override
     public XQPreparedExpression prepareExpression(InputStream xquery) throws XQException {
         return prepareExpression(xquery, staticContext);
     }
 
+    @Override
     public XQPreparedExpression prepareExpression(InputStream xquery, XQStaticContext properties) throws XQException {
         checkNotClosed();
         SaxonXQDataSource.checkNotNull(xquery, "xquery");
@@ -105,10 +114,12 @@ public class SaxonXQConnection extends SaxonXQDataFactory implements XQConnectio
         }
     }
 
+    @Override
     public XQPreparedExpression prepareExpression(Reader xquery) throws XQException {
         return prepareExpression(xquery, staticContext);
     }
 
+    @Override
     public XQPreparedExpression prepareExpression(Reader xquery, XQStaticContext properties) throws XQException {
         checkNotClosed();
         SaxonXQDataSource.checkNotNull(xquery, "xquery");
@@ -125,10 +136,12 @@ public class SaxonXQConnection extends SaxonXQDataFactory implements XQConnectio
         }
     }
 
+    @Override
     public XQPreparedExpression prepareExpression(String xquery) throws XQException {
         return prepareExpression(xquery, staticContext);
     }
 
+    @Override
     public XQPreparedExpression prepareExpression(String xquery, XQStaticContext properties) throws XQException {
         SaxonXQDataSource.checkNotNull(xquery, "xquery");
         return prepareExpression(new StringReader(xquery), properties);
@@ -163,17 +176,20 @@ public class SaxonXQConnection extends SaxonXQDataFactory implements XQConnectio
         return new SaxonXQPreparedExpression(this, xqe, sqc, dqc);
     }
 
+    @Override
     public void rollback() throws XQException {
         checkNotClosed();
         // no-op
     }
 
 
+    @Override
     public void setAutoCommit(boolean autoCommit) throws XQException {
         checkNotClosed();
         // no-op
     }
 
+    @Override
     public void setStaticContext(XQStaticContext properties) throws XQException {
         checkNotClosed();
         SaxonXQDataSource.checkNotNull(properties, "properties");

@@ -1,5 +1,6 @@
 package com.saxonica.ee.optim;
 
+import com.saxonica.ee.config.MultithreadingFactory;
 import net.sf.saxon.expr.ItemMappingFunction;
 import net.sf.saxon.expr.ItemMappingIterator;
 import net.sf.saxon.om.Item;
@@ -15,21 +16,22 @@ import java.util.concurrent.*;
  * by the collection() function), the order of items in the result sequence retains
  * the order of items in the input sequence.
  */
-public class MultithreadedItemMappingIterator<F extends Item<?>, T extends Item<?>> extends ItemMappingIterator<F, T> {
+public class MultithreadedItemMappingIterator extends ItemMappingIterator {
 
     private ExecutorService service;
-    private BlockingQueue<Future<T>> resultQueue = new LinkedBlockingQueue<>();
+    private BlockingQueue<Future<Item>> resultQueue = new LinkedBlockingQueue<>();
 
-    public MultithreadedItemMappingIterator(SequenceIterator<F> base, ItemMappingFunction<F, T> action) throws XPathException {
+    public MultithreadedItemMappingIterator(SequenceIterator base, ItemMappingFunction action, MultithreadingFactory factory) throws XPathException {
         super(base, action);
 
         int maxThreads = getMaxThreads();
-        service = makeExecutorService(maxThreads);
+        service = factory.makeExecutorService(maxThreads);
 
         // prime the queue
         int n = 0;
-        while (++n < maxThreads * 3) { // see bug 3958
-            F item = base.next();
+        int prime = maxThreads * 3; // bug 3958
+        while (++n < prime) {
+            Item item = base.next();
             if (item == null) {
                 return;
             }
@@ -48,29 +50,20 @@ public class MultithreadedItemMappingIterator<F extends Item<?>, T extends Item<
         return maxThreads > 0 ? maxThreads : 1;
     }
 
-    /**
-     * Overridable method to create an <code>ExecutorService</code> with a given concurrency
-     * @param maxThreads the maximum number of threads to be used
-     * @return a suitable <code>ExecutorService</code>
-     */
-
-    protected ExecutorService makeExecutorService(int maxThreads) {
-        return Executors.newFixedThreadPool(maxThreads);
-    }
-
-    public T next() throws XPathException {
+    @Override
+    public Item next() throws XPathException {
         while (true) {
-            F nextIn = getBaseIterator().next();
-            if (nextIn != null) {
-                mapOneItem(nextIn);
-            }
+            Item nextIn = getBaseIterator().next();
             try {
-                Future<T> future = resultQueue.poll();
+                if (nextIn != null) {
+                    mapOneItem(nextIn);
+                }
+                Future<Item> future = resultQueue.poll();
                 if (future == null) {
                     service.shutdown();
                     return null;
                 } else {
-                    T result = future.get();
+                    Item result = future.get();
                     if (!(result instanceof NullItem)) {
                         return result;
                         // otherwise continue;
@@ -78,11 +71,15 @@ public class MultithreadedItemMappingIterator<F extends Item<?>, T extends Item<
                 }
             } catch (InterruptedException e) {
                 throw new XPathException(e);
-            } catch (ExecutionException e) {
+            } catch (ExecutionException|RejectedExecutionException e) {
                 if (e.getCause() instanceof XPathException) {
                     throw (XPathException)e.getCause();
                 }
-                throw new XPathException(e);
+                if (!e.getMessage().contains("Shutting down")) {
+                    throw new XPathException(e);
+                } // else {
+                  // No action, error reported elsewhere
+                  //}
             }
         }
     }
@@ -101,21 +98,22 @@ public class MultithreadedItemMappingIterator<F extends Item<?>, T extends Item<
         service.shutdown();
     }
 
-    private void mapOneItem(F in) {
-        Future<T> future = service.submit(new CallableAction(getMappingFunction(), in));
+    private void mapOneItem(Item in) {
+        Future<Item> future = service.submit(new CallableAction(getMappingFunction(), in));
         resultQueue.add(future);
     }
 
-    private class CallableAction<F extends Item<?>, T extends Item<?>> implements Callable<Item> {
-        private ItemMappingFunction<F, T> action;
+    private class CallableAction<F extends Item, T extends Item> implements Callable<Item> {
+        private ItemMappingFunction action;
         private F input;
-        public CallableAction(ItemMappingFunction<F, T> action, F input) {
+        public CallableAction(ItemMappingFunction action, F input) {
             this.action = action;
             this.input = input;
         }
+        @Override
         public Item call() throws XPathException {
             try {
-                T out = action.mapItem(input);
+                Item out = action.mapItem(input);
                 if (out == null) {
                     return new NullItem(true);
                 } else {
@@ -142,4 +140,4 @@ public class MultithreadedItemMappingIterator<F extends Item<?>, T extends Item<
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

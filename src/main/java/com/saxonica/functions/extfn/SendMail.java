@@ -79,10 +79,10 @@ public class SendMail extends SystemFunction {
     }
 
 
-    private static GroundedValue<?> checkMailProperty(XPathContext context, MapItem emailConfigMap, String keyStr, String errorMessage, SequenceType expectedType) throws XPathException {
+    private static GroundedValue checkMailProperty(XPathContext context, MapItem emailConfigMap, String keyStr, String errorMessage, SequenceType expectedType) throws XPathException {
         try {
-            Sequence<?> sequence = emailConfigMap.get(new StringValue(keyStr));
-            GroundedValue<?> groundedValue = sequence.materialize();
+            Sequence sequence = emailConfigMap.get(new StringValue(keyStr));
+            GroundedValue groundedValue = sequence.materialize();
             if (!expectedType.matches(groundedValue, context.getConfiguration().getTypeHierarchy())) {
                 throw new XPathException("saxon:send-mail error: Invalid type for email configuration option " + keyStr, SaxonErrorCode.SXJM0001, context);
             }
@@ -127,7 +127,7 @@ public class SendMail extends SystemFunction {
     }
 
 
-    private static InternetAddress[] createRecipients(Sequence<?> seq, XPathContext context) throws XPathException {
+    private static InternetAddress[] createRecipients(Sequence seq, XPathContext context) throws XPathException {
         SequenceIterator iter = seq.iterate();
         List<InternetAddress> recipient = new ArrayList<>();
         Item item;
@@ -218,7 +218,7 @@ public class SendMail extends SystemFunction {
 
     }
 
-    private String toStringOrNull(Sequence<?> value) {
+    private String toStringOrNull(Sequence value) {
         try {
             if (value == null) {
                 return null;
@@ -231,7 +231,7 @@ public class SendMail extends SystemFunction {
     }
 
     @Override
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         MapItem emailConfigMap;
         String subjecti;
         Item contentItem;
@@ -241,7 +241,7 @@ public class SendMail extends SystemFunction {
         //Retrieve email configuration from map
 
         emailConfigMap = (MapItem) arguments[0].head();
-        Map<String, Sequence<?>> options =
+        Map<String, Sequence> options =
                 OPTION_DETAILS.processSuppliedOptions(emailConfigMap, context);
 
         int port;
@@ -277,8 +277,8 @@ public class SendMail extends SystemFunction {
             MailSSLSocketFactory sf = null;
             try {
                 sf = new MailSSLSocketFactory();
-            } catch (GeneralSecurityException e) {
-                e.printStackTrace();
+            } catch (GeneralSecurityException|SecurityException e) {
+                throw new XPathException(e);
             }
             sf.setTrustAllHosts(true);
             mailProps.put("mail.smtp.ssl.trust", server);
@@ -292,7 +292,7 @@ public class SendMail extends SystemFunction {
 
         for (KeyValuePair pair : emailConfigMap.keyValuePairs()) {
             if (pair.key.getStringValue().startsWith("mail.")) {
-                Sequence<?> val = pair.value;
+                Sequence val = pair.value;
                 Item first = val.head();
                 if (first != null) {
                     mailProps.setProperty(pair.key.getStringValue(), first.getStringValue());
@@ -322,8 +322,8 @@ public class SendMail extends SystemFunction {
 
         //Retrieve email attachment details from map
         if (arguments.length == 4) {
-            Sequence<?> attachments = arguments[3];
-            SequenceIterator<?> iter = attachments.iterate();
+            Sequence attachments = arguments[3];
+            SequenceIterator iter = attachments.iterate();
             Item item;
             while ((item = iter.next()) != null) {
                 try {
@@ -376,4 +376,4 @@ public class SendMail extends SystemFunction {
 
 }
 
-// Copyright (c) 2012 Saxonica Limited
+// Copyright (c) 2012-2020 Saxonica Limited

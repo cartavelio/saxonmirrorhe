@@ -1,20 +1,21 @@
 package com.saxonica.ee.stream.adjunct;
 
-import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import com.saxonica.ee.stream.*;
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.watch.Terminator;
 import com.saxonica.ee.stream.watch.Trigger;
 import com.saxonica.ee.stream.watch.WatchMaker;
 import com.saxonica.ee.stream.watch.WatchManager;
-import net.sf.saxon.event.SequenceOutputter;
-import net.sf.saxon.event.SequenceReceiver;
+import com.saxonica.ee.trans.ContextItemStaticInfoEE;
+import net.sf.saxon.event.ComplexContentOutputter;
+import net.sf.saxon.event.SequenceCollector;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.type.SimpleType;
 
 import java.util.List;
 
@@ -25,6 +26,7 @@ import java.util.List;
 public class LetExpressionAdjunct extends StreamingAdjunct {
 
 
+    @Override
     public WatchMaker getWatchMaker(boolean forGrouping) throws XPathException {
         final Expression select = ((LetExpression) getExpression()).getSequence();
         final Expression action = ((LetExpression) getExpression()).getAction();
@@ -34,35 +36,87 @@ public class LetExpressionAdjunct extends StreamingAdjunct {
             final Inversion route = ie.copy();
             Inversion.PushAction letAction = new Inversion.PushAction();
             letAction.feedMaker = new FeedMaker() {
-                public Feed makeItemFeed(final WatchManager watchManager, final Feed out, final XPathContext context) throws XPathException {
+                @Override
+                public ItemFeed makeItemFeed(final WatchManager watchManager, final ItemFeed out, final XPathContext context) throws XPathException {
                     return new ItemFeed(getExpression(), out, context) {
-                        private SequenceOutputter writer;
+                        private SequenceCollector collector;
+                        private ComplexContentOutputter writer;
 
                         @Override
                         public void open(Terminator terminator) throws XPathException {
                             super.open(terminator);
-                            writer = new SequenceOutputter(watchManager.getPipelineConfiguration());
+                            collector = new SequenceCollector(watchManager.getPipelineConfiguration());
+                            writer = new ComplexContentOutputter(collector);
                         }
 
                         @Override
-                        public void processItem(Item<?> item) throws XPathException {
+                        public void startDocument( int properties) throws XPathException {
+                            writer.startDocument(properties);
+                        }
+
+                        @Override
+                        public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties) throws XPathException {
+                            writer.startElement(elemName, typeCode, location, properties);
+                        }
+
+                        @Override
+                        public void startElement(NodeName elemName, SchemaType type, AttributeMap attributes, NamespaceMap namespaces, Location location, int properties) throws XPathException {
+                            writer.startElement(elemName, type, attributes, namespaces, location, properties);
+                        }
+
+                        @Override
+                        public void endDocument() throws XPathException {
+                            writer.endDocument();
+                        }
+
+                        @Override
+                        public void namespace(String prefix, String namespaceUri, int properties) throws XPathException {
+                            writer.namespace(prefix, namespaceUri, properties);
+                        }
+
+                        @Override
+                        public void attribute(NodeName attName, SimpleType typeCode, CharSequence value, Location location, int properties) throws XPathException {
+                            writer.attribute(attName, typeCode, value, location, properties);
+                        }
+
+                        @Override
+                        public void endElement() throws XPathException {
+                            writer.endElement();
+                        }
+
+                        @Override
+                        public void characters(CharSequence chars, Location location, int properties) throws XPathException {
+                            writer.characters(chars, location, properties);
+                        }
+
+                        @Override
+                        public void processingInstruction(String name, CharSequence data, Location location, int properties) throws XPathException {
+                            writer.processingInstruction(name, data, location, properties);
+                        }
+
+                        @Override
+                        public void comment(CharSequence content, Location location, int properties) throws XPathException {
+                            writer.comment(content, location, properties);
+                        }
+
+                        @Override
+                        public void append(Item item) throws XPathException {
                             writer.append(item);
                         }
 
                         @Override
                         public void close() throws XPathException {
-                            Sequence<?> value = writer.getSequence();
+                            Sequence value = collector.getSequence();
                             XPathContext context = getContext();
-                            context.setReceiver(out.getReceiver());
                             context.setLocalVariable(((LetExpression) getExpression()).getLocalSlotNumber(), value);
-                            action.process(context);
+                            action.process(out, context);
                             super.close();
                         }
 
-                        @Override
-                        public SequenceReceiver getReceiver() {
-                            return writer;
-                        }
+//                        @Override
+//                        public Outputter getOutputter() {
+//                            return new ComplexContentOutputter(writer);
+//                        }
                     };
                 }
             };
@@ -70,7 +124,8 @@ public class LetExpressionAdjunct extends StreamingAdjunct {
             letAction.streamingChildSequence = 0;
             route.prepend(letAction);
             return new WatchMaker() {
-                public Trigger makeWatch(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+                @Override
+                public Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
                     return route.getWatch(watchManager, out, context);
                 }
             };
@@ -187,4 +242,4 @@ public class LetExpressionAdjunct extends StreamingAdjunct {
     }
 }
 
-// Copyright (c) 2010-2015 Saxonica Limited.
+// Copyright (c) 2010-2020 Saxonica Limited

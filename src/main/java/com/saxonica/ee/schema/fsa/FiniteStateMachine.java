@@ -55,12 +55,16 @@ public class FiniteStateMachine {
      * @param state the state whose number is to be allocated
      */
 
-    public void allocateStateNumber(AutomatonState state) {
+    void allocateStateNumber(AutomatonState state) {
         if (statesUsed > states.length - 1) {
             states = Arrays.copyOf(states, statesUsed*2);
         }
         states[statesUsed] = state;
         state.stateNumber = statesUsed++;
+    }
+
+    public UserComplexType getComplexType() {
+        return complexType;
     }
 
     /**
@@ -169,17 +173,6 @@ public class FiniteStateMachine {
                 start.addLambdaTransition(n);
             }
             return start;
-//            if (min == 0) {
-//                NonDeterminizedState t = new NonDeterminizedState(machine);
-//                compileCountingTerm(particle.getTerm(), t, min, max, 0, subjectType, machine);
-//                t.addLambdaTransition(n);
-//                return t;
-//            } else {
-//                NonDeterminizedState t = new NonDeterminizedState(machine);
-//                compileCountingTerm(particle.getTerm(), t, min, max, 1, subjectType, machine);
-//                t.addLambdaTransition(n);
-//                return compileTerm(compiler, particle.getTerm(), t, subjectType, machine);
-//            }
         } else {
             // Make some unpleasant adjustments to the requested min and max values
             // to stop the algorithms blowing the heap size.
@@ -201,16 +194,7 @@ public class FiniteStateMachine {
             t.addLambdaTransition(b);
             n = b;
         } else if (particle.getTerm() instanceof AllModelGroup) {
-            // The FSA for an AllCompositor is not used to perform validation, but only to check
-            // subsumption. We compile all(a,b,c) as if it were choice(a,b,c){0,3}
-            // So treat this as an unbounded particle with a choice term
-            // 2007-12-04: I think we're not using this dummy FSA any more 
-//            int count = ((AllModelGroup)particle.getTerm()).getContentModelSize();
-//            for (int i=0; i<count; i++) {
-//                NonDeterminizedState b = compileTerm(compiler, particle.getTerm(), n, subjectType, machine);
-//                b.addLambdaTransition(endState);
-//                n = b;
-//            }
+            // Path not used
         } else {
             int count = max - min;
             for (int i = 0; i < count; i++) {
@@ -314,8 +298,6 @@ public class FiniteStateMachine {
         // Term, making it a polymorphic method; however, the algorithm is clearer if the
         // code is all in one place.
     }
-
-    //@param startFrom the initial value of the counter (zero or one)
 
     /**
      * Compile a term, again following the Thompson and Tobin algorithm.
@@ -728,7 +710,7 @@ public class FiniteStateMachine {
         public Term term;
         public Particle particle;
 
-        public TermParticlePair(Term t, Particle p) {
+        TermParticlePair(Term t, Particle p) {
             term = t;
             particle = p;
         }
@@ -748,4 +730,4 @@ public class FiniteStateMachine {
 
 }
 
-// Copyright (c) 2004-2008 Saxonica Limited. See Terms and Conditions.
+// Copyright (c) 2004-2020 Saxonica Limited

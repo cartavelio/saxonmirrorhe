@@ -5,22 +5,21 @@ import com.saxonica.ee.schema.PreparedSchema;
 import com.saxonica.ee.schema.SchemaCompiler;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.functions.ResolveURI;
+import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.InvalidityHandler;
-import net.sf.saxon.lib.InvalidityHandlerWrappingErrorListener;
+import net.sf.saxon.lib.InvalidityHandlerWrappingErrorReporter;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.lib.StandardErrorListener;
-import net.sf.saxon.om.NodeName;
-import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.XmlProcessingIncident;
+import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.Whitespace;
 
-import javax.xml.transform.ErrorListener;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -51,12 +50,13 @@ public class XSIAttributeHandler extends ValidatingFilter {
 
     public XSIAttributeHandler(ValidationStack out) {
         super(out);
-        namespacesEncountered = new HashSet<String>(10);
-        schemaDocumentsRead = new HashMap<String, URI>(10);
+        namespacesEncountered = new HashSet<>(10);
+        schemaDocumentsRead = new HashMap<>(10);
         useXsiSchemaLocation = getPipelineConfiguration().getParseOptions().isUseXsiSchemaLocation();
     }
 
 
+    @Override
     public void setPipelineConfiguration(/*@NotNull*/ PipelineConfiguration pipe) {
         super.setPipelineConfiguration(pipe);
         useXsiSchemaLocation = pipe.getParseOptions().isUseXsiSchemaLocation();
@@ -64,67 +64,79 @@ public class XSIAttributeHandler extends ValidatingFilter {
 
     /**
      * Notify the start of an element
-     *  @param nameCode   integer code identifying the name of the element within the name pool.
-     * @param typeCode   integer code identifying the element's type within the name pool.
-     * @param location
-     * @param properties for future use. Should be set to zero.
      */
 
-    public void startElement(NodeName nameCode, SchemaType typeCode, Location location, int properties)
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties)
             throws XPathException {
         boolean nilled = false;
         xsiValidationErrors.clear();
-        StartTagBufferEE startTagBuffer = getStartTagBuffer();
+
         SchemaType xsiType = null;
-        if (startTagBuffer.hasAttributeInNamespace(NamespaceConstant.SCHEMA_INSTANCE)) {
-            String value;
-            if (useXsiSchemaLocation) {
-                // Process an xsi:noNamespaceSchemaLocation attribute
-                value = startTagBuffer.getAttribute(NamespaceConstant.SCHEMA_INSTANCE, "noNamespaceSchemaLocation");
-                if (value != null) {
-                    processXsiNoNamespaceSchemaLocation(location, value);
+
+        boolean hasXsiAttributes = false;
+        for (AttributeInfo att : attributes) {
+            String uri = att.getNodeName().getURI();
+            if (uri.equals(NamespaceConstant.SCHEMA_INSTANCE)) {
+                hasXsiAttributes = true;
+                break;
+            }
+        }
+
+        AttributeMap attMap2 = attributes;
+
+        if (hasXsiAttributes) {
+            List<AttributeInfo> list = new ArrayList<>(attributes.size());
+            for (AttributeInfo att : attributes) {
+                NodeName attName = att.getNodeName();
+                SimpleType attType = att.getType();
+                // Check for special xsi attributes and annotate them with a type code
+                String uri = attName.getURI();
+                if (uri.equals(NamespaceConstant.SCHEMA_INSTANCE)) {
+                    String value = att.getValue();
+                    int fp = attName.obtainFingerprint(getNamePool());
+                    if (fp == StandardNames.XSI_NO_NAMESPACE_SCHEMA_LOCATION) {
+                        attType = BuiltInAtomicType.ANY_URI;
+                        processXsiNoNamespaceSchemaLocation(location, value);
+                    } else if (fp == StandardNames.XSI_SCHEMA_LOCATION) {
+                        attType = BuiltInListType.ANY_URIS;
+                        processXsiSchemaLocation(value, location);
+                    } else if (fp == StandardNames.XSI_TYPE) {
+                        attType = BuiltInAtomicType.QNAME;
+                        xsiType = processXsiType(value, namespaces);
+                    } else if (fp == StandardNames.XSI_NIL) {
+                        attType = BuiltInAtomicType.BOOLEAN;
+                        nilled = processXsiNil(value);
+                    }
+                    list.add(new AttributeInfo(att.getNodeName(), attType, att.getValue(),
+                                               att.getLocation(), att.getProperties()));
+                } else {
+                    list.add(att);
                 }
 
-                // Process an xsi:schemaLocation attribute
-                value = startTagBuffer.getAttribute(NamespaceConstant.SCHEMA_INSTANCE, "schemaLocation");
-                if (value != null) {
-                    processXsiSchemaLocation(value, location);
-                }
             }
-
-            // Process an xsi:type attribute
-            value = startTagBuffer.getAttribute(NamespaceConstant.SCHEMA_INSTANCE, "type");
-            if (value != null) {
-                xsiType = processXsiType(value);
-            }
-
-            // Process an xsi:nil attribute
-            value = startTagBuffer.getAttribute(NamespaceConstant.SCHEMA_INSTANCE, "nil");
-            if (value != null) {
-                nilled = processXsiNil(value);
-            }
+            attMap2 = AttributeMap.fromList(list);
         }
 
         // Tell the rest of the validation pipeline where to find a namespace resolver
         if (nextReceiver instanceof ValidationStack) {
             ((ValidationStack) nextReceiver).setValidationContext(getValidationContext());
-            //((ValidationStack)nextReceiver).setStartTagBuffer(startTagBuffer);
             ((ValidationStack) nextReceiver).setIsNilled(nilled);
             ((ValidationStack) nextReceiver).setXsiValidationErrors(xsiValidationErrors);
         }
 
         // Keep track of all namespaces encountered
-        namespacesEncountered.add(nameCode.getURI());
-
-        if (xsiType != null) {
-            getValidationContext().setXSIType(xsiType);
+        namespacesEncountered.add(elemName.getURI());
+        for (AttributeInfo att : attributes) {
+            String uri = att.getNodeName().getURI();
+            namespacesEncountered.add(uri);
         }
 
-        nextReceiver.startElement(nameCode, typeCode, location, properties);
+        getValidationContext().setXSIType(xsiType);
 
-        if (xsiType != null) {
-            getValidationContext().setXSIType(null);
-        }
+        nextReceiver.startElement(elemName, type, attMap2, namespaces, location, properties);
 
     }
 
@@ -246,10 +258,10 @@ public class XSIAttributeHandler extends ValidatingFilter {
      * @return the SchemaType corresponding to the xsi:type attribute, or null if it is invalid
      */
 
-    private SchemaType processXsiType(String value) {
+    private SchemaType processXsiType(String value, NamespaceResolver nsResolver) {
         final Configuration config = getConfiguration();
         try {
-            StructuredQName qName = StructuredQName.fromLexicalQName(value, true, false, getStartTagBuffer());
+            StructuredQName qName = StructuredQName.fromLexicalQName(value, true, false, nsResolver);
             SchemaType type = config.getSchemaType(qName);
 
             if (type == null) {
@@ -281,47 +293,48 @@ public class XSIAttributeHandler extends ValidatingFilter {
     }
 
 
-    /**
-     * Notify an attribute. Attributes are notified after the startElement event, and before any
-     * children. Namespaces and attributes may be intermingled.
-     *
-     * @param nameCode   The name of the attribute
-     * @param typeCode   The type of the attribute
-     * @param locationId the location of the node in the source, or of the instruction that created it
-     * @param properties Bit significant value. The following bits are defined:
-     *                   <dl>
-     *                   <dd>DISABLE_ESCAPING</dd>    <dt>Disable escaping for this attribute</dt>
-     *                   <dd>NO_SPECIAL_CHARACTERS</dd>      <dt>Attribute value contains no special characters</dt>
-     *                   </dl>
-     * @throws IllegalStateException: attempt to output an attribute when there is no open element
-     *                                start tag
-     */
+//    /**
+//     * Notify an attribute. Attributes are notified after the startElement event, and before any
+//     * children. Namespaces and attributes may be intermingled.
+//     *
+//     * @param nameCode   The name of the attribute
+//     * @param typeCode   The type of the attribute
+//     * @param locationId the location of the node in the source, or of the instruction that created it
+//     * @param properties Bit significant value. The following bits are defined:
+//     *                   <dl>
+//     *                   <dd>DISABLE_ESCAPING</dd>    <dt>Disable escaping for this attribute</dt>
+//     *                   <dd>NO_SPECIAL_CHARACTERS</dd>      <dt>Attribute value contains no special characters</dt>
+//     *                   </dl>
+//     * @throws IllegalStateException: attempt to output an attribute when there is no open element
+//     *                                start tag
+//     */
+//
+//    public void attribute(NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties)
+//            throws XPathException {
+//
+//        // Check for special xsi attributes and annotate them with a type code
+//        String uri = nameCode.getURI();
+//        if (uri.equals(NamespaceConstant.SCHEMA_INSTANCE)) {
+//            int fp = nameCode.obtainFingerprint(getNamePool());
+//            if (fp == StandardNames.XSI_NO_NAMESPACE_SCHEMA_LOCATION) {
+//                typeCode = BuiltInAtomicType.ANY_URI;
+//            } else if (fp == StandardNames.XSI_SCHEMA_LOCATION) {
+//                typeCode = BuiltInListType.ANY_URIS;
+//            } else if (fp == StandardNames.XSI_TYPE) {
+//                typeCode = BuiltInAtomicType.QNAME;
+//            } else if (fp == StandardNames.XSI_NIL) {
+//                typeCode = BuiltInAtomicType.BOOLEAN;
+//            }
+//        }
+//
+//        namespacesEncountered.add(uri);
+//
+//        // Pass the attribute down the pipeline
+//        nextReceiver.attribute(nameCode, typeCode, value, locationId, properties);
+//    }
 
-    public void attribute(NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties)
-            throws XPathException {
 
-        // Check for special xsi attributes and annotate them with a type code
-        String uri = nameCode.getURI();
-        if (uri.equals(NamespaceConstant.SCHEMA_INSTANCE)) {
-            int fp = nameCode.obtainFingerprint(getNamePool());
-            if (fp == StandardNames.XSI_NO_NAMESPACE_SCHEMA_LOCATION) {
-                typeCode = BuiltInAtomicType.ANY_URI;
-            } else if (fp == StandardNames.XSI_SCHEMA_LOCATION) {
-                typeCode = BuiltInListType.ANY_URIS;
-            } else if (fp == StandardNames.XSI_TYPE) {
-                typeCode = BuiltInAtomicType.QNAME;
-            } else if (fp == StandardNames.XSI_NIL) {
-                typeCode = BuiltInAtomicType.BOOLEAN;
-            }
-        }
-
-        namespacesEncountered.add(uri);
-
-        // Pass the attribute down the pipeline
-        nextReceiver.attribute(nameCode, typeCode, value, locationId, properties);
-    }
-
-
+    @Override
     public void endDocument() throws XPathException {
         super.endDocument();
         reportIfInvalid();
@@ -362,9 +375,9 @@ public class XSIAttributeHandler extends ValidatingFilter {
         try {
             pipe = new PipelineConfiguration(getPipelineConfiguration());
             InvalidityHandler handler = getValidationContext().getInvalidityHandler();
-            if (handler instanceof InvalidityHandlerWrappingErrorListener) {
-                ErrorListener listener = ((InvalidityHandlerWrappingErrorListener)handler).getErrorListener();
-                pipe.setErrorListener(listener);
+            if (handler instanceof InvalidityHandlerWrappingErrorReporter) {
+                ErrorReporter listener = ((InvalidityHandlerWrappingErrorReporter) handler).getErrorReporter();
+                pipe.setErrorReporter(listener);
             }
             EnterpriseConfiguration config = (EnterpriseConfiguration) pipe.getConfiguration();
             config.readSchema(pipe, base, href, targetNS);
@@ -379,13 +392,10 @@ public class XSIAttributeHandler extends ValidatingFilter {
                 compiler.setPreparedSchema(config.getSuperSchema());
                 config.getSuperSchema().validate(compiler);
                 // Revalidation succeeded
-                ErrorListener el = pipe.getErrorListener();
-                if (el instanceof StandardErrorListener && ((StandardErrorListener) el).getRecoveryPolicy() == Configuration.RECOVER_SILENTLY) {
-                    ((StandardErrorListener) el).setRecoveryPolicy(Configuration.RECOVER_WITH_WARNINGS);
-                }
-                pipe.getErrorListener().warning(e);
-                pipe.getErrorListener().warning(
-                        new SchemaException("Validation will continue without the schema at " + value));
+                ErrorReporter reporter = pipe.getErrorReporter();
+                reporter.report(new XmlProcessingException(e).asWarning());
+                reporter.report(
+                        new XmlProcessingIncident("Validation will continue without the schema at " + value).asWarning());
             } catch (SchemaException err) {
                 // Revalidation failed
                 throw XPathException.makeXPathException(e);
@@ -396,4 +406,4 @@ public class XSIAttributeHandler extends ValidatingFilter {
 
 }
 
-// Copyright � 2004 - 2008 Saxonica Limited. No warranty.
+// Copyright (c) 2004-2020 Saxonica Limited

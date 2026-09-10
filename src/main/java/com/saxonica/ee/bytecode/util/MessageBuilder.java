@@ -15,4 +15,4 @@ public interface MessageBuilder {
 
 }
 
-//Copyright (c) 2011-2014 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

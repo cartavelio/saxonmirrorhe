@@ -3,11 +3,12 @@ package com.saxonica.ee.bytecode;
 import com.saxonica.ee.bytecode.util.CannotCompileException;
 import com.saxonica.ee.bytecode.util.CompilerService;
 import com.saxonica.ee.bytecode.util.Generator;
-import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.FixedElement;
 import net.sf.saxon.om.NamespaceBinding;
-import net.sf.saxon.om.NamespaceBindingSet;
+import net.sf.saxon.om.NamespaceMap;
 
 /**
  * Generate bytecode for a fixed element constructor (or XSLT literal result element)
@@ -29,18 +30,19 @@ public class FixedElementCompiler extends ElementCreatorCompiler {
         allocateStatic(compiler, ((FixedElement) expression).getElementName());
     }
 
+    @Override
     protected void outputNamespaceNodes(CompilerService compiler, Expression expression) {
 
-        NamespaceBinding[] bindings = ((FixedElement) expression).getActiveNamespaces();
+        NamespaceMap bindings = ((FixedElement) expression).getActiveNamespaces();
         Generator ga = compiler.getCurrentGenerator();
 
         if (bindings != null) {
-            for (NamespaceBinding binding : bindings) {
-                //out.namespace(bindings[i], 0);
-                compiler.generateGetReceiver();
-                allocateStatic(compiler, binding);
-                ga.push(0);
-                ga.invokeInstanceMethod(Receiver.class, "namespace", NamespaceBindingSet.class, Integer.TYPE);
+            for (NamespaceBinding ns : bindings) {
+                compiler.generateGetOutputter();
+                ga.push(ns.getPrefix());
+                ga.push(ns.getURI());
+                ga.push(ReceiverOption.NONE);
+                ga.invokeInstanceMethod(Outputter.class, "namespace", String.class, String.class, Integer.TYPE);
             }
         }
     }
@@ -53,4 +55,4 @@ public class FixedElementCompiler extends ElementCreatorCompiler {
     }
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

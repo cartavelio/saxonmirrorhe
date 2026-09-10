@@ -1,10 +1,9 @@
 package com.saxonica.ee.validate;
 
 import com.saxonica.ee.schema.IdentityConstraint;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.ValidationException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +16,7 @@ public class KeySelectorWatch extends SelectorWatch {
 
     // A list of all keyref Watches that reference the unique/key constraint
     // handled by this KeySelectorWatch
-    private List<RefSelectorWatch> keyrefs = new ArrayList<RefSelectorWatch>(4);
+    private List<RefSelectorWatch> keyrefs = new ArrayList<>(4);
 
     public KeySelectorWatch(ConstraintChecker checker, IdentityConstraint uniqueConstraint) {
         super(checker, uniqueConstraint);
@@ -45,6 +44,7 @@ public class KeySelectorWatch extends SelectorWatch {
      *          the combination of fields) violates the constraint
      */
 
+    @Override
     protected void checkRow(AtomicSequence[] currentRow, boolean isTarget, Location locationId) throws XPathException {
         super.checkRow(currentRow, isTarget, locationId);
 
@@ -56,4 +56,4 @@ public class KeySelectorWatch extends SelectorWatch {
     }
 }
 
-// Copyright (c) 2004 Saxonica Limited. No warranty.
+// Copyright (c) 2004-2020 Saxonica Limited No warranty.

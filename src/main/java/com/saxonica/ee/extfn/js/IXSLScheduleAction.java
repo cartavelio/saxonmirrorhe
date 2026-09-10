@@ -2,9 +2,7 @@ package com.saxonica.ee.extfn.js;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
-import net.sf.saxon.om.AttributeCollection;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.*;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.style.StyleElement;
@@ -35,6 +33,7 @@ public class IXSLScheduleAction extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
@@ -45,29 +44,32 @@ public class IXSLScheduleAction extends StyleElement {
      * @return true: yes, it may contain a template-body
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return true;
     }
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         int c = 0, d = 0;
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
+        for (AttributeInfo att : atts) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
             if (f.equals("wait")) {
-                wait = makeExpression(atts.getValue(a), a);
+                wait = makeExpression(att.getValue(), att);
                 c++;
             } else if (f.equals("document")) {
-                document = makeAttributeValueTemplate(atts.getValue(a), a);
+                document = makeAttributeValueTemplate(att.getValue(), att);
                 c++;
                 d++;
             } else if (f.equals("http-request")) {
-                httpRequest = makeExpression(atts.getValue(a), a);
+                httpRequest = makeExpression(att.getValue(), att);
                 c++;
                 d++;
             } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+                checkUnknownAttribute(attName);
             }
         }
         if (c == 0) {
@@ -78,6 +80,7 @@ public class IXSLScheduleAction extends StyleElement {
         }
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         wait = typeCheck("wait", wait);
         document = typeCheck("document", document);
@@ -101,6 +104,7 @@ public class IXSLScheduleAction extends StyleElement {
         }
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         Expression action = compileSequenceConstructor(exec, decl, true);
         if (action == null) {
@@ -118,4 +122,4 @@ public class IXSLScheduleAction extends StyleElement {
 
 }
 
-// Copyright (c) 2009-2016 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

@@ -1,5 +1,6 @@
 package com.saxonica.ee.optim;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Choose;
 import net.sf.saxon.expr.instruct.ConditionalInstruction;
@@ -177,6 +178,7 @@ public class SwitchExpression extends Expression implements TailCallReturner, Co
      *         {@link net.sf.saxon.expr.StaticProperty#ALLOWS_ZERO_OR_MORE}
      */
 
+    @Override
     protected int computeCardinality() {
         int card = getOtherwiseExpression().getCardinality();
         for (Operand action : actions) {
@@ -209,6 +211,7 @@ public class SwitchExpression extends Expression implements TailCallReturner, Co
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         List<Operand> newActions = new ArrayList<>();
         for (Operand o : actions) {
@@ -231,6 +234,7 @@ public class SwitchExpression extends Expression implements TailCallReturner, Co
      * @param out the expression presenter used to display the structure
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         // Note: if several keys map to the same action, we are outputting the action repeatedly.
         // This is partly for simplicity, and partly to keep the SEF file compatible: see bug 3261
@@ -266,6 +270,7 @@ public class SwitchExpression extends Expression implements TailCallReturner, Co
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         ItemType type = getOtherwiseExpression().getItemType();
         Iterator<Operand> iter = actions.iterator();
@@ -313,6 +318,7 @@ public class SwitchExpression extends Expression implements TailCallReturner, Co
      *          expression
      */
 
+    @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
         AtomicValue subjectValue = (AtomicValue) getSubjectExpression().evaluateItem(context);
         if (subjectValue == null) {
@@ -343,7 +349,8 @@ public class SwitchExpression extends Expression implements TailCallReturner, Co
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         AtomicValue subjectValue = (AtomicValue) getSubjectExpression().evaluateItem(context);
         if (subjectValue == null) {
             return getOtherwiseExpression().iterate(context);
@@ -360,44 +367,46 @@ public class SwitchExpression extends Expression implements TailCallReturner, Co
     /**
      * Process the instruction, without returning any tail calls
      *
+     * @param output the destination for the result
      * @param context The dynamic context, giving access to the current node,
-     *                the current variables, etc.
      */
 
-    public void process(XPathContext context) throws XPathException {
+    @Override
+    public void process(Outputter output, XPathContext context) throws XPathException {
         AtomicValue subjectValue = (AtomicValue) getSubjectExpression().evaluateItem(context);
         if (subjectValue == null) {
-            getOtherwiseExpression().process(context);
+            getOtherwiseExpression().process(output, context);
             return;
         }
         AtomicMatchKey key = subjectValue.getXPathComparable(false, collation, context.getImplicitTimezone());
         Integer selection = map.get(key);
         if (selection == null) {
-            getOtherwiseExpression().process(context);
+            getOtherwiseExpression().process(output, context);
         } else {
-            actions.get(selection).getChildExpression().process(context);
+            actions.get(selection).getChildExpression().process(output, context);
         }
     }
 
-    public TailCall processLeavingTail(XPathContext context) throws XPathException {
+    @Override
+    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
         AtomicValue subjectValue = (AtomicValue) getSubjectExpression().evaluateItem(context);
         if (subjectValue == null) {
-            return doTailCall(getOtherwiseExpression(), context);
+            return doTailCall(getOtherwiseExpression(), output, context);
         }
         AtomicMatchKey key = subjectValue.getXPathComparable(false, collation, context.getImplicitTimezone());
         Integer selection = map.get(key);
         if (selection == null) {
-            return doTailCall(getOtherwiseExpression(), context);
+            return doTailCall(getOtherwiseExpression(), output, context);
         } else {
-            return doTailCall(actions.get(selection).getChildExpression(), context);
+            return doTailCall(actions.get(selection).getChildExpression(), output, context);
         }
     }
 
-    private TailCall doTailCall(Expression o, XPathContext context) throws XPathException {
+    private TailCall doTailCall(Expression o, Outputter output, XPathContext context) throws XPathException {
         if (o instanceof TailCallReturner) {
-            return ((TailCallReturner) o).processLeavingTail(context);
+            return ((TailCallReturner) o).processLeavingTail(output, context);
         } else {
-            o.process(context);
+            o.process(output, context);
             return null;
         }
     }
@@ -469,4 +478,4 @@ public class SwitchExpression extends Expression implements TailCallReturner, Co
 
 }
 
-// Copyright (c) 2009 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

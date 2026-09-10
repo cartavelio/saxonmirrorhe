@@ -31,17 +31,17 @@ public class Verifier {
 
     private static final int MS_A_DAY = 24 * 3600 * 1000;
     private License primaryLicense = null;
-    private IntHashMap<License> secondaryLicenses = new IntHashMap<License>();
+    private IntHashMap<License> secondaryLicenses = new IntHashMap<>();
 
     protected int status = UNREAD;
 
-    public static final int UNREAD = 0;
-    public static final int AVAILABLE = 1;
-    public static final int UNAVAILABLE = 2;
+    private static final int UNREAD = 0;
+    private static final int AVAILABLE = 1;
+    private static final int UNAVAILABLE = 2;
 
     // beware: access to this Properties object is synchronized, so it needs to be infrequent
 
-    public final static String LICENSE_FILE_NAME = "saxon-license.lic";
+    private final static String LICENSE_FILE_NAME = "saxon-license.lic";
 
     // Public key created by the KeyManager for Saxon.
 
@@ -58,8 +58,7 @@ public class Verifier {
 
     private static byte[] key = convertHexToBinary(PUBLIC_KEY);
 
-    public Verifier() {
-    }
+    Verifier() { }
 
 
 
@@ -69,18 +68,22 @@ public class Verifier {
      * @param config the Configuration
      */
 
-    public void displayLicenseMessage(Configuration config) {
+    void displayLicenseMessage(Configuration config) {
         loadPrimaryLicense(config);
         if (config.isTiming()) {
-            config.getStandardErrorOutput().println("Using license serial number " + getSerialNumber());
+            config.getLogger().info("Using license serial number " + getSerialNumber());
         }
         if (!config.getConfigurationProperty(Feature.SUPPRESS_EVALUATION_EXPIRY_WARNING)) {
             int left = primaryLicense.daysLeft();
             if (left == 1) {
-                config.getStandardErrorOutput().println("****** Saxon evaluation license expires tomorrow! ******");
+                config.getLogger().info("****** Saxon evaluation license expires tomorrow! ******");
             } else if (left > 0 && left < 15) {
-                config.getStandardErrorOutput().println("Saxon evaluation license expires in " + left + " days");
+                config.getLogger().info("Saxon evaluation license expires in " + left + " days");
             }
+        }
+        if (!"yes".equals(primaryLicense.getFeature("Evaluation")) && !"never".equals(primaryLicense.getFeature("Expiration"))) {
+            int left = primaryLicense.daysLeft();
+
         }
     }
 
@@ -89,7 +92,7 @@ public class Verifier {
         return primaryLicense.getFeature(name);
     }
 
-    protected final void loadPrimaryLicense(Configuration config) {
+    final void loadPrimaryLicense(Configuration config) {
         if (DISABLED || status==UNAVAILABLE) {
             throw new LicenseException("Saxon license disabled", LicenseException.NOT_FOUND);
         }
@@ -106,29 +109,29 @@ public class Verifier {
     }
 
 
-    protected final License loadLicense(Configuration config) {
+    final License loadLicense(Configuration config) {
         InputStream is = null;
         try {
-            List<String> attempts = new ArrayList<String>(4);
-            is = lookInCodeLocation(is, attempts);
+            List<String> attempts = new ArrayList<>(4);
+            is = lookInCodeLocation(attempts);
             if (is == null) {
-                is = lookInInstallationDirectory(config, is, attempts);
+                is = lookInInstallationDirectory(config, attempts);
             }
             if (is == null) {
-                is = lookInClassPath(is);
+                is = lookInClassPath();
             }
             if (is == null) {
                 attempts.add("classpath");
-                String message = "License file " + LICENSE_FILE_NAME + " not found. Tried in ";
+                StringBuilder message = new StringBuilder("License file " + LICENSE_FILE_NAME + " not found. Tried in ");
                 for (int i = 0; i < attempts.size(); i++) {
-                    message += attempts.get(i);
+                    message.append(attempts.get(i));
                     if (i < attempts.size() - 2) {
-                        message += ", ";
+                        message.append(", ");
                     } else if (i == attempts.size() - 2) {
-                        message += ", and ";
+                        message.append(", and ");
                     }
                 }
-                throw new LicenseException(message, LicenseException.NOT_FOUND);
+                throw new LicenseException(message.toString(), LicenseException.NOT_FOUND);
             }
             return readLicenseFile(is);
         } finally {
@@ -143,18 +146,18 @@ public class Verifier {
 
     }
 
-    private static InputStream lookInClassPath(InputStream is) {
+    private static InputStream lookInClassPath() {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         if (cl == null) {
             cl = ClassLoader.getSystemClassLoader();
         }
-        is = cl.getResourceAsStream(LICENSE_FILE_NAME);
-        return is;
+        return cl.getResourceAsStream(LICENSE_FILE_NAME);
     }
 
-    private static InputStream lookInInstallationDirectory(Configuration config, InputStream is, List<String> attempts) {
+    private static InputStream lookInInstallationDirectory(Configuration config, List<String> attempts) {
         String home = Version.platform.getInstallationDirectory(Version.softwareEdition, config);
         String path;
+        InputStream is = null;
         if (home != null) {
             // For backwards compatibility (/bin/ no longer exists)
             if (home.endsWith("/") || home.endsWith("\\")) {
@@ -182,7 +185,7 @@ public class Verifier {
         return is;
     }
 
-    private InputStream lookInCodeLocation(InputStream is, List<String> attempts) {
+    private InputStream lookInCodeLocation(List<String> attempts) {
         try {
             CodeSource codeSource = getClass().getProtectionDomain().getCodeSource();
             if (codeSource != null) {
@@ -190,13 +193,13 @@ public class Verifier {
                 if (sourceLoc != null) {
                     URL licenseLoc = new URL(sourceLoc, LICENSE_FILE_NAME);
                     attempts.add(licenseLoc.toString());
-                    is = licenseLoc.openStream();
+                    return licenseLoc.openStream();
                 }
             }
         } catch (Exception e) {
             // try elsewhere
         }
-        return is;
+        return null;
     }
 
     /**
@@ -205,7 +208,7 @@ public class Verifier {
      * @param filename the name or URI of the license file
      */
 
-    public synchronized void loadLicense(String filename) {
+    synchronized void loadLicense(String filename) {
         InputStream is;
         boolean exists = false;
         try {
@@ -233,12 +236,12 @@ public class Verifier {
      * local licenses
      */
 
-    public synchronized int registerSecondaryLicense(String dmk) {
+    synchronized int registerSecondaryLicense(String dmk) {
         try {
             Base64BinaryValue b64 = new Base64BinaryValue(dmk);
             byte[] binary = b64.getBinaryValue();
             ByteArrayInputStream is = new ByteArrayInputStream(binary);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(is, "utf8"));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             License license = configure(reader, true);
             int id = dmk.hashCode() & 0x3ffff;
             while (secondaryLicenses.get(id) != null) {
@@ -248,17 +251,15 @@ public class Verifier {
             return id;
         } catch (XPathException err) {
             throw new LicenseException(err.getMessage(), LicenseException.INVALID);
-        } catch (IOException err) {
-            throw new LicenseException(err.getMessage(), LicenseException.INVALID);
         }
     }
 
-    public void disableLicensing() {
+    void disableLicensing() {
         primaryLicense = null;
         status = UNAVAILABLE;
     }
 
-    public synchronized boolean isFeatureAllowedBySecondaryLicense(int license, int feature) {
+    synchronized boolean isFeatureAllowedBySecondaryLicense(int license, int feature) {
         License lic = secondaryLicenses.get(license);
         if (lic == null) {
             return false;
@@ -279,12 +280,7 @@ public class Verifier {
 
     private License readLicenseFile(InputStream is) {
         BufferedReader reader;
-        try {
-            reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            throw new LicenseException("License file uses UTF-8, which is an unsupported encoding",
-                    LicenseException.INVALID);
-        } 
+        reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
         return configure(reader, false);
     }
 
@@ -297,7 +293,7 @@ public class Verifier {
      * @throws IllegalArgumentException if the key supplied is not a valid OEM license key
      */
 
-    public synchronized void supplyLicenseKey(BufferedReader reader) {
+    synchronized void supplyLicenseKey(BufferedReader reader) {
         License license = configure(reader, false);
         String value = license.getFeature("Company");
         if (value == null || !value.startsWith("OEM")) {
@@ -344,17 +340,28 @@ public class Verifier {
                 }
             }
             boolean valid = verify(buffer.toString(), convertHexToBinary(signature), key);
-            String licenseDesc = embedded ? "license embedded in the stylesheet export file" : "license file";
+            String licenseDesc = embedded ? "embedded license" : "license file";
             if (!valid) {
                 throw new LicenseException("Invalid " + licenseDesc + " found", LicenseException.INVALID);
             }
             String serial = license.getFeature("Serial");
             licenseDesc += " (serial number " + serial + ")";
-            if (license.daysLeft() < 0) {
-
-                license.clearFeatures();
-                throw new LicenseException("The " + licenseDesc + " has expired",
-                        LicenseException.EXPIRED);
+            int daysLeft = license.daysLeft();
+            if (daysLeft < 0) {
+                if ("yes".equals(features.getProperty("Evaluation")) || daysLeft < -30) {
+                    license.clearFeatures();
+                    throw new LicenseException("The " + licenseDesc + " has expired",
+                                               LicenseException.EXPIRED);
+                } else {
+                    System.err.println("Saxon " + licenseDesc + " has expired. You are using the software without legal authority. "
+                                               + "You must obtain a new license immediately; meanwhile a delay of " + Math.abs(daysLeft)*2 + " seconds will be imposed.");
+                    try {
+                        Thread.sleep(Math.abs(daysLeft)*2000);
+                    } catch (InterruptedException e) {
+                        throw new LicenseException("Saxon license " + licenseDesc + " has expired",
+                                                   LicenseException.EXPIRED);
+                    }
+                }
             }
             DateValue licenseIssued = new DateValue(features.getProperty("Issued").substring(0, 10) + 'Z');
             // some licenses were wrongly issued with YYYY-MM-DDTHH:MM:SS format
@@ -401,7 +408,7 @@ public class Verifier {
      * @return the serial number
      */
 
-    public String getSerialNumber() {
+    String getSerialNumber() {
         return primaryLicense.getFeature("Serial");
     }
 
@@ -443,13 +450,11 @@ public class Verifier {
      * @param signature        the digital sugnature
      * @param encodedPublicKey the public key.
      * @return a boolean whether or the license is valid.
-     * @throws java.io.UnsupportedEncodingException
-     *          if the encoding of the license file is not recognized
      * @throws java.security.GeneralSecurityException
      *          if a failure occurs in the verification process
      */
     private static boolean verify(String data, byte[] signature, byte[] encodedPublicKey)
-            throws GeneralSecurityException, UnsupportedEncodingException {
+            throws GeneralSecurityException {
         Signature sig = Signature.getInstance("DSA");
         PublicKey key = KeyFactory.getInstance("DSA").generatePublic(new X509EncodedKeySpec(encodedPublicKey));
         sig.initVerify(key);
@@ -470,7 +475,7 @@ public class Verifier {
         Verifier v = new Verifier();
         License license = v.readLicenseFile(new FileInputStream(licenseFile));
         System.err.println("License OK");
-        for (Enumeration en = license.features.propertyNames(); en.hasMoreElements(); ) {
+        for (Enumeration<?> en = license.features.propertyNames(); en.hasMoreElements(); ) {
             String s = (String) en.nextElement();
             System.err.println("Feature " + s + " = " + license.features.getProperty(s));
         }
@@ -491,10 +496,7 @@ public class Verifier {
          * @return how many days are left for the license.
          */
 
-        protected int daysLeft() {
-//        if (features == null) {
-//            loadLicense(false);
-//        }
+        int daysLeft() {
             String expiration = features.getProperty("Expiration");
             if (expiration == null) {
                 return -1;
@@ -541,5 +543,4 @@ public class Verifier {
 
 }
 
-// Copyright (C) 2004-2015 Saxonica Limited.
-// Reproduction, distribution, or modification of this code is prohibited.
+// Copyright (C) 2004-2020 Saxonica Limited

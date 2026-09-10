@@ -27,7 +27,7 @@ import java.util.List;
 public class ConstraintChecker extends WatchManager {
 
     private ValidationContext validationContext;
-    private List<Watch> prearrangedWatches = new ArrayList<Watch>(4);
+    private List<Watch> prearrangedWatches = new ArrayList<>(4);
 
     public ConstraintChecker(PipelineConfiguration pipe) {
         super(pipe);
@@ -41,6 +41,7 @@ public class ConstraintChecker extends WatchManager {
         return validationContext;
     }
 
+    @Override
     public void setPipelineConfiguration(/*@NotNull*/ PipelineConfiguration pipe) {
         super.setPipelineConfiguration(pipe);
         Controller controller = pipe.getController();
@@ -96,6 +97,7 @@ public class ConstraintChecker extends WatchManager {
         }
     }
 
+    @Override
     protected void addPrearrangedWatches() throws XPathException {
         for (Watch prearrangedWatch : prearrangedWatches) {
             addWatch(prearrangedWatch, true);
@@ -105,4 +107,4 @@ public class ConstraintChecker extends WatchManager {
 
 }
 
-// Copyright (c) 2004-2012 Saxonica Limited. No warranty.
+// Copyright (c) 2004-2020 Saxonica Limited No warranty.

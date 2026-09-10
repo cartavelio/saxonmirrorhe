@@ -1,7 +1,10 @@
 package com.saxonica.serialize;
 
 import net.sf.saxon.event.ProxyReceiver;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.serialize.XMLEmitter;
 import net.sf.saxon.trans.XPathException;
@@ -12,8 +15,6 @@ import net.sf.saxon.type.SchemaType;
  * node that precedes the first element child, and before any comment or PI child that follows the first
  * element child. This action is currently invoked only when saxon:canonical=yes is requested, though it
  * could in principle be made available as a free-standing option.
- *
- * @author Michael Kay
  */
 
 
@@ -36,6 +37,7 @@ public class OuterNewlineInserter extends ProxyReceiver {
      * Start of document
      */
 
+    @Override
     public void open() throws XPathException {
         nextReceiver.open();
     }
@@ -44,8 +46,11 @@ public class OuterNewlineInserter extends ProxyReceiver {
      * Output element start tag
      */
 
-    public void startElement(NodeName nameCode, SchemaType type, Location location, int properties) throws XPathException {
-        nextReceiver.startElement(nameCode, type, location, properties);
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
+        nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
         level++;
         beforeFirstElement = false;
     }
@@ -55,6 +60,7 @@ public class OuterNewlineInserter extends ProxyReceiver {
      * Output element end tag
      */
 
+    @Override
     public void endElement() throws XPathException {
         level--;
         nextReceiver.endElement();
@@ -64,13 +70,14 @@ public class OuterNewlineInserter extends ProxyReceiver {
      * Output a processing instruction
      */
 
+    @Override
     public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
         if (level == 0 && !beforeFirstElement) {
-            characters("\n", locationId, 0);
+            characters("\n", locationId, ReceiverOption.NONE);
         }
         nextReceiver.processingInstruction(target, data, locationId, properties);
         if (level == 0 && beforeFirstElement) {
-            characters("\n", locationId, 0);
+            characters("\n", locationId, ReceiverOption.NONE);
         }
     }
 
@@ -78,17 +85,18 @@ public class OuterNewlineInserter extends ProxyReceiver {
      * Output a comment
      */
 
+    @Override
     public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
         if (level == 0 && !beforeFirstElement) {
-            characters("\n", locationId, 0);
+            characters("\n", locationId, ReceiverOption.NONE);
         }
         nextReceiver.comment(chars, locationId, properties);
         if (level == 0 && beforeFirstElement) {
-            characters("\n", locationId, 0);
+            characters("\n", locationId, ReceiverOption.NONE);
         }
     }
 
 }
 
-// Copyright (c) 2018 Saxonica Ltd
+// Copyright (c) 2018-2020 Saxonica Limited
 

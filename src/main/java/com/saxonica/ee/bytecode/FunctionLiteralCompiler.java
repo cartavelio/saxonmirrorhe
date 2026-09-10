@@ -2,7 +2,7 @@ package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.CannotCompileException;
 import com.saxonica.ee.bytecode.util.CompilerService;
-import com.saxonica.functions.hof.FunctionLiteral;
+import net.sf.saxon.functions.hof.FunctionLiteral;
 import net.sf.saxon.expr.Expression;
 
 /**
@@ -17,4 +17,4 @@ public class FunctionLiteralCompiler extends ToItemCompiler {
     }
 }
 
-//Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

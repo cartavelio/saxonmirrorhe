@@ -1,13 +1,12 @@
 package com.saxonica.ee.stream.adjunct;
 
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.watch.WatchMaker;
 import com.saxonica.ee.stream.watch.WatchManager;
 import net.sf.saxon.expr.ContextItemExpression;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
 
@@ -18,12 +17,14 @@ import net.sf.saxon.trans.XPathException;
  */
 public class AccumulatorAfterStreamer extends InspectionAdjunct implements FeedMaker {
 
+    @Override
     public WatchMaker getWatchMaker(boolean forGrouping) throws XPathException {
         return getInspectionWatchMaker(getExpression(), new ContextItemExpression(), forGrouping);
     }
 
 
-    public Feed makeItemFeed(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
         return new ItemFeed(getExpression(), out, context) {
 
             /**
@@ -32,7 +33,7 @@ public class AccumulatorAfterStreamer extends InspectionAdjunct implements FeedM
              * @param item the item to be supplied
              */
             @Override
-            public void processItem(Item<?> item) throws XPathException {
+            public void append(Item item) throws XPathException {
                 // do nothing
             }
 
@@ -54,4 +55,4 @@ public class AccumulatorAfterStreamer extends InspectionAdjunct implements FeedM
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

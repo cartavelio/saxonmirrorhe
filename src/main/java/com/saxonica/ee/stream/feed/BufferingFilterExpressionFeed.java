@@ -1,10 +1,14 @@
 package com.saxonica.ee.stream.feed;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.FilterExpression;
 import net.sf.saxon.expr.FilterIterator;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.FocusIterator;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceExtent;
 
@@ -23,7 +27,7 @@ public class BufferingFilterExpressionFeed extends ItemFeed {
     XPathContext localContext;
     private List<Item> inputValue = new ArrayList<>(4);
 
-    public BufferingFilterExpressionFeed(Expression expr, Feed result, XPathContext context) {
+    public BufferingFilterExpressionFeed(Expression expr, ItemFeed result, XPathContext context) {
         super(expr, result, context);
         filter = ((FilterExpression) expr).getActionExpression();
         localContext = context;
@@ -37,20 +41,21 @@ public class BufferingFilterExpressionFeed extends ItemFeed {
      *          to report any failure
      */
 
-    public void processItem(Item<?> item) throws XPathException {
+    @Override
+    public void append(Item item) throws XPathException {
         inputValue.add(item);
     }
 
     @Override
     public void close() throws XPathException {
-        Sequence<?> extent = SequenceExtent.makeSequenceExtent(inputValue);
+        Sequence extent = SequenceExtent.makeSequenceExtent(inputValue);
         XPathContext c2 = localContext.newMinorContext();
-        FocusIterator<?> iter = c2.trackFocus(extent.iterate());
-        SequenceIterator<?> filterIter = new FilterIterator<>(iter, filter, c2);
-        Feed result = getResult();
-        processItems(filterIter, result);
-        result.close();
+        FocusIterator iter = c2.trackFocus(extent.iterate());
+        SequenceIterator filterIter = new FilterIterator(iter, filter, c2);
+        Outputter out = getNextOutputter();
+        processItems(filterIter, out);
+        out.close();
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

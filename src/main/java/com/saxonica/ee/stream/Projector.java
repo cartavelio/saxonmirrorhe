@@ -3,17 +3,15 @@ package com.saxonica.ee.stream;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.expr.parser.PathMap;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.Type;
 
 import java.io.PrintStream;
-import java.util.Arrays;
 import java.util.Stack;
 
 /**
@@ -49,17 +47,22 @@ public class Projector extends ProxyReceiver {
     }
 
 
+    @Override
     public void setPipelineConfiguration(/*@NotNull*/ PipelineConfiguration pipe) {
         super.setPipelineConfiguration(pipe);
         displayStatistics = pipe.getConfiguration().isTiming();
     }
 
-    public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties) throws XPathException {
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
+        // TODO: handle attributes and namespaces properly
         level++;
         inputNodes++;
         boolean elementCopied = false;
         if (level > copyAllLevel) {
-            super.startElement(elemName, typeCode, location, properties);
+            super.startElement(elemName, type, attributes, namespaces, location, properties);
             elementCopied = true;
             pathPositionStack.push("dummy");
         } else {
@@ -70,7 +73,7 @@ public class Projector extends ProxyReceiver {
                 PathMap.PathMapArc[] pathMapArcs = aState.getArcs();
                 for (PathMap.PathMapArc arc : pathMapArcs) {
                     NodeTest test = arc.getNodeTest();
-                    if (test.matches(Type.ELEMENT, elemName, typeCode)) {
+                    if (test.matches(Type.ELEMENT, elemName, type)) {
                         foundMatch = true;
                         PathMap.PathMapNode target = arc.getTarget();
                         newState.add(target);
@@ -85,7 +88,7 @@ public class Projector extends ProxyReceiver {
             }
             pathPositionStack.push(newState);
             if (foundMatch) {
-                super.startElement(elemName, typeCode, location, properties);
+                super.startElement(elemName, type, attributes, namespaces, location, properties);
                 elementCopied = true;
             }
         }
@@ -109,7 +112,8 @@ public class Projector extends ProxyReceiver {
                     }
                 }
                 if (!duplicate) {
-                    super.namespace(nsStack[i], 0);
+                    throw new UnsupportedOperationException("to be re-implemented");
+                    //super.namespaces(nsStack[i], ReceiverOptions.NONE);
                 }
             }
         }
@@ -117,47 +121,7 @@ public class Projector extends ProxyReceiver {
 
     }
 
-
-    public void attribute(NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties) throws XPathException {
-        inputNodes++;
-        if (level > copyAllLevel) {
-            super.attribute(nameCode, typeCode, value, locationId, properties);
-            outputNodes++;
-        } else {
-            if ((Boolean) isCopiedStack.peek()) {
-                PathMap.PathMapNodeSet state = (PathMap.PathMapNodeSet) pathPositionStack.peek();
-                for (PathMap.PathMapNode aState : state) {
-                    PathMap.PathMapArc[] pathMapArcs = aState.getArcs();
-                    for (PathMap.PathMapArc arc : pathMapArcs) {
-                        NodeTest test = arc.getNodeTest();
-                        if (test.matches(Type.ATTRIBUTE, nameCode, typeCode)) {
-                            super.attribute(nameCode, typeCode, value, locationId, properties);
-                            outputNodes++;
-                            return;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-
-    public void namespace(NamespaceBindingSet namespaceBindings, int properties) throws XPathException {
-        if ((Boolean) isCopiedStack.peek()) {
-            super.namespace(namespaceBindings, properties);
-        } else {
-            // If the namespace is being declared on an element that isn't being copied, save it for later
-            for (NamespaceBinding ns : namespaceBindings) {
-                if (nsStack.length <= nsStackTop) {
-                    nsStack = Arrays.copyOf(nsStack, nsStack.length * 2);
-                }
-                nsStack[nsStackTop++] = ns;
-                nsCountStack[level - 1]++;
-            }
-        }
-    }
-
-
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         inputNodes++;
         if (level >= copyAllLevel) {
@@ -179,6 +143,7 @@ public class Projector extends ProxyReceiver {
         }
     }
 
+    @Override
     public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
         inputNodes++;
         if (level > copyAllLevel) {
@@ -200,6 +165,7 @@ public class Projector extends ProxyReceiver {
         }
     }
 
+    @Override
     public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
         inputNodes++;
         if (level > copyAllLevel) {
@@ -221,6 +187,7 @@ public class Projector extends ProxyReceiver {
         }
     }
 
+    @Override
     public void endElement() throws XPathException {
         boolean wasCopied = (Boolean) isCopiedStack.pop();
         if (wasCopied) {
@@ -236,6 +203,7 @@ public class Projector extends ProxyReceiver {
     }
 
 
+    @Override
     public void endDocument() throws XPathException {
         if (displayStatistics) {
             outputStatistics(System.err);
@@ -258,4 +226,4 @@ public class Projector extends ProxyReceiver {
 }
 
 
-// Copyright (c) 2007 Saxonica Limited.
+// Copyright (c) 2007-2020 Saxonica Limited

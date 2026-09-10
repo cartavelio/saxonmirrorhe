@@ -100,7 +100,7 @@ public class ItemCheckerCompiler extends ToIteratorCompiler {
         m = Method.getMethod("net.sf.saxon.om.Item map(net.sf.saxon.om.Item)");
         ga = new Generator(Opcodes.ACC_PUBLIC, m, true, cv);
         int contextVar = ga.newLocal(XPathContext.class);
-        compiler.pushNewMethodInfo(ga, false, contextVar);
+        compiler.pushNewMethodInfo(ga, false, contextVar, -1);
         visitLineNumber(compiler, ga, expression);
         ga.loadThis();
         ga.getField(Type.getType(OneToOneMappingIterator.class), "context", Type.getType(XPathContext.class));
@@ -188,6 +188,6 @@ public class ItemCheckerCompiler extends ToIteratorCompiler {
     }
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited
 
 

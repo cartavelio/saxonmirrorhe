@@ -5,7 +5,7 @@ import com.saxonica.ee.stream.om.FleetingParentNode;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.trans.XPathException;
@@ -17,7 +17,7 @@ import net.sf.saxon.type.UType;
  * validating an instance document against a schema; now it is used for many expressions that need
  * to be evaluated in streaming mode.
  * <p>The Watch is responsible for deciding which nodes it is interested in. There is a subclass
- * {@link PatternWatch} in which this is decided by matching an XSLT-like patternT, but not all
+ * {@link PatternWatch} in which this is decided by matching an XSLT-like pattern, but not all
  * watches make the decision in this way.</p>
  */
 
@@ -142,7 +142,7 @@ public interface Watch /*extends Feed*/ {
      * @throws XPathException May be raised if a dynamic error occurs
      */
 
-    void processItem(Item<?> item) throws XPathException;
+    void processItem(Item item) throws XPathException;
 
     /**
      * The close() method is called immediately before the Watch is destroyed, that is,
@@ -155,4 +155,4 @@ public interface Watch /*extends Feed*/ {
 
 }
 
-// Copyright (c) 2004-2012 Saxonica Limited. No warranty.
+// Copyright (c) 2004-2020 Saxonica Limited No warranty.

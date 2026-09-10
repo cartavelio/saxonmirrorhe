@@ -4,19 +4,22 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A representation of a (sequence) value that allows the construction of one or more indexes to provide rapid
  * access to the items in the sequence.
  */
 
-public class IndexedValue<T extends Item<?>> extends SearchableValue<T> {
+public class IndexedValue extends SearchableValue {
 
     // There can be more than one index, for different "use" expressions. But usually there's only
     // one. So rather than a full HashMap, we keep two parallel lists: a list of use expressions,
@@ -24,8 +27,9 @@ public class IndexedValue<T extends Item<?>> extends SearchableValue<T> {
 
     private List<Expression> indexedExpressions = new ArrayList<>(3);
     private List<MultiIndex> indexes = new ArrayList<>(3);
+    private Set<NodeInfo> distinctNodes;
 
-    IndexedValue(T[] array, int end) {
+    IndexedValue(Item[] array, int end) {
         this.value = array;
         this.end = end;
     }
@@ -46,7 +50,7 @@ public class IndexedValue<T extends Item<?>> extends SearchableValue<T> {
      */
 
     @Override
-    public SequenceIterator<T> findItems(Expression use, SequenceIterator<? extends AtomicValue> values,
+    public SequenceIterator findItems(Expression use, SequenceIterator values,
                                                       boolean convertUntypedToOther,
                                                       boolean firstOnly, AtomicComparer comparer, XPathContext context) throws XPathException {
         // first find the index for this expression if there is one
@@ -73,7 +77,7 @@ public class IndexedValue<T extends Item<?>> extends SearchableValue<T> {
                 }
             }
             if (index == null) {
-                index = new MultiIndex<>(this);
+                index = new MultiIndex(this);
                 indexedExpressions.add(use);
                 indexes.add(index);
             }
@@ -81,6 +85,25 @@ public class IndexedValue<T extends Item<?>> extends SearchableValue<T> {
         return index.findItems(use, values, convertUntypedToOther, firstOnly, comparer.getCollator(), context);
     }
 
+    /**
+     * Determine whether the value contains a particular node. This implementation
+     * of the method builds a representation of the node-sequence as a Java HashSet
+     * the first time it is invoked, and subsequently does a fast lookup in this HashSet
+     * rather than performing a sequential search.
+     * @param sought the sought-after node
+     * @return true if the value contains this node
+     */
+
+    @Override
+    public synchronized boolean containsNode(NodeInfo sought) {
+        if (distinctNodes == null) {
+            distinctNodes = new HashSet<>();
+            iterate().forEach(it -> {if (it instanceof NodeInfo) {
+                distinctNodes.add((NodeInfo)it);
+            }});
+        }
+        return distinctNodes.contains(sought);
+    }
 }
 
-// Copyright (c) 2005-2018 Saxonica Limited
+// Copyright (c) 2005-2020 Saxonica Limited

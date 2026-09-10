@@ -33,6 +33,7 @@ public class BlockCompiler extends ToIteratorCompiler {
      * @param compiler   the compiler service
      * @param expression the expression to be compiled
      */
+    @Override
     public void compileToPush(CompilerService compiler,
                               Expression expression) throws CannotCompileException {
         Operand[] children = ((Block) expression).getOperanda();
@@ -51,6 +52,7 @@ public class BlockCompiler extends ToIteratorCompiler {
      * @param expression the expression to be compiled
      */
     //@Override
+    @Override
     public void compileToIterator(CompilerService compiler,
                                   Expression expression) throws CannotCompileException {
 
@@ -122,7 +124,7 @@ public class BlockCompiler extends ToIteratorCompiler {
 
         int contextVar = ga.newLocal(Type.getType(XPathContext.class));
         final int currentVar = ga.newLocal(Item.class);
-        compiler.pushNewMethodInfo(ga, false, contextVar);
+        compiler.pushNewMethodInfo(ga, false, contextVar, -1);
         visitLineNumber(compiler, ga, expression);
         final GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         ga.loadThis();
@@ -178,6 +180,7 @@ public class BlockCompiler extends ToIteratorCompiler {
 
         TableSwitchGenerator tabSwitch = new TableSwitchGenerator() {
 
+            @Override
             public void generateCase(int key, Label end) {
                 visitAnnotation(compiler, "BlockCompiler - caseStatement");
                 if (key == children.length) {
@@ -249,6 +252,7 @@ public class BlockCompiler extends ToIteratorCompiler {
                 }
             }
 
+            @Override
             public void generateDefault() {
             }
         };
@@ -289,4 +293,4 @@ public class BlockCompiler extends ToIteratorCompiler {
 
 }
 
-//Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

@@ -1,7 +1,7 @@
 package com.saxonica.xqj.pull;
 
 import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pull.UnfailingPullProvider;
 import net.sf.saxon.pull.UnparsedEntity;
@@ -23,10 +23,10 @@ import java.util.List;
 
 public class PullFromIterator implements UnfailingPullProvider {
 
-    private FocusIterator<?> base;
+    private final FocusIterator base;
     private UnfailingPullProvider treeWalker = null;
     private PipelineConfiguration pipe;
-    private int currentEvent = START_OF_INPUT;
+    private Event currentEvent = Event.START_OF_INPUT;
 
     /**
      * Create a PullProvider that wraps a supplied SequenceIterator
@@ -34,8 +34,8 @@ public class PullFromIterator implements UnfailingPullProvider {
      * @param base the sequence iterator to be wrapped
      */
 
-    public PullFromIterator(SequenceIterator<?> base) {
-        this.base = base instanceof FocusIterator ? (FocusIterator)base : new FocusTrackingIterator<>(base);
+    public PullFromIterator(SequenceIterator base) {
+        this.base = base instanceof FocusIterator ? (FocusIterator)base : new FocusTrackingIterator(base);
     }
 
     /**
@@ -43,6 +43,7 @@ public class PullFromIterator implements UnfailingPullProvider {
      * have been read.
      */
 
+    @Override
     public void setPipelineConfiguration(PipelineConfiguration pipe) {
         this.pipe = pipe;
     }
@@ -51,6 +52,7 @@ public class PullFromIterator implements UnfailingPullProvider {
      * Get configuration information.
      */
 
+    @Override
     public PipelineConfiguration getPipelineConfiguration() {
         return pipe;
     }
@@ -58,39 +60,40 @@ public class PullFromIterator implements UnfailingPullProvider {
     /**
      * Get the next event
      *
-     * @return an integer code indicating the type of event. The code
-     *         {@link #END_OF_INPUT} is returned at the end of the sequence.
+     * @return an event code indicating the type of event. The code
+     *         {@link net.sf.saxon.pull.PullProvider.Event#END_OF_INPUT} is returned at the end of the sequence.
      */
 
-    public int next() throws XPathException {
+    @Override
+    public Event next() throws XPathException {
         if (treeWalker == null) {
             Item item = base.next();
             if (item == null) {
-                currentEvent = END_OF_INPUT;
+                currentEvent = Event.END_OF_INPUT;
                 return currentEvent;
             } else if (item instanceof AtomicValue) {
-                currentEvent = ATOMIC_VALUE;
+                currentEvent = Event.ATOMIC_VALUE;
                 return currentEvent;
             } else {
                 switch (((NodeInfo) item).getNodeKind()) {
                     case Type.TEXT:
-                        currentEvent = TEXT;
+                        currentEvent = Event.TEXT;
                         return currentEvent;
 
                     case Type.COMMENT:
-                        currentEvent = COMMENT;
+                        currentEvent = Event.COMMENT;
                         return currentEvent;
 
                     case Type.PROCESSING_INSTRUCTION:
-                        currentEvent = PROCESSING_INSTRUCTION;
+                        currentEvent = Event.PROCESSING_INSTRUCTION;
                         return currentEvent;
 
                     case Type.ATTRIBUTE:
-                        currentEvent = ATTRIBUTE;
+                        currentEvent = Event.ATTRIBUTE;
                         return currentEvent;
 
                     case Type.NAMESPACE:
-                        currentEvent = NAMESPACE;
+                        currentEvent = Event.NAMESPACE;
                         return currentEvent;
 
                     case Type.ELEMENT:
@@ -108,8 +111,8 @@ public class PullFromIterator implements UnfailingPullProvider {
 
         } else {
             // there is an active TreeWalker: just return its next event
-            int event = treeWalker.next();
-            if (event == END_OF_INPUT) {
+            Event event = treeWalker.next();
+            if (event == Event.END_OF_INPUT) {
                 treeWalker = null;
                 currentEvent = next();
             } else {
@@ -128,7 +131,8 @@ public class PullFromIterator implements UnfailingPullProvider {
      * @return the current event
      */
 
-    public int current() {
+    @Override
+    public Event current() {
         return currentEvent;
     }
 
@@ -146,7 +150,8 @@ public class PullFromIterator implements UnfailingPullProvider {
      *         that has just been notified.
      */
 
-    public AttributeCollection getAttributes() {
+    @Override
+    public AttributeMap getAttributes() {
         if (treeWalker != null) {
             return treeWalker.getAttributes();
         } else {
@@ -171,6 +176,7 @@ public class PullFromIterator implements UnfailingPullProvider {
      * one of the methods skipToEnd(), getStringValue(), or getTypedValue().</p>
      */
 
+    @Override
     public NamespaceBinding[] getNamespaceDeclarations() {
         if (treeWalker != null) {
             return treeWalker.getNamespaceDeclarations();
@@ -186,7 +192,8 @@ public class PullFromIterator implements UnfailingPullProvider {
      * the event following the END_DOCUMENT or END_ELEMENT.
      */
 
-    public int skipToMatchingEnd() {
+    @Override
+    public Event skipToMatchingEnd() {
         if (treeWalker != null) {
             return treeWalker.skipToMatchingEnd();
         } else {
@@ -196,12 +203,13 @@ public class PullFromIterator implements UnfailingPullProvider {
 
     /**
      * Close the event reader. This indicates that no further events are required.
-     * It is not necessary to close an event reader after {@link #END_OF_INPUT} has
+     * It is not necessary to close an event reader after {@link net.sf.saxon.pull.PullProvider.Event#END_OF_INPUT} has
      * been reported, but it is recommended to close it if reading terminates
      * prematurely. Once an event reader has been closed, the effect of further
      * calls on next() is undefined.
      */
 
+    @Override
     public void close() {
         if (treeWalker != null) {
             treeWalker.close();
@@ -210,9 +218,9 @@ public class PullFromIterator implements UnfailingPullProvider {
 
     /**
      * Get the NodeName identifying the name of the current node. This method
-     * can be used after the {@link #START_ELEMENT}, {@link #PROCESSING_INSTRUCTION},
-     * {@link #ATTRIBUTE}, or {@link #NAMESPACE} events. With some PullProvider implementations,
-     * it can also be used after {@link #END_ELEMENT}, but this is not guaranteed: a client who
+     * can be used after the {@link net.sf.saxon.pull.PullProvider.Event#START_ELEMENT}, {@link net.sf.saxon.pull.PullProvider.Event#PROCESSING_INSTRUCTION},
+     * {@link net.sf.saxon.pull.PullProvider.Event#ATTRIBUTE}, or {@link net.sf.saxon.pull.PullProvider.Event#NAMESPACE} events. With some PullProvider implementations,
+     * it can also be used after {@link net.sf.saxon.pull.PullProvider.Event#END_ELEMENT}, but this is not guaranteed: a client who
      * requires the information at that point (for example, to do serialization) should insert an
      * {@link com.saxonica.xqj.pull.ElementNameTracker} into the pipeline.
      * If called at other times, the result is undefined and may result in an IllegalStateException.
@@ -222,6 +230,7 @@ public class PullFromIterator implements UnfailingPullProvider {
      * @return the NodeName. The NodeName can be used to obtain the prefix, local name,
      * and namespace URI.
      */
+    @Override
     public NodeName getNodeName() {
         if (treeWalker != null) {
             return treeWalker.getNodeName();
@@ -239,15 +248,16 @@ public class PullFromIterator implements UnfailingPullProvider {
      * Get the string value of the current element, text node, processing-instruction,
      * or top-level attribute or namespace node, or atomic value.
      * <p>In other situations the result is undefined and may result in an IllegalStateException.</p>
-     * <p>If the most recent event was a {@link #START_ELEMENT}, this method causes the content
+     * <p>If the most recent event was a {@link net.sf.saxon.pull.PullProvider.Event#START_ELEMENT}, this method causes the content
      * of the element to be read. The current event on completion of this method will be the
-     * corresponding {@link #END_ELEMENT}. The next call of next() will return the event following
+     * corresponding {@link net.sf.saxon.pull.PullProvider.Event#END_ELEMENT}. The next call of next() will return the event following
      * the END_ELEMENT event.</p>
      *
      * @return the String Value of the node in question, defined according to the rules in the
      *         XPath data model.
      */
 
+    @Override
     public CharSequence getStringValue() throws XPathException {
         if (treeWalker != null) {
             return treeWalker.getStringValue();
@@ -263,8 +273,9 @@ public class PullFromIterator implements UnfailingPullProvider {
      * a free-standing atomic value; it is never used when reading the content of a node.
      */
 
+    @Override
     public AtomicValue getAtomicValue() {
-        if (currentEvent == ATOMIC_VALUE) {
+        if (currentEvent == Event.ATOMIC_VALUE) {
             return (AtomicValue) base.current();
         } else {
             throw new IllegalStateException();
@@ -279,6 +290,7 @@ public class PullFromIterator implements UnfailingPullProvider {
      * @return the type annotation.
      */
 
+    @Override
     public SchemaType getSchemaType() {
         if (treeWalker != null) {
             return treeWalker.getSchemaType();
@@ -300,6 +312,7 @@ public class PullFromIterator implements UnfailingPullProvider {
      * A value of null can be returned if no location information is available.
      */
 
+    @Override
     public Location getSourceLocator() {
         if (treeWalker != null) {
             return treeWalker.getSourceLocator();
@@ -316,10 +329,11 @@ public class PullFromIterator implements UnfailingPullProvider {
      */
 
     /*@Nullable*/
+    @Override
     public List<UnparsedEntity> getUnparsedEntities() {
         return null;
     }
 }
 
 
-// Copyright (c) 2009 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

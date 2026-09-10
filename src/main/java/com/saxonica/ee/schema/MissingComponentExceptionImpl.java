@@ -25,6 +25,7 @@ public class MissingComponentExceptionImpl extends MissingComponentException {
         return reference;
     }
 
+    @Override
     public String getMessage() {
         try {
             String space = SymbolSpace.getSymbolSpaceName(reference.getSymbolSpace());
@@ -42,4 +43,4 @@ public class MissingComponentExceptionImpl extends MissingComponentException {
 
 }
 
-// Copyright (c) 2004 Saxonica Limited
+// Copyright (c) 2004-2020 Saxonica Limited

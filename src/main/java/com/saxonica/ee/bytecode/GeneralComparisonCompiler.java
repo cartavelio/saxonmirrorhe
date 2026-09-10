@@ -20,16 +20,17 @@ import java.util.Stack;
  */
 public class GeneralComparisonCompiler extends ToBooleanCompiler {
 
+    @Override
     public void compileToBoolean(CompilerService compiler, Expression expression)
             throws CannotCompileException {
         switch (((GeneralComparison) expression).getComparisonCardinality()) {
-            case GeneralComparison.ONE_TO_ONE:
+            case ONE_TO_ONE:
                 compileToBooleanOneToOne(compiler, (GeneralComparison) expression);
                 break;
-            case GeneralComparison.MANY_TO_ONE:
+            case MANY_TO_ONE:
                 compileToBooleanManyToOne(compiler, (GeneralComparison) expression);
                 break;
-            case GeneralComparison.MANY_TO_MANY:
+            case MANY_TO_MANY:
                 compileToBooleanManyToMany(compiler, (GeneralComparison) expression);
                 break;
         }
@@ -318,13 +319,13 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
 
 
         // Test if arg0 is untyped
-        if (th.relationship(type0, BuiltInAtomicType.UNTYPED_ATOMIC) != TypeHierarchy.DISJOINT) {
+        if (th.relationship(type0, BuiltInAtomicType.UNTYPED_ATOMIC) != Affinity.DISJOINT) {
             ga.loadArgOrLocal(item0Var);
             ga.ifNotInstance(UntypedAtomicValue.class, notUntyped0);
             ga.loadArgOrLocal(item1Var);
             ga.ifInstance(UntypedAtomicValue.class, doneConversion1);
             // a0 is untypedAtomic, a1 is not
-            if (th.relationship(type1, NumericType.getInstance()) != TypeHierarchy.DISJOINT) {
+            if (th.relationship(type1, NumericType.getInstance()) != Affinity.DISJOINT) {
                 ga.loadArgOrLocal(item1Var);
                 ga.ifNotInstance(NumericValue.class, notNumeric0);
 
@@ -371,14 +372,14 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
 
         // Test if arg1 is untyped
 
-        if (th.relationship(type1, BuiltInAtomicType.UNTYPED_ATOMIC) != TypeHierarchy.DISJOINT) {
+        if (th.relationship(type1, BuiltInAtomicType.UNTYPED_ATOMIC) != Affinity.DISJOINT) {
             if (type1 != BuiltInAtomicType.UNTYPED_ATOMIC) {
                 ga.loadArgOrLocal(item1Var);
                 ga.ifNotInstance(UntypedAtomicValue.class, notUntyped1);
             }
 
             // a1 is untypedAtomic, a0 is not
-            if (th.relationship(type0, NumericType.getInstance()) != TypeHierarchy.DISJOINT) {
+            if (th.relationship(type0, NumericType.getInstance()) != Affinity.DISJOINT) {
                 ga.loadArgOrLocal(item0Var);
                 ga.ifNotInstance(NumericValue.class, notNumeric1);
 
@@ -469,14 +470,14 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
         //            return (op == Token.FNE);
         //        }
 
-        if (th.relationship(type0, BuiltInAtomicType.DOUBLE) != TypeHierarchy.DISJOINT ||
-                th.relationship(type0, BuiltInAtomicType.FLOAT) != TypeHierarchy.DISJOINT) {
+        if (th.relationship(type0, BuiltInAtomicType.DOUBLE) != Affinity.DISJOINT ||
+                th.relationship(type0, BuiltInAtomicType.FLOAT) != Affinity.DISJOINT) {
             ga.loadArgOrLocal(item0Var);
             ga.invokeInstanceMethod(AtomicValue.class, "isNaN");
             ga.ifTrue(comparison.getSingletonOperator() == Token.FNE ? returnTrue : returnFalse);
         }
-        if (th.relationship(type1, BuiltInAtomicType.DOUBLE) != TypeHierarchy.DISJOINT ||
-                th.relationship(type1, BuiltInAtomicType.FLOAT) != TypeHierarchy.DISJOINT) {
+        if (th.relationship(type1, BuiltInAtomicType.DOUBLE) != Affinity.DISJOINT ||
+                th.relationship(type1, BuiltInAtomicType.FLOAT) != Affinity.DISJOINT) {
             ga.loadArgOrLocal(item1Var);
             ga.invokeInstanceMethod(AtomicValue.class, "isNaN");
             ga.ifTrue(comparison.getSingletonOperator() == Token.FNE ? returnTrue : returnFalse);
@@ -652,4 +653,4 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
 
 }
 
-//Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

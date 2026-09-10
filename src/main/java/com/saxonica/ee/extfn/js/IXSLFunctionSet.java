@@ -3,12 +3,8 @@ package com.saxonica.ee.extfn.js;
 
 //import jdk.nashorn.api.scripting.JSObject;
 
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.Literal;
-import net.sf.saxon.expr.PackageData;
-import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.functions.DocumentFn;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
@@ -18,7 +14,9 @@ import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.*;
@@ -51,62 +49,71 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
 
     private void init() {
 
-        register("page", 0, Stub.class, NodeKindTest.DOCUMENT, OPT, 0, SIDE|LATE);
+        register("page", 0, Stub.class, NodeKindTest.DOCUMENT, ONE, SIDE|LATE);
 
-        register("source", 0, Source.class, AnyItemType.getInstance(), OPT, 0, LATE);
+        register("source", 0, Source.class, NodeKindTest.DOCUMENT, OPT, LATE);
 
-        register("window", 0, Stub.class, AnyItemType.getInstance(), OPT, 0, LATE);
+        register("window", 0, Stub.class, AnyItemType.getInstance(), ONE, LATE);
 
-        register("query-params", 0, Stub.class, MapType.ANY_MAP_TYPE, ONE, 0, SIDE|LATE);
+        register("query-params", 0, Stub.class, MapType.ANY_MAP_TYPE, ONE, SIDE|LATE);
 
-        register("event", 0, Stub.class, AnyItemType.getInstance(), OPT, 0, SIDE|LATE);
+        register("event", 0, Stub.class, AnyItemType.getInstance(), OPT, SIDE|LATE);
 
-        register("location", 0, Stub.class, AnyItemType.getInstance(), OPT, 0, SIDE|LATE);
+        register("location", 0, Stub.class, BuiltInAtomicType.STRING, ONE, SIDE|LATE);
 
-        register("style", 1, Stub.class, AnyItemType.getInstance(), OPT, 0, SIDE|LATE)
+        register("style", 1, Stub.class, MapType.ANY_MAP_TYPE, ONE, SIDE|LATE)
                 .arg(0, AnyItemType.getInstance(), OPT, null);
 
-        register("get", 2, Stub.class, AnyItemType.getInstance(), STAR, 0, SIDE|LATE)
+        register("get", 2, Stub.class, AnyItemType.getInstance(), STAR, SIDE|LATE)
                 .arg(0, AnyItemType.getInstance(), OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
 
-        register("call", 3, Call.class, AnyItemType.getInstance(), OPT, 0, SIDE|LATE)
+        register("call", 3, Call.class, AnyItemType.getInstance(), STAR, SIDE|LATE)
                 .arg(0, AnyItemType.getInstance(), ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, ArrayItemType.getInstance(), ONE, null);
 
-        register("eval", 1, Eval.class, AnyItemType.getInstance(), STAR, 0, SIDE|LATE)
+        register("contains", 2, Stub.class, BuiltInAtomicType.BOOLEAN, ONE, SIDE|LATE)
+                .arg(0, AnyItemType.getInstance(), ONE, null)
+                .arg(1, BuiltInAtomicType.STRING, ONE, null);
+
+        register("eval", 1, Eval.class, AnyItemType.getInstance(), STAR, SIDE|LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
 
-        register("apply", 2, Stub.class, AnyItemType.getInstance(), OPT, 0, SIDE|LATE)
+        register("apply", 2, Stub.class, AnyItemType.getInstance(), STAR, SIDE|LATE)
                 .arg(0, AnyItemType.getInstance(), ONE, null)
                 .arg(1, ArrayItemType.getInstance(), ONE, null);
 
-        register("schedule-action", 3, Stub.class, AnyItemType.getInstance(), STAR, 0, SIDE|LATE)
+        register("schedule-action", 3, Stub.class, AnyItemType.getInstance(), STAR, SIDE|LATE)
                 .arg(0, BuiltInAtomicType.INTEGER, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
                 .arg(2, AnyItemType.getInstance(), STAR, null);
 
-        register("schedule-action", 4, Stub.class, AnyItemType.getInstance(), STAR, 0, SIDE|LATE)
+        register("schedule-action", 4, Stub.class, AnyItemType.getInstance(), STAR, SIDE|LATE)
                 .arg(0, BuiltInAtomicType.INTEGER, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
                 .arg(2, AnyItemType.getInstance(), STAR, null)
                 .arg(3, MapType.ANY_MAP_TYPE, OPT, null);
 
-        register("set-attribute", 2, Stub.class, AnyItemType.getInstance(), STAR, 0, SIDE|FOCUS|LATE)
+        register("set-attribute", 3, Stub.class, AnyItemType.getInstance(), OPT, SIDE|FOCUS|LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, BuiltInAtomicType.STRING, ONE, null);
+                .arg(1, BuiltInAtomicType.STRING, ONE, null)
+                .arg(2, AnyItemType.getInstance(), ONE, null);
 
-        register("remove-attribute", 2, Stub.class, AnyItemType.getInstance(), OPT, 0, SIDE|FOCUS|LATE)
+        register("remove-attribute", 2, Stub.class, AnyItemType.getInstance(), OPT, SIDE|FOCUS|LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, BuiltInAtomicType.STRING, ONE, null);
+                .arg(1, AnyItemType.getInstance(), ONE, null);
 
-        register("set-property", 3, Stub.class, AnyItemType.getInstance(), OPT, 0, SIDE|FOCUS|LATE)
+        register("set-property", 3, Stub.class, AnyItemType.getInstance(), OPT, SIDE|FOCUS|LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, AnyItemType.getInstance(), OPT, null)
                 .arg(2, AnyItemType.getInstance(), ONE, null);
 
-        register("set-style", 3, Stub.class, AnyItemType.getInstance(), OPT, 0, SIDE|FOCUS|LATE)
+        register("remove-property", 2, Stub.class, AnyItemType.getInstance(), OPT, SIDE|FOCUS|LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null)
+                .arg(1, AnyItemType.getInstance(), ONE, null);
+
+        register("set-style", 3, Stub.class, AnyItemType.getInstance(), OPT, SIDE|FOCUS|LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
                 .arg(2, AnyItemType.getInstance(), ONE, null);
@@ -125,9 +132,9 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
 
     public static ScriptEngine engine = null;
 
-    public static ScriptEngine obtainEngine() throws XPathException {
+    public synchronized static ScriptEngine obtainEngine() throws XPathException {
         if (engine == null) {
-            ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
+            engine = new ScriptEngineManager().getEngineByName("nashorn");
             if (engine == null) {
                 throw new XPathException("Javascript extensions not available (needs Java 8)");
             }
@@ -141,16 +148,16 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
      */
     public static class Stub extends SystemFunction {
         @Override
-        public Sequence<?> call(XPathContext context, Sequence[] args) throws XPathException {
+        public Sequence call(XPathContext context, Sequence[] args) throws XPathException {
             throw new XPathException("ixsl:" + getDetails().name.getLocalPart() + " is available only in Saxon-JS");
         }
     }
 
     public static class Source extends SystemFunction {
         @Override
-        public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
-            Item<?> source = context.getController().getGlobalContextItem();
-            return new ZeroOrOne<Item<?>>(source);
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            Item source = context.getController().getGlobalContextItem();
+            return new ZeroOrOne(source);
         }
     }
 
@@ -169,21 +176,21 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
         }
 
         @Override
-        public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             IntegerValue wait = (IntegerValue)arguments[0].head();
             StringValue documents = (StringValue)arguments[1].head();
-            ObjectValue wrappedActionObject = (ObjectValue) arguments[2].head();
-            Expression action = (Expression)wrappedActionObject.getObject();
+            ObjectValue<Expression> wrappedActionObject = (ObjectValue<Expression>) arguments[2].head();
+            Expression action = wrappedActionObject.getObject();
             if (documents != null) {
-                SequenceIterator<StringValue> tokenIter = new Whitespace.Tokenizer(documents.getStringValueCS());
+                AtomicIterator<StringValue> tokenIter = new Whitespace.Tokenizer(documents.getStringValueCS());
                 String baseURI = getRetainedStaticContext().getStaticBaseUriString();
                 PackageData pd = getRetainedStaticContext().getPackageData();
                 ParseOptions options = context.getConfiguration().getParseOptions();
-                SequenceIterator<NodeInfo> mapped = context.getConfiguration().getMultithreadedItemMappingIterator(
-                        tokenIter,
-                        token -> DocumentFn.makeDoc(
-                                token.getStringValue(), baseURI, pd,
-                                options, context, location, false));
+                ItemMappingFunction mapper = token -> DocumentFn.makeDoc(
+                        token.getStringValue(), baseURI, pd,
+                        options, context, location, false);
+                SequenceIterator mapped = context.getConfiguration().getMultithreadedItemMappingIterator(
+                        tokenIter, mapper);
                 mapped.materialize();  // discard the result; the aim was to put the documents in the document pool
                 return new LazySequence(action.iterate(context));
             } else {
@@ -196,13 +203,13 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
     public static class Call extends SystemFunction {
 
         @Override
-        public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             ScriptEngine engine = obtainEngine();
-            Object target = convertToJavaScript((Sequence<?>)arguments[0]);
-            String method = convertToJavaScript((Sequence<?>)arguments[1]).toString();
+            Object target = convertToJavaScript((Sequence)arguments[0]);
+            String method = convertToJavaScript((Sequence)arguments[1]).toString();
             Object[] args = new Object[arguments.length - 2];
             for (int i=2; i<arguments.length; i++) {
-                args[i-2] = convertToJavaScript((Sequence<?>)arguments[i]);
+                args[i-2] = convertToJavaScript((Sequence)arguments[i]);
             }
             try {
                 Object result = ((Invocable)engine).invokeMethod(target, method, args);
@@ -219,19 +226,20 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
     public static class Eval extends SystemFunction {
 
         @Override
-        public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             ScriptEngine engine = obtainEngine();
             try {
-                engine.eval(arguments[0].head().getStringValue());
+                Object result = engine.eval(arguments[0].head().getStringValue());
+                return JPConverter.allocate(result.getClass(), null, context.getConfiguration())
+                        .convert(result, context);
             } catch (ScriptException e) {
                 throw new XPathException("Failure in ixsl:eval(): ", e);
             }
-            return EmptySequence.getInstance();
         }
 
     }
 
-    private static Sequence<?> convertFromJavaScript(Object result) throws XPathException {
+    private static Sequence convertFromJavaScript(Object result) throws XPathException {
         //try {
             if (result instanceof String) {
                 return new StringValue((String)result);
@@ -240,12 +248,12 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
             } else if (result instanceof Boolean) {
                 return BooleanValue.get((Boolean) result);
             } else if (result instanceof Collection) {
-                List<Item<?>> items = new ArrayList<>();
+                List<Item> items = new ArrayList<>();
                 for (Object val : (Collection)result) {
-                    SequenceIterator<?> converted = convertFromJavaScript(val).iterate();
+                    SequenceIterator converted = convertFromJavaScript(val).iterate();
                     converted.forEachOrFail(items::add);
                 }
-                return new SequenceExtent<>(items);
+                return new SequenceExtent(items);
             } else {
                 return EmptySequence.getInstance();
             }
@@ -253,7 +261,7 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
     }
 
 
-    private static Object convertToJavaScript(Sequence<?> supplied) throws XPathException {
+    private static Object convertToJavaScript(Sequence supplied) throws XPathException {
         if (supplied instanceof NumericValue) {
             return ((NumericValue)supplied).getDoubleValue();
         } else if (supplied instanceof BooleanValue) {
@@ -262,7 +270,7 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
             return ((AtomicValue)supplied).getStringValue();
         } else {
             List<Object> list = new ArrayList<>();
-            SequenceIterator<?> iter = supplied.iterate();
+            SequenceIterator iter = supplied.iterate();
             iter.forEachOrFail(next -> list.add(convertToJavaScript(next)));
             if (list.isEmpty()) {
                 return null;
@@ -276,4 +284,4 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

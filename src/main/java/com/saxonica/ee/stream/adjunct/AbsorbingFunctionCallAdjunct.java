@@ -1,7 +1,6 @@
 package com.saxonica.ee.stream.adjunct;
 
 import com.saxonica.ee.stream.*;
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.om.FleetingParentNode;
 import com.saxonica.ee.stream.watch.Terminator;
@@ -10,7 +9,7 @@ import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.UserFunction;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.pattern.Pattern;
@@ -53,6 +52,7 @@ public class AbsorbingFunctionCallAdjunct extends TransmissionAdjunct {
 
     }
 
+    @Override
     public WatchMaker getWatchMaker(boolean forGrouping) throws XPathException {
         final UserFunctionCall instruction = (UserFunctionCall) getExpression();
         final Expression select = instruction.getArg(0);
@@ -77,10 +77,11 @@ public class AbsorbingFunctionCallAdjunct extends TransmissionAdjunct {
         private Watch innerWatch;
         private boolean started;
 
-        public AbsorbingFunctionCallAction(Expression functionCall, Feed out, XPathContext context) {
+        public AbsorbingFunctionCallAction(Expression functionCall, ItemFeed out, XPathContext context) {
             super(functionCall, out, context);
         }
 
+        @Override
         public void open(Terminator terminator) throws XPathException {
             super.open(terminator);
             UserFunctionCall exp = (UserFunctionCall) getExpression();
@@ -115,6 +116,7 @@ public class AbsorbingFunctionCallAdjunct extends TransmissionAdjunct {
          * @throws XPathException May be raised if a dynamic error occurs
          */
 
+        @Override
         public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
 
             XPathContext context = localContext;
@@ -149,14 +151,15 @@ public class AbsorbingFunctionCallAdjunct extends TransmissionAdjunct {
          * @param item the item that was matched.
          */
 
-        public void processItem(Item<?> item) throws XPathException {
+        @Override
+        public void append(Item item) throws XPathException {
             if (!hasFailed()) {
                 XPathContext context = localContext;
                 context.setLocalVariable(0, item);
 
                 start();
 
-                ((Trigger) innerWatch).getAction().processItem(item);
+                ((Trigger) innerWatch).getAction().append(item);
             }
         }
 
@@ -169,10 +172,12 @@ public class AbsorbingFunctionCallAdjunct extends TransmissionAdjunct {
          *                                               Watch is violated @param locationId the location of the node in the source, or of the instruction that created it
          */
 
+        @Override
         public void endSelectedParentNode(Location locationId) throws XPathException {
             //watchManager.removeWatch(innerWatch);
         }
 
+        @Override
         public void close() throws XPathException {
             start();
             innerWatch.close();
@@ -184,7 +189,7 @@ public class AbsorbingFunctionCallAdjunct extends TransmissionAdjunct {
     }
 
     @Override
-    public Feed makeItemFeed(WatchManager watchManager, final Feed out, final XPathContext context) throws XPathException {
+    public ItemFeed makeItemFeed(WatchManager watchManager, final ItemFeed out, final XPathContext context) throws XPathException {
         AbsorbingFunctionCallAction feed = new AbsorbingFunctionCallAction(getExpression(), out, context);
         feed.setWatchManager(watchManager);
         return feed;
@@ -193,4 +198,4 @@ public class AbsorbingFunctionCallAdjunct extends TransmissionAdjunct {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

@@ -1,56 +1,47 @@
 package com.saxonica.ee.stream;
 
+import com.saxonica.ee.stream.watch.WatchManager;
+import net.sf.saxon.event.Event;
 import net.sf.saxon.event.ProxyReceiver;
-import net.sf.saxon.event.StartTagBuffer;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 
 /**
  * A ContentDetector is a filter that can be added to a Receiver pipeline to note whether the current
- * element node has children. It delays sending the startContent() event to the next Receiver in the pipeline
+ * element node has children. It delays sending the startElement() event to the next Receiver in the pipeline
  * until it is known whether the start tag is followed by children, or is followed immediately by an end tag.
  * It then passes this information to subsequent filters in the pipeline by use of property flags.
  */
 public class ContentDetector extends ProxyReceiver {
 
-    private boolean pending = false;
+    private Event.StartElement pendingEvent = null;
 
-    public ContentDetector(StartTagBuffer nextReceiver) {
+    public ContentDetector(WatchManager nextReceiver) {
         super(nextReceiver);
     }
 
     /**
      * Notify the start of an element
-     *  @param elemName   integer code identifying the name of the element within the name pool.
-     * @param typeCode   integer code identifying the element's type within the name pool.
-     * @param location
-     * @param properties properties of the element node
      */
 
-    public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties) throws XPathException {
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
         flush(true);
-        pending = false;
-        nextReceiver.startElement(elemName, typeCode, location, properties);
-    }
-
-    /**
-     * Notify the start of the content, that is, the completion of all attributes and namespaces.
-     * Note that the initial receiver of output from XSLT instructions will not receive this event,
-     * it has to detect it itself. Note that this event is reported for every element even if it has
-     * no attributes, no namespaces, and no content.
-     */
-
-
-    public void startContent() throws XPathException {
-        pending = true;
+        pendingEvent = new Event.StartElement(elemName, type, attributes, namespaces,location, properties);
     }
 
     /**
      * End of element
      */
 
+    @Override
     public void endElement() throws XPathException {
         flush(false);
         nextReceiver.endElement();
@@ -60,6 +51,7 @@ public class ContentDetector extends ProxyReceiver {
      * Character data
      */
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         flush(true);
         nextReceiver.characters(chars, locationId, properties);
@@ -70,6 +62,7 @@ public class ContentDetector extends ProxyReceiver {
      * Processing Instruction
      */
 
+    @Override
     public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
         flush(true);
         nextReceiver.processingInstruction(target, data, locationId, properties);
@@ -79,26 +72,30 @@ public class ContentDetector extends ProxyReceiver {
      * Output a comment
      */
 
+    @Override
     public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
         flush(true);
         nextReceiver.comment(chars, locationId, properties);
     }
 
     /**
-     * Output a delayed startContent() event
+     * Output a delayed startElement() event
      * @param nonEmpty false if the content was empty, true if children were found
      * @throws XPathException if the next receiver in the pipeline reports an error
      */
 
     private void flush(boolean nonEmpty) throws XPathException {
-        if (pending) {
-            ((StartTagBuffer)nextReceiver).setHasChildren(nonEmpty);
-            pending = false;
-            nextReceiver.startContent();
+        if (pendingEvent != null) {
+            int properties = pendingEvent.getProperties();
+            if (nonEmpty) {
+                properties |= ReceiverOption.HAS_CHILDREN;
+            }
+            pendingEvent.replay(nextReceiver, properties);
+            pendingEvent = null;
         }
     }
 
 
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited

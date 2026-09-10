@@ -28,10 +28,12 @@ public class WhitespaceFacet extends Facet {
      *         that the XSD specification misleadingly classifies whiteSpace as a constraining facet
      */
 
+    @Override
     public boolean isConstraining() {
         return false;
     }
 
+    @Override
     public String getName() {
         return "whiteSpace";
     }
@@ -55,6 +57,7 @@ public class WhitespaceFacet extends Facet {
      */
 
     /*@Nullable*/
+    @Override
     public String getValue() {
         switch (action) {
             case Whitespace.PRESERVE:
@@ -71,6 +74,7 @@ public class WhitespaceFacet extends Facet {
      * Get the whitespace action required: one of PRESERVE, REPLACE, or COLLAPSE
      */
 
+    @Override
     public int getWhitespaceAction() {
         return action;
     }
@@ -84,6 +88,7 @@ public class WhitespaceFacet extends Facet {
      *          if the facet is not legal
      */
 
+    @Override
     public void checkFacetRestriction(UserSimpleType type, SimpleType base, SchemaCompiler compiler) throws SchemaException, ValidationException {
         if (base.isListType()) {
             if (action != Whitespace.COLLAPSE) {
@@ -119,6 +124,7 @@ public class WhitespaceFacet extends Facet {
      *         fails
      */
 
+    @Override
     public boolean testAtomicValue(AtomicValue value) {
         return true;
     }
@@ -126,7 +132,8 @@ public class WhitespaceFacet extends Facet {
     @Override
     public Function getFacetAsFunctionItem() {
         Callable callable = new Callable() {
-            public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+            @Override
+            public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
@@ -156,4 +163,4 @@ public class WhitespaceFacet extends Facet {
 
 }
 
-// Copyright (c) 2004-2012 Saxonica Limited. All Rights Reserved
+// Copyright (c) 2004-2020 Saxonica Limited

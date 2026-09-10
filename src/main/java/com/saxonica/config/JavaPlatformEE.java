@@ -1,17 +1,7 @@
 package com.saxonica.config;
 
 import com.saxonica.ee.domino.DominoTreeModel;
-import com.saxonica.ee.jaxp.SchemaFactoryImpl;
-import com.saxonica.ee.schema.SchemaCompiler;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.Sender;
-import net.sf.saxon.event.Valve;
-import net.sf.saxon.lib.ParseOptions;
-import net.sf.saxon.lib.Validation;
-import net.sf.saxon.trans.XPathException;
-import org.xml.sax.XMLReader;
-
-import javax.xml.transform.Source;
 
 
 /**
@@ -34,6 +24,7 @@ public class JavaPlatformEE extends JavaPlatformPE {
      * Perform platform-specific initialization of the configuration
      */
 
+    @Override
     public void initialize(Configuration config) {
         super.initialize(config);
         config.registerExternalObjectModel(DominoTreeModel.getInstance());
@@ -44,4 +35,4 @@ public class JavaPlatformEE extends JavaPlatformPE {
 
 }
 
-// Copyright (c) 2009-2017 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

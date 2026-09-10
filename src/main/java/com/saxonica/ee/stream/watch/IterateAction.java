@@ -1,15 +1,15 @@
 package com.saxonica.ee.stream.watch;
 
-import com.saxonica.ee.stream.feed.Feed;
+import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.om.FleetingParentNode;
-import net.sf.saxon.expr.instruct.BreakInstr;
-import net.sf.saxon.expr.instruct.IterateInstr;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.TailCallLoop;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.expr.instruct.BreakInstr;
+import net.sf.saxon.expr.instruct.IterateInstr;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.QuitParsingException;
@@ -32,16 +32,17 @@ public class IterateAction extends ForEachAction {
     Terminator terminator;
 
 
-    public IterateAction(WatchManager watchManager, Expression expression, Feed result, XPathContext context) {
+    public IterateAction(WatchManager watchManager, Expression expression, ItemFeed result, XPathContext context) {
         super(watchManager, expression, result, context);
     }
 
 
+    @Override
     public void open(Terminator terminator) throws XPathException {
         super.open(terminator);
         this.terminator = terminator;
         XPathContext outerContext = getContext();
-        ((IterateInstr) getExpression()).getInitiallyExp().process(outerContext);
+        ((IterateInstr) getExpression()).getInitiallyExp().process(getNextOutputter(), outerContext);
         makeBodyContext();
     }
 
@@ -55,9 +56,11 @@ public class IterateAction extends ForEachAction {
      * @throws net.sf.saxon.type.ValidationException
      *          May be raised if the constraint implemented by this
      *          Watch is violated @param locationId the location of the node in the source, or of the instruction that created it
+     * @return a receiver that collects the contents of the selected node, or null
      */
 
     /*@Nullable*/
+    @Override
     public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
         if (broken) {
             // xsl:break has been executed
@@ -74,12 +77,13 @@ public class IterateAction extends ForEachAction {
      *
      */
 
-    public void processItem(Item<?> it) throws XPathException {
+    @Override
+    public void append(Item it) throws XPathException {
         if (broken) {
             // xsl:break has been executed
             return;
         }
-        super.processItem(it);
+        super.append(it);
         checkForBreakInstruction();
     }
 
@@ -93,6 +97,7 @@ public class IterateAction extends ForEachAction {
      * @param locationId the location of the node in the source, or of the instruction that created it
      */
 
+    @Override
     public void endSelectedParentNode(Location locationId) throws XPathException {
         if (broken) {
             // xsl:break has been executed
@@ -109,7 +114,7 @@ public class IterateAction extends ForEachAction {
         }
         XPathContextMajor cm = (XPathContextMajor)c;
         TailCallLoop.TailCallInfo tail = cm.getTailCallInfo();
-        if (tail != null && tail instanceof BreakInstr) {
+        if (tail instanceof BreakInstr) {
             // Indicates a saxon:break instruction was encountered: break the loop
             // If we are iterating over the whole document, abandon parsing as soon as xsl:break is executed
             broken = true;
@@ -117,12 +122,13 @@ public class IterateAction extends ForEachAction {
         }
     }
 
+    @Override
     public void close() throws XPathException {
         if (!broken) {
             // handle xsl:on-completion
             Expression onCompletion = ((IterateInstr) getExpression()).getOnCompletion();
             SequenceIterator iter = onCompletion.iterate(getContext());
-            processItems(iter, getResult());
+            processItems(iter, getNextOutputter());
         }
         broken = false;
         super.close();
@@ -130,4 +136,4 @@ public class IterateAction extends ForEachAction {
 
 }
 
-// Copyright (c) 2009-2013 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

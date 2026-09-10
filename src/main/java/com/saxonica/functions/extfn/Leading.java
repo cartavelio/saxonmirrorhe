@@ -35,7 +35,8 @@ public class Leading extends SystemFunction {
          *          code will add information about the error location.
          */
 
-        public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             final XPathContext c2 = context.newCleanContext();
             final Function function = arguments.length == 2 ? (Function) arguments[1].head() : context.getConfiguration().makeSystemFunction("data", 1);
             return SequenceTool.toLazySequence(new LeadingIterator(arguments[0].iterate(), function, c2));
@@ -56,6 +57,7 @@ public class Leading extends SystemFunction {
             this.context = context;
         }
 
+        @Override
         public Item next() throws XPathException {
             if (exhausted) {
                 return null;
@@ -76,16 +78,14 @@ public class Leading extends SystemFunction {
             }
         }
 
+        @Override
         public void close() {
             base.close();
         }
 
-        public int getProperties() {
-            return 0;
-        }
     }
 
 
 }
 
-// Copyright (c) 2004-2016 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

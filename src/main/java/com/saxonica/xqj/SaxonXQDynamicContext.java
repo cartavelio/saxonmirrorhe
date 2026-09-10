@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -45,6 +45,7 @@ public abstract class SaxonXQDynamicContext extends Closable implements XQDynami
 
     /*@Nullable*/ private TimeZone implicitTimeZone = null;
 
+    @Override
     public void bindAtomicValue(QName varname, String value, XQItemType type) throws XQException {
         checkNotClosed();
         checkNotNull(varname);
@@ -54,6 +55,7 @@ public abstract class SaxonXQDynamicContext extends Closable implements XQDynami
         bindExternalVariable(varname, item.getSaxonItem());
     }
 
+    @Override
     public void bindBoolean(QName varname, boolean value, XQItemType type) throws XQException {
         checkNotClosed();
         checkNotNull(varname);
@@ -62,6 +64,7 @@ public abstract class SaxonXQDynamicContext extends Closable implements XQDynami
         bindExternalVariable(varname, target);
     }
 
+    @Override
     public void bindByte(QName varname, byte value, XQItemType type) throws XQException {
         checkNotClosed();
         checkNotNull(varname);
@@ -71,6 +74,7 @@ public abstract class SaxonXQDynamicContext extends Closable implements XQDynami
         bindExternalVariable(varname, target);
     }
 
+    @Override
     public void bindDocument(QName varname, InputStream value, String baseURI, XQItemType type) throws XQException {
         checkNotClosed();
         checkNotNull(varname);
@@ -78,6 +82,7 @@ public abstract class SaxonXQDynamicContext extends Closable implements XQDynami
         bindExternalVariable(varname, item.getSaxonItem());
     }
 
+    @Override
     public void bindDocument(QName varname, Reader value, String baseURI, XQItemType type) throws XQException {
         checkNotClosed();
         checkNotNull(varname);
@@ -85,6 +90,7 @@ public abstract class SaxonXQDynamicContext extends Closable implements XQDynami
         bindExternalVariable(varname, item.getSaxonItem());
     }
 
+    @Override
     public void bindDocument(QName varname, Source value, XQItemType type) throws XQException {
         checkNotClosed();
         checkNotNull(varname);
@@ -92,6 +98,7 @@ public abstract class SaxonXQDynamicContext extends Closable implements XQDynami
         bindExternalVariable(varname, item.getSaxonItem());
     }
 
+    @Override
     public void bindDocument(QName varname, String value, String baseURI, XQItemType type) throws XQException {
         checkNotClosed();
         checkNotNull(varname);
@@ -99,6 +106,7 @@ public abstract class SaxonXQDynamicContext extends Closable implements XQDynami
         bindExternalVariable(varname, item.getSaxonItem());
     }
 
+    @Override
     public void bindDocument(QName varname, /*@NotNull*/ XMLStreamReader value, XQItemType type) throws XQException {
         checkNotClosed();
         checkNotNull(varname);
@@ -106,6 +114,7 @@ public abstract class SaxonXQDynamicContext extends Closable implements XQDynami
         bindExternalVariable(varname, item.getSaxonItem());
     }
 
+    @Override
     public void bindDouble(QName varname, double value, XQItemType type) throws XQException {
         checkNotClosed();
         checkNotNull(varname);
@@ -114,6 +123,7 @@ public abstract class SaxonXQDynamicContext extends Closable implements XQDynami
         bindExternalVariable(varname, target);
     }
 
+    @Override
     public void bindFloat(QName varname, float value, XQItemType type) throws XQException {
         checkNotClosed();
         checkNotNull(varname);
@@ -122,6 +132,7 @@ public abstract class SaxonXQDynamicContext extends Closable implements XQDynami
         bindExternalVariable(varname, target);
     }
 
+    @Override
     public void bindInt(QName varname, int value, XQItemType type) throws XQException {
         checkNotClosed();
         checkNotNull(varname);
@@ -131,6 +142,7 @@ public abstract class SaxonXQDynamicContext extends Closable implements XQDynami
         bindExternalVariable(varname, target);
     }
 
+    @Override
     public void bindItem(QName varname, /*@NotNull*/ XQItem value) throws XQException {
         checkNotClosed();
         ((SaxonXQItem) value).checkNotClosed();
@@ -138,6 +150,7 @@ public abstract class SaxonXQDynamicContext extends Closable implements XQDynami
         bindExternalVariable(varname, ((SaxonXQItem) value).getSaxonItem());
     }
 
+    @Override
     public void bindLong(QName varname, long value, XQItemType type) throws XQException {
         checkNotClosed();
         checkNotNull(varname);
@@ -147,6 +160,7 @@ public abstract class SaxonXQDynamicContext extends Closable implements XQDynami
         bindExternalVariable(varname, target);
     }
 
+    @Override
     public void bindNode(QName varname, Node value, XQItemType type) throws XQException {
         checkNotClosed();
         checkNotNull(varname);
@@ -154,6 +168,7 @@ public abstract class SaxonXQDynamicContext extends Closable implements XQDynami
         bindExternalVariable(varname, item.getSaxonItem());
     }
 
+    @Override
     public void bindObject(QName varname, /*@NotNull*/ Object value, XQItemType type) throws XQException {
         checkNotClosed();
         checkNotNull(varname);
@@ -162,13 +177,14 @@ public abstract class SaxonXQDynamicContext extends Closable implements XQDynami
 
     }
 
+    @Override
     public void bindSequence(QName varname, /*@NotNull*/ XQSequence value) throws XQException {
         checkNotClosed();
         ((Closable) value).checkNotClosed();
         checkNotNull(varname);
         try {
             if (value instanceof SaxonXQForwardSequence) {
-                GroundedValue<?> extent = ((SaxonXQForwardSequence) value).getIterator().materialize();
+                GroundedValue extent = ((SaxonXQForwardSequence) value).getIterator().materialize();
                 getDynamicContext().setParameter(getStructuredQName(varname), extent);
             } else if (value instanceof SaxonXQSequence) {
                 bindExternalVariable(varname, ((SaxonXQSequence) value).getValue());
@@ -182,6 +198,7 @@ public abstract class SaxonXQDynamicContext extends Closable implements XQDynami
         }
     }
 
+    @Override
     public void bindShort(QName varname, short value, XQItemType type) throws XQException {
         checkNotClosed();
         checkNotNull(varname);
@@ -191,6 +208,7 @@ public abstract class SaxonXQDynamicContext extends Closable implements XQDynami
         bindExternalVariable(varname, target);
     }
 
+    @Override
     public void bindString(QName varname, String value, XQItemType type) throws XQException {
         checkNotClosed();
         checkNotNull(varname);
@@ -201,6 +219,7 @@ public abstract class SaxonXQDynamicContext extends Closable implements XQDynami
     }
 
     /*@Nullable*/
+    @Override
     public TimeZone getImplicitTimeZone() throws XQException {
         checkNotClosed();
         if (implicitTimeZone != null) {
@@ -210,6 +229,7 @@ public abstract class SaxonXQDynamicContext extends Closable implements XQDynami
         }
     }
 
+    @Override
     public void setImplicitTimeZone(TimeZone implicitTimeZone) throws XQException {
         checkNotClosed();
         GregorianCalendar now = new GregorianCalendar(implicitTimeZone);
@@ -222,7 +242,7 @@ public abstract class SaxonXQDynamicContext extends Closable implements XQDynami
     }
 
 
-    private void bindExternalVariable(QName varName, Sequence<?> value) throws XQException {
+    private void bindExternalVariable(QName varName, Sequence value) throws XQException {
         checkNotNull(varName);
         checkNotNull(value);
         try {

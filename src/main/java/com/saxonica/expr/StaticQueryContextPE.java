@@ -52,6 +52,7 @@ public class StaticQueryContextPE extends StaticQueryContext {
      */
 
     /*@Nullable*/
+    @Override
     public FunctionLibrary getExtensionFunctionLibrary() {
         return extensionFunctionLibrary;
     }
@@ -59,4 +60,4 @@ public class StaticQueryContextPE extends StaticQueryContext {
 
 }
 
-// Copyright (c) 2009 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

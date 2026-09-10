@@ -1,6 +1,7 @@
 package com.saxonica.xsltextn.instruct;
 
 import net.sf.saxon.Controller;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.expr.instruct.Instruction;
@@ -27,7 +28,8 @@ public class Assign extends Instruction implements BindingReference {
         selectOp = new Operand(this, select, OperandRole.NAVIGATE);
     }
 
-    public void setStaticType(SequenceType type, GroundedValue<?> constantValue, int properties) {
+    @Override
+    public void setStaticType(SequenceType type, GroundedValue constantValue, int properties) {
     }
 
     public void setSelectExpr(Expression select) {
@@ -43,11 +45,13 @@ public class Assign extends Instruction implements BindingReference {
         return selectOp;
     }
 
+    @Override
     public void fixup(Binding binding) {
         this.binding = (GlobalVariable) binding;
     }
 
 
+    @Override
     public int getIntrinsicDependencies() {
         return StaticProperty.HAS_SIDE_EFFECTS;
     }
@@ -71,17 +75,19 @@ public class Assign extends Instruction implements BindingReference {
      * Get the name of this instruction for diagnostic and tracing purposes
      */
 
+    @Override
     public int getInstructionNameCode() {
         return StandardNames.SAXON_ASSIGN;
     }
 
 
     /*@Nullable*/
-    public TailCall processLeavingTail(XPathContext context) throws XPathException {
+    @Override
+    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
         if (binding == null) {
             throw new IllegalStateException("saxon:assign binding has not been fixed up");
         }
-        GroundedValue<?> value = getSelectExpr().iterate(context).materialize();
+        GroundedValue value = getSelectExpr().iterate(context).materialize();
         final Controller controller = context.getController();
         assert controller != null;
         controller.getBindery(getPackageData()).setGlobalVariable(binding, value);
@@ -93,7 +99,11 @@ public class Assign extends Instruction implements BindingReference {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
+        if ("JS".equals(((ExpressionPresenter.ExportOptions) out.getOptions()).target)) {
+            throw new XPathException("Export failure: Saxon-JS does not implement saxon:assign");
+        }
         out.startElement("assign", this);
         out.emitAttribute("name", binding.getVariableQName());
         getSelectExpr().export(out);
@@ -101,4 +111,4 @@ public class Assign extends Instruction implements BindingReference {
     }
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

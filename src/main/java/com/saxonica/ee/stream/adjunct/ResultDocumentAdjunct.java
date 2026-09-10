@@ -3,9 +3,8 @@ package com.saxonica.ee.stream.adjunct;
 import com.saxonica.ee.stream.Streamability;
 import com.saxonica.ee.stream.Sweep;
 import com.saxonica.ee.stream.feed.ComplexNodeEventFeed;
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
-import net.sf.saxon.event.Receiver;
+import com.saxonica.ee.stream.feed.ItemFeed;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.ResultDocument;
@@ -18,6 +17,7 @@ import net.sf.saxon.trans.XPathException;
 public class ResultDocumentAdjunct extends ParentConstructorAdjunct {
 
 
+    @Override
     public FeedMaker getFeedMaker(final int arg) throws XPathException {
         ResultDocument inst = (ResultDocument)getExpression();
         if (Streamability.getSweep(inst.getContentExpression()) == Sweep.CONSUMING) {
@@ -31,7 +31,7 @@ public class ResultDocumentAdjunct extends ParentConstructorAdjunct {
 
     public static class ResultDocumentFeed extends ComplexNodeEventFeed {
 
-        public ResultDocumentFeed(Expression exp, Feed result, XPathContext context) {
+        public ResultDocumentFeed(Expression exp, ItemFeed result, XPathContext context) {
             super(exp, result, context);
         }
 
@@ -45,8 +45,7 @@ public class ResultDocumentAdjunct extends ParentConstructorAdjunct {
         @Override
         protected void processLeft(XPathContext context) throws XPathException {
             ResultDocument instr = (ResultDocument)getExpression();
-            Receiver out  = instr.processLeft(context);
-            setReceiver(out);
+            next = instr.processLeft(context);
         }
 
         /**
@@ -58,18 +57,17 @@ public class ResultDocumentAdjunct extends ParentConstructorAdjunct {
          */
         @Override
         protected void processRight(XPathContext context) throws XPathException {
-            Receiver out = getReceiver();
             try {
-                out.endDocument();
+                next.endDocument();
             } catch (XPathException err) {
                 err.setXPathContext(context);
                 throw err;
             }
-            out.close();
+            next.close();
         }
 
 
     }
 }
 
-// Copyright (c) 2009-14 Saxonica Limited.
+// Copyright (c) 2009-19 Saxonica Limited

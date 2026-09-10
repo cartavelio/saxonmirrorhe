@@ -8,6 +8,7 @@ import net.sf.saxon.type.*;
 
 public class MaxLengthFacet extends LengthRangeFacet {
 
+    @Override
     public String getName() {
         return "maxLength";
     }
@@ -21,6 +22,7 @@ public class MaxLengthFacet extends LengthRangeFacet {
      *          if the facet is not legal
      */
 
+    @Override
     public void checkFacetRestriction(UserSimpleType type, SimpleType base, SchemaCompiler compiler) throws SchemaException, ValidationException {
         if (base instanceof UserSimpleType) {
             UserSimpleType ubase = (UserSimpleType) base;
@@ -85,9 +87,10 @@ public class MaxLengthFacet extends LengthRangeFacet {
      * Test whether a supplied length conforms to this required length
      */
 
+    @Override
     public boolean testLength(int actualLength) {
         return actualLength <= requiredLength;
     }
 }
 
-// Copyright (c) 2004-2007 Saxonica Limited. All Rights Reserved
+// Copyright (c) 2004-2020 Saxonica Limited

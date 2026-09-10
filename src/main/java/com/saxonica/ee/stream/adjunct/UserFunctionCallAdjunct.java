@@ -4,8 +4,8 @@ import com.saxonica.ee.stream.Posture;
 import com.saxonica.ee.stream.PostureAndSweep;
 import com.saxonica.ee.stream.Streamability;
 import com.saxonica.ee.stream.Sweep;
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
+import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.watch.WatchMaker;
 import com.saxonica.ee.stream.watch.WatchManager;
 import com.saxonica.ee.trans.ContextItemStaticInfoEE;
@@ -93,11 +93,13 @@ public class UserFunctionCallAdjunct extends StreamingAdjunct implements FeedMak
     }
 
 
+    @Override
     public WatchMaker getWatchMaker(boolean forGrouping) throws XPathException {
         return null;
     }
 
-    public Feed makeItemFeed(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
         UserFunctionCall call = (UserFunctionCall)getExpression();
         UserFunction function = call.getTargetFunction(context);
         FunctionStreamability ability = function.getDeclaredStreamability();
@@ -110,4 +112,4 @@ public class UserFunctionCallAdjunct extends StreamingAdjunct implements FeedMak
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

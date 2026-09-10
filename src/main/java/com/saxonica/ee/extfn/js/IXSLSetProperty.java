@@ -1,7 +1,8 @@
 package com.saxonica.ee.extfn.js;
 
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.style.StyleElement;
@@ -11,7 +12,7 @@ import net.sf.saxon.value.Whitespace;
 
 /**
  * Handler for ixsl:set-property elements in stylesheet.
- * The ixsl:set-property element has mandatory attributes name (the name of the attribute to be set,
+ * The ixsl:set-property element has mandatory attributes name (the name of the property to be set,
  * or dot-separated composite name), and select (the new property value),
  * and an optional attribute object (the object that the property belongs to, when no object attribute
  * is present, the window object is used)
@@ -29,6 +30,7 @@ public class IXSLSetProperty extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
@@ -39,31 +41,42 @@ public class IXSLSetProperty extends StyleElement {
      * @return true: no, the element must be empty
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return false;
     }
 
-    public void prepareAttributes() throws XPathException {
+    @Override
+    public void prepareAttributes() {
 
-        AttributeCollection atts = getAttributeList();
-
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
-            if (f.equals("name")) {
-                String nameAtt = Whitespace.trim(atts.getValue(a));
-                name = makeAttributeValueTemplate(nameAtt, a);
-            } else if (f.equals("select")) {
-                String selectAtt = atts.getValue(a);
-                select = makeExpression(selectAtt, a);
-            } else if (f.equals("object")) {
-                String objectAtt = atts.getValue(a);
-                object = makeExpression(objectAtt, a);
-            } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
+            String value = att.getValue();
+            switch (f) {
+                case "name":
+                    String nameAtt = Whitespace.trim(value);
+                    name = makeAttributeValueTemplate(nameAtt, att);
+                    break;
+                case "select":
+                    String selectAtt = value;
+                    select = makeExpression(selectAtt, att);
+                    break;
+                case "object":
+                    String objectAtt = value;
+                    object = makeExpression(objectAtt, att);
+                    break;
+                default:
+                    checkUnknownAttribute(attName);
+                    break;
             }
         }
         if (object == null) {
-            object = IXSLFunctionSet.getInstance().makeFunction("window", 0).makeFunctionCall();
+            try {
+                object = IXSLFunctionSet.getInstance().makeFunction("window", 0).makeFunctionCall();
+            } catch (XPathException e) {
+                compileError(e);
+            }
         }
 
         if (name == null) {
@@ -74,12 +87,14 @@ public class IXSLSetProperty extends StyleElement {
         }
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         name = typeCheck("name", name);
         select = typeCheck("select", select);
         object = typeCheck("object", object);
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         Expression e = IXSLFunctionSet.getInstance().makeFunction("set-property", 3).makeFunctionCall(name, select, object);
         e.setRetainedStaticContext(makeRetainedStaticContext());
@@ -88,4 +103,4 @@ public class IXSLSetProperty extends StyleElement {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

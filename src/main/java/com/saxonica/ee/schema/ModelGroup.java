@@ -6,7 +6,6 @@ import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.Function;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -251,6 +250,7 @@ public abstract class ModelGroup extends SchemaStructure implements UserSchemaCo
      * @throws SchemaException
      */
 
+    @Override
     public void lookForCycles(Stack references, SchemaCompiler compiler) throws SchemaException {
         references.push(this);
         for (Particle p : getParticles()) {
@@ -265,12 +265,13 @@ public abstract class ModelGroup extends SchemaStructure implements UserSchemaCo
      * @throws SchemaException when the error listener decides an error is fatal
      */
 
+    @Override
     public boolean validate(SchemaCompiler compiler) throws SchemaException {
         boolean result = true;
         for (Particle p : getParticles()) {
             if (p instanceof ModelGroupParticle) {
                 ModelGroupParticle ref = (ModelGroupParticle) p;
-                ref.tryToResolve(compiler);
+                ref.tryToResolve(compiler, false);
                 if (ref.isResolved()) {
                     result &= ref.getGroup().validate(compiler);
                 } else {
@@ -550,6 +551,7 @@ public abstract class ModelGroup extends SchemaStructure implements UserSchemaCo
      * @return true if all is well, false if errors found
      */
 
+    @Override
     public boolean fixup(SchemaCompiler compiler) throws SchemaException, MissingComponentException {
         if (getFixupStatus() == UNVALIDATED) {
             setFixupStatus(VALIDATING);
@@ -590,9 +592,11 @@ public abstract class ModelGroup extends SchemaStructure implements UserSchemaCo
         serializer.endElement();
     }
 
+    @Override
     public Function getComponentAsFunction() {
         Callable callable = new Callable() {
-            public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+            @Override
+            public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
@@ -618,4 +622,4 @@ public abstract class ModelGroup extends SchemaStructure implements UserSchemaCo
 
 }
 
-// Copyright (c) 2004 - 2007 Saxonica Limited. All Rights Reserved 
+// Copyright (c) 2004-2020 Saxonica Limited

@@ -123,6 +123,7 @@ public class DotNetExtensionFunctionCall extends FunctionCall {
      * @param visitor an expression visitor
      */
 
+    @Override
     public Expression preEvaluate(ExpressionVisitor visitor) {
         return this;
     }
@@ -147,6 +148,7 @@ public class DotNetExtensionFunctionCall extends FunctionCall {
      *         expressions, it is the same as the input pathMapNode.
      */
 
+    @Override
     public PathMap.PathMapNodeSet addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
         return addExternalFunctionCallToPathMap(pathMap, pathMapNodeSet);
     }
@@ -157,6 +159,7 @@ public class DotNetExtensionFunctionCall extends FunctionCall {
      * XPathContext.CURRENT_NODE
      */
 
+    @Override
     public int getIntrinsicDependencies() {
         int depend = StaticProperty.HAS_SIDE_EFFECTS;
         if (theMember instanceof MethodInfo) {
@@ -180,6 +183,7 @@ public class DotNetExtensionFunctionCall extends FunctionCall {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         throw new UnsupportedOperationException();
     }
@@ -194,8 +198,9 @@ public class DotNetExtensionFunctionCall extends FunctionCall {
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
-        Sequence<?>[] argValues = SequenceTool.makeSequenceArray(getArity());
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
+        Sequence[] argValues = SequenceTool.makeSequenceArray(getArity());
         for (int i = 0; i < argValues.length; i++) {
             argValues[i] = ExpressionTool.eagerEvaluate(getArg(i), context);
         }
@@ -244,7 +249,7 @@ public class DotNetExtensionFunctionCall extends FunctionCall {
      *          if a dynamic error occurs
      */
 
-    private SequenceIterator<?> call(Sequence[] argValues, XPathContext context) throws XPathException {
+    private SequenceIterator call(Sequence[] argValues, XPathContext context) throws XPathException {
 
 //        Class[] theParameterTypes;
 
@@ -411,17 +416,17 @@ public class DotNetExtensionFunctionCall extends FunctionCall {
      *
      */
 
-    private SequenceIterator<?> asIterator(Object result, XPathContext context) throws XPathException {
+    private SequenceIterator asIterator(Object result, XPathContext context) throws XPathException {
         if (result == null) {
             return EmptyIterator.getInstance();
         }
         if (result instanceof SequenceIterator) {
-            return (SequenceIterator<?>) result;
+            return (SequenceIterator) result;
         }
         if (result instanceof Sequence) {
-            return ((Sequence<?>) result).iterate();
+            return ((Sequence) result).iterate();
         }
-        Sequence<?> actual = convertFromDotNet(result, getReturnType(), context);
+        Sequence actual = convertFromDotNet(result, getReturnType(), context);
         return actual.iterate();
     }
 
@@ -464,6 +469,7 @@ public class DotNetExtensionFunctionCall extends FunctionCall {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return convertDotNetToXPathType(getReturnType());
     }
@@ -521,6 +527,7 @@ public class DotNetExtensionFunctionCall extends FunctionCall {
         }
     }
 
+    @Override
     public int computeCardinality() {
         cli.System.Type resultClass = getReturnType();
         if (resultClass == null) {
@@ -736,7 +743,7 @@ public class DotNetExtensionFunctionCall extends FunctionCall {
      * @throws XPathException if conversion fails
      */
 
-    public static Object convertToDotNet(Sequence<?> value, cli.System.Type targetType, XPathContext context)
+    public static Object convertToDotNet(Sequence value, cli.System.Type targetType, XPathContext context)
             throws XPathException {
 
         // TODO: use a similar approach to the rewritten Java code (PJConverter/JPConverter)
@@ -958,7 +965,7 @@ public class DotNetExtensionFunctionCall extends FunctionCall {
         throw new XPathException("Cannot convert supplied XPath value to the required type for the extension function");
     }
 
-    private static Item extractSingleton(Sequence<?> value, cli.System.Type targetType, XPathContext context) throws XPathException {
+    private static Item extractSingleton(Sequence value, cli.System.Type targetType, XPathContext context) throws XPathException {
         // try passing the first item in the sequence provided it is the only one
         SequenceIterator iter = value.iterate();
         Item first = null;
@@ -983,7 +990,7 @@ public class DotNetExtensionFunctionCall extends FunctionCall {
         throw new XPathException("Cannot convert supplied XPath value to the required type for the extension function");
     }
 
-    private static AtomicValue getAtomicValue(Sequence<?> value, cli.System.Type targetType, XPathContext context) throws XPathException {
+    private static AtomicValue getAtomicValue(Sequence value, cli.System.Type targetType, XPathContext context) throws XPathException {
         if (value instanceof UntypedAtomicValue) {
             UntypedAtomicValue uav = (UntypedAtomicValue) value;
             ConversionResult result;
@@ -1024,7 +1031,7 @@ public class DotNetExtensionFunctionCall extends FunctionCall {
         }
     }
 
-    private static void fail(Sequence<?> value, String type) throws XPathException {
+    private static void fail(Sequence value, String type) throws XPathException {
         throw new XPathException("Cannot convert value " + Err.wrap(SequenceTool.getStringValue(value)) + " to required type " + type);
     }
 
@@ -1039,8 +1046,8 @@ public class DotNetExtensionFunctionCall extends FunctionCall {
      */
 
     private static ICollection convertToDotNetList(
-            Sequence<?> value, IList list, XPathContext context) throws XPathException {
-        SequenceIterator<?> iter = value.iterate();
+            Sequence value, IList list, XPathContext context) throws XPathException {
+        SequenceIterator iter = value.iterate();
         Item it;
         while ((it = iter.next()) != null) {
             if (it instanceof AtomicValue) {
@@ -1075,7 +1082,7 @@ public class DotNetExtensionFunctionCall extends FunctionCall {
      *          if a failure occurs
      */
 
-    private static Sequence<?> convertFromDotNet(
+    private static Sequence convertFromDotNet(
             Object result, cli.System.Type returnType, XPathContext context)
             throws XPathException {
 
@@ -1085,7 +1092,7 @@ public class DotNetExtensionFunctionCall extends FunctionCall {
         List<ExternalObjectModel> externalObjectModels = config.getExternalObjectModels();
         for (ExternalObjectModel model : externalObjectModels) {
             if (model instanceof DotNetObjectModel) {
-                Sequence<?> val = ((DotNetObjectModel) model).convertObjectToXPathValue(result, config);
+                Sequence val = ((DotNetObjectModel) model).convertObjectToXPathValue(result, config);
                 if (val != null) {
                     // Note: at this point the Java code checks that the value is consistent with the required type
                     return val;
@@ -1129,20 +1136,20 @@ public class DotNetExtensionFunctionCall extends FunctionCall {
         } else if (returnType.get_IsArray()) {
             cli.System.Type elementType = returnType.GetElementType();
             Object[] array = (Object[]) result;
-            Item<?>[] values = new Item[array.length];
+            Item[] values = new Item[array.length];
             for (int i = 0; i < array.length; i++) {
                 values[i] = (Item) convertFromDotNet(array[i], elementType, context);
             }
-            return new SequenceExtent<>(values);
+            return new SequenceExtent(values);
         } else if (CLI_IENUMERABLE.IsAssignableFrom(returnType)) {
             // the difference here is we don't know the expected type of the elements
             IEnumerator enumerator = ((IEnumerable) result).GetEnumerator();
-            List<Item<?>> values = new ArrayList<>(20);
+            List<Item> values = new ArrayList<>(20);
             while (enumerator.MoveNext()) {
-                Sequence<?> v = convertFromDotNet(enumerator.get_Current(), CLI_OBJECT, context);
+                Sequence v = convertFromDotNet(enumerator.get_Current(), CLI_OBJECT, context);
                 v.iterate().forEachOrFail(values::add);
             }
-            return new SequenceExtent<>(values);
+            return new SequenceExtent(values);
         } else {
             return new DotNetObjectValue(result);
         }
@@ -1151,7 +1158,7 @@ public class DotNetExtensionFunctionCall extends FunctionCall {
 
 }
 
-// Copyright (c) 2004-2009 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited
 
 // Contributor(s): Gunther Schadow (changes to allow access to public fields; also wrapping
 // of extensions and mapping of null to empty sequence).

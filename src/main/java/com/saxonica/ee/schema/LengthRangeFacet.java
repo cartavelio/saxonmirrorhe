@@ -20,10 +20,12 @@ public abstract class LengthRangeFacet extends Facet {
 
     int requiredLength;
 
+    @Override
     public String getValue() {
         return "" + requiredLength;
     }
 
+    @Override
     public long toLong() {
         return requiredLength;
     }
@@ -69,6 +71,7 @@ public abstract class LengthRangeFacet extends Facet {
      *         fails
      */
 
+    @Override
     public boolean testAtomicValue(final AtomicValue value) {
         if (value instanceof StringValue) { //includes AnyURIValue
             return testLength(((StringValue) value).getStringLength());
@@ -88,12 +91,14 @@ public abstract class LengthRangeFacet extends Facet {
      * for the minlength and maxlength facets.
      */
 
+    @Override
     public abstract boolean testLength(int actualLength);
 
     @Override
     public Function getFacetAsFunctionItem() {
         Callable callable = new Callable() {
-            public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+            @Override
+            public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
@@ -114,4 +119,4 @@ public abstract class LengthRangeFacet extends Facet {
 
 }
 
-// Copyright (c) Saxonica 2004-2017
+// CCopyright (c) 2004-2020 Saxonica Limited

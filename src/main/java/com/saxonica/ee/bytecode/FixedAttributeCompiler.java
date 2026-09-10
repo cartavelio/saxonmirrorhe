@@ -2,14 +2,14 @@ package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.AttributeCreator;
 import net.sf.saxon.expr.instruct.DummyNamespaceResolver;
 import net.sf.saxon.expr.instruct.FixedAttribute;
 import net.sf.saxon.expr.instruct.ValidatingInstruction;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
@@ -40,7 +40,7 @@ public class FixedAttributeCompiler extends ToPushCompiler {
         Location locationId = instr.getLocation();
 
         // prepare the call on receiver.attribute()
-        compiler.generateGetReceiver();
+        compiler.generateGetOutputter();
         allocateStatic(compiler, nodeName);
         SchemaType schemaType = instr.getSchemaType();
         if (schemaType != null) {
@@ -61,7 +61,8 @@ public class FixedAttributeCompiler extends ToPushCompiler {
         // Complete the call on receiver.attribute()
         allocateStatic(compiler, locationId);
         ga.push(opt);
-        ga.invokeInstanceMethod(Receiver.class, "attribute", NodeName.class, SimpleType.class, CharSequence.class, Location.class, Integer.TYPE);
+        visitAnnotation(compiler, "FixedAttributeCompiler - call attribute()");
+        ga.invokeInstanceMethod(Outputter.class, "attribute", NodeName.class, SimpleType.class, CharSequence.class, Location.class, Integer.TYPE);
     }
 
     /**
@@ -323,4 +324,4 @@ public class FixedAttributeCompiler extends ToPushCompiler {
 
 }
 
-//Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

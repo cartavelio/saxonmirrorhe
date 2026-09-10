@@ -16,6 +16,7 @@ import net.sf.saxon.style.XSLTemplate;
 import net.sf.saxon.trans.Mode;
 import net.sf.saxon.trans.SimpleMode;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.rules.RuleManager;
 
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ public class TemplateRuleInitializer {
     private StructuredQName modeName;
     private boolean firstTime = true;
 
-    public TemplateRuleInitializer(Compilation comp, ComponentDeclaration decl, StructuredQName modeName) {
+    TemplateRuleInitializer(Compilation comp, ComponentDeclaration decl, StructuredQName modeName) {
         compilation = comp;
         this.decl = decl;
         this.modeName = modeName;
@@ -63,23 +64,26 @@ public class TemplateRuleInitializer {
                 rule.setBody(ExpressionTool.optimizeComponentBody(
                         body, compilation, visitor, cisi, false));
                 SimpleMode.allocateBindingSlotsRecursive(xslTemplate.getPackageData(), m, rule.getBody(), m.getDeclaringComponent().getComponentBindings());
+                if (compilation.getCompilerInfo().getCodeInjector() != null) {
+                    compilation.getCompilerInfo().getCodeInjector().process(rule);
+                }
                 ExpressionTool.allocateSlots(rule.getBody(), rule.getStackFrameMap().getNumberOfVariables(), rule.getStackFrameMap());
 
                 if (m.isDeclaredStreamable()) {
-                    List<String> reasons = new ArrayList<String>();
+                    List<String> reasons = new ArrayList<>();
                     if (!((TemplateRuleEE) rule).isActuallyStreamable(reasons)) {
-                        String message = "Template rule is not streamable";
+                        StringBuilder message = new StringBuilder("Template rule is not streamable");
                         for (String reason : reasons) {
-                            message += "\n  * " + reason;
+                            message.append("\n  * ").append(reason);
                         }
-                        throw new XPathException(message, "XTSE3430", rule);
+                        throw new XPathException(message.toString(), "XTSE3430", rule);
                     }
                     if (Streamability.getSweep(rule.getBody()) == Sweep.CONSUMING) {
                         ((TemplateRuleEE) rule).makeInversion();
                     }
                 }
             } catch (XPathException e) {
-                rule.setBody(new ErrorExpression(e));
+                rule.setBody(new ErrorExpression(new XmlProcessingException(e)));
                 firstTime = false;
                 throw e;
             }
@@ -89,4 +93,4 @@ public class TemplateRuleInitializer {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

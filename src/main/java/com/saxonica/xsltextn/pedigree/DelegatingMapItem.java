@@ -4,7 +4,6 @@ import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.TypeHierarchy;
@@ -37,7 +36,7 @@ public abstract class DelegatingMapItem implements MapItem {
     }
 
     @Override
-    public GroundedValue<?> get(AtomicValue key) {
+    public GroundedValue get(AtomicValue key) {
         return base.get(key);
     }
 
@@ -52,7 +51,7 @@ public abstract class DelegatingMapItem implements MapItem {
     }
 
     @Override
-    public AtomicIterator keys() {
+    public AtomicIterator<? extends AtomicValue> keys() {
         return base.keys();
     }
 
@@ -62,7 +61,7 @@ public abstract class DelegatingMapItem implements MapItem {
     }
 
     @Override
-    public MapItem addEntry(AtomicValue key, GroundedValue<?> value) {
+    public MapItem addEntry(AtomicValue key, GroundedValue value) {
         return base.addEntry(key, value);
     }
 
@@ -95,5 +94,5 @@ public abstract class DelegatingMapItem implements MapItem {
     }
 }
 
-// Copyright (c) 2018 Saxonica Ltd.
+// Copyright (c) 2018-2020 Saxonica Limited
 

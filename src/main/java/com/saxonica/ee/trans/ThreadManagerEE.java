@@ -84,6 +84,7 @@ public class ThreadManagerEE extends XPathContextMajor.ThreadManager {
      *                        error.
      */
 
+    @Override
     public synchronized void waitForChildThreads() throws XPathException {
 
         if (executorService == null) {
@@ -143,4 +144,4 @@ public class ThreadManagerEE extends XPathContextMajor.ThreadManager {
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

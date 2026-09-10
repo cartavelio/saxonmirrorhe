@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -40,25 +40,25 @@ import java.util.Properties;
  */
 public class SaxonXQSequence extends Closable implements XQResultSequence, SaxonXQItemAccessor {
 
-    private GroundedValue<?> value;
+    private GroundedValue value;
     private int position;
     private SaxonXQPreparedExpression expression;
     private SaxonXQDataFactory factory;
 
-    SaxonXQSequence(GroundedValue<?> value, SaxonXQDataFactory factory) {
+    SaxonXQSequence(GroundedValue value, SaxonXQDataFactory factory) {
         this.value = value;
         this.factory = factory;
         setClosableContainer(factory);
     }
 
-    SaxonXQSequence(GroundedValue<?> value, /*@NotNull*/ SaxonXQPreparedExpression expression) {
+    SaxonXQSequence(GroundedValue value, /*@NotNull*/ SaxonXQPreparedExpression expression) {
         this.value = value;
         this.expression = expression;
         this.factory = expression.getConnection();
         setClosableContainer(expression);
     }
 
-    GroundedValue<?> getValue() {
+    GroundedValue getValue() {
         return value;
     }
 
@@ -66,6 +66,7 @@ public class SaxonXQSequence extends Closable implements XQResultSequence, Saxon
         return factory.getConfiguration();
     }
 
+    @Override
     public boolean absolute(int itempos) throws XQException {
         checkNotClosed();
         if (itempos > 0) {
@@ -90,21 +91,25 @@ public class SaxonXQSequence extends Closable implements XQResultSequence, Saxon
         }
     }
 
+    @Override
     public void afterLast() throws XQException {
         checkNotClosed();
         position = -1;
     }
 
+    @Override
     public void beforeFirst() throws XQException {
         checkNotClosed();
         position = 0;
     }
 
+    @Override
     public int count() throws XQException {
         checkNotClosed();
         return value.getLength();
     }
 
+    @Override
     public boolean first() throws XQException {
         checkNotClosed();
         if (value.getLength() == 0) {
@@ -117,6 +122,7 @@ public class SaxonXQSequence extends Closable implements XQResultSequence, Saxon
     }
 
     /*@Nullable*/
+    @Override
     public XQItem getItem() throws XQException {
         checkNotClosed();
         SaxonXQItem item = new SaxonXQItem(value.itemAt(position - 1), factory);
@@ -125,10 +131,12 @@ public class SaxonXQSequence extends Closable implements XQResultSequence, Saxon
     }
 
     /*@Nullable*/
+    @Override
     public Item getSaxonItem() {
         return value.itemAt(position - 1);
     }
 
+    @Override
     public int getPosition() throws XQException {
         checkNotClosed();
         if (position >= 0) {
@@ -139,6 +147,7 @@ public class SaxonXQSequence extends Closable implements XQResultSequence, Saxon
     }
 
     /*@NotNull*/
+    @Override
     public XMLStreamReader getSequenceAsStream() throws XQException {
         checkNotClosed();
         PullProvider provider = new PullFromIterator(iterateRemainder());
@@ -146,6 +155,7 @@ public class SaxonXQSequence extends Closable implements XQResultSequence, Saxon
         return new PullToStax(provider);
     }
 
+    @Override
     public String getSequenceAsString(Properties props) throws XQException {
         checkNotClosed();
         StringWriter sw = new StringWriter();
@@ -153,36 +163,43 @@ public class SaxonXQSequence extends Closable implements XQResultSequence, Saxon
         return sw.toString();
     }
 
+    @Override
     public boolean isAfterLast() throws XQException {
         checkNotClosed();
         return position < 0;
     }
 
+    @Override
     public boolean isBeforeFirst() throws XQException {
         checkNotClosed();
         return position == 0 && value.getLength() != 0;
     }
 
+    @Override
     public boolean isFirst() throws XQException {
         checkNotClosed();
         return position == 1;
     }
 
+    @Override
     public boolean isLast() throws XQException {
         checkNotClosed();
         return position == value.getLength();
     }
 
+    @Override
     public boolean isOnItem() throws XQException {
         checkNotClosed();
         return position >= 1;
     }
 
+    @Override
     public boolean isScrollable() throws XQException {
         checkNotClosed();
         return true;
     }
 
+    @Override
     public boolean last() throws XQException {
         checkNotClosed();
         int n = value.getLength();
@@ -195,6 +212,7 @@ public class SaxonXQSequence extends Closable implements XQResultSequence, Saxon
         }
     }
 
+    @Override
     public boolean next() throws XQException {
         checkNotClosed();
         if (position == value.getLength()) {
@@ -206,6 +224,7 @@ public class SaxonXQSequence extends Closable implements XQResultSequence, Saxon
         }
     }
 
+    @Override
     public boolean previous() throws XQException {
         checkNotClosed();
         if (position == -1) {
@@ -215,6 +234,7 @@ public class SaxonXQSequence extends Closable implements XQResultSequence, Saxon
         return position != 0;
     }
 
+    @Override
     public boolean relative(int itempos) throws XQException {
         checkNotClosed();
         if (position == -1) {
@@ -232,6 +252,7 @@ public class SaxonXQSequence extends Closable implements XQResultSequence, Saxon
         return true;
     }
 
+    @Override
     public void writeSequence(OutputStream os, /*@Nullable*/ Properties props) throws XQException {
         checkNotClosed();
         checkNotNull(os);
@@ -247,6 +268,7 @@ public class SaxonXQSequence extends Closable implements XQResultSequence, Saxon
         }
     }
 
+    @Override
     public void writeSequence(Writer ow, /*@Nullable*/ Properties props) throws XQException {
         checkNotClosed();
         checkNotNull(ow);
@@ -268,6 +290,7 @@ public class SaxonXQSequence extends Closable implements XQResultSequence, Saxon
         }
     }
 
+    @Override
     public void writeSequenceToResult(Result result) throws XQException {
         checkNotClosed();
         Properties props = SaxonXQSequence.setDefaultProperties(null);
@@ -278,86 +301,106 @@ public class SaxonXQSequence extends Closable implements XQResultSequence, Saxon
         }
     }
 
+    @Override
     public void writeSequenceToSAX(ContentHandler saxHandler) throws XQException {
         checkNotClosed();
         writeSequenceToResult(new SAXResult(saxHandler));
     }
 
+    @Override
     public String getAtomicValue() throws XQException {
         return getCurrentItem().getAtomicValue();
     }
 
+    @Override
     public boolean getBoolean() throws XQException {
         return getCurrentItem().getBoolean();
     }
 
+    @Override
     public byte getByte() throws XQException {
         return getCurrentItem().getByte();
     }
 
+    @Override
     public double getDouble() throws XQException {
         return getCurrentItem().getDouble();
     }
 
+    @Override
     public float getFloat() throws XQException {
         return getCurrentItem().getFloat();
     }
 
+    @Override
     public int getInt() throws XQException {
         return getCurrentItem().getInt();
     }
 
     /*@NotNull*/
+    @Override
     public XMLStreamReader getItemAsStream() throws XQException {
         return getCurrentItem().getItemAsStream();
     }
 
+    @Override
     public String getItemAsString(Properties props) throws XQException {
         return getCurrentItem().getItemAsString(props);
     }
 
     /*@NotNull*/
+    @Override
     public XQItemType getItemType() throws XQException {
         return getCurrentItem().getItemType();
     }
 
+    @Override
     public long getLong() throws XQException {
         return getCurrentItem().getLong();
     }
 
+    @Override
     public Node getNode() throws XQException {
         return getCurrentItem().getNode();
     }
 
     /*@NotNull*/
+    @Override
     public URI getNodeUri() throws XQException {
         return getCurrentItem().getNodeUri();
     }
 
+    @Override
     public Object getObject() throws XQException {
         return getCurrentItem().getObject();
     }
 
+    @Override
     public short getShort() throws XQException {
         return getCurrentItem().getShort();
     }
 
+    @Override
     public boolean instanceOf(/*@NotNull*/ XQItemType type) throws XQException {
         return getCurrentItem().instanceOf(type);
     }
 
+    @Override
     public void writeItem(OutputStream os, Properties props) throws XQException {
         getCurrentItem().writeItem(os, props);
     }
 
+    @Override
     public void writeItem(Writer ow, Properties props) throws XQException {
         getCurrentItem().writeItem(ow, props);
     }
 
+    @Override
     public void writeItemToResult(Result result) throws XQException {
         getCurrentItem().writeItemToResult(result);
     }
 
+    @Override
     public void writeItemToSAX(ContentHandler saxHandler) throws XQException {
         getCurrentItem().writeItemToSAX(saxHandler);
     }
@@ -376,6 +419,7 @@ public class SaxonXQSequence extends Closable implements XQResultSequence, Saxon
         return item;
     }
 
+    @Override
     public XQConnection getConnection() throws XQException {
         checkNotClosed();
         if (expression == null) {
@@ -385,7 +429,7 @@ public class SaxonXQSequence extends Closable implements XQResultSequence, Saxon
     }
 
     /*@Nullable*/
-    private SequenceIterator<?> iterateRemainder() throws XQException {
+    private SequenceIterator iterateRemainder() throws XQException {
         try {
             if (position == 0) {
                 return value.iterate();

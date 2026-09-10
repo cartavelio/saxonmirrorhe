@@ -1,11 +1,12 @@
 package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.*;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.LocalVariableReference;
 import net.sf.saxon.expr.StackFrame;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.*;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
@@ -25,6 +26,7 @@ public class LocalVariableReferenceCompiler extends ToIteratorCompiler {
      * @param compiler   the compiler service
      * @param expression the expression to be compiled
      */
+    @Override
     public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         LocalVariableReference varRef = (LocalVariableReference) expression;
 
@@ -43,6 +45,7 @@ public class LocalVariableReferenceCompiler extends ToIteratorCompiler {
     }
 
 
+    @Override
     public void compileToPush(CompilerService compiler, Expression expression) throws CannotCompileException {
         LocalVariableReference varRef = (LocalVariableReference) expression;
 
@@ -77,9 +80,9 @@ public class LocalVariableReferenceCompiler extends ToIteratorCompiler {
         methodInfo.placeLabel(notInstance);
         ga.loadLocal(actualVar);
         ga.checkClass(Sequence.class);
-        compiler.generateGetContext();
+        compiler.generateGetOutputter();
         allocateStatic(compiler, varRef.getLocation());
-        ga.invokeStaticMethod(SequenceTool.class, "process", Sequence.class, XPathContext.class, Location.class);
+        ga.invokeStaticMethod(SequenceTool.class, "process", Sequence.class, Outputter.class, Location.class);
 
         methodInfo.releaseLocal(actualVar);
 
@@ -93,6 +96,7 @@ public class LocalVariableReferenceCompiler extends ToIteratorCompiler {
      * @param compiler   the compiler service
      * @param expression the expression to be compiled
      */
+    @Override
     public void compileToIterator(CompilerService compiler,
                                   Expression expression) throws CannotCompileException {
 
@@ -115,4 +119,4 @@ public class LocalVariableReferenceCompiler extends ToIteratorCompiler {
 
 }
 
-//Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

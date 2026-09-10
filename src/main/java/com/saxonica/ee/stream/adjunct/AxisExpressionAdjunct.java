@@ -53,6 +53,7 @@ public class AxisExpressionAdjunct extends StreamingAdjunct {
 
 
     /*@Nullable*/
+    @Override
     public WatchMaker getWatchMaker(final boolean forGrouping) throws XPathException {
 
         // If the expression in its entirety is a streamable pattern, then return a CopyWatch on this expression. (This is more
@@ -182,4 +183,4 @@ public class AxisExpressionAdjunct extends StreamingAdjunct {
 
 }
 
-// Copyright (c) 2013 Saxonica Limited.
+// Copyright (c) 2013-2020 Saxonica Limited

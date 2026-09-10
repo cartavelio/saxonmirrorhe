@@ -33,12 +33,13 @@ import java.util.List;
 
 public class SQLQueryFn extends SystemFunction {
 
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Connection connection = SQLFunctionSet.expectConnection(arguments[0], context);
         String tableName = arguments[1].head().getStringValue();
         List<String> columnNames = new ArrayList<>();
         Item it;
-        SequenceIterator<?> colIter = arguments[2].iterate();
+        SequenceIterator colIter = arguments[2].iterate();
         while ((it = colIter.next()) != null) {
             columnNames.add(it.getStringValue());
         }
@@ -98,7 +99,8 @@ public class SQLQueryFn extends SystemFunction {
         }
 
     }
+
 }
 
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

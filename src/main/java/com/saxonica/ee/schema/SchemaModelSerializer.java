@@ -3,19 +3,20 @@ package com.saxonica.ee.schema;
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.sdoc.SimpleTypeDefinition;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.CheckSumFilter;
-import net.sf.saxon.event.NamespaceReducer;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.event.*;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
+import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.DateTimeValue;
 import net.sf.saxon.value.QualifiedNameValue;
 
-import java.util.*;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 
 /**
@@ -26,10 +27,12 @@ public class SchemaModelSerializer {
 
     private EnterpriseConfiguration config;
     private Receiver receiver;
+    private ComplexContentOutputter cco;
     private LinkedList<SchemaComponent> pendingComponents = new LinkedList<>();
     private IdentityHashMap<SchemaComponent, String> componentToIdMap = new IdentityHashMap<>(200);
     private IdentityHashMap<SerializableSchemaComponent, String> serializedComponents = new IdentityHashMap<>(200);
     private int nextComponent = 0;
+    private NamespaceMap namespaceMap = NamespaceMap.emptyMap();
 
     private boolean inStartTag = false;
 
@@ -46,6 +49,7 @@ public class SchemaModelSerializer {
         this.config = (EnterpriseConfiguration) config;
         NamespaceReducer reducer = new NamespaceReducer(out);
         this.receiver = new CheckSumFilter(reducer);
+        this.cco = new ComplexContentOutputter(this.receiver);
     }
 
     /**
@@ -55,8 +59,8 @@ public class SchemaModelSerializer {
      */
 
     public void serialize() throws XPathException {
-        receiver.open();
-        receiver.startDocument(0);
+        cco.open();
+        cco.startDocument(ReceiverOption.NONE);
         startElement("schema");
         emitAttribute("generatedAt", DateTimeValue.getCurrentDateTime(null).getStringValue());
         emitAttribute("xsdVersion", config.getConfigurationProperty(Feature.XSD_VERSION));
@@ -70,7 +74,7 @@ public class SchemaModelSerializer {
         while (iter.hasNext()) {
             SchemaType type = (SchemaType) iter.next();
             if (type instanceof SimpleTypeDefinition) {
-                type = ((SimpleTypeDefinition)type).getSimpleType();
+                type = ((SimpleTypeDefinition)type).getWorkingType();
             }
             if (type instanceof SerializableSchemaComponent) {
                 serializeComponent((SerializableSchemaComponent) type);
@@ -116,40 +120,43 @@ public class SchemaModelSerializer {
         endElement();
         if (receiver instanceof CheckSumFilter) {
             int c = ((CheckSumFilter) receiver).getChecksum();
-            receiver.processingInstruction(CheckSumFilter.SIGMA, Integer.toHexString(c), ExplicitLocation.UNKNOWN_LOCATION, 0);
+            cco.processingInstruction(CheckSumFilter.SIGMA, Integer.toHexString(c),
+                                      Loc.NONE, ReceiverOption.NONE);
         }
-        receiver.endDocument();
-        receiver.close();
+        cco.endDocument();
+        cco.close();
 
     }
 
     public void startElement(String elementName) throws XPathException {
         if (inStartTag) {
-            receiver.startContent();
+            cco.namespace("", "", ReceiverOption.NONE);
+            cco.startContent();
         }
         inStartTag = true;
         NodeName nc = new FingerprintedQName("scm", NamespaceConstant.SCM, elementName);
-        receiver.startElement(nc, Untyped.getInstance(), ExplicitLocation.UNKNOWN_LOCATION, 0);
+        cco.startElement(nc, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
     }
 
     public void endElement() throws XPathException {
         if (inStartTag) {
-            receiver.startContent();
+            cco.startContent();
             inStartTag = false;
         }
         receiver.endElement();
     }
 
-    public void emitNamespaceContext(NamespaceResolver resolver) throws XPathException {
+    public void emitNamespaceContext(NamespaceResolver resolver) {
+        // TODO: maintain a stack of in-scope namespaces
         for (Iterator iter = resolver.iteratePrefixes(); iter.hasNext(); ) {
             String prefix = (String) iter.next();
             String uri = resolver.getURIForPrefix(prefix, false);
-            declareNamespace(prefix, uri);
+            namespaceMap = namespaceMap.put(prefix, uri);
         }
     }
 
     public void declareNamespace(String prefix, String uri) throws XPathException {
-        receiver.namespace(new NamespaceBinding(prefix, uri), 0);
+        namespaceMap = namespaceMap.put(prefix, uri);
     }
 
     public void emitAttribute(String attributeName, String value) throws XPathException {
@@ -162,7 +169,7 @@ public class SchemaModelSerializer {
         } else {
             nc = new NoNamespaceName(attributeName);
         }
-        receiver.attribute(nc, BuiltInAtomicType.UNTYPED_ATOMIC, value, ExplicitLocation.UNKNOWN_LOCATION, 0);
+        cco.attribute(nc, BuiltInAtomicType.UNTYPED_ATOMIC, value, Loc.NONE, ReceiverOption.NONE);
     }
 
     private static FingerprintedQName XML_BASE =
@@ -208,7 +215,7 @@ public class SchemaModelSerializer {
     }
 
     public void emitTypedValue(AtomicSequence value) throws XPathException {
-        value.iterate().forEachOrFail(atom -> {
+        for (AtomicValue atom : value) {
             startElement("item");
             AtomicType type = atom.getPrimitiveType();
             emitAttribute("type", "#" + type.getName());
@@ -217,7 +224,7 @@ public class SchemaModelSerializer {
                 emitAttribute("namespace", ((QualifiedNameValue) atom).getNamespaceURI());
             }
             endElement();
-        });
+        }
     }
 
     public String getTypeLink(SchemaType type) {
@@ -230,4 +237,4 @@ public class SchemaModelSerializer {
 
 }
 
-// Copyright (c) 2007-2018 Saxonica Limited.
+// Copyright (c) 2007-2020 Saxonica Limited

@@ -6,8 +6,9 @@ import net.sf.saxon.trans.XPathException;
 
 public abstract class CompiledItemMappingFunction implements ItemMappingFunction {
 
+    @Override
     public abstract Item mapItem(Item item) throws XPathException;
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

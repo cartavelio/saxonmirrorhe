@@ -4,10 +4,10 @@ import com.saxonica.ee.stream.om.FleetingNode;
 import com.saxonica.ee.stream.om.FleetingParentNode;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.accum.Accumulator;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeTestPattern;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
 
@@ -44,6 +44,7 @@ public class MultiAccumulatorWatch extends PatternWatch {
         return accumulatorMap;
     }
 
+    @Override
     public void open(Terminator terminator) throws XPathException {
         for (AccumulatorWatch watch : accumulatorMap.values()) {
             watch.open(terminator);
@@ -61,11 +62,12 @@ public class MultiAccumulatorWatch extends PatternWatch {
      * processing the startElement event that matches the selection. For this purpose,
      * any attributes selected by the last step in the selection are ignored
      *
-     * @return always null
      * @throws net.sf.saxon.type.ValidationException May be raised if the constraint implemented by this
      *                                               Watch is violated @param locationId the location of the node in the source, or of the instruction that created it
+     * @return always null
      */
 
+    @Override
     public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
         //System.err.println("AccumulatorWatch.startSelectedParentNode()");
         nodeStack.push(node);
@@ -82,7 +84,8 @@ public class MultiAccumulatorWatch extends PatternWatch {
      * @param item the node that was matched.
      */
 
-    public void processItem(Item<?> item) throws XPathException {
+    @Override
+    public void processItem(Item item) throws XPathException {
         //System.err.println("AccumulatorWatch.processItem()");
         FleetingNode node = (FleetingNode) item;
         if (node.getNodeKind() == Type.ATTRIBUTE) {
@@ -102,6 +105,7 @@ public class MultiAccumulatorWatch extends PatternWatch {
      *                                               Watch is violated @param locationId the location of the node in the source, or of the instruction that created it
      */
 
+    @Override
     public void endSelectedParentNode(Location locationId) throws XPathException {
         //System.err.println("AccumulatorWatch.endSelectedParentNode()");
         for (AccumulatorWatch watch : accumulatorMap.values()) {
@@ -110,6 +114,7 @@ public class MultiAccumulatorWatch extends PatternWatch {
         nodeStack.pop();
     }
 
+    @Override
     public void close() throws XPathException {
         //
     }
@@ -117,4 +122,4 @@ public class MultiAccumulatorWatch extends PatternWatch {
 
 }
 
-// Copyright (c) 2020 Saxonica Limited.
+// Copyright (c) 2012-2020 Saxonica Limited

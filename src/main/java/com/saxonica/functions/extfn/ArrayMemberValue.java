@@ -11,11 +11,11 @@ import net.sf.saxon.value.ObjectValue;
 
 public class ArrayMemberValue extends ObjectValue<Sequence> {
 
-    public ArrayMemberValue(Sequence<?> sequence) {
+    public ArrayMemberValue(Sequence sequence) {
         super(sequence);
     }
 
 }
 
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

@@ -14,6 +14,7 @@ public class IdentityField extends FieldOrSelector {
 
     private BuiltInAtomicType builtInBaseType;
     private boolean listValued;
+    private boolean ascending;
 
     /**
      * Creates a new IdentityField.
@@ -37,7 +38,13 @@ public class IdentityField extends FieldOrSelector {
         this.listValued = listValued;
     }
 
+    public void setAscending(boolean upwards) {
+        this.ascending = upwards;
+    }
 
+    public boolean isAscending() {
+        return ascending;
+    }
     /**
      * Get the static cardinality of the expression, that is the number of nodes the field xpath will select
      * for each node selected by the selector xpath.
@@ -59,4 +66,4 @@ public class IdentityField extends FieldOrSelector {
 
 }
 
-// Copyright (c) 2004 - 2007 Saxonica Limited. All Rights Reserved 
+// Copyright (c) 2004-2020 Saxonica Limited

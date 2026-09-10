@@ -10,6 +10,7 @@ import java.util.Locale;
  */
 public class ICUNumberer_de extends ICUNumbererPE {
 
+    @Override
     public void config(Locale locale, String privateUseExtension, Configuration config) {
         super.config(locale, privateUseExtension, config);
     }
@@ -21,6 +22,7 @@ public class ICUNumberer_de extends ICUNumbererPE {
      * @param ordinalParam the requested ordinal form, e.g. "-er" or "-es"
      * @return New ordinal as words, with appropriate suffix
      */
+    @Override
     public String postProcessOrdinal(String result, String ordinalParam) {
         if (ordinalParam.startsWith("-")) {
             if (result.endsWith("e")) {
@@ -36,4 +38,4 @@ public class ICUNumberer_de extends ICUNumbererPE {
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

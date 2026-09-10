@@ -2,12 +2,12 @@ package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.ComputedAttribute;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardURIChecker;
 import net.sf.saxon.om.*;
@@ -39,7 +39,7 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
         LabelInfo notEqual = methodInfo.newLabel("notEqual");
         LabelInfo done = null;
         // prepare the call on receiver.attribute()
-        compiler.generateGetReceiver();
+        compiler.generateGetOutputter();
         pushNodeName(compiler, expression);
         int nodeNameVar = ga.newLocal(NodeName.class);
         ga.storeLocal(nodeNameVar);
@@ -68,7 +68,8 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
         // Complete the call on receiver.attribute()
         allocateStatic(compiler, locationId);
         ga.push(opt);
-        ga.invokeInstanceMethod(Receiver.class, "attribute", NodeName.class, SimpleType.class, CharSequence.class, Location.class, Integer.TYPE);
+        visitAnnotation(compiler, "ComputedAttributeCompiler - call attribute()");
+        ga.invokeInstanceMethod(Outputter.class, "attribute", NodeName.class, SimpleType.class, CharSequence.class, Location.class, Integer.TYPE);
         if (done != null) {
             methodInfo.placeLabel(done);
         }
@@ -150,6 +151,7 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
         LabelInfo notEqual2 = methodInfo.newLabel("notEqual2");
         LabelInfo notEqual_rawName = methodInfo.newLabel("notEqual_rawName");
         LabelInfo notEqual_prefix = methodInfo.newLabel("notEqual_prefix");
+        LabelInfo notEQName = methodInfo.newLabel("notEQName");
 
         int localNameVar = methodInfo.allocateLocal(String.class);
         int uriVar = methodInfo.allocateLocal(String.class);
@@ -162,11 +164,14 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
         compiler.compileToItem(nameExpr);
         ga.dup();
         ga.ifNotInstance(StringValue.class, notStrInstance);
-        ga.invokeInstanceMethod(Item.class, "getStringValueCS");
+        ga.invokeInstanceMethod(Item.class, "getStringValue");
         ga.invokeStaticMethod(Whitespace.class, "trimWhitespace", CharSequence.class);
+        ga.invokeInstanceMethod(CharSequence.class, "toString");
+        // rawName
         int rawNameVar = methodInfo.allocateLocal(String.class);
         ga.storeLocal(rawNameVar);
         ga.loadLocal(rawNameVar);
+        // rawName
         if (namespace == null) {
             ga.dup();
             ga.invokeInstanceMethod(CharSequence.class, "toString");
@@ -180,7 +185,26 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
             ga.goTo(end);
             methodInfo.placeLabel(notEqual_rawName);
         }
+        // rawName
+        ga.dup();
+        ga.push("Q{");
+        ga.invokeInstanceMethod(String.class, "startsWith", String.class);
+        ga.ifFalse(notEQName);
+        ga.loadLocal(rawNameVar);
+        ga.invokeStaticMethod(StructuredQName.class, "fromEQName", CharSequence.class);
+        ga.dup();
+        ga.invokeInstanceMethod(StructuredQName.class, "getLocalPart");
+        ga.storeLocal(localNameVar);
+        ga.invokeInstanceMethod(StructuredQName.class, "getURI");
+        ga.storeLocal(uriVar);
+        ga.push("_");
+        ga.storeLocal(prefixVar);
+        ga.pop();
+        ga.goTo(test1);
 
+
+
+        methodInfo.placeLabel(notEQName);
         LabelInfo tryBegin = methodInfo.newLabel("tryBegin");
         LabelInfo tryEnd = methodInfo.newLabel("tryEnd");
         LabelInfo catchBegin = methodInfo.newLabel("catchBegin");
@@ -417,4 +441,4 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

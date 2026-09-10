@@ -14,11 +14,11 @@ import java.util.Set;
  */
 public class InsertAttributeAction extends PendingUpdateAction {
 
-    private NodeInfo element;
-    NodeName name;
-    SimpleType typeCode;
-    CharSequence value;
-    int properties;
+    private MutableNodeInfo element;
+    private NodeName name;
+    private SimpleType typeCode;
+    private CharSequence value;
+    private int properties;
 
     /**
      * Create a InsertAttributeAction
@@ -30,7 +30,7 @@ public class InsertAttributeAction extends PendingUpdateAction {
      * @param properties properties including IS_ID and IS_IDREF properties
      */
 
-    public InsertAttributeAction(NodeInfo element, NodeName name, SimpleType typeCode, CharSequence value, int properties) {
+    InsertAttributeAction(MutableNodeInfo element, NodeName name, SimpleType typeCode, CharSequence value, int properties) {
         this.element = element;
         this.name = fixNodeName(name);
         this.typeCode = typeCode;
@@ -48,18 +48,16 @@ public class InsertAttributeAction extends PendingUpdateAction {
      *          if any error occurs applying the update
      */
 
-    public void apply(XPathContext context, Set affectedRootSet) throws XPathException {
-        if (!(element instanceof MutableNodeInfo)) {
-            throw new XPathException("Attempting to update a non-updateable element");
-        }
+    @Override
+    public void apply(XPathContext context, Set<MutableNodeInfo> affectedRootSet) throws XPathException {
         if (element.getAttributeValue(name.getURI(), name.getLocalPart()) != null) {
             throw new XPathException("Attempt to insert an attribute " +
                     name.getDisplayName() +
                     " that is already present on the target element", "XUDY0021");
         }
-        affectedRootSet.add(element.getRoot());
-        ((MutableNodeInfo) element).addAttribute(name, typeCode, value, properties);
-        ((MutableNodeInfo) element).removeTypeAnnotation();
+        affectedRootSet.add((MutableNodeInfo)element.getRoot());
+        element.addAttribute(name, typeCode, value, properties);
+        element.removeTypeAnnotation();
     }
 
     /**
@@ -69,6 +67,7 @@ public class InsertAttributeAction extends PendingUpdateAction {
      *         case of a delete action, which affects multiple nodes.
      */
 
+    @Override
     public NodeInfo getTargetNode() {
         return element;
     }
@@ -112,9 +111,10 @@ public class InsertAttributeAction extends PendingUpdateAction {
      *         in the specification
      */
 
+    @Override
     public int getApplyPhase() {
         return 2;
     }
 }
 
-// Copyright (c) 2008 Saxonica Limited.
+// Copyright (c) 2008-2020 Saxonica Limited

@@ -6,12 +6,13 @@ import com.saxonica.ee.stream.watch.PatternWatch;
 import com.saxonica.ee.stream.watch.WatchManager;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.InvalidityHandler;
-import net.sf.saxon.lib.InvalidityHandlerWrappingErrorListener;
+import net.sf.saxon.lib.InvalidityHandlerWrappingErrorReporter;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.ValidationException;
@@ -31,13 +32,13 @@ import java.util.Stack;
 public abstract class SelectorWatch extends PatternWatch {
 
     IdentityConstraint identityConstraint;
-    ConstraintChecker constraintChecker;
-    int numberOfColumns;
-    AtomicSequence[] currentRow;
-    Stack<AtomicSequence[]> activationStack = null;
-    HashMap<ValueEntry, Integer> table = new HashMap<ValueEntry, Integer>(100);
+    private ConstraintChecker constraintChecker;
+    private int numberOfColumns;
+    private AtomicSequence[] currentRow;
+    private Stack<AtomicSequence[]> activationStack = null;
+    HashMap<ValueEntry, Integer> table = new HashMap<>(100);
 
-    public SelectorWatch(ConstraintChecker checker, IdentityConstraint uniqueConstraint) {
+    SelectorWatch(ConstraintChecker checker, IdentityConstraint uniqueConstraint) {
         identityConstraint = uniqueConstraint;
         constraintChecker = checker;
         setSelection(uniqueConstraint.getSelector().getSelection());
@@ -50,7 +51,7 @@ public abstract class SelectorWatch extends PatternWatch {
      * @return the identity constraint
      */
 
-    public IdentityConstraint getIdentityConstraint() {
+    IdentityConstraint getIdentityConstraint() {
         return identityConstraint;
     }
 
@@ -67,6 +68,7 @@ public abstract class SelectorWatch extends PatternWatch {
      *                             Watch is violated
      */
 
+    @Override
     public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
         // if there is already an existing activation, we are dealing
         // with nested elements that each contain key values
@@ -99,6 +101,7 @@ public abstract class SelectorWatch extends PatternWatch {
      *                             Watch is violated @param locationId the location of the node in the source, or of the instruction that created it
      */
 
+    @Override
     public void endSelectedParentNode(Location locationId) throws XPathException {
         checkRow(currentRow, false, locationId);
         if (activationStack != null && !activationStack.isEmpty()) {
@@ -114,6 +117,7 @@ public abstract class SelectorWatch extends PatternWatch {
      * Watch goes out of scope.
      */
 
+    @Override
     public void close() throws XPathException {
     }
 
@@ -133,8 +137,8 @@ public abstract class SelectorWatch extends PatternWatch {
      *                             the constraint
      */
 
-    public void addFieldValue(AtomicSequence[] currentRow, int column, AtomicSequence value,
-                              boolean nillableElement, Location locationId) throws XPathException {
+    void addFieldValue(AtomicSequence[] currentRow, int column, AtomicSequence value,
+                       boolean nillableElement, Location locationId) throws XPathException {
         if (currentRow[column] != null) {
             ValidationFailure ve = new ValidationFailure("Identity constraint " +
                                                                  Err.wrap(identityConstraint.getName()) +
@@ -217,8 +221,6 @@ public abstract class SelectorWatch extends PatternWatch {
                     // for <keyref>, the node is ignored unless all fields are present
                     return;
                 }
-            } else {
-                //hash.append(currentRow[i].getSchemaComparable().hashCode());
             }
         }
 
@@ -261,18 +263,57 @@ public abstract class SelectorWatch extends PatternWatch {
                                 identityConstraint.getName() +
                                 ": " + entry);
                 String err = constraintChecker.getValidationContext().getErrorCode();
-//                if (err == null || err.startsWith("XTTE")) {
-//                    err = "XTTE1555"; // more specific error code in XSLT
-//                }
                 ve.setErrorCode(err);
                 ve.setConstraintReference(1, "cvc-identity-constraint",
                                           identityConstraint instanceof Unique ? "4.1" : "4.2.2");
                 reportValidationError(ve, locationId);
             }
+        } else if (identityConstraint.isOrdered()) {
+            // The constraint is xs:unique with saxon:order = ascending/descending. In this case we maintain the
+            // table so that it only contains the most recent value
+            // First check that the new value satisfies the ordering constraints
+            if (table.isEmpty()) {
+                table.put(entry, PRESENT_VALUE);
+            } else {
+                ValueEntry latest = null;
+                for (ValueEntry ve : table.keySet()) { // There will only be one
+                    latest = ve;
+                }
+                assert latest != null;
+                if (orderedOK(latest, entry)) {
+                    table.clear();
+                    table.put(entry, PRESENT_VALUE);
+                } else {
+                    ValidationFailure ve = new ValidationFailure(
+                            "Value out of sequence for ordered constraint " +
+                                    identityConstraint.getName() +
+                                    ": " + entry);
+                    ve.setErrorCode(SaxonErrorCode.SXOR0001);
+                    ve.setConstraintReference(1, "saxon-identity-constraint", "0");
+                    reportValidationError(ve, locationId);
+                }
+            }
         } else {
             Integer details = isTarget ? REFERENCED_VALUE : PRESENT_VALUE;
             table.put(entry, details);
         }
+    }
+
+    private boolean orderedOK(ValueEntry first, ValueEntry second) {
+        AtomicSequence[] s1 = first.getValues();
+        AtomicSequence[] s2 = second.getValues();
+        if (s1.length != s2.length) {
+            throw new AssertionError();
+        }
+        for (int i = 0; i < s1.length; i++) {
+            Comparable c1 = s1[i].getSchemaComparable();
+            Comparable c2 = s2[i].getSchemaComparable();
+            int c = c1.compareTo(c2);
+            if (c != 0) {
+                return identityConstraint.getFields().get(i).isAscending() ? c < 0 : c > 0;
+            }
+        }
+        return false;
     }
 
     private static final Integer REFERENCED_VALUE = 0x10000;
@@ -287,7 +328,7 @@ public abstract class SelectorWatch extends PatternWatch {
 
     static abstract class ValueEntry {
 
-        public static ValueEntry makeValueEntry(AtomicSequence[] values) {
+        static ValueEntry makeValueEntry(AtomicSequence[] values) {
             switch (values.length) {
                 case 1:
                     return new ValueEntry1(values[0]);
@@ -302,7 +343,7 @@ public abstract class SelectorWatch extends PatternWatch {
             }
         }
 
-        protected boolean compareValues(AtomicSequence val0, AtomicSequence val1) {
+        boolean equalValues(AtomicSequence val0, AtomicSequence val1) {
             if (val0 == null) {
                 return val1 == null;
             } else {
@@ -310,13 +351,34 @@ public abstract class SelectorWatch extends PatternWatch {
             }
         }
 
-        protected String displayValue(AtomicSequence val) {
+        String displayValue(AtomicSequence val) {
             if (val == null) {
                 return "()";
             } else {
                 return val.toString();
             }
         }
+
+        /**
+         * Create a compact representation of an AtomicSequence
+         * @param value the supplied sequence
+         * @return either the original sequence, or a compacted version of it
+         */
+
+        protected final AtomicSequence compact(AtomicSequence value) {
+            if (value instanceof StringValue) {
+                return new CompactStringValue(value.getStringValue());
+            } else {
+                return value;
+            }
+        }
+
+        /**
+         * Get the array of atomic sequences, one per field definition in the constraint
+         * @return an array of atomic sequences, one per field definition
+         */
+
+        abstract AtomicSequence[] getValues();
 
         protected int hash(AtomicSequence value) {
             return value == null ? 0 : value.getSchemaComparable().hashCode();
@@ -330,20 +392,23 @@ public abstract class SelectorWatch extends PatternWatch {
          */
         AtomicSequence[] values;
 
-        public MultiValueEntry(AtomicSequence[] values) {
+        MultiValueEntry(AtomicSequence[] values) {
             this.values = values;
             for (int i = 0; i < values.length; i++) {
-                if (values[i] instanceof StringValue) {
-                    values[i] = new CompactStringValue(values[i].getStringValue());
-                }
+                values[i] = compact(values[i]);
             }
+        }
+
+        @Override
+        AtomicSequence[] getValues() {
+            return values;
         }
 
         @Override
         public boolean equals(Object obj) {
             if (obj instanceof MultiValueEntry && ((MultiValueEntry) obj).values.length == values.length) {
                 for (int i = 0; i < values.length; i++) {
-                    if (!compareValues(values[i], ((MultiValueEntry) obj).values[i])) {
+                    if (!equalValues(values[i], ((MultiValueEntry) obj).values[i])) {
                         return false;
                     }
                 }
@@ -364,14 +429,14 @@ public abstract class SelectorWatch extends PatternWatch {
 
         public String toString() {
             FastStringBuffer sb = new FastStringBuffer(100);
-            sb.append('(');
+            sb.cat('(');
             for (int i = 0; i < values.length; i++) {
                 if (i != 0) {
                     sb.append(", ");
                 }
                 sb.append(displayValue(values[i]));
             }
-            sb.append(')');
+            sb.cat(')');
             return sb.toString();
         }
     }
@@ -380,18 +445,19 @@ public abstract class SelectorWatch extends PatternWatch {
 
         AtomicSequence value;
 
-        public ValueEntry1(AtomicSequence value) {
-            if (value instanceof StringValue) {
-                this.value = new CompactStringValue(value.getStringValue());
-            } else {
-                this.value = value;
-            }
+        ValueEntry1(AtomicSequence value) {
+            this.value = compact(value);
+        }
+
+        @Override
+        AtomicSequence[] getValues() {
+            return new AtomicSequence[]{value};
         }
 
         @Override
         public boolean equals(Object obj) {
             return obj instanceof ValueEntry1 &&
-                    compareValues(value, ((ValueEntry1) obj).value);
+                    equalValues(value, ((ValueEntry1) obj).value);
         }
 
         @Override
@@ -409,24 +475,21 @@ public abstract class SelectorWatch extends PatternWatch {
         AtomicSequence value0;
         AtomicSequence value1;
 
-        public ValueEntry2(AtomicSequence value0, AtomicSequence value1) {
-            if (value0 instanceof StringValue) {
-                this.value0 = new CompactStringValue(value0.getStringValue());
-            } else {
-                this.value0 = value0;
-            }
-            if (value1 instanceof StringValue) {
-                this.value1 = new CompactStringValue(value1.getStringValue());
-            } else {
-                this.value1 = value1;
-            }
+        ValueEntry2(AtomicSequence value0, AtomicSequence value1) {
+            this.value0 = compact(value0);
+            this.value1 = compact(value1);
+        }
+
+        @Override
+        AtomicSequence[] getValues() {
+            return new AtomicSequence[]{value0, value1};
         }
 
         @Override
         public boolean equals(Object obj) {
             return obj instanceof ValueEntry2 &&
-                    compareValues(value0, ((ValueEntry2) obj).value0) &&
-                    compareValues(value1, ((ValueEntry2) obj).value1);
+                    equalValues(value0, ((ValueEntry2) obj).value0) &&
+                    equalValues(value1, ((ValueEntry2) obj).value1);
         }
 
         @Override
@@ -445,30 +508,23 @@ public abstract class SelectorWatch extends PatternWatch {
         AtomicSequence value1;
         AtomicSequence value2;
 
-        public ValueEntry3(AtomicSequence value0, AtomicSequence value1, AtomicSequence value2) {
-            if (value0 instanceof StringValue) {
-                this.value0 = new CompactStringValue(value0.getStringValue());
-            } else {
-                this.value0 = value0;
-            }
-            if (value1 instanceof StringValue) {
-                this.value1 = new CompactStringValue(value1.getStringValue());
-            } else {
-                this.value1 = value1;
-            }
-            if (value2 instanceof StringValue) {
-                this.value2 = new CompactStringValue(value2.getStringValue());
-            } else {
-                this.value2 = value2;
-            }
+        ValueEntry3(AtomicSequence value0, AtomicSequence value1, AtomicSequence value2) {
+            this.value0 = compact(value0);
+            this.value1 = compact(value1);
+            this.value2 = compact(value2);
+        }
+
+        @Override
+        AtomicSequence[] getValues() {
+            return new AtomicSequence[]{value0, value1, value2};
         }
 
         @Override
         public boolean equals(Object obj) {
             return obj instanceof ValueEntry3 &&
-                    compareValues(value0, ((ValueEntry3) obj).value0) &&
-                    compareValues(value1, ((ValueEntry3) obj).value1) &&
-                    compareValues(value2, ((ValueEntry3) obj).value2);
+                    equalValues(value0, ((ValueEntry3) obj).value0) &&
+                    equalValues(value1, ((ValueEntry3) obj).value1) &&
+                    equalValues(value2, ((ValueEntry3) obj).value2);
         }
 
         @Override
@@ -488,36 +544,25 @@ public abstract class SelectorWatch extends PatternWatch {
         AtomicSequence value2;
         AtomicSequence value3;
 
-        public ValueEntry4(AtomicSequence value0, AtomicSequence value1, AtomicSequence value2, AtomicSequence value3) {
-            if (value0 instanceof StringValue) {
-                this.value0 = new CompactStringValue(value0.getStringValue());
-            } else {
-                this.value0 = value0;
-            }
-            if (value1 instanceof StringValue) {
-                this.value1 = new CompactStringValue(value1.getStringValue());
-            } else {
-                this.value1 = value1;
-            }
-            if (value2 instanceof StringValue) {
-                this.value2 = new CompactStringValue(value2.getStringValue());
-            } else {
-                this.value2 = value2;
-            }
-            if (value3 instanceof StringValue) {
-                this.value3 = new CompactStringValue(value3.getStringValue());
-            } else {
-                this.value3 = value3;
-            }
+        ValueEntry4(AtomicSequence value0, AtomicSequence value1, AtomicSequence value2, AtomicSequence value3) {
+            this.value0 = compact(value0);
+            this.value1 = compact(value1);
+            this.value2 = compact(value2);
+            this.value3 = compact(value3);
+        }
+
+        @Override
+        AtomicSequence[] getValues() {
+            return new AtomicSequence[]{value0, value1, value2, value3};
         }
 
         @Override
         public boolean equals(Object obj) {
             return obj instanceof ValueEntry4 &&
-                    compareValues(value0, ((ValueEntry4) obj).value0) &&
-                    compareValues(value1, ((ValueEntry4) obj).value1) &&
-                    compareValues(value2, ((ValueEntry4) obj).value2) &&
-                    compareValues(value3, ((ValueEntry4) obj).value3);
+                    equalValues(value0, ((ValueEntry4) obj).value0) &&
+                    equalValues(value1, ((ValueEntry4) obj).value1) &&
+                    equalValues(value2, ((ValueEntry4) obj).value2) &&
+                    equalValues(value3, ((ValueEntry4) obj).value3);
         }
 
         @Override
@@ -550,7 +595,7 @@ public abstract class SelectorWatch extends PatternWatch {
         ValidationContext vc = constraintChecker.getValidationContext();
         InvalidityHandler handler = vc.getInvalidityHandler();
         if (handler == null) {
-            handler = new InvalidityHandlerWrappingErrorListener(pipe.getErrorListener());
+            handler = new InvalidityHandlerWrappingErrorReporter(pipe.getErrorReporter());
         }
         err.setHasBeenReported(true);
         err.setSourceLocator(locator);
@@ -566,4 +611,4 @@ public abstract class SelectorWatch extends PatternWatch {
 
 }
 
-// Copyright (c) 2004-2015 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

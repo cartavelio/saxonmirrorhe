@@ -3,12 +3,11 @@ package com.saxonica.ee.validate;
 import com.saxonica.ee.stream.om.FleetingNode;
 import com.saxonica.ee.stream.om.FleetingParentNode;
 import com.saxonica.ee.stream.watch.PatternWatch;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ValidationException;
 
@@ -19,9 +18,9 @@ import net.sf.saxon.type.ValidationException;
 
 public class FieldWatch extends PatternWatch {
 
-    private SelectorWatch parentWatch;
-    private AtomicSequence[] currentRow;
-    private int column;
+    private final SelectorWatch parentWatch;
+    private final AtomicSequence[] currentRow;
+    private final int column;
 
     /**
      * Create a new FieldWatch
@@ -54,9 +53,11 @@ public class FieldWatch extends PatternWatch {
      *
      * @throws ValidationException May be raised if the constraint implemented by this
      *                             Watch is violated @param locationId the location of the node in the source, or of the instruction that created it
+     * @return a FieldChecker - a receiver that collects the contents of the selected node, or null
      */
 
-    public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
+    @Override
+    public FieldChecker startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
         FieldChecker fc = new FieldChecker(parentWatch, getSelection(), currentRow, column);
         fc.setPipelineConfiguration(getPipelineConfiguration());
         fc.setNamespaceResolver(getNamespaceResolver());
@@ -72,6 +73,7 @@ public class FieldWatch extends PatternWatch {
      * @param locationId the location of the node in the source, or of the instruction that created it
      */
 
+    @Override
     public void endSelectedParentNode(Location locationId) throws ValidationException {
     }
 
@@ -83,12 +85,13 @@ public class FieldWatch extends PatternWatch {
      *
      */
 
-    public void processItem(Item<?> item) throws XPathException {
+    @Override
+    public void processItem(Item item) throws XPathException {
         FieldChecker fc = new FieldChecker(parentWatch, getSelection(), currentRow, column);
         fc.setPipelineConfiguration(getPipelineConfiguration());
         fc.setNamespaceResolver(getNamespaceResolver());
-        fc.notifySelectedAttribute((FleetingNode) item, ExplicitLocation.UNKNOWN_LOCATION);
+        fc.notifySelectedAttribute((FleetingNode) item, Loc.NONE);
     }
 }
 
-// Copyright (c) 2004-2009 Saxonica Limited. No warranty.
+// Copyright (c) 2004-2020 Saxonica Limited

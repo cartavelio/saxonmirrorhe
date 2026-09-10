@@ -1,11 +1,11 @@
 package com.saxonica.xqj.pull;
 
+import net.sf.saxon.event.NamespaceReducer;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pull.PullFilter;
 import net.sf.saxon.pull.PullProvider;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.AttributeCollectionImpl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,7 +20,7 @@ import java.util.List;
  * in the push pipeline. (In the push version, however, namespace fixup is not
  * performed by the NamespaceReducer, but by the ComplexContentOutputter).</p>
  *
- * @see net.sf.saxon.event.NamespaceReducer
+ * @see NamespaceReducer
  */
 
 public class PullNamespaceReducer extends PullFilter implements NamespaceResolver {
@@ -48,7 +48,7 @@ public class PullNamespaceReducer extends PullFilter implements NamespaceResolve
     private NodeName nodeName;                               // the name of the current element
 
     private NamespaceBinding[] declaredNamespaces;
-    private AttributeCollection attributeCollection;
+    private AttributeMap attributeMap;
 
     // Creating an element does not automatically inherit the namespaces of the containing element.
     // TODO: disinheriting namespaces is not yet supported by the pull pipeline
@@ -72,7 +72,8 @@ public class PullNamespaceReducer extends PullFilter implements NamespaceResolve
      * possibly adds an xmlns="" undeclaration.
      */
 
-    public int next() throws XPathException {
+    @Override
+    public Event next() throws XPathException {
 
         currentEvent = super.next();
 
@@ -95,11 +96,10 @@ public class PullNamespaceReducer extends PullFilter implements NamespaceResolve
     }
 
     private void startElement() throws XPathException {
-
         // Record the current height of the namespace list so it can be reset at endElement time
 
         namespaceCountStack[depth] = 0;
-        //disinheritStack[depth] = (properties & ReceiverOptions.DISINHERIT_NAMESPACES) != 0;
+        //disinheritStack[depth] = (properties & ReceiverOption.DISINHERIT_NAMESPACES) != 0;
         if (++depth >= namespaceCountStack.length) {
             namespaceCountStack = Arrays.copyOf(namespaceCountStack, depth*2);
             namestack = Arrays.copyOf(namestack, depth*2);
@@ -127,35 +127,27 @@ public class PullNamespaceReducer extends PullFilter implements NamespaceResolve
         nodeName = checkProposedPrefix(super.getNodeName(), 0);
         namestack[depth - 1] = nodeName;
 
-//        int elementNS = getNamePool().allocateNamespaceCode(getNameCode());
-//        if (isNeeded(elementNS)) {
-//            appendNamespace(elementNS);
-//        }
-
         // Namespace fixup: ensure that all namespaces used in attribute names are declared
 
-        attributeCollection = super.getAttributes();
-        boolean modified = false;
-        for (int i = 0; i < attributeCollection.getLength(); i++) {
-            NodeName nc = attributeCollection.getNodeName(i);
+        attributeMap = super.getAttributes();
+        List<AttributeInfo> list = new ArrayList<>(attributeMap.size());
+        for (AttributeInfo att : attributeMap) {
+            NodeName nc = att.getNodeName();
+            AttributeInfo att2 = att;
             if (!nc.getURI().isEmpty()) {
                 // Only need to do checking for an attribute that's namespaced
-                NodeName newnc = checkProposedPrefix(nc, i + 1);
+                NodeName newnc = checkProposedPrefix(nc, list.size());
                 if (nc != newnc) {
-                    if (!modified) {
-                        attributeCollection = copyAttributeCollection(attributeCollection);
-                        modified = true;
-                    }
-                    ((AttributeCollectionImpl) attributeCollection).setAttribute(i,
-                            newnc,
-                            attributeCollection.getTypeAnnotation(i),
-                            attributeCollection.getValue(i),
-                            attributeCollection.getLocation(i),
-                            attributeCollection.getProperties(i));
+                    att2 = new AttributeInfo(newnc,
+                                             att.getType(),
+                                             att.getValue(),
+                                             att.getLocation(),
+                                             att.getProperties());
                 }
             }
+            list.add(att2);
         }
-
+        attributeMap = AttributeMap.fromList(list);
 
         if (localNamespacesSize < localNamespaces.length) {
             localNamespaces[localNamespacesSize] = null;     // add a terminator
@@ -164,8 +156,6 @@ public class PullNamespaceReducer extends PullFilter implements NamespaceResolve
         declaredNamespaces = localNamespaces;
         namespaceCountStack[depth - 1] = localNamespacesSize;
     }
-
-    private NamespaceBinding[] nsBuffer = new NamespaceBinding[20];
 
     private void addLocalNamespace(NamespaceBinding nc) {
         if (localNamespacesSize < localNamespaces.length) {
@@ -218,21 +208,7 @@ public class PullNamespaceReducer extends PullFilter implements NamespaceResolve
 
         // we need it unless it's a redundant xmlns=""
         return !nscode.isDefaultUndeclaration();
-
-
-        // startContent: Add any namespace undeclarations needed to stop
-        // namespaces being inherited from parent elements
-
-//        if (pendingUndeclarations != null) {
-//            for (int i=0; i<pendingUndeclarations.length; i++) {
-//                int nscode1 = pendingUndeclarations[i];
-//                if (nscode1 != -1) {
-//                    namespace(nscode1 & 0xffff0000, 0);
-//                    // relies on the namespace() method to prevent duplicate undeclarations
-//                }
-//            }
-//        }
-        //pendingUndeclarations = null;
+        
     }
 
     /**
@@ -326,20 +302,9 @@ public class PullNamespaceReducer extends PullFilter implements NamespaceResolve
      *         that has just been notified.
      */
 
-    public AttributeCollection getAttributes() {
-        return attributeCollection;
-    }
-
-    private AttributeCollectionImpl copyAttributeCollection(AttributeCollection in) {
-        AttributeCollectionImpl out = new AttributeCollectionImpl(getPipelineConfiguration().getConfiguration());
-        for (int i = 0; i < in.getLength(); i++) {
-            out.addAttribute(in.getNodeName(i),
-                    in.getTypeAnnotation(i),
-                    in.getValue(i),
-                    in.getLocation(i),
-                    in.getProperties(i));
-        }
-        return out;
+    @Override
+    public AttributeMap getAttributes() {
+        return attributeMap;
     }
 
     /**
@@ -363,8 +328,9 @@ public class PullNamespaceReducer extends PullFilter implements NamespaceResolve
      * one of the methods skipToEnd(), getStringValue(), or getTypedValue().</p>
      */
 
+    @Override
     public NamespaceBinding[] getNamespaceDeclarations() {
-        if (currentEvent == END_ELEMENT) {
+        if (currentEvent == Event.END_ELEMENT) {
             // this case is sufficiently rare that we don't worry about its efficiency.
             // The namespaces that are needed are still on the namespace stack, even though the
             // top-of-stack pointer has already been decremented.
@@ -404,6 +370,7 @@ public class PullNamespaceReducer extends PullFilter implements NamespaceResolve
      */
 
     /*@Nullable*/
+    @Override
     public String getURIForPrefix(String prefix, boolean useDefault) {
         if (prefix.isEmpty() && !useDefault) {
             return "";
@@ -424,6 +391,7 @@ public class PullNamespaceReducer extends PullFilter implements NamespaceResolve
      * the default namespace (prefix="") and the XML namespace where appropriate
      */
 
+    @Override
     public Iterator<String> iteratePrefixes() {
         List<String> prefixes = new ArrayList<>(allNamespacesSize);
         for (int i = allNamespacesSize - 1; i >= 0; i--) {
@@ -439,4 +407,4 @@ public class PullNamespaceReducer extends PullFilter implements NamespaceResolve
 
 }
 
-// Copyright (c) 2009 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

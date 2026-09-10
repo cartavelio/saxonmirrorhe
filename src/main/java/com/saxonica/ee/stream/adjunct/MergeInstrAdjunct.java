@@ -8,9 +8,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.StartTagBuffer;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.sort.ItemWithMergeKeys;
 import net.sf.saxon.expr.sort.MergeInstr;
 import net.sf.saxon.functions.DocumentFn;
 import net.sf.saxon.functions.SnapshotFn;
@@ -21,9 +19,9 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.style.StylesheetPackage;
+import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.FastStringBuffer;
-import net.sf.saxon.value.ExternalObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,7 +70,7 @@ public class MergeInstrAdjunct extends StreamingAdjunct {
                 for (String s : reasons) {
                     buffer.append(s + ". ");
                 }
-                config.getErrorListener().warning(new XPathException(buffer.toString()));
+                config.makeErrorReporter().report(new XmlProcessingIncident(buffer.toString()).asWarning());
                 mergeSource.streamable = false;
             } else {
                 FastStringBuffer buffer = new FastStringBuffer(120);
@@ -89,6 +87,7 @@ public class MergeInstrAdjunct extends StreamingAdjunct {
 
     @Override
     public PostureAndSweep computeStreamability(ContextItemStaticInfoEE contextInfo, List<String> reasons) {
+        // Check that xsl:merge is allowed as an instruction within a streamable template. See bug 4275
         MergeInstr instr = (MergeInstr) getExpression();
         for (MergeInstr.MergeSource ms : instr.getMergeSources()) {
             if (ms.getForEachItem() != null && !Streamability.getStreamability(ms.getForEachItem(), contextInfo, reasons).equals(PostureAndSweep.GROUNDED_AND_MOTIONLESS)) {
@@ -119,10 +118,9 @@ public class MergeInstrAdjunct extends StreamingAdjunct {
      * @throws XPathException if anything goes wrong
      */
 
-    public static List<ContextMappingIterator<ExternalObject<ItemWithMergeKeys>>> makeSourceIterators(
+    public static List<ContextMappingIterator> makeSourceIterators(
             final MergeInstr.MergeSource ms, final PackageData pd, XPathContext c1) throws XPathException {
-        List<ContextMappingIterator<ExternalObject<ItemWithMergeKeys>>> result =
-                new ArrayList<>();
+        List<ContextMappingIterator> result = new ArrayList<>();
         SequenceIterator uriIter = ms.getForEachSource().iterate(c1);
         Item uri;
         while ((uri = uriIter.next()) != null) {
@@ -132,7 +130,7 @@ public class MergeInstrAdjunct extends StreamingAdjunct {
             options.setApplicableAccumulators(ms.accumulators);
 
             final String href = uri.getStringValue();
-            PushToPull.Pusher pusher = context -> {
+            PushToPull.Pusher pusher = (output, context) -> {
                 Controller controller = context.getController();
                 XPathContextMajor c2 = context.newContext();
                 c2.setCurrentTemplateRule(null);
@@ -141,6 +139,7 @@ public class MergeInstrAdjunct extends StreamingAdjunct {
 
                 WatchManager wm = new WatchManager(pipe);
                 wm.setXPathContext(context);
+                wm.setOutputter(output);
 
                 AccumulatorRegistryEE am = (AccumulatorRegistryEE) pd.getAccumulatorRegistry();
 
@@ -148,12 +147,7 @@ public class MergeInstrAdjunct extends StreamingAdjunct {
                     AccumulatorRegistryEE.registerSelectedAccumulators(wm, ms.accumulators);
                 }
 
-                StartTagBuffer stb = new StartTagBuffer(wm);
-                wm.setStartTagBuffer(stb);
-
-                stb.setUnderlyingReceiver(wm);
-
-                Receiver out = stb; //new ContentDetector(stb);
+                Receiver out = wm; //new ContentDetector(stb);
 
                 if (pd instanceof StylesheetPackage && ((StylesheetPackage) pd).isStripsTypeAnnotations()) {
                     out = pd.getConfiguration().getAnnotationStripper(out);
@@ -164,12 +158,12 @@ public class MergeInstrAdjunct extends StreamingAdjunct {
                 DocumentFn.sendDoc(href, ms.baseURI, context, ms.location, out, options);
             };
 
-            SequenceIterator<?> iter = new PushToPull(pusher, c1).getIterator();
+            SequenceIterator iter = new PushToPull(pusher, c1).getIterator();
             XPathContext c2 = c1.newMinorContext();
             c2.trackFocus(iter);
             MergeInstr.MergeKeyMappingFunction addMergeKeys = new MergeInstr.MergeKeyMappingFunction(c2, ms);
-            ContextMappingIterator<ExternalObject<ItemWithMergeKeys>> iter3 =
-                    new ContextMappingIterator<>(addMergeKeys, c2);
+            ContextMappingIterator iter3 =
+                    new ContextMappingIterator(addMergeKeys, c2);
             result.add(iter3);
         }
         return result;
@@ -177,4 +171,4 @@ public class MergeInstrAdjunct extends StreamingAdjunct {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited

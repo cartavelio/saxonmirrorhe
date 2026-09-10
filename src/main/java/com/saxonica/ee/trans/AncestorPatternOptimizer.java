@@ -21,10 +21,12 @@ public class AncestorPatternOptimizer extends PatternOptimizer {
         return THE_INSTANCE;
     }
 
+    @Override
     public boolean appliesTo(Pattern pattern) {
         return pattern instanceof AncestorQualifiedPattern;
     }
 
+    @Override
     public void process(RuleEE rule, Pattern pattern, Map<Precondition, List<RuleEE>> preconditions, Map<Characteristic, Characteristic> characteristics) {
         Pattern anc = ((AncestorQualifiedPattern) pattern).getUpperPattern();
         boolean isParent = ((AncestorQualifiedPattern) pattern).getUpwardsAxis() == AxisInfo.PARENT;
@@ -39,4 +41,4 @@ public class AncestorPatternOptimizer extends PatternOptimizer {
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited

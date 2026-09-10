@@ -24,8 +24,9 @@ public abstract class ForSequenceMappingAction implements MappingFunction {
         this.context = context;
     }
 
+    @Override
     public abstract SequenceIterator map(Item item) throws XPathException;
 
 }
 
-//Copyright (c) 2011-2018 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

@@ -28,18 +28,19 @@ public class ElementNameTracker extends PullFilter {
      * currentEvent to the event returned by any call on next().</p>
      *
      * @return an integer code indicating the type of event. The code
-     *         {@link #END_OF_INPUT} is returned at the end of the sequence.
+     *         {@link net.sf.saxon.pull.PullProvider.Event#END_OF_INPUT} is returned at the end of the sequence.
      */
 
-    public int next() throws XPathException {
+    @Override
+    public Event next() throws XPathException {
         currentEvent = super.next();
-        if (currentEvent == START_ELEMENT) {
+        if (currentEvent == Event.START_ELEMENT) {
             NodeName nc = getNodeName();
             if (used >= namestack.length) {
                 namestack = Arrays.copyOf(namestack, used*2);
             }
             namestack[used++] = nc;
-        } else if (currentEvent == END_ELEMENT) {
+        } else if (currentEvent == Event.END_ELEMENT) {
             elementJustEnded = namestack[--used];
         }
         return currentEvent;
@@ -47,9 +48,9 @@ public class ElementNameTracker extends PullFilter {
 
     /**
      * Get the node name identifying the name of the current node. This method
-     * can be used after the {@link #START_ELEMENT}, {@link #PROCESSING_INSTRUCTION},
-     * {@link #ATTRIBUTE}, or {@link #NAMESPACE} events. With some PullProvider implementations,
-     * including this one, it can also be used after {@link #END_ELEMENT}: in fact, that is the
+     * can be used after the {@link net.sf.saxon.pull.PullProvider.Event#START_ELEMENT}, {@link net.sf.saxon.pull.PullProvider.Event#PROCESSING_INSTRUCTION},
+     * {@link net.sf.saxon.pull.PullProvider.Event#ATTRIBUTE}, or {@link net.sf.saxon.pull.PullProvider.Event#NAMESPACE} events. With some PullProvider implementations,
+     * including this one, it can also be used after {@link net.sf.saxon.pull.PullProvider.Event#END_ELEMENT}: in fact, that is the
      * main purpose of this class.
      * If called at other times, the result is undefined and may result in an IllegalStateException.
      * If called when the current node is an unnamed namespace node (a node representing the default namespace)
@@ -59,8 +60,9 @@ public class ElementNameTracker extends PullFilter {
      *         and namespace URI from the name pool.
      */
 
+    @Override
     public NodeName getNodeName() {
-        if (currentEvent == END_ELEMENT) {
+        if (currentEvent == Event.END_ELEMENT) {
             return elementJustEnded;
         } else {
             return super.getNodeName();
@@ -68,4 +70,4 @@ public class ElementNameTracker extends PullFilter {
     }
 }
 
-// Copyright (c) 2009-2014 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

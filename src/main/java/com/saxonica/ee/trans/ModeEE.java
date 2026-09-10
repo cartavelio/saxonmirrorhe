@@ -57,10 +57,11 @@ public class ModeEE extends ModePE {
 
     @Override
     public Rule makeRule(/*@NotNull*/ Pattern pattern, /*@NotNull*/ RuleTarget action,
-                         int precedence, int minImportPrecedence, double priority, int sequence, int part) {
+                                      int precedence, int minImportPrecedence, double priority, int sequence, int part) {
         return new RuleEE(pattern, action, precedence, minImportPrecedence, priority, sequence, part);
     }
 
+    @Override
     protected PreconditionMatcher makeRuleSearchState(RuleChain chain, XPathContext context) {
         return new PreconditionMatcher(chain, context);
     }
@@ -137,6 +138,7 @@ public class ModeEE extends ModePE {
      * Compute the streamability of all template rules
      */
 
+    @Override
     public void computeStreamability() throws XPathException {
         RuleAction action = r -> {
             TemplateRuleEE t = (TemplateRuleEE) r.getAction();
@@ -205,6 +207,7 @@ public class ModeEE extends ModePE {
      * each rule chain in turn.
      */
 
+    @Override
     public void optimizeRules() {
 
         optimizeRuleChain(documentRuleChain);
@@ -399,6 +402,7 @@ public class ModeEE extends ModePE {
         return result;
     }
 
+    @Override
     public void explainTemplateRules(final ExpressionPresenter out) throws XPathException {
 //        if (patternOptimization != null) {
 //            patternOptimization.export(out);
@@ -410,6 +414,7 @@ public class ModeEE extends ModePE {
     }
 
 
+    @Override
     public void reportAmbiguity(Item item, Rule r1, Rule r2, XPathContext c)
             throws XPathException {
         super.reportAmbiguity(item, r1, r2, c);
@@ -442,4 +447,4 @@ public class ModeEE extends ModePE {
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

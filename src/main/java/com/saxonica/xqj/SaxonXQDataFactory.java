@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -168,6 +168,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
      */
 
     /*@NotNull*/
+    @Override
     public XQItemType createAtomicType(int baseType) throws XQException {
         checkNotClosed();
         int saxonType = XQJtoSaxonTypeTranslation.get(baseType);
@@ -198,6 +199,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
 
 
     /*@NotNull*/
+    @Override
     public XQItemType createAtomicType(int baseType, /*@Nullable*/ QName typename, URI schemaURI) throws XQException {
         checkNotClosed();
         if (typename == null) {
@@ -230,6 +232,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
 
 
     /*@NotNull*/
+    @Override
     public XQItemType createAttributeType(/*@Nullable*/ QName nodename, int basetype) throws XQException {
         checkNotClosed();
         Configuration config = getConfiguration();
@@ -248,6 +251,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
     }
 
     /*@NotNull*/
+    @Override
     public XQItemType createAttributeType(/*@Nullable*/ QName nodename, int basetype, /*@Nullable*/ QName typename, URI schemaURI) throws XQException {
         checkNotClosed();
         if (typename == null) {
@@ -282,12 +286,14 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
     }
 
     /*@NotNull*/
+    @Override
     public XQItemType createCommentType() throws XQException {
         checkNotClosed();
         return new SaxonXQItemType(NodeKindTest.COMMENT, getConfiguration());
     }
 
     /*@NotNull*/
+    @Override
     public XQItemType createDocumentElementType(XQItemType elementType) throws XQException {
         checkNotClosed();
         SaxonXQDataSource.checkNotNull(elementType, "elementType");
@@ -300,6 +306,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
     }
 
     /*@NotNull*/
+    @Override
     public XQItemType createDocumentSchemaElementType(XQItemType type) throws XQException {
         checkNotClosed();
         SaxonXQDataSource.checkNotNull(type, "type");
@@ -312,12 +319,14 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
     }
 
     /*@NotNull*/
+    @Override
     public XQItemType createDocumentType() throws XQException {
         checkNotClosed();
         return new SaxonXQItemType(NodeKindTest.DOCUMENT, getConfiguration());
     }
 
     /*@NotNull*/
+    @Override
     public XQItemType createElementType(/*@Nullable*/ QName nodename, int basetype) throws XQException {
         checkNotClosed();
         Configuration config = getConfiguration();
@@ -354,6 +363,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
     }
 
     /*@NotNull*/
+    @Override
     public XQItemType createElementType(/*@Nullable*/ QName nodename, int basetype, /*@Nullable*/ QName typename, URI schemaURI, boolean allowNill)
             throws XQException {
         checkNotClosed();
@@ -377,6 +387,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
     }
 
     /*@NotNull*/
+    @Override
     public XQItem createItem(XQItem item) throws XQException {
         checkNotClosed();
         SaxonXQDataSource.checkNotNull(item, "item");
@@ -385,6 +396,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
     }
 
     /*@NotNull*/
+    @Override
     public XQItem createItemFromAtomicValue(String value, XQItemType type) throws XQException {
         checkNotClosed();
         SaxonXQDataSource.checkNotNull(value, "value");
@@ -400,6 +412,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
     }
 
     /*@NotNull*/
+    @Override
     public XQItem createItemFromBoolean(boolean value, /*@Nullable*/ XQItemType type) throws XQException {
         checkNotClosed();
         if (type == null) {
@@ -424,6 +437,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
     }
 
     /*@NotNull*/
+    @Override
     public XQItem createItemFromByte(byte value, /*@Nullable*/ XQItemType type) throws XQException {
         checkNotClosed();
         if (type == null) {
@@ -438,6 +452,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
     }
 
     /*@NotNull*/
+    @Override
     public XQItem createItemFromDocument(InputStream value, String baseURI, XQItemType type) throws XQException {
         checkNotClosed();
         SaxonXQDataSource.checkNotNull(value, "value");
@@ -446,6 +461,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
     }
 
     /*@NotNull*/
+    @Override
     public XQItem createItemFromDocument(Reader value, String baseURI, XQItemType type) throws XQException {
         checkNotClosed();
         SaxonXQDataSource.checkNotNull(value, "value");
@@ -467,6 +483,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
     }
 
     /*@NotNull*/
+    @Override
     public XQItem createItemFromDocument(Source value, XQItemType type) throws XQException {
         checkNotClosed();
         SaxonXQDataSource.checkNotNull(value, "value");
@@ -481,6 +498,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
     }
 
     /*@NotNull*/
+    @Override
     public XQItem createItemFromDocument(String value, String baseURI, XQItemType type) throws XQException {
         checkNotClosed();
         SaxonXQDataSource.checkNotNull(value, "value");
@@ -497,6 +515,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
     }
 
     /*@NotNull*/
+    @Override
     public XQItem createItemFromDocument(XMLStreamReader value, XQItemType type) throws XQException {
         checkNotClosed();
         SaxonXQDataSource.checkNotNull(value, "value");
@@ -559,6 +578,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
     }
 
     /*@NotNull*/
+    @Override
     public XQItem createItemFromDouble(double value, /*@Nullable*/ XQItemType type) throws XQException {
         checkNotClosed();
         if (type == null) {
@@ -582,6 +602,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
     }
 
     /*@NotNull*/
+    @Override
     public XQItem createItemFromFloat(float value, /*@Nullable*/ XQItemType type) throws XQException {
         checkNotClosed();
         if (type == null) {
@@ -605,6 +626,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
     }
 
     /*@NotNull*/
+    @Override
     public XQItem createItemFromInt(int value, /*@Nullable*/ XQItemType type) throws XQException {
         checkNotClosed();
         if (type == null) {
@@ -619,6 +641,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
     }
 
     /*@NotNull*/
+    @Override
     public XQItem createItemFromLong(long value, /*@Nullable*/ XQItemType type) throws XQException {
         checkNotClosed();
         if (type == null) {
@@ -647,6 +670,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
     }
 
     /*@NotNull*/
+    @Override
     public XQItem createItemFromNode(Node value, /*@Nullable*/ XQItemType type) throws XQException {
         checkNotClosed();
         SaxonXQDataSource.checkNotNull(value, "value");
@@ -664,6 +688,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
     }
 
     /*@NotNull*/
+    @Override
     public XQItem createItemFromObject(Object value, /*@Nullable*/ XQItemType type) throws XQException {
         checkNotClosed();
         SaxonXQDataSource.checkNotNull(value, "value");
@@ -676,6 +701,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
 
 
     /*@NotNull*/
+    @Override
     public XQItem createItemFromString(String value, /*@Nullable*/ XQItemType type) throws XQException {
         checkNotClosed();
         SaxonXQDataSource.checkNotNull(value, "value");
@@ -701,6 +727,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
     }
 
     /*@NotNull*/
+    @Override
     public XQItemType createItemType() throws XQException {
         checkNotClosed();
         return new SaxonXQItemType(AnyItemType.getInstance(), getConfiguration());
@@ -861,6 +888,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
 
 
     /*@NotNull*/
+    @Override
     public XQItem createItemFromShort(short value, /*@Nullable*/ XQItemType type) throws XQException {
         checkNotClosed();
         if (type == null) {
@@ -876,12 +904,14 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
 
 
     /*@NotNull*/
+    @Override
     public XQItemType createNodeType() throws XQException {
         checkNotClosed();
         return new SaxonXQItemType(AnyNodeTest.getInstance(), getConfiguration());
     }
 
     /*@NotNull*/
+    @Override
     public XQItemType createProcessingInstructionType(/*@Nullable*/ String piTarget) throws XQException {
         checkNotClosed();
         if (piTarget == null) {
@@ -894,6 +924,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
     }
 
     /*@NotNull*/
+    @Override
     public XQItemType createSchemaAttributeType(/*@NotNull*/ QName name, int basetype, /*@Nullable*/ URI schemaURI) throws XQException {
         checkNotClosed();
         Configuration config = getConfiguration();
@@ -915,6 +946,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
     }
 
     /*@NotNull*/
+    @Override
     public XQItemType createSchemaElementType(/*@NotNull*/ QName nodename, int basetype, /*@Nullable*/ URI schemaURI) throws XQException {
         checkNotClosed();
         Configuration config = getConfiguration();
@@ -937,12 +969,13 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
     }
 
     /*@NotNull*/
+    @Override
     public XQSequence createSequence(/*@Nullable*/ Iterator i) throws XQException {
         checkNotClosed();
         if (i == null) {
             throw new XQException("createSequence(): argument is null");
         }
-        List<Item<?>> list = new ArrayList<>(50);
+        List<Item> list = new ArrayList<>(50);
         while (i.hasNext()) {
             Object object = i.next();
             XQItem item;
@@ -953,11 +986,12 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
             }
             list.add(((SaxonXQItem) item).getSaxonItem());
         }
-        SequenceExtent<Item<?>> extent = new SequenceExtent<>(list);
+        SequenceExtent extent = new SequenceExtent(list);
         return new SaxonXQSequence(extent, this);
     }
 
     /*@NotNull*/
+    @Override
     public XQSequence createSequence(/*@Nullable*/ XQSequence s) throws XQException {
         checkNotClosed();
         if (s == null) {
@@ -968,7 +1002,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
             return new SaxonXQSequence(((SaxonXQSequence) s).getValue(), this);
         } else if (s instanceof SaxonXQForwardSequence) {
             try {
-                GroundedValue<?> extent = ((SaxonXQForwardSequence) s).getIterator().materialize();
+                GroundedValue extent = ((SaxonXQForwardSequence) s).getIterator().materialize();
                 return new SaxonXQSequence(extent, this);
             } catch (XPathException de) {
                 throw newXQException(de);
@@ -979,6 +1013,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
     }
 
     /*@NotNull*/
+    @Override
     public XQSequenceType createSequenceType(XQItemType item, int occurrence) throws XQException {
         checkNotClosed();
         if (item instanceof SaxonXQItemType) {
@@ -1008,6 +1043,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
     }
 
     /*@NotNull*/
+    @Override
     public XQItemType createTextType() throws XQException {
         checkNotClosed();
         return new SaxonXQItemType(NodeKindTest.TEXT, getConfiguration());

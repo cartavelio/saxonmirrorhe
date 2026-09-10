@@ -3,7 +3,6 @@ package com.saxonica.ee.stream.adjunct;
 import com.saxonica.ee.stream.Posture;
 import com.saxonica.ee.stream.PostureAndSweep;
 import com.saxonica.ee.stream.Streamability;
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.watch.WatchManager;
@@ -20,7 +19,7 @@ import java.util.List;
 
 
 /**
- * Compiles streaming code to implement a Let expression
+ * Streaming code to implement a "for" expression
  */
 public class ForExpressionAdjunct extends StreamingAdjunct implements FeedMaker {
 
@@ -30,9 +29,7 @@ public class ForExpressionAdjunct extends StreamingAdjunct implements FeedMaker 
      * streamability, and is implemented to allow these criteria to be tested. It is not the
      * case that all expression that emerge as streamable from this analysis are currently
      * capable of being streamed by Saxon
-     *
-     *
-     *   @param contextInfo
+     * @param contextInfo      information about the context item
      * @param reasons          the caller may supply a list, in which case the implementation may add to this
      */
     @Override
@@ -54,13 +51,14 @@ public class ForExpressionAdjunct extends StreamingAdjunct implements FeedMaker 
     }
 
 
-    public Feed makeItemFeed(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
         return new ForExpressionFeed(getExpression(), out, context);
     }
 
     public static class ForExpressionFeed extends ItemFeed {
 
-        public ForExpressionFeed(Expression expr, Feed out, XPathContext context) {
+        public ForExpressionFeed(Expression expr, ItemFeed out, XPathContext context) {
             super(expr, out, context);
         }
 
@@ -70,13 +68,13 @@ public class ForExpressionAdjunct extends StreamingAdjunct implements FeedMaker 
          * @param item the item to be supplied
          */
         @Override
-        public void processItem(Item<?> item) throws XPathException {
+        public void append(Item item) throws XPathException {
             getContext().setLocalVariable(((ForExpression)getExpression()).getLocalSlotNumber(), item);
             SequenceIterator iter = ((ForExpression)getExpression()).getAction().iterate(getContext());
-            processItems(iter, getResult());
+            processItems(iter, getNextOutputter());
         }
     }
 
 }
 
-// Copyright (c) 2013 Saxonica Limited.
+// Copyright (c) 2013-2020 Saxonica Limited

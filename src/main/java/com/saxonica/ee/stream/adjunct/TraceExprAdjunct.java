@@ -1,19 +1,22 @@
 package com.saxonica.ee.stream.adjunct;
 
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.om.FleetingParentNode;
 import com.saxonica.ee.stream.watch.Terminator;
 import com.saxonica.ee.stream.watch.WatchManager;
 import net.sf.saxon.event.Receiver;
+import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.instruct.ComponentTracer;
 import net.sf.saxon.expr.instruct.TraceExpression;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.lib.TraceListener;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.trace.InstructionInfo;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.trace.Traceable;
 import net.sf.saxon.trans.XPathException;
+
+import java.util.Collections;
 
 /**
  * Implement streaming of the trace instruction injected into the code when compiled with tracing enabled.
@@ -21,15 +24,15 @@ import net.sf.saxon.trans.XPathException;
  */
 public class TraceExprAdjunct extends TransmissionAdjunct implements FeedMaker {
 
+    @Override
     public FeedMaker getFeedMaker(int arg) throws XPathException {
         return arg == 0 ? this : super.getFeedMaker(arg);
     }
 
-    public Feed makeItemFeed(final WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
-        return new TraceFeed((TraceExpression)getExpression(), out, context);
+    @Override
+    public ItemFeed makeItemFeed(final WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
+        return new TraceFeed(getExpression(), out, context);
     }
-
-    public static int sequenceNr = 0;
 
     /**
      * Streamed trace feed where the streamed argument is the first argument
@@ -37,10 +40,10 @@ public class TraceExprAdjunct extends TransmissionAdjunct implements FeedMaker {
 
     private static class TraceFeed extends ItemFeed {
 
-        InstructionInfo info;
+        Traceable info;
         TraceListener listener;
 
-        public TraceFeed(TraceExpression exp, Feed result, XPathContext context) {
+        TraceFeed(Expression exp, ItemFeed result, XPathContext context) {
             super(exp, result, context);
         }
 
@@ -48,14 +51,20 @@ public class TraceExprAdjunct extends TransmissionAdjunct implements FeedMaker {
          * Open the watch. This is done at the point where it first starts watching for nodes
          * that match the selection.
          *
-         * @throws XPathException
-         *          May be raised if a dynamic error occurs
-         * @param terminator
+         * @throws XPathException May be raised if a dynamic error occurs
+         * @param terminator used to achieve early exit
          */
+        @Override
         public void open(Terminator terminator) throws XPathException {
             super.open(terminator);
-            TraceExpression expr = (TraceExpression)getExpression();
-            info = expr.getInstructionInfo();
+            Expression expr = getExpression();
+            if (expr instanceof TraceExpression) {
+                info = ((TraceExpression) expr).getChild();
+            } else if (expr instanceof ComponentTracer) {
+                info = ((ComponentTracer)expr).getChild();
+            } else {
+                throw new IllegalStateException();
+            }
             if (getContext().getController().isTracing()) {
                 listener = getContext().getController().getTraceListener();
             }
@@ -70,11 +79,12 @@ public class TraceExprAdjunct extends TransmissionAdjunct implements FeedMaker {
          * @throws XPathException
          *          May be raised if a dynamic error occurs
          */
-        public void processItem(Item<?> item) throws XPathException {
+        @Override
+        public void append(Item item) throws XPathException {
             if (listener != null) {
-                listener.enter(info, getContext());
+                listener.enter(info, Collections.emptyMap(), getContext());
             }
-            getResult().processItem(item);
+            getNextOutputter().append(item);
             if (listener != null) {
                 listener.leave(info);
             }
@@ -94,9 +104,10 @@ public class TraceExprAdjunct extends TransmissionAdjunct implements FeedMaker {
          * @throws XPathException
          *          May be raised if a dynamic error occurs
          */
+        @Override
         public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
             if (listener != null) {
-                listener.enter(info, getContext());
+                listener.enter(info, Collections.emptyMap(), getContext());
             }
             return getResult().startSelectedParentNode(node, locationId);
         }
@@ -110,6 +121,7 @@ public class TraceExprAdjunct extends TransmissionAdjunct implements FeedMaker {
          *          May be raised if a constraint implemented by this
          *          Watch is violated
          */
+        @Override
         public void endSelectedParentNode(Location locationId) throws XPathException {
             if (listener != null) {
                 listener.leave(info);
@@ -122,4 +134,4 @@ public class TraceExprAdjunct extends TransmissionAdjunct implements FeedMaker {
 
 }
 
-// Copyright (c) 2018 Saxonica Ltd
+// Copyright (c) 2018-2020 Saxonica Limited

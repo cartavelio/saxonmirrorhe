@@ -3,7 +3,6 @@ package com.saxonica.ee.stream.adjunct;
 import com.saxonica.ee.stream.Posture;
 import com.saxonica.ee.stream.Streamability;
 import com.saxonica.ee.stream.feed.CopyOfFeed;
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.watch.WatchMaker;
@@ -45,7 +44,8 @@ public class DeepEqualStreamer extends StreamingAdjunct implements FeedMaker {
         return super.getWatchMaker(forGrouping);
     }
 
-    public Feed makeItemFeed(final WatchManager watchManager, Feed out, final XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(final WatchManager watchManager, ItemFeed out, final XPathContext context) throws XPathException {
         consumingArg = findConsumingArg(getExpression(), consumingArg);
         if (consumingArg >= 2) {
             return getDefaultFeedMaker(consumingArg).makeItemFeed(watchManager, out, context);
@@ -57,7 +57,7 @@ public class DeepEqualStreamer extends StreamingAdjunct implements FeedMaker {
         } else {
             // TODO: tough case. At present, we don't do a fully streamed implementation: we effectively do
             // deep-equal(copy-of(X/Y/Z), $val) instead of deep-equal(X/Y/Z, val).
-            Feed comparisonFeed = new GroundedDeepEqualFeed(call, out, context, consumingArg);
+            ItemFeed comparisonFeed = new GroundedDeepEqualFeed(call, out, context, consumingArg);
             return new CopyOfFeed(watchManager, comparisonFeed, context);
         }
     }
@@ -73,7 +73,7 @@ public class DeepEqualStreamer extends StreamingAdjunct implements FeedMaker {
         AtomicComparer comparer;
         boolean done;
 
-        public GroundedDeepEqualFeed(SystemFunctionCall exp, Feed result, XPathContext context, int consumingArg) throws XPathException {
+        public GroundedDeepEqualFeed(SystemFunctionCall exp, ItemFeed result, XPathContext context, int consumingArg) throws XPathException {
             super(exp, result, context);
             other = exp.getArg(1 - consumingArg).iterate(context);
             this.consumingArg = consumingArg;
@@ -104,7 +104,8 @@ public class DeepEqualStreamer extends StreamingAdjunct implements FeedMaker {
          * @throws net.sf.saxon.trans.XPathException
          *          May be raised if a dynamic error occurs
          */
-        public void processItem(Item<?> item) throws XPathException {
+        @Override
+        public void append(Item item) throws XPathException {
             if (!done) {
                 Item otherItem = other.next();
                 if (otherItem == null ||
@@ -112,8 +113,8 @@ public class DeepEqualStreamer extends StreamingAdjunct implements FeedMaker {
                             SingletonIterator.makeIterator(item),
                             SingletonIterator.makeIterator(otherItem),
                             comparer, getContext(), 0)) {
-                    getResult().processItem(BooleanValue.FALSE);
-                    getResult().close();
+                    getNextOutputter().append(BooleanValue.FALSE);
+                    getNextOutputter().close();
                     done = true;
                     getTerminator().terminate();
                 }
@@ -126,11 +127,12 @@ public class DeepEqualStreamer extends StreamingAdjunct implements FeedMaker {
          * Watch goes out of scope. The default implementation does nothing.
          */
 
+        @Override
         public void close() throws XPathException {
             if (!done) {
                 boolean more = other.next() != null;
-                getResult().processItem(BooleanValue.get(!more));
-                getResult().close();
+                getNextOutputter().append(BooleanValue.get(!more));
+                getNextOutputter().close();
             }
         }
 
@@ -139,4 +141,4 @@ public class DeepEqualStreamer extends StreamingAdjunct implements FeedMaker {
 
 }
 
-// Copyright (c) 2010 Saxonica Limited - 2015.
+// Copyright (c) 2010-2020 Saxonica Limited - 2015.

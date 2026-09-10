@@ -1,19 +1,19 @@
 package com.saxonica.ee.stream.adjunct;
 
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.om.FleetingParentNode;
 import com.saxonica.ee.stream.watch.Terminator;
 import com.saxonica.ee.stream.watch.WatchMaker;
 import com.saxonica.ee.stream.watch.WatchManager;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.Block;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 
 
@@ -45,7 +45,7 @@ public class BlockAdjunct extends TransmissionAdjunct implements FeedMaker {
 
         int consumingArg;
 
-        public BlockFeed(Block exp, int arg, Feed result, XPathContext context) {
+        public BlockFeed(Block exp, int arg, ItemFeed result, XPathContext context) {
             super(exp, result, context);
             this.consumingArg = arg;
         }
@@ -56,10 +56,11 @@ public class BlockAdjunct extends TransmissionAdjunct implements FeedMaker {
          * @param terminator used for early exit
          */
 
+        @Override
         public void open(Terminator terminator) throws XPathException {
             super.open(terminator);
             Block block = (Block)getExpression();
-            Feed result = getResult();
+            Outputter result = getNextOutputter();
             for (int i = 0; i < consumingArg; i++) {
                 Expression child = block.getOperanda()[i].getChildExpression();
                 SequenceIterator iter = child.iterate(getContext());
@@ -73,9 +74,10 @@ public class BlockAdjunct extends TransmissionAdjunct implements FeedMaker {
          * Watch goes out of scope. The default implementation does nothing.
          */
 
+        @Override
         public void close() throws XPathException {
             Block block = (Block)getExpression();
-            Feed result = getResult();
+            Outputter result = getNextOutputter();
             for (int i = consumingArg + 1; i < block.getOperanda().length; i++) {
                 Expression child = block.getOperanda()[i].getChildExpression();
                 SequenceIterator iter = child.iterate(getContext());
@@ -93,8 +95,9 @@ public class BlockAdjunct extends TransmissionAdjunct implements FeedMaker {
          * @throws net.sf.saxon.trans.XPathException
          *          May be raised if a dynamic error occurs
          */
-        public void processItem(Item<?> item) throws XPathException {
-            getResult().processItem(item);
+        @Override
+        public void append(Item item) throws XPathException {
+            getNextOutputter().append(item);
         }
 
         /**
@@ -111,6 +114,7 @@ public class BlockAdjunct extends TransmissionAdjunct implements FeedMaker {
          * @throws net.sf.saxon.trans.XPathException
          *          May be raised if a dynamic error occurs
          */
+        @Override
         public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
             return getResult().startSelectedParentNode(node, locationId);
         }
@@ -124,17 +128,19 @@ public class BlockAdjunct extends TransmissionAdjunct implements FeedMaker {
          *          May be raised if a constraint implemented by this
          *          Watch is violated
          */
+        @Override
         public void endSelectedParentNode(Location locationId) throws XPathException {
             getResult().endSelectedParentNode(locationId);
         }
     }
 
 
-    public Feed makeItemFeed(final WatchManager watchManager, Feed out, final XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(final WatchManager watchManager, ItemFeed out, final XPathContext context) throws XPathException {
         consumingArg = findConsumingArg(getExpression(), consumingArg);
         return new BlockFeed((Block)getExpression(),  consumingArg, out, context);
     }
 
 }
 
-// Copyright (c) 2010-2018 Saxonica Limited
+// Copyright (c) 2010-2020 Saxonica Limited

@@ -1,10 +1,12 @@
 package com.saxonica.ee.stream.feed;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMinor;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceExtent;
@@ -23,9 +25,9 @@ import java.util.List;
 
 public class BufferingFeed extends ItemFeed {
 
-    private List<Item<?>> inputValue = new ArrayList<>(4);
+    private List<Item> inputValue = new ArrayList<>(4);
 
-    public BufferingFeed(Expression expr, Feed result, XPathContext context) {
+    public BufferingFeed(Expression expr, ItemFeed result, XPathContext context) {
         super(expr, result, context);
     }
 
@@ -37,13 +39,14 @@ public class BufferingFeed extends ItemFeed {
      *          to report any failure
      */
 
-    public void processItem(Item<?> item) throws XPathException {
+    @Override
+    public void append(Item item) throws XPathException {
         inputValue.add(item);
         if (inputValue.size() == 2) {
             XPathContext c = getContext();
-            c.getController().getErrorListener().warning(
-                    new XPathException("Execution of " + getExpression().toShortString() + " is not fully streamed", SaxonErrorCode.SXST0067, getExpression().getLocation())
-            );
+            c.getController().getErrorReporter().report(
+                    new XmlProcessingIncident("Execution of " + getExpression().toShortString() + " is not fully streamed",
+                                              SaxonErrorCode.SXST0067, getExpression().getLocation()).asWarning());
         }
     }
 
@@ -54,15 +57,17 @@ public class BufferingFeed extends ItemFeed {
      *          to report any failure
      */
 
+    @Override
     public void close() throws XPathException {
         ((XPathContextMinor)getContext()).makeStackFrameMutable();
         getContext().getStackFrame().pushDynamicValue(SequenceExtent.makeSequenceExtent(inputValue));
         inputValue = new ArrayList<>(4);
-        SequenceIterator<?> iter = getExpression().iterate(getContext());
-        iter.forEachOrFail(item -> getResult().processItem(item));
-        getResult().close();
+        SequenceIterator iter = getExpression().iterate(getContext());
+        final Outputter out = getNextOutputter();
+        iter.forEachOrFail(out::append);
+        out.close();
     }
 
 }
 
-// Copyright (c) 2009-2014 Saxonica Limited
+// Copyright (c) 2009-2020 Saxonica Limited

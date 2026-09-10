@@ -1,16 +1,12 @@
 package com.saxonica.ee.validate;
 
-import net.sf.saxon.Configuration;
-import net.sf.saxon.event.PathMaintainer;
-import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.event.ProxyReceiver;
-import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.*;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.number.Numberer_en;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.InvalidityHandler;
-import net.sf.saxon.lib.InvalidityHandlerWrappingErrorListener;
+import net.sf.saxon.lib.InvalidityHandlerWrappingErrorReporter;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.AttributeLocation;
@@ -22,16 +18,15 @@ import net.sf.saxon.type.ValidationFailure;
  * This class is used for a filter on the validation pipeline. It provides error reporting services to each
  * of the filters.
  */
+
 public class ValidatingFilter extends ProxyReceiver {
 
     private ValidationContext validationContext;
 
-    protected boolean locallyInvalid = false; // indicates that the content model of this element is not satisfied
+    boolean locallyInvalid = false; // indicates that the content model of this element is not satisfied
 
-    /*@Nullable*/
-    //private String errorCode;
 
-    public ValidatingFilter(Receiver next) {
+    ValidatingFilter(Receiver next) {
         super(next);
     }
 
@@ -82,18 +77,19 @@ public class ValidatingFilter extends ProxyReceiver {
      * @param startTag the namespace resolver
      */
 
-    public void setStartTagBuffer(StartTagBufferEE startTag) {
-        validationContext.setStartTagBuffer(startTag);
+    public void setStartTagBuffer(AttributeInheritor startTag) {
+        validationContext.setAttributeInheritor(startTag);
     }
 
     /**
-     * Get the startTagBuffer
+     * Get the AttributeInheritor which maintains details of inherited attributes for use in
+     * conditional type assignment
      *
-     * @return the startTagBuffer
+     * @return the AttributeInheritor
      */
 
-    public StartTagBufferEE getStartTagBuffer() {
-        return validationContext.getStartTagBuffer();
+    public AttributeInheritor getAttributeInheritor() {
+        return validationContext.getAttributeInheritor();
     }
 
     /**
@@ -106,14 +102,15 @@ public class ValidatingFilter extends ProxyReceiver {
      *         so this instance of the method returns false.
      */
 
+    @Override
     public boolean usesTypeAnnotations() {
         return false;
     }
 
 
+    @Override
     public void append(Item item, Location locationId, int copyNamespaces) throws XPathException {
         decompose(item, locationId, copyNamespaces);
-        //throw new IllegalStateException("Items must be decomposed using a TreeReceiver before passing to a ValidatingFilter");
     }
 
     /**
@@ -136,7 +133,7 @@ public class ValidatingFilter extends ProxyReceiver {
 
         PipelineConfiguration pipe = getPipelineConfiguration();
 
-        if (ExplicitLocation.isUnknown(locationId)) {
+        if (Loc.isUnknown(locationId)) {
             err.setSourceLocator(validationContext.getInitiatingLocation());
         } else {
             err.setSourceLocator(locationId);
@@ -174,7 +171,7 @@ public class ValidatingFilter extends ProxyReceiver {
 
         InvalidityHandler handler = validationContext.getInvalidityHandler();
         if (handler == null) {
-            handler = new InvalidityHandlerWrappingErrorListener(pipe.getErrorListener());
+            handler = new InvalidityHandlerWrappingErrorReporter(pipe.getErrorReporter());
         }
 
         handler.reportInvalidity(err);
@@ -189,7 +186,7 @@ public class ValidatingFilter extends ProxyReceiver {
             throw new XPathException("Validation terminated - too many errors");
         }
         if (issueComment && pipe.getParseOptions().isAddCommentsAfterValidationErrors()) {
-            comment("\nVALIDATION ERROR: " + err.getMessage() + '\n', locationId, 0);
+            comment("\nVALIDATION ERROR: " + err.getMessage() + '\n', locationId, ReceiverOption.NONE);
         }
     }
 
@@ -211,12 +208,7 @@ public class ValidatingFilter extends ProxyReceiver {
             } else if (validationContext.getErrorCode() != null) {
                 err.setErrorCode(validationContext.getErrorCode());
             } else {
-                int lang = getPipelineConfiguration().getHostLanguage();
-                if (lang == Configuration.XSLT) {
-                    err.setErrorCode("XTTE1510");
-                } else if (lang == Configuration.XQUERY) {
-                    err.setErrorCode("XQDY0027");
-                }
+                err.setErrorCode(getPipelineConfiguration().isXSLT() ? "XTTE1510" : "XQDY0027");
             }
             ValidationException ve = err.makeException();
             ve.setErrorObject(validationContext.getValidationErrorObject());
@@ -225,4 +217,4 @@ public class ValidatingFilter extends ProxyReceiver {
     }
 }
 
-// Copyright (c) 2005-2016 Saxonica Limited. No warranty.
+// Copyright (c) 2005-2020 Saxonica Limited No warranty.

@@ -9,6 +9,7 @@ import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.CodepointCollatingComparer;
 import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.expr.sort.ComparableAtomicValueComparer;
+import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
@@ -50,6 +51,7 @@ public class ValueComparisonCompiler extends ToBooleanCompiler {
      * @param compiler   the compiler service
      * @param expression the expression to be compiled
      */
+    @Override
     public void compileToBoolean(CompilerService compiler,
                                  final Expression expression) throws CannotCompileException {
         ValueComparison expr = (ValueComparison) expression;
@@ -267,12 +269,12 @@ public class ValueComparisonCompiler extends ToBooleanCompiler {
                 *   return (op == Token.FNE);
                 */
 
-            int r0d = th.relationship(lhs.getItemType(), BuiltInAtomicType.DOUBLE);
-            int r0f = th.relationship(lhs.getItemType(), BuiltInAtomicType.FLOAT);
-            int r1d = th.relationship(rhs.getItemType(), BuiltInAtomicType.DOUBLE);
-            int r1f = th.relationship(rhs.getItemType(), BuiltInAtomicType.FLOAT);
+            Affinity r0d = th.relationship(lhs.getItemType(), BuiltInAtomicType.DOUBLE);
+            Affinity r0f = th.relationship(lhs.getItemType(), BuiltInAtomicType.FLOAT);
+            Affinity r1d = th.relationship(rhs.getItemType(), BuiltInAtomicType.DOUBLE);
+            Affinity r1f = th.relationship(rhs.getItemType(), BuiltInAtomicType.FLOAT);
 
-            if (r0d != TypeHierarchy.DISJOINT || r0f != TypeHierarchy.DISJOINT) {
+            if (r0d != Affinity.DISJOINT || r0f != Affinity.DISJOINT) {
                 // The first operand might be a NaN: generate code to test whether it actually is
                 ga.loadLocal(op0Var);
                 ga.checkClass(AtomicValue.class);
@@ -280,7 +282,7 @@ public class ValueComparisonCompiler extends ToBooleanCompiler {
                 ga.ifZCmp(GeneratorAdapter.NE, op == Token.FNE ? returnTrue.label() : returnFalse.label());
             }
 
-            if (r1d != TypeHierarchy.DISJOINT || r1f != TypeHierarchy.DISJOINT) {
+            if (r1d != Affinity.DISJOINT || r1f != Affinity.DISJOINT) {
                 // The second operand might be a NaN: generate code to test whether it actually is
                 ga.loadLocal(op1Var);
                 ga.checkClass(AtomicValue.class);
@@ -471,4 +473,4 @@ public class ValueComparisonCompiler extends ToBooleanCompiler {
 
 }
 
-//Copyright (c) 2011 to 2016 Saxonica Limited.
+// Copyright (c) 2011 to 2020 Saxonica Limited

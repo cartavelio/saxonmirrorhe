@@ -35,6 +35,7 @@ public class CannotCompileException extends Exception {
         this.reason = reason;
     }
 
+    @Override
     public String getMessage() {
         if (uncompilableExpression == null) {
             return (reason == null ? "" : reason);
@@ -54,5 +55,5 @@ public class CannotCompileException extends Exception {
     }
 }
 
-// Copyright (c) 2011-2017 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited
 

@@ -85,4 +85,4 @@ public class SchemaDocument {
 
 }
 
-// Copyright (c) 2004-2015 Saxonica Limited
+// Copyright (c) 2004-2020 Saxonica Limited

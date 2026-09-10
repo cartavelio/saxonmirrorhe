@@ -2,8 +2,8 @@ package com.saxonica.ee.stream.adjunct;
 
 import com.saxonica.ee.stream.*;
 import com.saxonica.ee.stream.feed.ApplyTemplatesFeed;
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
+import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.watch.ApplyTemplatesAction;
 import com.saxonica.ee.stream.watch.Trigger;
 import com.saxonica.ee.stream.watch.WatchMaker;
@@ -30,10 +30,20 @@ import java.util.List;
 
 public class ApplyTemplatesAdjunct extends StreamingAdjunct implements FeedMaker {
 
+    /**
+     * Set the expression being processed by this StreamingAdjunct
+     *
+     * @param expression the expression being processed
+     */
+    @Override
+    public void setExpression(Expression expression) {
+        super.setExpression(expression);
+    }
+
     @Override
     public PostureAndSweep computeStreamability(ContextItemStaticInfoEE contextInfo, List<String> reasons) {
         if (reasons == null) {
-            reasons = new ArrayList<String>();
+            reasons = new ArrayList<>();
         }
 
         ApplyTemplates exp = (ApplyTemplates)getExpression();
@@ -48,36 +58,28 @@ public class ApplyTemplatesAdjunct extends StreamingAdjunct implements FeedMaker
 
         // Rule 2
         if (exp.getSelectExpression() instanceof SortExpression) {
-            if (reasons != null) {
-                reasons.add("Cannot use sorting in a streamable template");
-            }
+            reasons.add("Cannot use sorting in a streamable template");
             return PostureAndSweep.ROAMING_AND_FREE_RANGING;
         }
 
         // Rule 3
         Mode mode = exp.getMode();
         if (!exp.usesCurrentMode() && mode != null && !mode.isDeclaredStreamable()) {
-            if (reasons != null) {
-                StructuredQName modeName = mode.getModeName();
-                String name = modeName == null ? "(unnamed)" : modeName.getDisplayName();
-                reasons.add("Cannot use non-streamable mode " + name + " in a streamable template");
-            }
+            StructuredQName modeName = mode.getModeName();
+            String name = modeName == null ? "(unnamed)" : modeName.getDisplayName();
+            reasons.add("Cannot use non-streamable mode " + name + " in a streamable template");
             return PostureAndSweep.ROAMING_AND_FREE_RANGING;
         }
 
         // Rule 4
         if (selectPS.getPosture() == Posture.CLIMBING) {
-            if (reasons != null) {
-                reasons.add("In a streaming apply-templates instruction, the select expression must not have climbing posture "
+            reasons.add("In a streaming apply-templates instruction, the select expression must not have climbing posture "
                                     + "(for example, it cannot select ancestors)");
-            }
             return PostureAndSweep.ROAMING_AND_FREE_RANGING;
         }
         if (selectPS.getPosture() == Posture.CRAWLING) {
-            if (reasons != null) {
-                reasons.add("In a streaming apply-templates instruction, the select expression must not have crawling posture "
+            reasons.add("In a streaming apply-templates instruction, the select expression must not have crawling posture "
                                     + "(for example, it cannot select descendants)");
-            }
             return PostureAndSweep.ROAMING_AND_FREE_RANGING;
         }
 
@@ -87,11 +89,12 @@ public class ApplyTemplatesAdjunct extends StreamingAdjunct implements FeedMaker
     }
 
 
+    @Override
     public WatchMaker getWatchMaker(boolean forGrouping) throws XPathException {
         final ApplyTemplates instruction = (ApplyTemplates)getExpression();
         final Expression select = instruction.getSelectExpression();
 
-        // If the select expression is grounded (but consuming), return null; so we end up with a Feed rather than a Watch.
+        // If the select expression is grounded (but consuming), return null; so we end up with a ItemFeed rather than a Watch.
         if (Streamability.getPosture(select) == Posture.GROUNDED) {
             return null;
         }
@@ -101,7 +104,8 @@ public class ApplyTemplatesAdjunct extends StreamingAdjunct implements FeedMaker
 
         if (selection != null || sa instanceof TransmissionAdjunct) {
             return new WatchMaker() {
-                public Trigger makeWatch(WatchManager watchManager, Feed out, XPathContext context)
+                @Override
+                public Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context)
                         throws XPathException {
                     Component.M actualMode = instruction.getTargetMode(context);
                     ApplyTemplatesAction action = new ApplyTemplatesAction(getExpression(), out, context);
@@ -118,7 +122,8 @@ public class ApplyTemplatesAdjunct extends StreamingAdjunct implements FeedMaker
         return null;
     }
 
-    public Feed makeItemFeed(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
         if (Streamability.getSweep(((ApplyTemplates) getExpression()).getSelectExpression()) != Sweep.CONSUMING) {
             int i = 0;
             for (Operand o : getExpression().operands()) {
@@ -134,4 +139,4 @@ public class ApplyTemplatesAdjunct extends StreamingAdjunct implements FeedMaker
 
 }
 
-// Copyright (c) 2009 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

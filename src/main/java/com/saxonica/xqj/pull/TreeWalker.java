@@ -1,16 +1,13 @@
 package com.saxonica.xqj.pull;
 
 import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pull.UnfailingPullProvider;
 import net.sf.saxon.pull.UnparsedEntity;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.AttributeCollectionImpl;
-import net.sf.saxon.tree.util.NamespaceIterator;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 
@@ -29,11 +26,12 @@ import java.util.Stack;
 
 public class TreeWalker implements UnfailingPullProvider, Location {
 
-    private NodeInfo startNode;
+    private final NodeInfo startNode;
     private NodeInfo currentNode;
-    private int currentEvent;
-    private Stack<FocusIterator> iteratorStack = new Stack<>();
+    private Event currentEvent = Event.START_OF_INPUT;
+    private final Stack<FocusIterator> iteratorStack = new Stack<>();
     private PipelineConfiguration pipe;
+    private final NamespaceBinding[] nsBuffer = new NamespaceBinding[10];
 
     /**
      * Factory method to get a tree walker starting an a given node
@@ -61,6 +59,7 @@ public class TreeWalker implements UnfailingPullProvider, Location {
      * have been read.
      */
 
+    @Override
     public void setPipelineConfiguration(PipelineConfiguration pipe) {
         this.pipe = pipe;
     }
@@ -69,6 +68,7 @@ public class TreeWalker implements UnfailingPullProvider, Location {
      * Get configuration information.
      */
 
+    @Override
     public PipelineConfiguration getPipelineConfiguration() {
         return pipe;
     }
@@ -76,36 +76,37 @@ public class TreeWalker implements UnfailingPullProvider, Location {
     /**
      * Get the next event
      *
-     * @return an integer code indicating the type of event. The code
-     *         {@link #END_OF_INPUT} is returned if there are no more events to return.
+     * @return an Event object indicating the type of event. The code
+     *         {@link net.sf.saxon.pull.PullProvider.Event#END_OF_INPUT} is returned if there are no more events to return.
      */
 
-    public int next() throws XPathException {
+    @Override
+    public Event next() throws XPathException {
         switch (currentEvent) {
             case START_OF_INPUT:
                 currentNode = startNode;
                 switch (currentNode.getNodeKind()) {
                     case Type.DOCUMENT:
-                        return currentEvent = START_DOCUMENT;
+                        return currentEvent = Event.START_DOCUMENT;
                     case Type.ELEMENT:
-                        return currentEvent = START_ELEMENT;
+                        return currentEvent = Event.START_ELEMENT;
                     case Type.TEXT:
-                        return currentEvent = TEXT;
+                        return currentEvent = Event.TEXT;
                     case Type.COMMENT:
-                        return currentEvent = COMMENT;
+                        return currentEvent = Event.COMMENT;
                     case Type.PROCESSING_INSTRUCTION:
-                        return currentEvent = PROCESSING_INSTRUCTION;
+                        return currentEvent = Event.PROCESSING_INSTRUCTION;
                     case Type.ATTRIBUTE:
-                        return currentEvent = ATTRIBUTE;
+                        return currentEvent = Event.ATTRIBUTE;
                     case Type.NAMESPACE:
-                        return currentEvent = NAMESPACE;
+                        return currentEvent = Event.NAMESPACE;
                     default:
                         throw new IllegalStateException();
                 }
 
             case START_DOCUMENT:
             case START_ELEMENT:
-                FocusIterator kids = new FocusTrackingIterator<>(currentNode.iterateAxis(AxisInfo.CHILD));
+                FocusIterator kids = new FocusTrackingIterator(currentNode.iterateAxis(AxisInfo.CHILD));
                 iteratorStack.push(kids);
 
                 currentNode = (NodeInfo)kids.next();
@@ -116,10 +117,10 @@ public class TreeWalker implements UnfailingPullProvider, Location {
                     if (iteratorStack.isEmpty()) {
                         currentNode = startNode;
                     }
-                    if (currentEvent == START_DOCUMENT) {
-                        return currentEvent = END_DOCUMENT;
+                    if (currentEvent == Event.START_DOCUMENT) {
+                        return currentEvent = Event.END_DOCUMENT;
                     } else {
-                        return currentEvent = END_ELEMENT;
+                        return currentEvent = Event.END_ELEMENT;
                     }
                 }
             case TEXT:
@@ -129,13 +130,13 @@ public class TreeWalker implements UnfailingPullProvider, Location {
                 if (iteratorStack.isEmpty()) {
                     if (currentNode == startNode) {
                         currentNode = null;
-                        return currentEvent = END_OF_INPUT;
+                        return currentEvent = Event.END_OF_INPUT;
                     } else {
                         currentNode = startNode;
                         if (currentNode.getNodeKind() == Type.ELEMENT) {
-                            return currentEvent = END_ELEMENT;
+                            return currentEvent = Event.END_ELEMENT;
                         } else {
-                            return currentEvent = END_DOCUMENT;
+                            return currentEvent = Event.END_DOCUMENT;
                         }
                     }
                 }
@@ -147,17 +148,17 @@ public class TreeWalker implements UnfailingPullProvider, Location {
                     if (iteratorStack.isEmpty()) {
                         currentNode = startNode;
                         if (currentNode.getNodeKind() == Type.ELEMENT) {
-                            return currentEvent = END_ELEMENT;
+                            return currentEvent = Event.END_ELEMENT;
                         } else {
-                            return currentEvent = END_DOCUMENT;
+                            return currentEvent = Event.END_DOCUMENT;
                         }
                     }
                     FocusIterator uncles = iteratorStack.peek();
                     currentNode = (NodeInfo)uncles.current();
                     if (currentNode.getNodeKind() == Type.DOCUMENT) {
-                        return currentEvent = END_DOCUMENT;
+                        return currentEvent = Event.END_DOCUMENT;
                     } else {
-                        return currentEvent = END_ELEMENT;
+                        return currentEvent = Event.END_ELEMENT;
                     }
                 } else {
                     return currentEvent = mapChildNodeEvent();
@@ -166,7 +167,7 @@ public class TreeWalker implements UnfailingPullProvider, Location {
             case ATTRIBUTE:
             case NAMESPACE:
             case END_DOCUMENT:
-                return currentEvent = END_OF_INPUT;
+                return currentEvent = Event.END_OF_INPUT;
 
             case END_OF_INPUT:
                 throw new IllegalStateException("Cannot call next() when input is exhausted");
@@ -177,16 +178,16 @@ public class TreeWalker implements UnfailingPullProvider, Location {
         }
     }
 
-    private int mapChildNodeEvent() {
+    private Event mapChildNodeEvent() {
         switch (currentNode.getNodeKind()) {
             case Type.ELEMENT:
-                return START_ELEMENT;
+                return Event.START_ELEMENT;
             case Type.TEXT:
-                return TEXT;
+                return Event.TEXT;
             case Type.COMMENT:
-                return COMMENT;
+                return Event.COMMENT;
             case Type.PROCESSING_INSTRUCTION:
-                return PROCESSING_INSTRUCTION;
+                return Event.PROCESSING_INSTRUCTION;
             default:
                 throw new IllegalStateException();
         }
@@ -200,34 +201,30 @@ public class TreeWalker implements UnfailingPullProvider, Location {
      * @return the current event
      */
 
-    public int current() {
+    @Override
+    public Event current() {
         return currentEvent;
     }
 
     /**
      * Get the attributes associated with the current element. This method must
      * be called only after a START_ELEMENT event has been notified. The contents
-     * of the returned AttributeCollection are guaranteed to remain unchanged
-     * until the next START_ELEMENT event, but may be modified thereafter. The object
-     * should not be modified by the client.
+     * of the returned AttributeMap are immutable.
      * <p>Attributes may be read before or after reading the namespaces of an element,
      * but must not be read after the first child node has been read, or after calling
      * one of the methods skipToEnd(), getStringValue(), or getTypedValue().</p>
      *
-     * @return an AttributeCollection representing the attributes of the element
+     * @return an AttributeMap representing the attributes of the element
      *         that has just been notified.
      */
 
-    public AttributeCollection getAttributes() {
+    @Override
+    public AttributeMap getAttributes() {
         if (currentNode == null) {
             throw new IllegalStateException("No current node");
         }
         if (currentNode.getNodeKind() == Type.ELEMENT) {
-            AttributeCollectionImpl atts = new AttributeCollectionImpl(startNode.getConfiguration());
-            currentNode.iterateAxis(AxisInfo.ATTRIBUTE).forEach(
-                    node -> atts.addAttribute(NameOfNode.makeName(node), (SimpleType) node.getSchemaType(),
-                                                  node.getStringValue(), ExplicitLocation.UNKNOWN_LOCATION, 0));
-            return atts;
+            return currentNode.attributes();
         } else {
             throw new IllegalStateException("getAttributes() called when current event is not ELEMENT_START");
         }
@@ -250,6 +247,7 @@ public class TreeWalker implements UnfailingPullProvider, Location {
      * one of the methods skipToEnd(), getStringValue(), or getTypedValue().</p>
      */
 
+    @Override
     public NamespaceBinding[] getNamespaceDeclarations() {
         if (currentNode == null) {
             throw new IllegalStateException("No current node");
@@ -257,7 +255,7 @@ public class TreeWalker implements UnfailingPullProvider, Location {
         if (currentNode.getNodeKind() == Type.ELEMENT) {
             if (iteratorStack.isEmpty()) {
                 // get all inscope namespaces for a top-level element in the sequence.
-                Iterator<NamespaceBinding> iter = NamespaceIterator.iterateNamespaces(currentNode);
+                Iterator<NamespaceBinding> iter = currentNode.getAllNamespaces().iterator();
                 List<NamespaceBinding> list = new ArrayList<>();
                 while (iter.hasNext()) {
                     list.add(iter.next());
@@ -271,8 +269,6 @@ public class TreeWalker implements UnfailingPullProvider, Location {
         throw new IllegalStateException("getNamespaceDeclarations() called when current event is not ELEMENT_START");
     }
 
-    private NamespaceBinding[] nsBuffer = new NamespaceBinding[10];
-
     /**
      * Skip the current subtree. This method may be called only immediately after
      * a START_DOCUMENT or START_ELEMENT event. This call returns the matching
@@ -280,14 +276,15 @@ public class TreeWalker implements UnfailingPullProvider, Location {
      * the event following the END_DOCUMENT or END_ELEMENT.
      */
 
-    public int skipToMatchingEnd()  {
+    @Override
+    public Event skipToMatchingEnd()  {
         // For this implementation, we simply leave the current node unchanged, and change
         // the current event
         switch (currentEvent) {
             case START_DOCUMENT:
-                return currentEvent = END_DOCUMENT;
+                return currentEvent = Event.END_DOCUMENT;
             case START_ELEMENT:
-                return currentEvent = END_ELEMENT;
+                return currentEvent = Event.END_ELEMENT;
             default:
                 throw new IllegalStateException(
                         "Cannot call skipToMatchingEnd() except when at start of element or document");
@@ -296,12 +293,13 @@ public class TreeWalker implements UnfailingPullProvider, Location {
 
     /**
      * Close the event reader. This indicates that no further events are required.
-     * It is not necessary to close an event reader after {@link #END_OF_INPUT} has
+     * It is not necessary to close an event reader after {@link net.sf.saxon.pull.PullProvider.Event#END_OF_INPUT} has
      * been reported, but it is recommended to close it if reading terminates
      * prematurely. Once an event reader has been closed, the effect of further
      * calls on next() is undefined.
      */
 
+    @Override
     public void close() {
         // no action
     }
@@ -318,9 +316,9 @@ public class TreeWalker implements UnfailingPullProvider, Location {
 
     /**
      * Get the NodeName identifying the name of the current node. This method
-     * can be used after the {@link #START_ELEMENT}, {@link #PROCESSING_INSTRUCTION},
-     * {@link #ATTRIBUTE}, or {@link #NAMESPACE} events. With some PullProvider implementations,
-     * it can also be used after {@link #END_ELEMENT}, but this is not guaranteed: a client who
+     * can be used after the {@link net.sf.saxon.pull.PullProvider.Event#START_ELEMENT}, {@link net.sf.saxon.pull.PullProvider.Event#PROCESSING_INSTRUCTION},
+     * {@link net.sf.saxon.pull.PullProvider.Event#ATTRIBUTE}, or {@link net.sf.saxon.pull.PullProvider.Event#NAMESPACE} events. With some PullProvider implementations,
+     * it can also be used after {@link net.sf.saxon.pull.PullProvider.Event#END_ELEMENT}, but this is not guaranteed: a client who
      * requires the information at that point (for example, to do serialization) should insert an
      * {@link com.saxonica.xqj.pull.ElementNameTracker} into the pipeline.
      * If called at other times, the result is undefined and may result in an IllegalStateException.
@@ -330,6 +328,7 @@ public class TreeWalker implements UnfailingPullProvider, Location {
      * @return the NodeName. The NodeName can be used to obtain the prefix, local name,
      * and namespace URI.
      */
+    @Override
     public NodeName getNodeName() {
         if (currentNode == null) {
             throw new IllegalStateException("No current node");
@@ -341,10 +340,11 @@ public class TreeWalker implements UnfailingPullProvider, Location {
      * Get the string value of the current attribute, text node, processing-instruction,
      * or atomic value.
      * This method cannot be used to obtain the string value of an element, or of a namespace
-     * node. If the most recent event was anything other than {@link #START_ELEMENT}, {@link #TEXT},
-     * {@link #PROCESSING_INSTRUCTION}, or {@link #ATOMIC_VALUE}, the result is undefined.
+     * node. If the most recent event was anything other than {@link net.sf.saxon.pull.PullProvider.Event#START_ELEMENT}, {@link net.sf.saxon.pull.PullProvider.Event#TEXT},
+     * {@link net.sf.saxon.pull.PullProvider.Event#PROCESSING_INSTRUCTION}, or {@link net.sf.saxon.pull.PullProvider.Event#ATOMIC_VALUE}, the result is undefined.
      */
 
+    @Override
     public CharSequence getStringValue() {
         if (currentNode == null) {
             throw new IllegalStateException("No current node");
@@ -363,7 +363,11 @@ public class TreeWalker implements UnfailingPullProvider, Location {
      * @return the type code.
      */
 
+    @Override
     public SchemaType getSchemaType() {
+        if (currentNode == null) {
+            throw new IllegalStateException("No current node");
+        }
         return currentNode.getSchemaType();
     }
 
@@ -373,6 +377,7 @@ public class TreeWalker implements UnfailingPullProvider, Location {
      * a free-standing atomic value; it is never used when reading the content of a node.
      */
 
+    @Override
     public AtomicValue getAtomicValue() {
         throw new IllegalStateException();
     }
@@ -385,6 +390,7 @@ public class TreeWalker implements UnfailingPullProvider, Location {
      * A value of null can be returned if no location information is available.
      */
 
+    @Override
     public Location getSourceLocator() {
         return this;
     }
@@ -399,6 +405,7 @@ public class TreeWalker implements UnfailingPullProvider, Location {
      *         null if none is available.
      * @see #getSystemId
      */
+    @Override
     public String getPublicId() {
         return null;
     }
@@ -415,6 +422,7 @@ public class TreeWalker implements UnfailingPullProvider, Location {
      *         if none is available.
      * @see #getPublicId
      */
+    @Override
     public String getSystemId() {
         return currentNode == null ? startNode.getSystemId() : currentNode.getSystemId();
     }
@@ -432,6 +440,7 @@ public class TreeWalker implements UnfailingPullProvider, Location {
      * @return The line number, or -1 if none is available.
      * @see #getColumnNumber
      */
+    @Override
     public int getLineNumber() {
         return currentNode == null ? -1 : currentNode.getLineNumber();
     }
@@ -449,6 +458,7 @@ public class TreeWalker implements UnfailingPullProvider, Location {
      * @return The column number, or -1 if none is available.
      * @see #getLineNumber
      */
+    @Override
     public int getColumnNumber() {
         return -1;
     }
@@ -458,8 +468,9 @@ public class TreeWalker implements UnfailingPullProvider, Location {
      * should not be saved for later use. The result of this operation holds the same location information,
      * but in an immutable form.
      */
+    @Override
     public Location saveLocation() {
-        return new ExplicitLocation(this);
+        return new Loc(this);
     }
 
     /**
@@ -470,9 +481,10 @@ public class TreeWalker implements UnfailingPullProvider, Location {
      */
 
     /*@Nullable*/
+    @Override
     public List<UnparsedEntity> getUnparsedEntities() {
         return null;
     }
 }
 
-// Copyright (c) 2009 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

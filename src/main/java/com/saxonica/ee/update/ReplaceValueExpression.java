@@ -88,6 +88,7 @@ public class ReplaceValueExpression extends BasicUpdatingExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         typeCheckChildren(visitor, contextInfo);
 
@@ -121,6 +122,7 @@ public class ReplaceValueExpression extends BasicUpdatingExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         Expression result = getReplacementExp();
         ReplaceValueExpression exp = new ReplaceValueExpression(getTargetExp().copy(rebindings), result.copy(rebindings));
@@ -135,6 +137,7 @@ public class ReplaceValueExpression extends BasicUpdatingExpression {
      * @param out the expression presenter used to display the structure
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("replaceValue", this);
         getTargetExp().export(out);
@@ -153,6 +156,7 @@ public class ReplaceValueExpression extends BasicUpdatingExpression {
      * @param pul     the pending update list to which the results should be written
      */
 
+    @Override
     public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
         Expression result = getReplacementExp();
         Item newText = result.evaluateItem(context);
@@ -224,4 +228,4 @@ public class ReplaceValueExpression extends BasicUpdatingExpression {
 
 }
 
-// Copyright (c) 2008 Saxonica Limited.
+// Copyright (c) 2008-2020 Saxonica Limited

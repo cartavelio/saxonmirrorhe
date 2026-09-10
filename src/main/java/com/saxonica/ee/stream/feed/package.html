@@ -5,7 +5,7 @@
 </head>
 <body>
 <p>This package contains classes used to support streaming. For many kinds of expression
-    that support streaming, there is a <code>Feed</code>class in this
+    that support streaming, there is a <code>ItemFeed</code>class in this
     package that evaluates the expression in composed push mode, one item at a time.</p>
 
 <p>None of these classes will be used directly by typical user applications.</p>
@@ -18,7 +18,7 @@
     method. (It is the responsibility of the class, however, to minimize the amount of data that it buffers).
 </p>
 
-<p>The <code>Feed</code> class for evaluating an expression is created by calling the <code>FeedMaker</code>,
+<p>The <code>ItemFeed</code> class for evaluating an expression is created by calling the <code>FeedMaker</code>,
     which in turn is returned by the streaming adjunct class for the particular kind of expression.</p>
 
 

@@ -40,7 +40,8 @@ public class SchemaFn extends SystemFunction {
      */
 
         /*@Nullable*/
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         if (arguments.length == 0) {
             return context.getConfiguration().getSchemaAsFunctionItem();
         } else if (arguments.length == 2) {
@@ -57,4 +58,4 @@ public class SchemaFn extends SystemFunction {
 
 }
 
-// Copyright (c) 2013-2016 Saxonica Limited.
+// Copyright (c) 2013-2020 Saxonica Limited

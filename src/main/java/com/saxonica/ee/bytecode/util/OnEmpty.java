@@ -58,6 +58,7 @@ public abstract class OnEmpty {
          * @param ga the code generator
          */
 
+        @Override
         public void generate(Generator ga) {
             Stack<Class> u = theUnwindStack;
             if (u != null) {
@@ -108,6 +109,7 @@ public abstract class OnEmpty {
      */
 
     public static class ReturnNull extends OnEmpty {
+        @Override
         public void generate(Generator ga) {
             ga.pushNull();
         }
@@ -119,12 +121,13 @@ public abstract class OnEmpty {
      */
 
     public static class ReturnEmptyString extends OnEmpty {
+        @Override
         public void generate(Generator ga) {
             ga.push("");
         }
     }
 }
 
-// Copyright (c) 2011 Saxonica Limited. All rights reserved
+// Copyright (c) 2011-2020 Saxonica Limited
 
 

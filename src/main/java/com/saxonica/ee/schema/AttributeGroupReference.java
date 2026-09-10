@@ -11,9 +11,7 @@ import net.sf.saxon.type.SchemaException;
 
 import java.util.Stack;
 
-import static net.sf.saxon.type.SchemaComponent.ValidationStatus.INVALID;
-import static net.sf.saxon.type.SchemaComponent.ValidationStatus.UNVALIDATED;
-import static net.sf.saxon.type.SchemaComponent.ValidationStatus.VALIDATED;
+import static net.sf.saxon.type.SchemaComponent.ValidationStatus.*;
 
 /**
  * An XML Schema Attribute Group Reference, corresponding to an
@@ -58,6 +56,7 @@ public final class AttributeGroupReference extends SchemaStructure
      * Determine whether this reference has been resolved
      */
 
+    @Override
     public boolean isResolved() {
         return target != null;
     }
@@ -68,6 +67,7 @@ public final class AttributeGroupReference extends SchemaStructure
      * @return true if the target of this component reference is known to be absent, and if a warning has
      * been issued to this effect
      */
+    @Override
     public boolean isDangling() {
         return dangling;
     }
@@ -76,6 +76,7 @@ public final class AttributeGroupReference extends SchemaStructure
      * Get the symbol space of the target of this reference
      */
 
+    @Override
     public int getSymbolSpace() {
         return SymbolSpace.ATTRIBUTE_GROUP;
     }
@@ -95,6 +96,7 @@ public final class AttributeGroupReference extends SchemaStructure
      *
      * @return the component name
      */
+    @Override
     public StructuredQName getTargetComponentName() {
         return qName;
     }
@@ -109,13 +111,9 @@ public final class AttributeGroupReference extends SchemaStructure
      *          if the reference to the attribute group
      *          declaration cannot be resolved
      */
-
-    public AttributeWildcard getAttributeWildcard(SchemaCompiler compiler) throws MissingComponentException {
-        return getAttributeWildcard(compiler, new Stack<>());
-    }
-
-    protected AttributeWildcard getAttributeWildcard(SchemaCompiler compiler, Stack<AttributeGroupDecl> stack) throws MissingComponentException {
-        tryToResolve(compiler);
+    
+    protected AttributeWildcard getAttributeWildcard(SchemaCompiler compiler, Stack<AttributeGroupDecl> stack) {
+        //tryToResolve(compiler);
         if (target == null) {
             throw new MissingComponentExceptionImpl(this);
         }
@@ -134,6 +132,7 @@ public final class AttributeGroupReference extends SchemaStructure
      * @throws SchemaException if a fatal error occurs
      */
 
+    @Override
     public boolean fixup(SchemaCompiler compiler) throws SchemaException {
         AttributeGroupDecl decl = (AttributeGroupDecl) PreparedSchema.validateReference(this, compiler, false);
         if (decl == null) {
@@ -183,6 +182,7 @@ public final class AttributeGroupReference extends SchemaStructure
      * @throws SchemaException if a circularity is detected.
      */
 
+    @Override
     public void lookForCycles(Stack references, SchemaCompiler compiler) throws SchemaException {
         if (compiler.getLanguageVersion() == Configuration.XSD11) {
             // circular attribute groups are not an error in XSD 1.1
@@ -213,23 +213,37 @@ public final class AttributeGroupReference extends SchemaStructure
     }
 
     /**
-     * Attempt to resolve this reference using the groups defined in a given schema.
-     * No error results if the reference cannot be resolved.
+     * Try to resolve the reference if possible, relative to components present in a given schema.
+     * If the reference cannot be resolved, the action depends on whether the compiler service allows
+     * dangling references to absent components. If it does, we try to patch the schema up with a dummy
+     * component (where possible). If not, the method throws an exception
+     *
+     * @param compiler The compiler being used to compile the referring component.
+     * @param fatal
+     * @throws SchemaException if the reference cannot be resolved or repaired.
      */
 
-    public void tryToResolve(/*@Nullable*/ SchemaCompiler compiler) {
+    @Override
+    public void tryToResolve(SchemaCompiler compiler, boolean fatal) throws SchemaException {
         if (!dangling) {
-            if (compiler != null) {
-                PreparedSchema schema = compiler.getPreparedSchema();
-                if (target == null) {
-                    target = schema.getAttributeGroup(getTargetComponentName());
-                }
+            PreparedSchema schema = compiler.getPreparedSchema();
+            if (target == null) {
+                target = schema.getAttributeGroup(getTargetComponentName());
             }
             if (target == null) {
                 target = getConfiguration().getSuperSchema().getAttributeGroup(getTargetComponentName());
             }
             if (target == null) {
-                dangling = true;
+                if (compiler.isAllowDanglingReferences()) {
+                    compiler.warning("Unknown attribute group " + qName.getEQName()
+                                             + " (substituting an empty attribute group)", this);
+                    dangling = true;
+                    target = new AttributeGroupDecl(compiler.getConfiguration());
+                    target.addAttributeGroupReference(this);
+                    target.setAttributeGroupName(qName);
+                } else {
+                    throw new SchemaException("Unknown type " + qName.getEQName(), this);
+                }
             }
         }
     }
@@ -243,6 +257,7 @@ public final class AttributeGroupReference extends SchemaStructure
      * @throws MissingComponentException if the reference has not been resolved.
      */
 
+    @Override
     public SchemaComponent getTarget() throws MissingComponentException {
         if (target == null) {
             throw new MissingComponentExceptionImpl(this);
@@ -258,10 +273,11 @@ public final class AttributeGroupReference extends SchemaStructure
      * @param compiler the schema compiler
      */
 
+    @Override
     public void elaborate(SchemaCompiler compiler) {
         // no action
     }
 
 }
 
-// Copyright (c) 2004-2006 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

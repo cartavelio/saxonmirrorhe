@@ -28,27 +28,26 @@ public class ReplaceValueAction extends PendingUpdateAction {
      * @param targetNode the node that defines where the new nodes will be inserted
      */
 
-    public ReplaceValueAction(String content, MutableNodeInfo targetNode) {
+    ReplaceValueAction(String content, MutableNodeInfo targetNode) {
         this.content = content;
         this.targetNode = targetNode;
     }
 
     /**
      * Apply the pending update action to the affected nodes
-     *
-     * @param context         the XPath evaluation context
+     *  @param context         the XPath evaluation context
      * @param affectedRootSet the set of roots of trees that have been modified, which
-     *                        this action should add to as necessary
      */
 
-    public void apply(XPathContext context, Set affectedRootSet) {
+    @Override
+    public void apply(XPathContext context, Set<MutableNodeInfo> affectedRootSet) {
         NodeInfo root = targetNode.getRoot();
         targetNode.replaceStringValue(content);
         int kind = targetNode.getNodeKind();
         if (kind == Type.ELEMENT || kind == Type.TEXT || kind == Type.ATTRIBUTE) {
             targetNode.removeTypeAnnotation();
         }
-        affectedRootSet.add(root);
+        affectedRootSet.add((MutableNodeInfo)root);
     }
 
     /**
@@ -58,6 +57,7 @@ public class ReplaceValueAction extends PendingUpdateAction {
      *         case of a delete action, which affects multiple nodes.
      */
 
+    @Override
     public NodeInfo getTargetNode() {
         return targetNode;
     }
@@ -70,9 +70,10 @@ public class ReplaceValueAction extends PendingUpdateAction {
      *         in the specification
      */
 
+    @Override
     public int getApplyPhase() {
         return (targetNode.getNodeKind() == Type.ELEMENT ? 4 : 1);
     }
 }
 
-// Copyright (c) 2008 Saxonica Limited.
+// Copyright (c) 2008-2020 Saxonica Limited

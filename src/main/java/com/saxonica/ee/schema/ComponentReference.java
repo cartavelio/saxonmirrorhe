@@ -1,10 +1,11 @@
 package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.type.MissingComponentException;
 import net.sf.saxon.type.SchemaComponent;
+import net.sf.saxon.type.SchemaException;
 
 /**
  * A reference to a schema component. The reference may have been resolved to
@@ -24,14 +25,17 @@ public interface ComponentReference extends Location {
 
     /**
      * Try to resolve the reference if possible, relative to components present in a given schema.
-     * No error occurs if the reference cannot yet be resolved, but the reference is marked as a dangling reference.
+     * If the reference cannot be resolved, the action depends on whether the schema compiler allows
+     * dangling references to absent components. If it does, we try to patch the schema up with a dummy
+     * component (where possible). If not, the method throws an exception
      *
      * @param compiler The compiler being used to compile the referring component.
-     *                 This is assumed to know about the schema containing the candidate target components for the reference. If
-     *                 null, the schema containing the reference is used.
+     * @param fatal True if a failure to resolve should be treated as fatal, irrespective of any settings
+     *              in the SchemaCompiler
+     * @throws SchemaException if the reference cannot be resolved or repaired.
      */
 
-    void tryToResolve(SchemaCompiler compiler);
+    void tryToResolve(SchemaCompiler compiler, boolean fatal) throws SchemaException;
 
     /**
      * Ask whether this reference has been resolved
@@ -75,6 +79,6 @@ public interface ComponentReference extends Location {
     int getSymbolSpace();
 }
 
-// Copyright (c) 2004-2015 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited
 
 

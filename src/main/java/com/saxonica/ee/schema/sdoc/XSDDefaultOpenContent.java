@@ -3,11 +3,9 @@ package com.saxonica.ee.schema.sdoc;
 import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.ee.schema.Wildcard;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.om.AttributeCollection;
-import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.linked.NodeImpl;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.value.Whitespace;
 
@@ -32,13 +30,14 @@ public class XSDDefaultOpenContent extends AnnotationParent {
      *          if any errors are found in the attributes
      */
 
+    @Override
     public void prepareAttributes() throws SchemaException {
 
         if (getXSDSchema().getSchemaCompiler().getLanguageVersion() == Configuration.XSD10) {
             error("The xs:defaultOpenContent element requires XSD 1.1 to be enabled");
         }
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         //-- handle attributes
 
         String[] allowed = {"appliesToEmpty", "id", "mode"};
@@ -72,11 +71,10 @@ public class XSDDefaultOpenContent extends AnnotationParent {
      *          if any XML representation constraints are violated
      */
 
+    @Override
     public void validate(SchemaCompiler compiler) throws SchemaException {
         checkContentModel(stateTerms, stateTargets, false);
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while ((child = (NodeImpl)iter.next()) != null) {
+        for (NodeInfo child : children()) {
             int fp = child.getFingerprint();
             switch (fp) {
                 case StandardNames.XS_ANY: {
@@ -102,6 +100,7 @@ public class XSDDefaultOpenContent extends AnnotationParent {
     private final static int[][] stateTargets = {
             state0targets, state1targets, state2targets};
 
+    @Override
     protected boolean isFinalState(int state) {
         return state == 1;
     }
@@ -109,4 +108,4 @@ public class XSDDefaultOpenContent extends AnnotationParent {
 
 }
 
-// Copyright (c) 2008 Saxonica Limited
+// Copyright (c) 2008-2020 Saxonica Limited

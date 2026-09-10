@@ -3,7 +3,8 @@ package com.saxonica.xsltextn.style;
 import com.saxonica.xsltextn.instruct.DeepUpdate;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.style.StyleElement;
@@ -26,6 +27,7 @@ public class SaxonDeepUpdate extends StyleElement {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
@@ -36,26 +38,30 @@ public class SaxonDeepUpdate extends StyleElement {
      * @return false: no, it may not contain a template-body
      */
 
+    @Override
     public boolean mayContainSequenceConstructor() {
         return false;
     }
 
-    public void prepareAttributes() throws XPathException {
-        AttributeCollection atts = getAttributeList();
-
-        for (int a = 0; a < atts.getLength(); a++) {
-            String f = atts.getQName(a);
-            if (f.equals("root")) {
-                String rootAtt = atts.getValue(a);
-                root = makeExpression(rootAtt, a);
-            } else if (f.equals("select")) {
-                String selectAtt = atts.getValue(a);
-                select = makeExpression(selectAtt, a);
-            } else if (f.equals("action")) {
-                String actionAtt = atts.getValue(a);
-                action = makeExpression(actionAtt, a);
-            } else {
-                checkUnknownAttribute(atts.getNodeName(a));
+    @Override
+    public void prepareAttributes() {
+        for (AttributeInfo att : attributes()) {
+            NodeName attName = att.getNodeName();
+            String f = attName.getDisplayName();
+            String value = att.getValue();
+            switch (f) {
+                case "root":
+                    root = makeExpression(value, att);
+                    break;
+                case "select":
+                    select = makeExpression(value, att);
+                    break;
+                case "action":
+                    action = makeExpression(value, att);
+                    break;
+                default:
+                    checkUnknownAttribute(attName);
+                    break;
             }
         }
 
@@ -70,6 +76,7 @@ public class SaxonDeepUpdate extends StyleElement {
         }
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         getConfiguration().checkLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION,
                                                 "saxon:deep-update",
@@ -79,10 +86,13 @@ public class SaxonDeepUpdate extends StyleElement {
         action = typeCheck("action", action);
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         return new DeepUpdate(root, select, action);
     }
 
+
+
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

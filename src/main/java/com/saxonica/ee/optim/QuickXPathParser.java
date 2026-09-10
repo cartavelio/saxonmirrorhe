@@ -14,6 +14,7 @@ import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.s9api.UnprefixedElementMatchingPolicy;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
@@ -54,6 +55,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
      * complex to parse.
      */
 
+    @Override
     public Expression parse(Tokenizer t, StaticContext env, String expression, int start, int terminator) {
         if (expression.length() - start > 30 && terminator != Token.RCURLY) {
             return null;
@@ -118,19 +120,17 @@ public class QuickXPathParser implements XPathParser.Accelerator {
     }
 
     static StructuredQName verifyQName(String name, StaticContext env) throws XPathException {
-        return new QNameParser(env.getNamespaceResolver()).parse(name);
+        return new QNameParser(env.getNamespaceResolver()).parse(name, "");
     }
 
     static StructuredQName verifyElementQName(String name, StaticContext env) throws XPathException {
         QNameParser qNameParser = new QNameParser(env.getNamespaceResolver());
-        qNameParser.setDefaultNamespace(env.getDefaultElementNamespace());
-        return qNameParser.parse(name);
+        return qNameParser.parse(name, env.getDefaultElementNamespace());
     }
 
     static StructuredQName verifyFunctionQName(String name, StaticContext env) throws XPathException {
         QNameParser qNameParser = new QNameParser(env.getNamespaceResolver());
-        qNameParser.setDefaultNamespace(env.getDefaultFunctionNamespace());
-        return qNameParser.parse(name);
+        return qNameParser.parse(name, env.getDefaultFunctionNamespace());
     }
 
     static {
@@ -235,6 +235,9 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         patterns.put(
                 key(Token.NAME),
                 (values, env) -> {
+                    if (env.getUnprefixedElementMatchingPolicy() != UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE) {
+                        return null;
+                    }
                     StructuredQName name = verifyElementQName(values.get(0), env);
                     return new AxisExpression(AxisInfo.CHILD,
                                               new NameTest(Type.ELEMENT, name.getURI(), name.getLocalPart(), env.getConfiguration().getNamePool()));
@@ -335,6 +338,9 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         patterns.put(
                 key(Token.NAME, Token.SLASH, Token.NAME),
                 (values, env) -> {
+                    if (env.getUnprefixedElementMatchingPolicy() != UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE) {
+                        return null;
+                    }
                     StructuredQName first = verifyElementQName(values.get(0), env);
                     AxisExpression start =
                             new AxisExpression(
@@ -354,6 +360,9 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         patterns.put(
                 key(Token.NAME, Token.UNION, Token.NAME),
                 (values, env) -> {
+                    if (env.getUnprefixedElementMatchingPolicy() != UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE) {
+                        return null;
+                    }
                     StructuredQName first = verifyElementQName(values.get(0), env);
                     AxisExpression one =
                             new AxisExpression(
@@ -373,6 +382,9 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         patterns.put(
                 key(Token.NAME, Token.SLASH, Token.AT, Token.NAME),
                 (values, env) -> {
+                    if (env.getUnprefixedElementMatchingPolicy() != UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE) {
+                        return null;
+                    }
                     StructuredQName first = verifyElementQName(values.get(0), env);
                     AxisExpression start =
                             new AxisExpression(
@@ -512,7 +524,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         patterns.put(
                 key(Token.AXIS, Token.NAME),
                 (values, env) -> {
-                    byte axis = AxisInfo.getAxisNumber(values.get(0));
+                    int axis = AxisInfo.getAxisNumber(values.get(0));
                     boolean reverse = !AxisInfo.isForwards[axis];
                     if (reverse || axis == AxisInfo.ATTRIBUTE || axis == AxisInfo.NAMESPACE) {
                         return null;
@@ -535,4 +547,6 @@ public class QuickXPathParser implements XPathParser.Accelerator {
 
 
 }
+
+// Copyright (c) 2020 Saxonica Limited
 

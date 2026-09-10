@@ -2,7 +2,6 @@ package com.saxonica.ee.stream.adjunct;
 
 import com.saxonica.ee.stream.PostureAndSweep;
 import com.saxonica.ee.stream.Streamability;
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.om.FleetingParentNode;
 import com.saxonica.ee.stream.watch.WatchManager;
@@ -10,8 +9,10 @@ import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.UserFunction;
-import net.sf.saxon.expr.parser.Location;
-import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
 
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ public class FilterFunctionCallAdjunct extends TransmissionAdjunct {
     @Override
     public PostureAndSweep computeStreamability(ContextItemStaticInfoEE contextInfo, List<String> reasons) {
         if (reasons == null) {
-            reasons = new ArrayList<String>();
+            reasons = new ArrayList<>();
         }
 
         UserFunctionCall exp = (UserFunctionCall)getExpression();
@@ -47,11 +48,11 @@ public class FilterFunctionCallAdjunct extends TransmissionAdjunct {
     }
 
     @Override
-    public Feed makeItemFeed(WatchManager watchManager, final Feed out, final XPathContext context) throws XPathException {
+    public ItemFeed makeItemFeed(WatchManager watchManager, final ItemFeed out, final XPathContext context) throws XPathException {
         UserFunctionCall exp = (UserFunctionCall) getExpression();
         final Component targetComponent = exp.getTargetComponent(context);
         final UserFunction target = exp.getTargetFunction(context);
-        final Sequence<?>[] argValues = SequenceTool.makeSequenceArray(target.getArity());
+        final Sequence[] argValues = SequenceTool.makeSequenceArray(target.getArity());
         for (int i=1; i<argValues.length; i++) {
             argValues[i] = exp.getArg(i).iterate(context).materialize();
         }
@@ -62,23 +63,23 @@ public class FilterFunctionCallAdjunct extends TransmissionAdjunct {
                 argValues[0] = node;
                 XPathContextMajor c2 = context.newCleanContext();
                 c2.setCurrentComponent(targetComponent);
-                Sequence<?> result =
+                Sequence result =
                         ((UserFunction)targetComponent.getActor()).call(c2, argValues);
                 result.iterate().forEachOrFail(it -> {
                     if (it instanceof FleetingParentNode) {
                         out.startSelectedParentNode((FleetingParentNode) it, locationId);
                     } else {
-                        out.processItem(it);
+                        out.append(it);
                     }
                 });
                 return null;
             }
 
             @Override
-            public void processItem(Item<?> item) throws XPathException {
+            public void append(Item item) throws XPathException {
                 argValues[0] = item;
                 XPathContext c2 = context.newCleanContext();
-                Sequence<?> result = target.call(c2, argValues);
+                Sequence result = target.call(c2, argValues);
                 processItems(result.iterate(), out);
             }
         };
@@ -87,4 +88,4 @@ public class FilterFunctionCallAdjunct extends TransmissionAdjunct {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

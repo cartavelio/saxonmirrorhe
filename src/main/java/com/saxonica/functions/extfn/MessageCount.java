@@ -36,6 +36,7 @@ public class MessageCount extends SystemFunction {
      *         the method should return <code>EmptyIterator.getInstance()</code>
      */
 
+    @Override
     public IntegerValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         Controller controller = context.getController();
         if (!(controller instanceof XsltController)) {
@@ -60,4 +61,4 @@ public class MessageCount extends SystemFunction {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

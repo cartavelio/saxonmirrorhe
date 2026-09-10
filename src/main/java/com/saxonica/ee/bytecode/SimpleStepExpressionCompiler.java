@@ -19,13 +19,7 @@ public class SimpleStepExpressionCompiler extends ToIteratorCompiler {
     @Override
     public void compileToIterator(CompilerService compiler,
                                   Expression expression) throws CannotCompileException {
-        /*
-           * Item origin = start.evaluateItem(context);
-          if (origin == null) {
-              return EmptyIterator.getInstance();
-          }
-          return ((AxisExpression)step).iterate(origin);
-           * */
+
         Expression start = ((SlashExpression) expression).getSelectExpression();
         Expression step = ((SlashExpression) expression).getActionExpression();
         final int axis = ((AxisExpression) step).getAxis();
@@ -62,4 +56,4 @@ public class SimpleStepExpressionCompiler extends ToIteratorCompiler {
 
 }
 
-//Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

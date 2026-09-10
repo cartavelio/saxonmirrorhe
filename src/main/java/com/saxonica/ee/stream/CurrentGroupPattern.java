@@ -37,6 +37,7 @@ public class CurrentGroupPattern extends AnchorPattern {
      * treated as the anchor node
      */
 
+    @Override
     public boolean matchesCurrentGroup() {
         return true;
     }
@@ -56,5 +57,5 @@ public class CurrentGroupPattern extends AnchorPattern {
 
 }
 
-// Copyright (c) 2018 Saxonica Ltd
+// Copyright (c) 2018-2020 Saxonica Limited
 

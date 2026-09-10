@@ -1,9 +1,11 @@
 package com.saxonica.serialize;
 
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ComplexContentOutputter;
+import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.event.Receiver;
 import net.sf.saxon.om.FingerprintedQName;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
@@ -36,6 +38,7 @@ public class SequenceWrapperPE extends SequenceWrapper {
         super(destination);
     }
 
+    @Override
     public void open() throws XPathException {
         super.open();
         resultMap = new FingerprintedQName("result", RESULT_NS, "map");
@@ -49,17 +52,18 @@ public class SequenceWrapperPE extends SequenceWrapper {
      * Output an item (atomic value or node) to the sequence
      */
 
+    @Override
     public void append(/*@NotNull*/ Item item, Location locationId, int copyNamespaces) throws XPathException {
         if (item instanceof MapItem) {
-            Receiver out = getDestination();
-            out.startElement(resultMap, Untyped.getInstance(), locationId, 0);
+            ComplexContentOutputter out = getDestination();
+            out.startElement(resultMap, Untyped.getInstance(), locationId, ReceiverOption.NONE);
             MapItem map = (MapItem) item;
             for (KeyValuePair pair : map.keyValuePairs()) {
-                out.startElement(resultMapEntry, Untyped.getInstance(), locationId, 0);
-                out.startElement(resultMapKey, Untyped.getInstance(), locationId, 0);
+                out.startElement(resultMapEntry, Untyped.getInstance(), locationId, ReceiverOption.NONE);
+                out.startElement(resultMapKey, Untyped.getInstance(), locationId, ReceiverOption.NONE);
                 append(pair.key);
                 out.endElement();
-                out.startElement(resultMapValue, Untyped.getInstance(), locationId, 0);
+                out.startElement(resultMapValue, Untyped.getInstance(), locationId, ReceiverOption.NONE);
                 SequenceIterator value = pair.value.iterate();
                 Item valItem;
                 while ((valItem = value.next()) != null) {
@@ -76,5 +80,5 @@ public class SequenceWrapperPE extends SequenceWrapper {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 

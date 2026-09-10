@@ -1,6 +1,5 @@
 package com.saxonica.ee.stream.adjunct;
 
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.watch.Terminator;
@@ -25,11 +24,13 @@ import java.util.List;
  */
 public class MapEntryStreamer extends StreamingAdjunct implements FeedMaker {
 
+    @Override
     public FeedMaker getFeedMaker(int arg) throws XPathException {
         return arg==1 ? this : getDefaultFeedMaker(arg);
     }
 
-    public Feed makeItemFeed(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
         return new MapEntryFeed(getExpression(), out, context);
     }
 
@@ -38,7 +39,7 @@ public class MapEntryStreamer extends StreamingAdjunct implements FeedMaker {
 
         List<Item> value;
 
-        public MapEntryFeed(Expression exp, Feed result, XPathContext context) {
+        public MapEntryFeed(Expression exp, ItemFeed result, XPathContext context) {
             super(exp, result, context);
         }
 
@@ -62,7 +63,7 @@ public class MapEntryStreamer extends StreamingAdjunct implements FeedMaker {
          * @param item the item to be supplied
          */
         @Override
-        public void processItem(Item<?> item) throws XPathException {
+        public void append(Item item) throws XPathException {
             value.add(item);
         }
 
@@ -77,8 +78,8 @@ public class MapEntryStreamer extends StreamingAdjunct implements FeedMaker {
             AtomicValue key = (AtomicValue) ((SystemFunctionCall) getExpression()).getArg(0).evaluateItem(getContext());
             GroundedValue seq = SequenceExtent.makeSequenceExtent(value);
             HashTrieMap map = HashTrieMap.singleton(key, seq);
-            getResult().processItem(map);
-            getResult().close();
+            getNextOutputter().append(map);
+            getNextOutputter().close();
         }
 
     }

@@ -3,6 +3,7 @@ package com.saxonica.ee.schema;
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.fsa.*;
 import com.saxonica.ee.schema.sdoc.SimpleTypeDefinition;
+import com.saxonica.ee.stream.Sweep;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Block;
@@ -22,6 +23,7 @@ import net.sf.saxon.z.IntIterator;
 
 import javax.xml.transform.SourceLocator;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static net.sf.saxon.type.SchemaComponent.ValidationStatus.*;
 
@@ -179,6 +181,7 @@ public class UserComplexType extends UserDefinedType
      * {@link #VARIETY_ELEMENT_ONLY}
      */
 
+    @Override
     public int getVariety() {
         return variety;
     }
@@ -189,6 +192,7 @@ public class UserComplexType extends UserDefinedType
      * @return an EQName identifying the type. In the case of an anonymous type, an internally-generated
      *         name is returned
      */
+    @Override
     public String getEQName() {
         return "Q{" + getTargetNamespace() + "}" + getName();
     }
@@ -419,6 +423,7 @@ public class UserComplexType extends UserDefinedType
      *
      * @return the value of the 'block' attribute for this element
      */
+    @Override
     public int getBlock() {
         return block;
     }
@@ -429,6 +434,7 @@ public class UserComplexType extends UserDefinedType
      * @return true if this UserComplexType is "abstract".
      */
 
+    @Override
     public boolean isAbstract() {
         return isAbstract;
     }
@@ -439,6 +445,7 @@ public class UserComplexType extends UserDefinedType
      *
      * @return true if this complexType has complex content
      */
+    @Override
     public boolean isComplexContent() {
         return variety != VARIETY_SIMPLE;
     }
@@ -450,6 +457,7 @@ public class UserComplexType extends UserDefinedType
      * @return true if this complexType has simple content
      */
 
+    @Override
     public boolean isSimpleContent() {
         return variety == VARIETY_SIMPLE;
     }
@@ -459,6 +467,7 @@ public class UserComplexType extends UserDefinedType
      * using an xs:all compositor
      */
 
+    @Override
     public boolean isAllContent() {
         return allContent;
     }
@@ -577,6 +586,7 @@ public class UserComplexType extends UserDefinedType
      */
 
     /*@Nullable*/
+    @Override
     public SimpleType getSimpleContentType() throws MissingComponentException {
         SimpleType simpleContentType;
         TypeReference ref = getSimpleContentTypeReference();
@@ -585,7 +595,7 @@ public class UserComplexType extends UserDefinedType
         }
         simpleContentType = (SimpleType) ref.getTarget();
         if (simpleContentType instanceof SimpleTypeDefinition) {
-            simpleContentType = ((SimpleTypeDefinition) simpleContentType).getSimpleType();
+            simpleContentType = ((SimpleTypeDefinition) simpleContentType).getWorkingType();
         }
         return simpleContentType;
     }
@@ -595,6 +605,7 @@ public class UserComplexType extends UserDefinedType
      *
      * @return true if this complexType is a restriction
      */
+    @Override
     public boolean isRestricted() {
         return restricted;
     }
@@ -603,6 +614,7 @@ public class UserComplexType extends UserDefinedType
      * Ask whether the contentType of this complexType is empty
      */
 
+    @Override
     public boolean isEmptyContent() {
         return variety == VARIETY_EMPTY;
     }
@@ -613,6 +625,7 @@ public class UserComplexType extends UserDefinedType
      * @return true, if and only if this type allows mixed content
      */
 
+    @Override
     public boolean isMixedContent() {
         return variety == VARIETY_MIXED;
     }
@@ -623,6 +636,7 @@ public class UserComplexType extends UserDefinedType
      * @return true if this SchemaType is a simple type
      */
 
+    @Override
     public boolean isSimpleType() {
         return false;
     }
@@ -633,6 +647,7 @@ public class UserComplexType extends UserDefinedType
      * @return true if this SchemaType is an atomic type
      */
 
+    @Override
     public boolean isAtomicType() {
         return false;
     }
@@ -645,6 +660,7 @@ public class UserComplexType extends UserDefinedType
      * node, however, can still allow a list.
      */
 
+    @Override
     public boolean isIdType() throws MissingComponentException {
         //noinspection ConstantConditions
         return isSimpleContent() && getSimpleContentType().isIdType();
@@ -656,6 +672,7 @@ public class UserComplexType extends UserDefinedType
      * from IDREF or IDREFS by restriction, list, or union
      */
 
+    @Override
     public boolean isIdRefType() throws MissingComponentException {
         //noinspection ConstantConditions
         return isSimpleContent() && getSimpleContentType().isIdRefType();
@@ -815,6 +832,7 @@ public class UserComplexType extends UserDefinedType
      * @return true if there are any assertions
      */
 
+    @Override
     public boolean hasAssertions() {
         return assertions != null && !assertions.isEmpty();
     }
@@ -834,6 +852,21 @@ public class UserComplexType extends UserDefinedType
     }
 
     /**
+     * Get the assertions defined on this complex type that have a given streaming sweep
+     * @param sweep the sweep of the assertions to be selected
+     * @return the set of asserts defined on this type, including those inherited from the base type, where
+     * the sweep of the assertion is the requested sweep
+     */
+
+    public Set<Assertion> getAssertions(Sweep sweep) {
+        if (assertions == null) {
+            return Collections.emptySet();
+        } else {
+            return assertions.stream().filter(a -> a.getSweep() == sweep).collect(Collectors.toSet());
+        }
+    }
+
+    /**
      * This method is called to look for cycles. The object implementing this
      * method is required (a) to raise an exception if the object itself appears
      * in the list of references, (b) to add itself to the list of references, and
@@ -845,6 +878,7 @@ public class UserComplexType extends UserDefinedType
      * @throws SchemaException
      */
 
+    @Override
     public void lookForCycles(Stack references, SchemaCompiler compiler) throws SchemaException, MissingComponentException {
         for (Object reference : references) {
             if (((SchemaType) reference).isSameType(this)) {
@@ -854,7 +888,7 @@ public class UserComplexType extends UserDefinedType
             }
         }
         references.push(this);
-        getBaseTypeReference().tryToResolve(compiler);
+        getBaseTypeReference().tryToResolve(compiler, false);
         if (getBaseTypeReference().isResolved()) {
             SchemaType base = (SchemaType) getBaseTypeReference().getTarget();
             if (base instanceof UserSchemaComponent) {
@@ -871,6 +905,7 @@ public class UserComplexType extends UserDefinedType
      * @return true if all is well, false if errors found
      */
 
+    @Override
     public boolean fixup(SchemaCompiler compiler) throws SchemaException {
         if (getFixupStatus() == UNVALIDATED) {
             setFixupStatus(VALIDATING);
@@ -917,6 +952,7 @@ public class UserComplexType extends UserDefinedType
      * Checks the validity of this UserComplexType definition.
      */
 
+    @Override
     public boolean validate(SchemaCompiler compiler) throws SchemaException {
         boolean result = true;
 
@@ -1010,7 +1046,10 @@ public class UserComplexType extends UserDefinedType
 
     private boolean validateSimpleContent(SchemaCompiler compiler, SchemaType base) throws SchemaException {
         if (simpleContentTypeRef == null) {
-            if (base.isSimpleType()) {
+            if (getValidationStatus() == INVALID) {
+                setValidationStatus(INVALID);
+                return false;
+            } else if (base.isSimpleType()) {
                 // the simple content type is the same as the base type: share the reference
                 simpleContentTypeRef = getBaseTypeReference();
             } else if (base.isComplexType() && ((ComplexType) base).isSimpleContent()) {
@@ -1033,9 +1072,12 @@ public class UserComplexType extends UserDefinedType
         if (content instanceof SimpleTypeDefinition) {
             SchemaType type = compiler.getPreparedSchema().getSchemaType(content.getStructuredQName());
             if (type != null) {
-                if (type.isSimpleType()) {
+                if (type.getValidationStatus() == INVALID) {
+                    setValidationStatus(INVALID);
+                    return false;
+                } else if (type.isSimpleType()) {
                     if (type instanceof SimpleTypeDefinition) {
-                        type = ((SimpleTypeDefinition) type).getSimpleType();
+                        type = ((SimpleTypeDefinition) type).getWorkingType();
                     }
                     getSimpleContentTypeReference().setTarget(type);
                 } else {
@@ -1074,7 +1116,7 @@ public class UserComplexType extends UserDefinedType
         if (base instanceof UserDefinedType) {
             Set<UserComplexType> existingExtensions = ((UserDefinedType) base).getExtensionTypes();
             for (UserComplexType ex : existingExtensions) {
-                if (ex.getStructuredQName().equals(getStructuredQName()) && ex.isSameType(this)) {
+                if (ex.getTypeName().equals(getTypeName()) && ex.isSameType(this)) {
                     return true;
                 }
             }
@@ -1413,7 +1455,7 @@ public class UserComplexType extends UserDefinedType
         while (true) {
             if (b instanceof UserDefinedType) {
                 if (b instanceof SimpleTypeDefinition) {
-                    b = ((SimpleTypeDefinition) b).getSimpleType();
+                    b = ((SimpleTypeDefinition) b).getWorkingType();
                 }
                 ((UserDefinedType) b).registerExtensionType(this);
                 b = b.getBaseType();
@@ -1717,39 +1759,8 @@ public class UserComplexType extends UserDefinedType
                 machine.getInitialState().setFinalState(true);
                 machine.setOpenContentWildcard(openContentWildcard, openContentMode == OPEN_CONTENT_INTERLEAVE);
             } else {
-                //extended.rewrite(null);
-                NonDeterminizedState finalState = new NonDeterminizedState(machine);
-                finalState.setFinalState(true);
-                try {
-                    //                long startTime = System.currentTimeMillis();
-                    AutomatonState state = FiniteStateMachine.compileParticle(compiler, extended, finalState, this, machine);
-                    machine.setInitialState(state);
-                    //                System.err.println("Time to compile complex type " + getDescription() +
-                    //                        " - " + (System.currentTimeMillis() - startTime));
-                    if (debug) {
-                        Logger err = compiler.getConfiguration().getLogger();
-                        err.info("==== NFSA for complex type " + getDescription());
-                        machine.display(err);
-                    }
-                    //                startTime = System.currentTimeMillis();
-                    machine = FiniteStateMachine.determinize(compiler, machine);
-                    //                System.err.println("Time to determinize complex type " + getDescription() +
-                    //                        " - " + (System.currentTimeMillis() - startTime));
-
-                    if (debug) {
-                        Logger err = compiler.getConfiguration().getLogger();
-                        err.info("==== DFSA for complex type " + getDescription());
-                        machine.display(err);
-                    }
-
-                    machine.setOpenContentWildcard(openContentWildcard, openContentMode == OPEN_CONTENT_INTERLEAVE);
-                    //initialState = machine.getInitialState();
-                } catch (SchemaException err) {
-                    compiler.error("Error in complex type " +
-                            getDescription() +
-                            ": " + err.getMessage(), this);
-                    throw err;
-                }
+                //makeAutomaton(compiler);
+                compiler.scheduleAutomaton(this);
                 if (particle != null) {
                     particle.compile(compiler);
                 }
@@ -1758,6 +1769,43 @@ public class UserComplexType extends UserDefinedType
         makeCombinedAttributeGroup(compiler);
         makeContextDeterminedTypeMapForAttributes();
         makeContextDeterminedTypeMapForElements();
+    }
+
+    protected void makeAutomaton(SchemaCompiler compiler) throws SchemaException {
+        //extended.rewrite(null);
+        Particle extended = extendedParticle;
+        NonDeterminizedState finalState = new NonDeterminizedState(machine);
+        finalState.setFinalState(true);
+        try {
+            //                long startTime = System.currentTimeMillis();
+            AutomatonState state = FiniteStateMachine.compileParticle(compiler, extended, finalState, this, machine);
+            machine.setInitialState(state);
+            //                System.err.println("Time to compile complex type " + getDescription() +
+            //                        " - " + (System.currentTimeMillis() - startTime));
+            if (debug) {
+                Logger err = compiler.getConfiguration().getLogger();
+                err.info("==== NFSA for complex type " + getDescription());
+                machine.display(err);
+            }
+            //                startTime = System.currentTimeMillis();
+            machine = FiniteStateMachine.determinize(compiler, machine);
+            //                System.err.println("Time to determinize complex type " + getDescription() +
+            //                        " - " + (System.currentTimeMillis() - startTime));
+
+            if (debug) {
+                Logger err = compiler.getConfiguration().getLogger();
+                err.info("==== DFSA for complex type " + getDescription());
+                machine.display(err);
+            }
+
+            machine.setOpenContentWildcard(openContentWildcard, openContentMode == OPEN_CONTENT_INTERLEAVE);
+            //initialState = machine.getInitialState();
+        } catch (SchemaException err) {
+            compiler.error("Error in complex type " +
+                    getDescription() +
+                    ": " + err.getMessage(), this);
+            throw err;
+        }
     }
 
     /**
@@ -1770,11 +1818,12 @@ public class UserComplexType extends UserDefinedType
 
     public void recompile(SchemaCompiler compiler) throws SchemaException {
         if (debug) {
-            getConfiguration().getStandardErrorOutput().println("Recompiling type " + getDescription());
+            getConfiguration().getLogger().info("Recompiling type " + getDescription());
         }
         compiled = false;
         compile(compiler);
-        // TODO: delay this until the compiled type definition is actually needed, to avoid repeated compilations.
+        // See bug 4554. Generation of the finite state machine is now deferred, so the expensive part
+        // of the operation is only performed once, at the end
     }
 
     /**
@@ -1976,6 +2025,7 @@ public class UserComplexType extends UserDefinedType
      * Test whether the content model of this complexType allows empty content
      */
 
+    @Override
     public boolean isEmptiable() throws MissingComponentException {
         Particle p = getParticle();
         return p == null || p.isEmptiable();
@@ -1993,6 +2043,7 @@ public class UserComplexType extends UserDefinedType
      *                           model permitted by the type. If there is one extension that defines the particle, return
      */
 
+    @Override
     public SchemaType getElementParticleType(int elementName, boolean considerExtensions) throws MissingComponentException {
         Particle p = getParticle();
         SchemaType child = p == null ? null : p.getElementParticleType(elementName);
@@ -2036,6 +2087,7 @@ public class UserComplexType extends UserDefinedType
      * @return the cardinality of the requested element within this complex type
      */
 
+    @Override
     public int getElementParticleCardinality(int elementName, boolean considerExtensions) throws MissingComponentException {
         int baseCardinality;
         Particle p = getParticle();
@@ -2065,13 +2117,6 @@ public class UserComplexType extends UserDefinedType
         return baseCardinality;
     }
 
-    @Override
-    public int getElementParticleCardinality(StructuredQName elementName, boolean considerExtensions) throws SchemaException {
-        return getElementParticleCardinality(
-                getNamePool().getFingerprint(elementName.getURI(), elementName.getLocalPart()),
-                considerExtensions);
-    }
-
     /**
      * Find an attribute use within this complex type definition having a given attribute name
      * (identified by fingerprint), and return the schema type associated with that attribute.
@@ -2082,6 +2127,7 @@ public class UserComplexType extends UserDefinedType
      * @param attributeName Identifies the name of the required attribute use within this content model
      */
 
+    @Override
     public SimpleType getAttributeUseType(StructuredQName attributeName) throws SchemaException {
         AttributeGroupDecl ag = getCombinedAttributeGroup();
         AttributeUse use = ag.getAttributeUse(attributeName);
@@ -2151,6 +2197,7 @@ public class UserComplexType extends UserDefinedType
      * application or not: see bug 3072.
      */
 
+    @Override
     public int getAttributeUseCardinality(StructuredQName attributeName) throws SchemaException {
         AttributeGroupDecl ag = getCombinedAttributeGroup();
         AttributeUse use = ag.getAttributeUse(attributeName);
@@ -2184,6 +2231,7 @@ public class UserComplexType extends UserDefinedType
      *         false indicates that only the standard attributes in the xsi namespace are permitted.
      */
 
+    @Override
     public boolean allowsAttributes() throws MissingComponentException {
         AttributeGroupDecl ag = getCombinedAttributeGroup();
         if (!ag.getAttributeUses().isEmpty()) {
@@ -2207,6 +2255,7 @@ public class UserComplexType extends UserDefinedType
      * @return true if the content model of this type, or its extensions, contains an element wildcard
      */
 
+    @Override
     public boolean containsElementWildcard() throws MissingComponentException {
         if (extendedParticle != null && extendedParticle.containsElementWildcard()) {
             return true;
@@ -2325,6 +2374,7 @@ public class UserComplexType extends UserDefinedType
      * @param ignoreWildcards if set to true, wildcards are ignored; only the elements that match explicit
      */
 
+    @Override
     public void gatherAllPermittedChildren(IntHashSet children, boolean ignoreWildcards) throws SchemaException {
         Particle p = getParticle();
         if (p == null) {
@@ -2351,6 +2401,7 @@ public class UserComplexType extends UserDefinedType
      *                    be ignored.
      */
 
+    @Override
     public void gatherAllPermittedDescendants(IntHashSet descendants) throws SchemaException {
         Particle p = getParticle();
         if (p == null) {
@@ -2394,6 +2445,7 @@ public class UserComplexType extends UserDefinedType
      *         anyType if it can appear with several different types
      */
 
+    @Override
     public SchemaType getDescendantElementType(int elementName) throws SchemaException {
         Set<SchemaType> parentsConsidered = new HashSet<>();
         Set<SchemaType> foundTypes = new HashSet<>();
@@ -2462,6 +2514,7 @@ public class UserComplexType extends UserDefinedType
      * @return the cardinality of the descendant element within this complex type
      */
 
+    @Override
     public int getDescendantElementCardinality(int elementFingerprint) throws SchemaException {
         int cardinality = StaticProperty.EMPTY;
         IntHashSet children = new IntHashSet();
@@ -2485,7 +2538,7 @@ public class UserComplexType extends UserDefinedType
                 IntHashSet childDescendants = new IntHashSet();
                 ((ComplexType) childType).gatherAllPermittedDescendants(childDescendants);
                 if (childDescendants.contains(-1)) {
-                    // There's a wildcard so all bets are off
+                    // The content model includes a wildcard
                     return StaticProperty.ALLOWS_ZERO_OR_MORE;
                 }
                 if (childDescendants.contains(elementFingerprint)) {
@@ -2594,7 +2647,9 @@ public class UserComplexType extends UserDefinedType
                 return "Derived type has empty content model, but base type does not allow empty content";
             }
         } else {
-            return FiniteStateMachine.subsumesMachine(machine, sub.machine, compiler);
+            compiler.scheduleAutomatonCheck(this, sub);
+            return null;
+            //return FiniteStateMachine.subsumesMachine(machine, sub.machine, compiler);
         }
     }
 
@@ -2794,6 +2849,7 @@ public class UserComplexType extends UserDefinedType
      *          if the expression will never deliver a value of the correct type (that is, of this type)
      */
 
+    @Override
     public void analyzeContentExpression(Expression expression, int kind) throws XPathException {
         Configuration config = getConfiguration();
         TypeHierarchy th = config.getTypeHierarchy();
@@ -2802,7 +2858,7 @@ public class UserComplexType extends UserDefinedType
         // an expression capable of delivering an attribute with the right name
         for (AttributeUse use : getAttributeGroup().getAttributeUses()) {
             if (use.isRequired()) {
-                if (th.relationship(expression.getItemType(), NodeKindTest.ATTRIBUTE) == TypeHierarchy.DISJOINT) {
+                if (th.relationship(expression.getItemType(), NodeKindTest.ATTRIBUTE) == Affinity.DISJOINT) {
                     XPathException err = new XPathException("Type " + getDescription() + " defines a mandatory attribute " +
                             use.getTargetComponentName().getDisplayName() +
                             ", but there is no instruction to create such an attribute");
@@ -2823,7 +2879,7 @@ public class UserComplexType extends UserDefinedType
                                     foundPossible = true;
                                     break;
                                 }
-                            } else if (th.relationship(child.getItemType(), NodeKindTest.ATTRIBUTE) != TypeHierarchy.DISJOINT) {
+                            } else if (th.relationship(child.getItemType(), NodeKindTest.ATTRIBUTE) != Affinity.DISJOINT) {
                                 foundPossible = true;
                                 break;
                             }
@@ -2886,11 +2942,11 @@ public class UserComplexType extends UserDefinedType
                             String message;
                             if (state instanceof SuffixState) {
                                 message = "The content model does not allow element " +
-                                        Err.wrap(elementName.getStructuredQName().getEQName(), Err.ELEMENT) +
+                                        Err.wrap(elementName.getDisplayName(), Err.ELEMENT) +
                                         " to appear after an element that matches the suffix open content wildcard. ";
                             } else {
                                 message = "The content model does not allow element " +
-                                        Err.wrap(elementName.getStructuredQName().getEQName(), Err.ELEMENT) +
+                                        Err.wrap(elementName.getDisplayName(), Err.ELEMENT) +
                                         " to appear here" +
                                         (openContentWildcard == null ? "" : " (it does not match the open content wildcard)") +
                                         ". " + sb;
@@ -2911,7 +2967,7 @@ public class UserComplexType extends UserDefinedType
 
                     } else {
                         ItemType t = child.getItemType();
-                        if (th.relationship(t, NodeKindTest.ELEMENT) != TypeHierarchy.DISJOINT) {
+                        if (th.relationship(t, NodeKindTest.ELEMENT) != Affinity.DISJOINT) {
                             // instruction might or might not produce an element. Abandon static checking.
                             return;
                         }
@@ -2947,6 +3003,7 @@ public class UserComplexType extends UserDefinedType
      * @since 8.5
      */
 
+    @Override
     public AtomicSequence atomize(NodeInfo node) throws XPathException {
         if (isSimpleContent()) {
             if (node.isNilled()) {
@@ -3082,6 +3139,7 @@ public class UserComplexType extends UserDefinedType
     /**
      * Serialize the schema component
      */
+    @Override
     public void serialize(SchemaModelSerializer serializer) throws XPathException {
         String id = serializer.getId(this, true);
         serializer.startElement("complexType");
@@ -3175,13 +3233,15 @@ public class UserComplexType extends UserDefinedType
         serializer.endElement();
     }
 
+    @Override
     public Function getComponentAsFunction() {
         return getComponentAsFunction(this);
     }
 
     public static Function getComponentAsFunction(final ComplexType type) {
         Callable callable = new Callable() {
-            public Sequence<?> call(XPathContext context, Sequence<?>[] arguments) throws XPathException {
+            @Override
+            public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
@@ -3245,7 +3305,8 @@ public class UserComplexType extends UserDefinedType
                         }
                     case "content type":
                         Callable contentType = new Callable() {
-                            public Sequence<?> call(XPathContext context, Sequence<?>[] arguments) throws XPathException {
+                            @Override
+                            public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
                                 String key = arguments[0].head().getStringValue();
                                 switch (key) {
                                     case "class":
@@ -3282,7 +3343,8 @@ public class UserComplexType extends UserDefinedType
                                             final String mode = ctype.getOpenContentModeString();
                                             if ("interleave".equals(mode) || "suffix".equals(mode)) {
                                                 Callable open = new Callable() {
-                                                    public Sequence<?> call(XPathContext context, Sequence<?>[] arguments) throws XPathException {
+                                                    @Override
+                                                    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
                                                         String key = arguments[0].head().getStringValue();
                                                         switch (key) {
                                                             case "class":
@@ -3345,4 +3407,4 @@ public class UserComplexType extends UserDefinedType
     }
 }
 
-// Copyright (c) 2004-2018 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

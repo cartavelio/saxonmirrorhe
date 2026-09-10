@@ -12,8 +12,6 @@ import net.sf.saxon.sxpath.XPathEvaluator;
 import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.sxpath.XPathVariable;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.linked.NodeImpl;
 import net.sf.saxon.type.SchemaException;
 
 import java.util.HashMap;
@@ -42,8 +40,9 @@ public class XSDAlternative extends AnnotationParent {
      *          if any errors are found in the attributes
      */
 
+    @Override
     public void prepareAttributes() throws SchemaException {
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         String[] allowed = {"id", "test", "type", "xpathDefaultNamespace"};
         allowAttributes(atts, allowed);
 
@@ -77,7 +76,7 @@ public class XSDAlternative extends AnnotationParent {
             // Declare any variables defined in saxon:param elements
             for (GlobalParam param : getXSDSchema().getGlobalParams()) {
                 XPathVariable var = env.declareVariable(param.getVariableQName());
-                GroundedValue defaultVal = ((Literal) param.getSelectExpression()).getValue();
+                GroundedValue defaultVal = ((Literal) param.getBody()).getValue();
                 var.setDefaultValue(defaultVal);
                 parameters.put(param.getVariableQName(), var);
             }
@@ -126,11 +125,10 @@ public class XSDAlternative extends AnnotationParent {
     }
 
 
+    @Override
     public void validate(SchemaCompiler compiler) throws SchemaException {
         checkContentModel(stateTerms, stateTargets, false);
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while ((child = (NodeImpl)iter.next()) != null) {
+        for (NodeInfo child : children()) {
             int childfp = child.getFingerprint();
             switch (childfp) {
                 case StandardNames.XS_ANNOTATION: {
@@ -170,6 +168,7 @@ public class XSDAlternative extends AnnotationParent {
     private final static int[][] stateTargets = {
             state0targets, state1targets, state2targets};
 
+    @Override
     protected boolean isFinalState(int state) {
         return state == 0 || state == 1 || state == 2;
     }
@@ -180,12 +179,11 @@ public class XSDAlternative extends AnnotationParent {
      * @param compiler used primarily for reporting errors
      */
 
+    @Override
     public void postValidate(SchemaCompiler compiler) throws SchemaException {
 
         EnterpriseConfiguration config = (EnterpriseConfiguration) getConfiguration();
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while ((child = (NodeImpl)iter.next()) != null) {
+        for (NodeInfo child : children()) {
             int childfp = child.getFingerprint();
             switch (childfp) {
                 case StandardNames.XS_COMPLEX_TYPE: {
@@ -223,4 +221,4 @@ public class XSDAlternative extends AnnotationParent {
 
 }
 
-// Copyright (c) 2007 Saxonica Limited.
+// Copyright (c) 2007-2020 Saxonica Limited

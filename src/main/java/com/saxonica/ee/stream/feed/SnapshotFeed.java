@@ -3,9 +3,9 @@ package com.saxonica.ee.stream.feed;
 import com.saxonica.ee.stream.om.FleetingParentNode;
 import com.saxonica.ee.stream.watch.Trigger;
 import com.saxonica.ee.stream.watch.WatchManager;
+import net.sf.saxon.event.Receiver;
 import net.sf.saxon.functions.SnapshotFn;
 import net.sf.saxon.event.BuilderMonitor;
-import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
@@ -36,21 +36,18 @@ public class SnapshotFeed extends AbsorptionFeed {
      * @return the new Watch
      */
 
-    public static Trigger getWatch(Feed result, Pattern selection, WatchManager wm, XPathContext context) {
+    public static Trigger getWatch(ItemFeed result, Pattern selection, WatchManager wm, XPathContext context) {
         SnapshotFeed action = new SnapshotFeed(wm, result, context);
+        action.copyAccumulators = false;
         Trigger watch = new Trigger(selection, action, context);
         watch.setPipelineConfiguration(wm.getPipelineConfiguration());
         return watch;
     }
 
-    public SnapshotFeed(WatchManager watchManager, Feed result, XPathContext context) {
+    public SnapshotFeed(WatchManager watchManager, ItemFeed result, XPathContext context) {
         super(result, context);
         this.watchManager = watchManager;
         this.copyAccumulators = true;
-    }
-
-    public void setCopyAccumulators(boolean copy) {
-        this.copyAccumulators = copy;
     }
 
     @Override
@@ -59,7 +56,7 @@ public class SnapshotFeed extends AbsorptionFeed {
     }
 
     @Override
-    protected Sequence<?> processGroundedItem(Item item) {
+    protected Sequence processGroundedItem(Item item) {
         return SnapshotFn.snapshotSingle(item);
     }
 
@@ -85,8 +82,8 @@ public class SnapshotFeed extends AbsorptionFeed {
         @Override
         public Receiver getGatherer() throws XPathException {
             TinyBuilder builder = (TinyBuilder)monitor.getNextReceiver();
-            // Ensure that accumulator values are copied
             if (copyAccumulators) {
+                // Ensure that accumulator values are copied
                 return new CopyOfFeed.AccumulatorCopier(watchManager, monitor, builder);
             } else {
                 return monitor;
@@ -94,7 +91,7 @@ public class SnapshotFeed extends AbsorptionFeed {
         }
 
         @Override
-        public Sequence<?> deliver() throws XPathException {
+        public Sequence deliver() throws XPathException {
             SnapshotFn.closeAncestors(ancestorList, monitor);
             return monitor.getMarkedNode();
         }
@@ -105,4 +102,4 @@ public class SnapshotFeed extends AbsorptionFeed {
     }
 }
 
-// Copyright (c) 2010-2015 Saxonica Limited
+// Copyright (c) 2010-2020 Saxonica Limited

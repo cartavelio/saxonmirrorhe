@@ -38,6 +38,7 @@ final class PrecedingIterator implements AxisIterator {
     }
 
     /*@Nullable*/
+    @Override
     public NodeInfo next() {
         if (current == null) {
             return null;
@@ -75,5 +76,5 @@ final class PrecedingIterator implements AxisIterator {
 
 }
 
-// Copyright (c) 2017 Saxonica Ltd
+// Copyright (c) 2017-2020 Saxonica Limited
 

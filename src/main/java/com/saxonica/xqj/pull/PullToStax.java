@@ -1,15 +1,13 @@
 package com.saxonica.xqj.pull;
 
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.om.AttributeCollection;
-import net.sf.saxon.om.NamespaceBinding;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pull.NamespaceContextImpl;
 import net.sf.saxon.pull.PullProvider;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.SingleNodeIterator;
 import net.sf.saxon.tree.util.FastStringBuffer;
+import net.sf.saxon.type.MissingComponentException;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.Whitespace;
 
@@ -19,6 +17,7 @@ import javax.xml.stream.Location;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import java.util.List;
 
 /**
  * This class bridges PullProvider events to XMLStreamReader (Stax) events. That is, it acts
@@ -67,58 +66,86 @@ public class PullToStax implements XMLStreamReader {
         }
     }
 
+    @Override
     public int getAttributeCount() {
-        return provider.getAttributes().getLength();
+        return provider.getAttributes().size();
     }
 
+    @Override
     public boolean isAttributeSpecified(int i) {
         return true;
     }
 
+    private List<AttributeInfo> getAttributeList() {
+        return provider.getAttributes().asList();
+    }
+
+    private AttributeInfo getAttributeInfo(int index) {
+        return provider.getAttributes().itemAt(index);
+    }
+
+    @Override
     public QName getAttributeName(int i) {
-        AttributeCollection atts = provider.getAttributes();
-        return new QName(atts.getURI(i), atts.getLocalName(i), atts.getPrefix(i));
+        NodeName attName = getAttributeInfo(i).getNodeName();
+        return new QName(attName.getURI(), attName.getLocalPart(), attName.getPrefix());
     }
 
+    @Override
     public String getAttributeLocalName(int i) {
-        return provider.getAttributes().getLocalName(i);
+        return getAttributeInfo(i).getNodeName().getLocalPart();
     }
 
+    @Override
     public String getAttributeNamespace(int i) {
-        return provider.getAttributes().getURI(i);
+        return getAttributeInfo(i).getNodeName().getURI();
     }
 
+    @Override
     public String getAttributePrefix(int i) {
-        return provider.getAttributes().getPrefix(i);
+        return getAttributeInfo(i).getNodeName().getPrefix();
     }
 
+    @Override
     public String getAttributeType(int i) {
-        AttributeCollection ac = provider.getAttributes();
-        if (ac.isId(i)) {
-            return "ID";
-        } else if (ac.isIdref(i)) {
-            return "IDREFS";
-        } else {
+        try {
+            AttributeInfo info = getAttributeInfo(i);
+            if (info.isId()) {
+                return "ID";
+            } else if (info.getType().isIdRefType()) {
+                return "IDREFS";
+            } else {
+                return "CDATA";
+            }
+        } catch (MissingComponentException e) {
             return "CDATA";
         }
     }
 
+    @Override
     public String getAttributeValue(int i) {
-        return provider.getAttributes().getValue(i);
+        return getAttributeInfo(i).getValue();
     }
 
+    @Override
     public String getAttributeValue(String uri, String local) {
         return provider.getAttributes().getValue(uri, local);
     }
 
+    @Override
     public int getEventType() {
         return currentStaxEvent;
     }
 
+    /**
+     * Return the number of namespaces declared on this element.
+     * @return the number of in-scope namespaces
+     */
+
+    @Override
     public int getNamespaceCount() {
         NamespaceBinding[] bindings = provider.getNamespaceDeclarations();
         int count = bindings.length;
-        for (int i=0; i<count; i++) {
+        for (int i = 0; i < count; i++) {
             if (bindings[i] == null) {
                 return i;
             }
@@ -126,6 +153,7 @@ public class PullToStax implements XMLStreamReader {
         return count;
     }
 
+    @Override
     public String getText() {
         if (previousAtomic) {
             return currentTextNode.toString();
@@ -139,6 +167,7 @@ public class PullToStax implements XMLStreamReader {
         }
     }
 
+    @Override
     public int getTextLength() {
         if (previousAtomic) {
             return currentTextNode.length();
@@ -152,10 +181,12 @@ public class PullToStax implements XMLStreamReader {
         }
     }
 
+    @Override
     public int getTextStart() {
         return 0;
     }
 
+    @Override
     public char[] getTextCharacters() {
         if (previousAtomic) {
             return currentTextNode.toCharArray();
@@ -173,6 +204,7 @@ public class PullToStax implements XMLStreamReader {
     }
 
 
+    @Override
     public int getTextCharacters(int sourceStart, char[] target, int targetStart, int length) throws XMLStreamException {
         if (pendingException != null) {
             throw new XMLStreamException(pendingException);
@@ -196,6 +228,7 @@ public class PullToStax implements XMLStreamReader {
         }
     }
 
+    @Override
     public int next() throws XMLStreamException {
         if (pendingException != null) {
             throw new XMLStreamException(pendingException);
@@ -204,60 +237,61 @@ public class PullToStax implements XMLStreamReader {
             throw new IllegalStateException("next() called after END_DOCUMENT");
             // Javadoc is unclear. See Saxon bug 3806, resulting in JDK bug JDK-8204329
         }
-        int p;
+        PullProvider.Event p;
         try {
             p = provider.next();
         } catch (XPathException e) {
             throw new XMLStreamException(e);
         }
         switch (p) {
-            case PullProvider.START_OF_INPUT:
+            case START_OF_INPUT:
                 return next();
-            case PullProvider.ATOMIC_VALUE:
+            case ATOMIC_VALUE:
                 currentTextNode.setLength(0);
                 if (previousAtomic) {
-                    currentTextNode.append(' ');
+                    currentTextNode.cat(' ');
                 }
                 currentTextNode.append(provider.getAtomicValue().getStringValue());
                 currentStaxEvent = XMLStreamConstants.CHARACTERS;
                 break;
-            case PullProvider.START_DOCUMENT:
+            case START_DOCUMENT:
                 // STAX doesn't actually report START_DOCUMENT: it's the initial state before reading any events
                 currentStaxEvent = XMLStreamConstants.START_DOCUMENT;
                 return next();
-            case PullProvider.END_DOCUMENT:
+            case END_DOCUMENT:
                 currentStaxEvent = XMLStreamConstants.END_DOCUMENT;
                 break;
-            case PullProvider.START_ELEMENT:
+            case START_ELEMENT:
                 currentStaxEvent = XMLStreamConstants.START_ELEMENT;
                 break;
-            case PullProvider.END_ELEMENT:
+            case END_ELEMENT:
                 currentStaxEvent = XMLStreamConstants.END_ELEMENT;
                 break;
-            case PullProvider.TEXT:
+            case TEXT:
                 currentStaxEvent = XMLStreamConstants.CHARACTERS;
                 break;
-            case PullProvider.COMMENT:
+            case COMMENT:
                 currentStaxEvent = XMLStreamConstants.COMMENT;
                 break;
-            case PullProvider.PROCESSING_INSTRUCTION:
+            case PROCESSING_INSTRUCTION:
                 currentStaxEvent = XMLStreamConstants.PROCESSING_INSTRUCTION;
                 break;
-            case PullProvider.END_OF_INPUT:
+            case END_OF_INPUT:
                 currentStaxEvent = XMLStreamConstants.END_DOCUMENT;
                 break;
-            case PullProvider.ATTRIBUTE:
+            case ATTRIBUTE:
                 throw new XMLStreamException("Free-standing attributes cannot be serialized");
-            case PullProvider.NAMESPACE:
+            case NAMESPACE:
                 throw new XMLStreamException("Free-standing namespace nodes cannot be serialized");
             default:
                 throw new IllegalStateException("Unknown Stax event " + p);
 
         }
-        previousAtomic = p == PullProvider.ATOMIC_VALUE;
+        previousAtomic = p == PullProvider.Event.ATOMIC_VALUE;
         return currentStaxEvent;
     }
 
+    @Override
     public int nextTag() throws XMLStreamException {
         if (pendingException != null) {
             throw new XMLStreamException(pendingException);
@@ -278,6 +312,7 @@ public class PullToStax implements XMLStreamReader {
         return eventType;
     }
 
+    @Override
     public void close() throws XMLStreamException {
         if (pendingException != null) {
             throw new XMLStreamException(pendingException);
@@ -285,11 +320,13 @@ public class PullToStax implements XMLStreamReader {
         provider.close();
     }
 
+    @Override
     public boolean hasName() {
         return currentStaxEvent == XMLStreamConstants.START_ELEMENT ||
                 currentStaxEvent == XMLStreamConstants.END_ELEMENT;
     }
 
+    @Override
     public boolean hasNext() throws XMLStreamException {
         if (pendingException != null) {
             throw new XMLStreamException(pendingException);
@@ -297,26 +334,32 @@ public class PullToStax implements XMLStreamReader {
         return currentStaxEvent != XMLStreamConstants.END_DOCUMENT;
     }
 
+    @Override
     public boolean hasText() {
         return currentStaxEvent == XMLStreamConstants.CHARACTERS || currentStaxEvent == XMLStreamConstants.COMMENT;
     }
 
+    @Override
     public boolean isCharacters() {
         return currentStaxEvent == XMLStreamConstants.CHARACTERS;
     }
 
+    @Override
     public boolean isEndElement() {
         return currentStaxEvent == XMLStreamConstants.END_ELEMENT;
     }
 
+    @Override
     public boolean isStandalone() {
         return false;
     }
 
+    @Override
     public boolean isStartElement() {
         return currentStaxEvent == XMLStreamConstants.START_ELEMENT;
     }
 
+    @Override
     public boolean isWhiteSpace() {
         try {
             return currentStaxEvent == XMLStreamConstants.CHARACTERS && Whitespace.isWhite(provider.getStringValue());
@@ -326,15 +369,18 @@ public class PullToStax implements XMLStreamReader {
         }
     }
 
+    @Override
     public boolean standaloneSet() {
         return false;
     }
 
 
+    @Override
     public String getCharacterEncodingScheme() {
         return null;
     }
 
+    @Override
     public String getElementText() throws XMLStreamException {
         if (pendingException != null) {
             throw new XMLStreamException(pendingException);
@@ -365,18 +411,22 @@ public class PullToStax implements XMLStreamReader {
         return content.toString();
     }
 
+    @Override
     public String getEncoding() {
         return null;
     }
 
+    @Override
     public String getLocalName() {
         return provider.getNodeName().getLocalPart();
     }
 
+    @Override
     public String getNamespaceURI() {
         return provider.getNodeName().getURI();
     }
 
+    @Override
     public String getPIData() {
         if (currentStaxEvent != XMLStreamConstants.PROCESSING_INSTRUCTION) {
             throw new IllegalStateException("Not positioned at a processing instruction");
@@ -389,6 +439,7 @@ public class PullToStax implements XMLStreamReader {
         }
     }
 
+    @Override
     public String getPITarget() {
         if (currentStaxEvent != XMLStreamConstants.PROCESSING_INSTRUCTION) {
             throw new IllegalStateException("Not positioned at a processing instruction");
@@ -396,46 +447,54 @@ public class PullToStax implements XMLStreamReader {
         return provider.getNodeName().getLocalPart();
     }
 
+    @Override
     public String getPrefix() {
         return provider.getNodeName().getPrefix();
     }
 
 
+    @Override
     public String getVersion() {
         return "1.0";
     }
 
 
+    @Override
     public String getNamespacePrefix(int i) {
         return provider.getNamespaceDeclarations()[i].getPrefix();
-
     }
 
+    @Override
     public String getNamespaceURI(int i) {
         return provider.getNamespaceDeclarations()[i].getURI();
     }
 
+    @Override
     public NamespaceContext getNamespaceContext() {
         return new NamespaceContextImpl(provider);
     }
 
+    @Override
     public QName getName() {
         NodeName nn = provider.getNodeName();
         return new QName(nn.getURI(), nn.getLocalPart(), nn.getPrefix());
     }
 
+    @Override
     public Location getLocation() {
-        net.sf.saxon.expr.parser.Location sourceLocator = provider.getSourceLocator();
+        net.sf.saxon.s9api.Location sourceLocator = provider.getSourceLocator();
         if (sourceLocator == null) {
-            sourceLocator = ExplicitLocation.UNKNOWN_LOCATION;
+            sourceLocator = Loc.NONE;
         }
         return new SourceStreamLocation(sourceLocator);
     }
 
+    @Override
     public Object getProperty(String s) throws IllegalArgumentException {
         throw new IllegalArgumentException("Unknown property " + s);
     }
 
+    @Override
     public void require(int event, String uri, String local) throws XMLStreamException {
         if (pendingException != null) {
             throw new XMLStreamException(pendingException);
@@ -452,6 +511,7 @@ public class PullToStax implements XMLStreamReader {
     }
 
     /*@Nullable*/
+    @Override
     public String getNamespaceURI(String s) {
         return provider.getURIForPrefix(s, true);
     }
@@ -462,33 +522,38 @@ public class PullToStax implements XMLStreamReader {
 
     public static class SourceStreamLocation implements javax.xml.stream.Location {
 
-        private net.sf.saxon.expr.parser.Location locator;
+        private net.sf.saxon.s9api.Location locator;
 
         /**
          * Create a StAX SourceStreamLocation object based on a given SAX SourceLocator
          *
          * @param locator the SAX SourceLocator
          */
-        public SourceStreamLocation(net.sf.saxon.expr.parser.Location locator) {
+        public SourceStreamLocation(net.sf.saxon.s9api.Location locator) {
             this.locator = locator;
         }
 
+        @Override
         public int getCharacterOffset() {
             return -1;
         }
 
+        @Override
         public int getColumnNumber() {
             return locator.getColumnNumber();
         }
 
+        @Override
         public int getLineNumber() {
             return locator.getLineNumber();
         }
 
+        @Override
         public String getPublicId() {
             return locator.getPublicId();
         }
 
+        @Override
         public String getSystemId() {
             return locator.getSystemId();
         }
@@ -496,4 +561,4 @@ public class PullToStax implements XMLStreamReader {
 
 }
 
-// Copyright (c) 2009-2018 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

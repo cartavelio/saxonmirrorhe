@@ -9,6 +9,7 @@ import net.sf.saxon.lib.StandardURIChecker;
 import net.sf.saxon.om.FingerprintedQName;
 import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.QNameValue;
 import net.sf.saxon.value.StringValue;
@@ -49,12 +50,13 @@ public class ComputedElementCompiler extends ElementCreatorCompiler {
         LabelInfo notEqual = methodInfo.newLabel("notEqual");
         LabelInfo notEqual2 = methodInfo.newLabel("notEqual2");
         LabelInfo XMLNSTest = methodInfo.newLabel("XMLNSTest");
+        LabelInfo notEQName = methodInfo.newLabel("notEQName");
         int localNameVar = methodInfo.allocateLocal(String.class);
         int uriVar = methodInfo.allocateLocal(String.class);
         ga.pushNull();
         ga.storeLocal(uriVar);
         final int prefixVar = methodInfo.allocateLocal(String.class);
-        final int rawNameVar = methodInfo.allocateLocal(CharSequence.class);
+        final int rawNameVar = methodInfo.allocateLocal(String.class);
 
         compiler.compileToItem(nameExpr);
         ga.checkClass(AtomicValue.class);
@@ -66,10 +68,28 @@ public class ComputedElementCompiler extends ElementCreatorCompiler {
         methodInfo.placeLabel(notNull);
         ga.dup();
         ga.ifNotInstance(StringValue.class, notStrInstance);
-        ga.invokeInstanceMethod(AtomicValue.class, "getStringValueCS");
+        ga.invokeInstanceMethod(AtomicValue.class, "getStringValue");
         ga.invokeStaticMethod(Whitespace.class, "trimWhitespace", CharSequence.class);
+        ga.invokeInstanceMethod(CharSequence.class, "toString");
         ga.storeLocal(rawNameVar);
         ga.loadLocal(rawNameVar);
+
+        ga.dup();
+        ga.push("Q{");
+        ga.invokeInstanceMethod(String.class, "startsWith", String.class);
+        ga.ifFalse(notEQName);
+        ga.loadLocal(rawNameVar);
+        ga.invokeStaticMethod(StructuredQName.class, "fromEQName", CharSequence.class);
+        ga.dup();
+        ga.invokeInstanceMethod(StructuredQName.class, "getLocalPart");
+        ga.storeLocal(localNameVar);
+        ga.invokeInstanceMethod(StructuredQName.class, "getURI");
+        ga.storeLocal(uriVar);
+        ga.push("");
+        ga.storeLocal(prefixVar);
+        ga.pop();
+        ga.goTo(test1);
+        methodInfo.placeLabel(notEQName);
 
         LabelInfo tryBegin = methodInfo.newLabel("tryBegin");
         LabelInfo tryEnd = methodInfo.newLabel("tryEnd");
@@ -240,6 +260,7 @@ public class ComputedElementCompiler extends ElementCreatorCompiler {
         methodInfo.releaseLocal(prefixVar);
     }
 
+    @Override
     protected void outputNamespaceNodes(CompilerService compiler, Expression expression) {
     }
 
@@ -249,4 +270,4 @@ public class ComputedElementCompiler extends ElementCreatorCompiler {
     }
 }
 
-//Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

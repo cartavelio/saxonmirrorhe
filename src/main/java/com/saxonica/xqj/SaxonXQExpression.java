@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -45,29 +45,35 @@ public class SaxonXQExpression extends SaxonXQDynamicContext implements XQExpres
         setClosableContainer(connection);
     }
 
+    @Override
     protected DynamicQueryContext getDynamicContext() {
         return context;
     }
 
+    @Override
     protected SaxonXQDataFactory getDataFactory() {
         return connection;
     }
 
+    @Override
     public void cancel() throws XQException {
         checkNotClosed();
         //
     }
 
+    @Override
     public void executeCommand(Reader command) throws XQException {
         checkNotClosed();
         throw new XQException("Saxon does not recognize any non-XQuery commands");
     }
 
+    @Override
     public void executeCommand(String command) throws XQException {
         checkNotClosed();
         throw new XQException("Saxon does not recognize any non-XQuery commands");
     }
 
+    @Override
     public XQResultSequence executeQuery(InputStream query) throws XQException {
         checkNotClosed();
         try {
@@ -82,6 +88,7 @@ public class SaxonXQExpression extends SaxonXQDynamicContext implements XQExpres
         }
     }
 
+    @Override
     public XQResultSequence executeQuery(Reader query) throws XQException {
         checkNotClosed();
         SaxonXQDataSource.checkNotNull(query, "query");
@@ -97,6 +104,7 @@ public class SaxonXQExpression extends SaxonXQDynamicContext implements XQExpres
         }
     }
 
+    @Override
     public XQResultSequence executeQuery(String query) throws XQException {
         checkNotClosed();
         try {
@@ -113,11 +121,13 @@ public class SaxonXQExpression extends SaxonXQDynamicContext implements XQExpres
         }
     }
 
+    @Override
     public XQStaticContext getStaticContext() throws XQException {
         checkNotClosed();
         return sqc;
     }
 
+    @Override
     protected boolean externalVariableExists(QName name) {
         return true;
     }

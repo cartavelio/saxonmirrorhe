@@ -24,25 +24,24 @@ public class ReplaceNodeAction extends PendingUpdateAction {
      * @param targetNode the node that defines where the new nodes will be inserted
      */
 
-    public ReplaceNodeAction(NodeInfo[] content, MutableNodeInfo targetNode) {
+    ReplaceNodeAction(NodeInfo[] content, MutableNodeInfo targetNode) {
         this.content = content;
         this.targetNode = targetNode;
     }
 
     /**
      * Apply the pending update action to the affected nodes
-     *
-     * @param context         the XPath evaluation context
+     *  @param context         the XPath evaluation context
      * @param affectedRootSet the set of roots of trees that have been modified, which
-     *                        this action should add to as necessary
      */
 
-    public void apply(XPathContext context, Set affectedRootSet) {
+    @Override
+    public void apply(XPathContext context, Set<MutableNodeInfo> affectedRootSet) {
         NodeInfo root = targetNode.getRoot();
         MutableNodeInfo parent = (MutableNodeInfo) targetNode.getParent();
         if (!parent.isDeleted() && !targetNode.isDeleted()) {
             targetNode.replace(content, true);
-            affectedRootSet.add(root);
+            affectedRootSet.add((MutableNodeInfo)root);
             parent.removeTypeAnnotation();
         }
     }
@@ -54,6 +53,7 @@ public class ReplaceNodeAction extends PendingUpdateAction {
      *         case of a delete action, which affects multiple nodes.
      */
 
+    @Override
     public NodeInfo getTargetNode() {
         return targetNode;
     }
@@ -76,9 +76,10 @@ public class ReplaceNodeAction extends PendingUpdateAction {
      *         in the specification
      */
 
+    @Override
     public int getApplyPhase() {
         return 3;
     }
 }
 
-// Copyright (c) 2008 Saxonica Limited.
+// Copyright (c) 2008-2020 Saxonica Limited

@@ -7,7 +7,7 @@ import com.saxonica.ee.schema.SchemaCompiler;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
 import net.sf.saxon.event.*;
-import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.SchemaURIResolver;
@@ -17,6 +17,7 @@ import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.linked.LinkedTreeBuilder;
@@ -156,9 +157,9 @@ public abstract class SchemaReader {
         }
         if (!(top instanceof XSDSchema)) {
             SchemaException err = new SchemaException("Outermost element of schema document must be xs:schema");
-            ExplicitLocation loc = new ExplicitLocation(source.getSystemId(), top == null ? 1 : top.getLineNumber(), -1);
+            Loc loc = new Loc(source.getSystemId(), top == null ? 1 : top.getLineNumber(), -1);
             err.setLocator(loc);
-            pipe.getErrorListener().fatalError(err);
+            pipe.getErrorReporter().report(new XmlProcessingException(err));
             throw err;
         }
 
@@ -212,16 +213,8 @@ public abstract class SchemaReader {
         schemaBuilder.setLineNumbering(true);
 
         Stripper stripper = new Stripper(AllElementsSpaceStrippingRule.getInstance(), schemaBuilder);
-
         VersionControlFilter vcFilter = new VersionControlFilter(compiler, stripper);
-
-        StartTagBuffer startTagBuffer = new StartTagBuffer(vcFilter);
-
-        vcFilter.setStartTagBuffer(startTagBuffer);
-
-        startTagBuffer.setUnderlyingReceiver(vcFilter);
-
-        CommentStripper commentStripper = new CommentStripper(startTagBuffer);
+        CommentStripper commentStripper = new CommentStripper(vcFilter);
 
         if (source instanceof NodeInfo) {
             String base = ((NodeInfo) source).getBaseURI();
@@ -246,7 +239,7 @@ public abstract class SchemaReader {
         //AugmentedSource aug = AugmentedSource.makeAugmentedSource(source);
         ParseOptions options = new ParseOptions(config.getParseOptions());
         options.setSchemaValidationMode(Validation.PRESERVE);
-        options.setErrorListener(compiler.getErrorListener());
+        options.setErrorReporter(compiler.getErrorReporter());
         try {
             commentStripper.setPipelineConfiguration(pipe);
             if (Version.platform.isJava() && options.getXMLReader() == null && options.getXMLReaderMaker() == null
@@ -258,7 +251,7 @@ public abstract class SchemaReader {
                 TinyBuilder temp = new TinyBuilder(pipe);
                 temp.setSystemId(source.getSystemId());
                 temp.open();
-                temp.startDocument(0);
+                temp.startDocument(ReceiverOption.NONE);
                 Sender.send(source, temp, options);
                 temp.endDocument();
                 temp.close();
@@ -326,9 +319,9 @@ public abstract class SchemaReader {
         if (options.getEntityResolver() != null && parser.getEntityResolver() == null) {
             parser.setEntityResolver(options.getEntityResolver());
         }
-        if (compiler.getErrorListener() instanceof SchemaFactoryImpl.ErrorListenerWrappingErrorHandler) {
+        if (compiler.getErrorReporter() instanceof SchemaFactoryImpl.ErrorReporterWrappingErrorHandler) {
             parser.setErrorHandler(
-                    ((SchemaFactoryImpl.ErrorListenerWrappingErrorHandler)compiler.getErrorListener()).getErrorHandler());
+                    ((SchemaFactoryImpl.ErrorReporterWrappingErrorHandler)compiler.getErrorReporter()).getErrorHandler());
         }
         options.setDTDValidationMode(Validation.SKIP);
         Sender.send(source, valve, options);
@@ -346,4 +339,4 @@ public abstract class SchemaReader {
 
 }
 
-// Copyright (c) 2004-2015 Saxonica Limited
+// Copyright (c) 2004-2020 Saxonica Limited

@@ -8,15 +8,14 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.ElementCreator;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.type.AnyType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Untyped;
-import org.objectweb.asm.Type;
 
 
 /**
@@ -39,20 +38,26 @@ public abstract class ElementCreatorCompiler extends ToPushCompiler {
         SchemaType typeCode = elementCreator.getValidationAction() == Validation.PRESERVE
             ? AnyType.getInstance()
             : Untyped.getInstance();
-        int resetReceiver = 0;
         int nodeNameVar = -1;
 
+        int outVar = methodInfo.allocateLocal(Outputter.class);
+        compiler.generateGetOutputter();
+        ga.storeLocal(outVar);
+
+        int elemOutVar = methodInfo.allocateLocal(Receiver.class);
+        compiler.generateGetOutputter();
+        ga.storeLocal(elemOutVar);
+
         if (!elementCreator.isPreservingTypes()) {
-            resetReceiver++;
-            if (elementCreator.getValidationAction() == Validation.STRIP) {
-                addTypeStripper(compiler);
-            } else {
+//            if (elementCreator.getValidationAction() == Validation.STRIP) {
+//                addTypeStripper(compiler);
+//            } else {
                 // ParseOptions options = new ParseOptions(validationOptions)
                 // options.setTopLevelElement(elemName);
-                // validator = config.getElementValidator(receiver, options, locationId)
+                // validator = config.getElementValidator(elemOut, options, locationId)
                 compiler.generateGetContext();
                 ga.invokeInstanceMethod(XPathContext.class, "getConfiguration");
-                compiler.generateGetReceiver();
+                compiler.generateGetOutputter();
                 ga.newInstance(ParseOptions.class);
                 ga.dup();
                 allocateStatic(compiler, elementCreator.getValidationOptions());
@@ -66,39 +71,43 @@ public abstract class ElementCreatorCompiler extends ToPushCompiler {
                 ga.invokeInstanceMethod(ParseOptions.class, "setTopLevelElement", StructuredQName.class);
                 allocateStatic(compiler, expression.getLocation());
                 ga.invokeInstanceMethod(Configuration.class, "getElementValidator",
-                        Receiver.class, ParseOptions.class, Location.class);
+                                        Receiver.class, ParseOptions.class, Location.class);
                 int validatorVar = methodInfo.allocateLocal(Receiver.class);
                 ga.storeLocal(validatorVar);
 
                 ga.loadLocal(validatorVar);
-                compiler.generateGetReceiver();
+                ga.loadLocal(elemOutVar);
                 LabelInfo sameReceiver = methodInfo.newLabel("sameReceiver");
-                LabelInfo doneReceiver = methodInfo.newLabel("doneReceiver");
+                //LabelInfo doneReceiver = methodInfo.newLabel("doneReceiver");
                 ga.ifSameObject(sameReceiver);
-                ga.newInstance(Type.getType(TreeReceiver.class));
+                ga.newInstance(ComplexContentOutputter.class);
                 ga.dup();
                 ga.loadLocal(validatorVar);
-                ga.invokeConstructor(TreeReceiver.class, Receiver.class);
-                ga.goTo(doneReceiver);
+                ga.invokeConstructor(ComplexContentOutputter.class, Receiver.class);
+                ga.storeLocal(outVar);
+                //ga.goTo(doneReceiver);
                 methodInfo.placeLabel(sameReceiver);
-                compiler.generateGetReceiver();
-                methodInfo.placeLabel(doneReceiver);
-                compiler.pushNewReceiverInfo(ga);
+
+                ga.loadLocal(validatorVar);
+                ga.storeLocal(elemOutVar);
+
+                //methodInfo.placeLabel(doneReceiver);
+                //compiler.pushNewOutputterInfo(ga);
                 methodInfo.releaseLocal(validatorVar);
-            }
+//            }
         }
 
         // Generate code to set the base URI if necessary
 
         LabelInfo nonNullSystemId = methodInfo.newLabel("nonNullSystemId");
         if (elementCreator.getStaticBaseURIString() != null) {
-            compiler.generateGetReceiver();
-            ga.showObject(compiler, "Receiver: ");
+            ga.loadLocal(elemOutVar);
+            //ga.showObject(compiler, "Receiver: ");
             ga.invokeInstanceMethod(Receiver.class, "getSystemId");
             ga.ifNonNull(nonNullSystemId.label());
             visitAnnotation(compiler, "ElementCreator-setting system ID to " + elementCreator.getStaticBaseURIString());
-            compiler.generateGetReceiver();
-            ga.push(elementCreator.getStaticBaseURIString());
+            ga.loadLocal(elemOutVar);
+            ga.push(elementCreator.getStaticBaseURIString());  // TODO: interpreted code calls getNewBaseURI(context, copiedNode)
             ga.invokeInstanceMethod(Receiver.class, "setSystemId", String.class);
             methodInfo.placeLabel(nonNullSystemId);
         }
@@ -107,34 +116,35 @@ public abstract class ElementCreatorCompiler extends ToPushCompiler {
 
         Expression content = elementCreator.getContentExpression();
         Location locationId = expression.getLocation();
-        //int typeCode = (elementCreator.getValidationAction() == Validation.PRESERVE ? StandardNames.XS_ANY_TYPE : StandardNames.XS_UNTYPED);
-        int properties = (elementCreator.isInheritNamespacesToChildren() ? 0 : ReceiverOptions.DISINHERIT_NAMESPACES);
+
+        boolean condition = !elementCreator.isBequeathNamespacesToChildren();
+        int properties = condition ? ReceiverOption.DISINHERIT_NAMESPACES : ReceiverOption.NONE;
         if (!elementCreator.isInheritNamespacesFromParent()) {
-            properties |= ReceiverOptions.REFUSE_NAMESPACES;
+            properties |= ReceiverOption.REFUSE_NAMESPACES;
         }
-        compiler.generateGetReceiver();
+
+        ga.loadLocal(outVar);
         if (nodeNameVar == -1) {
             pushNodeName(compiler, expression);
         } else {
             ga.loadLocal(nodeNameVar);
         }
-        //ga.push(typeCode);
+
         allocateStatic(compiler, typeCode);
         allocateStatic(compiler, locationId);
         ga.push(properties);
-        ga.invokeInstanceMethod(Receiver.class, "startElement", NodeName.class, SchemaType.class, Location.class, Integer.TYPE);
+        ga.invokeInstanceMethod(Outputter.class, "startElement", NodeName.class, SchemaType.class, Location.class, Integer.TYPE);
 
+        methodInfo.pushOutputterInfo(outVar);
         outputNamespaceNodes(compiler, expression);
-
         if (!Literal.isEmptySequence(content)) {
             compiler.compileToPush(content);
         }
-        compiler.generateGetReceiver();
-        ga.invokeInstanceMethod(Receiver.class, "endElement");
+        methodInfo.popOutputterInfo();
+        
+        ga.loadLocal(outVar);
+        ga.invokeInstanceMethod(Outputter.class, "endElement");
 
-        for (int i = 0; i < resetReceiver; i++) {
-            compiler.popReceiverInfo();
-        }
         methodInfo.releaseLocal(nodeNameVar);
     }
 
@@ -172,31 +182,35 @@ public abstract class ElementCreatorCompiler extends ToPushCompiler {
 
         LabelInfo noStripNeeded = methodInfo.newLabel("noStripNeeded");
         LabelInfo returnReceiver = methodInfo.newLabel("returnReceiver");
-        compiler.generateGetReceiver();
+        compiler.generateGetOutputter();
 
-        ga.invokeInstanceMethod(Receiver.class, "usesTypeAnnotations");
+        ga.invokeInstanceMethod(Outputter.class, "usesTypeAnnotations");
         ga.ifFalse(noStripNeeded);
+
+        ga.newInstance(ComplexContentOutputter.class);
+        ga.dup();
 
         ga.newInstance(TreeReceiver.class);
         ga.dup();
 
         ga.newInstance(SkipValidator.class);
         ga.dup();
-        compiler.generateGetReceiver();
+        compiler.generateGetOutputter();
         ga.invokeConstructor(SkipValidator.class, Receiver.class);
         ga.invokeConstructor(TreeReceiver.class, Receiver.class);
+        ga.invokeConstructor(ComplexContentOutputter.class, Receiver.class);
         ga.goTo(returnReceiver);
         methodInfo.placeLabel(noStripNeeded);
         // if we haven't created a new receiver, we put a copy of the old one one the stack, allowing an
         // unconditional pop() later.
-        compiler.generateGetReceiver();
+        compiler.generateGetOutputter();
         methodInfo.placeLabel(returnReceiver);
         // assert stack newReceiver
-        compiler.pushNewReceiverInfo(ga);
+        compiler.pushNewOutputterInfo(ga);
     }
 
     public abstract void identifyExpression(CompilerService compiler, Expression expression, String evalMode);
 
 }
 
-//Copyright (c) 2011-2015 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

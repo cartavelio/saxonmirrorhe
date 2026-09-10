@@ -3,8 +3,8 @@ package com.saxonica.js;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.NashornException;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StandardErrorListener;
 import net.sf.saxon.om.Item;
@@ -299,7 +299,7 @@ public class RunJSTransform {
                     Object errorObject = ((NashornException)scrEx.getCause()).getEcmaError();
                     String message = scrEx.getMessage();
                     String code = null;
-                    Location loc = ExplicitLocation.UNKNOWN_LOCATION;
+                    Location loc = Loc.NONE;
                     if (errorObject instanceof ScriptObjectMirror) {
                         ScriptObjectMirror eo = (ScriptObjectMirror)errorObject;
                         code = errInfo(eo, "code");
@@ -311,7 +311,7 @@ public class RunJSTransform {
                             module += " [sef#" + compiledLineNr + "]";
                         }
                         if (module != null && lineNr != null) {
-                            loc = new ExplicitLocation(module, Integer.parseInt(lineNr), -1);
+                            loc = new Loc(module, Integer.parseInt(lineNr), -1);
                         }
                     }
                     //System.err.println(code + ": " + message);
@@ -377,7 +377,7 @@ public class RunJSTransform {
     }
 
     private static XdmValue makeXdmValue(List<String> types, List<String> values) throws XPathException {
-        List<Item<?>> result = new ArrayList<>(types.size());
+        List<Item> result = new ArrayList<>(types.size());
         for (int i=0; i<types.size(); i++) {
             String type = types.get(i);
             String value = values.get(i);

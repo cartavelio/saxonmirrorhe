@@ -1,13 +1,14 @@
 package com.saxonica.ee.stream.watch;
 
 import com.saxonica.ee.stream.feed.DecomposingFeed;
-import com.saxonica.ee.stream.feed.Feed;
+import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.feed.SnapshotFeed;
 import com.saxonica.ee.stream.om.FleetingNode;
 import com.saxonica.ee.stream.om.FleetingParentNode;
 import net.sf.saxon.Controller;
+import net.sf.saxon.event.ComplexContentOutputter;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.SequenceOutputter;
+import net.sf.saxon.event.SequenceCollector;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
@@ -15,13 +16,14 @@ import net.sf.saxon.expr.accum.Accumulator;
 import net.sf.saxon.expr.accum.AccumulatorRule;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.parser.Evaluator;
-import net.sf.saxon.expr.parser.ExplicitLocation;
 import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.functions.AccumulatorFn;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnchorPattern;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeTestPattern;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.SimpleMode;
 import net.sf.saxon.trans.XPathException;
@@ -39,6 +41,11 @@ import java.util.Stack;
  * it is called to process every node in the stream; it then checks whether the accumulator
  * has any rule that matches this node, and if so applies the next-value expression associated
  * with that accumulator rule.
+ *
+ * <p>The class also provides methods to return the "before" and "after" values of the
+ * accumulator for a given node. These have to make provision (a) for handling error situations
+ * (where evaluation of the accumulator failed), and (b) for handling the case where the value
+ * is requested (by another accumulator) before it is available.</p>
  */
 
 
@@ -48,14 +55,15 @@ public class AccumulatorWatch extends PatternWatch {
     private SimpleMode preDescentMode;
     private SimpleMode postDescentMode;
 
-    private Stack<Sequence<?>> preDescentStack = new Stack<>();
-    private Stack<SequenceOutputter> captureStack = new Stack<>();
-    private Sequence<?> currentValue;
+    private Stack<Sequence> preDescentStack = new Stack<>();
+    private Stack<ComplexContentOutputter> captureStack = new Stack<>();
+
+    private Sequence currentValue;
 
     private FleetingNode lastPredescentNode = null;
     private FleetingNode lastPostdescentNode = null;
 
-    private boolean beingComputed;
+    private AccumulatorFn.Phase beingComputed = null;
 
 
     // localContext contains the iterator over the nodes selected by the apply-templates instruction,
@@ -64,15 +72,12 @@ public class AccumulatorWatch extends PatternWatch {
     private WatchManager watchManager;
     private Stack<FleetingNode> nodeStack;
 
+
     public AccumulatorWatch(Accumulator accumulator) {
         this.accumulator = accumulator;
         this.preDescentMode = accumulator.getPreDescentRules();
         this.postDescentMode = accumulator.getPostDescentRules();
         setSelection(new NodeTestPattern(AnyNodeTest.getInstance()));
-    }
-
-    public void setNodeStack(Stack<FleetingNode> stack) {
-        this.nodeStack = stack;
     }
 
     public Accumulator getAccumulator() {
@@ -83,22 +88,23 @@ public class AccumulatorWatch extends PatternWatch {
         return context;
     }
 
-    public FleetingNode getLastPredescentNode() {
-        return lastPredescentNode;
-    }
-
+    @Override
     public void open(Terminator terminator) throws XPathException {
         context = watchManager.getXPathContext().newCleanContext();
         context.setCurrentComponent(accumulator.getDeclaringComponent());
         SlotManager slotManager = accumulator.getSlotManagerForInitialValueExpression();
         context.setStackFrame(slotManager, SequenceTool.makeSequenceArray(slotManager.getNumberOfVariables()));
-        context.setCurrentIterator(new ManualIterator<>());
+        context.setCurrentIterator(new ManualIterator());
         try {
             currentValue = ExpressionTool.eagerEvaluate(accumulator.getInitialValueExpression(), getContext());
         } catch (XPathException err) {
             // Save the error until the accumulator value is read
             currentValue = new ObjectValue<>(err);
         }
+    }
+
+    public void setNodeStack(Stack<FleetingNode> stack) {
+        this.nodeStack = stack;
     }
 
 
@@ -114,26 +120,30 @@ public class AccumulatorWatch extends PatternWatch {
      *
      * @throws net.sf.saxon.type.ValidationException May be raised if the constraint implemented by this
      *                                               Watch is violated @param locationId the location of the node in the source, or of the instruction that created it
+     * @return always null
      */
 
+    @Override
     public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
-        //System.err.println("AccumulatorWatch.startSelectedParentNode()");
+//        System.err.println("AccumulatorWatch.startSelectedParentNode(" +
+//                                   accumulator.getAccumulatorName() + "," + node.getDisplayName() + ")");
         int nodeNr = node.getNodeNumber();
         if (lastPredescentNode != null && nodeNr == lastPredescentNode.getNodeNumber()) {
             // We have already processed this event
             return null;
         }
         lastPredescentNode = node;
-        ManualIterator<NodeInfo> iter = (ManualIterator<NodeInfo>) context.getCurrentIterator();
+
+        ManualIterator iter = (ManualIterator) context.getCurrentIterator();
         iter.setContextItem(node);
         iter.incrementPosition();
 
         Rule rule = preDescentMode.getRule(node, context);
-        Sequence<?> value = currentValue;
+        Sequence value = currentValue;
         if (rule != null) {
-            beingComputed = true;
+            beingComputed = AccumulatorFn.Phase.BEFORE;
             value = applyRule(node, rule);
-            beingComputed = false;
+            beingComputed = null;
             currentValue = value;
             if (accumulator.isTracing()) {
                 context.getConfiguration().getLogger().info(accumulator.getAccumulatorName().getDisplayName() +
@@ -144,20 +154,21 @@ public class AccumulatorWatch extends PatternWatch {
         // If there is a capturing post-descent rule, then fire it off now
         Rule capture = postDescentMode.getRule(node, context);
         if (capture != null && ((AccumulatorRule)capture.getAction()).isCapturing()) {
-            SequenceOutputter so = new SequenceOutputter(getPipelineConfiguration());
-            Feed feed = new DecomposingFeed(so);
-            Trigger snapshotWatch = SnapshotFeed.getWatch(feed, AnchorPattern.getInstance(), watchManager, context);
-            ((SnapshotFeed)snapshotWatch.getAction()).setCopyAccumulators(false);
+            SequenceCollector so = new SequenceCollector(getPipelineConfiguration());
+            ComplexContentOutputter cco = new ComplexContentOutputter(so);
+            ItemFeed feed = new DecomposingFeed(cco, context);
+            Watch snapshotWatch = SnapshotFeed.getWatch(feed, AnchorPattern.getInstance(), watchManager, context);
             watchManager.addWatch(snapshotWatch, true);
-            captureStack.push(so);
+            captureStack.push(cco);
         }
         int depth = nodeStack.size();
-        setAtDepth(preDescentStack, depth - 1, value);
+        setAtDepth(preDescentStack, depth-1, value);
+
         return null;
     }
 
-    private Sequence<?> applyRule(FleetingNode node, Rule rule) throws XPathException {
-        if (currentValue instanceof ExternalObject && ((ExternalObject) currentValue).getObject() instanceof XPathException) {
+    private Sequence applyRule(FleetingNode node, Rule rule) throws XPathException {
+        if (currentValue instanceof ExternalObject && ((ExternalObject<?>) currentValue).getObject() instanceof XPathException) {
             return currentValue;
         }
         AccumulatorRule target = (AccumulatorRule) rule.getAction();
@@ -168,10 +179,12 @@ public class AccumulatorWatch extends PatternWatch {
 
         NodeInfo targetNode = node;
         if (target.isPostDescent() && target.isCapturing()) {
-            targetNode = (NodeInfo)captureStack.pop().getFirstItem();
+            ComplexContentOutputter cco = captureStack.pop();
+            SequenceCollector so = (SequenceCollector)cco.getReceiver();
+            targetNode = (NodeInfo)so.getFirstItem();
         }
 
-        ManualIterator<NodeInfo> initialNode = new ManualIterator<>(targetNode);
+        ManualIterator initialNode = new ManualIterator(targetNode);
         c2.setCurrentIterator(initialNode);
         c2.openStackFrame(target.getStackFrameMap());
         c2.setLocalVariable(0, currentValue);
@@ -185,8 +198,7 @@ public class AccumulatorWatch extends PatternWatch {
         }
     }
 
-    private static void setAtDepth(
-            Stack<Sequence<?>> stack, int depth, Sequence<?> value) {
+    private static void setAtDepth(Stack<Sequence> stack, int depth, Sequence value) {
         if (depth >= stack.size()) {
             stack.push(value);
         } else {
@@ -194,8 +206,8 @@ public class AccumulatorWatch extends PatternWatch {
         }
     }
 
-    public boolean isBeingComputed() {
-        return beingComputed;
+    public boolean isBeingComputed(AccumulatorFn.Phase phase) {
+        return beingComputed == phase;
     }
 
     /**
@@ -205,7 +217,8 @@ public class AccumulatorWatch extends PatternWatch {
      * @param item the node that was matched.
      */
 
-    public void processItem(Item<?> item) throws XPathException {
+    @Override
+    public void processItem(Item item) throws XPathException {
         //System.err.println("AccumulatorWatch.processItem()");
         FleetingNode node = (FleetingNode) item;
         if (node.getNodeKind() == Type.ATTRIBUTE) {
@@ -223,9 +236,9 @@ public class AccumulatorWatch extends PatternWatch {
         lastPredescentNode = node;
         Rule rule = preDescentMode.getRule(item, context);
         if (rule != null) {
-            beingComputed = true;
+            beingComputed = AccumulatorFn.Phase.BEFORE;
             currentValue = applyRule(node, rule);
-            beingComputed = false;
+            beingComputed = null;
             if (accumulator.isTracing()) {
                 context.getConfiguration().getLogger().info(accumulator.getAccumulatorName().getDisplayName() +
                                                                     " BEFORE " + Navigator.getPath(node) + ": " + Err.depictSequence(currentValue));
@@ -235,9 +248,9 @@ public class AccumulatorWatch extends PatternWatch {
         setAtDepth(preDescentStack, depth, currentValue);
         rule = postDescentMode.getRule(item, context);
         if (rule != null) {
-            beingComputed = true;
+            beingComputed = AccumulatorFn.Phase.AFTER;
             currentValue = applyRule(node, rule);
-            beingComputed = false;
+            beingComputed = null;
             if (accumulator.isTracing()) {
                 context.getConfiguration().getLogger().info(accumulator.getAccumulatorName().getDisplayName() +
                                                                     " AFTER " + Navigator.getPath(node) + ": " + Err.depictSequence(currentValue));
@@ -254,6 +267,7 @@ public class AccumulatorWatch extends PatternWatch {
      *                                               Watch is violated @param locationId the location of the node in the source, or of the instruction that created it
      */
 
+    @Override
     public void endSelectedParentNode(Location locationId) throws XPathException {
         FleetingNode node = nodeStack.peek();
 //        System.err.println("AccumulatorWatch.endSelectedParentNode(" +
@@ -266,9 +280,9 @@ public class AccumulatorWatch extends PatternWatch {
         lastPostdescentNode = node;
         Rule rule = postDescentMode.getRule(node, context);
         if (rule != null) {
-            beingComputed = true;
+            beingComputed = AccumulatorFn.Phase.AFTER;
             currentValue = applyRule(node, rule);
-            beingComputed = false;
+            beingComputed = null;
             if (accumulator.isTracing()) {
                 context.getConfiguration().getLogger().info(accumulator.getAccumulatorName().getDisplayName() +
                                                                     " AFTER " + Navigator.getPath(node) + ": " + Err.depictSequence(currentValue));
@@ -276,41 +290,39 @@ public class AccumulatorWatch extends PatternWatch {
         }
     }
 
+    @Override
     public void close() throws XPathException {
         //
     }
 
-    public Sequence<?> getPreDescentValue(FleetingNode node) throws XPathException {
+    public Sequence getPreDescentValue(FleetingNode node) throws XPathException {
         if (lastPredescentNode == null || node.getNodeNumber() > lastPredescentNode.getNodeNumber()) {
             // we haven't yet processed this node (accumulators are allowed to reference each other)
             if (node instanceof FleetingParentNode) {
-                startSelectedParentNode((FleetingParentNode) node, ExplicitLocation.UNKNOWN_LOCATION);
+                startSelectedParentNode((FleetingParentNode) node, Loc.NONE);
             } else {
                 processItem(node);
             }
         }
         detectErrorValue(currentValue);
-        Sequence<?> value = preDescentStack.get(node.getDepth());
+        Sequence value = preDescentStack.get(node.getDepth());
         detectErrorValue(value);
         return value;
     }
 
-    private void detectErrorValue(Sequence<?> value) throws XPathException {
-        if (value instanceof ExternalObject && ((ExternalObject) value).getObject() instanceof XPathException) {
-            throw (XPathException) ((ExternalObject) value).getObject();
+    private void detectErrorValue(Sequence value) throws XPathException {
+        if (value instanceof ExternalObject && ((ExternalObject<?>) value).getObject() instanceof XPathException) {
+            throw (XPathException) ((ExternalObject<?>) value).getObject();
         }
     }
 
-    public Sequence<?> getPreDescentValueAtDepth(int depth) throws XPathException {
-        Sequence<?> value = preDescentStack.get(depth);
-        if (value instanceof ExternalObject && ((ExternalObject) value).getObject() instanceof XPathException) {
-            throw (XPathException) ((ExternalObject) value).getObject();
-        } else {
-            return value;
-        }
+    public Sequence getPreDescentValueAtDepth(int depth) throws XPathException {
+        Sequence value = preDescentStack.get(depth);
+        detectErrorValue(value);
+        return value;
     }
 
-    public Sequence<?> getPostDescentValue(FleetingNode node) throws XPathException {
+    public Sequence getPostDescentValue(FleetingNode node) throws XPathException {
         if (node == null) {
             // happens while copying accumulators
             node = nodeStack.peek();
@@ -318,7 +330,7 @@ public class AccumulatorWatch extends PatternWatch {
         if (lastPostdescentNode == null || node.getNodeNumber() > lastPostdescentNode.getNodeNumber()) {
             // we haven't yet processed this node (accumulators are allowed to reference each other)
             if (node instanceof FleetingParentNode) {
-                endSelectedParentNode(ExplicitLocation.UNKNOWN_LOCATION);
+                endSelectedParentNode(Loc.NONE);
             } else {
                 processItem(node);
             }
@@ -328,6 +340,7 @@ public class AccumulatorWatch extends PatternWatch {
         return value;
     }
 
+
 }
 
-// Copyright (c) 2012-2016 Saxonica Limited.
+// Copyright (c) 2012-2020 Saxonica Limited

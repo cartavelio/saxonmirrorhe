@@ -7,7 +7,7 @@ import com.saxonica.ee.bytecode.util.LabelInfo;
 import net.sf.saxon.expr.Calculator;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.type.ConversionResult;
 import net.sf.saxon.type.Converter;
 import net.sf.saxon.type.Converter.FloatToInteger;
@@ -51,6 +51,7 @@ public abstract class CalculatorCompiler {
 
 
     public static class IntegerPlusInteger extends CalculatorCompiler {
+        @Override
         public void compute(Generator ga, SourceLocator locator) {
             ExpressionCompiler.visitAnnotation(compiler, "IntPlusCalculator-0");
             ga.checkClass(IntegerValue.class);
@@ -62,6 +63,7 @@ public abstract class CalculatorCompiler {
     }
 
     public static class IntegerMinusInteger extends CalculatorCompiler {
+        @Override
         public void compute(Generator ga, SourceLocator locator) {
             ExpressionCompiler.visitAnnotation(compiler, "IntMinusCalculator-0");
             ga.checkClass(IntegerValue.class);
@@ -73,6 +75,7 @@ public abstract class CalculatorCompiler {
     }
 
     public static class IntegerTimesInteger extends CalculatorCompiler {
+        @Override
         public void compute(Generator ga, SourceLocator locator) {
             ExpressionCompiler.visitAnnotation(compiler, "IntTimesCalculator-0");
             ga.checkClass(IntegerValue.class);
@@ -83,6 +86,7 @@ public abstract class CalculatorCompiler {
     }
 
     public static class IntegerDivInteger extends CalculatorCompiler {
+        @Override
         public void compute(Generator ga, SourceLocator locator) {
             ExpressionCompiler.visitAnnotation(compiler, "IntDivCalculator-0");
             ga.checkClass(IntegerValue.class);
@@ -95,6 +99,7 @@ public abstract class CalculatorCompiler {
     }
 
     public static class IntegerModInteger extends CalculatorCompiler {
+        @Override
         public void compute(Generator ga, SourceLocator locator) {
             ExpressionCompiler.visitAnnotation(compiler, "IntModCalculator-0");
             ga.checkClass(IntegerValue.class);
@@ -107,6 +112,7 @@ public abstract class CalculatorCompiler {
     }
 
     public static class IntegerIdivInteger extends CalculatorCompiler {
+        @Override
         public void compute(Generator ga, SourceLocator locator) {
             ExpressionCompiler.visitAnnotation(compiler, "IntIdivCalculator-0");
             ga.checkClass(IntegerValue.class);
@@ -159,6 +165,7 @@ public abstract class CalculatorCompiler {
      * Arithmetic: double + double (including types that promote to double)
      */
     public static class DoublePlusDouble extends CalculatorCompiler {
+        @Override
         public void compute(Generator ga, SourceLocator locator) {
             ExpressionCompiler.visitAnnotation(compiler, "DoublePlusDoubleCalculator-0");
             doubleArithmetic(ga, GeneratorAdapter.ADD);
@@ -169,6 +176,7 @@ public abstract class CalculatorCompiler {
      * Arithmetic: double - double (including types that promote to double)
      */
     public static class DoubleMinusDouble extends CalculatorCompiler {
+        @Override
         public void compute(Generator ga, SourceLocator locator) {
             ExpressionCompiler.visitAnnotation(compiler, "DoubleMinusDoubleCalculator-0");
             doubleArithmetic(ga, GeneratorAdapter.SUB);
@@ -179,6 +187,7 @@ public abstract class CalculatorCompiler {
      * Arithmetic: double * double (including types that promote to double)
      */
     public static class DoubleTimesDouble extends CalculatorCompiler {
+        @Override
         public void compute(Generator ga, SourceLocator locator) {
             ExpressionCompiler.visitAnnotation(compiler, "DoubleTimesDoubleCalculator-0");
             doubleArithmetic(ga, GeneratorAdapter.MUL);
@@ -189,6 +198,7 @@ public abstract class CalculatorCompiler {
      * Arithmetic: double / double (including types that promote to double)
      */
     public static class DoubleDivDouble extends CalculatorCompiler {
+        @Override
         public void compute(Generator ga, SourceLocator locator) {
             ExpressionCompiler.visitAnnotation(compiler, "DoubleDivDoubleCalculator-0");
             doubleArithmetic(ga, GeneratorAdapter.DIV);
@@ -199,6 +209,7 @@ public abstract class CalculatorCompiler {
      * Arithmetic: double % double (including types that promote to double)
      */
     public static class DoubleModDouble extends CalculatorCompiler {
+        @Override
         public void compute(Generator ga, SourceLocator locator) {
             ExpressionCompiler.visitAnnotation(compiler, "DoubleModDoubleCalculator-0");
             doubleArithmetic(ga, GeneratorAdapter.REM);
@@ -231,6 +242,7 @@ public abstract class CalculatorCompiler {
      * Arithmetic: float + float (including types that promote to float))
      */
     public static class FloatPlusFloat extends CalculatorCompiler {
+        @Override
         public void compute(Generator ga, SourceLocator locator) {
             floatArithmetic(ga, GeneratorAdapter.ADD);
         }
@@ -240,6 +252,7 @@ public abstract class CalculatorCompiler {
      * Arithmetic: float - float (including types that promote to float)
      */
     public static class FloatMinusFloat extends CalculatorCompiler {
+        @Override
         public void compute(Generator ga, SourceLocator locator) {
             floatArithmetic(ga, GeneratorAdapter.SUB);
         }
@@ -249,6 +262,7 @@ public abstract class CalculatorCompiler {
      * Arithmetic: float * float (including types that promote to float)
      */
     public static class FloatTimesFloat extends CalculatorCompiler {
+        @Override
         public void compute(Generator ga, SourceLocator locator) {
             floatArithmetic(ga, GeneratorAdapter.MUL);
         }
@@ -258,6 +272,7 @@ public abstract class CalculatorCompiler {
      * Arithmetic: float div float (including types that promote to float)
      */
     public static class FloatDivFloat extends CalculatorCompiler {
+        @Override
         public void compute(Generator ga, SourceLocator locator) {
             floatArithmetic(ga, GeneratorAdapter.DIV);
         }
@@ -267,6 +282,7 @@ public abstract class CalculatorCompiler {
      * Arithmetic: float mod float (including types that promote to float)
      */
     public static class FloatModFloat extends CalculatorCompiler {
+        @Override
         public void compute(Generator ga, SourceLocator locator) {
             floatArithmetic(ga, GeneratorAdapter.REM);
         }
@@ -278,6 +294,7 @@ public abstract class CalculatorCompiler {
      */
     public static class FloatIdivFloat extends CalculatorCompiler {
 
+        @Override
         public void compute(Generator ga, SourceLocator locator) {
 
             GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
@@ -401,6 +418,7 @@ public abstract class CalculatorCompiler {
 
     public static class DecimalPlusDecimal extends CalculatorCompiler {
 
+        @Override
         public void compute(Generator ga, SourceLocator locator) {
             decimalArithmetic(compiler, ga, "plus", "add");
 
@@ -414,6 +432,7 @@ public abstract class CalculatorCompiler {
 
     public static class DecimalMinusDecimal extends CalculatorCompiler {
 
+        @Override
         public void compute(Generator ga, SourceLocator locator) {
             decimalArithmetic(compiler, ga, "minus", "subtract");
         }
@@ -426,6 +445,7 @@ public abstract class CalculatorCompiler {
 
     public static class DecimalTimesDecimal extends CalculatorCompiler {
 
+        @Override
         public void compute(Generator ga, SourceLocator locator) {
             decimalArithmetic(compiler, ga, "times", "multiply");
         }
@@ -438,6 +458,7 @@ public abstract class CalculatorCompiler {
 
     public static class DecimalDivDecimal extends CalculatorCompiler {
 
+        @Override
         public void compute(Generator ga, SourceLocator locator) {
             ga.checkClass(NumericValue.class);
             ga.swap();
@@ -456,6 +477,7 @@ public abstract class CalculatorCompiler {
 
     public static class DecimalModDecimal extends CalculatorCompiler {
 
+        @Override
         public void compute(Generator ga, SourceLocator locator) {
 
             GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
@@ -524,6 +546,7 @@ public abstract class CalculatorCompiler {
 
     public static class DecimalIdivDecimal extends CalculatorCompiler {
 
+        @Override
         public void compute(Generator ga, SourceLocator locator) {
 
             GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
@@ -624,6 +647,7 @@ public abstract class CalculatorCompiler {
      */
 
     public static class AnyPlusAny extends CalculatorCompiler {
+        @Override
         public void compute(Generator ga, SourceLocator locator) {
             ExpressionCompiler.visitAnnotation(compiler, "AnyPlusCalculator-0");
             anyAnyArithmetic(compiler, ga, Calculator.PLUS, "plus (+)", locator);
@@ -635,6 +659,7 @@ public abstract class CalculatorCompiler {
      */
 
     public static class AnyMinusAny extends CalculatorCompiler {
+        @Override
         public void compute(Generator ga, SourceLocator locator) {
             ExpressionCompiler.visitAnnotation(compiler, "AnyMinusCalculator-0");
             anyAnyArithmetic(compiler, ga, Calculator.MINUS, "minus (-)", locator);
@@ -646,6 +671,7 @@ public abstract class CalculatorCompiler {
      */
 
     public static class AnyTimesAny extends CalculatorCompiler {
+        @Override
         public void compute(Generator ga, SourceLocator locator) {
             ExpressionCompiler.visitAnnotation(compiler, "AnyTimesCalculator-0");
             anyAnyArithmetic(compiler, ga, Calculator.TIMES, "multiply (*)", locator);
@@ -657,6 +683,7 @@ public abstract class CalculatorCompiler {
      */
 
     public static class AnyIdivAny extends CalculatorCompiler {
+        @Override
         public void compute(Generator ga, SourceLocator locator) {
             ExpressionCompiler.visitAnnotation(compiler, "AnyIdivAnyCalculator");
             anyAnyArithmetic(compiler, ga, Calculator.IDIV, "idiv", locator);
@@ -668,6 +695,7 @@ public abstract class CalculatorCompiler {
      */
 
     public static class AnyDivAny extends CalculatorCompiler {
+        @Override
         public void compute(Generator ga, SourceLocator locator) {
             ExpressionCompiler.visitAnnotation(compiler, "AnyDivAnyCalculator");
             anyAnyArithmetic(compiler, ga, Calculator.DIV, "div", locator);
@@ -676,6 +704,7 @@ public abstract class CalculatorCompiler {
 
 
     public static class AnyModAny extends CalculatorCompiler {
+        @Override
         public void compute(/*@NotNull*/ Generator ga, SourceLocator locator) {
             ExpressionCompiler.visitAnnotation(compiler, "AnyModAnyCalculator");
             anyAnyArithmetic(compiler, ga, Calculator.MOD, "mod", locator);
@@ -683,4 +712,4 @@ public abstract class CalculatorCompiler {
     }
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

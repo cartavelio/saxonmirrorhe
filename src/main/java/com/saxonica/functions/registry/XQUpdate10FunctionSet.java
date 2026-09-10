@@ -2,6 +2,7 @@ package com.saxonica.functions.registry;
 
 import net.sf.saxon.functions.Put;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
+import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Type;
@@ -24,9 +25,9 @@ public class XQUpdate10FunctionSet extends BuiltInFunctionSet {
 
     private void init() {
 
-        importFunctionSet(XPath31HOFunctionSet.getInstance());
+        importFunctionSet(XPath31FunctionSet.getInstance());
 
-        register("put", 2, Put.class, AnyItemType.getInstance(), OPT, XQUPDATE, LATE)
+        register("put", 2, Put.class, AnyItemType.getInstance(), OPT, LATE)
                 .arg(0, Type.NODE_TYPE, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
     }
@@ -34,4 +35,4 @@ public class XQUpdate10FunctionSet extends BuiltInFunctionSet {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited

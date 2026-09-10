@@ -41,7 +41,7 @@ public interface ComponentWithValueConstraint {
      * @return a function whose result gives details of the value constraint
      */
 
-    default Sequence<?> getValueConstraintAsFunction(ComponentWithValueConstraint att) {
+    default Sequence getValueConstraintAsFunction(ComponentWithValueConstraint att) {
         if (getValueConstraint() != null) {
             return getValueConstraint().asFunction();
         } else {
@@ -112,4 +112,4 @@ public interface ComponentWithValueConstraint {
     NamespaceResolver getNamespaceResolver();
 }
 
-// Copyright (c) Saxonica 2018
+// Copyright (c) 2018-2020 Saxonica Limited

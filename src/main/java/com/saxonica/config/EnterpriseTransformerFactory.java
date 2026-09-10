@@ -4,8 +4,8 @@ import com.saxonica.config.pe.ConfigurationReaderPE;
 import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.ee.schema.sdoc.SchemaDocument;
 import com.saxonica.ee.schema.sdoc.SchemaReader;
-import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.trans.XPathException;
 
@@ -56,7 +56,7 @@ public class EnterpriseTransformerFactory extends ProfessionalTransformerFactory
         EnterpriseConfiguration config = (EnterpriseConfiguration) getConfiguration();
         SchemaCompiler compiler = config.newSchemaCompiler();
         PipelineConfiguration pipe = config.makePipelineConfiguration();
-        pipe.setHostLanguage(Configuration.XML_SCHEMA);
+        pipe.setHostLanguage(HostLanguage.XML_SCHEMA);
         SchemaDocument schemadoc = SchemaReader.read(schemaSource, compiler, pipe, null);
         compiler.validate(schemadoc);
     }
@@ -88,4 +88,4 @@ public class EnterpriseTransformerFactory extends ProfessionalTransformerFactory
     }
 }
 
-// Copyright (c) 2004-2009 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

@@ -6,11 +6,11 @@ import com.saxonica.ee.bytecode.simtype.AtomicTypeValidatorCompiler;
 import com.saxonica.ee.schema.UserAtomicType;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.SequenceReceiver;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.expr.parser.ICompilerService;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.IdentityComparable;
@@ -50,7 +50,7 @@ public class CompilerService implements ICompilerService {
 
     private int maxClasses = 10000;
     private static int classCounter = 0; // counted for the VM, not for the Configuration
-    private int hostLanguage;
+    private HostLanguage hostLanguage;
     /**
      * Indicate in a map a list of methods to be added in the main class at the end of the class generation
      * ExpressionCompiler is the hashMap key because we only expect one generated method per ExpressionCompiler
@@ -100,7 +100,7 @@ public class CompilerService implements ICompilerService {
         expressionCompilers.put("SubstringAfterCompiler", new SubstringAfterCompiler());
     }
 
-    public CompilerService(Configuration config, int hostLanguage) {
+    public CompilerService(Configuration config, HostLanguage hostLanguage) {
         this.config = config;
         this.hostLanguage = hostLanguage;
         if (config.getBooleanProperty(Feature.DEBUG_BYTE_CODE)) {
@@ -133,7 +133,7 @@ public class CompilerService implements ICompilerService {
         return debugByteCode;
     }
 
-    public int getHostLanguage() {
+    public HostLanguage getHostLanguage() {
         return hostLanguage;
     }
 
@@ -382,35 +382,23 @@ public class CompilerService implements ICompilerService {
     }
 
     /**
-     * Generate code to set a new current receiver on the top of the receiver stack.
-     * <p>Runtime precondition: the new receiver is on the top of the bytecode stack</p>
-     * <p>Runtime postcondition: the new receiver is now the current receiver; the previous
+     * Generate code to set a new current Outputter on the top of the receiver stack.
+     * <p>Runtime precondition: the new Outputter is on the top of the bytecode stack</p>
+     * <p>Runtime postcondition: the new Outputter is now the current receiver; the previous
      * current receiver has been added to the receiver stack. The top entry from the
      * bytecode stack has been consumed.</p>
      *
      * @param ga the code generator
      */
 
-    public void pushNewReceiverInfo(Generator ga) {
+    public void pushNewOutputterInfo(Generator ga) {
         //if (isDebugByteCode()) {
         //    ga.showObject(this, "Push receiver: ");
         //}
         GeneratedMethodInfo methodInfo = getCurrentMethod();
-        int newReceiverPosition = methodInfo.allocateLocal(SequenceReceiver.class);
-        if (!methodInfo.isSequenceReceiverInitialized()) {
-            // this means we're in a method that didn't allocate a slot for the receiver, and now we find
-            // we need one after all, so that the receiver can be reset after use.
-            int oldReceiverPosition = methodInfo.allocateLocal(SequenceReceiver.class);
-            generateGetContext();
-            ga.invokeInstanceMethod(XPathContext.class, "getReceiver");
-            ga.storeLocal(oldReceiverPosition);
-            methodInfo.pushSequenceReceiverInfo(oldReceiverPosition);
-        }
-        ga.storeLocal(newReceiverPosition);
-        generateGetContext();
-        ga.loadLocal(newReceiverPosition);
-        ga.invokeInstanceMethod(XPathContext.class, "setReceiver", Receiver.class);
-        methodInfo.pushSequenceReceiverInfo(newReceiverPosition);
+        int newOutputterPosition = methodInfo.allocateLocal(Outputter.class);
+        ga.storeLocal(newOutputterPosition);
+        methodInfo.pushOutputterInfo(newOutputterPosition);
     }
 
     /**
@@ -421,35 +409,20 @@ public class CompilerService implements ICompilerService {
      * stack and is now the current receiver.</p>
      */
 
-    public void popReceiverInfo() {
+    public void popOutputterInfo() {
         GeneratedMethodInfo methodInfo = getCurrentMethod();
-        methodInfo.popSequenceReceiverInfo();
-        generateGetContext();
-        Generator ga = methodInfo.currentGenerator;
-        ga.loadLocal(methodInfo.getSequenceReceiverPosition());
-        ga.invokeInstanceMethod(XPathContext.class, "setReceiver", Receiver.class);
-        if (!methodInfo.isSequenceReceiverInitialized()) {
-            methodInfo.popSequenceReceiverInfo();
-        }
+        methodInfo.popOutputterInfo();
     }
 
 
-    public void pushNewMethodInfo(Generator ga, boolean contextIsArgument, int contextVariablePosition) {
+    public void pushNewMethodInfo(Generator ga, boolean contextIsArgument, int contextVariablePosition, int outputterVariablePosition) {
         mostRecentLineNumber = -1;
         GeneratedMethodInfo methodInfo = new GeneratedMethodInfo();
         methodInfo.currentGenerator = ga;
         methodInfo.debug = isDebugByteCode();
         methodInfo.pushContextVariableInfo(contextVariablePosition, contextIsArgument);
+        methodInfo.pushOutputterInfo(outputterVariablePosition);
         currentMethods.push(methodInfo);
-        if (contextIsArgument) {
-            // If the XPathContext is an argument to the method, then it is already available for use.
-            // In other cases, this call must be followed by a call on initNewMethod() or setContextField()
-            ga.loadArg(contextVariablePosition);
-            ga.invokeInstanceMethod(XPathContext.class, "getReceiver");
-            int receiverPosition = methodInfo.allocateLocal(SequenceReceiver.class);
-            ga.storeLocal(receiverPosition);
-            currentMethods.peek().pushSequenceReceiverInfo(receiverPosition);
-        }
     }
 
     /**
@@ -463,17 +436,8 @@ public class CompilerService implements ICompilerService {
 
     public void initNewMethod(Generator ga, boolean holdReceiverAsLocal) {
         GeneratedMethodInfo info = currentMethods.peek();
-        if (holdReceiverAsLocal) {
-            ga.dup();
-            ga.storeLocal(info.getContextVariablePosition());
-            ga.invokeInstanceMethod(XPathContext.class, "getReceiver");
-            int receiverPosition = ga.newLocal(SequenceReceiver.class);
-            ga.storeLocal(receiverPosition);
-            info.pushSequenceReceiverInfo(receiverPosition);
-        } else {
-            ga.storeLocal(info.getContextVariablePosition());
-            info.pushSequenceReceiverInfo(-1);
-        }
+        ga.storeLocal(info.getContextVariablePosition());
+        info.pushOutputterInfo(-1);
     }
 
     public void pushNewClassInfo(String className, Class superclass, ClassWriter cw) {
@@ -568,7 +532,7 @@ public class CompilerService implements ICompilerService {
             if ((evaluationModes & Expression.ITERATE_METHOD) != 0) {
                 m = Method.getMethod("net.sf.saxon.om.SequenceIterator iterate(net.sf.saxon.expr.XPathContext)");
                 ga = new Generator(Opcodes.ACC_PUBLIC, m, true, cv);
-                pushNewMethodInfo(ga, true, 0);
+                pushNewMethodInfo(ga, true, 0, -1);
                 try {
                     compileToIterator(expr);
                 } catch (CannotCompileException e) {
@@ -588,7 +552,7 @@ public class CompilerService implements ICompilerService {
             if ((evaluationModes & Expression.EVALUATE_METHOD) != 0) {
                 m = Method.getMethod("net.sf.saxon.om.Item evaluateItem(net.sf.saxon.expr.XPathContext)");
                 ga = new Generator(Opcodes.ACC_PUBLIC, m, true, cv);
-                pushNewMethodInfo(ga, true, 0);
+                pushNewMethodInfo(ga, true, 0, -1);
                 try {
                     compileToItem(expr);
                 } catch (CannotCompileException e) {
@@ -608,7 +572,7 @@ public class CompilerService implements ICompilerService {
                     // If we're not generating an explicit iterate method, create one that invokes evaluateItem
                     m = Method.getMethod("net.sf.saxon.om.SequenceIterator iterate(net.sf.saxon.expr.XPathContext)");
                     ga = new Generator(Opcodes.ACC_PUBLIC, m, true, cv);
-                    pushNewMethodInfo(ga, true, 0);
+                    pushNewMethodInfo(ga, true, 0, -1);
                     // return SingletonIterator.makeIterator(evaluateItem(context))
                     ga.loadThis();
                     ga.loadArg(0);
@@ -628,7 +592,7 @@ public class CompilerService implements ICompilerService {
             if (evaluationModes == Expression.EFFECTIVE_BOOLEAN_VALUE) {
                 m = Method.getMethod("boolean effectiveBooleanValue(net.sf.saxon.expr.XPathContext)");
                 ga = new Generator(Opcodes.ACC_PUBLIC, m, true, cv);
-                pushNewMethodInfo(ga, true, 0);
+                pushNewMethodInfo(ga, true, 0, -1);
                 try {
                     compileToBoolean(expr);
                 } catch (CannotCompileException e) {
@@ -646,7 +610,7 @@ public class CompilerService implements ICompilerService {
 
                 m = Method.getMethod("net.sf.saxon.om.Item evaluateItem(net.sf.saxon.expr.XPathContext)");
                 ga = new Generator(Opcodes.ACC_PUBLIC, m, true, cv);
-                pushNewMethodInfo(ga, true, 0);
+                pushNewMethodInfo(ga, true, 0, -1);
                 ga.loadThis();
                 ga.loadArg(0);
                 ga.invokeInstanceMethod(GeneratedCode.class, "effectiveBooleanValue", XPathContext.class);
@@ -662,7 +626,7 @@ public class CompilerService implements ICompilerService {
 
                 m = Method.getMethod("net.sf.saxon.om.SequenceIterator iterate(net.sf.saxon.expr.XPathContext)");
                 ga = new Generator(Opcodes.ACC_PUBLIC, m, true, cv);
-                pushNewMethodInfo(ga, true, 0);
+                pushNewMethodInfo(ga, true, 0, -1);
                 // return SingletonIterator.makeIterator(evaluateItem(context))
                 ga.loadThis();
                 ga.loadArg(0);
@@ -680,9 +644,9 @@ public class CompilerService implements ICompilerService {
             }
 
             if ((evaluationModes & Expression.PROCESS_METHOD) != 0) {
-                m = Method.getMethod("void process(net.sf.saxon.expr.XPathContext)");
+                m = Method.getMethod("void process(net.sf.saxon.event.Outputter, net.sf.saxon.expr.XPathContext)");
                 ga = new Generator(Opcodes.ACC_PUBLIC, m, true, cv);
-                pushNewMethodInfo(ga, true, 0);
+                pushNewMethodInfo(ga, true, 1, 0);
                 ExpressionCompiler.visitLineNumber(this, ga, expr);
                 // mg.loadArg(0);
                 try {
@@ -692,12 +656,12 @@ public class CompilerService implements ICompilerService {
                     return null;
                 }
                 ga.returnValue();
-                //try {
-                ga.endMethod();
-                //                } catch (Exception e) {
-                //                    e.printStackTrace();
-                //                    System.err.println("*** end method failed");
-                //                }
+                try {
+                    ga.endMethod();
+                } catch (Exception e) {
+                    handleCodeGeneratorException(objectName, e);
+                    return null;
+                }
 
                 popCurrentMethodInfo();
             }
@@ -718,7 +682,7 @@ public class CompilerService implements ICompilerService {
                 for (Operand o : expr.operands()) {
                     Expression child = o.getChildExpression();
                     System.err.println("Trying to compile " + child.toString());
-                    CompiledExpression compiledChild = compileToByteCode(child,child.toString(), evaluationModes);
+                    compileToByteCode(child, child.toString(), evaluationModes);
                 }
             }
 
@@ -734,25 +698,18 @@ public class CompilerService implements ICompilerService {
             CompiledExpression compiledExpression = new CompiledExpression(expr, gc);
             compiledExpression.setClassName(className);
             return compiledExpression;
-        } catch (VerifyError | ClassFormatError e) {
-            handleCodeGeneratorException(objectName, e);
-            currentClasses.pop();
-            return null;
-        } catch (RuntimeException e) {
+        } catch (VerifyError | ClassFormatError | RuntimeException e) {
             handleCodeGeneratorException(objectName, e);
             currentClasses.pop();
             return null;
         }
-        // }
     }
-
-    private static int verifyErrors = 0;
 
     private void handleCodeGeneratorException(String objectName, Throwable e) {
         // If assertions are enabled, we crash out; otherwise we recover
         String message = e.getMessage();
         if (e instanceof CannotCompileException) {
-            Expression exp = ((CannotCompileException)e).getExpression();
+            Expression exp = ((CannotCompileException) e).getExpression();
             if (exp != null) {
                 Location loc = exp.getLocation();
                 message += " at " + loc.getLineNumber() + " of " + loc.getSystemId();
@@ -787,7 +744,7 @@ public class CompilerService implements ICompilerService {
 
     /**
      * Generate bytecode to evaluate an expression by writing events to the current
-     * SequenceReceiver (leaving nothing on the stack at execution time)
+     * Outputter (leaving nothing on the stack at execution time)
      *
      * @param expr the expression to be evaluated
      * @throws CannotCompileException if the expression cannot be compiled
@@ -922,20 +879,16 @@ public class CompilerService implements ICompilerService {
     }
 
     /**
-     * Generate code to load the current Receiver, leaving it on the top of the stack
+     * Generate code to load the current Outputter, leaving it on the top of the stack
      */
 
-    public void generateGetReceiver() {
-
+    public void generateGetOutputter() {
         GeneratedMethodInfo gci = currentMethods.peek();
-        if (gci.getSequenceReceiverPosition() == -1) {
-            generateGetContext();
-            Generator ga = getCurrentGenerator();
-            ga.invokeInstanceMethod(XPathContext.class, "getReceiver");
+        if (gci.getOutputterPosition() == -1) {
+            throw new AssertionError();
         } else {
-            getCurrentGenerator().loadLocal(gci.getSequenceReceiverPosition());
+            getCurrentGenerator().loadArgOrLocal(gci.getOutputterPosition());
         }
-
     }
 
     /**
@@ -986,7 +939,7 @@ public class CompilerService implements ICompilerService {
         ga.throwException();
     }
 
-    protected void pushLocation(SourceLocator locator, Generator ga) {
+    private void pushLocation(SourceLocator locator, Generator ga) {
         if (locator != null) {
             ga.push(locator.getSystemId());
             ga.push(locator.getLineNumber());
@@ -1021,14 +974,6 @@ public class CompilerService implements ICompilerService {
         //pw.flush();
         cv.visitEnd();
         final byte[] classFile = writer.toByteArray();
-
-/*
-        try {
-            FileOutputStream out = new FileOutputStream("saxonByteCodeProgram.dat");
-            out.write(classFile);
-            out.close();
-        } catch(Exception e){}
-*/
 
         if (myClassLoader == null) {
             myClassLoader = Version.platform.makeGeneratedClassLoader(config, getClass());
@@ -1104,10 +1049,10 @@ public class CompilerService implements ICompilerService {
                 if (c == '/') {
                     sb.append("_Slash_");
                 } else {
-                    sb.append('_');
+                    sb.cat('_');
                 }
             } else {
-                sb.append(c);
+                sb.cat(c);
             }
         }
     }
@@ -1186,7 +1131,7 @@ public class CompilerService implements ICompilerService {
 
             m = Method.getMethod("net.sf.saxon.type.ValidationFailure validate(java.lang.CharSequence)");
             ga = new Generator(Opcodes.ACC_PUBLIC, m, true, cv);
-            pushNewMethodInfo(ga, false, 0);
+            pushNewMethodInfo(ga, false, 0, -1);
             try {
                 new AtomicTypeValidatorCompiler(type).compileAtomicValidator(this, rules);
                 //System.err.println("Compiled atomic type " + objectName);
@@ -1198,8 +1143,8 @@ public class CompilerService implements ICompilerService {
             try {
                 ga.endMethod();
             } catch (Exception e) {
-                e.printStackTrace();
-                System.err.println("*** end method failed");
+                handleCodeGeneratorException(objectName, e);
+                return null;
             }
             popCurrentMethodInfo();
 
@@ -1258,6 +1203,6 @@ public class CompilerService implements ICompilerService {
 
 }
 
-// Copyright (c) 2011-2016 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited
 
 

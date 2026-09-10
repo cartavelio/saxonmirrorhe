@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -24,7 +24,6 @@ import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.option.axiom.AxiomObjectModel;
 import net.sf.saxon.option.dom4j.DOM4JObjectModel;
-import net.sf.saxon.option.jdom.JDOMObjectModel;
 import net.sf.saxon.option.jdom2.JDOM2ObjectModel;
 import net.sf.saxon.option.xom.XOMObjectModel;
 import net.sf.saxon.query.DynamicQueryContext;
@@ -82,7 +81,7 @@ public class XMarkBenchmark {
 
     static String[] tests = {"xmark1.xml", "xmark4.xml", "xmark10.xml"};
     static TreeModel[] models = {TreeModel.TINY_TREE, TreeModel.TINY_TREE_CONDENSED, TreeModel.LINKED_TREE,
-            new DOMObjectModel(), new JDOMObjectModel(), new JDOM2ObjectModel(),
+            new DOMObjectModel(), new JDOM2ObjectModel(),
             new DOM4JObjectModel(), new XOMObjectModel(), new AxiomObjectModel(), new DominoTreeModel()};
 //    static TreeModel[] models = {new DOMObjectModel()};
 
@@ -209,8 +208,6 @@ public class XMarkBenchmark {
                 String modelName = anArgv.substring(6);
                 if (modelName.equalsIgnoreCase("dom")) {
                     treeModel = new DOMObjectModel();
-                } else if (modelName.equalsIgnoreCase("jdom")) {
-                    treeModel = new JDOMObjectModel();
                 } else if (modelName.equalsIgnoreCase("jdom2")) {
                     treeModel = new JDOM2ObjectModel();
                 } else if (modelName.equalsIgnoreCase("dom4j")) {
@@ -291,7 +288,7 @@ public class XMarkBenchmark {
                         //AutoActivate.activate(config);
                         config.setSchemaValidationMode(Validation.STRICT);
                         config.addSchemaSource(new StreamSource(new File(dir + "schema.xsd")),
-                                               config.getErrorListener());
+                                               config.makeErrorReporter());
                         config.setBooleanProperty(FeatureKeys.USE_TYPED_VALUE_CACHE, false);
                     }
                     if (val) {

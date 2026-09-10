@@ -12,7 +12,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
@@ -24,7 +23,8 @@ import javax.xml.transform.TransformerException;
 
 
 /**
- * This class implements the saxon:transform() extension function
+ * This class implements the {@code saxon:transform()} extension function (not to be confused with
+ * the standard {@code fn:transform()} function in XPath 3.1)
  */
 
 public class TransformFn extends SystemFunction {
@@ -49,17 +49,18 @@ public class TransformFn extends SystemFunction {
      */
 
         /*@Nullable*/
+    @Override
     public ZeroOrOne<NodeInfo> call(XPathContext context, Sequence[] arguments) throws XPathException {
         try {
             ExternalObject<PreparedStylesheet> templatesObject = (ExternalObject) arguments[0].head();
             if (templatesObject == null) {
-                return ZeroOrOne.empty();
+                return ZeroOrOne.empty(); // Should not happen
             }
             PreparedStylesheet pss = templatesObject.getObject();
 
             NodeInfo source = (NodeInfo) arguments[1].head();
             if (source == null) {
-                return ZeroOrOne.empty();
+                return ZeroOrOne.empty(); // Should not happen
             }
             XsltController transformer = pss.newController();
             GlobalParameterSet params = new GlobalParameterSet();
@@ -72,13 +73,11 @@ public class TransformFn extends SystemFunction {
                         switch (((NodeInfo) param).getNodeKind()) {
                             case Type.ELEMENT:
                             case Type.ATTRIBUTE:
-                                setTransformerParameter(param, params, source);
+                                setTransformerParameter(param, params);
                                 break;
                             case Type.DOCUMENT:
-                                AxisIterator kids = ((NodeInfo) param).iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
-                                Item kid;
-                                while ((kid = kids.next()) != null) {
-                                    setTransformerParameter(kid, params, source);
+                                for (NodeInfo kid : ((NodeInfo)param).children(NodeKindTest.ELEMENT)) {
+                                    setTransformerParameter(kid, params);
                                 }
                                 break;
                             default:
@@ -88,7 +87,7 @@ public class TransformFn extends SystemFunction {
                     } else if (param instanceof MapItem) {
                         for (KeyValuePair pair : ((MapItem) param).keyValuePairs()) {
                             AtomicValue key = pair.key;
-                            GroundedValue val = ((Sequence<?>) pair.value).materialize();
+                            GroundedValue val = ((Sequence) pair.value).materialize();
                             if (key instanceof StringValue) {
                                 params.put(new StructuredQName("", "", key.getStringValue()), val);
                             } else if (key instanceof QNameValue) {
@@ -108,14 +107,13 @@ public class TransformFn extends SystemFunction {
             transformer.setApplyFunctionConversionRulesToExternalVariables(true);
             transformer.initializeController(params);
             transformer.applyTemplates(source, new TreeReceiver(builder));
-            NodeInfo result = builder.getCurrentRoot();
-            return new ZeroOrOne<>(result);
+            return new ZeroOrOne<>(builder.getCurrentRoot());
         } catch (TransformerException e) {
             throw XPathException.makeXPathException(e);
         }
     }
 
-    private static void setTransformerParameter(Item param, GlobalParameterSet params, NodeInfo source) throws XPathException {
+    private static void setTransformerParameter(Item param, GlobalParameterSet params) throws XPathException {
         NodeName name = NameOfNode.makeName((NodeInfo) param);
         AtomicSequence val = param.atomize();
         params.put(name.getStructuredQName(), val);
@@ -124,4 +122,4 @@ public class TransformFn extends SystemFunction {
 
 }
 
-// Copyright (c) 2009-2016 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

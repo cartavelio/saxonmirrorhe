@@ -3,7 +3,7 @@ package com.saxonica;
 import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
-import net.sf.saxon.lib.FeatureKeys;
+import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.InvalidityReportGenerator;
 import net.sf.saxon.lib.StandardInvalidityHandler;
 import net.sf.saxon.s9api.*;
@@ -48,12 +48,9 @@ public class Validate {
      * Main program, can be used directly from the command line.
      *
      * @param args List of arguments supplied on operating system command line
-     * @throws java.lang.Exception Indicates that a compile-time or
-     *                             run-time error occurred
      */
 
-    public static void main(String args[])
-            throws Exception {
+    public static void main(String[] args) {
         // the real work is delegated to another routine so that it can be used in a subclass
         final Validate validate = new Validate();
         int rc = validate.doValidate(args);
@@ -153,17 +150,17 @@ public class Validate {
      *         carried out successfully.
      */
 
-    public int doValidate(String args[]) {
+    public int doValidate(String[] args) {
 
-        List<String> sourceFileNames = new ArrayList<String>();
-        List<String> schemaFileNames = new ArrayList<String>();
+        List<String> sourceFileNames = new ArrayList<>();
+        List<String> schemaFileNames = new ArrayList<>();
         String scmInput;
         String scmOutput;
         int validCount = 0;
         int invalidCount = 0;
         int unreadableCount = 0;
-        String reportFileName = null;
-        InvalidityReportGenerator reportHandler = null;
+        String reportFileName;
+        InvalidityReportGenerator reportHandler;
         CommandLineOptions options = new CommandLineOptions();
         setPermittedOptions(options);
         try {
@@ -238,7 +235,7 @@ public class Validate {
 
             value = options.getOptionValue("t");
             if (value != null) {
-                processor.setConfigurationProperty(FeatureKeys.TIMING, true);
+                processor.setConfigurationProperty(Feature.TIMING, true);
                 showTime = true;
             }
 
@@ -259,13 +256,11 @@ public class Validate {
             }
 
 
-            xsdLanguageVersion = "1.1".equals(processor.getConfigurationProperty(FeatureKeys.XSD_VERSION)) ?
+            xsdLanguageVersion = "1.1".equals(processor.getConfigurationProperty(Feature.XSD_VERSION)) ?
                     Configuration.XSD11 : Configuration.XSD10;
 
 
-            for (String s : options.getPositionalOptions()) {
-                sourceFileNames.add(s);
-            }
+            sourceFileNames.addAll(options.getPositionalOptions());
 
             // Customization hook for subclasses
             applyLocalOptions(options, config);
@@ -285,7 +280,7 @@ public class Validate {
                 System.err.println(Version.platform.getPlatformVersion());
             }
             config.displayLicenseMessage();
-            processor.setConfigurationProperty(FeatureKeys.SCHEMA_VALIDATION_MODE, validationMode);
+            processor.setConfigurationProperty(Feature.SCHEMA_VALIDATION_MODE, validationMode);
             //processor.setConfigurationProperty(FeatureKeys.VALIDATION_WARNINGS, true);
 
             long startTime = new Date().getTime();
@@ -301,13 +296,12 @@ public class Validate {
                     }
                 } else if (schemaFileName.equals("-")) {
                     // take input from stdin
-                    String sysID = new File(System.getProperty("user.dir")).toURI().toASCIIString();
                     if (Version.platform.isJava()) {
                         final InputSource inputSource = new InputSource(System.in);
-                        inputSource.setSystemId(sysID);
+                        inputSource.setSystemId(new File(System.getProperty("user.dir")).toURI().toASCIIString());
                         schemaSource = new SAXSource(config.getStyleParser(), inputSource);
                     } else {
-                        schemaSource = new StreamSource(System.in, sysID);
+                        schemaSource = new StreamSource(System.in);
                     }
                 } else {
                     File schemaFile = new File(schemaFileName);
@@ -345,8 +339,8 @@ public class Validate {
 
             if (showTime && !schemaFileNames.isEmpty()) {
                 long endTime = new Date().getTime();
-                System.err.println("Schema checking successful. Time: " + (endTime - startTime) +
-                                           "ms. Memory: " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) /1000000 + "Mb.");
+                System.err.println("Schema checking successful. Time: " + (endTime - startTime) + "ms.");
+                CommandLineOptions.showMemoryUsed();
                 //TimeUnit.MINUTES.sleep(1); // Useful for getting a heap dump
             }
 
@@ -359,11 +353,7 @@ public class Validate {
             }
 
             if (options.definesParameterValues()) {
-                options.setParams(processor, new CommandLineOptions.ParamSetter() {
-                    public void setParam(QName qName, XdmValue value) {
-                        validator.setParameter(qName, value);
-                    }
-                });
+                options.setParams(processor, validator::setParameter);
             }
 
             Serializer statsSerializer = null;
@@ -401,7 +391,7 @@ public class Validate {
             }
 
             if (sourceFileNames.size() > 1) {
-                List<Source> sources = new ArrayList<Source>(sourceFileNames.size());
+                List<Source> sources = new ArrayList<>(sourceFileNames.size());
                 for (String sourceFileName : sourceFileNames) {
                     Source source = loadDocument(sourceFileName, useURLs, config);
                     sources.add(source);
@@ -457,10 +447,7 @@ public class Validate {
                 validator.reportValidationStatistics(statsSerializer);
             }
 
-            if (Instrumentation.ACTIVE) {
-                Instrumentation.report();
-                Instrumentation.reset();
-            }
+            Instrumentation.report();
 
             // If requested, produce the serialized Schema Component Model
 
@@ -577,13 +564,13 @@ public class Validate {
             }
         } else if (sourceFileName.equals("-")) {
             // take input from stdin
-            String sysID = new File(System.getProperty("user.dir")).toURI().toASCIIString();
             if (Version.platform.isJava()) {
+                String sysId = new File(System.getProperty("user.dir")).toURI().toASCIIString();
                 final InputSource inputSource = new InputSource(System.in);
-                inputSource.setSystemId(sysID);
+                inputSource.setSystemId(sysId);
                 sourceInput = new SAXSource(config.getSourceParser(), inputSource);
             } else {
-                sourceInput = new StreamSource(System.in, sysID);
+                sourceInput = new StreamSource(System.in);
             }
         } else {
             File sourceFile = new File(sourceFileName);
@@ -617,16 +604,13 @@ public class Validate {
         }
         long startTime = new Date().getTime();
 
-        try {
-            for (int r = 0; r < repeat; r++) {      // repeat is for internal testing/timing
-                validator.validate(source);
-            }
-        } finally {
-            if (showTime) {
-                long endTime = new Date().getTime();
-                System.err.println("Validation time: " + (endTime - startTime) + "ms. Memory: "
-                                           + ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())) / 1000000 + "Mb.");
-            }
+        for (int r = 0; r < repeat; r++) {      // repeat is for internal testing/timing
+            validator.validate(source);
+        }
+        if (showTime) {
+            long endTime = new Date().getTime();
+            System.err.println("Validation time: " + (endTime - startTime) + "ms.");
+            CommandLineOptions.showMemoryUsed();
         }
     }
 
@@ -644,7 +628,7 @@ public class Validate {
             System.err.println(config.getProductTitle());
         }
         System.err.println("Usage: see http://www.saxonica.com/documentation/index.html#!schema-processing/commandline");
-        System.err.println("Format: " + getClass().getName() + " options");
+        System.err.println("Format: " + CommandLineOptions.getCommandName(this) + " options");
         CommandLineOptions options = new CommandLineOptions();
         setPermittedOptions(options);
         System.err.println("Options available:" + options.displayPermittedOptions());
@@ -663,4 +647,4 @@ public class Validate {
 
 }
 
-// Copyright (C) 2004-2012 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

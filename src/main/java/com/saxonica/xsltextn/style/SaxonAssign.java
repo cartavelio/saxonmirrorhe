@@ -11,6 +11,8 @@ import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.EnumSet;
+
 /**
  * saxon:assign element in stylesheet.
  * The saxon:assign element has mandatory attribute name and optional attribute select.
@@ -23,14 +25,14 @@ public class SaxonAssign extends XSLGeneralVariable {
     private SequenceType requiredType;
     private SourceBinding sourceBinding = new SourceBinding(this);
 
-    private final static int allowedAttributes =
-            SourceBinding.SELECT;
+    private final static EnumSet<SourceBinding.BindingProperty> allowedAttributes =
+            EnumSet.of(SourceBinding.BindingProperty.SELECT);
 
     public SaxonAssign() {
     }
 
     @Override
-    protected void prepareAttributes() throws XPathException {
+    protected void prepareAttributes() {
         sourceBinding.prepareAttributes(allowedAttributes);
     }
 
@@ -40,13 +42,15 @@ public class SaxonAssign extends XSLGeneralVariable {
      * @return true - it is an instruction
      */
 
+    @Override
     public boolean isInstruction() {
         return true;
     }
 
+    @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         super.validate(decl);
-        instruction = new Assign(makeExpression("()", -1));
+        instruction = new Assign(makeExpression("()", null));
         getConfiguration().checkLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION,
                                                 "saxon:assign",
                                                 getPackageData().getLocalLicenseId());
@@ -72,11 +76,11 @@ public class SaxonAssign extends XSLGeneralVariable {
             compileError(err.getMessage());
             return;
         }
-        if (!globalVariable.hasProperty(SourceBinding.GLOBAL)) {
+        if (!globalVariable.hasProperty(SourceBinding.BindingProperty.GLOBAL)) {
             compileError("Variable " + name.getDisplayName() + " is not global");
             return;
         }
-        if (!globalVariable.hasProperty(SourceBinding.ASSIGNABLE)) {
+        if (!globalVariable.hasProperty(SourceBinding.BindingProperty.ASSIGNABLE)) {
             compileError("Variable " + name.getDisplayName() + " is not marked as assignable");
         }
         // Fix for bug 3871
@@ -87,6 +91,7 @@ public class SaxonAssign extends XSLGeneralVariable {
         }
     }
 
+    @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         //initializeBinding(exec, decl, instruction);
         if (sourceBinding.getSelectExpression() != null) {
@@ -99,5 +104,5 @@ public class SaxonAssign extends XSLGeneralVariable {
 
 }
 
-// Copyright (c) 2004-2012 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited
 

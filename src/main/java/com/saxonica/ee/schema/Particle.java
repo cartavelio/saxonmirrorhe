@@ -236,6 +236,7 @@ public abstract class Particle extends SimpleComponentReference implements UserS
      * @return true if all is well, false if errors found
      */
 
+    @Override
     public abstract boolean fixup(SchemaCompiler compiler) throws SchemaException;
 
     /**
@@ -248,6 +249,7 @@ public abstract class Particle extends SimpleComponentReference implements UserS
      *          error listener decides that the error is fatal
      */
 
+    @Override
     public abstract boolean validate(SchemaCompiler compiler) throws SchemaException;
 
     /**
@@ -280,9 +282,11 @@ public abstract class Particle extends SimpleComponentReference implements UserS
 
     public abstract void serializeParticle(SchemaModelSerializer serializer) throws XPathException, MissingComponentException;
 
+    @Override
     public Function getComponentAsFunction() {
         Callable callable = new Callable() {
-            public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+            @Override
+            public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
@@ -309,4 +313,4 @@ public abstract class Particle extends SimpleComponentReference implements UserS
 
 }
 
-// Copyright (c) 2004-2007 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

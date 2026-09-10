@@ -9,6 +9,7 @@ import net.sf.saxon.type.ValidationException;
  */
 public class TotalDigitsFacet extends DigitsFacet {
 
+    @Override
     public String getName() {
         return "totalDigits";
     }
@@ -20,6 +21,7 @@ public class TotalDigitsFacet extends DigitsFacet {
      * @throws net.sf.saxon.type.SchemaException
      *          if the value is invalid (not an integer)
      */
+    @Override
     public void setValue(String value) throws SchemaException {
         int val;
         try {
@@ -33,6 +35,7 @@ public class TotalDigitsFacet extends DigitsFacet {
         setNumericValue(val);
     }
 
+    @Override
     public void checkFacetRestriction(UserSimpleType type, SimpleType base, SchemaCompiler compiler) throws SchemaException, ValidationException {
         super.checkFacetRestriction(type, base, compiler);
         if (base instanceof UserSimpleType) {
@@ -50,7 +53,7 @@ public class TotalDigitsFacet extends DigitsFacet {
     }
 }
 
-// Copyright (c) 2009 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited
 
 
 

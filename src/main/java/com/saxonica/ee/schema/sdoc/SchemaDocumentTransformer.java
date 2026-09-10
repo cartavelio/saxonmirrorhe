@@ -28,7 +28,7 @@ import java.util.List;
 
 public class SchemaDocumentTransformer {
 
-    PreparedStylesheet pss;
+    private PreparedStylesheet pss;
 
     public SchemaDocumentTransformer(Configuration config, String filename) throws SchemaException {
         compileStylesheet(config, filename);
@@ -68,4 +68,4 @@ public class SchemaDocumentTransformer {
     }
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

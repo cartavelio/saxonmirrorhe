@@ -2,7 +2,6 @@ package com.saxonica.ee.optim;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.event.SequenceOutputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.om.FocusIterator;
 import net.sf.saxon.om.Item;
@@ -24,9 +23,9 @@ import java.util.concurrent.*;
  * the iterations returned by the action expression.</p>
  */
 
-public final class MultithreadedContextMappingIterator implements SequenceIterator<Item<?>> {
+public final class MultithreadedContextMappingIterator implements SequenceIterator {
 
-    private FocusIterator<?> base;
+    private FocusIterator base;
     private Expression action;
     private XPathContextMinor context;
     private SequenceIterator stepIterator = null;
@@ -61,20 +60,17 @@ public final class MultithreadedContextMappingIterator implements SequenceIterat
         service = config.getMultithreadingFactory().makeExecutorService(threads);
         // prime the queue
         int n = 0;
-        try {
-            while (++n <= 3 * threads) {   // see bug 3958
-                Item item = base.next();
-                if (item == null) {
-                    return;
-                }
-                mapOneItem(context);
+        int max  = threads * 3; // bug 3958
+        while (++n <= max ) {
+            Item item = base.next();
+            if (item == null) {
+                return;
             }
-        } catch (XPathException e) {
-            close();
-            throw e;
+            mapOneItem(context);
         }
     }
 
+    @Override
     public Item next() throws XPathException {
         Item nextItem;
         while (true) {
@@ -98,7 +94,6 @@ public final class MultithreadedContextMappingIterator implements SequenceIterat
                 } catch (InterruptedException e) {
                     throw new XPathException(e);
                 } catch (ExecutionException e) {
-                    close();
                     if (e.getCause() instanceof XPathException) {
                         throw (XPathException) e.getCause();
                     }
@@ -125,37 +120,25 @@ public final class MultithreadedContextMappingIterator implements SequenceIterat
         return nextItem;
     }
 
+    @Override
     public void close() {
         base.close();
         service.shutdown();
     }
 
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link net.sf.saxon.om.SequenceIterator#GROUNDED}, {@link net.sf.saxon.om.SequenceIterator#LAST_POSITION_FINDER},
-     *         and {@link net.sf.saxon.om.SequenceIterator#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     */
-
-    public int getProperties() {
-        return 0;
-    }
 
     private void mapOneItem(XPathContextMinor context) {
         final XPathContext c3 = XPathContextMajor.newThreadContext(context);
-        FocusIterator<?> base = context.getCurrentIterator();
-        ManualIterator<?> manualIterator =
-                new ManualIterator<>(base.current(), base.position());
+        FocusIterator base = context.getCurrentIterator();
+        ManualIterator manualIterator =
+                new ManualIterator(base.current(), base.position());
         manualIterator.setLastPositionFinder(lastPositionFinder);
         c3.setCurrentIterator(manualIterator);
 
         PipelineConfiguration pipe = context.getController().makePipelineConfiguration();
         pipe.setXPathContext(context);
-        SequenceOutputter outputter = new SequenceOutputter(pipe);
-        c3.setReceiver(outputter);
+        //SequenceCollector outputter = new SequenceCollector(pipe);
+        //c3.setReceiver(new ComplexContentOutputter(outputter));
 
         int attempts = 0;
         Future<Sequence> future = null;
@@ -173,17 +156,15 @@ public final class MultithreadedContextMappingIterator implements SequenceIterat
                 break;
             } catch (RejectedExecutionException e) {  // bug 4075
                 if (service.isShutdown()) {
-                    return; // bug 4788
+                    return;
                 }
                 if (attempts++ < 10) {
                     try {
                         Thread.sleep(1 << attempts);
                     } catch (InterruptedException e1) {
-                        close();
                         throw e;
                     }
                 } else {
-                    close();
                     throw e;
                 }
             }
@@ -195,4 +176,4 @@ public final class MultithreadedContextMappingIterator implements SequenceIterat
 }
 
 
-// Copyright (c) 2010-2015 Saxonica Limited.
+// Copyright (c) 2010-2020 Saxonica Limited

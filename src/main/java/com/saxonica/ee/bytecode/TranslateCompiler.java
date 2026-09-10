@@ -47,4 +47,4 @@ public class TranslateCompiler extends ToStringCompiler {
 
 }
 
-//Copyright (c) 2011-2013 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

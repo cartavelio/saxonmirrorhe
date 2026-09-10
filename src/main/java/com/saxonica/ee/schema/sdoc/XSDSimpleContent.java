@@ -1,7 +1,7 @@
 package com.saxonica.ee.schema.sdoc;
 
 import com.saxonica.ee.schema.SchemaCompiler;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.type.SchemaException;
 
@@ -23,9 +23,10 @@ public class XSDSimpleContent extends SchemaElement {
      * @throws SchemaException if any errors are found in the attributes
      */
 
+    @Override
     public void prepareAttributes() throws SchemaException {
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         String[] allowed = {"id"};
         allowAttributes(atts, allowed);
 
@@ -40,6 +41,7 @@ public class XSDSimpleContent extends SchemaElement {
      * @throws SchemaException if any XML representation constraints are violated
      */
 
+    @Override
     public void validate(SchemaCompiler compiler) throws SchemaException {
         checkContentModel(stateTerms, stateTargets, false);
     }
@@ -64,10 +66,11 @@ public class XSDSimpleContent extends SchemaElement {
     private final static int[][] stateTargets = {
             state0targets, state1targets, state2targets};
 
+    @Override
     protected boolean isFinalState(int state) {
         return state == 1;
     }
 
 }
 
-// Copyright (c) 2004 - 2007 Saxonica Limited
+// Copyright (c) 2004-2020 Saxonica Limited

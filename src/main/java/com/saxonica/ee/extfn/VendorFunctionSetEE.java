@@ -6,6 +6,7 @@ import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.type.AnyFunctionType;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -28,31 +29,38 @@ public class VendorFunctionSetEE extends BuiltInFunctionSet {
 
         importFunctionSet(new VendorFunctionSetPE(config));
 
-        register("schema", 0, SchemaFn.class, AnyFunctionType.getInstance(), OPT, 0, 0);
+        register("schema", 0, SchemaFn.class, AnyFunctionType.getInstance(), OPT, 0);
 
-        register("schema", 2, SchemaFn.class, AnyFunctionType.getInstance(), OPT, 0, 0)
+        register("schema", 2, SchemaFn.class, AnyFunctionType.getInstance(), OPT, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.QNAME, ONE, null);
 
-        register("stream", 1, StreamFn.class, AnyItemType.getInstance(), STAR, 0, 0)
+        register("stream", 1, StreamFn.class, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY);
 
-        register("validate", 1, ValidateFn.class, MapType.getInstance(), OPT, 0, 0)
+        register("validate", 1, ValidateFn.class, MapType.getInstance(), OPT, 0)
                 .arg(0, AnyNodeTest.getInstance(), OPT, null);
 
-        register("validate", 2, ValidateFn.class, MapType.getInstance(), OPT, 0, 0)
+        register("validate", 2, ValidateFn.class, MapType.getInstance(), OPT, 0)
                 .arg(0, AnyNodeTest.getInstance(), OPT, EMPTY)
                 .arg(1, MapType.getInstance(), ONE, null);
 
-        register("validate", 3, ValidateFn.class, MapType.getInstance(), OPT, 0, 0)
+        register("validate", 3, ValidateFn.class, MapType.getInstance(), OPT, 0)
                 .arg(0, AnyNodeTest.getInstance(), OPT, EMPTY)
                 .arg(1, MapType.getInstance(), ONE, null)
                 .arg(2, MapType.getInstance(), ONE, null);
 
-        register("compile-XPath", 3, CompileXPath.class, AnyItemType.getInstance(), ONE, 0, BuiltInFunctionSet.LATE)
+        register("compile-XPath", 3, CompileXPath.class, AnyItemType.getInstance(), ONE, BuiltInFunctionSet.LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, EMPTY)
                 .arg(1, AnyItemType.getInstance(), OPT, null)
                 .arg(2, AnyItemType.getInstance(), OPT, null);
+
+        register("marshal-type", 1, CompileXPath.class, MapType.getInstance(), ONE, BuiltInFunctionSet.LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, EMPTY);
+        register("parse-sequence-type", 3, CompileXPath.class, MapType.getInstance(), ONE, BuiltInFunctionSet.LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, EMPTY)
+                .arg(1, NodeKindTest.ELEMENT, ONE, EMPTY)
+                .arg(2, BuiltInAtomicType.STRING, OPT, null);
 
     }
 
@@ -74,4 +82,4 @@ public class VendorFunctionSetEE extends BuiltInFunctionSet {
     }
 }
 
-// Copyright (c) 2004-2016 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

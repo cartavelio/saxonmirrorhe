@@ -1,5 +1,6 @@
 package com.saxonica.xsltextn.instruct;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Instruction;
 import net.sf.saxon.expr.instruct.TailCall;
@@ -76,6 +77,7 @@ public class DeepUpdate extends Instruction {
      * @return the string "saxon:while"
      */
 
+    @Override
     public int getInstructionNameCode() {
         return StandardNames.SAXON_DEEP_UPDATE;
     }
@@ -112,6 +114,7 @@ public class DeepUpdate extends Instruction {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         DeepUpdate exp = new DeepUpdate(
                 getRootExpression().copy(rebindings),
@@ -128,29 +131,31 @@ public class DeepUpdate extends Instruction {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return getRootExpression().getItemType();
     }
 
     /*@Nullable*/
-    public TailCall processLeavingTail(XPathContext context) throws XPathException {
+    @Override
+    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
         Item root;
-        SequenceIterator<?> rootIterator = getRootExpression().iterate(context);
-        MappingFunction<Item<?>, Item<?>> mapper = item -> SingletonIterator.makeIterator(
+        SequenceIterator rootIterator = getRootExpression().iterate(context);
+        MappingFunction mapper = item -> SingletonIterator.makeIterator(
                 makeRootWithPedigree(item)
         );
-        SequenceIterator<?> mappedRootIterator = new MappingIterator(rootIterator, mapper);
+        SequenceIterator mappedRootIterator = new MappingIterator(rootIterator, mapper);
 
         XPathContext c2 = context.newMinorContext();
         FocusIterator trackingIterator = c2.trackFocus(mappedRootIterator);
         while ((root = trackingIterator.next()) != null) {
             Item replacedRoot = processRootItem(root, c2);
-            context.getReceiver().append(replacedRoot);
+            output.append(replacedRoot);
         }
         return null;
     }
 
-    private static Item<?> makeRootWithPedigree(Item root) {
+    private static Item makeRootWithPedigree(Item root) {
         if (root instanceof MapItem) {
             return new PedigreeMapItem((MapItem) root);
         } else if (root instanceof ArrayItem) {
@@ -180,11 +185,11 @@ public class DeepUpdate extends Instruction {
                                     + " (expected a map/array with pedigree)");
                 }
             }
-            SequenceIterator<?> actionIter = getActionExpression().iterate(c3);
-            GroundedValue<?> actionVal = actionIter.materialize();
+            SequenceIterator actionIter = getActionExpression().iterate(c3);
+            GroundedValue actionVal = actionIter.materialize();
             Pedigree pedigree = ((PedigreeValue)selected).getPedigree();
             PedigreeValue parent = pedigree.getContainer();
-            GroundedValue<?> val = actionVal;
+            GroundedValue val = actionVal;
             while (parent != null) {
                 Item latestParent = (Item) parent;
                 // If two updates affect the same parent/ancestor at some level in the
@@ -216,14 +221,18 @@ public class DeepUpdate extends Instruction {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("deepUpdate", this);
+        out.setChildRole("root");
         getRootExpression().export(out);
+        out.setChildRole("select");
         getSelectExpression().export(out);
+        out.setChildRole("action");
         getActionExpression().export(out);
         out.endElement();
     }
 
 }
 
-// Copyright (c) 2011-2014 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

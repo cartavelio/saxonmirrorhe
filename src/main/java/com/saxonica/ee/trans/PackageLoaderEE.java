@@ -6,6 +6,8 @@ import com.saxonica.ee.optim.IndexedFilterExpression;
 import com.saxonica.ee.optim.SwitchExpression;
 import com.saxonica.ee.stream.StreamInstr;
 import com.saxonica.ee.stream.StreamableUserFunction;
+import com.saxonica.ee.update.*;
+import com.saxonica.ee.xtupdate.SaxonInsert;
 import com.saxonica.trans.PackageLoaderPE;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Block;
@@ -15,11 +17,10 @@ import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
@@ -36,6 +37,21 @@ public class PackageLoaderEE extends PackageLoaderPE {
 
 
     static {
+        eMap.put("copyModify", (loader, element) -> {
+            int validation = Validation.getCode(element.getAttributeValue("", "val"));
+            Expression bindings = loader.getExpressionWithRole(element, "bindings");
+            Expression update = loader.getExpressionWithRole(element, "modify");
+            Expression returnExp = loader.getExpressionWithRole(element, "return");
+            CopyModifyExpression c = new CopyModifyExpression(update, returnExp, validation);
+            c.setCopyBindings(bindings);
+            return c;
+        });
+
+        eMap.put("delete", (loader, element) -> {
+            Expression select = loader.getFirstChildExpression(element);
+            return new DeleteExpression(select);
+        });
+
         eMap.put("gcEE", (loader, element) -> {
             String opAtt = element.getAttributeValue("", "op");
             int op = getOperator(opAtt);
@@ -70,6 +86,34 @@ public class PackageLoaderEE extends PackageLoaderPE {
 
         eMap.put("indexedLookup", (loader, element) -> {
             throw new XPathException("indexedLookup expression is no longer supported: please recompile stylesheet");
+        });
+
+        eMap.put("insert", (loader, element) -> {
+            int constructionMode = loader.getIntegerAttribute(element, "constructionMode");
+            int position = SaxonInsert.interpretPosition(element.getAttributeValue("", "position"));
+            String flags = element.getAttributeValue("", "flags");
+            Expression source = loader.getFirstChildExpression(element);
+            Expression target = loader.getSecondChildExpression(element);
+            return new InsertExpression(source, target, position, constructionMode, flags.contains("i"), flags.contains("p"));
+        });
+
+        eMap.put("rename", (loader, element) -> {
+            Expression target = loader.getFirstChildExpression(element);
+            Expression namer = loader.getSecondChildExpression(element);
+            return new RenameExpression(target, namer, null, null);
+        });
+
+        eMap.put("replaceNodes", (loader, element) -> {
+            int constructionMode = Validation.getCode(element.getAttributeValue("", "constructionMode"));
+            Expression target = loader.getFirstChildExpression(element);
+            Expression replacement = loader.getSecondChildExpression(element);
+            return new ReplaceNodeExpression(target, replacement, constructionMode);
+        });
+
+        eMap.put("replaceValue", (loader, element) -> {
+            Expression target = loader.getFirstChildExpression(element);
+            Expression replacement = loader.getSecondChildExpression(element);
+            return new ReplaceValueExpression(target, replacement);
         });
 
         eMap.put("stream", (loader, element) -> {
@@ -125,15 +169,14 @@ public class PackageLoaderEE extends PackageLoaderPE {
             info.collation = loader.getConfiguration().getCollation(element.getAttributeValue("", "coll"));
             info.commonlhs = loader.getExpressionWithRole(element, "value");
             info.defaultAction = loader.getExpressionWithRole(element, "default");
-            AxisIterator cases = element.iterateAxis(AxisInfo.CHILD,
-                                                     new NameTest(Type.ELEMENT, NamespaceConstant.SAXON_XSLT_EXPORT,
-                                                                  "case", loader.getConfiguration().getNamePool()));
-            cases.forEachOrFail(aCase -> {
+            NameTest condition = new NameTest(Type.ELEMENT, NamespaceConstant.SAXON_XSLT_EXPORT,
+                                                                  "case", loader.getConfiguration().getNamePool());
+            for (NodeInfo aCase : element.children(condition)) {
                 Expression val = loader.getFirstChildExpression(aCase);
                 AtomicValue av = (AtomicValue) ((Literal) val).getValue();
                 info.values.add(av);
                 info.actions.add(loader.getSecondChildExpression(aCase));
-            });
+            }
             info.makeIndex();
             return new SwitchExpression(info);
         });
@@ -151,4 +194,4 @@ public class PackageLoaderEE extends PackageLoaderPE {
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

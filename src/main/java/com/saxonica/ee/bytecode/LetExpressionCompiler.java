@@ -6,13 +6,10 @@ import com.saxonica.ee.stream.Posture;
 import com.saxonica.ee.stream.PostureAndSweep;
 import com.saxonica.ee.stream.Streamability;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.Controller;
-import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.event.SequenceOutputter;
+import net.sf.saxon.event.SequenceCollector;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.parser.Evaluator;
-import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.*;
 import net.sf.saxon.value.*;
 import org.objectweb.asm.Type;
@@ -21,17 +18,19 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
+import static net.sf.saxon.expr.EvaluationMode.EVALUATE_VARIABLE;
+
 /**
  * Generate bytecode for evaluation of an LetExpression
  */
 public class LetExpressionCompiler extends ToIteratorCompiler {
 
-    private int getEvaluatorCode(LetExpression expr) {
+    private EvaluationMode getEvaluationMode(LetExpression expr) {
         Evaluator eval = expr.getEvaluator();
         if (eval == null) {
-            return ExpressionTool.ITERATE_AND_MATERIALIZE;
+            return EvaluationMode.ITERATE_AND_MATERIALIZE;
         } else {
-            return eval.getCode();
+            return eval.getEvaluationMode();
         }
     }
 
@@ -61,7 +60,7 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
         //Stack: XPathContext Integer XPathContext
         ga.push(StandardNames.XSL_VARIABLE);
         ga.invokeInstanceMethod(XPathContext.class, "setTemporaryOutputState", Integer.TYPE);
-        compileCommonExpr(compiler, letExpr.getSequence(), getEvaluatorCode(letExpr), letExpr.getNominalReferenceCount());
+        compileCommonExpr(compiler, letExpr.getSequence(), getEvaluationMode(letExpr), letExpr.getNominalReferenceCount());
         int valueRepVar = methodInfo.allocateLocal(Sequence.class);
         ga.storeLocal(valueRepVar);
 
@@ -105,7 +104,7 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
         //Stack: XPathContext Integer XPathContext
         ga.push(StandardNames.XSL_VARIABLE);
         ga.invokeInstanceMethod(XPathContext.class, "setTemporaryOutputState", Integer.TYPE);
-        compileCommonExpr(compiler, letExpr.getSequence(), getEvaluatorCode(letExpr), letExpr.getNominalReferenceCount());
+        compileCommonExpr(compiler, letExpr.getSequence(), getEvaluationMode(letExpr), letExpr.getNominalReferenceCount());
         int valueRepVar = methodInfo.allocateLocal(Sequence.class);
         ga.storeLocal(valueRepVar);
         ga.invokeInstanceMethod(XPathContext.class,"setTemporaryOutputState", Integer.TYPE);
@@ -147,7 +146,7 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
         //Stack: XPathContext Integer XPathContext
         ga.push(StandardNames.XSL_VARIABLE);
         ga.invokeInstanceMethod(XPathContext.class, "setTemporaryOutputState", Integer.TYPE);
-        compileCommonExpr(compiler, letExpr.getSequence(), getEvaluatorCode(letExpr), letExpr.getNominalReferenceCount());
+        compileCommonExpr(compiler, letExpr.getSequence(), getEvaluationMode(letExpr), letExpr.getNominalReferenceCount());
         int valueRepVar = methodInfo.allocateLocal(Sequence.class);
         ga.storeLocal(valueRepVar);
         ga.invokeInstanceMethod(XPathContext.class,"setTemporaryOutputState", Integer.TYPE);
@@ -172,33 +171,33 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
      * @throws CannotCompileException if the expression cannot be compiled to bytecode
      */
     public static void compileCommonExpr(CompilerService compiler,
-                                         Expression exp, int evaluationMode, int refCount) throws CannotCompileException {
+                                         Expression exp, EvaluationMode evaluationMode, int refCount) throws CannotCompileException {
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         visitLineNumber(compiler, ga, exp);
         switch (evaluationMode) {
 
-            case ExpressionTool.EVALUATE_LITERAL:
+            case EVALUATE_LITERAL:
                 //return ((Literal)exp).getValue();
                 compiler.compileToSequence(exp);
                 break;
 
-            case ExpressionTool.EVALUATE_VARIABLE:
+            case EVALUATE_VARIABLE:
                 compiler.compileToSequence(exp);
                 //was: VariableReferenceCompiler.genEvaluateVariable(compiler, ga, (VariableReference)exp);
                 // but the new code is more robust. QT3 Axes-089 was failing with a ClassCastException here.
                 break;
 
-            case ExpressionTool.MAKE_CLOSURE:
+            case MAKE_CLOSURE:
                 makeClosure(compiler, exp, refCount, ga, methodInfo);
                 break;
-            case ExpressionTool.MAKE_MEMO_CLOSURE:
+            case MAKE_MEMO_CLOSURE:
                 makeClosure(compiler, exp, refCount == 1 ? 10 : refCount, ga, methodInfo);
                 break;
-            case ExpressionTool.LAZY_TAIL_EXPRESSION:
+            case LAZY_TAIL_EXPRESSION:
                 TailExpression tail = (TailExpression) exp;
                 VariableReference vr = (VariableReference) tail.getBaseExpression();
-                compileCommonExpr(compiler,  vr, ExpressionTool.EVALUATE_VARIABLE, refCount);
+                compileCommonExpr(compiler,  vr, EVALUATE_VARIABLE, refCount);
                 ga.dup();
                 int baseVar = methodInfo.allocateLocal(Sequence.class);
                 ga.storeLocal(baseVar);
@@ -339,7 +338,7 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
                 methodInfo.releaseLocal(baseVar);
                 break;
 
-            case ExpressionTool.MAKE_SINGLETON_CLOSURE:
+            case MAKE_SINGLETON_CLOSURE:
                 //            // return new SingletonClosure(exp, context);
                 compiledExpr = compiler.compileToByteCode(exp, "", Expression.ITERATE_METHOD);
                 if (compiledExpr == null) {
@@ -351,12 +350,12 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
                 compiler.generateGetContext();
                 ga.invokeConstructor(SingletonClosure.class, Expression.class, XPathContext.class);
                 break;
-            case ExpressionTool.RETURN_EMPTY_SEQUENCE:
+            case RETURN_EMPTY_SEQUENCE:
                 ga.invokeStaticMethod(EmptySequence.class, "getInstance");
                 ga.checkClass(Sequence.class);
                 break;
             //
-            case ExpressionTool.EVALUATE_AND_MATERIALIZE_VARIABLE:
+            case EVALUATE_AND_MATERIALIZE_VARIABLE:
                 LabelInfo doneEvalMaterialize = methodInfo.newLabel("doneEvalMaterialize");
 
                 VariableReferenceCompiler.genEvaluateVariable(compiler, ga, (VariableReference)exp);
@@ -368,7 +367,7 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
                 ga.invokeInstanceMethod(SequenceIterator.class, "materialize");
                 methodInfo.placeLabel(doneEvalMaterialize);
                 break;
-            case ExpressionTool.CALL_EVALUATE_OPTIONAL_ITEM:
+            case CALL_EVALUATE_OPTIONAL_ITEM:
                 visitLineNumber(compiler, ga, exp);
                 compiler.compileToItem(exp);
                 LabelInfo notNullLab = methodInfo.newLabel("notNullLab");
@@ -379,13 +378,13 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
                 ga.checkClass(Sequence.class);
                 methodInfo.placeLabel(notNullLab);
                 break;
-            case ExpressionTool.CALL_EVALUATE_SINGLE_ITEM:
+            case CALL_EVALUATE_SINGLE_ITEM:
                 visitLineNumber(compiler, ga, exp);
                 compiler.compileToItem(exp);
                 break;
 
-            case ExpressionTool.UNDECIDED:
-            case ExpressionTool.ITERATE_AND_MATERIALIZE:
+            case UNDECIDED:
+            case ITERATE_AND_MATERIALIZE:
                 if (refCount == FilterExpression.FILTERED) {
                     // WAS: return new IndexedValue(expression.iterate(context));
                     // 9.9: return SearchableValue.makeSearchable(expression.iterate(context));
@@ -400,53 +399,12 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
                 }
                 break;
 
-            case ExpressionTool.PROCESS:
-                compiler.generateGetContext();
-                ga.invokeInstanceMethod(XPathContext.class, "getController");
-                int conVar = methodInfo.allocateLocal(Controller.class);
-                ga.storeLocal(conVar);
-                ga.loadLocal(conVar);
-                ga.invokeInstanceMethod(Controller.class, "allocateSequenceOutputter");
-                ga.dup();
-                ga.loadLocal(conVar);
-                ga.invokeInstanceMethod(Controller.class, "makePipelineConfiguration");
-                ga.dup();
-                ga.push(exp.getPackageData().getHostLanguage());
-                ga.invokeInstanceMethod(PipelineConfiguration.class, "setHostLanguage", Integer.TYPE);
-                ga.invokeInstanceMethod(SequenceOutputter.class, "setPipelineConfiguration", PipelineConfiguration.class);
-                compiler.pushNewReceiverInfo(ga);
-                compiler.generateGetReceiver();
-                ga.invokeInstanceMethod(SequenceOutputter.class, "open");
-                compiler.compileToPush(exp);
-                compiler.generateGetReceiver();
-                ga.invokeInstanceMethod(SequenceOutputter.class, "close");
-                compiler.generateGetReceiver();
-                ga.invokeInstanceMethod(SequenceOutputter.class, "getSequence");
-                compiler.generateGetReceiver();
-                ga.invokeInstanceMethod(SequenceOutputter.class, "reset");
-                compiler.popReceiverInfo();
-                methodInfo.releaseLocal(conVar);
+            case PROCESS:
+                ToPushCompiler.compilePushToSequenceCollector(compiler, exp);
+                ga.invokeInstanceMethod(SequenceCollector.class, "getSequence");
                 break;
-/*
-*
-* case PROCESS:
-              Controller controller = context.getController();
-              SequenceReceiver saved = context.getReceiver();
-              SequenceOutputter seq = controller.allocateSequenceOutputter(20);
-              PipelineConfiguration pipe = controller.makePipelineConfiguration();
-              pipe.setHostLanguage(exp.getHostLanguage());
-              seq.setPipelineConfiguration(pipe);
-              context.setReceiver(seq);
-              seq.open();
-              exp.process(context);
-              seq.close();
-              context.setReceiver(saved);
-              ValueRepresentation val = seq.getSequence();
-              seq.reset();
-              return val;
-* */
 
-            case ExpressionTool.SHARED_APPEND_EXPRESSION:
+            case SHARED_APPEND_EXPRESSION:
                 if (exp instanceof Block) {
 //                    Block block = (Block) exp;
 //                    Expression[] children = block.getChildren();
@@ -564,12 +522,12 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
                 break;
 
 
-            case ExpressionTool.MAKE_INDEXED_VARIABLE:
+            case MAKE_INDEXED_VARIABLE:
                 compiler.compileToIterator(exp);
                 ga.invokeStaticMethod(SearchableValue.class, "makeSearchableValue", SequenceIterator.class);
                 break;
 
-            case ExpressionTool.STREAMING_ARGUMENT:
+            case STREAMING_ARGUMENT:
                 PostureAndSweep ps = Streamability.getPostureAndSweepIfKnown(exp);
                 if (ps == null || ps.getPosture() == Posture.GROUNDED) {
                     visitLineNumber(compiler, ga, exp);
@@ -640,4 +598,4 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
     }
 }
 
-//Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

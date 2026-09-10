@@ -40,7 +40,8 @@ public class SlashExpressionCompiler extends ToIteratorCompiler {
         visitAnnotation(compiler, "SlashExpressionCompiler-Iterator");
         visitLineNumber(compiler, ga, expression);
 
-        if (expression instanceof SlashExpression && ((SlashExpression)expression).isContextFree()) {
+        if (expression instanceof SlashExpression && ((SlashExpression)expression).isContextFree()
+                && step instanceof AxisExpression) {
 //            return new MappingIterator<>((SequenceIterator<? extends NodeInfo>) getStart().iterate(context),
 //                                         ((AxisExpression) getRhsExpression())::iterate);
             ga.newInstance(MappingIterator.class);
@@ -123,7 +124,7 @@ public class SlashExpressionCompiler extends ToIteratorCompiler {
         m = Method.getMethod("net.sf.saxon.om.SequenceIterator map(net.sf.saxon.expr.XPathContext)");
         visitAnnotation(compiler, "SlashExpressionCompiler - map");
         ga = new Generator(Opcodes.ACC_PUBLIC, m, true, cv);
-        compiler.pushNewMethodInfo(ga, true, 0);
+        compiler.pushNewMethodInfo(ga, true, 0, -1);
         visitLineNumber(compiler, ga, step);
         compiler.compileToIterator(step);
         ga.returnValue();
@@ -150,7 +151,7 @@ public class SlashExpressionCompiler extends ToIteratorCompiler {
      * @throws CannotCompileException if the expression cannot be compiled to bytecode
      * @return the mapping function
      */
-    public static CompiledAxisMappingFunction generateAxisMappingFunction(CompilerService compiler, AxisExpression step) throws CannotCompileException {
+    private static CompiledAxisMappingFunction generateAxisMappingFunction(CompilerService compiler, AxisExpression step) throws CannotCompileException {
 
         compiler.checkMaxClassesLimit();
         ClassWriter cw = new ClassWriter(compiler.getFlags());
@@ -170,10 +171,10 @@ public class SlashExpressionCompiler extends ToIteratorCompiler {
         ga.returnValue();
         ga.endMethod();
 
-        m = Method.getMethod("net.sf.saxon.tree.iter.AxisIterator map(net.sf.saxon.om.NodeInfo)");
+        m = Method.getMethod("net.sf.saxon.tree.iter.AxisIterator map(net.sf.saxon.om.Item)");
         visitAnnotation(compiler, "SlashExpressionCompiler - axisMap");
         ga = new Generator(Opcodes.ACC_PUBLIC, m, true, cv);
-        compiler.pushNewMethodInfo(ga, false, 0);
+        compiler.pushNewMethodInfo(ga, false, 0, -1);
         visitLineNumber(compiler, ga, step);
         ga.loadArg(0);
         AxisExpressionCompiler.iterate(compiler, step.getAxis(), step.getNodeTest());
@@ -242,4 +243,4 @@ public class SlashExpressionCompiler extends ToIteratorCompiler {
     }
 }
 
-//Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

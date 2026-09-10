@@ -217,10 +217,12 @@ public final class AttributeDecl extends SchemaStructure
      * @return the name of the attribute being declared
      */
 
+    @Override
     public StructuredQName getComponentName() {
         return attributeName;
     }
 
+    @Override
     public NamespaceResolver getNamespaceResolver() {
         return namespaceResolver;
     }
@@ -242,6 +244,7 @@ public final class AttributeDecl extends SchemaStructure
      * @return the fingerprint of the attribute name in the NamePool
      */
 
+    @Override
     public int getFingerprint() {
         return fingerprint;
     }
@@ -267,6 +270,7 @@ public final class AttributeDecl extends SchemaStructure
      *         always be an instanceof {@link SimpleType}
      */
 
+    @Override
     public SimpleType getType() throws MissingComponentException {
         return getSimpleType();
     }
@@ -278,6 +282,7 @@ public final class AttributeDecl extends SchemaStructure
      * @return the applicable value constraint if there is one, or null otherwise
      */
 
+    @Override
     public ValueConstraint getValueConstraint() {
         return valueConstraint;
     }
@@ -305,6 +310,7 @@ public final class AttributeDecl extends SchemaStructure
      * @param vc the value constraint
      */
 
+    @Override
     public void setValueConstraint(ValueConstraint vc) {
         this.valueConstraint = vc;
     }
@@ -325,6 +331,7 @@ public final class AttributeDecl extends SchemaStructure
      * @throws MissingComponentException if the type of the declaration is not present in the schema.
      */
 
+    @Override
     public NodeTest makeSchemaNodeTest() throws MissingComponentException {
         return new SchemaAttributeTest(this);
     }
@@ -354,6 +361,7 @@ public final class AttributeDecl extends SchemaStructure
      *
      * @return false for an attribute declaration
      */
+    @Override
     public boolean hasTypeAlternatives() {
         return false;
     }
@@ -365,17 +373,18 @@ public final class AttributeDecl extends SchemaStructure
      * @return true if all is well, false if errors found
      */
 
+    @Override
     public boolean fixup(SchemaCompiler compiler) throws SchemaException {
         if (getFixupStatus() == UNVALIDATED) {
             setFixupStatus(VALIDATING);
             SchemaType decl = (SchemaType) PreparedSchema.validateReference(simpleTypeRef, compiler, false);
-            if (decl instanceof UserSchemaComponent) {
+            if (decl instanceof UserSchemaComponent && decl.getValidationStatus() != INVALID) {
                 boolean b = ((UserSchemaComponent) decl).fixup(compiler);
                 if (!b) {
                     decl = null;
                 }
             }
-            if (decl == null) {
+            if (decl == null || decl.getValidationStatus() == INVALID) {
                 setFixupStatus(INVALID);
                 return false;
             }
@@ -390,6 +399,7 @@ public final class AttributeDecl extends SchemaStructure
      *
      * @throws SchemaException if the error listener decides an error is fatal
      */
+    @Override
     public boolean validate(SchemaCompiler compiler) throws SchemaException {
 
         if (getFixupStatus() == INVALID) {
@@ -413,7 +423,7 @@ public final class AttributeDecl extends SchemaStructure
         SimpleType simpleType = (SimpleType) type;
 
         if (simpleType instanceof SimpleTypeDefinition) {
-            simpleType = ((SimpleTypeDefinition) simpleType).getSimpleType();
+            simpleType = ((SimpleTypeDefinition) simpleType).getWorkingType();
             simpleTypeRef.setTarget(simpleType);
         }
 
@@ -472,6 +482,7 @@ public final class AttributeDecl extends SchemaStructure
      * always return false;
      */
 
+    @Override
     public boolean isNillable() {
         return false;
     }
@@ -481,6 +492,7 @@ public final class AttributeDecl extends SchemaStructure
      * always return false;
      */
 
+    @Override
     public boolean isAbstract() {
         return false;
     }
@@ -489,6 +501,7 @@ public final class AttributeDecl extends SchemaStructure
      * Serialize the schema component
      */
 
+    @Override
     public void serialize(SchemaModelSerializer serializer) throws XPathException {
         String id = serializer.getId(this, true);
         serializer.startElement("attribute");
@@ -517,6 +530,7 @@ public final class AttributeDecl extends SchemaStructure
         serializer.endElement();
     }
 
+    @Override
     public Function getComponentAsFunction() {
         Callable callable = (context, arguments) -> {
             String key = arguments[0].head().getStringValue();
@@ -567,4 +581,4 @@ public final class AttributeDecl extends SchemaStructure
 
 }
 
-// Copyright (c) 2004-2008 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

@@ -1,10 +1,11 @@
 package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.*;
-import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.ProcessingInstruction;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.value.AnyURIValue;
 import net.sf.saxon.value.AtomicValue;
@@ -19,6 +20,7 @@ public class ProcessingInstructionCompiler extends SimpleNodeConstructorCompiler
      * @return true if the instruction generates a kind of node that is named
      */
 
+    @Override
     protected boolean isNamedNodeKind() {
         return true;
     }
@@ -83,6 +85,7 @@ public class ProcessingInstructionCompiler extends SimpleNodeConstructorCompiler
 
     }
 
+    @Override
     public void checkContent(CompilerService compiler, Expression expression) {
 
         ProcessingInstruction procInstr = (ProcessingInstruction) expression;
@@ -106,11 +109,11 @@ public class ProcessingInstructionCompiler extends SimpleNodeConstructorCompiler
     protected void pushNode(CompilerService compiler, Expression expression) {
         Generator ga = compiler.getCurrentGenerator();
         allocateStatic(compiler, expression.getLocation());
-        ga.push(0);
-        ga.invokeInstanceMethod(Receiver.class, "processingInstruction", String.class, CharSequence.class, Location.class, Integer.TYPE);
+        ga.push(ReceiverOption.NONE);
+        ga.invokeInstanceMethod(Outputter.class, "processingInstruction", String.class, CharSequence.class, Location.class, Integer.TYPE);
     }
 
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

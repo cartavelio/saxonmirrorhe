@@ -1,6 +1,5 @@
 package com.saxonica.functions.extfn;
 
-import com.saxonica.functions.registry.XPath31HOFunctionSet;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.ContextOriginator;
 import net.sf.saxon.expr.Expression;
@@ -16,8 +15,11 @@ import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
+import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.sxpath.XPathVariable;
 import net.sf.saxon.trans.XPathException;
@@ -61,7 +63,7 @@ public class Evaluate extends SystemFunction {
         for (FunctionLibrary lib : libraryList0.getLibraryList()) {
             if (lib instanceof BuiltInFunctionSet && ((BuiltInFunctionSet) lib).getNamespace().equals(NamespaceConstant.FN)) {
                 // Exclude XSLT-defined functions
-                libraryList1.addFunctionLibrary(XPath31HOFunctionSet.getInstance());
+                libraryList1.addFunctionLibrary(XPath31FunctionSet.getInstance());
             } else {
                 libraryList1.addFunctionLibrary(lib);
             }
@@ -135,7 +137,8 @@ public class Evaluate extends SystemFunction {
      *                                           code will add information about the error location.
      */
 
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         XPathContextMajor c2 = context.newCleanContext();
         String exprText = arguments[0].head().getStringValue();
         PreparedExpression pexpr = prepareExpression(
@@ -149,7 +152,7 @@ public class Evaluate extends SystemFunction {
         c2.setCurrentIterator(context.getCurrentIterator());
         return SequenceTool.toLazySequence(pexpr.expression.iterate(c2));
     }
-    
+
 
     /**
      * Inner class PreparedExpression represents a compiled XPath expression together
@@ -166,4 +169,4 @@ public class Evaluate extends SystemFunction {
 
 }
 
-// Copyright (c) 2009-2016 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

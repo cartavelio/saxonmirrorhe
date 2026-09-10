@@ -1,7 +1,7 @@
 package com.saxonica.ee.stream.adjunct;
 
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FilteringFeed;
+import com.saxonica.ee.stream.feed.ItemFeed;
 import net.sf.saxon.expr.TailExpression;
 import net.sf.saxon.expr.XPathContext;
 
@@ -16,11 +16,12 @@ public class TailExpressionAdjunct extends FilteringAdjunct {
      * @return a filter that can be added to the event stream
      */
 
-    public FilteringFeed.Filter makeFilter(XPathContext context, Feed out)  {
+    @Override
+    public FilteringFeed.Filter makeFilter(XPathContext context, ItemFeed out)  {
         final int start = ((TailExpression)getExpression()).getStart();
         return (item, position) -> position >= start ? FilteringFeed.Filter.MATCHES : FilteringFeed.Filter.SKIP;
     }
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

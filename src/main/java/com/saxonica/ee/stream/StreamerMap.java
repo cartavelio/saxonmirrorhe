@@ -8,7 +8,7 @@ import java.util.HashMap;
 public class StreamerMap {
 
     private static HashMap<String, Class<? extends StreamingAdjunct>> map =
-            new HashMap<String, Class<? extends StreamingAdjunct>>();
+            new HashMap<>();
 
     static {
         map.put("AccumulatorAfter", AccumulatorAfterStreamer.class);
@@ -41,6 +41,11 @@ public class StreamerMap {
         map.put("TreatFn", TreatFnStreamer.class);
         map.put("XmlToJsonFn", XmlToJsonFnStreamer.class);
 
+        map.put("saxon:ItemsUntil", ItemsUntilStreamer.class);
+        map.put("saxon:ItemsBefore", ItemsBeforeStreamer.class);
+        map.put("saxon:ItemsFrom", ItemsFromStreamer.class);
+        map.put("saxon:ItemsAfter", ItemsAfterStreamer.class);
+
     }
 
     public static StreamingAdjunct getStreamingAdjunct(String f) {
@@ -55,6 +60,6 @@ public class StreamerMap {
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited
 
 

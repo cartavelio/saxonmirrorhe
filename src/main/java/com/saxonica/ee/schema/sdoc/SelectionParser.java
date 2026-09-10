@@ -45,7 +45,7 @@ public class SelectionParser extends XPathParser {
                                  boolean isField) throws XPathException {
         //System.err.println("Parse expression: " + expression);
 
-        setLanguage(XPathParser.XPATH, 20);
+        setLanguage(XPathParser.ParsedLanguage.XPATH, 20);
         this.env = env;
         this.charChecker = env.getConfiguration().getValidCharacterChecker();
         this.isFieldSubset = isField;
@@ -90,6 +90,7 @@ public class SelectionParser extends XPathParser {
     }
 
     /*@NotNull*/
+    @Override
     protected Expression parseRelativePath() throws XPathException {
         boolean first = true;
         Expression exp = parseStepExpression();
@@ -165,7 +166,7 @@ public class SelectionParser extends XPathParser {
                         grumble("Unexpected token " + currentTokenDisplay() + " after axis name");
                 }
             case Token.AXIS:
-                byte axis = AxisInfo.getAxisNumber(t.currentTokenValue);
+                int axis = AxisInfo.getAxisNumber(t.currentTokenValue);
                 if (axis != AxisInfo.CHILD && axis != AxisInfo.ATTRIBUTE) {
                     grumble("Only the child and attribute axes are permitted");
                 }
@@ -204,4 +205,4 @@ public class SelectionParser extends XPathParser {
 
 }
 
-// Copyright (c) 2004 - 2014 Saxonica Limited
+// Copyright (c) 2004-2020 Saxonica Limited

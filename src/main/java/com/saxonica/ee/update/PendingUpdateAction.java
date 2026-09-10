@@ -2,10 +2,7 @@ package com.saxonica.ee.update;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.FingerprintedQName;
-import net.sf.saxon.om.NameOfNode;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 
 import java.util.Set;
@@ -46,7 +43,7 @@ public abstract class PendingUpdateAction {
      * @throws XPathException if any error occurs applying the update
      */
 
-    public abstract void apply(XPathContext context, Set affectedRootSet) throws XPathException;
+    public abstract void apply(XPathContext context, Set<MutableNodeInfo> affectedRootSet) throws XPathException;
 
     /**
      * Get the target node of the update action
@@ -88,4 +85,4 @@ public abstract class PendingUpdateAction {
     }
 }
 
-// Copyright (c) 2008-2015 Saxonica Limited.
+// Copyright (c) 2008-2020 Saxonica Limited

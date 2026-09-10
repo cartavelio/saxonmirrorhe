@@ -3,12 +3,16 @@ package com.saxonica.ee.schema.sdoc;
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.ee.schema.TypeReference;
-import net.sf.saxon.om.AttributeCollection;
-import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.linked.NodeImpl;
+import net.sf.saxon.regex.RegularExpression;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaException;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -36,12 +40,13 @@ public class XSDList extends SchemaElement {
      * @throws SchemaException if any errors are found in the attributes
      */
 
+    @Override
     public void prepareAttributes() throws SchemaException {
 
         typeDefinition = getContainingSimpleType();
         typeDefinition.setDerivationMethodName("list");
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         String[] allowed = {"id", "itemType"};
         allowAttributes(atts, allowed);
 
@@ -71,6 +76,25 @@ public class XSDList extends SchemaElement {
             TypeReference typeRef = new TypeReference(itemTypeFingerprint, (EnterpriseConfiguration) getConfiguration(), this);
             typeDefinition.setItemTypeReference(typeRef);
         }
+
+        //-- @saxon:separator
+        String separator = atts.getValue(NamespaceConstant.SAXON, "separator");
+        if (separator != null) {
+            List<String> warnings = new ArrayList<>();
+            try {
+                RegularExpression regex = getConfiguration().compileRegularExpression(
+                        separator, "", "XSD11", warnings);
+                if (regex.matches("")) {
+                    error("The regular expression in saxon:separator must not be one that matches a zero-length string");
+                }
+                for (String message : warnings) {
+                    warning(message);
+                }
+                typeDefinition.setTokenSeparator(regex);
+            } catch (XPathException e) {
+                error("Error in saxon:separator regular expression: " + e.getMessage());
+            }
+        }
     }
 
     /**
@@ -80,12 +104,11 @@ public class XSDList extends SchemaElement {
      * @throws SchemaException if any XML representation constraints are violated
      */
 
+    @Override
     public void validate(SchemaCompiler compiler) throws SchemaException {
         boolean foundAnnotation = false;
         boolean foundSimpleType = false;
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while ((child = (NodeImpl)iter.next()) != null) {
+        for (NodeInfo child : children()) {
             int fp = child.getFingerprint();
             switch (fp) {
                 case StandardNames.XS_ANNOTATION: {
@@ -125,10 +148,9 @@ public class XSDList extends SchemaElement {
      *
      * @param compiler the schema compiler
      */
+    @Override
     public void postValidate(SchemaCompiler compiler) throws SchemaException {
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while ((child = (NodeImpl)iter.next()) != null) {
+        for (NodeInfo child : children()) {
             if (child.getFingerprint() == StandardNames.XS_SIMPLE_TYPE) {
                 SimpleTypeDefinition itemType = ((XSDSimpleType) child).getSimpleTypeDefinition();
                 TypeReference typeRef = new TypeReference(itemType.getFingerprint(),
@@ -141,4 +163,4 @@ public class XSDList extends SchemaElement {
     }
 }
 
-// Copyright (c) 2004 - 2007 Saxonica Limited
+// Copyright (c) 2004-2020 Saxonica Limited

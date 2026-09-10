@@ -7,8 +7,6 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.linked.NodeImpl;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Whitespace;
 
@@ -53,6 +51,7 @@ public class XSDComplexType extends SchemaElement {
      * @throws SchemaException if any errors are found in the attributes
      */
 
+    @Override
     public void prepareAttributes() throws SchemaException {
 
         PreparedSchema schema = getSchema();
@@ -60,7 +59,7 @@ public class XSDComplexType extends SchemaElement {
         complexType.setSchemaDocumentURI(getParent().getSystemId());
         isRedefinition = (getParent() instanceof XSDRedefine);
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         if (isTopLevel()) {
             String[] allowed = {"abstract", "block", "defaultAttributesApply", "final", "id", "mixed", "name"};
             allowAttributes(atts, allowed);
@@ -100,7 +99,7 @@ public class XSDComplexType extends SchemaElement {
             complexType.setTypeName(typeName, fp);
 
             if (!isRedefinition) {
-                if (schema.getSchemaType(complexType.getStructuredQName()) != null && fp > 1023) {
+                if (schema.getSchemaType(complexType.getTypeName()) != null && fp > 1023) {
                     // don't report duplicates for built-in types: this might be the schema for schemas
                     duplicate("type", attValue);
                 }
@@ -181,6 +180,7 @@ public class XSDComplexType extends SchemaElement {
      * @throws SchemaException if any XML representation constraints are violated
      */
 
+    @Override
     public void validate(SchemaCompiler compiler) throws SchemaException {
 
         checkContentModel(stateTerms, stateTargets, false);
@@ -192,9 +192,7 @@ public class XSDComplexType extends SchemaElement {
         boolean thisMixed = mixed != null && mixed.booleanValue();
         complexType.setVariety(thisMixed ? ComplexType.VARIETY_MIXED : ComplexType.VARIETY_ELEMENT_ONLY);
 
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while (((child = (NodeImpl)iter.next()) != null)) {
+        for (NodeInfo child : children()) {
             int fp = child.getFingerprint();
             if (fp == StandardNames.XS_SIMPLE_CONTENT) {
                 foundSimpleContent = true;
@@ -262,6 +260,7 @@ public class XSDComplexType extends SchemaElement {
     private final static int[][] stateTargets = {
             state0targets, state1targets, state2targets, state3targets, state4targets, state5targets, state6targets, state7targets};
 
+    @Override
     protected boolean isFinalState(int state) {
         return true;
     }
@@ -274,6 +273,7 @@ public class XSDComplexType extends SchemaElement {
      * @param compiler used for error reporting
      */
 
+    @Override
     public void postValidate(SchemaCompiler compiler) throws SchemaException {
         if (isRedefinition) {
             PreparedSchema externalSchema = ((XSDRedefine) getParent()).getExternalSchema();
@@ -284,7 +284,7 @@ public class XSDComplexType extends SchemaElement {
             if (externalSchema == null) {
                 return; // error already reported
             }
-            UserDefinedType oldType = (UserDefinedType) externalSchema.getSchemaType(complexType.getStructuredQName());
+            UserDefinedType oldType = (UserDefinedType) externalSchema.getSchemaType(complexType.getTypeName());
             if (oldType == null) {
                 error("Cannot redefine complex type " + Err.wrap(complexType.getName()) +
                         " because it is not present in the redefined schema");
@@ -305,7 +305,7 @@ public class XSDComplexType extends SchemaElement {
             NamePool pool = getNamePool();
             String localName = pool.getLocalName(complexType.getFingerprint());
             String newLocalName = localName + '_' + complexType.hashCode();
-            String prefix = complexType.getStructuredQName().getPrefix();
+            String prefix = complexType.getTypeName().getPrefix();
             int newFingerprint = pool.allocateFingerprint(uri, newLocalName);
             oldType.setTypeName(new StructuredQName(prefix, uri, newLocalName), newFingerprint);
             TypeReference baseType = new TypeReference(newFingerprint, complexType.getConfiguration(), this);
@@ -362,10 +362,7 @@ public class XSDComplexType extends SchemaElement {
             complexType.addAttributeGroupReference(defaultAttributes);
         }
 
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while (((child = (NodeImpl)iter.next()) != null)) {
-
+        for (NodeInfo child : children()) {
             switch (child.getFingerprint()) {
                 case StandardNames.XS_ANY_ATTRIBUTE: {
                     AttributeWildcard wildcard = ((XSDAnyAttribute) child).getWildcard();
@@ -449,4 +446,4 @@ public class XSDComplexType extends SchemaElement {
 
 }
 
-// Copyright (c) 2004-8 Saxonica Limited.
+// Copyright (c) 2004-8 Saxonica Limited

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -73,6 +73,7 @@ public class SaxonXQDataSource implements XQDataSource, Configuration.ApiProvide
     }
 
     /*@NotNull*/
+    @Override
     public XQConnection getConnection() {
         return new SaxonXQConnection(this);
     }
@@ -87,6 +88,7 @@ public class SaxonXQDataSource implements XQDataSource, Configuration.ApiProvide
      */
 
     /*@NotNull*/
+    @Override
     public XQConnection getConnection(Connection con) throws XQException {
         throw new XQException("Saxon cannot connect to a SQL data source");
     }
@@ -101,14 +103,17 @@ public class SaxonXQDataSource implements XQDataSource, Configuration.ApiProvide
      */
 
     /*@NotNull*/
+    @Override
     public XQConnection getConnection(String username, String password) {
         return getConnection();
     }
 
+    @Override
     public int getLoginTimeout() {
         return 0;
     }
 
+    @Override
     public PrintWriter getLogWriter() {
         return logger;
     }
@@ -127,6 +132,7 @@ public class SaxonXQDataSource implements XQDataSource, Configuration.ApiProvide
      */
 
     /*@Nullable*/
+    @Override
     public String getProperty(String name) throws XQException {
         checkNotNull(name, "name");
         switch (name) {
@@ -176,18 +182,22 @@ public class SaxonXQDataSource implements XQDataSource, Configuration.ApiProvide
     };
 
     /*@NotNull*/
+    @Override
     public String[] getSupportedPropertyNames() {
         return supportedPropertyNames;
     }
 
+    @Override
     public void setLoginTimeout(int seconds) {
         // no-op
     }
 
+    @Override
     public void setLogWriter(PrintWriter out) {
         logger = out;
     }
 
+    @Override
     public void setProperties(Properties props) throws XQException {
         checkNotNull(props, "props");
         Enumeration iter = props.keys();
@@ -211,6 +221,7 @@ public class SaxonXQDataSource implements XQDataSource, Configuration.ApiProvide
      * @throws XQException if the property name or value is invalid
      */
 
+    @Override
     public void setProperty(String name, String value) throws XQException {
         SaxonXQDataSource.checkNotNull(name, "name");
         SaxonXQDataSource.checkNotNull(value, "value");

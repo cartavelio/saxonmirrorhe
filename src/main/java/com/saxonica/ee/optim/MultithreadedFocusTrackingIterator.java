@@ -4,6 +4,8 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.XPathException;
 
+import java.util.EnumSet;
+
 /**
  * This is a thread-safe version of the parent class {@link FocusTrackingIterator}. It is identical
  * to the superclass except that the methods a synchronized. It is used when there is any possibility
@@ -20,12 +22,11 @@ import net.sf.saxon.trans.XPathException;
  * to completion; when the main thread resumes, there will be a new base iterator positioned over the materialized
  * sequence that was read into memory as a side-effect of calling <code>last()</code>.</p>
  * <p>See bug 3927.</p>
- * @param <T> the type of items selected by the iterator
  */
 
-public class MultithreadedFocusTrackingIterator<T extends Item<?>> extends FocusTrackingIterator<T> {
+public class MultithreadedFocusTrackingIterator extends FocusTrackingIterator {
 
-    public MultithreadedFocusTrackingIterator(SequenceIterator<T> base) {
+    public MultithreadedFocusTrackingIterator(SequenceIterator base) {
         super(base);
     }
 
@@ -35,7 +36,7 @@ public class MultithreadedFocusTrackingIterator<T extends Item<?>> extends Focus
      * @return the iterator underlying this FocusIterator
      */
     @Override
-    public synchronized SequenceIterator<T> getUnderlyingIterator() {
+    public synchronized SequenceIterator getUnderlyingIterator() {
         return super.getUnderlyingIterator();
     }
 
@@ -52,7 +53,7 @@ public class MultithreadedFocusTrackingIterator<T extends Item<?>> extends Focus
      * @since 8.4
      */
     @Override
-    public synchronized T next() throws XPathException {
+    public synchronized Item next() throws XPathException {
         return super.next();
     }
 
@@ -67,7 +68,7 @@ public class MultithreadedFocusTrackingIterator<T extends Item<?>> extends Focus
      * @since 8.4
      */
     @Override
-    public synchronized T current() {
+    public synchronized Item current() {
         return super.current();
     }
 
@@ -114,7 +115,7 @@ public class MultithreadedFocusTrackingIterator<T extends Item<?>> extends Focus
      * next(). It is used only when there is an explicit need to tell if we
      * are at the last element.
      * <p>This method must not be called unless the result of getProperties() on the iterator
-     * includes the bit setting {@link SequenceIterator#LOOKAHEAD}</p>
+     * includes the bit setting {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}</p>
      *
      * @return true if there are more items in the sequence
      * @throws ClassCastException if the base iterator does not support lookahead processing
@@ -131,10 +132,10 @@ public class MultithreadedFocusTrackingIterator<T extends Item<?>> extends Focus
      * @return the corresponding Value
      * @throws XPathException     in the cases of subclasses (such as the iterator over a MemoClosure)
      *                            which cause evaluation of expressions while materializing the value.
-     * @throws ClassCastException if the iterator does not have the {@link #GROUNDED} property.
+     * @throws ClassCastException if the iterator does not have the {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED} property.
      */
     @Override
-    public synchronized GroundedValue<T> materialize() throws XPathException {
+    public synchronized GroundedValue materialize() throws XPathException {
         return super.materialize();
     }
 
@@ -145,10 +146,10 @@ public class MultithreadedFocusTrackingIterator<T extends Item<?>> extends Focus
      * @return the corresponding Value
      * @throws XPathException     in the cases of subclasses (such as the iterator over a MemoClosure)
      *                            which cause evaluation of expressions while materializing the value.
-     * @throws ClassCastException if the iterator does not have the {@link #GROUNDED} property.
+     * @throws ClassCastException if the iterator does not have the {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED} property.
      */
     @Override
-    public synchronized GroundedValue<T> getResidue() throws XPathException {
+    public synchronized GroundedValue getResidue() throws XPathException {
         return super.getResidue();
     }
 
@@ -173,14 +174,14 @@ public class MultithreadedFocusTrackingIterator<T extends Item<?>> extends Focus
      * Get properties of this iterator, as a bit-significant integer.
      *
      * @return the properties of this iterator. This will be some combination of
-     * properties such as {@link #GROUNDED}, {@link #LAST_POSITION_FINDER},
-     * and {@link #LOOKAHEAD}. It is always
+     * properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED}, {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
+     * and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
      * acceptable to return the value zero, indicating that there are no known special properties.
      * It is acceptable for the properties of the iterator to change depending on its state.
      * @since 8.6
      */
     @Override
-    public synchronized int getProperties() {
+    public synchronized EnumSet<Property> getProperties() {
         return super.getProperties();
     }
 
@@ -208,4 +209,4 @@ public class MultithreadedFocusTrackingIterator<T extends Item<?>> extends Focus
     }
 }
 
-// Copyright (c) 2018 Saxonica Ltd
+// Copyright (c) 2018-2020 Saxonica Limited

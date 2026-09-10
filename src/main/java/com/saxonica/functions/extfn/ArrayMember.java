@@ -34,10 +34,11 @@ public class ArrayMember extends SystemFunction {
      *                                           code will add information about the error location.
      */
 
+    @Override
     public ArrayMemberValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         return new ArrayMemberValue(arguments[0].materialize());
     }
 }
 
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

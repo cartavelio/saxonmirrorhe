@@ -1,15 +1,17 @@
 package com.saxonica.functions.extfn.EXPathArchive;
 
 import com.saxonica.functions.extfn.EXPathBinary;
-import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.ma.map.HashTrieMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.QName;
+import net.sf.saxon.sapling.SaplingElement;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Untyped;
 import net.sf.saxon.value.*;
@@ -130,7 +132,7 @@ public class Archive {
      * @return suitably encapsulated Base64BinaryValue
      */
     private static One<Base64BinaryValue> one(byte[] result) {
-        return new One<Base64BinaryValue>(new Base64BinaryValue(result));
+        return new One<>(new Base64BinaryValue(result));
     }
 
     /**
@@ -151,8 +153,8 @@ public class Archive {
      * @return a namespaced NodeName for the given name
      */
 
-    private static NodeName qnameNS(String s) {
-        return new FingerprintedQName(PREFIX, NAMESPACE, s);
+    private static QName qnameNS(String s) {
+        return new QName(PREFIX, NAMESPACE, s);
     }
 
     private static HashMap<String, CharsetDecoder> decoders = new HashMap<String, CharsetDecoder>();
@@ -184,9 +186,10 @@ public class Archive {
      * @throws XPathException if any failure occurs
      */
 
-    private static void attribute(Receiver r, NodeName name,
+    private static void attribute(Outputter r, NodeName name,
                                   String value) throws XPathException {
-        r.attribute(name, BuiltInAtomicType.UNTYPED_ATOMIC, value, ExplicitLocation.UNKNOWN_LOCATION, 0);
+        r.attribute(name, BuiltInAtomicType.UNTYPED_ATOMIC, value,
+                    Loc.NONE, ReceiverOption.NONE);
     }
 
     /**
@@ -198,9 +201,10 @@ public class Archive {
      * @throws XPathException if any failure occurs
      */
 
-    private static void attribute(Receiver r, NodeName name, long value)
+    private static void attribute(Outputter r, NodeName name, long value)
             throws XPathException {
-        r.attribute(name, BuiltInAtomicType.UNTYPED_ATOMIC, Long.valueOf(value).toString(), ExplicitLocation.UNKNOWN_LOCATION, 0);
+        r.attribute(name, BuiltInAtomicType.UNTYPED_ATOMIC, Long.valueOf(value).toString(),
+                    Loc.NONE, ReceiverOption.NONE);
     }
 
     /**
@@ -211,12 +215,12 @@ public class Archive {
      * @throws XPathException if any failure occurs
      */
 
-    private static void startElement(Receiver r, NodeName name)
+    private static void startElement(Outputter r, NodeName name)
             throws XPathException {
-        r.startElement(name, Untyped.getInstance(), ExplicitLocation.UNKNOWN_LOCATION, 0);
+        r.startElement(name, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
     }
 
-    private static ArrayList<Entry> toExtractionEntries(Sequence<?> entries) throws XPathException {
+    private static ArrayList<Entry> toExtractionEntries(Sequence entries) throws XPathException {
         return toExtractionEntries(entries, null);
     }
 
@@ -231,12 +235,12 @@ public class Archive {
      * internally
      * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs
      */
-    private static ArrayList<Entry> toExtractionEntries(Sequence<?> entries, Entry entryDefault) throws XPathException {
+    private static ArrayList<Entry> toExtractionEntries(Sequence entries, Entry entryDefault) throws XPathException {
         ArrayList<Entry> requested = new ArrayList<>();
         if (entries == null) {
             return requested;
         }
-        SequenceIterator<?> iter = entries.iterate();
+        SequenceIterator iter = entries.iterate();
         Item item;
         while ((item = iter.next()) != null) {
             if (item instanceof MapItem) {
@@ -274,9 +278,9 @@ public class Archive {
 
     private static ArrayList<Entry> toInsertionEntries(MapItem entries, Entry defaultEntry) throws XPathException {
         AtomicIterator ui = entries.keys();
-        ArrayList<Entry> result = new ArrayList<Entry>();
+        ArrayList<Entry> result = new ArrayList<>();
         Entry first = null;
-        Sequence<?> s;
+        Sequence s;
         AtomicValue av;
         StringValue content = new StringValue("content");
         StringValue compressionKey = new StringValue("compression");
@@ -390,36 +394,27 @@ public class Archive {
     public static ArrayList<NodeInfo> entries(XPathContext context, Base64BinaryValue in)
             throws IOException, XPathException, URISyntaxException {
 
-        NodeName archEntry = qnameNS("entry");
-        NodeName archDir = qnameNS("dir");
-        NodeName size = qname("size");
-        NodeName compressedSize = qname("compressed-size");
-        NodeName lastModified = qname("last-modified");
-
-        TinyBuilder builder = (TinyBuilder) context.getController().makeBuilder();
+        QName archEntry = qnameNS("entry");
+        QName archDir = qnameNS("dir");
 
         ZipInputStream zi = new ZipInputStream(new ByteArrayInputStream(in.getBinaryValue()));
         ArrayList<ZipEntry> entries = getEntries(zi);
-        ArrayList<NodeInfo> results = new ArrayList<NodeInfo>();
+        ArrayList<NodeInfo> results = new ArrayList<>();
         long val;
         for (ZipEntry ze : entries) {
-            builder.open();
-            startElement(builder, ze.isDirectory() ? archDir : archEntry);
+            SaplingElement elem = new SaplingElement(ze.isDirectory() ? archDir : archEntry);
             if ((val = ze.getSize()) != -1) {
-                attribute(builder, size, val);
+                elem = elem.withAttr("size", ""+val);
             }
             if ((val = ze.getCompressedSize()) != -1) {
-                attribute(builder, compressedSize, val);
+                elem = elem.withAttr("compressed-size", val+"");
             }
             if ((val = ze.getTime()) != -1) {
-                attribute(builder, lastModified, DateTimeValue.fromJavaTime(val).getStringValue());
+                elem = elem.withAttr("last-modified", DateTimeValue.fromJavaTime(val).getStringValue());
             }
-            attribute(builder, qname("compression"), compressionTypes.get(zipCompressions(ze.getMethod())));
-            builder.startContent();
-            builder.characters(ze.getName(), ExplicitLocation.UNKNOWN_LOCATION, 0);
-            builder.endElement();
-            builder.close();
-            results.add(builder.getCurrentRoot());
+            elem = elem.withAttr("compression", compressionTypes.get(zipCompressions(ze.getMethod())));
+            elem = elem.withText(ze.getName());
+            results.add(elem.toNodeInfo(context.getConfiguration()));
         }
         return results;
     }
@@ -483,29 +478,19 @@ public class Archive {
 
     // arch:options($in as xs:base64Binary) as element(arch:options)*
     public static NodeInfo options(XPathContext context, Base64BinaryValue in)
-            throws IOException, XPathException {
-        NodeName value = qname("value");
-        //FingerprintedQName format = qname(namePool,"format");
-        //FingerprintedQName compression = qname(namePool,"compression");
-
-        TinyBuilder builder = (TinyBuilder) context.getController().makeBuilder();
-        builder.open();
-        startElement(builder, qnameNS("options"));
+            throws XPathException {
+        SaplingElement elem = new SaplingElement(qnameNS("options"));
         if (USE_ELEMENTS) {
-            builder.startContent();
-            startElement(builder, qnameNS("format"));
-            attribute(builder, value, archiveTypes.get(archiveType(in)));
-            builder.endElement();
-            startElement(builder, qnameNS("compression"));
-            attribute(builder, value, compressionTypes.get(compressionType(in)));
-            builder.endElement();
+            elem = elem.withChild(
+                new SaplingElement(qnameNS("format")).withAttr("value", archiveTypes.get(archiveType(in))),
+                new SaplingElement(qnameNS("compression")).withAttr("value", compressionTypes.get(compressionType(in))));
+
         } else {
-            attribute(builder, qname("format"), archiveTypes.get(archiveType(in)));
-            attribute(builder, qname("compression"), compressionTypes.get(compressionType(in)));
+            elem = elem
+                    .withAttr("format", archiveTypes.get(archiveType(in)))
+                    .withAttr("compression", compressionTypes.get(compressionType(in)));
         }
-        builder.endElement();
-        builder.close();
-        return builder.getCurrentRoot();
+        return elem.toNodeInfo(context.getConfiguration());
     }
 
     /*
@@ -839,7 +824,7 @@ public class Archive {
     // as xs:base64Binary
     public static Base64BinaryValue createMap(One<MapItem> entries, One<MapItem> options) throws IOException, XPathException {
         Entry defaultEntry = new Entry();
-        Sequence<?> s = options.head().get(new StringValue("compression"));
+        Sequence s = options.head().get(new StringValue("compression"));
         if (s != null) {
             defaultEntry.setCompression(stringToCompressionType(((StringValue) s.iterate().next()).getStringValue()));
         }
@@ -876,4 +861,4 @@ public class Archive {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited

@@ -3,20 +3,20 @@ package com.saxonica.ee.schema;
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.sdoc.SimpleTypeDefinition;
 import net.sf.saxon.expr.instruct.GlobalParam;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.Action;
 import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.NotationSet;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.z.IntHashMap;
 import net.sf.saxon.z.IntIterator;
 
 import javax.xml.transform.SourceLocator;
-import javax.xml.transform.TransformerException;
 import java.util.*;
 
 
@@ -182,6 +182,7 @@ public class PreparedSchema extends SchemaStructure implements NotationSet {
      * Set the configuration
      */
 
+    @Override
     public void setConfiguration(EnterpriseConfiguration config) {
         this.config = config;
     }
@@ -190,6 +191,7 @@ public class PreparedSchema extends SchemaStructure implements NotationSet {
      * Get the configuration
      */
 
+    @Override
     public EnterpriseConfiguration getConfiguration() {
         return config;
     }
@@ -247,14 +249,12 @@ public class PreparedSchema extends SchemaStructure implements NotationSet {
                 try {
                     //System.err.println("Fixing up " + component.toString());
                     boolean b = component.fixup(compiler);
-                    //if (!b) errors++;
+                    if (!b && !compiler.isAllowDanglingReferences()) {
+                        errors++;
+                    }
                 } catch (SchemaException err) {
                     errors++;
-                    try {
-                        compiler.getErrorListener().fatalError(err);
-                    } catch (TransformerException e) {
-                        throw err;
-                    }
+                    compiler.getErrorReporter().report(new XmlProcessingException(err));
                 }
             }
             if (errors > 0) {
@@ -883,7 +883,7 @@ public class PreparedSchema extends SchemaStructure implements NotationSet {
 
         for (SchemaType schemaType : anonymousTypesByName.values()) {
             UserDefinedType type = (UserDefinedType) schemaType;
-            final SchemaType existing = destination.getSchemaType(type.getStructuredQName());
+            final SchemaType existing = destination.getSchemaType(type.getTypeName());
             if (existing != null && !type.isSameType(existing)) {
                 String loc = "";
                 if (existing instanceof SourceLocator) {
@@ -1013,8 +1013,8 @@ public class PreparedSchema extends SchemaStructure implements NotationSet {
                 //System.err.println("Validating " + s.toString());
                 result &= s.validate(compiler);
                 if (result && (s instanceof SimpleTypeDefinition)) {
-                    UserSimpleType st = ((SimpleTypeDefinition) s).getSimpleType();
-                    typesByName.put(st.getStructuredQName(), st);
+                    UserSimpleType st = ((SimpleTypeDefinition) s).getWorkingType();
+                    typesByName.put(st.getTypeName(), st);
                 }
             }
         }
@@ -1050,9 +1050,9 @@ public class PreparedSchema extends SchemaStructure implements NotationSet {
             throws SchemaException {
         if (ref.isDangling()) {
             // we've been here before and failed; don't repeat the error message
-            return null;
+            return ref.getTarget();
         }
-        ref.tryToResolve(compiler);
+        ref.tryToResolve(compiler, fatal);
         if (ref.isResolved()) {
             return ref.getTarget();
         } else {
@@ -1065,7 +1065,7 @@ public class PreparedSchema extends SchemaStructure implements NotationSet {
                 Err.wrap(ref.getTargetComponentName().getDisplayName()) +
                 " is referenced, but " + reason;
             if (compiler.reportMissingComponent(componentType, ref.getTargetComponentName())) {
-                if (fatal) {
+                if (fatal || !compiler.isAllowDanglingReferences()) {
                     compiler.error(message, ref);
                 } else {
                     compiler.warning(message, ref);
@@ -1219,10 +1219,11 @@ public class PreparedSchema extends SchemaStructure implements NotationSet {
     }
 
 
+    @Override
     public boolean isDeclaredNotation(String uri, String local) {
         return notations != null && notations.get(new StructuredQName("", uri, local)) != null;
     }
 
 }
 
-// Copyright (c) 2005-2010 Saxonica Limited.
+// Copyright (c) 2005-2020 Saxonica Limited

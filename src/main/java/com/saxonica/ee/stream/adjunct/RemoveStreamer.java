@@ -1,8 +1,8 @@
 package com.saxonica.ee.stream.adjunct;
 
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
 import com.saxonica.ee.stream.feed.FilteringFeed;
+import com.saxonica.ee.stream.feed.ItemFeed;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
@@ -16,12 +16,13 @@ import net.sf.saxon.value.IntegerValue;
 public class RemoveStreamer extends FilteringAdjunct implements FeedMaker {
 
     @Override
-    public FilteringFeed.Filter makeFilter(XPathContext context, Feed out) throws XPathException {
+    public FilteringFeed.Filter makeFilter(XPathContext context, ItemFeed out) throws XPathException {
         SystemFunctionCall fnc = (SystemFunctionCall)getExpression();
         IntegerValue startD = (IntegerValue) fnc.getArg(1).evaluateItem(context);
         return new RemoveFilter((int)startD.longValue());
     }
 
+    @Override
     public FeedMaker getFeedMaker(int arg) throws XPathException {
         return arg == 0 ? this : getDefaultFeedMaker(arg);
     }
@@ -34,6 +35,7 @@ public class RemoveStreamer extends FilteringAdjunct implements FeedMaker {
             this.removeIndex = removeIndex;
         }
 
+        @Override
         public int matches(Item item, int position) {
             return position != removeIndex ? MATCHES : SKIP;
         }
@@ -41,4 +43,4 @@ public class RemoveStreamer extends FilteringAdjunct implements FeedMaker {
 
 }
 
-// Copyright (c) 2013 Saxonica Limited.
+// Copyright (c) 2013-2020 Saxonica Limited

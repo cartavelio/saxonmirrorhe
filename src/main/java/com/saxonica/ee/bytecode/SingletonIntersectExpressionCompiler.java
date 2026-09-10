@@ -98,4 +98,4 @@ public class SingletonIntersectExpressionCompiler extends ToIteratorCompiler {
 }
 
 
-// Copyright (c) 2011-2018 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

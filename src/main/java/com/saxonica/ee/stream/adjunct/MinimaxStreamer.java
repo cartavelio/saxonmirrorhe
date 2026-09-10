@@ -1,6 +1,6 @@
 package com.saxonica.ee.stream.adjunct;
 
-import com.saxonica.ee.stream.feed.Feed;
+import com.saxonica.ee.stream.feed.AtomicItemFeed;
 import com.saxonica.ee.stream.feed.FeedMaker;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.watch.Terminator;
@@ -31,15 +31,17 @@ import net.sf.saxon.value.UntypedAtomicValue;
  */
 public class MinimaxStreamer extends StreamingAdjunct implements FeedMaker {
 
+    @Override
     public FeedMaker getFeedMaker(int arg) throws XPathException {
         return arg == 0 ? this : getDefaultFeedMaker(arg);
     }
 
-    public Feed makeItemFeed(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
         return new MinimaxFeed(getExpression(), out, context);
     }
 
-    private static class MinimaxFeed extends ItemFeed {
+    private static class MinimaxFeed extends AtomicItemFeed {
 
         /*@Nullable*/ private AtomicValue min;
         private AtomicComparer atomicComparer;
@@ -50,10 +52,11 @@ public class MinimaxStreamer extends StreamingAdjunct implements FeedMaker {
         private boolean ignoreNaN;
 
 
-        public MinimaxFeed(Expression expr, Feed result, XPathContext context) {
+        public MinimaxFeed(Expression expr, ItemFeed result, XPathContext context) {
             super(expr, result, context);
         }
 
+        @Override
         public void open(Terminator terminator) throws XPathException {
             SystemFunctionCall call = (SystemFunctionCall) getExpression();
             SystemFunction fn = call.getTargetFunction();
@@ -74,7 +77,8 @@ public class MinimaxStreamer extends StreamingAdjunct implements FeedMaker {
          *          to report any failure
          */
 
-        public void processItem(Item<?> item) throws XPathException {
+        @Override
+        public void append(Item item) throws XPathException {
             if (!hasFailed()) {
 
                 AtomicValue value = (AtomicValue) item;
@@ -184,6 +188,7 @@ public class MinimaxStreamer extends StreamingAdjunct implements FeedMaker {
          *          to report any failure
          */
 
+        @Override
         public void close() throws XPathException {
             if (!hasFailed()) {
                 if (min == null) {
@@ -205,13 +210,13 @@ public class MinimaxStreamer extends StreamingAdjunct implements FeedMaker {
                     if (lowestCommonSuperType != NumericType.getInstance()) {
                         min = Converter.convert(min, lowestCommonSuperType, rules);
                     }
-                    getResult().processItem(min);
+                    getNextOutputter().append(min);
                 }
-                getResult().close();
+                getNextOutputter().close();
             }
         }
 
     }
 }
 
-// Copyright (c) 2010-2013 Saxonica Limited.
+// Copyright (c) 2010-2020 Saxonica Limited

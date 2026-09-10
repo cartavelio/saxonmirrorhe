@@ -1,15 +1,17 @@
 package com.saxonica.ee.stream.feed;
 
-import com.saxonica.ee.stream.watch.Terminator;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.SimpleNodeConstructor;
 import net.sf.saxon.expr.instruct.ValueOf;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.util.CharSequenceConsumer;
 import net.sf.saxon.tree.util.FastStringBuffer;
-import net.sf.saxon.tree.util.Orphan;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.Type;
 
 /**
  * This class is used when a streaming template requests evaluation of a simple content constructor
@@ -27,14 +29,16 @@ public class SimpleNodeConstructorFeed extends ItemFeed {
 
     private FastStringBuffer buffer = new FastStringBuffer(100);
     private boolean disableOutputEscaping;
+    private boolean isSimpleText;
 
-    public SimpleNodeConstructorFeed(Expression expr, Feed result, XPathContext context) {
+    public SimpleNodeConstructorFeed(Expression expr, ItemFeed result, XPathContext context) {
         super(expr, result, context);
         disableOutputEscaping = expr instanceof ValueOf && ((ValueOf)expr).isDisableOutputEscaping();
-    }
-
-    public void open(Terminator terminator) throws XPathException {
-        super.open(terminator);
+        SimpleNodeConstructor constructor = (SimpleNodeConstructor) getExpression();
+        int kind = constructor.getItemType().getPrimitiveType();
+        if (kind == Type.TEXT && !disableOutputEscaping) {
+            isSimpleText = true;
+        }
     }
 
     /**
@@ -45,31 +49,93 @@ public class SimpleNodeConstructorFeed extends ItemFeed {
      *          to report any failure
      */
 
-    public void processItem(Item<?> item) throws XPathException {
+    @Override
+    public void append(Item item) throws XPathException {
         if (!hasFailed()) {
-            buffer.append(item.getStringValueCS());
+            if (isSimpleText) {
+                try {
+                    getNextOutputter().characters(item.getStringValueCS(), Loc.NONE, ReceiverOption.NONE);
+                } catch (XPathException e) {
+                    dynamicError(e);
+                }
+            } else {
+                buffer.cat(item.getStringValueCS());
+            }
         }
     }
 
+    @Override
+    public CharSequenceConsumer getStringReceiver(boolean asTextNode) {
+        if (isSimpleText) {
+            return new CharSequenceConsumer() {
+                @Override
+                public CharSequenceConsumer cat(CharSequence chars) throws XPathException {
+                    try {
+                        getNextOutputter().characters(chars, Loc.NONE, ReceiverOption.NONE);
+                    } catch (XPathException e) {
+                        dynamicError(e);
+                    }
+                    return this;
+                }
+            };
+        } else {
+            return super.getStringReceiver(asTextNode);
+        }
+    }
+
+    @Override
     public void close() throws XPathException {
         if (!hasFailed()) {
             SimpleNodeConstructor constructor = (SimpleNodeConstructor) getExpression();
-            NodeName nameCode;
-            try {
-                nameCode = constructor.evaluateNodeName(getContext());
-            } catch (XPathException e) {
-                dynamicError(e);
-                return;
-            }
-            Orphan node = new Orphan(getContext().getConfiguration());
-            node.setNodeKind((short) constructor.getItemType().getPrimitiveType());
-            node.setNodeName(nameCode);
-            node.setStringValue(buffer);
-            if (disableOutputEscaping) {
-                node.setDisableOutputEscaping(true);
+            int kind = constructor.getItemType().getPrimitiveType();
+            switch (kind) {
+                case Type.ATTRIBUTE:
+                    try {
+                        getNextOutputter().attribute(
+                                constructor.evaluateNodeName(getContext()),
+                                BuiltInAtomicType.UNTYPED_ATOMIC,
+                                buffer.toString(),
+                                Loc.NONE,
+                                ReceiverOption.NONE);
+                    } catch (XPathException e) {
+                        dynamicError(e);
+                    }
+                    break;
+                case Type.TEXT:
+                    if (!isSimpleText) {
+                        try {
+                            int options = disableOutputEscaping? ReceiverOption.DISABLE_ESCAPING : ReceiverOption.NONE;
+                            getNextOutputter().characters(buffer, Loc.NONE, options);
+                        } catch (XPathException e) {
+                            dynamicError(e);
+                        }
+                    }
+                    break;
+                case Type.COMMENT:
+                    try {
+                        getNextOutputter().comment(
+                                buffer.toString(),
+                                Loc.NONE,
+                                ReceiverOption.NONE);
+                    } catch (XPathException e) {
+                        dynamicError(e);
+                    }
+                    break;
+                case Type.PROCESSING_INSTRUCTION:
+                    try {
+                        getNextOutputter().processingInstruction(
+                                constructor.evaluateNodeName(getContext()).getLocalPart(),
+                                buffer.toString(),
+                                Loc.NONE,
+                                ReceiverOption.NONE);
+                    } catch (XPathException e) {
+                        dynamicError(e);
+                    }
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown node kind " + kind);
             }
             buffer = new FastStringBuffer(100);
-            getResult().processItem(node);
             super.close();
         }
     }
@@ -78,4 +144,4 @@ public class SimpleNodeConstructorFeed extends ItemFeed {
 
 }
 
-// Copyright (c) 2009-2014 Saxonica Limited
+// Copyright (c) 2009-2020 Saxonica Limited

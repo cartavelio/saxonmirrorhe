@@ -1,7 +1,7 @@
 package com.saxonica.ee.schema.sdoc;
 
 import com.saxonica.ee.schema.Assertion;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.sxpath.XPathEvaluator;
 import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.sxpath.XPathVariable;
@@ -47,8 +47,9 @@ public class SaxonPreprocess extends AnnotationParent {
      *          if any errors are found in the attributes
      */
 
+    @Override
     public void prepareAttributes() throws SchemaException {
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         String[] allowed = {"action", "id", "reverse", "xpathDefaultNamespace"};
         allowAttributes(atts, allowed);
 
@@ -160,4 +161,4 @@ public class SaxonPreprocess extends AnnotationParent {
 
 }
 
-// Copyright (c) 2008, Saxonica Limited.
+// Copyright (c) 2008, Saxonica Limited

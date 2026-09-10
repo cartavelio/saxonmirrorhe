@@ -4,11 +4,9 @@ import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.ee.schema.SingleNamespaceSchema;
 import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.om.AttributeCollection;
-import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.linked.NodeImpl;
 import net.sf.saxon.type.SchemaException;
 
 import javax.xml.transform.Source;
@@ -33,9 +31,10 @@ public class XSDRedefine extends SchemaElement {
      * @throws SchemaException if any errors are found in the attributes
      */
 
+    @Override
     public void prepareAttributes() throws SchemaException {
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         String[] allowed = {"id", "schemaLocation"};
         allowAttributes(atts, allowed);
 
@@ -130,6 +129,7 @@ public class XSDRedefine extends SchemaElement {
      * @throws SchemaException if any XML representation constraints are violated
      */
 
+    @Override
     public void validate(SchemaCompiler compiler) throws SchemaException {
         if (externalSchema == null) {
             return;     // previous error
@@ -138,9 +138,7 @@ public class XSDRedefine extends SchemaElement {
         HashSet<String> redefinedAttributeGroups = new HashSet<>();
         HashSet<String> redefinedModelGroups = new HashSet<>();
 
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while ((child = (NodeImpl)iter.next()) != null) {
+        for (NodeInfo child : children()) {
             int fp = child.getFingerprint();
             switch (fp) {
                 case StandardNames.XS_ANNOTATION: {
@@ -184,6 +182,7 @@ public class XSDRedefine extends SchemaElement {
      * @param compiler the schema compiler
      */
 
+    @Override
     public void postValidate(SchemaCompiler compiler) throws SchemaException {
         if (redefinedSchema != null) {
             redefinedSchema.copyTo(getSchema(), compiler);
@@ -192,5 +191,5 @@ public class XSDRedefine extends SchemaElement {
 
 }
 
-// Copyright (c) 2004 - 2007 Saxonica Limited. All rights reserved
+// Copyright (c) 2004-2020 Saxonica Limited
 

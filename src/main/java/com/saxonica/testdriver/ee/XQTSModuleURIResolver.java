@@ -57,6 +57,7 @@ public class XQTSModuleURIResolver implements ModuleURIResolver {
      *          module resolver is not required.
      */
 
+    @Override
     public StreamSource[] resolve(String moduleURI, String baseURI, String[] locations) throws XPathException {
         NamePool pool = testCase.getConfiguration().getNamePool();
         int moduleNC = pool.allocateFingerprint("http://www.w3.org/2005/02/query-test-XQTSCatalog", "module");
@@ -90,4 +91,4 @@ public class XQTSModuleURIResolver implements ModuleURIResolver {
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited

@@ -5,17 +5,13 @@ import com.saxonica.ee.trans.Outcome;
 import com.saxonica.ee.validate.InvalidityReportGeneratorEE;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
-import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.Sender;
-import net.sf.saxon.event.Sink;
+import net.sf.saxon.event.*;
 import net.sf.saxon.expr.PackageData;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.Executable;
 import net.sf.saxon.expr.instruct.GlobalParam;
 import net.sf.saxon.expr.instruct.GlobalParameterSet;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.*;
@@ -72,7 +68,8 @@ public class SchemaValidatorImpl extends SchemaValidator {
     public SchemaValidatorImpl(Processor processor) {
         this.processor = processor;
         this.useXsiSchemaLocation = processor.getConfigurationProperty(Feature.USE_XSI_SCHEMA_LOCATION);
-        this.invalidityHandler = new InvalidityHandlerWrappingErrorListener(processor.getUnderlyingConfiguration().getErrorListener());
+        this.invalidityHandler = new InvalidityHandlerWrappingErrorReporter(
+                processor.getUnderlyingConfiguration().makeErrorReporter());
     }
 
     /**
@@ -84,6 +81,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
      * @param lax true if validation is to be lax, false if it is to be strict
      */
 
+    @Override
     public void setLax(boolean lax) {
         this.lax = lax;
     }
@@ -94,6 +92,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
      * @return true if validation is to be in lax mode, false if it is to be in strict mode.
      */
 
+    @Override
     public boolean isLax() {
         return lax;
     }
@@ -105,6 +104,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
      *                 validation episode.
      */
 
+    @Override
     public void setErrorListener(ErrorListener listener) {
         this.invalidityHandler = new InvalidityHandlerWrappingErrorListener(listener);
     }
@@ -119,12 +119,15 @@ public class SchemaValidatorImpl extends SchemaValidator {
      *         an error listener.
      */
 
+    @Override
     public ErrorListener getErrorListener() {
-        if (invalidityHandler instanceof InvalidityHandlerWrappingErrorListener) {
-            return ((InvalidityHandlerWrappingErrorListener) invalidityHandler).getErrorListener();
-        } else {
-            return null;
+        if (invalidityHandler instanceof InvalidityHandlerWrappingErrorReporter) {
+            ErrorReporter reporter = ((InvalidityHandlerWrappingErrorReporter)invalidityHandler).getErrorReporter();
+            if (reporter instanceof ErrorReporterToListener) {
+                return ((ErrorReporterToListener) reporter).getErrorListener();
+            }
         }
+        return null;
     }
 
     /**
@@ -133,6 +136,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
      * @param destination where XML will be sent
      * @throws SaxonApiException if the destination cannot be configured for this purpose
      */
+    @Override
     public void setValidityReporting(Destination destination) throws SaxonApiException {
         invalidityHandler = processor.getUnderlyingConfiguration().createValidityReporter();
         ((InvalidityReportGeneratorEE) invalidityHandler).setDestination(destination);
@@ -166,6 +170,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
      * @since 9.6
      */
 
+    @Override
     public void setCollectStatistics(boolean collect) {
         this.keepStatistics = collect;
         latestStatistics = null;
@@ -178,6 +183,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
      * @since 9.6
      */
 
+    @Override
     public boolean isCollectStatistics() {
         return this.keepStatistics;
     }
@@ -192,6 +198,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
      * @since Saxon 9.6
      */
 
+    @Override
     public void reportValidationStatistics(Destination destination) throws SaxonApiException {
         if (latestStatistics != null) {
             latestStatistics.report(processor, destination);
@@ -206,6 +213,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
      *                  be ignored. Default is true.
      */
 
+    @Override
     public void setUseXsiSchemaLocation(boolean recognize) {
         useXsiSchemaLocation = recognize;
     }
@@ -218,6 +226,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
      *         be ignored. Default is true.
      */
 
+    @Override
     public boolean isUseXsiSchemaLocation() {
         return useXsiSchemaLocation;
     }
@@ -230,6 +239,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
      * @param destination the destination to receive the validated document
      */
 
+    @Override
     public void setDestination(/*@Nullable*/ Destination destination) {
         this.destination = destination;
     }
@@ -243,6 +253,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
 
 
     /*@Nullable*/
+    @Override
     public Destination getDestination() {
         return destination;
     }
@@ -256,6 +267,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
      *             value.
      */
 
+    @Override
     public void setDocumentElementName(QName name) {
         documentElementName = name;
     }
@@ -266,6 +278,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
      * @return the name of the required document element, or null if no value has been set.
      */
 
+    @Override
     public QName getDocumentElementName() {
         return documentElementName;
     }
@@ -281,6 +294,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
      *          if there is no known type with this name
      */
 
+    @Override
     public void setDocumentElementTypeName(QName name) throws SaxonApiException {
         Configuration config = processor.getUnderlyingConfiguration();
         documentElementType = config.getSchemaType(name.getStructuredQName());
@@ -295,6 +309,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
      * @return the name of the required type of the document element, or null if no value has been set.
      */
 
+    @Override
     public QName getDocumentElementTypeName() {
         if (documentElementType == null) {
             return null;
@@ -309,6 +324,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
      * @return the schema type
      */
 
+    @Override
     protected SchemaType getDocumentElementType() {
         return documentElementType;
     }
@@ -321,6 +337,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
      * @param expand true if defaults are to be expanded, false if not
      */
 
+    @Override
     public void setExpandAttributeDefaults(boolean expand) {
         expandAttributeDefaults = expand;
     }
@@ -333,6 +350,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
      * @return true if defaults are to be expanded, false if not
      */
 
+    @Override
     public boolean isExpandAttributeDefaults() {
         return expandAttributeDefaults;
     }
@@ -347,9 +365,10 @@ public class SchemaValidatorImpl extends SchemaValidator {
      * @since 9.5
      */
 
+    @Override
     public void setParameter(QName name, XdmValue value) {
         try {
-            suppliedParams.put(name.getStructuredQName(), value == null ? null : ((Sequence<?>) value.getUnderlyingValue()).materialize());
+            suppliedParams.put(name.getStructuredQName(), value == null ? null : ((Sequence) value.getUnderlyingValue()).materialize());
         } catch (XPathException e) {
             throw new SaxonApiUncheckedException(e);
         }
@@ -364,6 +383,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
      * @since 9.5
      */
 
+    @Override
     public XdmValue getParameter(QName name) {
         GroundedValue value = suppliedParams.get(name.getStructuredQName());
         return value ==  null ? null : XdmValue.wrap(value);
@@ -394,6 +414,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
          * @return computed result
          * @throws Exception if unable to compute a result
          */
+        @Override
         public Outcome<Boolean> call() throws Exception {
             Configuration config = processor.getUnderlyingConfiguration();
 
@@ -402,7 +423,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
                 controller.getExecutable().setSchemaAware(true);
                 PipelineConfiguration pipe = controller.makePipelineConfiguration();
                 pipe.setUseXsiSchemaLocation(useXsiSchemaLocation);
-                pipe.setHostLanguage(Configuration.XML_SCHEMA);
+                pipe.setHostLanguage(HostLanguage.XML_SCHEMA);
 
                 ParseOptions options = new ParseOptions();
 
@@ -461,6 +482,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
      *                           document). The wrapped exception acting as the cause of the SaxonApiException can be used to
      *                           distinguish these failure conditions.
      */
+    @Override
     public void validateMultiple(Iterable<Source> sources) throws SaxonApiException {
         EnterpriseConfiguration config = (EnterpriseConfiguration)processor.getUnderlyingConfiguration();
         if (!config.getBooleanProperty(Feature.ALLOW_MULTITHREADING)) {
@@ -537,15 +559,18 @@ public class SchemaValidatorImpl extends SchemaValidator {
             }
         }
 
-        final Location loc = ExplicitLocation.UNKNOWN_LOCATION;
+        final Location loc = Loc.NONE;
         if (reportDestination != null) {
             Receiver receiver = reportDestination.getReceiver(config.makePipelineConfiguration(), config.obtainDefaultSerializationProperties());
             try {
                 receiver.open();
-                receiver.startDocument(0);
-                receiver.startElement(new FingerprintedQName("", InvalidityReportGenerator.REPORT_NS, "validation-reports"), Untyped.getInstance(), loc, 0);
+                receiver.startDocument(ReceiverOption.NONE);
+                receiver.startElement(new FingerprintedQName("", InvalidityReportGenerator.REPORT_NS, "validation-reports"),
+                                      Untyped.getInstance(),
+                                      EmptyAttributeMap.getInstance(),
+                                      NamespaceMap.of("", InvalidityReportGenerator.REPORT_NS),
+                                      loc, ReceiverOption.NONE);
 
-                receiver.startContent();
                 for (XdmNode node : reportDocs) {
                     for (XdmNode de : node.select(child()).asListOfNodes()) {
                         de.getUnderlyingNode().copy(receiver, 0, loc);
@@ -574,6 +599,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
      *          distinguish these failure conditions.
      */
 
+    @Override
     public void validate(Source source) throws SaxonApiException {
         Configuration config = processor.getUnderlyingConfiguration();
         Receiver receiver = getReceiver(config, source.getSystemId());
@@ -621,6 +647,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
      * @throws SaxonApiException if a failure occurs
      */
 
+    @Override
     public Receiver getReceiver(PipelineConfiguration pipe, SerializationProperties params) throws SaxonApiException {
         return getReceiver(pipe.getConfiguration(), null);
     }
@@ -635,7 +662,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
         exec.setSchemaAware(true);
         PipelineConfiguration pipe = controller.makePipelineConfiguration();
         pipe.setUseXsiSchemaLocation(useXsiSchemaLocation);
-        pipe.setHostLanguage(Configuration.XML_SCHEMA);
+        pipe.setHostLanguage(HostLanguage.XML_SCHEMA);
 
         ParseOptions options = pipe.getParseOptions();
         options.setCheckEntityReferences(true);
@@ -669,6 +696,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
      * it has finished writing to the destination.
      */
 
+    @Override
     public void close() throws SaxonApiException {
         if (destination != null) {
             destination.close();
@@ -678,4 +706,4 @@ public class SchemaValidatorImpl extends SchemaValidator {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

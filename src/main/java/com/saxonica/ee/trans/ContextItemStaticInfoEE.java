@@ -21,6 +21,7 @@ public class ContextItemStaticInfoEE extends ContextItemStaticInfo {
     private Actor container;
     private AccumulatorFn.Phase accumulatorPhase;
 
+
     /**
      * Create a ContextItemStaticInfo
      *
@@ -47,10 +48,12 @@ public class ContextItemStaticInfoEE extends ContextItemStaticInfo {
         this.explicitPosture = contextItemPosture;
     }
 
+    @Override
     public void setContextPostureStriding() {
         this.explicitPosture = Posture.STRIDING;
     }
 
+    @Override
     public void setContextPostureGrounded() {
         this.explicitPosture = Posture.GROUNDED;
     }
@@ -89,6 +92,7 @@ public class ContextItemStaticInfoEE extends ContextItemStaticInfo {
         }
     }
 
+    @Override
     public boolean isStrictStreamabilityRules() {
         return strictStreamabilityRules;
     }
@@ -97,9 +101,23 @@ public class ContextItemStaticInfoEE extends ContextItemStaticInfo {
         this.strictStreamabilityRules = strictStreamabilityRules;
     }
 
+    /**
+     * Indicate that the expression is within the select expression or sequence constructor
+     * of an accumulator rule, and whether the rule is for the start or end phase
+     * @param phase indicates whether this is the start or end phase, or null to indicate
+     *              that the expression is not within an accumulator rule
+     */
     public void setAccumulatorPhase(AccumulatorFn.Phase phase) {
         this.accumulatorPhase = phase;
     }
+
+    /**
+     * Ask whether the expression is within the select expression or sequence constructor
+     * of an accumulator rule, and whether the rule is for the start or end phase
+     *
+     * @return whether this is the start or end phase, or null to indicate
+     *              that the expression is not within an accumulator rule
+     */
 
     public AccumulatorFn.Phase getAccumulatorPhase() {
         return accumulatorPhase;
@@ -116,8 +134,6 @@ public class ContextItemStaticInfoEE extends ContextItemStaticInfo {
     public final static ContextItemStaticInfoEE ABSENT =
             new ContextItemStaticInfoEE(ErrorType.getInstance(), true, Posture.STRIDING);
 
-
-
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited

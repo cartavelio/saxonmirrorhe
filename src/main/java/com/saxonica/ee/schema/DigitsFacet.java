@@ -36,6 +36,7 @@ public abstract class DigitsFacet extends Facet {
      * @return the value of this facet as a string
      */
 
+    @Override
     public String getValue() {
         return requiredValue + "";
     }
@@ -69,6 +70,7 @@ public abstract class DigitsFacet extends Facet {
      *                         the combination of facets is inconsistent with values defined on the base type.
      */
 
+    @Override
     public void checkFacetRestriction(UserSimpleType type, SimpleType base, SchemaCompiler compiler) throws SchemaException, ValidationException {
         if (!(base.isAtomicType())) {
             throw new SchemaException("The " + getName() +
@@ -94,6 +96,7 @@ public abstract class DigitsFacet extends Facet {
      * @return true if the value conforms; false if it doesn't conform
      */
 
+    @Override
     public boolean testAtomicValue(AtomicValue value) {
 //        if (value instanceof PrecisionDecimalValue) {
 //            return ((PrecisionDecimalValue)value).checkTotalDigits(requiredValue);
@@ -133,7 +136,8 @@ public abstract class DigitsFacet extends Facet {
     @Override
     public Function getFacetAsFunctionItem() {
         Callable callable = new Callable() {
-            public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+            @Override
+            public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
@@ -157,4 +161,4 @@ public abstract class DigitsFacet extends Facet {
 
 }
 
-// Copyright (c) 2004 Saxonica Limited. See Terms and Conditions.
+// Copyright (c) 2004-2020 Saxonica Limited See Terms and Conditions.

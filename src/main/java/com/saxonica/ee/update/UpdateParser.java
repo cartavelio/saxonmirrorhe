@@ -11,7 +11,6 @@ import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.query.QueryModule;
-import net.sf.saxon.trace.LocationKind;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceType;
 
@@ -54,14 +53,14 @@ public class UpdateParser {
         t.setState(Tokenizer.DEFAULT_STATE);
         p.nextToken();
         Expression updateExp = p.parseExprSingle();
-        updateExp = p.makeTracer(modifyOffset, updateExp, LocationKind.COPY_MODIFY_EXPRESSION, null);
+        updateExp = p.makeTracer(updateExp, null);
 
         int returnOffset = t.currentTokenStartOffset;
         p.expect(Token.RETURN);
         t.setState(Tokenizer.DEFAULT_STATE);
         p.nextToken();
         Expression returnExp = p.parseExprSingle();
-        returnExp = p.makeTracer(returnOffset, returnExp, LocationKind.RETURN_EXPRESSION, null);
+        returnExp = p.makeTracer(returnExp, null);
 
         int revalidationMode = ((QueryModule) p.getStaticContext()).getRevalidationMode();
         CopyModifyExpression copyExp = new CopyModifyExpression(updateExp, returnExp, revalidationMode);
@@ -85,7 +84,7 @@ public class UpdateParser {
         }
 
         p.setLocation(e, offset);
-        return p.makeTracer(offset, e, LocationKind.COPY_MODIFY_EXPRESSION, null);
+        return p.makeTracer(e, null);
     }
 
     /**
@@ -186,7 +185,7 @@ public class UpdateParser {
         boolean inherit = env.isInheritNamespaces();
         boolean preserve = env.isPreserveNamespaces();
         Expression e = new InsertExpression(source, target, position, constructionMode, inherit, preserve);
-        return p.makeTracer(offset, e, LocationKind.INSERT_EXPRESSION, null);
+        return p.makeTracer(e, null);
     }
 
     /**
@@ -203,7 +202,7 @@ public class UpdateParser {
         p.nextToken();
         Expression target = p.parseExprSingle();
         Expression e = new DeleteExpression(target);
-        return p.makeTracer(offset, e, LocationKind.DELETE_EXPRESSION, null);
+        return p.makeTracer(e, null);
     }
 
     /**
@@ -223,7 +222,7 @@ public class UpdateParser {
         p.nextToken();
         Expression replacement = p.parseExprSingle();
         Expression e = new ReplaceNodeExpression(target, replacement, ((QueryModule) p.getStaticContext()).getConstructionMode());
-        return p.makeTracer(offset, e, LocationKind.REPLACE_EXPRESSION, null);
+        return p.makeTracer(e, null);
     }
 
     /**
@@ -244,7 +243,7 @@ public class UpdateParser {
         p.nextToken();
         Expression replacement = p.parseExprSingle();
         Expression e = new ReplaceValueExpression(target, replacement);
-        return p.makeTracer(offset, e, LocationKind.REPLACE_EXPRESSION, null);
+        return p.makeTracer(e, null);
     }
 
     /**
@@ -265,8 +264,8 @@ public class UpdateParser {
         p.nextToken();
         Expression newName = p.parseExprSingle();
         Expression e = new RenameExpression(target, newName, env.getNamespaceResolver(), env.getDefaultElementNamespace());
-        return p.makeTracer(offset, e, LocationKind.RENAME_EXPRESSION, null);
+        return p.makeTracer(e, null);
     }
 }
 
-// Copyright (c) 2008-2012 Saxonica Limited.
+// Copyright (c) 2008-2020 Saxonica Limited

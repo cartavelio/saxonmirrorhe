@@ -40,6 +40,7 @@ public class EnumerationFacetSet extends Facet {
      *
      * @return "enumeration"
      */
+    @Override
     public String getName() {
         return "enumeration";
     }
@@ -74,6 +75,7 @@ public class EnumerationFacetSet extends Facet {
      * Get a string representation of the value of the facet
      */
 
+    @Override
     public String getValue() {
         FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C64);
         for (AtomicSequence v : typedValues.values()) {
@@ -91,6 +93,7 @@ public class EnumerationFacetSet extends Facet {
      * @param compiler the schema compiler
      */
 
+    @Override
     public void checkFacetRestriction(UserSimpleType type, SimpleType base, SchemaCompiler compiler) {
         //
     }
@@ -103,6 +106,7 @@ public class EnumerationFacetSet extends Facet {
      *         fails
      */
 
+    @Override
     public boolean testAtomicValue(AtomicValue value) {
         return typedValues.containsKey(value.getSchemaComparable());
     }
@@ -115,6 +119,7 @@ public class EnumerationFacetSet extends Facet {
      * @return true if the value conforms; false if it doesn't conform, or if the test fails
      */
 
+    @Override
     public boolean testListValue(AtomicSequence value) {
         return typedValues.containsKey(value.getSchemaComparable());
     }
@@ -153,6 +158,7 @@ public class EnumerationFacetSet extends Facet {
      * Serialize this facet
      */
 
+    @Override
     public void serializeFacet(SchemaModelSerializer serializer) throws XPathException {
         for (AtomicSequence v : typedValues.values()) {
             serializer.startElement("enumeration");
@@ -192,7 +198,7 @@ public class EnumerationFacetSet extends Facet {
                     return SequenceExtent.makeSequenceExtent(list);
                 case "typed-value":
                     // Introduced by bug 4024
-                    List<GroundedValue<?>> members = new ArrayList<>(typedValues.values());
+                    List<GroundedValue> members = new ArrayList<>(typedValues.values());
                     return new SimpleArrayItem(members);
                 default:
                     return EmptySequence.getInstance();
@@ -204,4 +210,4 @@ public class EnumerationFacetSet extends Facet {
 
 }
 
-// Copyright (c) 2004 - 2017 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

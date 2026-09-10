@@ -2,9 +2,9 @@ package com.saxonica.ee.stream.adjunct;
 
 import com.saxonica.ee.stream.Posture;
 import com.saxonica.ee.stream.PostureAndSweep;
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
 import com.saxonica.ee.stream.feed.FilteringFeed;
+import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
@@ -40,7 +40,7 @@ public class OutermostStreamer extends FilteringAdjunct implements FeedMaker {
     }
 
     @Override
-    public FilteringFeed.Filter makeFilter(XPathContext context, Feed out) throws XPathException {
+    public FilteringFeed.Filter makeFilter(XPathContext context, ItemFeed out) throws XPathException {
         return new OutermostFilter();
     }
 
@@ -56,6 +56,7 @@ public class OutermostStreamer extends FilteringAdjunct implements FeedMaker {
         public OutermostFilter() {
         }
 
+        @Override
         public int matches(Item item, int position) {
             if (previous==null ||
                     !Navigator.isAncestorOrSelf(previous, (NodeInfo)item)) {
@@ -69,4 +70,4 @@ public class OutermostStreamer extends FilteringAdjunct implements FeedMaker {
 
 }
 
-// Copyright (c) 2013 Saxonica Limited.
+// Copyright (c) 2013-2020 Saxonica Limited

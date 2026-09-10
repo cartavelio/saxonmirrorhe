@@ -23,16 +23,17 @@ import java.util.List;
 public class NextIterationFeed extends ItemFeed {
 
     private int streamedArgument;
-    private List<Item<?>> inputValue = new ArrayList<>(4);
+    private List<Item> inputValue = new ArrayList<>(4);
     Sequence[] newValues;
 
-    public NextIterationFeed(Expression inst, Feed result, XPathContext context, int arg) throws XPathException {
+    public NextIterationFeed(Expression inst, ItemFeed result, XPathContext context, int arg) throws XPathException {
         super(inst, result, context);
         WithParam[] actualParams = ((NextIteration) getExpression()).getParameters();
         newValues = SequenceTool.makeSequenceArray(actualParams.length);
         streamedArgument = arg;
     }
 
+    @Override
     public void open(Terminator terminator) throws XPathException {
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                getResult().open(terminator);
         WithParam[] actualParams = ((NextIteration) getExpression()).getParameters();
@@ -56,7 +57,8 @@ public class NextIterationFeed extends ItemFeed {
      *          to report any failure
      */
 
-    public void processItem(Item<?> item) throws XPathException {
+    @Override
+    public void append(Item item) throws XPathException {
         inputValue.add(item);
     }
 
@@ -67,6 +69,7 @@ public class NextIterationFeed extends ItemFeed {
      *          to report any failure
      */
 
+    @Override
     public void close() throws XPathException {
         WithParam[] actualParams = ((NextIteration) getExpression()).getParameters();
         WithParam wp = actualParams[streamedArgument];
@@ -78,9 +81,9 @@ public class NextIterationFeed extends ItemFeed {
                 context.setLocalVariable(wp.getSlotNumber(), newValues[i]);
             }
         }
-        getResult().close();
+        getNextOutputter().close();
     }
 
 }
 
-// Copyright (c) 2011 Saxonica Limited
+// Copyright (c) 2011-2020 Saxonica Limited

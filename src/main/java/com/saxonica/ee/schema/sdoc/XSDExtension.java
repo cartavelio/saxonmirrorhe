@@ -1,12 +1,10 @@
 package com.saxonica.ee.schema.sdoc;
 
 import com.saxonica.ee.schema.*;
-import net.sf.saxon.om.AttributeCollection;
-import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.linked.NodeImpl;
 import net.sf.saxon.type.SchemaException;
 
 /**
@@ -31,6 +29,7 @@ public class XSDExtension extends SchemaElement {
      * @throws SchemaException if any errors are found in the attributes
      */
 
+    @Override
     public void prepareAttributes() throws SchemaException {
 
         try {
@@ -44,7 +43,7 @@ public class XSDExtension extends SchemaElement {
 
         complexType.setDerivationMethodName("extension");
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         String[] allowed = {"base", "id"};
         allowAttributes(atts, allowed);
 
@@ -77,14 +76,13 @@ public class XSDExtension extends SchemaElement {
      * @throws SchemaException if any XML representation constraints are violated
      */
 
+    @Override
     public void validate(SchemaCompiler compiler) throws SchemaException {
 
         checkContentModel(stateTerms, stateTargets, false);
 
         if (isSimpleContent) {
-            AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-            NodeImpl child;
-            while ((child = (NodeImpl)iter.next()) != null) {
+            for (NodeInfo child : children()) {
                 int fp = child.getFingerprint();
                 switch (fp) {
                     case StandardNames.XS_GROUP:
@@ -141,6 +139,7 @@ public class XSDExtension extends SchemaElement {
     private final static int[][] stateTargets = {
             state0targets, state1targets, state2targets, state3targets, state4targets, state5targets, state6targets};
 
+    @Override
     protected boolean isFinalState(int state) {
         return true;
     }
@@ -151,6 +150,7 @@ public class XSDExtension extends SchemaElement {
      * @param compiler used to report errors and warnings
      */
 
+    @Override
     public void postValidate(SchemaCompiler compiler) throws SchemaException {
 
         if (complexType == null) {
@@ -158,9 +158,7 @@ public class XSDExtension extends SchemaElement {
             return;
         }
 
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while ((child = (NodeImpl)iter.next()) != null) {
+        for (NodeInfo child : children()) {
             switch (child.getFingerprint()) {
                 case StandardNames.XS_ANY_ATTRIBUTE: {
                     AttributeWildcard wildcard = ((XSDAnyAttribute) child).getWildcard();
@@ -219,4 +217,4 @@ public class XSDExtension extends SchemaElement {
 
 }
 
-// Copyright (c) 2004-2008 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

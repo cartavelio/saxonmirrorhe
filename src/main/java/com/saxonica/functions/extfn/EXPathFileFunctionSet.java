@@ -1,11 +1,15 @@
 package com.saxonica.functions.extfn;
 
-import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.ErrorExpression;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.Literal;
+import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.ZeroOrOne;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.value.StringValue;
 
@@ -30,7 +34,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
 
     private void init() {
 
-        register("base-dir", 0, BaseDir.class, AnyItemType.getInstance(), OPT, 0, 0);
+        register("base-dir", 0, BaseDir.class, AnyItemType.getInstance(), OPT, 0);
 
     }
 
@@ -62,7 +66,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
                 try {
                     return Literal.makeLiteral(makeResult(getStaticBaseUriString()));
                 } catch (XPathException e) {
-                    return new ErrorExpression(e);
+                    return new ErrorExpression(new XmlProcessingException(e));
                 }
             }
         }
@@ -76,7 +80,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
          * @throws XPathException if a dynamic error occurs within the function
          */
         @Override
-        public Sequence<?> call(XPathContext context, Sequence[] args) throws XPathException {
+        public Sequence call(XPathContext context, Sequence[] args) throws XPathException {
             return makeResult(getStaticBaseUriString());
         }
 
@@ -97,4 +101,4 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

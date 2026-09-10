@@ -3,12 +3,11 @@ package com.saxonica.ee.schema.sdoc;
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.*;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.om.AttributeCollection;
-import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.linked.NodeImpl;
 import net.sf.saxon.type.SchemaException;
 
 /**
@@ -44,9 +43,10 @@ public class XSDIdentityConstraint extends SchemaElement {
      * @throws SchemaException if any errors are found in the attributes
      */
 
+    @Override
     public void prepareAttributes() throws SchemaException {
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         if (getFingerprint() == StandardNames.XS_KEYREF) {
             String[] allowed = {"id", "name", "ref", "refer"};
             allowAttributes(atts, allowed);
@@ -116,6 +116,7 @@ public class XSDIdentityConstraint extends SchemaElement {
             }
 
             schema.addIdentityConstraint(identityConstraint);
+            
         }
 
         constraintName = nameCode;
@@ -164,15 +165,14 @@ public class XSDIdentityConstraint extends SchemaElement {
      * @throws SchemaException if any XML representation constraints are violated
      */
 
+    @Override
     public void validate(SchemaCompiler compiler) throws SchemaException {
 
         boolean foundAnnotation = false;
         boolean foundSelector = false;
         boolean foundField = false;
 
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while ((child = (NodeImpl)iter.next()) != null) {
+        for (NodeInfo child : children()) {
             switch (child.getFingerprint()) {
                 case StandardNames.XS_ANNOTATION: {
                     if (foundAnnotation) {
@@ -226,15 +226,14 @@ public class XSDIdentityConstraint extends SchemaElement {
      *
      * @param compiler the schema compiler
      */
+    @Override
     public void postValidate(SchemaCompiler compiler)
             throws SchemaException {
         if (identityConstraint == null) {
             // means an error was already reported
             return;
         }
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD);
-        NodeImpl child;
-        while ((child = (NodeImpl)iter.next()) != null) {
+        for (NodeInfo child : children()) {
             switch (child.getFingerprint()) {
                 case StandardNames.XS_ANNOTATION: {
                     break;
@@ -247,6 +246,12 @@ public class XSDIdentityConstraint extends SchemaElement {
                 case StandardNames.XS_FIELD: {
                     IdentityField field = ((XSDFieldOrSelector) child).getIdentityField();
                     identityConstraint.addField(field);
+                    if (child.getAttributeValue(NamespaceConstant.SAXON, "order") != null) {
+                        if (getFingerprint() != StandardNames.XS_UNIQUE) {
+                            error("saxon:order is allowed only on a field of xs:unique");
+                        }
+                        identityConstraint.setOrdered(true);
+                    }
                     break;
                 }
             }
@@ -255,4 +260,4 @@ public class XSDIdentityConstraint extends SchemaElement {
 
 }
 
-// Copyright (c) 2004-2010 Saxonica Limited. All rights reserved
+// Copyright (c) 2004-2020 Saxonica Limited

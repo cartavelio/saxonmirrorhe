@@ -3,9 +3,10 @@ package com.saxonica.ee.stream.om;
 import com.saxonica.ee.stream.watch.MultiAccumulatorWatch;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.UntypedAtomicValue;
@@ -42,10 +43,12 @@ public class FleetingDocumentNode extends FleetingParentNode implements TreeInfo
      * @return the document node
      */
 
+    @Override
     public NodeInfo getRootNode() {
         return this;
     }
 
+    @Override
     public TreeInfo getTreeInfo() { return this; }
 
     protected int allocateNodeNumber() {
@@ -57,6 +60,7 @@ public class FleetingDocumentNode extends FleetingParentNode implements TreeInfo
      *
      * @return the document number
      */
+    @Override
     public long getDocumentNumber() {
         return documentNumber;
     }
@@ -107,10 +111,11 @@ public class FleetingDocumentNode extends FleetingParentNode implements TreeInfo
             for (NodeInfo node : initialCommentsAndProcessingInstructions) {
                 switch (node.getNodeKind()) {
                     case Type.COMMENT:
-                        out.comment(node.getStringValue(), ExplicitLocation.UNKNOWN_LOCATION, 0);
+                        out.comment(node.getStringValue(), Loc.NONE, ReceiverOption.NONE);
                         break;
                     case Type.PROCESSING_INSTRUCTION:
-                        out.processingInstruction(node.getLocalPart(), node.getStringValue(), ExplicitLocation.UNKNOWN_LOCATION, 0);
+                        out.processingInstruction(node.getLocalPart(), node.getStringValue(),
+                                                  Loc.NONE, ReceiverOption.NONE);
                         break;
                     default:
                         throw new IllegalStateException();
@@ -130,18 +135,9 @@ public class FleetingDocumentNode extends FleetingParentNode implements TreeInfo
      *         type ID)
      */
 
+    @Override
     public NodeInfo selectID(String id, boolean getParent) {
         return null;
-    }
-
-    /**
-     * Ask whether the document contains any nodes whose type annotation is anything other than
-     * UNTYPED
-     *
-     * @return true if the document contains elements whose type is other than UNTYPED
-     */
-    public boolean isTyped() {
-        return false;
     }
 
     /**
@@ -163,6 +159,7 @@ public class FleetingDocumentNode extends FleetingParentNode implements TreeInfo
      *         information is not available then an empty iterator is returned
      */
 
+    @Override
     public Iterator<String> getUnparsedEntityNames() {
         if (unparsedEntities == null) {
             Collection<String> e = Collections.emptyList();
@@ -185,6 +182,7 @@ public class FleetingDocumentNode extends FleetingParentNode implements TreeInfo
      * @since 8.4
      */
 
+    @Override
     public String[] getUnparsedEntity(String name) {
         if (unparsedEntities == null) {
             return null;
@@ -202,6 +200,7 @@ public class FleetingDocumentNode extends FleetingParentNode implements TreeInfo
      *
      * @param systemId The system identifier as a URL string.
      */
+    @Override
     public void setSystemId(String systemId) {
         this.systemId = systemId;
     }
@@ -213,6 +212,7 @@ public class FleetingDocumentNode extends FleetingParentNode implements TreeInfo
      * @since 8.4
      */
 
+    @Override
     public Configuration getConfiguration() {
         return config;
     }
@@ -224,6 +224,7 @@ public class FleetingDocumentNode extends FleetingParentNode implements TreeInfo
      * @since 8.4
      */
 
+    @Override
     public NamePool getNamePool() {
         return config.getNamePool();
     }
@@ -232,15 +233,14 @@ public class FleetingDocumentNode extends FleetingParentNode implements TreeInfo
      * Copy this node to a given Receiver.
      * <p>This method is primarily for internal use. It should not be considered a stable
      * part of the Saxon API.</p>
-     *
-     * @param out         the Receiver to which the node should be copied. It is the caller's
+     *  @param out         the Receiver to which the node should be copied. It is the caller's
      *                    responsibility to ensure that this Receiver is open before the method is called
      *                    (or that it is self-opening), and that it is closed after use.
      * @param copyOptions Define how namespaces are handled
      * @param locationId  If non-zero, identifies the location of the instruction
- *                    that requested this copy. If zero, indicates that the location information
      */
 
+    @Override
     public void copy(Receiver out, int copyOptions, Location locationId) throws XPathException {
         throw new UnsupportedOperationException("copy() is not supported in streaming mode for document nodes");
     }
@@ -260,6 +260,7 @@ public class FleetingDocumentNode extends FleetingParentNode implements TreeInfo
      * @since 8.4
      */
 
+    @Override
     public String getSystemId() {
         return systemId;
     }
@@ -273,11 +274,12 @@ public class FleetingDocumentNode extends FleetingParentNode implements TreeInfo
      * @since 8.4
      */
 
+    @Override
     public String getBaseURI() {
         return systemId;
     }
 
-    //    /**
+//    /**
 //     * Get a mapping from accumulators to the AccumulatorWatch that implements the accumulator.
 //     * @return a mapping from accumulators to the corresponding AccumulatorWatch
 //     */
@@ -303,7 +305,6 @@ public class FleetingDocumentNode extends FleetingParentNode implements TreeInfo
         return this.multiAccumulatorWatch;
     }
 
-
     /**
      * Set details of space stripping action that was applied to this document during
      * construction. This ensures that space stripping is not applied twice to the same
@@ -313,6 +314,7 @@ public class FleetingDocumentNode extends FleetingParentNode implements TreeInfo
      *             document during its construction.
      * @since 9.9
      */
+    @Override
     public void setSpaceStrippingRule(SpaceStrippingRule rule) {
         this.spaceStrippingRule = rule;
     }
@@ -327,6 +329,7 @@ public class FleetingDocumentNode extends FleetingParentNode implements TreeInfo
      * indicating that no space stripping has been applied
      * @since 9.9
      */
+    @Override
     public SpaceStrippingRule getSpaceStrippingRule() {
         return spaceStrippingRule;
     }
@@ -342,6 +345,7 @@ public class FleetingDocumentNode extends FleetingParentNode implements TreeInfo
      *              removes the existing value for the property.
      */
 
+    @Override
     public void setUserData(String key, Object value) {
         if (userData == null) {
             userData = new HashMap<String, Object>(4);
@@ -362,6 +366,7 @@ public class FleetingDocumentNode extends FleetingParentNode implements TreeInfo
      */
 
     /*@Nullable*/
+    @Override
     public Object getUserData(String key) {
         if (userData == null) {
             return null;
@@ -370,10 +375,18 @@ public class FleetingDocumentNode extends FleetingParentNode implements TreeInfo
         }
     }
 
-
+    /**
+     * Notify the event to a Receiver
+     *
+     * @param out the receiver to be notified
+     */
+    @Override
+    public void notify(Receiver out) throws XPathException {
+        out.startDocument(ReceiverOption.NONE);
+    }
 }
 
-// Copyright (c) 2009-2014 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited
 
 
 

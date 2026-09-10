@@ -13,6 +13,7 @@ import org.objectweb.asm.Type;
  */
 public class PositionCompiler extends ToItemCompiler {
 
+    @Override
     public void compileToPrimitive(CompilerService compiler, Expression expression, Class requiredClass, OnEmpty onEmpty) {
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
@@ -52,6 +53,6 @@ public class PositionCompiler extends ToItemCompiler {
     }
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited
 
 

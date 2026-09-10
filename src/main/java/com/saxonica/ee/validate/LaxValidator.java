@@ -5,11 +5,9 @@ import com.saxonica.ee.schema.ElementDecl;
 import com.saxonica.ee.schema.UserAtomicType;
 import com.saxonica.ee.schema.ValueConstraint;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.NodeName;
-import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -17,12 +15,13 @@ import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.ValidationFailure;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.Whitespace;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class performs lax validation on an element.
  *
- * @author Michael Kay
  */
 
 public class LaxValidator extends ContentValidator {
@@ -38,6 +37,7 @@ public class LaxValidator extends ContentValidator {
      * @return the schema type that this validator is validating against, or null
      */
 
+    @Override
     public SchemaType getSchemaType() {
         return null;
     }
@@ -45,67 +45,53 @@ public class LaxValidator extends ContentValidator {
     /**
      * Output element start tag for a child element
      */
-
-    public void startElement(NodeName nodeName, SchemaType typeCode, Location location, int properties) throws XPathException {
-        int fp = nodeName.obtainFingerprint(getNamePool());
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
+        int fp = elemName.obtainFingerprint(getNamePool());
         ElementDecl decl = (ElementDecl) getConfiguration().getElementDeclaration(fp);
-        makeChildValidator(decl, nodeName.getStructuredQName(), location, Validation.LAX);
+        makeChildValidator(decl, elemName.getStructuredQName(), location, Validation.LAX);
         checkNoChildrenWhenNil(location);
-        typeCode = childValidator.getAnnotation();
-        super.startElement(nodeName, typeCode, location, properties);
+        List<AttributeInfo> attList = new ArrayList<>(attributes.size());
+        for (AttributeInfo att : attributes) {
+            attList.add(processAttribute(att));
+        }
+        AttributeMap validatedAtts = AttributeMap.fromList(attList);
+        type = childValidator.getAnnotation();
+        super.startElement(elemName, type, validatedAtts, namespaces, location, properties);
     }
 
     /*@Nullable*/
+    @Override
     public ContentValidator getChildValidator() {
         return childValidator;
     }
 
     /**
-     * Handle an attribute
-     *
-     * @param attName    integer identifying the name of the attribute
-     * @param typeCode   integer identifying the type annotation of the
-     *                   attribute
-     * @param value      the value of the attribute
-     * @param locationId the location of the node in the source, or of the instruction that created it
-     *@param properties bit-significant flags indicating special action to
-     *                   be taken  @throws net.sf.saxon.trans.XPathException
-     *          On any failure to write the attribute
+     * Lax-validate an attribute
+     * @param att the attribute to be validated
      */
 
-    public void attribute(NodeName attName, SimpleType typeCode, CharSequence value, Location locationId, int properties)
-            throws XPathException {
-        int fingerprint = attName.obtainFingerprint(getNamePool());
-        if (fingerprint == StandardNames.XSI_NIL) {
-            if (getNillability() == Nillability.DISALLOWED) {
-                String message = "The element is not nillable, so xsi:nil must not be present";
-                ValidationFailure ve = new ValidationFailure(message);
-                ve.setConstraintReference(1, "cvc-elt", "3.1");
-                ve.setSchemaType(getSchemaType());
-                reportValidationError(ve, true, locationId);
-            }
-            String b = Whitespace.trim(value);
-            if (getNillability() != Nillability.IGNORED && (b.equals("true") || b.equals("1"))) {
-                nil = true;
-            }
-        }
+    protected AttributeInfo processAttribute(AttributeInfo att) throws XPathException {
+        String value = att.getValue();
         SimpleType annotation = BuiltInAtomicType.UNTYPED_ATOMIC;
         // During lax validation, if an attribute is found for which a global attribute declaration
         //  exists, the attribute must be valid against that declaration.
-        AttributeDecl decl = (AttributeDecl) getConfiguration().getAttributeDeclaration(attName.getStructuredQName());
+        AttributeDecl decl = (AttributeDecl) getConfiguration().getAttributeDeclaration(att.getNodeName().getStructuredQName());
         if (decl != null) {
             SimpleType type = decl.getSimpleType();
             ValidationFailure err = type.validateContent(
-                    value, getNamespaceResolver(), getConfiguration().getConversionRules());
+                    att.getValue(), getNamespaceResolver(), getConfiguration().getConversionRules());
             if (err != null) {
                 err.setConstraintReference(1, "cvc-complex-type", "3");
                 err.setSchemaType(type);
-                reportValidationError(err, false, locationId);
+                reportValidationError(err, false, att.getLocation());
             } else {
                 // if the attribute declaration has an enumeration facet, economize on storage by
                 // passing on the reference to the value already held in the schema.
                 if (type instanceof UserAtomicType) {
-                    value = ((UserAtomicType) type).getSharedInstance(value.toString());
+                    value = ((UserAtomicType) type).getSharedInstance(value);
                 }
 
                 annotation = type;
@@ -117,23 +103,24 @@ public class LaxValidator extends ContentValidator {
                         getConfiguration(), value, type, getNamespaceResolver())) {
                     AtomicSequence fixed = decl.getFixedValue();
                     String message = "The actual value " + Err.wrap(value, Err.VALUE) +
-                            " of attribute " + Err.wrap(attName.getDisplayName(), Err.ATTRIBUTE) +
+                            " of attribute " + Err.wrap(att.getNodeName().getDisplayName(), Err.ATTRIBUTE) +
                             " does not match the required fixed value " +
                             (fixed instanceof AtomicValue ? Err.wrap(fixed.getStringValue(), Err.VALUE) : "");
                     ValidationFailure ve = new ValidationFailure(message);
                     ve.setConstraintReference(1, "cvc-au", "0");
                     ve.setSchemaType(type);
-                    reportValidationError(ve, false, locationId);
+                    reportValidationError(ve, false, att.getLocation());
                 }
             }
         }
-        super.attribute(attName, annotation, value, locationId, properties);
+        return new AttributeInfo(att.getNodeName(), annotation, value, att.getLocation(), att.getProperties());
     }
 
     /**
      * Character data
      */
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         checkNoCharactersWhenNil(locationId);
         super.characters(chars, locationId, properties);
@@ -141,5 +128,5 @@ public class LaxValidator extends ContentValidator {
 
 }
 
-// Copyright (c) 2004-2018 Saxonica Limited. No warranty.
+// Copyright (c) 2004-2020 Saxonica Limited No warranty.
 

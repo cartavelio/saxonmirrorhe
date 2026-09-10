@@ -1,8 +1,10 @@
 package com.saxonica.ee.update;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
+import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
@@ -88,6 +90,7 @@ public class CopyModifyExpression extends Expression {
      *         information).
      */
 
+    @Override
     public int computeCardinality() {
         return getReturnExp().getCardinality();
     }
@@ -105,6 +108,7 @@ public class CopyModifyExpression extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return getReturnExp().getItemType();
     }
@@ -116,6 +120,7 @@ public class CopyModifyExpression extends Expression {
      *         expression
      */
 
+    @Override
     public boolean isUpdatingExpression() {
         return false;
     }
@@ -140,6 +145,7 @@ public class CopyModifyExpression extends Expression {
      *          if the expression has a non-permitted updating subexpression
      */
 
+    @Override
     public void checkForUpdatingSubexpressions() throws XPathException {
         if (ExpressionTool.isNotAllowedInUpdatingContext(getUpdateExp())) {
             throw new XPathException("Expression in modify clause must be an updating expression (or () or error())",
@@ -159,6 +165,7 @@ public class CopyModifyExpression extends Expression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         CopyModifyExpression exp =
                 new CopyModifyExpression(getUpdateExp().copy(rebindings), getReturnExp().copy(rebindings), validationMode);
@@ -187,17 +194,16 @@ public class CopyModifyExpression extends Expression {
      * @param out the expression presenter used to display the structure
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("copyModify", this);
-        out.startElement("copyBindings", this);
+        out.emitAttribute("val", Validation.toString(validationMode));
+        out.setChildRole("bindings");
         getCopyBindings().export(out);
-        out.endElement();
-        out.startElement("modify", this);
+        out.setChildRole("modify");
         getUpdateExp().export(out);
-        out.endElement();
-        out.startElement("return", this);
+        out.setChildRole("return");
         getReturnExp().export(out);
-        out.endElement();
         out.endElement();
     }
 
@@ -217,7 +223,8 @@ public class CopyModifyExpression extends Expression {
      */
 
     /*@NotNull*/
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         doUpdates(context);
         return getReturnExp().iterate(context);
     }
@@ -239,6 +246,7 @@ public class CopyModifyExpression extends Expression {
      *          expression
      */
 
+    @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
         doUpdates(context);
         return getReturnExp().evaluateItem(context);
@@ -248,13 +256,14 @@ public class CopyModifyExpression extends Expression {
     /**
      * Process the instruction, without returning any tail calls
      *
+     * @param output the destination for the result
      * @param context The dynamic context, giving access to the current node,
-     *                the current variables, etc.
      */
 
-    public void process(XPathContext context) throws XPathException {
+    @Override
+    public void process(Outputter output, XPathContext context) throws XPathException {
         doUpdates(context);
-        getReturnExp().process(context);
+        getReturnExp().process(output, context);
     }
 
     private void doUpdates(XPathContext context) throws XPathException {
@@ -262,7 +271,7 @@ public class CopyModifyExpression extends Expression {
         getUpdateExp().evaluatePendingUpdates(context, pul);
         pul.apply(context, validationMode);
         // The set of updated trees must be a subset of the set of nodes created during the copy phase
-        Set<NodeInfo> copiedNodes = new HashSet<NodeInfo>();
+        Set<NodeInfo> copiedNodes = new HashSet<>();
         getCopyBindings().iterate(context).forEachOrFail(node -> copiedNodes.add((NodeInfo)node));
         if (!copiedNodes.containsAll(pul.getAffectedTrees())) {
             XPathException err = new XPathException(
@@ -278,4 +287,4 @@ public class CopyModifyExpression extends Expression {
 
 }
 
-// Copyright (c) 2008 Saxonica Limited.
+// Copyright (c) 2008-2020 Saxonica Limited

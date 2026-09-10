@@ -1,24 +1,30 @@
 package com.saxonica.ee.stream.om;
 
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.pattern.NameTest;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.NamespaceNode;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
+import net.sf.saxon.tree.iter.SingleNodeIterator;
+import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
+
+import java.util.Objects;
+import java.util.function.Predicate;
 
 /**
  * Represents an element node available transiently within a streamed document
  */
 public class FleetingElementNode extends FleetingParentNode {
 
-    private NamespaceBinding[] localNamespaces;
-    private AttributeCollection attributes;
+    private NamespaceMap inScopeNamespaces;
+    private AttributeMap attributes;
 
     public FleetingElementNode(NodeName name, SchemaType type) {
         setNodeKind(Type.ELEMENT);
@@ -26,14 +32,28 @@ public class FleetingElementNode extends FleetingParentNode {
         setTypeAnnotation(type);
     }
 
+    public FleetingElementNode(NodeName name, SchemaType type, AttributeMap attributes, NamespaceMap namespaces) {
+        setNodeKind(Type.ELEMENT);
+        setNodeName(name);
+        setTypeAnnotation(type);
+        setAttributes(attributes);
+        setNamespaceMap(namespaces);
+    }
+
     /**
-     * Set the local namespace declarations for this element, that is, the namespace declarations
-     * (and undeclarations) that actually appear on this element
-     * @param namespaces the local namespace declarations
+     * Set the in-scope namespaces for this element
+     * @param namespaces the in-scope namespaces. This includes all namespace bindings that are
+     *                   in scope, not just the local namespace declarations
      */
 
-    public void setLocalNamespaces(NamespaceBinding[] namespaces) {
-        this.localNamespaces = namespaces;
+    public void setNamespaceMap(NamespaceMap namespaces) {
+        this.inScopeNamespaces = namespaces;
+    }
+
+
+    @Override
+    public NamespaceMap getAllNamespaces() {
+        return inScopeNamespaces;
     }
 
     /**
@@ -41,7 +61,7 @@ public class FleetingElementNode extends FleetingParentNode {
      * @param attributes the element's attributes
      */
 
-    public void setAttributes(AttributeCollection attributes) {
+    public void setAttributes(AttributeMap attributes) {
         this.attributes = attributes;
     }
 
@@ -60,6 +80,7 @@ public class FleetingElementNode extends FleetingParentNode {
      * @throws UnsupportedOperationException (always)
      */
 
+    @Override
     public void copy(Receiver out, int copyOptions, Location locationId) throws XPathException {
         throw new UnsupportedOperationException("copy() is not supported for streamed " +
                                                         Err.wrap(getDisplayName(), Err.ELEMENT) +
@@ -71,7 +92,7 @@ public class FleetingElementNode extends FleetingParentNode {
      * that match a given NodeTest
      *
      * @param axisNumber an integer identifying the axis; one of the constants
-     *                   defined in class {@link net.sf.saxon.om.AxisInfo}
+     *                   defined in class {@link AxisInfo}
      * @param nodeTest   A condition to be satisfied by the returned nodes; nodes
      *                   that do not satisfy this condition are not included in the result
      * @return an AxisIterator that delivers the nodes reached by the axis in
@@ -83,13 +104,21 @@ public class FleetingElementNode extends FleetingParentNode {
      * @since 8.4
      */
 
-    public AxisIterator iterateAxis(byte axisNumber, NodeTest nodeTest) {
+    @Override
+    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> nodeTest) {
         switch (axisNumber) {
             case AxisInfo.ATTRIBUTE:
-                if (attributes.getLength() == 0) {
-                    return EmptyIterator.OfNodes.THE_INSTANCE;
+                if (attributes.size() == 0) {
+                    return EmptyIterator.ofNodes();
+                } else if (nodeTest instanceof NameTest) {
+                    AttributeInfo att = attributes.getByFingerprint(
+                            ((NameTest)nodeTest).getFingerprint(), getConfiguration().getNamePool());
+                    return att==null ? EmptyIterator.ofNodes() : SingleNodeIterator.makeIterator(makeAttributeNode(att));
+                } else {
+                    final AttributeIterator base = new AttributeIterator(
+                            this, attributes, (e, a) -> ((FleetingElementNode)e).makeAttributeNode(a));
+                    return new Navigator.AxisFilter(base, nodeTest);
                 }
-                return new AttributeIterator(this, attributes, nodeTest);
 
             case AxisInfo.NAMESPACE:
                 return NamespaceNode.makeIterator(this, nodeTest);
@@ -101,35 +130,44 @@ public class FleetingElementNode extends FleetingParentNode {
     }
 
     /**
+     * Make an attribute node
+     *
+     * @param attInfo information about the attribute
+     * @return the attribute node.
+     */
+
+    private FleetingNode makeAttributeNode(AttributeInfo attInfo) {
+        Objects.requireNonNull(attInfo);
+        FleetingNode attr = new FleetingNode();
+        attr.setParent(this);
+        attr.setNodeKind(Type.ATTRIBUTE);
+        attr.setNodeName(attInfo.getNodeName());
+        attr.setTypeAnnotation(attInfo.getType());
+        attr.setStringValue(attInfo.getValue());
+        return attr;
+    }
+
+    /**
      * Get the attributes defined on this element
      * @return the attributes in the form of an AttributeCollection
      */
 
-    public AttributeCollection getAttributes() {
+    public AttributeMap getAttributes() {
         return attributes;
     }
 
     /**
-     * Get all namespace declarations and undeclarations defined on this element.
-     * <p>This method is intended primarily for internal use. User applications needing
-     * information about the namespace context of a node should use <code>iterateAxis(Axis.NAMESPACE)</code>.
-     * (However, not all implementations support the namespace axis, whereas all implementations are
-     * required to support this method.)</p>
+     * Get all in-scope namespaces defined on this element.
      *
-     * @param buffer If this is non-null, and the result array fits in this buffer, then the result
-     *               may overwrite the contents of this array, to avoid the cost of allocating a new array on the heap.
-     * @return An array of integers representing the namespace declarations and undeclarations present on
-     *         this element. For a node other than an element, return null. Otherwise, the returned array is a
-     *         sequence of namespace codes, whose meaning may be interpreted by reference to the name pool. The
-     *         top half word of each namespace code represents the prefix, the bottom half represents the URI.
-     *         If the bottom half is zero, then this is a namespace undeclaration rather than a declaration.
-     *         The XML namespace is never included in the list. If the supplied array is larger than required,
-     *         then the first unused entry will be set to -1.
-     *         <p>For a node other than an element, the method returns null.</p>
+     * @return a {@code NamespaceMap} containing all the in-scope namespaces for an element (not just
+     * those declared locally on the element itself). Returns null if the node is
+     * not an element.
      */
 
-    public NamespaceBinding[] getDeclaredNamespaces(NamespaceBinding[] buffer) {
-        return localNamespaces;
+    /*@Nullable*/
+    @Override
+    public NamespaceMap getInScopeNamespaces() {
+        return inScopeNamespaces;
     }
 
     /**
@@ -152,7 +190,32 @@ public class FleetingElementNode extends FleetingParentNode {
      */
 
     public int getAttributeIndex(String uri, String local) {
-        return attributes.getIndex(uri, local);
+        int i=0;
+        for (AttributeInfo att : attributes) {
+            final NodeName nn = att.getNodeName();
+            if (nn.hasURI(uri) && nn.getLocalPart().equals(local)) {
+                return i;
+            } else {
+                i++;
+            }
+        }
+        return Integer.MAX_VALUE;
+    }
+
+    public int compareAttributeOrder(NodeName one, NodeName two) {
+        if (one.equals(two)) {
+            return 0;
+        } else {
+            for (AttributeInfo att : attributes) {
+                final NodeName nn = att.getNodeName();
+                if (nn.equals(one)) {
+                    return -1;
+                } else if (nn.equals(two)) {
+                    return +1;
+                }
+            }
+            throw new IllegalStateException("Attribute not found in attribute list");
+        }
     }
 
     /**
@@ -172,7 +235,16 @@ public class FleetingElementNode extends FleetingParentNode {
         return -1;
     }
 
+    /**
+     * Notify the event to a Receiver
+     *
+     * @param out the receiver to be notified
+     */
+    @Override
+    public void notify(Receiver out) throws XPathException {
+        out.startElement(getNodeName(), getSchemaType(), getAttributes(), getAllNamespaces(), this, ReceiverOption.NONE);
+    }
 }
 
-// Copyright (c) 2012 Saxonica Limited.
+// Copyright (c) 2012-2020 Saxonica Limited
 

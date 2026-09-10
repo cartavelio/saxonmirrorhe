@@ -14,12 +14,12 @@ import net.sf.saxon.trans.XPathException;
  */
 public interface FeedMaker {
 
-    Feed makeItemFeed(WatchManager watchManager, Feed out, XPathContext context) throws XPathException;
+    ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException;
 
 }
 
 //
-// Copyright (c) 2009 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited
 //
 
 

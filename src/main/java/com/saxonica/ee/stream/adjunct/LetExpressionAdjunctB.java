@@ -1,7 +1,6 @@
 package com.saxonica.ee.stream.adjunct;
 
 import com.saxonica.ee.stream.Inversion;
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.om.FleetingParentNode;
@@ -13,7 +12,7 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.LetExpression;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
@@ -25,13 +24,15 @@ import net.sf.saxon.trans.XPathException;
 public class LetExpressionAdjunctB extends TransmissionAdjunct {
 
 
+    @Override
     public WatchMaker getWatchMaker(boolean forGrouping) throws XPathException {
         final Expression action = ((LetExpression) getExpression()).getAction();
         final Inversion ie = Inversion.invertExpression(action, forGrouping);
         final Inversion route = ie.copy();
         Inversion.PushAction letAction = new Inversion.PushAction();
         letAction.feedMaker = new FeedMaker() {
-            public Feed makeItemFeed(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+            @Override
+            public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
                 return LetExpressionAdjunctB.this.makeItemFeed(watchManager, out, context);
             }
         };
@@ -39,14 +40,16 @@ public class LetExpressionAdjunctB extends TransmissionAdjunct {
         letAction.streamingChildSequence = 0;
         route.prepend(letAction);
         return new WatchMaker() {
-            public Trigger makeWatch(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+            @Override
+            public Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
                 return route.getWatch(watchManager, out, context);
             }
         };
 //        }
     }
 
-    public Feed makeItemFeed(WatchManager watchManager, final Feed out, final XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(WatchManager watchManager, final ItemFeed out, final XPathContext context) throws XPathException {
         return new ItemFeed(getExpression(), out, context) {
 
             private XPathContext context = getContext();
@@ -55,7 +58,7 @@ public class LetExpressionAdjunctB extends TransmissionAdjunct {
             public void open(Terminator terminator) throws XPathException {
                 super.open(terminator);
                 try {
-                    Sequence<?> value = ((LetExpression) getExpression()).eval(context);
+                    Sequence value = ((LetExpression) getExpression()).eval(context);
                     context.setLocalVariable(((LetExpression) getExpression()).getLocalSlotNumber(), value);
                 } catch (XPathException e) {
                     dynamicError(e);
@@ -71,9 +74,9 @@ public class LetExpressionAdjunctB extends TransmissionAdjunct {
             }
 
             @Override
-            public void processItem(Item<?> item) throws XPathException {
+            public void append(Item item) throws XPathException {
                 if (!hasFailed()) {
-                    getResult().processItem(item);
+                    getNextOutputter().append(item);
                 }
             }
 
@@ -88,4 +91,4 @@ public class LetExpressionAdjunctB extends TransmissionAdjunct {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

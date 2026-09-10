@@ -3,17 +3,33 @@ package com.saxonica.ee.validate;
 import com.saxonica.ee.schema.Assertion;
 import com.saxonica.ee.schema.ElementDecl;
 import com.saxonica.ee.schema.UserComplexType;
+import com.saxonica.ee.stream.Inversion;
+import com.saxonica.ee.stream.Sweep;
+import com.saxonica.ee.stream.adjunct.BooleanFnFeed;
+import com.saxonica.ee.stream.feed.ItemFeed;
+import com.saxonica.ee.stream.feed.SinkFeed;
+import com.saxonica.ee.stream.watch.Trigger;
+import com.saxonica.ee.stream.watch.WatchManager;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.ReceiverOptions;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.s9api.SaxonApiException;
+import net.sf.saxon.sxpath.XPathDynamicContext;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingIncident;
+import net.sf.saxon.tree.iter.ManualIterator;
+import net.sf.saxon.tree.linked.ElementImpl;
+import net.sf.saxon.tree.linked.LinkedTreeBuilder;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.tree.wrapper.VirtualCopy;
 import net.sf.saxon.type.*;
+import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.*;
@@ -30,7 +46,7 @@ public class ValidationStack extends ValidatingFilter {
 
     private Stack<ContentValidator> stack = new Stack<>();
     private Stack<Location> locationStack = new Stack<>();
-    private boolean contentStarted = false;
+//    private boolean contentStarted = false;
     private Receiver outputReceiver;
     private ContentValidator initialValidator;
     private List<ValidationFailure> xsiValidationErrors;
@@ -39,6 +55,7 @@ public class ValidationStack extends ValidatingFilter {
     private boolean isNilled = false;
     private NodeName topLevelElement = null;
     private AssertionTreeBuilder assertionBuilder;
+    private WatchManager watchManager;
     private TinyBuilder builder;
     private int builderDepth;
     private Map<SchemaComponent, Integer> statistics;
@@ -59,8 +76,10 @@ public class ValidationStack extends ValidatingFilter {
         final PipelineConfiguration pipe = next.getPipelineConfiguration();
         setPipelineConfiguration(pipe);
         assertionBuilder = (AssertionTreeBuilder) pipe.getComponent(AssertionTreeBuilder.class.getName());
+        watchManager = (WatchManager) pipe.getComponent(WatchManager.class.getName());
     }
 
+    @Override
     public void setPipelineConfiguration(/*@NotNull*/ PipelineConfiguration pipe) {
         super.setPipelineConfiguration(pipe);
         if (pipe.getController() == null) {
@@ -134,17 +153,22 @@ public class ValidationStack extends ValidatingFilter {
      * Process element start tag
      */
 
-    public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties)
+    @Override
+    public void startElement(NodeName elemName, SchemaType typeCode,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties)
             throws XPathException {
         locationStack.push(location.saveLocation());
         SchemaType xsiType = getValidationContext().getXSIType();
         if (isNilled) {
-            properties |= ReceiverOptions.NILLED_ELEMENT;
+            properties |= ReceiverOption.NILLED_ELEMENT;
         }
         PipelineConfiguration pipe = getPipelineConfiguration();
         try {
             int fp = elemName.obtainFingerprint(getNamePool());
             if (stack.isEmpty()) {
+
+                // Handle the top-level element of the tree being validated
 
                 ContentValidator initial;
                 if (initialValidator != null && xsiType == null) {
@@ -198,8 +222,7 @@ public class ValidationStack extends ValidatingFilter {
                             ElementDecl decl = (ElementDecl) getConfiguration().getElementDeclaration(fp);
                             initial = ContentValidator.makeValidator(decl, elemName.getStructuredQName(), location,
                                     getValidationContext(), xsiType,
-                                    initialValidationMode,
-                                                                     pipe,
+                                    initialValidationMode, pipe,
                                     outputReceiver, failures);
                         }
                     } else if (initialReceiver instanceof ContentValidator) {
@@ -212,6 +235,13 @@ public class ValidationStack extends ValidatingFilter {
                         initial = ContentValidator.makeValidator(
                                 decl, elemName.getStructuredQName(), location, getValidationContext(), null, initialValidationMode,
                                 pipe, outputReceiver, failures);
+                        if (decl != null && !decl.isNillable() && attributes.get(NamespaceConstant.SCHEMA_INSTANCE, "nil") != null) {
+                            String message = "The element is not nillable, so xsi:nil must not be present";
+                            ValidationFailure ve = new ValidationFailure(message);
+                            ve.setConstraintReference(1, "cvc-elt", "3.1");
+                            xsiValidationErrors.add(ve);
+                        }
+
                     }
                     if (!failures.isEmpty()) {
                         reportValidationError(failures.get(0), false, location);
@@ -222,9 +252,11 @@ public class ValidationStack extends ValidatingFilter {
                 }
                 SchemaType annotation = initial.getAnnotation();
                 initial.setConstraintChecker(getConstraintChecker());
-                if (isNilled) {
-                    properties |= ReceiverOptions.NILLED_ELEMENT;
-                }
+                initial.setNamespaceResolver(namespaces);
+                initial.setNilled(isNilled);
+//                if (isNilled) {
+//                    properties |= ReceiverOption.NILLED_ELEMENT;
+//                }
 
                 if (!(initial instanceof SkipValidator) && !xsiValidationErrors.isEmpty()) {
                     // Errors in xsi attributes are not reported when doing skip validation
@@ -235,9 +267,15 @@ public class ValidationStack extends ValidatingFilter {
 
                 SchemaType type = initial.getSchemaType();
 
+                List<NamespaceBinding> additionalNamespaces = new ArrayList<>();
+                AttributeMap validatedAttributes = initial.validateAttributes(attributes, additionalNamespaces);
+                for (NamespaceBinding ns : additionalNamespaces) {
+                    namespaces = namespaces.put(ns.getPrefix(), ns.getURI());
+                }
+
                 if (initial instanceof SimpleContentValidator && type.isIdType()) {
-                    pipe.getErrorListener().warning(
-                            new XPathException("During validation, using an ID element at the outermost level has no effect"));
+                    pipe.getErrorReporter().report(
+                            new XmlProcessingIncident("During validation, using an ID element at the outermost level has no effect").asWarning());
                 }
 
                 ConstraintChecker constraintChecker = getConstraintChecker();
@@ -247,23 +285,10 @@ public class ValidationStack extends ValidatingFilter {
                         constraintChecker.setElementDeclaration(element);
                     }
                 }
-                outputReceiver.startElement(elemName, annotation, location, properties);
+                outputReceiver.startElement(elemName, annotation, validatedAttributes, namespaces, location, properties);
 
                 if (type instanceof UserComplexType && ((UserComplexType) type).hasAssertions()) {
-
-                    builder = new TinyBuilder(pipe);
-                    builder.setStatistics(pipe.getConfiguration().getTreeStatistics().ASSERTION_TREE_STATISTICS);
-                    builder.setLineNumbering(true);
-                    builder.open();
-                    builder.startElement(elemName, typeCode, location, properties);
-                    NamespaceResolver nr = getValidationContext().getStartTagBuffer();
-                    for (Iterator<String> iter = nr.iteratePrefixes(); iter.hasNext(); ) {
-                        String prefix = iter.next();
-                        String uri = nr.getURIForPrefix(prefix, true);
-                        builder.namespace(new NamespaceBinding(prefix, uri), 0);
-                    }
-                    builderDepth = 0;
-                    assertionBuilder.activate(builder);
+                    prepareForAssertions(elemName, type, validatedAttributes, namespaces, location, properties, pipe);
                 }
 
                 stack.push(initial);
@@ -271,26 +296,25 @@ public class ValidationStack extends ValidatingFilter {
             } else {
                 // validate any element except the outermost one
 
-                if (!contentStarted) {
-                    startContent();
-                }
+//                if (!contentStarted) {
+//                    startContent();
+//                }
                 // v0 is the validator for the current element (the parent of the one just starting)
                 ContentValidator v0 = stack.peek();
-                //v0.setXSIType(xsiType);
-                //v0.setStartTagBuffer(getStartTagBuffer());
-                v0.startElement(elemName, typeCode, location, properties);
+                v0.startElement(elemName, typeCode, attributes, namespaces, location, properties);
 
                 // v1 is the validator for the new element (the one just starting)
                 ContentValidator v1 = v0.getChildValidator();
                 v1.setValidationContext(getValidationContext());
                 v1.setUnderlyingReceiver(outputReceiver);
+                v1.setNamespaceResolver(namespaces);
                 if (statistics != null) {
                     incrementStatistics(v1.getElementDeclaration());
                     incrementStatistics(v1.getSchemaType());
                 }
                 setUnderlyingReceiver(v1);
                 stack.push(v1);
-                contentStarted = false;
+//                contentStarted = false;
 
                 if (!(v1 instanceof SkipValidator) && !xsiValidationErrors.isEmpty()) {
                     // Errors in xsi attributes are not reported when doing skip validation
@@ -299,23 +323,36 @@ public class ValidationStack extends ValidatingFilter {
                     }
                 }
 
-                if (builder == null) {
-                    SchemaType type = v1.getSchemaType();
-                    if (type instanceof UserComplexType && ((UserComplexType) type).hasAssertions()) {
-                        builder = new TinyBuilder(pipe);
-                        builder.setStatistics(pipe.getConfiguration().getTreeStatistics().ASSERTION_TREE_STATISTICS);
-                        builder.open();
-                        builder.startElement(elemName, typeCode, location, properties);
-                        NamespaceResolver nr = getValidationContext().getStartTagBuffer();
-                        for (Iterator<String> iter = nr.iteratePrefixes(); iter.hasNext(); ) {
-                            String prefix = iter.next();
-                            String uri = nr.getURIForPrefix(prefix, true);
-                            builder.namespace(new NamespaceBinding(prefix, uri), 0);
-                        }
-                        builderDepth = 0;
-                        assertionBuilder.activate(builder);
+                SchemaType type = v1.getSchemaType();
+                if (type instanceof UserComplexType && ((UserComplexType) type).hasAssertions()) {
+                    List<NamespaceBinding> additionalNamespaces = new ArrayList<>();
+                    AttributeMap validatedAtts = v1.validateAttributes(attributes, additionalNamespaces);
+                    for (NamespaceBinding ns : additionalNamespaces) {
+                        namespaces = namespaces.put(ns.getPrefix(), ns.getURI());
                     }
+                    prepareForAssertions(elemName, type, validatedAtts, namespaces, location, properties, pipe);
                 }
+
+//                if (builder == null) {
+//                    SchemaType type = v1.getSchemaType();
+//                    if (type instanceof UserComplexType && ((UserComplexType) type).hasAssertions()) {
+//                        List<NamespaceBinding> additionalNamespaces = new ArrayList<>();
+//                        AttributeMap validatedAtts = v1.validateAttributes(attributes, additionalNamespaces);
+//                        for (NamespaceBinding ns : additionalNamespaces) {
+//                            namespaces = namespaces.put(ns.getPrefix(), ns.getURI());
+//                        }
+//                        builder = new TinyBuilder(pipe);
+//                        builder.setStatistics(pipe.getConfiguration().getTreeStatistics().ASSERTION_TREE_STATISTICS);
+//                        builder.setSystemId(location.getSystemId());
+//                        builder.setBaseURI(location.getSystemId());
+//                        builder.open();
+//                        builder.startElement(elemName, typeCode, validatedAtts, namespaces, location, properties);
+////                        StartTagBuffer nr = getValidationContext().getStartTagBuffer();
+////                        builder.namespaces(nr.getNamespaceMap(), ReceiverOption.NONE);
+//                        builderDepth = 0;
+//                        assertionBuilder.activate(builder);
+//                    }
+//                }
 
             }
             if (builder != null) {
@@ -332,6 +369,98 @@ public class ValidationStack extends ValidatingFilter {
         }
     }
 
+    private void prepareForAssertions(NodeName elemName, SchemaType type, AttributeMap validatedAttributes, NamespaceMap namespaces, Location location, int properties, PipelineConfiguration pipe) throws XPathException {
+        Set<Assertion> assertions = ((UserComplexType) type).getAssertions();
+        boolean buildTree = false;
+        ElementImpl stub = null;
+        for (Assertion a : assertions) {
+            if (a.getSweep() == Sweep.MOTIONLESS) {
+                if (stub == null) {
+                    LinkedTreeBuilder stubBuilder = new LinkedTreeBuilder(pipe);
+                    stubBuilder.open();
+                    stubBuilder.startElement(elemName, Untyped.INSTANCE, validatedAttributes, namespaces, location, properties);
+                    stubBuilder.endElement();
+                    stubBuilder.close();
+                    stub = (ElementImpl)stubBuilder.getCurrentRoot();
+                }
+                Controller controller = getValidationContext().getController();
+                XPathDynamicContext context = a.getCondition().createDynamicContext(controller, stub);
+                boolean ok;
+                try {
+                    ok = a.getCondition().effectiveBooleanValue(context);
+                } catch (XPathException err) {
+                    ok = false;
+                }
+                if (!ok) {
+                    String message = "Element " + elemName + " does not satisfy assertion";
+                    if (a.getMessage() != null) {
+                        message += ". " + a.getMessage();
+                    } else {
+                        message += " " + Whitespace.collapseWhitespace(a.getConditionText());
+                    }
+
+                    ValidationFailure error = new ValidationFailure(message);
+                    error.setLocator(location);
+                    error.setConstraintReference(1, "sec-cvc-assertion", "0");
+                    reportValidationError(error, true, location);
+                }
+            } else if (a.getSweep() == Sweep.CONSUMING && builder == null) {
+                Controller controller = getValidationContext().getController();
+                XPathContext context = controller.newXPathContext();
+                context.setCurrentIterator(new ManualIterator(watchManager.getCurrentNode()));
+                Inversion inversion = Inversion.invertExpression(a.getCondition().getInternalExpression(), false);
+                    // TODO: precompute the inversion
+
+                ItemFeed assertionResultHandler = new SinkFeed(context) {
+                    /**
+                     * Supply one item towards the streamed input of the expression
+                     *
+                     * @param item the item to be supplied
+                     */
+                    @Override
+                    public void append(Item item) throws XPathException {
+                        if (item instanceof BooleanValue && !((BooleanValue)item).getBooleanValue()) {
+                            String message = "Element " + elemName + " does not satisfy assertion";
+                            if (a.getMessage() != null) {
+                                message += ". " + a.getMessage();
+                            } else {
+                                message += " " + Whitespace.collapseWhitespace(a.getConditionText());
+                            }
+
+                            ValidationFailure error = new ValidationFailure(message);
+                            error.setLocator(location);
+                            error.setConstraintReference(1, "sec-cvc-assertion", "0");
+                            reportValidationError(error, true, location);
+                        }
+                    }
+
+                    @Override
+                    public boolean handlesAppend() {
+                        return true;
+                    }
+                };
+                assertionResultHandler.setPipelineConfiguration(pipe);
+                ItemFeed booleanCapture = new BooleanFnFeed.Positive(null, assertionResultHandler, context);
+                Trigger assertionWatch = inversion.getWatch(watchManager, booleanCapture, context);
+                watchManager.addWatch(assertionWatch, true);
+                watchManager.restartElement(assertionWatch);
+            } else {
+                buildTree = true;
+            }
+        }
+        if (buildTree && builder == null) {
+            builder = new TinyBuilder(pipe);
+            builder.setStatistics(pipe.getConfiguration().getTreeStatistics().ASSERTION_TREE_STATISTICS);
+            //builder.setLineNumbering(true);
+            builder.setSystemId(location.getSystemId());
+            builder.setBaseURI(location.getSystemId());
+            builder.open();
+            builder.startElement(elemName, Untyped.INSTANCE, validatedAttributes, namespaces, location, properties);
+            builderDepth = 0;
+            assertionBuilder.activate(builder);
+        }
+    }
+
     /**
      * Set the initial validator to be used for the outermost element
      *
@@ -342,48 +471,11 @@ public class ValidationStack extends ValidatingFilter {
         initialValidator = validator;
     }
 
-    /**
-     * Handle an attribute
-     *
-     * @param nameCode   integer identifying the name of the attribute
-     * @param typeCode   integer identifying the pre-validation type annotation (typically untypedAtomic)
-     * @param value      the value of the attribute
-     * @param locationId location in the instance document of the element being validated
-     * @param properties additional properties of the attribute  @throws net.sf.saxon.trans.XPathException
-     *          On any failure to write the attribute
-     */
-
-    public void attribute(NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties)
-            throws XPathException {
-        ContentValidator v0 = stack.peek();
-        v0.setStartTagBuffer(getStartTagBuffer());
-        v0.attribute(nameCode, typeCode, value, locationId, properties);
-        if (statistics != null && v0 instanceof AttributeValidator) {
-            SimpleType type = ((AttributeValidator) v0).getMostRecentAttributeType();
-            if (type != null) {
-                incrementStatistics(type);
-            }
-
-        }
-    }
-
-    /**
-     * Notify the start of the content, that is, the completion of all attributes and namespaces.
-     * Note that the initial receiver of output from XSLT instructions will not receive this event,
-     * it has to detect it itself. Note that this event is reported for every element even if it has
-     * no attributes, no namespaces, and no content.
-     */
-
-    public final void startContent() throws XPathException {
-        contentStarted = true;
-        ContentValidator v0 = stack.peek();
-        v0.startContent();
-    }
-
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
-        if (!contentStarted) {
-            startContent();
-        }
+//        if (!contentStarted) {
+//            startContent();
+//        }
         ContentValidator v0 = stack.peek();
         v0.characters(chars, locationId, properties);
     }
@@ -392,11 +484,12 @@ public class ValidationStack extends ValidatingFilter {
      * End of element
      */
 
+    @Override
     public void endElement() throws XPathException {
         Location location = locationStack.pop();
-        if (!contentStarted) {
-            startContent();
-        }
+//        if (!contentStarted) {
+//            startContent();
+//        }
         ContentValidator v0 = stack.pop();
         v0.endElement();
 
@@ -414,7 +507,7 @@ public class ValidationStack extends ValidatingFilter {
                     // make a logical copy of the node to prevent straying outside the subtree
                     root = VirtualCopy.makeVirtualCopy(root);
                 } else {
-                    //builder.endElement();   // bug 4124
+                    //builder.endElement();
                 }
                 testAssertions(root, (UserComplexType) type, location);
             }
@@ -437,12 +530,17 @@ public class ValidationStack extends ValidatingFilter {
      * Notify the end of a document node
      */
 
+    @Override
     public void endDocument() throws XPathException {
-        nextReceiver.endDocument();
-        reportIfInvalid();
-        if (statistics != null) {
-            getPipelineConfiguration().getParseOptions().
-                    getValidationStatisticsRecipient().notifyValidationStatistics(statistics);
+        try {
+            nextReceiver.endDocument();
+            reportIfInvalid();
+            if (statistics != null) {
+                getPipelineConfiguration().getParseOptions().
+                        getValidationStatisticsRecipient().notifyValidationStatistics(statistics);
+            }
+        } catch (SaxonApiException e) {
+            throw XPathException.makeXPathException(e);
         }
     }
 
@@ -463,29 +561,35 @@ public class ValidationStack extends ValidatingFilter {
         if (type.isSimpleContent()) {
             CharSequence s = root.getStringValueCS();
             SimpleType st = type.getSimpleContentType();
-            NamespaceResolver ns = st.isNamespaceSensitive() ? new InscopeNamespaceResolver(root) : null;
+            NamespaceResolver ns = st.isNamespaceSensitive() ? root.getAllNamespaces() : null;
             value = st.getTypedValue(s, ns, getConfiguration().getConversionRules());
         }
         for (Assertion assertion : assertions) {
-            List<NodeInfo> offendingItems = assertion.testComplex(root, value, getValidationContext());
-            if (!offendingItems.isEmpty()) {
-                String message = "Element " + root.getDisplayName() + " does not satisfy assertion";
-                if (assertion.getMessage() != null) {
-                    message += ". " + assertion.getMessage();
-                } else {
-                    message += " " + Whitespace.collapseWhitespace(assertion.getConditionText());
-                }
-
-                ValidationFailure error = new ValidationFailure(message);
-                error.setLocator(location);
-                error.setConstraintReference(1, "sec-cvc-assertion", "0");
-                for (NodeInfo item : offendingItems) {
-                    if (item != root) {
-                        error.addOffendingNode(item);
-                    }
-                }
-                reportValidationError(error, true, location);
+            if (assertion.getSweep() != Sweep.MOTIONLESS) {
+                testAssertion(assertion, root, value, location);
             }
+        }
+    }
+
+    private void testAssertion(Assertion assertion, NodeInfo root, AtomicSequence value, Location location) throws XPathException {
+        List<NodeInfo> offendingItems = assertion.testComplex(root, value, getValidationContext());
+        if (!offendingItems.isEmpty()) {
+            String message = "Element " + root.getDisplayName() + " does not satisfy assertion";
+            if (assertion.getMessage() != null) {
+                message += ". " + assertion.getMessage();
+            } else {
+                message += " " + Whitespace.collapseWhitespace(assertion.getConditionText());
+            }
+
+            ValidationFailure error = new ValidationFailure(message);
+            error.setLocator(location);
+            error.setConstraintReference(1, "sec-cvc-assertion", "0");
+            for (NodeInfo item : offendingItems) {
+                if (item != root) {
+                    error.addOffendingNode(item);
+                }
+            }
+            reportValidationError(error, true, location);
         }
     }
 
@@ -532,6 +636,6 @@ public class ValidationStack extends ValidatingFilter {
 
 }
 
-// Copyright � 2004 - 2008 Saxonica Limited. No warranty.
+// Copyright (c) 2004-2020 Saxonica Limited
 
 

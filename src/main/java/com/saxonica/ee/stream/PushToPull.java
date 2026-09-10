@@ -2,6 +2,8 @@ package com.saxonica.ee.stream;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.trans.Outcome;
+import net.sf.saxon.event.ComplexContentOutputter;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.SequenceWriter;
 import net.sf.saxon.expr.XPathContext;
@@ -41,13 +43,15 @@ public class PushToPull {
         /**
          * Evaluate an instruction in push mode
          *
+         *
+         * @param output the destination for the result
          * @param context the evaluation context
          * @throws XPathException       in the event of a failure
          * @throws QuitParsingException if there was an early exit, that is, if the instruction was evaluated
          *                              without reading the input to completion
          */
 
-        void push(XPathContext context) throws XPathException;
+        void push(Outputter output, XPathContext context) throws XPathException;
     }
 
     /**
@@ -97,14 +101,13 @@ public class PushToPull {
      */
 
     private class Provider implements Runnable {
+        @Override
         public void run() {
             PipelineConfiguration pipe = context.getController().makePipelineConfiguration();
             pipe.setXPathContext(context);
             QueueWriter q = new QueueWriter(pipe);
-            XPathContext c2 = context.newMinorContext();
-            c2.setReceiver(q);
             try {
-                expression.push(c2);
+                expression.push(new ComplexContentOutputter(q), context);
                 // On completion, write a stopper item which the consumer recognizes as representing
                 // the end of the sequence.
                 q.write(stopper);
@@ -129,14 +132,15 @@ public class PushToPull {
      * queue, waiting if necessary until the next item becomes available.
      */
 
-    public SequenceIterator<Item<?>> getIterator() {
+    public SequenceIterator getIterator() {
         EnterpriseConfiguration config = (EnterpriseConfiguration)context.getConfiguration();
         final Thread provider = config.getMultithreadingFactory().makeThread(new Provider());
         provider.start();
-        return new SequenceIterator<Item<?>>() {
+        return new SequenceIterator() {
 
             boolean allDone = false;
 
+            @Override
             public Item next() throws XPathException {
                 //System.err.println("Consumer.read()");
                 if (allDone) {
@@ -168,6 +172,7 @@ public class PushToPull {
              * this may cause the parse() to be aborted early, which gives substantial performance benefits.
              */
 
+            @Override
             public void close() {
                 allDone = true;
                 provider.interrupt();
@@ -176,4 +181,4 @@ public class PushToPull {
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

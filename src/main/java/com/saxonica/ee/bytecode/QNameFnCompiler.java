@@ -3,7 +3,7 @@ package com.saxonica.ee.bytecode;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicType;
@@ -121,4 +121,4 @@ public class QNameFnCompiler extends ToItemCompiler {
 
 }
 
-//Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

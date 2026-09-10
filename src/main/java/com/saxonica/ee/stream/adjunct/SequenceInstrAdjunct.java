@@ -35,6 +35,7 @@ public class SequenceInstrAdjunct extends StreamingAdjunct {
         return Streamability.getStreamability(select, contextInfo, reasons);
     }
 
+    @Override
     public WatchMaker getWatchMaker(boolean forGrouping) throws XPathException {
         Expression select = ((SequenceInstr) getExpression()).getBaseExpression();
         StreamingAdjunct sa = StreamingAdjunct.makeStreamingAdjunct(getConfiguration(), select);
@@ -46,4 +47,4 @@ public class SequenceInstrAdjunct extends StreamingAdjunct {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

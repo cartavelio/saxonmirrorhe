@@ -3,6 +3,7 @@ package com.saxonica.ee.bytecode;
 import com.saxonica.ee.bytecode.util.CannotCompileException;
 import com.saxonica.ee.bytecode.util.CompilerService;
 import com.saxonica.ee.bytecode.util.Generator;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 
@@ -47,9 +48,10 @@ public class CompiledExpressionCompiler extends ExpressionCompiler {
         CompiledExpression ce = (CompiledExpression) expression;
         Generator ga = compiler.getCurrentGenerator();
         allocateStatic(compiler, ce.getGeneratedCode());
+        compiler.generateGetOutputter();
         compiler.generateGetContext();
-        ga.invokeInstanceMethod(GeneratedCode.class, "process", XPathContext.class);
+        ga.invokeInstanceMethod(GeneratedCode.class, "process", Outputter.class, XPathContext.class);
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

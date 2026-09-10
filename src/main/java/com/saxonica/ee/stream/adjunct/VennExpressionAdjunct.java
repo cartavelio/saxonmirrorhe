@@ -5,7 +5,6 @@ import com.saxonica.ee.stream.Posture;
 import com.saxonica.ee.stream.PostureAndSweep;
 import com.saxonica.ee.stream.Streamability;
 import com.saxonica.ee.stream.Sweep;
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FilteringFeed;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.om.FleetingParentNode;
@@ -17,7 +16,7 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.VennExpression;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.sort.GlobalOrderComparer;
 import net.sf.saxon.om.Item;
@@ -129,7 +128,8 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
 
     }
 
-    public Feed makeItemFeed(final WatchManager watchManager, Feed out, final XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(final WatchManager watchManager, ItemFeed out, final XPathContext context) throws XPathException {
         final VennExpression exp = (VennExpression) getExpression();
 
         Sweep s0 = Streamability.getSweep(exp.getLhsExpression());
@@ -159,7 +159,7 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
                     @Override
                     public void open(Terminator terminator) throws XPathException {
                         super.open(terminator);
-                        processItems(exp.getLhsExpression().iterate(getContext()), getResult());
+                        processItems(exp.getLhsExpression().iterate(getContext()), getNextOutputter());
                     }
                 };
             }
@@ -176,11 +176,11 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
     private static class UnionFeed extends ItemFeed {
 
         Expression nonConsumingOperand;
-        SequenceIterator<NodeInfo> nonConsumingIterator;
+        SequenceIterator nonConsumingIterator;
         boolean atStart = true;
         boolean emitNonConsumingOperandAtEnd = true;
 
-        public UnionFeed(Expression exp, Expression nonConsumingOperand, Feed result, XPathContext context) {
+        public UnionFeed(Expression exp, Expression nonConsumingOperand, ItemFeed result, XPathContext context) {
             super(exp, result, context);
             this.nonConsumingOperand = nonConsumingOperand;
 
@@ -193,9 +193,10 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
          * @param terminator used for early exit
          */
 
+        @Override
         public void open(Terminator terminator) throws XPathException {
             super.open(terminator);
-            nonConsumingIterator = (SequenceIterator<NodeInfo>)nonConsumingOperand.iterate(getContext());
+            nonConsumingIterator = nonConsumingOperand.iterate(getContext());
         }
 
         /**
@@ -204,11 +205,12 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
          * Watch goes out of scope. The default implementation does nothing.
          */
 
+        @Override
         public void close() throws XPathException {
             if (emitNonConsumingOperandAtEnd) {
-                processItems(nonConsumingIterator, getResult());
+                processItems(nonConsumingIterator, getNextOutputter());
             }
-            getResult().close();
+            getNextOutputter().close();
         }
 
         /**
@@ -219,16 +221,17 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
          * @param item the node that was matched.
          * @throws net.sf.saxon.trans.XPathException May be raised if a dynamic error occurs
          */
-        public void processItem(Item<?> item) throws XPathException {
+        @Override
+        public void append(Item item) throws XPathException {
             if (atStart) {
-                NodeInfo first = nonConsumingIterator.next();
+                NodeInfo first = (NodeInfo)nonConsumingIterator.next();
                 if (first != null) {
                     if (GlobalOrderComparer.getInstance().compare(item, first) < 0) {
-                        nonConsumingIterator = new PrependSequenceIterator<>(first, nonConsumingIterator);
+                        nonConsumingIterator = new PrependSequenceIterator(first, nonConsumingIterator);
                         emitNonConsumingOperandAtEnd = true;
                     } else {
-                        getResult().processItem(first);
-                        processItems(nonConsumingIterator, getResult());
+                        getNextOutputter().append(first);
+                        processItems(nonConsumingIterator, getNextOutputter());
                         emitNonConsumingOperandAtEnd = false;
                     }
                 } else {
@@ -236,7 +239,7 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
                 }
             }
             atStart = false;
-            getResult().processItem(item);
+            getNextOutputter().append(item);
         }
 
         /**
@@ -252,16 +255,17 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
          * feature is not required.
          * @throws net.sf.saxon.trans.XPathException May be raised if a dynamic error occurs
          */
+        @Override
         public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
             if (atStart) {
-                NodeInfo first = nonConsumingIterator.next();
+                NodeInfo first = (NodeInfo)nonConsumingIterator.next();
                 if (first != null) {
                     if (GlobalOrderComparer.getInstance().compare(node, first) < 0) {
-                        nonConsumingIterator = new PrependSequenceIterator<>(first, nonConsumingIterator);
+                        nonConsumingIterator = new PrependSequenceIterator(first, nonConsumingIterator);
                         emitNonConsumingOperandAtEnd = true;
                     } else {
-                        getResult().processItem(first);
-                        processItems(nonConsumingIterator, getResult());
+                        getNextOutputter().append(first);
+                        processItems(nonConsumingIterator, getNextOutputter());
                         emitNonConsumingOperandAtEnd = false;
                     }
                 } else {
@@ -280,6 +284,7 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
          * @throws net.sf.saxon.trans.XPathException May be raised if a constraint implemented by this
          *                                           Watch is violated
          */
+        @Override
         public void endSelectedParentNode(Location locationId) throws XPathException {
             getResult().endSelectedParentNode(locationId);
         }
@@ -288,4 +293,4 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

@@ -4,6 +4,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.RangeKey;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
@@ -14,7 +15,6 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.StringValue;
 
-import java.util.List;
 import java.util.TreeMap;
 
 /**
@@ -26,7 +26,7 @@ import java.util.TreeMap;
 public class KeyMap extends SystemFunction {
 
     @Override
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public MapItem call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringValue keyName = (StringValue) arguments[0].head();
         NodeInfo doc = (NodeInfo) arguments[1].head();
         StringValue min = (StringValue) arguments[2].head();
@@ -47,7 +47,7 @@ public class KeyMap extends SystemFunction {
         String maxS = max == null ? null : max.getStringValue();
         KeyIndex index = keyManager.obtainIndex(kds, doc.getTreeInfo(), context);
         return new RangeKey(
-                minS, maxS, (TreeMap<AtomicMatchKey, List<NodeInfo>>) index.getUnderlyingMap());
+                minS, maxS, (TreeMap<AtomicMatchKey, Object>) index.getUnderlyingMap());
     }
 
 
@@ -68,4 +68,4 @@ public class KeyMap extends SystemFunction {
     }
 }
 
-// Copyright (c) 2012 Saxonica Limited.
+// Copyright (c) 2012-2020 Saxonica Limited

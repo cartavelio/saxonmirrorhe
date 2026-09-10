@@ -1,6 +1,5 @@
 package com.saxonica.ee.stream.adjunct;
 
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.watch.Terminator;
@@ -24,24 +23,27 @@ import net.sf.saxon.value.Int64Value;
  */
 public class IndexOfStreamer extends StreamingAdjunct implements FeedMaker {
 
-    public FeedMaker getFeedMaker(int arg) throws XPathException {
+    @Override
+    public FeedMaker getFeedMaker(int arg) {
         return arg == 0 ? this : getDefaultFeedMaker(arg);
     }
 
-    public Feed makeItemFeed(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
         return new IndexOfFeed(getExpression(), out, context);
     }
 
     private static class IndexOfFeed extends ItemFeed {
 
-        AtomicValue search;
-        AtomicComparer comparer;
-        int count;
+        private AtomicValue search;
+        private AtomicComparer comparer;
+        private int count;
 
-        public IndexOfFeed(Expression expr, Feed result, XPathContext context) {
+        IndexOfFeed(Expression expr, ItemFeed result, XPathContext context) {
             super(expr, result, context);
         }
 
+        @Override
         public void open(Terminator terminator) throws XPathException {
             super.open(terminator);
             SystemFunctionCall call = (SystemFunctionCall)getExpression();
@@ -70,11 +72,12 @@ public class IndexOfStreamer extends StreamingAdjunct implements FeedMaker {
          *          to report any failure
          */
 
-        public void processItem(Item<?> item) throws XPathException {
+        @Override
+        public void append(Item item) throws XPathException {
             if (!hasFailed()) {
                 count++;
                 if (comparer.comparesEqual((AtomicValue)item, search)) {
-                    getResult().processItem(new Int64Value(count));
+                    getNextOutputter().append(new Int64Value(count));
                 }
             }
         }
@@ -83,4 +86,4 @@ public class IndexOfStreamer extends StreamingAdjunct implements FeedMaker {
 
 }
 
-// Copyright (c) 2010-2015 Saxonica Limited.
+// Copyright (c) 2010-2020 Saxonica Limited

@@ -1,6 +1,7 @@
 package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
+import com.saxonica.ee.stream.Sweep;
 import com.saxonica.ee.validate.ValidationContext;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
@@ -19,6 +20,7 @@ import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.sxpath.XPathStaticContext;
 import net.sf.saxon.sxpath.XPathVariable;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.type.SchemaComponent;
 import net.sf.saxon.type.ValidationParams;
 import net.sf.saxon.value.EmptySequence;
@@ -41,6 +43,8 @@ public class Assertion extends SchemaStructure implements SchemaComponent, Seria
     private String conditionText;
     private String message;
     private XPathStaticContext staticContext;
+    private Sweep sweep = Sweep.FREE_RANGING;
+    private boolean returnsFailingNodes;
 
     public Assertion() {}
 
@@ -115,6 +119,38 @@ public class Assertion extends SchemaStructure implements SchemaComponent, Seria
     }
 
     /**
+     * Set the sweep of the expression; if motionless or consuming, the validator
+     * may attempt streamed evaluation.
+     * @param sweep the sweep of the expression (indicating whether it is capable of streamed
+     *              evaluation)
+     */
+
+    public void setSweep(Sweep sweep) {
+        this.sweep = sweep;
+    }
+
+    /**
+     * Get the sweep of the expression; if motionless or consuming, the validator
+     * may attempt streamed evaluation.
+     * @return the sweep of the expression (indicating whether it is capable of streamed
+     *              evaluation)
+     */
+
+    public Sweep getSweep() {
+        return sweep;
+    }
+
+    /**
+     * Say that the expression should return the nodes that cause the expression to be
+     * invalid, rather than returning a true/false result
+     * @param failingNodes set to true if the result is a set of nodes that cause the assertion to fail
+     */
+
+    public void setReturnsFailingNodes(boolean failingNodes) {
+        this.returnsFailingNodes = failingNodes;
+    }
+
+    /**
      * Set the static context for the expression.
      * Note: this is needed only to support exporting of the schema component model
      *
@@ -186,7 +222,7 @@ public class Assertion extends SchemaStructure implements SchemaComponent, Seria
             return ExpressionTool.effectiveBooleanValue(condition.iterate(context));
         } catch (XPathException err) {
             // Treat an error in evaluating the assertion as false
-            context.getErrorListener().warning(err);
+            context.getErrorReporter().report(new XmlProcessingException(err).asWarning());
             return false;
         }
     }
@@ -234,11 +270,18 @@ public class Assertion extends SchemaStructure implements SchemaComponent, Seria
 
         List<NodeInfo> result = new ArrayList<>();
         try {
-            condition.iterate(context).forEachOrFail(item -> result.add((NodeInfo)item));
-            return result;
+            if (returnsFailingNodes) {
+                condition.iterate(context).forEachOrFail(item -> result.add((NodeInfo) item));
+                return result;
+            } else {
+                boolean ok = condition.effectiveBooleanValue(context);
+                if (!ok) {
+                    result.add(contextItem);
+                }
+            }
         } catch (XPathException err) {
             // Treat an error in evaluating the assertion as false
-            context.getErrorListener().warning(err);
+            context.getErrorReporter().report(new XmlProcessingException(err).asWarning());
             result.add(contextItem);
         }
         return result;
@@ -254,6 +297,7 @@ public class Assertion extends SchemaStructure implements SchemaComponent, Seria
 
     public static void setDocumentsAndCollections(final Configuration config, XPathDynamicContext context) {
         context.setURIResolver(new StandardURIResolver(config) {
+            @Override
             public Source resolve(String href, String base) throws XPathException {
                 throw new XPathException("Use of doc() function within an assertion is not allowed", "FODC0002");
             }
@@ -291,15 +335,20 @@ public class Assertion extends SchemaStructure implements SchemaComponent, Seria
      * Serialize the schema component
      */
 
+    @Override
     public void serialize(SchemaModelSerializer serializer) throws XPathException {
         serializer.startElement("assertion");
         serializer.emitNamespaceContext(staticContext.getNamespaceResolver());
         serializer.emitAttribute("test", getConditionText());
         serializer.emitAttribute("defaultNamespace", staticContext.getDefaultElementNamespace());
         serializer.emitAttribute("xml:base", staticContext.getStaticBaseURI());
+        if (sweep != Sweep.FREE_RANGING) {
+            serializer.emitAttribute("sweep", sweep.toString());
+        }
         serializer.endElement();
     }
 
+    @Override
     public Function getComponentAsFunction() {
         Callable callable = (context, arguments) -> {
             String key = arguments[0].head().getStringValue();
@@ -319,4 +368,4 @@ public class Assertion extends SchemaStructure implements SchemaComponent, Seria
     }
 }
 
-// Copyright (c) 2007-2008 Saxonica Limited.
+// Copyright (c) 2007-2020 Saxonica Limited

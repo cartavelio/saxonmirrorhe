@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -70,6 +70,7 @@ public class StandardObjectConverter implements ObjectConverter {
 
     //@SuppressWarnings({"ConstantConditions"})
     /*@Nullable*/
+    @Override
     public Object toObject(/*@NotNull*/ XQItemAccessor xqItemAccessor) throws XQException {
         Item item = ((SaxonXQItemAccessor) xqItemAccessor).getSaxonItem();
         if (item instanceof AtomicValue) {
@@ -158,6 +159,7 @@ public class StandardObjectConverter implements ObjectConverter {
      */
 
     /*@Nullable*/
+    @Override
     public Item convertToItem(/*@NotNull*/ Object value) throws XQException {
         if (value == null) {
             return null;
@@ -262,6 +264,7 @@ public class StandardObjectConverter implements ObjectConverter {
      */
 
     /*@Nullable*/
+    @Override
     public Item convertToItem(Object value, /*@NotNull*/ XQItemType type) throws XQException {
         if (value == null) {
             return null;

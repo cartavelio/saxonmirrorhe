@@ -28,10 +28,12 @@ public class GeneralPatternOptimizer extends PatternOptimizer {
         return THE_INSTANCE;
     }
 
+    @Override
     public boolean appliesTo(Pattern pattern) {
         return true;
     }
 
+    @Override
     public void process(RuleEE rule, Pattern pattern, Map<Precondition, List<RuleEE>> preconditions, Map<Characteristic, Characteristic> characteristics) {
         for (PatternOptimizer optimizer : patternOptimizers) {
             if (optimizer.appliesTo(pattern)) {
@@ -42,5 +44,5 @@ public class GeneralPatternOptimizer extends PatternOptimizer {
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited
 

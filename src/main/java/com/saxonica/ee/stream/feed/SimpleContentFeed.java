@@ -31,7 +31,7 @@ public class SimpleContentFeed extends AbsorptionFeed {
 
 
 
-    public SimpleContentFeed(Feed result) {
+    public SimpleContentFeed(ItemFeed result) {
         super(result, null);
     }
 
@@ -42,7 +42,7 @@ public class SimpleContentFeed extends AbsorptionFeed {
 
 
     @Override
-    protected Sequence<?> processGroundedItem(Item item) throws XPathException {
+    protected Sequence processGroundedItem(Item item) throws XPathException {
         if (item instanceof NodeInfo && ((NodeInfo)item).getNodeKind() == Type.TEXT) {
             // discard zero-length text nodes
             CharSequence cs = item.getStringValueCS();
@@ -81,12 +81,13 @@ public class SimpleContentFeed extends AbsorptionFeed {
             this.node = node;
         }
 
+        @Override
         public Receiver getGatherer() {
             return new StringValueGatherer(buffer);
         }
 
         @Override
-        public Sequence<?> deliver() throws XPathException {
+        public Sequence deliver() throws XPathException {
             if (node instanceof FleetingElementNode) {
                 FleetingElementNode element = (FleetingElementNode) node;
                 element.setStringValue(buffer);
@@ -106,4 +107,4 @@ public class SimpleContentFeed extends AbsorptionFeed {
 }
 
 
-// Copyright (c) 2009-2014 Saxonica Limited
+// Copyright (c) 2009-2020 Saxonica Limited

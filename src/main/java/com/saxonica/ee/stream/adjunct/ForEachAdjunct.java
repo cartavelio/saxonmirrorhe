@@ -1,8 +1,9 @@
 package com.saxonica.ee.stream.adjunct;
 
 import com.saxonica.ee.stream.*;
-import com.saxonica.ee.stream.feed.Feed;
+import com.saxonica.ee.stream.feed.BufferingForEachExpressionFeed;
 import com.saxonica.ee.stream.feed.FeedMaker;
+import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.watch.ForEachAction;
 import com.saxonica.ee.stream.watch.Trigger;
 import com.saxonica.ee.stream.watch.WatchMaker;
@@ -10,6 +11,7 @@ import com.saxonica.ee.stream.watch.WatchManager;
 import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.instruct.ForEach;
 import net.sf.saxon.expr.instruct.UserFunctionParameter;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.sort.SortExpression;
@@ -29,6 +31,22 @@ import java.util.List;
  */
 
 public class ForEachAdjunct extends TransmissionAdjunct implements FeedMaker {
+
+    private boolean isBuffering;
+
+    /**
+     * Set the expression being processed by this StreamingAdjunct
+     *
+     * @param expression the expression being processed
+     */
+    @Override
+    public void setExpression(Expression expression) {
+        super.setExpression(expression);
+        if (expression instanceof ForEach) {
+            isBuffering =
+                    (((ForEach) getExpression()).getActionExpression().getDependencies() & StaticProperty.DEPENDS_ON_LAST) != 0;
+        }
+    }
 
     /**
      * Convert this expression to a streaming pattern (a pattern used internally to match nodes during
@@ -85,7 +103,7 @@ public class ForEachAdjunct extends TransmissionAdjunct implements FeedMaker {
                 tailPattern = ((AncestorQualifiedPattern) tailPattern).getBasePattern();
             }
 
-            byte axis;
+            int axis;
             try {
                 if (tailPattern instanceof SimplePositionalPattern) {
                     axis = AxisInfo.PARENT;
@@ -122,6 +140,7 @@ public class ForEachAdjunct extends TransmissionAdjunct implements FeedMaker {
     }
 
     /*@Nullable*/
+    @Override
     public WatchMaker getWatchMaker(final boolean forGrouping) throws XPathException {
 
         // If the expression in its entirety is a streamable pattern, then return a CopyWatch on this expression. (This is more
@@ -135,7 +154,8 @@ public class ForEachAdjunct extends TransmissionAdjunct implements FeedMaker {
             final Pattern pattern = StreamingPatternMaker.makeStreamingPattern(getExpression(), config, failures);
             if (pattern != null) {
                 return new WatchMaker() {
-                    public Trigger makeWatch(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+                    @Override
+                    public Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
                         return new Trigger(pattern, out, context);
                     }
                 };
@@ -144,7 +164,7 @@ public class ForEachAdjunct extends TransmissionAdjunct implements FeedMaker {
 
         final Expression select = ((ContextSwitchingExpression) getExpression()).getSelectExpression();
 
-        // If the select expression is grounded (but consuming), return null; so we end up with a Feed rather than a Watch.
+        // If the select expression is grounded (but consuming), return null; so we end up with a ItemFeed rather than a Watch.
         if (Streamability.getPosture(select) == Posture.GROUNDED) {
             return null;
         }
@@ -155,7 +175,8 @@ public class ForEachAdjunct extends TransmissionAdjunct implements FeedMaker {
         final StreamingAdjunct sa = StreamingAdjunct.makeStreamingAdjunct(config, select);
         if (selection != null) {
             return new WatchMaker() {
-                public Trigger makeWatch(WatchManager watchManager, Feed out, XPathContext context)
+                @Override
+                public Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context)
                         throws XPathException {
                     ForEachAction actor = new ForEachAction(watchManager, getExpression(), out, context);
                     if (actionInversion != null) {
@@ -166,7 +187,8 @@ public class ForEachAdjunct extends TransmissionAdjunct implements FeedMaker {
             };
         } else if (sa instanceof TransmissionAdjunct) {
             return new WatchMaker() {
-                public Trigger makeWatch(WatchManager watchManager, Feed out, XPathContext context)
+                @Override
+                public Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context)
                         throws XPathException {
                     ForEachAction actor = new ForEachAction(watchManager, getExpression(), out, context);
                     if (actionInversion != null) {
@@ -180,7 +202,11 @@ public class ForEachAdjunct extends TransmissionAdjunct implements FeedMaker {
         }
     }
 
-    public Feed makeItemFeed(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
+        if (isBuffering) {
+            return new BufferingForEachExpressionFeed(((ForEach)getExpression()), out, context);
+        } 
         final Inversion actionInversion = getActionInversion(false);
         ForEachAction actor = new ForEachAction(watchManager, getExpression(), out, context);
         if (getActionInversion(false) != null) {
@@ -216,6 +242,13 @@ public class ForEachAdjunct extends TransmissionAdjunct implements FeedMaker {
         if (select instanceof SortExpression) {
             if (reasons != null) {
                 reasons.add("Sorting is not possible during streamed evaluation");
+            }
+            return PostureAndSweep.ROAMING_AND_FREE_RANGING;
+        }
+
+        if (expression instanceof ForEach && ((ForEach)expression).getSeparatorExpression() != null) {
+            if (reasons != null) {
+                reasons.add("Streaming is not supported for xsl:for-each/@separator");
             }
             return PostureAndSweep.ROAMING_AND_FREE_RANGING;
         }
@@ -259,4 +292,4 @@ public class ForEachAdjunct extends TransmissionAdjunct implements FeedMaker {
 
 }
 
-// Copyright (c) 2009-2013 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

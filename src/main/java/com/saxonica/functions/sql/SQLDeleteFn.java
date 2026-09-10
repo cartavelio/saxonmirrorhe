@@ -23,7 +23,8 @@ import java.sql.SQLException;
 
 public class SQLDeleteFn extends SystemFunction {
 
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Connection connection = SQLFunctionSet.expectConnection(arguments[0], context);
         String tableName = arguments[1].head().getStringValue();
         String predicate = arguments[2].head().getStringValue();
@@ -46,4 +47,4 @@ public class SQLDeleteFn extends SystemFunction {
 }
 
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

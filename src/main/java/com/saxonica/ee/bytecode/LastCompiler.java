@@ -12,6 +12,7 @@ import org.objectweb.asm.Type;
  */
 public class LastCompiler extends ToItemCompiler {
 
+    @Override
     public void compileToPrimitive(CompilerService compiler, Expression expression, Class requiredClass, OnEmpty onEmpty) {
         SystemFunctionCall fnc = (SystemFunctionCall)expression;
         PositionAndLast.Last fn = (PositionAndLast.Last)fnc.getTargetFunction();
@@ -50,6 +51,6 @@ public class LastCompiler extends ToItemCompiler {
     }
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited
 
 

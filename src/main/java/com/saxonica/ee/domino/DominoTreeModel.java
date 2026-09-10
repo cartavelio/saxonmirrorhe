@@ -41,6 +41,7 @@ public class DominoTreeModel extends TreeModel implements ExternalObjectModel {
      * @return by convention (but not necessarily) the class that implements a document node in the relevant
      * external model
      */
+    @Override
     public String getDocumentClassName() {
         return "com.saxonica.ee.domino.DominoNode";
     }
@@ -50,18 +51,22 @@ public class DominoTreeModel extends TreeModel implements ExternalObjectModel {
      * an XPath implementation
      */
 
+    @Override
     public String getIdentifyingURI() {
         return NamespaceConstant.OBJECT_MODEL_DOMINO;
     }
 
+    @Override
     public Builder makeBuilder(PipelineConfiguration pipe) {
         return new DominoBuilder(pipe);
     }
 
+    @Override
     public int getSymbolicValue() {
         return Builder.DOMINO_TREE;
     }
 
+    @Override
     public String getName() {
         return "DOMINO";
     }
@@ -74,6 +79,7 @@ public class DominoTreeModel extends TreeModel implements ExternalObjectModel {
      * Otherwise, return false.
      */
 
+    @Override
     public boolean sendSource(Source source, Receiver receiver) throws XPathException {
         if (source instanceof DOMSource) {
             DOMObjectModel.sendDOMSource((DOMSource) source, receiver);
@@ -198,5 +204,5 @@ public class DominoTreeModel extends TreeModel implements ExternalObjectModel {
     }
 }
 
-// Copyright (c) 2017 Saxonica Ltd
+// Copyright (c) 2017-2020 Saxonica Limited
 

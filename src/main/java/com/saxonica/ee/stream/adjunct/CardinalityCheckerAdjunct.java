@@ -3,8 +3,8 @@ package com.saxonica.ee.stream.adjunct;
 import com.saxonica.ee.stream.PostureAndSweep;
 import com.saxonica.ee.stream.Streamability;
 import com.saxonica.ee.stream.feed.CardinalityCheckingFeed;
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
+import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.watch.WatchMaker;
 import com.saxonica.ee.stream.watch.WatchManager;
 import com.saxonica.ee.trans.ContextItemStaticInfoEE;
@@ -19,6 +19,7 @@ import java.util.List;
  */
 public class CardinalityCheckerAdjunct extends TransmissionAdjunct implements FeedMaker {
 
+    @Override
     public WatchMaker getWatchMaker(boolean forGrouping) throws XPathException {
         return null;
     }
@@ -37,17 +38,13 @@ public class CardinalityCheckerAdjunct extends TransmissionAdjunct implements Fe
         return Streamability.getStreamability(((CardinalityChecker)getExpression()).getBaseExpression(), contextInfo, reasons);
     }
 
-//    @Override
-//    public Pattern toStreamingPattern(Configuration config) {
-//        return ((CardinalityChecker) getExpression()).getBaseExpression().toStreamingPattern(config);
-//    }
-
-    public Feed makeItemFeed(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
         return new CardinalityCheckingFeed(getExpression(), out, context);
     }
 
 }
 
-// Copyright (c) 2006-2014 Saxonica Limited.
+// Copyright (c) 2006-2020 Saxonica Limited
 
 

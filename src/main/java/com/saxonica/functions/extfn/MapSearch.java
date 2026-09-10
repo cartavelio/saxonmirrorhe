@@ -24,7 +24,8 @@ import java.util.List;
 
 public class MapSearch extends SystemFunction {
 
-    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         List<Item> result = new ArrayList<>();
         AtomicValue key = (AtomicValue)arguments[1].head();
         Function tester = arguments.length > 2 ? (Function) arguments[2].head() : null;
@@ -32,8 +33,8 @@ public class MapSearch extends SystemFunction {
         return SequenceExtent.makeSequenceExtent(result);
     }
 
-    private void processSequence(GroundedValue<?> seq, AtomicValue key, Function tester, XPathContext context, List<Item> result) throws XPathException {
-        GroundedValue in = ((Sequence<?>) seq).materialize();
+    private void processSequence(GroundedValue seq, AtomicValue key, Function tester, XPathContext context, List<Item> result) throws XPathException {
+        GroundedValue in = ((Sequence) seq).materialize();
         SequenceIterator iter = in.iterate();
         Item item;
         int i = 0;
@@ -44,7 +45,7 @@ public class MapSearch extends SystemFunction {
                     array = new PedigreeArrayItem(array);
                 }
                 int j = 0;
-                for (GroundedValue<?> member : array.members()) {
+                for (GroundedValue member : array.members()) {
                     processSequence(member, key, tester, context, result);
                 }
             } else if (item instanceof MapItem) {
@@ -52,9 +53,9 @@ public class MapSearch extends SystemFunction {
                 if (!(map instanceof PedigreeValue)) {
                     map = new PedigreeMapItem(map);
                 }
-                GroundedValue<?> value = map.get(key);
+                GroundedValue value = map.get(key);
                 if (value != null) {
-                    Sequence<?> test = tester == null ? BooleanValue.TRUE : tester.call(context, new Sequence[]{value});
+                    Sequence test = tester == null ? BooleanValue.TRUE : tester.call(context, new Sequence[]{value});
                     if (((BooleanValue)test.head()).getBooleanValue()) {
                         DictionaryMap hit = new DictionaryMap();
                         hit.initialPut("key", key);
@@ -72,4 +73,4 @@ public class MapSearch extends SystemFunction {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited

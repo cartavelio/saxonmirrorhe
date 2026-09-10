@@ -1,9 +1,8 @@
-// Copyright (c) 2018. Saxonica Limited. All rights reserved.
+// Copyright (c) 2018-2020 Saxonica Limited
 
 package com.saxonica.ee.extfn;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import com.saxonica.functions.registry.XPath31HOFunctionSet;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.Builder;
@@ -18,6 +17,7 @@ import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
+import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.functions.registry.XSLT30FunctionSet;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.map.HashTrieMap;
@@ -26,13 +26,17 @@ import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.style.PublicStylesheetFunctionLibrary;
 import net.sf.saxon.style.StylesheetFunctionLibrary;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.sxpath.XPathVariable;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trans.*;
+import net.sf.saxon.trans.SymbolicName;
+import net.sf.saxon.trans.Visibility;
+import net.sf.saxon.trans.VisibilityProvenance;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.AnyItemType;
@@ -49,7 +53,6 @@ import java.util.List;
  * This class implements the saxon:compile-XPath() extension function,
  * which is specially-recognized by the system because it needs access
  * to parts of the static context.
- *
  * <p>The compile-XPath() extension function compiles an XPath expression to a SEF
  * representation. It was originally defined for Saxon-JS to allow free-standing compilation
  * and execution of dynamic XPath expressions in the browser; this is a back-port to
@@ -72,11 +75,14 @@ public class CompileXPath extends SystemFunction {
      *                  <code>arguments[i].next()</code>. The implementation is not obliged to read all the items in each
      *                  <code>SequenceIterator</code> if they are not required to compute the result; but if any SequenceIterator is not read
      *                  to completion, it is good practice to call its close() method.
-     * @return the results of the function.
+     * @return an iterator over the results of the function. If the result is a single item, it can be
+     * returned in the form of a {@link net.sf.saxon.tree.iter.SingletonIterator}. If the result is an empty sequence,
+     * the method should return <code>EmptyIterator.getInstance()</code>
      * @throws XPathException if a dynamic error occurs during evaluation of the function. The Saxon run-time
      *                        code will add information about the error location.
      */
 
+    @Override
     public MapItem call(XPathContext context, Sequence[] arguments) throws XPathException {
         Controller controller = context.getController();
         Configuration configuration = controller.getConfiguration();
@@ -108,7 +114,7 @@ public class CompileXPath extends SystemFunction {
 
         MapItem namespaces = (MapItem) options.get(new StringValue("namespaces"));
         if (namespaces != null) {
-            AtomicIterator keys = namespaces.keys();
+            AtomicIterator<?> keys = namespaces.keys();
             AtomicValue key;
             while ((key = keys.next()) != null) {
                 String prefix = key.getStringValue();
@@ -134,7 +140,7 @@ public class CompileXPath extends SystemFunction {
         MapItem globals = (MapItem) options.get(new StringValue("globals"));
         ArrayList<String> knownGlobals = new ArrayList<>();
         if (globals != null) {
-            AtomicIterator keys = globals.keys();
+            AtomicIterator<?> keys = globals.keys();
             AtomicValue key;
             while ((key = keys.next()) != null) {
                 knownGlobals.add(key.getStringValue());
@@ -149,13 +155,13 @@ public class CompileXPath extends SystemFunction {
         }
         int maxSlot = 0;
         if (locals != null) {
-            AtomicIterator keys = locals.keys();
+            AtomicIterator<?> keys = locals.keys();
             AtomicValue key;
             while ((key = keys.next()) != null) {
                 SequenceExtent s = (SequenceExtent) locals.get(key);
-                String st = s.itemAt(2).getStringValue();
+                String st = ((StringValue)s.itemAt(2)).getStringValue();
                 int slot = (int) ((Int64Value)s.itemAt(1)).longValue();
-                if(slot > maxSlot){
+                if (slot > maxSlot){
                     maxSlot = slot;
                 }
                 XPathVariable v = env.declareVariable(StructuredQName.fromClarkName(key.getStringValue()));
@@ -164,28 +170,9 @@ public class CompileXPath extends SystemFunction {
             }
         }
 
-       /* MapItem slotTypes = (MapItem) options.get(new StringValue("slotTypes"));
-        MapItem slotMap = (MapItem) options.get(new StringValue("slotMap"));
-        if (slotMap != null) {
-            AtomicIterator keys = slotMap.keys();
-            AtomicValue key;
-            while ((key = keys.next()) != null) {
-                String st = ((StringValue) slotTypes.get(key)).getStringValue();
-                int slot = (int) ((Int64Value) (slotMap.get(key))).longValue();
-                XPathVariable v = env.declareVariable(StructuredQName.fromClarkName(key.getStringValue()));
-                v.setSlotNumber(slot);
-                if (st != null) {
-                v.setRequiredType(makeType(st));
-            }
-            }
-        } else {
-            slotMap = new HashTrieMap();
-        }*/
         FunctionLibraryList libraryList = new FunctionLibraryList();
-
-
         ExecutableFunctionLibrary userFunctionLibrary = new ExecutableFunctionLibrary(context.getController().getConfiguration()) {
-            HashMap lib = new HashMap();
+            HashMap<SymbolicName.F, UserFunction> lib = new HashMap<>();
 
             @Override
             public boolean isAvailable(SymbolicName.F functionName) {
@@ -195,8 +182,8 @@ public class CompileXPath extends SystemFunction {
 
             @Override
             public Expression bind(SymbolicName.F functionName, Expression[] staticArgs, StaticContext env, List<String> reasons) {
-                UserFunction fn = (UserFunction) lib.get(functionName);
-                UserFunctionParameter params[] = new UserFunctionParameter[staticArgs.length];
+                UserFunction fn = lib.get(functionName);
+                UserFunctionParameter[] params = new UserFunctionParameter[staticArgs.length];
                 int i = 0;
                 for (Expression s : staticArgs) {
                     UserFunctionParameter p = new UserFunctionParameter();
@@ -221,14 +208,15 @@ public class CompileXPath extends SystemFunction {
             }
 
             @Override
-            public Function getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) throws XPathException {
-                return (Function) lib.get(functionName);
+            public Function getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) {
+                return lib.get(functionName);
             }
         };
+
         FunctionLibraryList libraryList0 = ((StylesheetPackage) getRetainedStaticContext().getPackageData()).getFunctionLibrary();
         for (FunctionLibrary lib : libraryList0.getLibraryList()) {
             if (lib instanceof BuiltInFunctionSet && ((BuiltInFunctionSet) lib).getNamespace().equals(NamespaceConstant.FN)) {
-                libraryList.addFunctionLibrary(XPath31HOFunctionSet.getInstance());
+                libraryList.addFunctionLibrary(XPath31FunctionSet.getInstance());
                 libraryList.addFunctionLibrary(XSLT30FunctionSet.getInstance());
                 libraryList.addFunctionLibrary(new VendorFunctionSetEE((EnterpriseConfiguration) configuration));
             } else if (lib instanceof StylesheetFunctionLibrary || lib instanceof ExecutableFunctionLibrary) {
@@ -237,6 +225,7 @@ public class CompileXPath extends SystemFunction {
                 libraryList.addFunctionLibrary(lib);
             }
         }
+
         MapItem globalFunctions = (MapItem) options.get(new StringValue("globalFunctions"));
 
         XPathParser parser = configuration.newExpressionParser("XP", false, 31);// Used for parsing sequence type
@@ -248,7 +237,7 @@ public class CompileXPath extends SystemFunction {
             /* TODO - this is being set up for every call of saxon:compile-XPath() - should be 'static' */
             NameTest argTest = new NameTest(Type.ELEMENT, exportURI, "arg", configuration.getNamePool());
             StylesheetPackage sheet = new StylesheetPackage(configuration);
-            AtomicIterator keys = globalFunctions.keys();
+            AtomicIterator<?> keys = globalFunctions.keys();
             AtomicValue key;
             while ((key = keys.next()) != null) {
                 String nameArity = key.getStringValue();
@@ -259,14 +248,13 @@ public class CompileXPath extends SystemFunction {
                 if (rType != null) {
                     reqType = parser.parseSequenceType(rType, parseContext);
                 }
-                AxisIterator iter = decl.iterateAxis(AxisInfo.CHILD, argTest);
+
                 String[] parts = nameArity.split("#");
                 int arity = Integer.parseInt(parts[1]);
                 SymbolicName.F functionName = new SymbolicName.F(StructuredQName.fromClarkName(parts[0]), arity);
                 UserFunction fn = new UserFunction();
                 fn.setFunctionName(functionName.getComponentName());
 
-                NodeInfo comp = decl.getParent();
                 Component component = Component.makeComponent(fn, Visibility.PUBLIC, VisibilityProvenance.DEFAULTED, sheet, sheet);
                 fn.setDeclaringComponent(component);
                 fn.setResultType(reqType);
@@ -275,9 +263,10 @@ public class CompileXPath extends SystemFunction {
                 * Note that this may fail when there is a type clash when the result is NOT a string */
                 fn.setBody(new StringLiteral("BODY("+nameArity +")"));
 
-                UserFunctionParameter params[] = new UserFunctionParameter[arity];
+                UserFunctionParameter[] params = new UserFunctionParameter[arity];
                 int i = 0;
                 NodeInfo arg;
+                AxisIterator iter = decl.iterateAxis(AxisInfo.CHILD, argTest);
                 while (((arg = iter.next()) != null)) {
                     UserFunctionParameter p = new UserFunctionParameter();
                     String name = arg.getAttributeValue("", "name");
@@ -289,7 +278,7 @@ public class CompileXPath extends SystemFunction {
                     p.setRequiredType(reqType);
                     p.setVariableQName(StructuredQName.fromEQName(name));
                     params[i++] = p;
-                    }
+                }
                 fn.setParameterDefinitions(params);
                 fn.setStackFrameMap(new SlotManager(i));
                 userFunctionLibrary.addFunction(fn);
@@ -317,7 +306,7 @@ public class CompileXPath extends SystemFunction {
         ExpressionVisitor visitor = new ExpressionVisitor(configuration);
         visitor.setStaticContext(env);
         expr = expr.typeCheck(visitor, new ContextItemStaticInfo(contextItemType, false));
-        HashMap<StructuredQName, LocalVariableBinding> internalSlotMap = new HashMap<StructuredQName, LocalVariableBinding>();
+        HashMap<StructuredQName, LocalVariableBinding> internalSlotMap = new HashMap<>();
         expr = setSlots(expr, knownGlobals, internalSlotMap, maxSlot + 1);
         Builder b = controller.makeBuilder();
         b.setTiming(false);
@@ -325,7 +314,7 @@ public class CompileXPath extends SystemFunction {
         out.setDefaultNamespace(exportURI);
         expr.export(out);
         NodeInfo node = b.getCurrentRoot().iterateAxis(AxisInfo.CHILD).next();
-        StringValue st = new StringValue(expr.getStaticType().toExportString());
+        StringValue st = new StringValue(expr.getStaticType().toAlphaCode());
         HashTrieMap result = new HashTrieMap();
         result.initialPut(new StringValue("expr"), node);
         result.initialPut(new StringValue("type"), st);
@@ -344,11 +333,10 @@ public class CompileXPath extends SystemFunction {
     /**
      * Upgraded from ExpressionTool.make() to permit 'in-catch' conversion of error variables
      * to calls on saxon:dynamic-error-info()
-     * <p>
-     * Parse an XPath expression. This performs the basic analysis of the expression against the
+     * <p>Parse an XPath expression. This performs the basic analysis of the expression against the
      * grammar, it binds variable references and function calls to variable definitions and
      * function definitions, and it performs context-independent expression rewriting for
-     * optimization purposes.
+     * optimization purposes.</p>
      *
      * @param expression   The expression (as a character string)
      * @param env          An object giving information about the compile-time
@@ -391,19 +379,8 @@ public class CompileXPath extends SystemFunction {
             return possible;
         }
         /* TODO - get sequence/instance type for LHS of let and for */
-        if (expr instanceof LetExpression) {
-            LetExpression le = (LetExpression) expr;
-            if (le.getLocalSlotNumber() == -999) {
-                StructuredQName name = le.getVariableQName();
-                LocalVariableBinding b = new LocalVariableBinding(name, le.getStaticType());
-                b.setSlotNumber(nextSlot);
-                le.setSlotNumber(nextSlot);
-                internalSlotMap.put(name, b);
-                nextSlot++;
-            }
-        }
-        if (expr instanceof ForExpression) {
-            ForExpression f = (ForExpression) expr;
+        if (expr instanceof Assignation) {
+            Assignation f = (Assignation) expr;
             if (f.getLocalSlotNumber() == -999) {
                 StructuredQName name = f.getVariableQName();
                 LocalVariableBinding b = new LocalVariableBinding(name, f.getStaticType());
@@ -413,17 +390,7 @@ public class CompileXPath extends SystemFunction {
                 nextSlot++;
             }
         }
-        if (expr instanceof QuantifiedExpression) {
-            QuantifiedExpression qe = (QuantifiedExpression) expr;
-            if (qe.getLocalSlotNumber() == -999) {
-                StructuredQName name = qe.getVariableQName();
-                LocalVariableBinding b = new LocalVariableBinding(name, qe.getStaticType());
-                b.setSlotNumber(nextSlot);
-                qe.setSlotNumber(nextSlot);
-                internalSlotMap.put(name, b);
-                nextSlot++;
-            }
-        }
+
         if (expr instanceof LocalVariableReference) {
             LocalVariableReference lvr = (LocalVariableReference) expr;
             if (lvr.getBinding().getLocalSlotNumber() == -999) {
@@ -457,10 +424,8 @@ public class CompileXPath extends SystemFunction {
                 g.setRetainedStaticContext(expr.getRetainedStaticContext());
                 return g;
             }
-            return null;
-        } else {
-            return null;
         }
+        return null;
     }
 }
 

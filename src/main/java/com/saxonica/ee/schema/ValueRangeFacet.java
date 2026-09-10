@@ -25,6 +25,7 @@ public abstract class ValueRangeFacet extends Facet {
     AtomicValue requiredValue;    // Initially a string value; converted to the target type when that is known
 
 
+    @Override
     public String getValue() {
         return requiredValue.getStringValue();
     }
@@ -51,6 +52,7 @@ public abstract class ValueRangeFacet extends Facet {
      *          if the facet is not legal
      */
 
+    @Override
     public void checkFacetRestriction(UserSimpleType type, SimpleType base, SchemaCompiler compiler) throws SchemaException, ValidationException {
         if (!(base.isAtomicType())) {
             throw new SchemaException("The " + getName() +
@@ -185,6 +187,7 @@ public abstract class ValueRangeFacet extends Facet {
      *         fails
      */
 
+    @Override
     public boolean testAtomicValue(AtomicValue value) {
         if (!isConverted) {
             throw new AssertionError("Value used in facet has not been converted to required type");
@@ -232,4 +235,4 @@ public abstract class ValueRangeFacet extends Facet {
 
 }
 
-// Copyright (c) 2004-2007 Saxonica Limited. All Rights Reserved
+// Copyright (c) 2004-2020 Saxonica Limited

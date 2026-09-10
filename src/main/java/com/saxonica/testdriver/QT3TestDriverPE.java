@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -9,8 +9,6 @@ package com.saxonica.testdriver;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
-import net.sf.saxon.expr.StaticContext;
-import net.sf.saxon.expr.flwor.Clause;
 import net.sf.saxon.expr.parser.CodeInjector;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.Sequence;
@@ -18,7 +16,6 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.option.axiom.AxiomObjectModel;
 import net.sf.saxon.option.dom4j.DOM4JObjectModel;
-import net.sf.saxon.option.jdom.JDOMObjectModel;
 import net.sf.saxon.option.jdom2.JDOM2ObjectModel;
 import net.sf.saxon.option.xom.XOMObjectModel;
 import net.sf.saxon.s9api.Processor;
@@ -66,11 +63,10 @@ public class QT3TestDriverPE extends QT3TestDriverHE {
      * @param s  The name of the tree model required
      * @return  The tree model - null if model requested is unrecognised
      */
+    @Override
     protected TreeModel getTreeModel(String s) {
         TreeModel tree = super.getTreeModel(s);
-        if (s.equalsIgnoreCase("jdom")) {
-            tree = new JDOMObjectModel();
-        } else if (s.equalsIgnoreCase("jdom2")) {
+        if (s.equalsIgnoreCase("jdom2")) {
             tree = new JDOM2ObjectModel();
         } else if (s.equalsIgnoreCase("dom4j")) {
             tree = new DOM4JObjectModel();
@@ -84,6 +80,7 @@ public class QT3TestDriverPE extends QT3TestDriverHE {
 
 
 
+    @Override
     protected boolean isSupportedLanguage(String language) {
         return "en".equals(language) || "fr".equals(language) || "de".equals(language) || "it".equals(language);
     }
@@ -102,7 +99,9 @@ public class QT3TestDriverPE extends QT3TestDriverHE {
      */
 
     private static class LazyLiteralInjector implements CodeInjector {
-        public Expression inject(Expression exp, StaticContext env, int construct, StructuredQName qName) {
+
+        @Override
+        public Expression inject(Expression exp) {
             if (exp instanceof Literal) {
                 StructuredQName name = new StructuredQName("saxon", NamespaceConstant.SAXON, "lazy-literal");
                 com.saxonica.expr.JavaExtensionFunctionCall wrapper = new com.saxonica.expr.JavaExtensionFunctionCall();
@@ -110,7 +109,7 @@ public class QT3TestDriverPE extends QT3TestDriverHE {
                     wrapper.init(name,
                                  QT3TestDriverHE.class,
                                  QT3TestDriverHE.class.getMethod("lazyLiteral", Sequence.class),
-                                 env.getConfiguration()
+                                 exp.getConfiguration()
                     );
                     wrapper.setArguments(new Expression[]{exp});
                 } catch (NoSuchMethodException e) {
@@ -122,8 +121,5 @@ public class QT3TestDriverPE extends QT3TestDriverHE {
             }
         }
 
-        public Clause injectClause(Clause target, StaticContext env) {
-            return null;
-        }
     }
 }

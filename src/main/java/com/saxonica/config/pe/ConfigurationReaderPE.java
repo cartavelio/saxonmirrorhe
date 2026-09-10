@@ -17,6 +17,7 @@ public class ConfigurationReaderPE extends ConfigurationReader {
      * @param atts the attributes of the element in the configuration file
      */
 
+    @Override
     protected void readExtensionElement(Attributes atts) {
         String namespace = null;
         String className = null;
@@ -43,6 +44,6 @@ public class ConfigurationReaderPE extends ConfigurationReader {
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited
 
 

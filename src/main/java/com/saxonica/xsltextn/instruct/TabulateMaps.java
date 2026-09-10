@@ -4,6 +4,7 @@ import com.saxonica.functions.extfn.WithPedigree;
 import com.saxonica.xsltextn.pedigree.Pedigree;
 import com.saxonica.xsltextn.pedigree.PedigreeMapItem;
 import com.saxonica.xsltextn.pedigree.PedigreeValue;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Instruction;
 import net.sf.saxon.expr.instruct.TailCall;
@@ -98,6 +99,7 @@ public class TabulateMaps extends Instruction {
      * @return the integer namecode of the QName saxon:tabulate-maps
      */
 
+    @Override
     public int getInstructionNameCode() {
         return StandardNames.SAXON_TABULATE_MAPS;
     }
@@ -130,6 +132,7 @@ public class TabulateMaps extends Instruction {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         TabulateMaps exp = new TabulateMaps(
                 getRootExpression().copy(rebindings),
@@ -145,29 +148,31 @@ public class TabulateMaps extends Instruction {
      */
 
     /*@NotNull*/
+    @Override
     public ItemType getItemType() {
         return MapType.ANY_MAP_TYPE;
     }
 
     /*@Nullable*/
-    public TailCall processLeavingTail(XPathContext context) throws XPathException {
+    @Override
+    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
         Item root;
-        SequenceIterator<Function> rootIterator = (SequenceIterator<Function>)getRootExpression().iterate(context);
-        MappingFunction<Function, Function> mapper = item -> SingletonIterator.makeIterator(
+        SequenceIterator rootIterator = getRootExpression().iterate(context);
+        MappingFunction mapper = item -> SingletonIterator.makeIterator(
                 WithPedigree.makeRootWithPedigree(item)
         );
-        SequenceIterator<Function> mappedRootIterator = new MappingIterator<>(rootIterator, mapper);
+        SequenceIterator mappedRootIterator = new MappingIterator(rootIterator, mapper);
 
         XPathContext c2 = context.newMinorContext();
-        FocusIterator<?> trackingIterator = c2.trackFocus(mappedRootIterator);
+        FocusIterator trackingIterator = c2.trackFocus(mappedRootIterator);
         while ((root = trackingIterator.next()) != null) {
-            processRootItem(root, c2);
+            processRootItem(output, root, c2);
         }
         return null;
     }
 
-    private void processRootItem(Item root, XPathContext c2) throws XPathException {
-        FocusIterator selectIterator = new FocusTrackingIterator<>(
+    private void processRootItem(Outputter output, Item root, XPathContext c2) throws XPathException {
+        FocusIterator selectIterator = new FocusTrackingIterator(
                 getSelectExpression().iterate(c2));
         Item selected;
         while ((selected = selectIterator.next()) != null) {
@@ -195,7 +200,7 @@ public class TabulateMaps extends Instruction {
                     for (KeyValuePair kvp : ((MapItem) latestParent).keyValuePairs()) {
                         AtomicValue k = kvp.key;
                         if (!k.isIdentical(pedigree.getKey())) {
-                            GroundedValue<?> value = selectedMap.get(k);
+                            GroundedValue value = selectedMap.get(k);
                             if (value == null) {
                                 selectedMap = selectedMap.addEntry(k, kvp.value);
                             } else if (k instanceof StringValue) {
@@ -221,10 +226,10 @@ public class TabulateMaps extends Instruction {
             while (selectedMap.get(new StringValue(keysKey)) != null) {
                 keysKey = keysKey + "_";
             }
-            List<GroundedValue<?>> copy = new ArrayList<>(keys);
+            List<GroundedValue> copy = new ArrayList<>(keys);
             selectedMap = selectedMap.addEntry(new StringValue(keysKey),
                                                new SimpleArrayItem(copy));
-            c2.getReceiver().append(selectedMap);
+            output.append(selectedMap);
         }
     }
 
@@ -234,6 +239,7 @@ public class TabulateMaps extends Instruction {
      * is written to the supplied output destination.
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("tabulate", this);
         getRootExpression().export(out);
@@ -243,4 +249,4 @@ public class TabulateMaps extends Instruction {
 
 }
 
-// Copyright (c) 2011-2018 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

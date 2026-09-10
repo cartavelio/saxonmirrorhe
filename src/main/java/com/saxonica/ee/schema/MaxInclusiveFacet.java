@@ -9,14 +9,17 @@ import net.sf.saxon.type.ValidationException;
  */
 public class MaxInclusiveFacet extends ValueRangeFacet {
 
+    @Override
     public String getName() {
         return "maxInclusive";
     }
 
+    @Override
     protected boolean testComparisonOK(int comparisonResult) {
         return comparisonResult <= 0;
     }
 
+    @Override
     public void checkFacetRestriction(UserSimpleType type, SimpleType base, SchemaCompiler compiler) throws SchemaException, ValidationException {
         super.checkFacetRestriction(type, base, compiler);
         ValueRangeFacet min = (ValueRangeFacet) type.getFacet(MinExclusiveFacet.class);
@@ -38,4 +41,4 @@ public class MaxInclusiveFacet extends ValueRangeFacet {
     }
 }
 
-// Copyright (c) Saxonica 2009. All rights reserved
+// Copyright (c) 2009-2020 Saxonica Limited

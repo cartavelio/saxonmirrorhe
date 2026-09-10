@@ -11,7 +11,7 @@ import net.sf.saxon.value.StringValue;
  * purpose of taking a snapshot is to ensure that changes to the base iterator in one thread do not
  * affect the result of the current-group() function in another thread.
  */
-public class ManualRegexIterator extends ManualIterator<StringValue> implements RegexIterator {
+public class ManualRegexIterator extends ManualIterator implements RegexIterator {
 
     private boolean isMatching;
     private String[] groups;
@@ -24,9 +24,15 @@ public class ManualRegexIterator extends ManualIterator<StringValue> implements 
         }
     }
 
+    @Override
+    public StringValue next() {
+        return (StringValue)super.next();
+    }
+
     /**
      * Get the number of captured groups
      */
+    @Override
     public int getNumberOfGroups() {
         return groups.length;
     }
@@ -36,6 +42,7 @@ public class ManualRegexIterator extends ManualIterator<StringValue> implements 
      *
      * @return true if the current item is a matching item
      */
+    @Override
     public boolean isMatching() {
         return isMatching;
     }
@@ -47,6 +54,7 @@ public class ManualRegexIterator extends ManualIterator<StringValue> implements 
      * @return the substring of the current item that matches the n'th parenthesized group
      * within the regular expression
      */
+    @Override
     public String getRegexGroup(int number) {
         if (number >= 0 && number < groups.length) {
             return groups[number];
@@ -61,6 +69,7 @@ public class ManualRegexIterator extends ManualIterator<StringValue> implements 
      *
      * @param action the action to be performed on a matching substring
      */
+    @Override
     public void processMatchingSubstring(MatchHandler action) {
         throw new UnsupportedOperationException();
     }
@@ -68,4 +77,4 @@ public class ManualRegexIterator extends ManualIterator<StringValue> implements 
 }
 
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

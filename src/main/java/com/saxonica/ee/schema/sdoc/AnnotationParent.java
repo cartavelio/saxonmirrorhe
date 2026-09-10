@@ -20,11 +20,12 @@ public abstract class AnnotationParent extends SchemaElement {
      * @throws SchemaException if any XML representation constraints are violated
      */
 
+    @Override
     public void validate(SchemaCompiler compiler) throws SchemaException {
         checkOnlyChildIsAnnotation();
     }
 
 }
 
-// Copyright (c) 2004-7 Saxonica Limited.
+// Copyright (c) 2004-7 Saxonica Limited
 

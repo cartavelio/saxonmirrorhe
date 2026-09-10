@@ -27,6 +27,7 @@ public class UnknownElement extends SchemaElement {
      *          if any errors are found in the attributes
      */
 
+    @Override
     public void prepareAttributes() throws SchemaException {
 
     }
@@ -38,6 +39,7 @@ public class UnknownElement extends SchemaElement {
      * @param compiler the schema compiler
      */
 
+    @Override
     public void validateSubtree(SchemaCompiler compiler) {
         // Suppress validation of the subtree for these elements. This has the side-effect of permitting
         // character data where all other elements prohibit it.
@@ -52,10 +54,11 @@ public class UnknownElement extends SchemaElement {
      * @param compiler the schema compiler
      */
 
+    @Override
     public void validate(SchemaCompiler compiler) {
         // This method is not called, because validateSubtree() suppresses it
     }
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

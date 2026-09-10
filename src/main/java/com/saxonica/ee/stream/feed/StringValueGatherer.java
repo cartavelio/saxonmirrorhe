@@ -1,17 +1,17 @@
 package com.saxonica.ee.stream.feed;
 
-import com.saxonica.ee.validate.Checker;
-import net.sf.saxon.expr.parser.Location;
+import com.saxonica.ee.validate.AbstractReceiver;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.FastStringBuffer;
 
 
 /**
- * A StringValueAccumulator is a Receiver that computes the string value of an element in streaming mode, by
+ * A StringValueGatherer is a Receiver that computes the string value of an element in streaming mode, by
  * copying all the text nodes to a supplied receiver.
  */
 
-public class StringValueGatherer extends Checker {
+public class StringValueGatherer extends AbstractReceiver {
 
     private FastStringBuffer buffer;
 
@@ -19,10 +19,11 @@ public class StringValueGatherer extends Checker {
         this.buffer = buffer;
     }
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
-        buffer.append(chars);
+        buffer.cat(chars);
     }
 
 }
 
-// Copyright (c) 2009 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited

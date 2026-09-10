@@ -3,10 +3,7 @@ package com.saxonica.ee.schema;
 import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.SchemaComponent;
-import net.sf.saxon.type.SchemaException;
-import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.MissingComponentException;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.z.IntHashSet;
 
@@ -46,6 +43,7 @@ public class ModelGroupParticle extends Particle {
      * Determine whether this reference has been resolved
      */
 
+    @Override
     public boolean isResolved() {
         return (target != null);
     }
@@ -58,6 +56,7 @@ public class ModelGroupParticle extends Particle {
      * Get the symbol space of the target of this reference
      */
 
+    @Override
     public int getSymbolSpace() {
         return SymbolSpace.GROUP;
     }
@@ -66,6 +65,7 @@ public class ModelGroupParticle extends Particle {
      * Determine if empty content is allowed
      */
 
+    @Override
     public boolean isEmptiable() throws MissingComponentException {
         return getMinOccurs() == 0 || getGroup().isEmptiable();
     }
@@ -78,6 +78,7 @@ public class ModelGroupParticle extends Particle {
      * @throws SchemaException if a fatal error occurs
      */
 
+    @Override
     public boolean fixup(SchemaCompiler compiler) throws SchemaException {
         SchemaComponent decl = PreparedSchema.validateReference(this, compiler, false);
         if (decl == null) {
@@ -102,6 +103,7 @@ public class ModelGroupParticle extends Particle {
      *
      */
 
+    @Override
     public void lookForCycles(Stack references, SchemaCompiler compiler) throws SchemaException, MissingComponentException {
         if (references.contains(this)) {
             String err = "The definition of group " +
@@ -111,7 +113,7 @@ public class ModelGroupParticle extends Particle {
             //contentModel = new ArrayList(20);
             throw new SchemaException(err);
         }
-        tryToResolve(compiler);
+        tryToResolve(compiler, false);
         if (isResolved()) {
             getGroup().lookForCycles(references, compiler);
         }
@@ -127,6 +129,7 @@ public class ModelGroupParticle extends Particle {
      *                                      this is an unchecked exception.
      */
 
+    @Override
     public SchemaComponent getTarget() throws MissingComponentException {
         if (target == null) {
             throw new MissingComponentExceptionImpl(this);
@@ -139,12 +142,24 @@ public class ModelGroupParticle extends Particle {
      * No error results if the reference cannot be resolved.
      */
 
-    public void tryToResolve(SchemaCompiler compiler) {
+    @Override
+    public void tryToResolve(SchemaCompiler compiler, boolean fatal) throws SchemaException {
         if (target == null) {
             target = compiler.getPreparedSchema().getGroup(getTargetComponentName());
         }
         if (target == null) {
             target = compiler.getConfiguration().getSuperSchema().getGroup(getTargetComponentName());
+        }
+        if (target == null) {
+            String name = getTargetComponentName().getEQName();
+            if (compiler.isAllowDanglingReferences() && !fatal) {
+                compiler.warning("Unknown model group " + name + " (substituting empty group)", this);
+                ModelGroupDefinition decl = new ModelGroupDefinition(getConfiguration(), this);
+                decl.setModelGroupName(getTargetComponentName());
+                target = decl;
+            } else{
+                throw new SchemaException("Unknown attribute declaration " + name, this);
+            }
         }
     }
 
@@ -153,6 +168,7 @@ public class ModelGroupParticle extends Particle {
      * Schema Component Constraint: Particle Valid (Restriction)
      */
 
+    @Override
     public boolean isPointless(ModelGroup container) throws MissingComponentException {
         return getMinOccurs() == 1 && getMaxOccurs() == 1 &&
                 ((ModelGroup) getTarget()).isPointless(container);
@@ -169,6 +185,7 @@ public class ModelGroupParticle extends Particle {
      */
 
     /*@Nullable*/
+    @Override
     public SchemaType getElementParticleType(int elementName) throws MissingComponentException {
         return getGroup().getElementParticleType(elementName);
     }
@@ -184,6 +201,7 @@ public class ModelGroupParticle extends Particle {
      * @param elementName Identifies the name of the child element within this content model
      */
 
+    @Override
     public int getElementParticleCardinality(int elementName) throws MissingComponentException {
         int card = getGroup().getElementParticleCardinality(elementName);
         return Cardinality.multiply(card,
@@ -196,6 +214,7 @@ public class ModelGroupParticle extends Particle {
      * @return true if the particle is an element wildcard, or contains one
      */
 
+    @Override
     public boolean containsElementWildcard() throws MissingComponentException {
         return getGroup().containsElementWildcard();
     }
@@ -207,6 +226,7 @@ public class ModelGroupParticle extends Particle {
      * @param ignoreWildcards true if wildcard particles are to be ignored. If false, the resulting set
      */
 
+    @Override
     public void gatherAllPermittedElements(IntHashSet result, boolean ignoreWildcards) throws SchemaException {
         getGroup().gatherAllPermittedElements(result, ignoreWildcards);
     }
@@ -215,6 +235,7 @@ public class ModelGroupParticle extends Particle {
      * Mark the vulnerable subParticles of this particle
      */
 
+    @Override
     public void markVulnerableSubParticles() throws MissingComponentException {
         getGroup().markVulnerableSubParticles(getMaxOccurs() > 1 || getMaxOccurs() == -1);
     }
@@ -225,6 +246,7 @@ public class ModelGroupParticle extends Particle {
      * @throws net.sf.saxon.type.SchemaException
      *
      */
+    @Override
     public boolean validate(SchemaCompiler compiler) throws SchemaException {
 
         switch (getValidationStatus()) {
@@ -269,9 +291,10 @@ public class ModelGroupParticle extends Particle {
     /**
      * Compile a particle
      *
-     * @param compiler the schema compmiler
+     * @param compiler the schema compiler
      */
 
+    @Override
     public void compile(SchemaCompiler compiler) throws SchemaException {
         ((ModelGroup) getTarget()).compile(compiler);
     }
@@ -282,6 +305,7 @@ public class ModelGroupParticle extends Particle {
      * @return the corresponding term
      */
 
+    @Override
     public Term getTerm() throws MissingComponentException {
         return getGroup();
     }
@@ -295,6 +319,7 @@ public class ModelGroupParticle extends Particle {
      * @throws SchemaException if the schema is found to be invalid
      */
 
+    @Override
     public void elaborate(SchemaCompiler compiler) throws SchemaException {
         getGroup().elaborate(compiler);
     }
@@ -303,6 +328,7 @@ public class ModelGroupParticle extends Particle {
      * Serialize the schema component as a particle
      */
 
+    @Override
     public void serializeParticle(SchemaModelSerializer serializer) throws XPathException {
         serializer.startElement("modelGroupParticle");
         serializer.emitAttribute("minOccurs", "" + getMinOccurs());
@@ -316,4 +342,4 @@ public class ModelGroupParticle extends Particle {
     }
 }
 
-// Copyright (c) 2004-2006 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

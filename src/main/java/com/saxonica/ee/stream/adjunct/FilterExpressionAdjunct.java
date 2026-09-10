@@ -4,9 +4,9 @@ import com.saxonica.ee.stream.PostureAndSweep;
 import com.saxonica.ee.stream.Streamability;
 import com.saxonica.ee.stream.Sweep;
 import com.saxonica.ee.stream.feed.BufferingFilterExpressionFeed;
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
 import com.saxonica.ee.stream.feed.FilteringFeed;
+import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
@@ -26,6 +26,21 @@ import java.util.List;
  * Generate streaming code for a filter expression (when not part of a Watch).
  */
 public class FilterExpressionAdjunct extends FilteringAdjunct {
+
+    boolean isBuffering;
+
+    /**
+     * Set the expression being processed by this StreamingAdjunct
+     *
+     * @param expression the expression being processed
+     */
+    @Override
+    public void setExpression(Expression expression) {
+        super.setExpression(expression);
+        isBuffering =
+                (((FilterExpression) getExpression()).getActionExpression().getDependencies() & StaticProperty.DEPENDS_ON_LAST) != 0;
+
+    }
 
     @Override
     public PostureAndSweep computeStreamability(ContextItemStaticInfoEE contextInfo, List<String> reasons) {
@@ -97,14 +112,15 @@ public class FilterExpressionAdjunct extends FilteringAdjunct {
      * @return a filter that can be added to the event stream
      */
     @Override
-    public FilteringFeed.Filter makeFilter(XPathContext context, Feed out)  {
+    public FilteringFeed.Filter makeFilter(XPathContext context, ItemFeed out)  {
         return new PredicateFilter(((FilterExpression)getExpression()).getActionExpression(), context);
     }
 
+    @Override
     public FeedMaker getFeedMaker(int arg) throws XPathException {
         FilterExpression f = (FilterExpression) getExpression();
-        final boolean isBuffering =
-                (f.getActionExpression().getDependencies() & StaticProperty.DEPENDS_ON_LAST) != 0;
+//        final boolean isBuffering =
+//                (f.getActionExpression().getDependencies() & StaticProperty.DEPENDS_ON_LAST) != 0;
         if (isBuffering) {
             return (watchManager, out, context) -> new BufferingFilterExpressionFeed(getExpression(), out, context);
         } else {
@@ -126,6 +142,7 @@ public class FilterExpressionAdjunct extends FilteringAdjunct {
 
         }
 
+        @Override
         public int matches(Item item, int position) throws XPathException {
             iter.setContextItem(item);
             iter.setPosition(position);
@@ -137,4 +154,4 @@ public class FilterExpressionAdjunct extends FilteringAdjunct {
     }
 }
 
-// Copyright (c) 2010-2013 Saxonica Limited.
+// Copyright (c) 2010-2020 Saxonica Limited

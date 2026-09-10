@@ -38,8 +38,9 @@ public class TokenMatchOperand extends Characteristic<IntSet> {
         this.exp = exp;
     }
 
+    @Override
     public IntSet evaluate(XPathContext context) throws XPathException {
-        SequenceIterator<?> iter = exp.iterate(context);
+        SequenceIterator iter = exp.iterate(context);
         IntHashSet keys = new IntHashSet();
         StringCollator collator = CodepointCollator.getInstance();
         iter.forEachOrFail(item -> {
@@ -69,4 +70,4 @@ public class TokenMatchOperand extends Characteristic<IntSet> {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited
+// Copyright (c) 2018-2020 Saxonica Limited

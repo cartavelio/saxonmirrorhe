@@ -98,7 +98,7 @@ public class Pedigree {
      * augmented with this pedigree. Otherwise, returns the supplied value unchanged.
      */
 
-    public GroundedValue<?> makePedigreeValue(GroundedValue<?> value) {
+    public GroundedValue makePedigreeValue(GroundedValue value) {
         if (value instanceof PedigreeArrayItem) {
             return new PedigreeArrayItem(((PedigreeArrayItem)value).getBaseItem(), this);
         } else if (value instanceof PedigreeMapItem) {
@@ -114,6 +114,6 @@ public class Pedigree {
 
 }
 
-// Copyright (c) 2018 Saxonica Ltd.
+// Copyright (c) 2018-2020 Saxonica Limited
 
 

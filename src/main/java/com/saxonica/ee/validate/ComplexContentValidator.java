@@ -4,13 +4,11 @@ import com.saxonica.ee.schema.*;
 import com.saxonica.ee.schema.fsa.*;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.NoElementsSpaceStrippingRule;
-import net.sf.saxon.om.NodeName;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.FastStringBuffer;
@@ -29,32 +27,32 @@ import java.util.*;
 public class ComplexContentValidator extends AttributeValidator {
 
     // The complex type that we are validating against
-    UserComplexType type;
+    private UserComplexType type;
 
     // Boolean to indicate whether mixed content is allowed. If not, all non-whitespace
     // character data is rejected
-    boolean mixed;
+    private boolean mixed;
 
     // The fixed value, if any, converted to a string
-    String fixedValue = null;
+    private String fixedValue = null;
 
     // The default value, if any
-    String defaultValue = null;
+    private String defaultValue = null;
 
     // The current state in the finite state machine
-    State state;
+    private State state;
 
     // The previous element encountered
-    int previousElement = -1;
+    private int previousElement = -1;
 
     // Boolean to indicate whether whitespace in element-only content is to be stripped
-    boolean ignoreIgnorable;
+    private boolean ignoreIgnorable;
 
     // Buffer for accumulating character content
-    FastStringBuffer buffer;
+    private FastStringBuffer buffer;
 
     // Boolean to indicate whether any child elements have been found
-    boolean foundChildren = false;
+    private boolean foundChildren = false;
 
 
     /**
@@ -78,6 +76,7 @@ public class ComplexContentValidator extends AttributeValidator {
         }
     }
 
+    @Override
     public void setPipelineConfiguration(/*@NotNull*/ PipelineConfiguration pipe) {
         super.setPipelineConfiguration(pipe);
         ignoreIgnorable = getConfiguration().getParseOptions().getSpaceStrippingRule() != NoElementsSpaceStrippingRule.getInstance();
@@ -98,6 +97,7 @@ public class ComplexContentValidator extends AttributeValidator {
         setAttributeGroup(type.getCombinedAttributeGroup());
     }
 
+    @Override
     public SchemaType getSchemaType() {
         return type;
     }
@@ -106,12 +106,15 @@ public class ComplexContentValidator extends AttributeValidator {
      * Handle the start tag for a child element of the element being validated
      */
 
-    public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties)
+    @Override
+    public void startElement(NodeName elemName, SchemaType elemType,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties)
             throws XPathException {
         if (locallyInvalid) {
             // already found errors and warned about them. But because of EDC, we can still try to
             // find a governing type for the element, to tease out more validation errors.
-            recover(elemName, location, properties);
+            recover(elemName, attributes, namespaces, location, properties);
             return;
         }
 
@@ -127,7 +130,7 @@ public class ComplexContentValidator extends AttributeValidator {
             ve.setSchemaType(type);
             reportValidationError(ve, true, location);
             locallyInvalid = true;
-            recover(elemName, location, properties);
+            recover(elemName, attributes, namespaces, location, properties);
             return;
         }
 
@@ -145,14 +148,14 @@ public class ComplexContentValidator extends AttributeValidator {
                     // interleaved open content: leave the state unchanged
                     childValidator = new LaxValidator(getNextReceiver());
                     annotation = processWildcardTerm(openContentWildcard, elemName, location);
-                    super.startElement(elemName, annotation, location, properties);
+                    super.startElement(elemName, annotation, attributes, namespaces, location, properties);
                     return;
                 } else if (state.isFinalState()) {
                     // suffix wildcard: from now on we can only match the open content wildcard
                     state = SuffixState.getInstance();
                     childValidator = new LaxValidator(getNextReceiver());
                     annotation = processWildcardTerm(openContentWildcard, elemName, location);
-                    super.startElement(elemName, annotation, location, properties);
+                    super.startElement(elemName, annotation, attributes, namespaces, location, properties);
                     return;
                 }
             }
@@ -163,7 +166,7 @@ public class ComplexContentValidator extends AttributeValidator {
             ve.setSchemaType(type);
             reportValidationError(ve, true, location);
             locallyInvalid = true;
-            recover(elemName, location, properties);
+            recover(elemName, attributes, namespaces, location, properties);
             return;
         }
         try {
@@ -178,7 +181,7 @@ public class ComplexContentValidator extends AttributeValidator {
             ve.setSchemaType(type);
             reportValidationError(ve, true, location);
             locallyInvalid = true;
-            recover(elemName, location, properties);
+            recover(elemName, attributes, namespaces, location, properties);
             return;
 
         }
@@ -197,7 +200,7 @@ public class ComplexContentValidator extends AttributeValidator {
                 childValidator = new LaxValidator(getNextReceiver());
             }
         }
-        super.startElement(elemName, annotation, location, properties);
+        super.startElement(elemName, annotation, attributes, namespaces, location, properties);
     }
 
     /**
@@ -223,6 +226,49 @@ public class ComplexContentValidator extends AttributeValidator {
                 fsb.append("Empty content is not allowed. ");
             } else {
                 fsb.append("The content is incomplete. ");
+                try {
+
+                    // See if the error can be attributed to the absence of an element
+                    StructuredQName omission;
+                    StructuredQName firstOmission = null;
+                    HashSet<StructuredQName> possibleOmissions = new HashSet<>();
+                    for (Iterator<Edge> edges = state.getEdges(); edges.hasNext(); ) {
+                        Edge e = edges.next();
+                        if (e.getParticle() instanceof ElementParticle) {
+                            omission = e.getParticle().getTargetComponentName();
+                            int omittedfp = ((ElementParticle) e.getParticle()).getDeclaration().getFingerprint();
+                            AutomatonState s = state.getTransition(omittedfp, type).getTargetState();
+                            if (s.isFinalState()) {
+                                possibleOmissions.add(omission);
+                                if (firstOmission == null) {
+                                    firstOmission = omission;
+                                }
+                            }
+                        }
+                    }
+                    if (!possibleOmissions.isEmpty()) {
+                        if (possibleOmissions.size() == 1) {
+                            fsb.append("It would be valid if followed by " + Err.wrap(firstOmission.getEQName(), Err.ELEMENT) + ". ");
+                        } else if (possibleOmissions.size() > 5) {
+                            fsb.append("It would be valid if followed by another element, for example " + Err.wrap(firstOmission.getEQName(), Err.ELEMENT) + ". ");
+                        } else {
+                            fsb.append("It would be valid if followed by one of: ");
+                            boolean first = true;
+                            for (StructuredQName poss : possibleOmissions) {
+                                if (!first) {
+                                    fsb.append(", ");
+                                }
+                                fsb.append(Err.wrap(poss.getEQName(), Err.ELEMENT));
+                                first = false;
+                            }
+                            fsb.append(". ");
+                        }
+                        explained = true;
+                    }
+
+                } catch (MissingComponentException e) {
+                    // no action
+                }
             }
         } else {
             if (state instanceof SuffixState) {
@@ -256,9 +302,9 @@ public class ComplexContentValidator extends AttributeValidator {
                     if (!explained && type.getElementParticleType(fingerprint, false) != null) {
                         // The element is allowed by the content model, but not here
                         // See if the error can be attributed to the absence of an element
-                        StructuredQName omission = null;
-                        HashSet<StructuredQName> possibleOmissions = new HashSet<StructuredQName>();
+                        StructuredQName omission;
                         StructuredQName firstOmission = null;
+                        HashSet<StructuredQName> possibleOmissions = new HashSet<>();
                         for (Iterator<Edge> edges = state.getEdges(); edges.hasNext(); ) {
                             Edge e = edges.next();
                             if (e.getParticle() instanceof ElementParticle) {
@@ -334,9 +380,9 @@ public class ComplexContentValidator extends AttributeValidator {
         }
 
         if (!explained) {
-            Set<String> specificTransitions = new HashSet<String>();
+            Set<String> specificTransitions = new HashSet<>();
             StructuredQName expected = null;
-            Set<String> specificURIs = new HashSet<String>();
+            Set<String> specificURIs = new HashSet<>();
             String namespace = null;
             for (Iterator<Edge> ii = state.getEdges(); ii.hasNext(); ) {
                 Edge e = ii.next();
@@ -347,7 +393,7 @@ public class ComplexContentValidator extends AttributeValidator {
                     specificURIs.add(namespace);
                 }
             }
-            Set<Wildcard> wildcards = new HashSet<Wildcard>();
+            Set<Wildcard> wildcards = new HashSet<>();
             for (Iterator<Edge> ii = state.getEdges(); ii.hasNext(); ) {
                 Edge e = ii.next();
                 if (e.getParticle() instanceof ElementWildcard) {
@@ -433,11 +479,12 @@ public class ComplexContentValidator extends AttributeValidator {
         return fsb.toString();
     }
 
-    private void recover(NodeName elemName, Location locationId, int properties) throws XPathException {
+    private void recover(NodeName elemName, AttributeMap attributes,
+                         NamespaceMap namespaces, Location locationId, int properties) throws XPathException {
         childValidator = null;
         SchemaType childType = type.getContextDeterminedTypeForElement(elemName.getStructuredQName());
         if (childType != null && !(childType.isComplexType() && ((ComplexType) childType).isAbstract())) {
-            List<ValidationFailure> failures = new ArrayList<ValidationFailure>(1);
+            List<ValidationFailure> failures = new ArrayList<>(1);
             childValidator = makeValidator(null, elemName.getStructuredQName(), locationId, getValidationContext(), childType,
                     Validation.BY_TYPE, getPipelineConfiguration(), nextReceiver, failures);
             for (ValidationFailure failure : failures) {
@@ -448,7 +495,7 @@ public class ComplexContentValidator extends AttributeValidator {
             childType = AnyType.getInstance();
             childValidator = new AnyTypeValidator(nextReceiver);
         }
-        nextReceiver.startElement(elemName, childType, locationId, properties);
+        nextReceiver.startElement(elemName, childType, attributes, namespaces, locationId, properties);
     }
 
     /**
@@ -457,18 +504,19 @@ public class ComplexContentValidator extends AttributeValidator {
      * this element.
      */
 
+    @Override
     protected ContentValidator getChildValidator() {
         return childValidator;
     }
 
     /**
      * Handle character data appearing as a child of the element being validated
-     *
      * @param chars      The character content
      * @param locationId the location of the node in the source, or of the instruction that created it
      * @param properties Additional properties  @throws XPathException If this element does not allow character data
      */
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         checkNoCharactersWhenNil(locationId);
         if (mixed) {
@@ -476,7 +524,7 @@ public class ComplexContentValidator extends AttributeValidator {
                 if (buffer == null) {
                     buffer = new FastStringBuffer(chars.length());
                 }
-                buffer.append(chars);
+                buffer.cat(chars);
             }
             nextReceiver.characters(chars, locationId, properties);
         } else {
@@ -504,9 +552,10 @@ public class ComplexContentValidator extends AttributeValidator {
      * @throws XPathException if the element is invalid
      */
 
+    @Override
     public void endElement() throws XPathException {
         if (fixedValue != null) {
-            if (isNil()) {
+            if (isNilled()) {
                 String message = "The " + getContainingElementName() +
                         " has a fixed value so it must not be nil";
                 ValidationFailure ve = new ValidationFailure(message);
@@ -518,7 +567,7 @@ public class ComplexContentValidator extends AttributeValidator {
                 return;
             }
             if (buffer == null || buffer.isEmpty()) {
-                characters(fixedValue, ExplicitLocation.UNKNOWN_LOCATION, 0);
+                characters(fixedValue, Loc.NONE, ReceiverOption.NONE);
             } else if (!buffer.toString().equals(fixedValue)) {
                 String message = "The content of " + getContainingElementName() +
                         " differs from the fixed value defined in the schema. Fixed value is " +
@@ -532,10 +581,10 @@ public class ComplexContentValidator extends AttributeValidator {
         }
         if (defaultValue != null && !foundChildren) {
             if (buffer == null || buffer.isEmpty()) {
-                characters(defaultValue, ExplicitLocation.UNKNOWN_LOCATION, 0);
+                characters(defaultValue, Loc.NONE, ReceiverOption.NONE);
             }
         }
-        if (!state.isFinalState() && !isNil() && !locallyInvalid) {
+        if (!state.isFinalState() && !isNilled() && !locallyInvalid) {
             String message = supplyReasonForNonMatch(null);
             ValidationFailure ve = new ValidationFailure(message);
             ve.setSchemaType(type);
@@ -546,4 +595,4 @@ public class ComplexContentValidator extends AttributeValidator {
     }
 }
 
-// Copyright � 2004-2012 Saxonica Limited. No warranty.
+// Copyright � 2004-2020 Saxonica Limited No warranty.

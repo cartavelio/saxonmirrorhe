@@ -8,12 +8,14 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.parser.XPathParser;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.pattern.NodeTestPattern;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ErrorType;
 import net.sf.saxon.type.SchemaException;
+import net.sf.saxon.value.Whitespace;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +33,7 @@ public class XSDFieldOrSelector extends AnnotationParent {
     /**
      * Creates a new FieldOrSelector element
      */
-    public XSDFieldOrSelector() {
+    XSDFieldOrSelector() {
     }
 
     /**
@@ -40,9 +42,10 @@ public class XSDFieldOrSelector extends AnnotationParent {
      * @throws SchemaException if any errors are found in the attributes
      */
 
+    @Override
     public void prepareAttributes() throws SchemaException {
         boolean isField = (getLocalPart().equals("field"));
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         String[] allowed = {"id", "xpath", "xpathDefaultNamespace"};
         allowAttributes(atts, allowed);
 
@@ -52,12 +55,16 @@ public class XSDFieldOrSelector extends AnnotationParent {
             defaultNS = getXSDSchema().getXPathDefaultNamespace();
         }
         if (defaultNS != null) {
-            if (defaultNS.equals("##defaultNamespace")) {
-                defaultNS = getURIForPrefix("", true);
-            } else if (defaultNS.equals("##targetNamespace")) {
-                defaultNS = getXSDSchema().getTargetNamespace();
-            } else if (defaultNS.equals("##local")) {
-                defaultNS = "";
+            switch (defaultNS) {
+                case "##defaultNamespace":
+                    defaultNS = getURIForPrefix("", true);
+                    break;
+                case "##targetNamespace":
+                    defaultNS = getXSDSchema().getTargetNamespace();
+                    break;
+                case "##local":
+                    defaultNS = "";
+                    break;
             }
         } else {
             defaultNS = "";
@@ -77,7 +84,7 @@ public class XSDFieldOrSelector extends AnnotationParent {
             exp = new XPathParser().parse(xpath, 0, Token.EOF, env);
             boolean allowExtensions = getXSDSchema().getAllowedExtensions().contains("id-xpath-syntax");
             if (allowExtensions) {
-                List<String> reasonsForFailure = new ArrayList<String>();
+                List<String> reasonsForFailure = new ArrayList<>();
                 selector = StreamingPatternMaker.makeStreamingPattern(exp, getConfiguration(), reasonsForFailure);
                 if (!reasonsForFailure.isEmpty()) {
                     throw new XPathException(reasonsForFailure.get(0));
@@ -101,12 +108,28 @@ public class XSDFieldOrSelector extends AnnotationParent {
 
         //-- field
         if (isField) {
+            //-- saxon:order
+            String order = Whitespace.trim(getAttributeValue(NamespaceConstant.SAXON, "order"));
+            boolean ascending = true;
+            if (order != null) {
+                switch (order) {
+                    case "ascending":
+                        break;
+                    case "descending":
+                        ascending = false;
+                        break;
+                    default:
+                        error("xs:field/@saxon:order must be 'ascending' or 'descending'");
+                }
+
+            }
             fieldOrSelector = new IdentityField(xpath);
             fieldOrSelector.setLocator(this);
             fieldOrSelector.setSelection(selector);
             fieldOrSelector.setSelectExpression(exp);
             fieldOrSelector.setNamespaceContext(makeNamespaceContext());
             fieldOrSelector.setXPathDefaultNamespace(defaultNS);
+            ((IdentityField)fieldOrSelector).setAscending(ascending);
         }
 
         //-- @selector
@@ -121,7 +144,7 @@ public class XSDFieldOrSelector extends AnnotationParent {
 
     }
 
-    public IdentityField getIdentityField() {
+    IdentityField getIdentityField() {
         if (fieldOrSelector instanceof IdentityField) {
             return (IdentityField) fieldOrSelector;
         } else {
@@ -130,7 +153,7 @@ public class XSDFieldOrSelector extends AnnotationParent {
     }
 
     /*@Nullable*/
-    public IdentitySelector getIdentitySelector() {
+    IdentitySelector getIdentitySelector() {
         if (fieldOrSelector instanceof IdentitySelector) {
             return (IdentitySelector) fieldOrSelector;
         } else {
@@ -141,4 +164,4 @@ public class XSDFieldOrSelector extends AnnotationParent {
 
 }
 
-// Copyright (c) 2004-2006 Saxonica Limited
+// Copyright (c) 2004-2020 Saxonica Limited

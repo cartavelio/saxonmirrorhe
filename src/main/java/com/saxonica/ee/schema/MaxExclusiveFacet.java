@@ -15,14 +15,17 @@ import java.math.BigInteger;
  */
 public class MaxExclusiveFacet extends ValueRangeFacet {
 
+    @Override
     public String getName() {
         return "maxExclusive";
     }
 
+    @Override
     protected boolean testComparisonOK(int comparisonResult) {
         return comparisonResult < 0;
     }
 
+    @Override
     public void checkFacetRestriction(UserSimpleType type, SimpleType base, SchemaCompiler compiler) throws SchemaException, ValidationException {
         super.checkFacetRestriction(type, base, compiler);
         if (isNewlyIntroduced(base)) {
@@ -73,6 +76,5 @@ public class MaxExclusiveFacet extends ValueRangeFacet {
     }
 }
 
-// Copyright (c) Saxonica 2009. All rights reserved
-
+// Copyright (c) 2009-2020 Saxonica Limited
 

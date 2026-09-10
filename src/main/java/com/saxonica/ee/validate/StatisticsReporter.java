@@ -1,23 +1,27 @@
 package com.saxonica.ee.validate;
 
 import com.saxonica.ee.schema.ElementDecl;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.StreamWriterToReceiver;
 import net.sf.saxon.lib.ValidationStatisticsRecipient;
-import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.s9api.Destination;
+import net.sf.saxon.s9api.Processor;
+import net.sf.saxon.s9api.SaxonApiException;
+import net.sf.saxon.sapling.SaplingDocument;
+import net.sf.saxon.sapling.SaplingElement;
 import net.sf.saxon.type.SchemaComponent;
 import net.sf.saxon.type.SchemaType;
 
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
 import java.util.Map;
+
+import static net.sf.saxon.sapling.Saplings.doc;
+import static net.sf.saxon.sapling.Saplings.elem;
 
 /**
  * Generates statistics relating to a validation episode
  */
 public class StatisticsReporter implements ValidationStatisticsRecipient {
 
-    private XMLStreamWriter writer;
+    private Processor processor;
+    private Destination destination;
 
     public StatisticsReporter() {
 
@@ -27,21 +31,13 @@ public class StatisticsReporter implements ValidationStatisticsRecipient {
      * Create a StatisticsReporter and set a Receiver to receive an XML report of the statistics that have been
      * collected
      *
-     * @param receiver the receiver to which the XML report will be sent
-     */
-    public StatisticsReporter(Receiver receiver) {
-        setReceiver(receiver);
-    }
-
-    /**
-     * Create a StatisticsReporter and set a Receiver to receive an XML report of the statistics that have been
-     * collected
-     *
-     * @param receiver the receiver to which the XML report will be sent
+     * @param processor the processor owning the destination to which the XML report will be sent
+     * @param destination the destination to which the XML report will be sent
      */
 
-    public void setReceiver(Receiver receiver) {
-        this.writer = new StreamWriterToReceiver(receiver);
+    public void setReceiver(Processor processor, Destination destination) {
+        this.processor = processor;
+        this.destination = destination;
     }
 
 
@@ -52,47 +48,42 @@ public class StatisticsReporter implements ValidationStatisticsRecipient {
      *                   element declarations and schema types) to a count of how often the component
      *                   was used during the validation episode
      */
-    public void notifyValidationStatistics(Map<SchemaComponent, Integer> statistics) throws XPathException {
-        if (writer == null) {
-            throw new IllegalStateException("No writer has been set");
+    @Override
+    public void notifyValidationStatistics(Map<SchemaComponent, Integer> statistics) throws SaxonApiException {
+        if (processor == null) {
+            throw new IllegalStateException("No destination has been set");
         }
-        try {
-            //System.err.println("REPORTING STATISTICS");
-            writer.writeStartDocument();
-            writer.writeStartElement("schemaCoverage");
-            for (Map.Entry<SchemaComponent, Integer> entry : statistics.entrySet()) {
-                SchemaComponent component = entry.getKey();
-                int count = entry.getValue();
-                String kind = null;
-                String namespace = null;
-                String localname = null;
-                if (component instanceof SchemaType) {
-                    kind = (((SchemaType) component).isComplexType() ? "complexType" : "simpleType");
-                    namespace = ((SchemaType) component).getTargetNamespace();
-                    localname = ((SchemaType) component).getName();
+        SaplingElement coverage = elem("schemaCoverage");
+        for (Map.Entry<SchemaComponent, Integer> entry : statistics.entrySet()) {
+            SchemaComponent component = entry.getKey();
+            int count = entry.getValue();
+            String kind = null;
+            String namespace = null;
+            String localname = null;
+            if (component instanceof SchemaType) {
+                kind = (((SchemaType) component).isComplexType() ? "complexType" : "simpleType");
+                namespace = ((SchemaType) component).getTargetNamespace();
+                localname = ((SchemaType) component).getName();
 
-                } else if (component instanceof ElementDecl) {
-                    kind = "element";
-                    namespace = ((ElementDecl) component).getTargetNamespace();
-                    localname = ((ElementDecl) component).getName();
-                }
-                writer.writeEmptyElement("component");
-                writer.writeAttribute("kind", kind);
-                writer.writeAttribute("namespace", namespace);
-                writer.writeAttribute("name", localname);
-                writer.writeAttribute("count", count + "");
+            } else if (component instanceof ElementDecl) {
+                kind = "element";
+                namespace = ((ElementDecl) component).getTargetNamespace();
+                localname = ((ElementDecl) component).getName();
             }
-            writer.writeEndElement();
-            writer.writeEndDocument();
-            writer.close();
-        } catch (XMLStreamException e) {
-            throw new XPathException("Failure to write to statistics report file", e);
+            coverage = coverage.withChild(elem("component")
+                                              .withAttr("kind", kind)
+                                              .withAttr("namespace", namespace)
+                                              .withAttr("name", localname)
+                                              .withAttr("count", count + ""));
+
         }
+        SaplingDocument report = doc().withChild(coverage);
+        report.send(processor, destination);
 
     }
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited
 
 
 

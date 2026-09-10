@@ -29,50 +29,62 @@ public class CompactStringValue implements AtomicSequence {
         this.value = content.toCharArray();
     }
 
-    public AtomicValue head() {
+    @Override
+    public StringValue head() {
         return new StringValue(new String(value));
     }
 
-    public AtomicIterator iterate() {
-        return new SingleAtomicIterator(head());
+    @Override
+    public AtomicIterator<StringValue> iterate() {
+        return new SingleAtomicIterator<>(head());
     }
 
+    @Override
     public AtomicValue itemAt(int n) {
         return n==0 ? head() : null;
     }
 
+    @Override
     public int getLength() {
         return 1;
     }
 
+    @Override
     public CharSequence getCanonicalLexicalRepresentation() {
         return head().getStringValueCS();
     }
 
-    public Comparable getSchemaComparable() {
+    @Override
+    public Comparable<?> getSchemaComparable() {
         return new String(value);
     }
 
+    @Override
     public CharSequence getStringValueCS() {
         return head().getStringValueCS();
     }
 
+    @Override
     public String getStringValue() {
         return head().getStringValue();
     }
 
+    @Override
     public GroundedValue subsequence(int start, int length) {
         return head().subsequence(start, length);
     }
 
+    @Override
     public boolean effectiveBooleanValue() throws XPathException {
         return value.length != 0;
     }
 
+    @Override
     public GroundedValue reduce() {
         return head();
     }
 
+    @Override
     public Iterator<AtomicValue> iterator() {
         return head().iterator();
     }
@@ -84,4 +96,4 @@ public class CompactStringValue implements AtomicSequence {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

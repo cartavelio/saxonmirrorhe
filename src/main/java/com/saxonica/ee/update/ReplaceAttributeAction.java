@@ -16,7 +16,7 @@ public class ReplaceAttributeAction extends PendingUpdateAction {
 
     private NodeInfo element;
     private NodeInfo oldAttribute;
-    AttributeCollection newAttributes;
+    private AttributeMap newAttributes;
 
     /**
      * Create a ReplaceAttributeAction
@@ -26,7 +26,7 @@ public class ReplaceAttributeAction extends PendingUpdateAction {
      * @param newAttributes the attributes that are to replace the target attribute
      */
 
-    public ReplaceAttributeAction(NodeInfo element, NodeInfo oldAttribute, AttributeCollection newAttributes) {
+    ReplaceAttributeAction(NodeInfo element, NodeInfo oldAttribute, AttributeMap newAttributes) {
         this.element = element;
         this.oldAttribute = oldAttribute;
         this.newAttributes = newAttributes;
@@ -42,20 +42,21 @@ public class ReplaceAttributeAction extends PendingUpdateAction {
      *          if any error occurs applying the update
      */
 
-    public void apply(XPathContext context, Set affectedRootSet) throws XPathException {
+    @Override
+    public void apply(XPathContext context, Set<MutableNodeInfo> affectedRootSet) throws XPathException {
         if (!(element instanceof MutableNodeInfo)) {
             throw new XPathException("Attempting to update a non-updateable element");
         }
-        affectedRootSet.add(element.getRoot());
+        affectedRootSet.add((MutableNodeInfo)element.getRoot());
 //        FingerprintedQName name = new FingerprintedQName(
 //                oldAttribute.getPrefix(), oldAttribute.getURI(), oldAttribute.getLocalPart());
         ((MutableNodeInfo) element).removeAttribute(oldAttribute);
-        int len = newAttributes.getLength();
-        for (int i = 0; i < len; i++) {
-            NodeName name = newAttributes.getNodeName(i);
-            SimpleType typeCode = newAttributes.getTypeAnnotation(i);
-            CharSequence value = newAttributes.getValue(i);
-            int properties = newAttributes.getProperties(i);
+        int len = newAttributes.size();
+        for (AttributeInfo att : newAttributes) {
+            NodeName name = att.getNodeName();
+            SimpleType typeCode = att.getType();
+            CharSequence value = att.getValue();
+            int properties = att.getProperties();
             if (element.getAttributeValue(name.getURI(), name.getLocalPart()) != null) {
                 throw new XPathException("Attempting to add an attribute that already exists");
             }
@@ -71,6 +72,7 @@ public class ReplaceAttributeAction extends PendingUpdateAction {
      *         case of a delete action, which affects multiple nodes.
      */
 
+    @Override
     public NodeInfo getTargetNode() {
         return element;
     }
@@ -91,7 +93,7 @@ public class ReplaceAttributeAction extends PendingUpdateAction {
      * @return the new attributes to be added in place of the old attribute
      */
 
-    public AttributeCollection getNewAttributes() {
+    public AttributeMap getNewAttributes() {
         return newAttributes;
     }
 
@@ -103,9 +105,10 @@ public class ReplaceAttributeAction extends PendingUpdateAction {
      *         in the specification
      */
 
+    @Override
     public int getApplyPhase() {
         return 3;
     }
 }
 
-// Copyright (c) 2008 Saxonica Limited.
+// Copyright (c) 2008-2020 Saxonica Limited

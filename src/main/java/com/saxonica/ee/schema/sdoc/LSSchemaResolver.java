@@ -32,6 +32,7 @@ public class LSSchemaResolver implements SchemaURIResolver {
      * @param config the Saxon Configuration (which will always be an {@link com.saxonica.config.EnterpriseConfiguration})
      */
 
+    @Override
     public void setConfiguration(Configuration config) {
         this.config = config;
     }
@@ -55,6 +56,7 @@ public class LSSchemaResolver implements SchemaURIResolver {
      *          module resolver is not required.
      */
 
+    @Override
     public Source[] resolve(String targetNamespace, String baseURI, String[] locations) throws XPathException {
 
         Source[] sources = new Source[locations.length];
@@ -89,4 +91,4 @@ public class LSSchemaResolver implements SchemaURIResolver {
     }
 }
 
-// Copyright (c) 2006 Saxonica Limited.
+// Copyright (c) 2006-2020 Saxonica Limited

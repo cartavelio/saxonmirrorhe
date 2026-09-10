@@ -4,56 +4,27 @@ import com.saxonica.ee.stream.om.FleetingDocumentNode;
 import com.saxonica.ee.stream.om.FleetingElementNode;
 import com.saxonica.ee.stream.om.FleetingParentNode;
 import com.saxonica.ee.stream.watch.Terminator;
-import net.sf.saxon.event.PipelineConfiguration;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.SequenceReceiver;
-import net.sf.saxon.expr.parser.Location;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NameOfNode;
-import net.sf.saxon.om.NamespaceBinding;
 import net.sf.saxon.trans.XPathException;
 
 import java.util.Stack;
 
 /**
- * Appends the output of an ItemFeed to a SequenceReceiver
+ * Appends the output of an ItemFeed to an Outputter
  */
-public class DecomposingFeed implements Feed {
+public class DecomposingFeed extends ItemFeed {
 
-    private Receiver receiver;
-    private Stack<Boolean> nodeKindStack = new Stack<Boolean>();
+    private Stack<Boolean> nodeKindStack = new Stack<>();
 
-    public DecomposingFeed(Receiver receiver) {
-        this.receiver = receiver;
-    }
-
-    /**
-     * Get the pipeline configuration
-     *
-     * @return the pipeline configuration
-     */
-
-    public PipelineConfiguration getPipelineConfiguration() {
-        return receiver.getPipelineConfiguration();
-    }
-
-    /**
-     * Get the destination receiver
-     * @return the receiver to which events are being written to represent the results of this instruction
-     */
-
-    public Receiver getReceiver() {
-        return receiver;
-    }
-
-    /**
-     * Set the destination receiver
-     * @param out the receiver to which events should henceforth be written
-     */
-
-    public void setReceiver(SequenceReceiver out) {
-        receiver = out;
+    public DecomposingFeed(Outputter receiver, XPathContext context) {
+        // There is no next ItemFeed in the pipeline; all output goes to the supplied Outputter instead
+        super(receiver, context, true);
     }
 
     /**
@@ -64,6 +35,7 @@ public class DecomposingFeed implements Feed {
      * @param terminator
      */
 
+    @Override
     public void open(Terminator terminator) throws XPathException {
 
     }
@@ -82,24 +54,28 @@ public class DecomposingFeed implements Feed {
      * @throws net.sf.saxon.trans.XPathException
      *          May be raised if a dynamic error occurs
      */
+    @Override
     public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
         boolean isDocNode = node instanceof FleetingDocumentNode;
         nodeKindStack.push(isDocNode);
         if (isDocNode) {
-            receiver.startDocument(0);
+            getNextOutputter().startDocument(ReceiverOption.NONE);
         } else {
             FleetingElementNode element = (FleetingElementNode)node;
-            receiver.startElement(NameOfNode.makeName(element), node.getSchemaType(), locationId, 0);
-            AttributeCollection atts = element.getAttributes();
-            for (int i=0; i<atts.getLength(); i++) {
-                receiver.attribute(atts.getNodeName(i), atts.getTypeAnnotation(i), atts.getValue(i), locationId, 0);
-            }
-            NamespaceBinding[] namespaces = element.getDeclaredNamespaces(null);
-            for (NamespaceBinding nb : namespaces) {
-                receiver.namespace(nb, 0);
-            }
+            getNextOutputter().startElement(NameOfNode.makeName(element), node.getSchemaType(),
+                                  locationId, ReceiverOption.NONE);
         }
         return null;
+    }
+
+    /**
+     * Supply one item towards the streamed input of the expression
+     *
+     * @param item the item to be supplied
+     */
+    @Override
+    public void append(Item item) throws XPathException {
+        getNextOutputter().append(item);
     }
 
     /**
@@ -111,25 +87,14 @@ public class DecomposingFeed implements Feed {
      *          May be raised if a constraint implemented by this
      *          Watch is violated
      */
+    @Override
     public void endSelectedParentNode(Location locationId) throws XPathException {
         boolean isDocNode = nodeKindStack.pop();
         if (isDocNode) {
-            receiver.endDocument();
+            getNextOutputter().endDocument();
         } else {
-            receiver.endElement();
+            getNextOutputter().endElement();
         }
-    }
-
-    /**
-     * Supply an item to the feed
-     *
-     * @param item the item being fed
-     * @throws net.sf.saxon.trans.XPathException
-     *          to report any failure
-     */
-
-    public void processItem(Item<?> item) throws XPathException {
-        receiver.append(item);
     }
 
     /**
@@ -139,12 +104,13 @@ public class DecomposingFeed implements Feed {
      *          to report any failure
      */
 
+    @Override
     public void close() throws XPathException {
-
+        //getNextOutputter().close();
     }
 
 }
 
-// Copyright (c) 2009 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited
 
 

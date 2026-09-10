@@ -1,10 +1,11 @@
 package com.saxonica.ee.domino;
 
 import net.sf.saxon.dom.DOMNodeWrapper;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.NamespaceNode;
 import net.sf.saxon.tree.iter.*;
@@ -23,6 +24,7 @@ import org.w3c.dom.NodeList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * A node in the Domino tree (other than an attribute or namespace node)
@@ -185,7 +187,7 @@ public class DominoNode implements NodeInfo, VirtualNode {
     public void generateId(FastStringBuffer buffer) {
         buffer.append("d");
         buffer.append(Long.toString(tree.getDocumentNumber()));
-        buffer.append(TinyNodeImpl.NODE_LETTER[getNodeKind()]);
+        buffer.cat(TinyNodeImpl.NODE_LETTER[getNodeKind()]);
         buffer.append(Integer.toString(nodeNr));
     }
 
@@ -243,11 +245,22 @@ public class DominoNode implements NodeInfo, VirtualNode {
      */
     @Override
     public NamespaceBinding[] getDeclaredNamespaces(NamespaceBinding[] buffer) {
-        if ((tree.nameCode[nodeNr] & DominoTree.HAS_NAMESPACES) != 0) {
-            return tree.getNamespaceBindings(nodeNr);
-        } else {
-            return NamespaceBinding.EMPTY_ARRAY;
-        }
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Get all the namespace bindings that are in-scope for this element.
+     * <p>For an element return all the prefix-to-uri bindings that are in scope. This may include
+     * a binding to the default namespace (represented by a prefix of ""). It will never include
+     * "undeclarations" - that is, the namespace URI will never be empty; the effect of an undeclaration
+     * is to remove a binding from the in-scope namespaces, not to add anything.</p>
+     * <p>For a node other than an element, returns null.</p>
+     *
+     * @return the in-scope namespaces for an element, or null for any other kind of node.
+     */
+    @Override
+    public NamespaceMap getAllNamespaces() {
+        return tree.getNamespaceMap(nodeNr);
     }
 
     /**
@@ -517,7 +530,7 @@ public class DominoNode implements NodeInfo, VirtualNode {
      *
      * @param axisNumber an integer identifying the axis; one of the constants
      *                   defined in class {@link AxisInfo}
-     * @param nodeTest   A condition to be satisfied by the returned nodes; nodes
+     * @param predicate   A condition to be satisfied by the returned nodes; nodes
      *                   that do not satisfy this condition are not included in the result
      * @return an AxisIterator that delivers the nodes reached by the axis in
      * turn.  The nodes are returned in axis order (document order for a forwards
@@ -527,158 +540,164 @@ public class DominoNode implements NodeInfo, VirtualNode {
      * @see AxisInfo
      */
     @Override
-    public AxisIterator iterateAxis(byte axisNumber, NodeTest nodeTest) {
-        int type = getNodeKind();
-        switch (axisNumber) {
-            case AxisInfo.ANCESTOR:
-                return new AncestorIterator(this, nodeTest);
+    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> predicate) {
+        if (predicate instanceof NodeTest) {
+            NodeTest nodeTest = (NodeTest)predicate;
+            int type = getNodeKind();
+            switch (axisNumber) {
+                case AxisInfo.ANCESTOR:
+                    return new AncestorIterator(this, nodeTest);
 
-            case AxisInfo.ANCESTOR_OR_SELF:
-                AxisIterator ancestors = new AncestorIterator(this, nodeTest);
-                if (nodeTest.matchesNode(this)) {
-                    return new PrependAxisIterator(this, ancestors);
-                } else {
-                    return ancestors;
-                }
-
-            case AxisInfo.ATTRIBUTE:
-                if (!hasAttributes()) {
-                    return EmptyIterator.OfNodes.THE_INSTANCE;
-                }
-                Node element = getDomNode();
-                if (nodeTest instanceof NameTest) {
-                    String uri = ((NameTest)nodeTest).getNamespaceURI();
-                    if (uri.isEmpty()) {
-                        uri = null;
+                case AxisInfo.ANCESTOR_OR_SELF:
+                    AxisIterator ancestors = new AncestorIterator(this, nodeTest);
+                    if (nodeTest.test(this)) {
+                        return new PrependAxisIterator(this, ancestors);
+                    } else {
+                        return ancestors;
                     }
-                    String local = ((NameTest) nodeTest).getLocalPart();
-                    synchronized(getDomNode()) {
-                        Attr attr = (Attr)element.getAttributes().getNamedItemNS(uri, local);
-                        if (attr == null) {
-                            return EmptyIterator.OfNodes.THE_INSTANCE;
-                        } else {
-                            DominoAttr wrappedAttr = new DominoAttr(tree, this, attr);
-                            return SingleNodeIterator.makeIterator(wrappedAttr);
+
+                case AxisInfo.ATTRIBUTE:
+                    if (!hasAttributes()) {
+                        return EmptyIterator.ofNodes();
+                    }
+                    Node element = getDomNode();
+                    if (nodeTest instanceof NameTest) {
+                        String uri = ((NameTest) nodeTest).getNamespaceURI();
+                        if (uri.isEmpty()) {
+                            uri = null;
                         }
-                    }
-                } else {
-                    synchronized(element) {
-                        List<NodeInfo> list = new ArrayList<>();
-                        NamedNodeMap atts = element.getAttributes();
-                        if (atts != null) {
-                            final int attsLen = atts.getLength();
-                            for (int i = 0; i < attsLen; i++) {
-                                String name = atts.item(i).getNodeName();
-                                if (!(name.startsWith("xmlns") &&
-                                        (name.length() == 5 || name.charAt(5) == ':'))) {
-                                    list.add(new DominoAttr(tree, this, (Attr) atts.item(i)));
-                                }
+                        String local = ((NameTest) nodeTest).getLocalPart();
+                        synchronized(getDomNode()) {
+                            Attr attr = (Attr) element.getAttributes().getNamedItemNS(uri, local);
+                            if (attr == null) {
+                                return EmptyIterator.ofNodes();
+                            } else {
+                                DominoAttr wrappedAttr = new DominoAttr(tree, this, attr);
+                                return SingleNodeIterator.makeIterator(wrappedAttr);
                             }
                         }
-                        return new Navigator.AxisFilter(new ListIterator.OfNodes(list), nodeTest);
-                    }
-                }
-
-            case AxisInfo.CHILD:
-                if (hasChildNodes()) {
-                    return new SiblingIterator(tree, this, nodeTest, true);
-                } else {
-                    return EmptyIterator.OfNodes.THE_INSTANCE;
-                }
-
-            case AxisInfo.DESCENDANT:
-                if (type == Type.DOCUMENT &&
-                        nodeTest instanceof NameTest &&
-                        nodeTest.getPrimitiveType() == Type.ELEMENT) {
-                    return tree.getAllElements(nodeTest.getFingerprint());
-                } else if (hasChildNodes()) {
-                    return new DescendantIterator(tree, this, nodeTest);
-                } else {
-                    return EmptyIterator.OfNodes.THE_INSTANCE;
-                }
-
-            case AxisInfo.DESCENDANT_OR_SELF:
-                if (hasChildNodes()) {
-                    AxisIterator descendants = new DescendantIterator(tree, this, nodeTest);
-                    if (nodeTest.matchesNode(this)) {
-                        return new PrependAxisIterator(this, descendants);
                     } else {
-                        return descendants;
+                        synchronized(element) {
+                            List<NodeInfo> list = new ArrayList<>();
+                            NamedNodeMap atts = element.getAttributes();
+                            if (atts != null) {
+                                final int attsLen = atts.getLength();
+                                for (int i = 0; i < attsLen; i++) {
+                                    String name = atts.item(i).getNodeName();
+                                    if (!(name.startsWith("xmlns") &&
+                                                  (name.length() == 5 || name.charAt(5) == ':'))) {
+                                        list.add(new DominoAttr(tree, this, (Attr) atts.item(i)));
+                                    }
+                                }
+                            }
+                            return new Navigator.AxisFilter(new ListIterator.OfNodes(list), nodeTest);
+                        }
                     }
-                } else {
+
+                case AxisInfo.CHILD:
+                    if (hasChildNodes()) {
+                        return new SiblingIterator(tree, this, nodeTest, true);
+                    } else {
+                        return EmptyIterator.ofNodes();
+                    }
+
+                case AxisInfo.DESCENDANT:
+                    if (type == Type.DOCUMENT &&
+                            nodeTest instanceof NameTest &&
+                            nodeTest.getPrimitiveType() == Type.ELEMENT) {
+                        return tree.getAllElements(nodeTest.getFingerprint());
+                    } else if (hasChildNodes()) {
+                        return new DescendantIterator(tree, this, nodeTest);
+                    } else {
+                        return EmptyIterator.ofNodes();
+                    }
+
+                case AxisInfo.DESCENDANT_OR_SELF:
+                    if (hasChildNodes()) {
+                        AxisIterator descendants = new DescendantIterator(tree, this, nodeTest);
+                        if (nodeTest.test(this)) {
+                            return new PrependAxisIterator(this, descendants);
+                        } else {
+                            return descendants;
+                        }
+                    } else {
+                        return Navigator.filteredSingleton(this, nodeTest);
+                    }
+
+                case AxisInfo.FOLLOWING:
+                    if (type == Type.ATTRIBUTE || type == Type.NAMESPACE) {
+                        return new FollowingIterator(tree, getParent(), nodeTest, true);
+                    } else if (tree.depth[nodeNr] == 0) {
+                        return EmptyIterator.ofNodes();
+                    } else {
+                        return new FollowingIterator(tree, this, nodeTest, false);
+                    }
+
+                case AxisInfo.FOLLOWING_SIBLING:
+                    if (type == Type.ATTRIBUTE || type == Type.NAMESPACE || tree.depth[nodeNr] == 0) {
+                        return EmptyIterator.ofNodes();
+                    } else {
+                        return new SiblingIterator(tree, this, nodeTest, false);
+                    }
+
+                case AxisInfo.NAMESPACE:
+                    if (type != Type.ELEMENT) {
+                        return EmptyIterator.ofNodes();
+                    }
+                    AxisIterator unfiltered;
+                    if (!hasNamespaces()) {
+                        DominoNode parent = getParent();
+                        if (parent.getNodeKind() == Type.ELEMENT) {
+                            unfiltered = parent.iterateAxis(axisNumber, nodeTest);
+                        } else {
+                            NamespaceBinding xml = NamespaceBinding.XML;
+                            unfiltered = SingleNodeIterator.makeIterator(new NamespaceNode(this, xml, 0));
+                        }
+                    } else {
+                        unfiltered = NamespaceNode.makeIterator(this, nodeTest);
+                    }
+                    return new Navigator.AxisFilter(unfiltered, nodeTest);
+
+                case AxisInfo.PARENT:
+                    NodeInfo parent = getParent();
+                    return Navigator.filteredSingleton(parent, nodeTest);
+
+                case AxisInfo.PRECEDING:
+                    if (type == Type.ATTRIBUTE || type == Type.NAMESPACE) {
+                        return new PrecedingIterator(tree, getParent(), nodeTest, false);
+                    } else if (tree.depth[nodeNr] == 0) {
+                        return EmptyIterator.ofNodes();
+                    } else {
+                        return new PrecedingIterator(tree, this, nodeTest, false);
+                    }
+
+                case AxisInfo.PRECEDING_SIBLING:
+                    if (type == Type.ATTRIBUTE || type == Type.NAMESPACE || tree.depth[nodeNr] == 0) {
+                        return EmptyIterator.ofNodes();
+                    } else {
+                        return new PrecedingSiblingIterator(tree, this, nodeTest);
+                    }
+
+                case AxisInfo.SELF:
                     return Navigator.filteredSingleton(this, nodeTest);
-                }
 
-            case AxisInfo.FOLLOWING:
-                if (type == Type.ATTRIBUTE || type == Type.NAMESPACE) {
-                    return new FollowingIterator(tree, getParent(), nodeTest, true);
-                } else if (tree.depth[nodeNr] == 0) {
-                    return EmptyIterator.OfNodes.THE_INSTANCE;
-                } else {
-                    return new FollowingIterator(tree, this, nodeTest, false);
-                }
-
-            case AxisInfo.FOLLOWING_SIBLING:
-                if (type == Type.ATTRIBUTE || type == Type.NAMESPACE || tree.depth[nodeNr] == 0) {
-                    return EmptyIterator.OfNodes.THE_INSTANCE;
-                } else {
-                    return new SiblingIterator(tree, this, nodeTest, false);
-                }
-
-            case AxisInfo.NAMESPACE:
-                if (type != Type.ELEMENT) {
-                    return EmptyIterator.OfNodes.THE_INSTANCE;
-                }
-                AxisIterator unfiltered;
-                if (!hasNamespaces()) {
-                    DominoNode parent = getParent();
-                    if (parent.getNodeKind() == Type.ELEMENT) {
-                        unfiltered = parent.iterateAxis(axisNumber, nodeTest);
+                case AxisInfo.PRECEDING_OR_ANCESTOR:
+                    if (type == Type.DOCUMENT) {
+                        return EmptyIterator.ofNodes();
+                        //                } else if (type == Type.ATTRIBUTE || type == Type.NAMESPACE) {
+                        //                    // See test numb32.
+                        //                    TinyNodeImpl el = getParent();
+                        //                    return new PrependIterator(el, new PrecedingEnumeration(tree, el, nodeTest, true));
                     } else {
-                        NamespaceBinding xml = NamespaceBinding.XML;
-                        unfiltered = SingleNodeIterator.makeIterator(new NamespaceNode(this, xml, 0));
+                        return new PrecedingIterator(tree, this, nodeTest, true);
                     }
-                } else {
-                    unfiltered = NamespaceNode.makeIterator(this, nodeTest);
-                }
-                return new Navigator.AxisFilter(unfiltered, nodeTest);
 
-            case AxisInfo.PARENT:
-                NodeInfo parent = getParent();
-                return Navigator.filteredSingleton(parent, nodeTest);
-
-            case AxisInfo.PRECEDING:
-                if (type == Type.ATTRIBUTE || type == Type.NAMESPACE) {
-                    return new PrecedingIterator(tree, getParent(), nodeTest, false);
-                } else if (tree.depth[nodeNr] == 0) {
-                    return EmptyIterator.OfNodes.THE_INSTANCE;
-                } else {
-                    return new PrecedingIterator(tree, this, nodeTest, false);
-                }
-
-            case AxisInfo.PRECEDING_SIBLING:
-                if (type == Type.ATTRIBUTE || type == Type.NAMESPACE || tree.depth[nodeNr] == 0) {
-                    return EmptyIterator.OfNodes.THE_INSTANCE;
-                } else {
-                    return new PrecedingSiblingIterator(tree, this, nodeTest);
-                }
-
-            case AxisInfo.SELF:
-                return Navigator.filteredSingleton(this, nodeTest);
-
-            case AxisInfo.PRECEDING_OR_ANCESTOR:
-                if (type == Type.DOCUMENT) {
-                    return EmptyIterator.OfNodes.THE_INSTANCE;
-//                } else if (type == Type.ATTRIBUTE || type == Type.NAMESPACE) {
-//                    // See test numb32.
-//                    TinyNodeImpl el = getParent();
-//                    return new PrependIterator(el, new PrecedingEnumeration(tree, el, nodeTest, true));
-                } else {
-                    return new PrecedingIterator(tree, this, nodeTest, true);
-                }
-
-            default:
-                throw new IllegalArgumentException("Unknown axis number " + axisNumber);
+                default:
+                    throw new IllegalArgumentException("Unknown axis number " + axisNumber);
+            }
+        } else {
+            return new Navigator.AxisFilter(
+                    iterateAxis(axisNumber, AnyNodeTest.getInstance()), predicate);
         }
     }
 
@@ -835,5 +854,5 @@ public class DominoNode implements NodeInfo, VirtualNode {
     }
 }
 
-// Copyright (c) 2017 Saxonica Ltd
+// Copyright (c) 2017-2020 Saxonica Limited
 

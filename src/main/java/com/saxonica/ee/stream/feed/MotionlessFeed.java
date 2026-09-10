@@ -4,7 +4,7 @@ import com.saxonica.ee.stream.om.FleetingParentNode;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
@@ -20,7 +20,7 @@ public class MotionlessFeed extends ItemFeed {
     private Expression expression;
     private boolean selected;
 
-    public MotionlessFeed(Expression expression, Feed result, XPathContext context) {
+    public MotionlessFeed(Expression expression, ItemFeed result, XPathContext context) {
         super(expression, result, context);
         this.expression = expression;
     }
@@ -34,10 +34,9 @@ public class MotionlessFeed extends ItemFeed {
      * @param locationId the location associated with the element or document node (may be
      *                   the location of the instruction that created it)
      * @return a Receiver to be notified of all events starting with the startElement/startDocument event
-     *         for the matched element, and ending with the endElement event for that element; or null if this
-     *         feature is not required.
-     * @throws net.sf.saxon.trans.XPathException
-     *          May be raised if a dynamic error occurs
+     * for the matched element, and ending with the endElement event for that element; or null if this
+     * feature is not required.
+     * @throws net.sf.saxon.trans.XPathException May be raised if a dynamic error occurs
      */
     @Override
     public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
@@ -52,7 +51,7 @@ public class MotionlessFeed extends ItemFeed {
                 return getResult().startSelectedParentNode((FleetingParentNode) item, locationId);
             } else {
                 // See bug 4128
-                getResult().processItem(item);
+                getResult().append(item);
             }
         }
         return null;
@@ -64,10 +63,10 @@ public class MotionlessFeed extends ItemFeed {
      * @param item the item to be supplied
      */
     @Override
-    public void processItem(Item<?> item) throws XPathException {
+    public void append(Item item) throws XPathException {
         // This path is probably unused - MHK 2019-02-02
         SequenceIterator iter = expression.iterate(getContext());
-        processItems(iter, getResult());
+        processItems(iter, getNextOutputter());
     }
 
     @Override
@@ -79,4 +78,4 @@ public class MotionlessFeed extends ItemFeed {
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

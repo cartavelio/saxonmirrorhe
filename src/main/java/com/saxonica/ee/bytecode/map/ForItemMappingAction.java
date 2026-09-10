@@ -22,8 +22,9 @@ public abstract class ForItemMappingAction implements ItemMappingFunction {
         this.context = context;
     }
 
+    @Override
     public abstract Item mapItem(Item item) throws XPathException;
 
 }
 
-//Copyright (c) 2011-2018 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

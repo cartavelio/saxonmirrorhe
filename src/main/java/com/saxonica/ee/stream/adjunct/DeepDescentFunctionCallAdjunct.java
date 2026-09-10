@@ -1,7 +1,6 @@
 package com.saxonica.ee.stream.adjunct;
 
 import com.saxonica.ee.stream.*;
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.om.FleetingParentNode;
 import com.saxonica.ee.stream.watch.Terminator;
@@ -10,12 +9,13 @@ import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.UserFunction;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
 
@@ -32,7 +32,7 @@ public class DeepDescentFunctionCallAdjunct extends TransmissionAdjunct {
     @Override
     public PostureAndSweep computeStreamability(ContextItemStaticInfoEE contextInfo, List<String> reasons) {
         if (reasons == null) {
-            reasons = new ArrayList<String>();
+            reasons = new ArrayList<>();
         }
 
         UserFunctionCall exp = (UserFunctionCall)getExpression();
@@ -77,22 +77,21 @@ public class DeepDescentFunctionCallAdjunct extends TransmissionAdjunct {
             TypeHierarchy th = getConfiguration().getTypeHierarchy();
             ItemType declared = target.getArgumentType(0).getPrimaryType();
             boolean declaredTypeAllowsParentNodes =
-                    th.relationship(declared, NodeKindTest.DOCUMENT) != TypeHierarchy.DISJOINT ||
-                            th.relationship(declared, NodeKindTest.ELEMENT) != TypeHierarchy.DISJOINT;
+                    th.relationship(declared, NodeKindTest.DOCUMENT) != Affinity.DISJOINT ||
+                            th.relationship(declared, NodeKindTest.ELEMENT) != Affinity.DISJOINT;
             ItemType supplied = exp.getArg(0).getItemType();
             boolean suppliedTypeAllowsParentNodes =
-                    th.relationship(supplied, NodeKindTest.DOCUMENT) != TypeHierarchy.DISJOINT ||
-                            th.relationship(supplied, NodeKindTest.ELEMENT) != TypeHierarchy.DISJOINT;
+                    th.relationship(supplied, NodeKindTest.DOCUMENT) != Affinity.DISJOINT ||
+                            th.relationship(supplied, NodeKindTest.ELEMENT) != Affinity.DISJOINT;
             if (declaredTypeAllowsParentNodes && suppliedTypeAllowsParentNodes) {
                 return new PostureAndSweep(p0, Sweep.CONSUMING);
             } else {
                 return ps0;
             }
         }
-
-
     }
 
+    @Override
     public WatchMaker getWatchMaker(boolean forGrouping) throws XPathException {
         final UserFunctionCall instruction = (UserFunctionCall) getExpression();
         final Expression select = instruction.getArg(0);
@@ -100,13 +99,10 @@ public class DeepDescentFunctionCallAdjunct extends TransmissionAdjunct {
         final Pattern selection = StreamingPatternMaker.makeStreamingPattern(select, getConfiguration(), null);
 
         if (selection != null) {
-            return new WatchMaker() {
-                public Trigger makeWatch(WatchManager watchManager, Feed out, XPathContext context)
-                        throws XPathException {
-                    DeepDescentFunctionCallAction action = new DeepDescentFunctionCallAction(getExpression(), out, context);
-                    action.setWatchManager(watchManager);
-                    return new Trigger(selection, action, context);
-                }
+            return (watchManager, out, context) -> {
+                DeepDescentFunctionCallAction action = new DeepDescentFunctionCallAction(getExpression(), out, context);
+                action.setWatchManager(watchManager);
+                return new Trigger(selection, action, context);
             };
         }
         return null;
@@ -120,10 +116,11 @@ public class DeepDescentFunctionCallAdjunct extends TransmissionAdjunct {
         private Watch innerWatch;
         private boolean started;
 
-        public DeepDescentFunctionCallAction(Expression functionCall, Feed out, XPathContext context) {
+        DeepDescentFunctionCallAction(Expression functionCall, ItemFeed out, XPathContext context) {
             super(functionCall, out, context);
         }
 
+        @Override
         public void open(Terminator terminator) throws XPathException {
             super.open(terminator);
             UserFunctionCall exp = (UserFunctionCall) getExpression();
@@ -157,6 +154,7 @@ public class DeepDescentFunctionCallAdjunct extends TransmissionAdjunct {
          * @throws XPathException May be raised if a dynamic error occurs
          */
 
+        @Override
         public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
 
             XPathContext context = localContext;
@@ -188,14 +186,15 @@ public class DeepDescentFunctionCallAdjunct extends TransmissionAdjunct {
          * @param item the item that was matched.
          */
 
-        public void processItem(Item<?> item) throws XPathException {
+        @Override
+        public void append(Item item) throws XPathException {
             if (!hasFailed()) {
                 XPathContext context = localContext;
                 context.setLocalVariable(0, item);
 
                 start();
 
-                ((Trigger) innerWatch).getAction().processItem(item);
+                ((Trigger) innerWatch).getAction().append(item);
             }
         }
 
@@ -208,10 +207,12 @@ public class DeepDescentFunctionCallAdjunct extends TransmissionAdjunct {
          *                                               Watch is violated @param locationId the location of the node in the source, or of the instruction that created it
          */
 
+        @Override
         public void endSelectedParentNode(Location locationId) throws XPathException {
             watchManager.removeWatch(innerWatch);
         }
 
+        @Override
         public void close() throws XPathException {
             start();
             innerWatch.close();
@@ -222,7 +223,7 @@ public class DeepDescentFunctionCallAdjunct extends TransmissionAdjunct {
     }
 
     @Override
-    public Feed makeItemFeed(WatchManager watchManager, final Feed out, final XPathContext context) throws XPathException {
+    public ItemFeed makeItemFeed(WatchManager watchManager, final ItemFeed out, final XPathContext context) throws XPathException {
         DeepDescentFunctionCallAction action = new DeepDescentFunctionCallAction(getExpression(), out, context);
         action.setWatchManager(watchManager);
         return action;
@@ -231,4 +232,4 @@ public class DeepDescentFunctionCallAdjunct extends TransmissionAdjunct {
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

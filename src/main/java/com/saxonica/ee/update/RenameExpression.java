@@ -7,10 +7,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.Type;
-import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.QNameValue;
 import net.sf.saxon.value.SequenceType;
@@ -98,6 +95,7 @@ public class RenameExpression extends BasicUpdatingExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         typeCheckChildren(visitor, contextInfo);
 
@@ -121,9 +119,9 @@ public class RenameExpression extends BasicUpdatingExpression {
         setNameExp(tc.staticTypeCheck(getNameExp(), SequenceType.SINGLE_ATOMIC, role1, visitor));
         TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
         ItemType supplied = getNameExp().getItemType();
-        if (th.relationship(supplied, BuiltInAtomicType.STRING) == TypeHierarchy.DISJOINT &&
-                th.relationship(supplied, BuiltInAtomicType.UNTYPED_ATOMIC) == TypeHierarchy.DISJOINT &&
-                th.relationship(supplied, BuiltInAtomicType.QNAME) == TypeHierarchy.DISJOINT) {
+        if (th.relationship(supplied, BuiltInAtomicType.STRING) == Affinity.DISJOINT &&
+                th.relationship(supplied, BuiltInAtomicType.UNTYPED_ATOMIC) == Affinity.DISJOINT &&
+                th.relationship(supplied, BuiltInAtomicType.QNAME) == Affinity.DISJOINT) {
             XPathException de = new XPathException("The new name must be a string, QName, or untypedAtomic");
             de.setErrorCode("XPTY0004");
             de.setIsTypeError(true);
@@ -142,6 +140,7 @@ public class RenameExpression extends BasicUpdatingExpression {
      */
 
     /*@NotNull*/
+    @Override
     public Expression copy(RebindingMap rebindings) {
         RenameExpression exp = new RenameExpression(getTargetExp().copy(rebindings), getNameExp().copy(rebindings), nsContext, defaultNamespace);
         ExpressionTool.copyLocationInfo(this, exp);
@@ -155,6 +154,7 @@ public class RenameExpression extends BasicUpdatingExpression {
      * @param out the expression presenter used to display the structure
      */
 
+    @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("rename", this);
         getTargetExp().export(out);
@@ -170,6 +170,7 @@ public class RenameExpression extends BasicUpdatingExpression {
      * @param pul     the pending update list to which the results should be written
      */
 
+    @Override
     public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
         NodeInfo node = (NodeInfo) getTargetExp().evaluateItem(context);
         if (!(node instanceof MutableNodeInfo)) {
@@ -259,7 +260,7 @@ public class RenameExpression extends BasicUpdatingExpression {
             targetNode = null;
         }
         if (targetNode != null && (nodeKind == Type.ELEMENT || prefix.length() != 0)) {
-            NamespaceResolver nr = new InscopeNamespaceResolver(targetNode);
+            NamespaceResolver nr = targetNode.getAllNamespaces();
             String existingURI = nr.getURIForPrefix(prefix, true);
             if (existingURI != null && existingURI.length() != 0 && !existingURI.equals(uri)) {
                 XPathException err1 = new XPathException("New name conflicts with existing namespace binding");
@@ -299,4 +300,4 @@ public class RenameExpression extends BasicUpdatingExpression {
 
 }
 
-// Copyright (c) 2008 Saxonica Limited.
+// Copyright (c) 2008-2020 Saxonica Limited

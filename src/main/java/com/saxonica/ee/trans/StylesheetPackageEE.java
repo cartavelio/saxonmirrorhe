@@ -31,6 +31,7 @@ public class StylesheetPackageEE extends StylesheetPackage {
         super(config);
     }
 
+    @Override
     public void setFallbackToNonStreaming() {
         for (Mode m : getRuleManager().getAllNamedModes()) {
             m.setStreamable(false);
@@ -49,6 +50,7 @@ public class StylesheetPackageEE extends StylesheetPackage {
      * @return true if the stylesheet must fall back to unstreamed processing
      */
 
+    @Override
     public boolean isFallbackToNonStreaming() {
         return fallbackToNonStreaming;
     }
@@ -58,6 +60,7 @@ public class StylesheetPackageEE extends StylesheetPackage {
      * @return true if just-in-time compilation was enabled when the package was compiled
      */
 
+    @Override
     public boolean isJustInTimeCompilation() {
         return justInTimeCompilation;
     }
@@ -69,6 +72,7 @@ public class StylesheetPackageEE extends StylesheetPackage {
      * @param justInTimeCompilation set to true if just-in-time compilation was enabled when the package was compiled
      */
 
+    @Override
     public void setJustInTimeCompilation(boolean justInTimeCompilation) {
         this.justInTimeCompilation = justInTimeCompilation;
     }
@@ -139,8 +143,9 @@ public class StylesheetPackageEE extends StylesheetPackage {
         if (isSchemaAware()) {
             presenter.emitAttribute("schemaAware", "1");
         }
+        presenter.emitAttribute("saxonProduct", Version.getProductName() + '-' + config.getEditionCode());
         presenter.emitAttribute("saxonVersion", Version.getProductVersion());
-        //presenter.emitAttribute("timeStamp", new DateTimeValue(new GregorianCalendar(), true).getStringValue());
+        presenter.emitAttribute("buildDateTime", DateTimeValue.now().getStringValue());
         presenter.emitAttribute("target", ((ExpressionPresenter.ExportOptions) presenter.getOptions()).target);
         presenter.emitAttribute("targetVersion", ((ExpressionPresenter.ExportOptions) presenter.getOptions()).targetVersion+"");
         presenter.emitAttribute("relocatable", isRelocatable() ? "true" : "false");
@@ -223,8 +228,16 @@ public class StylesheetPackageEE extends StylesheetPackage {
     private void exportOutputDefinition(Properties properties, ExpressionPresenter presenter) {
         for (Map.Entry<Object, Object> prop : properties.entrySet()) {
             presenter.startElement("property");
-            presenter.emitAttribute("name", prop.getKey().toString());
-            presenter.emitAttribute("value", prop.getValue().toString());
+            String key = prop.getKey().toString();
+            if (key.startsWith("{")) {
+                key = "Q" + key;
+            }
+            presenter.emitAttribute("name", key);
+            String val = prop.getValue().toString();
+            if (key.equals("use-character-maps")) {
+                val = val.replace("{", "Q{");
+            }
+            presenter.emitAttribute("value", val);
             presenter.endElement();
         }
     }
@@ -240,11 +253,11 @@ public class StylesheetPackageEE extends StylesheetPackage {
 
     private void exportAccumulators(ExpressionPresenter presenter, Map<Component, Integer> componentIdMap) throws XPathException {
         for (Accumulator acc : getAccumulatorRegistry().getAllAccumulators()) {
-            ((Accumulator)acc).export(presenter, componentIdMap);
+            acc.export(presenter, componentIdMap);
 
         }
     }
 
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

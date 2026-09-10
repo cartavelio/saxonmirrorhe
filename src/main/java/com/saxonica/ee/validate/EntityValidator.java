@@ -3,23 +3,17 @@ package com.saxonica.ee.validate;
 import com.saxonica.ee.schema.TypeReference;
 import com.saxonica.ee.schema.UserUnionType;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.instruct.DummyNamespaceResolver;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
-import net.sf.saxon.om.NodeName;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Whitespace;
 
-import javax.xml.transform.ErrorListener;
-import javax.xml.transform.TransformerException;
 import java.util.*;
 
 
@@ -38,8 +32,8 @@ public class EntityValidator extends ValidatingFilter {
 
     /*@Nullable*/ private EntityChecker currentElementChecker = null;
     private FastStringBuffer buffer = new FastStringBuffer(FastStringBuffer.C64);
-    private Location textLocationId = ExplicitLocation.UNKNOWN_LOCATION;
-    private Map<SchemaType, EntityChecker> checkerMap = new HashMap<SchemaType, EntityChecker>(10);
+    private Location textLocationId = Loc.NONE;
+    private Map<SchemaType, EntityChecker> checkerMap = new HashMap<>(10);
 
     /**
      * Create a validator for attributes of type ENTITY or ENTITIES
@@ -62,31 +56,41 @@ public class EntityValidator extends ValidatingFilter {
 
     /**
      * Notify the start of an element
-     *  @param nameCode   integer code identifying the name of the element within the name pool.
-     * @param typeCode   integer code identifying the element's type within the name pool.
-     * @param location
-     * @param properties for future use. Should be set to zero.
      */
 
-    public void startElement(NodeName nameCode, SchemaType typeCode, Location location, int properties) throws XPathException {
-        currentElementChecker = checkerMap.get(typeCode);
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties)
+            throws XPathException {
+        currentElementChecker = checkerMap.get(type);
         if (currentElementChecker == null) {
-            currentElementChecker = allocateChecker(typeCode);
-            checkerMap.put(typeCode, currentElementChecker);
+            currentElementChecker = allocateChecker(type);
+            checkerMap.put(type, currentElementChecker);
         }
         if (currentElementChecker == SINGLETON_NON_ENTITY_CHECKER) {
             currentElementChecker = null;
         }
-        nextReceiver.startElement(nameCode, typeCode, location, properties);
+        for (AttributeInfo att : attributes) {
+            SimpleType typeCode = att.getType();
+            EntityChecker checker = checkerMap.get(typeCode);
+            if (checker == null) {
+                checker = allocateChecker(typeCode);
+                checkerMap.put(typeCode, checker);
+            }
+            checker.checkValue(att.getValue(), att.getLocation());
+        }
+        nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
     }
 
     /**
      * Character data
      */
 
+    @Override
     public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
         if (currentElementChecker != null) {
-            buffer.append(chars);
+            buffer.cat(chars);
         }
         nextReceiver.characters(chars, locationId, properties);
         textLocationId = locationId.saveLocation();
@@ -96,6 +100,7 @@ public class EntityValidator extends ValidatingFilter {
      * End of element
      */
 
+    @Override
     public void endElement() throws XPathException {
         if (currentElementChecker != null) {
             currentElementChecker.checkValue(buffer, textLocationId);
@@ -104,29 +109,7 @@ public class EntityValidator extends ValidatingFilter {
         currentElementChecker = null;
         nextReceiver.endElement();
     }
-
-    /**
-     * Handle an attribute
-     *
-     * @param nameCode   integer identifying the name of the attribute
-     * @param typeCode   integer identifying the type annotation (ignored)
-     * @param value      the value of the attribute
-     * @param locationId the location of the node in the source, or of the instruction that created it
-     *@param properties additional properties of the attribute  @throws net.sf.saxon.trans.XPathException
-     *          On any failure to write the attribute
-     */
-
-    public void attribute(NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties)
-            throws XPathException {
-        EntityChecker checker = checkerMap.get(typeCode);
-        if (checker == null) {
-            checker = allocateChecker(typeCode);
-            checkerMap.put(typeCode, checker);
-        }
-        checker.checkValue(value, locationId);
-        nextReceiver.attribute(nameCode, typeCode, value, locationId, properties);
-    }
-
+    
     /**
      * Classify a type as one of ID, IDREF, IDREFS, or other.
      * This is only done the first type a type is encountered, to avoid repeated searching of the
@@ -215,38 +198,10 @@ public class EntityValidator extends ValidatingFilter {
      *         may supply untyped nodes instead of supplying the type annotation
      */
 
+    @Override
     public boolean usesTypeAnnotations() {
         return true;
     }
-
- /*   *//**
-     * Report a validation error
-     *
-     * @param err        The validation exception
-     * @param locationId identifies the location in the source document or stylesheet/query where the
-     *                   validation error was detected
-     * @throws net.sf.saxon.type.ValidationException
-     *          if the error is considered fatal
-     *//*
-    protected void reportValidationError(ValidationException err, Location locationId)
-            throws ValidationException {
-        PipelineConfiguration pipe = getPipelineConfiguration();
-        err.setLocation(locationId.saveLocation());
-        ErrorListener listener = pipe.getErrorListener();
-        try {
-            listener.fatalError(err);
-            err.setHasBeenReported(true);
-        } catch (TransformerException e) {
-            err.setHasBeenReported(true);
-            if (e instanceof ValidationException) {
-                throw (ValidationException) e;
-            } else if (e.getException() instanceof ValidationException) {
-                throw (ValidationException) e.getException();
-            } else {
-                throw new ValidationException(e);
-            }
-        }
-    } */
 
     /**
      * Process a string that has been identified as an entity value
@@ -262,7 +217,7 @@ public class EntityValidator extends ValidatingFilter {
             ValidationFailure ve = new ValidationFailure("Value '" + eref + "' is not declared in the DTD as an unparsed entity name");
             ve.setConstraintReference(1, "cvc-simple-type", "3");
             reportValidationError(ve, false, locationId);
-            throw ve.makeException();
+            //throw ve.makeException();
         }
     }
 
@@ -285,6 +240,7 @@ public class EntityValidator extends ValidatingFilter {
      */
 
     private class SimpleEntityChecker implements EntityChecker {
+        @Override
         public void checkValue(CharSequence value, Location locationId) throws XPathException {
             String id = Whitespace.trimWhitespace(value).toString();
             processEntityRef(id, locationId);
@@ -297,6 +253,7 @@ public class EntityValidator extends ValidatingFilter {
      */
 
     private class EntityListChecker implements EntityChecker {
+        @Override
         public void checkValue(CharSequence value, Location locationId) throws XPathException {
             String ids = value.toString();
             StringTokenizer tok = new StringTokenizer(ids, " \t\n\r", false);
@@ -320,6 +277,7 @@ public class EntityValidator extends ValidatingFilter {
             this.type = type;
         }
 
+        @Override
         public void checkValue(CharSequence value, Location locationId) throws XPathException {
             Configuration config = getConfiguration();
             TypeHierarchy th = config.getTypeHierarchy();
@@ -340,6 +298,7 @@ public class EntityValidator extends ValidatingFilter {
      */
 
     private static class NonIdChecker implements EntityChecker {
+        @Override
         public void checkValue(CharSequence value, Location locationId) throws XPathException {
             // do nothing
         }
@@ -349,6 +308,6 @@ public class EntityValidator extends ValidatingFilter {
 
 }
 
-// Copyright � 2010 Saxonica Limited. No warranty.
+// Copyright � 2020 Saxonica Limited No warranty.
 
 

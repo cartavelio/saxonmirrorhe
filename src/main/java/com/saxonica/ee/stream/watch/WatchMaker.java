@@ -1,6 +1,6 @@
 package com.saxonica.ee.stream.watch;
 
-import com.saxonica.ee.stream.feed.Feed;
+import com.saxonica.ee.stream.feed.ItemFeed;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.trans.XPathException;
 
@@ -23,11 +23,11 @@ public interface WatchMaker {
      * @throws XPathException if any dynamic error occurs
      */
 
-    Trigger makeWatch(WatchManager watchManager, Feed out, XPathContext context)
+    Trigger makeWatch(WatchManager watchManager, ItemFeed out, XPathContext context)
             throws XPathException;
 }
 
 //
-// Copyright (c) 2009 Saxonica Limited.
+// Copyright (c) 2009-2020 Saxonica Limited
 //
 

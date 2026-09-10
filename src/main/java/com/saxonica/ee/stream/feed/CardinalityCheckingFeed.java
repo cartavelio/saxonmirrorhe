@@ -2,16 +2,15 @@
 package com.saxonica.ee.stream.feed;
 
 import com.saxonica.ee.stream.om.FleetingParentNode;
-import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.SequenceReceiver;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.functions.TreatFn;
+import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NamespaceBindingSet;
+import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
@@ -29,11 +28,14 @@ import net.sf.saxon.value.Cardinality;
  */
 public class CardinalityCheckingFeed extends ItemFeed {
 
+    // TODO: simplify this by using a DelegatingFeed that delegates to a TypeCheckingFilter
+
+    private int level = 0;
     private int count = 0;
     private int requiredCardinality;
     private RoleDiagnostic role;
 
-    public CardinalityCheckingFeed(Expression checker, Feed result, XPathContext context) {
+    public CardinalityCheckingFeed(Expression checker, ItemFeed result, XPathContext context) {
         super(checker, result, context);
         if (checker instanceof CardinalityChecker) {
             requiredCardinality = ((CardinalityChecker) checker).getRequiredCardinality();
@@ -71,10 +73,11 @@ public class CardinalityCheckingFeed extends ItemFeed {
      *          to report any failure
      */
 
-    public void processItem(Item<?> item) throws XPathException {
+    @Override
+    public void append(Item item) throws XPathException {
         if (!hasFailed()) {
             checkCount();
-            getResult().processItem(item);
+            getNextOutputter().append(item);
         }
     }
 
@@ -98,6 +101,7 @@ public class CardinalityCheckingFeed extends ItemFeed {
      *          to report any failure
      */
 
+    @Override
     public void close() throws XPathException {
         if (!hasFailed()) {
             if (count == 0 && !Cardinality.allowsZero(requiredCardinality)) {
@@ -105,7 +109,7 @@ public class CardinalityCheckingFeed extends ItemFeed {
                         role.getMessage(), role.getErrorCode());
                 return;
             }
-            getResult().close();
+            getNextOutputter().close();
         }
     }
 
@@ -115,98 +119,98 @@ public class CardinalityCheckingFeed extends ItemFeed {
         dynamicError(e);
     }
 
+
     @Override
-    public SequenceReceiver getReceiver() {
-        // Unlike most expressions, a cardinality checker needs to take note of start/end element/document
-        // events sent by the Receiver route, since these contribute to the item count;
-        // see test cases such as si-copy-121. Top-level events sent to the target receiver are counted,
-        // and all events are passed on unchanged.
-        Receiver next = getResult().getReceiver();
-        return new ProxyReceiver(next) {
-            int level = 0;
-            @Override
-            public void startDocument(int properties) throws XPathException {
-                if (level++ == 0) {
-                    checkCount();
-                }
-                super.startDocument(properties);
-            }
-
-            @Override
-            public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties) throws XPathException {
-                if (!hasFailed()) {
-                    if (level++ == 0) {
-                        checkCount();
-                    }
-                    super.startElement(elemName, typeCode, location, properties);
-                }
-            }
-
-            @Override
-            public void endElement() throws XPathException {
-                if (!hasFailed()) {
-                    level--;
-                    super.endElement();
-                }
-            }
-
-            @Override
-            public void endDocument() throws XPathException {
-                level--;
-                super.endDocument();
-            }
-
-            @Override
-            public void namespace(NamespaceBindingSet namespaceBindings, int properties) throws XPathException {
-                if (level == 0) {
-                    checkCount();
-                    // This event might represent more than one node, but it doesn't matter for cardinality checking
-                }
-                super.namespace(namespaceBindings, properties);
-            }
-
-            @Override
-            public void attribute(NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties) throws XPathException {
-                if (level == 0) {
-                    checkCount();
-                }
-                super.attribute(nameCode, typeCode, value, locationId, properties);
-            }
-
-            @Override
-            public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
-                if (level == 0) {
-                    checkCount();
-                }
-                super.characters(chars, locationId, properties);
-            }
-
-            @Override
-            public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
-                if (level == 0) {
-                    checkCount();
-                }
-                super.processingInstruction(target, data, locationId, properties);
-            }
-
-            @Override
-            public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
-                if (level == 0) {
-                    checkCount();
-                }
-                super.comment(chars, locationId, properties);
-            }
-
-            @Override
-            public void append(Item item, Location locationId, int properties) throws XPathException {
-                if (level == 0) {
-                    checkCount();
-                }
-                super.append(item, locationId, properties);
-            }
-        };
+    public void startDocument(int properties) throws XPathException {
+        if (level++ == 0) {
+            checkCount();
+        }
+        super.startDocument(properties);
     }
+
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             Location location, int properties) throws XPathException {
+        if (!hasFailed()) {
+            if (level++ == 0) {
+                checkCount();
+            }
+            super.startElement(elemName, type, location, properties);
+        }
+    }
+
+    @Override
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
+        if (!hasFailed()) {
+            if (level++ == 0) {
+                checkCount();
+            }
+            super.startElement(elemName, type, attributes, namespaces, location, properties);
+        }
+    }
+
+    @Override
+    public void namespace(String prefix, String namespaceUri, int properties) throws XPathException {
+        if (!hasFailed()) {
+            if (level++ == 0) {
+                checkCount();
+            }
+            super.namespace(prefix, namespaceUri, properties);
+        }
+    }
+
+    @Override
+    public void attribute(NodeName attName, SimpleType typeCode, CharSequence value, Location location, int properties) throws XPathException {
+        if (!hasFailed()) {
+            if (level++ == 0) {
+                checkCount();
+            }
+            super.attribute(attName, typeCode, value, location, properties);
+        }
+    }
+
+    @Override
+    public void endElement() throws XPathException {
+        if (!hasFailed()) {
+            level--;
+            super.endElement();
+        }
+    }
+
+    @Override
+    public void endDocument() throws XPathException {
+        level--;
+        super.endDocument();
+    }
+
+    @Override
+    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+        if (level == 0) {
+            checkCount();
+        }
+        super.characters(chars, locationId, properties);
+    }
+
+    @Override
+    public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
+        if (level == 0) {
+            checkCount();
+        }
+        super.processingInstruction(target, data, locationId, properties);
+    }
+
+    @Override
+    public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
+        if (level == 0) {
+            checkCount();
+        }
+        super.comment(chars, locationId, properties);
+    }
+
+
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 

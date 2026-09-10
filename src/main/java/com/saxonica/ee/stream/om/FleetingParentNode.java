@@ -1,5 +1,8 @@
 package com.saxonica.ee.stream.om;
 
+import net.sf.saxon.event.Receiver;
+import net.sf.saxon.trans.XPathException;
+
 /**
  * A streamed document or element node.
  */
@@ -24,6 +27,14 @@ public abstract class FleetingParentNode extends FleetingNode {
     public void setHasChildren(boolean has) {
         hasChildren = has;
     }
+
+    /**
+     * Notify the event to a Receiver
+     * @param out the receiver to be notified
+     */
+
+    public abstract void notify(Receiver out) throws XPathException;
+
 }
 
-// Copyright (c) 2012-2014 Saxonica.
+// Copyright (c) 2012-2020 Saxonica.

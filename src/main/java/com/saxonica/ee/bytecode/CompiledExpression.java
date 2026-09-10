@@ -1,5 +1,6 @@
 package com.saxonica.ee.bytecode;
 
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.PendingUpdateList;
 import net.sf.saxon.expr.XPathContext;
@@ -36,6 +37,7 @@ public class CompiledExpression extends Expression {
      * @return the original expression
      */
 
+    @Override
     public Expression getInterpretedExpression() {
         return original;
     }
@@ -79,9 +81,9 @@ public class CompiledExpression extends Expression {
     }
 
     @Override
-    public void process(XPathContext context) throws XPathException {
+    public void process(Outputter output, XPathContext context) throws XPathException {
         try {
-            byteCode.process(context);
+            byteCode.process(output, context);
         } catch (XPathException e) {
             e.maybeSetContext(context);
             e.maybeSetLocation(getInterpretedExpression().getLocation());
@@ -151,11 +153,6 @@ public class CompiledExpression extends Expression {
     }
 
     @Override
-    public int getConstructType() {
-        return getInterpretedExpression().getConstructType();
-    }
-
-    @Override
     public StructuredQName getObjectName() {
         return getInterpretedExpression().getObjectName();
     }
@@ -177,6 +174,7 @@ public class CompiledExpression extends Expression {
      * Hashcode supporting equals()
      */
 
+    @Override
     public int computeHashCode() {
         int h = 0x833b12a0;
         return h + getInterpretedExpression().hashCode() + byteCode.hashCode();
@@ -205,7 +203,7 @@ public class CompiledExpression extends Expression {
 
     /*@NotNull*/
     @Override
-    public SequenceIterator<?> iterate(XPathContext context) throws XPathException {
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
         try {
             return byteCode.iterate(context);
         } catch (XPathException e) {
@@ -235,7 +233,7 @@ public class CompiledExpression extends Expression {
     }
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited
 
 
 

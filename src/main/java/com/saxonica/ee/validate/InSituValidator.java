@@ -2,15 +2,14 @@ package com.saxonica.ee.validate;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.*;
-import net.sf.saxon.expr.parser.ExplicitLocation;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.HostLanguage;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.Type;
 
 /**
@@ -53,7 +52,7 @@ public class InSituValidator {
     public void validate() throws XPathException {
         Configuration config = root.getConfiguration();
         PipelineConfiguration pipe = config.makePipelineConfiguration();
-        pipe.setHostLanguage(Configuration.XML_SCHEMA);
+        pipe.setHostLanguage(HostLanguage.XML_SCHEMA);
         SequenceReceiver endPoint = new NodeUpdater(pipe);
         // Create the validation pipeline
         ParseOptions options = new ParseOptions();
@@ -64,11 +63,11 @@ public class InSituValidator {
             validator = config.getDocumentValidator(endPoint, root.getSystemId(), options, null);
         } else {
             options.setTopLevelElement(NameOfNode.makeName(root).getStructuredQName());
-            validator = config.getElementValidator(endPoint, options, ExplicitLocation.UNKNOWN_LOCATION);
+            validator = config.getElementValidator(endPoint, options, Loc.NONE);
         }
-        pipe.setComponent(CopyInformee.class.getName(), new NodeCounter(validator));
+        pipe.setComponent(CopyInformee.class.getName(), new NodeCounter());
         // Run the validation by invoking the copy() method to send events to the validation pipeline
-        root.copy(validator, CopyOptions.ALL_NAMESPACES, ExplicitLocation.UNKNOWN_LOCATION);
+        root.copy(validator, CopyOptions.ALL_NAMESPACES, Loc.NONE);
     }
 
     /**
@@ -82,7 +81,7 @@ public class InSituValidator {
 
         int counter = 0;
 
-        public NodeCounter(Receiver next) {
+        public NodeCounter() {
             //setUnderlyingReceiver(next);
         }
 
@@ -93,9 +92,10 @@ public class InSituValidator {
          * @param element the node being copied, which must be an element node
          */
 
+        @Override
         public Location notifyElementNode(NodeInfo element) {
             nodeBuffer[counter % 16] = (MutableNodeInfo) element;
-            return new ExplicitLocation(element.getSystemId(), counter++, 998877);
+            return new Loc(element.getSystemId(), counter++, 998877);
         }
 
     }
@@ -111,53 +111,22 @@ public class InSituValidator {
 
         /**
          * Notify the start of an element
-         * @param nameCode   the name of the element
-         * @param type   the element's type annotation
-         * @param location location of the originator of the element
-         * @param properties properties of the element node
+         *
          */
 
-        public void startElement(NodeName nameCode, SchemaType type, Location location, int properties) throws XPathException {
+        @Override
+        public void startElement(NodeName elemName, SchemaType type,
+                                 AttributeMap attributes, NamespaceMap namespaces,
+                                 Location location, int properties) throws XPathException {
             MutableNodeInfo node = nodeBuffer[location.getLineNumber() % 16];
             node.setTypeAnnotation(type);
             currentElement = node;
-        }
-
-        /**
-         * Notify an attribute. Attributes are notified after the startElement event, and before any
-         * children. Namespaces and attributes may be intermingled.
-         *
-         * @param name       The name of the attribute
-         * @param type   The type of the attribute
-         * @param locationId the location of the node in the source, or of the instruction that created it
-         * @param properties Bit significant value. The following bits are defined:
-         *                   <dl>
-         *                   <dd>DISABLE_ESCAPING</dd>    <dt>Disable escaping for this attribute</dt>
-         *                   <dd>NO_SPECIAL_CHARACTERS</dd>      <dt>Attribute value contains no special characters</dt>
-         *                   </dl>
-         * @throws IllegalStateException: attempt to output an attribute when there is no open element
-         *                                start tag
-         */
-
-        public void attribute(NodeName name, SimpleType type, CharSequence value, Location locationId, int properties) throws XPathException {
-            if ((properties & ReceiverOptions.DEFAULTED_ATTRIBUTE) != 0) {
-                currentElement.addAttribute(name, type, value, 0);
-            } else {
-                AxisIterator axis = currentElement.iterateAxis(AxisInfo.ATTRIBUTE);
-                NodeInfo att;
-                while ((att = axis.next()) != null) {
-                    if (NameOfNode.makeName(att).equals(name)) {
-                        ((MutableNodeInfo) att).setTypeAnnotation(type);
-                        axis.close();
-                        break;
-                    }
-                }
-            }
+            node.setAttributes(attributes);
         }
 
         @Override
         public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
-            if ((properties & ReceiverOptions.DEFAULTED_ATTRIBUTE) != 0) {
+            if (ReceiverOption.contains(properties, ReceiverOption.DEFAULTED_VALUE)) {
                 Orphan child = new Orphan(getConfiguration());
                 child.setNodeKind(Type.TEXT);
                 child.setStringValue(chars.toString());
@@ -174,6 +143,7 @@ public class InSituValidator {
          *         may supply untyped nodes instead of supplying the type annotation
          */
 
+        @Override
         public boolean usesTypeAnnotations() {
             return true;
         }
@@ -181,5 +151,5 @@ public class InSituValidator {
 
 }
 
-// Copyright (c) 2008-2018 Saxonica Limited.
+// Copyright (c) 2008-2020 Saxonica Limited
 

@@ -1,11 +1,11 @@
 package com.saxonica.ee.stream.adjunct;
 
-import com.saxonica.ee.stream.feed.Feed;
 import com.saxonica.ee.stream.feed.FeedMaker;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.watch.Terminator;
 import com.saxonica.ee.stream.watch.WatchMaker;
 import com.saxonica.ee.stream.watch.WatchManager;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.ma.arrays.ArrayItem;
@@ -47,10 +47,10 @@ public class ArrayBlockAdjunct extends TransmissionAdjunct implements FeedMaker 
     private static class SquareArrayFeed extends ItemFeed {
 
         int consumingArg;
-        List<GroundedValue<?>> members;
-        List<Item<?>> consumingMember = new ArrayList<>();
+        List<GroundedValue> members;
+        List<Item> consumingMember = new ArrayList<>();
 
-        public SquareArrayFeed(SquareArrayConstructor exp, int arg, Feed result, XPathContext context) {
+        public SquareArrayFeed(SquareArrayConstructor exp, int arg, ItemFeed result, XPathContext context) {
             super(exp, result, context);
             this.consumingArg = arg;
         }
@@ -61,12 +61,13 @@ public class ArrayBlockAdjunct extends TransmissionAdjunct implements FeedMaker 
          * @param terminator used for early exit
          */
 
+        @Override
         public void open(Terminator terminator) throws XPathException {
             super.open(terminator);
             SquareArrayConstructor block = (SquareArrayConstructor)getExpression();
             members = new ArrayList<>();
             for (int i = 0; i < consumingArg; i++) {
-                List<Item<?>> member = new ArrayList<>();
+                List<Item> member = new ArrayList<>();
                 Expression child = block.getOperanda().getOperand(i).getChildExpression();
                 child.iterate(getContext()).forEachOrFail(member::add);
                 members.add(SequenceExtent.makeSequenceExtent(member));
@@ -81,7 +82,8 @@ public class ArrayBlockAdjunct extends TransmissionAdjunct implements FeedMaker 
          * @param item the node that was matched.
          * @throws XPathException May be raised if a dynamic error occurs
          */
-        public void processItem(Item<?> item) throws XPathException {
+        @Override
+        public void append(Item item) throws XPathException {
             consumingMember.add(item);
         }
 
@@ -92,29 +94,31 @@ public class ArrayBlockAdjunct extends TransmissionAdjunct implements FeedMaker 
          * Watch goes out of scope. The default implementation does nothing.
          */
 
+        @Override
         public void close() throws XPathException {
             members.add(SequenceExtent.makeSequenceExtent(consumingMember));
             SquareArrayConstructor block = (SquareArrayConstructor)getExpression();
-            Feed result = getResult();
+            Outputter result = getNextOutputter();
             for (int i = consumingArg + 1; i < block.getOperanda().getNumberOfOperands(); i++) {
-                List<Item<?>> member = new ArrayList<>();
+                List<Item> member = new ArrayList<>();
                 Expression child = block.getOperand(i).getChildExpression();
                 child.iterate(getContext()).forEachOrFail(member::add);
                 members.add(SequenceExtent.makeSequenceExtent(member));
             }
             ArrayItem resultArray = new SimpleArrayItem(members);
-            result.processItem(resultArray);
+            result.append(resultArray);
             result.close();
         }
 
     }
 
 
-    public Feed makeItemFeed(final WatchManager watchManager, Feed out, final XPathContext context) throws XPathException {
+    @Override
+    public ItemFeed makeItemFeed(final WatchManager watchManager, ItemFeed out, final XPathContext context) throws XPathException {
         consumingArg = findConsumingArg(getExpression(), consumingArg);
         return new SquareArrayFeed((SquareArrayConstructor)getExpression(), consumingArg, out, context);
     }
 
 }
 
-// Copyright (c) 2010-2018 Saxonica Limited.
+// Copyright (c) 2010-2020 Saxonica Limited

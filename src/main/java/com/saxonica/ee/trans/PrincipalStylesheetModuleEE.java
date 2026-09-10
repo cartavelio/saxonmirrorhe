@@ -4,7 +4,7 @@ package com.saxonica.ee.trans;
 import com.saxonica.ee.stream.Posture;
 import com.saxonica.ee.stream.PostureAndSweep;
 import com.saxonica.ee.stream.Streamability;
-import com.saxonica.xsltextn.style.SaxonTypeAlias;
+import com.saxonica.xsltextn.style.SaxonItemType;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
@@ -44,6 +44,7 @@ public class PrincipalStylesheetModuleEE extends PrincipalStylesheetModule {
      *          if errors are detected
      */
 
+    @Override
     protected void importSchemata() throws XPathException {
         // Scan the declarations in reverse order, that is, highest precedence first
         boolean importsSchemas = false;
@@ -60,8 +61,8 @@ public class PrincipalStylesheetModuleEE extends PrincipalStylesheetModule {
                     if (decl.getSourceElement() instanceof XSLImportSchema) {
                         ((XSLImportSchema) decl.getSourceElement()).readSchema();
                     }
-                    if (decl.getSourceElement() instanceof SaxonTypeAlias) {
-                        ((SaxonTypeAlias) decl.getSourceElement()).indexTypeAlias(decl, this);
+                    if (decl.getSourceElement() instanceof SaxonItemType) {
+                        ((SaxonItemType) decl.getSourceElement()).indexTypeAlias(decl, this);
                     }
                 }
                 // Now seal all the schemas that have been imported to guarantee consistency with instance documents
@@ -82,6 +83,7 @@ public class PrincipalStylesheetModuleEE extends PrincipalStylesheetModule {
      * @throws XPathException if the streamability rules are not satisifed
      */
 
+    @Override
     protected void checkStreamability(AttributeSet aSet) throws XPathException {
         List<String> reasons = new ArrayList<String>();
         Expression body = aSet.getBody();
@@ -104,7 +106,7 @@ public class PrincipalStylesheetModuleEE extends PrincipalStylesheetModule {
     }
     
     private static boolean isVariableReusable(GlobalVariable variable) {
-        Expression select = variable.getSelectExpression();
+        Expression select = variable.getBody();
         return select != null && !variable.isAssignable() && !(variable instanceof GlobalParam) &&
                 ((select.getDependencies() & StaticProperty.DEPENDS_ON_STATIC_CONTEXT) == 0);
     }
@@ -119,7 +121,7 @@ public class PrincipalStylesheetModuleEE extends PrincipalStylesheetModule {
 
             // TODO: before calling addGlobalVariable(), the GlobalExtractor calls getEquivalentVariable(), so this
             // looks redundant.
-            indexOfVariablesByInitializer.put(variable.getSelectExpression(), variable);
+            indexOfVariablesByInitializer.put(variable.getBody(), variable);
         }
     }
 
@@ -129,4 +131,4 @@ public class PrincipalStylesheetModuleEE extends PrincipalStylesheetModule {
     }
 }
 
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited

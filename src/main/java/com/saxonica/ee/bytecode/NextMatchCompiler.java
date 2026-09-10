@@ -1,17 +1,18 @@
 package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.*;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.NextMatch;
 import net.sf.saxon.expr.instruct.ParameterSet;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.instruct.TemplateRule;
-import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.FocusIterator;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.Mode;
-import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.trans.rules.BuiltInRuleSet;
+import net.sf.saxon.trans.rules.Rule;
 
 /**
  * Compiler for the XSLT next-match instruction
@@ -124,10 +125,12 @@ public class NextMatchCompiler extends ToPushCompiler {
             ga.pushNull();
         }
         ga.loadLocal(tunnelsVar);
+        compiler.generateGetOutputter();
         compiler.generateGetContext();
         allocateStatic(compiler, instr.getLocation());
         ga.invokeInstanceMethod(BuiltInRuleSet.class, "process", Item.class,
-            ParameterSet.class, ParameterSet.class, XPathContext.class, Location.class);
+                                ParameterSet.class, ParameterSet.class,
+                                Outputter.class, XPathContext.class, Location.class);
         ga.goTo(applyEnd);
 
 ////       } else if (useTailRecursion) {
@@ -209,7 +212,11 @@ public class NextMatchCompiler extends ToPushCompiler {
         // Assert stack: c2 template
         ga.swap();
         // Assert stack: template c2
-        ga.invokeInstanceMethod(TemplateRule.class, "apply", XPathContextMajor.class);
+        compiler.generateGetOutputter();
+        // Assert stack: template c2 Outputter
+        ga.swap();
+        // Assert stack: template Outputter c2
+        ga.invokeInstanceMethod(TemplateRule.class, "apply", Outputter.class, XPathContextMajor.class);
 
         methodInfo.placeLabel(applyEnd);
 
@@ -223,7 +230,7 @@ public class NextMatchCompiler extends ToPushCompiler {
 
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited
 
 
 

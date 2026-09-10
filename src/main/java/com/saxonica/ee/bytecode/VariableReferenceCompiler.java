@@ -1,7 +1,7 @@
 package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.*;
-import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.om.Item;
@@ -9,6 +9,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
@@ -176,9 +177,9 @@ public class VariableReferenceCompiler extends ToIteratorCompiler {
         ga.invokeInstanceMethod(SequenceIterator.class, "next");
         ga.dup();
         ga.ifNull(done.label());
-        compiler.generateGetReceiver();
+        compiler.generateGetOutputter();
         ga.swap();
-        ga.invokeInstanceMethod(Receiver.class, "append", Item.class);
+        ga.invokeInstanceMethod(Outputter.class, "append", Item.class);
         ga.goTo(loop);
 
         methodInfo.placeLabel(done);
@@ -195,9 +196,9 @@ public class VariableReferenceCompiler extends ToIteratorCompiler {
         TypeHierarchy th = compiler.getConfiguration().getTypeHierarchy();
         visitAnnotation(compiler, "VariableReferenceCompiler-toBoolean");
         ItemType type = expression.getItemType();
-        int rel = th.relationship(type, AnyNodeTest.getInstance());
-        boolean isNode = rel == TypeHierarchy.SAME_TYPE || rel == TypeHierarchy.SUBSUMED_BY;
-        boolean isNotNode = rel == TypeHierarchy.DISJOINT;
+        Affinity rel = th.relationship(type, AnyNodeTest.getInstance());
+        boolean isNode = rel == Affinity.SAME_TYPE || rel == Affinity.SUBSUMED_BY;
+        boolean isNotNode = rel == Affinity.DISJOINT;
         boolean dontKnow = !(isNode || isNotNode);
         if (Cardinality.allowsMany(expression.getCardinality()) || dontKnow) {
             super.compileToBoolean(compiler, expression);
@@ -232,4 +233,4 @@ public class VariableReferenceCompiler extends ToIteratorCompiler {
     }
 }
 
-//Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

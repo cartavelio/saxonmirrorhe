@@ -7,9 +7,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.Version;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.lib.SaxonOutputKeys;
+import net.sf.saxon.lib.*;
 import net.sf.saxon.om.NamePool;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.serialize.SerializationProperties;
@@ -62,7 +60,7 @@ public class SchemaTestSuiteDriver {
      */
     public static void main(String[] args) throws Exception {
         if (args.length == 0 || args[0].equals("-?")) {
-            System.err.println("SchemaTestSuiteDriver testDir -local:dir [-w] [-onwards] [-scm:scmschema.xsd] [-tv] -v:1.0|1.1 -c:contributor? -s:setName? -g:groupName?");
+            System.err.println("SchemaTestSuiteDriver testDir -local:dir [-w] [-onwards] [-scm:scmschema.xsd] [-tv] [-dangle] -v:1.0|1.1 -c:contributor? -s:setName? -g:groupName?");
         }
         System.err.println("Testing Saxon " + Version.getProductVersion());
         new SchemaTestSuiteDriver().go(args);
@@ -78,6 +76,7 @@ public class SchemaTestSuiteDriver {
     boolean onwards = false;
     boolean useSCM = false;
     boolean useTV = false;
+    boolean allowDangling = false;
     String versionUnderTest = "1.1";
     private TestDriverShell shell = new TestDriverShell();
     private int countSuccesses = 0;
@@ -108,6 +107,9 @@ public class SchemaTestSuiteDriver {
 
         if (validate) {
             SchemaValidator validator = processor.getSchemaManager().newSchemaValidator();
+            StandardErrorReporter reporter = new StandardErrorReporter();
+            reporter.setMaximumNumberOfErrors(500);
+            validator.setInvalidityHandler(new InvalidityHandlerWrappingErrorReporter(reporter));
             validator.validate(ss);
             return null;
         } else {
@@ -158,6 +160,8 @@ public class SchemaTestSuiteDriver {
                 localDir = args[i].substring(7);
             } else if (args[i].equals("-tv")) {
                 useTV = true;
+            } else if (args[i].equals("-dangle")) {
+                allowDangling = true;
             } else if (args[i].startsWith("-bytecode:")) {
                 bytecode = args[i].substring(10);
             } else if (args[i].startsWith("-scm:")) {
@@ -320,6 +324,7 @@ public class SchemaTestSuiteDriver {
                     testProcessor.setConfigurationProperty(Feature.ASSERTIONS_CAN_SEE_COMMENTS, false);
                     testProcessor.setConfigurationProperty(Feature.THRESHOLD_FOR_COMPILING_TYPES, 100);
                     testProcessor.setConfigurationProperty(Feature.MAX_COMPILED_CLASSES, 100000);
+                    testProcessor.setConfigurationProperty(Feature.ALLOW_UNRESOLVED_SCHEMA_COMPONENTS,allowDangling);
 
                     for (XdmItem feature : xpath.evaluate("saxon:Configuration/feature", testGroup)) {
                         String name = ((XdmNode) feature).attribute("name");
@@ -591,6 +596,7 @@ public class SchemaTestSuiteDriver {
         tempProcessor.setConfigurationProperty(Feature.XSD_VERSION, versionUnderTest);
         tempProcessor.setConfigurationProperty(Feature.XML_VERSION,
                                                testProcessor.getConfigurationProperty(Feature.XML_VERSION));
+        tempProcessor.setConfigurationProperty(Feature.ALLOW_UNRESOLVED_SCHEMA_COMPONENTS, allowDangling);
         EnterpriseConfiguration tempConfig = (EnterpriseConfiguration) tempProcessor.getUnderlyingConfiguration();
         //AutoActivate.activate(tempConfig);
         XPathCompiler tempXPath = tempProcessor.newXPathCompiler();
@@ -750,4 +756,4 @@ public class SchemaTestSuiteDriver {
     }
 }
 
-// Copyright (c) 2011 Saxonica Limited.
+// Copyright (c) 2011-2020 Saxonica Limited

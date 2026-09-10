@@ -171,6 +171,7 @@ public class ElementDecl extends SchemaStructure
      * @param id the generated ID
      */
 
+    @Override
     public void setGeneratedId(String id) {
         this.generatedId = id;
     }
@@ -245,6 +246,7 @@ public class ElementDecl extends SchemaStructure
      * @return the applicable value constraint if there is one, or null otherwise
      */
 
+    @Override
     public ValueConstraint getValueConstraint() {
         return valueConstraint;
     }
@@ -309,6 +311,7 @@ public class ElementDecl extends SchemaStructure
      *         or null if no fixed value was specified.
      */
 
+    @Override
     public AtomicSequence getFixedValue() {
         ValueConstraint vc = getFixedValueConstraint();
         return vc == null ? null : vc.getValue();
@@ -321,6 +324,7 @@ public class ElementDecl extends SchemaStructure
      * @return the lexical form of the "fixed" value, or null if there is no fixed value
      */
 
+    @Override
     public String getFixedValueLexicalForm() {
         ValueConstraint vc = getFixedValueConstraint();
         return vc == null ? null : vc.getLexicalForm();
@@ -413,15 +417,19 @@ public class ElementDecl extends SchemaStructure
      *                                      to its type cannot be resolved.
      */
 
+    @Override
     public SchemaType getType() throws MissingComponentException {
         SchemaType schemaType;
         if (typeReference == null) {
             return AnyType.getInstance();
         }
         schemaType = (SchemaType) typeReference.getTarget();
-
+        if (schemaType == null || schemaType.getValidationStatus() == INVALID) {
+            // error already reported
+            return AnyType.getInstance();
+        }
         if (schemaType instanceof SimpleTypeDefinition) {
-            schemaType = ((SimpleTypeDefinition) schemaType).getSimpleType();
+            schemaType = ((SimpleTypeDefinition) schemaType).getWorkingType();
             typeReference.setTarget(schemaType);
         }
         return schemaType;
@@ -573,6 +581,7 @@ public class ElementDecl extends SchemaStructure
      * @return true if this element definition is abstract
      */
 
+    @Override
     public boolean isAbstract() {
         return isAbstract;
     }
@@ -586,6 +595,7 @@ public class ElementDecl extends SchemaStructure
      *         may be nilled, and false otherwise.
      */
 
+    @Override
     public boolean isNillable() {
         return nillable;
     }
@@ -645,6 +655,7 @@ public class ElementDecl extends SchemaStructure
      * @param vc the value constraint
      */
 
+    @Override
     public void setValueConstraint(ValueConstraint vc) {
         this.valueConstraint = vc;
     }
@@ -681,6 +692,7 @@ public class ElementDecl extends SchemaStructure
         substitutionGroupMembers.add(this);
     }
 
+    @Override
     public StructuredQName getComponentName() {
         return elementName;
     }
@@ -691,6 +703,7 @@ public class ElementDecl extends SchemaStructure
      * @return the fingerprint of the element name
      */
 
+    @Override
     public int getFingerprint() {
         return fingerprint;
     }
@@ -745,6 +758,7 @@ public class ElementDecl extends SchemaStructure
      * @return true if type alternatives have been defined
      */
 
+    @Override
     public boolean hasTypeAlternatives() {
         return typeAlternatives != null;
     }
@@ -774,6 +788,7 @@ public class ElementDecl extends SchemaStructure
      * @throws SchemaException if cycles are found
      */
 
+    @Override
     public void lookForCycles(Stack references, SchemaCompiler compiler) throws SchemaException {
         for (Object reference : references) {
             ElementDecl member = (ElementDecl) reference;
@@ -787,7 +802,7 @@ public class ElementDecl extends SchemaStructure
         if (substitutionGroupOwners != null) {
             references.push(this);
             for (ComponentReference headRef : substitutionGroupOwners) {
-                headRef.tryToResolve(compiler);
+                headRef.tryToResolve(compiler, false);
                 if (headRef.isResolved()) {
                     ElementDecl head = (ElementDecl) headRef.getTarget();
                     head.lookForCycles(references, compiler);
@@ -805,6 +820,7 @@ public class ElementDecl extends SchemaStructure
      * @return true if all is well, false if errors found
      */
 
+    @Override
     public boolean fixup(SchemaCompiler compiler) throws SchemaException {
         boolean result = true;
         if (getFixupStatus() == UNVALIDATED) {
@@ -814,15 +830,22 @@ public class ElementDecl extends SchemaStructure
                     ElementDecl decl = (ElementDecl) PreparedSchema.validateReference(headRef, compiler, false);
                     if (decl == null) {
                         setFixupStatus(INVALID);
+                        substitutionGroupOwners = null; // for recovery, remove the element from the substitution group
                         return false;
                     }
                     result = decl.fixup(compiler);
                 }
             }
             if (typeReference != null && !typeReference.isDangling()) {
-                SchemaType type = (SchemaType) PreparedSchema.validateReference(typeReference, compiler, false);
+                SchemaType type;
+                try {
+                    type = (SchemaType) PreparedSchema.validateReference(typeReference, compiler, false);
+                } catch (MissingComponentException e) {
+                    type = null;
+                }
                 if (type == null) {
                     setFixupStatus(INVALID);
+                    typeReference = new TypeReference(StandardNames.XS_ERROR, getConfiguration(),this);
                     return false;
                 }
                 if (type instanceof UserSchemaComponent) {
@@ -835,7 +858,7 @@ public class ElementDecl extends SchemaStructure
                 }
             }
             for (IdentityConstraintReference icr : constraintRefs) {
-                icr.tryToResolve(compiler);
+                icr.tryToResolve(compiler, false);
             }
         }
         setFixupStatus(result ? VALIDATED : INVALID);
@@ -848,6 +871,7 @@ public class ElementDecl extends SchemaStructure
      * @throws MissingComponentException if the type of the declaration is not present in the schema.
      */
 
+    @Override
     public NodeTest makeSchemaNodeTest() throws MissingComponentException {
         return new SchemaElementTest(this);
     }
@@ -861,6 +885,7 @@ public class ElementDecl extends SchemaStructure
      *                         error listener decides that the error is fatal
      */
 
+    @Override
     public boolean validate(SchemaCompiler compiler) throws SchemaException {
         // System.err.println("Validate " + getName());
         // check for circularities and for previous validation
@@ -875,7 +900,7 @@ public class ElementDecl extends SchemaStructure
         boolean checkFirstSubstitutionGroup = true;
 
         if (typeReference != null) {
-            typeReference.tryToResolve(compiler);
+            typeReference.tryToResolve(compiler, false);
         } else {
             if (substitutionGroupOwners != null) {
                 // if the element has no type definition but is a member of a substitution group,
@@ -985,7 +1010,7 @@ public class ElementDecl extends SchemaStructure
         }
 
         for (IdentityConstraintReference icr : constraintRefs) {
-            icr.tryToResolve(compiler);
+            icr.tryToResolve(compiler, false);
             if (!icr.isResolved()) {
                 compiler.error("Cannot resolve integrity constraint reference " +
                         icr.getTargetComponentName().getDisplayName(), this);
@@ -1111,7 +1136,7 @@ public class ElementDecl extends SchemaStructure
             if (!result) {
                 return false;
             }
-            simpleType = ((SimpleTypeDefinition) simpleType).getSimpleType();
+            simpleType = ((SimpleTypeDefinition) simpleType).getWorkingType();
         }
 
         if (valueConstraint != null) {
@@ -1260,6 +1285,7 @@ public class ElementDecl extends SchemaStructure
      * Serialize the schema component
      */
 
+    @Override
     public void serialize(SchemaModelSerializer serializer) throws XPathException {
         String id = serializer.getId(this, true);
         serializer.startElement("element");
@@ -1333,6 +1359,7 @@ public class ElementDecl extends SchemaStructure
         serializer.endElement();
     }
 
+    @Override
     public Function getComponentAsFunction() {
         Callable callable = (context, arguments) -> {
             String key = arguments[0].head().getStringValue();
@@ -1462,4 +1489,4 @@ public class ElementDecl extends SchemaStructure
 
 }
 
-// Copyright (c) 2004-2008 Saxonica Limited.
+// Copyright (c) 2004-2020 Saxonica Limited

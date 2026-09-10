@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -58,6 +58,7 @@ public class QT3TestDriverEE extends QT3TestDriverPE {
      * @param s  The name of the tree model required
      * @return  The tree model - null if model requested is unrecognised
      */
+    @Override
     protected TreeModel getTreeModel(String s) {
         TreeModel tree = super.getTreeModel(s);
         if (s.equalsIgnoreCase("DOMINO")) {
@@ -66,6 +67,7 @@ public class QT3TestDriverEE extends QT3TestDriverPE {
         return tree;
     }
 
+    @Override
     public XdmNode makeDominoTree(Document doc, Configuration config, String baseUri) throws SaxonApiException {
         XdmNode result = null;
         DominoTree dominoTree = null;
@@ -79,6 +81,7 @@ public class QT3TestDriverEE extends QT3TestDriverPE {
         return result;
     }
 
+    @Override
     protected boolean makeSchemaAware(Environment env, boolean inverse) {
          if (!treeModel.isSchemaAware() || !env.processor.isSchemaAware()) {
              return false; // cannot use the selected tree model for schema-aware tests
@@ -94,10 +97,11 @@ public class QT3TestDriverEE extends QT3TestDriverPE {
              env.processor = new Processor(pConfig);
              env.processor.setConfigurationProperty(Feature.STABLE_UNPARSED_TEXT, true);
 
-             final XPathCompiler savedXPathCompiler = env.xpathCompiler;
-             final XQueryCompiler savedXQueryCompiler = env.xqueryCompiler;
-             final XsltCompiler savedXsltCompiler = env.xsltCompiler;
+
              // Note that at present no variables are copied across
+             final boolean xpcState = env.xpathCompiler.isSchemaAware();
+             final boolean xqcState = env.xqueryCompiler.isSchemaAware();
+             final boolean xtState = env.xsltCompiler != null && env.xsltCompiler.isSchemaAware();
              env.xpathCompiler = env.processor.newXPathCompiler();
              env.xqueryCompiler = env.processor.newXQueryCompiler();
              env.xsltCompiler = env.processor.newXsltCompiler();
@@ -105,29 +109,32 @@ public class QT3TestDriverEE extends QT3TestDriverPE {
              env.xqueryCompiler.setSchemaAware(false);
              env.xsltCompiler.setSchemaAware(false);
              env.resetActions.add(new Environment.ResetAction() {
+                 @Override
                  public void reset(Environment env) {
-                     env.processor = savedProcessor;
-                     env.xpathCompiler = savedXPathCompiler;
-                     env.xqueryCompiler = savedXQueryCompiler;
-                     env.xsltCompiler = savedXsltCompiler;
+                     env.xpathCompiler.setSchemaAware(xpcState);
+                     env.xqueryCompiler.setSchemaAware(xqcState);
+                     if (env.xsltCompiler != null) {
+                         env.xsltCompiler.setSchemaAware(xtState);
+                     }
                  }
              });
          } else {
-             final Processor savedProcessor = env.processor;
-             final XPathCompiler savedXPathCompiler = env.xpathCompiler;
-             final XQueryCompiler savedXQueryCompiler = env.xqueryCompiler;
-             final XsltCompiler savedXsltCompiler = env.xsltCompiler;
+             final boolean xpcState = env.xpathCompiler.isSchemaAware();
+             final boolean xqcState = env.xqueryCompiler.isSchemaAware();
+             final boolean xtState = env.xsltCompiler != null && env.xsltCompiler.isSchemaAware();
              env.xpathCompiler.setSchemaAware(true);
              env.xqueryCompiler.setSchemaAware(true);
              if (env.xsltCompiler != null) {
                 env.xsltCompiler.setSchemaAware(true);
              }
              env.resetActions.add(new Environment.ResetAction() {
+                 @Override
                  public void reset(Environment env) {
-                     env.processor = savedProcessor;
-                     env.xpathCompiler = savedXPathCompiler;
-                     env.xqueryCompiler = savedXQueryCompiler;
-                     env.xsltCompiler = savedXsltCompiler;
+                     env.xpathCompiler.setSchemaAware(xpcState);
+                     env.xqueryCompiler.setSchemaAware(xqcState);
+                     if (env.xsltCompiler != null) {
+                         env.xsltCompiler.setSchemaAware(xtState);
+                     }
                  }
              });
          }

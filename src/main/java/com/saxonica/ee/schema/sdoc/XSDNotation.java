@@ -1,7 +1,7 @@
 package com.saxonica.ee.schema.sdoc;
 
 import com.saxonica.ee.schema.Notation;
-import net.sf.saxon.om.AttributeCollection;
+import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.type.SchemaException;
@@ -26,11 +26,12 @@ public class XSDNotation extends AnnotationParent {
      *          if any errors are found in the attributes
      */
 
+    @Override
     public void prepareAttributes() throws SchemaException {
 
         notation = new Notation(getSchema().getConfiguration(), this);
 
-        AttributeCollection atts = getAttributeList();
+        AttributeMap atts = attributes();
         //-- handle attributes
 
         String[] allowed = {"id", "name", "public", "system"};
@@ -83,4 +84,4 @@ public class XSDNotation extends AnnotationParent {
 
 }
 
-// Copyright (c) 2004-2006 Saxonica Limited
+// Copyright (c) 2004-2020 Saxonica Limited

@@ -2,11 +2,12 @@
 package com.saxonica.ee.stream.feed;
 
 import com.saxonica.ee.stream.om.FleetingParentNode;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Location;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.StringValue;
 
@@ -26,23 +27,25 @@ import java.util.Stack;
  */
 
 
-public abstract class AbsorptionFeed extends ItemFeed {
+public abstract class AbsorptionFeed extends GroundedItemFeed {
 
-    Stack<PendingItem> valuesUnderConstructionStack = new Stack<PendingItem>();
-    List<Sequence> valuesReadyToBeOutput = new ArrayList<Sequence>(5);
+    private Stack<PendingItem> valuesUnderConstructionStack = new Stack<>();
+    List<Sequence> valuesReadyToBeOutput = new ArrayList<>(5);
 
 
-    public AbsorptionFeed(Feed result, XPathContext context) {
+    public AbsorptionFeed(ItemFeed result, XPathContext context) {
         super(result, context);
     }
 
     /**
      * Signal that an element has been found that matches the selection that this
      * Watch is looking for.
-     *  @param node the node that matches the selection
+     * @param node the node that matches the selection
      * @param locationId @throws net.sf.saxon.type.ValidationException
+     * @return a receiver that collects the contents of the selected node
      */
 
+    @Override
     public final Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
         PendingItem item = makePendingItem(valuesReadyToBeOutput.size(), node);
         valuesUnderConstructionStack.push(item);
@@ -69,6 +72,7 @@ public abstract class AbsorptionFeed extends ItemFeed {
      * @param locationId the location of the node in the source, or of the instruction that created it
      */
 
+    @Override
     public final void endSelectedParentNode(Location locationId) throws XPathException {
         if (!hasFailed()) {
             PendingItem item = valuesUnderConstructionStack.pop();
@@ -77,8 +81,9 @@ public abstract class AbsorptionFeed extends ItemFeed {
             valuesReadyToBeOutput.set(seq, item.deliver());
 
             if (valuesUnderConstructionStack.isEmpty()) {
-                for (Sequence<?> val : valuesReadyToBeOutput) {
-                    processItems(val.iterate(), getResult());
+                Outputter out = getNextOutputter();
+                for (Sequence val : valuesReadyToBeOutput) {
+                    processItems(val.iterate(), out);
                 }
                 valuesReadyToBeOutput.clear();
             }
@@ -96,12 +101,13 @@ public abstract class AbsorptionFeed extends ItemFeed {
      *
      */
 
-    public void processItem(Item<?> item) throws XPathException {
+    @Override
+    public void append(Item item) throws XPathException {
         if (!hasFailed()) {
-            Sequence<?> value = processGroundedItem(item);
+            Sequence value = processGroundedItem(item);
             if (!hasFailed()) {
                 if (valuesUnderConstructionStack.isEmpty()) {
-                    processItems(value.iterate(), getResult());
+                    processItems(value.iterate(), getNextOutputter());
                 } else {
                     // We are currently processing nested elements. The output will have to wait until the elements
                     // are all finished.
@@ -120,7 +126,7 @@ public abstract class AbsorptionFeed extends ItemFeed {
      * @throws XPathException if a dynamic error occurs
      */
 
-    protected abstract Sequence<?> processGroundedItem(Item item) throws XPathException;
+    protected abstract Sequence processGroundedItem(Item item) throws XPathException;
 
     @Override
     public void setHasFailed() {
@@ -171,7 +177,7 @@ public abstract class AbsorptionFeed extends ItemFeed {
          * @throws XPathException if the processing fails with a dynamic error
          */
 
-        public abstract Sequence<?> deliver() throws XPathException;
+        public abstract Sequence deliver() throws XPathException;
 
         /**
          * Reset the data relating to this node if a dynamic error occurs while processing the
@@ -182,4 +188,4 @@ public abstract class AbsorptionFeed extends ItemFeed {
     }
 }
 
-// Copyright (c) 2009-2014 Saxonica Limited
+// Copyright (c) 2009-2020 Saxonica Limited

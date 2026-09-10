@@ -47,8 +47,8 @@ public class PedigreeMapItem extends DelegatingMapItem implements MapItem, Pedig
      */
 
     @Override
-    public GroundedValue<?> get(AtomicValue key) {
-        GroundedValue<?> value = super.get(key);
+    public GroundedValue get(AtomicValue key) {
+        GroundedValue value = super.get(key);
         if (value instanceof ArrayItem) {
             Pedigree ped = new Pedigree(this, key);
             return new PedigreeArrayItem((ArrayItem) value, ped);
@@ -81,7 +81,7 @@ public class PedigreeMapItem extends DelegatingMapItem implements MapItem, Pedig
             public KeyValuePair next() {
                 KeyValuePair val = base.next();
                 Pedigree ped = new Pedigree(PedigreeMapItem.this, val.key);
-                GroundedValue<?> newValue = ped.makePedigreeValue(val.value);
+                GroundedValue newValue = ped.makePedigreeValue(val.value);
                 return new KeyValuePair(val.key, newValue);
             }
         };
@@ -100,5 +100,5 @@ public class PedigreeMapItem extends DelegatingMapItem implements MapItem, Pedig
 
 }
 
-// Copyright (c) 2018 Saxonica Ltd.
+// Copyright (c) 2018-2020 Saxonica Limited
 
