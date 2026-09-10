@@ -23,7 +23,7 @@ import java.util.function.IntPredicate;
 
 public class SegmentedString extends UnicodeString {
 
-    private UnicodeString[] segments;
+    private final UnicodeString[] segments;
 
     private final static long LOCAL_BITS = 16;  // segments of fixed size 2^16 = 65536 codepoints
     public final static int SEGMENT_LENGTH = 1<<LOCAL_BITS;
@@ -64,8 +64,9 @@ public class SegmentedString extends UnicodeString {
     public static final SegmentedString EMPTY = new SegmentedString();
 
     /**
-     * Internal constructor
-     * @param segmentArray the array of segments
+     * Internal constructor for use by UnicodeBuilder
+     * @param segmentArray the array of segments. The method assumes that the segment length
+     *                     is correct.
      */
     protected SegmentedString(UnicodeString[] segmentArray) {
         this.segments = segmentArray;
@@ -119,7 +120,6 @@ public class SegmentedString extends UnicodeString {
      */
     @Override
     public long length() {
-        long temp = ((long) segments.length - 1) * SEGMENT_LENGTH + segments[segments.length - 1].length();
         return ((long) segments.length - 1) * SEGMENT_LENGTH + segments[segments.length - 1].length();
     }
 
