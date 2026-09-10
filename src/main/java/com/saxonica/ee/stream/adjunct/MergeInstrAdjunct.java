@@ -163,7 +163,7 @@ public class MergeInstrAdjunct extends StreamingAdjunct {
             c2.trackFocus(iter);
             MergeInstr.MergeKeyMappingFunction addMergeKeys = new MergeInstr.MergeKeyMappingFunction(c2, ms);
             ContextMappingIterator iter3 =
-                    new ContextMappingIterator(addMergeKeys, c2);
+                    new ContextMappingIterator(addMergeKeys::map, c2);
             result.add(iter3);
         }
         return result;

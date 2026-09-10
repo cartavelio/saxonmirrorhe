@@ -7,11 +7,9 @@ import com.saxonica.ee.stream.watch.WatchManager;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
-
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.StringItem;
-
-import java.util.function.IntPredicate;
+import net.sf.saxon.z.IntPredicateProxy;
 
 public class CodepointsToStringStreamer extends StreamingAdjunct implements FeedMaker {
 
@@ -19,7 +17,7 @@ public class CodepointsToStringStreamer extends StreamingAdjunct implements Feed
     public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
         return new ItemFeed(getExpression(), out, context) {
             final StringBuilder buffer = new StringBuilder(64);
-            final IntPredicate checker = getConfiguration().getValidCharacterChecker();
+            final IntPredicateProxy checker = getConfiguration().getValidCharacterChecker();
 
             @Override
             public void append(Item item) throws XPathException {

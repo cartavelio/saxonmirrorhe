@@ -128,11 +128,10 @@ public class XSDElement extends SchemaElement {
                     if (!existsAsTopLevel) {
                         String localName = nc.getLocalPart();
                         XSDSchema s = getXSDSchema();
-                        for (NodeInfo decl : s.children(x -> x instanceof XSDElement)) {
-                            if (localName.equals(decl.getAttributeValue("", "name"))) {
-                                existsAsTopLevel = true;
-                                break;
-                            }
+                        for (NodeInfo ignored : s.children(x -> x instanceof XSDElement &&
+                                localName.equals(x.getAttributeValue("", "name")))) {
+                            existsAsTopLevel = true;
+                            break;
                         }
                     }
                     if (existsAsTopLevel) {

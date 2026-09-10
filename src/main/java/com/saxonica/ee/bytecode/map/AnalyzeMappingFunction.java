@@ -5,8 +5,11 @@
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-package net.sf.saxon.expr;
+package com.saxonica.ee.bytecode.map;
 
+import net.sf.saxon.expr.ContextMappingFunction;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.trans.XPathException;

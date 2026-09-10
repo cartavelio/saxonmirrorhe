@@ -1,14 +1,14 @@
 package com.saxonica.ee.domino;
 
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.z.IntPredicateProxy;
 
 import java.util.EnumSet;
-import java.util.function.IntPredicate;
 
 /**
  * This class supports both the child:: and following-sibling:: axes, which are
@@ -31,7 +31,7 @@ final class SiblingIterator implements AxisIterator, LookaheadIterator {
     private final DominoNode parentNode;
     private final boolean getChildren;
     private boolean needToAdvance = false;
-    private final IntPredicate matcher;
+    private final IntPredicateProxy matcher;
 
     /**
      * Return an enumeration over children or siblings of the context node

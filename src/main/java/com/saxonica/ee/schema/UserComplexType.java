@@ -2917,8 +2917,8 @@ public class UserComplexType extends UserDefinedType
                 for (Operand o : children) {
                     Expression child = o.getChildExpression();
                     if (child instanceof FixedElement) {
-                        NodeName elementName = ((FixedElement) child).getElementName();
-                        int fingerprint = ((FixedElement) child).getElementName().getFingerprint();
+                        NodeName elementName = ((FixedElement) child).getFixedElementName();
+                        int fingerprint = ((FixedElement) child).getFixedElementName().getFingerprint();
                         final Edge edge = state.getTransition(fingerprint, this);
                         if (edge == null) {
                             FiniteStateMachine machine = getFiniteStateMachine();

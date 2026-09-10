@@ -42,8 +42,8 @@ public class CompactStringValue implements AtomicSequence, SchemaComparable {
     }
 
     @Override
-    public AtomicIterator<StringItem> iterate() {
-        return new SingleAtomicIterator<>(head());
+    public AtomicIterator iterate() {
+        return new SingleAtomicIterator(head());
     }
 
     @Override

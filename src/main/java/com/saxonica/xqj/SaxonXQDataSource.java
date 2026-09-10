@@ -447,7 +447,7 @@ public class SaxonXQDataSource implements XQDataSource, Configuration.ApiProvide
      */
 
     public String getSchemaValidationMode() {
-        return Validation.toString(config.getSchemaValidationMode());
+        return Validation.describe(config.getSchemaValidationMode());
     }
 
     /**

@@ -197,7 +197,7 @@ public class CopyModifyExpression extends Expression {
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("copyModify", this);
-        out.emitAttribute("val", Validation.toString(validationMode));
+        out.emitAttribute("val", Validation.describe(validationMode));
         out.setChildRole("bindings");
         getCopyBindings().export(out);
         out.setChildRole("modify");

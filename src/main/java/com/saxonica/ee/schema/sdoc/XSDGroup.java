@@ -2,7 +2,7 @@ package com.saxonica.ee.schema.sdoc;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.*;
-import net.sf.saxon.annotate.CSharp;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
@@ -210,7 +210,7 @@ public class XSDGroup extends SchemaElement {
                     if (foundMaxOccurs) {
                         mutuallyExclusiveElementAndAttribute("all", "maxOccurs");
                     }
-                    CSharp.emitCode("goto case StandardNames.XS_SEQUENCE");
+                    CSharp.emitCode("goto case net.sf.saxon.om.StandardNames.XS_SEQUENCE");
                     // fall through
                 case StandardNames.XS_SEQUENCE:
                 case StandardNames.XS_CHOICE:

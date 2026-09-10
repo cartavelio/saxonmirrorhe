@@ -26,6 +26,7 @@ import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.tree.util.ProcInstParser;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
+import net.sf.saxon.z.IntPredicateProxy;
 
 import java.io.*;
 import java.net.URL;
@@ -39,7 +40,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.IntPredicate;
 
 /**
  * This class implements functions that are supplied as standard with SAXON,
@@ -638,7 +638,7 @@ public class Extensions {
      * @throws XPathException if the string contains characters that are invalid in XML
      */
 
-    private static void checkBytes(char[] array, int start, int end, IntPredicate checker) throws XPathException {
+    private static void checkBytes(char[] array, int start, int end, IntPredicateProxy checker) throws XPathException {
         int ch32 = UTF16CharacterSet.firstInvalidChar(
                 StringTool.codePoints(new String(array, start, end - start)), checker);
         if (ch32 != -1) {

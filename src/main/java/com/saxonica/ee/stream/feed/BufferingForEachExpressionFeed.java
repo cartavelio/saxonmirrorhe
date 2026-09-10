@@ -47,7 +47,7 @@ public class BufferingForEachExpressionFeed extends ItemFeed {
     @Override
     public void close() throws XPathException {
         XPathContext c2 = localContext.newMinorContext();
-        c2.trackFocus(new ListIterator<>(inputValue));
+        c2.trackFocus(new ListIterator(inputValue));
         SequenceIterator mappingIter = new ContextMappingIterator(c1 -> action.iterate(c1), c2);
 
         Outputter out = getNextOutputter();

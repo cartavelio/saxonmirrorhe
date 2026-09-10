@@ -68,7 +68,7 @@ public class ManualGroupIterator extends ManualIterator implements GroupIterator
 
     @Override
     public SequenceIterator iterateCurrentGroup() throws XPathException {
-        return new ListIterator<>(currentGroupItems);
+        return new ListIterator(currentGroupItems);
     }
 
     public boolean currentGroupContains(Item item) {

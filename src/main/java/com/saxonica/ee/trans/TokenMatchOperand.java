@@ -4,6 +4,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.lib.StringCollator;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Whitespace;
@@ -44,9 +45,9 @@ public class TokenMatchOperand extends Characteristic<IntSet> {
         StringCollator collator = CodepointCollator.getInstance();
         iter.forEachOrFail(item -> {
             Whitespace.Tokenizer seq = new Whitespace.Tokenizer(item.getUnicodeStringValue());
-            seq.forEach(token -> {
+            for (Item token : seq) {
                 keys.add(collator.getCollationKey(token.getUnicodeStringValue()).hashCode());
-            });
+            };
         });
         return keys;
     }

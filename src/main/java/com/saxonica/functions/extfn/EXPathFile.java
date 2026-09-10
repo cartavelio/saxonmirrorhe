@@ -17,6 +17,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.TextLinesIterator;
 import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.value.*;
+import net.sf.saxon.z.IntPredicateLambda;
 
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
@@ -29,7 +30,6 @@ import java.nio.charset.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.function.IntPredicate;
 
 /**
  * Implementation of extension functions in the EXPath File package, see
@@ -762,12 +762,7 @@ public class EXPathFile {
             this.file = file;
             reader = new LineNumberReader(getInputStreamReader(file, encoding));
             uri = file.toURI();
-            checker = new IntPredicate() {
-                @Override
-                public boolean test(int value) {
-                    return XMLCharacterData.isValid11(value);
-                }
-            };
+            checker = IntPredicateLambda.of(XMLCharacterData::isValid11);
         }
 
         @Override

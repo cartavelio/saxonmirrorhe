@@ -89,7 +89,7 @@ public class GroupStarting extends SystemFunction {
 
         private SimpleArrayItem makeSimpleArray(List<Item> group) {
             try {
-                return SimpleArrayItem.makeSimpleArrayItem(new ListIterator<>(group));
+                return SimpleArrayItem.makeSimpleArrayItem(new ListIterator(group));
             } catch (XPathException e) {
                 throw new AssertionError(e);
             }

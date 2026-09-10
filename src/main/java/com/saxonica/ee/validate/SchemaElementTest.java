@@ -8,13 +8,13 @@ import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.tree.tiny.TinyTree;
 import net.sf.saxon.type.*;
 import net.sf.saxon.z.IntHashMap;
+import net.sf.saxon.z.IntPredicateProxy;
 import net.sf.saxon.z.IntSet;
 import net.sf.saxon.z.IntSetPredicate;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Optional;
-import java.util.function.IntPredicate;
 
 
 /**
@@ -116,7 +116,7 @@ public class SchemaElementTest extends NodeTest implements SchemaNodeTest {
     }
 
     @Override
-    public IntPredicate getMatcher(final NodeVectorTree tree) {
+    public IntPredicateProxy getMatcher(final NodeVectorTree tree) {
         if (!tree.isTyped()) {
             return IntSetPredicate.ALWAYS_FALSE;
         }

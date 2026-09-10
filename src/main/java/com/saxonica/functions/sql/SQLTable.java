@@ -56,7 +56,7 @@ public class SQLTable implements Sequence /* of MapItem */ {
             if (!connection.getAutoCommit()) {
                 connection.commit();
             }
-            return new ListIterator<>(out);
+            return new ListIterator(out);
         } catch (SQLException ex) {
             throw new XPathException("Failed to materialize sql:table(): " + ex.getMessage(), SaxonErrorCode.SXSQ0004, context);
         } finally {

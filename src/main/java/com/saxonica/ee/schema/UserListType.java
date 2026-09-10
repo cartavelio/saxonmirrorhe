@@ -11,7 +11,6 @@ import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.Whitespace;
 
@@ -102,7 +101,7 @@ public class UserListType extends UserSimpleType implements ListType {
     }
 
     @SuppressWarnings("Convert2MethodRef")  // For Java-C# conversion
-    private Function<UnicodeString, AtomicIterator<StringItem>> tokenizerFactory = str -> new Whitespace.Tokenizer(str);
+    private Function<UnicodeString, AtomicIterator> tokenizerFactory = str -> new Whitespace.Tokenizer(str);
 
     /**
      * Get the extended facet list, creating it if necessary. The extended facet
@@ -226,11 +225,11 @@ public class UserListType extends UserSimpleType implements ListType {
             } catch (MissingComponentException e) {
                 return new ValidationFailure(e.getMessage());
             }
-            AtomicIterator<StringItem> iter = tokenizerFactory.apply(value);
+            AtomicIterator iter = tokenizerFactory.apply(value);
             int count = 0;
             StringItem val;
             //try {
-                while ((val = iter.next()) != null) {
+                while ((val = (StringItem)iter.next()) != null) {
                     ValidationFailure err = itemType.validateContent(val.getUnicodeStringValue(), nsResolver, rules);
                     if (err != null) {
                         return err;
@@ -361,7 +360,7 @@ public class UserListType extends UserSimpleType implements ListType {
         if (value.isEmpty()) {
             return EmptyAtomicSequence.getInstance();
         }
-        AtomicIterator<StringItem> iter = tokenizerFactory.apply(value);
+        AtomicIterator iter = tokenizerFactory.apply(value);
         UserListMappingFunction map = new UserListMappingFunction();
         map.resolver = resolver;
         try {
@@ -409,7 +408,7 @@ public class UserListType extends UserSimpleType implements ListType {
          */
 
         @Override
-        public AtomicIterator<AtomicValue> map(Item item) throws XPathException {
+        public AtomicIterator map(Item item) throws XPathException {
             try {
                 return itemType.getTypedValue(item.getUnicodeStringValue(), resolver, rules).iterate();
             } catch (ValidationException err) {

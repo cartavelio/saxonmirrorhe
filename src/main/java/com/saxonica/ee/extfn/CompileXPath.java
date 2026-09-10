@@ -115,7 +115,7 @@ public class CompileXPath extends SystemFunction {
 
         MapItem namespaces = (MapItem) options.get(StringItem.bmp("namespaces"));
         if (namespaces != null) {
-            AtomicIterator<?> keys = namespaces.keys();
+            AtomicIterator keys = namespaces.keys();
             AtomicValue key;
             while ((key = keys.next()) != null) {
                 String prefix = key.getStringValue();
@@ -141,7 +141,7 @@ public class CompileXPath extends SystemFunction {
         MapItem globals = (MapItem) options.get(StringItem.bmp("globals"));
         ArrayList<String> knownGlobals = new ArrayList<>();
         if (globals != null) {
-            AtomicIterator<?> keys = globals.keys();
+            AtomicIterator keys = globals.keys();
             AtomicValue key;
             while ((key = keys.next()) != null) {
                 knownGlobals.add(key.getStringValue());
@@ -156,7 +156,7 @@ public class CompileXPath extends SystemFunction {
         }
         int maxSlot = 0;
         if (locals != null) {
-            AtomicIterator<?> keys = locals.keys();
+            AtomicIterator keys = locals.keys();
             AtomicValue key;
             while ((key = keys.next()) != null) {
                 SequenceExtent s = (SequenceExtent) locals.get(key);
@@ -238,7 +238,7 @@ public class CompileXPath extends SystemFunction {
             /* TODO - this is being set up for every call of saxon:compile-XPath() - should be 'static' */
             NameTest argTest = new NameTest(Type.ELEMENT, exportURI, "arg", configuration.getNamePool());
             StylesheetPackage sheet = new StylesheetPackage(configuration);
-            AtomicIterator<?> keys = globalFunctions.keys();
+            AtomicIterator keys = globalFunctions.keys();
             AtomicValue key;
             while ((key = keys.next()) != null) {
                 String nameArity = key.getStringValue();

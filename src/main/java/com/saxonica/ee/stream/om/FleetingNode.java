@@ -2,7 +2,6 @@ package com.saxonica.ee.stream.om;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.SaxonErrorCode;
@@ -12,6 +11,8 @@ import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
+
+import java.util.function.Predicate;
 
 /**
  * A FleetingNode is a node that exists transiently in the course of streaming processing. The node has
@@ -480,7 +481,7 @@ public class FleetingNode implements NodeInfo {
      */
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber, NodeTest nodeTest) {
+    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> nodeTest) {
         if (AxisInfo.isAlwaysEmpty(axisNumber, nodeKind)) {
             return EmptyIterator.ofNodes();
         }

@@ -3,8 +3,7 @@ package com.saxonica.ee.domino;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.tree.iter.AxisIterator;
-
-import java.util.function.IntPredicate;
+import net.sf.saxon.z.IntPredicateProxy;
 
 /**
  * Enumerate all the nodes on the preceding axis from a given start node.
@@ -23,7 +22,7 @@ final class PrecedingIterator implements AxisIterator {
     private final NodeTest test;
     private int nextAncestorDepth;
     private final boolean includeAncestors;
-    private final IntPredicate matcher;
+    private final IntPredicateProxy matcher;
 
     public PrecedingIterator(/*@NotNull*/ DominoTree doc, /*@NotNull*/ DominoNode node,
                              NodeTest nodeTest, boolean includeAncestors) {

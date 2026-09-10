@@ -27,7 +27,7 @@ public class FixedElementCompiler extends ElementCreatorCompiler {
      */
     @Override
     protected void pushNodeName(CompilerService compiler, Expression expression) throws CannotCompileException {
-        allocateStatic(compiler, ((FixedElement) expression).getElementName());
+        allocateStatic(compiler, ((FixedElement) expression).getFixedElementName());
     }
 
     @Override
@@ -50,7 +50,7 @@ public class FixedElementCompiler extends ElementCreatorCompiler {
     @Override
     public void identifyExpression(CompilerService compiler, Expression expression, String evalMode) {
         visitAnnotation(compiler, "FixedElement-" +
-                ((FixedElement) expression).getElementName().getDisplayName());
+                ((FixedElement) expression).getFixedElementName().getDisplayName());
 
     }
 }

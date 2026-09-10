@@ -11,7 +11,7 @@ import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.ArrayIterator;
+import net.sf.saxon.tree.iter.TwoItemIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
@@ -153,8 +153,7 @@ public class GeneralComparisonEE extends GeneralComparison {
     }
 
     private static SequenceIterator prependTwo(Item first, Item second, SequenceIterator rest) {
-        Item[] first2 = new Item[]{first, second};
-        return new InsertBefore.InsertIterator(rest, new ArrayIterator<>(first2), 1);
+        return new InsertBefore.InsertIterator(rest, new TwoItemIterator(first, second), 1);
     }
 
     private boolean compareOneToOne(AtomicValue lhsValue, AtomicValue rhsValue, XPathContext context) throws XPathException {

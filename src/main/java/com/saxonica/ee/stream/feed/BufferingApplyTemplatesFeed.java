@@ -54,7 +54,7 @@ public class BufferingApplyTemplatesFeed extends ItemFeed {
     @Override
     public void close() throws XPathException {
         XPathContextMajor c2 = getContext().newContext();
-        c2.trackFocus(new ListIterator<>(inputValue));
+        c2.trackFocus(new ListIterator(inputValue));
 
         // handle parameters if any
 

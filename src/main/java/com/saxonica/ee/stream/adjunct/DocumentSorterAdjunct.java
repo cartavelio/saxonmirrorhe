@@ -234,7 +234,7 @@ public class DocumentSorterAdjunct extends TransmissionAdjunct implements FeedMa
 
         @Override
         public void close() throws XPathException {
-            SequenceIterator grounded = new ListIterator<>(groundedItems);
+            SequenceIterator grounded = new ListIterator(groundedItems);
             SequenceIterator sorted = new DocumentOrderIterator(grounded, GlobalOrderComparer.getInstance());
             Outputter out = getNextOutputter();
             sorted.forEachOrFail(out::append);

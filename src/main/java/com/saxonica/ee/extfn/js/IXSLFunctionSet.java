@@ -182,7 +182,7 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
             ObjectValue<Expression> wrappedActionObject = (ObjectValue<Expression>) arguments[2].head();
             Expression action = wrappedActionObject.getObject();
             if (documents != null) {
-                AtomicIterator<StringItem> tokenIter = new Whitespace.Tokenizer(documents.getUnicodeStringValue());
+                AtomicIterator tokenIter = new Whitespace.Tokenizer(documents.getUnicodeStringValue());
                 String baseURI = getRetainedStaticContext().getStaticBaseUriString();
                 PackageData pd = getRetainedStaticContext().getPackageData();
                 ParseOptions options = context.getConfiguration().getParseOptions();

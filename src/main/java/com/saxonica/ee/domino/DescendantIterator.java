@@ -3,8 +3,7 @@ package com.saxonica.ee.domino;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.tree.iter.AxisIterator;
-
-import java.util.function.IntPredicate;
+import net.sf.saxon.z.IntPredicateProxy;
 
 /**
  * This class supports both the descendant:: and descendant-or-self:: axes, which are
@@ -20,7 +19,7 @@ final class DescendantIterator implements AxisIterator {
     private int nextNodeNr;
     private final int startDepth;
     private final NodeTest test;
-    private final IntPredicate matcher;
+    private final IntPredicateProxy matcher;
 
     /**
      * Create an iterator over the descendant axis

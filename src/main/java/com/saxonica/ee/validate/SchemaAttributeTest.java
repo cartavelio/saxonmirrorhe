@@ -10,12 +10,12 @@ import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.pattern.SchemaNodeTest;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.*;
+import net.sf.saxon.z.IntPredicateProxy;
 import net.sf.saxon.z.IntSet;
 import net.sf.saxon.z.IntSetPredicate;
 import net.sf.saxon.z.IntSingletonSet;
 
 import java.util.Optional;
-import java.util.function.IntPredicate;
 
 /**
  * A NodeTest of the form schema-attribute(attribute-name)
@@ -96,7 +96,7 @@ public class SchemaAttributeTest extends NodeTest implements SchemaNodeTest {
     }
 
     @Override
-    public IntPredicate getMatcher(NodeVectorTree tree) {
+    public IntPredicateProxy getMatcher(NodeVectorTree tree) {
         return IntSetPredicate.ALWAYS_FALSE;
         // because this method is never used for attribute nodes
     }

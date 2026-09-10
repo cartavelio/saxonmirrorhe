@@ -72,7 +72,7 @@ public class QueryFn extends SystemFunction {
                                 dqc.setParameter(NameOfNode.makeName((NodeInfo) param).getStructuredQName(), val);
                                 break;
                             case Type.DOCUMENT:
-                                for (NodeInfo kid : ((NodeInfo) param).children(NodeKindTest.ELEMENT::test)) {
+                                for (NodeInfo kid : ((NodeInfo) param).children(NodeKindTest.ELEMENT)) {
                                     AtomicSequence val2 = kid.atomize();
                                     dqc.setParameter(NameOfNode.makeName(kid).getStructuredQName(), val2);
                                 }

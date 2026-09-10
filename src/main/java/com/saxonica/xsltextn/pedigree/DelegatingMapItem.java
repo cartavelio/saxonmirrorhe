@@ -51,7 +51,7 @@ public abstract class DelegatingMapItem extends MapItem {
     }
 
     @Override
-    public AtomicIterator<? extends AtomicValue> keys() {
+    public AtomicIterator keys() {
         return base.keys();
     }
 

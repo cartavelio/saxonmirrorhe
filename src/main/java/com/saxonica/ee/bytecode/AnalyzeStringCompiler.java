@@ -1,5 +1,6 @@
 package com.saxonica.ee.bytecode;
 
+import com.saxonica.ee.bytecode.map.AnalyzeMappingFunction;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
