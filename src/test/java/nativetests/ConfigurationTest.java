@@ -9,6 +9,7 @@ import net.sf.saxon.lib.Numberer;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.XPathCompiler;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -22,6 +23,7 @@ public class ConfigurationTest {
      * Demonstrate use of a user-written LocalizerFactory to customize numbering
      */
 
+    @Test
     public void testCustomizedNumbering() {
         try {
             Configuration config = new ProfessionalConfiguration();
