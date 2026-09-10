@@ -317,7 +317,7 @@ public class Edge implements Iterable<Edge> {
             if (mode.equals("skip")) {
                 return null;
             } else if (mode.equals("strict")) {
-                ElementDecl een = schema.getElementDecl(((ElementDecl) de.term).getComponentName());
+                ElementDecl een = (ElementDecl)schema.getElementDecl(((ElementDecl) de.term).getComponentName());
                 if (een == null) {
                     compiler.warning("There is no global element declaration named " +
                             Err.wrap(((ElementDecl) de.term).getDisplayName()) +
@@ -344,7 +344,7 @@ public class Edge implements Iterable<Edge> {
                 return null;
 
             } else if (mode.equals("lax")) {
-                ElementDecl een = schema.getElementDecl(((ElementDecl) de.term).getComponentName());
+                ElementDecl een = (ElementDecl)schema.getElementDecl(((ElementDecl) de.term).getComponentName());
                 if (een == null) {
                     return null;
                 }

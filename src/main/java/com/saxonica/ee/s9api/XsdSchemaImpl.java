@@ -7,6 +7,7 @@ import net.sf.saxon.lib.Feature;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Schema;
+import net.sf.saxon.type.SchemaException;
 
 public class XsdSchemaImpl extends XsdSchema {
 
@@ -29,6 +30,7 @@ public class XsdSchemaImpl extends XsdSchema {
         return new SchemaValidatorImpl(processor, this);
     }
 
+    //#if CSHARP==false
     /**
      * Create an {@link ItemTypeFactory} which can be used to create {@link ItemType}
      * objects based on the definitions in this schema.
@@ -37,8 +39,9 @@ public class XsdSchemaImpl extends XsdSchema {
      */
     @Override
     public ItemTypeFactory newItemTypeFactory() {
-        return null;
+        return new ItemTypeFactory(processor, this);
     }
+    //#endif
 
     /**
      * Combine this schema with another, to form a new combined schema.
@@ -56,7 +59,12 @@ public class XsdSchemaImpl extends XsdSchema {
      */
     @Override
     public XsdSchema combine(XsdSchema other) throws SaxonApiException {
-        return null;
+        try {
+            return new XsdSchemaImpl(processor, PreparedSchema.merge(
+                    schema, (PreparedSchema) other.getUnderlyingSchema()));
+        } catch (SchemaException e) {
+            throw new SaxonApiException(e);
+        }
     }
 
     /**

@@ -108,7 +108,7 @@ public class XSLImportSchemaEE extends XSLImportSchema {
                 getPrincipalStylesheetModule().addImportedSchemaNamespace(targetNamespace);
             }
             if (inlineSchema != null) {
-                return inlineSchema;
+                return inlineSchema.asActiveSource();
             }
             if (namespace.equals(NamespaceConstant.XML) ||
                     namespace.equals(NamespaceConstant.FN) ||
