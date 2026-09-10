@@ -119,6 +119,9 @@ public class SingleEntryMap extends MapItem {
      */
     @Override
     public MapItem put(AtomicValue key, GroundedValue value) {
+        if (this.matchKey.equals(key.asMapKey())) {
+            return new SingleEntryMap(key, value);
+        }
         return toGeneralMap().put(key, value);
     }
 
