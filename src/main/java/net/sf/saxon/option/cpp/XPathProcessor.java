@@ -242,7 +242,7 @@ public class XPathProcessor extends SaxonCAPI {
      * @param params   - Parameters and properties names required by the XPath expression. This could contain the context node , source as string or file name, etc
      * @param values   -  The values for the parameters and properties required by the XPath expression
      **/
-    @CEntryPoint(name = "evaluateSingle")
+    @CEntryPoint(name = "j_evaluate")
     public static XdmValue[] evaluate(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer ccwd, CCharPointer c_xpathStr, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
         XPathProcessor xPathProcessor = objectHandles.get(xpathProcessorRef);
@@ -334,7 +334,7 @@ public class XPathProcessor extends SaxonCAPI {
      * @param params   - Parameters and properties names required by the XPath expression. This could contain the context node , source as string or file name, etc
      * @param values   -  The values for the parameters and properties required by the XPath expression
      **/
-    @CEntryPoint(name = "evaluateSingle")
+    @CEntryPoint(name = "j_evaluateSingle")
     public static long evaluateSingle(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer ccwd, CCharPointer c_xpathStr, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         String cwd = CTypeConversion.toJavaString(ccwd);
         String xpathStr = CTypeConversion.toJavaString(c_xpathStr);
