@@ -7,22 +7,19 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.ContextItemStaticInfo;
-import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.expr.sort.AtomicComparer;
+import net.sf.saxon.expr.sort.AtomicMatchKey;
+import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.AtomicType;
-import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.Int64Value;
+
+import java.util.function.Predicate;
 
 
 /**
@@ -33,27 +30,44 @@ import net.sf.saxon.value.Int64Value;
 public class IndexOf extends CollatingFunctionFixed  {
 
 
+//    @Override
+//    public void supplyTypeInformation(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType, Expression[] arguments) {
+//        ItemType type0 = arguments[0].getItemType();
+//        ItemType type1 = arguments[1].getItemType();
+//        if (type0 instanceof AtomicType && type1 instanceof AtomicType) {
+//            preAllocateComparer((AtomicType) type0, (AtomicType) type1, visitor.getStaticContext());
+//        }
+//    }
+
+    /**
+     * Evaluate the expression
+     *
+     * @param context   the dynamic evaluation context
+     * @param arguments the values of the arguments, supplied as SequenceIterators
+     * @return the result of the evaluation, in the form of a SequenceIterator
+     * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs during the evaluation of the expression
+     */
     @Override
-    public void supplyTypeInformation(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType, Expression[] arguments) {
-        ItemType type0 = arguments[0].getItemType();
-        ItemType type1 = arguments[1].getItemType();
-        if (type0 instanceof AtomicType && type1 instanceof AtomicType) {
-            preAllocateComparer((AtomicType) type0, (AtomicType) type1, visitor.getStaticContext());
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+        SequenceIterator seq = arguments[0].iterate();
+        AtomicValue val = (AtomicValue) arguments[1].head();
+        if (val.isNaN()) {
+            return EmptySequence.getInstance();
         }
+        return SequenceTool.toLazySequence(new IndexIterator(seq, val, getStringCollator(),
+                                                             context.getImplicitTimezone(),
+                                                             getRetainedStaticContext().getPackageData().getHostLanguageVersion()));
     }
 
     private static class IndexIterator implements SequenceIterator {
         private int index = 0;
         private final SequenceIterator base;
-        private final BuiltInAtomicType searchType;
-        private final AtomicComparer comparer;
-        private final AtomicValue key;
+        private final Predicate<AtomicValue> matcher;
 
-        public IndexIterator(SequenceIterator base, BuiltInAtomicType searchType, AtomicValue key, AtomicComparer comparer) {
+        public IndexIterator(SequenceIterator base, AtomicValue key, StringCollator collator, int implicitTimezone, int specVersion) {
             this.base = base;
-            this.searchType = searchType;
-            this.key = key;
-            this.comparer = comparer;
+            AtomicMatchKey searchKey = key.getXPathMatchKey(collator, implicitTimezone, specVersion);
+            this.matcher = av -> av.getXPathMatchKey(collator, implicitTimezone, specVersion).equals(searchKey);
         }
 
         /**
@@ -90,34 +104,13 @@ public class IndexOf extends CollatingFunctionFixed  {
             AtomicValue baseItem;
             while ((baseItem = (AtomicValue) base.next()) != null) {
                 index++;
-                if (Type.isGuaranteedComparable(searchType, baseItem.getPrimitiveType(), false) &&
-                        comparer.comparesEqual(baseItem, key)) {
+                if (!baseItem.isNaN() && matcher.test(baseItem)) {
                     return new Int64Value(index);
                 }
             }
             return null;
         }
 
-    }
-
-
-
-    /**
-     * Evaluate the expression
-     *
-     * @param context   the dynamic evaluation context
-     * @param arguments the values of the arguments, supplied as SequenceIterators
-     * @return the result of the evaluation, in the form of a SequenceIterator
-     * @throws net.sf.saxon.trans.XPathException
-     *          if a dynamic error occurs during the evaluation of the expression
-     */
-    @Override
-    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        AtomicComparer comparer = getAtomicComparer(context);
-        SequenceIterator seq = arguments[0].iterate();
-        AtomicValue val = (AtomicValue) arguments[1].head();
-        BuiltInAtomicType searchType = val.getPrimitiveType();
-        return SequenceTool.toLazySequence(new IndexIterator(seq, searchType, val, comparer));
     }
 
     @Override

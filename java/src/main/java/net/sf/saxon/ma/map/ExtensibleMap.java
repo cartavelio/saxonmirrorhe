@@ -89,7 +89,7 @@ public class ExtensibleMap extends MapItem implements Iterable<KeyValuePair> {
      */
     @Override
     public GroundedValue get(AtomicValue key) {
-        int offset = getOffset(index, key.asMapKey());
+        int offset = getOffset(index, key.asMapKey(getSpecVersion()));
         if (offset == -1 || removals.contains(offset)) {
             return null;
         }
@@ -193,7 +193,7 @@ public class ExtensibleMap extends MapItem implements Iterable<KeyValuePair> {
      */
     @Override
     public MapItem put(AtomicValue key, GroundedValue value) {
-        AtomicMatchKey matchKey = key.asMapKey();
+        AtomicMatchKey matchKey = key.asMapKey(getSpecVersion());
         int offset = getOffset(index, matchKey);
         if (offset >= 0) {
             // Key is already present. Modify the values array, leave the keys and the index
@@ -220,7 +220,7 @@ public class ExtensibleMap extends MapItem implements Iterable<KeyValuePair> {
      */
     @Override
     public MapItem remove(AtomicValue key) {
-        int offset = getOffset(index, key.asMapKey());
+        int offset = getOffset(index, key.asMapKey(getSpecVersion()));
         if (offset == -1) {
             return this;
         }

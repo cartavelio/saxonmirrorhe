@@ -13,6 +13,7 @@ import net.sf.saxon.expr.sort.DoubleSortComparer;
 import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.Round;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.transpile.CSharpReplaceException;
@@ -423,7 +424,7 @@ public final class FloatValue extends NumericValue {
             try {
                 return compareTo(other.longValue());
             } catch (XPathException e) {
-                throw new RuntimeException(e);
+                throw new UncheckedXPathException(e);
             }
         } else {
             return -other.transitiveCompareTo(this);

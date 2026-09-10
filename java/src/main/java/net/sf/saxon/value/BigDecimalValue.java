@@ -15,6 +15,7 @@ import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.*;
@@ -703,7 +704,7 @@ public final class BigDecimalValue extends DecimalValue {
             try {
                 return value.compareTo(other.getDecimalValue());
             } catch (ValidationException e) {
-                throw new RuntimeException(e);
+                throw new UncheckedXPathException(e);
             }
         } else {
             double dbl = other.getDoubleValue();

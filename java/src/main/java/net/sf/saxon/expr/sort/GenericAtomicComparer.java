@@ -98,7 +98,9 @@ public class GenericAtomicComparer implements AtomicComparer {
         }
 
         if (type0.isPrimitiveNumeric() && type1.isPrimitiveNumeric()) {
-            return ContextFreeAtomicComparer.getInstance();
+            return specVersion >= 40
+                    ? ContextFreeAtomicComparer40.getInstance()
+                    : ContextFreeAtomicComparer.getInstance();
         }
 
         if ((fp0 == StandardNames.XS_STRING ||

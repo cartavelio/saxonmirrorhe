@@ -640,7 +640,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
      *                   then the context must already have been bound using comparer.provideContext().
      * @param checkTypes set to true if the operand types need to be checked for comparability at runtime
      * @param context    the XPath evaluation context
-     * @param nsResolver namespace resolver
+     * @param staticContext retained static context, used for namespace resolver and spec version
      * @return true if the comparison succeeds
      * @throws XPathException if a dynamic error occurs during the comparison
      */
@@ -651,8 +651,9 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
                                   AtomicComparer comparer,
                                   boolean checkTypes,
                                   XPathContext context,
-                                  NamespaceResolver nsResolver) throws XPathException {
+                                  RetainedStaticContext staticContext) throws XPathException {
 
+        int specVersion = staticContext.getPackageData().getHostLanguageVersion();
         boolean u0 = a0.isUntypedAtomic();
         boolean u1 = a1.isUntypedAtomic();
         if (u0 != u1) {
@@ -661,31 +662,30 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
             if (u0) {
                 // a0 is untyped atomic
                 if (a1 instanceof NumericValue) {
-                    // TODO: reinstate quick compare
-                    //return UntypedNumericComparer.quickCompare((StringValue) a0, (NumericValue) a1, operator, rules);
-                    a0 = new DoubleValue(StringToDouble11.getInstance().stringToNumber(a0.getUnicodeStringValue()));
+                    return UntypedNumericComparer.quickCompare(
+                            (StringValue) a0, (NumericValue) a1, operator, rules, specVersion);
                 } else if (a1 instanceof StringValue) {
                     // no conversion needed
                 } else {
                     AtomicType prim = a1.getPrimitiveType();
                     StringConverter sc = prim.getStringConverter(rules);
                     if (a1 instanceof QualifiedNameValue) {
-                        sc = (StringConverter) sc.setNamespaceResolver(nsResolver);
+                        sc = (StringConverter) sc.setNamespaceResolver(staticContext);
                     }
                     a0 = sc.convertString(a0.getUnicodeStringValue()).asAtomic();
                 }
             } else {
                 // a1 is untyped atomic
                 if (a0 instanceof NumericValue) {
-                    //TODO: return UntypedNumericComparer.quickCompare((StringValue) a1, (NumericValue) a0, OperatorInfo.inverse(operator), rules);
-                    a1 = new DoubleValue(StringToDouble11.getInstance().stringToNumber(a1.getUnicodeStringValue()));
+                    return UntypedNumericComparer.quickCompare(
+                            (StringValue) a1, (NumericValue) a0, OperatorInfo.inverse(operator), rules, specVersion);
                 } else if (a0 instanceof StringValue) {
                     // no conversion needed
                 } else {
                     AtomicType prim = a0.getPrimitiveType();
                     StringConverter sc = prim.getStringConverter(rules);
                     if (a0 instanceof QualifiedNameValue) {
-                        sc = (StringConverter) sc.setNamespaceResolver(nsResolver);
+                        sc = (StringConverter) sc.setNamespaceResolver(staticContext);
                     }
                     a1 = sc.convertString(a1.getUnicodeStringValue()).asAtomic();
                 }

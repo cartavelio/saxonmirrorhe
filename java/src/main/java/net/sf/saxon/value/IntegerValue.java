@@ -13,6 +13,7 @@ import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.z.IntIterator;
@@ -123,7 +124,7 @@ public abstract class IntegerValue extends DecimalValue {
             try {
                 return getDecimalValue().compareTo(other.getDecimalValue());
             } catch (ValidationException e) {
-                throw new RuntimeException(e);
+                throw new UncheckedXPathException(e);
             }
         }
         double dbl = other.getDoubleValue();

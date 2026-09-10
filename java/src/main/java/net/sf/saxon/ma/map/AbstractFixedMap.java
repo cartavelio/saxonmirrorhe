@@ -55,7 +55,7 @@ public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyVa
             GroundedValue[] valueArray = values.toArray(new GroundedValue[0]);
             HashMap<AtomicMatchKey, Integer> index = new HashMap<>(keyArray.length);
             for (int i = 0; i < keyArray.length; i++) {
-                boolean isNew = putOffsetIfAbsent(index, keyArray[i].asMapKey(), i);
+                boolean isNew = putOffsetIfAbsent(index, keyArray[i].asMapKey(specVersion), i);
                 if (!isNew) {
                     throw new XPathException("Duplicate key " + Err.depict(keyArray[i]) + " in map", "FOJS0003");
                 }
@@ -90,7 +90,7 @@ public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyVa
                 HashMap<AtomicMatchKey, Integer> index = new HashMap<>(keys.size());
                 int serial = 0;
                 for (int i = 0; i < keys.size(); i++) {
-                    AtomicMatchKey key = keys.get(i).asMapKey();
+                    AtomicMatchKey key = keys.get(i).asMapKey(specVersion);
                     boolean isNew = putOffsetIfAbsent(index, key, i);
                     if (isNew) {
                         index.put(key, serial++);
@@ -165,7 +165,7 @@ public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyVa
     @Override
     public GroundedValue get(AtomicValue key) {
         ensureIndexed();
-        int offset = getOffset(index, key.asMapKey());
+        int offset = getOffset(index, key.asMapKey(getSpecVersion()));
         return offset < 0 ? null : values[offset];
     }
 
@@ -200,7 +200,7 @@ public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyVa
 
     public int getIndex(AtomicValue key) {
         ensureIndexed();
-        return getOffset(index, key.asMapKey());
+        return getOffset(index, key.asMapKey(getSpecVersion()));
     }
 
     /**

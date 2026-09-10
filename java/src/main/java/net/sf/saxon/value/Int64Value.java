@@ -12,6 +12,7 @@ import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.Round;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicMetadata;
 import net.sf.saxon.type.AtomicType;
@@ -302,7 +303,7 @@ public final class Int64Value extends IntegerValue {
             try {
                 return compareTo(other.longValue());
             } catch (XPathException e) {
-                throw new RuntimeException(e);
+                throw new UncheckedXPathException(e);
             }
         }
         return super.transitiveCompareTo(other);
