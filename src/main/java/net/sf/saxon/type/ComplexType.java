@@ -8,12 +8,8 @@
 
 package net.sf.saxon.type;
 
-import com.saxonica.functions.qt4.ElementsToMaps;
-import com.saxonica.functions.qt4.JsonLayout;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.z.IntHashSet;
-
-import java.util.Set;
 
 
 /**
@@ -267,13 +263,6 @@ public interface ComplexType extends SchemaType {
 
     boolean hasAssertions();
 
-    /**
-     * Decide what kind of layout to use when formatting an element of this type using the
-     * elements-to-maps function. The result is a layout name, such as "record", "list", "mixed", "sequence"
-     *
-     * @param schema          the schema containing this type (needed to expand the content model)
-     * @param disabledLayouts layouts that cannot be used because they have been disabled
-     */
-    ElementsToMaps.ElementPlan getPreferredJsonLayout(Schema schema, Set<JsonLayout> disabledLayouts);
+
 }
 
