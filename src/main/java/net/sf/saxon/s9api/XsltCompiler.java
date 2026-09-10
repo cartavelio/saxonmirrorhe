@@ -24,7 +24,6 @@ import net.sf.saxon.trans.packages.IPackageLoader;
 import net.sf.saxon.trans.packages.PackageDetails;
 import net.sf.saxon.trans.packages.PackageLibrary;
 import net.sf.saxon.trans.packages.VersionedPackageName;
-import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.linked.DocumentImpl;
 
@@ -66,11 +65,11 @@ import java.util.Objects;
  * @since 9.0
  */
 
-@CSharpInjectMembers(code = {
-        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
-                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
-                + "    }"
-})
+//@CSharpInjectMembers(code = {
+//        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
+//                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
+//                + "    }"
+//})
 public class XsltCompiler {
 
     private final Processor processor;
@@ -194,7 +193,7 @@ public class XsltCompiler {
     public ErrorListener getErrorListener() {
         return compilerInfo.getErrorListener();
     }
-    //#endif
+
 
     /**
      * Supply a (typically empty) {@code List} which will be populated with information about any static errors
@@ -212,6 +211,7 @@ public class XsltCompiler {
         //noinspection Convert2MethodRef
         compilerInfo.setErrorReporter(err -> errorList.add(err));
     }
+    //#endif
 
     /**
      * Supply a callback which will be notified of all static errors and warnings

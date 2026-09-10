@@ -18,6 +18,7 @@ import net.sf.saxon.trans.DecimalFormatManager;
 import net.sf.saxon.trans.DecimalSymbols;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharp;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.*;
 
@@ -113,17 +114,22 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
         }
 
         if (sep < 0) {
-            pics[0] = new SubPicture(picture4, dfs);
+            pics[0] = makeSubPicture(picture4, dfs);
             pics[1] = null;
         } else {
             int[] pic0 = new int[sep];
             System.arraycopy(picture4, 0, pic0, 0, sep);
             int[] pic1 = new int[picture4.length - sep - 1];
             System.arraycopy(picture4, sep + 1, pic1, 0, picture4.length - sep - 1);
-            pics[0] = new SubPicture(pic0, dfs);
-            pics[1] = new SubPicture(pic1, dfs);
+            pics[0] = makeSubPicture(pic0, dfs);
+            pics[1] = makeSubPicture(pic1, dfs);
         }
         return pics;
+    }
+
+    @CSharpReplaceBody(code="return new Saxon.Impl.Overrides.FormatNumberSubPicture(details, dfs);")
+    protected static SubPicture makeSubPicture(int[] details, DecimalSymbols dfs) throws XPathException {
+        return new SubPicture(details, dfs);
     }
 
     /**
@@ -261,22 +267,22 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
      * Inner class to represent one sub-picture (the negative or positive subpicture)
      */
 
-    private static class SubPicture {
+    public static class SubPicture {  // public so it can be overridden for C#
 
-        int minWholePartSize = 0;
-        int maxWholePartSize = 0;
-        int minFractionPartSize = 0;
-        int maxFractionPartSize = 0;
-        int minExponentSize = 0;
-        int scalingFactor = 0;
-        boolean isPercent = false;
-        boolean isPerMille = false;
-        String prefix = "";
-        String suffix = "";
-        int[] wholePartGroupingPositions = null;
-        int[] fractionalPartGroupingPositions = null;
-        boolean regular;
-        boolean is31 = false;
+        protected int minWholePartSize = 0;
+        protected int maxWholePartSize = 0;
+        protected int minFractionPartSize = 0;
+        protected int maxFractionPartSize = 0;
+        protected int minExponentSize = 0;
+        protected int scalingFactor = 0;
+        protected boolean isPercent = false;
+        protected boolean isPerMille = false;
+        protected String prefix = "";
+        protected String suffix = "";
+        protected int[] wholePartGroupingPositions = null;
+        protected int[] fractionalPartGroupingPositions = null;
+        protected boolean regular;
+        protected boolean is31 = false;
 
         public SubPicture(int[] pic, DecimalSymbols dfs) throws XPathException {
 
@@ -733,17 +739,17 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
          * @param dval the decimal value
          * @param fsb  the StringBuilder to contain the result
          */
+        @CSharpModifiers(code={"protected", "virtual"})
         private void formatDecimal(BigDecimal dval, StringBuilder fsb) {
+            //#if CSHARP==false
             int exponent = 0;
             if (minExponentSize == 0) {
                 dval = dval.setScale(maxFractionPartSize, RoundingMode.HALF_EVEN);
             } else if (dval.signum() != 0) {
-                //#if CSHARP==false
                 //TODO: reinstate for C#, in some form
                 exponent = dval.precision() - dval.scale() - scalingFactor;
                 dval = dval.movePointLeft(exponent);
                 dval = dval.setScale(maxFractionPartSize, RoundingMode.HALF_EVEN);
-                //#endif
             }
             BigDecimalValue.decimalToString(dval, fsb);
 
@@ -772,6 +778,7 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
                     }
                 }
             }
+
             if (minWholePartSize == 0 && intDigits == 1 && fsb.charAt(0) == '0') {
                 fsb.deleteCharAt(0);
             } else if (minWholePartSize > intDigits) {
@@ -795,6 +802,7 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
                 }
                 fsb.append(expStr);
             }
+            //#endif
         }
 
         /**

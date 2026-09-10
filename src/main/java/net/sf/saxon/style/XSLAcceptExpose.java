@@ -27,7 +27,7 @@ public abstract class XSLAcceptExpose extends StyleElement {
 
     private final Set<ComponentTest> explicitComponentTests = new HashSet<>();
     private final Set<ComponentTest> wildcardComponentTests = new HashSet<>();
-    private Visibility visibility;
+    private Visibility visibility = Visibility.UNDEFINED;
 
     @Override
     public Visibility getVisibility() {
@@ -47,7 +47,7 @@ public abstract class XSLAcceptExpose extends StyleElement {
     @Override
     protected void prepareAttributes() {
 
-        if (visibility != null) {
+        if (visibility != Visibility.UNDEFINED) {
             return;
         }
 

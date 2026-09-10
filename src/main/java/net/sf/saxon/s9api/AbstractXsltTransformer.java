@@ -21,7 +21,6 @@ import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
-import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.tiny.TinyBuilder;
@@ -44,11 +43,11 @@ import java.util.function.Consumer;
  * A class that exists to contain common code shared between XsltTransformer and Xslt30Transformer
  */
 
-@CSharpInjectMembers(code = {
-        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
-                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
-                + "    }"
-})
+//@CSharpInjectMembers(code = {
+//        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
+//                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
+//                + "    }"
+//})
 public abstract class AbstractXsltTransformer {
     protected Processor processor;
     protected XsltController controller;

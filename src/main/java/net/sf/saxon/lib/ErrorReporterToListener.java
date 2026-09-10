@@ -69,7 +69,7 @@ public class ErrorReporterToListener implements ErrorReporter {
                 }
                 error.setAlreadyReported(true);
             } catch (TransformerException e) {
-                error.setFatal(e.getMessage());
+                error.setTerminationMessage(e.getMessage());
             }
         }
     }

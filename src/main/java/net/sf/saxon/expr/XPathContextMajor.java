@@ -21,7 +21,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.trans.rules.RuleManager;
-import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.tree.iter.SingletonIterator;
 
 import javax.xml.transform.URIResolver;
@@ -33,11 +32,11 @@ import java.util.Arrays;
  * a "minor context" only allows changes to the focus and the destination for push output.
  */
 
-@CSharpInjectMembers(code = {
-        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
-                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
-                + "    }"
-})
+//@CSharpInjectMembers(code = {
+//        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
+//                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
+//                + "    }"
+//})
 public class XPathContextMajor extends XPathContextMinor {
 
     private ParameterSet localParameters;

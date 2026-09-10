@@ -118,14 +118,14 @@ public interface StaticError {
      * will generally not be caught by any try/catch mechanism within the stylesheet or query.
      */
 
-    void setFatal(String message);
+    void setTerminationMessage(String message);
 
     /**
-     * Ask whether this error is to be treated as fatal, and if so, return the relevant messsage
+     * Ask whether this error is to be treated as fatal, and if so, return the relevant message
      * @return a non-null message if the error has been marked as a fatal error.
      */
 
-    String getFatalErrorMessage();
+    String getTerminationMessage();
 
 }
 

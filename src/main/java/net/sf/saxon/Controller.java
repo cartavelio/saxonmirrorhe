@@ -27,7 +27,6 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.TraceEventMulticaster;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.RuleManager;
-import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.iter.GroundedIterator;
 import net.sf.saxon.tree.tiny.TinyBuilder;
@@ -81,11 +80,11 @@ import java.util.function.Function;
  * was split into two: XSLT-specific functionality has been moved into the subclass {@link XsltController}.
  */
 
-@CSharpInjectMembers(code = {
-        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
-                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
-                + "    }"
-})
+//@CSharpInjectMembers(code = {
+//        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
+//                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
+//                + "    }"
+//})
 public class Controller implements ContextOriginator {
 
     private final Configuration config;

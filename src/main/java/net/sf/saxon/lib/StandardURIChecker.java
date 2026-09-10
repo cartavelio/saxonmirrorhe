@@ -10,6 +10,7 @@ package net.sf.saxon.lib;
 import net.sf.saxon.expr.sort.LFUCache;
 import net.sf.saxon.functions.IriToUri;
 import net.sf.saxon.str.StringView;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.value.Whitespace;
 
 import java.net.URI;
@@ -85,6 +86,7 @@ public class StandardURIChecker implements URIChecker {
         sv = IriToUri.iriToUri(StringView.tidy(sv)).toString();
         try {
             URI uri = new URI(sv);
+            CSharp.emitCode("if (!uri.IsWellFormedOriginalString()) return false");
             cache.put(value, uri);
             return true;
         } catch (URISyntaxException e) {

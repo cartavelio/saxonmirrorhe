@@ -245,21 +245,21 @@ public class StandardErrorReporter
      *
      * <p>After calling this method to report a static error, the compiler will normally
      * continue to detect and report further errors, but the method can abort the
-     * compilation by calling {@link StaticError#setFatal(String)}</p>
+     * compilation by calling {@link StaticError#setTerminationMessage(String)}</p>
      *
-     * @param error The error information.
+     * @param err The error information.
      */
 
-    protected void error(XmlProcessingError error) {
+    protected void error(XmlProcessingError err) {
         if (errorCount++ > maximumNumberOfErrors) {
-            error.setFatal("Too many errors reported");
+            err.setTerminationMessage("Too many errors reported");
         }
         if (logger == null) {
             logger = new StandardLogger();
         }
         String message;
 
-        HostLanguage lang = error.getHostLanguage();
+        HostLanguage lang = err.getHostLanguage();
         String langText = "";
         if (lang != null) {
             switch (lang) {
@@ -282,18 +282,18 @@ public class StandardErrorReporter
         }
 
         String kind = "Error ";
-        if (error.isTypeError()) {
+        if (err.isTypeError()) {
             kind = "Type error ";
-        } else if (error.isStaticError()) {
+        } else if (err.isStaticError()) {
             kind = "Static error ";
         }
 
-        message = constructMessage(error, langText, kind);
+        message = constructMessage(err, langText, kind);
 
         logger.error(message);
 
-        if (error instanceof XmlProcessingException) {
-            XPathException exception = ((XmlProcessingException)error).getXPathException();
+        if (err instanceof XmlProcessingException) {
+            XPathException exception = ((XmlProcessingException)err).getXPathException();
             XPathContext context = exception.getXPathContext();
             if (context != null && !(context instanceof EarlyEvaluationContext)) {
                 outputStackTrace(logger, context);

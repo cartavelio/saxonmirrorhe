@@ -379,13 +379,7 @@ public class TransformFn extends SystemFunction implements Callable {
         }
         final List<XmlProcessingError> compileErrors = new ArrayList<>();
         final ErrorReporter originalReporter = xsltCompiler.getErrorReporter();
-        xsltCompiler.setErrorReporter(error -> {
-            if (!error.isWarning()) {
-                compileErrors.add(error);
-            }
-            originalReporter.report(error);
-        });
-        
+        xsltCompiler.setErrorReporter(new TransformErrorReporter(compileErrors, originalReporter));
         boolean cacheable = options.get("static-params") == null;
         if (options.get("cache") != null) {
             cacheable &= ((BooleanValue) options.get("cache").head()).getBooleanValue();
@@ -504,6 +498,26 @@ public class TransformFn extends SystemFunction implements Callable {
                 break;
         }
         return executable;
+    }
+
+    private static class TransformErrorReporter implements ErrorReporter {
+
+        private final List<XmlProcessingError> compileErrors;
+        private final ErrorReporter originalReporter;
+
+        public TransformErrorReporter(List<XmlProcessingError> compileErrors, ErrorReporter originalReporter) {
+            this.compileErrors = compileErrors;
+            this.originalReporter = originalReporter;
+        }
+
+        @Override
+        public void report (XmlProcessingError error){
+            if (!error.isWarning()) {
+                compileErrors.add(error);
+            }
+            originalReporter.report(error);
+        }
+
     }
 
     private XsltExecutable reportCompileError(SaxonApiException e, List<XmlProcessingError> compileErrors) throws XPathException {

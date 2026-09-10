@@ -1257,8 +1257,8 @@ public class QueryModule implements StaticContext {
 
     public void reportStaticError(XmlProcessingError err) {
         userQueryContext.getErrorReporter().report(err);
-        if (err.getFatalErrorMessage() != null) {
-            throw new XmlProcessingAbort(err.getFatalErrorMessage());
+        if (err.getTerminationMessage() != null) {
+            throw new XmlProcessingAbort(err.getTerminationMessage());
         }
     }
     

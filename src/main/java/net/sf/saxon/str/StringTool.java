@@ -169,6 +169,20 @@ public class StringTool {
     }
 
     /**
+     * Insert repeated occurrences of a given character at the end of a StringBuilder
+     *
+     * @param builder the string builder
+     * @param ch      the character to be inserted
+     * @param count   the number of repetitions
+     */
+
+    public static void appendRepeated(StringBuilder builder, char ch, int count) {
+        for (int i=0; i<count; i++) {
+            builder.append(ch);
+        }
+    }
+
+    /**
      * Utility method for use where strings longer than 2^31 characters cannot yet be handled.
      * @param value the actual value of a character position within a string, or the length of
      *              a string
