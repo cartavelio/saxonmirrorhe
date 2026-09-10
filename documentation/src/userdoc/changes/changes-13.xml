@@ -767,8 +767,8 @@ TODO: rethink redefines and override
         <h2>4.0 Features not yet implemented</h2>
         
         <p>Here is a list of some of the features in the 4.0 specifications that have not yet been implemented.
-        Please check the QT4 GitHub project for the latest status: Pull Requests are labeled "In Saxon13" when
-        they have been implemented.</p>
+        Please check the QT4 GitHub project (https://github.com/qt4cg/qtspecs) for the latest status: 
+        Pull Requests are labeled "In Saxon13" when they have been implemented.</p>
         
         <ul>
             <li><p>Item type declarations in XSLT and XQuery have restrictions:</p>
@@ -800,6 +800,8 @@ TODO: rethink redefines and override
             <li><p>PR2213 - <code>trusted</code> attribute for <code>xsl:evaluate</code></p></li>
             <li><p>PR2259 - Canonical XHTML serialization (<code>method="xhtml"</code> wih <code>canonical="yes"</code>code>)</p></li>
             <li><p>PR791 - The <code>fn:invisible-xml</code> function is not implemented in SaxonCS</p></li>
+            <li><p>PR1068 - The SaxonCS implementation of fn:graphemes does not handle all strings correctly. This
+            is due to limitations in the ICU4N library.</p></li>
             <li><p>PR2372 - Serializing processing instructions with the HTML serialization method.</p></li>
             <li><p>PR2337 - New values for <code>xsl:mode/@typed</code>.</p></li>
             <li><p>PR2387 - Handling of NaN and Infinity by the JSON serialization method.</p></li>
