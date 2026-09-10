@@ -824,7 +824,7 @@ public class QT3TestDriverHE extends TestDriver {
             successes++;
             writeTestcaseElement(testCaseName, "pass", null);
         } else {
-            XdmItem expectedError = xpc.evaluateSingle("result//error/@code", testCase);
+            XdmItem expectedError = xpc.evaluateSingle("result//(error|assert-serialization-error)/@code", testCase);
             if (outcome.isException()){
                 if (expectedError != null){
                     wrongErrorResults++;

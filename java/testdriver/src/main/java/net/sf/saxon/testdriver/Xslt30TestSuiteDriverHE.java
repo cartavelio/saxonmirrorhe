@@ -143,20 +143,6 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         };
     }
 
-    public boolean unavailableInXX(String type, String value) {
-        if (type.equals("feature") && value.equals("higher_order_functions")) {
-            return true;
-        }
-        if (type.equals("feature") && value.equals("streaming")) {
-            return true;
-        }
-        return type.equals("year_component_values") &&
-                (value.equals("support year above 9999") ||
-                         value.equals("support negative year") ||
-                         value.equals("support year zero")
-                );
-    }
-
     @Override
     protected void runTestCase(XdmNode testCase, XPathCompiler xpath) throws SaxonApiException {
 
@@ -1381,7 +1367,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                     int order = token.compareTo(specName);
                     if (atLeast ? order <= 0 : order == 0) {
                         return true;
-                    };
+                    }
                 }
                 return false;
 
@@ -1512,31 +1498,15 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 return !inverse;
 
             case "package_version_resolution":
-                if ("highest_version".equals(value)) {
-                    return !inverse;
-                }
-                if ("unspecified".equals(value)) {
-                    return !inverse;
-                }
-                if ("lowest_version".equals(value)) {
-                    return inverse;
-                }
-                return !inverse;
+                return switch (value) {
+                    case "highest_version" -> !inverse;
+                    case "unspecified" -> !inverse;
+                    case "lowest_version" -> inverse;
+                    default -> !inverse;
+                };
 
             case "on-multiple-match":
                 throw new IllegalStateException("on-multiple-match is no longer recognized");
-//                env.resetActions.add(new Environment.ResetAction() {
-//                    @Override
-//                    public void reset(Environment env) {
-//                        env.xsltCompiler.getUnderlyingCompilerInfo().setRecoveryPolicy(Mode.RECOVER_WITH_WARNINGS);
-//                    }
-//                });
-//                if ("error".equals(value)) {
-//                    env.xsltCompiler.getUnderlyingCompilerInfo().setRecoveryPolicy(Mode.DO_NOT_RECOVER);
-//                } else {
-//                    env.xsltCompiler.getUnderlyingCompilerInfo().setRecoveryPolicy(Mode.RECOVER_SILENTLY);
-//                }
-//                return true;
 
             case "ignore_doc_failure":
                 return inverse;
