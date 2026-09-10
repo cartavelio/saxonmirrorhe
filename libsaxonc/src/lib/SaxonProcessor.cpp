@@ -149,58 +149,16 @@ const char *failure;
 sxnc_environment *SaxonProcessor::sxn_environ = 0;
 int SaxonProcessor::jvmCreatedCPP = 0;
 
-bool SaxonProcessor::exceptionOccurred() {
-  return (bool)j_checkForException(sxn_environ->thread);
-}
-
-const char *SaxonProcessor::checkException() {
-  const char *message = nullptr;
-  message = checkForException(sxn_environ);
-  return message;
-}
-
-/*SaxonApiException *SaxonProcessor::checkAndCreateException() {
-    SaxonProcessor::attachCurrentThread();
-    if (SaxonProcessor::sxn_environ->env->ExceptionCheck()) {
-        SaxonApiException *exception =
-checkForExceptionCPP(SaxonProcessor::sxn_environ->env, cppClass, nullptr);
-#ifdef DEBUG
-        SaxonProcessor::sxn_environ->env->ExceptionDescribe();
-#endif
-        return exception;
-    }
-    return nullptr;
-}
-*/
-const char *SaxonProcessor::getErrorMessage() {
-  if (exception == nullptr) {
-    return nullptr;
-  }
-  return exception->getMessage();
-}
-
-void SaxonProcessor::exceptionClear() {
-
-  if (exception != nullptr) {
-    delete exception;
-    exception = nullptr;
-  }
-  j_clearException(sxn_environ->thread);
-}
 
 /*SaxonProcessor::SaxonProcessor():  {
     licensei = false;
     SaxonProcessor(false);
 }*/
 
-SaxonApiException *SaxonProcessor::checkForExceptionCPP() {
-  return nullptr;
-}
 
 SaxonProcessor::SaxonProcessor(int64_t proc, bool l) {
   cwd = "";
   licensei = l;
-  exception = nullptr;
   procRef = proc;
 }
 
@@ -211,7 +169,6 @@ SaxonProcessor::SaxonProcessor(bool l) { initialize(l); }
 void SaxonProcessor::initialize(bool l) {
   cwd = "";
   licensei = l;
-  exception = nullptr;
   procRef = SXN_UNSET;
   if (SaxonProcessor::jvmCreatedCPP == 0) {
     SaxonProcessor::jvmCreatedCPP = 1;
@@ -341,7 +298,6 @@ SaxonProcessor::SaxonProcessor(const char *configFile) {
   cwd = "";
 
   licensei = true;
-  exception = nullptr;
   procRef = SXN_UNSET;
   if (SaxonProcessor::jvmCreatedCPP == 0) {
     SaxonProcessor::jvmCreatedCPP = 1;
@@ -730,9 +686,7 @@ SaxonProcessor &SaxonProcessor::operator=(const SaxonProcessor &other) {
   cwd = other.cwd;
 
   parameters = other.parameters;
-  //configProperties = other.configProperties;
   licensei = other.licensei;
-  exception = other.exception;
   return *this;
 }
 

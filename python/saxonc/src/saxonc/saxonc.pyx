@@ -1176,42 +1176,6 @@ cdef class PySaxonProcessor:
         else:
             raise Exception(py_error_message)
 
-    @property
-    def exception_occurred(self):
-        """Property to check if an exception has occurred internally within SaxonC
-
-        .. deprecated:: 12.1
-            This method is no longer used, since exceptions are now thrown.
-
-        Returns:
-            boolean: True if an exception has been reported; otherwise False
-        """
-        return self.thisptr.exceptionOccurred()
-
-    def exception_clear(self):
-        """Clear any exception thrown internally in SaxonC.
-
-        .. deprecated:: 12.1
-            This method is no longer used, since exceptions are now thrown.
-        """
-        self.thisptr.exceptionClear()
-
-    @property
-    def error_message(self):
-        """Return current error message (if any)
-
-        The PySaxonProcessor may have a number of errors reported against it. Get the error message
-        if there are any errors.
-
-        .. deprecated:: 12.1
-            This method is no longer used, since exceptions are now thrown.
-
-        Returns:
-            str: The message of the exception. Returns None if the exception does not exist.
-        """
-        cdef const char* c_string = self.thisptr.getErrorMessage()
-        ustring = make_py_str(c_string)
-        return ustring
 
 
 cdef class PyDocumentBuilder:
@@ -1910,59 +1874,6 @@ cdef class PyXslt30Processor:
         xdmValue = self.thisxptr.transformFileToValue(c_sourcefile, c_stylesheet)
         return self.processor.wrap_value(xdmValue)
 
-    @property
-    def exception_occurred(self):
-        """Property to check for pending exceptions
-
-        .. deprecated:: 12.1
-            This method is no longer used, since exceptions are now thrown.
-
-        Property to check for pending exceptions without creating a local reference to the exception object
-
-        Returns:
-            boolean: True when there is an exception thrown; otherwise False
-        """
-        return self.thisxptr.exceptionOccurred()
-
-    def exception_clear(self):
-        """Clear any exception thrown
-        .. deprecated:: 12.1
-            This method is no longer used, since exceptions are now thrown.
-        """
-        self.thisxptr.exceptionClear()
-
-    @property
-    def error_message(self):
-        """Returns an error message if there are any errors.
-
-        .. deprecated:: 12.1
-            This method is no longer used, since exceptions are now thrown.
-
-        A transformation may have a number of errors reported against it. This property returns an error message
-        if there are any errors.
-
-        Returns:
-            str: The message of the exception. Returns None if the exception does not exist.
-        """
-        cdef const char* c_string = self.thisxptr.getErrorMessage()
-        ustring = make_py_str(c_string)
-        return ustring
-
-    @property
-    def error_code(self):
-        """Returns the error code if there are any errors
-
-        .. deprecated:: 12.1
-            This method is no longer used, since exceptions are now thrown.
-
-        A transformation may have a number of errors reported against it. This property returns the error code if
-        there are any errors.
-        Returns:
-            str: The error code associated with the exception. Returns None if the exception does not exist.
-        """
-        cdef const char* c_string = self.thisxptr.getErrorCode()
-        ustring = make_py_str(c_string)
-        return ustring
 
 cdef class PyXsltExecutable:
     """A PyXsltExecutable represents the compiled form of a stylesheet.
@@ -3126,56 +3037,6 @@ cdef class PyXsltExecutable:
         if _len > 0:
             self.thisxptr.deleteXdmValueArray(argumentV, _len)
 
-    @property
-    def exception_occurred(self):
-        """Property to check for pending exceptions
-
-        Property to check for pending exceptions without creating a local reference to the exception object
-
-        .. deprecated:: 12.1
-            This method is no longer used, since exceptions are now thrown.
-
-        Returns:
-            boolean: True when there is a pending exception; otherwise False
-        """
-        return self.thisxptr.exceptionOccurred()
-
-    def exception_clear(self):
-        """Clear any exception thrown
-
-        .. deprecated:: 12.1
-            This method is no longer used, since exceptions are now thrown.
-        """
-        self.thisxptr.exceptionClear()
-
-    @property
-    def error_message(self):
-        """Get the error message if there are any errors
-
-        A transformation may have a number of errors reported against it. Get the error message if there are any errors
-
-        .. deprecated:: 12.1
-            This method is no longer used, since exceptions are now thrown.
-
-        Returns:
-            str: The message of the exception. Returns None if the exception does not exist.
-        """
-        cdef const char * c_string = self.thisxptr.getErrorMessage()
-        ustring = make_py_str(c_string)
-        return ustring
-
-        """def error_code(self):  """
-        """                        
-        error_code(self, index)
-        A transformation may have a number of errors reported against it. Get the i'th error code if there are any errors
-        Args:
-            index (int): The i'th exception
-        Returns:
-            str: The error code associated with the i'th exception. Returns None if the i'th exception does not exist.
-        """
-        """cdef const char* c_string = self.thisxptr.getErrorCode()
-        ustring = c_string.decode('UTF-8') if c_string is not NULL else None
-        return ustring"""
 
 cdef class PyXQueryProcessor:
      """A PyXQueryProcessor represents a factory to compile, load and execute queries. """
@@ -3607,58 +3468,6 @@ cdef class PyXQueryProcessor:
         c_cwd = py_cwd_string if cwd is not None else ""
         self.thisxqptr.setcwd(c_cwd)
 
-     def check_exception(self):
-        """
-        check_exception(self)
-        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
-        Check for exception thrown and get message of the exception.
-        Returns:
-            str: Returns the exception message if thrown otherwise returns None
-        """
-        return self.thisxqptr.checkException()
-
-     @property
-     def exception_occurred(self):
-        """
-        exception_occurred(self)
-        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
-        Property to check for pending exceptions without creating a local reference to the exception object
-        Returns:
-            boolean: True when there is a pending exception; otherwise False
-        """
-        return self.thisxqptr.exceptionOccurred()
-
-     def exception_clear(self):
-        """
-        exception_clear(self)
-        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
-        Clear any exception thrown
-        """
-        self.thisxqptr.exceptionClear()
-
-     @property
-     def error_message(self):
-        """
-        error_message(self)
-        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
-        A query may have a number of errors reported against it. This property returns an error message
-        if there are any errors.
-        Returns:
-            str: The message of the exception. Returns None if the exception does not exist.
-        """
-        return make_py_str(self.thisxqptr.getErrorMessage())
-
-     @property
-     def error_code(self):
-        """
-        error_code(self)
-        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
-        A query may have a number of errors reported against it. This property returns the error code
-        if there are any errors.
-        Returns:
-            str: The error code associated with the exception. Returns None if the exception does not exist.
-        """
-        return make_py_str(self.thisxqptr.getErrorCode())
 
 cdef class PyXPathProcessor:
     """A PyXPathProcessor represents a factory to compile, load and execute XPath expressions. """
@@ -4029,50 +3838,6 @@ cdef class PyXPathProcessor:
         """
         self.thisxpptr.clearProperties()
 
-    @property
-    def exception_occurred(self):
-        """
-        exception_occurred(self)
-        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
-        Check if an exception has occurred internally within SaxonC
-        Returns:
-            boolean: True if an exception has been reported; otherwise False
-        """
-        return self.thisxpptr.exceptionOccurred()
-
-    def exception_clear(self):
-        """
-        exception_clear(self)
-        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
-        Clear any exception thrown
-        """
-        self.thisxpptr.exceptionClear()
-
-    @property
-    def error_message(self):
-        """
-        error_message(self)
-        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
-        An expression may have a number of errors reported against it. This property returns the error message
-        if there are any errors.
-        Returns:
-            str: The message of the exception. Returns None if the exception does not exist.
-        """
-        cdef const char * c_string = self.thisxpptr.getErrorMessage()
-        py_string_i = make_py_str(c_string)
-        return py_string_i
-
-    @property
-    def error_code(self):
-        """
-        error_code(self)
-        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
-        An expression may have a number of errors reported against it. This property returns the error code
-        if there are any errors.
-        Returns:
-            str: The error code associated with the exception. Returns None if the exception does not exist.
-        """
-        return make_py_str(self.thisxpptr.getErrorCode())
 
 cdef class PySchemaValidator:
     """A PySchemaValidator represents a factory for validating instance documents against a schema."""
@@ -4387,47 +4152,6 @@ cdef class PySchemaValidator:
         """
         self.thissvptr.clearProperties()
 
-    @property
-    def exception_occurred(self):
-        """
-        exception_occurred(self)
-        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
-        Property to check if an exception has occurred internally within SaxonC
-        Returns:
-            boolean: True if an exception has been reported; otherwise False
-        """
-        return self.thissvptr.exceptionOccurred()
-
-    def exception_clear(self):
-        """
-        exception_clear(self)
-        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
-        Clear any exception thrown
-        """
-        self.thissvptr.exceptionClear()
-
-    def get_error_message(self):
-        """
-        get_error_message(self)
-        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
-        A validation may have a number of errors reported against it. Get the error message if there
-        are any errors.
-        Args:
-        Returns:
-            str: The message of the exception. Returns None if the exception does not exist.
-        """
-        return make_py_str(self.thissvptr.getErrorMessage())
-
-    def get_error_code(self):
-        """
-        get_error_code(self)
-        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
-        A validation may have a number of errors reported against it. Get the error code if there was an error.
-        Args:
-        Returns:
-            str: The error code associated with the exception thrown. Returns None if the exception does not exist.
-        """
-        return make_py_str(self.thissvptr.getErrorCode())
 
     def set_lax(self, lax):
         """

@@ -824,7 +824,7 @@ void testTrackingOfValueReferenceError(SaxonProcessor *processor,
           (XdmValue *)processor->parseXmlFromString(valStr.str().c_str());
       if (values == nullptr) {
         cerr << "values NULL ====== FAIL =======" << endl;
-        processor->exceptionClear();
+        
       } else {
         trans->setParameter(name.str().c_str(), values);
       }
@@ -869,7 +869,7 @@ void testValidation(Xslt30Processor *trans, sResultCount *sresult) {
   if (executable == nullptr) {
     sresult->failure++;
     sresult->failureList.push_back("testValidation");
-    trans->exceptionClear();
+    
     return;
   }
 
@@ -906,7 +906,7 @@ void testContext2NotRootNamedTemplate(SaxonProcessor *saxonproc,
   if (executable == nullptr) {
     sresult->failure++;
     sresult->failureList.push_back("testContext2NotRootNamedTemplate");
-    trans->exceptionClear();
+    
     return;
   }
 
@@ -954,7 +954,7 @@ void testXdmNodeOutput(Xslt30Processor *trans, sResultCount *sresult) {
   if (executable == nullptr) {
     sresult->failure++;
     sresult->failureList.push_back("testXdmNodeOutput");
-    trans->exceptionClear();
+    
     return;
   }
 
@@ -1331,7 +1331,7 @@ void exampleSimple3aError(SaxonProcessor *saxonProc, Xslt30Processor *proc,
 void exampleParam(SaxonProcessor *saxonProc, Xslt30Processor *proc,
                   sResultCount *sresult) {
   cout << "Test: ExampleParam" << endl;
-  proc->exceptionClear();
+  
   XsltExecutable *executable = nullptr;
   try {
     executable = proc->compileFromFile("php/xsl/foo.xsl");
@@ -3004,7 +3004,7 @@ void testSaxSourceDTDValidation(SaxonProcessor *proc, sResultCount *sresult) {
     delete builder;
     return;
   } catch (SaxonApiException &e) {
-    builder->exceptionClear();
+
   }
 
   try {

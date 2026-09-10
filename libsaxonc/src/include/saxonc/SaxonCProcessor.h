@@ -241,6 +241,8 @@ SAXONC_EXPORT const char *executeQueryToString(sxnc_environment *environi,
  * Get a pointer to the current error message as a string
  *
  * @param environi - GraalVM environment
+ * @return returns NULL
+ * @deprecated Since SaxonC 13 error messages are handled  by returning a struct with the error.
  */
 SAXONC_EXPORT const char *c_getErrorMessage(sxnc_environment *environi);
 

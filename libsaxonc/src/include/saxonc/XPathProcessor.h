@@ -339,55 +339,12 @@ public:
    */
   void clearProperties();
 
-
-  /**
-   * Deprecated. Checks for pending exceptions without creating a local reference to the
-   * exception object
-   * @return True when there is a pending exception; otherwise false
-   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
-   */
-  bool exceptionOccurred();
-
-  /**
-   * Deprecated. Clear any thrown exceptions
-   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
-   */
-  void exceptionClear();
-
-  /**
-   * Deprecated. Get the first error message if there are any errors.
-   * An XPath expression may have a number of errors reported against it.
-   * @return The message of the exception
-   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
-   */
-  const char *getErrorMessage();
-
-  /**
-   * Deprecated. Get the first error code if there are any errors.
-   * After the execution of the XPath expression there may be a number of
-   * errors reported against it.
-   * @return The error code of the exception
-   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
-   */
-  const char *getErrorCode();
-
-  /**
-   * Deprecated. Get the SaxonApiException object created when we have an error.
-   * After the execution of the processor if there is an error then a
-   * SaxonApiException is created.
-   * @return The SaxonApiException object if there is an exception thrown, or nullptr otherwise
-   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
-   */
-  SaxonApiException *getException();
-
   /**
    * Get the SaxonProcessor which created this XPathProcessor.
    */
   SaxonProcessor* getSaxonProcessor() ;
 
 private:
-  void createException(const char *message = nullptr);
-
 
   int64_t procRef; /*!< Pointer to the SaxonProcessor object which created this XPathProcessor */
   std::string cwdXP;    /*!< Current working directory */
@@ -401,8 +358,6 @@ private:
   std::map<std::string, std::string>
       properties; /*!< Map of properties used for the transformation as (string,
                      string) pairs */
-  SaxonApiException
-      *exception; /*!< Exception object created when there is an error */
   UnprefixedElementMatchingPolicy unprefixedElementPolicy;
 };
 

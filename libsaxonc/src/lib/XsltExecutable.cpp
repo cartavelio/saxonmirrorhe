@@ -33,7 +33,6 @@ XsltExecutable::XsltExecutable(int64_t procRefi, int64_t exRef,
   procRef = j_copy_handles(thread, (void *)procRefi);
   cwdXE = curr;
   resources_dir = resources;
-  exceptionFound = false;
   selectionStringFlag = false;
 }
 
@@ -84,7 +83,6 @@ XsltExecutable::XsltExecutable(const XsltExecutable &other) {
   resources_dir = other.resources_dir;
   selectionRef = other.selectionRef;
   rawResultsFlag = other.rawResultsFlag;
-  exceptionFound = other.exceptionFound;
   saxonMessageListenerRef = SXN_UNSET;
   selectionStringFlag = other.selectionStringFlag;
   saxonResultDocRef = SXN_UNSET;
@@ -126,8 +124,6 @@ void XsltExecutable::deleteXdmValueArray(XdmValue **arr, int len) {
     delete[] arr;
   }
 }
-
-bool XsltExecutable::exceptionOccurred() { return exceptionFound; }
 
 void XsltExecutable::setGlobalContextItem(XdmItem *value) {
   if (value != nullptr) {
@@ -400,12 +396,6 @@ std::map<std::string, std::string> &XsltExecutable::getProperties() {
   return ptr;
 }
 
-void XsltExecutable::exceptionClear() {
-  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-  j_clearException(thread);
-  exceptionFound = false;
-}
-
 void XsltExecutable::setcwd(const char *dir) {
   if (dir != nullptr) {
     cwdXE = std::string(dir);
@@ -556,7 +546,7 @@ XdmValue *XsltExecutable::applyTemplatesReturningValue() {
                          (void *)processorDataRef, (char *)optionStr.c_str(),
                          (void *)saxonMessageListenerRef, &r);
     if (r.status != SAXON_OK) {
-      exceptionFound = true;
+      
       throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
     }
   }
@@ -566,7 +556,7 @@ XdmValue *XsltExecutable::applyTemplatesReturningValue() {
                          (void *)processorDataRef, (char *)optionStr.c_str(),
                          (void *)saxonResultDocRef, &r);
     if (r.status != SAXON_OK) {
-      exceptionFound = true;
+      
       throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
     }
   }
@@ -1133,7 +1123,7 @@ void XsltExecutable::setSaveXslMessage(bool create, const char *filename) {
           (char *)cwdXE.c_str(), (char *)filename, &r);
     }
     if (r.status != SAXON_OK) {
-      exceptionFound = true;
+      
       saxonMessageListenerRef = SXN_UNSET;
       throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
     }
@@ -1280,7 +1270,3 @@ void XsltExecutable::transformToFile(XdmNode *source) {
   }
   transformFileToFile(nullptr, nullptr);
 }
-
-SaxonApiException *XsltExecutable::getException() { return nullptr; }
-
-const char *XsltExecutable::getErrorMessage() { return nullptr; }

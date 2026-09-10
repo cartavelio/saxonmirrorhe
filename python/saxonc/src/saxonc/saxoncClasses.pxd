@@ -3,6 +3,7 @@
 from libcpp cimport bool
 from libcpp.string cimport string
 from libcpp.map cimport map
+from libcpp.vector cimport vector
 
 cdef extern from "Python.h" nogil:
     ctypedef struct PyObject
@@ -80,13 +81,15 @@ cdef extern from "saxonc/SaxonProcessor.h":
 
         XQueryProcessor * newXQueryProcessor()  except +handle_saxonc_api_exceptions
 
-        XPathProcessor * newXPathProcessor()   except +handle_saxonc_api_exceptions
+        XPathProcessor  * newXPathProcessor()   except +handle_saxonc_api_exceptions
 
         SchemaValidator * newSchemaValidator() except +handle_saxonc_api_exceptions
 
+        XsdCompiler     * newXsdCompiler() except +handle_saxonc_api_exceptions
+
         DocumentBuilder * newDocumentBuilder() except +handle_saxonc_api_exceptions
 
-        XdmAtomicValue * makeStringValue(const char* str1, const char* encoding)
+        XdmAtomicValue  * makeStringValue(const char* str1, const char* encoding)
 
         XdmAtomicValue * makeIntegerValue(int i)
 
@@ -143,12 +146,6 @@ cdef extern from "saxonc/SaxonProcessor.h":
         XdmValue * parseJsonFromFile(const char* source)  except +handle_saxonc_api_exceptions
 
         bool isSchemaAwareProcessor() except +handle_saxonc_api_exceptions
-
-        bool exceptionOccurred()
-
-        void exceptionClear()
-
-        const char * getErrorMessage()
 
         @staticmethod
         XdmValue *makeXdmValueFromRef(long results)
@@ -261,25 +258,6 @@ cdef extern from "saxonc/SaxonProcessor.h":
 
         # compile a stylesheet received as an XdmNode.
         XsltExecutable * compileFromXdmNode(XdmNode * node)   except +handle_saxonc_api_exceptions
-
-
-        # Checks for pending exceptions without creating a local reference to the exception object
-        bool exceptionOccurred()
-
-        # Check for exception thrown.
-        const char* checkException()
-
-        # Clear any exception thrown
-        void exceptionClear()
-
-        # Get number of errors reported during execution or evaluate of stylesheet
-        int exceptionCount()
-
-        # Get the error message if there are any error
-        const char * getErrorMessage()
-
-        # Get the ith error code if there are any error
-        const char * getErrorCode()
 
 
 
@@ -413,24 +391,38 @@ cdef extern from "saxonc/SaxonProcessor.h":
         # Execute transformation to file. Properties supplied in advance.
         void transformToFile(XdmNode * source)   except +handle_saxonc_api_exceptions
 
-        # Checks for pending exceptions without creating a local reference to the exception object
-        bool exceptionOccurred()
-
-        # Check for exception thrown.
-        SaxonApiException* getException()
-
-        # Get the error message if there are any error
-        const char * getErrorMessage()
-
-        # Clear any exception thrown
-        void exceptionClear()
-
-        # Get number of errors reported during execution or evaluate of stylesheet
-        int exceptionCount()
 
 
     cdef cppclass SaxonApiException:
         SaxonApiException() except +handle_saxonc_api_exceptions
+
+    cdef cppclass XsdCompiler:
+        XsdCompiler() except +handle_saxonc_api_exceptions
+        setcwd(const char * cwd)  except +handle_saxonc_api_exceptions
+        char * getcwd()
+
+        setXsdVersion(const char * version)  except +handle_saxonc_api_exceptions
+
+        char * getXsdVersion()   except +handle_saxonc_api_exceptions
+
+        XsdSchema * compileFromString(const char * source, const char * encoding) except +handle_saxonc_api_exceptions
+        XsdSchema * compileFromFiles(vector[string] filenames) except +handle_saxonc_api_exceptions
+
+        XsdSchema * compileFromFiles(const char** filenames, int count) except +handle_saxonc_api_exceptions
+        XsdSchema * compileFromFile(const char * filename) except +handle_saxonc_api_exceptions
+        XsdSchema * compileFromNode(XdmNode * node) except +handle_saxonc_api_exceptions
+        XsdSchema * combine(XsdSchema** schemas, int num_schemas) except +handle_saxonc_api_exceptions
+        XsdSchema * emptySchema() except +handle_saxonc_api_exceptions
+        XsdSchema * importComponents(const char * filename) except +handle_saxonc_api_exceptions
+        XsdSchema * importComponentsFromNode(XdmNode * node) except +handle_saxonc_api_exceptions
+        void setProperty(const char * name, const char * value) except +handle_saxonc_api_exceptions
+
+    cdef cppclass XsdSchema:
+        SchemaValidator * newValidator() except +handle_saxonc_api_exceptions
+        XsdSchema * combine(XsdSchema * other) except +handle_saxonc_api_exceptions
+        void exportComponents(const char * filename) except +handle_saxonc_api_exceptions
+        XsdSchema()  except +handle_saxonc_api_exceptions
+
 
 
     cdef cppclass SchemaValidator:
@@ -469,19 +461,6 @@ cdef extern from "saxonc/SaxonProcessor.h":
         void clearParameters()
 
         void clearProperties()
-
-        bool exceptionOccurred()
-
-        const char* checkException()
-
-        void exceptionClear()
-
-        int exceptionCount()
-
-    
-        const char * getErrorMessage()
-     
-        const char * getErrorCode()
 
         void setLax(bool l)
 
@@ -537,15 +516,6 @@ cdef extern from "saxonc/SaxonProcessor.h":
 
         void clearProperties()
 
-        bool exceptionOccurred()
-
-        void exceptionClear()
-
-        int exceptionCount()
-
-        const char * getErrorMessage()
-
-        const char * getErrorCode()
 
     cdef cppclass XQueryProcessor:
         XQueryProcessor() except +handle_saxonc_api_exceptions
@@ -601,17 +571,6 @@ cdef extern from "saxonc/SaxonProcessor.h":
 
         const char* getcwd()
 
-        const char* checkException()
-
-        bool exceptionOccurred()
-
-        void exceptionClear()
-
-        int exceptionCount()
-
-        const char * getErrorMessage()
-
-        const char * getErrorCode()
 
 
 cdef extern from "saxonc/XdmValue.h":

@@ -1176,7 +1176,7 @@ public class SaxonCAPI {
                             System.err.println("JAVA DEBUG: standErrorOutputFile set name=" + value);
                         }
                         //processor.setConfigurationProperty(Feature.STANDARD_ERROR_OUTPUT_FILE,value);
-                        SaxonCException.errorOutputFile = value;
+
 
                         //TODO this option no longer will work with the redesign.
 

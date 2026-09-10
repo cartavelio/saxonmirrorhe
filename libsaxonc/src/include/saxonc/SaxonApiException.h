@@ -130,16 +130,6 @@ public:
    */
   const char *getMessageWithErrorCode();
 
-  /**
-   * Returns static error messages resulting from compile errors as a char array of the throwable, if
-   * there are any.  The caller does not need to deallocate memory.
-   * @return the detail message string of this <tt>Throwable</tt> instance with
-   * the error code as prefix if there is an error code associated with the
-   * exception. Memory deallocation is handled internally.
-   */
-// TODO: deprecated. This will be removed
-  //  const char *getCombinedStaticErrorMessages();
-
 
   /**
    * Returns the number of static errors encountered
@@ -152,7 +142,6 @@ public:
   const char *getSystemId();
 
 private:
-  bool cppException;
   bool isStaticError;
   saxon_status_t exception_status;
   std::string message;

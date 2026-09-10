@@ -526,75 +526,6 @@ PHP_METHOD(XQueryProcessor, clearProperties) {
   }
 }
 
-PHP_METHOD(XQueryProcessor, exceptionOccurred) {
-  XQueryProcessor *xqueryProcessor;
-  zend_object *pobj = Z_OBJ_P(getThis());
-  xqueryProcessor_object *obj =
-      (xqueryProcessor_object *)((char *)pobj -
-                                 XtOffsetOf(xqueryProcessor_object, std));
-  if (ZEND_NUM_ARGS() > 0) {
-    WRONG_PARAM_COUNT;
-  }
-
-  xqueryProcessor = obj->xqueryProcessor;
-  if (xqueryProcessor != nullptr) {
-    bool result = xqueryProcessor->exceptionOccurred();
-    RETURN_BOOL(result);
-  }
-  RETURN_BOOL(false);
-}
-
-PHP_METHOD(XQueryProcessor, getErrorCode) {
-  XQueryProcessor *xqueryProcessor;
-  if (ZEND_NUM_ARGS() > 0) {
-    WRONG_PARAM_COUNT;
-  }
-  zend_object *pobj = Z_OBJ_P(getThis());
-  xqueryProcessor_object *obj =
-      (xqueryProcessor_object *)((char *)pobj -
-                                 XtOffsetOf(xqueryProcessor_object, std));
-  xqueryProcessor = obj->xqueryProcessor;
-  if (xqueryProcessor != nullptr) {
-    const char *errCode = xqueryProcessor->getErrorCode();
-    if (errCode != nullptr) {
-      // char *str = estrdup(errCode);
-      RETURN_STRING(errCode);
-    }
-  }
-  RETURN_NULL();
-}
-
-PHP_METHOD(XQueryProcessor, getErrorMessage) {
-  XQueryProcessor *xqueryProcessor;
-  long index;
-  if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &index) == FAILURE) {
-    RETURN_NULL();
-  }
-  zend_object *pobj = Z_OBJ_P(getThis());
-  xqueryProcessor_object *obj =
-      (xqueryProcessor_object *)((char *)pobj -
-                                 XtOffsetOf(xqueryProcessor_object, std));
-  xqueryProcessor = obj->xqueryProcessor;
-  if (xqueryProcessor != nullptr) {
-    const char *errStr = xqueryProcessor->getErrorMessage();
-    if (errStr != nullptr) {
-      // char *str = estrdup(errStr);
-      RETURN_STRING(errStr);
-    }
-  }
-  RETURN_NULL();
-}
-PHP_METHOD(XQueryProcessor, exceptionClear) {
-  XQueryProcessor *xqueryProcessor;
-  zend_object *pobj = Z_OBJ_P(getThis());
-  xqueryProcessor_object *obj =
-      (xqueryProcessor_object *)((char *)pobj -
-                                 XtOffsetOf(xqueryProcessor_object, std));
-  xqueryProcessor = obj->xqueryProcessor;
-  if (xqueryProcessor != nullptr) {
-    xqueryProcessor->exceptionClear();
-  }
-}
 
 zend_function_entry XQueryProcessor_methods[] = {
     PHP_ME(XQueryProcessor, __destruct, arginfo_saxonc_XQueryProcessor_destruct,
@@ -647,26 +578,6 @@ zend_function_entry XQueryProcessor_methods[] = {
                                         PHP_ME(
                                             XQueryProcessor, declareNamespace,
                                             arginfo_saxonc_XQueryProcessor_declareNamespace,
-                                            ZEND_ACC_PUBLIC)
-                                            PHP_ME(
-                                                XQueryProcessor,
-                                                exceptionOccurred,
-                                                arginfo_saxonc_XQueryProcessor_exceptionOccurred,
-                                                ZEND_ACC_PUBLIC)
-                                                PHP_ME(
-                                                    XQueryProcessor,
-                                                    exceptionClear,
-                                                    arginfo_saxonc_XQueryProcessor_exceptionClear,
-                                                    ZEND_ACC_PUBLIC)
-                                                    PHP_ME(
-                                                        XQueryProcessor,
-                                                        getErrorCode,
-                                                        arginfo_saxonc_XQueryProcessor_getErrorCode,
-                                                        ZEND_ACC_PUBLIC)
-                                                        PHP_ME(
-                                                            XQueryProcessor,
-                                                            getErrorMessage,
-                                                            arginfo_saxonc_XQueryProcessor_getErrorMessage,
-                                                            ZEND_ACC_PUBLIC){
+                                            ZEND_ACC_PUBLIC){
                                                             nullptr, nullptr,
                                                             nullptr}};

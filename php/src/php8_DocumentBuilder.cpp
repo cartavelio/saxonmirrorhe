@@ -260,13 +260,6 @@ PHP_METHOD(DocumentBuilder, parseXmlFromString) {
 
         xdmNObj->xdmNode = node;
       }
-    } else {
-      if (documentBuilder->exceptionOccurred()) {
-        SaxonApiException *exception = documentBuilder->getException();
-        if (exception != nullptr) {
-          zend_throw_exception(zend_ce_exception, exception->getMessage(), 0);
-        }
-      }
     }
   } else {
     RETURN_NULL();
@@ -305,13 +298,6 @@ PHP_METHOD(DocumentBuilder, parseXmlFromFile) {
         assert(xdmNObj != nullptr);
 
         xdmNObj->xdmNode = node;
-      }
-    } else {
-      if (documentBuilder->exceptionOccurred()) {
-        SaxonApiException *exception = documentBuilder->getException();
-        if (exception != nullptr) {
-          zend_throw_exception(zend_ce_exception, exception->getMessage(), 0);
-        }
       }
     }
   } else {
@@ -352,91 +338,12 @@ PHP_METHOD(DocumentBuilder, parseXmlFromUri) {
 
         xdmNObj->xdmNode = node;
       }
-    } else {
-      if (documentBuilder->exceptionOccurred()) {
-        SaxonApiException *exception = documentBuilder->getException();
-        if (exception != nullptr) {
-          zend_throw_exception(zend_ce_exception, exception->getMessage(), 0);
-        }
-      }
     }
   } else {
     RETURN_NULL();
   }
 }
 
-PHP_METHOD(DocumentBuilder, exceptionOccurred) {
-  DocumentBuilder *documentBuilder;
-  zend_object *pobj = Z_OBJ_P(getThis());
-  documentBuilder_object *obj =
-      (documentBuilder_object *)((char *)pobj -
-                                 XtOffsetOf(documentBuilder_object, std));
-  if (ZEND_NUM_ARGS() > 0) {
-    WRONG_PARAM_COUNT;
-  }
-
-  documentBuilder = obj->documentBuilder;
-  if (documentBuilder != NULL) {
-    bool result = documentBuilder->exceptionOccurred();
-    RETURN_BOOL(result);
-  }
-  RETURN_BOOL(false);
-}
-
-PHP_METHOD(DocumentBuilder, getErrorCode) {
-  DocumentBuilder *documentBuilder;
-
-  if (ZEND_NUM_ARGS() > 0) {
-    WRONG_PARAM_COUNT;
-  }
-
-  zend_object *pobj = Z_OBJ_P(getThis());
-  documentBuilder_object *obj =
-      (documentBuilder_object *)((char *)pobj -
-                                 XtOffsetOf(documentBuilder_object, std));
-  documentBuilder = obj->documentBuilder;
-  if (documentBuilder != NULL) {
-    const char *errCode = documentBuilder->getErrorCode();
-    if (errCode != NULL) {
-      // char *str = estrdup(errCode);
-      RETURN_STRING(errCode);
-    }
-  }
-  RETURN_NULL();
-}
-
-PHP_METHOD(DocumentBuilder, getErrorMessage) {
-  DocumentBuilder *documentBuilder;
-
-  if (ZEND_NUM_ARGS() > 0) {
-    WRONG_PARAM_COUNT;
-  }
-
-  zend_object *pobj = Z_OBJ_P(getThis());
-  documentBuilder_object *obj =
-      (documentBuilder_object *)((char *)pobj -
-                                 XtOffsetOf(documentBuilder_object, std));
-  documentBuilder = obj->documentBuilder;
-  if (documentBuilder != NULL) {
-    const char *errStr = documentBuilder->getErrorMessage();
-    if (errStr != NULL) {
-      // char *str = estrdup(errStr);
-      RETURN_STRING(errStr);
-    }
-  }
-  RETURN_NULL();
-}
-PHP_METHOD(DocumentBuilder, exceptionClear) {
-  DocumentBuilder *documentBuilder;
-  zend_object *pobj = Z_OBJ_P(getThis());
-  documentBuilder_object *obj =
-      (documentBuilder_object *)((char *)pobj -
-                                 XtOffsetOf(documentBuilder_object, std));
-  documentBuilder = obj->documentBuilder;
-  if (documentBuilder != NULL) {
-    documentBuilder->exceptionClear();
-  }
-}
 
 // =============================================================
 
@@ -475,21 +382,5 @@ zend_function_entry DocumentBuilder_methods[] = {
                                ZEND_ACC_PUBLIC)
                             PHP_ME(DocumentBuilder, parseXmlFromUri,
                                    arginfo_saxonc_docbuilder_parseXmlFromUri,
-                                   ZEND_ACC_PUBLIC)
-                                PHP_ME(
-                                    DocumentBuilder, exceptionOccurred,
-                                    arginfo_saxonc_docbuilder_exceptionOccurred,
-                                    ZEND_ACC_PUBLIC)
-                                    PHP_ME(
-                                        DocumentBuilder, exceptionClear,
-                                        arginfo_saxonc_docbuilder_exceptionClear,
-                                        ZEND_ACC_PUBLIC)
-                                        PHP_ME(
-                                            DocumentBuilder, getErrorMessage,
-                                            arginfo_saxonc_docbuilder_getErrorMessage,
-                                            ZEND_ACC_PUBLIC)
-                                            PHP_ME(
-                                                DocumentBuilder, getErrorCode,
-                                                arginfo_saxonc_docbuilder_getErrorCode,
-                                                ZEND_ACC_PUBLIC){
+                                   ZEND_ACC_PUBLIC){
                                                 nullptr, nullptr, nullptr}};

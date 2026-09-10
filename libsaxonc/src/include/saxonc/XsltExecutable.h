@@ -540,34 +540,6 @@ public:
    */
   void clearXslMessages();
 
-  /**
-   * Deprecated. Checks for pending exceptions without creating a local reference to the
-   * exception object
-   * @return True when there is a pending exception; otherwise false
-   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
-   */
-  bool exceptionOccurred();
-
-  /**
-   * Deprecated. Get the SaxonApiException object created when we have an error.
-   * @return The SaxonApiException object if there is an exception thrown, or nullptr otherwise
-   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
-   */
-  SaxonApiException *getException();
-
-  /**
-   * Deprecated. Get the first error message if there are any errors.
-   * A transformation may have a number of errors reported against it.
-   * @return The message of the exception
-   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
-   */
-  const char *getErrorMessage();
-
-  /**
-   * Deprecated. Clear any thrown exceptions.
-   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
-   */
-  void exceptionClear();
 
   /**
    * Get the SaxonProcessor which created this XsltExecutable.
@@ -609,7 +581,7 @@ private:
                                 XdmValue */
   std::string cwdXE;         /*!< Current working directory */
   std::string resources_dir; /*!< Saxon resources directory */
-  bool jitCompilation, rawResultsFlag, exceptionFound;
+  bool jitCompilation, rawResultsFlag;
   std::map<std::string, XdmValue *>
       parameters; /*!< Map of parameters used for the transformation as (string,
                      value) pairs */

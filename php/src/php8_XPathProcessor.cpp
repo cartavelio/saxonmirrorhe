@@ -622,76 +622,6 @@ PHP_METHOD(XPathProcessor, clearProperties) {
   }
 }
 
-PHP_METHOD(XPathProcessor, exceptionOccurred) {
-  XPathProcessor *xpathProcessor;
-  zend_object *pobj = Z_OBJ_P(getThis());
-  xpathProcessor_object *obj =
-      (xpathProcessor_object *)((char *)pobj -
-                                XtOffsetOf(xpathProcessor_object, std));
-  if (ZEND_NUM_ARGS() > 0) {
-    WRONG_PARAM_COUNT;
-  }
-
-  xpathProcessor = obj->xpathProcessor;
-  if (xpathProcessor != nullptr) {
-    bool result = xpathProcessor->exceptionOccurred();
-    RETURN_BOOL(result);
-  }
-  RETURN_BOOL(false);
-}
-
-PHP_METHOD(XPathProcessor, getErrorCode) {
-  XPathProcessor *xpathProcessor;
-  long index;
-  if (ZEND_NUM_ARGS() > 0) {
-    WRONG_PARAM_COUNT;
-  }
-  zend_object *pobj = Z_OBJ_P(getThis());
-  xpathProcessor_object *obj =
-      (xpathProcessor_object *)((char *)pobj -
-                                XtOffsetOf(xpathProcessor_object, std));
-  xpathProcessor = obj->xpathProcessor;
-  if (xpathProcessor != nullptr) {
-    const char *errCode = xpathProcessor->getErrorCode();
-    if (errCode != nullptr) {
-      // char *str = estrdup(errCode);
-      RETURN_STRING(errCode);
-    }
-  }
-  RETURN_NULL();
-}
-
-PHP_METHOD(XPathProcessor, getErrorMessage) {
-  XPathProcessor *xpathProcessor;
-  long index;
-  if (ZEND_NUM_ARGS() > 0) {
-    WRONG_PARAM_COUNT;
-  }
-  zend_object *pobj = Z_OBJ_P(getThis());
-  xpathProcessor_object *obj =
-      (xpathProcessor_object *)((char *)pobj -
-                                XtOffsetOf(xpathProcessor_object, std));
-  xpathProcessor = obj->xpathProcessor;
-  if (xpathProcessor != nullptr) {
-    const char *errStr = xpathProcessor->getErrorMessage();
-    if (errStr != nullptr) {
-      // char *str = estrdup(errStr);
-      RETURN_STRING(errStr);
-    }
-  }
-  RETURN_NULL();
-}
-PHP_METHOD(XPathProcessor, exceptionClear) {
-  XPathProcessor *xpathProcessor;
-  zend_object *pobj = Z_OBJ_P(getThis());
-  xpathProcessor_object *obj =
-      (xpathProcessor_object *)((char *)pobj -
-                                XtOffsetOf(xpathProcessor_object, std));
-  xpathProcessor = obj->xpathProcessor;
-  if (xpathProcessor != nullptr) {
-    xpathProcessor->exceptionClear();
-  }
-}
 
 zend_function_entry XPathProcessor_methods[] = {
     PHP_ME(XPathProcessor, __destruct, arginfo_saxonc_xpath_destruct,
@@ -722,17 +652,6 @@ zend_function_entry XPathProcessor_methods[] = {
 
                     PHP_ME(XPathProcessor, setcwd,arginfo_saxonc_xpath_setcwd,ZEND_ACC_PUBLIC)
                     PHP_ME(XPathProcessor,getcwd,arginfo_saxonc_xpath_getcwd,ZEND_ACC_PUBLIC)
-                    PHP_ME(XPathProcessor, exceptionOccurred, arginfo_saxonc_xpath_exceptionOccurred,ZEND_ACC_PUBLIC)
-                    PHP_ME(XPathProcessor,
-                                                        exceptionClear,
-                                                        arginfo_saxonc_xpath_exceptionClear,
-                                                        ZEND_ACC_PUBLIC)
-                                PHP_ME(XPathProcessor, getErrorCode,
-                                       arginfo_saxonc_xpath_getErrorCode,
-                                       ZEND_ACC_PUBLIC)
-                                    PHP_ME(XPathProcessor, getErrorMessage,
-                                           arginfo_saxonc_xpath_getErrorMessage,
-                                           ZEND_ACC_PUBLIC)
                                         PHP_ME(
                                             XPathProcessor, declareNamespace,
                                             arginfo_saxonc_xpath_declareNamespace,

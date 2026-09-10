@@ -362,46 +362,6 @@ public:
    */
   XsltExecutable *compileFromXdmNode(XdmNode *node);
 
-  /**
-   * Deprecated. Checks for pending exceptions without creating a local reference to the
-   * exception object.
-   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
-   * @return True when there is a pending exception; otherwise false
-   */
-  bool exceptionOccurred();
-
-  /**
-   * Deprecated. Get the SaxonApiException object created when we have an error.
-   * After use of the processor if there is an error then a
-   * SaxonApiException is created.
-   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
-   * @return The SaxonApiException object if there is an exception thrown, or nullptr otherwise
-   */
-  SaxonApiException *getException();
-
-  /**
-   * Deprecated. Clear any thrown exceptions
-   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
-   */
-  void exceptionClear();
-
-  /**
-   * Deprecated. Get the first error message if there are any errors.
-   * A transformation may have a number of errors reported against it.
-   * @return The message of the exception
-   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
-   */
-  const char *getErrorMessage();
-
-  /**
-   * Deprecated. Get the first error code if there are any errors
-   * A transformation may have a number of errors reported against it.
-   * @return The error code of the exception. The error codes are
-   * related to the specific specification
-   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
-   */
-  const char *getErrorCode();
-
 private:
   void createException(const char *message = nullptr);
 
@@ -439,7 +399,6 @@ private:
   std::map<std::string, std::string>
       properties; /*!< Map of properties used for the transformation as (string,
                      string) pairs */
-  SaxonApiException *exception;
 };
 
 #endif /* SAXON_XSLT30_H */

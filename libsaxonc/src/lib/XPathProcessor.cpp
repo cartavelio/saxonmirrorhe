@@ -41,7 +41,6 @@ XPathProcessor::XPathProcessor(SaxonProcessor *p, std::string curr) {
     debugMID, (jboolean)true);*/
 #endif
 
-    exception = nullptr;
     if (!(p->cwd.empty()) && curr.empty()) {
         cwdXP = p->cwd;
     } else {
@@ -420,38 +419,6 @@ std::map <std::string, std::string> &XPathProcessor::getProperties() {
     return ptr;
 }
 
-void XPathProcessor::exceptionClear() {
-
-    if (exception != nullptr) {
-        delete exception;
-        exception = nullptr;
-    }
-    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-    j_clearException(thread);
-}
-
-const char *XPathProcessor::getErrorCode() {
-    if (exception == nullptr) {
-        return nullptr;
-    }
-    return exception->getErrorCode();
-}
-
-const char *XPathProcessor::getErrorMessage() {
-    if (exception == nullptr) {
-        return nullptr;
-    }
-    return exception->getMessage();
-}
-
-SaxonApiException *XPathProcessor::getException() { return exception; }
-
-bool XPathProcessor::exceptionOccurred() {
-    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-    bool exceptionOccurred = (bool)j_checkForException(thread);
-    return exceptionOccurred || exception != nullptr;
-}
-
 SaxonProcessor* XPathProcessor::getSaxonProcessor() {
     graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
     bool licensed = j_isLicensed(thread, (void *)procRef);
@@ -459,16 +426,4 @@ SaxonProcessor* XPathProcessor::getSaxonProcessor() {
     SaxonProcessor * processor = new SaxonProcessor(newProcRef, licensed);
     processor->setcwd(cwdXP.c_str());
     return processor;
-}
-
-void XPathProcessor::createException(const char *message) {
-    if (exception != nullptr) {
-        delete exception;
-        exception = nullptr;
-    }
-    if (message == nullptr) {
-
-    } else {
-        exception = new SaxonApiException(message);
-    }
 }

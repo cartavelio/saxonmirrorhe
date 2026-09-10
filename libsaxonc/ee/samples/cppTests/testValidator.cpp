@@ -188,7 +188,6 @@ void testValidator2(sResultCount *sresult) {
 
 void testValidator3(SaxonProcessor *processor, const std::string *const dataDir,
                     sResultCount *sresult) {
-  processor->exceptionClear();
   SchemaValidator *val = nullptr;
   XsdCompiler *compiler = nullptr;
   XsdSchema * schema = nullptr;

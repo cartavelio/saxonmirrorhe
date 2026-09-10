@@ -713,10 +713,6 @@ PHP_METHOD(SaxonProcessor, parseJsonFromString) {
 
         xdmVObj->xdmValue = value;
       }
-    } else {
-      if (obj->saxonProcessor->exceptionOccurred()) {
-        // TODO throw exception
-      }
     }
   } else {
     RETURN_NULL();
@@ -829,10 +825,6 @@ PHP_METHOD(SaxonProcessor, parseXmlFromString) {
         assert(xdmNObj != nullptr);
 
         xdmNObj->xdmNode = node;
-      }
-    } else {
-      if (obj->saxonProcessor->exceptionOccurred()) {
-        // TODO throw exception
       }
     }
   } else {
@@ -1284,58 +1276,6 @@ PHP_METHOD(SaxonProcessor, version) {
     RETURN_STRING(verStr);
   }
   RETURN_NULL();
-}
-
-PHP_METHOD(SaxonProcessor, exceptionOccurred) {
-  SaxonProcessor *saxonProcessor;
-  zend_object *pobj = Z_OBJ_P(getThis());
-  saxonProcessor_object *obj =
-      (saxonProcessor_object *)((char *)pobj -
-                                XtOffsetOf(saxonProcessor_object, std));
-  if (ZEND_NUM_ARGS() > 0) {
-    WRONG_PARAM_COUNT;
-  }
-
-  saxonProcessor = obj->saxonProcessor;
-  if (saxonProcessor != NULL) {
-    bool result = saxonProcessor->exceptionOccurred();
-    RETURN_BOOL(result);
-  }
-  RETURN_BOOL(false);
-}
-
-PHP_METHOD(SaxonProcessor, getErrorMessage) {
-  SaxonProcessor *saxonProcessor;
-
-  if (ZEND_NUM_ARGS() > 0) {
-    WRONG_PARAM_COUNT;
-  }
-
-  zend_object *pobj = Z_OBJ_P(getThis());
-  saxonProcessor_object *obj =
-      (saxonProcessor_object *)((char *)pobj -
-                                XtOffsetOf(saxonProcessor_object, std));
-  saxonProcessor = obj->saxonProcessor;
-  if (saxonProcessor != NULL) {
-    const char *errStr = saxonProcessor->getErrorMessage();
-    if (errStr != NULL) {
-      // char *str = estrdup(errStr);
-      RETURN_STRING(errStr);
-    }
-  }
-  RETURN_NULL();
-}
-
-PHP_METHOD(SaxonProcessor, exceptionClear) {
-  SaxonProcessor *saxonProcessor;
-  zend_object *pobj = Z_OBJ_P(getThis());
-  saxonProcessor_object *obj =
-      (saxonProcessor_object *)((char *)pobj -
-                                XtOffsetOf(saxonProcessor_object, std));
-  saxonProcessor = obj->saxonProcessor;
-  if (saxonProcessor != nullptr) {
-    saxonProcessor->exceptionClear();
-  }
 }
 
 PHP_METHOD(SaxonProcessor, setConfigurationProperty) {
@@ -4488,9 +4428,6 @@ zend_function_entry SaxonProcessor_methods[] = {
     PHP_ME(SaxonProcessor, isSchemaAware, arginfo_saxonc_isSchemaAware,ZEND_ACC_PUBLIC)
 	PHP_ME(SaxonProcessor, EQNameToClarkName,arginfo_saxonc_EQNameToClarkName,ZEND_ACC_PUBLIC)
 	PHP_ME(SaxonProcessor, clarkNameToEQName,arginfo_saxonc_clarkNameToEQName, ZEND_ACC_PUBLIC)
-	PHP_ME(SaxonProcessor, exceptionOccurred,arginfo_saxonc_isSchemaAware, ZEND_ACC_PUBLIC)
-	PHP_ME(SaxonProcessor, getErrorMessage,arginfo_saxonc_exceptionOccurred, ZEND_ACC_PUBLIC)
-	PHP_ME(SaxonProcessor, exceptionClear,arginfo_saxonc_exceptionClear, ZEND_ACC_PUBLIC)
 	PHP_ME(SaxonProcessor, release,arginfo_saxonc_release,ZEND_ACC_PUBLIC)
 	{nullptr, nullptr, nullptr}};
 

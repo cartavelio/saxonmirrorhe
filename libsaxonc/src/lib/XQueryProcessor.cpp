@@ -28,7 +28,6 @@ XQueryProcessor::~XQueryProcessor() {
     cppXQ = SXN_UNSET;
   }
   cwdXQ.erase();
-  exceptionClear();
   if (procRef != SXN_UNSET) {
     j_handles_destroy(thread,
                       (void *)procRef);
@@ -46,7 +45,6 @@ SaxonProcessor* XQueryProcessor::getSaxonProcessor() {
 }
 
 XQueryProcessor::XQueryProcessor(SaxonProcessor *p, std::string curr) {
-  exception = nullptr;
   if (p == nullptr) {
     throw SaxonApiException("Processor object is null");
   }
@@ -370,51 +368,4 @@ void XQueryProcessor::setLanguageVersion(const char *version) {
 void XQueryProcessor::setQueryContent(const char *content) {
   // outputfile1 = std::string(content);
   setProperty("qs", content);
-}
-
-void XQueryProcessor::exceptionClear() {
-  if (exception != nullptr) {
-    delete exception;
-    exception = nullptr;
-  }
-  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-  j_clearException(thread);
-}
-
-bool XQueryProcessor::exceptionOccurred() {
-  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-  bool exceptionOccurred = (bool)j_checkForException(thread);
-  return exceptionOccurred || exception != nullptr;
-}
-
-const char *XQueryProcessor::getErrorCode() {
-  if (exception == nullptr) {
-    return nullptr;
-  }
-  return exception->getErrorCode();
-}
-
-const char *XQueryProcessor::getErrorMessage() {
-  if (exception == nullptr) {
-    return nullptr;
-  }
-  return exception->getMessage();
-}
-
-const char *XQueryProcessor::checkException() {
-  return nullptr;
-}
-
-SaxonApiException *XQueryProcessor::getException() { return exception; }
-
-void XQueryProcessor::createException(const char *message) {
-  if (exception != nullptr) {
-    delete exception;
-    exception = nullptr;
-  }
-  if (message == nullptr) {
-
-  } else {
-    exception = new SaxonApiException(message);
-  }
 }

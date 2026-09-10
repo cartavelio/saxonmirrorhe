@@ -5,7 +5,6 @@
 #include "saxonc/XdmNode.h"
 
 DocumentBuilder::DocumentBuilder() {
-  exception = nullptr;
   schemaValidator = nullptr;
   proc = new SaxonProcessor(false);
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
@@ -23,7 +22,6 @@ DocumentBuilder::DocumentBuilder(SaxonProcessor *p, int64_t docObject,
   schemaValidator = nullptr;
   cwdDB = cwd;
   proc = p;
-  exception = nullptr;
   /*if(!cwd.empty()) {
        setBaseUri(cwd.c_str());
   }  */
@@ -37,7 +35,6 @@ DocumentBuilder::DocumentBuilder(const DocumentBuilder &other) {
   dtdVal = other.dtdVal;
   cwdDB = other.cwdDB;
   proc = other.proc;
-  exception = other.exception;
 }
 
 DocumentBuilder::~DocumentBuilder() {
@@ -48,7 +45,6 @@ DocumentBuilder::~DocumentBuilder() {
   }
   cwdDB.erase();
   baseURI.erase();
-  exceptionClear();
   // delete contextItem;
 
 }
@@ -154,18 +150,3 @@ XdmNode *DocumentBuilder::parseXmlFromUri(const char *uri) {
 
   return nullptr;
 }
-
-void DocumentBuilder::exceptionClear() {
-  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-  j_clearException(thread);
-}
-
-const char *DocumentBuilder::getErrorCode() { return nullptr; }
-
-const char *DocumentBuilder::getErrorMessage() { return nullptr; }
-
-SaxonApiException *DocumentBuilder::getException() { return nullptr; }
-
-bool DocumentBuilder::exceptionOccurred() { return proc->exceptionOccurred(); }
-
-void DocumentBuilder::createException(const char *message) {}

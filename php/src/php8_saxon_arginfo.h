@@ -100,15 +100,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_isSchemaAware, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_exceptionOccurred, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_getErrorMessage, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_exceptionClear, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_release, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
@@ -154,15 +145,6 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_docbuilder_parseXmlFromUri, 0, 0, 1)
 ZEND_ARG_INFO(0, uri)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_docbuilder_exceptionOccurred, 0, 0, 0)
-ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_docbuilder_exceptionClear, 0, 0, 0)
-ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_docbuilder_getErrorMessage, 0, 0, 0)
-ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_docbuilder_getErrorCode, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 //===================== XsltExecutable
@@ -299,23 +281,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xe_clearXslMessages, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xe_exceptionOccurred, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xe_exceptionClear, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xe_exportStylesheet, 0, 0, 0)
 ZEND_ARG_INFO(0, file_name)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xe_getErrorCode, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xe_checkForException, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xe_getErrorMessage, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xe_setCaptureResultDocuments, 0, 0, 1)
@@ -416,17 +383,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_clearParameters, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_exceptionOccurred, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_exceptionClear, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_getErrorCode, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_getErrorMessage, 0, 0, 0)
-ZEND_END_ARG_INFO()
 
 //================== SchemaValidator
 
@@ -491,25 +447,11 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_sval_clearProperties, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_sval_exceptionOccurred, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_sval_exceptionClear, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_sval_getErrorCode, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_sval_getErrorMessage, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
 //====================   XQueryProcessor
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_destruct, 0, 0, 0)
 ZEND_END_ARG_INFO()
-// ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor,  getErrorCode, 0, 0,
-// 0)
-// ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_setQueryContent, 0, 0, 1)
 ZEND_ARG_INFO(0, query)
 ZEND_END_ARG_INFO()
@@ -575,16 +517,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_declareNamespace, 0, 0, 2)
 ZEND_ARG_INFO(0, prefix)
 ZEND_ARG_INFO(0, namespacei)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_exceptionOccurred, 0, 0,
-                       0)
-ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_exceptionClear, 0, 0, 0)
-ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_getErrorCode, 0, 0, 0)
-ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_getErrorMessage, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_setLanguageVersion, 0, 0,
@@ -653,18 +585,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xpath_clearParameters, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xpath_clearProperties, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xpath_exceptionOccurred, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xpath_exceptionClear, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xpath_getErrorCode, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xpath_getErrorMessage, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xpath_declareNamespace, 0, 0, 2)

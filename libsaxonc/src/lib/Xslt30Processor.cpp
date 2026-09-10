@@ -30,7 +30,6 @@ Xslt30Processor::Xslt30Processor(SaxonProcessor *proc, std::string curr) {
   procRef = j_copy_handles(thread, (void *)proc->procRef);
   jitCompilation = false;
   importPackageValue = SXN_UNSET;
-  exception = nullptr;
   saxon_error_t r = SAXON_ERROR_DEFAULT;
   cppXT = createXslt30WithProcessor(thread,
                                     (void *)proc->procRef, &r);
@@ -65,7 +64,6 @@ Xslt30Processor::~Xslt30Processor() {
     cppXT = SXN_UNSET;
   }
   cwdXT.erase();
-  exceptionClear();
   if (importPackageValue != SXN_UNSET) {
     j_handles_destroy(thread,
                       (void *)importPackageValue);
@@ -123,10 +121,6 @@ std::map<std::string, std::string> &Xslt30Processor::getProperties() { return pr
 
 
 void Xslt30Processor::clearProperties() { properties.clear(); }
-
-bool Xslt30Processor::exceptionOccurred() { return false; }
-
-const char *Xslt30Processor::getErrorCode() { return nullptr; }
 
 void Xslt30Processor::setBaseOutputURI(const char *baseURI) {
   if (baseURI != nullptr) {
@@ -220,11 +214,6 @@ std::map<std::string, XdmValue *> &Xslt30Processor::getParameters() {
   return ptr;
 }
 
-void Xslt30Processor::exceptionClear() {
-  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-  j_clearException(thread);
-}
-
 void Xslt30Processor::setcwd(const char *dir) {
   if (dir != nullptr) {
     cwdXT = std::string(dir);
@@ -243,8 +232,6 @@ SaxonProcessor *Xslt30Processor::getSaxonProcessor() {
   processor->setcwd(cwdXT.c_str());
   return processor;
 }
-
-SaxonApiException *Xslt30Processor::getException() { return exception; }
 
 void Xslt30Processor::createException(const char *message) {}
 
@@ -508,7 +495,6 @@ XsltExecutable *Xslt30Processor::compileFromFile(const char *stylesheet) {
   }
 
   if (r.status != SAXON_OK) {
-    //Static exception
     throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
   XsltExecutable *executable =
@@ -568,11 +554,6 @@ void Xslt30Processor::transformFileToFile(const char *source,
                                           const char *stylesheet,
                                           const char *outputfile) {
 
-  if (exceptionOccurred()) {
-    // Possible error detected in the compile phase. Processor not in a clean
-    // state. Require clearing exception.
-    return;
-  }
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   if (stylesheet == nullptr) {
     throw SaxonApiException("Error: stylesheet has not been set.");
@@ -616,12 +597,7 @@ void Xslt30Processor::transformFileToFile(const char *source,
 
 const char *Xslt30Processor::transformFileToString(const char *source,
                                                    const char *stylesheet) {
-  if (exceptionOccurred()) {
-    // Possible error detected in the compile phase. Processor not in a clean
-    // state. Require clearing exception.
-    throw SaxonApiException(
-        "Error: Xslt30Processor not in a clean state. - Exception found");
-  }
+
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   if (source == nullptr && stylesheet == nullptr) {
     throw SaxonApiException(
@@ -665,5 +641,3 @@ const char *Xslt30Processor::transformFileToString(const char *source,
 
   return result;
 }
-
-const char *Xslt30Processor::getErrorMessage() { return nullptr; }

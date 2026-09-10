@@ -218,12 +218,9 @@ PHP_METHOD(SaxonProcessor, setcwd);
 PHP_METHOD(SaxonProcessor, getcwd);
 PHP_METHOD(SaxonProcessor, attachCurrentThread);
 PHP_METHOD(SaxonProcessor, detachCurrentThread);
-
 PHP_METHOD(SaxonProcessor, setCatalog);
 PHP_METHOD(SaxonProcessor, setCatalogFiles);
 PHP_METHOD(SaxonProcessor, registerUserFunction);
-PHP_METHOD(SaxonProcessor, getErrorMessage);
-PHP_METHOD(SaxonProcessor, exceptionOccurred);
 PHP_METHOD(SaxonProcessor, setConfigurationProperty);
 PHP_METHOD(SaxonProcessor, clearConfigurationProperties);
 PHP_METHOD(SaxonProcessor, newXslt30Processor);
@@ -234,9 +231,6 @@ PHP_METHOD(SaxonProcessor, newDocumentBuilder);
 PHP_METHOD(SaxonProcessor, version);
 PHP_METHOD(SaxonProcessor, isSchemaAware);
 PHP_METHOD(SaxonProcessor, release);
-PHP_METHOD(SaxonProcessor, exceptionClear);
-PHP_METHOD(SaxonProcessor, exceptionOccurred);
-PHP_METHOD(SaxonProcessor, getErrorMessage);
 PHP_METHOD(SaxonProcessor, EQNameToClarkName);
 PHP_METHOD(SaxonProcessor, clarkNameToEQName);
 PHP_METHOD(SaxonProcessor, getSaxonEdition);
@@ -254,10 +248,6 @@ PHP_METHOD(DocumentBuilder, getBaseUri);
 PHP_METHOD(DocumentBuilder, parseXmlFromString);    // increment refCount
 PHP_METHOD(DocumentBuilder, parseXmlFromFile);     // increment refCount
 PHP_METHOD(DocumentBuilder, parseXmlFromUri);      // increment refCount
-PHP_METHOD(DocumentBuilder, exceptionOccurred);
-PHP_METHOD(DocumentBuilder, exceptionClear);
-PHP_METHOD(DocumentBuilder, getErrorMessage);
-PHP_METHOD(DocumentBuilder, getErrorCode);
 
 PHP_METHOD(Xslt30Processor, __destruct);
 PHP_METHOD(Xslt30Processor, transformFileToFile);
@@ -278,9 +268,6 @@ PHP_METHOD(Xslt30Processor, setFastCompilation);
 PHP_METHOD(Xslt30Processor, setXsltLanguageVersion);
 PHP_METHOD(Xslt30Processor, setParameter); // checks for old values, then add new one, increment refCount
 PHP_METHOD(Xslt30Processor, clearParameters); // do decrementing of values and delete if refCount == 0
-PHP_METHOD(Xslt30Processor, exceptionClear);
-PHP_METHOD(Xslt30Processor, exceptionOccurred);
-PHP_METHOD(Xslt30Processor, getErrorCode);
 PHP_METHOD(Xslt30Processor, setcwd);
 PHP_METHOD(Xslt30Processor, getcwd);
 
@@ -317,11 +304,6 @@ PHP_METHOD(XsltExecutable, setProperty);
 PHP_METHOD(XsltExecutable, clearParameters);   // do decrementing of values and delete if refCount == 0
 PHP_METHOD(XsltExecutable, clearProperties);
 PHP_METHOD(XsltExecutable, exportStylesheet);
-PHP_METHOD(XsltExecutable, exceptionClear);
-PHP_METHOD(XsltExecutable, exceptionOccurred);
-PHP_METHOD(XsltExecutable, checkForException);
-PHP_METHOD(XsltExecutable, getErrorCode);
-PHP_METHOD(XsltExecutable, getErrorMessage);
 PHP_METHOD(XsltExecutable, setSaveXslMessage);
 PHP_METHOD(XsltExecutable, getXslMessages);  //check increment refCount
 PHP_METHOD(XsltExecutable, clearXslMessages);
@@ -349,10 +331,6 @@ PHP_METHOD(XQueryProcessor, runQueryToFile);
 PHP_METHOD(XQueryProcessor, setQueryFile);
 PHP_METHOD(XQueryProcessor, setQueryBaseURI);
 PHP_METHOD(XQueryProcessor, declareNamespace);
-PHP_METHOD(XQueryProcessor, exceptionClear);
-PHP_METHOD(XQueryProcessor, exceptionOccurred);
-PHP_METHOD(XQueryProcessor, getErrorCode);
-PHP_METHOD(XQueryProcessor, getErrorMessage);
 
 // PHP_METHOD(XPathProcessor,  __construct);
 PHP_METHOD(XPathProcessor, __destruct);
@@ -374,10 +352,6 @@ PHP_METHOD(XPathProcessor, setProperty);
 PHP_METHOD(XPathProcessor, getProperty);
 PHP_METHOD(XPathProcessor, clearParameters);   // do decrementing of values and delete if refCount == 0
 PHP_METHOD(XPathProcessor, clearProperties);
-PHP_METHOD(XPathProcessor, exceptionClear);
-PHP_METHOD(XPathProcessor, exceptionOccurred);
-PHP_METHOD(XPathProcessor, getErrorCode);
-PHP_METHOD(XPathProcessor, getErrorMessage);
 PHP_METHOD(XPathProcessor, setcwd);
 PHP_METHOD(XPathProcessor, getcwd);
 
@@ -399,10 +373,6 @@ PHP_METHOD(SchemaValidator, setParameter);         // checks for old values, the
 PHP_METHOD(SchemaValidator, setProperty);
 PHP_METHOD(SchemaValidator, clearParameters); // do decrementing of values and delete if refCount == 0
 PHP_METHOD(SchemaValidator, clearProperties);
-PHP_METHOD(SchemaValidator, exceptionClear);
-PHP_METHOD(SchemaValidator, exceptionOccurred);
-PHP_METHOD(SchemaValidator, getErrorCode);
-PHP_METHOD(SchemaValidator, getErrorMessage);
 PHP_METHOD(SchemaValidator, setcwd);
 PHP_METHOD(SchemaValidator, getcwd);
 

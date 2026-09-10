@@ -18,7 +18,6 @@ SchemaValidator::SchemaValidator(std::string curr, int64_t p ,int64_t schemaVali
   cppV = schemaValidatorObject;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   procRef = j_copy_handles(thread, (void *)p);
-  exception = nullptr;
   if (!(curr.empty())) {
     cwdV = curr;
   }
@@ -32,7 +31,6 @@ SchemaValidator::SchemaValidator(SaxonProcessor *p, std::string curr) {
   procRef = j_copy_handles(thread, (void *)p->procRef);
   saxon_error_t r = SAXON_ERROR_DEFAULT;
   cppV = SXN_UNSET;
-  exception = nullptr;
 
   if (r.status == SXN_EXCEPTION) {
     j_handles_destroy(thread, (void *)procRef);
@@ -50,7 +48,6 @@ SchemaValidator::SchemaValidator(SaxonProcessor *p, std::string curr) {
 
 SchemaValidator::SchemaValidator(const SchemaValidator &other) {
 
-  exception = nullptr;
   lax = other.lax;
   cwdV = other.cwdV;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
@@ -155,8 +152,7 @@ SaxonProcessor* SchemaValidator::getSaxonProcessor() {
 void SchemaValidator::registerSchemaFromNode(XdmNode *node) {
 
   if (node == nullptr) {
-    exception = new SaxonApiException("Error:: XdmNode XSD is NULL");
-    return;
+    throw SaxonApiException("Error:: XdmNode XSD is NULL");
   }
 
   if (cppV > SXN_UNSET) {
@@ -215,9 +211,8 @@ void SchemaValidator::registerSchemaFromFile(const char *sourceFile) {
 
 void SchemaValidator::exportSchema(const char *fileName) {
   if (fileName == nullptr) {
-    exception = new SaxonApiException(
+    throw SaxonApiException(
         "Error: fileName string cannot be empty or nullptr");
-    return;
   }
   saxon_error_t r = SAXON_ERROR_DEFAULT;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
@@ -231,9 +226,8 @@ void SchemaValidator::exportSchema(const char *fileName) {
 void SchemaValidator::registerSchemaFromString(const char *sourceStr,
                                                const char *systemID) {
   if (sourceStr == nullptr) {
-    exception = new SaxonApiException(
+    throw SaxonApiException(
         "Error:: Schema string cannot be empty or nullptr");
-    return;
   }
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   saxon_error_t r = SAXON_ERROR_DEFAULT;
@@ -352,29 +346,6 @@ XdmNode *SchemaValidator::validateToNode(const char *sourceFile) {
 
   return nullptr;
 }
-
-void SchemaValidator::exceptionClear() {
-  if (exception != nullptr) {
-    delete exception;
-    exception = nullptr;
-  }
-}
-
-const char *SchemaValidator::getErrorCode() {
-  return nullptr;
-}
-
-const char *SchemaValidator::getErrorMessage() {
-  return nullptr;
-}
-
-bool SchemaValidator::exceptionOccurred() {
-  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-  bool exceptionOccurred = (bool)j_checkForException(thread);
-  return exceptionOccurred || exception != nullptr;
-}
-
-const char *SchemaValidator::checkException() { return nullptr; }
 
 
 void SchemaValidator::setSourceNode(XdmNode *value) {

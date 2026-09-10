@@ -228,42 +228,6 @@ public:
    */
   std::map<std::string, std::string> &getProperties();
 
-  /**
-   * Checks for pending exceptions without creating a local reference to the exception object.
-   * @return True when there is a pending exception; otherwise false
-   */
-  bool exceptionOccurred();
-
-  /**
-   * Deprecated. Check for thrown exceptions.
-   * @return The main exception message if any has been thrown otherwise
-   * return nullptr
-   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
-   */
-  const char *checkException();
-
-  /**
-   * Deprecated. Clear any thrown exceptions.
-   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
-   */
-  void exceptionClear();
-
-
-  /**
-   * Deprecated. Get the error message if there are any validation errors.
-   * A validation may have a number of errors reported against it.
-   * @return The message of the exception
-   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
-   */
-  const char *getErrorMessage();
-
-  /**
-   * Deprecated. Get error code if an error is reported.
-   * Validation error are reported as exceptions. All errors can be retrieved.
-   * @return char* - The error code of the exception.
-   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
-   */
-  const char *getErrorCode();
 
   /**
    * Set the validation mode - which may be either strict or lax.
@@ -331,8 +295,6 @@ private:
   std::map<std::string, std::string>
       properties; /*!< Map of properties used for the transformation as (string,
                      string) pairs */
-  SaxonApiException *exception; /*!< Exceptions reported against the
-                                   SchemaValidator are stored here */
 };
 
 #endif /* SAXON_SCHEMA_H */

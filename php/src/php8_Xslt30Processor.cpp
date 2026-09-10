@@ -638,78 +638,6 @@ PHP_METHOD(Xslt30Processor, getcwd) {
     }
 }
 
-PHP_METHOD(Xslt30Processor, exceptionOccurred) {
-  Xslt30Processor *xslt30Processor;
-  zend_object *pobj = Z_OBJ_P(getThis());
-  xslt30Processor_object *obj =
-      (xslt30Processor_object *)((char *)pobj -
-                                 XtOffsetOf(xslt30Processor_object, std));
-  if (ZEND_NUM_ARGS() > 0) {
-    WRONG_PARAM_COUNT;
-  }
-
-  xslt30Processor = obj->xslt30Processor;
-  if (xslt30Processor != NULL) {
-    bool result = xslt30Processor->exceptionOccurred();
-    RETURN_BOOL(result);
-  }
-  RETURN_BOOL(false);
-}
-
-PHP_METHOD(Xslt30Processor, getErrorCode) {
-  Xslt30Processor *xslt30Processor;
-
-  if (ZEND_NUM_ARGS() > 0) {
-    WRONG_PARAM_COUNT;
-  }
-
-  zend_object *pobj = Z_OBJ_P(getThis());
-  xslt30Processor_object *obj =
-      (xslt30Processor_object *)((char *)pobj -
-                                 XtOffsetOf(xslt30Processor_object, std));
-  xslt30Processor = obj->xslt30Processor;
-  if (xslt30Processor != NULL) {
-    const char *errCode = xslt30Processor->getErrorCode();
-    if (errCode != NULL) {
-      // char *str = estrdup(errCode);
-      RETURN_STRING(errCode);
-    }
-  }
-  RETURN_NULL();
-}
-
-PHP_METHOD(Xslt30Processor, getErrorMessage) {
-  Xslt30Processor *xslt30Processor;
-
-  if (ZEND_NUM_ARGS() > 0) {
-    WRONG_PARAM_COUNT;
-  }
-
-  zend_object *pobj = Z_OBJ_P(getThis());
-  xslt30Processor_object *obj =
-      (xslt30Processor_object *)((char *)pobj -
-                                 XtOffsetOf(xslt30Processor_object, std));
-  xslt30Processor = obj->xslt30Processor;
-  if (xslt30Processor != NULL) {
-    const char *errStr = xslt30Processor->getErrorMessage();
-    if (errStr != NULL) {
-      // char *str = estrdup(errStr);
-      RETURN_STRING(errStr);
-    }
-  }
-  RETURN_NULL();
-}
-PHP_METHOD(Xslt30Processor, exceptionClear) {
-  Xslt30Processor *xslt30Processor;
-  zend_object *pobj = Z_OBJ_P(getThis());
-  xslt30Processor_object *obj =
-      (xslt30Processor_object *)((char *)pobj -
-                                 XtOffsetOf(xslt30Processor_object, std));
-  xslt30Processor = obj->xslt30Processor;
-  if (xslt30Processor != NULL) {
-    xslt30Processor->exceptionClear();
-  }
-}
 
 zend_function_entry Xslt30Processor_methods[] = {
     PHP_ME(Xslt30Processor, __destruct, arginfo_saxonc_xp_destruct,
@@ -755,32 +683,7 @@ zend_function_entry Xslt30Processor_methods[] = {
                                            ZEND_ACC_PUBLIC)
                                         PHP_ME(Xslt30Processor, setParameter,
                                                arginfo_saxonc_xp_setParameter,
-                                               ZEND_ACC_PUBLIC)
-                                            PHP_ME(
-                                                Xslt30Processor,
-                                                clearParameters,
-                                                arginfo_saxonc_xp_clearParameters,
-                                                ZEND_ACC_PUBLIC)
-                                                PHP_ME(
-                                                    Xslt30Processor,
-                                                    exceptionOccurred,
-                                                    arginfo_saxonc_xp_exceptionOccurred,
-                                                    ZEND_ACC_PUBLIC)
-                                                    PHP_ME(
-                                                        Xslt30Processor,
-                                                        exceptionClear,
-                                                        arginfo_saxonc_xp_exceptionClear,
-                                                        ZEND_ACC_PUBLIC)
-                                                        PHP_ME(
-                                                            Xslt30Processor,
-                                                            getErrorCode,
-                                                            arginfo_saxonc_xp_getErrorCode,
-                                                            ZEND_ACC_PUBLIC)
-                                                            PHP_ME(
-                                                                Xslt30Processor,
-                                                                getErrorMessage,
-                                                                arginfo_saxonc_xp_getErrorMessage,
-                                                                ZEND_ACC_PUBLIC){
+                                               ZEND_ACC_PUBLIC){
                                                                 nullptr,
                                                                 nullptr,
                                                                 nullptr}};

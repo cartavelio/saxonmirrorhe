@@ -209,14 +209,6 @@ public:
   ~SaxonProcessor();
 
   /**
-   * Deprecated. Get any error message thrown by the processor.
-   * @return String value of the error message. JNI exceptions thrown by this
-   * processor are handled internally and can be retrieved by this method.
-   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
-   */
-  const char *getErrorMessage();
-
-  /**
    * Create a DocumentBuilder.
    * A DocumentBuilder is used to load source XML documents.
    *
@@ -271,9 +263,6 @@ public:
      * @since 13.0.
      */
   XsdCompiler *newXsdCompiler();
-
-
-  void setExtensionLibrary(const char * libraryName);
 
   /**
    * Factory method to create an <code>xs:string</code> atomic value as a new XdmAtomicValue.
@@ -540,20 +529,6 @@ public:
    */
   bool isSchemaAwareProcessor();
 
-  /**
-   * Deprecated. Checks for thrown exceptions.
-   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
-   * @return True when there is a pending exception; false otherwise
-   */
-  bool exceptionOccurred();
-
- /**
-  * Deprecated. Clears any exception that is currently being thrown.
-  * If no exception is currently being thrown, this routine has no effect.
-  *
-  * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
-  */
-  void exceptionClear();
 
   /**
    * Utility method for working with SaxonC on Python - internal use only.
@@ -582,12 +557,6 @@ public:
    * @param len - length of the array
    */
   void deleteXdmAtomicValueArray(XdmAtomicValue **arr, int len);
-
- /**
-  * Deprecated. Checks for pending exceptions and creates a SaxonApiException object.
-  * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
-  */
-  static SaxonApiException *checkForExceptionCPP();
 
 
  /**
@@ -832,9 +801,7 @@ protected:
                     Processor is created  */
   int64_t procRef; /*!< ObjectHandle reference to the underlying processor */
 
-  SaxonApiException
-      *exception; /*!< SaxonApiException object to capture exceptions thrown
-                     from the underlying Java code via JNI */
+
 private:
   // void createException(const char *message = nullptr);
 
@@ -852,8 +819,6 @@ private:
   createParameterJArray2(std::map<std::string, XdmValue *> parameters);
 
   static int64_t createJArray(XdmValue **values, int length);
-
-  static const char *checkException();
 
  /**
  * Remove ObjectHandle from the pool. Free for the GC.

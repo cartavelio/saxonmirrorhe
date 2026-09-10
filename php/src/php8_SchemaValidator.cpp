@@ -477,7 +477,6 @@ PHP_METHOD(SchemaValidator, clearProperties) {
   schemaValidator = obj->schemaValidator;
   if (schemaValidator != nullptr) {
     schemaValidator->clearProperties();
-    schemaValidator->exceptionClear();
   }
 }
 
@@ -495,79 +494,10 @@ PHP_METHOD(SchemaValidator, clearParameters) {
   if (schemaValidator != nullptr) {
     _decrementRefCount(schemaValidator->getParameters());
     schemaValidator->clearParameters();
-    schemaValidator->exceptionClear();
   }
 }
 
-PHP_METHOD(SchemaValidator, exceptionOccurred) {
-  SchemaValidator *schemaValidator;
-  if (ZEND_NUM_ARGS() > 0) {
-    WRONG_PARAM_COUNT;
-  }
-  zend_object *pobj = Z_OBJ_P(getThis());
-  schemaValidator_object *obj =
-      (schemaValidator_object *)((char *)pobj -
-                                 XtOffsetOf(schemaValidator_object, std));
-  schemaValidator = obj->schemaValidator;
-  if (schemaValidator != nullptr) {
-    bool result = schemaValidator->exceptionOccurred();
-    RETURN_BOOL(result);
-  }
-  RETURN_BOOL(false);
-}
 
-PHP_METHOD(SchemaValidator, getErrorCode) {
-  SchemaValidator *schemaValidator;
-  /*long index;
-  if (zend_parse_parameters(ZEND_NUM_ARGS() , "l", &index) == FAILURE) {
-      RETURN_NULL();
-  } */
-  zend_object *pobj = Z_OBJ_P(getThis());
-  schemaValidator_object *obj =
-      (schemaValidator_object *)((char *)pobj -
-                                 XtOffsetOf(schemaValidator_object, std));
-  schemaValidator = obj->schemaValidator;
-  if (schemaValidator != nullptr) {
-    const char *errCode = schemaValidator->getErrorCode();
-    if (errCode != nullptr) {
-      // char *str = estrdup(errCode);
-      RETURN_STRING(errCode);
-    }
-  }
-  RETURN_NULL();
-}
-
-PHP_METHOD(SchemaValidator, getErrorMessage) {
-  SchemaValidator *schemaValidator;
-  /*long index;
-  if (zend_parse_parameters(ZEND_NUM_ARGS() , "l", &index) == FAILURE) {
-      RETURN_NULL();
-  } */
-  zend_object *pobj = Z_OBJ_P(getThis());
-  schemaValidator_object *obj =
-      (schemaValidator_object *)((char *)pobj -
-                                 XtOffsetOf(schemaValidator_object, std));
-  schemaValidator = obj->schemaValidator;
-  if (schemaValidator != nullptr) {
-    const char *errStr = schemaValidator->getErrorMessage();
-    if (errStr != nullptr) {
-      // char *str = estrdup(errStr);
-      RETURN_STRING(errStr);
-    }
-  }
-  RETURN_NULL();
-}
-PHP_METHOD(SchemaValidator, exceptionClear) {
-  SchemaValidator *schemaValidator;
-  zend_object *pobj = Z_OBJ_P(getThis());
-  schemaValidator_object *obj =
-      (schemaValidator_object *)((char *)pobj -
-                                 XtOffsetOf(schemaValidator_object, std));
-  schemaValidator = obj->schemaValidator;
-  if (schemaValidator != nullptr) {
-    schemaValidator->exceptionClear();
-  }
-}
 
 zend_function_entry SchemaValidator_methods[] = {
     PHP_ME(
@@ -604,23 +534,6 @@ zend_function_entry SchemaValidator_methods[] = {
                                 PHP_ME(SchemaValidator, clearProperties,
                                        arginfo_saxonc_sval_clearProperties,
                                        ZEND_ACC_PUBLIC)
-                                    PHP_ME(
-                                        SchemaValidator, exceptionOccurred,
-                                        arginfo_saxonc_sval_exceptionOccurred,
-                                        ZEND_ACC_PUBLIC)
-                                        PHP_ME(
-                                            SchemaValidator, exceptionClear,
-                                            arginfo_saxonc_sval_exceptionClear,
-                                            ZEND_ACC_PUBLIC)
-                                            PHP_ME(
-                                                SchemaValidator, getErrorCode,
-                                                arginfo_saxonc_sval_getErrorCode,
-                                                ZEND_ACC_PUBLIC)
-                                                PHP_ME(
-                                                    SchemaValidator,
-                                                    getErrorMessage,
-                                                    arginfo_saxonc_sval_getErrorMessage,
-                                                    ZEND_ACC_PUBLIC)
     //    PHP_ME(SchemaValidator,  getExceptionCount,
     //    arginfo_saxonc_sval_getExceptionCount, ZEND_ACC_PUBLIC)
     {nullptr, nullptr, nullptr}};
