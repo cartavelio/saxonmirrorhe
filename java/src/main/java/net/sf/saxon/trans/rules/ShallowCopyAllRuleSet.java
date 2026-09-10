@@ -12,6 +12,8 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.expr.instruct.ParameterSet;
 import net.sf.saxon.expr.instruct.TailCall;
+import net.sf.saxon.functions.ConstantFunction;
+import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.ma.map.*;
@@ -63,13 +65,14 @@ public class ShallowCopyAllRuleSet extends ShallowCopyRuleSet {
     public void process(Item item, ParameterSet parameters,
                         ParameterSet tunnelParams, Outputter out, XPathContext context,
                         Location locationId) throws XPathException {
-        if (item instanceof ArrayItem) {
+        if (item instanceof ArrayItem arrayItem) {
             SequenceCollector collector = context.getController().allocateSequenceOutputter();
             ComplexContentOutputter cco = new ComplexContentOutputter(collector);
             ProxyOutputter checker = new ShallowCopyProxyOutputterForArrays(cco, locationId);
   
             collector.setSystemId(out.getSystemId());
-            SequenceIterator iter = ((ArrayItem) item).parcels();
+            GroundedValue inputMembers = ArrayFunctionSet.ArrayMembers.members(arrayItem);
+            SequenceIterator iter = inputMembers.iterate();
 
             PipelineConfiguration pipe = out.getPipelineConfiguration();
             XPathContextMajor c2 = context.newContext();
@@ -224,6 +227,9 @@ public class ShallowCopyAllRuleSet extends ShallowCopyRuleSet {
         public void append(Item item) throws XPathException {
             if (RecordTest.VALUE_RECORD.matches(item)) {
                 super.append(item);
+            } else if (item instanceof ConstantFunction fn) {
+                // Temporary while the 4.0 spec gets sorted out
+                super.append(new ShapedMap(ArrayFunctionSet.VALUE_RECORD, fn.getConstantValue()));
             } else {
                 mustBeValueRecord(locationId);
             }
@@ -233,6 +239,9 @@ public class ShallowCopyAllRuleSet extends ShallowCopyRuleSet {
         public void append(Item item, Location locationId, int properties) throws XPathException {
             if (RecordTest.VALUE_RECORD.matches(item)) {
                 super.append(item, locationId, properties);
+            } else if (item instanceof ConstantFunction fn) {
+                // Temporary while the 4.0 spec gets sorted out
+                super.append(new ShapedMap(ArrayFunctionSet.VALUE_RECORD, fn.getConstantValue()));
             } else {
                 mustBeValueRecord(locationId);
             }
