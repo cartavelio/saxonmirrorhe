@@ -233,12 +233,15 @@ saxon:evaluate($expression)
       <p><a href="http://www.expath.org/" class="bodylink">EXPath</a> is a more recent initiative to
         define a standardized set of extension functions and extension elements that can be used
         across different XSLT and XQuery processors.</p>
-
-      <p>Saxon supports the EXPath <strong>file</strong> module since release 9.5. Since 9.6 the
-          <strong>binary</strong> and <strong>archive</strong> modules are supported too. Note that
-        the <strong>zip</strong> module was withdrawn at 9.5.1 and is now replaced by
-          <strong>archive</strong> and that some of the functions of <strong>file</strong> 
-        changed between 9.5 and 9.6 as result of specification changes.</p>
+      
+      <p>The EXPath <strong>file</strong> module is supported since Saxon 9.5. The
+        <strong>binary</strong> and <strong>archive</strong> modules are supported since Saxon
+        9.6.</p>
+      
+      <p>Version 4.0 specifications for the EXPath binary and file modules have been produced by
+        the QT4CG (XSLT and XQuery Extensions Community Group). Since Saxon 13, the
+        implementations of these modules has been updated to conform to the new specifications.
+        Changes apply whether or not 4.0 is enabled.</p>
 
       <p>Details of the functions supported (with some additional information about the Saxon
         implementation) can be found in the main <a class="bodylink" href="/functions">Function
@@ -248,13 +251,14 @@ saxon:evaluate($expression)
       <h3>The EXPath file module</h3>
 
       <p>The file module provides a set of functions to examine and manipulate the local file
-        system. For the specification of the file module see <a href="http://expath.org/spec/file"
-          class="bodylink">EXPath File Module</a>. </p>
+        system. For the specification of the file module see <a class="bodylink"
+          href="https://qt4cg.org/specifications/expath-file-40/Overview.html"
+          >EXPath File Module 4.0</a>.</p>
       <aside>These extension functions require Saxon-PE or Saxon-EE. Implemented since Saxon
         9.5. Available on all platforms.</aside>
-      <p>All functions in the file module are implemented.</p>
-      <!-- <p>The variables <code>$file:dir.separator</code> and <code>$file:path.separator</code> are
-        not implemented.</p>-->
+      <p>The new EXPath 4.0 functions <code>file:is-absolute</code>,
+        <code>file:list-roots</code> and <code>file:descendants</code> are not yet implemented.
+        All other functions in the file module are implemented.</p>
       <p>Note that many of the functions in this module have side-effects, and therefore need to be
         used with care to ensure that they are called the right number of times, and in the right
         order. The best way of achieving this is to imagine that a function like
@@ -265,13 +269,13 @@ saxon:evaluate($expression)
         be evaluated exactly once. By contrast, a call appearing as the initializer of a variable
         (for example in <code>let $x := file:write(...) return ...</code>) might be evaluated
         multiple times or not at all, depending on how the variable is actually used.</p>
+      <aside>Avoid calling functions with side effects in the initializing expression of a variable. It is unpredictable whether and when
+        such expressions are evaluated. They might not be evaluated at all, or they might be evaluated partially, or they
+        might be evaluated in an unexpected order.</aside>
       <p>A good way to invoke functions with side-effects is to use the <a class="bodylink code"
         href="/extensions/instructions/do">saxon:do</a>
       extension instruction: for example <code>&lt;saxon:do action="file:create-dir('temp')"/></code>.
       This is because instructions within a sequence constructor are always evaluated sequentially, in the order written.</p>
-      <aside>Avoid calling functions with side effects in the initializing expression of a variable. It is unpredictable whether and when
-      such expressions are evaluated. They might not be evaluated at all, or they might be evaluated partially, or they
-      might be evaluated in an unexpected order.</aside>
       <p>Functions in the EXPath file module use file paths that are specified as being relative to the
         "current working directory". If the Java system property <code>expath.base.directory</code>
         is present, this is taken as the current working directory, but this property is deprecated.
@@ -301,9 +305,9 @@ saxon:evaluate($expression)
 
       <p>The binary module defines a library of functions for manipulating binary data and
         converting between binary data and string and numeric forms. For the specification of the
-        binary module see <a href="http://expath.org/spec/binary" class="bodylink">EXPath Binary
-          Module</a>. The specification has been stabilised at a Version 1.0 status so the functions
-        can be considered stable.</p>
+        binary module see <a class="bodylink"
+          href="https://qt4cg.org/specifications/expath-binary-40/Overview.html"
+          >EXPath Binary Module 4.0</a>.</p>
       <aside>These extension functions require Saxon-PE or Saxon-EE. Implemented since Saxon
         9.6. Available on all platforms.</aside>
       <p>All functions in the binary module are implemented and tested. Note that this module does

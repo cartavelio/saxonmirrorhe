@@ -878,7 +878,9 @@ TODO: rethink redefines and override
     
     <category name="extensions">
         
-        <h2>Changes to EXPath functions</h2>>
+        <h2>Changes to EXPath functions</h2>
+        <p>The implementations of the EXPath binary and file module functions have been updated
+            to conform to the new 4.0 specifications. Changes apply whether or not 4.0 is enabled.</p>
     	<ul>
     		<li><p>The handling of byte order marks in <code>bin:encode-string</code> and <code>bin:decode-string</code> has been clarified in the specification, and this has resulted in changes to the Saxon implementation. The changed behaviour applies whether or not 4.0 is enabled. (PR 1765)</p></li>
     		<li><p>The non-standard function <code>bin:version</code> is dropped.</p></li>
