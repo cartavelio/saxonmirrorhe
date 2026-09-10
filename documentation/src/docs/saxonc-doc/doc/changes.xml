@@ -316,6 +316,8 @@
             </li>
             <li>The changes to Soname and library filenames also mean that it's now possible to link
                to SaxonC with <code>-lsaxonc-ee</code> instead of <code>-llibsaxon-eec-12.6.0</code>.</li>
+            <li>For details on what these packaging changes mean for installing and running SaxonC,
+               see the updates in the <a href="/starting">Getting started</a> section.</li>
          </ul>
       </category>
    </release>
