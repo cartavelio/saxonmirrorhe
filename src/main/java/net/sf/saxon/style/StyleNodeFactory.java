@@ -124,6 +124,9 @@ public class StyleNodeFactory implements NodeFactory {
                     new XmlProcessingIncident(elemName.getDisplayName() + " can only appear at the outermost level", "XTSE0010");
             e.setValidationError(reason, StyleElement.OnFailure.REPORT_ALWAYS);
         }
+        if (e instanceof XSLPackage) {
+            ((XSLPackage)e).setFixedNamespaces((NamespaceMap)pipe.getComponent("FixedNamespaces"));
+        }
 
         if (e != null) {  // recognized as an XSLT element
 

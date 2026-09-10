@@ -60,6 +60,9 @@ public class XSLStylesheet extends XSLModuleRoot {
                 case "exclude-result-prefixes":
                     //
                     break;
+                case "fixed-namespaces":
+                    requireXslt40Attribute(f); // Value already processed in use-when filter
+                    break;
                 case "input-type-annotations":
                     inputTypeAnnotationsAtt = value;
                     break;

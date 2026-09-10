@@ -27,6 +27,7 @@ public class XSLPackage extends XSLModuleRoot {
     private boolean declaredModes = true;
     private boolean prepared = false;
 
+
     /**
      * Initialise a new ElementImpl with an element name
      * @param elemName       Integer representing the element name, with namespaces resolved
@@ -110,7 +111,8 @@ public class XSLPackage extends XSLModuleRoot {
 
             } else if (lexicalName.equals("declared-modes") && getLocalPart().equals("package")) {
                 declaredModes = processBooleanAttribute("declared-modes", value);
-
+            } else if (lexicalName.equals("fixed-namespaces")) {
+                requireXslt40Attribute("fixed-namespaces"); // Value already processed in use-when filter
             } else if (lexicalName.equals("input-type-annotations")) {
                 inputTypeAnnotationsAtt = value;
             } else {

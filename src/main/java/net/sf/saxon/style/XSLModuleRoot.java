@@ -7,6 +7,7 @@
 
 package net.sf.saxon.style;
 
+import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.trans.XPathException;
@@ -19,6 +20,22 @@ public abstract class XSLModuleRoot extends StyleElement {
     public static final int ANNOTATION_UNSPECIFIED = 0;
     public static final int ANNOTATION_STRIP = 1;
     public static final int ANNOTATION_PRESERVE = 2;
+
+    private NamespaceMap fixedNamespaces;
+
+
+    public void setFixedNamespaces(NamespaceMap map) {
+        this.fixedNamespaces = map;
+    }
+
+    public NamespaceMap getFixedNamespaces() {
+        return fixedNamespaces;
+    }
+
+    @Override
+    public XSLModuleRoot getModuleRoot() {
+        return this;
+    }
 
     /**
      * Ask whether it is required that modes be explicitly declared

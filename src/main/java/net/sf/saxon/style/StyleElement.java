@@ -364,8 +364,12 @@ public abstract class StyleElement extends ElementImpl {
 
         StructuredQName qName;
         try {
+            NamespaceResolver resolver = this;
+            if (getModuleRoot().getFixedNamespaces() != null) {
+                resolver = getModuleRoot().getFixedNamespaces();
+            }
             qName = StructuredQName.fromLexicalQName((lexicalQName), false,
-                                                     true, this);
+                                                     true, resolver);
         } catch (XPathException e) {
             String requestedError = errorCode == null ? "XTSE0020" : errorCode;
             XPathException e2 = e.asStaticError()
@@ -1705,6 +1709,16 @@ public abstract class StyleElement extends ElementImpl {
         }
     }
 
+    public XSLModuleRoot getModuleRoot() {
+        NodeImpl node = this;
+        while (true) {
+            NodeImpl next = node.getParent();
+            if (next instanceof XSLModuleRoot) {
+                return (XSLModuleRoot) next;
+            }
+            node = next;
+        }
+    }
 
     /**
      * Recursive walk through the stylesheet to validate all nodes

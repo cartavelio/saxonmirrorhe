@@ -32,6 +32,7 @@ import net.sf.saxon.tree.AttributeLocation;
 import net.sf.saxon.tree.jiter.TopDownStackIterable;
 import net.sf.saxon.tree.linked.DocumentImpl;
 import net.sf.saxon.tree.linked.LinkedTreeBuilder;
+import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
@@ -45,6 +46,7 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
+import java.util.StringTokenizer;
 import java.util.function.Supplier;
 
 /**
@@ -71,6 +73,7 @@ public class UseWhenFilter extends ProxyReceiver {
     private int importCount = 0;
     private boolean dropUnderscoredAttributes;
     private final LinkedTreeBuilder treeBuilder;
+    private NamespaceMap fixedNamespaces;
 
 
     /**
@@ -222,6 +225,10 @@ public class UseWhenFilter extends ProxyReceiver {
         return version;
     }
 
+    public NamespaceMap getFixedNamespaces() {
+        return fixedNamespaces;
+    }
+
     private DocumentImpl processIncludeImport(
             NodeName elemName, Location location, URI baseUri, String href, boolean isImport) throws XPathException {
         if (href == null) {
@@ -359,8 +366,22 @@ public class UseWhenFilter extends ProxyReceiver {
         if (fp == StandardNames.XSL_APPLY_TEMPLATES) {
             registerModeName(attributes.getValue("mode"), namespaces);
             return null;
-        } else if (defaultNamespaceStack.size() == 2) {
+        } else if (defaultNamespaceStack.size() == 1) {
             switch (fp) {
+                case StandardNames.XSL_STYLESHEET:
+                case StandardNames.XSL_TRANSFORM:
+                case StandardNames.XSL_PACKAGE:
+                    if (getVersion(pa, fp) >= 40) {
+                        String fixedNamespacesAtt = attributes.getValue("fixed-namespaces");
+                        if (fixedNamespacesAtt != null) {
+                            fixedNamespaces = parseFixedNamespacesAtt(fixedNamespacesAtt, namespaces, baseUri);
+                            getPipelineConfiguration().setComponent("FixedNamespaces", fixedNamespaces);
+                        }
+                    }
+                    break;
+            }
+        } else if (defaultNamespaceStack.size() == 2) {
+                switch (fp) {
                 case StandardNames.XSL_VARIABLE:
                 case StandardNames.XSL_PARAM:
                     if (pa.hasShadowAttributes) {
@@ -447,6 +468,9 @@ public class UseWhenFilter extends ProxyReceiver {
         String requiredStr = Whitespace.trim(attributes.getValue(NamespaceUri.NULL, "required"));
         boolean isRequired = StyleElement.isYes(requiredStr);
 
+        if (fixedNamespaces != null) {
+            nsResolver = fixedNamespaces;
+        }
 
         UseWhenStaticContext staticContext = new UseWhenStaticContext(compilation, nsResolver);
         staticContext.setBaseURI(baseUri.toString());
@@ -634,6 +658,11 @@ public class UseWhenFilter extends ProxyReceiver {
      */
 
     private String processShadowAttribute(String expression, String baseUri, NamespaceResolver nsResolver, AttributeLocation loc) throws XPathException {
+
+        if (fixedNamespaces != null) {
+            nsResolver = fixedNamespaces;
+        }
+
         UseWhenStaticContext staticContext = new UseWhenStaticContext(compilation, nsResolver);
         staticContext.setBaseURI(baseUri);
         staticContext.setContainingLocation(loc);
@@ -713,6 +742,11 @@ public class UseWhenFilter extends ProxyReceiver {
      */
 
     private boolean evaluateUseWhen(String expression, AttributeLocation location, String baseUri, NamespaceResolver nsResolver) throws XPathException {
+
+        if (fixedNamespaces != null) {
+            nsResolver = fixedNamespaces;
+        }
+
         UseWhenStaticContext staticContext = new UseWhenStaticContext(compilation, nsResolver);
         staticContext.setBaseURI(baseUri);
         staticContext.setContainingLocation(location);
@@ -726,6 +760,83 @@ public class UseWhenFilter extends ProxyReceiver {
         //dynamicContext.getController().getExecutable().setFunctionLibrary((FunctionLibraryList)staticContext.getFunctionLibrary());
         ((XPathContextMajor) dynamicContext).openStackFrame(stackFrameMap);
         return expr.effectiveBooleanValue(dynamicContext);
+    }
+
+    private NamespaceMap parseFixedNamespacesAtt(String att, NamespaceMap nsContext, URI baseUri) throws XPathException {
+        NamespaceMap nsMap = NamespaceMap.emptyMap();
+        StringTokenizer st = new StringTokenizer(att, " \t\n\r", false);
+
+        while (st.hasMoreTokens()) {
+            String s = st.nextToken();
+            if (s.equals("#standard")) {
+                nsMap = nsMap.put("xsl", NamespaceUri.XSLT);
+                nsMap = nsMap.put("xs", NamespaceUri.SCHEMA);
+                nsMap = nsMap.put("fn", NamespaceUri.FN);
+                nsMap = nsMap.put("map", NamespaceUri.MAP_FUNCTIONS);
+                nsMap = nsMap.put("array", NamespaceUri.ARRAY_FUNCTIONS);
+                nsMap = nsMap.put("math", NamespaceUri.MATH);
+                // etc
+            } else if (s.equals("xsl")) {
+                nsMap = nsMap.put("xsl", NamespaceUri.XSLT);
+            } else if (s.equals("xs")) {
+                nsMap = nsMap.put("xs", NamespaceUri.SCHEMA);
+            } else if (s.equals("fn")) {
+                nsMap = nsMap.put("fn", NamespaceUri.FN);
+            } else if (s.equals("map")) {
+                nsMap = nsMap.put("map", NamespaceUri.MAP_FUNCTIONS);
+            } else if (s.equals("array")) {
+                nsMap = nsMap.put("array", NamespaceUri.ARRAY_FUNCTIONS);
+            } else if (s.equals("math")) {
+                nsMap = nsMap.put("math", NamespaceUri.MATH);
+            } else if (NameChecker.isValidNCName(s)) {
+                NamespaceUri uri = nsContext.getNamespaceUri(s);
+                if (uri == null) {
+                    throw new XPathException("Namespace prefix " + s + " has not been declared");
+                } else {
+                    nsMap = nsMap.put(s, uri);
+                }
+            } else {
+                int eq = s.indexOf('=');
+                if (eq > 0 && eq + 1 < s.length() && NameChecker.isValidNCName(s.substring(0, eq))) {
+                    nsMap = nsMap.put(s.substring(0, eq), NamespaceUri.of(s.substring(eq + 1)));
+                } else {
+                    NodeInfo doc = null;
+
+                    Configuration config = getConfiguration();
+                    ResourceResolver resolver = compilation.getCompilerInfo().getResourceResolver();
+                    String baseUriStr = baseUri.toString();
+                    DocumentKey key = DocumentFn.computeDocumentKey(s, baseUri.toString(), compilation.getPackageData(), false);
+                    Map<DocumentKey, TreeInfo> map = compilation.getStylesheetModules();
+                    if (map.containsKey(key)) {
+                        doc = (DocumentImpl) map.get(key);
+                        NodeInfo outer = Navigator.getOutermostElement(doc.getTreeInfo());
+                        nsMap = nsMap.addAll(outer.getAllNamespaces());
+                    } else {
+                        ResourceRequest request = new ResourceRequest();
+                        request.relativeUri = s;
+                        request.baseUri = baseUriStr;
+                        request.uri = key.getAbsoluteURI();
+                        request.nature = ResourceRequest.XSLT_NATURE;
+                        request.purpose = ResourceRequest.ANY_PURPOSE;
+                        Source source = request.resolve(resolver,
+                                                        config.getResourceResolver(),
+                                                        new DirectResourceResolver(config));
+
+                        if (source == null) {
+                            throw new XPathException("Unable to resolve URI " + s
+                                                             + " in fixed-namespaces attribute ", "XTSE0165");
+                        }
+
+                        TreeInfo tree = config.buildDocumentTree(source);
+                        NodeInfo outer = Navigator.getOutermostElement(tree);
+                        nsMap = nsMap.addAll(outer.getAllNamespaces());
+
+                    }
+                }
+            }
+        }
+        return nsMap;
+
     }
 
     private SlotManager allocateSlots(String expression, Expression expr) {
