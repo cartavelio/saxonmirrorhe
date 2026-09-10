@@ -7,23 +7,15 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.Bindery;
 import net.sf.saxon.expr.instruct.Executable;
 import net.sf.saxon.expr.instruct.GlobalVariable;
-import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.StandardOutputResolver;
-import net.sf.saxon.om.NamespaceUri;
-import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.option.jdom2.JDOM2ObjectModel;
 import net.sf.saxon.option.xom.XOMDocumentWrapper;
 import net.sf.saxon.option.xom.XOMObjectModel;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trace.XSLTTraceListener;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.ComplexType;
-import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.value.Cardinality;
-import net.sf.saxon.value.QNameValue;
 import net.sf.saxon.value.StringValue;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
@@ -644,7 +636,7 @@ public class TestXsltTransformer {
             serializer.setOutputFile(Testdata.tempFile("validationWarnings.xml"));
 
             XsltCompiler compiler = processor.newXsltCompiler();
-            compiler.useSchema(schema);
+            compiler.useSchema("", schema);
 
             String xsl = "<xsl:stylesheet version=\"2.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
                     "\n" +
