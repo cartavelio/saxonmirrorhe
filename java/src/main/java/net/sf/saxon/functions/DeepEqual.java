@@ -13,7 +13,9 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.CodepointCollator;
+import net.sf.saxon.expr.sort.GenericAtomicComparer;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.ma.arrays.ArrayItem;
@@ -150,6 +152,7 @@ public class DeepEqual extends CollatingFunctionFixed {
         public StringCollator stringCollator;
         public BiFunction<AtomicValue, AtomicValue, Boolean> comparer;
         public FunctionItem itemsEqualFn;
+        public int version;
 
 
         private static final String[] booleanOptions = new String[]{
@@ -165,6 +168,7 @@ public class DeepEqual extends CollatingFunctionFixed {
             for (String option : DeepEqualOptions.booleanOptions) {
                 setBooleanOption(values, option);
             }
+            this.version = version;
             GroundedValue normForm = map.get(new StringValue("normalization-form"));
             if (normForm != null) {
                 normalizationForm = normForm.getStringValue();
@@ -193,9 +197,15 @@ public class DeepEqual extends CollatingFunctionFixed {
             if (stringCollator == null) {
                 throw new XPathException("Unknown collation " + collationName, "FOCH0002");
             }
-            comparer = (a, b) -> a.getXPathTransitiveMatchKey(stringCollator, context.getImplicitTimezone())
+            if (version < 40) {
+                AtomicComparer ac = GenericAtomicComparer.makeAtomicComparer(
+                        BuiltInAtomicType.ANY_ATOMIC, BuiltInAtomicType.ANY_ATOMIC,
+                        stringCollator, context);
+                comparer = (a, b)  -> ac.comparesEqual(a, b);
+            } else {
+                comparer = (a, b) -> a.getXPathTransitiveMatchKey(stringCollator, context.getImplicitTimezone())
                         .equals(b.getXPathTransitiveMatchKey(stringCollator, context.getImplicitTimezone()));
-
+            }
             if (normalizeSpace || normalizationForm != null) {
                 final BiFunction<AtomicValue, AtomicValue, Boolean> baseComparer = comparer;
                 comparer = (v0, v1) -> {
