@@ -2495,7 +2495,7 @@ public class PackageLoaderHE implements IPackageLoader {
             Expression content = loader.getExpressionWithRole(element, "content");
             StringCollator collator = null;
             if (collationNameExp instanceof StringLiteral) {
-                String collationName = ((StringLiteral) collationNameExp).getString().toString();
+                String collationName = ((StringLiteral) collationNameExp).stringify();
                 collator = loader.config.getCollation(collationName);
             }
             ForEachGroup feg = new ForEachGroup(

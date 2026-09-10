@@ -4446,7 +4446,7 @@ public class XPathParser {
                             FunctionCall operand = (FunctionCall) expression;
                             Literal keyExp = (Literal) operand.getArguments()[0];
                             Literal valueExp = (Literal) operand.getArguments()[1];
-                            UnicodeString key = ((StringLiteral) keyExp).getString();
+                            UnicodeString key = ((StringLiteral) keyExp).getUnicodeString();
                             GroundedValue val = valueExp.getGroundedValue();
                             mapBuilder.put(key, val);
                         }

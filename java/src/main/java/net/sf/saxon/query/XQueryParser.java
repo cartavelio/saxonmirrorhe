@@ -4886,7 +4886,7 @@ public class XQueryParser extends XPathParser {
                 Expression exp = parsePseudoXML(true);
                 // An end tag can appear here, and is returned as a string value
                 if (exp instanceof StringLiteral) {
-                    String endTag = ((StringLiteral) exp).getString().toString();
+                    String endTag = ((StringLiteral) exp).stringify();
                     if (Whitespace.isWhite(endTag.charAt(0))) {
                         grumble("End tag contains whitespace before the name");
                     }

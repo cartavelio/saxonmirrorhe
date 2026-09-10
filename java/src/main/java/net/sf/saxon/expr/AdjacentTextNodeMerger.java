@@ -117,7 +117,7 @@ public class AdjacentTextNodeMerger extends UnaryExpression {
                     Expression content = ((ValueOf) action).getSelect();
                     if (content instanceof StringLiteral) {
                         // if it's empty, we could remove it now, but that's awkward and probably doesn't happen
-                        maybeEmpty |= ((StringLiteral) content).getString().isEmpty();
+                        maybeEmpty |= ((StringLiteral) content).getUnicodeString().isEmpty();
                     } else {
                         maybeEmpty = true;
                     }

@@ -21,6 +21,8 @@ import net.sf.saxon.value.StringValue;
  */
 public class StringLiteral extends Literal {
 
+    private final String valueAsString;
+
     /**
      * Create a StringLiteral that wraps a StringValue
      *
@@ -29,6 +31,7 @@ public class StringLiteral extends Literal {
 
     public StringLiteral(StringValue value) {
         super(value);
+        valueAsString = value.getStringValue();
     }
 
     /**
@@ -67,7 +70,7 @@ public class StringLiteral extends Literal {
      * @return the underlying string
      */
 
-    public UnicodeString getString() {
+    public UnicodeString getUnicodeString() {
         return getGroundedValue().getUnicodeStringValue();
     }
 
@@ -78,7 +81,7 @@ public class StringLiteral extends Literal {
      */
 
     public String stringify() {
-        return getGroundedValue().getStringValue();
+        return valueAsString;
     }
 
     /*@NotNull*/
@@ -112,7 +115,7 @@ public class StringLiteral extends Literal {
      */
     @Override
     public String toShortString() {
-        return '"' + Err.truncate30(getString()).toString() + '"';
+        return '"' + Err.truncate30(getUnicodeString()).toString() + '"';
     }
 }
 

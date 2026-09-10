@@ -106,7 +106,7 @@ public class XSLAnalyzeString extends StyleElement {
 
         if (regex instanceof StringLiteral && flags instanceof StringLiteral) {
             try {
-                final UnicodeString regex = ((StringLiteral) this.regex).getString();
+                final UnicodeString regex = ((StringLiteral) this.regex).getUnicodeString();
                 final String flagstr = ((StringLiteral) flags).stringify();
 
                 String regexDialect = getEffectiveVersion() >= 30 ? "XP31" : "XP20";
