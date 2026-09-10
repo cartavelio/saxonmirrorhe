@@ -108,12 +108,12 @@ final class FollowingIterator implements SequenceIterator {
                 TinyTextualElement e = (TinyTextualElement)tree.getNode(nodeNr);
                 NodeInfo t = e.getTextNode();
                 if (matcher.test(nodeNr)) {
-                    if (predicate.test(t)) {
+                    if (predicate == null || predicate.test(t)) {
                         pending = t;
                     }
                     position++;
                     return current = tree.getNode(nodeNr);
-                } else if (predicate.test(t)) {
+                } else if (predicate == null || predicate.test(t)) {
                     position++;
                     return current = t;
                 }
