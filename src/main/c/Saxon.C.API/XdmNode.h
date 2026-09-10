@@ -76,14 +76,7 @@ public:
  * node. That is, it corresponds to the "is" operator in XPath.
  * @param other - the node being copied
  */
- bool operator==(const XdmNode& other) const
- {
-  char result = j_xdmNodeEquals(SaxonProcessor::sxn_environ->thread, (void *)value, (void *)other.value);
-  if((int)result == SXN_EXCEPTION) {
-   throw SaxonApiException();
-  }
-  return result != 0;
- }
+ bool operator==(const XdmNode& other) const;
 
   /**
    * XdmNode copy constructor.

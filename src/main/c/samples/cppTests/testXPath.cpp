@@ -1054,7 +1054,6 @@ void testXdmNodeEquals(XPathProcessor *xpath, sResultCount *sresult) {
 
       if (result == result2) {
         cout << "Results are equal" << endl;
-        cout << "Node name: " << node->getNodeName() << endl;
         sresult->success++;
       } else {
         cout << "Results are not equal" << endl;

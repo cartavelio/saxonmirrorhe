@@ -33,6 +33,16 @@ XdmNode::XdmNode(const XdmNode &other): XdmItem(other) {
 
 }
 
+bool XdmNode::operator==(const XdmNode& other) const
+{
+  std::cerr<<"C++ equals operator called !!!!"<<std::endl;
+  char result = j_xdmNodeEquals(SaxonProcessor::sxn_environ->thread, (void *)value, (void *)other.value);
+  if((int)result == SXN_EXCEPTION) {
+    throw SaxonApiException();
+  }
+  return result != 0;
+}
+
 bool XdmNode::isAtomic() { return false; }
 
 XDM_NODE_KIND XdmNode::getNodeKind() {

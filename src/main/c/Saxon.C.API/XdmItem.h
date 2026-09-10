@@ -57,6 +57,18 @@ public:
   return *this;
  }
 
+ bool operator==(const XdmItem& other) const
+ {
+  std::cerr<<"C++ XdmItem equals operator called !!!!"<<std::endl;
+  return false;
+  /*char result = j_xdmNodeEquals(SaxonProcessor::sxn_environ->thread, (void *)value, (void *)other.value);
+  if((int)result == SXN_EXCEPTION) {
+   throw SaxonApiException();
+  }
+  return result != 0;*/
+ }
+
+
   /**
    * Destructor method for XdmItem
    */
@@ -173,22 +185,12 @@ public:
    */
   virtual XDM_TYPE getType();
 
- /**
- * Internal method to reset the underlying ObjectHandle value
-*/
- void resetValue(int64_t newValue);
-
- void resetRelinquishedItems();
-
 protected:
 
   const char *stringValue;  /*!< Cached. String representation of the XdmValue,
                                if available */
   const char *itemToString; /*!< Cached. String representation of the XdmValue,
                                if available */
-
- private:
-
 };
 
 #endif
