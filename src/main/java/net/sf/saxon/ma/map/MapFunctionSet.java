@@ -15,7 +15,6 @@ import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.hof.FunctionLiteral;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
@@ -135,7 +134,6 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         mergeOptionDetails.addAllowedOption("duplicates", duplicatesOptionType, StringValue.bmp("use-first"));
         // duplicates=unspecified is retained because that's what the XSLT 3.0 Rec incorrectly uses
         mergeOptionDetails.addAllowedOption("retain-order", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        mergeOptionDetails.addAllowedOption(MapMerge.errorCodeKey, SequenceType.SINGLE_STRING, StringValue.bmp("FOJS0003"));
 
 
         register("merge", 2, e -> e.populate( MapMerge::new, MapType.ANY_MAP_TYPE, ONE, 0)
@@ -719,11 +717,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
      */
     public static class MapMerge extends SystemFunction {
 
-        //public final static String finalKey = "Q{" + NamespaceConstant.SAXON + "}final";
-        //public final static String keyTypeKey ="Q{"+NamespaceConstant.SAXON +"}key-type";
-        public final static String errorCodeKey = "Q{" + NamespaceConstant.SAXON + "}duplicates-error-code";
 
-        private final String duplicates = "use-first";
         private final String duplicatesErrorCode = "FOJS0003";
 
 
@@ -740,21 +734,21 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 return MapType.EMPTY_MAP_TYPE;
             } else if (it instanceof MapType) {
                 boolean maybeCombined = true;  // see bug 3980
-                if (args.length == 1) {
-                    maybeCombined = false;
-                } else if (args[1] instanceof Literal) {
-                    MapItem options = (MapItem) ((Literal) args[1]).getGroundedValue().head();
-                    if (options != null) {
-                        GroundedValue dupes = options.get(StringValue.bmp("duplicates"));
-                        try {
-                            if (dupes != null && !"combine".equals(dupes.getStringValue())) {
-                                maybeCombined = false;
-                            }
-                        } catch (XPathException e) {
-                            //
-                        }
-                    }
-                }
+//                if (args.length == 1) {
+//                    maybeCombined = false;
+//                } else if (args[1] instanceof Literal) {
+//                    MapItem options = (MapItem) ((Literal) args[1]).getGroundedValue().head();
+//                    if (options != null) {
+//                        GroundedValue dupes = options.get(StringValue.bmp("duplicates"));
+//                        try {
+//                            if (dupes != null && !"combine".equals(dupes.getStringValue())) {
+//                                maybeCombined = false;
+//                            }
+//                        } catch (XPathException e) {
+//                            //
+//                        }
+//                    }
+//                }
                 if (maybeCombined) {
                     return new MapType(((MapType) it).getKeyType(),
                                        SequenceType.zeroOrMore(((MapType) it).getValueType().getPrimaryType()));
@@ -776,7 +770,6 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     MapItem options = (MapItem) arguments[1].head();
                     if (options != null && !options.isEmpty()) {
                         Map<String, GroundedValue> values = getDetails().optionDetails.processSuppliedOptions(options, context);
-                        duplicatesErrorCode = ((StringValue) values.get(errorCodeKey)).getStringValue();
                         action = getDuplicatesCombiner(options, "use-first", duplicatesErrorCode);
                     }
                 }
@@ -833,8 +826,8 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             if (call.getArity() == 1) {
                 StringMapBuilder options = new StringMapBuilder(2).unordered();
                 options.setOrdered(false);
+                String duplicates = "use-first";
                 options.put(new Twine8("duplicates"), new StringValue(duplicates));
-                options.put(new Twine8("Q{" + NamespaceUri.SAXON + "}duplicates-error-code"), new StringValue(duplicatesErrorCode));
                 Literal.exportValue(options.getCompletedMap(), out);
             }
         }

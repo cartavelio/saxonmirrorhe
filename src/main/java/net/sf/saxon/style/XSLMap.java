@@ -13,17 +13,19 @@ import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.instruct.SequenceInstr;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.expr.parser.TypeChecker;
+import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.ma.map.MapBuilder;
 import net.sf.saxon.ma.map.MapFunctionSet;
+import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.ma.map.SimpleMap;
+import net.sf.saxon.ma.map.SingleEntryMap;
 import net.sf.saxon.om.AttributeInfo;
-import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.QNameValue;
+import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
@@ -113,11 +115,8 @@ public class XSLMap extends StyleElement {
             optionsExp = MapFunctionSet.getInstance(31).makeFunction("entry", 2).makeFunctionCall(
                     new StringLiteral("duplicates"), onDuplicates);
         } else {
-            MapBuilder options = SimpleMap.getBuilder();
-            options.put(StringValue.bmp("duplicates"), StringValue.bmp("reject"));
-            options.put(new QNameValue("", NamespaceUri.SAXON, "duplicates-error-code"),
-                               StringValue.bmp("XTDE3365"));
-            optionsExp = Literal.makeLiteral(options.getCompletedMap(), select);
+            MapItem options = new SingleEntryMap(new StringValue("duplicates"), mapConstructorDuplicatesAction);
+            optionsExp = Literal.makeLiteral(options, select);
         }
 
         Expression exp = MapFunctionSet.getInstance(40).makeFunction("merge", 2)
@@ -127,5 +126,12 @@ public class XSLMap extends StyleElement {
         }
         return exp;
     }
+
+    private final static FunctionItem mapConstructorDuplicatesAction = new CallableFunction(
+            (context, arguments) -> {
+                throw new UncheckedXPathException("Duplicate key in xsl:map instruction", "XTDE3365");
+            },
+            new SpecificFunctionType(new SequenceType[]{}, SequenceType.ANY_SEQUENCE)
+    );
 
 }

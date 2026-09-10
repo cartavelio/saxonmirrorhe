@@ -42,7 +42,7 @@ import java.util.function.Supplier;
  */
 public class RecordTest extends AnyFunctionType implements RecordType {
 
-    private final Map<String, SequenceType> fieldTypes = new HashMap<>();
+    private final Map<String, SequenceType> fieldTypes = new LinkedHashMap<>();
     private final Set<String> optionalFields = new HashSet<>();
     private boolean _extensible;
     private StructuredQName name;
@@ -230,6 +230,15 @@ public class RecordTest extends AnyFunctionType implements RecordType {
     @Override
     public Iterable<String> getFieldNames() {
         return fieldTypes.keySet();
+    }
+
+    /**
+     * Get the number of declared fields
+     * @return the number of declared fields
+     */
+
+    public int getSize() {
+        return fieldTypes.size();
     }
 
     /**

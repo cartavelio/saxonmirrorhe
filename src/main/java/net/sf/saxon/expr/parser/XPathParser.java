@@ -4073,11 +4073,15 @@ public class XPathParser {
                                  .makeFunction("entry", 2).makeFunctionCall(keys.get(i), values.get(i));
                     }
                     Block block = new Block(entriesArray);
-                    MapBuilder options = SimpleMap.getBuilder();
-                    options.put(new StringValue("duplicates"), new StringValue("reject"));
-                    options.put(new QNameValue("", NamespaceUri.SAXON, "duplicates-error-code"), new StringValue("XQDY0137"));
+                    MapItem optionsMap;
+                    if (allLiteralKeys) {
+                        optionsMap = EmptyMap.getInstance();
+                    } else {
+                        optionsMap = new SingleEntryMap(new StringValue("duplicates"),
+                                                        mapConstructorDuplicatesAction);
+                    }
                     result = MapFunctionSet.getInstance(31).makeFunction("merge", 2)
-                            .makeFunctionCall(block, Literal.makeLiteral(options.getCompletedMap()));
+                        .makeFunctionCall(block, Literal.makeLiteral(optionsMap));
                 }
                 break;
         }
@@ -4085,6 +4089,13 @@ public class XPathParser {
         return result;
 
     }
+
+    private final static FunctionItem mapConstructorDuplicatesAction = new CallableFunction(
+            (context, arguments) -> {
+                throw new UncheckedXPathException("Duplicate key in map constructor", "XQDY0037");
+            },
+            new SpecificFunctionType(new SequenceType[]{}, SequenceType.ANY_SEQUENCE)
+    );
 
     /**
      * Parse a "square" array constructor
