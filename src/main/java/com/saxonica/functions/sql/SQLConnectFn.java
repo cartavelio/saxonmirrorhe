@@ -6,13 +6,16 @@ import net.sf.saxon.lib.Feature;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.value.ExternalObject;
 import net.sf.saxon.value.ObjectValue;
 import net.sf.saxon.value.StringItem;
 
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -41,28 +44,51 @@ public class SQLConnectFn extends SystemFunction {
 
         Connection connection = null;      // JDBC Database Connection
 
-        MapItem options = (MapItem)arguments[0].head();
+        MapItem options = (MapItem) arguments[0].head();
 
-        String dbString = str(options.get(StringItem.bmp("database")));
-        String dbDriverString = str(options.get(StringItem.bmp("driver")));
-        String userString = str(options.get(StringItem.bmp("user")));
-        String pwdString = str(options.get(StringItem.bmp("password")));
-        String autoCommitString = str(options.get(StringItem.bmp("autoCommit")));
+        String dataSource = str(options.get(new StringItem("dataSource")));
+        String dbString = str(options.get(new StringItem("database")));
+        String dbDriverString = str(options.get(new StringItem("driver")));
+        String userString = str(options.get(new StringItem("user")));
+        String pwdString = str(options.get(new StringItem("password")));
+        String autoCommitString = str(options.get(new StringItem("autoCommit")));
 
-        try {
-            // the following hack is necessary to load JDBC drivers
-            Class.forName(dbDriverString);
-        } catch (ClassNotFoundException e) {
-            XPathException err = new XPathException("Failed to load JDBC driver " + dbDriverString, e);
-            err.setXPathContext(context);
-            err.setErrorCode(SaxonErrorCode.SXSQ0003);
-            throw err;
-        }
+//        try {
+//            // the following hack is necessary to load JDBC drivers
+//            Class.forName(dbDriverString);
+//        } catch (ClassNotFoundException e) {
+//            XPathException err = new XPathException("Failed to load JDBC driver " + dbDriverString, e);
+//            err.setXPathContext(context);
+//            err.setErrorCode(SaxonErrorCode.SXSQ0003);
+//            throw err;
+//        }
         try {
             if (context.getConfiguration().isTiming()) {
                 DriverManager.setLogWriter(new PrintWriter(System.err));
             }
-            connection = DriverManager.getConnection(dbString, userString, pwdString);
+            if (dataSource != null) {
+                InitialContext namingContext = new InitialContext();
+                DataSource ds = (DataSource) namingContext.lookup(dataSource);
+                if (userString != null && pwdString != null) {
+                    connection = ds.getConnection(userString, pwdString);
+                } else {
+                    connection = ds.getConnection();
+                }
+            } else {
+                if (userString == null && pwdString == null) {
+                    connection = DriverManager.getConnection(dbString);
+                } else {
+                    connection = DriverManager.getConnection(dbString, userString, pwdString);
+                }
+            }
+        } catch (NamingException nex) {
+            if (context.getConfiguration().isTiming()) {
+                nex.printStackTrace();
+            }
+            XPathException err = new XPathException("JDBC Connection Failure: failure from naming service", nex);
+            err.setXPathContext(context);
+            err.setErrorCode(SaxonErrorCode.SXSQ0003);
+            throw err;
         } catch (SQLException ex) {
             if (context.getConfiguration().isTiming()) {
                 ex.printStackTrace();
@@ -88,10 +114,14 @@ public class SQLConnectFn extends SystemFunction {
 
     }
 
-    private String str(Sequence iterator) throws XPathException {
-        Item item = iterator.head();
+    private String str(Sequence seq) throws XPathException {
+        if (seq == null) {
+            return null;
+        }
+        Item item = seq.head();
         return item == null ? "" : item.getStringValue();
     }
+
 
 }
 
