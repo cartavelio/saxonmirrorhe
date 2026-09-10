@@ -97,6 +97,7 @@ EndGlobal
         <PackageSummary>An XSLT 3.0 processor for .NET</PackageSummary>
         <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <DefineConstants>{upper-case($edition)}</DefineConstants>
       </PropertyGroup>    
       
       <ItemGroup>
