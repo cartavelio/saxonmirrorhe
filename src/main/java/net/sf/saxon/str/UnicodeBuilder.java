@@ -375,7 +375,29 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      */
     @Override
     public void writeAscii(byte[] content) throws IOException {
-        accept(new Twine8(content));
+        append(new Twine8(content));
+    }
+
+    /**
+     * Process a single character.
+     *
+     * @param codepoint the Unicode character to be processed. Must not be a surrogate
+     * @throws IOException if processing fails for any reason
+     */
+    @Override
+    public void writeCodePoint(int codepoint) throws IOException {
+        append(codepoint);
+    }
+
+    /**
+     * Process a single ASCII character.
+     *
+     * @param codepoint the Unicode character to be processed. Must be in the range 0-127; this is not necessarily checked
+     * @throws IOException if processing fails for any reason
+     */
+    @Override
+    public void writeAscii(int codepoint) {
+        append(codepoint);
     }
 
     /**

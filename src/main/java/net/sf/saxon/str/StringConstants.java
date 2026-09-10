@@ -22,17 +22,17 @@ public class StringConstants {
         return s.getBytes(StandardCharsets.US_ASCII);
     }
 
-    public static final UnicodeString SINGLE_SPACE = new Twine8(bytes(" "));
-    public static final UnicodeString NEWLINE = new Twine8(bytes("\n"));
+    public static final UnicodeString SINGLE_SPACE = new UnicodeChar(' ');
+    public static final UnicodeString NEWLINE = new UnicodeChar('\n');
     public static final UnicodeString TRUE = new Twine8(bytes("true"));
     public static final UnicodeString FALSE = new Twine8(bytes("false"));
-    public static final UnicodeString ONE = new Twine8(bytes("1"));
-    public static final UnicodeString ZERO = new Twine8(bytes("0"));
+    public static final UnicodeString ONE = new UnicodeChar('1');
+    public static final UnicodeString ZERO = new UnicodeChar('0');
     public static final UnicodeString ZERO_TO_NINE = new Twine8(bytes("0123456789"));
 
     public static final UnicodeString MIN_LONG = new Twine8(bytes("-9223372036854775808"));
     public static final UnicodeString POINT_ZERO = new Twine8(bytes(".0"));
-    public static final UnicodeString ASTERISK = new Twine8(bytes("*"));
+    public static final UnicodeString ASTERISK = new UnicodeChar('*');
 
     public static final byte[] COMMENT_START = bytes("<!--");
     public static final byte[] COMMENT_END = bytes("-->");

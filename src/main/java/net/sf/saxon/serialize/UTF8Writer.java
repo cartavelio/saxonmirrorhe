@@ -287,6 +287,17 @@ public final class UTF8Writer extends Writer implements UnicodeWriter {
     }
 
     /**
+     * Write a single ASCII character.
+     *
+     * @param codepoint the Unicode character to be processed. Must be in the range 0-127; this is not necessarily checked
+     * @throws IOException if processing fails for any reason
+     */
+    @Override
+    public void writeAscii(int codepoint) throws IOException {
+        write(codepoint);
+    }
+
+    /**
      * Write a sequence of ASCII characters. The caller is responsible for ensuring
      * that each byte represents a character in the range 1-127
      * @param chars the characters to be written
@@ -368,7 +379,7 @@ public final class UTF8Writer extends Writer implements UnicodeWriter {
     @Override
     public void write(int c)
             throws IOException {
-        // First; do we have a left over surrogate?
+        // First; do we have a leftover surrogate?
         if (_surrogate > 0) {
             c = _convertSurrogate(c);
             // If not, do we start with a surrogate?

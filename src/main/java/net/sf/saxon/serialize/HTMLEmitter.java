@@ -182,7 +182,7 @@ public abstract class HTMLEmitter extends XMLEmitter {
      */
 
     @Override
-    public void setEscapeNonAscii(Boolean escape) {
+    public void setEscapeNonAscii(boolean escape) {
         escapeNonAscii = escape;
     }
 
@@ -354,7 +354,7 @@ public abstract class HTMLEmitter extends XMLEmitter {
                 // used to switch escaping on and off
                 disabled = !disabled;
             } else if (disabled) {
-                writeCodePoint(ch);
+                writer.writeCodePoint(ch);
             } else if (ch <= 127) {
                 // handle a special ASCII character
                 if (inAttribute) {
