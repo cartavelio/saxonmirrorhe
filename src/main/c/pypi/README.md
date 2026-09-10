@@ -1,17 +1,26 @@
-# Welcome to SaxonC @@EDITION@@!
+# Welcome to SaxonC-@@EDITION@@
 
-This is the official Saxonica Python wheel package for
-[Saxon](https://www.saxonica.com/saxon-c/documentation/index.html), an
-XML document processor. SaxonC includes a range of tools for XML
-transformations, XML queries, and schema validations.
+This is the official [Saxonica](https://www.saxonica.com/) Python wheel package for
+Saxon, an XML document processor. [SaxonC](https://www.saxonica.com/saxon-c/index.xml) 
+provides APIs to run XSLT 3.0 transformations, XQuery 3.1 queries, XPath 3.1, and 
+XML Schema validation.
 
-The SaxonC release comes in separate wheels for the three product
-editions, namely: saxonche (HE: open-source), saxoncpe (PE:
-professional edition) and saxoncee (EE: enterprise edition). SaxonC-PE
-and SaxonC-EE are commercial products that require an activation
-license.
+The SaxonC release comes in separate wheels for the three product editions:
+* **saxonche** (SaxonC-HE: open-source Home Edition)
+* **saxoncpe** (SaxonC-PE: Professional Edition) 
+* **saxoncee** (SaxonC-EE: Enterprise Edition)
 
-## When to choose SaxonC
+SaxonC-PE and SaxonC-EE are commercial products that require a valid
+license key. Licenses can be purchased from the 
+[Saxonica online store](https://www.saxonica.com/shop/shop.xml). 
+Alternatively a 30-day [evaluation license](https://www.saxonica.com/download/download.xml) 
+is available free of charge. By downloading the software, you are agreeing to our 
+[terms and conditions](https://www.saxonica.com/license/terms.xml).
+
+For full documentation for the latest SaxonC release, see the
+[SaxonC 12 documentation](https://www.saxonica.com/saxon-c/documentation12/index.html).
+
+## Why choose SaxonC?
 
 The main reason for using SaxonC in preference to other XML
 tools available for Python is that it supports all the latest W3C
@@ -19,175 +28,101 @@ standards: XSLT 3.0, XPath 3.1, XQuery 3.1, and XSD 1.1. It even
 includes experimental support for the draft 4.0 specifications
 currently under development.
 
+## About SaxonC
+
+SaxonC is a version of Saxon developed by compiling the Java source code to native 
+executables that run on the C/C++ platform, with extensions for PHP and Python. All 
+features of Saxon have been ported, other than those (such as collations) that are 
+necessarily platform dependent. In particular, SaxonC provides processing in XSLT, 
+XQuery and XPath, and Schema validation. It therefore makes these processing capabilities 
+available to a plethora of other languages that are strongly coupled to C/C++ such as PHP, 
+Perl, Python, and Ruby.
+
+
+## About Saxonica
+
+Saxon is developed by Saxonica, a company created in 2004 by Michael Kay, who was 
+the editor of the XSLT 2.0 and 3.0 specifications in W3C. The original Saxon product 
+on the Java platform has been continually developed for over 20 years, and has 
+acquired a reputation for standards conformance, performance, and reliability.
+
+
 ## Installation
 
 ```bash
 pip install saxonc@@edition@@
 ```
 
-## Usage
+## Getting started
+
+Either import the whole API:
 
 ```python 
 from saxonc@@edition@@ import *
 ```
 
-Import specific modules
+Or specific modules:
+
 ```python 
 from saxonc@@edition@@ import PySaxonProcessor
 ```
 
-Now, let's check what processors are available see our docuemntation: [Saxonica's site](https://www.saxonica.com/saxon-c/documentation/index.html#!api/saxon_c_python_api). In the API section, you will find more information about what each processor does.
+The SaxonC API includes classes for constructing XDM data models
+and for a variety of processors. For full details see the [SaxonC Python API 
+documentation](https://www.saxonica.com/saxon-c/documentation/index.html#!api/saxon_c_python_api).
 
-Next, we will use `PySaxonProcessor` to check the Saxon version.
+The following short example shows how to get the Saxon version from
+the `PySaxonProcessor`:
+
 ```python
 from saxonc@@edition@@ import PySaxonProcessor
 
 with PySaxonProcessor(license=False) as proc:
 	print(proc.version)
 ```
-It will print the version like below if your installation is successful.
+
+It will print something like this:
 
 ```bash
 SaxonC-@@edition@@ @@VERSION@@ from Saxonica
 ```
-Please **note** that `license=False` requests the open-source version of Saxon, whereas  `license=True` requests the commercial product. A license file is required for this to work. You can use the SAXONC_HOME environment variable to locate the license file or install the file next to the SaxonC library. 
 
-### Example #1
-Let's parse a toy XML.
-```python
-from saxonc@@edition@@ import PySaxonProcessor
+**Note**: `license=False` requests the open-source version of Saxon, whereas 
+`license=True` requests the commercial product - which requires a license file.
+SaxonC looks for the license key in the directory where the main SaxonC library has been 
+installed, and the directory identified by the environment variable `SAXONC_HOME`.
 
-with PySaxonProcessor(license=False) as proc:
-	xml = """\
-		<out>
-			<person att1='value1' att2='value2'>text1</person>
-			<person>text2</person>
-			<person>text3</person>
-		</out>
-		"""
-	node = proc.parse_xml(xml_text=xml)
-	print("node.node_kind="+ node.node_kind_str)
-	print("node.size="+ str(node.size))
-	outNode = node.children
-	print("len of children="+str(len(node.children)))
-	print('element name='+outNode[0].name)
-	children = outNode[0].children
-	print(*children, sep= ', ')
-	attrs = children[1].attributes
-	if  len(attrs) == 2:
-		print(attrs[1].string_value)
-```
-In the output, we will get this.
-```bash
-node.node_kind=document
-node.size=1
-len of children=1
-element name=out
-        , <person att1="value1" att2="value2">text1</person>, 
-        , <person>text2</person>, 
-        , <person>text3</person>, 
-value2
-```
-As we can see, we can explore the XML node structure, attributes, and many other things if you check more on the [APIs](https://www.saxonica.com/saxon-c/documentation/index.html#!api/saxon_c_python_api).
-It is also to parse an XML source document using the [PyDocumentBuilder](https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyDocumentBuilder) which provides properties controlling how the document is built.  
+### Example: Running a transformation
 
-### Example #2
-Let's use the XML path processor. 
-```python
-from saxonc@@edition@@ import PySaxonProcessor
-from saxonc@@edition@@ import PyXdmNode
+The following basic example shows how an XSLT stylesheet can be run against a source 
+XML document in Python using SaxonC:
+
+```python 
+from saxonc@@edition@@ import *
 
 with PySaxonProcessor(license=False) as proc:
-	xml = """\
-		<out>
-			<person>text1</person>
-			<person>text2</person>
-			<person>text3</person>
-		</out>"""
-
-	xp = proc.new_xpath_processor()
-	node = proc.parse_xml(xml_text=xml)
-	xp.set_context(xdm_item=node)
-	
-	item = xp.evaluate_single('//person[1]')
-	if  isinstance(item,PyXdmNode):
-		print(item.string_value)
-	# pay attention, Saxon's xdm data type
-	value = proc.make_double_value(3.5)
-	print(value.primitive_type_name)
+ 
+xsltproc = proc.new_xslt30_processor()
+document = proc.parse_xml(xml_text="<doc><item>text1</item><item>text2</item><item>text3</item></doc>")
+executable = xsltproc.compile_stylesheet(stylesheet_file="test.xsl")
+output = executable.transform_to_string(xdm_node=document)
+print(output)
 ```
-The output shows here.
-```bash
-text1
-Q{http://www.w3.org/2001/XMLSchema}double
-```
-Saxon shows the result given the path. 
 
-### Example #3
-The XSLT processor, #1
-```python
-from saxonc@@edition@@ import PySaxonProcessor
+For more Python examples, and further details about installing and configuring the product, 
+see the [SaxonC 12 documentation](https://www.saxonica.com/saxon-c/documentation12/index.html).
 
-with PySaxonProcessor(license=False) as proc:
-	xsltproc = proc.new_xslt30_processor()
-	
-	document = proc.parse_xml(xml_text="<out><person>text1</person><person>text2</person><person>text3</person></out>")
-    
-	executable = xsltproc.compile_stylesheet(stylesheet_text="<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'> <xsl:param name='values' select='(2,3,4)' /><xsl:output method='xml' indent='yes' /><xsl:template match='*'><output><xsl:value-of select='//person[1]'/><xsl:for-each select='$values' ><out><xsl:value-of select='. * 3'/></out></xsl:for-each></output></xsl:template></xsl:stylesheet>")
 
-	output2 = executable.apply_templates_returning_string(xdm_value=document)
-	print(output2)
-```
-Here is the output that shows the result of transformation.
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<output>text1<out>6</out>
-   <out>9</out>
-   <out>12</out>
-</output>
-```
-### Example #4
-Watch out for the not-pythonic way!
-```python
-from saxonc@@edition@@ import PySaxonProcessor
 
-with PySaxonProcessor(license=False) as proc:
-        xsltproc = proc.new_xslt30_processor()
+## Support
 
-        xml = '<a><b>Text</b></a>'
-        xslt = '''\
-                <xsl:stylesheet version="1.0"
-                xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-                <xsl:param name="a" />
-                <xsl:output method='xml' indent='yes' />
-                <xsl:template name="main">
-                <foo><xsl:copy-of select="/" /><xsl:value-of select="$a" /></foo>
-                </xsl:template>
-                </xsl:stylesheet>'''
-
-        document = proc.parse_xml(xml_text=xml)
-
-        #please note the not Python way in the next two lines.
-        xdm_a = proc.make_string_value('a was given in the parameter')
-        xsltproc.set_parameter('a', xdm_a)
-
-        executable = xsltproc.compile_stylesheet(stylesheet_text=xslt)
-        executable.set_global_context_item(xdm_item=document)
-        output2 = executable.call_template_returning_value(template_name="main")
-        print(output2)
-```
-Here we use an XSLT/stylesheet parameter. Note that the Python string is not the same string that Saxon uses, and the same goes for other types. We need to convert it by calling `make_string_value`. This is because there isn't an exact match between the type system used by XSLT (called XDM) and Python's data types: for some types like strings and booleans there is a very close correspondence, but for numbers, dates, URIs etc it's less exact.
-                         
-Please check out [Saxonica's documentation](https://www.saxonica.com/saxon-c/documentation/index.html) for `xquery`, schema validation, and others.
-
-## Why the `with` keyword?
-Using `with` assures that the underlying processes are cleared out when
-the block finishes.
-
-## Source code & Development
-- Source code is available here: [Saxonica's site](https://www.saxonica.com/download/c.xml) 
+All users are welcome to use the public [support site](http://saxonica.plan.io) for 
+reporting issues and seeking help (registration required). In addition, many 
+questions are asked and answered on [StackOverflow](https://stackoverflow.com): 
+please use the **saxon** tag.
 
 ## Acknowledgement
-To create this wheel project we had help from the Saxonpy wheel
-package, which is a third-party project created by [github
-repo](https://github.com/tennom/saxonpy).
+
+We learned a lot about how to create Python wheels for Saxon from the
+Saxonpy wheel package, which is a third-party project
+[on github](https://github.com/tennom/saxonpy).
