@@ -94,7 +94,7 @@ PHP_METHOD(XQueryProcessor, runQueryToString) {
     } catch (SaxonApiException &e) {
       zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
     }
-   }
+  }
   RETURN_NULL();
 }
 
@@ -200,10 +200,10 @@ PHP_METHOD(XQueryProcessor, declareNamespace) {
                                    XtOffsetOf(xqueryProcessor_object, std));
     xqueryProcessor = obj->xqueryProcessor;
     try {
-        xqueryProcessor->declareNamespace(prefix, ns);
+      xqueryProcessor->declareNamespace(prefix, ns);
     } catch (SaxonApiException &e) {
-          zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
-        }
+      zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+    }
   }
 }
 

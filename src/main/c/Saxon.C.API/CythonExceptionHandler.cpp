@@ -13,7 +13,7 @@ void raise_py_error() {
     const char *errorMessage = e.getMessageWithErrorCode();
     if (errorMessage == nullptr) {
       errorMessage = e.getMessage();
-      if(errorMessage == nullptr) {
+      if (errorMessage == nullptr) {
         PyErr_SetString(pysaxonapierror, "Unknown exception found");
       } else {
         PyErr_SetString(pysaxonapierror, errorMessage);

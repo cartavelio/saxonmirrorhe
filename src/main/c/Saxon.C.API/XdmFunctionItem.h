@@ -77,13 +77,13 @@ public:
    */
   virtual int getArity();
 
-    //! Get the string value of the XdmArray item.
-    /**
-     * Get the string value of the function
-     *
-     * @return nothing; this method always throws an exception
-     */
-    const char *getStringValue();
+  //! Get the string value of the XdmArray item.
+  /**
+   * Get the string value of the function
+   *
+   * @return nothing; this method always throws an exception
+   */
+  const char *getStringValue();
 
   //! Get a system function
   /**

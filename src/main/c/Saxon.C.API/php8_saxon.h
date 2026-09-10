@@ -6,7 +6,7 @@
 // "Incompatible With Secondary Licenses", as defined by the Mozilla Public
 // License, v. 2.0.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////#ifndef
-///PHP_SAXON_H
+/// PHP_SAXON_H
 
 #ifndef PHP_SAXON_H
 #define PHP_SAXON_H
@@ -15,10 +15,10 @@
 extern "C" { // remove comment
 #endif
 
+#include "Zend/zend_exceptions.h"
+#include "ext/standard/info.h"
 #include "php.h"
 #include "php_ini.h"
-#include "ext/standard/info.h"
-#include "Zend/zend_exceptions.h"
 
 #include "SAPI.h"
 #include "zend_closures.h"

@@ -101,8 +101,9 @@ XdmFunctionItem *XdmFunctionItem::getSystemFunction(SaxonProcessor *processor,
                                                     const char *name,
                                                     int arity) {
   if (processor == nullptr || name == nullptr) {
-    throw SaxonApiException("Error in getSystemFunction. Please make sure processor and "
-                 "name are not nullptr.");
+    throw SaxonApiException(
+        "Error in getSystemFunction. Please make sure processor and "
+        "name are not nullptr.");
   }
 
   int64_t result =
@@ -116,8 +117,9 @@ XdmFunctionItem *XdmFunctionItem::getSystemFunction(SaxonProcessor *processor,
   return nullptr;
 }
 
-const char * XdmFunctionItem::getStringValue(){
-    throw SaxonApiException("The string value of a function is not defined", "FOTY0014", nullptr, -1);
+const char *XdmFunctionItem::getStringValue() {
+  throw SaxonApiException("The string value of a function is not defined",
+                          "FOTY0014", nullptr, -1);
 }
 
 XdmValue *XdmFunctionItem::call(SaxonProcessor *processor, XdmValue **arguments,
@@ -136,13 +138,14 @@ XdmValue *XdmFunctionItem::call(SaxonProcessor *processor, XdmValue **arguments,
   int64_t results = j_xdmFunctionItem_call(
       SaxonProcessor::sxn_environ->thread, (void *)processor->procRef,
       (void *)value,
-      (argumentJArrayRef == SXN_UNSET ? (void *)nullptr : (void *)argumentJArrayRef));
+      (argumentJArrayRef == SXN_UNSET ? (void *)nullptr
+                                      : (void *)argumentJArrayRef));
   if (argumentJArrayRef != SXN_UNSET) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)argumentJArrayRef);
     argumentJArrayRef = -1;
   }
-  if (results ==SXN_EXCEPTION) {
+  if (results == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
   return getXdmValueSubClass(results);

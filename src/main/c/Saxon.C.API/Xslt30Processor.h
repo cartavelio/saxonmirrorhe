@@ -129,8 +129,8 @@ public:
    * other than just-in-time compilation of template rules. Setting this option,
    * however, indicates an intent rather than a mechanism, and the
    * implementation details may change in future to reflect the intent.</i></p>
-   * @param fast - set to true to request fast compilation; set to false to revert
-   * to the optimization options defined in the Configuration.
+   * @param fast - set to true to request fast compilation; set to false to
+   * revert to the optimization options defined in the Configuration.
    */
   void setFastCompilation(bool fast);
 
@@ -249,16 +249,15 @@ public:
   XdmValue *transformFileToValue(const char *sourcefile,
                                  const char *stylesheetfile);
 
-
   //! Import a library package.
   /**
-  * Calling this method makes the supplied package available for reference
-  * in the <code>xsl:use-package</code> declarations of subsequent compilations
-  * performed using this <code>Xslt30Processor</code>.
-  * @param packageFile - the file name of the package to be imported, which should
-  * be supplied as an SEF. If relative, the file name of the SEF is resolved
-  * against the cwd, which is set using <code>setcwd()</code>.
-  */
+   * Calling this method makes the supplied package available for reference
+   * in the <code>xsl:use-package</code> declarations of subsequent compilations
+   * performed using this <code>Xslt30Processor</code>.
+   * @param packageFile - the file name of the package to be imported, which
+   * should be supplied as an SEF. If relative, the file name of the SEF is
+   * resolved against the cwd, which is set using <code>setcwd()</code>.
+   */
   void importPackage(const char *packageFile);
 
   //! compile a stylesheet file.
@@ -288,7 +287,8 @@ public:
    * transformations, in series or concurrently.
    * @throws SaxonApiException if the compilation of the stylesheet fails
    */
-  XsltExecutable *compileFromString(const char *stylesheet, const char * encoding = nullptr);
+  XsltExecutable *compileFromString(const char *stylesheet,
+                                    const char *encoding = nullptr);
 
   //! Get the stylesheet associated
   /* via the xml-stylesheet processing instruction (see
@@ -319,7 +319,8 @@ public:
    * @param filename - the file to which the compiled package should be saved
    * @throws SaxonApiException if the compilation of the stylesheet fails
    */
-  void compileFromStringAndSave(const char *stylesheet, const char *filename, const char * encoding = nullptr);
+  void compileFromStringAndSave(const char *stylesheet, const char *filename,
+                                const char *encoding = nullptr);
 
   //! compile a stylesheet received as a file and save to an exported file
   //! (SEF).

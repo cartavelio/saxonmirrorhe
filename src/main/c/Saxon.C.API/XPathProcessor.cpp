@@ -39,9 +39,10 @@ cppClass,
                                             (void *)p->procRef);
 
   if (cppXP == SXN_UNSET) {
-    throw SaxonApiException("Error: Failed to create the XPathProcessor internal object");
+    throw SaxonApiException(
+        "Error: Failed to create the XPathProcessor internal object");
 
-  } else if(cppXP == SXN_EXCEPTION) {
+  } else if (cppXP == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
 
@@ -91,8 +92,8 @@ XPathProcessor::XPathProcessor(const XPathProcessor &other) {
 XPathProcessor::~XPathProcessor() {
   clearProperties();
   clearParameters();
-  if(xp_baseURI != nullptr) {
-    delete [] xp_baseURI;
+  if (xp_baseURI != nullptr) {
+    delete[] xp_baseURI;
   }
   if (cppXP != SXN_UNSET) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)cppXP);
@@ -102,7 +103,7 @@ XPathProcessor::~XPathProcessor() {
   // exceptionClear();
 }
 
-XdmValue *XPathProcessor::evaluate(const char *xpathStr, const char* encoding) {
+XdmValue *XPathProcessor::evaluate(const char *xpathStr, const char *encoding) {
   if (xpathStr == nullptr) {
     throw SaxonApiException("Error:: XPath string cannot be empty or nullptr");
   }
@@ -111,11 +112,11 @@ XdmValue *XPathProcessor::evaluate(const char *xpathStr, const char* encoding) {
   setProperty("resources", proc->getResourcesDirectory());
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties, 0);
-  int64_t results =
-      j_evaluate(SaxonProcessor::sxn_environ->thread, (void *)cppXP,
-                 (char *)cwdXP.c_str(), (char *)xpathStr, (char *)encoding,
-                 (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                                 : (void *)processorDataRef));
+  int64_t results = j_evaluate(
+      SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)cwdXP.c_str(),
+      (char *)xpathStr, (char *)encoding,
+      (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
+                                             : (void *)processorDataRef));
   if (processorDataRef > 0) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)processorDataRef);
@@ -130,7 +131,8 @@ XdmValue *XPathProcessor::evaluate(const char *xpathStr, const char* encoding) {
   return nullptr;
 }
 
-XdmItem *XPathProcessor::evaluateSingle(const char *xpathStr, const char* encoding) {
+XdmItem *XPathProcessor::evaluateSingle(const char *xpathStr,
+                                        const char *encoding) {
 
   if (xpathStr == nullptr) {
     throw SaxonApiException("Error:: XPath string cannot be empty or nullptr");
@@ -144,7 +146,7 @@ XdmItem *XPathProcessor::evaluateSingle(const char *xpathStr, const char* encodi
       SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)cwdXP.c_str(),
       (char *)xpathStr, (char *)encoding,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                      : (void *)processorDataRef));
+                                             : (void *)processorDataRef));
   if (processorDataRef > 0) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)processorDataRef);
@@ -209,24 +211,26 @@ void XPathProcessor::setContextFile(const char *filename) {
   }
 }
 
-void XPathProcessor::setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy policy){
-    std::map<std::string, std::string>::iterator it;
-    it = properties.find("uemp:");
-    if (it != properties.end()) {
-        std::string valuei = it->second;
-        parameters.erase("uemp:");
-    }
-    setProperty("uemp:", std::to_string(int(policy)).c_str());
+void XPathProcessor::setUnprefixedElementMatchingPolicy(
+    UnprefixedElementMatchingPolicy policy) {
+  std::map<std::string, std::string>::iterator it;
+  it = properties.find("uemp:");
+  if (it != properties.end()) {
+    std::string valuei = it->second;
+    parameters.erase("uemp:");
+  }
+  setProperty("uemp:", std::to_string(int(policy)).c_str());
 }
 
-UnprefixedElementMatchingPolicy XPathProcessor::getUnprefixedElementMatchingPolicy()  {
-    std::map<std::string,std::string>::iterator it;
-    it = properties.find("uemp:");
-    if (it != properties.end()) {
-        int valuei = stoi(it->second);
-        return UnprefixedElementMatchingPolicy(valuei);
-    }
-    return UnprefixedElementMatchingPolicy::DEFAULT_NAMESPACE;
+UnprefixedElementMatchingPolicy
+XPathProcessor::getUnprefixedElementMatchingPolicy() {
+  std::map<std::string, std::string>::iterator it;
+  it = properties.find("uemp:");
+  if (it != properties.end()) {
+    int valuei = stoi(it->second);
+    return UnprefixedElementMatchingPolicy(valuei);
+  }
+  return UnprefixedElementMatchingPolicy::DEFAULT_NAMESPACE;
 }
 
 void XPathProcessor::declareNamespace(const char *prefix, const char *uri) {
@@ -288,22 +292,23 @@ void XPathProcessor::setBaseURI(const char *uriStr) {
 
   if (uriStr != nullptr) {
     j_xp_setBaseURI(SaxonProcessor::sxn_environ->thread, (void *)cppXP,
-                  (char *)uriStr);
-    operator delete (xp_baseURI);
+                    (char *)uriStr);
+    operator delete(xp_baseURI);
     xp_baseURI = nullptr;
   }
 }
 
-
-const char * XPathProcessor::getBaseURI() {
-    if (xp_baseURI == nullptr) {
-        allocFn fn = operator new;
-        xp_baseURI = j_xp_getBaseURI(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (void *)fn);
-    }
-    return (const char *)xp_baseURI;
+const char *XPathProcessor::getBaseURI() {
+  if (xp_baseURI == nullptr) {
+    allocFn fn = operator new;
+    xp_baseURI = j_xp_getBaseURI(SaxonProcessor::sxn_environ->thread,
+                                 (void *)cppXP, (void *)fn);
+  }
+  return (const char *)xp_baseURI;
 }
 
-bool XPathProcessor::effectiveBooleanValue(const char *xpathStr, const char* encoding) {
+bool XPathProcessor::effectiveBooleanValue(const char *xpathStr,
+                                           const char *encoding) {
   SaxonProcessor::attachCurrentThread();
   setProperty("resources", proc->getResourcesDirectory());
   int64_t processorDataRef =
@@ -312,7 +317,7 @@ bool XPathProcessor::effectiveBooleanValue(const char *xpathStr, const char* enc
       SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)cwdXP.c_str(),
       (char *)xpathStr, (char *)encoding,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                      : (void *)processorDataRef));
+                                             : (void *)processorDataRef));
   if (processorDataRef > 0) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)processorDataRef);

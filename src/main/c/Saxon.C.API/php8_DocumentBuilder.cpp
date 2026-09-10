@@ -234,10 +234,11 @@ PHP_METHOD(DocumentBuilder, parseXmlFromString) {
   if (ZEND_NUM_ARGS() == 1 &&
       zend_parse_parameters(ZEND_NUM_ARGS(), "s", &source, &len1) == FAILURE) {
     RETURN_NULL();
-  } else   if (ZEND_NUM_ARGS() == 2 &&
-     zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &source, &len1, &encoding, &len2) == FAILURE) {
-     RETURN_NULL();
-   }
+  } else if (ZEND_NUM_ARGS() == 2 &&
+             zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &source, &len1,
+                                   &encoding, &len2) == FAILURE) {
+    RETURN_NULL();
+  }
   zend_object *pobj = Z_OBJ_P(getThis());
   documentBuilder_object *obj =
       (documentBuilder_object *)((char *)pobj -

@@ -44,7 +44,6 @@ void testValidator1(SaxonProcessor *processor, SchemaValidator *val,
   }
   val->clearParameters();
   val->clearProperties();
-
 }
 
 void testValidatorInParseXml(SaxonProcessor *processor, SchemaValidator *val,
@@ -83,7 +82,6 @@ void testValidatorInParseXml(SaxonProcessor *processor, SchemaValidator *val,
     delete input;
     input = nullptr;
   }
-
 }
 
 void testValidator2(sResultCount *sresult) {
@@ -178,7 +176,7 @@ void testValidator3(SaxonProcessor *processor, SchemaValidator *val,
   }
 }
 
-void testValidator4(const char* cwd, sResultCount *sresult) {
+void testValidator4(const char *cwd, sResultCount *sresult) {
 
   SaxonProcessor *processor = new SaxonProcessor(true);
   processor->setConfigurationProperty("xsdversion", "1.1");
@@ -235,7 +233,7 @@ void testValidator4a(sResultCount *sresult) {
     const char *valueStr = node->toString();
     if (valueStr != nullptr) {
       cout << endl << "Doc1 is OK:" << valueStr << endl;
-      operator delete ((char *)valueStr);
+      operator delete((char *)valueStr);
     } else {
       cout << endl << "Error: Doc reported as valid!" << endl;
     }
@@ -316,7 +314,7 @@ void testValidator5(SaxonProcessor *processor, SchemaValidator *val,
     if (value != nullptr) {
       cout << endl << "Validation Report: " << value << endl;
       sresult->success++;
-      operator delete ((char *)value);
+      operator delete((char *)value);
     } else {
       cout << endl << "Validation Report value is NULL" << endl;
       sresult->failure++;

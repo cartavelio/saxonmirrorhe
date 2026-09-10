@@ -248,7 +248,8 @@ PHP_METHOD(XPathProcessor, setUnprefixedElementMatchingPolicy) {
                                 XtOffsetOf(xpathProcessor_object, std));
   xpathProcessor = obj->xpathProcessor;
   if (xpathProcessor != nullptr) {
-    xpathProcessor->setUnprefixedElementMatchingPolicy(xpathProcessor->convertEnumPolicy((int)policy));
+    xpathProcessor->setUnprefixedElementMatchingPolicy(
+        xpathProcessor->convertEnumPolicy((int)policy));
   }
 }
 
@@ -262,10 +263,11 @@ PHP_METHOD(XPathProcessor, effectiveBooleanValue) {
   if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &xpathStr, &len1) ==
       FAILURE) {
     RETURN_BOOL(false);
-  }  else   if (ZEND_NUM_ARGS() == 2 &&
-             zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &xpathStr, &len1, &encoding, &len2) == FAILURE) {
-             RETURN_NULL();
-           }
+  } else if (ZEND_NUM_ARGS() == 2 &&
+             zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &xpathStr, &len1,
+                                   &encoding, &len2) == FAILURE) {
+    RETURN_NULL();
+  }
 
   zend_object *pobj = Z_OBJ_P(getThis());
   xpathProcessor_object *obj =
@@ -292,10 +294,11 @@ PHP_METHOD(XPathProcessor, evaluate) {
   if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &xpathStr, &len1) ==
       FAILURE) {
     RETURN_NULL();
-  } else   if (ZEND_NUM_ARGS() == 2 &&
-         zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &xpathStr, &len1, &encoding, &len2) == FAILURE) {
-         RETURN_NULL();
-       }
+  } else if (ZEND_NUM_ARGS() == 2 &&
+             zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &xpathStr, &len1,
+                                   &encoding, &len2) == FAILURE) {
+    RETURN_NULL();
+  }
   zend_object *pobj = Z_OBJ_P(getThis());
   xpathProcessor_object *obj =
       (xpathProcessor_object *)((char *)pobj -
@@ -353,10 +356,11 @@ PHP_METHOD(XPathProcessor, evaluateSingle) {
   if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &xpathStr, &len1) ==
       FAILURE) {
     RETURN_NULL();
-  }  else   if (ZEND_NUM_ARGS() == 2 &&
-             zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &xpathStr, &len1, &encoding, &len2) == FAILURE) {
-             RETURN_NULL();
-           }
+  } else if (ZEND_NUM_ARGS() == 2 &&
+             zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &xpathStr, &len1,
+                                   &encoding, &len2) == FAILURE) {
+    RETURN_NULL();
+  }
 
   zend_object *pobj = Z_OBJ_P(getThis());
   xpathProcessor_object *obj =
@@ -426,35 +430,35 @@ PHP_METHOD(XPathProcessor, setContextItem) {
         if (value != nullptr) {
           xpathProcessor->setContextItem((XdmItem *)value);
           value->incrementRefCount();
-      }
-    } else if (strcmp(objName, "Saxon\\XdmAtomicValue") == 0) {
-      zend_object *vvobj = Z_OBJ_P(oth);
-      xdmAtomicValue_object *ooth =
-          (xdmAtomicValue_object *)((char *)vvobj -
-                                    XtOffsetOf(xdmAtomicValue_object, std));
-      if (ooth != nullptr) {
-        XdmAtomicValue *value = ooth->xdmAtomicValue;
-        if (value != nullptr) {
-
-          xpathProcessor->setContextItem((XdmItem *)value);
-          value->incrementRefCount();
         }
-      }
-    } else if (strcmp(objName, "Saxon\\XdmItem") == 0) {
-      zend_object *vvobj = Z_OBJ_P(oth);
-      xdmItem_object *ooth =
-          (xdmItem_object *)((char *)vvobj - XtOffsetOf(xdmItem_object, std));
-      if (ooth != nullptr) {
-        XdmItem *value = ooth->xdmItem;
-        if (value != nullptr) {
+      } else if (strcmp(objName, "Saxon\\XdmAtomicValue") == 0) {
+        zend_object *vvobj = Z_OBJ_P(oth);
+        xdmAtomicValue_object *ooth =
+            (xdmAtomicValue_object *)((char *)vvobj -
+                                      XtOffsetOf(xdmAtomicValue_object, std));
+        if (ooth != nullptr) {
+          XdmAtomicValue *value = ooth->xdmAtomicValue;
+          if (value != nullptr) {
 
-          xpathProcessor->setContextItem(value);
-          value->incrementRefCount();
+            xpathProcessor->setContextItem((XdmItem *)value);
+            value->incrementRefCount();
+          }
+        }
+      } else if (strcmp(objName, "Saxon\\XdmItem") == 0) {
+        zend_object *vvobj = Z_OBJ_P(oth);
+        xdmItem_object *ooth =
+            (xdmItem_object *)((char *)vvobj - XtOffsetOf(xdmItem_object, std));
+        if (ooth != nullptr) {
+          XdmItem *value = ooth->xdmItem;
+          if (value != nullptr) {
+
+            xpathProcessor->setContextItem(value);
+            value->incrementRefCount();
+          }
         }
       }
     }
   }
-}
 }
 
 PHP_METHOD(XPathProcessor, setBaseURI) {
@@ -612,62 +616,71 @@ zend_function_entry XPathProcessor_methods[] = {
            ZEND_ACC_PUBLIC) PHP_ME(XPathProcessor, setContextItem,
                                    arginfo_saxonc_xpath_setContextItem,
                                    ZEND_ACC_PUBLIC)
-        PHP_ME(XPathProcessor, setContextFile, arginfo_saxonc_xpath_setContextFile,ZEND_ACC_PUBLIC)
-        PHP_ME(XPathProcessor, effectiveBooleanValue,arginfo_saxonc_xpath_effectiveBooleanValue,ZEND_ACC_PUBLIC)
-        PHP_ME(XPathProcessor, setUnprefixedElementMatchingPolicy,
-        arginfo_saxonc_xpath_setUnprefixedElementMatchingPolicy,ZEND_ACC_PUBLIC)
-        PHP_ME(XPathProcessor, evaluate, arginfo_saxonc_xpath_evaluate, ZEND_ACC_PUBLIC)
-        PHP_ME(XPathProcessor, evaluateSingle, arginfo_saxonc_xpath_evaluateSingle, ZEND_ACC_PUBLIC)
-                PHP_ME(XPathProcessor, setParameter,
-                       arginfo_saxonc_xpath_setParameter,
-                       ZEND_ACC_PUBLIC) PHP_ME(XPathProcessor, setProperty,
-                                               arginfo_saxonc_xpath_setProperty,
-                                               ZEND_ACC_PUBLIC)
+        PHP_ME(
+            XPathProcessor, setContextFile, arginfo_saxonc_xpath_setContextFile,
+            ZEND_ACC_PUBLIC) PHP_ME(XPathProcessor, effectiveBooleanValue,
+                                    arginfo_saxonc_xpath_effectiveBooleanValue,
+                                    ZEND_ACC_PUBLIC)
+            PHP_ME(XPathProcessor, setUnprefixedElementMatchingPolicy,
+                   arginfo_saxonc_xpath_setUnprefixedElementMatchingPolicy,
+                   ZEND_ACC_PUBLIC) PHP_ME(XPathProcessor, evaluate,
+                                           arginfo_saxonc_xpath_evaluate,
+                                           ZEND_ACC_PUBLIC)
+                PHP_ME(
+                    XPathProcessor, evaluateSingle,
+                    arginfo_saxonc_xpath_evaluateSingle,
+                    ZEND_ACC_PUBLIC) PHP_ME(XPathProcessor, setParameter,
+                                            arginfo_saxonc_xpath_setParameter,
+                                            ZEND_ACC_PUBLIC)
                     PHP_ME(
-                        XPathProcessor, setLanguageVersion,
-                        arginfo_saxonc_xpath_setLanguageVersion,
-                        ZEND_ACC_PUBLIC) PHP_ME(XPathProcessor, clearParameters,
-                                                arginfo_saxonc_xpath_clearParameters,
+                        XPathProcessor, setProperty,
+                        arginfo_saxonc_xpath_setProperty,
+                        ZEND_ACC_PUBLIC) PHP_ME(XPathProcessor,
+                                                setLanguageVersion,
+                                                arginfo_saxonc_xpath_setLanguageVersion,
                                                 ZEND_ACC_PUBLIC)
                         PHP_ME(
-                            XPathProcessor, clearProperties,
-                            arginfo_saxonc_xpath_clearProperties,
+                            XPathProcessor, clearParameters,
+                            arginfo_saxonc_xpath_clearParameters,
                             ZEND_ACC_PUBLIC) PHP_ME(XPathProcessor,
-                                                    exceptionOccurred,
-                                                    arginfo_saxonc_xpath_exceptionOccurred,
+                                                    clearProperties,
+                                                    arginfo_saxonc_xpath_clearProperties,
                                                     ZEND_ACC_PUBLIC)
                             PHP_ME(
-                                XPathProcessor, exceptionClear,
-                                arginfo_saxonc_xpath_exceptionClear,
+                                XPathProcessor, exceptionOccurred,
+                                arginfo_saxonc_xpath_exceptionOccurred,
                                 ZEND_ACC_PUBLIC) PHP_ME(XPathProcessor,
-                                                        getErrorCode,
-                                                        arginfo_saxonc_xpath_getErrorCode,
+                                                        exceptionClear,
+                                                        arginfo_saxonc_xpath_exceptionClear,
                                                         ZEND_ACC_PUBLIC)
-                                PHP_ME(XPathProcessor, getErrorMessage,
-                                       arginfo_saxonc_xpath_getErrorMessage,
+                                PHP_ME(XPathProcessor, getErrorCode,
+                                       arginfo_saxonc_xpath_getErrorCode,
                                        ZEND_ACC_PUBLIC)
-                                    PHP_ME(
-                                        XPathProcessor, declareNamespace,
-                                        arginfo_saxonc_xpath_declareNamespace,
-                                        ZEND_ACC_PUBLIC)
+                                    PHP_ME(XPathProcessor, getErrorMessage,
+                                           arginfo_saxonc_xpath_getErrorMessage,
+                                           ZEND_ACC_PUBLIC)
                                         PHP_ME(
-                                            XPathProcessor,
-                                            setBackwardsCompatible,
-                                            arginfo_saxonc_xpath_setBackwardsCompatible,
+                                            XPathProcessor, declareNamespace,
+                                            arginfo_saxonc_xpath_declareNamespace,
                                             ZEND_ACC_PUBLIC)
                                             PHP_ME(
-                                                XPathProcessor, setCaching,
-                                                arginfo_saxonc_xpath_setCaching,
+                                                XPathProcessor,
+                                                setBackwardsCompatible,
+                                                arginfo_saxonc_xpath_setBackwardsCompatible,
                                                 ZEND_ACC_PUBLIC)
                                                 PHP_ME(
-                                                    XPathProcessor,
-                                                    importSchemaNamespace,
-                                                    arginfo_saxonc_xpath_importSchemaNamespace,
+                                                    XPathProcessor, setCaching,
+                                                    arginfo_saxonc_xpath_setCaching,
                                                     ZEND_ACC_PUBLIC)
                                                     PHP_ME(
                                                         XPathProcessor,
-                                                        setBaseURI,
-                                                        arginfo_saxonc_xpath_setBaseURI,
-                                                        ZEND_ACC_PUBLIC){
-                                                        nullptr, nullptr,
-                                                        nullptr}};
+                                                        importSchemaNamespace,
+                                                        arginfo_saxonc_xpath_importSchemaNamespace,
+                                                        ZEND_ACC_PUBLIC)
+                                                        PHP_ME(
+                                                            XPathProcessor,
+                                                            setBaseURI,
+                                                            arginfo_saxonc_xpath_setBaseURI,
+                                                            ZEND_ACC_PUBLIC){
+                                                            nullptr, nullptr,
+                                                            nullptr}};

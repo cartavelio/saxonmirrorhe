@@ -11,7 +11,7 @@
 const char *SaxonApiException::what() {
   if (message.empty() && !cppException) {
     allocFn fn = operator new;
-    char * tempm = nullptr;
+    char *tempm = nullptr;
     if (isStaticError) {
       tempm = j_getCombinedStaticErrorMessages(
           SaxonProcessor::sxn_environ->thread, (void *)fn);
@@ -20,11 +20,11 @@ const char *SaxonApiException::what() {
       tempm =
           j_getErrorMessage(SaxonProcessor::sxn_environ->thread, (void *)fn);
     }
-    if(tempm == nullptr) {
-        return nullptr;
+    if (tempm == nullptr) {
+      return nullptr;
     }
     message = std::string(tempm);
-    operator delete (tempm);
+    operator delete(tempm);
   }
   return message.c_str();
 }
@@ -47,11 +47,11 @@ SaxonApiException::SaxonApiException(const SaxonApiException &ex) {
   isStaticError = ex.isStaticError;
 }
 
-SaxonApiException::SaxonApiException(const char * m) {
+SaxonApiException::SaxonApiException(const char *m) {
   if (m != nullptr) {
-     message = std::string(m);
+    message = std::string(m);
   } else {
-  message = "unknown exception";
+    message = "unknown exception";
   }
 
   lineNumber = -1;
@@ -61,8 +61,8 @@ SaxonApiException::SaxonApiException(const char * m) {
   isStaticError = false;
 }
 
-SaxonApiException::SaxonApiException(const char * m, const char * ec,
-                                     const char * sysId, int linenumber) {
+SaxonApiException::SaxonApiException(const char *m, const char *ec,
+                                     const char *sysId, int linenumber) {
   if (m != nullptr) {
     message = std::string(m);
   } else {
@@ -78,7 +78,7 @@ SaxonApiException::SaxonApiException(const char * m, const char * ec,
   }
 
   if (sysId != nullptr) {
-    systemId =  std::string(sysId);
+    systemId = std::string(sysId);
   } else {
     systemId = "";
   }
@@ -87,13 +87,13 @@ SaxonApiException::SaxonApiException(const char * m, const char * ec,
 }
 
 SaxonApiException::~SaxonApiException() throw() {
- if(!message.empty()){
+  if (!message.empty()) {
     message.clear();
   }
- if(!s_message.empty()){
+  if (!s_message.empty()) {
     s_message.clear();
   }
- if(!ec_message.empty()){
+  if (!ec_message.empty()) {
     ec_message.clear();
   }
   if (!errorCode.empty()) {
@@ -116,13 +116,13 @@ SaxonApiException::~SaxonApiException() throw() {
 const char *SaxonApiException::getErrorCode() {
   if (errorCode.empty() && !cppException) {
     allocFn fn = operator new;
-    char * tempm = nullptr;
+    char *tempm = nullptr;
     tempm = j_getErrorCode(SaxonProcessor::sxn_environ->thread, (void *)fn);
-    if(tempm == nullptr) {
-        return nullptr;
+    if (tempm == nullptr) {
+      return nullptr;
     }
     errorCode = std::string(tempm);
-    operator delete (tempm);
+    operator delete(tempm);
   }
   return errorCode.c_str();
 }
@@ -137,13 +137,13 @@ int SaxonApiException::getLineNumber() {
 const char *SaxonApiException::getSystemId() {
   if (systemId.empty() && !cppException) {
     allocFn fn = operator new;
-    char * tempm = nullptr;
+    char *tempm = nullptr;
     tempm = j_getSystemId(SaxonProcessor::sxn_environ->thread, (void *)fn);
-    if(tempm == nullptr) {
-        return nullptr;
+    if (tempm == nullptr) {
+      return nullptr;
     }
     systemId = std::string(tempm);
-    operator delete (tempm);
+    operator delete(tempm);
   }
   return systemId.c_str();
 }
@@ -151,7 +151,7 @@ const char *SaxonApiException::getSystemId() {
 const char *SaxonApiException::getMessage() {
   if (message.empty() && !cppException) {
     allocFn fn = operator new;
-    char * tempm = nullptr;
+    char *tempm = nullptr;
     if (isStaticError) {
       tempm = j_getCombinedStaticErrorMessages(
           SaxonProcessor::sxn_environ->thread, (void *)fn);
@@ -159,11 +159,11 @@ const char *SaxonApiException::getMessage() {
       tempm =
           j_getErrorMessage(SaxonProcessor::sxn_environ->thread, (void *)fn);
     }
-    if(tempm == nullptr) {
-        return nullptr;
+    if (tempm == nullptr) {
+      return nullptr;
     }
     message = std::string(tempm);
-    operator delete (tempm);
+    operator delete(tempm);
   }
 
   return message.c_str();
@@ -173,19 +173,19 @@ const char *SaxonApiException::getMessageWithErrorCode() {
 
   if (ec_message.empty() && !cppException) {
     allocFn fn = operator new;
-    char * tempm = nullptr;
+    char *tempm = nullptr;
     if (isStaticError) {
       tempm = j_getCombinedStaticErrorMessages(
           SaxonProcessor::sxn_environ->thread, (void *)fn);
     } else {
-      tempm = j_getErrorMessageWithErrorCode(SaxonProcessor::sxn_environ->thread,
-                                            (void *)fn);
+      tempm = j_getErrorMessageWithErrorCode(
+          SaxonProcessor::sxn_environ->thread, (void *)fn);
     }
-    if(tempm == nullptr) {
-        return nullptr;
+    if (tempm == nullptr) {
+      return nullptr;
     }
     ec_message = std::string(tempm);
-    operator delete (tempm);
+    operator delete(tempm);
   }
   return ec_message.c_str();
 }
@@ -193,16 +193,16 @@ const char *SaxonApiException::getMessageWithErrorCode() {
 const char *SaxonApiException::getCombinedStaticErrorMessages() {
   if (s_message.empty() && !cppException) {
     allocFn fn = operator new;
-    char * tempm = nullptr;
-    tempm = j_getCombinedStaticErrorMessages(SaxonProcessor::sxn_environ->thread,
-                                          (void *)fn);
-    if(tempm == nullptr) {
-        return nullptr;
+    char *tempm = nullptr;
+    tempm = j_getCombinedStaticErrorMessages(
+        SaxonProcessor::sxn_environ->thread, (void *)fn);
+    if (tempm == nullptr) {
+      return nullptr;
     }
     s_message = std::string(tempm);
-    operator delete (tempm);
+    operator delete(tempm);
   }
-    return s_message.c_str();
+  return s_message.c_str();
 }
 
 int SaxonApiException::staticErrorCount() {

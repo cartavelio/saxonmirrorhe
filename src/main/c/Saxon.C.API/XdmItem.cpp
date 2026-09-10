@@ -9,9 +9,8 @@ XdmItem::XdmItem() : XdmValue() {
 }
 
 XdmItem::XdmItem(const XdmItem &other) : XdmValue(other) {
-if (getenv("SAXONC_DEBUG_FLAG")) {
-    std::cerr << "XdmItem copy constructor called:"
-              << std::endl;
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+    std::cerr << "XdmItem copy constructor called:" << std::endl;
   }
   value = other.value;
   xdmSize = 1;
@@ -59,23 +58,23 @@ int64_t XdmItem::getUnderlyingValue() {
 
 const char *XdmItem::getStringValue() {
   const char *stringValuei = nullptr;
-  //if (stringValue == nullptr) {
-    if (value < 0) {
-      return nullptr;
-    }
-    allocFn fn = operator new;
-    stringValuei = getStringValueForXdmItem(SaxonProcessor::sxn_environ->thread,
-                                           (void *)fn, (void *)value);
+  // if (stringValue == nullptr) {
+  if (value < 0) {
+    return nullptr;
+  }
+  allocFn fn = operator new;
+  stringValuei = getStringValueForXdmItem(SaxonProcessor::sxn_environ->thread,
+                                          (void *)fn, (void *)value);
   //}
   return stringValuei;
 }
 
 const char *XdmItem::toString() {
   const char *itemToStringi = nullptr;
-  //if (itemToString == nullptr) {
+  // if (itemToString == nullptr) {
   allocFn fn = operator new;
   itemToStringi = xdmItemToString(SaxonProcessor::sxn_environ->thread,
-                                   (void *)fn, (void *)value);
+                                  (void *)fn, (void *)value);
   //}
   return itemToStringi;
 }

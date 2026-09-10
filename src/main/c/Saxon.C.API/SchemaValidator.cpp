@@ -117,7 +117,7 @@ void SchemaValidator::registerSchemaFromNode(XdmNode *node) {
       SaxonProcessor::sxn_environ->thread, (void *)proc->procRef,
       (void *)node->getUnderlyingValue(),
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                      : (void *)processorDataRef));
+                                             : (void *)processorDataRef));
   if (status == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
@@ -142,7 +142,7 @@ void SchemaValidator::registerSchemaFromFile(const char *sourceFile) {
       SaxonProcessor::sxn_environ->thread, (void *)proc->procRef,
       (char *)cwdV.c_str(), (char *)sourceFile,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                      : (void *)processorDataRef));
+                                             : (void *)processorDataRef));
   if (status == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
@@ -185,7 +185,7 @@ void SchemaValidator::registerSchemaFromString(const char *sourceStr,
       (char *)(systemID == nullptr ? cwdV.c_str() : systemID),
       (char *)sourceStr,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                      : (void *)processorDataRef));
+                                             : (void *)processorDataRef));
   if (status == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
@@ -204,7 +204,7 @@ void SchemaValidator::validate(const char *sourceFile) {
       SaxonProcessor::sxn_environ->thread, (void *)proc->procRef, (void *)cppV,
       (char *)cwdV.c_str(), (char *)sourceFile, (char *)nullptr,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                      : (void *)processorDataRef));
+                                             : (void *)processorDataRef));
   if (status == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
@@ -228,7 +228,7 @@ XdmNode *SchemaValidator::validateToNode(const char *sourceFile) {
       SaxonProcessor::sxn_environ->thread, (void *)proc->procRef, (void *)cppV,
       (char *)cwdV.c_str(), (char *)sourceFile,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                      : (void *)processorDataRef));
+                                             : (void *)processorDataRef));
   if (processorDataRef > 0) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)processorDataRef);
@@ -329,9 +329,8 @@ void SchemaValidator::clearParameters(bool delVal) {
         delete value;
       }
     }
-    }
-    parameters.clear();
-
+  }
+  parameters.clear();
 }
 
 void SchemaValidator::clearProperties() { properties.clear(); }

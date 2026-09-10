@@ -95,7 +95,8 @@ void DocumentBuilder::setBaseUri(const char *uri) {
 
 const char *DocumentBuilder::getBaseUri() { return baseURI.c_str(); }
 
-XdmNode *DocumentBuilder::parseXmlFromString(const char *source, const char *encoding) {
+XdmNode *DocumentBuilder::parseXmlFromString(const char *source,
+                                             const char *encoding) {
   int64_t result = j_main_parseXmlString(
       SaxonProcessor::sxn_environ->thread,
       (baseURI.empty() ? (char *)nullptr : (char *)baseURI.c_str()),

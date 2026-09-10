@@ -143,7 +143,8 @@ public:
    * memory.
    *
    * @param content - the XML document as a serialized string
-   * @param encoding of the source string argument. If not specified then platform default encoding is used
+   * @param encoding of the source string argument. If not specified then
+   * platform default encoding is used
    * @return An <code>XdmNode</code>. This will be
    *         the document node at the root of the tree of the resulting
    * in-memory document.
@@ -151,7 +152,8 @@ public:
    * exception methods will provide more information
    */
 
-  XdmNode *parseXmlFromString(const char *content, const char *encoding = nullptr);
+  XdmNode *parseXmlFromString(const char *content,
+                              const char *encoding = nullptr);
 
   /**
    * Build a document from a supplied XML file.

@@ -13,7 +13,9 @@
 #include "SaxonCGlue.h"
 
 /*!    \file   SaxonCProcessor.h
-    \brief  <code>SaxonCProcessor.h</code> provides the C API for XSLT and XQuery processing. This file contains a set of functions to compile and execute stylesheets and queries.
+    \brief  <code>SaxonCProcessor.h</code> provides the C API for XSLT and
+   XQuery processing. This file contains a set of functions to compile and
+   execute stylesheets and queries.
 
 */
 
@@ -52,14 +54,20 @@ const char *getProductVariantAndVersion(sxnc_environment *environi,
                                         sxnc_processor *proc);
 
 /**
- * Initialise the SaxonC Processor, along with the parameters and the properties pointers.
- * This utility function is used to allocate memory on the heap, therefore is required to be called before execution of stylesheets or queries.
+ * Initialise the SaxonC Processor, along with the parameters and the properties
+ * pointers. This utility function is used to allocate memory on the heap,
+ * therefore is required to be called before execution of stylesheets or
+ * queries.
  *
- * @param environi - GraalVM environment held as the struct sxnc_environment. This function calls malloc on the pointer.
- * @param proc - Pointer to the Saxon Processor which is represented as the struct sxnc_processor
- *              and is used for creating the XSLT and XQuery processors. This function calls malloc on the pointer.
- * @param param - Pointers to the sxnc_parameter structs used for parameters. This function calls calloc on the pointers.
- * @param prop - Pointers to the sxnc_property structs used for properties.  This function calls calloc on the pointers.
+ * @param environi - GraalVM environment held as the struct sxnc_environment.
+ * This function calls malloc on the pointer.
+ * @param proc - Pointer to the Saxon Processor which is represented as the
+ * struct sxnc_processor and is used for creating the XSLT and XQuery
+ * processors. This function calls malloc on the pointer.
+ * @param param - Pointers to the sxnc_parameter structs used for parameters.
+ * This function calls calloc on the pointers.
+ * @param prop - Pointers to the sxnc_property structs used for properties. This
+ * function calls calloc on the pointers.
  * @param cap - The length of the parameters array
  * @param propCap - The length of the properties array
  */
@@ -68,32 +76,38 @@ void initSaxonc(sxnc_environment **environi, sxnc_processor **proc,
                 int propCap);
 
 /**
- * Free associated memory on the heap created by the SaxonC Processors, properties and parameters.
+ * Free associated memory on the heap created by the SaxonC Processors,
+ * properties and parameters.
  *
  * @param environi - GraalVM environment held as the struct sxnc_environment
- * @param proc - Pointer to the Saxon Processor which is represented as the struct sxnc_processor
+ * @param proc - Pointer to the Saxon Processor which is represented as the
+ * struct sxnc_processor
  * @param param - Pointers to the sxnc_parameter structs used for parameters
  * @param prop - Pointers to the sxnc_property structs used for properties
  */
 void freeSaxonc(sxnc_environment **environi, sxnc_processor **proc,
                 sxnc_parameter **param, sxnc_property **prop);
 
-
 /**
  * Transform an XSLT stylesheet with the result saved to file.
  * The compile and execution is done in the same call of this method.
  *
  * @param environi - GraalVM environment
- * @param proc - Pointer to the Saxon Processor used for creating the XSLT executable
- * @param cwd - Current working directory - used for base URI for input and output files
+ * @param proc - Pointer to the Saxon Processor used for creating the XSLT
+ * executable
+ * @param cwd - Current working directory - used for base URI for input and
+ * output files
  * @param source - The file name of the source document
  * @param stylesheet - The file name of the stylesheet document
  * @param outputfile - The file name of where the result will be stored
- * @param parameters - Array of parameters for the transform, as mappings (string, value)
- * @param properties - Array of properties for the transform, as mappings (string, string).
- * Available XSLT Processor properties: serialization properties names start with '!' (e.g.
- * '!method' -> 'xml'), 'o': output file name, 'it': initial template, 'im': initial mode,
- * 's': source file name, 'm': switch on message listener for xsl:message instructions
+ * @param parameters - Array of parameters for the transform, as mappings
+ * (string, value)
+ * @param properties - Array of properties for the transform, as mappings
+ * (string, string). Available XSLT Processor properties: serialization
+ * properties names start with '!' (e.g.
+ * '!method' -> 'xml'), 'o': output file name, 'it': initial template, 'im':
+ * initial mode, 's': source file name, 'm': switch on message listener for
+ * xsl:message instructions
  * @param parLen - The length of the parameters array
  * @param propLen - The length of the properties array
  */
@@ -103,19 +117,25 @@ void xsltSaveResultToFile(sxnc_environment *environi, sxnc_processor *proc,
                           sxnc_property *properties, int parLen, int propLen);
 
 /**
- * Transform an XSLT stylesheet with the result returned as a string value (char pointer array).
- * The compile and execution is done in the same call of this method.
+ * Transform an XSLT stylesheet with the result returned as a string value (char
+ * pointer array). The compile and execution is done in the same call of this
+ * method.
  *
  * @param environi - GraalVM environment
- * @param proc - Pointer to the Saxon Processor used for creating the XSLT executable
- * @param cwd - Current working directory - used for base URI for input and output files
+ * @param proc - Pointer to the Saxon Processor used for creating the XSLT
+ * executable
+ * @param cwd - Current working directory - used for base URI for input and
+ * output files
  * @param source - The file name of the source document
  * @param stylesheet - The file name of the stylesheet document
- * @param parameters - Array of parameters for the transform, as mappings (string, value)
- * @param properties - Array of properties for the transform, as mappings (string, string).
- * Available XSLT Processor properties: serialization properties names start with '!' (e.g.
- * '!method' -> 'xml'), 'o': output file name, 'it': initial template, 'im': initial mode,
- * 's': source file name, 'm': switch on message listener for xsl:message instructions
+ * @param parameters - Array of parameters for the transform, as mappings
+ * (string, value)
+ * @param properties - Array of properties for the transform, as mappings
+ * (string, string). Available XSLT Processor properties: serialization
+ * properties names start with '!' (e.g.
+ * '!method' -> 'xml'), 'o': output file name, 'it': initial template, 'im':
+ * initial mode, 's': source file name, 'm': switch on message listener for
+ * xsl:message instructions
  * @param parLen - The length of the parameters array
  * @param propLen - The length of the properties array
  * @return char pointer array - The result of the transformation
@@ -129,14 +149,18 @@ const char *xsltApplyStylesheet(sxnc_environment *environi,
  * Execute a query with the result saved to file.
  *
  * @param environi - GraalVM environment
- * @param proc - Pointer to the Saxon Processor used for creating the XQuery executable
- * @param cwd - Current working directory - used for base URI for input and output files
+ * @param proc - Pointer to the Saxon Processor used for creating the XQuery
+ * executable
+ * @param cwd - Current working directory - used for base URI for input and
+ * output files
  * @param outputfile - The file name of where the result will be stored
- * @param parameters - Array of parameters for the query, as mappings (string, value)
- * @param properties - Array of properties for the query, as mappings (string, string).
- * Available XQuery Processor properties: serialization properties names start with '!' (e.g.
- * '!method' -> 'xml'), 'o': output file name, 's': source file name, 'q': query file name,
- * 'qs': string form of the query, 'base': base URI of the query,
+ * @param parameters - Array of parameters for the query, as mappings (string,
+ * value)
+ * @param properties - Array of properties for the query, as mappings (string,
+ * string). Available XQuery Processor properties: serialization properties
+ * names start with '!' (e.g.
+ * '!method' -> 'xml'), 'o': output file name, 's': source file name, 'q': query
+ * file name, 'qs': string form of the query, 'base': base URI of the query,
  * 'dtd': set DTD validation 'on' or 'off'
  * @param parLen - The length of the parameters array
  * @param propLen - The length of the properties array
@@ -145,18 +169,22 @@ void executeQueryToFile(sxnc_environment *environi, sxnc_processor *proc,
                         char *cwd, char *outputfile, sxnc_parameter *parameters,
                         sxnc_property *properties, int parLen, int propLen);
 
-
 /**
- * Execute a query with the result returned as a string value (char pointer array).
+ * Execute a query with the result returned as a string value (char pointer
+ * array).
  *
  * @param environi - GraalVM environment
- * @param proc - Pointer to the Saxon Processor used for creating the XQuery executable
- * @param cwd - Current working directory - used for base URI for input and output files
- * @param parameters - Array of parameters for the query, as mappings (string, value)
- * @param properties - Array of properties for the query, as mappings (string, string).
- * Available XQuery Processor properties: serialization properties names start with '!' (e.g.
- * '!method' -> 'xml'), 'o': output file name, 's': source file name, 'q': query file name,
- * 'qs': string form of the query, 'base': base URI of the query,
+ * @param proc - Pointer to the Saxon Processor used for creating the XQuery
+ * executable
+ * @param cwd - Current working directory - used for base URI for input and
+ * output files
+ * @param parameters - Array of parameters for the query, as mappings (string,
+ * value)
+ * @param properties - Array of properties for the query, as mappings (string,
+ * string). Available XQuery Processor properties: serialization properties
+ * names start with '!' (e.g.
+ * '!method' -> 'xml'), 'o': output file name, 's': source file name, 'q': query
+ * file name, 'qs': string form of the query, 'base': base URI of the query,
  * 'dtd': set DTD validation 'on' or 'off'
  * @param parLen - The length of the parameters array
  * @param propLen - The length of the properties array

@@ -32,8 +32,7 @@ public:
    * A constructor. Create a SaxonApiException
    * @param message - The detail message string of this throwable.
    */
-  SaxonApiException(const char * err);
-
+  SaxonApiException(const char *err);
 
   /**
    * A Copy constructor. Create a SaxonApiException
@@ -58,8 +57,8 @@ public:
    * @param linenumber - The line number in the stylesheet related to cause of
    * the exception
    */
-  SaxonApiException(const char * message, const char * errorCode,
-                    const char * systemId, int linenumber);
+  SaxonApiException(const char *message, const char *errorCode,
+                    const char *systemId, int linenumber);
 
   /**
    * A destructor.

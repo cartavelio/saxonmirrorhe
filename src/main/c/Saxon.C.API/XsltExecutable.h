@@ -53,19 +53,22 @@ public:
    */
   void setBaseOutputURI(const char *baseURI);
 
-  //! Supply the context item to be used when evaluating global variables and parameters.
+  //! Supply the context item to be used when evaluating global variables and
+  //! parameters.
   /**
    * Set the source document from an XdmNode for the transformation.
-   * @param value - the item to be used as the context item within the initializers of global variables and parameters. Given as a pointer to the XdmItem
-   * object.
+   * @param value - the item to be used as the context item within the
+   * initializers of global variables and parameters. Given as a pointer to the
+   * XdmItem object.
    */
 
   void setGlobalContextItem(XdmItem *value);
 
   /**
-   * Supply the context item to be used when evaluating global variables and parameters.
-   * Set the source from file for the transformation.
-   * @param filename - the item to be used as the context item within the initializers of global variables and parameters.
+   * Supply the context item to be used when evaluating global variables and
+   * parameters. Set the source from file for the transformation.
+   * @param filename - the item to be used as the context item within the
+   * initializers of global variables and parameters.
    */
   void setGlobalContextFromFile(const char *filename);
 
@@ -546,7 +549,9 @@ private:
   // jclass messageListenerClass, resultDocumentClass;
   int64_t procRef, executableRef, selectionRef, saxonMessageListenerRef,
       saxonResultDocRef;
-  bool selectionStringFlag;  /*!< Flag to indicate that the selection was retrieved as a string file value instead of XdmValue */
+  bool selectionStringFlag;  /*!< Flag to indicate that the selection was
+                                retrieved as a string file value instead of
+                                XdmValue */
   std::string cwdXE;         /*!< current working directory */
   std::string resources_dir; /*!< current Saxon resources directory */
   bool tunnel, jitCompilation, rawResultsFlag, exceptionFound;

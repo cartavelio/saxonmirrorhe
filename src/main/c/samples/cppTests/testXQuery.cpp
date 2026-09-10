@@ -232,7 +232,6 @@ void testReusability(SaxonProcessor *processor, sResultCount *sresult) {
       cerr << "failure in testReusability-1" << endl;
       sresult->failure++;
       sresult->failureList.push_back("testReusability");
-
     }
     delete val;
   } else {
@@ -267,10 +266,9 @@ void testReusability(SaxonProcessor *processor, sResultCount *sresult) {
   XdmValue *val2 = queryProc3->runQueryToValue();
 
   if (val2 != nullptr) {
-    const char * valStr = (val2->itemAt(0))->getStringValue();
+    const char *valStr = (val2->itemAt(0))->getStringValue();
 
-    cout << "XdmValue size=" << val2->size() << ", "
-         << valStr << endl;
+    cout << "XdmValue size=" << val2->size() << ", " << valStr << endl;
     if (((XdmItem *)val2->itemAt(0))->isAtomic()) {
       sresult->success++;
       cout << "Test3: Result is atomic" << endl;
@@ -280,7 +278,7 @@ void testReusability(SaxonProcessor *processor, sResultCount *sresult) {
       cout << "PrimitiveTypeName of  atomic2="
            << atomic2->getPrimitiveTypeName() << endl;
     }
-    operator delete ((char *) valStr);
+    operator delete((char *)valStr);
     delete val2;
   } else {
     if (queryProc3->exceptionOccurred()) {
@@ -338,7 +336,7 @@ void testXQueryLineNumberError(const char *cwd, sResultCount *sresult) {
       sresult->failureList.push_back("testXQueryLineNumberError");
 
       cout << "Result :" << result << endl;
-      operator delete ((char *)result);
+      operator delete((char *)result);
     }
   } catch (SaxonApiException &e) {
     sresult->success++;
@@ -373,7 +371,7 @@ void testXQueryLineNumber(const char *cwd, sResultCount *sresult) {
     cout << "Result :" << result << endl;
     sresult->success++;
 
-    operator delete ((char *)result);
+    operator delete((char *)result);
 
   } catch (SaxonApiException &e) {
     sresult->failure++;
