@@ -6,9 +6,9 @@ import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapBuilder;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.ma.map.MapTypeMaintainer;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.tree.jiter.IterableUsingIteratorSupplier;
+import net.sf.saxon.type.UType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
 
@@ -16,7 +16,7 @@ import net.sf.saxon.value.StringValue;
  * An XDM Map implementation using arbitrary atomic keys, that maintains map entries
  * in insertion order (new entries at the end)
  */
-public class OrderedMap extends MapTypeMaintainer {
+public class OrderedMap extends MapItem {
 
     private static class OrderedMapBuilder implements MapBuilder {
 
@@ -163,6 +163,11 @@ public class OrderedMap extends MapTypeMaintainer {
     @Override
     public MapItem remove(AtomicValue key) {
         return new OrderedMap(baseMap.remove(key.asMapKey()));
+    }
+
+    @Override
+    public UType getKeyUType() {
+        return null;
     }
 
 }

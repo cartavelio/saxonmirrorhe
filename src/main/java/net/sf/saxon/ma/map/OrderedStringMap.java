@@ -7,11 +7,10 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.StringMapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.jiter.MappingJavaIterator;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.UType;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
 import java.util.Iterator;
@@ -59,15 +58,6 @@ public class OrderedStringMap extends StringMapItem {
         };
     }
 
-    @Override
-    public boolean conforms(PlainType keyType, SequenceType valueType, TypeHierarchy th) {
-        return false;
-    }
-
-    @Override
-    public ItemType getItemType(TypeHierarchy th) {
-        return null;
-    }
 
     @Override
     public UType getKeyUType() {
@@ -133,17 +123,9 @@ public class OrderedStringMap extends StringMapItem {
 
     private MapItem toGeneralMap() {
         //System.err.println("Dictionary rewrite!!!!");
-        // TODO: bypass the check for duplicates
         GeneralMapBuilder target = new GeneralMapBuilder();
-        for (KeyValuePair kvp : keyValuePairs()) {
-            target.put(kvp.key, kvp.value);
-        }
-        try {
-            return target.getCompletedMap();
-        } catch (XPathException e) {
-            // There should be no duplicates
-            throw new IllegalStateException();
-        }
+        target.copy(this);
+        return target.getCompletedMapConfidently();
     }
 
 }
