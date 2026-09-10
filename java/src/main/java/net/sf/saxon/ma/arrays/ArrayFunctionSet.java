@@ -16,6 +16,7 @@ import net.sf.saxon.functions.FoldingFunction;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.ma.Parcel;
+import net.sf.saxon.ma.jnode.*;
 import net.sf.saxon.ma.map.*;
 import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.*;
@@ -303,6 +304,12 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                     .arg(0, RecordType.VALUE_RECORD, STAR, null));
 
             register("members", 1, e -> e.populate(ArrayMembers::new, RecordType.VALUE_RECORD, STAR, 0)
+                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null));
+
+            register("of-members-2814", 1, e -> e.populate(ArrayOfMembers2814::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+                    .arg(0, AnyJNodeType.getInstance(), STAR, null));
+
+            register("members-2814", 1, e -> e.populate(ArrayMembers2814::new, AnyJNodeType.getInstance(), STAR, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null));
 
         }
@@ -840,6 +847,32 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         }
     }
 
+    public static GroundedValue arrayMembers2814(ArrayItem input) {
+        List<JNode> parcels = new ArrayList<>(input.arrayLength());
+        JNode root = new RootJNode(input);
+        int index = 1;
+        for (GroundedValue member : input.members()) {
+            parcels.add(new JNodeForArrayMember(root, 1, Int64Value.makeIntegerValue(index++), member));
+        }
+        return SequenceExtent.makeSequenceExtent(parcels);
+    }
+
+    //#if EE==true || PE==true
+
+    /**
+     * Implementation of the proposed XP40 function array:members(array(*)) =&gt; record(value)*
+     */
+    public static class ArrayMembers2814 extends SystemFunction {
+
+        @Override
+        public GroundedValue call(XPathContext context, Sequence[] arguments) throws XPathException {
+            ArrayItem input = (ArrayItem) arguments[0].head();
+            return arrayMembers2814(input);
+        }
+    }
+
+    //#endif
+
     /**
      * Implementation of the proposed XP40 function array:items(array(*)) =&gt; item()*
      */
@@ -878,6 +911,24 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             SequenceIterator parcels = arguments[0].iterate();
             for (MapItem parcel; (parcel = (MapItem)parcels.next()) != null; ) {
                 members.add(parcel.getU(valueRecordKey));
+            }
+            return makeArray(members);
+        }
+
+
+    }
+
+    /**
+     * Implementation of the proposed XP40 function array:of(jnode*) =&gt; array
+     */
+    public static class ArrayOfMembers2814 extends ArrayGeneratingFunction {
+
+        @Override
+        public ArrayItem call(XPathContext context, Sequence[] arguments) throws XPathException {
+            List<GroundedValue> members = new ArrayList<>(expectedSize());
+            SequenceIterator parcels = arguments[0].iterate();
+            for (JNode parcel; (parcel = (JNode) parcels.next()) != null; ) {
+                members.add(parcel.getContent());
             }
             return makeArray(members);
         }
