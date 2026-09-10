@@ -160,12 +160,19 @@ namespace Saxon.Eej.serialize {
             if ((next == null)) {
                 Saxon.Ejavax.xml.transform.Source source = null;
                 try {
-                    if ((pipe.getURIResolver() != null)) {
-                        source = pipe.getURIResolver().resolve(href, baseURI);
+                    Saxon.Hej.lib.JJ_ResourceRequest request = new Saxon.Hej.lib.JJ_ResourceRequest();
+                    request.relativeUri = href;
+                    try {
+                        if ((baseURI == null)) {
+                            request.uri = href;
+                        } else {
+                            request.baseUri = baseURI;
+                            request.uri = Saxon.Hej.functions.ResolveURI.makeAbsolute(href, baseURI).ToString();
+                        }
+                    } catch (System.UriFormatException e) {
+                        throw new Saxon.Hej.trans.XPathException("Cannot resolve URI supplied for next-in-chain", e);
                     }
-                    if ((source == null)) {
-                        source = pipe.getController().getStandardURIResolver().resolve(href, baseURI);
-                    }
+                    source = request.resolve(config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
                 } catch (Saxon.Ejavax.xml.transform.TransformerException e) {
                     throw Saxon.Hej.trans.XPathException.makeXPathException(e);
                 }
@@ -184,9 +191,6 @@ namespace Saxon.Eej.serialize {
             nextTransformer.setPipelineConfiguration(new Saxon.Hej.@event.PipelineConfiguration(pipe));
             nextTransformer.setDestination(destination);
             return new Saxon.Hej.@event.SequenceNormalizerWithSpaceSeparator(nextTransformer);
-        }
-        public override Saxon.Hej.query.SequenceWrapper newSequenceWrapper(Saxon.Hej.@event.Receiver destination) {
-            return new Saxon.Eej.serialize.SequenceWrapperPE(destination);
         }
         public override string checkOutputProperty(string key, string value) {
             if (key.StartsWith("{http://saxon.sf.net/}")) {

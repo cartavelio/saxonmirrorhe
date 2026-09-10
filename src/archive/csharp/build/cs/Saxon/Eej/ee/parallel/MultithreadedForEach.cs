@@ -51,7 +51,7 @@ namespace Saxon.Eej.ee.parallel {
                 string threadsValue = getThreads().evaluateAsString(context).ToString();
                 int threads = 0;
                 try {
-                    threads = System.Int32.Parse(threadsValue.ToString());
+                    threads = Saxon.Impl.Helpers.Utils.ParseInt(threadsValue.ToString());
                 } catch (Saxon.Ejava.lang.NumberFormatException e) {
                     Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Value of 'threads' is not an integer ("+threadsValue)+")"));
                     err.setLocation(getLocation());

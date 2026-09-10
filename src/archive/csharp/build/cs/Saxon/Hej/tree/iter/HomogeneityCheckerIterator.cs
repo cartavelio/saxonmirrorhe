@@ -14,6 +14,9 @@ namespace Saxon.Hej.tree.iter {
         public void close() {
             @base.close();
         }
+        public void discharge() {
+            @base.discharge();
+        }
         private Saxon.Hej.trans.UncheckedXPathException reportMixedItems() {
             Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Cannot mix nodes and atomic values in the result of a path expression");
             err.setErrorCode("XPTY0018");

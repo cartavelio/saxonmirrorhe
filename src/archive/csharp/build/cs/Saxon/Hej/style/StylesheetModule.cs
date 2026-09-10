@@ -25,7 +25,6 @@ namespace Saxon.Hej.style {
             Saxon.Hej.@event.PipelineConfiguration pipe = config.makePipelineConfiguration();
             pipe.setErrorReporter(compilation.getCompilerInfo().getErrorReporter());
             Saxon.Hej.tree.linked.LinkedTreeBuilder styleBuilder = new Saxon.Hej.tree.linked.LinkedTreeBuilder(pipe);
-            pipe.setURIResolver(compilation.getCompilerInfo().getURIResolver());
             styleBuilder.setSystemId(styleSource.getSystemId());
             styleBuilder.setNodeFactory(compilation.getStyleNodeFactory(topLevelModule));
             styleBuilder.setLineNumbering(true);
@@ -82,7 +81,6 @@ namespace Saxon.Hej.style {
             Saxon.Hej.@event.PipelineConfiguration pipe = config.makePipelineConfiguration();
             pipe.setErrorReporter(compilation.getCompilerInfo().getErrorReporter());
             Saxon.Hej.tree.linked.LinkedTreeBuilder styleBuilder = new Saxon.Hej.tree.linked.LinkedTreeBuilder(pipe);
-            pipe.setURIResolver(compilation.getCompilerInfo().getURIResolver());
             styleBuilder.setSystemId(styleSource.getSystemId());
             styleBuilder.setNodeFactory(compilation.getStyleNodeFactory(true));
             styleBuilder.setLineNumbering(true);

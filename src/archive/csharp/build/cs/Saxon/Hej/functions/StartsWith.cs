@@ -8,7 +8,7 @@ namespace Saxon.Hej.functions {
         }
         public override Saxon.Hej.expr.Expression makeOptimizedFunctionCall(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo, params Saxon.Hej.expr.Expression[]  arguments) {
             if ((getStringCollator() == Saxon.Hej.expr.sort.CodepointCollator.getInstance())) {
-                return new Inner_Optimized_d1155e136(this, this, arguments);
+                return new Inner_Optimized_3(this, this, arguments);
             } else {
                 return base.makeOptimizedFunctionCall(visitor, contextInfo, arguments);
             }
@@ -31,9 +31,9 @@ namespace Saxon.Hej.functions {
             return "StartsWithCompiler";
         }
     
-        private class Inner_Optimized_d1155e136 : Saxon.Hej.expr.SystemFunctionCall.Optimized {
+        private class Inner_Optimized_3 : Saxon.Hej.expr.SystemFunctionCall.Optimized {
             private readonly StartsWith outerInstance;
-            public Inner_Optimized_d1155e136(StartsWith outerInstance, StartsWith arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
+            public Inner_Optimized_3(StartsWith outerInstance, StartsWith arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
                 this.outerInstance = outerInstance;
             }
             public override  /* REPLACING public */ bool effectiveBooleanValue(Saxon.Hej.expr.XPathContext context) {

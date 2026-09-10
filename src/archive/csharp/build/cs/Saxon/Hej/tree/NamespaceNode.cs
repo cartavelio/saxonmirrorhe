@@ -202,32 +202,14 @@ namespace Saxon.Hej.tree {
             return Saxon.Hej.om.SequenceTool.toGroundedValue(iterate());
         }
 
-        /* Expanding default method toShortString from interface NodeInfo */
+        /* Expanding default method toShortString from interface Item */
         public virtual string toShortString() {
-            switch (getNodeKind()) {
-              case Saxon.Hej.type.Type.DOCUMENT:
-                return "document-node()";
-              case Saxon.Hej.type.Type.ELEMENT:
-                return (("<"+getDisplayName())+"/>");
-              case Saxon.Hej.type.Type.ATTRIBUTE:
-                return ("@"+getDisplayName());
-              case Saxon.Hej.type.Type.TEXT:
-                return (("text(\""+Saxon.Hej.trans.Err.truncate30(getUnicodeStringValue()))+"\")");
-              case Saxon.Hej.type.Type.COMMENT:
-                return (("<!--"+Saxon.Hej.trans.Err.truncate30(getUnicodeStringValue()))+"-->");
-              case Saxon.Hej.type.Type.PROCESSING_INSTRUCTION:
-                return (("<?"+getDisplayName())+"?>");
-              case Saxon.Hej.type.Type.NAMESPACE:
-                string prefix = getLocalPart();
-                return (((("xmlns"+((prefix.Equals("") ? "" : (":"+prefix))))+"=\"")+getUnicodeStringValue())+'"');
-              default:
-                return "";
-            }
+            return ToString();
         }
 
         /* Expanding default method asIterable from interface GroundedValue */
         public virtual System.Collections.Generic.IEnumerable<Saxon.Hej.om.Item> asIterable() {
-            return new Saxon.Hej.om.GroundedValueAsIterable<Saxon.Hej.om.Item>(this);
+            return new Saxon.Hej.om.GroundedValueAsIterable(this);
         }
 
         /* Expanding default method containsNode from interface GroundedValue */
@@ -245,28 +227,9 @@ namespace Saxon.Hej.tree {
             return chain;
         }
 
-        /* Expanding default method itemAt from interface Item */
-        public virtual Saxon.Hej.om.Item itemAt(int n) {
-            return ((n == 0) ? head() : null);
-        }
-
-        /* Expanding default method subsequence from interface Item */
-        public virtual Saxon.Hej.om.GroundedValue subsequence(int start, int length) {
-            if (((start<=0) && (((start+length))>0))) {
-                return this;
-            } else {
-                return Saxon.Hej.value.EmptySequence.getInstance();
-            }
-        }
-
-        /* Expanding default method getLength from interface Item */
-        public virtual int getLength() {
-            return 1;
-        }
-
-        /* Expanding default method iterate from interface Item */
-        public virtual Saxon.Hej.om.SequenceIterator iterate() {
-            return new Saxon.Hej.tree.iter.SingletonIterator(this);
+        /* Expanding default method makeRepeatable from interface Sequence */
+        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
+            return this;
         }
 
         /* Expanding default method isSameNodeInfo from interface NodeInfo */
@@ -327,9 +290,28 @@ namespace Saxon.Hej.tree {
             return Saxon.Hej.om.Genre.NODE;
         }
 
-        /* Expanding default method makeRepeatable from interface Sequence */
-        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
-            return this;
+        /* Expanding default method itemAt from interface Item */
+        public virtual Saxon.Hej.om.Item itemAt(int n) {
+            return ((n == 0) ? head() : null);
+        }
+
+        /* Expanding default method subsequence from interface Item */
+        public virtual Saxon.Hej.om.GroundedValue subsequence(int start, int length) {
+            if (((start<=0) && (((start+length))>0))) {
+                return this;
+            } else {
+                return Saxon.Hej.value.EmptySequence.getInstance();
+            }
+        }
+
+        /* Expanding default method getLength from interface Item */
+        public virtual int getLength() {
+            return 1;
+        }
+
+        /* Expanding default method iterate from interface Item */
+        public virtual Saxon.Hej.om.SequenceIterator iterate() {
+            return new Saxon.Hej.tree.iter.SingletonIterator(this);
         }
 
     }

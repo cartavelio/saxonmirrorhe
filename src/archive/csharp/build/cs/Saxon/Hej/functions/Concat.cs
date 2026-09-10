@@ -15,7 +15,7 @@ namespace Saxon.Hej.functions {
             if (Saxon.Hej.expr.oper.OperandArray.every(arguments, arg => ((arg.getCardinality() == Saxon.Hej.expr.StaticProperty.EXACTLY_ONE) && (arg.getItemType() == Saxon.Hej.type.BuiltInAtomicType.BOOLEAN)))) {
                 visitor.getStaticContext().issueWarning((("Did you intend to apply string concatenation to boolean operands? "+"Perhaps you intended 'or' rather than '||'. ")+"To suppress this warning, use string() on the arguments."), arguments[0].getLocation());
             }
-            return new Inner_Optimized_d1006e257(this, this, arguments);
+            return new Inner_Optimized_7(this, this, arguments);
         }
         public override Saxon.Hej.value.StringValue call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
             Saxon.Hej.str.UnicodeBuilder builder = new Saxon.Hej.str.UnicodeBuilder();
@@ -29,7 +29,7 @@ namespace Saxon.Hej.functions {
             return new Saxon.Hej.value.StringValue(builder.toUnicodeString());
         }
         public void process(Saxon.Hej.@event.Outputter destination, Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
-            Saxon.Hej.str.UniStringConsumer output = destination.getStringReceiver(false);
+            Saxon.Hej.str.UniStringConsumer output = destination.getStringReceiver(false, Saxon.Hej.expr.parser.Loc.NONE);
             output.open();
             foreach (Saxon.Hej.om.Sequence arg in arguments) {
                 Saxon.Hej.om.SequenceIterator iter = arg.iterate();
@@ -47,9 +47,9 @@ namespace Saxon.Hej.functions {
             return "ConcatCompiler";
         }
     
-        private class Inner_Optimized_d1006e257 : Saxon.Hej.expr.SystemFunctionCall.Optimized {
+        private class Inner_Optimized_7 : Saxon.Hej.expr.SystemFunctionCall.Optimized {
             private readonly Concat outerInstance;
-            public Inner_Optimized_d1006e257(Concat outerInstance, Concat arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
+            public Inner_Optimized_7(Concat outerInstance, Concat arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
                 this.outerInstance = outerInstance;
             }
             public override  /* REPLACING public */ Saxon.Hej.str.UnicodeString evaluateAsString(Saxon.Hej.expr.XPathContext context) {

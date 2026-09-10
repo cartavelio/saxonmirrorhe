@@ -121,12 +121,12 @@ namespace Saxon.Hej.regex {
             System.Collections.Generic.Stack<Saxon.Hej.z.IntIterator> iterators = new System.Collections.Generic.Stack<Saxon.Hej.z.IntIterator>();
             Saxon.Hej.regex.REMatcher.State savedState = (containsCapturingExpressions() ? matcher.captureState() : null);
             int backtrackingLimit = matcher.getProgram().getBacktrackingLimit();
-            return new Inner_IntIterator_d1454e827(this, matcher, iterators, backtrackingLimit, savedState, position);
+            return new Inner_IntIterator_58(this, matcher, iterators, backtrackingLimit, savedState, position);
         }
     
-        private class Inner_IntIterator_d1454e827 : Saxon.Hej.z.IntIterator {
+        private class Inner_IntIterator_58 : Saxon.Hej.z.IntIterator {
             private readonly OpSequence outerInstance;
-            public Inner_IntIterator_d1454e827(OpSequence outerInstance, Saxon.Hej.regex.REMatcher matcher, System.Collections.Generic.Stack<Saxon.Hej.z.IntIterator> iterators, int backtrackingLimit, Saxon.Hej.regex.REMatcher.State savedState, int position) {
+            public Inner_IntIterator_58(OpSequence outerInstance, Saxon.Hej.regex.REMatcher matcher, System.Collections.Generic.Stack<Saxon.Hej.z.IntIterator> iterators, int backtrackingLimit, Saxon.Hej.regex.REMatcher.State savedState, int position) {
                 this.outerInstance = outerInstance;
                 this.matcher = matcher;
                 this.iterators = iterators;

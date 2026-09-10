@@ -31,7 +31,7 @@ namespace Saxon.Hej.functions {
         protected internal Saxon.Hej.om.Sequence doSort(System.Collections.Generic.List<Saxon.Hej.functions.Sort_1.ItemToBeSorted> inputList, Saxon.Hej.lib.StringCollator collation, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.expr.sort.AtomicComparer atomicComparer = Saxon.Hej.expr.sort.AtomicSortComparer.makeSortComparer(collation, Saxon.Hej.om.StandardNames.XS_ANY_ATOMIC_TYPE, context);
             try {
-                inputList.Sort((a, b) => {
+                Saxon.Impl.Helpers.ListUtils.Sort(inputList, (a, b) => {
     int result = Saxon.Hej.ma.arrays.ArraySort.compareSortKeys(a.sortKey, b.sortKey, atomicComparer);
     if ((result == 0)) {
         return (a.originalPosition-b.originalPosition);

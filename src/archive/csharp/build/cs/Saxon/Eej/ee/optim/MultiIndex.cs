@@ -227,6 +227,10 @@ namespace Saxon.Eej.ee.optim {
             public virtual void close() {
             }
 
+            /* Expanding default method discharge from interface SequenceIterator */
+            public virtual void discharge() {
+            }
+
         }
         private class ValueIndex {
             public Saxon.Hej.type.BuiltInAtomicType untypedType;

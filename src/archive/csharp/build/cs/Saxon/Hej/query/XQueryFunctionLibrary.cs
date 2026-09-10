@@ -52,7 +52,7 @@ namespace Saxon.Hej.query {
                 return null;
             }
         }
-        public bool isAvailable(Saxon.Hej.trans.SymbolicName.F functionName) {
+        public bool isAvailable(Saxon.Hej.trans.SymbolicName.F functionName, int languageLevel) {
             return (Saxon.Impl.Helpers.MapUtils.Get(functions, functionName) != null);
         }
         public class UnresolvedCallable : Saxon.Hej.expr.UserFunctionResolvable, Saxon.Hej.expr.Callable {

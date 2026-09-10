@@ -7,14 +7,14 @@ namespace Saxon.Eej.ee.s9api {
         private Saxon.Hej.lib.ValidationStatisticsRecipient recipient;
         public Saxon.Hej.lib.ValidationStatisticsRecipient getRecipient() {
             if ((recipient == null)) {
-                recipient = new Inner_ValidationStatisticsRecipient_d58e103(this);
+                recipient = new Inner_ValidationStatisticsRecipient_1(this);
             }
             return recipient;
         }
     
-        private class Inner_ValidationStatisticsRecipient_d58e103 : Saxon.Hej.lib.ValidationStatisticsRecipient {
+        private class Inner_ValidationStatisticsRecipient_1 : Saxon.Hej.lib.ValidationStatisticsRecipient {
             private readonly ValidationStatistics outerInstance;
-            public Inner_ValidationStatisticsRecipient_d58e103(ValidationStatistics outerInstance) {
+            public Inner_ValidationStatisticsRecipient_1(ValidationStatistics outerInstance) {
                 this.outerInstance = outerInstance;
             }
             public void notifyValidationStatistics(System.Collections.Generic.IDictionary<Saxon.Hej.type.SchemaComponent,int> statistics) {

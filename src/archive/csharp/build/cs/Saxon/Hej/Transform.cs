@@ -18,6 +18,7 @@ namespace Saxon.Hej {
             new Saxon.Hej.Transform().doTransform(args);
         }
         internal  /* REPLACING public */ void setPermittedOptions(Saxon.Hej.trans.CommandLineOptions options) {
+            options.addRecognizedOption("catalog", (Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Use specified catalog file to resolve URIs");
             options.addRecognizedOption("config", (Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Use specified configuration file");
             options.addRecognizedOption("diag", Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME, "Display runtime diagnostics");
             options.addRecognizedOption("dtd", Saxon.Hej.trans.CommandLineOptions.TYPE_ENUMERATION, "Validate using DTD");
@@ -96,10 +97,14 @@ namespace Saxon.Hej {
                 quit(err.Message, 2);
             }
             schemaAware = false;
-            string configFile = options.getOptionValue("config");
-            if ((configFile != null)) {
+            string configFileName = options.getOptionValue("config");
+            if ((configFileName != null)) {
+                Saxon.Ejava.io.File configFile = new Saxon.Ejava.io.File(configFileName);
+                if (!(configFile.exists())) {
+                    quit((("Configuration file "+configFileName)+" does not exist"), 2);
+                }
                 try {
-                    config = Saxon.Hej.Configuration.readConfiguration(new Saxon.Ejavax.xml.transform.stream.StreamSource(configFile));
+                    config = Saxon.Hej.Configuration.readConfiguration(new Saxon.Ejavax.xml.transform.stream.StreamSource(configFile.toURI().ToString()));
                     initializeConfiguration(config);
                     processor = new Saxon.Hej.s9api.Processor(config);
                     schemaAware = config.isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.ENTERPRISE_XSLT);
@@ -214,13 +219,13 @@ namespace Saxon.Hej {
                 }
                 value = options.getOptionValue("p");
                 if ("on".Equals(value)) {
-                    config.setParameterizedURIResolver();
+                    config.setBooleanProperty(Saxon.Hej.lib.Feature<bool>.RECOGNIZE_URI_QUERY_PARAMETERS, true);
                     useURLs = true;
                 }
                 value = options.getOptionValue("repeat");
                 if ((value != null)) {
                     try {
-                        repeat = System.Int32.Parse(value);
+                        repeat = Saxon.Impl.Helpers.Utils.ParseInt(value);
                     } catch (Saxon.Ejava.lang.NumberFormatException err) {
                         badUsage("Bad number after -repeat");
                     }
@@ -235,7 +240,7 @@ namespace Saxon.Hej {
                 }
                 value = options.getOptionValue("threads");
                 if ((value != null)) {
-                    threadCount = System.Int32.Parse(value);
+                    threadCount = Saxon.Impl.Helpers.Utils.ParseInt(value);
                 }
                 value = options.getOptionValue("t");
                 if ((value != null)) {
@@ -274,10 +279,6 @@ namespace Saxon.Hej {
                             break ;
                         }
                     }
-                }
-                value = options.getOptionValue("TB");
-                if ((value != null)) {
-                    config.setBooleanProperty(Saxon.Hej.lib.Feature<bool>.MONITOR_HOT_SPOT_BYTE_CODE, true);
                 }
                 value = options.getOptionValue("traceout");
                 if ((value == null)) {
@@ -410,10 +411,13 @@ namespace Saxon.Hej {
                     Saxon.Hej.s9api.XsltExecutable sheet = null;
                     Saxon.Ejavax.xml.transform.Source styleSource = null;
                     if (isURI) {
-                        styleSource = config.getURIResolver().resolve(styleFileName, null);
-                        if ((styleSource == null)) {
-                            styleSource = config.getSystemURIResolver().resolve(styleFileName, null);
-                        }
+                        Saxon.Hej.lib.JJ_ResourceRequest request = new Saxon.Hej.lib.JJ_ResourceRequest();
+                        request.relativeUri = styleFileName;
+                        System.Uri cwd = new Saxon.Ejava.io.File(Saxon.Ejava.lang.System.getProperty("user.dir")).toURI();
+                        request.baseUri = cwd.ToString();
+                        request.uri = new System.Uri(cwd, styleFileName).ToString();
+                        request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XSLT_NATURE;
+                        request.purpose = "transformation";
                     } else {
                         if (styleFileName.Equals("-")) {
                             string sysId = new Saxon.Ejava.io.File(Saxon.Ejava.lang.System.getProperty("user.dir")).toURI().OriginalString;
@@ -728,6 +732,11 @@ namespace Saxon.Hej {
                         builder.setWhitespaceStrippingPolicy(sheet.getWhitespaceStrippingPolicy());
                         if (getConfiguration().getBooleanProperty(Saxon.Hej.lib.Feature<bool>.DTD_VALIDATION_RECOVERABLE)) {
                             source = new Saxon.Hej.lib.AugmentedSource(source, getConfiguration().getParseOptions());
+                        }
+                        Saxon.Hej.style.StylesheetPackage top = pss.getTopLevelPackage();
+                        if (top.isStripsTypeAnnotations()) {
+                            source = Saxon.Hej.lib.AugmentedSource.makeAugmentedSource(source);
+                            ((Saxon.Hej.lib.AugmentedSource)(source)).getParseOptions().addFilter(receiver => getConfiguration().getAnnotationStripper(receiver));
                         }
                         Saxon.Api.XdmNode node = builder.build(source);
                         transformer.setGlobalContextItem(node, true);

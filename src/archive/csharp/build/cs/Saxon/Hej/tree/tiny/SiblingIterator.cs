@@ -98,11 +98,11 @@ namespace Saxon.Hej.tree.tiny {
             switch (kind) {
               case Saxon.Hej.type.Type.TEXT:
                 {
-                    return new Saxon.Hej.value.UntypedAtomicValue(Saxon.Hej.tree.tiny.TinyTextImpl.getStringValue(tree, nextNodeNr));
+                    return Saxon.Hej.value.StringValue.makeUntypedAtomic(Saxon.Hej.tree.tiny.TinyTextImpl.getStringValue(tree, nextNodeNr));
                 }
               case Saxon.Hej.type.Type.WHITESPACE_TEXT:
                 {
-                    return new Saxon.Hej.value.UntypedAtomicValue(Saxon.Hej.tree.tiny.WhitespaceTextImpl.getStringValue(tree, nextNodeNr));
+                    return Saxon.Hej.value.StringValue.makeUntypedAtomic(Saxon.Hej.tree.tiny.WhitespaceTextImpl.getStringValue(tree, nextNodeNr));
                 }
               case Saxon.Hej.type.Type.ELEMENT:
               case Saxon.Hej.type.Type.TEXTUAL_ELEMENT:
@@ -141,6 +141,10 @@ namespace Saxon.Hej.tree.tiny {
     
         /* Expanding default method close from interface SequenceIterator */
         public void close() {
+        }
+
+        /* Expanding default method discharge from interface SequenceIterator */
+        public void discharge() {
         }
 
     }

@@ -27,11 +27,11 @@ namespace Saxon.Eej.ee.stream.feed {
                 }
             }
         }
-        public override Saxon.Hej.str.UniStringConsumer getStringReceiver(bool asTextNode) {
+        public override Saxon.Hej.str.UniStringConsumer getStringReceiver(bool asTextNode, Saxon.Hej.s9api.Location loc) {
             if (isSimpleText) {
-                return new Inner_AbstractUniStringConsumer_d346e299(this);
+                return new Inner_AbstractUniStringConsumer_14(this, loc);
             } else {
-                return base.getStringReceiver(asTextNode);
+                return base.getStringReceiver(asTextNode, loc);
             }
         }
         public override void close() {
@@ -78,14 +78,16 @@ namespace Saxon.Eej.ee.stream.feed {
             }
         }
     
-        private class Inner_AbstractUniStringConsumer_d346e299 : Saxon.Hej.str.AbstractUniStringConsumer {
+        private class Inner_AbstractUniStringConsumer_14 : Saxon.Hej.str.AbstractUniStringConsumer {
             private readonly SimpleNodeConstructorFeed outerInstance;
-            public Inner_AbstractUniStringConsumer_d346e299(SimpleNodeConstructorFeed outerInstance) {
+            public Inner_AbstractUniStringConsumer_14(SimpleNodeConstructorFeed outerInstance, Saxon.Hej.s9api.Location loc) {
                 this.outerInstance = outerInstance;
+                this.loc = loc;
             }
+            private Saxon.Hej.s9api.Location loc;
             public override  /* REPLACING public */ Saxon.Hej.str.UniStringConsumer accept(Saxon.Hej.str.UnicodeString chars) {
                 try {
-                    /*guess*/outerInstance.getNextOutputter().characters(/*localparam*/chars, Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE);
+                    /*guess*/outerInstance.getNextOutputter().characters(/*localparam*/chars, /*extraParam*/loc, Saxon.Hej.@event.ReceiverOption.NONE);
                 } catch (Saxon.Hej.trans.XPathException e) {
                     /*guess*/outerInstance.dynamicError(/*exception*/e);
                 }

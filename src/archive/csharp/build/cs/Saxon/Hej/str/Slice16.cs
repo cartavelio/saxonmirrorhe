@@ -74,7 +74,7 @@ namespace Saxon.Hej.str {
             }
         }
         public override Saxon.Hej.z.IntIterator codePoints() {
-            return new Inner_IntIterator_d1580e584(this);
+            return new Inner_IntIterator_38(this);
         }
         public override int GetHashCode() {
             if ((cachedHash != 0)) {
@@ -91,9 +91,9 @@ namespace Saxon.Hej.str {
             return new string(chars, start, (end-start));
         }
     
-        private class Inner_IntIterator_d1580e584 : Saxon.Hej.z.IntIterator {
+        private class Inner_IntIterator_38 : Saxon.Hej.z.IntIterator {
             private readonly Slice16 outerInstance;
-            public Inner_IntIterator_d1580e584(Slice16 outerInstance) {
+            public Inner_IntIterator_38(Slice16 outerInstance) {
                 this.outerInstance = outerInstance;
                 i = outerInstance.start;
             }

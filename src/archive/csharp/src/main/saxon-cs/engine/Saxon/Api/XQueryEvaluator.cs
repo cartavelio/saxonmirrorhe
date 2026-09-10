@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
+using Saxon.Api.Support;
 using Saxon.Hej.lib;
 using Saxon.Hej.query;
 using Saxon.Callbacks;
@@ -25,15 +26,23 @@ namespace Saxon.Api {
     public class XQueryEvaluator : IEnumerable<XdmItem> {
         private Saxon.Hej.s9api.XQueryEvaluator evaluator;
         private TextWriter traceFunctionDestination;
-        private TextResolver textResolver;
+        private ResourceResolver textResolver;
+        private ResourceResolver xmlDocumentResolver;
         private System.Action closeAction;
 
 
         // internal constructor
 
-        internal XQueryEvaluator(Saxon.Hej.s9api.XQueryEvaluator eval) {
+        internal XQueryEvaluator(Processor processor, Saxon.Hej.s9api.XQueryEvaluator eval) {
             this.evaluator = eval;
+            this.Processor = processor;
         }
+        
+        /// <summary>
+        /// Get the <c>Processor</c> from which this <c>XQueryCompiler</c> was constructed
+        /// </summary>
+
+        public Processor Processor { get; }
 
         /// <summary>
         /// The context item for the query.
@@ -98,43 +107,51 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// The <code>XmlResolver</code> to be used at run-time to resolve and dereference URIs
-        /// supplied to the <c>doc()</c> function.
+        /// The <code>ResourceResolver</code> to be used at run-time to resolve and dereference URIs
+        /// supplied to the <c>fn:doc()</c> and <c>fn:doc-available()</c> functions, and other functions
+        /// that fetch XML resources such as <c>fn:transform</c>.
         /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The URI supplied as the first argument to the resolver is the absolute URI requested,
+        /// that is, the result of resolving the requested relative URI against the relevant base URI.
+        /// </para>
+        /// <para>The requested relative URI and the corresponding base URI are supplied as separate
+        /// properties within the <c>ResourceProperties</c> argument, in case they are needed.
+        /// </para>
+        /// <para>The returned <c>IResource</c> must be one of the following:
+        /// <list>
+        /// <item>An <c>IResource</c> such as a <c>NodeResource</c> or an <c>XmlReaderResource</c>
+        /// whose <c>getItem()</c> method delivers an <c>XdmNode</c>;</item>
+        /// <item>A <c>TextResource</c> delivering lexical XML in its <c>Content</c> property; this
+        /// will then be parsed to deliver the corresponding XML document.</item>
+        /// </list>
+        /// </para>
+        /// <para>If no <c>XmlDocumentResolver</c> is supplied, or if it returns null, then
+        /// the <c>CommonResourceResolver</c> associated with the Saxon Configuration is invoked.
+        /// </para>
+        /// </remarks>
 
-        public XmlResolver XmlResolver {
-            get => ((StandardURIResolver) evaluator.getURIResolver()).getXmlResolver();
-            set => evaluator.setURIResolver(
-                new StandardURIResolver(
-                    evaluator.getUnderlyingQueryContext().getConfiguration(), 
-                    value));
+        public ResourceResolver XmlDocumentResolver {
+            get => xmlDocumentResolver;
+            set {
+                xmlDocumentResolver = value;
+                evaluator.setResourceResolver(
+                    new JResourceResolverWrappingCS(value, evaluator.getUnderlyingQueryContext().getConfiguration()));
+            }
         }
-        
+
         /// <summary>
         /// The <code>TextResolver</code> to be used at run-time to resolve and dereference URIs
         /// supplied to the <c>unparsed-text()</c>, <c>unparsed-text-lines()</c>,
         /// <c>unparsed-text-available()</c>, and <c>json-doc()</c> functions.
         /// </summary>
 
-        public TextResolver TextResolver {
+        public ResourceResolver TextResolver {
             get => textResolver;
             set {
                 textResolver = value;
-                evaluator.setUnparsedTextResolver((uri, encoding, config) => {
-                    Encoding enc;
-                    if (encoding == null) {
-                        enc = null;
-                    }
-                    else {
-                        try {
-                            enc = Encoding.GetEncoding(encoding);
-                        }
-                        catch (System.ArgumentException e) {
-                            throw new Saxon.Hej.trans.XPathException("Unparsed-text encoding problem: " + e.Message, "FOUT1190");
-                        }
-                    }
-                    return value(uri, enc);
-                });
+                evaluator.setUnparsedTextResolver(Xslt30Transformer.WrapTextResolver(value));
             }
         }
 

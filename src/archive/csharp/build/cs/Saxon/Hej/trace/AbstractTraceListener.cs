@@ -7,9 +7,6 @@ namespace Saxon.Hej.trace {
         private int detail = 2;
         protected internal Saxon.Hej.lib.Logger @out = new Saxon.Callbacks.StandardLogger();
         private static readonly Saxon.Ejava.lang.StringBuilder spaceBuffer = new Saxon.Ejava.lang.StringBuilder("                ");
-        public virtual Saxon.Hej.expr.parser.CodeInjector getCodeInjector() {
-            return new Saxon.Hej.trace.TraceCodeInjector();
-        }
         public void setLevelOfDetail(int level) {
             this.detail = level;
         }

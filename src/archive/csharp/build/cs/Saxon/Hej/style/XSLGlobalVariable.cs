@@ -47,6 +47,7 @@ namespace Saxon.Hej.style {
                 gv.setVariableQName(sourceBinding.getVariableQName());
                 gv.setSystemId(getSystemId());
                 gv.setLineNumber(getLineNumber());
+                gv.setColumnNumber(getColumnNumber());
                 Saxon.Hej.expr.parser.RetainedStaticContext rsc = makeRetainedStaticContext();
                 gv.setRetainedStaticContext(rsc);
                 if ((gv.getBody() != null)) {
@@ -156,7 +157,9 @@ namespace Saxon.Hej.style {
             if ((exp2 != null)) {
                 try {
                     Saxon.Hej.expr.parser.ExpressionVisitor visitor = makeExpressionVisitor();
-                    exp2 = select.simplify().typeCheck(visitor, getConfiguration().makeContextItemStaticInfo(Saxon.Hej.type.Type.ITEM_TYPE, true));
+                    Saxon.Hej.expr.instruct.GlobalContextRequirement gcr = getPackageData().getContextItemRequirements();
+                    Saxon.Hej.expr.parser.ContextItemStaticInfo cisi = ((gcr == null) ? getConfiguration().getDefaultContextItemStaticInfo() : gcr.makeGlobalContextInfo(getConfiguration()));
+                    exp2 = select.simplify().typeCheck(visitor, cisi);
                 } catch (Saxon.Hej.trans.XPathException err) {
                     compileError(err);
                 }

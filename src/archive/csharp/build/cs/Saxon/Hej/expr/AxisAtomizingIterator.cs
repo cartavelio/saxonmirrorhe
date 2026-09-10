@@ -40,6 +40,9 @@ namespace Saxon.Hej.expr {
         public void close() {
             @base.close();
         }
+        public void discharge() {
+            @base.discharge();
+        }
     
     }
 }

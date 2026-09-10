@@ -107,7 +107,7 @@ namespace Saxon.Hej.ma.zeno {
             }
             return new Saxon.Hej.ma.zeno.ZenoSequence(list);
         }
-        public class ZenoSequenceIterator : Saxon.Hej.tree.iter.GroundedIterator {
+        public class ZenoSequenceIterator : Saxon.Hej.tree.iter.GroundedIterator, Saxon.Hej.expr.LastPositionFinder {
             private Saxon.Hej.ma.zeno.ZenoSequence sequence;
             private System.Collections.Generic.IEnumerator<Saxon.Hej.om.Item> chainIterator;
             private int position = 0;
@@ -118,6 +118,12 @@ namespace Saxon.Hej.ma.zeno {
             public Saxon.Hej.om.Item next() {
                 position++;
                 return (chainIterator.MoveNext() /*UNSAFE CONVERSION*/ ? chainIterator.Current : null);
+            }
+            public bool supportsGetLength() {
+                return true;
+            }
+            public int getLength() {
+                return sequence.getLength();
             }
             public bool isActuallyGrounded() {
                 return true;
@@ -137,6 +143,10 @@ namespace Saxon.Hej.ma.zeno {
         
             /* Expanding default method close from interface SequenceIterator */
             public virtual void close() {
+            }
+
+            /* Expanding default method discharge from interface SequenceIterator */
+            public virtual void discharge() {
             }
 
         }
@@ -163,7 +173,7 @@ namespace Saxon.Hej.ma.zeno {
 
         /* Expanding default method asIterable from interface GroundedValue */
         public virtual System.Collections.Generic.IEnumerable<Saxon.Hej.om.Item> asIterable() {
-            return new Saxon.Hej.om.GroundedValueAsIterable<Saxon.Hej.om.Item>(this);
+            return new Saxon.Hej.om.GroundedValueAsIterable(this);
         }
 
         /* Expanding default method containsNode from interface GroundedValue */

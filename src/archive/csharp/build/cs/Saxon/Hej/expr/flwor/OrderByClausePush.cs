@@ -34,7 +34,7 @@ namespace Saxon.Hej.expr.flwor {
         }
         public override void close() {
             try {
-                tupleArray.Sort((a, b) => {
+                Saxon.Impl.Helpers.ListUtils.Sort(tupleArray, (a, b) => {
     try {
         for (int i = 0; (i<comparers.Length); i++) {
             int comp = comparers[i].compareAtomicValues(a.sortKeyValues[i], b.sortKeyValues[i]);

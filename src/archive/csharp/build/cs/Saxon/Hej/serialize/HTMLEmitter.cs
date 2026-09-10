@@ -165,8 +165,8 @@ namespace Saxon.Hej.serialize {
         protected internal override void writeEscape(Saxon.Hej.str.UnicodeString chars, bool inAttribute) {
             int segstart = 0;
             bool[] specialChars = (inAttribute ? attSpecials : specialInText);
-            if ((chars is Saxon.Hej.str.CompressedWhitespace)) {
-                ((Saxon.Hej.str.CompressedWhitespace)(chars)).writeEscape(specialChars, writer);
+            if ((chars is Saxon.Hej.str.WhitespaceString)) {
+                ((Saxon.Hej.str.WhitespaceString)(chars)).writeEscape(specialChars, writer);
                 return ;
             }
             bool disabled = false;

@@ -62,6 +62,16 @@ namespace Saxon.Hej.expr.flwor {
         public virtual string toShortString() {
             return ToString();
         }
+        public virtual System.Collections.Generic.IDictionary<string,System.Object> getTraceInfo() {
+            Saxon.Hej.expr.flwor.LocalVariableBinding[] vars = getRangeVariables();
+            if ((vars.Length == 0)) {
+                return new System.Collections.Generic.Dictionary<string, System.Object>();
+            } else {
+                System.Collections.Generic.IDictionary<string,System.Object> info = new System.Collections.Generic.Dictionary<string, System.Object>(1);
+                Saxon.Impl.Helpers.MapUtils.Put(info, "var", ("$"+vars[0].getVariableQName().getDisplayName()));
+                return info;
+            }
+        }
     
     }
 }

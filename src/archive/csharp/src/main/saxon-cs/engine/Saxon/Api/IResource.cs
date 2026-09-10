@@ -2,8 +2,8 @@ using System;
 
 namespace Saxon.Api {
     /// <summary>
-    /// This interface defines a Resource. The Resource objects typically belong to a collection.
-    /// It is used to support the fn:collection() and fn:uri-collection() functions.
+    /// This interface defines a Resource, which might be an external XML file, text file, JSON file, etc.
+    /// Resources might belong to a collection, or might be accessed individually by URI.
     /// </summary>
     /// <remarks>
     /// <para>It is recommended (but is not universally the case) that fetching (and where necessary parsing)
@@ -21,18 +21,19 @@ namespace Saxon.Api {
         /// A URI that identifies this resource
         /// </summary>
 
-		/**public**/ Uri ResourceUri { get; }
+        /**public**/ Uri ResourceUri { get; }   
+        // Note, this is marked "public" for the benefit of API documentation 
 
-        /// <summary>
-        /// Get an XDM Item holding the contents of this resource.
-        /// </summary>
-        /// <param name="context">the XPath evaluation context</param>
-        /// <returns>an item holding the contents of the resource. The type of item will
-        /// reflect the type of the resource: a document node for XML resources, a string
-        /// for text resources, a map or array for JSON resources, a base64Binary value
-        /// for binary resource. May also return null if the resource cannot be materialized
-        /// and this is not to be treated as an error.</returns>
-		/**public**/ XdmItem GetXdmItem(DynamicContext context);
+        ///  <summary>
+        ///  Get an XDM Item holding the contents of this resource.
+        ///  </summary>
+        ///  <returns>an item holding the contents of the resource. The type of item will
+        ///  reflect the type of the resource: a document node for XML resources, a string
+        ///  for text resources, a map or array for JSON resources, a base64Binary value
+        ///  for binary resource. May also return null if the resource cannot be materialized
+        ///  and this is not to be treated as an error.</returns>
+
+        /**public**/ XdmItem GetXdmItem();
 
         /// <summary> 
         /// The media type (MIME type) of the resource if known (otherwise null)

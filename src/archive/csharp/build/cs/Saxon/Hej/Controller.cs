@@ -14,13 +14,12 @@ namespace Saxon.Hej {
         protected internal Saxon.Hej.lib.TraceListener traceListener;
         private bool tracingPaused;
         private Saxon.Hej.lib.Logger traceFunctionDestination;
-        private Saxon.Ejavax.xml.transform.URIResolver standardURIResolver;
-        private Saxon.Ejavax.xml.transform.URIResolver userURIResolver;
+        private Saxon.Hej.lib.JJ_ResourceResolver resourceResolver;
         protected internal Saxon.Hej.@event.Receiver principalResult;
         protected internal string principalResultURI;
         private Saxon.Hej.lib.UnparsedTextURIResolver unparsedTextResolver;
         private string defaultCollectionURI;
-        private Saxon.Hej.lib.ErrorReporter errorReporter = new Saxon.Hej.lib.StandardErrorReporter();
+        private Saxon.Hej.lib.ErrorReporter errorReporter;
         private Saxon.Hej.om.TreeModel treeModel = Saxon.Hej.om.TreeModel.TINY_TREE;
         private Saxon.Hej.om.DocumentPool sourceDocumentPool;
         private Saxon.Hej.z.IntHashMap<System.Collections.Generic.IDictionary<System.Int64,Saxon.Hej.trans.KeyIndex>> localIndexes;
@@ -54,11 +53,10 @@ namespace Saxon.Hej {
             globalParameters = new Saxon.Hej.expr.instruct.GlobalParameterSet();
             focusTrackerFactory = config.getFocusTrackerFactory(executable, false);
             multiThreadedFocusTrackerFactory = config.getFocusTrackerFactory(executable, true);
-            standardURIResolver = config.getSystemURIResolver();
-            userURIResolver = config.getURIResolver();
+            resourceResolver = null;
             unparsedTextResolver = config.getUnparsedTextURIResolver();
             validationMode = config.getSchemaValidationMode();
-            errorReporter = new Saxon.Hej.lib.StandardErrorReporter();
+            errorReporter = config.makeErrorReporter();
             traceListener = null;
             traceFunctionDestination = config.getLogger();
             Saxon.Hej.lib.TraceListener tracer;
@@ -141,7 +139,6 @@ namespace Saxon.Hej {
         }
         public Saxon.Hej.@event.PipelineConfiguration makePipelineConfiguration() {
             Saxon.Hej.@event.PipelineConfiguration pipe = config.makePipelineConfiguration();
-            pipe.setURIResolver(((userURIResolver == null) ? standardURIResolver : userURIResolver));
             pipe.getParseOptions().setSchemaValidationMode(validationMode);
             pipe.getParseOptions().setErrorReporter(errorReporter);
             pipe.setController(this);
@@ -249,17 +246,11 @@ namespace Saxon.Hej {
         public Saxon.Hej.om.Item getGlobalContextItem() {
             return globalContextItem;
         }
-        public void setURIResolver(Saxon.Ejavax.xml.transform.URIResolver resolver) {
-            userURIResolver = resolver;
-            if ((resolver is Saxon.Callbacks.StandardURIResolver)) {
-                ((Saxon.Callbacks.StandardURIResolver)(resolver)).setConfiguration(getConfiguration());
-            }
+        public void setResourceResolver(Saxon.Hej.lib.JJ_ResourceResolver resolver) {
+            resourceResolver = resolver;
         }
-        public Saxon.Ejavax.xml.transform.URIResolver getURIResolver() {
-            return userURIResolver;
-        }
-        public Saxon.Ejavax.xml.transform.URIResolver getStandardURIResolver() {
-            return standardURIResolver;
+        public Saxon.Hej.lib.JJ_ResourceResolver getResourceResolver() {
+            return resourceResolver;
         }
         public void setUnparsedTextURIResolver(Saxon.Hej.lib.UnparsedTextURIResolver resolver) {
             unparsedTextResolver = resolver;

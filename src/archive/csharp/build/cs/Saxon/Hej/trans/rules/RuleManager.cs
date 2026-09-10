@@ -32,6 +32,9 @@ namespace Saxon.Hej.trans.rules {
         public void setCompilerInfo(Saxon.Hej.trans.CompilerInfo compilerInfo) {
             this.compilerInfo = compilerInfo;
         }
+        public Saxon.Hej.style.StylesheetPackage getStylesheetPackage() {
+            return stylesheetPackage;
+        }
         public System.Collections.Generic.ICollection<Saxon.Hej.trans.Mode> getAllNamedModes() {
             return modes.Values;
         }
@@ -118,9 +121,9 @@ namespace Saxon.Hej.trans.rules {
             }
         }
         public void checkConsistency() {
-            unnamedMode.checkForConflictingProperties();
+            unnamedMode.resolveProperties(this);
             foreach (Saxon.Hej.trans.Mode mode in modes.Values) {
-                mode.getActivePart().checkForConflictingProperties();
+                mode.getActivePart().resolveProperties(this);
             }
         }
         public void explainTemplateRules(Saxon.Hej.trace.ExpressionPresenter presenter) {

@@ -56,7 +56,12 @@ namespace Saxon.Impl.Helpers {
                     }
                 }
             }
-            Encoding encoding = System.Text.Encoding.GetEncoding(encodingName, EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
+            Encoding encoding;
+            try {
+                encoding = System.Text.Encoding.GetEncoding(encodingName, EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
+            } catch (System.ArgumentException e) {
+                throw new XPathException("Invalid encoding " + encodingName, e);
+            }
             try {
                 string decoded = new string(encoding.GetChars(value, offset, len));
                 if (decoded.StartsWith(BOM)) {
@@ -65,6 +70,7 @@ namespace Saxon.Impl.Helpers {
 
                 return decoded;
             }
+            
             catch (DecoderFallbackException e) {
                 throw new XPathException("Invalid bytes for decoding " + encodingName, e);
             }

@@ -22,7 +22,7 @@ namespace Saxon.Eej.config {
             multithreadingFactory = new Saxon.Eej.ee.config.MultithreadingFactory(this);
             internalSetBooleanProperty(Saxon.Hej.lib.FeatureCode.ALLOW_MULTITHREADING, Saxon.Hej.lib.FeatureKeys.ALLOW_MULTITHREADING, true);
             internalSetBooleanProperty(Saxon.Hej.lib.FeatureCode.GENERATE_BYTE_CODE, Saxon.Hej.lib.FeatureKeys.GENERATE_BYTE_CODE, true);
-            setStaticQueryContextFactory(new Inner_StaticQueryContextFactory_d7e690(this));
+            setStaticQueryContextFactory(new Inner_StaticQueryContextFactory_8(this));
             optimizerOptions = Saxon.Hej.expr.parser.OptimizerOptions.FULL_EE_OPTIMIZATION;
             defaultXsltCompilerInfo.setOptimizerOptions(optimizerOptions);
             standardSchemaResolver = new Saxon.Eej.ee.config.StandardSchemaResolver(this);
@@ -61,7 +61,7 @@ namespace Saxon.Eej.config {
                                 } else {
                                     internalSetBooleanProperty(code, name, true);
                                     try {
-                                        byteCodeThreshold = System.Int32.Parse(value.ToString());
+                                        byteCodeThreshold = Saxon.Impl.Helpers.Utils.ParseInt(value.ToString());
                                     } catch (Saxon.Ejava.lang.NumberFormatException e) {
                                         throw new Saxon.Ejava.lang.IllegalArgumentException((("Value of "+name)+" must be a boolean or an integer"));
                                     }
@@ -94,9 +94,13 @@ namespace Saxon.Eej.config {
                     if ((comma<1)) {
                         throw new Saxon.Ejava.lang.IllegalArgumentException((("Value of "+name)+"must be two integers, comma-separated"));
                     }
-                    int min = System.Int32.Parse(val.Substring(0, comma - 0));
-                    int max = System.Int32.Parse(val.Substring((comma+1)));
-                    setOccurrenceLimits(min, max);
+                    try {
+                        int min = Saxon.Impl.Helpers.Utils.ParseInt(val.Substring(0, comma - 0));
+                        int max = Saxon.Impl.Helpers.Utils.ParseInt(val.Substring((comma+1)));
+                        setOccurrenceLimits(min, max);
+                    } catch (Saxon.Ejava.lang.NumberFormatException e) {
+                        throw new Saxon.Ejava.lang.IllegalArgumentException((("Value of "+name)+"must be two integers, comma-separated"));
+                    }
                     break ;
                 }
               case Saxon.Hej.lib.FeatureCode.RESULT_DOCUMENT_THREADS:
@@ -237,24 +241,12 @@ namespace Saxon.Eej.config {
         public override Saxon.Hej.expr.accum.AccumulatorRegistry makeAccumulatorRegistry() {
             return new Saxon.Eej.ee.stream.AccumulatorRegistryEE();
         }
-        public override Saxon.Hej.functions.FunctionLibraryList getBuiltInExtensionLibraryList() {
-            if (!(isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.SCHEMA_VALIDATION))) {
-                return base.getBuiltInExtensionLibraryList();
+        protected internal override Saxon.Hej.functions.registry.BuiltInFunctionSet makeVendorFunctionSet() {
+            if (isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.SCHEMA_VALIDATION)) {
+                return new Saxon.Eej.ee.extfn.VendorFunctionSetEE(this);
+            } else {
+                return null;
             }
-            if ((builtInExtensionLibraryList == null)) {
-                vendorFunctionSet = new Saxon.Eej.ee.extfn.VendorFunctionSetEE(this);
-                builtInExtensionLibraryList = new Saxon.Hej.functions.FunctionLibraryList();
-                builtInExtensionLibraryList.addFunctionLibrary(vendorFunctionSet);
-                builtInExtensionLibraryList.addFunctionLibrary(Saxon.Hej.functions.MathFunctionSet.getInstance());
-                builtInExtensionLibraryList.addFunctionLibrary(Saxon.Hej.ma.map.MapFunctionSet.getInstance());
-                builtInExtensionLibraryList.addFunctionLibrary(Saxon.Hej.ma.arrays.ArrayFunctionSet.getInstance());
-                builtInExtensionLibraryList.addFunctionLibrary(Saxon.Hej.functions.registry.ExsltCommonFunctionSet.getInstance());
-                builtInExtensionLibraryList.addFunctionLibrary(/*134*/Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.getInstance());
-                if (getBooleanProperty(Saxon.Hej.lib.Feature<bool>.ALLOW_EXTERNAL_FUNCTIONS)) {
-                    builtInExtensionLibraryList.addFunctionLibrary(/*134*/Saxon.Eej.functions.extfn.EXPathFileFunctionSet.getInstance());
-                }
-            }
-            return builtInExtensionLibraryList;
         }
         public override Saxon.Hej.expr.instruct.UserFunction newUserFunction(bool memoFunction, Saxon.Hej.trans.FunctionStreamability streamability) {
             if (memoFunction) {
@@ -611,7 +603,7 @@ namespace Saxon.Eej.config {
                 Saxon.Hej.@event.PathMaintainer pathMaintainer = new Saxon.Hej.@event.PathMaintainer(stb);
                 pipe.setComponent("net.sf.saxon.event.PathMaintainer", pathMaintainer);
                 Saxon.Hej.@event.DocumentValidator dv = new Saxon.Hej.@event.DocumentValidator(pathMaintainer, ((hostLanguage == Saxon.Api.HostLanguage.XSLT) ? "XTTE1550" : "XQDY0061"));
-                Saxon.Hej.@event.LocationCopier copier = new Saxon.Hej.@event.LocationCopier(true);
+                Saxon.Hej.@event.LocationCopier copier = new Saxon.Hej.@event.LocationCopier(true, systemId);
                 pipe.setCopyInformee((element) => copier.notifyElementNode(element));
                 vc.startValidation(systemId);
                 return dv;
@@ -823,14 +815,9 @@ namespace Saxon.Eej.config {
         public override Saxon.Hej.expr.PendingUpdateList newPendingUpdateList() {
             return new Saxon.Eej.ee.update.PendingUpdateListImpl();
         }
-        public override Saxon.Hej.@event.PipelineConfiguration makePipelineConfiguration() {
-            Saxon.Hej.@event.PipelineConfiguration pipe = base.makePipelineConfiguration();
-            pipe.setSchemaURIResolver(getSchemaURIResolver());
-            return pipe;
-        }
-        public override Saxon.Hej.lib.SchemaURIResolver makeSchemaURIResolver(Saxon.Ejavax.xml.transform.URIResolver resolver) {
+        public override Saxon.Hej.lib.SchemaURIResolver makeSchemaURIResolver(Saxon.Hej.lib.JJ_ResourceResolver resolver) {
             Saxon.Eej.ee.config.StandardSchemaResolver schemaResolver = new Saxon.Eej.ee.config.StandardSchemaResolver(this);
-            schemaResolver.setURIResolver(resolver);
+            schemaResolver.setResourceResolver(resolver);
             return schemaResolver;
         }
         public override Saxon.Hej.@event.FilterFactory makeDocumentProjector(Saxon.Hej.expr.parser.PathMap.PathMapRoot map) {
@@ -1071,9 +1058,9 @@ namespace Saxon.Eej.config {
             return base.makeCompilerInfo();
         }
     
-        private class Inner_StaticQueryContextFactory_d7e690 : Saxon.Hej.lib.StaticQueryContextFactory {
+        private class Inner_StaticQueryContextFactory_8 : Saxon.Hej.lib.StaticQueryContextFactory {
             private readonly EnterpriseConfiguration outerInstance;
-            public Inner_StaticQueryContextFactory_d7e690(EnterpriseConfiguration outerInstance) {
+            public Inner_StaticQueryContextFactory_8(EnterpriseConfiguration outerInstance) {
                 this.outerInstance = outerInstance;
             }
             public override Saxon.Hej.query.StaticQueryContext newStaticQueryContext(Saxon.Hej.Configuration config, bool copyFromDefault) {

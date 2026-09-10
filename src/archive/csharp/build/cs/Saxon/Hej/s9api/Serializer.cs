@@ -13,7 +13,7 @@ namespace Saxon.Hej.s9api {
         private Saxon.Hej.s9api.Processor processor;
         private readonly System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,string> properties = new System.Collections.Generic.Dictionary<Saxon.Hej.om.StructuredQName, string>(10);
         private readonly Saxon.Ejavax.xml.transform.stream.StreamResult result = new Saxon.Ejavax.xml.transform.stream.StreamResult();
-        private Saxon.Hej.serialize.CharacterMapIndex characterMap = null;
+        private Saxon.Hej.serialize.CharacterMapIndex characterMapIndex = null;
         private bool mustClose = false;
         private static readonly System.Collections.Generic.IDictionary<string,Saxon.Hej.s9api.Serializer.Property> standardProperties = new System.Collections.Generic.Dictionary<string, Saxon.Hej.s9api.Serializer.Property>();
         public class  Property  {
@@ -174,7 +174,7 @@ namespace Saxon.Hej.s9api {
             mustClose = value;
         }
         public void setCharacterMap(Saxon.Hej.serialize.CharacterMapIndex characterMap) {
-            Saxon.Hej.serialize.CharacterMapIndex existingIndex = this.characterMap;
+            Saxon.Hej.serialize.CharacterMapIndex existingIndex = this.characterMapIndex;
             if (((existingIndex == null) || existingIndex.isEmpty())) {
                 existingIndex = characterMap;
             } else {
@@ -185,7 +185,13 @@ namespace Saxon.Hej.s9api {
                     }
                 }
             }
-            this.characterMap = existingIndex;
+            this.characterMapIndex = existingIndex;
+        }
+        public Saxon.Hej.serialize.CharacterMapIndex getCharacterMapIndex() {
+            if ((characterMapIndex == null)) {
+                characterMapIndex = new Saxon.Hej.serialize.CharacterMapIndex();
+            }
+            return characterMapIndex;
         }
         public void setOutputProperty(Saxon.Hej.s9api.Serializer.Property property, string value) {
             Saxon.Hej.lib.SerializerFactory sf = processor.getUnderlyingConfiguration().getSerializerFactory();
@@ -256,7 +262,7 @@ namespace Saxon.Hej.s9api {
                 serializeNode((Saxon.Api.XdmNode)(value));
             } else {
                 try {
-                    Saxon.Hej.serialize.SerializationProperties properties = new Saxon.Hej.serialize.SerializationProperties(getLocallyDefinedProperties(), characterMap);
+                    Saxon.Hej.serialize.SerializationProperties properties = new Saxon.Hej.serialize.SerializationProperties(getLocallyDefinedProperties(), characterMapIndex);
                     Saxon.Hej.query.QueryResult.serializeSequence(((Saxon.Hej.om.GroundedValue)value.Unwrap()).iterate(), processor.getUnderlyingConfiguration(), result, properties);
                 } catch (Saxon.Hej.trans.XPathException e) {
                     throw new Saxon.Api.SaxonApiException(e);
@@ -354,7 +360,7 @@ namespace Saxon.Hej.s9api {
             return props;
         }
         public Saxon.Hej.serialize.SerializationProperties getSerializationProperties() {
-            return new Saxon.Hej.serialize.SerializationProperties(getLocallyDefinedProperties(), characterMap);
+            return new Saxon.Hej.serialize.SerializationProperties(getLocallyDefinedProperties(), characterMapIndex);
         }
         protected internal Saxon.Ejavax.xml.transform.Result getResult() {
             return result;

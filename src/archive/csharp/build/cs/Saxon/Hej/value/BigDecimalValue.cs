@@ -117,7 +117,7 @@ namespace Saxon.Hej.value {
         }
         public BigDecimalValue(double @in)  {
             try {
-                Singulink.Numerics.BigDecimal d = Singulink.Numerics.BigDecimal.FromDouble(@in, Singulink.Numerics.FloatConversion.Roundtrip);
+                Singulink.Numerics.BigDecimal d = Singulink.Numerics.BigDecimal.FromDouble(@in, Singulink.Numerics.FloatConversion.Exact);
                 value = d;
             } catch (System.Exception err) {
                 Saxon.Hej.type.ValidationFailure e = new Saxon.Hej.type.ValidationFailure((("Cannot convert double "+Saxon.Hej.trans.Err.wrap((@in+""), Saxon.Hej.trans.Err.VALUE))+" to decimal"));
@@ -159,7 +159,12 @@ namespace Saxon.Hej.value {
         }
         public override int GetHashCode() {
             Singulink.Numerics.BigDecimal round = value;
-            long longVal = ((long)round);
+            long longVal;
+            try {
+                longVal = ((long)round);
+            } catch (System.Exception e) {
+                longVal = System.Int64.MaxValue;
+            }
             if (((longVal>System.Int32.MinValue) && (longVal<System.Int32.MaxValue))) {
                 return (int)(longVal);
             } else {
@@ -180,7 +185,7 @@ namespace Saxon.Hej.value {
             return Saxon.Hej.str.BMPString.of(decimalToString(value, new Saxon.Ejava.lang.StringBuilder(16)).ToString());
         }
         public static Saxon.Ejava.lang.StringBuilder decimalToString(Singulink.Numerics.BigDecimal value, Saxon.Ejava.lang.StringBuilder fsb) {
-            return fsb.append(value.ToString()); /*maybe imprecise?*/
+            return fsb.append(value.ToString("G", System.Globalization.CultureInfo.InvariantCulture));
         }
         public override Saxon.Hej.value.NumericValue negate() {
             return new Saxon.Hej.value.BigDecimalValue(-value);

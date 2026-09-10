@@ -22,7 +22,7 @@ namespace Saxon.Hej.functions {
                 sf.getDetails().properties = (sf.getDetails().properties|Saxon.Hej.functions.registry.BuiltInFunctionSet.LATE);
                 return null;
             } else {
-                return new Inner_SystemFunctionCall_d1030e260(sf, arguments, sf);
+                return new Inner_SystemFunctionCall_8(sf, arguments, sf);
             }
         }
         public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
@@ -46,8 +46,8 @@ namespace Saxon.Hej.functions {
             return (((Saxon.Hej.expr.StaticProperty.ORDERED_NODESET|Saxon.Hej.expr.StaticProperty.PEER_NODESET)|Saxon.Hej.expr.StaticProperty.NO_NODES_NEWLY_CREATED)|Saxon.Hej.expr.StaticProperty.SINGLE_DOCUMENT_NODESET);
         }
     
-        private class Inner_SystemFunctionCall_d1030e260 : Saxon.Hej.expr.SystemFunctionCall {
-            public Inner_SystemFunctionCall_d1030e260(/*AA*/Saxon.Hej.functions.SystemFunction arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2, Saxon.Hej.functions.SystemFunction sf) : base(arg1, arg2) {
+        private class Inner_SystemFunctionCall_8 : Saxon.Hej.expr.SystemFunctionCall {
+            public Inner_SystemFunctionCall_8(/*AA*/Saxon.Hej.functions.SystemFunction arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2, Saxon.Hej.functions.SystemFunction sf) : base(arg1, arg2) {
                 this.sf = sf;
             }
             private Saxon.Hej.functions.SystemFunction sf;
@@ -66,7 +66,7 @@ namespace Saxon.Hej.functions {
                     if ((/*localvar*/href.IndexOf('#')>=0)) {
                         return this;
                     }
-                    Saxon.Hej.om.NodeInfo item = Saxon.Hej.functions.DocumentFn.preLoadDoc(/*localvar*/href, /*extraParam*/sf.getStaticBaseUriString(), /*localvar*/config, /*superMethod*/getLocation());
+                    Saxon.Hej.om.NodeInfo item = Saxon.Hej.functions.DocumentFn.preLoadDoc(/*localvar*/href, /*extraParam*/sf.getStaticBaseUriString(), /*extraParam*/sf.getRetainedStaticContext().getPackageData(), /*localvar*/config, /*superMethod*/getLocation());
                     if ((/*localvar*/item != null)) {
                         Saxon.Hej.expr.Expression constant = Saxon.Hej.expr.Literal.makeLiteral(/*localvar*/item);
                         Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this.getArg(0), /*localvar*/constant);

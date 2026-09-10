@@ -227,6 +227,7 @@ namespace Saxon.Api {
             }
             return new XdmArray(list);
         }
+
     }
 }
 

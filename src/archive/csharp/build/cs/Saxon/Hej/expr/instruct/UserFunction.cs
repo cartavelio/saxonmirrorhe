@@ -295,6 +295,11 @@ namespace Saxon.Hej.expr.instruct {
                 err.maybeSetLocation(getLocation());
                 err.maybeSetContext(c2);
                 throw;
+            } catch (Saxon.Hej.trans.UncheckedXPathException uxe) {
+                Saxon.Hej.trans.XPathException err = uxe.getXPathException();
+                err.maybeSetLocation(getLocation());
+                err.maybeSetContext(c2);
+                throw err;
             } catch (System.Exception err2) {
                 string message = ((("Internal error evaluating function "+(((functionName == null) ? "(unnamed)" : functionName.getDisplayName())))+(((getLineNumber()>0) ? (" at line "+getLineNumber()) : "")))+(((getSystemId() != null) ? (" in module "+getSystemId()) : "")));
                 throw new System.Exception(message, err2);
@@ -425,9 +430,9 @@ namespace Saxon.Hej.expr.instruct {
         public virtual void prepareForStreaming() {
         }
     
-        /* Expanding default method isSequenceVariadic from interface Function */
-        public virtual bool isSequenceVariadic() {
-            return false;
+        /* Expanding default method materialize from interface Sequence */
+        public virtual Saxon.Hej.om.GroundedValue materialize() {
+            return Saxon.Hej.om.SequenceTool.toGroundedValue(iterate());
         }
 
         /* Expanding default method toShortString from interface Item */
@@ -435,19 +440,9 @@ namespace Saxon.Hej.expr.instruct {
             return ToString();
         }
 
-        /* Expanding default method getGenre from interface Function */
-        public virtual Saxon.Hej.om.Genre getGenre() {
-            return Saxon.Hej.om.Genre.FUNCTION;
-        }
-
-        /* Expanding default method materialize from interface Sequence */
-        public virtual Saxon.Hej.om.GroundedValue materialize() {
-            return Saxon.Hej.om.SequenceTool.toGroundedValue(iterate());
-        }
-
         /* Expanding default method asIterable from interface GroundedValue */
         public virtual System.Collections.Generic.IEnumerable<Saxon.Hej.om.Item> asIterable() {
-            return new Saxon.Hej.om.GroundedValueAsIterable<Saxon.Hej.om.Item>(this);
+            return new Saxon.Hej.om.GroundedValueAsIterable(this);
         }
 
         /* Expanding default method containsNode from interface GroundedValue */
@@ -465,6 +460,21 @@ namespace Saxon.Hej.expr.instruct {
             return chain;
         }
 
+        /* Expanding default method makeRepeatable from interface Sequence */
+        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
+            return this;
+        }
+
+        /* Expanding default method isSequenceVariadic from interface Function */
+        public virtual bool isSequenceVariadic() {
+            return false;
+        }
+
+        /* Expanding default method getGenre from interface Function */
+        public virtual Saxon.Hej.om.Genre getGenre() {
+            return Saxon.Hej.om.Genre.FUNCTION;
+        }
+
         /* Expanding default method getStringValue from interface Item */
         public virtual string getStringValue() {
             return getUnicodeStringValue().ToString();
@@ -478,11 +488,6 @@ namespace Saxon.Hej.expr.instruct {
         /* Expanding default method isStreamed from interface Item */
         public virtual bool isStreamed() {
             return false;
-        }
-
-        /* Expanding default method makeRepeatable from interface Sequence */
-        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
-            return this;
         }
 
     }

@@ -177,12 +177,15 @@ namespace Saxon.Hej.expr {
             Saxon.Hej.expr.parser.Optimizer.trace(getConfiguration(), "Replaced general comparison by untyped-numeric value comparison", vc);
             return vc;
         }
-        private static Saxon.Hej.expr.Expression makeMinOrMax(Saxon.Hej.expr.Expression exp, string function) {
+        private static Saxon.Hej.expr.Expression makeMinOrMax(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo, Saxon.Hej.expr.Expression exp, string function) {
             if (Saxon.Hej.value.Cardinality.allowsMany(exp.getCardinality())) {
-                Saxon.Hej.expr.Expression fn = Saxon.Hej.functions.SystemFunction.makeCall(function, exp.getRetainedStaticContext(), exp);
-                System.Diagnostics.Debug.Assert((fn != null));
-                ((Saxon.Hej.functions.Minimax)(((Saxon.Hej.expr.SystemFunctionCall)(fn)).getTargetFunction())).setIgnoreNaN(true);
-                return fn;
+                Saxon.Hej.functions.SystemFunction fn = Saxon.Hej.functions.SystemFunction.makeFunction(function, exp.getRetainedStaticContext(), 1);
+                ((Saxon.Hej.functions.Minimax)(fn)).setIgnoreNaN(true);
+                Saxon.Hej.expr.Expression x = fn.makeOptimizedFunctionCall(visitor, contextInfo, exp);
+                if ((x == null)) {
+                    x = fn.makeFunctionCall(exp);
+                }
+                return x;
             } else {
                 return exp;
             }
@@ -247,13 +250,13 @@ namespace Saxon.Hej.expr {
                 switch (@operator) {
                   case Saxon.Hej.expr.parser.Token.LT:
                   case Saxon.Hej.expr.parser.Token.LE:
-                    vc = new Saxon.Hej.expr.ValueComparison(makeMinOrMax(getLhsExpression(), "min"), singletonOperator, makeMinOrMax(getRhsExpression(), "max"));
+                    vc = new Saxon.Hej.expr.ValueComparison(makeMinOrMax(visitor, contextInfo, getLhsExpression(), "min"), singletonOperator, makeMinOrMax(visitor, contextInfo, getRhsExpression(), "max"));
                     vc.setResultWhenEmpty(Saxon.Hej.value.BooleanValue.FALSE);
                     vc.setAtomicComparer(comparer);
                     break ;
                   case Saxon.Hej.expr.parser.Token.GT:
                   case Saxon.Hej.expr.parser.Token.GE:
-                    vc = new Saxon.Hej.expr.ValueComparison(makeMinOrMax(getLhsExpression(), "max"), singletonOperator, makeMinOrMax(getRhsExpression(), "min"));
+                    vc = new Saxon.Hej.expr.ValueComparison(makeMinOrMax(visitor, contextInfo, getLhsExpression(), "max"), singletonOperator, makeMinOrMax(visitor, contextInfo, getRhsExpression(), "min"));
                     vc.setResultWhenEmpty(Saxon.Hej.value.BooleanValue.FALSE);
                     vc.setAtomicComparer(comparer);
                     break ;
@@ -375,7 +378,7 @@ namespace Saxon.Hej.expr {
                     return false;
                 }
                 if ((iter0 is Saxon.Hej.tree.iter.RangeIterator)) {
-                    if ((value1 is Saxon.Hej.value.UntypedAtomicValue)) {
+                    if (value1.isUntypedAtomic()) {
                         value1 = Saxon.Hej.type.StringConverter.StringToInteger.INSTANCE.convertString(value1.getUnicodeStringValue()).asAtomic();
                     }
                     Saxon.Hej.tree.iter.RangeIterator ri = (Saxon.Hej.tree.iter.RangeIterator)(iter0);

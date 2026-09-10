@@ -35,7 +35,7 @@ namespace Saxon.Hej.query {
             Saxon.Hej.functions.CallableFunction fi = new Saxon.Hej.functions.CallableFunction(functionName, uc, Saxon.Hej.type.AnyFunctionType.getInstance());
             return fi;
         }
-        public bool isAvailable(Saxon.Hej.trans.SymbolicName.F functionName) {
+        public bool isAvailable(Saxon.Hej.trans.SymbolicName.F functionName, int languageLevel) {
             return false;
         }
         public void bindUnboundFunctionReferences(Saxon.Hej.query.XQueryFunctionBinder lib, Saxon.Hej.Configuration config) {

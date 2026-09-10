@@ -44,7 +44,7 @@ namespace Saxon.Hej.expr {
         public static Saxon.Hej.expr.UntypedSequenceConverter makeUntypedSequenceRejector(Saxon.Hej.Configuration config, Saxon.Hej.expr.Expression operand, Saxon.Hej.type.PlainType requiredItemType) {
             Saxon.Hej.expr.UntypedSequenceConverter atomicSeqConverter = new Saxon.Hej.expr.UntypedSequenceConverter(operand, requiredItemType);
             Saxon.Hej.lib.ConversionRules rules = config.getConversionRules();
-            Saxon.Hej.type.Converter untypedConverter = new Inner_Converter_d968e405(requiredItemType, operand);
+            Saxon.Hej.type.Converter untypedConverter = new Inner_Converter_7(requiredItemType, operand);
             Saxon.Hej.type.Converter converter = new Saxon.Hej.expr.UntypedSequenceConverter.UntypedConverter(rules, untypedConverter);
             atomicSeqConverter.setConverter(converter);
             return atomicSeqConverter;
@@ -108,8 +108,8 @@ namespace Saxon.Hej.expr {
             destination.endElement();
         }
     
-        private class Inner_Converter_d968e405 : Saxon.Hej.type.Converter {
-            public Inner_Converter_d968e405(Saxon.Hej.type.PlainType requiredItemType, Saxon.Hej.expr.Expression operand) {
+        private class Inner_Converter_7 : Saxon.Hej.type.Converter {
+            public Inner_Converter_7(Saxon.Hej.type.PlainType requiredItemType, Saxon.Hej.expr.Expression operand) {
                 this.requiredItemType = requiredItemType;
                 this.operand = operand;
             }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.om {
     public class NodeSource : Saxon.Hej.lib.ActiveSource {
-        private Saxon.Hej.om.NodeInfo node;
+        private readonly Saxon.Hej.om.NodeInfo node;
         private string systemId;
         public NodeSource(Saxon.Hej.om.NodeInfo node)  {
             this.node = node;

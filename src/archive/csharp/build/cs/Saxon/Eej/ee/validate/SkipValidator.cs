@@ -4,13 +4,12 @@ using System.Linq;
 namespace Saxon.Eej.ee.validate {
     public class SkipValidator : Saxon.Eej.ee.validate.ContentValidator {
         private bool stripIdProperty = false;
-        private Saxon.Hej.type.TypeHierarchy typeHierarchy;
         public SkipValidator(Saxon.Hej.@event.Receiver next) : base (next) {
+            setPipelineConfiguration(next.getPipelineConfiguration());
         }
         public override void setPipelineConfiguration(Saxon.Hej.@event.PipelineConfiguration pipe) {
             base.setPipelineConfiguration(pipe);
             stripIdProperty = (pipe.getHostLanguage() == Saxon.Api.HostLanguage.XQUERY);
-            typeHierarchy = pipe.getConfiguration().getTypeHierarchy();
         }
         public override Saxon.Hej.type.SchemaType getSchemaType() {
             return null;

@@ -67,7 +67,7 @@ namespace Saxon.Eej.ee.stream.om {
             return null;
         }
         public override Saxon.Hej.om.AtomicSequence atomize() {
-            return new Saxon.Hej.value.UntypedAtomicValue(getUnicodeStringValue());
+            return Saxon.Hej.value.StringValue.makeUntypedAtomic(getUnicodeStringValue());
         }
         public System.Collections.Generic.IEnumerator<string> getUnparsedEntityNames() {
             if ((unparsedEntities == null)) {

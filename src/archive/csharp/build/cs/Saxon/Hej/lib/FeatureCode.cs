@@ -127,7 +127,9 @@ namespace Saxon.Hej.lib {
         public const int RETAIN_NODE_FOR_DIAGNOSTICS = 125;
         public const int ALLOW_UNRESOLVED_SCHEMA_COMPONENTS = 126;
         public const int ZIP_URI_PATTERN = 127;
-        public const int MAX = 127;
+        public const int RESOURCE_RESOLVER = 128;
+        public const int RESOURCE_RESOLVER_CLASS = 129;
+        public const int MAX = 129;
     
     }
 }

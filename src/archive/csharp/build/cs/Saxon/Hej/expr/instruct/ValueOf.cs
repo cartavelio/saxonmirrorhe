@@ -138,7 +138,8 @@ namespace Saxon.Hej.expr.instruct {
                 return null;
             } else {
                 if ((((getSelect().getItemType() == Saxon.Hej.type.BuiltInAtomicType.STRING) && !(isDisableOutputEscaping())) && !(Saxon.Hej.value.Cardinality.allowsZero(getCardinality())))) {
-                    Saxon.Hej.@event.Outputter toText = new Inner_ProxyOutputter_d807e1043(this, output);
+                    Saxon.Hej.s9api.Location instructionLoc = getLocation();
+                    Saxon.Hej.@event.Outputter toText = new Inner_ProxyOutputter_14(this, output, instructionLoc);
                     getSelect().process(toText, context);
                     return null;
                 } else {
@@ -198,19 +199,23 @@ namespace Saxon.Hej.expr.instruct {
             @out.endElement();
         }
     
-        private class Inner_ProxyOutputter_d807e1043 : Saxon.Hej.@event.ProxyOutputter {
+        private class Inner_ProxyOutputter_14 : Saxon.Hej.@event.ProxyOutputter {
             private readonly ValueOf outerInstance;
-            public Inner_ProxyOutputter_d807e1043(ValueOf outerInstance, /*AA*/Saxon.Hej.@event.Outputter arg1) : base(arg1) {
+            public Inner_ProxyOutputter_14(ValueOf outerInstance, /*AA*/Saxon.Hej.@event.Outputter arg1, Saxon.Hej.s9api.Location instructionLoc) : base(arg1) {
                 this.outerInstance = outerInstance;
+                this.instructionLoc = instructionLoc;
             }
+            private Saxon.Hej.s9api.Location instructionLoc;
             public override void append(Saxon.Hej.om.Item item) {
-                /*superMethod*/getNextOutputter().characters(/*localparam*/item.getUnicodeStringValue(), Saxon.Hej.expr.parser.Loc.NONE, outerInstance.options);
+                /*superMethod*/getNextOutputter().characters(/*localparam*/item.getUnicodeStringValue(), /*extraParam*/instructionLoc, outerInstance.options);
             }
-            public override void append(Saxon.Hej.om.Item item, Saxon.Hej.s9api.Location locationId, int properties) {
-                /*superMethod*/getNextOutputter().characters(/*localparam*/item.getUnicodeStringValue(), /*localparam*/locationId, (/*localparam*/properties|outerInstance.options));
+            public override void append(Saxon.Hej.om.Item item, Saxon.Hej.s9api.Location loc, int properties) {
+                Saxon.Hej.s9api.Location location = ((/*localparam*/loc.getLineNumber() == -1) ? /*extraParam*/instructionLoc : /*localparam*/loc);
+                /*superMethod*/getNextOutputter().characters(/*localparam*/item.getUnicodeStringValue(), /*localvar*/location, (/*localparam*/properties|outerInstance.options));
             }
-            public override  /* REPLACING public */ Saxon.Hej.str.UniStringConsumer getStringReceiver(bool asTextNode) {
-                return /*superMethod*/getNextOutputter().getStringReceiver(true);
+            public override  /* REPLACING public */ Saxon.Hej.str.UniStringConsumer getStringReceiver(bool asTextNode, Saxon.Hej.s9api.Location loc) {
+                Saxon.Hej.s9api.Location location = ((/*localparam*/loc.getLineNumber() == -1) ? /*extraParam*/instructionLoc : /*localparam*/loc);
+                return /*superMethod*/getNextOutputter().getStringReceiver(true, /*localvar*/location);
             }
         }
 

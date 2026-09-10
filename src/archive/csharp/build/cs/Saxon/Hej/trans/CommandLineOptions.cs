@@ -193,7 +193,34 @@ namespace Saxon.Hej.trans {
                     throw new Saxon.Hej.trans.XPathException(((("Incorrect value for --"+name)+": ")+err.Message));
                 }
             }
-            string optionValue;
+            string optionValue = getOptionValue("catalog");
+            if ((optionValue != null)) {
+                System.Collections.Generic.List<string> catalogs = new System.Collections.Generic.List<string>();
+                if ((((getOptionValue("u") != null)) || isImplicitURI(optionValue))) {
+                    Saxon.Hej.lib.JJ_ResourceRequest request = new Saxon.Hej.lib.JJ_ResourceRequest();
+                    request.nature = "urn:oasis:names:tc:entity:xmlns:xml:catalog";
+                    request.purpose = "catalog";
+                    foreach (string s in System.Text.RegularExpressions.Regex.Split(optionValue, ";")) {
+                        Saxon.Ejavax.xml.transform.Source sourceInput;
+                        try {
+                            request.uri = s;
+                            sourceInput = new Saxon.Callbacks.DirectResourceResolver(config).resolve(request);
+                        } catch (Saxon.Hej.trans.XPathException e) {
+                            throw new Saxon.Hej.trans.XPathException(("Catalog file not found: "+s), e);
+                        }
+                        catalogs.Add(sourceInput.getSystemId());
+                    }
+                } else {
+                    foreach (string s in System.Text.RegularExpressions.Regex.Split(optionValue, ";")) {
+                        Saxon.Ejava.io.File catalogFile = new Saxon.Ejava.io.File(s);
+                        if (!(catalogFile.exists())) {
+                            throw new Saxon.Hej.trans.XPathException(("Catalog file not found: "+s));
+                        }
+                        catalogs.Add(catalogFile.toURI().OriginalString);
+                    }
+                }
+                setCatalogFiles(config, catalogs);
+            }
             optionValue = getOptionValue("dtd");
             if ((optionValue != null)) {
                 switch (optionValue) {
@@ -248,7 +275,7 @@ namespace Saxon.Hej.trans {
             }
             optionValue = getOptionValue("r");
             if ((optionValue != null)) {
-                config.setURIResolver(config.makeURIResolver(optionValue));
+                config.setResourceResolver(config.makeResourceResolver(optionValue));
             }
             optionValue = getOptionValue("strip");
             if ((optionValue != null)) {
@@ -318,6 +345,17 @@ namespace Saxon.Hej.trans {
                 Saxon.Hej.lib.Initializer initializer = (Saxon.Hej.lib.Initializer)(config.getInstance(optionValue));
                 initializer.initialize(config);
             }
+        }
+        private void setCatalogFiles(Saxon.Hej.Configuration config, System.Collections.Generic.IList<string> catalogs) {
+            Saxon.Hej.lib.JJ_ResourceResolver rr = config.getResourceResolver();
+            if ((rr is Saxon.Callbacks.ConfigurableResourceResolver)) {
+                setCatalogFiles(((Saxon.Callbacks.ConfigurableResourceResolver)(rr)), catalogs);
+            } else {
+                throw new Saxon.Ejava.lang.IllegalStateException("The resolver in the Configuration is not a ConfigurableResourceResolver");
+            }
+        }
+        public static void setCatalogFiles(Saxon.Callbacks.ConfigurableResourceResolver crr, System.Collections.Generic.IList<string> catalogs) {
+            crr.setFeature(Org.XmlResolver.Features.ResolverFeature.CATALOG_FILES, catalogs);
         }
         public string displayPermittedOptions() {
             string[] options = new string[recognizedOptions.Count];
@@ -448,11 +486,12 @@ namespace Saxon.Hej.trans {
             Saxon.Hej.Configuration config = processor.getUnderlyingConfiguration();
             if ((useURLs || isImplicitURI(sourceFileName))) {
                 try {
-                    sourceInput = config.getURIResolver().resolve(sourceFileName, null);
-                    if ((sourceInput == null)) {
-                        sourceInput = config.getSystemURIResolver().resolve(sourceFileName, null);
-                    }
-                } catch (Saxon.Ejavax.xml.transform.TransformerException e) {
+                    Saxon.Hej.lib.JJ_ResourceRequest request = new Saxon.Hej.lib.JJ_ResourceRequest();
+                    request.uri = sourceFileName;
+                    request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XML_NATURE;
+                    request.purpose = "source document";
+                    sourceInput = request.resolve(config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
+                } catch (Saxon.Hej.trans.XPathException e) {
                     throw new Saxon.Api.SaxonApiException(e);
                 }
                 sources.Add(sourceInput);

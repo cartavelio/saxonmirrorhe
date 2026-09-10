@@ -7,9 +7,10 @@ namespace Saxon.Eej.ee.s9api {
         private Saxon.Hej.lib.ErrorReporter errorReporter;
         public SchemaManagerImpl(Saxon.Hej.s9api.Processor processor)  {
             this.processor = processor;
-            Saxon.Hej.lib.StandardErrorReporter reporter = new Saxon.Hej.lib.StandardErrorReporter();
-            reporter.setOutputErrorCodes(false);
-            errorReporter = reporter;
+            errorReporter = processor.getUnderlyingConfiguration().makeErrorReporter();
+            if ((errorReporter is Saxon.Hej.lib.StandardErrorReporter)) {
+                ((Saxon.Hej.lib.StandardErrorReporter)(errorReporter)).setOutputErrorCodes(false);
+            }
         }
         public override void setXsdVersion(string version) {
             if ((version.Equals("1.0") || version.Equals("1.1"))) {

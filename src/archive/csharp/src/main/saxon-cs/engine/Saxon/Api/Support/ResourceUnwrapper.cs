@@ -22,8 +22,8 @@ namespace Saxon.Api.Support {
             return resource.ResourceUri.ToString();
         }
 
-        public Item getItem(XPathContext context) {
-            return (Item)resource.GetXdmItem(new DynamicContext(context)).value;
+        public Item getItem() {
+            return (Item)resource.GetXdmItem().value;
         }
 
         public string getContentType() {

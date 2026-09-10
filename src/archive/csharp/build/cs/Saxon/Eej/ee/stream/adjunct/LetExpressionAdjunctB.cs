@@ -15,12 +15,12 @@ namespace Saxon.Eej.ee.stream.adjunct {
             return (watchManager, @out, context) => route.getWatch(watchManager, @out, context);
         }
         public override Saxon.Eej.ee.stream.feed.ItemFeed makeItemFeed(Saxon.Eej.ee.stream.watch.WatchManager watchManager, Saxon.Eej.ee.stream.feed.ItemFeed @out, Saxon.Hej.expr.XPathContext context) {
-            return new Inner_ItemFeed_d263e279(this, getExpression(), @out, context);
+            return new Inner_ItemFeed_13(this, getExpression(), @out, context);
         }
     
-        private class Inner_ItemFeed_d263e279 : Saxon.Eej.ee.stream.feed.ItemFeed {
+        private class Inner_ItemFeed_13 : Saxon.Eej.ee.stream.feed.ItemFeed {
             private readonly LetExpressionAdjunctB outerInstance;
-            public Inner_ItemFeed_d263e279(LetExpressionAdjunctB outerInstance, /*AB*/Saxon.Hej.expr.Expression arg1, /*AA*/Saxon.Eej.ee.stream.feed.ItemFeed arg2, /*AA*/Saxon.Hej.expr.XPathContext arg3) : base(arg1, arg2, arg3) {
+            public Inner_ItemFeed_13(LetExpressionAdjunctB outerInstance, /*AB*/Saxon.Hej.expr.Expression arg1, /*AA*/Saxon.Eej.ee.stream.feed.ItemFeed arg2, /*AA*/Saxon.Hej.expr.XPathContext arg3) : base(arg1, arg2, arg3) {
                 this.outerInstance = outerInstance;
                 context = /*superMethod*/getContext();
             }

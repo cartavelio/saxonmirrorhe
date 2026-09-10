@@ -4,13 +4,9 @@ using System.Linq;
 namespace Saxon.Hej.str {
     public sealed class UnicodeBuilder : Saxon.Hej.str.UniStringConsumer, Saxon.Hej.str.UnicodeWriter {
         internal Saxon.Hej.str.ZenoString content = Saxon.Hej.str.ZenoString.of(Saxon.Hej.str.EmptyUnicodeString.getInstance());
-        internal Saxon.Ejava.util.function.Consumer<Saxon.Hej.str.UnicodeString> segmentConsumer = null;
         public UnicodeBuilder()  {
         }
         public UnicodeBuilder(int allocate)  {
-        }
-        public UnicodeBuilder(Saxon.Ejava.util.function.Consumer<Saxon.Hej.str.UnicodeString> consumer)  {
-            segmentConsumer = consumer;
         }
         public Saxon.Hej.str.UnicodeBuilder append(char ch) {
             content = content.concat(new Saxon.Hej.str.UnicodeChar(ch));
@@ -29,10 +25,14 @@ namespace Saxon.Hej.str {
         public Saxon.Hej.str.UnicodeBuilder appendLatin(string str) {
             return append(new Saxon.Hej.str.BMPString(str));
         }
-        public Saxon.Hej.str.UnicodeBuilder append(string str) {
-            int uLength = Saxon.Hej.str.StringTool.getStringLength(str);
-            if ((uLength == str.Length)) {
+        public Saxon.Hej.str.UnicodeBuilder appendAll(Saxon.Hej.om.SequenceIterator iter) {
+            Saxon.Hej.om.Item item;
+            while (((item = iter.next()) != null)) {
+                append(item.getUnicodeStringValue());
             }
+            return this;
+        }
+        public Saxon.Hej.str.UnicodeBuilder append(string str) {
             return append(Saxon.Hej.str.StringTool.codePoints(str));
         }
         public Saxon.Hej.str.UnicodeBuilder append(Saxon.Hej.str.UnicodeString str) {

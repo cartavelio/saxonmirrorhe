@@ -80,7 +80,7 @@ namespace Saxon.Eej.expr {
             Saxon.Hej.expr.parser.Tokenizer t = p.getTokenizer();
             int n = -1;
             try {
-                n = System.Int32.Parse(t.currentTokenValue);
+                n = Saxon.Impl.Helpers.Utils.ParseInt(t.currentTokenValue);
             } catch (Saxon.Ejava.lang.NumberFormatException err) {
                 p.grumble("Numeric parameter reference must be an integer");
             }
@@ -107,7 +107,7 @@ namespace Saxon.Eej.expr {
         public override void handleExternalFunctionDeclaration(Saxon.Hej.query.XQueryParser p, Saxon.Hej.query.XQueryFunction func) {
             Saxon.Hej.query.QueryModule qenv = (Saxon.Hej.query.QueryModule)(p.getStaticContext());
             Saxon.Hej.trans.SymbolicName.F fName = new Saxon.Hej.trans.SymbolicName.F(func.getFunctionName(), func.getNumberOfArguments());
-            if (!(qenv.getFunctionLibrary().isAvailable(fName))) {
+            if (!(qenv.getFunctionLibrary().isAvailable(fName, qenv.getXPathVersion()))) {
                 p.grumble((("External function "+fName)+" is not available"), "XPST0017");
             }
             Saxon.Hej.om.Function ext = qenv.getFunctionLibrary().getFunctionItem(fName, qenv);

@@ -4,7 +4,7 @@ using System.Linq;
 namespace Saxon.Hej.functions {
     public class Exists : Saxon.Hej.functions.Aggregate {
         public override Saxon.Hej.expr.Expression makeFunctionCall(Saxon.Hej.expr.Expression[] arguments) {
-            return new Inner_SystemFunctionCall_d1048e88(this, this, arguments);
+            return new Inner_SystemFunctionCall_1(this, this, arguments);
         }
         public override Saxon.Hej.expr.Expression makeOptimizedFunctionCall(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo, params Saxon.Hej.expr.Expression[]  arguments) {
             int c = arguments[0].getCardinality();
@@ -46,9 +46,9 @@ namespace Saxon.Hej.functions {
             return "Exists";
         }
     
-        private class Inner_SystemFunctionCall_d1048e88 : Saxon.Hej.expr.SystemFunctionCall {
+        private class Inner_SystemFunctionCall_1 : Saxon.Hej.expr.SystemFunctionCall {
             private readonly Exists outerInstance;
-            public Inner_SystemFunctionCall_d1048e88(Exists outerInstance, Exists arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
+            public Inner_SystemFunctionCall_1(Exists outerInstance, Exists arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
                 this.outerInstance = outerInstance;
             }
             public override Saxon.Hej.expr.Expression optimize(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {

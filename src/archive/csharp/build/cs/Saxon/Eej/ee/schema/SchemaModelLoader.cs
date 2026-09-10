@@ -823,7 +823,7 @@ namespace Saxon.Eej.ee.schema {
                 string minOccursAtt = attributes.getValue("", "minOccurs");
                 int minOccurs = 1;
                 if ((minOccursAtt != null)) {
-                    minOccurs = System.Int32.Parse(minOccursAtt.Trim());
+                    minOccurs = Saxon.Impl.Helpers.Utils.ParseInt(minOccursAtt.Trim());
                 }
                 particle.setMinOccurs(minOccurs);
                 string maxOccursAtt = attributes.getValue("", "maxOccurs");
@@ -833,7 +833,7 @@ namespace Saxon.Eej.ee.schema {
                     if (maxOccursAtt.Equals("unbounded")) {
                         maxOccurs = -1;
                     } else {
-                        maxOccurs = System.Int32.Parse(maxOccursAtt);
+                        maxOccurs = Saxon.Impl.Helpers.Utils.ParseInt(maxOccursAtt);
                     }
                 }
                 particle.setMaxOccurs(maxOccurs);
@@ -1215,15 +1215,15 @@ namespace Saxon.Eej.ee.schema {
                 string min = attributes.getValue("", "minOccurs");
                 string max = attributes.getValue("", "maxOccurs");
                 if (((min != null) && (max != null))) {
-                    state.setLimits(System.Int32.Parse(min), (max.Equals("unbounded") ? -1 : System.Int32.Parse(max)));
+                    state.setLimits(Saxon.Impl.Helpers.Utils.ParseInt(min), (max.Equals("unbounded") ? -1 : Saxon.Impl.Helpers.Utils.ParseInt(max)));
                 }
                 string afterMax = attributes.getValue("", "afterMax");
                 if ((afterMax != null)) {
                     Saxon.Eej.ee.schema.SchemaModelLoader.PendingEdge leavingEdge = new Saxon.Eej.ee.schema.SchemaModelLoader.PendingEdge();
                     leavingEdge.machine = fsm;
                     leavingEdge.termId = "##afterMax";
-                    leavingEdge.fromState = System.Int32.Parse(stateNumber);
-                    leavingEdge.toState = System.Int32.Parse(afterMax);
+                    leavingEdge.fromState = Saxon.Impl.Helpers.Utils.ParseInt(stateNumber);
+                    leavingEdge.toState = Saxon.Impl.Helpers.Utils.ParseInt(afterMax);
                     loader.pendingEdges.Add(leavingEdge);
                 }
             }
@@ -1243,7 +1243,7 @@ namespace Saxon.Eej.ee.schema {
             }
             public override void processElementStart(string localName, Saxon.Hej.om.AttributeMap attributes) {
                 string term = attributes.getValue("", "term");
-                int targetState = System.Int32.Parse(attributes.getValue("", "to"));
+                int targetState = Saxon.Impl.Helpers.Utils.ParseInt(attributes.getValue("", "to"));
                 Saxon.Eej.ee.schema.SchemaModelLoader.PendingEdge pe = new Saxon.Eej.ee.schema.SchemaModelLoader.PendingEdge();
                 pe.machine = fsm.getFiniteStateMachine();
                 pe.fromState = state.getStateNumber();

@@ -115,7 +115,12 @@ namespace Saxon.Eej.ee.extfn {
                         reqType = parser.parseSequenceType(rType, parseContext);
                     }
                     string[] parts = System.Text.RegularExpressions.Regex.Split(nameArity, "#");
-                    int arity = System.Int32.Parse(parts[1]);
+                    int arity;
+                    try {
+                        arity = Saxon.Impl.Helpers.Utils.ParseInt(parts[1]);
+                    } catch (Saxon.Ejava.lang.NumberFormatException e) {
+                        throw new Saxon.Hej.trans.XPathException("Function arity must be an integer");
+                    }
                     Saxon.Hej.trans.SymbolicName.F functionName = new Saxon.Hej.trans.SymbolicName.F(Saxon.Hej.om.StructuredQName.fromClarkName(parts[0]), arity);
                     Saxon.Hej.expr.instruct.UserFunction fn = new Saxon.Hej.expr.instruct.UserFunction();
                     fn.setFunctionName(functionName.getComponentName());
@@ -179,7 +184,7 @@ namespace Saxon.Eej.ee.extfn {
             readonly System.Collections.Generic.Dictionary<Saxon.Hej.trans.SymbolicName.F,Saxon.Hej.expr.instruct.UserFunction> lib = new System.Collections.Generic.Dictionary<Saxon.Hej.trans.SymbolicName.F, Saxon.Hej.expr.instruct.UserFunction>();
             public LocalFunctionLibrary(Saxon.Hej.Configuration config) : base (config) {
             }
-            public override bool isAvailable(Saxon.Hej.trans.SymbolicName.F functionName) {
+            public override bool isAvailable(Saxon.Hej.trans.SymbolicName.F functionName, int languageLevel) {
                 return lib.ContainsKey(functionName);
             }
             public override Saxon.Hej.expr.Expression bind(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.Expression[] staticArgs, Saxon.Hej.expr.StaticContext env, System.Collections.Generic.IList<string> reasons) {

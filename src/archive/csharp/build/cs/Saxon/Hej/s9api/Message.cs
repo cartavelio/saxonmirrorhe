@@ -16,6 +16,12 @@ namespace Saxon.Hej.s9api {
         public Saxon.Api.XdmNode getContent() {
             return _content;
         }
+        public string getStringValue() {
+            return _content.StringValue;
+        }
+        public override string ToString() {
+            return _content.ToString();
+        }
         public Saxon.Api.QName getErrorCode() {
             return _errorCode;
         }

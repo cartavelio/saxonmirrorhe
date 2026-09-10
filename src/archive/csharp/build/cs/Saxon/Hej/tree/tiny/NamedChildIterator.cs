@@ -81,5 +81,9 @@ namespace Saxon.Hej.tree.tiny {
         public void close() {
         }
 
+        /* Expanding default method discharge from interface SequenceIterator */
+        public void discharge() {
+        }
+
     }
 }

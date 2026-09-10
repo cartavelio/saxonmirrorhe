@@ -994,9 +994,6 @@ namespace Saxon.Hej.query {
                 }
             }
             if ((sources == null)) {
-                if ((hints.Length == 0)) {
-                    grumble(("Cannot locate module for namespace "+mImport.namespaceURI), "XQST0059", mImport.offset);
-                }
                 resolver = env.getConfiguration().getStandardModuleURIResolver();
                 sources = resolver.resolve(mImport.namespaceURI, env.getStaticBaseURI(), hints);
             }
@@ -1244,6 +1241,7 @@ namespace Saxon.Hej.query {
             Saxon.Hej.expr.instruct.GlobalVariable var = new Saxon.Hej.expr.instruct.GlobalVariable();
             var.setPackageData(env.getPackageData());
             var.setLineNumber((t.getLineNumber()+1));
+            var.setColumnNumber((t.getColumnNumber()+1));
             var.setSystemId(env.getSystemId());
             if ((annotations != null)) {
                 var.setPrivate(annotations.includes(Saxon.Hej.query.Annotation.PRIVATE));
@@ -1281,6 +1279,7 @@ namespace Saxon.Hej.query {
                         Saxon.Hej.expr.instruct.GlobalParam par = new Saxon.Hej.expr.instruct.GlobalParam();
                         par.setPackageData(env.getPackageData());
                         par.setLineNumber(var.getLineNumber());
+                        par.setColumnNumber(var.getColumnNumber());
                         par.setSystemId(var.getSystemId());
                         par.setVariableQName(var.getVariableQName());
                         par.setRequiredType(var.getRequiredType());
@@ -1583,16 +1582,22 @@ namespace Saxon.Hej.query {
             switch (localName) {
               case "parameter-document":
                 {
-                    Saxon.Ejavax.xml.transform.Source source;
+                    Saxon.Hej.Configuration config = env.getConfiguration();
+                    Saxon.Hej.lib.JJ_ResourceRequest rr = new Saxon.Hej.lib.JJ_ResourceRequest();
+                    rr.relativeUri = value;
+                    rr.baseUri = env.getStaticBaseURI();
                     try {
-                        source = env.getConfiguration().getURIResolver().resolve(value, env.getStaticBaseURI());
-                    } catch (Saxon.Ejavax.xml.transform.TransformerException e) {
-                        throw Saxon.Hej.trans.XPathException.makeXPathException(e);
+                        rr.uri = Saxon.Hej.functions.ResolveURI.makeAbsolute(value, env.getStaticBaseURI()).ToString();
+                    } catch (System.UriFormatException err) {
+                        throw Saxon.Hej.trans.XPathException.makeXPathException(err);
                     }
+                    rr.nature = Saxon.Hej.lib.NamespaceConstant.OUTPUT;
+                    rr.purpose = "serialization";
+                    Saxon.Ejavax.xml.transform.Source source = rr.resolve(config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
                     Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions();
                     options.setSchemaValidationMode(Saxon.Hej.lib.Validation.LAX);
                     options.setDTDValidationMode(Saxon.Hej.lib.Validation.SKIP);
-                    Saxon.Hej.om.TreeInfo doc = env.getConfiguration().buildDocumentTree(source);
+                    Saxon.Hej.om.TreeInfo doc = config.buildDocumentTree(source);
                     Saxon.Hej.serialize.SerializationParamsHandler ph = new Saxon.Hej.serialize.SerializationParamsHandler(parameterDocProperties);
                     ph.setSerializationParams(doc.getRootNode());
                     Saxon.Hej.serialize.CharacterMap characterMap = ph.getCharacterMap();
@@ -1664,6 +1669,7 @@ namespace Saxon.Hej.query {
                                         nextToken();
                                         Saxon.Hej.expr.Expression condition = parseExprSingle();
                                         Saxon.Hej.expr.flwor.WhereClause clause = new Saxon.Hej.expr.flwor.WhereClause(flwor, condition);
+                                        setLocation(clause, t.currentTokenStartOffset);
                                         clause.setRepeated(containsLoopingClause(clauseList));
                                         clauseList.Add(clause);
                                     } else {
@@ -2970,53 +2976,55 @@ namespace Saxon.Hej.query {
             setLocation(inst, offset);
         }
         private Saxon.Hej.expr.Expression parsePseudoXML(bool allowEndTag) {
-            try {
-                Saxon.Hej.expr.Expression exp;
-                int offset = t.inputOffset;
-                char c = t.nextChar();
-                switch (c) {
-                  case '!':
-                    c = t.nextChar();
-                    if ((c == '-')) {
-                        exp = parseCommentConstructor();
+            Saxon.Hej.expr.Expression exp;
+            int offset = t.inputOffset;
+            char c = t.nextChar();
+            switch (c) {
+              case '!':
+                c = t.nextChar();
+                if ((c == '-')) {
+                    exp = parseCommentConstructor();
+                } else {
+                    if ((c == '[')) {
+                        grumble("A CDATA section is allowed only in element content");
+                        return null;
                     } else {
-                        if ((c == '[')) {
-                            grumble("A CDATA section is allowed only in element content");
-                            return null;
-                        } else {
-                            grumble("Expected '--' or '[CDATA[' after '<!'");
-                            return null;
-                        }
+                        grumble("Expected '--' or '[CDATA[' after '<!'");
+                        return null;
                     }
-                    break ;
-                  case '?':
-                    exp = parsePIConstructor();
-                    break ;
-                  case '/':
-                    if (allowEndTag) {
-                        Saxon.Ejava.lang.StringBuilder sb = new Saxon.Ejava.lang.StringBuilder(16);
-                        while (true) {
-                            c = t.nextChar();
-                            if ((c == '>')) {
-                                break ;
-                            }
-                            sb.append(c);
-                        }
-                        return new Saxon.Hej.expr.StringLiteral(sb.ToString());
-                    }
-                    grumble("Unmatched XML end tag");
-                    return new Saxon.Hej.expr.ErrorExpression();
-                  default:
-                    t.unreadChar();
-                    exp = parseDirectElementConstructor(allowEndTag);
-                    break ;
                 }
-                setLocation(exp, offset);
-                return exp;
-            } catch (System.IndexOutOfRangeException e) {
+                break ;
+              case '?':
+                exp = parsePIConstructor();
+                break ;
+              case '/':
+                if (allowEndTag) {
+                    Saxon.Ejava.lang.StringBuilder sb = new Saxon.Ejava.lang.StringBuilder(16);
+                    while (true) {
+                        c = t.nextChar();
+                        if ((c == '>')) {
+                            break ;
+                        } else {
+                            if ((c == Saxon.Hej.expr.parser.Tokenizer.NUL)) {
+                                grumble("Expected '>' after '/'; found end of input");
+                            }
+                        }
+                        sb.append(c);
+                    }
+                    return new Saxon.Hej.expr.StringLiteral(sb.ToString());
+                }
+                grumble("Unmatched XML end tag");
+                return new Saxon.Hej.expr.ErrorExpression();
+              case Saxon.Hej.expr.parser.Tokenizer.NUL:
                 grumble("End of input encountered while parsing direct constructor");
                 return new Saxon.Hej.expr.ErrorExpression();
+              default:
+                t.unreadChar();
+                exp = parseDirectElementConstructor(allowEndTag);
+                break ;
             }
+            setLocation(exp, offset);
+            return exp;
         }
         private Saxon.Hej.expr.Expression parseDirectElementConstructor(bool isNested) {
             Saxon.Hej.om.NamePool pool = env.getConfiguration().getNamePool();
@@ -3029,6 +3037,10 @@ namespace Saxon.Hej.query {
                 c = t.nextChar();
                 if (((((((c == ' ') || (c == '\n')) || (c == '\r')) || (c == '\t')) || (c == '/')) || (c == '>'))) {
                     break ;
+                } else {
+                    if ((c == Saxon.Hej.expr.parser.Tokenizer.NUL)) {
+                        grumble("Found end of input while reading element name in XQuery element constructor");
+                    }
                 }
                 buff.append(c);
             }
@@ -3041,13 +3053,17 @@ namespace Saxon.Hej.query {
                 c = skipSpaces(c);
                 if (((c == '/') || (c == '>'))) {
                     break ;
+                } else {
+                    if ((c == Saxon.Hej.expr.parser.Tokenizer.NUL)) {
+                        grumble("End of input encountered within element start tag");
+                    }
                 }
                 int attOffset = (t.inputOffset-1);
                 buff.setLength(0);
                 do {
                     buff.append(c);
                     c = t.nextChar();
-                } while ((((((c != ' ') && (c != '\n')) && (c != '\r')) && (c != '\t')) && (c != '=')));
+                } while (((((((c != ' ') && (c != '\n')) && (c != '\r')) && (c != '\t')) && (c != '=')) && (c != Saxon.Hej.expr.parser.Tokenizer.NUL)));
                 string attName = buff.ToString();
                 if (!(Saxon.Hej.om.NameChecker.isQName(Saxon.Hej.str.StringTool.codePoints(attName)))) {
                     grumble(("Invalid attribute name "+Saxon.Hej.trans.Err.wrap(attName, Saxon.Hej.trans.Err.ATTRIBUTE)));
@@ -3056,6 +3072,9 @@ namespace Saxon.Hej.query {
                 expectChar(c, '=');
                 c = t.nextChar();
                 c = skipSpaces(c);
+                if ((c == Saxon.Hej.expr.parser.Tokenizer.NUL)) {
+                    grumble("End of input encountered within element start tag");
+                }
                 char delim = c;
                 bool isNamespace = ("xmlns".Equals(attName) || attName.StartsWith("xmlns:"));
                 int end;
@@ -3073,6 +3092,9 @@ namespace Saxon.Hej.query {
                         throw;
                     }
                     end = (int)(((Saxon.Hej.value.Int64Value)(((Saxon.Hej.expr.Literal)(avt)).getGroundedValue())).longValue());
+                }
+                if ((end>=t.input.Length)) {
+                    grumble("Reached end of input while processing attributes in start tag");
                 }
                 string val = t.input.Substring((t.inputOffset-1), (end+1) - (t.inputOffset-1));
                 string rval = t.input.Substring(t.inputOffset, end - t.inputOffset);
@@ -3406,47 +3428,49 @@ namespace Saxon.Hej.query {
             return last;
         }
         private void readElementContent(string startTag, System.Collections.Generic.IList<Saxon.Hej.expr.Expression> components) {
-            try {
-                bool afterEnclosedExpr = false;
+            bool afterEnclosedExpr = false;
+            while (true) {
+                Saxon.Ejava.lang.StringBuilder text = new Saxon.Ejava.lang.StringBuilder(64);
+                char c;
+                bool containsEntities = false;
                 while (true) {
-                    Saxon.Ejava.lang.StringBuilder text = new Saxon.Ejava.lang.StringBuilder(64);
-                    char c;
-                    bool containsEntities = false;
-                    while (true) {
-                        c = t.nextChar();
-                        if ((c == '<')) {
-                            if ((t.nextChar() == '!')) {
-                                if ((t.nextChar() == '[')) {
-                                    readCDATASection(text);
-                                    containsEntities = true;
-                                    continue ;
-                                } else {
-                                    t.unreadChar();
-                                    t.unreadChar();
-                                }
+                    c = t.nextChar();
+                    if ((c == '<')) {
+                        if ((t.nextChar() == '!')) {
+                            if ((t.nextChar() == '[')) {
+                                readCDATASection(text);
+                                containsEntities = true;
+                                continue ;
                             } else {
                                 t.unreadChar();
+                                t.unreadChar();
                             }
-                            break ;
                         } else {
-                            if ((c == '&')) {
-                                text.append(readEntityReference());
-                                containsEntities = true;
+                            t.unreadChar();
+                        }
+                        break ;
+                    } else {
+                        if ((c == '&')) {
+                            text.append(readEntityReference());
+                            containsEntities = true;
+                        } else {
+                            if ((c == '}')) {
+                                c = t.nextChar();
+                                if ((c != '}')) {
+                                    grumble("'}' must be written as '}}' within element content");
+                                }
+                                text.append(c);
                             } else {
-                                if ((c == '}')) {
+                                if ((c == '{')) {
                                     c = t.nextChar();
-                                    if ((c != '}')) {
-                                        grumble("'}' must be written as '}}' within element content");
+                                    if ((c != '{')) {
+                                        c = '{';
+                                        break ;
                                     }
                                     text.append(c);
                                 } else {
-                                    if ((c == '{')) {
-                                        c = t.nextChar();
-                                        if ((c != '{')) {
-                                            c = '{';
-                                            break ;
-                                        }
-                                        text.append(c);
+                                    if ((c == Saxon.Hej.expr.parser.Tokenizer.NUL)) {
+                                        grumble("Reached end of input while reading XQuery element content");
                                     } else {
                                         if ((!(charChecker.test(c)) && !(Saxon.Hej.serialize.charcode.UTF16CharacterSet.isSurrogate(c)))) {
                                             grumble((("Character code "+c)+" is not a valid XML character"));
@@ -3457,144 +3481,139 @@ namespace Saxon.Hej.query {
                             }
                         }
                     }
-                    string textStr = text.ToString();
-                    if ((!(textStr.Length==0) && (((containsEntities|((Saxon.Hej.query.QueryModule)(env)).isPreserveBoundarySpace()) || !(Saxon.Hej.value.Whitespace.isAllWhite(Saxon.Hej.str.StringView.of(textStr))))))) {
-                        Saxon.Hej.expr.instruct.ValueOf inst = new Saxon.Hej.expr.instruct.ValueOf(new Saxon.Hej.expr.StringLiteral(new Saxon.Hej.value.StringValue(textStr)), false, false);
-                        setLocation(inst);
-                        components.Add(inst);
-                        afterEnclosedExpr = false;
-                    }
-                    if ((c == '<')) {
-                        Saxon.Hej.expr.Expression exp = parsePseudoXML(true);
-                        if ((exp is Saxon.Hej.expr.StringLiteral)) {
-                            string endTag = ((Saxon.Hej.expr.StringLiteral)(exp)).getString().ToString();
-                            if (Saxon.Hej.value.Whitespace.isWhite(endTag[0])) {
-                                grumble("End tag contains whitespace before the name");
-                            }
-                            endTag = Saxon.Hej.value.Whitespace.trim(endTag);
-                            if (endTag.Equals(startTag)) {
-                                return ;
-                            } else {
-                                grumble((((("End tag </"+endTag)+"> does not match start tag <")+startTag)+'>'), "XQST0118");
-                            }
+                }
+                string textStr = text.ToString();
+                if ((!(textStr.Length==0) && (((containsEntities|((Saxon.Hej.query.QueryModule)(env)).isPreserveBoundarySpace()) || !(Saxon.Hej.value.Whitespace.isAllWhite(Saxon.Hej.str.StringView.of(textStr))))))) {
+                    Saxon.Hej.expr.instruct.ValueOf inst = new Saxon.Hej.expr.instruct.ValueOf(new Saxon.Hej.expr.StringLiteral(new Saxon.Hej.value.StringValue(textStr)), false, false);
+                    setLocation(inst);
+                    components.Add(inst);
+                    afterEnclosedExpr = false;
+                }
+                if ((c == '<')) {
+                    Saxon.Hej.expr.Expression exp = parsePseudoXML(true);
+                    if ((exp is Saxon.Hej.expr.StringLiteral)) {
+                        string endTag = ((Saxon.Hej.expr.StringLiteral)(exp)).getString().ToString();
+                        if (Saxon.Hej.value.Whitespace.isWhite(endTag[0])) {
+                            grumble("End tag contains whitespace before the name");
+                        }
+                        endTag = Saxon.Hej.value.Whitespace.trim(endTag);
+                        if (endTag.Equals(startTag)) {
+                            return ;
                         } else {
-                            components.Add(exp);
+                            grumble((((("End tag </"+endTag)+"> does not match start tag <")+startTag)+'>'), "XQST0118");
                         }
                     } else {
-                        if (afterEnclosedExpr) {
-                            Saxon.Hej.expr.Expression previousComponent = components[(components.Count-1)];
-                            bool previousComponentIsNodeTest = true;
-                            Saxon.Hej.type.UType previousItemType = previousComponent.getStaticUType(Saxon.Hej.type.UType.ANY);
-                            previousComponentIsNodeTest = Saxon.Hej.type.UType.ANY_NODE.subsumes(previousItemType);
-                            if (!(previousComponentIsNodeTest)) {
-                                Saxon.Hej.expr.instruct.ValueOf inst = new Saxon.Hej.expr.instruct.ValueOf(new Saxon.Hej.expr.StringLiteral(Saxon.Hej.value.StringValue.EMPTY_STRING), false, false);
-                                setLocation(inst);
-                                components.Add(inst);
-                            }
-                        }
-                        t.unreadChar();
-                        t.setState(Saxon.Hej.expr.parser.Tokenizer.DEFAULT_STATE);
-                        lookAhead();
-                        nextToken();
-                        if (((t.currentToken == Saxon.Hej.expr.parser.Token.RCURLY) && allowXPath31Syntax)) {
-                            components.Add(Saxon.Hej.expr.Literal.makeEmptySequence());
-                        } else {
-                            Saxon.Hej.expr.Expression exp = parseExpression();
-                            if (!(((Saxon.Hej.query.QueryModule)(env)).isPreserveNamespaces())) {
-                                exp = new Saxon.Hej.expr.instruct.CopyOf(exp, false, Saxon.Hej.lib.Validation.PRESERVE, null, true);
-                            }
-                            components.Add(exp);
-                            expect(Saxon.Hej.expr.parser.Token.RCURLY);
-                        }
-                        afterEnclosedExpr = true;
+                        components.Add(exp);
                     }
+                } else {
+                    if (afterEnclosedExpr) {
+                        Saxon.Hej.expr.Expression previousComponent = components[(components.Count-1)];
+                        bool previousComponentIsNodeTest = true;
+                        Saxon.Hej.type.UType previousItemType = previousComponent.getStaticUType(Saxon.Hej.type.UType.ANY);
+                        previousComponentIsNodeTest = Saxon.Hej.type.UType.ANY_NODE.subsumes(previousItemType);
+                        if (!(previousComponentIsNodeTest)) {
+                            Saxon.Hej.expr.instruct.ValueOf inst = new Saxon.Hej.expr.instruct.ValueOf(new Saxon.Hej.expr.StringLiteral(Saxon.Hej.value.StringValue.EMPTY_STRING), false, false);
+                            setLocation(inst);
+                            components.Add(inst);
+                        }
+                    }
+                    t.unreadChar();
+                    t.setState(Saxon.Hej.expr.parser.Tokenizer.DEFAULT_STATE);
+                    lookAhead();
+                    nextToken();
+                    if (((t.currentToken == Saxon.Hej.expr.parser.Token.RCURLY) && allowXPath31Syntax)) {
+                        components.Add(Saxon.Hej.expr.Literal.makeEmptySequence());
+                    } else {
+                        Saxon.Hej.expr.Expression exp = parseExpression();
+                        if (!(((Saxon.Hej.query.QueryModule)(env)).isPreserveNamespaces())) {
+                            exp = new Saxon.Hej.expr.instruct.CopyOf(exp, false, Saxon.Hej.lib.Validation.PRESERVE, null, true);
+                        }
+                        components.Add(exp);
+                        expect(Saxon.Hej.expr.parser.Token.RCURLY);
+                    }
+                    afterEnclosedExpr = true;
                 }
-            } catch (System.IndexOutOfRangeException err) {
-                grumble("No closing end tag found for direct element constructor");
             }
         }
         private Saxon.Hej.expr.Expression parsePIConstructor() {
-            try {
-                Saxon.Ejava.lang.StringBuilder pi = new Saxon.Ejava.lang.StringBuilder(64);
-                int firstSpace = -1;
-                while (!(pi.ToString().EndsWith("?>"))) {
-                    char c = t.nextChar();
-                    if (((firstSpace<0) && (" \t\r\n".IndexOf(c)>=0))) {
-                        firstSpace = pi.length();
-                    }
-                    pi.append(c);
+            Saxon.Ejava.lang.StringBuilder pi = new Saxon.Ejava.lang.StringBuilder(64);
+            int firstSpace = -1;
+            while (!(pi.ToString().EndsWith("?>"))) {
+                char c = t.nextChar();
+                if ((c == Saxon.Hej.expr.parser.Tokenizer.NUL)) {
+                    grumble("Found end of input while reading processing instruction constructor");
                 }
-                pi.setLength((pi.length()-2));
-                string target;
-                string data = "";
-                if ((firstSpace<0)) {
-                    target = pi.ToString();
-                } else {
-                    target = pi.ToString().Substring(0, firstSpace - 0);
-                    firstSpace++;
-                    while (((firstSpace<pi.length()) && (" \t\r\n".IndexOf(pi.charAt(firstSpace))>=0))) {
-                        firstSpace++;
-                    }
-                    data = pi.ToString().Substring(firstSpace);
+                if (((firstSpace<0) && (" \t\r\n".IndexOf(c)>=0))) {
+                    firstSpace = pi.length();
                 }
-                if (!(Saxon.Hej.om.NameChecker.isValidNCName(target))) {
-                    grumble(("Invalid processing instruction name "+Saxon.Hej.trans.Err.wrap(target)));
-                }
-                if (Saxon.Impl.Helpers.StringUtils.stringEqualsIgnoreCase(target, "xml")) {
-                    grumble("A processing instruction must not be named 'xml' in any combination of upper and lower case");
-                }
-                Saxon.Hej.expr.instruct.ProcessingInstruction instruction = new Saxon.Hej.expr.instruct.ProcessingInstruction(new Saxon.Hej.expr.StringLiteral(target));
-                instruction.setSelect(new Saxon.Hej.expr.StringLiteral(data));
-                setLocation(instruction);
-                return instruction;
-            } catch (System.IndexOutOfRangeException err) {
-                grumble("No closing '?>' found for processing instruction");
-                return null;
+                pi.append(c);
             }
+            pi.setLength((pi.length()-2));
+            string target;
+            string data = "";
+            if ((firstSpace<0)) {
+                target = pi.ToString();
+            } else {
+                target = pi.ToString().Substring(0, firstSpace - 0);
+                firstSpace++;
+                while (((firstSpace<pi.length()) && (" \t\r\n".IndexOf(pi.charAt(firstSpace))>=0))) {
+                    firstSpace++;
+                }
+                data = pi.ToString().Substring(firstSpace);
+            }
+            if (!(Saxon.Hej.om.NameChecker.isValidNCName(target))) {
+                grumble(("Invalid processing instruction name "+Saxon.Hej.trans.Err.wrap(target)));
+            }
+            if (Saxon.Impl.Helpers.StringUtils.stringEqualsIgnoreCase(target, "xml")) {
+                grumble("A processing instruction must not be named 'xml' in any combination of upper and lower case");
+            }
+            Saxon.Hej.expr.instruct.ProcessingInstruction instruction = new Saxon.Hej.expr.instruct.ProcessingInstruction(new Saxon.Hej.expr.StringLiteral(target));
+            instruction.setSelect(new Saxon.Hej.expr.StringLiteral(data));
+            setLocation(instruction);
+            return instruction;
         }
         private void readCDATASection(Saxon.Ejava.lang.StringBuilder cdata) {
-            try {
-                char c;
-                c = t.nextChar();
-                expectChar(c, 'C');
-                c = t.nextChar();
-                expectChar(c, 'D');
-                c = t.nextChar();
-                expectChar(c, 'A');
-                c = t.nextChar();
-                expectChar(c, 'T');
-                c = t.nextChar();
-                expectChar(c, 'A');
-                c = t.nextChar();
-                expectChar(c, '[');
-                while (!(cdata.ToString().EndsWith("]]>"))) {
-                    cdata.append(t.nextChar());
+            char c;
+            c = t.nextChar();
+            expectChar(c, 'C');
+            c = t.nextChar();
+            expectChar(c, 'D');
+            c = t.nextChar();
+            expectChar(c, 'A');
+            c = t.nextChar();
+            expectChar(c, 'T');
+            c = t.nextChar();
+            expectChar(c, 'A');
+            c = t.nextChar();
+            expectChar(c, '[');
+            while (!(cdata.ToString().EndsWith("]]>"))) {
+                char cc = t.nextChar();
+                if ((cc == Saxon.Hej.expr.parser.Tokenizer.NUL)) {
+                    grumble("No closing ']]>' found for CDATA section");
                 }
-                cdata.setLength((cdata.length()-3));
-            } catch (System.IndexOutOfRangeException err) {
-                grumble("No closing ']]>' found for CDATA section");
+                cdata.append(cc);
             }
+            cdata.setLength((cdata.length()-3));
         }
         private Saxon.Hej.expr.Expression parseCommentConstructor() {
-            try {
-                char c = t.nextChar();
-                expectChar(c, '-');
-                Saxon.Ejava.lang.StringBuilder comment = new Saxon.Ejava.lang.StringBuilder(256);
-                while (!(comment.ToString().EndsWith("--"))) {
-                    comment.append(t.nextChar());
+            char c = t.nextChar();
+            expectChar(c, '-');
+            Saxon.Ejava.lang.StringBuilder comment = new Saxon.Ejava.lang.StringBuilder(256);
+            while (!(comment.ToString().EndsWith("--"))) {
+                char cc = t.nextChar();
+                if ((cc == Saxon.Hej.expr.parser.Tokenizer.NUL)) {
+                    grumble("Reached end of input while reading XML comment constructor");
                 }
-                if ((t.nextChar() != '>')) {
-                    grumble("'--' is not permitted in an XML comment");
-                }
-                string commentText = comment.substring(0, (comment.length()-2));
-                Saxon.Hej.expr.instruct.Comment instruction = new Saxon.Hej.expr.instruct.Comment();
-                instruction.setSelect(new Saxon.Hej.expr.StringLiteral(new Saxon.Hej.value.StringValue(commentText.ToString())));
-                setLocation(instruction);
-                return instruction;
-            } catch (System.IndexOutOfRangeException err) {
-                grumble("No closing '-->' found for comment constructor");
-                return null;
+                comment.append(cc);
             }
+            if ((t.nextChar() != '>')) {
+                grumble("'--' is not permitted in an XML comment");
+            }
+            string commentText = comment.substring(0, (comment.length()-2));
+            Saxon.Hej.expr.instruct.Comment instruction = new Saxon.Hej.expr.instruct.Comment();
+            instruction.setSelect(new Saxon.Hej.expr.StringLiteral(new Saxon.Hej.value.StringValue(commentText.ToString())));
+            setLocation(instruction);
+            return instruction;
         }
         public static Saxon.Hej.expr.Expression stringify(Saxon.Hej.expr.Expression exp, bool noNodeIfEmpty, Saxon.Hej.expr.StaticContext env) {
             if ((exp is Saxon.Hej.expr.StringLiteral)) {
@@ -3720,21 +3739,21 @@ namespace Saxon.Hej.query {
         
         }
         private string readEntityReference() {
-            try {
-                Saxon.Ejava.lang.StringBuilder sb = new Saxon.Ejava.lang.StringBuilder(64);
-                while (true) {
-                    char c = t.nextChar();
-                    if ((c == ';')) {
-                        break ;
+            Saxon.Ejava.lang.StringBuilder sb = new Saxon.Ejava.lang.StringBuilder(64);
+            while (true) {
+                char c = t.nextChar();
+                if ((c == ';')) {
+                    break ;
+                } else {
+                    if ((c == Saxon.Hej.expr.parser.Tokenizer.NUL)) {
+                        grumble("No closing ';' found for entity or character reference");
+                        return "";
                     }
-                    sb.append(c);
                 }
-                string entity = sb.ToString();
-                return new Saxon.Hej.query.XQueryParser.Unescaper(env.getConfiguration().getValidCharacterChecker()).analyzeEntityReference(entity);
-            } catch (System.IndexOutOfRangeException err) {
-                grumble("No closing ';' found for entity or character reference");
-                return "";
+                sb.append(c);
             }
+            string entity = sb.ToString();
+            return new Saxon.Hej.query.XQueryParser.Unescaper(env.getConfiguration().getValidCharacterChecker()).analyzeEntityReference(entity);
         }
         protected internal override Saxon.Hej.expr.Expression parseStringConstructor() {
             int offset = t.currentTokenStartOffset;
@@ -3763,42 +3782,41 @@ namespace Saxon.Hej.query {
                 }
                 char prior = (char)(0);
                 char penult = (char)(0);
-                try {
-                    bool continueOuter = false;
-                    while (true) {
-                        c = t.nextChar();
-                        if (((prior == '`') && (c == '{'))) {
-                            sb.setLength((sb.length()-1));
+                bool continueOuter = false;
+                while (true) {
+                    c = t.nextChar();
+                    if ((c == Saxon.Hej.expr.parser.Tokenizer.NUL)) {
+                        grumble("Reached end of input while reading string constructor");
+                    }
+                    if (((prior == '`') && (c == '{'))) {
+                        sb.setLength((sb.length()-1));
+                        components.Add(new Saxon.Hej.expr.StringLiteral(sb.ToString()));
+                        t.lookAhead();
+                        t.next();
+                        if ((t.currentToken == Saxon.Hej.expr.parser.Token.RCURLY)) {
+                            components.Add(Saxon.Hej.expr.Literal.makeEmptySequence());
+                            sb.setLength(0);
+                            continue ;
+                        } else {
+                            continueOuter = true;
+                            break ;
+                        }
+                    } else {
+                        if ((((penult == ']') && (prior == '`')) && (c == '`'))) {
+                            sb.setLength((sb.length()-2));
                             components.Add(new Saxon.Hej.expr.StringLiteral(sb.ToString()));
                             t.lookAhead();
                             t.next();
-                            if ((t.currentToken == Saxon.Hej.expr.parser.Token.RCURLY)) {
-                                components.Add(Saxon.Hej.expr.Literal.makeEmptySequence());
-                                sb.setLength(0);
-                                continue ;
-                            } else {
-                                continueOuter = true;
-                                break ;
-                            }
-                        } else {
-                            if ((((penult == ']') && (prior == '`')) && (c == '`'))) {
-                                sb.setLength((sb.length()-2));
-                                components.Add(new Saxon.Hej.expr.StringLiteral(sb.ToString()));
-                                t.lookAhead();
-                                t.next();
-                                continueOuter = false;
-                                break ;
-                            }
+                            continueOuter = false;
+                            break ;
                         }
-                        sb.append(c);
-                        penult = prior;
-                        prior = c;
                     }
-                    if (!(continueOuter)) {
-                        break ;
-                    }
-                } catch (System.IndexOutOfRangeException e) {
-                    grumble("String constructor is missing ]`` terminator ");
+                    sb.append(c);
+                    penult = prior;
+                    prior = c;
+                }
+                if (!(continueOuter)) {
+                    break ;
                 }
             }
             Saxon.Hej.expr.Expression[] args = components.ToArray();
@@ -3833,7 +3851,7 @@ namespace Saxon.Hej.query {
         }
         private void expectChar(char actual, char expected) {
             if ((actual != expected)) {
-                grumble((((("Expected '"+expected)+"', found '")+actual)+'\''));
+                grumble(((("Expected '"+expected)+"', found ")+(((actual == Saxon.Hej.expr.parser.Tokenizer.NUL) ? "end of input" : (("'"+actual)+"'")))));
             }
         }
         protected internal override string getLanguage() {

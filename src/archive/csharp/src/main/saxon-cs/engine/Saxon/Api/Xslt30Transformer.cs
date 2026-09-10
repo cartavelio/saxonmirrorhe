@@ -1,16 +1,18 @@
 using System;
 using System.Collections.Generic;
+using System.Impl.Helpers;
 using System.IO;
 using System.Text;
 using System.Xml;
-using Saxon.Ejava.util.function;
 using Saxon.Ejavax.xml.transform.stream;
 using Saxon.Hej.@event;
 using Saxon.Hej.lib;
 using Saxon.Hej.s9api;
-using Saxon.Hej.trans;
 using Saxon.Api.Support;
 using Saxon.Callbacks;
+using Saxon.Ejavax.xml.transform;
+using Saxon.Hej;
+using Saxon.Hej.pull;
 using StandardMessageHandler = Saxon.Callbacks.StandardMessageHandler;
 
 namespace Saxon.Api {
@@ -72,7 +74,8 @@ namespace Saxon.Api {
         private TextWriter traceFunctionDestination;
         private Saxon.Hej.s9api.Xslt30Transformer s9Transformer;
         private readonly StandardMessageHandler _standardMessageHandler;
-        private TextResolver textResolver;
+        private ResourceResolver textResolver;
+        private ResourceResolver xmlDocumentResolver;
 
         // internal constructor
 
@@ -245,49 +248,65 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// The <c>XmlResolver</c> to be used at run-time to resolve and dereference URIs
-        /// supplied to the <c>doc()</c> and <c>document()</c> functions.
-        /// </summary>
-
-        public XmlResolver XmlResolver {
-            get => ((StandardURIResolver) s9Transformer.getURIResolver()).getXmlResolver();
-            set => s9Transformer.setURIResolver(
-                new StandardURIResolver(
-                    s9Transformer.getUnderlyingController().getConfiguration(), 
-                    value));
-        }
-        
-        /// <summary>
-        /// The <code>TextResolver</code> to be used at run-time to resolve and dereference URIs
+        /// The <c>TextResolver</c> to be used at run-time to resolve and dereference URIs
         /// supplied to the <c>unparsed-text()</c>, <c>unparsed-text-lines()</c>,
         /// <c>unparsed-text-available()</c>, and <c>json-doc()</c> functions.
         /// </summary>
+        /// <remarks>
+        /// <para>If no <c>TextResolver</c> is supplied, or if the supplied <c>TextResolver</c> returns null
+        /// when called, the <c>CommonResourceResolver</c> for the Saxon <c>Configuration</c> is invoked,
+        /// with a <c>ResourceRequest</c> having <c>Nature == ResourceRequest.TEXT_NATURE</c>. If this
+        /// returns null, then the "direct" URI resolution provided by <c>Org.XmlResolver.UriUtils</c> is
+        /// invoked: this is capable of handling regular <c>file:</c>, <c>http:</c>, and <c>https:</c>
+        /// URIs, as well as the <c>data:</c> and <c>pack:</c> schemes.
+        /// </para>
+        /// <para>If the call on <c>unparsed-text()</c> supplies an encoding parameter, this is made
+        /// available in the call to the <c>TextResolver</c>. 
+        /// </para>
+        /// </remarks>
 
-        public TextResolver TextResolver {
+        public ResourceResolver TextResolver {
             get => textResolver;
             set {
                 textResolver = value;
-                s9Transformer.setUnparsedTextResolver((uri, encoding, config) => {
-                    Encoding enc;
-                    if (encoding == null) {
-                        enc = null;
-                    }
-                    else {
-                        if (encoding == "iso-646") {
-                            encoding = "us-ascii";
-                        }
-                        try {
-                            enc = Encoding.GetEncoding(encoding);
-                        }
-                        catch (System.ArgumentException e) {
-                            throw new SaxonApiException(new Saxon.Hej.trans.XPathException("Unparsed-text encoding problem: " + e.Message, "FOUT1190"));
-                        }
-                    }
-                    return value(uri, enc);
-                });
+                s9Transformer.setUnparsedTextResolver(WrapTextResolver(value));
             }
         }
 
+        /// <summary>
+        /// The <code>ResourceResolver</code> to be used at run-time to resolve and dereference URIs
+        /// supplied to functions retrieving XML, such as the <c>fn:doc()</c>, <c>fn:document()</c>, and
+        /// <c>fn:doc-available()</c> functions, as well as <c>fn:transform()</c>
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The URI supplied as the first argument to the resolver is the absolute URI requested,
+        /// that is, the result of resolving the requested relative URI against the relevant base URI.
+        /// </para>
+        /// <para>The requested relative URI and the corresponding base URI are supplied as separate
+        /// properties within the <c>ResourceProperties</c> argument, in case they are needed.
+        /// </para>
+        /// <para>The returned <c>IResource</c> must be one of the following:
+        /// <list>
+        /// <item>An <c>IResource</c> such as a <c>NodeResource</c> or an <c>XmlReaderResource</c>
+        /// whose <c>getItem()</c> method delivers an <c>XdmNode</c>;</item>
+        /// <item>A <c>TextResource</c> delivering lexical XML in its <c>Content</c> property; this
+        /// will then be parsed to deliver the corresponding XML document.</item>
+        /// </list>
+        /// </para>
+        /// <para>If no <c>XmlDocumentResolver</c> is supplied, or if it returns null, then
+        /// the <c>CommonResourceResolver</c> associated with the Saxon Configuration is invoked.
+        /// </para>
+        /// </remarks>
+
+        public ResourceResolver XmlDocumentResolver {
+            get => xmlDocumentResolver;
+            set {
+                xmlDocumentResolver = value;
+                s9Transformer.setResourceResolver(new JResourceResolverWrappingCS(
+                    value, s9Transformer.getUnderlyingController().getConfiguration()));
+            }
+        }
 
         /// <summary>
         /// Ask whether assertions (<c>xsl:assert</c> instructions) have been enabled at run time. 
@@ -395,7 +414,7 @@ namespace Saxon.Api {
 
 
         /// <summary>Invoke the stylesheet by applying templates to a supplied source document, 
-        /// sending the results (wrapped in a document node) to a given <c>Destination</c>. The 
+        /// sending the results to a given <c>IDestination</c>. The 
         /// invocation uses any initial mode set using <see cref="InitialMode"/>,
         /// and any template parameters set using <see cref="SetInitialTemplateParameters"/>.
         /// </summary>
@@ -415,7 +434,7 @@ namespace Saxon.Api {
 
         /// <summary>Invoke the stylesheet by applying templates to a supplied source document, 
         /// using the supplied base URI,
-        /// sending the results (wrapped in a document node) to a given <c>Destination</c>. The 
+        /// sending the results to a given <c>IDestination</c>. The 
         /// invocation uses any initial mode set using <see cref="InitialMode"/>,
         /// and any template parameters set using <see cref="SetInitialTemplateParameters"/>.
         /// </summary>
@@ -435,8 +454,8 @@ namespace Saxon.Api {
             s9Transformer.applyTemplates(streamSource, destination.UnderlyingDestination);
         }
         
-               /// <summary>Invoke the stylesheet by applying templates to a supplied source document, 
-        /// sending the results (wrapped in a document node) to a given <c>Destination</c>. The 
+        /// <summary>Invoke the stylesheet by applying templates to a supplied source document, 
+        /// sending the results to a given <c>IDestination</c>. The 
         /// invocation uses any initial mode set using <see cref="InitialMode"/>,
         /// and any template parameters set using <see cref="SetInitialTemplateParameters"/>.
         /// </summary>
@@ -457,7 +476,7 @@ namespace Saxon.Api {
 
         /// <summary>Invoke the stylesheet by applying templates to a supplied source document, 
         /// using the supplied base URI,
-        /// sending the results (wrapped in a document node) to a given <c>Destination</c>. The 
+        /// sending the results to a given <c>IDestination</c>. The 
         /// invocation uses any initial mode set using <see cref="InitialMode"/>,
         /// and any template parameters set using <see cref="SetInitialTemplateParameters"/>.
         /// </summary>
@@ -552,11 +571,57 @@ namespace Saxon.Api {
             return s9Transformer.applyTemplates(streamSource);
         }
 
+        /// <summary>Invoke the stylesheet by applying templates to a supplied source document, 
+        /// sending the results to a given <c>IDestination</c>. The 
+        /// invocation uses any initial mode set using <see cref="InitialMode"/>,
+        /// and any template parameters set using <see cref="SetInitialTemplateParameters"/>.
+        /// </summary>
+        /// <param name="input">The source document, encapsulated by an <c>XmlReader</c>.
+        /// Saxon will not change any property settings on the <c>XmlReader</c> (for example,
+        /// it will not reset its <c>XmlResolver</c> property.)</param>
+        /// <param name="destination">The destination of the result document produced by wrapping the result 
+        /// of the apply-templates call in a document node.  If the destination is a <see cref="Serializer"/>, 
+        /// then the serialization parameters set in the serializer are combined with those defined in the 
+        /// stylesheet (the parameters set in the serializer take precedence).</param>
+        /// <remarks>
+        /// If the initial mode is declared streamable, this will perform a streamed transformation.
+        /// </remarks>
+      
+        public void ApplyTemplates(XmlReader input, IDestination destination) {
+            s9Transformer.applyTemplates(makePullSource(input), destination.UnderlyingDestination);
+        }
+        
+        /// <summary>Invoke the stylesheet by applying templates to a supplied source document, 
+        /// using the supplied base URI, returning the raw results as an <c>XdmValue</c>. The 
+        /// invocation uses any initial mode set using <see cref="InitialMode"/>,
+        /// and any template parameters set using <see cref="SetInitialTemplateParameters"/>.
+        /// </summary>
+        /// <param name="input">The source document, encapsulated by an <c>XmlReader</c>.
+        /// Saxon will not change any property settings on the <c>XmlReader</c> (for example,
+        /// it will not reset its <c>XmlResolver</c> property.)</param>
+        /// <returns>the raw result of applying templates to the supplied selection value, without wrapping in
+        /// a document node or serializing the result. If there is more than one item in the selection, the result
+        /// is the concatenation of the results of applying templates to each item in turn.</returns>
+        /// <remarks>
+        /// If the initial mode is declared streamable, this will perform a streamed transformation.
+        /// </remarks>
+        public XdmValue ApplyTemplates(XmlReader input) {
+            return s9Transformer.applyTemplates(makePullSource(input));
+        }
 
+        private PullSource makePullSource(XmlReader reader) {
+            Configuration config = s9Transformer.getUnderlyingController().getConfiguration();
+            PullProvider pp = new DotNetPullProvider(reader);
+            pp.setPipelineConfiguration(config.makePipelineConfiguration());
+            // pp = new PullTracer(pp);  /* diagnostics */
+            PullSource source = new (pp);
+            source.setSystemId(reader.BaseURI);
+            return source;
+        }
 
         /// <summary>
-        /// Invoke the stylesheet by applying templates to a supplied input sequence, sending the results (wrapped
-        /// in a document node) to a given <c>Destination</c>. The invocation uses any initial mode set using 
+        /// Invoke the stylesheet by applying templates to a supplied input sequence, sending the results 
+        /// to a given <c>IDestination</c>. The invocation uses any initial mode set using 
         /// <see cref="InitialMode"/>, and any template parameters set using <see cref="SetInitialTemplateParameters"/>.
         /// </summary>
         /// <param name="selection">The initial value to which templates are to be applied (equivalent to the <code>select</code>
@@ -642,7 +707,76 @@ namespace Saxon.Api {
         public void CallFunction(QName function, XdmValue[] arguments, IDestination destination) {
             s9Transformer.callFunction(function, arguments, destination.UnderlyingDestination);
         }
+
+
+        protected internal static UnparsedTextURIResolver WrapTextResolver(Saxon.Api.ResourceResolver value) {
+            return new WrappedTextResolver(value);
+        }
+        
+        /// <summary>
+        /// An implementation of <c>UnparsedTextURIResolver</c> that wraps (and delegates to)
+        /// a supplied <c>Saxon.Api.ResourceResolver</c>
+        /// </summary>
+        internal class WrappedTextResolver : UnparsedTextURIResolver {
+            
+            private readonly Saxon.Api.ResourceResolver resolver;
+
+            /// <summary>
+            /// Create a wrapped text resolver
+            /// </summary>
+            /// <param name="resolver">the resolver to be wrapped</param>
+            public WrappedTextResolver(Saxon.Api.ResourceResolver resolver) {
+                this.resolver = resolver;
+            }
+            
+            /// <summary>
+            /// Resolve a URI for an unparsed text document
+            /// </summary>
+            /// <param name="absoluteURI">The requested URI, made absolute</param>
+            /// <param name="encoding">The requested encoding if any (or null if absent)</param>
+            /// <param name="config">The Saxon configuration</param>
+            /// <returns>A reader giving access to the text</returns>
+            /// <exception cref="Saxon.Hej.trans.XPathException">If the encoding is not available,
+            /// or if the returned resource is not a text resource.</exception>
+
+            public TextReader resolve(Uri absoluteURI, string encoding, Configuration config) {
+                Encoding enc;
+                if (encoding == null) {
+                    enc = null;
+                }
+                else {
+                    if (encoding == "iso-646") {
+                        encoding = "us-ascii";
+                    }
+                    try {
+                        enc = Encoding.GetEncoding((string)encoding);
+                    }
+                    catch (System.ArgumentException e) {
+                        throw new Saxon.Hej.trans.XPathException("Unparsed-text encoding problem: " + e.Message, "FOUT1190");
+                    }
+                }
+                Saxon.Api.ResourceRequest request = new() {
+                    BaseUri = absoluteURI,
+                    Uri = absoluteURI,
+                    Encoding = enc,
+                    Nature = ResourceRequest.TEXT_NATURE
+                };
+                IResource resource = resolver.Invoke(request);
+                return resource switch {
+                    null => null,
+                    TextResource text => text.TextReader,
+                    _ => throw new Saxon.Hej.trans.XPathException(
+                        "Resolver for unparsed-text URI " + absoluteURI + " returned an IResource that is not a TextResource",
+                        "FOUT1170")
+                };
+            }
+        }
+        
+ 
+
     }
+    
+    
 }
 
 // Copyright (c) 2021 Saxonica Limited

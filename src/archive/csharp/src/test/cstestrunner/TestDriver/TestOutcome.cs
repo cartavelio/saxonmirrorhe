@@ -180,6 +180,9 @@ namespace TestDriver {
             }
         }
 
+        public void AddReportedError(QName errorCode) {
+            errorsReported.Add(errorCode);
+        }
 
         public void SetErrorQNameReported(SysCollGen.IList<QName> errors) {
             foreach (QName err in errors) {
@@ -840,6 +843,9 @@ namespace TestDriver {
                     return false;
                 }
                 catch (SaxonApiException err) {
+                    if ("CRASH-999999".Equals(err.ErrorCode.LocalName)) {
+                        return false;
+                    }
                     bool b = expectedError.Equals(err.ErrorCode.LocalName);
                     if (!b) {
                         driver.println("Expected " + expectedError + ", got " + err.ErrorCode.LocalName);
@@ -1096,9 +1102,8 @@ namespace TestDriver {
 
             //noinspection ThrowableResultOfMethodCallIgnored
             bool ok = (expectedError.Equals("*") ||
-                       (GetErrorCode() != null &&
-                        GetErrorCode().LocalName.Equals(expectedErrorQ.LocalName)) ||
-                       (HasReportedError(expectedErrorQ)));
+                       (GetErrorCode() != null && GetErrorCode().LocalName.Equals(expectedErrorQ.LocalName)) ||
+                       HasReportedError(expectedErrorQ));
             if (ok) {
                 wrongError = null;
             }

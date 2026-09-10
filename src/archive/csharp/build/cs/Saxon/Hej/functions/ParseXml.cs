@@ -39,15 +39,35 @@ namespace Saxon.Hej.functions {
                 }
                 s.setPipelineConfiguration(b.getPipelineConfiguration());
                 Saxon.Hej.@event.Sender.send(pullSource, s, options);
-                Saxon.Hej.tree.tiny.TinyDocumentImpl node = (Saxon.Hej.tree.tiny.TinyDocumentImpl)(b.getCurrentRoot());
-                node.setBaseURI(baseURI);
+                Saxon.Hej.om.NodeInfo root = b.getCurrentRoot();
+                if ((root is Saxon.Hej.tree.tiny.TinyDocumentImpl)) {
+                    Saxon.Hej.tree.tiny.TinyDocumentImpl node = (Saxon.Hej.tree.tiny.TinyDocumentImpl)(root);
+                    node.setBaseURI(baseURI);
+                    node.getTreeInfo().setUserData("saxon:document-uri", "");
+                } else {
+                    if ((root is Saxon.Hej.tree.linked.DocumentImpl)) {
+                        Saxon.Hej.tree.linked.DocumentImpl node = (Saxon.Hej.tree.linked.DocumentImpl)(root);
+                        node.setBaseURI(baseURI);
+                        node.getTreeInfo().setUserData("saxon:document-uri", "");
+                    }
+                }
                 b.reset();
-                return node;
+                return root;
             } catch (Saxon.Hej.trans.XPathException err) {
-                Saxon.Hej.trans.XPathException xe = new Saxon.Hej.trans.XPathException(("First argument to parse-xml() is not a well-formed and namespace-well-formed XML document. XML parser reported: "+err.Message), "FODC0006");
+                string msg = makeParsingErrorMessage(err);
+                Saxon.Hej.trans.XPathException xe = new Saxon.Hej.trans.XPathException(msg, "FODC0006");
                 xe.maybeSetContext(context);
                 throw xe;
             }
+        }
+        private string makeParsingErrorMessage(Saxon.Hej.trans.XPathException err) {
+            string msg = "First argument to parse-xml() is not a well-formed and namespace-well-formed XML document. ";
+            msg += err.Message;
+            System.Exception cause = err.InnerException;
+            if ((cause != null)) {
+                msg += cause.Message;
+            }
+            return msg;
         }
     
     }

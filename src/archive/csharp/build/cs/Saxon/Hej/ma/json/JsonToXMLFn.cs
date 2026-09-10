@@ -35,7 +35,7 @@ namespace Saxon.Hej.ma.json {
             System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> checkedOptions = null;
             if ((options != null)) {
                 checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
-                flags = Saxon.Hej.ma.json.JsonParser.getFlags(checkedOptions, context, true);
+                flags = Saxon.Hej.ma.json.JsonParser.getFlags(checkedOptions, true, context.getController().getExecutable().isSchemaAware());
                 if ((((flags&Saxon.Hej.ma.json.JsonParser.DUPLICATES_LAST)) != 0)) {
                     throw new Saxon.Hej.trans.XPathException("json-to-xml: duplicates=use-last is not allowed", "FOJS0005");
                 }

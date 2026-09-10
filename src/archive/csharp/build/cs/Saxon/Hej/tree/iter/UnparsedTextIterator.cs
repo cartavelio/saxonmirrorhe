@@ -7,7 +7,7 @@ namespace Saxon.Hej.tree.iter {
         internal string encoding = null;
         public UnparsedTextIterator(System.Uri absoluteURI, Saxon.Hej.expr.XPathContext context, string encoding, Saxon.Hej.s9api.Location location)  {
             Saxon.Hej.Configuration config = context.getConfiguration();
-            System.IO.TextReader reader = /*Delegate.resolve()*/context.getController().getUnparsedTextURIResolver()(absoluteURI, encoding, config);
+            System.IO.TextReader reader = context.getController().getUnparsedTextURIResolver().resolve(absoluteURI, encoding, config);
             this.reader = new Saxon.Impl.Helpers.LineNumberReader(reader);
             this.uri = absoluteURI;
             this.context = context;

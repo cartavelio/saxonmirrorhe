@@ -141,6 +141,8 @@ namespace Saxon.Hej.lib {
             featureList.Add(new Saxon.Hej.lib.FeatureData("http://saxon.sf.net/feature/retainNodeForDiagnostics", 125, "EE", typeof(bool), false));
             featureList.Add(new Saxon.Hej.lib.FeatureData("http://saxon.sf.net/feature/allowUnresolvedSchemaComponents", 126, "EE", typeof(bool), false));
             featureList.Add(new Saxon.Hej.lib.FeatureData("http://saxon.sf.net/feature/zipUriPattern", 127, "EE", typeof(string), null));
+            featureList.Add(new Saxon.Hej.lib.FeatureData("http://saxon.sf.net/feature/saxon-resource-resolver", 128, "HE PE EE", typeof(System.Object), null));
+            featureList.Add(new Saxon.Hej.lib.FeatureData("http://saxon.sf.net/feature/saxon-resource-resolver-class", 129, "HE PE EE", typeof(string), null));
         }
     
     }

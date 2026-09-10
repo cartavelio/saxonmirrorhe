@@ -1,4 +1,6 @@
 
+using System;
+using System.Collections.Immutable;
 using SysCollGen = System.Collections.Generic;
 using System.Linq;
 using Saxon.Ejava.lang;
@@ -14,6 +16,28 @@ namespace Saxon.Impl.Helpers {
             else {
                 // Use Linq
                 return input.Skip(start).Take(end - start).ToList();
+            }
+        }
+        
+        public static void Sort<T>(SysCollGen.List<T> input, System.Comparison<T> comparator) {
+            // Saxon assumes that if the comparator throws a ClassCastException, we can catch this. But the C# Sort()
+            // method converts it to an InvalidOperationException, so we need to catch that.
+            try {
+                input.Sort(comparator);
+            }
+            catch (System.InvalidOperationException e) {
+                throw new System.InvalidCastException();
+            }
+        }
+        
+        public static void Sort<T>(SysCollGen.List<T> input, SysCollGen.IComparer<T> comparator) {
+            // Saxon assumes that if the comparator throws a ClassCastException, we can catch this. But the C# Sort()
+            // method converts it to an InvalidOperationException, so we need to catch that.
+            try {
+                input.Sort(comparator);
+            }
+            catch (System.InvalidOperationException e) {
+                throw new System.InvalidCastException();
             }
         }
 

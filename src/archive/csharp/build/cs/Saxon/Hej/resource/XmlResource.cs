@@ -4,22 +4,26 @@ using System.Linq;
 namespace Saxon.Hej.resource {
     public class XmlResource : Saxon.Hej.lib.Resource {
         private Saxon.Hej.om.NodeInfo doc;
+        private readonly Saxon.Hej.expr.XPathContext context;
         private readonly Saxon.Hej.Configuration config;
         private Saxon.Hej.resource.AbstractResourceCollection.InputDetails details;
-        public readonly static Saxon.Hej.lib.ResourceFactory FACTORY = (config, details) => new Saxon.Hej.resource.XmlResource(config, details);
+        public readonly static Saxon.Hej.lib.ResourceFactory FACTORY = (context, details) => new Saxon.Hej.resource.XmlResource(context, details);
         public XmlResource(Saxon.Hej.om.NodeInfo doc)  {
             this.config = doc.getConfiguration();
+            this.context = this.config.getConversionContext();
             this.doc = doc;
         }
-        public XmlResource(Saxon.Hej.Configuration config, Saxon.Hej.om.NodeInfo doc)  {
-            this.config = config;
+        public XmlResource(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.NodeInfo doc)  {
+            this.context = context;
+            this.config = context.getConfiguration();
             this.doc = doc;
             if ((config != doc.getConfiguration())) {
                 throw new Saxon.Ejava.lang.IllegalArgumentException("Supplied node belongs to wrong configuration");
             }
         }
-        public XmlResource(Saxon.Hej.Configuration config, Saxon.Hej.resource.AbstractResourceCollection.InputDetails details)  {
-            this.config = config;
+        public XmlResource(Saxon.Hej.expr.XPathContext context, Saxon.Hej.resource.AbstractResourceCollection.InputDetails details)  {
+            this.config = context.getConfiguration();
+            this.context = context;
             this.details = details;
         }
         public string getResourceURI() {
@@ -29,7 +33,7 @@ namespace Saxon.Hej.resource {
                 return doc.getSystemId();
             }
         }
-        public Saxon.Hej.om.Item getItem(Saxon.Hej.expr.XPathContext context) {
+        public Saxon.Hej.om.Item getItem() {
             if ((doc == null)) {
                 string resourceURI = details.resourceUri;
                 Saxon.Hej.lib.ParseOptions options = details.parseOptions;

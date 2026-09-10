@@ -20,7 +20,7 @@ namespace Saxon.Hej.tree.tiny {
             buffer.append(Saxon.Hej.str.CompressedWhitespace.uncompress(value));
         }
         public override Saxon.Hej.value.StringValue atomize() {
-            return new Saxon.Hej.value.UntypedAtomicValue(getUnicodeStringValue());
+            return Saxon.Hej.value.StringValue.makeUntypedAtomic(getUnicodeStringValue());
         }
         public static long getLongValue(Saxon.Hej.tree.tiny.TinyTree tree, int nodeNr) {
             return ((((long)(tree.alpha[nodeNr])<<32))|(((long)(tree.beta[nodeNr])&unchecked((long)0xffffffffL))));

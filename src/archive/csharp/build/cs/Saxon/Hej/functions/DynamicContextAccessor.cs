@@ -16,7 +16,7 @@ namespace Saxon.Hej.functions {
             }
         }
         public override Saxon.Hej.expr.Expression makeFunctionCall(Saxon.Hej.expr.Expression[] arguments) {
-            return new Inner_SystemFunctionCall_d1036e181(this, this, arguments);
+            return new Inner_SystemFunctionCall_4(this, this, arguments);
         }
         public class ImplicitTimezone : Saxon.Hej.functions.DynamicContextAccessor {
             public override Saxon.Hej.value.AtomicValue evaluate(Saxon.Hej.expr.XPathContext context) {
@@ -53,9 +53,9 @@ namespace Saxon.Hej.functions {
         
         }
     
-        private class Inner_SystemFunctionCall_d1036e181 : Saxon.Hej.expr.SystemFunctionCall {
+        private class Inner_SystemFunctionCall_4 : Saxon.Hej.expr.SystemFunctionCall {
             private readonly DynamicContextAccessor outerInstance;
-            public Inner_SystemFunctionCall_d1036e181(DynamicContextAccessor outerInstance, DynamicContextAccessor arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
+            public Inner_SystemFunctionCall_4(DynamicContextAccessor outerInstance, DynamicContextAccessor arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
                 this.outerInstance = outerInstance;
             }
             public override  /* REPLACING public */ Saxon.Hej.om.Item evaluateItem(Saxon.Hej.expr.XPathContext context) {

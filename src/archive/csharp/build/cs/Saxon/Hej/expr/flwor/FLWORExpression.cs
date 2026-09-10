@@ -135,6 +135,11 @@ namespace Saxon.Hej.expr.flwor {
         }
         public void injectCode(Saxon.Hej.expr.parser.CodeInjector injector) {
             if ((injector != null)) {
+                foreach (Saxon.Hej.expr.flwor.Clause clause in clauses) {
+                    if ((clause is Saxon.Hej.expr.flwor.TraceClause)) {
+                        return ;
+                    }
+                }
                 System.Collections.Generic.IList<Saxon.Hej.expr.flwor.Clause> expandedList = new System.Collections.Generic.List<Saxon.Hej.expr.flwor.Clause>((clauses.Count*2));
                 expandedList.Add(clauses[0]);
                 for (int i = 1; (i<clauses.Count); i++) {
@@ -149,6 +154,7 @@ namespace Saxon.Hej.expr.flwor {
                     expandedList.Add(extra);
                 }
                 clauses = expandedList;
+                returnClauseOp.setChildExpression(Saxon.Hej.expr.parser.ExpressionTool.injectCode(returnClauseOp.getChildExpression(), injector));
             }
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
@@ -206,6 +212,7 @@ namespace Saxon.Hej.expr.flwor {
             return Saxon.Hej.expr.Expression.PROCESS_METHOD;
         }
         public override Saxon.Hej.expr.Expression optimize(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextItemType) {
+            Saxon.Hej.expr.parser.Optimizer opt = visitor.obtainOptimizer();
             foreach (Saxon.Hej.expr.flwor.Clause c in clauses) {
                 c.processOperands(op => op.optimize(visitor, contextItemType));
                 c.optimize(visitor, contextItemType);
@@ -226,6 +233,7 @@ namespace Saxon.Hej.expr.flwor {
                         Saxon.Hej.expr.flwor.LetClause lc = (Saxon.Hej.expr.flwor.LetClause)(c);
                         if (!(Saxon.Hej.expr.parser.ExpressionTool.dependsOnVariable(this, new Saxon.Hej.expr.Binding[]{lc.getRangeVariable()}))) {
                             Saxon.Impl.Helpers.ListUtils.Remove(clauses, c);
+                            opt.trace(("Removed unused variable "+lc.getRangeVariable().getVariableQName().getDisplayName()), this);
                             tryAgain = true;
                             break ;
                         }
@@ -242,6 +250,7 @@ namespace Saxon.Hej.expr.flwor {
                             if ((oneRef || simpleSeq)) {
                                 Saxon.Hej.expr.parser.ExpressionTool.replaceVariableReferences(this, lc.getRangeVariable(), lc.getSequence(), true);
                                 Saxon.Impl.Helpers.ListUtils.Remove(clauses, c);
+                                opt.trace(("Inlined variable "+lc.getRangeVariable().getVariableQName().getDisplayName()), this);
                                 if (clauses.Count==0) {
                                     return getReturnClause();
                                 }
@@ -340,10 +349,13 @@ namespace Saxon.Hej.expr.flwor {
                             if ((((clause is Saxon.Hej.expr.flwor.ForClause)) && !(((Saxon.Hej.expr.flwor.ForClause)(clause)).isAllowingEmpty()))) {
                                 bool added = ((Saxon.Hej.expr.flwor.ForClause)(clause)).addPredicate(this, visitor, contextItemType, term);
                                 if (!(added)) {
-                                    clauses.Insert((c+1), new Saxon.Hej.expr.flwor.WhereClause(this, removedExpr));
+                                    Saxon.Hej.expr.flwor.WhereClause newWhere = new Saxon.Hej.expr.flwor.WhereClause(this, removedExpr);
+                                    newWhere.setLocation(clause.getLocation());
+                                    clauses.Insert((c+1), newWhere);
                                 }
                             } else {
                                 Saxon.Hej.expr.flwor.WhereClause newWhere = new Saxon.Hej.expr.flwor.WhereClause(this, term);
+                                newWhere.setLocation(clause.getLocation());
                                 clauses.Insert((c+1), newWhere);
                             }
                             break ;
@@ -357,6 +369,7 @@ namespace Saxon.Hej.expr.flwor {
                             whereClause.setPredicate(makeAndCondition(list));
                         }
                         Saxon.Hej.expr.flwor.WhereClause newWhere = new Saxon.Hej.expr.flwor.WhereClause(this, term);
+                        newWhere.setLocation(condition.getLocation());
                         clauses.Insert(0, newWhere);
                     }
                 }

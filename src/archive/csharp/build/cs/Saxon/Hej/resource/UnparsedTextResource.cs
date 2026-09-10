@@ -35,7 +35,7 @@ namespace Saxon.Hej.resource {
         private string makeString(byte[] bytes, string encoding) {
             return System.Text.Encoding.GetEncoding(encoding).GetString(bytes);
         }
-        public readonly static Saxon.Hej.lib.ResourceFactory FACTORY = (config, details) => new Saxon.Hej.resource.UnparsedTextResource(details);
+        public readonly static Saxon.Hej.lib.ResourceFactory FACTORY = (context, details) => new Saxon.Hej.resource.UnparsedTextResource(details);
         public string getResourceURI() {
             return href;
         }
@@ -57,7 +57,7 @@ namespace Saxon.Hej.resource {
             }
             return unparsedText;
         }
-        public Saxon.Hej.om.Item getItem(Saxon.Hej.expr.XPathContext context) {
+        public Saxon.Hej.om.Item getItem() {
             return new Saxon.Hej.value.StringValue(getContent());
         }
         public string getContentType() {

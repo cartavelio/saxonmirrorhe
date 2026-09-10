@@ -22,7 +22,11 @@ namespace Saxon.Hej.functions.registry {
                 System.Collections.Generic.IList<string> messages = new System.Collections.Generic.List<string>();
                 System.IO.Stream @is = Saxon.Hej.Version.platform.locateResource("sef/function-library.sef.xml", messages);
                 if ((@is == null)) {
-                    throw new Saxon.Hej.trans.XPathException(("Failed to load built-in function library: "+messages[0]));
+                    Saxon.Ejava.lang.StringBuilder sb = new Saxon.Ejava.lang.StringBuilder("Failed to load built-in function library: function-library.sef.xml");
+                    foreach (string msg in messages) {
+                        sb.append(": ").append(msg);
+                    }
+                    throw new Saxon.Hej.trans.XPathException(sb.ToString());
                 }
                 pack = loader.loadPackage(new Saxon.Ejavax.xml.transform.stream.StreamSource(@is));
             }

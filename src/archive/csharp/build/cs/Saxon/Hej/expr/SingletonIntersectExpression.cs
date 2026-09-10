@@ -25,6 +25,7 @@ namespace Saxon.Hej.expr {
             Saxon.Hej.om.NodeInfo n;
             while (((n = (Saxon.Hej.om.NodeInfo)(iter.next())) != null)) {
                 if (n.Equals(m)) {
+                    iter.close();
                     return Saxon.Hej.tree.iter.SingletonIterator.makeIterator(m);
                 }
             }

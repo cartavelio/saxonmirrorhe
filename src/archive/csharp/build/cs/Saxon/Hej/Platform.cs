@@ -12,6 +12,7 @@ namespace Saxon.Hej {
         string getDefaultLanguage();
         string getDefaultCountry();
         System.IO.Stream locateResource(string filename, System.Collections.Generic.IList<string> messages);
+        void showEmbeddedResources();
         Saxon.Hej.lib.ActiveSource resolveSource(Saxon.Ejavax.xml.transform.Source source, Saxon.Hej.Configuration config);
         Saxon.Hej.lib.StringCollator makeCollation(Saxon.Hej.Configuration config, Saxon.Ejava.util.Properties props, string uri);
         bool canReturnCollationKeys(Saxon.Hej.lib.StringCollator collation);

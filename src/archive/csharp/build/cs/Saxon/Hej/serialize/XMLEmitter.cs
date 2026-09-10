@@ -88,8 +88,8 @@ namespace Saxon.Hej.serialize {
                 attSpecials = specialInAttSingle;
             }
             if (allCharactersEncodable) {
-                isSpecialInText = c => (((c<127) ? specialInText[c] : ((((c<160) || (c == 0x2028)) || (c>65535)))));
-                isSpecialInAttribute = c => (((c<127) ? attSpecials[c] : ((((c<160) || (c == 0x2028)) || (c>65535)))));
+                isSpecialInText = c => (((c<127) ? specialInText[c] : (((c<160) || (c == 0x2028)))));
+                isSpecialInAttribute = c => (((c<127) ? attSpecials[c] : (((c<160) || (c == 0x2028)))));
             } else {
                 isSpecialInText = c => (((c<127) ? specialInText[c] : (((((c<160) || (c == 0x2028)) || (c>65535)) || !(characterSet.inCharset(c))))));
                 isSpecialInAttribute = c => (((c<127) ? attSpecials[c] : (((((c<160) || (c == 0x2028)) || (c>65535)) || !(characterSet.inCharset(c))))));
@@ -492,8 +492,8 @@ namespace Saxon.Hej.serialize {
                 if (openStartTag) {
                     closeStartTag();
                 }
-                if ((chars is Saxon.Hej.str.CompressedWhitespace)) {
-                    ((Saxon.Hej.str.CompressedWhitespace)(chars)).write(writer);
+                if ((chars is Saxon.Hej.str.WhitespaceString)) {
+                    ((Saxon.Hej.str.WhitespaceString)(chars)).write(writer);
                 } else {
                     if (Saxon.Hej.@event.ReceiverOption.contains(properties, Saxon.Hej.@event.ReceiverOption.NO_SPECIAL_CHARS)) {
                         writer.write(chars);
@@ -576,8 +576,8 @@ namespace Saxon.Hej.serialize {
             long segstart = 0;
             bool disabled = false;
             bool[] specialChars = (inAttribute ? attSpecials : specialInText);
-            if ((chars is Saxon.Hej.str.CompressedWhitespace)) {
-                ((Saxon.Hej.str.CompressedWhitespace)(chars)).writeEscape(specialChars, writer);
+            if ((chars is Saxon.Hej.str.WhitespaceString)) {
+                ((Saxon.Hej.str.WhitespaceString)(chars)).writeEscape(specialChars, writer);
                 return ;
             }
             Saxon.Ejava.util.function.IntPredicate special = (inAttribute ? isSpecialInAttribute : isSpecialInText);
@@ -586,7 +586,11 @@ namespace Saxon.Hej.serialize {
                 long found = chars.indexWhere(special, segstart);
                 long i = ((found == -1) ? clength : found);
                 if ((found<0)) {
-                    writer.write(chars.substring(segstart, clength));
+                    if ((segstart == 0)) {
+                        writer.write(chars);
+                    } else {
+                        writer.write(chars.substring(segstart, clength));
+                    }
                     return ;
                 }
                 if ((i>segstart)) {

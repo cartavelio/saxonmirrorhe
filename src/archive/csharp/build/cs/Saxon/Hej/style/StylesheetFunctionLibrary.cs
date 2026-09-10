@@ -51,7 +51,7 @@ namespace Saxon.Hej.style {
         public Saxon.Hej.om.Function getFunctionItem(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.StaticContext staticContext) {
             return pack.getFunction(functionName);
         }
-        public bool isAvailable(Saxon.Hej.trans.SymbolicName.F functionName) {
+        public bool isAvailable(Saxon.Hej.trans.SymbolicName.F functionName, int languageLevel) {
             return (pack.getFunction(functionName) != null);
         }
         public Saxon.Hej.functions.FunctionLibrary copy() {

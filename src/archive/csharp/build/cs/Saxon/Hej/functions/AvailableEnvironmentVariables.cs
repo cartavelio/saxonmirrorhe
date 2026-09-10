@@ -14,12 +14,12 @@ namespace Saxon.Hej.functions {
             return new Saxon.Hej.value.SequenceExtent.Of<Saxon.Hej.om.Item>(myList);
         }
         public override Saxon.Hej.expr.Expression makeFunctionCall(Saxon.Hej.expr.Expression[] arguments) {
-            return new Inner_SystemFunctionCall_d988e204(this, this, arguments);
+            return new Inner_SystemFunctionCall_5(this, this, arguments);
         }
     
-        private class Inner_SystemFunctionCall_d988e204 : Saxon.Hej.expr.SystemFunctionCall {
+        private class Inner_SystemFunctionCall_5 : Saxon.Hej.expr.SystemFunctionCall {
             private readonly AvailableEnvironmentVariables outerInstance;
-            public Inner_SystemFunctionCall_d988e204(AvailableEnvironmentVariables outerInstance, AvailableEnvironmentVariables arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
+            public Inner_SystemFunctionCall_5(AvailableEnvironmentVariables outerInstance, AvailableEnvironmentVariables arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
                 this.outerInstance = outerInstance;
             }
             public override Saxon.Hej.expr.Expression preEvaluate(Saxon.Hej.expr.parser.ExpressionVisitor visitor) {

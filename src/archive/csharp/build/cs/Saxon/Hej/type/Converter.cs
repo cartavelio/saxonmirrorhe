@@ -122,7 +122,7 @@ namespace Saxon.Hej.type {
         public class ToUntypedAtomicConverter : Saxon.Hej.type.Converter.UnfailingConverter {
             public static readonly Saxon.Hej.type.Converter.ToUntypedAtomicConverter INSTANCE = new Saxon.Hej.type.Converter.ToUntypedAtomicConverter();
             public override Saxon.Hej.value.StringValue convert(Saxon.Hej.value.AtomicValue input) {
-                return new Saxon.Hej.value.UntypedAtomicValue(input.getUnicodeStringValue());
+                return Saxon.Hej.value.StringValue.makeUntypedAtomic(input.getUnicodeStringValue());
             }
         
         }

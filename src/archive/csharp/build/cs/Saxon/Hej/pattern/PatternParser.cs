@@ -261,7 +261,7 @@ namespace Saxon.Hej.pattern {
         public override Saxon.Hej.expr.Expression parseFunctionCall(Saxon.Hej.expr.Expression prefixArgument) {
             Saxon.Hej.expr.Expression fn = base.parseFunctionCall(prefixArgument);
             if ((((((inPredicate<=0) && !(fn.isCallOn(typeof(Saxon.Hej.functions.SuperId)))) && !(fn.isCallOn(typeof(Saxon.Hej.functions.KeyFn)))) && !(fn.isCallOn(typeof(Saxon.Hej.functions.Doc)))) && !(fn.isCallOn(typeof(Saxon.Hej.functions.Root_1))))) {
-                grumble((("The "+fn.ToString())+" function is not allowed at the head of a pattern"));
+                grumble((("The "+fn)+" function is not allowed at the head of a pattern"));
             }
             return fn;
         }

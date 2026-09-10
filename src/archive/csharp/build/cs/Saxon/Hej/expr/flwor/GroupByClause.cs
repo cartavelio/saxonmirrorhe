@@ -95,9 +95,7 @@ namespace Saxon.Hej.expr.flwor {
             @out.endElement();
         }
         public override string ToString() {
-            Saxon.Ejava.lang.StringBuilder fsb = new Saxon.Ejava.lang.StringBuilder(64);
-            fsb.append("group by ... ");
-            return fsb.ToString();
+            return "group by ... ";
         }
         public class ObjectToBeGrouped {
             public Saxon.Hej.expr.flwor.Tuple groupingValues;

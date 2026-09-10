@@ -15,7 +15,7 @@ namespace Saxon.Hej.resource {
         public string getResourceURI() {
             return uri;
         }
-        public Saxon.Hej.om.Item getItem(Saxon.Hej.expr.XPathContext context) {
+        public Saxon.Hej.om.Item getItem() {
             throw error;
         }
         public Saxon.Hej.trans.XPathException getError() {

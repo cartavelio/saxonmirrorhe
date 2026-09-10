@@ -1828,7 +1828,7 @@ namespace Saxon.Eej.ee.schema {
                     if (node.isNilled()) {
                         return Saxon.Hej.om.EmptyAtomicSequence.getInstance();
                     }
-                    return new Saxon.Hej.value.UntypedAtomicValue(node.getUnicodeStringValue());
+                    return Saxon.Hej.value.StringValue.makeUntypedAtomic(node.getUnicodeStringValue());
                 } else {
                     if (isEmptyContent()) {
                         return Saxon.Hej.om.EmptyAtomicSequence.getInstance();

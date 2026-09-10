@@ -66,7 +66,7 @@ namespace Saxon.Hej.str {
             return -1;
         }
         public override Saxon.Hej.z.IntIterator codePoints() {
-            return new Inner_IntIterator_d1584e515(this);
+            return new Inner_IntIterator_29(this);
         }
         internal override void copy8bit(byte[] target, int offset) {
             Saxon.Ejava.lang.System.arraycopy(bytes, start, target, offset, (end-start));
@@ -98,9 +98,9 @@ namespace Saxon.Hej.str {
             return Saxon.Impl.Helpers.StringUtils.LATIN_1.GetString(bytes, start, end - start);
         }
     
-        private class Inner_IntIterator_d1584e515 : Saxon.Hej.z.IntIterator {
+        private class Inner_IntIterator_29 : Saxon.Hej.z.IntIterator {
             private readonly Slice8 outerInstance;
-            public Inner_IntIterator_d1584e515(Slice8 outerInstance) {
+            public Inner_IntIterator_29(Slice8 outerInstance) {
                 this.outerInstance = outerInstance;
                 i = outerInstance.start;
             }

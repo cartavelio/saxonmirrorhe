@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Xml;
+using Org.XmlResolver.Features;
 using Saxon.Ejavax.xml.transform.stream;
 using Saxon.Hej;
 using Saxon.Hej.@event;
@@ -41,8 +43,6 @@ namespace Saxon.Api {
         private SchemaManager schemaManager;
         private TextWriter textWriter = Console.Error;
         private CollectionFinder userCollectionFinder;
-
-        private TextResolver textResolver;
 
         internal Processor(Saxon.Hej.s9api.Processor p) {
             JProcessor = p;
@@ -94,14 +94,21 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="configurationFile">A stream holding the text of the XML configuration file. Details of the file format
         /// can be found in the Saxon documentation.</param>
-        /// <param name="baseUri">baseUri of the configuration file used for resolving any relative URIs in the file</param> 
+        /// <param name="baseUri">baseUri of the configuration file used for resolving any relative URIs in the file</param>
+        /// <exception cref="SaxonApiException">if the configuration file is invalid or sets properties not available
+        /// in this Saxon version</exception> 
         public Processor(Stream configurationFile, Uri baseUri) {
-            StreamSource ss = new StreamSource(configurationFile, baseUri.AbsoluteUri);
-            Configuration config = Configuration.readConfiguration(ss);
-            //config.registerExternalObjectModel(new DotNetObjectModelDefinition());
-            JProcessor = new Saxon.Hej.s9api.Processor(config);
-            config.setProcessor(this);
-            init();
+            try {
+                StreamSource ss = new StreamSource(configurationFile, baseUri.AbsoluteUri);
+                Configuration config = Configuration.readConfiguration(ss);
+                //config.registerExternalObjectModel(new DotNetObjectModelDefinition());
+                JProcessor = new Hej.s9api.Processor(config);
+                config.setProcessor(this);
+                init();
+            }
+            catch (XPathException e) {
+                throw new SaxonApiException(e);
+            }
         }
 
         /// <summary>
@@ -160,48 +167,64 @@ namespace Saxon.Api {
 
         public SchemaManager SchemaManager => schemaManager ??= new SchemaManager(this);
 
+        // /// <summary>
+        // /// An <c>XmlResolver</c>, which will be used while compiling and running queries, 
+        // /// XPath expressions, and stylesheets, if no other <c>XmlResolver</c> is nominated
+        // /// </summary>
+        // /// <remarks>
+        // /// <para>By default a <c>StandardXmlResolver</c> is used.</para>
+        // /// <para>When Saxon invokes a user-written <c>XmlResolver</c>, the <c>GetEntity</c> method
+        // /// may return any of: a <c>System.IO.Stream</c>; a <c>System.IO.TextReader</c>; or a
+        // /// <c>Saxon.Ejava.xml.transform.Source</c>.</para>
+        // /// </remarks>
+        //
+        // public XmlResolver XmlResolver {
+        //     get => Implementation.getCommonResourceResolver();
+        //     set {
+        //         Implementation.getCommonResourceResolver().chain(new XmlResolverWrapper(value));
+        //     }
+        // }
+        
         /// <summary>
-        /// An <c>XmlResolver</c>, which will be used while compiling and running queries, 
-        /// XPath expressions, and stylesheets, if no other <c>XmlResolver</c> is nominated
+        /// Set a resource resolver to be used to resolve URIs referring to external resources.
         /// </summary>
         /// <remarks>
-        /// <para>By default a <c>StandardXmlResolver</c> is used.</para>
-        /// <para>When Saxon invokes a user-written <c>XmlResolver</c>, the <c>GetEntity</c> method
-        /// may return any of: a <c>System.IO.Stream</c>; a <c>System.IO.TextReader</c>; or a
-        /// <c>Saxon.Ejava.xml.transform.Source</c>.</para>
+        /// <para>This resolver is used for all resources within the scope of the <c>Processor</c>, unless
+        /// a more specific resolver is allocated for example at the level of an <c>XsltCompiler</c>
+        /// or <c>XQueryEvaluator</c>.</para>
+        /// <para>If the resolver returns null, then "direct URI resolution" (using the native methods
+        /// supported by the platform) is used as a fallback.</para>
         /// </remarks>
+        /// <param name="resolver">The resource resolver to be used</param>
+        /// <param name="combine">If true, then the existing resource resolver registered
+        /// at configuration level is used as a fallback when the new resource resolver returns null.</param>
 
-        public XmlResolver XmlResolver {
-            get {
-                Saxon.Ejavax.xml.transform.URIResolver resolver = JProcessor.getUnderlyingConfiguration().getURIResolver();
-                if (resolver is StandardURIResolver uriResolver) {
-                    return uriResolver.getXmlResolver();
-                }
-
-                return new StandardXmlResolver(Implementation);
-            }
-            set => JProcessor.getUnderlyingConfiguration().setURIResolver(
-                                new StandardURIResolver(JProcessor.getUnderlyingConfiguration(), value));
+        public void SetResourceResolver(Saxon.Api.ResourceResolver resolver, bool combine) {
+            Saxon.Hej.lib.JJ_ResourceResolver wrapper = new JResourceResolverWrappingCS(resolver, Implementation);
+            Saxon.Hej.lib.JJ_ResourceResolver newResolver = combine
+                ? new ChainedResourceResolver(wrapper, Implementation.getResourceResolver())
+                : wrapper;
+            Implementation.setResourceResolver(newResolver);
         }
         
         /// <summary>
-        /// An <c>TextResolver</c>, which will be used for resolving URIs passed to calls on
-        /// <c>unparsed-text()</c>, <c>unparsed-text-lines()</c>, <c>unparsed-text-available()</c>,
-        /// and <c>json-doc()</c>. The default is null, which indicates that Saxon will use its
-        /// own internal mechanisms.
+        /// Set one or more catalog files to be used for resolving URIs
         /// </summary>
+        /// <remarks>
+        /// <para>The call has no effect unless the configuration is using a resolver capable of using catalogs.
+        /// It generally won't work if <c>SetResourceResolver</c> has been called to set a different configuration-level
+        /// resolver. However you can call this method to set catalogs for use by the standard resolver, and
+        /// then subsequently call <c>SetResourceResolver</c> with <c>combine=true</c> to combine a user-defined
+        /// resolver for specific URIs with a catalog-based resolver for others.</para>
+        /// </remarks>
+        /// <param name="fileNames">A list of filenames. (Often a single filename.)
+        /// The call has no effect if the list is empty.
+        /// Relative filenames are interpreted relative to the current working directory.</param>
 
-        public TextResolver TextResolver {
-            get => textResolver;
-            set {
-                textResolver = value;
-                Implementation.setUnparsedTextURIResolver((uri, encoding, config) =>
-                    value(uri, Encoding.GetEncoding(encoding)));
-            }
+        public void SetCatalogFiles(params string[] fileNames) {
+            JProcessor.setCatalogFiles(fileNames);
         }
-
-
-
+        
         /// <summary>
         /// A <c>TextWriter</c> used as the destination of miscellaneous error, warning, and progress messages.
         /// </summary>
@@ -224,7 +247,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns>A new <c>DocumentBuilder</c></returns>
         public DocumentBuilder NewDocumentBuilder() {
-            return new DocumentBuilder(this) {XmlResolver = XmlResolver};
+            return new DocumentBuilder(this);
         }
         
         /// <summary>
@@ -550,7 +573,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="feature">The property feature</param>
         /// <param name="value">The property value</param>
-        public void SetProperty<T>(Feature<T> feature, T value) {
+        public void SetProperty(Feature feature, object value) {
             Implementation.setFeature(FeatureIndex.getData(feature.Code), value);
         }
 
@@ -576,16 +599,13 @@ namespace Saxon.Api {
         /// Get a property of the configuration.
         /// </summary>
         /// <remarks>
-        /// <para>This method provides a type-safe way of getting the value of a configuration
-        /// property of any type: for example, <c>GetProperty(Feature&lt;bool>.XQUERY_ALLOW_UPDATE)</c>
-        /// returns a boolean property as a boolean. </para>
+        /// <para>In earlier versions of SaxonCS this method attempted to achieve type-safety by returning
+        /// a generic type. This has been abandoned - see bug 5183</para>
         /// </remarks>
-        /// <typeparam name="T">See the class <c>Feature</c> for constants 
-        /// representing the properties that can be requested.</typeparam>
         /// <param name="feature">the required property. </param>
         /// <returns>the value of the property</returns>
-        public T GetProperty<T>(Feature<T> feature) {
-            return (T)Implementation.getFeature(FeatureIndex.getData(feature.Code));
+        public object GetProperty(Feature feature) {
+            return Implementation.getFeature(FeatureIndex.getData(feature.Code));
         }
 
         /// <summary>

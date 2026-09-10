@@ -66,15 +66,27 @@ namespace Saxon.Api {
         /// <summary>
         /// The <c>SchemaResolver</c> is a user-supplied callback used for resolving references to
         /// schema documents. It applies to references from one schema document to another
-        /// appearing in <c>xs:import</c>, <c>xs:include</c>, and <c>xs:redefine</c>; to
+        /// appearing in <c>xs:import</c>, <c>xs:include</c>, <c>xs:override</c>, and <c>xs:redefine</c>; to
         /// references from an instance document to a schema in <c>xsi:schemaLocation</c> and
         /// <c>xsi:noNamespaceSchemaLocation</c>, to <c>xsl:import-schema</c> in XSLT, and to
         /// the <c>import schema</c> declaration in XQuery.
         /// </summary>
+        /// <remarks>
+        /// <para>If no <c>SchemaResolver</c> is supplied, or if the supplied
+        /// <c>SchemaResolver</c> returns null, then the system attempts to locate
+        /// a schema using the common resource resolver associated with the Saxon <c>Configuration</c>.
+        /// It first attempts to resolve the location hint (if available), then the target namespace
+        /// (if present and non-empty). If both attempts fail, the system then attempts to use
+        /// standard URI resolution mechanisms to resolve the location hint (if available); it does
+        /// not attempt to resolve the target namespace.
+        /// </para>
+        /// </remarks>
 
-        public SchemaResolver SchemaResolver
-        {
-            set => s9schemaManager.setSchemaURIResolver(new DelegatingSchemaResolver(value));
+        public SchemaResolver SchemaResolver {
+            set {
+                DelegatingSchemaResolver dsr = new DelegatingSchemaResolver(value, processor.Implementation);
+                s9schemaManager.setSchemaURIResolver(dsr);
+            }
         }
 
         /// <summary>Set the <c>ErrorReporter</c> to be used when validating instance documents as a user defined ErrorReporter.

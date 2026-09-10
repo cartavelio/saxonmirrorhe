@@ -9,7 +9,10 @@ namespace Saxon.Hej.functions {
             try {
                 return Saxon.Hej.om.SequenceTool.toLazySequence(evalUnparsedTextLines(hrefVal, encoding, context));
             } catch (Saxon.Hej.trans.XPathException e) {
-                if (((getArity() == 2) && e.getErrorCodeLocalPart().Equals("FOUT1200"))) {
+                if ((e.getErrorCodeQName() == null)) {
+                    e.setErrorCode("FOUT1170");
+                }
+                if (((getArity() == 2) && "FOUT1200".Equals(e.getErrorCodeLocalPart()))) {
                     e.setErrorCode("FOUT1190");
                 }
                 throw;

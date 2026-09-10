@@ -134,6 +134,27 @@ namespace Saxon.Hej.functions {
                 return new Saxon.Hej.om.LazySequence(Saxon.Hej.expr.ItemMappingIterator.filter(all, item => Saxon.Hej.tree.util.Navigator.isAncestorOrSelf(origin, (Saxon.Hej.om.NodeInfo)(item))));
             } else {
                 Saxon.Hej.om.SequenceIterator allResults = null;
+                if ((sought is Saxon.Hej.value.AtomicValue)) {
+                    Saxon.Hej.om.SequenceIterator results = keyManager.selectByKey(selectedKeySet, doc.getTreeInfo(), (Saxon.Hej.value.AtomicValue)(sought), context);
+                    if ((results is Saxon.Hej.tree.iter.EmptyIterator)) {
+                        return Saxon.Hej.value.EmptySequence.getInstance();
+                    } else {
+                        if ((results is Saxon.Hej.tree.iter.SingletonIterator)) {
+                            Saxon.Hej.om.NodeInfo result = (Saxon.Hej.om.NodeInfo)(results.next());
+                            if ((doc.Equals(origin) || Saxon.Hej.tree.util.Navigator.isAncestorOrSelf(origin, result))) {
+                                return result;
+                            } else {
+                                return Saxon.Hej.value.EmptySequence.getInstance();
+                            }
+                        } else {
+                            if (doc.Equals(origin)) {
+                                return new Saxon.Hej.om.LazySequence(results);
+                            } else {
+                                new Saxon.Hej.om.LazySequence(Saxon.Hej.expr.ItemMappingIterator.filter(results, item => Saxon.Hej.tree.util.Navigator.isAncestorOrSelf(origin, (Saxon.Hej.om.NodeInfo)(item))));
+                            }
+                        }
+                    }
+                }
                 Saxon.Hej.om.SequenceIterator keys = sought.iterate();
                 Saxon.Hej.value.AtomicValue keyValue;
                 System.Collections.Generic.IList<Saxon.Hej.om.SequenceIterator> allKeyIterators = new System.Collections.Generic.List<Saxon.Hej.om.SequenceIterator>();
@@ -142,7 +163,7 @@ namespace Saxon.Hej.functions {
                     allKeyIterators.Add(someResults);
                 }
                 if (allKeyIterators.Count==0) {
-                    allResults = Saxon.Hej.tree.iter.EmptyIterator.ofNodes();
+                    return Saxon.Hej.value.EmptySequence.getInstance();
                 } else {
                     if ((allKeyIterators.Count == 1)) {
                         allResults = allKeyIterators[0];

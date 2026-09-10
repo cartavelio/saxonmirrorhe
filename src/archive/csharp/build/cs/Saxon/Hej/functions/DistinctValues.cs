@@ -42,6 +42,9 @@ namespace Saxon.Hej.functions {
             public void close() {
                 @base.close();
             }
+            public void discharge() {
+                @base.discharge();
+            }
         
         }
         public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {

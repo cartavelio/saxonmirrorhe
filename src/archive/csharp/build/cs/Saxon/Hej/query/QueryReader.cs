@@ -16,7 +16,19 @@ namespace Saxon.Hej.query {
                 if ((ss.getReader() != null)) {
                     queryText = readQueryFromReader(ss.getReader(), charChecker);
                 } else {
-                    throw new Saxon.Hej.trans.XPathException("Module URI Resolver must supply either an InputStream or a Reader");
+                    if ((ss.getSystemId() != null)) {
+                        try {
+                            Saxon.Ejava.net.URL url = new Saxon.Ejava.net.URL(ss.getSystemId());
+                            System.IO.Stream stream = Saxon.Impl.Overrides.ResourceLoader.urlStream(url);
+                            stream = Saxon.Hej.query.InputStreamMarker.ensureMarkSupported(stream);
+                            string encoding = readEncoding(stream);
+                            queryText = readInputStream(stream, encoding, charChecker);
+                        } catch (System.IO.IOException e) {
+                            throw new Saxon.Hej.trans.XPathException(("I/O Error reading input stream from "+ss.getSystemId()), e);
+                        }
+                    } else {
+                        throw new Saxon.Hej.trans.XPathException("Module URI Resolver must supply either an InputStream or a Reader");
+                    }
                 }
             }
             return queryText.ToString();

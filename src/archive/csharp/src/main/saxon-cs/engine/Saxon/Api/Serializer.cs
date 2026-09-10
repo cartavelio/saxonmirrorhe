@@ -23,7 +23,7 @@ namespace Saxon.Api {
 
         private readonly Saxon.Hej.s9api.Serializer jSerializer;
         private readonly Properties props = new();
-        private readonly CharacterMapIndex characterMapIndex = new();
+        //private readonly CharacterMapIndex characterMapIndex = new();
         private Properties defaultOutputProperties;
         
         /// <summary>QName identifying the serialization parameter "method". If the value
@@ -299,7 +299,7 @@ namespace Saxon.Api {
         
         public IDictionary<int, string> GetCharacterMap(QName name) {
             Saxon.Hej.serialize.CharacterMap map = 
-                    characterMapIndex.getCharacterMap(name.GetStructuredQName());
+                    jSerializer.getCharacterMapIndex().getCharacterMap(name.GetStructuredQName());
             if (map != null) {
                 IntHashMap<string> content = map.getMap();
                 SysCollGen.Dictionary<int, string> result = new();
@@ -332,7 +332,7 @@ namespace Saxon.Api {
             }
 
             CharacterMap map = new CharacterMap(name.GetStructuredQName(), content);
-            characterMapIndex.putCharacterMap(name.GetStructuredQName(), map);
+            jSerializer.getCharacterMapIndex().putCharacterMap(name.GetStructuredQName(), map);
         }
 
 

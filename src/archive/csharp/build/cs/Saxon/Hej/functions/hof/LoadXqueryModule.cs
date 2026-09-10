@@ -39,7 +39,7 @@ namespace Saxon.Hej.functions.hof {
             int qv = 31;
             if ((xqueryVersionOption != null)) {
                 Singulink.Numerics.BigDecimal decimalVn = ((Saxon.Hej.value.DecimalValue)(xqueryVersionOption.head())).getDecimalValue();
-                if (((decimalVn.Equals(Singulink.Numerics.BigDecimal.Parse("1.0")) || decimalVn.Equals(Singulink.Numerics.BigDecimal.Parse("3.0"))) || decimalVn.Equals(Singulink.Numerics.BigDecimal.Parse("3.1")))) {
+                if (((decimalVn.Equals(Singulink.Numerics.BigDecimal.Parse("1.0", System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.InvariantCulture)) || decimalVn.Equals(Singulink.Numerics.BigDecimal.Parse("3.0", System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.InvariantCulture))) || decimalVn.Equals(Singulink.Numerics.BigDecimal.Parse("3.1", System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.InvariantCulture)))) {
                     qv = ((int)(decimalVn*(Singulink.Numerics.BigDecimal)10));
                 } else {
                     throw new Saxon.Hej.trans.XPathException(("Unsupported XQuery version "+decimalVn), "FOQM0006");
@@ -61,7 +61,7 @@ namespace Saxon.Hej.functions.hof {
             Saxon.Hej.query.StaticQueryContext staticQueryContext = config.newStaticQueryContext();
             Saxon.Hej.lib.ModuleURIResolver moduleURIResolver = config.getModuleURIResolver();
             if ((moduleURIResolver == null)) {
-                moduleURIResolver = new Saxon.Callbacks.StandardModuleURIResolver(config);
+                moduleURIResolver = new Saxon.Hej.lib.StandardModuleURIResolver(config);
             }
             staticQueryContext.setModuleURIResolver(moduleURIResolver);
             string baseURI = getRetainedStaticContext().getStaticBaseUriString();
@@ -71,7 +71,7 @@ namespace Saxon.Hej.functions.hof {
                 string[] hints = locationHints.ToArray();
                 streamSources = staticQueryContext.getModuleURIResolver().resolve(moduleUri, baseURI, hints);
                 if ((streamSources == null)) {
-                    streamSources = new Saxon.Callbacks.StandardModuleURIResolver(config).resolve(moduleUri, baseURI, hints);
+                    streamSources = new Saxon.Hej.lib.StandardModuleURIResolver(config).resolve(moduleUri, baseURI, hints);
                 }
             } catch (Saxon.Hej.trans.XPathException e) {
                 e.maybeSetErrorCode("FOQM0002");
@@ -137,7 +137,7 @@ namespace Saxon.Hej.functions.hof {
             }
             Saxon.Hej.ma.map.MapItem functionsMap = new Saxon.Impl.DataModel.ImmMap();
             Saxon.Hej.query.XQueryFunctionLibrary functionLib = lib.getGlobalFunctionLibrary();
-            Saxon.Hej.expr.ExportAgent agent = new Inner_ExportAgent_d1076e1373(this);
+            Saxon.Hej.expr.ExportAgent agent = new Inner_ExportAgent_36(this);
             foreach (Saxon.Hej.query.XQueryFunction function in functionLib.getFunctionDefinitions()) {
                 Saxon.Hej.ma.map.MapItem newMap;
                 Saxon.Hej.value.QNameValue functionQName = new Saxon.Hej.value.QNameValue(function.getFunctionName(), Saxon.Hej.type.BuiltInAtomicType.QNAME);
@@ -158,9 +158,9 @@ namespace Saxon.Hej.functions.hof {
             return map;
         }
     
-        private class Inner_ExportAgent_d1076e1373 : Saxon.Hej.expr.ExportAgent {
+        private class Inner_ExportAgent_36 : Saxon.Hej.expr.ExportAgent {
             private readonly LoadXqueryModule outerInstance;
-            public Inner_ExportAgent_d1076e1373(LoadXqueryModule outerInstance) {
+            public Inner_ExportAgent_36(LoadXqueryModule outerInstance) {
                 this.outerInstance = outerInstance;
             }
             public void export(Saxon.Hej.trace.ExpressionPresenter @out) {

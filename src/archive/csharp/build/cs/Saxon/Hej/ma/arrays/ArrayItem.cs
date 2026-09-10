@@ -41,11 +41,6 @@ namespace Saxon.Hej.ma.arrays {
             return Saxon.Hej.om.Genre.ARRAY;
         }
     
-        /* Expanding default method isSequenceVariadic from interface Function */
-        public virtual bool isSequenceVariadic() {
-            return false;
-        }
-
         /* Expanding default method effectiveBooleanValue from interface GroundedValue */
         public virtual bool effectiveBooleanValue() {
             return Saxon.Hej.expr.parser.ExpressionTool.effectiveBooleanValue(iterate());
@@ -63,7 +58,7 @@ namespace Saxon.Hej.ma.arrays {
 
         /* Expanding default method asIterable from interface GroundedValue */
         public virtual System.Collections.Generic.IEnumerable<Saxon.Hej.om.Item> asIterable() {
-            return new Saxon.Hej.om.GroundedValueAsIterable<Saxon.Hej.om.Item>(this);
+            return new Saxon.Hej.om.GroundedValueAsIterable(this);
         }
 
         /* Expanding default method containsNode from interface GroundedValue */
@@ -79,6 +74,16 @@ namespace Saxon.Hej.ma.arrays {
                 chain.appendSequence(seq);
             }
             return chain;
+        }
+
+        /* Expanding default method makeRepeatable from interface Sequence */
+        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
+            return this;
+        }
+
+        /* Expanding default method isSequenceVariadic from interface Function */
+        public virtual bool isSequenceVariadic() {
+            return false;
         }
 
         /* Expanding default method head from interface Item */
@@ -120,13 +125,9 @@ namespace Saxon.Hej.ma.arrays {
             return false;
         }
 
-        /* Expanding default method makeRepeatable from interface Sequence */
-        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
-            return this;
-        }
-
-        /* Creating stub method call to satisfy interface Callable */
-        public virtual Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext arg1, Saxon.Hej.om.Sequence[] arg2) {
+        /* Creating stub method getUnicodeStringValue to satisfy interface GroundedValue */
+        /* (Also inherited from Item) */
+        public virtual Saxon.Hej.str.UnicodeString getUnicodeStringValue() {
             throw new System.NotImplementedException();
         }
 
@@ -180,14 +181,13 @@ namespace Saxon.Hej.ma.arrays {
             throw new System.NotImplementedException();
         }
 
-        /* Creating stub method getUnicodeStringValue to satisfy interface GroundedValue */
-        /* (Also inherited from Item) */
-        public virtual Saxon.Hej.str.UnicodeString getUnicodeStringValue() {
+        /* Creating stub method atomize to satisfy interface Item */
+        public virtual Saxon.Hej.om.AtomicSequence atomize() {
             throw new System.NotImplementedException();
         }
 
-        /* Creating stub method atomize to satisfy interface Item */
-        public virtual Saxon.Hej.om.AtomicSequence atomize() {
+        /* Creating stub method call to satisfy interface Callable */
+        public virtual Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext arg1, Saxon.Hej.om.Sequence[] arg2) {
             throw new System.NotImplementedException();
         }
 

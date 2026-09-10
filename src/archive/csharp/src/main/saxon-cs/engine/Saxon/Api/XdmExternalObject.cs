@@ -5,20 +5,24 @@ namespace Saxon.Api {
     /// An <c>XdmItem</c> that wraps an external .NET object. 
     /// </summary>
     /// <remarks>
-    /// External objects are a Saxon extension, and
+    /// <para>External objects are a Saxon extension, and
     /// represent a fourth kind of item, after nodes, atomic values, and functions. They are primarily useful
     /// in conjunction with extension functions: an external object may be returned from one extension function,
     /// and passed as an argument to another. They can also be supplied as parameters to a stylesheet or query,
-    /// which in turn might pass them to an extension function.
+    /// which in turn might pass them to an extension function.</para>
+    /// <para>
+    /// In the first release of SaxonCS (11.0), this type was generic, and was parameterized by the type of the
+    /// wrapped object. This caused problems when attempting to reconstruct an <c>XdmExternalObject</c> from its
+    /// internal representation (see bug 5151); in consequence the type parameter was dropped in 11.1. 
+    /// </para>
     /// </remarks>
-    /// <typeparam name="T">The type of the wrapped object</typeparam>
-    public class XdmExternalObject<T> : XdmItem {
+    public class XdmExternalObject : XdmItem {
         
         /// <summary>
         /// Wrap an external object as an XdmItem
         /// </summary>
         /// <param name="value">The object to be wrapped</param>
-        public XdmExternalObject(T value) : base(new ObjectValue<T>(value)) {
+        public XdmExternalObject(object value) : base(new ObjectValue<object>(value)) {
             
         }
         /// <summary>
@@ -35,8 +39,8 @@ namespace Saxon.Api {
         /// Get the wrapped external object
         /// </summary>
         /// <returns>The wrapped external object</returns>
-        public T GetObject() {
-            return ((ObjectValue<T>)Unwrap()).getObject();
+        public object GetObject() {
+            return ((ObjectValue<object>)Unwrap()).getObject();
         }
     }
 }

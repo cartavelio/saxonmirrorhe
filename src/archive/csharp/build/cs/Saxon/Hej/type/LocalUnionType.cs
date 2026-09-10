@@ -145,43 +145,14 @@ namespace Saxon.Hej.type {
             return fsb.ToString();
         }
     
-        /* Expanding default method getNormalizedDefaultPriority from interface ItemType */
-        public virtual double getNormalizedDefaultPriority() {
-            return (((getDefaultPriority()+1))/2);
-        }
-
-        /* Expanding default method getFullAlphaCode from interface ItemType */
-        public virtual string getFullAlphaCode() {
-            return getBasicAlphaCode();
-        }
-
-        /* Expanding default method explainMismatch from interface UnionType */
-        public virtual Saxon.Ejava.util.Optional<string> explainMismatch(Saxon.Hej.om.Item item, Saxon.Hej.type.TypeHierarchy th) {
-            if ((item.getGenre() == /*explicit enum*/ Saxon.Hej.om.Genre.ATOMIC)) {
-                Saxon.Ejava.lang.StringBuilder message = new Saxon.Ejava.lang.StringBuilder(256);
-                message.append("The required type is a union type allowing any of ");
-                string punctuation = "(";
-                try {
-                    foreach (Saxon.Hej.type.PlainType member in getPlainMemberTypes()) {
-                        message.append(punctuation);
-                        punctuation = ", ";
-                        message.append(member.getTypeName().getDisplayName());
-                    }
-                } catch (Saxon.Hej.type.MissingComponentException e) {
-                    message.append("*member types unobtainable*");
-                }
-                message.append("), but the supplied type ");
-                message.append(((Saxon.Hej.value.AtomicValue)(item)).getItemType().getDisplayName());
-                message.append(" is not any of these");
-                return Saxon.Ejava.util.Optional<string>.of(message.ToString());
-            } else {
-                return Saxon.Ejava.util.Optional<string>.empty();
-            }
-        }
-
         /* Expanding default method getStructuredQName from interface UnionType */
         public virtual Saxon.Hej.om.StructuredQName getStructuredQName() {
             return getTypeName();
+        }
+
+        /* Expanding default method explainMismatch from interface ItemType */
+        public virtual Saxon.Ejava.util.Optional<string> explainMismatch(Saxon.Hej.om.Item item, Saxon.Hej.type.TypeHierarchy th) {
+            return Saxon.Ejava.util.Optional<string>.empty();
         }
 
         /* Expanding default method getDescription from interface UnionType */
@@ -191,6 +162,16 @@ namespace Saxon.Hej.type {
             } else {
                 return ToString();
             }
+        }
+
+        /* Expanding default method getNormalizedDefaultPriority from interface ItemType */
+        public virtual double getNormalizedDefaultPriority() {
+            return (((getDefaultPriority()+1))/2);
+        }
+
+        /* Expanding default method getFullAlphaCode from interface ItemType */
+        public virtual string getFullAlphaCode() {
+            return getBasicAlphaCode();
         }
 
     }

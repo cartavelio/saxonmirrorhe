@@ -59,7 +59,7 @@ namespace Saxon.Hej.om {
 
         /* Expanding default method asIterable from interface GroundedValue */
         public virtual System.Collections.Generic.IEnumerable<Saxon.Hej.om.Item> asIterable() {
-            return new Saxon.Hej.om.GroundedValueAsIterable<Saxon.Hej.om.Item>(this);
+            return new Saxon.Hej.om.GroundedValueAsIterable(this);
         }
 
         /* Expanding default method containsNode from interface GroundedValue */

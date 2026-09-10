@@ -6,7 +6,7 @@ namespace Saxon.Hej.query {
         private Saxon.Hej.om.Item contextItem;
         private Saxon.Hej.expr.instruct.GlobalParameterSet parameters = new Saxon.Hej.expr.instruct.GlobalParameterSet();
         private readonly Saxon.Hej.Configuration config;
-        private Saxon.Ejavax.xml.transform.URIResolver uriResolver;
+        private Saxon.Hej.lib.JJ_ResourceResolver resourceResolver;
         private Saxon.Hej.lib.ErrorReporter errorReporter;
         private Saxon.Hej.lib.TraceListener traceListener;
         private Saxon.Hej.lib.UnparsedTextURIResolver unparsedTextURIResolver;
@@ -16,8 +16,7 @@ namespace Saxon.Hej.query {
         private bool applyConversionRules = true;
         public DynamicQueryContext(Saxon.Hej.Configuration config)  {
             this.config = config;
-            uriResolver = config.getURIResolver();
-            errorReporter = new Saxon.Hej.lib.StandardErrorReporter();
+            errorReporter = config.makeErrorReporter();
             traceFunctionDestination = config.getLogger();
         }
         public int getSchemaValidationMode() {
@@ -68,11 +67,11 @@ namespace Saxon.Hej.query {
                 return parameters;
             }
         }
-        public void setURIResolver(Saxon.Ejavax.xml.transform.URIResolver resolver) {
-            uriResolver = resolver;
+        public void setResourceResolver(Saxon.Hej.lib.JJ_ResourceResolver resolver) {
+            resourceResolver = resolver;
         }
-        public Saxon.Ejavax.xml.transform.URIResolver getURIResolver() {
-            return uriResolver;
+        public Saxon.Hej.lib.JJ_ResourceResolver getResourceResolver() {
+            return resourceResolver;
         }
         public void setUnparsedTextURIResolver(Saxon.Hej.lib.UnparsedTextURIResolver resolver) {
             unparsedTextURIResolver = resolver;
@@ -111,7 +110,7 @@ namespace Saxon.Hej.query {
             return config;
         }
         public void initializeController(Saxon.Hej.Controller controller) {
-            controller.setURIResolver(getURIResolver());
+            controller.setResourceResolver(getResourceResolver());
             controller.setErrorReporter(getErrorReporter());
             controller.addTraceListener(getTraceListener());
             if ((unparsedTextURIResolver != null)) {

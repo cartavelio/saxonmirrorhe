@@ -253,60 +253,59 @@ namespace Saxon.Hej.serialize {
                 write(chars.ToString());
             } else {
                 if ((chars is Saxon.Hej.str.UnicodeChar)) {
-                    writeCodePoint(chars.codePointAt(0));
-                }
-                if ((chars.getWidth()<=8)) {
-                    if ((chars is Saxon.Hej.str.Twine8)) {
-                        int width = ((Saxon.Hej.str.UnicodeString)(chars)).getWidth();
-                        if ((width == 7)) {
-                            writeAscii(((Saxon.Hej.str.Twine8)(chars)).getByteArray(), 0, chars.length32());
-                            return ;
-                        } else {
-                            if ((width == 8)) {
-                                writeLatin1(((Saxon.Hej.str.Twine8)(chars)).getByteArray(), 0, chars.length32());
-                                return ;
-                            }
-                        }
+                    writeCodePoint(((Saxon.Hej.str.UnicodeChar)(chars)).getCodepoint());
+                } else {
+                    if ((chars is Saxon.Hej.str.ZenoString)) {
+                        ((Saxon.Hej.str.ZenoString)(chars)).writeSegments(this);
                     } else {
-                        if ((chars is Saxon.Hej.str.Slice8)) {
-                            Saxon.Hej.str.Slice8 s8 = (Saxon.Hej.str.Slice8)(chars);
-                            int width = chars.getWidth();
-                            if ((width == 7)) {
-                                writeAscii(s8.getByteArray(), s8.getStart(), (s8.getEnd()-s8.getStart()));
-                                return ;
+                        if ((chars.getWidth()<=8)) {
+                            if ((chars is Saxon.Hej.str.Twine8)) {
+                                int width = chars.getWidth();
+                                if ((width == 7)) {
+                                    writeAscii(((Saxon.Hej.str.Twine8)(chars)).getByteArray(), 0, chars.length32());
+                                } else {
+                                    if ((width == 8)) {
+                                        writeLatin1(((Saxon.Hej.str.Twine8)(chars)).getByteArray(), 0, chars.length32());
+                                    }
+                                }
                             } else {
-                                if ((width == 8)) {
-                                    writeLatin1(s8.getByteArray(), s8.getStart(), (s8.getEnd()-s8.getStart()));
-                                    return ;
+                                if ((chars is Saxon.Hej.str.Slice8)) {
+                                    Saxon.Hej.str.Slice8 s8 = (Saxon.Hej.str.Slice8)(chars);
+                                    int width = chars.getWidth();
+                                    if ((width == 7)) {
+                                        writeAscii(s8.getByteArray(), s8.getStart(), (s8.getEnd()-s8.getStart()));
+                                    } else {
+                                        if ((width == 8)) {
+                                            writeLatin1(s8.getByteArray(), s8.getStart(), (s8.getEnd()-s8.getStart()));
+                                        }
+                                    }
+                                } else {
+                                    if ((chars is Saxon.Hej.str.WhitespaceString)) {
+                                        ((Saxon.Hej.str.WhitespaceString)(chars)).write(this);
+                                    } else {
+                                        Saxon.Hej.z.IntIterator iter = chars.codePoints();
+                                        while (iter.hasNext()) {
+                                            write(iter.next());
+                                        }
+                                    }
                                 }
                             }
                         } else {
-                            if ((chars is Saxon.Hej.str.CompressedWhitespace)) {
-                                ((Saxon.Hej.str.CompressedWhitespace)(chars)).write(this);
+                            if ((chars.getWidth() == 16)) {
+                                if ((chars is Saxon.Hej.str.Twine16)) {
+                                    write(((Saxon.Hej.str.Twine16)(chars)).getCharArray());
+                                } else {
+                                    if ((chars is Saxon.Hej.str.Slice16)) {
+                                        Saxon.Hej.str.Slice16 s16 = (Saxon.Hej.str.Slice16)(chars);
+                                        write(s16.getCharArray(), s16.getStart(), (s16.getEnd()-s16.getStart()));
+                                    }
+                                }
                             } else {
                                 Saxon.Hej.z.IntIterator iter = chars.codePoints();
                                 while (iter.hasNext()) {
                                     write(iter.next());
                                 }
                             }
-                        }
-                    }
-                } else {
-                    if ((chars.getWidth() == 16)) {
-                        if ((chars is Saxon.Hej.str.Twine16)) {
-                            write(((Saxon.Hej.str.Twine16)(chars)).getCharArray());
-                            return ;
-                        } else {
-                            if ((chars is Saxon.Hej.str.Slice16)) {
-                                Saxon.Hej.str.Slice16 s16 = (Saxon.Hej.str.Slice16)(chars);
-                                write(s16.getCharArray(), s16.getStart(), (s16.getEnd()-s16.getStart()));
-                                return ;
-                            }
-                        }
-                    } else {
-                        Saxon.Hej.z.IntIterator iter = chars.codePoints();
-                        while (iter.hasNext()) {
-                            write(iter.next());
                         }
                     }
                 }

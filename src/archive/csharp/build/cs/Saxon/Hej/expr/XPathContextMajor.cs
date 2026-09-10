@@ -13,7 +13,7 @@ namespace Saxon.Hej.expr {
         private Saxon.Hej.regex.RegexIterator currentRegexIterator;
         private Saxon.Hej.expr.ContextOriginator origin;
         private Saxon.Hej.expr.XPathContextMajor.ThreadManager threadManager = null;
-        private Saxon.Ejavax.xml.transform.URIResolver uriResolver;
+        private Saxon.Hej.lib.JJ_ResourceResolver resourceResolver;
         private Saxon.Hej.lib.ErrorReporter errorReporter;
         private Saxon.Hej.expr.Component currentComponent;
         internal Saxon.Hej.trans.XPathException currentException;
@@ -55,7 +55,7 @@ namespace Saxon.Hej.expr {
             c.threadManager = threadManager;
             c.currentComponent = currentComponent;
             c.errorReporter = errorReporter;
-            c.uriResolver = uriResolver;
+            c.resourceResolver = resourceResolver;
             return c;
         }
         public static Saxon.Hej.expr.XPathContextMajor newContext(Saxon.Hej.expr.XPathContextMinor prev) {
@@ -81,7 +81,7 @@ namespace Saxon.Hej.expr {
             c.threadManager = ((Saxon.Hej.expr.XPathContextMajor)(p)).threadManager;
             c.currentComponent = ((Saxon.Hej.expr.XPathContextMajor)(p)).currentComponent;
             c.errorReporter = ((Saxon.Hej.expr.XPathContextMajor)(p)).errorReporter;
-            c.uriResolver = ((Saxon.Hej.expr.XPathContextMajor)(p)).uriResolver;
+            c.resourceResolver = ((Saxon.Hej.expr.XPathContextMajor)(p)).resourceResolver;
             c.temporaryOutputState = prev.temporaryOutputState;
             return c;
         }
@@ -235,14 +235,11 @@ namespace Saxon.Hej.expr {
             bool @checked = @params.isTypeChecked(index);
             return (@checked ? Saxon.Hej.expr.instruct.ParameterSet.SUPPLIED_AND_CHECKED : Saxon.Hej.expr.instruct.ParameterSet.SUPPLIED);
         }
-        public void setURIResolver(Saxon.Ejavax.xml.transform.URIResolver resolver) {
-            uriResolver = resolver;
-            if ((resolver is Saxon.Callbacks.StandardURIResolver)) {
-                ((Saxon.Callbacks.StandardURIResolver)(resolver)).setConfiguration(getConfiguration());
-            }
+        public void setResourceResolver(Saxon.Hej.lib.JJ_ResourceResolver resolver) {
+            this.resourceResolver = resolver;
         }
-        public override Saxon.Ejavax.xml.transform.URIResolver getURIResolver() {
-            return ((uriResolver == null) ? controller.getURIResolver() : uriResolver);
+        public override Saxon.Hej.lib.JJ_ResourceResolver getResourceResolver() {
+            return ((resourceResolver == null) ? controller.getResourceResolver() : resourceResolver);
         }
         public void setErrorReporter(Saxon.Hej.lib.ErrorReporter reporter) {
             this.errorReporter = reporter;

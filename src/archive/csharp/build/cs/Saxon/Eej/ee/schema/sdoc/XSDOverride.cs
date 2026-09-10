@@ -22,9 +22,8 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 return ;
             }
             string documentBase = getBaseURI();
-            Saxon.Hej.@event.PipelineConfiguration pipe = getSchemaNodeFactory().getPipelineConfiguration();
-            Saxon.Eej.ee.schema.SchemaCompiler manager = getXSDSchema().getSchemaCompiler();
-            Saxon.Ejavax.xml.transform.Source source = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.getSource(documentBase, schemaLocation, pipe, null);
+            Saxon.Eej.ee.schema.SchemaCompiler compiler = getXSDSchema().getSchemaCompiler();
+            Saxon.Ejavax.xml.transform.Source source = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.getSource(documentBase, schemaLocation, compiler, null);
             if (((source == null) || (source.getSystemId() == null))) {
                 throw new Saxon.Hej.type.SchemaException("The xsl:override/@schemaLocation resolves to a source with no known system ID");
             }
@@ -35,17 +34,17 @@ namespace Saxon.Eej.ee.schema.sdoc {
             fsb.append(";index=");
             fsb.append((Saxon.Hej.tree.util.Navigator.getNumberSimple(this, null)+""));
             string key = fsb.ToString();
-            if (manager.isBeingRead(key)) {
+            if (compiler.isBeingRead(key)) {
                 replacementSchema = null;
                 return ;
             }
-            manager.setBeingRead(key);
-            if ((manager.getExistingSchemaDocument(schemaLocation, getXSDSchema().getTargetNamespace()) != null)) {
+            compiler.setBeingRead(key);
+            if ((compiler.getExistingSchemaDocument(schemaLocation, getXSDSchema().getTargetNamespace()) != null)) {
                 error("Saxon can't handle overriding of a schema document that has already been loaded by a different route");
                 return ;
             }
             try {
-                Saxon.Eej.ee.schema.SchemaCompiler compiler = getSchemaNodeFactory().getSchemaCompiler();
+                Saxon.Hej.@event.PipelineConfiguration pipe = getSchemaNodeFactory().getPipelineConfiguration();
                 Saxon.Eej.ee.schema.sdoc.SchemaDocument schemaDoc = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.buildSchemaDocument(source, compiler, pipe, this);
                 originalSchemaDocument = schemaDoc;
                 originalSchema = schemaDoc.getXSDSchema().getSchema();

@@ -21,7 +21,7 @@ namespace Saxon.Hej.resource {
                     if (uri.StartsWith("data:")) {
                         try {
                             Saxon.Hej.lib.Resource basicResource = Saxon.Hej.resource.DataURIScheme.decode(new System.Uri(uri, System.UriKind.RelativeOrAbsolute));
-                            return makeTypedResource(context.getConfiguration(), basicResource);
+                            return makeTypedResource(context, basicResource);
                         } catch (Exception e) when (e is System.UriFormatException || e is Saxon.Ejava.lang.IllegalArgumentException) {
                             throw new Saxon.Hej.trans.XPathException(e);
                         }
@@ -30,7 +30,7 @@ namespace Saxon.Hej.resource {
                         id.parseOptions = new Saxon.Hej.lib.ParseOptions(context.getConfiguration().getParseOptions());
                         id.parseOptions.setSpaceStrippingRule(whitespaceRules);
                         id.resourceUri = uri;
-                        return makeResource(context.getConfiguration(), id);
+                        return makeResource(context, id);
                     }
                 } catch (Saxon.Hej.trans.XPathException e) {
                     Saxon.Ejava.util.Optional<int> onError = Saxon.Ejava.util.Optional<int>.of(Saxon.Hej.functions.URIQueryParameters.ON_ERROR_FAIL);

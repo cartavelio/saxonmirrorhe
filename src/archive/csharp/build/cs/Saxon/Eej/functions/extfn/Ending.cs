@@ -68,6 +68,9 @@ namespace Saxon.Eej.functions.extfn {
             public void close() {
                 baseIterator.close();
             }
+            public void discharge() {
+                baseIterator.discharge();
+            }
         
         }
     

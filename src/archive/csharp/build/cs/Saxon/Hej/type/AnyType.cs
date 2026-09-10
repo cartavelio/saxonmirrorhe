@@ -115,7 +115,7 @@ namespace Saxon.Hej.type {
         public void analyzeContentExpression(Saxon.Hej.expr.Expression expression, int kind) {
         }
         public Saxon.Hej.om.AtomicSequence atomize(Saxon.Hej.om.NodeInfo node) {
-            return new Saxon.Hej.value.UntypedAtomicValue(node.getUnicodeStringValue());
+            return Saxon.Hej.value.StringValue.makeUntypedAtomic(node.getUnicodeStringValue());
         }
         public void checkTypeDerivationIsOK(Saxon.Hej.type.SchemaType type, int block) {
             if (!(((type is Saxon.Hej.type.AnyType)))) {

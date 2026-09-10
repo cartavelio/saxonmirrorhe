@@ -17,7 +17,7 @@ namespace Saxon.Hej.expr.sort {
                 }
             } )));
             if ((sequence.Count>1)) {
-                sequence.Sort(comparer);
+                Saxon.Impl.Helpers.ListUtils.Sort(sequence, comparer);
             }
             iterator = new Saxon.Hej.tree.iter.NodeListIterator(sequence);
         }
@@ -37,6 +37,10 @@ namespace Saxon.Hej.expr.sort {
     
         /* Expanding default method close from interface SequenceIterator */
         public void close() {
+        }
+
+        /* Expanding default method discharge from interface SequenceIterator */
+        public void discharge() {
         }
 
     }

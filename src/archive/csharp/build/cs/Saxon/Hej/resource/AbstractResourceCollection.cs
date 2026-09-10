@@ -55,7 +55,7 @@ namespace Saxon.Hej.resource {
                     onError = @params.getOnError().get();
                 }
                 Saxon.Hej.Controller controller = context.getController();
-                Saxon.Hej.lib.ErrorReporter oldErrorReporter = ((controller == null) ? new Saxon.Hej.lib.StandardErrorReporter() : controller.getErrorReporter());
+                Saxon.Hej.lib.ErrorReporter oldErrorReporter = ((controller == null) ? context.getConfiguration().makeErrorReporter() : controller.getErrorReporter());
                 setupErrorHandlingForCollection(options, onError, oldErrorReporter);
             }
             return options;
@@ -217,18 +217,18 @@ namespace Saxon.Hej.resource {
             }
             return null;
         }
-        public Saxon.Hej.lib.Resource makeResource(Saxon.Hej.Configuration config, Saxon.Hej.resource.AbstractResourceCollection.InputDetails details) {
+        public Saxon.Hej.lib.Resource makeResource(Saxon.Hej.expr.XPathContext context, Saxon.Hej.resource.AbstractResourceCollection.InputDetails details) {
             Saxon.Hej.lib.ResourceFactory factory = null;
             string contentType = details.contentType;
             if ((contentType != null)) {
-                factory = config.getResourceFactoryForMediaType(contentType);
+                factory = context.getConfiguration().getResourceFactoryForMediaType(contentType);
             }
             if ((factory == null)) {
                 factory = Saxon.Hej.resource.BinaryResource.FACTORY;
             }
-            return /*Delegate.makeResource()*/factory(config, details);
+            return /*Delegate.makeResource()*/factory(context, details);
         }
-        public Saxon.Hej.lib.Resource makeTypedResource(Saxon.Hej.Configuration config, Saxon.Hej.lib.Resource basicResource) {
+        public Saxon.Hej.lib.Resource makeTypedResource(Saxon.Hej.expr.XPathContext context, Saxon.Hej.lib.Resource basicResource) {
             string mediaType = basicResource.getContentType();
             Saxon.Hej.lib.ResourceFactory factory = config.getResourceFactoryForMediaType(mediaType);
             if ((factory == null)) {
@@ -239,22 +239,22 @@ namespace Saxon.Hej.resource {
                 details.binaryContent = ((Saxon.Hej.resource.BinaryResource)(basicResource)).getData();
                 details.contentType = mediaType;
                 details.resourceUri = basicResource.getResourceURI();
-                return /*Delegate.makeResource()*/factory(config, details);
+                return /*Delegate.makeResource()*/factory(context, details);
             } else {
                 if ((basicResource is Saxon.Hej.resource.UnparsedTextResource)) {
                     Saxon.Hej.resource.AbstractResourceCollection.InputDetails details = new Saxon.Hej.resource.AbstractResourceCollection.InputDetails();
                     details.characterContent = ((Saxon.Hej.resource.UnparsedTextResource)(basicResource)).getContent();
                     details.contentType = mediaType;
                     details.resourceUri = basicResource.getResourceURI();
-                    return /*Delegate.makeResource()*/factory(config, details);
+                    return /*Delegate.makeResource()*/factory(context, details);
                 } else {
                     return basicResource;
                 }
             }
         }
-        public Saxon.Hej.lib.Resource makeResource(Saxon.Hej.Configuration config, string resourceURI) {
+        public Saxon.Hej.lib.Resource makeResource(Saxon.Hej.expr.XPathContext context, string resourceURI) {
             Saxon.Hej.resource.AbstractResourceCollection.InputDetails details = getInputDetails(resourceURI);
-            return makeResource(config, details);
+            return makeResource(context, details);
         }
         public virtual bool stripWhitespace(Saxon.Hej.om.SpaceStrippingRule rules) {
             return false;

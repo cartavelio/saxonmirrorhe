@@ -17,6 +17,7 @@ namespace Saxon.Eej.expr {
                 newvar.setRequiredType(libvar.getRequiredType());
                 newvar.setBody(libvar.getBody());
                 newvar.setLineNumber(libvar.getLineNumber());
+                newvar.setColumnNumber(libvar.getColumnNumber());
                 newvar.setSystemId(libvar.getSystemId());
                 newvar.setOriginalVariable(libvar);
                 importer.declareVariable(newvar);

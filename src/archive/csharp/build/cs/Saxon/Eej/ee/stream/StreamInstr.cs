@@ -136,7 +136,7 @@ namespace Saxon.Eej.ee.stream {
                     }
                 }
                 try {
-                    Saxon.Hej.functions.DocumentFn.sendDoc(href, getStaticBaseURIString(), context, getLocation(), stream, parseOptions);
+                    Saxon.Hej.functions.DocumentFn.sendDoc(href, getStaticBaseURIString(), getPackageData(), context, getLocation(), stream, parseOptions);
                 } catch (Saxon.Hej.trans.QuitParsingException q) {
                     if (verbose) {
                         controller.getConfiguration().getLogger().info((("Streaming "+href)+" : early exit "));

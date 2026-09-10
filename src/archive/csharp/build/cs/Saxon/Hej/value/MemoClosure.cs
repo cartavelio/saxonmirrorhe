@@ -24,7 +24,12 @@ namespace Saxon.Hej.value {
         private void makeSequence() {
             if ((sequence == null)) {
                 inputIterator = expression.iterate(savedXPathContext);
-                sequence = Saxon.Hej.om.SequenceTool.toMemoSequence(inputIterator);
+                inputIterator.discharge();
+                if (((inputIterator is Saxon.Hej.tree.iter.GroundedIterator) && ((Saxon.Hej.tree.iter.GroundedIterator)(inputIterator)).isActuallyGrounded())) {
+                    sequence = ((Saxon.Hej.tree.iter.GroundedIterator)(inputIterator)).materialize();
+                } else {
+                    sequence = Saxon.Hej.om.SequenceTool.toMemoSequence(inputIterator);
+                }
             }
         }
         public Saxon.Hej.om.Item itemAt(int n) { lock(this) {

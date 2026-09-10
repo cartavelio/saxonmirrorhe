@@ -31,7 +31,7 @@ namespace Saxon.Hej.tree.linked {
         public virtual Saxon.Hej.om.AtomicSequence atomize() {
             Saxon.Hej.type.SchemaType stype = getSchemaType();
             if (((stype == Saxon.Hej.type.Untyped.getInstance()) || (stype == Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC))) {
-                return new Saxon.Hej.value.UntypedAtomicValue(getUnicodeStringValue());
+                return Saxon.Hej.value.StringValue.makeUntypedAtomic(getUnicodeStringValue());
             } else {
                 return stype.atomize(this);
             }
@@ -372,32 +372,14 @@ namespace Saxon.Hej.tree.linked {
             return Saxon.Hej.om.SequenceTool.toGroundedValue(iterate());
         }
 
-        /* Expanding default method toShortString from interface NodeInfo */
+        /* Expanding default method toShortString from interface Item */
         public virtual string toShortString() {
-            switch (getNodeKind()) {
-              case Saxon.Hej.type.Type.DOCUMENT:
-                return "document-node()";
-              case Saxon.Hej.type.Type.ELEMENT:
-                return (("<"+getDisplayName())+"/>");
-              case Saxon.Hej.type.Type.ATTRIBUTE:
-                return ("@"+getDisplayName());
-              case Saxon.Hej.type.Type.TEXT:
-                return (("text(\""+Saxon.Hej.trans.Err.truncate30(getUnicodeStringValue()))+"\")");
-              case Saxon.Hej.type.Type.COMMENT:
-                return (("<!--"+Saxon.Hej.trans.Err.truncate30(getUnicodeStringValue()))+"-->");
-              case Saxon.Hej.type.Type.PROCESSING_INSTRUCTION:
-                return (("<?"+getDisplayName())+"?>");
-              case Saxon.Hej.type.Type.NAMESPACE:
-                string prefix = getLocalPart();
-                return (((("xmlns"+((prefix.Equals("") ? "" : (":"+prefix))))+"=\"")+getUnicodeStringValue())+'"');
-              default:
-                return "";
-            }
+            return ToString();
         }
 
         /* Expanding default method asIterable from interface GroundedValue */
         public virtual System.Collections.Generic.IEnumerable<Saxon.Hej.om.Item> asIterable() {
-            return new Saxon.Hej.om.GroundedValueAsIterable<Saxon.Hej.om.Item>(this);
+            return new Saxon.Hej.om.GroundedValueAsIterable(this);
         }
 
         /* Expanding default method containsNode from interface GroundedValue */
@@ -415,46 +397,9 @@ namespace Saxon.Hej.tree.linked {
             return chain;
         }
 
-        /* Expanding default method getStringValue from interface Item */
-        public virtual string getStringValue() {
-            return getUnicodeStringValue().ToString();
-        }
-
-        /* Expanding default method itemAt from interface Item */
-        public virtual Saxon.Hej.om.Item itemAt(int n) {
-            return ((n == 0) ? head() : null);
-        }
-
-        /* Expanding default method subsequence from interface Item */
-        public virtual Saxon.Hej.om.GroundedValue subsequence(int start, int length) {
-            if (((start<=0) && (((start+length))>0))) {
-                return this;
-            } else {
-                return Saxon.Hej.value.EmptySequence.getInstance();
-            }
-        }
-
-        /* Expanding default method getLength from interface Item */
-        public virtual int getLength() {
-            return 1;
-        }
-
-        /* Expanding default method iterate from interface Item */
-        public virtual Saxon.Hej.om.SequenceIterator iterate() {
-            return new Saxon.Hej.tree.iter.SingletonIterator(this);
-        }
-
-        /* Expanding default method isStreamed from interface NodeInfo */
-        public virtual bool isStreamed() {
-            return false;
-        }
-
-        /* Expanding default method removeNamespace from interface MutableNodeInfo */
-        public virtual void removeNamespace(string prefix) {
-        }
-
-        /* Expanding default method addNamespace from interface MutableNodeInfo */
-        public virtual void addNamespace(string prefix, string uri) {
+        /* Expanding default method makeRepeatable from interface Sequence */
+        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
+            return this;
         }
 
         /* Expanding default method isSameNodeInfo from interface NodeInfo */
@@ -502,14 +447,51 @@ namespace Saxon.Hej.tree.linked {
             return false;
         }
 
+        /* Expanding default method isStreamed from interface Item */
+        public virtual bool isStreamed() {
+            return false;
+        }
+
         /* Expanding default method getGenre from interface NodeInfo */
         public virtual Saxon.Hej.om.Genre getGenre() {
             return Saxon.Hej.om.Genre.NODE;
         }
 
-        /* Expanding default method makeRepeatable from interface Sequence */
-        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
-            return this;
+        /* Expanding default method getStringValue from interface Item */
+        public virtual string getStringValue() {
+            return getUnicodeStringValue().ToString();
+        }
+
+        /* Expanding default method itemAt from interface Item */
+        public virtual Saxon.Hej.om.Item itemAt(int n) {
+            return ((n == 0) ? head() : null);
+        }
+
+        /* Expanding default method subsequence from interface Item */
+        public virtual Saxon.Hej.om.GroundedValue subsequence(int start, int length) {
+            if (((start<=0) && (((start+length))>0))) {
+                return this;
+            } else {
+                return Saxon.Hej.value.EmptySequence.getInstance();
+            }
+        }
+
+        /* Expanding default method getLength from interface Item */
+        public virtual int getLength() {
+            return 1;
+        }
+
+        /* Expanding default method iterate from interface Item */
+        public virtual Saxon.Hej.om.SequenceIterator iterate() {
+            return new Saxon.Hej.tree.iter.SingletonIterator(this);
+        }
+
+        /* Expanding default method removeNamespace from interface MutableNodeInfo */
+        public virtual void removeNamespace(string prefix) {
+        }
+
+        /* Expanding default method addNamespace from interface MutableNodeInfo */
+        public virtual void addNamespace(string prefix, string uri) {
         }
 
         /* Creating stub method getUnicodeStringValue to satisfy interface GroundedValue */
@@ -518,13 +500,13 @@ namespace Saxon.Hej.tree.linked {
             throw new System.NotImplementedException();
         }
 
-        /* Creating stub method replaceStringValue to satisfy interface MutableNodeInfo */
-        public virtual void replaceStringValue(Saxon.Hej.str.UnicodeString arg1) {
+        /* Creating stub method getNodeKind to satisfy interface NodeInfo */
+        public virtual int getNodeKind() {
             throw new System.NotImplementedException();
         }
 
-        /* Creating stub method getNodeKind to satisfy interface NodeInfo */
-        public virtual int getNodeKind() {
+        /* Creating stub method replaceStringValue to satisfy interface MutableNodeInfo */
+        public virtual void replaceStringValue(Saxon.Hej.str.UnicodeString arg1) {
             throw new System.NotImplementedException();
         }
 

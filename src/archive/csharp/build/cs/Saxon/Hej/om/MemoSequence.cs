@@ -142,8 +142,6 @@ namespace Saxon.Hej.om {
                     }
                 }
             }
-            public void close() {
-            }
             public bool supportsGetLength() {
                 return true;
             }
@@ -211,6 +209,14 @@ namespace Saxon.Hej.om {
                 }
             }
         
+            /* Expanding default method close from interface SequenceIterator */
+            public void close() {
+            }
+
+            /* Expanding default method discharge from interface SequenceIterator */
+            public void discharge() {
+            }
+
         }
     
         /* Expanding default method materialize from interface Sequence */

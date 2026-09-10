@@ -106,33 +106,17 @@ namespace Saxon.Hej.tree.iter {
         
         }
     
-        /* Expanding default method close from interface SequenceIterator */
-        public virtual void close() {
-        }
-
         /* Expanding default method materialize from interface GroundedIterator */
         public virtual Saxon.Hej.om.GroundedValue materialize() {
             return Saxon.Hej.value.SequenceExtent.from(this).reduce();
         }
 
-        /* Creating stub method supportsGetLength to satisfy interface LastPositionFinder */
-        public virtual bool supportsGetLength() {
-            throw new System.NotImplementedException();
+        /* Expanding default method close from interface SequenceIterator */
+        public virtual void close() {
         }
 
-        /* Creating stub method getLength to satisfy interface LastPositionFinder */
-        public virtual int getLength() {
-            throw new System.NotImplementedException();
-        }
-
-        /* Creating stub method next to satisfy interface SequenceIterator */
-        public virtual Saxon.Hej.om.Item next() {
-            throw new System.NotImplementedException();
-        }
-
-        /* Creating stub method getResidue to satisfy interface GroundedIterator */
-        public virtual Saxon.Hej.om.GroundedValue getResidue() {
-            throw new System.NotImplementedException();
+        /* Expanding default method discharge from interface SequenceIterator */
+        public virtual void discharge() {
         }
 
         /* Creating stub method hasNext to satisfy interface LookaheadIterator */
@@ -142,6 +126,26 @@ namespace Saxon.Hej.tree.iter {
 
         /* Creating stub method getReverseIterator to satisfy interface ReversibleIterator */
         public virtual Saxon.Hej.om.SequenceIterator getReverseIterator() {
+            throw new System.NotImplementedException();
+        }
+
+        /* Creating stub method getResidue to satisfy interface GroundedIterator */
+        public virtual Saxon.Hej.om.GroundedValue getResidue() {
+            throw new System.NotImplementedException();
+        }
+
+        /* Creating stub method next to satisfy interface SequenceIterator */
+        public virtual Saxon.Hej.om.Item next() {
+            throw new System.NotImplementedException();
+        }
+
+        /* Creating stub method supportsGetLength to satisfy interface LastPositionFinder */
+        public virtual bool supportsGetLength() {
+            throw new System.NotImplementedException();
+        }
+
+        /* Creating stub method getLength to satisfy interface LastPositionFinder */
+        public virtual int getLength() {
             throw new System.NotImplementedException();
         }
 

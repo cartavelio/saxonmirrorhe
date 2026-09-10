@@ -115,7 +115,7 @@ namespace Saxon.Hej.om {
             }
         }
         public System.Collections.Generic.IEnumerator<Saxon.Hej.om.AttributeInfo> GetEnumerator() {
-            return new Inner_Iterator_d1313e998(this);
+            return new Inner_Iterator_63(this);
         }
         // Extra method to make the class IEnumerable as well as IEnumerable<T>
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() {
@@ -136,9 +136,9 @@ namespace Saxon.Hej.om {
             return sb.ToString().Trim();
         }
     
-        private class Inner_Iterator_d1313e998 : System.Collections.Generic.IEnumerator<Saxon.Hej.om.AttributeInfo> {
+        private class Inner_Iterator_63 : System.Collections.Generic.IEnumerator<Saxon.Hej.om.AttributeInfo> {
             private readonly LargeAttributeMap outerInstance;
-            public Inner_Iterator_d1313e998(LargeAttributeMap outerInstance) {
+            public Inner_Iterator_63(LargeAttributeMap outerInstance) {
                 this.outerInstance = outerInstance;
                 current = outerInstance.first;
             }

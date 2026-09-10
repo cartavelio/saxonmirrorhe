@@ -34,14 +34,14 @@ namespace Saxon.Hej.serialize {
             string max = details.getProperty(Saxon.Hej.lib.SaxonOutputKeys.LINE_LENGTH);
             if ((max != null)) {
                 try {
-                    maxLineLength = System.Int32.Parse(max);
+                    maxLineLength = Saxon.Impl.Helpers.Utils.ParseInt(max);
                 } catch (Saxon.Ejava.lang.NumberFormatException err) {
                 }
             }
             string spaces = details.getProperty(Saxon.Hej.lib.SaxonOutputKeys.INDENT_SPACES);
             if ((spaces != null)) {
                 try {
-                    indentSpaces = System.Int32.Parse(spaces);
+                    indentSpaces = Saxon.Impl.Helpers.Utils.ParseInt(spaces);
                 } catch (Saxon.Ejava.lang.NumberFormatException err) {
                 }
             }

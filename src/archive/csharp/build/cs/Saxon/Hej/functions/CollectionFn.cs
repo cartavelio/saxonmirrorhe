@@ -80,6 +80,10 @@ namespace Saxon.Hej.functions {
                 sources.Dispose();
             }
         
+            /* Expanding default method discharge from interface SequenceIterator */
+            public virtual void discharge() {
+            }
+
         }
         public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
             string href;
@@ -129,7 +133,7 @@ namespace Saxon.Hej.functions {
                 }
             }
             Saxon.Hej.om.SequenceIterator sourceSeq = getSequenceIterator(collection, context);
-            Saxon.Hej.om.SequenceIterator result = context.getConfiguration().getMultithreadedItemMappingIterator(sourceSeq, Saxon.Hej.expr.ItemMapper.of(it => ((Saxon.Hej.value.ObjectValue<Saxon.Hej.lib.Resource>)(it)).getObject().getItem(context)));
+            Saxon.Hej.om.SequenceIterator result = context.getConfiguration().getMultithreadedItemMappingIterator(sourceSeq, Saxon.Hej.expr.ItemMapper.of(it => ((Saxon.Hej.value.ObjectValue<Saxon.Hej.lib.Resource>)(it)).getObject().getItem()));
             if ((whitespaceRule != null)) {
                 Saxon.Hej.om.SpaceStrippingRule rule = whitespaceRule;
                 result = Saxon.Hej.expr.ItemMappingIterator.map(result, item => {

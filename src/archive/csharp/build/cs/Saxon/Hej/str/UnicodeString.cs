@@ -28,7 +28,8 @@ namespace Saxon.Hej.str {
             Saxon.Hej.z.IntIterator iter = codePoints();
             long i = 0;
             while (iter.hasNext()) {
-                if (((i>=from) && predicate(iter.next()))) {
+                int ch = iter.next();
+                if (((i>=from) && predicate(ch))) {
                     return i;
                 }
                 i++;
@@ -78,6 +79,9 @@ namespace Saxon.Hej.str {
             return substring(start, length());
         }
         public abstract Saxon.Hej.str.UnicodeString substring(long start, long end);
+        public Saxon.Hej.str.UnicodeString prefix(long end) {
+            return substring(0, end);
+        }
         public virtual Saxon.Hej.str.UnicodeString concat(Saxon.Hej.str.UnicodeString other) {
             return Saxon.Hej.str.ZenoString.of(this).concat(other);
         }

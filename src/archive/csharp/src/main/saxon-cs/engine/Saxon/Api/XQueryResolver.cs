@@ -26,14 +26,14 @@ namespace Saxon.Api {
 	/// xqueryCompiler.XQueryResolver = (moduleUri, baseUri, locations) => {
     ///     if (moduleUri == "test.xq") {
     ///         const string q = "module namespace t='test.xq'; declare variable $t:x := 'x';";
-    ///         return new [] {new XQueryModuleSource() {Content = q}};
+    ///         return new [] {new TextResource() {Content = q}};
     ///     }
     ///     return null;
     /// };
     /// </code>
     /// </example>
     /// 
-    public delegate XQueryModuleSource[] XQueryResolver(string moduleUri, Uri baseUri, Uri[] locationHints);
+    public delegate TextResource[] XQueryResolver(string moduleUri, Uri baseUri, Uri[] locationHints);
 
 }
 

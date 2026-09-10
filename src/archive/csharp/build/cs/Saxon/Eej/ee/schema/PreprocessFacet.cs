@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Eej.ee.schema {
     public class PreprocessFacet : Saxon.Eej.ee.schema.Facet {
-        internal Saxon.Hej.Configuration config;
         internal Saxon.Eej.ee.schema.Assertion action;
         internal Saxon.Eej.ee.schema.Assertion reverseAction;
         public PreprocessFacet()  {

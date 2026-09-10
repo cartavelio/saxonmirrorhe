@@ -30,5 +30,9 @@ namespace Saxon.Eej.ee.stream.om {
         public void close() {
         }
 
+        /* Expanding default method discharge from interface SequenceIterator */
+        public void discharge() {
+        }
+
     }
 }

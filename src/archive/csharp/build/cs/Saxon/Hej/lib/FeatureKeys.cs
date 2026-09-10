@@ -127,6 +127,8 @@ namespace Saxon.Hej.lib {
         public const string RETAIN_NODE_FOR_DIAGNOSTICS = "http://saxon.sf.net/feature/retainNodeForDiagnostics";
         public const string ALLOW_UNRESOLVED_SCHEMA_COMPONENTS = "http://saxon.sf.net/feature/allowUnresolvedSchemaComponents";
         public const string ZIP_URI_PATTERN = "http://saxon.sf.net/feature/zipUriPattern";
+        public const string RESOURCE_RESOLVER = "http://saxon.sf.net/feature/saxon-resource-resolver";
+        public const string RESOURCE_RESOLVER_CLASS = "http://saxon.sf.net/feature/saxon-resource-resolver-class";
     
     }
 }

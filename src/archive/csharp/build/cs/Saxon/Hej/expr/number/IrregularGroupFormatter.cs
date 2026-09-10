@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.expr.number {
     public class IrregularGroupFormatter : Saxon.Hej.expr.number.NumericGroupFormatter {
-        private Saxon.Hej.z.IntSet groupingPositions = null;
-        private System.Collections.Generic.IList<int> separators = null;
+        private readonly Saxon.Hej.z.IntSet groupingPositions;
+        private readonly System.Collections.Generic.IList<int> separators;
         public IrregularGroupFormatter(Saxon.Hej.z.IntSet groupingPositions, System.Collections.Generic.IList<int> sep, Saxon.Hej.str.UnicodeString adjustedPicture)  {
             this.groupingPositions = groupingPositions;
             separators = sep;

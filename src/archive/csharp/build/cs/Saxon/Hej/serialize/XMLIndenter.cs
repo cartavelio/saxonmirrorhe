@@ -37,12 +37,8 @@ namespace Saxon.Hej.serialize {
         }
         public override void startElement(Saxon.Hej.om.NodeName nameCode, Saxon.Hej.type.SchemaType type, Saxon.Hej.om.AttributeMap attributes, Saxon.Hej.om.NamespaceMap namespaces, Saxon.Hej.s9api.Location location, int properties) {
             if ((afterStartTag || afterEndTag)) {
-                if (isDoubleSpaced(nameCode)) {
-                    nextReceiver.characters(Saxon.Hej.str.BMPString.of("\n"), location, Saxon.Hej.@event.ReceiverOption.NONE);
-                    line = 0;
-                    column = 0;
-                }
-                indent();
+                bool doubleSpaced = isDoubleSpaced(nameCode);
+                indent(doubleSpaced);
             } else {
                 flushPendingWhitespace();
             }
@@ -90,7 +86,7 @@ namespace Saxon.Hej.serialize {
         public override void endElement() {
             level--;
             if ((afterEndTag && !(sameline))) {
-                indent();
+                indent(false);
             } else {
                 flushPendingWhitespace();
             }
@@ -105,7 +101,7 @@ namespace Saxon.Hej.serialize {
         }
         public override void processingInstruction(string target, Saxon.Hej.str.UnicodeString data, Saxon.Hej.s9api.Location locationId, int properties) {
             if (afterEndTag) {
-                indent();
+                indent(false);
             } else {
                 flushPendingWhitespace();
             }
@@ -133,7 +129,7 @@ namespace Saxon.Hej.serialize {
         }
         public override void comment(Saxon.Hej.str.UnicodeString chars, Saxon.Hej.s9api.Location locationId, int properties) {
             if (afterEndTag) {
-                indent();
+                indent(false);
             } else {
                 flushPendingWhitespace();
             }
@@ -142,7 +138,7 @@ namespace Saxon.Hej.serialize {
         public override bool usesTypeAnnotations() {
             return true;
         }
-        private void indent() {
+        private void indent(bool doubleSpace) {
             if ((suppressedAtLevel>=0)) {
                 flushPendingWhitespace();
                 return ;
@@ -155,7 +151,7 @@ namespace Saxon.Hej.serialize {
                     return ;
                 }
             }
-            emitter.characters(Saxon.Hej.str.CompressedWhitespace.makeIndent(((line == 0) ? 1 : 0), spaces), Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NO_SPECIAL_CHARS);
+            emitter.characters(Saxon.Hej.str.IndentWhitespace.of(((line == 0) ? ((doubleSpace ? 2 : 1)) : 0), spaces), Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NO_SPECIAL_CHARS);
             sameline = false;
         }
         private void flushPendingWhitespace() {

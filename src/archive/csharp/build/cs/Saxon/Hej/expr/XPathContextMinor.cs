@@ -105,8 +105,8 @@ namespace Saxon.Hej.expr {
                 throw Saxon.Hej.trans.XPathException.makeXPathException(e);
             }
         }
-        public virtual Saxon.Ejavax.xml.transform.URIResolver getURIResolver() {
-            return caller.getURIResolver();
+        public virtual Saxon.Hej.lib.JJ_ResourceResolver getResourceResolver() {
+            return caller.getResourceResolver();
         }
         public virtual Saxon.Hej.lib.ErrorReporter getErrorReporter() {
             return caller.getErrorReporter();

@@ -568,7 +568,7 @@ namespace Saxon.Eej.ee.optim {
                 addTerms(predicate, filters);
                 @base = ((Saxon.Hej.expr.FilterExpression)(@base)).getBase();
             }
-            filters.Sort((f0, f1) => {
+            Saxon.Impl.Helpers.ListUtils.Sort(filters, (f0, f1) => {
     if ((f0 == f1)) {
         return 0;
     }

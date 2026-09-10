@@ -1578,7 +1578,7 @@ namespace Saxon.Hej.trans {
         string[] evals = System.Text.RegularExpressions.Regex.Split(eval, " ");
         Saxon.Hej.expr.parser.Evaluator[] evalModes = new Saxon.Hej.expr.parser.Evaluator[evals.Length];
         for (int i = 0; (i<evals.Length); i++) {
-            evalModes[i] = Saxon.Hej.expr.parser.Evaluators.getEvaluator(System.Int32.Parse(evals[i]));
+            evalModes[i] = Saxon.Hej.expr.parser.Evaluators.getEvaluator(Saxon.Impl.Helpers.Utils.ParseInt(evals[i]));
         }
         call.setArgumentEvaluators(evalModes);
     }
@@ -1841,7 +1841,7 @@ namespace Saxon.Hej.trans {
                 Saxon.Ejava.util.StringTokenizer tokenizer = new Saxon.Ejava.util.StringTokenizer(entry.Value);
                 while (tokenizer.hasMoreTokens()) {
                     string token = tokenizer.nextToken();
-                    int target = System.Int32.Parse(token);
+                    int target = Saxon.Impl.Helpers.Utils.ParseInt(token);
                     Saxon.Hej.expr.Component targetComponent = Saxon.Impl.Helpers.MapUtils.Get(componentIdMap, target);
                     if ((targetComponent == null)) {
                         throw new Saxon.Hej.trans.XPathException(("Unresolved external reference to component "+target));
@@ -2637,7 +2637,7 @@ namespace Saxon.Hej.trans {
             string lineAtt = getInheritedAttribute(element, "line");
             string moduleAtt = getInheritedAttribute(element, "module");
             if (((lineAtt != null) && (moduleAtt != null))) {
-                int line = System.Int32.Parse(lineAtt);
+                int line = Saxon.Impl.Helpers.Utils.ParseInt(lineAtt);
                 return allocateLocation(moduleAtt, line);
             } else {
                 return Saxon.Hej.expr.parser.Loc.NONE;
@@ -2772,7 +2772,7 @@ namespace Saxon.Hej.trans {
                 return System.Int32.MinValue;
             }
             try {
-                return System.Int32.Parse(val);
+                return Saxon.Impl.Helpers.Utils.ParseInt(val);
             } catch (Saxon.Ejava.lang.NumberFormatException e) {
                 throw new Saxon.Hej.trans.XPathException((((((("Expected integer value for "+element.getDisplayName())+"/")+localName)+", found '")+val)+"'"), Saxon.Hej.trans.SaxonErrorCode.SXPK0002);
             }
@@ -2880,7 +2880,7 @@ namespace Saxon.Hej.trans {
                                                         if (name.StartsWith("AtSC|")) {
                                                             int nextBar = name.IndexOf('|', 5);
                                                             string fps = name.Substring(5, nextBar - 5);
-                                                            int fp = System.Int32.Parse(fps);
+                                                            int fp = Saxon.Impl.Helpers.Utils.ParseInt(fps);
                                                             string collName = name.Substring((nextBar+1));
                                                             return Saxon.Hej.expr.sort.AtomicSortComparer.makeSortComparer(config.getCollation(collName), fp, new Saxon.Hej.expr.EarlyEvaluationContext(config));
                                                         } else {

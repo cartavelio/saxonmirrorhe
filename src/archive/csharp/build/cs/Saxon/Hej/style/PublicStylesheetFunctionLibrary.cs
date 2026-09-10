@@ -30,7 +30,7 @@ namespace Saxon.Hej.style {
             }
             return null;
         }
-        public bool isAvailable(Saxon.Hej.trans.SymbolicName.F functionName) {
+        public bool isAvailable(Saxon.Hej.trans.SymbolicName.F functionName, int languageLevel) {
             if ((@base is Saxon.Hej.style.StylesheetFunctionLibrary)) {
                 Saxon.Hej.style.StylesheetPackage pack = ((Saxon.Hej.style.StylesheetFunctionLibrary)(@base)).getStylesheetPackage();
                 Saxon.Hej.expr.instruct.UserFunction fn = pack.getFunction(functionName);
@@ -41,7 +41,7 @@ namespace Saxon.Hej.style {
                     return false;
                 }
             } else {
-                return @base.isAvailable(functionName);
+                return @base.isAvailable(functionName, languageLevel);
             }
         }
         public Saxon.Hej.functions.FunctionLibrary copy() {

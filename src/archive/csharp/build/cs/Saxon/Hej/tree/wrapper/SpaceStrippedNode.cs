@@ -190,6 +190,9 @@ namespace Saxon.Hej.tree.wrapper {
             public void close() {
                 @base.close();
             }
+            public void discharge() {
+                @base.discharge();
+            }
         
         }
     

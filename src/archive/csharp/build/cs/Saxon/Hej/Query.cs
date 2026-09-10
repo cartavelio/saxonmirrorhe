@@ -13,7 +13,6 @@ namespace Saxon.Hej {
         protected internal bool useURLs = false;
         protected internal string outputFileName = null;
         protected internal string moduleURIResolverClass = null;
-        protected internal readonly string uriResolverClass = null;
         protected internal bool explaining = false;
         protected internal bool wrap = false;
         protected internal bool projection = false;
@@ -121,21 +120,15 @@ namespace Saxon.Hej {
                 if (updating) {
                     compiler.setUpdatingEnabled(true);
                 }
-                if ((config.getTraceListener() != null)) {
-                    compiler.setCompileWithTracing(true);
-                }
                 if ((moduleURIResolverClass != null)) {
                     System.Object mr = config.getInstance(moduleURIResolverClass);
                     if (!(((mr is Saxon.Hej.lib.ModuleURIResolver)))) {
                         badUsage((moduleURIResolverClass+" is not a ModuleURIResolver"));
                     }
-                    if ((mr is Saxon.Callbacks.StandardModuleURIResolver)) {
-                        ((Saxon.Callbacks.StandardModuleURIResolver)(mr)).setConfiguration(config);
+                    if ((mr is Saxon.Hej.lib.StandardModuleURIResolver)) {
+                        ((Saxon.Hej.lib.StandardModuleURIResolver)(mr)).setConfiguration(config);
                     }
                     compiler.setModuleURIResolver((Saxon.Hej.lib.ModuleURIResolver)(mr));
-                }
-                if ((uriResolverClass != null)) {
-                    config.setURIResolver(config.makeURIResolver(uriResolverClass));
                 }
                 config.displayLicenseMessage();
                 if ((schemaAware && !(config.isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.ENTERPRISE_XQUERY)))) {
@@ -220,9 +213,6 @@ namespace Saxon.Hej {
                     } else {
                         config.getLogger().warning((("Invalid dateTime: "+now)+" (ignored)"));
                     }
-                }
-                if ((uriResolverClass != null)) {
-                    evaluator.setURIResolver(config.makeURIResolver(uriResolverClass));
                 }
                 processSource(sourceInput, exp, evaluator);
                 if ((sourceJsonFileName != null)) {
@@ -310,7 +300,7 @@ namespace Saxon.Hej {
             }
         }
         internal static  /* REPLACING static */ Saxon.Api.XdmValue parseJson(Saxon.Hej.s9api.Processor processor, System.IO.TextReader jsonReader) {
-            return new Saxon.Api.JsonBuilder(processor.getUnderlyingConfiguration()).parseJson(jsonReader);
+            return new Saxon.Api.JsonBuilder(processor.getUnderlyingConfiguration()).ParseJson(jsonReader);
         }
         protected internal void initializeConfiguration(Saxon.Hej.Configuration config) {
         }
@@ -325,7 +315,7 @@ namespace Saxon.Hej {
             streaming = "on".Equals(options.getOptionValue("stream"));
             string value = options.getOptionValue("p");
             if ("on".Equals(value)) {
-                config.setParameterizedURIResolver();
+                config.setBooleanProperty(Saxon.Hej.lib.Feature<bool>.RECOGNIZE_URI_QUERY_PARAMETERS, true);
                 useURLs = true;
             }
             projection = "on".Equals(options.getOptionValue("projection"));
@@ -347,7 +337,11 @@ namespace Saxon.Hej {
             }
             value = options.getOptionValue("repeat");
             if ((value != null)) {
-                repeat = System.Int32.Parse(value);
+                try {
+                    repeat = Saxon.Impl.Helpers.Utils.ParseInt(value);
+                } catch (Saxon.Ejava.lang.NumberFormatException err) {
+                    badUsage("Bad number after -repeat");
+                }
             }
             sourceXmlFileName = options.getOptionValue("s");
             sourceJsonFileName = options.getOptionValue("json");
@@ -480,10 +474,14 @@ namespace Saxon.Hej {
         protected internal Saxon.Ejavax.xml.transform.Source processSourceFile(string sourceFileName, bool useURLs) {
             Saxon.Ejavax.xml.transform.Source sourceInput;
             if ((useURLs || Saxon.Hej.trans.CommandLineOptions.isImplicitURI(sourceFileName))) {
-                sourceInput = config.getURIResolver().resolve(sourceFileName, null);
-                if ((sourceInput == null)) {
-                    sourceInput = config.getSystemURIResolver().resolve(sourceFileName, null);
-                }
+                Saxon.Hej.lib.JJ_ResourceRequest request = new Saxon.Hej.lib.JJ_ResourceRequest();
+                request.relativeUri = sourceFileName;
+                System.Uri cwd = new Saxon.Ejava.io.File(Saxon.Ejava.lang.System.getProperty("user.dir")).toURI();
+                request.baseUri = cwd.ToString();
+                request.uri = new System.Uri(cwd, sourceFileName).ToString();
+                request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XML_NATURE;
+                request.purpose = "source document";
+                sourceInput = request.resolve(config.getResourceResolver());
             } else {
                 if (sourceFileName.Equals("-")) {
                     string sysId = new Saxon.Ejava.io.File(Saxon.Ejava.lang.System.getProperty("user.dir")).toURI().OriginalString;

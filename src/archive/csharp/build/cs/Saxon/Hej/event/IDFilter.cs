@@ -6,7 +6,6 @@ namespace Saxon.Hej.@event {
         private readonly string requiredId;
         private int activeDepth = 0;
         private bool matched = false;
-        private System.Collections.Generic.HashSet<Saxon.Hej.type.SimpleType> nonIDs;
         public IDFilter(Saxon.Hej.@event.Receiver next, string id) : base (next) {
             this.requiredId = id;
         }

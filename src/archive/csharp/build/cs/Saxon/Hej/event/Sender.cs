@@ -13,7 +13,9 @@ namespace Saxon.Hej.@event {
                 options = new Saxon.Hej.lib.ParseOptions(options);
             }
             string systemId = source.getSystemId();
+            Saxon.Hej.lib.AugmentedSource originalAugmentedSource = null;
             if ((source is Saxon.Hej.lib.AugmentedSource)) {
+                originalAugmentedSource = (Saxon.Hej.lib.AugmentedSource)(source);
                 options.merge(((Saxon.Hej.lib.AugmentedSource)(source)).getParseOptions());
                 systemId = source.getSystemId();
                 source = ((Saxon.Hej.lib.AugmentedSource)(source)).getContainedSource();
@@ -22,7 +24,6 @@ namespace Saxon.Hej.@event {
             options.applyDefaults(config);
             receiver.setSystemId(systemId);
             Saxon.Hej.@event.Receiver next = receiver;
-            next = makeValidator(next, source.getSystemId(), options);
             System.Collections.Generic.IList<Saxon.Hej.@event.FilterFactory> filters = options.getFilters();
             if ((filters != null)) {
                 for (int i = (filters.Count-1); (i>=0); i--) {
@@ -32,6 +33,7 @@ namespace Saxon.Hej.@event {
                     next = filter;
                 }
             }
+            next = makeValidator(next, source.getSystemId(), options);
             Saxon.Hej.om.SpaceStrippingRule strippingRule = options.getSpaceStrippingRule();
             if (((strippingRule != null) && !(((strippingRule is Saxon.Hej.om.NoElementsSpaceStrippingRule))))) {
                 next = strippingRule.makeStripper(next);
@@ -43,6 +45,9 @@ namespace Saxon.Hej.@event {
                 throw new Saxon.Hej.trans.XPathException((("A source of type "+source.GetType().Name)+" is not supported in this environment"));
             }
             ((Saxon.Hej.lib.ActiveSource)(source)).deliver(next, options);
+            if (((originalAugmentedSource != null) && originalAugmentedSource.isPleaseCloseAfterUse())) {
+                originalAugmentedSource.close();
+            }
         }
         public static void sendDocumentInfo(Saxon.Hej.om.NodeInfo top, Saxon.Hej.@event.Receiver receiver, Saxon.Hej.s9api.Location location) {
             Saxon.Hej.@event.PipelineConfiguration pipe = receiver.getPipelineConfiguration();
@@ -50,7 +55,8 @@ namespace Saxon.Hej.@event {
             if ((top.getConfiguration().getNamePool() != targetNamePool)) {
                 receiver = new Saxon.Hej.@event.NamePoolConverter(receiver, top.getConfiguration().getNamePool(), targetNamePool);
             }
-            Saxon.Hej.@event.LocationCopier copier = new Saxon.Hej.@event.LocationCopier((top.getNodeKind() == Saxon.Hej.type.Type.DOCUMENT));
+            Saxon.Hej.@event.LocationCopier copier = new Saxon.Hej.@event.LocationCopier((top.getNodeKind() == Saxon.Hej.type.Type.DOCUMENT), location.getSystemId());
+            pipe.setComponent(typeof(Saxon.Hej.@event.CopyInformee).Name, copier);
             pipe.setCopyInformee(element => copier.notifyElementNode(element));
             receiver.open();
             switch (top.getNodeKind()) {

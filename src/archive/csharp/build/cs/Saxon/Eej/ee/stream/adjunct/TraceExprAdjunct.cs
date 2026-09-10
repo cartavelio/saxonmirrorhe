@@ -32,7 +32,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
             }
             public override void append(Saxon.Hej.om.Item item) {
                 if ((listener != null)) {
-                    listener.enter(info, new System.Collections.Generic.Dictionary<string, System.Object >(), getContext());
+                    listener.enter(info, new System.Collections.Generic.Dictionary<string, System.Object>(), getContext());
                 }
                 getNextOutputter().append(item);
                 if ((listener != null)) {
@@ -41,7 +41,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
             }
             public override Saxon.Hej.@event.Receiver startSelectedParentNode(Saxon.Eej.ee.stream.om.FleetingParentNode node, Saxon.Hej.s9api.Location locationId) {
                 if ((listener != null)) {
-                    listener.enter(info, new System.Collections.Generic.Dictionary<string, System.Object >(), getContext());
+                    listener.enter(info, new System.Collections.Generic.Dictionary<string, System.Object>(), getContext());
                 }
                 return getResultFeed().startSelectedParentNode(node, locationId);
             }

@@ -7,7 +7,7 @@ namespace Saxon.Hej.value {
             if (((@in.IndexOf('e')>=0) || (@in.IndexOf('E')>=0))) {
                 try {
                     return new Saxon.Hej.value.DoubleValue(System.Double.Parse(@in));
-                } catch (Saxon.Ejava.lang.NumberFormatException e) {
+                } catch (/* substitute exception */ System.FormatException e) {
                     return Saxon.Hej.value.DoubleValue.NaN;
                 }
             } else {

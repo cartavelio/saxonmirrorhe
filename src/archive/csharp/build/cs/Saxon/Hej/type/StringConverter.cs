@@ -83,10 +83,10 @@ namespace Saxon.Hej.type {
         public class StringToUntypedAtomic : Saxon.Hej.type.StringConverter {
             public static readonly Saxon.Hej.type.StringConverter.StringToUntypedAtomic INSTANCE = new Saxon.Hej.type.StringConverter.StringToUntypedAtomic();
             public override Saxon.Hej.value.StringValue convert(Saxon.Hej.value.AtomicValue input) {
-                return new Saxon.Hej.value.UntypedAtomicValue(input.getUnicodeStringValue());
+                return Saxon.Hej.value.StringValue.makeUntypedAtomic(input.getUnicodeStringValue());
             }
             public override Saxon.Hej.type.ConversionResult convertString(Saxon.Hej.str.UnicodeString input) {
-                return new Saxon.Hej.value.UntypedAtomicValue(input);
+                return Saxon.Hej.value.StringValue.makeUntypedAtomic(input);
             }
             public override Saxon.Hej.type.ValidationFailure validate(Saxon.Hej.str.UnicodeString input) {
                 return null;

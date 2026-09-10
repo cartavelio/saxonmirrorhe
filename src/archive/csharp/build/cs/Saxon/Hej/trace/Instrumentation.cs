@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.trace {
     public class Instrumentation {
-        public const bool ACTIVE = true;
+        public const bool ACTIVE = false;
         public static System.Collections.Generic.Dictionary<string,System.Int64> counters = new System.Collections.Generic.Dictionary<string, System.Int64>();
         public static void count(string counter) {
             if (counters.ContainsKey(counter)) {

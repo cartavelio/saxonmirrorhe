@@ -15,7 +15,7 @@ namespace Saxon.Eej.config {
             declareBuiltInExtensionElementNamespaces();
             declareBuiltInExtensionFunctions();
             setSerializerFactory(new Saxon.Eej.serialize.SerializerFactoryPE(this));
-            setStaticQueryContextFactory(new Inner_StaticQueryContextFactory_d13e444(this));
+            setStaticQueryContextFactory(new Inner_StaticQueryContextFactory_3(this));
             internalSetBooleanProperty(Saxon.Hej.lib.FeatureCode.DISABLE_XSL_EVALUATE, Saxon.Hej.lib.FeatureKeys.DISABLE_XSL_EVALUATE, false);
         }
         private Saxon.Eej.config.Verifier makeVerifier() {
@@ -45,6 +45,13 @@ namespace Saxon.Eej.config {
         }
         public override Saxon.Eej.trans.PackageLoaderPE makePackageLoader() {
             return new Saxon.Eej.trans.PackageLoaderPE(this);
+        }
+        public override void setConfigurationProperty(string name, System.Object value) {
+            if (name.Equals("http://saxonica.com/oem-data")) {
+                supplyLicenseKey(new System.IO.StringReader((string)(value)));
+            } else {
+                base.setConfigurationProperty(name, value);
+            }
         }
         public override  /* REPLACING protected internal override */ void setFeature(Saxon.Hej.lib.FeatureData feature, System.Object value) {
             string name = feature.uri;
@@ -159,7 +166,7 @@ namespace Saxon.Eej.config {
         protected internal void loadLicense() {
             verifier.loadPrimaryLicense(this);
             if ((((Saxon.Ejava.lang.System.currentTimeMillis()%100) == 42) && "yes".Equals(verifier.getFeature("Evaluation", this)))) {
-                Saxon.Eej.serialize.SerializerFactoryPE sf = new Inner_SerializerFactoryPE_d13e1377(this, this);
+                Saxon.Eej.serialize.SerializerFactoryPE sf = new Inner_SerializerFactoryPE_10(this, this);
                 setSerializerFactory(sf);
             }
             setLicensedFeatures();
@@ -293,19 +300,30 @@ namespace Saxon.Eej.config {
                 return base.getBuiltInExtensionLibraryList();
             }
             if ((builtInExtensionLibraryList == null)) {
-                vendorFunctionSet = new Saxon.Eej.functions.extfn.VendorFunctionSetPE(this);
-                builtInExtensionLibraryList = new Saxon.Hej.functions.FunctionLibraryList();
-                builtInExtensionLibraryList.addFunctionLibrary(vendorFunctionSet);
-                builtInExtensionLibraryList.addFunctionLibrary(Saxon.Hej.functions.MathFunctionSet.getInstance());
-                builtInExtensionLibraryList.addFunctionLibrary(Saxon.Hej.ma.map.MapFunctionSet.getInstance());
-                builtInExtensionLibraryList.addFunctionLibrary(Saxon.Hej.ma.arrays.ArrayFunctionSet.getInstance());
-                builtInExtensionLibraryList.addFunctionLibrary(Saxon.Hej.functions.registry.ExsltCommonFunctionSet.getInstance());
-                builtInExtensionLibraryList.addFunctionLibrary(/*134*/Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.getInstance());
-                if (getBooleanProperty(Saxon.Hej.lib.Feature<bool>.ALLOW_EXTERNAL_FUNCTIONS)) {
-                    builtInExtensionLibraryList.addFunctionLibrary(/*134*/Saxon.Eej.functions.extfn.EXPathFileFunctionSet.getInstance());
-                }
+                builtInExtensionLibraryList = makeBuiltInExtensionLibraryList();
             }
             return builtInExtensionLibraryList;
+        }
+        private Saxon.Hej.functions.FunctionLibraryList makeBuiltInExtensionLibraryList() { lock(this) {
+            vendorFunctionSet = makeVendorFunctionSet();
+            Saxon.Hej.functions.FunctionLibraryList result = new Saxon.Hej.functions.FunctionLibraryList();
+            result.addFunctionLibrary(vendorFunctionSet);
+            result.addFunctionLibrary(Saxon.Hej.functions.MathFunctionSet.getInstance());
+            result.addFunctionLibrary(Saxon.Hej.ma.map.MapFunctionSet.getInstance());
+            result.addFunctionLibrary(Saxon.Hej.ma.arrays.ArrayFunctionSet.getInstance());
+            result.addFunctionLibrary(/*134*/Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.getInstance());
+            result.addFunctionLibrary(Saxon.Hej.functions.registry.ExsltCommonFunctionSet.getInstance());
+            if (getBooleanProperty(Saxon.Hej.lib.Feature<bool>.ALLOW_EXTERNAL_FUNCTIONS)) {
+                result.addFunctionLibrary(/*134*/Saxon.Eej.functions.extfn.EXPathFileFunctionSet.getInstance());
+            }
+            return result;
+        }}
+        protected internal virtual Saxon.Hej.functions.registry.BuiltInFunctionSet makeVendorFunctionSet() {
+            if (isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
+                return new Saxon.Eej.functions.extfn.VendorFunctionSetPE(this);
+            } else {
+                return null;
+            }
         }
         public Saxon.Hej.functions.registry.BuiltInFunctionSet getVendorFunctionSet() {
             return vendorFunctionSet;
@@ -362,9 +380,9 @@ namespace Saxon.Eej.config {
             return new Saxon.Eej.trans.ModePE(modeName);
         }
     
-        private class Inner_StaticQueryContextFactory_d13e444 : Saxon.Hej.lib.StaticQueryContextFactory {
+        private class Inner_StaticQueryContextFactory_3 : Saxon.Hej.lib.StaticQueryContextFactory {
             private readonly ProfessionalConfiguration outerInstance;
-            public Inner_StaticQueryContextFactory_d13e444(ProfessionalConfiguration outerInstance) {
+            public Inner_StaticQueryContextFactory_3(ProfessionalConfiguration outerInstance) {
                 this.outerInstance = outerInstance;
             }
             public override Saxon.Hej.query.StaticQueryContext newStaticQueryContext(Saxon.Hej.Configuration config, bool copyFromDefault) {
@@ -372,9 +390,9 @@ namespace Saxon.Eej.config {
             }
         }
 
-        private class Inner_SerializerFactoryPE_d13e1377 : Saxon.Eej.serialize.SerializerFactoryPE {
+        private class Inner_SerializerFactoryPE_10 : Saxon.Eej.serialize.SerializerFactoryPE {
             private readonly ProfessionalConfiguration outerInstance;
-            public Inner_SerializerFactoryPE_d13e1377(ProfessionalConfiguration outerInstance, ProfessionalConfiguration arg1) : base(arg1) {
+            public Inner_SerializerFactoryPE_10(ProfessionalConfiguration outerInstance, ProfessionalConfiguration arg1) : base(arg1) {
                 this.outerInstance = outerInstance;
             }
             public override  /* REPLACING public */ Saxon.Hej.@event.Receiver getReceiver(Saxon.Ejavax.xml.transform.Result result, Saxon.Hej.serialize.SerializationProperties parameters, Saxon.Hej.@event.PipelineConfiguration pipe) {

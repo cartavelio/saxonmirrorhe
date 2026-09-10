@@ -4,12 +4,12 @@ using System.Linq;
 namespace Saxon.Eej.ee.stream.adjunct {
     public class CodepointsToStringStreamer : Saxon.Eej.ee.stream.adjunct.StreamingAdjunct, Saxon.Eej.ee.stream.feed.FeedMaker {
         public Saxon.Eej.ee.stream.feed.ItemFeed makeItemFeed(Saxon.Eej.ee.stream.watch.WatchManager watchManager, Saxon.Eej.ee.stream.feed.ItemFeed @out, Saxon.Hej.expr.XPathContext context) {
-            return new Inner_ItemFeed_d207e80(this, getExpression(), @out, context);
+            return new Inner_ItemFeed_1(this, getExpression(), @out, context);
         }
     
-        private class Inner_ItemFeed_d207e80 : Saxon.Eej.ee.stream.feed.ItemFeed {
+        private class Inner_ItemFeed_1 : Saxon.Eej.ee.stream.feed.ItemFeed {
             private readonly CodepointsToStringStreamer outerInstance;
-            public Inner_ItemFeed_d207e80(CodepointsToStringStreamer outerInstance, /*AB*/Saxon.Hej.expr.Expression arg1, /*AA*/Saxon.Eej.ee.stream.feed.ItemFeed arg2, /*AA*/Saxon.Hej.expr.XPathContext arg3) : base(arg1, arg2, arg3) {
+            public Inner_ItemFeed_1(CodepointsToStringStreamer outerInstance, /*AB*/Saxon.Hej.expr.Expression arg1, /*AA*/Saxon.Eej.ee.stream.feed.ItemFeed arg2, /*AA*/Saxon.Hej.expr.XPathContext arg3) : base(arg1, arg2, arg3) {
                 this.outerInstance = outerInstance;
                 buffer = new Saxon.Ejava.lang.StringBuilder(64);
                 checker = /*superMethod*/getConfiguration().getValidCharacterChecker();

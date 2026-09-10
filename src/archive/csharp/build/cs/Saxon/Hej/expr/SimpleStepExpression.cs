@@ -8,6 +8,9 @@ namespace Saxon.Hej.expr {
                 throw new Saxon.Ejava.lang.IllegalArgumentException();
             }
         }
+        public Saxon.Hej.expr.AxisExpression getAxisExpression() {
+            return (Saxon.Hej.expr.AxisExpression)(getStep());
+        }
         private static readonly Saxon.Hej.expr.OperandRole STEP_ROLE = new Saxon.Hej.expr.OperandRole((Saxon.Hej.expr.OperandRole.USES_NEW_FOCUS|Saxon.Hej.expr.OperandRole.HIGHER_ORDER), Saxon.Hej.expr.OperandUsage.TRANSMISSION, Saxon.Hej.value.SequenceType.ANY_SEQUENCE);
         protected internal override Saxon.Hej.expr.OperandRole getOperandRole(int arg) {
             return ((arg == 0) ? Saxon.Hej.expr.OperandRole.FOCUS_CONTROLLING_SELECT : STEP_ROLE);

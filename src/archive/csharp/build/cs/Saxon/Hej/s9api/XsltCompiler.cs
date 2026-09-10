@@ -18,7 +18,10 @@ namespace Saxon.Hej.s9api {
             return processor;
         }
         public void setURIResolver(Saxon.Ejavax.xml.transform.URIResolver resolver) {
-            compilerInfo.setURIResolver(resolver);
+            compilerInfo.setResourceResolver(new Saxon.Hej.lib.ResourceResolverWrappingURIResolver(resolver));
+        }
+        public void setResourceResolver(Saxon.Hej.lib.JJ_ResourceResolver resolver) {
+            compilerInfo.setResourceResolver(resolver);
         }
         public void setParameter(Saxon.Api.QName name, Saxon.Api.XdmValue value) {
             try {
@@ -31,7 +34,15 @@ namespace Saxon.Hej.s9api {
             compilerInfo.clearParameters();
         }
         public Saxon.Ejavax.xml.transform.URIResolver getURIResolver() {
-            return compilerInfo.getURIResolver();
+            Saxon.Hej.lib.JJ_ResourceResolver rr = compilerInfo.getResourceResolver();
+            if ((rr is Saxon.Hej.lib.ResourceResolverWrappingURIResolver)) {
+                return ((Saxon.Hej.lib.ResourceResolverWrappingURIResolver)(rr)).getWrappedURIResolver();
+            } else {
+                return null;
+            }
+        }
+        public Saxon.Hej.lib.JJ_ResourceResolver getResourceResolver() {
+            return compilerInfo.getResourceResolver();
         }
         public void setErrorReporter(Saxon.Hej.lib.ErrorReporter reporter) {
             compilerInfo.setErrorReporter(reporter);
@@ -175,6 +186,9 @@ namespace Saxon.Hej.s9api {
         }
         public Saxon.Hej.s9api.XsltExecutable loadExecutablePackage(System.Uri location) {
             return loadLibraryPackage(location).link();
+        }
+        public Saxon.Hej.s9api.XsltExecutable loadExecutablePackage(Saxon.Ejavax.xml.transform.Source source) {
+            return loadLibraryPackage(source).link();
         }
         public void importPackage(Saxon.Hej.s9api.XsltPackage thePackage) {
             if ((thePackage.getProcessor() != processor)) {

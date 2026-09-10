@@ -5,7 +5,7 @@ namespace Saxon.Hej.functions {
     public class Contains : Saxon.Hej.functions.CollatingFunctionFixed {
         public override Saxon.Hej.expr.Expression makeOptimizedFunctionCall(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo, params Saxon.Hej.expr.Expression[]  arguments) {
             if ((getStringCollator() == Saxon.Hej.expr.sort.CodepointCollator.getInstance())) {
-                return new Inner_Optimized_d1009e130(this, this, arguments);
+                return new Inner_Optimized_2(this, this, arguments);
             } else {
                 return base.makeOptimizedFunctionCall(visitor, contextInfo, arguments);
             }
@@ -31,15 +31,15 @@ namespace Saxon.Hej.functions {
             return "ContainsCompiler";
         }
     
-        private class Inner_Optimized_d1009e130 : Saxon.Hej.expr.SystemFunctionCall.Optimized {
+        private class Inner_Optimized_2 : Saxon.Hej.expr.SystemFunctionCall.Optimized {
             private readonly Contains outerInstance;
-            public Inner_Optimized_d1009e130(Contains outerInstance, Contains arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
+            public Inner_Optimized_2(Contains outerInstance, Contains arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
                 this.outerInstance = outerInstance;
             }
             public override  /* REPLACING public */ bool effectiveBooleanValue(Saxon.Hej.expr.XPathContext context) {
-                Saxon.Hej.str.UnicodeString s0 = /*superMethod*/getArg(0).evaluateAsString(/*localparam*/context).tidy();
-                Saxon.Hej.str.UnicodeString s1 = /*superMethod*/getArg(1).evaluateAsString(/*localparam*/context).tidy();
-                return (/*localvar*/s0.indexOf(/*localvar*/s1, 0)>=0);
+                string s0 = /*superMethod*/getArg(0).evaluateAsString(/*localparam*/context).ToString();
+                string s1 = /*superMethod*/getArg(1).evaluateAsString(/*localparam*/context).ToString();
+                return /*localvar*/s0.Contains(/*localvar*/s1);
             }
             public override  /* REPLACING public */ Saxon.Hej.expr.Expression optimize(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
                 return this;

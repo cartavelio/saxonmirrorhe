@@ -15,8 +15,12 @@ namespace Saxon.Hej.query {
         private Saxon.Hej.om.FingerprintedQName resultNamespace;
         private Saxon.Hej.om.FingerprintedQName resultAtomicValue;
         private Saxon.Hej.om.FingerprintedQName resultFunction;
-        private Saxon.Hej.om.FingerprintedQName resultArray;
         private Saxon.Hej.om.FingerprintedQName resultMap;
+        private Saxon.Hej.om.FingerprintedQName resultMapEntry;
+        private Saxon.Hej.om.FingerprintedQName resultMapKey;
+        private Saxon.Hej.om.FingerprintedQName resultMapValue;
+        private Saxon.Hej.om.FingerprintedQName resultArray;
+        private Saxon.Hej.om.FingerprintedQName resultArrayMember;
         private Saxon.Hej.om.FingerprintedQName resultExternalValue;
         private Saxon.Hej.om.FingerprintedQName xsiType;
         private Saxon.Hej.om.NamespaceMap namespaces;
@@ -28,7 +32,8 @@ namespace Saxon.Hej.query {
         }
         private void startWrapper(Saxon.Hej.om.NodeName name) {
             @out.startElement(name, Saxon.Hej.type.Untyped.getInstance(), Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE);
-            @out.@namespace("", "", Saxon.Hej.@event.ReceiverOption.NONE);
+            @out.@namespace("xs", Saxon.Hej.lib.NamespaceConstant.SCHEMA, Saxon.Hej.@event.ReceiverOption.NONE);
+            @out.@namespace("xsi", Saxon.Hej.lib.NamespaceConstant.SCHEMA_INSTANCE, Saxon.Hej.@event.ReceiverOption.NONE);
             @out.startContent();
         }
         private void endWrapper() {
@@ -46,12 +51,15 @@ namespace Saxon.Hej.query {
             resultAtomicValue = new Saxon.Hej.om.FingerprintedQName("result", RESULT_NS, "atomic-value");
             resultFunction = new Saxon.Hej.om.FingerprintedQName("result", RESULT_NS, "function");
             resultArray = new Saxon.Hej.om.FingerprintedQName("result", RESULT_NS, "array");
+            resultArrayMember = new Saxon.Hej.om.FingerprintedQName("result", RESULT_NS, "array-member");
             resultMap = new Saxon.Hej.om.FingerprintedQName("result", RESULT_NS, "map");
+            resultMapEntry = new Saxon.Hej.om.FingerprintedQName("result", RESULT_NS, "map-entry");
+            resultMapKey = new Saxon.Hej.om.FingerprintedQName("result", RESULT_NS, "map-key");
+            resultMapValue = new Saxon.Hej.om.FingerprintedQName("result", RESULT_NS, "map-value");
             resultExternalValue = new Saxon.Hej.om.FingerprintedQName("result", RESULT_NS, "external-object");
             xsiType = new Saxon.Hej.om.FingerprintedQName("xsi", Saxon.Hej.lib.NamespaceConstant.SCHEMA_INSTANCE, "type");
             @out.open();
             @out.startDocument(Saxon.Hej.@event.ReceiverOption.NONE);
-            namespaces = Saxon.Hej.om.NamespaceMap.emptyMap().put("result", RESULT_NS).put("xs", Saxon.Hej.lib.NamespaceConstant.SCHEMA).put("xsi", Saxon.Hej.lib.NamespaceConstant.SCHEMA_INSTANCE);
             startWrapper(resultSequence);
         }
         public override void startDocument(int properties) {
@@ -67,7 +75,6 @@ namespace Saxon.Hej.query {
                 startWrapper(resultElement);
             }
             @out.startElement(elemName, type, location, properties);
-            @out.@namespace("", "", properties);
             foreach (Saxon.Hej.om.AttributeInfo att in attributes) {
                 @out.attribute(att.getNodeName(), att.getType(), att.getValue(), att.getLocation(), att.getProperties());
             }
@@ -110,7 +117,6 @@ namespace Saxon.Hej.query {
             if ((item is Saxon.Hej.value.AtomicValue)) {
                 Saxon.Hej.om.NamePool pool = getNamePool();
                 @out.startElement(resultAtomicValue, Saxon.Hej.type.Untyped.getInstance(), Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE);
-                @out.@namespace("", "", Saxon.Hej.@event.ReceiverOption.NONE);
                 Saxon.Hej.type.AtomicType type = ((Saxon.Hej.value.AtomicValue)(item)).getItemType();
                 Saxon.Hej.om.StructuredQName name = type.getStructuredQName();
                 string prefix = name.getPrefix();
@@ -123,7 +129,6 @@ namespace Saxon.Hej.query {
                     }
                 }
                 string displayName = ((prefix+':')+localName);
-                @out.@namespace("", "", Saxon.Hej.@event.ReceiverOption.NONE);
                 @out.@namespace(prefix, uri, Saxon.Hej.@event.ReceiverOption.NONE);
                 @out.attribute(xsiType, Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC, displayName, locationId, Saxon.Hej.@event.ReceiverOption.NONE);
                 @out.startContent();
@@ -143,33 +148,55 @@ namespace Saxon.Hej.query {
                         }
                     }
                 } else {
-                    if ((item is Saxon.Hej.om.Function)) {
-                        if ((item is Saxon.Hej.ma.map.MapItem)) {
-                            @out.startElement(resultMap, Saxon.Hej.type.Untyped.getInstance(), Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE);
+                    if ((item is Saxon.Hej.ma.map.MapItem)) {
+                        Saxon.Hej.@event.ComplexContentOutputter @out = getDestination();
+                        @out.startElement(resultMap, Saxon.Hej.type.Untyped.getInstance(), locationId, Saxon.Hej.@event.ReceiverOption.NONE);
+                        Saxon.Hej.ma.map.MapItem map = (Saxon.Hej.ma.map.MapItem)(item);
+                        foreach (Saxon.Hej.ma.map.KeyValuePair pair in map.keyValuePairs()) {
+                            @out.startElement(resultMapEntry, Saxon.Hej.type.Untyped.getInstance(), locationId, Saxon.Hej.@event.ReceiverOption.NONE);
+                            @out.startElement(resultMapKey, Saxon.Hej.type.Untyped.getInstance(), locationId, Saxon.Hej.@event.ReceiverOption.NONE);
+                            append(pair.key);
+                            @out.endElement();
+                            @out.startElement(resultMapValue, Saxon.Hej.type.Untyped.getInstance(), locationId, Saxon.Hej.@event.ReceiverOption.NONE);
+                            Saxon.Hej.om.SequenceIterator value = pair.value.iterate();
+                            Saxon.Hej.om.Item valItem;
+                            while (((valItem = value.next()) != null)) {
+                                append(valItem);
+                            }
+                            @out.endElement();
+                            @out.endElement();
+                        }
+                        @out.endElement();
+                    } else {
+                        if ((item is Saxon.Hej.ma.arrays.ArrayItem)) {
+                            @out.startElement(resultArray, Saxon.Hej.type.Untyped.getInstance(), Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE);
                             @out.startContent();
-                            @out.characters(Saxon.Hej.str.StringView.of(item.toShortString()), locationId, Saxon.Hej.@event.ReceiverOption.NONE);
+                            foreach (Saxon.Hej.om.GroundedValue mem in ((Saxon.Hej.ma.arrays.ArrayItem)(item)).members()) {
+                                @out.startElement(resultArrayMember, Saxon.Hej.type.Untyped.getInstance(), Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE);
+                                Saxon.Hej.om.SequenceIterator value = mem.iterate();
+                                Saxon.Hej.om.Item valItem;
+                                while (((valItem = value.next()) != null)) {
+                                    append(valItem);
+                                }
+                                @out.endElement();
+                            }
                             @out.endElement();
                         } else {
-                            if ((item is Saxon.Hej.ma.arrays.ArrayItem)) {
-                                @out.startElement(resultArray, Saxon.Hej.type.Untyped.getInstance(), Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE);
-                                @out.startContent();
-                                @out.characters(Saxon.Hej.str.StringView.of(item.toShortString()), locationId, Saxon.Hej.@event.ReceiverOption.NONE);
-                                @out.endElement();
-                            } else {
+                            if ((item is Saxon.Hej.om.Function)) {
                                 @out.startElement(resultFunction, Saxon.Hej.type.Untyped.getInstance(), Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE);
                                 @out.startContent();
                                 @out.characters(Saxon.Hej.str.StringView.of(((Saxon.Hej.om.Function)(item)).getDescription()), locationId, Saxon.Hej.@event.ReceiverOption.NONE);
                                 @out.endElement();
+                            } else {
+                                if ((item.getGenre() == Saxon.Hej.om.Genre.EXTERNAL)) {
+                                    System.Object obj = ((Saxon.Hej.value.ObjectValue<object>)(item)).getObject();
+                                    @out.startElement(resultExternalValue, Saxon.Hej.type.Untyped.getInstance(), Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE);
+                                    @out.attribute(new Saxon.Hej.om.NoNamespaceName("class"), Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC, obj.GetType().Name, Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE);
+                                    @out.startContent();
+                                    @out.characters(Saxon.Hej.str.StringView.of(obj.ToString()), locationId, Saxon.Hej.@event.ReceiverOption.NONE);
+                                    @out.endElement();
+                                }
                             }
-                        }
-                    } else {
-                        if ((item.getGenre() == Saxon.Hej.om.Genre.EXTERNAL)) {
-                            System.Object obj = ((Saxon.Hej.value.ObjectValue<object>)(item)).getObject();
-                            @out.startElement(resultExternalValue, Saxon.Hej.type.Untyped.getInstance(), Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE);
-                            @out.attribute(new Saxon.Hej.om.NoNamespaceName("class"), Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC, obj.GetType().Name, Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE);
-                            @out.startContent();
-                            @out.characters(Saxon.Hej.str.StringView.of(obj.ToString()), locationId, Saxon.Hej.@event.ReceiverOption.NONE);
-                            @out.endElement();
                         }
                     }
                 }

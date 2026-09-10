@@ -44,6 +44,9 @@ namespace Saxon.Eej.functions.extfn {
             public void close() {
                 @base.close();
             }
+            public void discharge() {
+                @base.discharge();
+            }
         
         }
     

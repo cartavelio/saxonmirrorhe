@@ -19,7 +19,7 @@ namespace Saxon.Hej.value {
             int[] valuei = new int[st.countTokens()];
             try {
                 for (int i = 0; st.hasMoreTokens(); i++) {
-                    valuei[i] = System.Int32.Parse(st.nextToken());
+                    valuei[i] = Saxon.Impl.Helpers.Utils.ParseInt(st.nextToken());
                 }
             } catch (Saxon.Ejava.lang.NumberFormatException exc) {
                 throw new Saxon.Hej.trans.XPathException(("Nested integer value has incorrect format: "+v));

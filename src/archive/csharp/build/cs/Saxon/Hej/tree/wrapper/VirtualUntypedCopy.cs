@@ -31,7 +31,7 @@ namespace Saxon.Hej.tree.wrapper {
             switch (getNodeKind()) {
               case Saxon.Hej.type.Type.ELEMENT:
               case Saxon.Hej.type.Type.ATTRIBUTE:
-                return new Saxon.Hej.value.UntypedAtomicValue(getUnicodeStringValue());
+                return Saxon.Hej.value.StringValue.makeUntypedAtomic(getUnicodeStringValue());
               default:
                 return base.atomize();
             }

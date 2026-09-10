@@ -49,7 +49,7 @@ namespace Saxon.Hej.serialize {
             return charMap;
         }
         public Saxon.Hej.str.UnicodeString map(Saxon.Hej.str.UnicodeString @in, bool insertNulls) {
-            if ((!(mapsWhitespace) && (@in is Saxon.Hej.str.CompressedWhitespace))) {
+            if ((!(mapsWhitespace) && (@in is Saxon.Hej.str.WhitespaceString))) {
                 return @in;
             }
             bool move = false;

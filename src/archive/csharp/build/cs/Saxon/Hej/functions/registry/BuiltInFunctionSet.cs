@@ -158,9 +158,21 @@ namespace Saxon.Hej.functions.registry {
             }
             return (num+" arguments");
         }
-        public bool isAvailable(Saxon.Hej.trans.SymbolicName.F symbolicName) {
+        public bool isAvailable(Saxon.Hej.trans.SymbolicName.F symbolicName, int languageLevel) {
             Saxon.Hej.om.StructuredQName qn = symbolicName.getComponentName();
-            return (qn.hasURI(getNamespace()) && (getFunctionDetails(qn.getLocalPart(), symbolicName.getArity()) != null));
+            if (!(qn.hasURI(getNamespace()))) {
+                return false;
+            }
+            Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry entry = getFunctionDetails(qn.getLocalPart(), symbolicName.getArity());
+            if ((entry == null)) {
+                return false;
+            }
+            if ((((entry.properties&SEQV)) != 0)) {
+                if ((((languageLevel<40) && symbolicName.getComponentName().getLocalPart().Equals("concat")) && (symbolicName.getArity()<2))) {
+                    return false;
+                }
+            }
+            return true;
         }
         public Saxon.Hej.functions.FunctionLibrary copy() {
             return this;

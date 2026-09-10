@@ -52,12 +52,17 @@ namespace Saxon.Hej.lib {
                 }
                 Saxon.Ejava.util.Properties props2 = new Saxon.Ejava.util.Properties(props);
                 props2.setProperty(Saxon.Hej.lib.SaxonOutputKeys.PARAMETER_DOCUMENT, "");
-                Saxon.Ejavax.xml.transform.Source source;
+                Saxon.Hej.lib.JJ_ResourceRequest rr = new Saxon.Hej.lib.JJ_ResourceRequest();
+                rr.relativeUri = paramDoc;
+                rr.baseUri = @base;
                 try {
-                    source = config.getURIResolver().resolve(paramDoc, @base);
-                } catch (Saxon.Ejavax.xml.transform.TransformerException e) {
-                    throw Saxon.Hej.trans.XPathException.makeXPathException(e);
+                    rr.uri = Saxon.Hej.functions.ResolveURI.makeAbsolute(paramDoc, @base).ToString();
+                } catch (System.UriFormatException err) {
+                    throw Saxon.Hej.trans.XPathException.makeXPathException(err);
                 }
+                rr.nature = Saxon.Hej.lib.NamespaceConstant.OUTPUT;
+                rr.purpose = "serialization";
+                Saxon.Ejavax.xml.transform.Source source = rr.resolve(config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
                 Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions();
                 options.setSchemaValidationMode(Saxon.Hej.lib.Validation.LAX);
                 options.setDTDValidationMode(Saxon.Hej.lib.Validation.SKIP);
@@ -531,7 +536,7 @@ namespace Saxon.Hej.lib {
             pipe.getConfiguration().checkLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.PROFESSIONAL_EDITION, "saxon:next-in-chain", -1);
             return null;
         }
-        public virtual Saxon.Hej.query.SequenceWrapper newSequenceWrapper(Saxon.Hej.@event.Receiver destination) {
+        public Saxon.Hej.query.SequenceWrapper newSequenceWrapper(Saxon.Hej.@event.Receiver destination) {
             return new Saxon.Hej.query.SequenceWrapper(destination);
         }
         public virtual string checkOutputProperty(string key, string value) {
@@ -678,7 +683,7 @@ namespace Saxon.Hej.lib {
         }
         protected internal static void checkNonNegativeInteger(string key, string value) {
             try {
-                int n = System.Int32.Parse(value);
+                int n = Saxon.Impl.Helpers.Utils.ParseInt(value);
                 if ((n<0)) {
                     throw new Saxon.Hej.trans.XPathException((("Value of "+Saxon.Hej.trans.Err.wrap(key))+" must be a non-negative integer"), "SEPM0016");
                 }

@@ -16,7 +16,7 @@ namespace Saxon.Hej.expr.flwor {
             if (controller.isTracing()) {
                 Saxon.Hej.expr.flwor.ClauseInfo baseInfo = new Saxon.Hej.expr.flwor.ClauseInfo(baseClause);
                 baseInfo.setNamespaceResolver(traceClause.getNamespaceResolver());
-                controller.getTraceListener().enter(baseInfo, new System.Collections.Generic.Dictionary<string, System.Object >(), context);
+                controller.getTraceListener().enter(baseInfo, baseClause.getTraceInfo(), context);
                 bool b = @base.nextTuple(context);
                 controller.getTraceListener().leave(baseInfo);
                 return b;

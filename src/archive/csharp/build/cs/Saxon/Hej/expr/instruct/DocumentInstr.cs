@@ -87,7 +87,7 @@ namespace Saxon.Hej.expr.instruct {
         public Saxon.Hej.expr.Expression getStringValueExpression() {
             if (textOnly) {
                 if ((constantText != null)) {
-                    return new Saxon.Hej.expr.StringLiteral(new Saxon.Hej.value.UntypedAtomicValue(constantText));
+                    return new Saxon.Hej.expr.StringLiteral(Saxon.Hej.value.StringValue.makeUntypedAtomic(constantText));
                 } else {
                     if ((getContentExpression() is Saxon.Hej.expr.instruct.ValueOf)) {
                         return ((Saxon.Hej.expr.instruct.ValueOf)(getContentExpression())).convertToCastAsString();

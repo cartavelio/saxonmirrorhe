@@ -19,7 +19,12 @@ namespace Saxon.Hej.expr {
             return (Saxon.Hej.om.NodeInfo)(iter.next());
         }
         public Saxon.Hej.om.Item next() {
-            if (((nextNode1 == null) || (nextNode2 == null))) {
+            if ((nextNode1 == null)) {
+                e2.close();
+                return null;
+            }
+            if ((nextNode2 == null)) {
+                e1.close();
                 return null;
             }
             while (((nextNode1 != null) && (nextNode2 != null))) {
@@ -42,6 +47,10 @@ namespace Saxon.Hej.expr {
         public void close() {
             e1.close();
             e2.close();
+        }
+        public void discharge() {
+            e1.discharge();
+            e2.discharge();
         }
     
     }

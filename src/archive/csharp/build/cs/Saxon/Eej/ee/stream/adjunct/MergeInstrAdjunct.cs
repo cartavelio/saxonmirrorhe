@@ -119,7 +119,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                     @out = pd.getConfiguration().getAnnotationStripper(@out);
                 }
                 wm.addWatch(new Saxon.Eej.ee.stream.watch.StreamWatch((Saxon.Eej.ee.stream.Inversion)(ms.invertedAction), wm, c2), true);
-                Saxon.Hej.functions.DocumentFn.sendDoc(href, ms.baseURI, context, ms.location, @out, options);
+                Saxon.Hej.functions.DocumentFn.sendDoc(href, ms.baseURI, pd, context, ms.location, @out, options);
             }
         
         }

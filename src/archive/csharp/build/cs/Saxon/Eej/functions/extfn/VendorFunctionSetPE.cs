@@ -41,6 +41,7 @@ namespace Saxon.Eej.functions.extfn {
             register("expression", 1, typeof(Saxon.Eej.functions.extfn.ExpressionFn), config.getJavaExternalObjectType(typeof(Saxon.Eej.functions.extfn.Evaluate.PreparedExpression)), ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
             register("expression", 2, typeof(Saxon.Eej.functions.extfn.ExpressionFn), config.getJavaExternalObjectType(typeof(Saxon.Eej.functions.extfn.Evaluate.PreparedExpression)), ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.pattern.NodeKindTest.ELEMENT, ONE, null);
             register("function-annotations", 1, typeof(Saxon.Eej.functions.extfn.FunctionAnnotations), Saxon.Eej.functions.extfn.FunctionAnnotations.RETURN_TYPE, STAR, 0).arg(0, Saxon.Hej.type.AnyFunctionType.getInstance(), ONE, null);
+            register("get-context", 0, typeof(Saxon.Eej.functions.extfn.VendorFunctionSetPE.GetContext), config.getJavaExternalObjectType(typeof(Saxon.Hej.expr.XPathContext)), ONE, (CITEM|LATE));
             register("get-pseudo-attribute", 1, typeof(Saxon.Eej.functions.extfn.VendorFunctionSetPE.GetPseudoAttribute), Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, (CITEM|LATE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, EMPTY);
             register("group-starting", 2, typeof(Saxon.Eej.functions.extfn.GroupStarting), Saxon.Hej.ma.arrays.ArrayItemType.ANY_ARRAY_TYPE, STAR, 0).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), STAR, EMPTY).arg(1, predicate, ONE, EMPTY);
             register("has-same-nodes", 2, typeof(Saxon.Eej.functions.extfn.VendorFunctionSetPE.HasSameNodes), Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, 0).arg(0, Saxon.Hej.pattern.AnyNodeTest.getInstance(), STAR, null).arg(1, Saxon.Hej.pattern.AnyNodeTest.getInstance(), STAR, null);
@@ -197,7 +198,7 @@ namespace Saxon.Eej.functions.extfn {
         
         }
         public class DiscardDocument : Saxon.Hej.functions.SystemFunction {
-            public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+            public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) { lock(this) {
                 Saxon.Hej.om.NodeInfo doc = (Saxon.Hej.om.NodeInfo)(arguments[0].head());
                 if ((doc == null)) {
                     return Saxon.Hej.value.EmptySequence.getInstance();
@@ -209,6 +210,12 @@ namespace Saxon.Eej.functions.extfn {
                 }
                 c.getDocumentPool().discard(doc.getTreeInfo());
                 return doc;
+            }}
+        
+        }
+        public class GetContext : Saxon.Hej.functions.SystemFunction {
+            public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                return new Saxon.Hej.value.ObjectValue<Saxon.Hej.expr.XPathContext>(context);
             }
         
         }

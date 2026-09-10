@@ -163,6 +163,9 @@ namespace Saxon.Impl.Parallel {
                 allDone = true;
                 //provider.interrupt();
             }
+            
+            public void discharge() {
+            }
         }
     }
 }

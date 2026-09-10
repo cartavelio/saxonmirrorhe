@@ -188,7 +188,7 @@ namespace Saxon.Eej.config {
                 string upgradeDays = features.getProperty("UpgradeDays");
                 int udays = 366;
                 if ((upgradeDays != null)) {
-                    udays = System.Int32.Parse(upgradeDays.Trim());
+                    udays = Saxon.Impl.Helpers.Utils.ParseInt(upgradeDays.Trim());
                 }
                 Saxon.Hej.value.DayTimeDurationValue sinceMajorRelease = majorVersionIssued.subtract(licenseIssued, null);
                 if ((sinceMajorRelease.getLengthInSeconds()>(((60*60)*24)*udays))) {
@@ -198,7 +198,7 @@ namespace Saxon.Eej.config {
                 string maintenanceDays = features.getProperty("MaintenanceDays");
                 int mdays = udays;
                 if ((maintenanceDays != null)) {
-                    mdays = System.Int32.Parse(maintenanceDays.Trim());
+                    mdays = Saxon.Impl.Helpers.Utils.ParseInt(maintenanceDays.Trim());
                 }
                 Saxon.Hej.value.DayTimeDurationValue sinceMinorRelease = minorVersionIssued.subtract(licenseIssued, null);
                 if ((sinceMinorRelease.getLengthInSeconds()>(((60*60)*24)*mdays))) {

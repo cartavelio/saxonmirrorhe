@@ -182,18 +182,7 @@ namespace Saxon.Api {
         }
 
 
-        /// <summary>
-        /// The <c>XmlResolver</c> to be used at run-time to resolve and dereference URIs
-        /// supplied to the <c>doc()</c> and <c>document()</c> functions.
-        /// </summary>
-
-        public XmlResolver InputXmlResolver {
-            get => ((StandardURIResolver) s9Transformer.getURIResolver()).getXmlResolver();
-            set => s9Transformer.setURIResolver(
-                new StandardURIResolver(
-                    s9Transformer.getUnderlyingController().getConfiguration(),
-                    value));
-        }
+        
 
         /// <summary>
         /// The <c>IResultDocumentHandler</c> to be used at run-time to process the output

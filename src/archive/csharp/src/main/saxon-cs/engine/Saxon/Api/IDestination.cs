@@ -1,9 +1,12 @@
 
 namespace Saxon.Api {
     /// <summary>
-    /// An abstract destination for the results of a query or transformation
+    /// An abstract destination for the results of a query or transformation.
     /// </summary>
     /// <remarks>
+    /// A number of implementations of <c>IDestination</c> are supplied with the Saxon product. While
+    /// user-written or third-party implementations of the interface can be created in principle, the interface
+    /// is not designed to make this easy.
     /// </remarks>
 
 

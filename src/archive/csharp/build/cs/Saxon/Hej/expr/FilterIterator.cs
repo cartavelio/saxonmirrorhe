@@ -83,6 +83,9 @@ namespace Saxon.Hej.expr {
         public void close() {
             @base.close();
         }
+        public void discharge() {
+            @base.discharge();
+        }
         public sealed class NonNumeric : Saxon.Hej.expr.FilterIterator {
             public NonNumeric(Saxon.Hej.om.SequenceIterator @base, Saxon.Hej.expr.Expression filter, Saxon.Hej.expr.XPathContext context) : base (@base, filter, context) {
             }

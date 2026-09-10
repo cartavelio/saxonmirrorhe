@@ -124,6 +124,11 @@ namespace Saxon.Hej.s9api {
         public void registerCollection(string collectionURI, Saxon.Hej.lib.ResourceCollection collection) {
             config.registerCollection(collectionURI, collection);
         }
+        public void setCatalogFiles(params string[]  fileNames) {
+            if ((config.getResourceResolver() is Saxon.Callbacks.ConfigurableResourceResolver)) {
+                Saxon.Hej.trans.CommandLineOptions.setCatalogFiles(((Saxon.Callbacks.ConfigurableResourceResolver)(config.getResourceResolver())), Saxon.Ejava.util.Arrays.asList(fileNames));
+            }
+        }
         public Saxon.Hej.Configuration getUnderlyingConfiguration() {
             return config;
         }

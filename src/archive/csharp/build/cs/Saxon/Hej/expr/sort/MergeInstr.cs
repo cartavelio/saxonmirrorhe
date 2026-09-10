@@ -302,7 +302,7 @@ namespace Saxon.Hej.expr.sort {
             }
         }
         private Saxon.Hej.expr.LastPositionFinder getLastPositionFinder(Saxon.Hej.expr.XPathContext context) {
-            return new Inner_LastPositionFinder_d930e2581(this, context);
+            return new Inner_LastPositionFinder_134(this, context);
         }
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
             try {
@@ -434,7 +434,7 @@ namespace Saxon.Hej.expr.sort {
             return mergeSources[0].mergeKeyDefinitions.getSortKeyDefinition(0).getSortKey();
         }
         public System.Collections.Generic.Comparer<Saxon.Hej.value.ObjectValue<Saxon.Hej.expr.sort.ItemWithMergeKeys>> getComparer(Saxon.Hej.expr.sort.SortKeyDefinitionList sKeys, Saxon.Hej.expr.sort.AtomicComparer[] comps) {
-            return new Inner_Comparator_d930e4062(sKeys, comps);
+            return new Inner_Comparator_221(sKeys, comps);
         }
         public override Saxon.Hej.expr.Expression copy(Saxon.Hej.expr.parser.RebindingMap rebindings) {
             Saxon.Hej.expr.sort.MergeInstr newMerge = new Saxon.Hej.expr.sort.MergeInstr();
@@ -532,9 +532,9 @@ namespace Saxon.Hej.expr.sort {
         
         }
     
-        private class Inner_LastPositionFinder_d930e2581 : Saxon.Hej.expr.LastPositionFinder {
+        private class Inner_LastPositionFinder_134 : Saxon.Hej.expr.LastPositionFinder {
             private readonly MergeInstr outerInstance;
-            public Inner_LastPositionFinder_d930e2581(MergeInstr outerInstance, Saxon.Hej.expr.XPathContext context) {
+            public Inner_LastPositionFinder_134(MergeInstr outerInstance, Saxon.Hej.expr.XPathContext context) {
                 this.outerInstance = outerInstance;
                 this.context = context;
                 last = -1;
@@ -563,8 +563,8 @@ namespace Saxon.Hej.expr.sort {
             }
         }
 
-        private class Inner_Comparator_d930e4062 : System.Collections.Generic.Comparer<Saxon.Hej.value.ObjectValue<Saxon.Hej.expr.sort.ItemWithMergeKeys>> {
-            public Inner_Comparator_d930e4062(Saxon.Hej.expr.sort.SortKeyDefinitionList sKeys, Saxon.Hej.expr.sort.AtomicComparer[] comps) {
+        private class Inner_Comparator_221 : System.Collections.Generic.Comparer<Saxon.Hej.value.ObjectValue<Saxon.Hej.expr.sort.ItemWithMergeKeys>> {
+            public Inner_Comparator_221(Saxon.Hej.expr.sort.SortKeyDefinitionList sKeys, Saxon.Hej.expr.sort.AtomicComparer[] comps) {
                 this.sKeys = sKeys;
                 this.comps = comps;
             }

@@ -44,7 +44,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                     return null;
                 } else {
                     foundOneNode = true;
-                    receiver = new Saxon.Hej.ma.json.JsonReceiver(getPipelineConfiguration(), getNextOutputter().getStringReceiver(false));
+                    receiver = new Saxon.Hej.ma.json.JsonReceiver(getPipelineConfiguration(), getContext(), getNextOutputter().getStringReceiver(false, locationId));
                     receiver.setIndenting(indenting);
                     receiver.open();
                     return receiver;

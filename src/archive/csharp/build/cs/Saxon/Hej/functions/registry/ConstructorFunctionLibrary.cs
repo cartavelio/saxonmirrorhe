@@ -36,7 +36,7 @@ namespace Saxon.Hej.functions.registry {
                 }
             }
         }
-        public bool isAvailable(Saxon.Hej.trans.SymbolicName.F functionName) {
+        public bool isAvailable(Saxon.Hej.trans.SymbolicName.F functionName, int languageLevel) {
             if ((functionName.getArity() != 1)) {
                 return false;
             }

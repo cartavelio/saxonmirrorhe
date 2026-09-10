@@ -50,7 +50,7 @@ namespace Saxon.Hej.expr {
             Saxon.Hej.om.Item item = context.getContextItem();
             if ((item is Saxon.Hej.tree.tiny.TinyElementImpl)) {
                 string val = ((Saxon.Hej.tree.tiny.TinyElementImpl)(item)).getAttributeValue(attributeName.getFingerprint());
-                return ((val == null) ? null : new Saxon.Hej.value.UntypedAtomicValue(Saxon.Hej.str.StringView.tidy(val)));
+                return ((val == null) ? null : Saxon.Hej.value.StringValue.makeUntypedAtomic(Saxon.Hej.str.StringView.tidy(val)));
             }
             if ((item == null)) {
                 dynamicError((("The context item for @"+attributeName.getDisplayName())+" is absent"), "XPDY0002", context);
@@ -62,7 +62,7 @@ namespace Saxon.Hej.expr {
             Saxon.Hej.om.NodeInfo node = (Saxon.Hej.om.NodeInfo)(item);
             if ((node.getNodeKind() == Saxon.Hej.type.Type.ELEMENT)) {
                 string val = node.getAttributeValue(attributeName.getURI(), attributeName.getLocalPart());
-                return ((val == null) ? null : new Saxon.Hej.value.UntypedAtomicValue(Saxon.Hej.str.StringView.tidy(val)));
+                return ((val == null) ? null : Saxon.Hej.value.StringValue.makeUntypedAtomic(Saxon.Hej.str.StringView.tidy(val)));
             } else {
                 return null;
             }

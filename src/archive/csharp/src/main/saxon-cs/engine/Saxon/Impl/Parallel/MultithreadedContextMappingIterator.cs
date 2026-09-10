@@ -80,6 +80,9 @@ namespace Saxon.Impl.Parallel {
         public void close() {
             //
         }
+        
+        public void discharge() {
+        }
     }
 
 }

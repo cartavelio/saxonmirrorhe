@@ -94,9 +94,13 @@ namespace Saxon.Eej {
                         badUsage("format: -limits:min,max");
                         return 2;
                     }
-                    int min = System.Int32.Parse(value.Substring(0, comma - 0));
-                    int max = System.Int32.Parse(value.Substring((comma+1)));
-                    config.setOccurrenceLimits(min, max);
+                    try {
+                        int min = Saxon.Impl.Helpers.Utils.ParseInt(value.Substring(0, comma - 0));
+                        int max = Saxon.Impl.Helpers.Utils.ParseInt(value.Substring((comma+1)));
+                        config.setOccurrenceLimits(min, max);
+                    } catch (Saxon.Ejava.lang.NumberFormatException e) {
+                        badUsage("format: -limits:min,max where min and max are integers");
+                    }
                 }
                 scmInput = options.getOptionValue("scmin");
                 scmOutput = options.getOptionValue("export");
@@ -150,10 +154,14 @@ namespace Saxon.Eej {
                 foreach (string schemaFileName in schemaFileNames) {
                     Saxon.Ejavax.xml.transform.Source schemaSource;
                     if ((useURLs || Saxon.Hej.trans.CommandLineOptions.isImplicitURI(schemaFileName))) {
-                        schemaSource = config.getURIResolver().resolve(schemaFileName, null);
-                        if ((schemaSource == null)) {
-                            schemaSource = config.getSystemURIResolver().resolve(schemaFileName, null);
-                        }
+                        Saxon.Hej.lib.JJ_ResourceRequest request = new Saxon.Hej.lib.JJ_ResourceRequest();
+                        request.relativeUri = schemaFileName;
+                        System.Uri cwd = new Saxon.Ejava.io.File(Saxon.Ejava.lang.System.getProperty("user.dir")).toURI();
+                        request.baseUri = cwd.ToString();
+                        request.uri = new System.Uri(cwd, schemaFileName).ToString();
+                        request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XSD_NATURE;
+                        request.purpose = "schema validation";
+                        schemaSource = request.resolve(config.getResourceResolver());
                     } else {
                         if (schemaFileName.Equals("-")) {
                             schemaSource = new Saxon.Ejavax.xml.transform.stream.StreamSource(System.Console.In);
@@ -304,14 +312,14 @@ namespace Saxon.Eej {
         public static Saxon.Ejavax.xml.transform.Source loadDocument(string sourceFileName, bool useURLs, Saxon.Hej.Configuration config) {
             Saxon.Ejavax.xml.transform.Source sourceInput;
             if ((useURLs || Saxon.Hej.trans.CommandLineOptions.isImplicitURI(sourceFileName))) {
-                try {
-                    sourceInput = config.getURIResolver().resolve(sourceFileName, null);
-                } catch (Saxon.Ejavax.xml.transform.TransformerException e) {
-                    throw Saxon.Hej.trans.XPathException.makeXPathException(e);
-                }
-                if ((sourceInput == null)) {
-                    sourceInput = config.getSystemURIResolver().resolve(sourceFileName, null);
-                }
+                Saxon.Hej.lib.JJ_ResourceRequest request = new Saxon.Hej.lib.JJ_ResourceRequest();
+                request.relativeUri = sourceFileName;
+                System.Uri cwd = new Saxon.Ejava.io.File(Saxon.Ejava.lang.System.getProperty("user.dir")).toURI();
+                request.baseUri = cwd.ToString();
+                request.uri = new System.Uri(cwd, sourceFileName).ToString();
+                request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XML_NATURE;
+                request.purpose = "source document";
+                sourceInput = request.resolve(config.getResourceResolver());
             } else {
                 if (sourceFileName.Equals("-")) {
                     sourceInput = new Saxon.Ejavax.xml.transform.stream.StreamSource(System.Console.In);

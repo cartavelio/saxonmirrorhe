@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.expr.instruct {
     public class CallTemplate : Saxon.Hej.expr.instruct.Instruction, Saxon.Hej.expr.instruct.ITemplateCall, Saxon.Hej.expr.ComponentInvocation {
-        private Saxon.Hej.expr.instruct.NamedTemplate template = null;
+        private Saxon.Hej.expr.instruct.NamedTemplate template;
         private readonly Saxon.Hej.om.StructuredQName calledTemplateName;
         private Saxon.Hej.expr.instruct.WithParam[] actualParams = Saxon.Hej.expr.instruct.WithParam.EMPTY_ARRAY;
         private Saxon.Hej.expr.instruct.WithParam[] tunnelParams = Saxon.Hej.expr.instruct.WithParam.EMPTY_ARRAY;
-        private bool useTailRecursion = false;
+        private bool useTailRecursion;
         private int bindingSlot = -1;
         private readonly bool isWithinDeclaredStreamableConstruct;
         public CallTemplate(Saxon.Hej.expr.instruct.NamedTemplate template, Saxon.Hej.om.StructuredQName calledTemplateName, bool useTailRecursion, bool inStreamable)  {
@@ -270,10 +270,7 @@ namespace Saxon.Hej.expr.instruct {
             return buff.ToString();
         }
         public override string toShortString() {
-            Saxon.Ejava.lang.StringBuilder buff = new Saxon.Ejava.lang.StringBuilder(64);
-            buff.append("CallTemplate#");
-            buff.append(template.getObjectName().getDisplayName());
-            return buff.ToString();
+            return ("CallTemplate#"+template.getObjectName().getDisplayName());
         }
         public override string getStreamerName() {
             return "CallTemplate";

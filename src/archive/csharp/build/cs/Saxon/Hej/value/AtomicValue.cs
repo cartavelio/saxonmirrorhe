@@ -145,7 +145,7 @@ namespace Saxon.Hej.value {
 
         /* Expanding default method asIterable from interface GroundedValue */
         public virtual System.Collections.Generic.IEnumerable<Saxon.Hej.om.Item> asIterable() {
-            return new Saxon.Hej.om.GroundedValueAsIterable<Saxon.Hej.om.Item>(this);
+            return new Saxon.Hej.om.GroundedValueAsIterable(this);
         }
 
         /* Expanding default method containsNode from interface GroundedValue */
@@ -161,6 +161,11 @@ namespace Saxon.Hej.value {
                 chain.appendSequence(seq);
             }
             return chain;
+        }
+
+        /* Expanding default method makeRepeatable from interface Sequence */
+        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
+            return this;
         }
 
         /* Expanding default method getStringValue from interface Item */
@@ -180,11 +185,6 @@ namespace Saxon.Hej.value {
         /* Expanding default method isStreamed from interface Item */
         public virtual bool isStreamed() {
             return false;
-        }
-
-        /* Expanding default method makeRepeatable from interface Sequence */
-        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
-            return this;
         }
 
     }

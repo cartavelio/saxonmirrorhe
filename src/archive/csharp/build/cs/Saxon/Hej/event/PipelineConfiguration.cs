@@ -4,8 +4,6 @@ using System.Linq;
 namespace Saxon.Hej.@event {
     public class PipelineConfiguration {
         private Saxon.Hej.Configuration config;
-        private Saxon.Ejavax.xml.transform.URIResolver uriResolver;
-        private Saxon.Hej.lib.SchemaURIResolver schemaURIResolver;
         private Saxon.Hej.Controller controller;
         private Saxon.Hej.lib.ParseOptions parseOptions;
         private Saxon.Api.HostLanguage hostLanguage = Saxon.Api.HostLanguage.XSLT;
@@ -18,8 +16,6 @@ namespace Saxon.Hej.@event {
         }
         public PipelineConfiguration(Saxon.Hej.@event.PipelineConfiguration p)  {
             config = p.config;
-            uriResolver = p.uriResolver;
-            schemaURIResolver = p.schemaURIResolver;
             controller = p.controller;
             parseOptions = new Saxon.Hej.lib.ParseOptions(p.parseOptions);
             hostLanguage = p.hostLanguage;
@@ -44,15 +40,6 @@ namespace Saxon.Hej.@event {
         public void setErrorReporter(Saxon.Hej.lib.ErrorReporter errorReporter) {
             parseOptions.setErrorReporter(errorReporter);
         }
-        public Saxon.Ejavax.xml.transform.URIResolver getURIResolver() {
-            return uriResolver;
-        }
-        public void setURIResolver(Saxon.Ejavax.xml.transform.URIResolver uriResolver) {
-            this.uriResolver = uriResolver;
-        }
-        public Saxon.Hej.lib.SchemaURIResolver getSchemaURIResolver() {
-            return schemaURIResolver;
-        }
         public void setParseOptions(Saxon.Hej.lib.ParseOptions options) {
             parseOptions = options;
         }
@@ -67,9 +54,6 @@ namespace Saxon.Hej.@event {
         }
         public bool isRecoverFromValidationErrors() {
             return parseOptions.isContinueAfterValidationErrors();
-        }
-        public void setSchemaURIResolver(Saxon.Hej.lib.SchemaURIResolver resolver) {
-            schemaURIResolver = resolver;
         }
         public Saxon.Hej.Controller getController() {
             return controller;

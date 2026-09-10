@@ -25,9 +25,11 @@ using JStructuredQName = Saxon.Hej.om.StructuredQName;
 using Saxon.Hej;
 using Saxon.Hej.lib;
 using Saxon.Callbacks;
+using Saxon.Eej.ee.stream;
 using Saxon.Impl.Helpers;
 using DocumentBuilder = Saxon.Api.DocumentBuilder;
 using Processor = Saxon.Api.Processor;
+using UriUtils = Org.XmlResolver.Utils.UriUtils;
 using XPathCompiler = Saxon.Api.XPathCompiler;
 using XPathSelector = Saxon.Api.XPathSelector;
 using XQueryCompiler = Saxon.Api.XQueryCompiler;
@@ -40,7 +42,7 @@ namespace TestDriver {
      * This class represents a collection of resources (source documents, schemas, collections etc) used for a number
      * of test cases.
      */
-    public class Environment : XmlUrlResolver {
+    public class Environment {
 
         public Processor processor;
         public SysCollGen.Dictionary<string, XdmNode> sourceDocs = new();
@@ -59,11 +61,11 @@ namespace TestDriver {
         public bool usable = true;
         public StringBuilder paramDeclarations = new StringBuilder(256);
         public StringBuilder paramDecimalDeclarations = new StringBuilder(256);
-        public TextResolver unparsedTextResolver;
+        public Saxon.Api.ResourceResolver unparsedTextResolver;
         public SysCollGen.IList<ResetAction> resetActions = new SysCollGen.List<ResetAction>();
         public bool outputTree = true;
         public bool outputSerialize = false;
-        public String streamedInputValidation = "skip";
+        public string streamedInputValidation = "skip";
         internal bool failedToBuild = false;
 
 
@@ -80,13 +82,14 @@ namespace TestDriver {
             //environment.processor.SetProperty(JFeatureKeys.TRACE_EXTERNAL_FUNCTIONS, "true");
             string version = SpecAttr.VersionOf(spec);
             string xpVersion = version == "3.0" ? "3.1" : version;
-            string xtVersion = version == "3.1" ? "3.0" : version;
+            string xqVersion = (xpVersion == "2.0" || version == "3.0") ? "3.1" : version;
+            string xtVersion = (version == "3.1" || version == "2.0") ? "3.0" : version;
             environment.xpathCompiler = environment.processor.NewXPathCompiler();
             environment.xpathCompiler.BaseUri = baseURI;
             environment.xpathCompiler.XPathLanguageVersion = xpVersion;
             environment.xqueryCompiler = environment.processor.NewXQueryCompiler();
             environment.xqueryCompiler.BaseUri = baseURI;
-            environment.xqueryCompiler.XQueryLanguageVersion = xpVersion;
+            environment.xqueryCompiler.XQueryLanguageVersion = xqVersion;
             environment.xsltCompiler = environment.processor.NewXsltCompiler();
             environment.xsltCompiler.BaseUri = baseURI;
             environment.xsltCompiler.XsltLanguageVersion = xtVersion;
@@ -139,7 +142,7 @@ namespace TestDriver {
             environment.xpathCompiler.XPathLanguageVersion = xpVersion;
             environment.xqueryCompiler = environment.processor.NewXQueryCompiler();
             environment.xqueryCompiler.BaseUri = env.BaseUri;
-            environment.xqueryCompiler.XQueryLanguageVersion = xpVersion;
+            environment.xqueryCompiler.XQueryLanguageVersion = (version == "2.0" ? "3.1" : xpVersion);
             if (driver.RequestedSpec.ToString().Contains("XT")) {
                 environment.xsltCompiler = environment.processor.NewXsltCompiler();
                 environment.xsltCompiler.XsltLanguageVersion = version;
@@ -314,7 +317,7 @@ namespace TestDriver {
                 string defaultAtt = basei.GetAttributeValue("default");
                 if (defaultAtt != null && (defaultAtt.Trim().Equals("true") || defaultAtt.Trim().Equals("1"))) {
                     environment.xpathCompiler.DeclareDefaultCollation(uri);
-                    //environment.xqueryCompiler.DeclareCollation(uri, true);
+                    environment.xqueryCompiler.DefaultCollationName = uri;
                     if (environment.xsltCompiler != null) {
                         environment.xsltCompiler.DefaultCollationName = uri;
                     }
@@ -351,8 +354,8 @@ namespace TestDriver {
             Configuration config = environment.processor.Implementation;
             XmlUrlResolver res = new TracingXmlResolver(env.BaseUri);
             foreach (XdmNode schema in env.Children("schema")) {
-                String role = schema.GetAttributeValue(new QName("role"));
-                String xsdVersion = schema.GetAttributeValue(new QName("xsd-version"));
+                string role = schema.GetAttributeValue(new QName("role"));
+                string xsdVersion = schema.GetAttributeValue(new QName("xsd-version"));
                 if (manager == null || !driver.schemaAware) {
                     driver.println("** Processor is not schema aware **");
                     environment.usable = false;
@@ -364,8 +367,8 @@ namespace TestDriver {
                 }
 
                 if (!"secondary".Equals(role)) {
-                    String href = ((XdmNode) schema).GetAttributeValue(new QName("file"));
-                    String ns = schema.GetAttributeValue("uri");
+                    string href = ((XdmNode) schema).GetAttributeValue(new QName("file"));
+                    string ns = schema.GetAttributeValue("uri");
                     if (href == null) {
                         if (ns == "http://www.w3.org/2005/xpath-functions") {
                             Console.Error.WriteLine("No need to load schema document " + ns);
@@ -373,7 +376,7 @@ namespace TestDriver {
                         else {
                             Uri uri = res.ResolveUri(null, ns);
                             Console.Error.WriteLine("Load schema document " + uri);
-                            Stream file = KnownResourceFinder.fetchSystemId(uri.ToString(), config).stream;
+                            Stream file = null; //KnownResourceFinder.fetchSystemId(uri.ToString(), config).stream;
                             if (file == null) {
                                 file = new FileStream(uri.AbsolutePath, FileMode.Open, FileAccess.Read);
                             }
@@ -418,9 +421,9 @@ namespace TestDriver {
         private static void DeclareExternalVariables(Driver driver, XPathCompiler xpc, XdmItem env,
             Environment environment) {
             foreach (XdmItem param in xpc.Evaluate("param", env)) {
-                String varName = ((XdmNode) param).GetAttributeValue(new QName("name"));
+                string varName = ((XdmNode) param).GetAttributeValue(new QName("name"));
                 XdmValue value;
-                String source = ((XdmNode) param).GetAttributeValue(new QName("source"));
+                string source = ((XdmNode) param).GetAttributeValue(new QName("source"));
                 if (source != null) {
                     XdmNode sourceDoc = null;
                     try {
@@ -436,7 +439,7 @@ namespace TestDriver {
                     value = sourceDoc;
                 }
                 else {
-                    String select = ((XdmNode) param).GetAttributeValue(new QName("select"));
+                    string select = ((XdmNode) param).GetAttributeValue(new QName("select"));
                     value = xpc.Evaluate(select, null);
                 }
 
@@ -452,7 +455,7 @@ namespace TestDriver {
 
 
                 environment.xpathCompiler.DeclareVariable(varQName);
-                String declared = ((XdmNode) param).GetAttributeValue(new QName("declared"));
+                string declared = ((XdmNode) param).GetAttributeValue(new QName("declared"));
                 if (declared != null && "true".Equals(declared) || "1".Equals(declared)) {
                     // no action
                 }
@@ -502,8 +505,8 @@ namespace TestDriver {
 
                 foreach (XdmItem decimalFormatAtt in xpc.Evaluate("@* except @name", formatElement)) {
                     XdmNode formatAttribute = (XdmNode) decimalFormatAtt;
-                    String property = formatAttribute.NodeName.LocalName;
-                    String value = formatAttribute.StringValue;
+                    string property = formatAttribute.NodeName.LocalName;
+                    string value = formatAttribute.StringValue;
                     environment.paramDecimalDeclarations.Append(property + "=\"" + value + "\" ");
                     try {
                         environment.xpathCompiler.SetDecimalFormatProperty(formatQName, property, value);
@@ -519,7 +522,7 @@ namespace TestDriver {
 
         private static void CreateUnparsedTextResolver(Driver driver, XPathCompiler xpc, XdmItem env,
                 Environment environment) {
-            SysCollGen.Dictionary<Uri, Func<TextReader>> resources = new SysCollGen.Dictionary<Uri, Func<TextReader>>();
+            SysCollGen.Dictionary<Uri, Func<TextResource>> resources = new SysCollGen.Dictionary<Uri, Func<TextResource>>();
             SysCollGen.Dictionary<Uri, Encoding> encodings = new SysCollGen.Dictionary<Uri, Encoding>();
             XmlUrlResolver res = new XmlUrlResolver();
             
@@ -551,7 +554,7 @@ namespace TestDriver {
                             byte[] content = wc.DownloadData(href);
                             string str = enc1.GetString(content);
                             //string str = wc.DownloadString(href);
-                            return new StringReader(str);
+                            return new TextResource(str, nominalUri);
                         });
                     }
                     else {
@@ -575,7 +578,7 @@ namespace TestDriver {
                                 if (str.Length > 0 && str[0] == 0xfffe) {
                                     str = str.Substring(1);
                                 }
-                                return new StringReader(str);
+                                return new TextResource(str, nominalUri);
                             }
                             catch (System.Text.DecoderFallbackException e) {
                                 throw new JXpathException(e.Message, "FOUT1190");
@@ -604,17 +607,17 @@ namespace TestDriver {
 
             if (resources.Count != 0) {
                 environment.unparsedTextResolver =
-                    new TestUnparsedTextURIResolver(encodings, resources, environment.processor.Implementation).resolve;
+                    new TestUnparsedTextURIResolver(encodings, resources, environment.processor.Implementation).Resolve;
             }
         }
 
         public class TestUnparsedTextURIResolver {
             SysCollGen.Dictionary<Uri, Encoding> encodings;
-            SysCollGen.Dictionary<Uri, Func<TextReader>> resources;
+            SysCollGen.Dictionary<Uri, Func<TextResource>> resources;
             private Configuration config;
 
             public TestUnparsedTextURIResolver(SysCollGen.Dictionary<Uri, Encoding> encodings,
-                SysCollGen.Dictionary<Uri, Func<TextReader>> resources,
+                SysCollGen.Dictionary<Uri, Func<TextResource>> resources,
                 Configuration config) {
                 this.encodings = encodings;
                 this.resources = resources;
@@ -622,7 +625,9 @@ namespace TestDriver {
             }
 
 
-            public TextReader resolve(Uri absoluteURI, Encoding encoding) {
+            public TextResource Resolve(Saxon.Api.ResourceRequest request) {
+                Uri absoluteURI = request.Uri;
+                Encoding encoding = request.Encoding;
                 if (resources.ContainsKey(absoluteURI)) {
                     if (encoding == null) {
                         encodings.TryGetValue(new Uri(absoluteURI.ToString()), out encoding);
@@ -646,7 +651,10 @@ namespace TestDriver {
                     if (encoding == null) {
                         encoding = Encoding.UTF8;
                     }
-                    return new StandardUnparsedTextResolver().resolve(absoluteURI, encoding.WebName, config);
+
+                    return null;
+                    // TextReader reader = new StandardUnparsedTextResolver(config).resolve(absoluteURI, encoding.WebName, config);
+                    // return new TextResource(reader, absoluteURI);
                 }
 
             }
@@ -756,7 +764,7 @@ namespace TestDriver {
 
             public Uri ResourceUri { get; }
 
-            public XdmItem GetXdmItem(DynamicContext context) {
+            public XdmItem GetXdmItem() {
                 return value;
             }
 
@@ -766,13 +774,12 @@ namespace TestDriver {
         }
 
 
-        // Environment implements XmlResolver (though it relies on the caller accepting a Source object
-        // as the return value, which is somewhat unorthodox...)
-        
-        public override object GetEntity(Uri href, string role, Type ofObjectToReturn) {
+        // Support URI resolution for XML documents
+
+        private IResource GetDocument(Uri uri) {
             XdmNode node = null;
-            string hrefStr = href.ToString();
-            bool foundDoc = sourceDocs.TryGetValue(hrefStr, out node);
+            string hrefStr = uri.ToString();
+            bool foundDoc = this.sourceDocs.TryGetValue(hrefStr, out node);
 
             if (!foundDoc) {
                 hrefStr = hrefStr.Substring(hrefStr.LastIndexOf('/') + 1);
@@ -781,7 +788,7 @@ namespace TestDriver {
 
             if (!foundDoc) {
                 string val;
-                hrefStr = href.ToString();
+                hrefStr = uri.ToString();
                 //hrefStr = hrefStr.Substring(hrefStr.LastIndexOf ('/')+1);
 
                 bool foundSecDoc = streamedSecondaryDocs.TryGetValue(hrefStr, out val);
@@ -792,54 +799,68 @@ namespace TestDriver {
 
                 if (foundSecDoc) {
                     //string hrefStr = href.ToString ();
-                    string hrefStri = (href.IsFile ? href.LocalPath : hrefStr);
+                    string hrefStri = (uri.IsFile ? uri.LocalPath : hrefStr);
                     Stream stream = new FileStream(hrefStri, FileMode.Open);
                     resetActions.Add(env => stream.Close());
-                    Saxon.Ejavax.xml.transform.Source sourcei = new Saxon.Ejavax.xml.transform.stream.StreamSource(stream);
-
-
-                    if (!val.Equals("skip")) {
-                        sourcei = Saxon.Hej.lib.AugmentedSource.makeAugmentedSource(sourcei);
-                        ((Saxon.Hej.lib.AugmentedSource) sourcei).setSchemaValidationMode(
-                            Saxon.Hej.lib.Validation.getCode(val));
+                    
+                    XmlReader parser = XmlReader.Create(stream, new XmlReaderSettings(), hrefStr);
+                    DocumentBuilder builder = processor.NewDocumentBuilder();
+                    if (val != "skip") {
+                        builder.SchemaValidator = processor.SchemaManager.NewSchemaValidator();
                     }
-
-                    sourcei.setSystemId(hrefStr);
-                    return sourcei;
+                    
+                    return new XmlReaderResource(builder, parser);
                 }
                 else {
-                    // Some tests, notably catalog tests, don't declare the documents they use
-                    return new XmlUrlResolver().GetEntity(href, role, ofObjectToReturn);
+                    // Some tests, notably test-catalog tests, don't declare the documents they use
+                    try {
+                        Stream stream = UriUtils.GetStream(uri);
+                        return new TextResource(stream, uri);
+                    }
+                    catch (FileNotFoundException) {
+                        return null;
+                    }
+                    catch (DirectoryNotFoundException) {
+                        return null;
+                    }
                 }
             }
             else {
-                return node.Implementation.asActiveSource();
+                return new NodeResource(node);
             }
         }
-
-        public override Uri ResolveUri(Uri basei, string href) {
-            return base.ResolveUri(basei, href);
+        
+        public Saxon.Api.ResourceResolver GetXmlDocumentResolver() {
+            return (request) => GetDocument(request.Uri);
         }
+
+        // public override Uri ResolveUri(Uri basei, string href) {
+        //     return base.ResolveUri(basei, href);
+        // }
 
         private static void LoadSourceDocuments(Driver driver, XPathCompiler xpc, XdmItem env,
             Environment environment, DocumentBuilder builder, SchemaManager manager, bool validateSources) {
             XmlUrlResolver res = new XmlUrlResolver();
+            
             foreach (XdmItem source in xpc.Evaluate("source", env)) {
                 XdmNode doc = null;
 
-                String uri = ((XdmNode) source).GetAttributeValue(new QName("uri"));
-                String mime = ((XdmNode) source).GetAttributeValue(new QName("media-type"));
-                
+                string uri = ((XdmNode)source).GetAttributeValue(new QName("uri"));
+                string mime = ((XdmNode)source).GetAttributeValue(new QName("media-type"));
+
                 if (mime != null && "application/xml".Equals(mime)) {
                     continue;
                 }
-
-                String validation = ((XdmNode) source).GetAttributeValue(new QName("", "validation"));
+                bool mutable = isTrue("mutable")(source);
+                if (mutable) {
+                    builder.TreeModel = TreeModel.LinkedTree;
+                }
+                string validation = ((XdmNode)source).GetAttributeValue(new QName("", "validation"));
                 if (validation == null) {
                     validation = "skip";
                 }
 
-                String streaming = ((XdmNode) source).GetAttributeValue(new QName("", "streaming"));
+                string streaming = ((XdmNode)source).GetAttributeValue(new QName("", "streaming"));
                 if (!validateSources && validation.Equals("skip")) {
                     builder.SchemaValidationMode = SchemaValidationMode.None;
                     builder.SchemaValidator = null;
@@ -863,29 +884,29 @@ namespace TestDriver {
                     }
                 }
 
-                String role = ((XdmNode) source).GetAttributeValue(new QName("role"));
-                String href = ((XdmNode) source).GetAttributeValue(new QName("file"));
-                
+                string role = ((XdmNode)source).GetAttributeValue(new QName("role"));
+                string href = ((XdmNode)source).GetAttributeValue(new QName("file"));
+
                 Console.Error.WriteLine("Load source document " + href);
-                
+
                 if ("true".Equals(streaming)) {
                     if (".".Equals(role)) {
                         if (href == null) {
                             environment.streamedContent = xpc.Evaluate("string(content)", source).ToString();
                         }
                         else {
-                            environment.streamedPath = res.ResolveUri(((XdmNode) env).BaseUri, href).AbsolutePath;
+                            environment.streamedPath = res.ResolveUri(((XdmNode)env).BaseUri, href).AbsolutePath;
                         }
 
                         environment.streamedInputValidation = validation;
                     }
                     else {
                         try {
-                            System.Console.WriteLine(res.ResolveUri(((XdmNode) env).BaseUri, href).AbsolutePath);
-                            System.Console.WriteLine(res.ResolveUri(((XdmNode) env).BaseUri, href).AbsoluteUri);
-                            System.Console.WriteLine(res.ResolveUri(((XdmNode) env).BaseUri, href).ToString());
+                            System.Console.WriteLine(res.ResolveUri(((XdmNode)env).BaseUri, href).AbsolutePath);
+                            System.Console.WriteLine(res.ResolveUri(((XdmNode)env).BaseUri, href).AbsoluteUri);
+                            System.Console.WriteLine(res.ResolveUri(((XdmNode)env).BaseUri, href).ToString());
                             environment.streamedSecondaryDocs.Add(
-                                res.ResolveUri(((XdmNode) env).BaseUri, href).AbsoluteUri, validation);
+                                res.ResolveUri(((XdmNode)env).BaseUri, href).AbsoluteUri, validation);
                         }
                         catch (Exception) {
                         }
@@ -894,10 +915,10 @@ namespace TestDriver {
                 else {
                     if (href != null) {
                         try {
-                            Uri fileLoc = res.ResolveUri(((XdmNode) env).BaseUri, href);
+                            Uri fileLoc = res.ResolveUri(((XdmNode)env).BaseUri, href);
                             FileStream file = null;
                             if (fileLoc.Scheme.Equals("file")) {
-                                file = new FileStream(res.ResolveUri(((XdmNode) env).BaseUri, href).AbsolutePath,
+                                file = new FileStream(res.ResolveUri(((XdmNode)env).BaseUri, href).AbsolutePath,
                                     FileMode.Open, FileAccess.Read);
                                 if (uri == null) {
                                     uri = fileLoc.AbsoluteUri;
@@ -908,14 +929,16 @@ namespace TestDriver {
                                 ? new FileStream(fileLoc.ToString(), FileMode.Open, FileAccess.Read)
                                 : file);
 
-                            Uri absUri = builder.BaseUri = new Uri(res.ResolveUri(((XdmNode) env).BaseUri, uri).AbsoluteUri);
+                            Uri absUri = builder.BaseUri =
+                                new Uri(res.ResolveUri(((XdmNode)env).BaseUri, uri).AbsoluteUri);
                             try {
                                 doc = builder.Build(ss);
                                 environment.sourceDocs.Add(absUri.OriginalString, doc);
                             }
                             catch (Exception e) {
                                 Console.Error.WriteLine(e);
-                                driver.println("*** failed to build source document " + href + ", Exception:" + e.Message);
+                                driver.println("*** failed to build source document " + href + ", Exception:" +
+                                               e.Message);
                             }
                         }
                         catch (Exception e) {
@@ -926,23 +949,24 @@ namespace TestDriver {
                     else {
                         // content is inline in the catalog
                         if (uri == null) {
-                            uri = ((XdmNode) env).BaseUri.AbsolutePath;
+                            uri = ((XdmNode)env).BaseUri.AbsolutePath;
                         }
 
                         string content = xpc.Evaluate("string(content)", source).ToString();
-                        Uri absUri = builder.BaseUri = new Uri(res.ResolveUri(((XdmNode) env).BaseUri, uri).AbsoluteUri);
+                        Uri absUri = builder.BaseUri = new Uri(res.ResolveUri(((XdmNode)env).BaseUri, uri).AbsoluteUri);
                         try {
                             doc = builder.Build(new StringReader(content));
                             environment.sourceDocs.Add(absUri.OriginalString, doc);
-                        } catch (Exception e) {
+                        }
+                        catch (Exception e) {
                             driver.println("*** failed to parse inline source document, Exception:" + e.Message);
                             continue;
                         }
-                        
+
                     }
 
                     XdmItem selectedItem = doc;
-                    String select = ((XdmNode) source).GetAttributeValue(new QName("select"));
+                    string select = ((XdmNode)source).GetAttributeValue(new QName("select"));
                     if (select != null) {
                         XPathSelector selector = environment.xpathCompiler.Compile(select).Load();
                         selector.ContextItem = selectedItem;
@@ -955,34 +979,40 @@ namespace TestDriver {
                             environment.contextItem = selectedItem;
                         }
                         else if (role.StartsWith("$")) {
-                            String varName = role.Substring(1);
+                            string varName = role.Substring(1);
                             environment.params1.Add(new QName(varName), selectedItem);
                             environment.xpathCompiler.DeclareVariable(new QName(varName));
-                            environment.paramDeclarations.Append("declare variable $" + varName + " external; ");
+                            if (!isTrue("declared")(source)) {
+                                environment.paramDeclarations.Append("declare variable $" + varName + " external; ");
+                            }
                         }
                     }
-                }
 
-                String definesStylesheet = ((XdmNode) source).GetAttributeValue(new QName("defines-stylesheet"));
-                if (definesStylesheet != null) {
-                    definesStylesheet = definesStylesheet.Trim();
-                }
-
-                if ("true".Equals(definesStylesheet) || "1".Equals(definesStylesheet)) {
-                    // try using an embedded stylesheet from the source document
-                    try {
-                        environment.xsltExecutable =
-                            environment.xsltCompiler.CompileAssociatedStylesheet(((XdmNode) environment.contextItem));
+                    string definesStylesheet = ((XdmNode)source).GetAttributeValue(new QName("defines-stylesheet"));
+                    if (definesStylesheet != null) {
+                        definesStylesheet = definesStylesheet.Trim();
                     }
-                    catch (Exception e) {
-                        driver.println("*** failed to compile stylesheet referenced in source document " + href);
-                        Console.Error.Write(e.StackTrace);
+
+                    if ("true".Equals(definesStylesheet) || "1".Equals(definesStylesheet)) {
+                        // try using an embedded stylesheet from the source document
+                        try {
+                            environment.xsltExecutable =
+                                environment.xsltCompiler.CompileAssociatedStylesheet(
+                                    ((XdmNode)environment.contextItem));
+                        }
+                        catch (Exception e) {
+                            driver.println("*** failed to compile stylesheet referenced in source document " + href);
+                            Console.Error.Write(e.StackTrace);
+                        }
                     }
                 }
             }
         }
-        
-        
+
+
+
+
+
         public delegate void ResetAction(Environment env);
 
         public class XdmNodeResource : IResource {
@@ -995,11 +1025,33 @@ namespace TestDriver {
 
             public Uri ResourceUri { get; }
 
-            public XdmItem GetXdmItem(DynamicContext context) {
+            public XdmItem GetXdmItem() {
                 return node;
             }
 
             public string ContentType => "application/xml";
+        }
+        
+        /**
+             * Construct a predicate that tests whether a specified attribute of the supplied
+             * element has the value "true", "yes", or "1" after whitespace trimming
+             * @param attName the name of the attribute
+             * @return a function which, when applied to an XDM item, returns true if the item is
+             * an element that has an attribute with the given name, and whose whitespace-normalized
+             * value is "true", "yes", or "1".
+             */
+        public static Predicate<XdmItem> isTrue(string attName) {
+            return element => {
+                if (element is XdmNode) {
+                    string attVal = ((XdmNode)element).GetAttributeValue(attName);
+                    if (attVal != null) {
+                        attVal = attVal.Trim();
+                        return "yes".Equals(attVal) || "1".Equals(attVal) || "true".Equals(attVal);
+                    }
+                }
+
+                return false;
+            };
         }
     }
 }

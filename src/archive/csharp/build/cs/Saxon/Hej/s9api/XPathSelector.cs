@@ -44,11 +44,21 @@ namespace Saxon.Hej.s9api {
                 throw new Saxon.Api.SaxonApiException(e);
             }
         }
+        public void setResourceResolver(Saxon.Hej.lib.JJ_ResourceResolver resolver) {
+            dynamicContext.setResourceResolver(resolver);
+        }
+        public Saxon.Hej.lib.JJ_ResourceResolver getResourceResolver() {
+            return dynamicContext.getResourceResolver();
+        }
         public void setURIResolver(Saxon.Ejavax.xml.transform.URIResolver resolver) {
-            dynamicContext.setURIResolver(resolver);
+            dynamicContext.setResourceResolver(new Saxon.Hej.lib.ResourceResolverWrappingURIResolver(resolver));
         }
         public Saxon.Ejavax.xml.transform.URIResolver getURIResolver() {
-            return dynamicContext.getURIResolver();
+            if ((dynamicContext.getResourceResolver() is Saxon.Hej.lib.ResourceResolverWrappingURIResolver)) {
+                return ((Saxon.Hej.lib.ResourceResolverWrappingURIResolver)(dynamicContext.getResourceResolver())).getWrappedURIResolver();
+            } else {
+                return null;
+            }
         }
         public void setUnparsedTextResolver(Saxon.Hej.lib.UnparsedTextURIResolver resolver) {
             dynamicContext.setUnparsedTextURIResolver(resolver);
