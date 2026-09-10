@@ -446,9 +446,11 @@ History
     </xsl:template>
     
     <xsl:template match="d:type" mode="typeparam">
-        <bounds>
-            <limit fulltype="{@fullname}" type="{@name}"/>
-        </bounds>
+        <xsl:if test="@fullname ne 'java.lang.Object'">
+            <bounds>
+                <limit fulltype="{@fullname}" type="{@name}"/>
+            </bounds>
+        </xsl:if>
     </xsl:template>
     
     <xsl:template match="d:purpose">
