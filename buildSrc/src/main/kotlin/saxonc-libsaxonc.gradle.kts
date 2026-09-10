@@ -127,7 +127,7 @@ private fun setupConfigTasks(config: String, stagingPath: Provider<Directory>, c
         inputs.files(layout.projectDirectory.dir("../samples/cppTests"))
         inputs.files(layout.projectDirectory.dir("../samples/cTests"))
         outputs.dir(cmakeBuildDir.map { it.dir(config) })
-        
+
         workingDir = layout.projectDirectory.asFile
         executable = "cmake"
         args("--build", cmakeBuildDir.get().asFile.toString(), "--config", config)
