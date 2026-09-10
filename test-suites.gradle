@@ -1,100 +1,410 @@
 // ============================================================
-// Run the whole shebang!
-task testSuitesJava(
-  dependsOn: ["hejTestSuitesJava", "pejTestSuitesJava", "eejTestSuitesJava"]
-) {
-  // Just somewhere to hang dependencies
-}
+// This build file configures and runs the test drivers.
+// It's entirely table driven.
 
-task hejTestSuitesJava() {
-  // Just somewhere to hang dependencies
-}
+testSuite.configure([
+  // This maps options to command line arguments to the test driver.
+  // If the value ends with a colon, the map value will be passed
+  // with the option, otherwise it's just a flag. Use "on" as the
+  // value for flags in the map.
+  "optionMap": ["bytecode": "-bytecode:",
+                "unfolded": "-unfolded",
+                "export": "-export",
+                "jit": "-jit",
+                "summarizeresults": "-summarizeresults:"
+  ],
 
-task pejTestSuitesJava() {
-  // Just somewhere to hang dependencies
-}
+  // This maps test suites to the directories that contain the tests.
+  "directoryMap": ["qt3": testsuites.w3cQT3TestSuiteDir,
+                   "qt3extra": "${projectDir}/src/test/extra/qt3",
+                   "qt4": testsuites.w3cQT4TestSuiteDir,
+                   "xslt30": testsuites.w3cXslt30TestSuiteDir,
+                   "xslt30extra": "${projectDir}/src/test/extra/xslt30",
+                   "xsd": testsuites.w3cXsdTestSuiteDir
+  ]
+])
 
-task eejTestSuitesJava() {
-  // Just somewhere to hang dependencies
-}
-
-task eejTestSuitesDotnet() {
-  // Just somewhere to hang dependencies
-}
-
-// This task will generate the test suite report from
-// whatever results are lying around
-task testSuiteReportsJava(
-  type: JavaExec
-) {
-  def rundate = project.findProperty('rundate')
-
-  inputs.files fileTree(dir: "${buildDir}/test-results")
-  inputs.file "${projectDir}/tools/test-suites/report.xsl"
-  outputs.file "${buildDir}/report.xml"
-  outputs.file "${buildDir}/report.html"
-  classpath = configurations.preprocessor
-  workingDir = buildDir
-  main = "net.sf.saxon.Transform"
-
-  def arglist = ["-it:main",
-                 "-xsl:${projectDir}/tools/test-suites/report.xsl",
-                 "-ns:##any"]
-
-  if (rundate != null) {
-    arglist += ["rundate=${rundate}"]
-  }
-
-  args arglist
-}
-
-// This task *runs all the tests* and then generates the
-// test suite report from the results
-task runTestSuiteReportsJava(
-  type: JavaExec,
-  dependsOn: ["testSuitesJava"]
-) {
-  def rundate = project.findProperty('rundate')
-
-  inputs.files fileTree(dir: "${buildDir}/test-results")
-  inputs.file "${projectDir}/tools/test-suites/report.xsl"
-  outputs.file "${buildDir}/report.xml"
-  outputs.file "${buildDir}/report.html"
-  classpath = configurations.preprocessor
-  workingDir = buildDir
-  main = "net.sf.saxon.Transform"
-
-  def arglist = ["-it:main",
-                 "-xsl:${projectDir}/tools/test-suites/report.xsl",
-                 "-ns:##any"]
-
-  if (rundate != null) {
-    arglist += ["rundate=${rundate}"]
-  }
-
-  args arglist
-}
-
-// ============================================================
-
-def langCodeMap = ["XP20": "XPath2.0",
-                   "XP30": "XPath3.0",
-                   "XP31": "XPath3.1",
-                   "XT30": "XSLT3.0",
-                   "XT40": "XSLT4.0",
-                   "XP31": "XPath3.1",
-                   "XQ20": "XQuery2.0",
-                   "XQ30": "XQuery3.0",
-                   "XQ31": "XQuery3.1"]
-
-// N.B. These tasks cannot be run in parallel because the
-// test suite drivers write to filenames that are not distinct
-// based on the options used to run them (e.g, whether or not
-// the bytecode option is enabled doesn't change the output
-// filename).
+// From the perspective of the test suites, we have three products:
+// hej, pej, and eej. We obviously have .NET and C products as well,
+// but we haven't configured the build scripts to run test suites
+// for those products yet.
 //
+// We have six test suites: qt3, qt3extra, qt4, xslt30, xslt30extra,
+// and xsd.
+//
+// Each test suite supports a number of languages, XPxx, XQxx, etc.
+//
+// And finally, additional options can be passed.
+//
+// The combination of [product][suite][language][options] is used
+// to create a unique task name and also to create the name of the
+// test result output file stored in build/test-results/...
+//
+// Option names that begin with an underscore are considered global
+// to all the actual matrices under them. So, for example, all of the
+// qt3 tests under hej use the "net.sf.saxon.testdriver.QT3TestDriverHE"
+// class.
+//
+def testSuiteMatrix = [
+  "hej": [
+    "qt3": [
+      "_class": "net.sf.saxon.testdriver.QT3TestDriverHE",
+      "_exceptions": "${projectDir}/src/test/exceptions/qt3.xml",
+      "_depends": ["cloneQT3TestSuite"],
+      
+      "XP31": [
+        "": [:]
+      ],
+      "XQ30": [
+        "": [:]
+      ],
+      "XQ31": [
+        "": [:]
+      ]
+    ],
+    "qt4": [
+      "_class": "net.sf.saxon.testdriver.QT3TestDriverHE",
+      "_exceptions": "${projectDir}/src/test/exceptions/qt4.xml",
+      "_depends": ["cloneQT4TestSuite"],
+
+      "XP31": [
+        "": [:]
+      ],
+      "XQ30": [
+        "": [:]
+      ],
+      "XQ31": [
+        "": [:]
+      ]
+    ],
+    "xslt30": [
+      "_class": "net.sf.saxon.testdriver.Xslt30TestSuiteDriverHE",
+      "_exceptions": "${projectDir}/src/test/exceptions/xslt30.xml",
+      "_depends": ["cloneXslt30TestSuite"],
+
+      "XT30": [
+        "": [:]
+      ]
+    ]
+  ],
+  "pej": [
+    "qt3": [
+      "_class": "com.saxonica.testdriver.QT3TestDriverPE",
+      "_exceptions": "${projectDir}/src/test/exceptions/qt3.xml",
+      "_depends": ["cloneQT3TestSuite"],
+
+      "XP31": [
+        "": [:]
+      ],
+      "XQ30": [
+        "": [:]
+      ],
+      "XQ31": [
+        "": [:]
+      ]
+    ],
+    "qt3extra": [
+      "_class": "com.saxonica.testdriver.QT3TestDriverPE",
+      "_exceptions": "${projectDir}/src/test/exceptions/qt3extra.xml",
+
+      "XP31": [
+        "": [:]
+      ],
+      "XQ30": [
+        "": [:]
+      ],
+      "XQ31": [
+        "": [:]
+      ]
+    ],
+    "qt4": [
+      "_class": "com.saxonica.testdriver.QT3TestDriverPE",
+      "_exceptions": "${projectDir}/src/test/exceptions/qt4.xml",
+      "_depends": ["cloneQT4TestSuite"],
+
+      "XP31": [
+        "": [:]
+      ],
+      "XQ30": [
+        "": [:]
+      ],
+      "XQ31": [
+        "": [:]
+      ]
+    ],
+    "xslt30": [
+      "_class": "com.saxonica.testdriver.Xslt30TestSuiteDriverPE",
+      "_exceptions": "${projectDir}/src/test/exceptions/xslt30.xml",
+      "_depends": ["cloneXslt30TestSuite"],
+
+      "XT30": [
+        "": [:]
+      ]
+    ]
+  ],
+  "eej": [
+    "qt3": [
+      "_class": "com.saxonica.testdriver.QT3TestDriverEE",
+      "_exceptions": "${projectDir}/src/test/exceptions/qt3.xml",
+      "_depends": ["cloneQT3TestSuite"],
+
+      "XP30": [
+        "": [:],
+        "bc": ["bytecode": "on"]
+      ],
+      "XP31": [
+        "": [:],
+        "bc": ["bytecode": "on"]
+      ],
+      "XQ10": [
+        "": [:],
+        "bc": ["bytecode": "on"]
+      ],
+      "XQ30": [
+        "": [:],
+        "bc": ["bytecode": "on"],
+        "unfold": ["unfolded": "on"],
+      ],
+      "XQ31": [
+        "": [:],
+        "bc": ["bytecode": "on"],
+        "unfold": ["unfolded": "on"],
+      ]
+    ],
+    "qt3extra": [
+      "_class": "com.saxonica.testdriver.QT3TestDriverEE",
+      "_exceptions": "${projectDir}/src/test/exceptions/qt3extra.xml",
+
+      "XP30": [
+        "": [:],
+        "bc": ["bytecode": "on"]
+      ],
+      "XP31": [
+        "": [:],
+        "bc": ["bytecode": "on"]
+      ],
+      "XQ10": [
+        "": [:],
+        "bc": ["bytecode": "on"]
+      ],
+      "XQ30": [
+        "": [:],
+        "bc": ["bytecode": "on"]
+      ],
+      "XQ31": [
+        "": [:],
+        "bc": ["bytecode": "on"],
+      ]
+    ],
+    "qt4": [
+      "_class": "com.saxonica.testdriver.QT3TestDriverEE",
+      "_exceptions": "${projectDir}/src/test/exceptions/qt4.xml",
+      "_depends": ["cloneQT4TestSuite"],
+
+      "XP30": [
+        "": [:],
+        "bc": ["bytecode": "on"]
+      ],
+      "XP31": [
+        "": [:],
+        "bc": ["bytecode": "on"]
+      ],
+      "XQ10": [
+        "": [:],
+        "bc": ["bytecode": "on"]
+      ],
+      "XQ30": [
+        "": [:],
+        "bc": ["bytecode": "on"],
+        "unfold": ["unfolded": "on"],
+      ],
+      "XQ31": [
+        "": [:],
+        "bc": ["bytecode": "on"],
+        "unfold": ["unfolded": "on"],
+      ]
+    ],
+    "xslt30": [
+      "_class": "com.saxonica.testdriver.Xslt30TestSuiteDriverEE",
+      "_exceptions": "${projectDir}/src/test/exceptions/xslt30.xml",
+      "_depends": ["cloneXslt30TestSuite"],
+
+      "XT30": [
+        "": [:],
+        "ex": ["export": "on"],
+        "bc": ["bytecode": "on"],
+        "bc_jit": ["bytecode": "on", "jit": "on"],
+        "bc_ex": ["bytecode": "on", "export": "on"],
+        "bc_ex_jit": ["bytecode": "on", "export": "on", "jit": "on"],
+      ]
+    ],
+    "xslt30extra": [
+      "_class": "com.saxonica.testdriver.Xslt30TestSuiteDriverEE",
+      "_exceptions": "${projectDir}/src/test/exceptions/xslt30extra.xml",
+
+      "XT30": [
+        "": [:],
+        "ex": ["export": "on"],
+        "bc": ["bytecode": "on"],
+        "bc_jit": ["bytecode": "on", "jit": "on"],
+        "bc_ex": ["bytecode": "on", "export": "on"],
+        "bc_ex_jit": ["bytecode": "on", "export": "on", "jit": "on"],
+      ]
+    ],
+    "xsd": [
+      "_class": "com.saxonica.testdriver.ee.SchemaTestSuiteDriver",
+      "_depends": ["cloneXsdTestSuite"],
+      "_summerizeresults": "${projectDir}/src/test/extra/tools/summarize-results.xsl",
+
+      "XSD10": [
+        "_exceptions": "${projectDir}/src/test/exceptions/xsd.xml",
+        "": [:],
+        "bc": ["bytecode": "on"]
+      ],
+      "XSD11": [
+        "_exceptions": "${projectDir}/src/test/exceptions/xsd11.xml",
+        "": [:],
+        "bc": ["bytecode": "on"]
+      ]
+    ]
+  ],
+  "eedotnet": [
+    "qt3": [
+      "_exceptions": "${projectDir}/src/test/exceptions/qt3cs.xml",
+      "_depends": ["cloneQT3TestSuite"],
+
+      "XP31": [
+        "": [:],
+        "unfolded": ["unfolded": "on"]
+      ],
+      "XQ30": [
+        "": [:],
+        "unfolded": ["unfolded": "on"]
+      ],
+      "XQ31": [
+        "": [:],
+        "unfolded": ["unfolded": "on"]
+      ],
+      "XP30": [
+        "": [:],
+        "unfolded": ["unfolded": "on"]
+      ],
+      "XP31": [
+        "": [:],
+        "unfolded": ["unfolded": "on"]
+      ],
+      "XQ31": [
+        "": [:],
+        "unfolded": ["unfolded": "on"]
+      ]
+    ],
+    "qt3extra": [
+      "_exceptions": "${projectDir}/src/test/exceptions/qt3extra-cs.xml",
+
+      "XP30": [
+        "": [:],
+        "bc": ["bytecode": "on"]
+      ],
+      "XP31": [
+        "": [:],
+        "bc": ["bytecode": "on"]
+      ],
+      "XQ31": [
+        "": [:]
+      ],
+      "XQ40": [
+        "": [:]
+      ]
+    ],
+    "xslt30": [
+      "_exceptions": "${projectDir}/src/test/exceptions/xslt30.xml",
+      "_depends": ["cloneXslt30TestSuite"],
+
+      "XT30": [
+        "": [:]
+      ]
+    ],
+    "xslt30extra": [
+      "_exceptions": "${projectDir}/src/test/exceptions/xslt30extra-cs.xml",
+
+      "XT30": [
+        "": [:],
+      ]
+    ]
+  ]
+]
+
 // ============================================================
-// Tasks to build the test drivers and setup the test suite results directories
+
+def g0opt = [:]
+testSuiteMatrix.keySet().findAll { it.startsWith("_") }.each { prop ->
+  g0opt[prop.substring(1)] = testSuiteMatrix[prop]
+}  
+
+project.task("all_test_suites") {
+  description "Runs all the test suites"
+  doLast {
+    testSuite.checkAccumulatedFailures()
+  }
+}
+
+testSuiteMatrix.keySet().findAll { !it.startsWith("_") }.each { product ->
+  def suites = testSuiteMatrix[product]
+  def g1opt = ["product": product]
+  suites.keySet().findAll { it.startsWith("_") }.each { prop ->
+    g1opt[prop.substring(1)] = suites[prop]
+  }  
+
+  project.task("all_${product}_test_suites") {
+    description "Runs all the test suites for ${product}"
+    doLast {
+      testSuite.checkAccumulatedFailures()
+    }
+  }
+
+  suites.keySet().findAll { !it.startsWith("_") }.each { suite ->
+    def languages = suites[suite]
+    def g2opt = ["suite": suite]
+    languages.keySet().findAll { it.startsWith("_") }.each { prop ->
+      g2opt[prop.substring(1)] = languages[prop]
+    }  
+
+    project.task("all_${product}_${suite}_test_suites") {
+      description "Runs all the ${suite} test suites for ${product}"
+      doLast {
+        testSuite.checkAccumulatedFailures()
+      }
+    }
+
+    languages.keySet().findAll { !it.startsWith("_") }.each { lang ->
+      def options = languages[lang]
+      def g3opt = ["language": lang]
+      options.keySet().findAll { it.startsWith("_") }.each { prop ->
+        g3opt[prop.substring(1)] = options[prop]
+      }
+
+      options.keySet().findAll { !it.startsWith("_") }.each { optname ->
+        def name = "${product}_${suite}_${lang}"
+        if (optname != "") {
+          name += "_${optname}"
+        }
+        def config = ["name": name,
+                      "language": lang]
+        config += options[optname] + g0opt + g1opt + g2opt + g3opt
+        if (product.contains("dotnet")) {
+          config["platform"] = "dotnet"
+          config["dotnet"] = dotnetex
+        } else {
+          config["platform"] = "java"
+        }
+
+        testSuite.task(config)
+      }
+    }
+  }
+}
+
+// ============================================================
 
 ["he", "pe", "ee"].each { release ->
   def RELEASE = release.toUpperCase()
@@ -145,285 +455,3 @@ def langCodeMap = ["XP20": "XPath2.0",
     destinationDirectory = new File("${buildDir}/testdriver_classes/${release}j")
   }
 }
-
-// ============================================================
-// Tasks to run QT3 test driver with a variety of options
-
-task qt3TestsJava() {
-  // Just somewhere to hang dependencies
-}
-
-task qt3TestsDotnet() {
-  // Just somewhere to hang dependencies
-}
-
-["he", "pe", "ee"].each { rel ->
-  def languages = ["XP31", "XQ30", "XQ31"]
-  if (rel == "ee") {
-    languages = ["XP30", "XP31", "XQ10", "XQ30", "XQ31"]
-  }
-
-  def bytecodes = [""]
-  if (rel == "ee") {
-    bytecodes = ["off", "on"]
-  }
-
-  languages.each { lang ->
-    bytecodes.each { bc ->
-
-      def unfolds = [""]
-      if (rel == "ee" && (lang == "XQ30" || lang == "XQ31")) {
-        unfolds = ["", "yes"]
-      }
-
-      unfolds.each { uoption ->
-        if (bc == "off" && uoption != "") {
-          // ignore this combination
-        } else {
-          testSuite.qt3 {
-            language lang
-            release rel
-            directory testsuites.w3cQT3TestSuiteDir
-            if (bc != "" || rel == "ee") {
-              bytecode (bc == "on")
-            }
-            if (uoption != "") {
-              unfolded (uoption == "yes")
-            }
-          }
-        }
-
-        if (rel == "ee" && bc == "off") {
-          testSuite.qt3 {
-            platform "dotnet"
-            dotnet dotnetex
-            language lang
-            release rel
-            directory testsuites.w3cQT3TestSuiteDir
-            if (bc != "" || rel == "ee") {
-              bytecode (bc == "on")
-            }
-            if (uoption != "") {
-              unfolded (uoption == "yes")
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-// ============================================================
-// Tasks to run QT3 extra test driver with a variety of options
-
-task qt3ExtraTestsJava() {
-  // Just somewhere to hang dependencies
-}
-
-task qt3ExtraTestsDotnet() {
-  // Just somewhere to hang dependencies
-}
-
-// These tests are not run for "he".
-["pe", "ee"].each { rel ->
-  def languages = ["XP31", "XQ30", "XQ31"]
-  if (rel == "ee") {
-    languages = ["XP30", "XP31", "XQ10", "XQ30", "XQ31"]
-  }
-
-  def bytecodes = [""]
-  if (rel == "ee") {
-    bytecodes = ["off", "on"]
-  }
-
-  languages.each { lang ->
-    bytecodes.each { bc ->
-      testSuite.qt3extra {
-        language lang
-        release rel
-        directory "${projectDir}/src/test/extra/qt3"
-        if (bc != "" || rel == "ee") {
-          bytecode (bc == "on")
-        }
-      }
-    
-      if (rel == "ee" && bc == "off" && lang != "XQ30") {
-        testSuite.qt3extra {
-          platform "dotnet"
-          dotnet dotnetex
-          language lang
-          release rel
-          directory "${projectDir}/src/test/extra/qt3"
-        }
-      }
-    }
-  }
-}
-
-// ============================================================
-// Tasks to run QT4 test driver with a variety of options
-
-task qt4TestsJava() {
-  // Just somewhere to hang dependencies
-}
-
-["he", "pe", "ee"].each { rel ->
-  def languages = ["XP31", "XP40", "XQ30", "XQ31"]
-  if (rel == "ee") {
-    languages = ["XP31", "XP40", "XQ10", "XQ30", "XQ31"]
-  }
-
-  def bytecodes = [""]
-  if (rel == "ee") {
-    bytecodes = ["off", "on"]
-  }
-
-  languages.each { lang ->
-    bytecodes.each { bc ->
-
-      def unfolds = [""]
-      if (rel == "ee" && (lang == "XQ30" || lang == "XQ31")) {
-        unfolds = ["", "yes"]
-      }
-
-      unfolds.each { uoption ->
-        if (bc == "off" && uoption != "") {
-          // ignore this combination
-        } else {
-          testSuite.qt4 {
-            language lang
-            release rel
-            directory testsuites.w3cQT4TestSuiteDir
-            if (bc != "" || rel == "ee") {
-              bytecode (bc == "on")
-            }
-            if (uoption != "") {
-              unfolded (uoption == "yes")
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-// ============================================================
-// Tasks to run XSLT3.0 test driver with a variety of options
-
-task xslt30TestsJava() {
-  // Just somewhere to hang dependencies
-}
-
-task xslt30TestsDotnet() {
-  // Just somewhere to hang dependencies
-}
-
-task xslt30ExtraTestsJava() {
-  // Just somewhere to hang dependencies
-}
-
-task xslt30ExtraTestsDotnet() {
-  // Just somewhere to hang dependencies
-}
-
-["he", "pe", "ee"].each { rel ->
-  def languages = ["XT30"]
-  def bytecodes = [""]
-  def exports = [""]
-  def jits = [""]
-  if (rel == "ee") {
-    bytecodes = ["off", "on"]
-    exports = ["", "on"]
-    jits = ["", "on"]
-  }
-
-  languages.each { lang ->
-    bytecodes.each { bc ->
-      exports.each { expopt ->
-        jits.each { jitopt ->
-          def skipThisCombo = ((expopt == "-export" && bc == "on")
-                               || (jitopt == "on" && bc == "off"))
-
-          if (!skipThisCombo) {
-            testSuite.xslt30 {
-              language lang
-              release rel
-              directory testsuites.w3cXslt30TestSuiteDir
-              if (bc != "" || rel == "ee") {
-                bytecode (bc == "on")
-              }
-              if (expopt != "") {
-                export (expopt == "on")
-              }
-              if (jitopt != "") {
-                jit (jitopt == "on")
-              }
-            }
-
-            if (rel == "ee" && bc == "off" && jitopt == "" && expopt == "") {
-              testSuite.xslt30 {
-                platform "dotnet"
-                dotnet dotnetex
-                language lang
-                release rel
-                directory testsuites.w3cXslt30TestSuiteDir
-              }
-            }
-
-            testSuite.xslt30extra {
-              language lang
-              release rel
-              directory "${projectDir}/src/test/extra/xslt30"
-              if (bc != "" || rel == "ee") {
-                bytecode (bc == "on")
-              }
-              if (expopt != "") {
-                export (expopt == "on")
-              }
-              if (jitopt != "") {
-                jit (jitopt == "on")
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-// ============================================================
-// Tasks to run XSD test driver with a variety of options
-
-task xsdTestsJava() {
-  // Just somewhere to hang dependencies
-}
-
-// Only applies to EE
-["ee"].each { rel ->
-  def languages = ["1.0", "1.1"]
-  def bytecodes = ["off", "on"]
-
-  languages.each { lang ->
-    bytecodes.each { bc ->
-      testSuite.xsd {
-        directory testsuites.w3cXsdTestSuiteDir
-        language lang
-        release rel
-        if (bc != "" || rel == "ee") {
-          bytecode (bc == "on")
-        }
-      }
-    }
-  }
-}
-
-// ============================================================
-// Tasks to run XSD extra test driver with a variety of options
-
-task xsdExtraTestsJava() {
-  // Just somewhere to hang dependencies
-}
-
-// Not currently enabled.
-
-// ============================================================

@@ -3,1263 +3,622 @@ import org.gradle.api.Task
 import org.gradle.api.Project
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.JavaExec
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
+import groovy.util.slurpersupport.GPathResult
 
 class TestSuite {
-  private static String fileSeparator = System.getProperty("file.separator")
-  private static def langCodeMap = ["XP20": "XPath2.0",
-                   "XP30": "XPath3.0",
-                   "XP31": "XPath3.1",
-                   "XT30": "XSLT3.0",
-                   "XT40": "XSLT4.0",
-                   "XP31": "XPath3.1",
-                   "XQ10": "XQuery1.0",                                    
-                   "XQ20": "XQuery2.0",
-                   "XQ30": "XQuery3.0",
-                   "XQ31": "XQuery3.1"]
-  private def errorsReported = [:]
+  static String fileSeparator = System.getProperty("file.separator")
+  private def optionMap = [:]
+  private def directoryMap = [:]
 
-  Project project
-  boolean configOk = true
-  String suite = null
-  String testPlatform = null
-  String testDotnet = null
-  String testRelease = null
-  String testTaskName = null
-  String testClass = null
-  String testLang = null
-  String testDir = null
-  String testEx = null
-  String testReportFilename = null
-  String testReportDirectory = null
-  String testCatalog = null
-  Boolean testByteCode = null
-  Boolean testUnfolded = null
-  Boolean testTree = null
-  Boolean testExport = null
-  Boolean testJit = null
-  ArrayList testOptions = []
-  Boolean testDebug = null
+  def errorsReported = [:]
+  Project project = null
+  def testOptions = []
+  def testReportArchive = null
+  def testDriverOutputRedirect = false
+  def debugExec = false
+  def ignoreFailures = false
+  def accumulateFailures = null
 
   TestSuite(Project project) {
     this.project = project
-  }
 
-  private void reset(String suiteName) {
-    configOk = true
-    suite = suiteName
-    testPlatform = null
-    testDotnet = null
-    testRelease = null
-    testTaskName = null
-    testClass = null
-    testLang = null
-    testDir = null
-    testEx = null
-    testReportFilename = null
-    testReportDirectory = null
-    testCatalog = null
-    testByteCode = null
-    testUnfolded = null
-    testTree = null
-    testExport = null
-    testJit = null
-    testDebug = null
-
-    // This is kind of a hack...
-    testOptions = []
     project.properties.keySet().each { key ->
       if (key.startsWith("td_")) {
         String opt = key.substring(3)
         String value = project.properties.get(key).trim()
         if (value == "") {
-          testOptions += ["-${opt}"]
+          this.testOptions += ["-${opt}"]
         } else {
-          testOptions += ["-${opt}:${value}"]
+          this.testOptions += ["-${opt}:${value}"]
+        }
+      } else if (key == "saxonicaTestDriverReportArchive") {
+        def dir = project.properties.get(key).trim()
+        if (dir.endsWith("/") || dir.endsWith("\\")) {
+          dir = dir.substring(0, dir.length() - 1)
+        }
+        this.testReportArchive = dir
+      } else if (key == "saxonicaTestDriverOutputRedirect") {
+        def bool = project.properties.get(key).trim()
+        this.testDriverOutputRedirect = (bool == "true" || bool == "1" || bool == "yes")
+      } else if (key == "saxonicaTestDriverDebugExec") {
+        def bool = project.properties.get(key).trim()
+        this.debugExec = (bool == "true" || bool == "1" || bool == "yes")
+      } else if (key == "saxonicaIgnoreFailures") {
+        def bool = project.properties.get(key).trim()
+        this.ignoreFailures = (bool == "true" || bool == "1" || bool == "yes")
+      } else if (key == "accumulateFailures") {
+        def bool = project.properties.get(key).trim()
+        if (bool == "true" || bool == "1" || bool == "yes") {
+          this.accumulateFailures = []
         }
       }
     }
+
+    this.testDriverOutputRedirect = this.testDriverOutputRedirect && this.testOptions.size() == 0
   }
 
-  private void dumpConfiguration() {
-    println("==== TestSuite configuration: ====")
-    println("Test suite: ${suite}")
-    dumpState("Platform", testPlatform)
-    dumpState("Dotnet", testDotnet)
-    dumpState("Release", testRelease)
-    dumpState("Task", testTaskName)
-    dumpState("Class", testClass)
-    dumpState("Language", testLang)
-    dumpState("Directory", testDir)
-    dumpState("Exceptions", testEx)
-    dumpState("Report", testReportFilename)
-    dumpState("Output", testReportDirectory)
-    dumpState("Catalog", testCatalog)
-    dumpState("Bytecode", testByteCode)
-    dumpState("Unfolded", testUnfolded)
-    dumpState("Tree", testTree)
-    dumpState("Export", testExport)
-    dumpState("Jit", testJit)
-    if (testOptions.size() != 0) {
-      dumpState("Options", testOptions.join(" "))
-    }
-  }
-
-  private void dumpState(String name, Object value) {
-    if (value != null) {
-      name = "${name}                              ".substring(0, 12)
-      println("${name}: ${value}")
-    }
-  }
-
-  private void require(String name, Object value) {
-    if (value == null) {
-      configOk = false
-      if (!errorsReported.containsKey(suite)) {
-        println("Missing required property in ${suite} test configuration: ${name}")
-        errorsReported[suite] = true
-      }
-    }
-  }
-
-  private void forbid(String name, Object value) {
-    if (value != null) {
-      if (!errorsReported.containsKey(suite)) {
-        println("Unknown property in ${suite} test configuration: ${name}")
-        errorsReported[suite] = true
-      }
-      configOk = false
-    }
-  }
-
-  private void onlyOnce(String name, Object value) {
-    if (value != null) {
-      throw new GradleException("Only one value for ${name} is allowed in test configuration")
-    }
-  }
-
-  private String getReportFilename(String reportFilename) {
-    if (reportFilename.contains(fileSeparator)) {
-      def pos = reportFilename.lastIndexOf(fileSeparator)
-      return reportFilename.substring(pos + 1)
+  def configure(options) {
+    if ("directoryMap" in options) {
+      this.directoryMap = options["directoryMap"]
     } else {
-      // This should never happen, the reportFilename should always be
-      // absolute when this function is called.
-      reportFilename
+      throw new GradleException("No directoryMap in testSuite options")
     }
-  }
 
-  private String getReportDirectory(String reportFilename) {
-    if (reportFilename.contains(fileSeparator)) {
-      def pos = reportFilename.lastIndexOf(fileSeparator)
-      return reportFilename.substring(0, pos)
+    if ("optionMap" in options) {
+      this.optionMap = options["optionMap"]
     } else {
-      // This should never happen, the reportFilename should always be
-      // absolute when this function is called.
-      return System.getProperty("user.dir")
+      throw new GradleException("No optionMap in testSuite options")
     }
   }
 
-  void taskName(String name) {
-    onlyOnce("taskName", testTaskName)
-    testTaskName = name
-  }
-
-  void platform(String platform) {
-    if (platform != "java" && platform != "dotnet") {
-      throw new GradleException("Unsupported platform: ${platform}")
+  def task(options) {
+    if (!('suite' in options)) {
+      throw new GradleException("No test suite specified.")
     }
-    onlyOnce("platform", testPlatform)
-    testPlatform = platform
-  }
-
-  void dotnet(String dotnet) {
-    onlyOnce("dotnet", testDotnet)
-    testDotnet = dotnet
-  }
-
-  void release(String release) {
-    onlyOnce("release", testRelease)
-    testRelease = release
-  }
-
-  void main(String klass) {
-    onlyOnce("main", testClass)
-    testClass = klass
-  }
-
-  void language(String lang) {
-    onlyOnce("language", testLang)
-    testLang = lang
-  }
-
-  void directory(String dir) {
-    onlyOnce("directory", testDir)
-    testDir = dir
-  }
-
-  void exceptions(String ex) {
-    onlyOnce("exceptions", testEx)
-    testEx = ex
-  }
-
-  void bytecode(boolean bc) {
-    onlyOnce("bytecode", testByteCode)
-    testByteCode = bc
-  }
-
-  void unfolded(boolean un) {
-    onlyOnce("unfolded", testUnfolded)
-    testUnfolded = un
-  }
-
-  void tree(boolean t) {
-    onlyOnce("tree", testTree)
-    testTree = t
-  }
-
-  void export(boolean ex) {
-    onlyOnce("export", testExport)
-    testExport = ex
-  }
-
-  void jit(boolean j) {
-    onlyOnce("jit", testJit)
-    testJit = j
-  }
-
-  void option(String opt) {
-    testOptions += ["${opt}"]
-  }
-
-  void debug(boolean debugSetting) {
-    onlyOnce("debug", testDebug)
-    testDebug = debugSetting
-  }
-
-  private String computeTaskName() {
-    def taskroot = ["qt3" : "QT3TestSuite",
-                    "qt3extra": "QT3ExtraTestSuite",
-                    "qt4" : "QT4TestSuite",
-                    "xslt30": "Xslt30TestSuite",
-                    "xslt30extra": "Xslt30ExtraTestSuite",
-                    "xsd": "XsdTestSuite"]
-
-    if (!taskroot.containsKey(suite)) {
-      throw new GradleException("Unexpected test suite: ${suite}")
+    if (!(options['suite'] in this.directoryMap)) {
+      throw new GradleException("Incomplete configuration for test suite ${options['suite']}")
     }
 
-    String computedTaskName = "${testRelease}${taskroot[suite]}_${testLang}"
+    // Defaults
+    options['catalog'] = options.getOrDefault('catalog', 'catalog.xml')
 
-    if (testPlatform == "dotnet") {
-      computedTaskName = "dotnet${computedTaskName}"
-    }
+    def reportdir = "${project.buildDir}/test-results/"
+    reportdir += "${options['product']}/${options['suite']}/"
+    reportdir += "${options['language']}/${project.ext.DSTAMP}/"
+    def reportfn = options['name']
 
-    if (testByteCode != null) {
-      computedTaskName += "_bc${testByteCode ? 'on' : 'off'}"
-    }
-    if (testUnfolded != null && testUnfolded) {
-      computedTaskName += "_un"
-    }
-    if (testTree != null && testTree) {
-      computedTaskName += "_tree"
-    }
-    if (testExport != null && testExport) {
-      computedTaskName += "_export"
-    }
-    if (testJit != null && testJit) {
-      computedTaskName += "_jit"
+    reportdir = options.getOrDefault('reportDirectory', reportdir)
+    reportfn = options.getOrDefault('reportFilename', reportfn)
+    if (reportdir.endsWith("/") || reportdir.endsWith("\\")) {
+      reportdir = reportdir.substring(0, reportdir.length() - 1)
     }
 
-    return computedTaskName
+    options['reportDirectory'] = reportdir
+    options['reportFilename'] = reportfn
+    options['report'] = "${reportdir}/${reportfn}"
+
+    if (options["platform"] == "java") {
+      this.javaTask(options)
+    } else if (options["platform"] == "dotnet") {
+      this.dotnetTask(options)
+    } else {
+      throw new GradleException("Unexpected platform: ${platform}")
+    }
   }
 
-  private File computeReport() {
-    if (project.findProperty("tdReport") != null) {
-      return new File(project.findProperty("tdReport"))
+  def javaTask(options) {
+    if (options['suite'] == "xsd") {
+      this.javaXsdTask(options)
+      return
     }
 
-    if (suite == "xsd") {
-      throw new GradleException("Internal error, computeReport for xsd")
+    String testTaskName = options["name"]
+    String directory = this.directoryMap[options['suite']]
+    def optionMap = this.optionMap
+
+    Task run = project.task("run__${testTaskName}", type: JavaExec) {
+      inputs.files project.fileTree(dir: "${project.projectDir}/src")
+      outputs.file "${options['report']}.xml"
+
+      doFirst {
+        project.mkdir options["reportDirectory"]
+      }
+
+      String prod = options['product']
+      
+      def msg = "Run the ${options['suite']} test suite "
+      msg += "for ${options['language']} with ${prod}"
+      description msg
+
+      def depends = ["${prod}Compile", "${prod}_compileTestDrivers"]
+      depends += options.getOrDefault("depends", [])
+      depends.each { name ->
+        dependsOn name
+      }
+
+      classpath = project.configurations.testDrivers \
+        + project.files("${project.buildDir}/classes/${prod}") \
+        + project.files("${project.buildDir}/testdriver_classes/${prod}")
+
+      def testargs = [directory,
+                      options["catalog"],
+                      "-exceptions:${options['exceptions']}",
+                      "-reportfilename:${options['reportFilename']}.xml",
+                      "-o:${options['reportDirectory']}",
+                      "-lang:${options['language']}"]
+
+      optionMap.keySet().each { name ->
+        if (name in options) {
+          def argform = optionMap[name]
+          if (argform.endsWith(":")) {
+            argform += options[name]
+          } else {
+            if (options[name] != "on") {
+              println("Warning: option '${options[name]}' to ${name} is ignored in ${testTaskName}...")
+            }
+          }
+          testargs += [argform]
+        }
+      }
+
+      doFirst {
+        if (this.debugExec) {
+          println("Running ${options['class']} ${testargs.join(' ')}")
+        }
+      }
+
+      def stdout = new ByteArrayOutputStream()
+      def stderr = new ByteArrayOutputStream()
+
+      if (this.testDriverOutputRedirect) {
+        standardOutput = stdout
+        errorOutput = stderr
+
+        doFirst {
+          println("Redirecting output to .../${options['reportFilename']}.{out,err}")
+        }
+
+        doLast {
+          def fos = new FileOutputStream(new File("${options['report']}.out"))
+          fos.write(stdout.toByteArray())
+          fos = new FileOutputStream(new File("${options['report']}.err"))
+          fos.write(stderr.toByteArray())
+        }
+
+        doLast {
+          def result = executionResult.get()
+          result.assertNormalExitValue()
+        }
+      }
+
+      main = options['class']
+      args testargs
+      ignoreExitValue = true
     }
 
-    String computedName = "${project.buildDir}/test-results/${testRelease}j"
+    Task testTask = project.task("${testTaskName}_test_suite", dependsOn: ["run__${testTaskName}"]) {
+      String resultOutputPath = "${project.buildDir}/test-results/"
+      def reportdir = options['reportDirectory']
 
-    if (testPlatform == "dotnet") {
-      computedName = "${project.buildDir}/test-results/${testRelease}dotnet"
-    }
-
-    computedName = "${computedName}/${suite}/${project.ext.DSTAMP}"
-    computedName = "${computedName}/report_${langCodeMap[testLang]}_${project.ext.saxonVersion}"
-    if (testByteCode != null && testByteCode) {
-      computedName += "_bc${testByteCode ? 'on' : 'off'}"
-    }
-    if (testUnfolded != null && testUnfolded) {
-      computedName += "_un"
-    }
-    if (testTree != null && testTree) {
-      computedName += "_tree"
-    }
-    if (testExport != null && testExport) {
-      computedName += "_export"
-    }
-    if (testJit != null && testJit) {
-      computedName += "_jit"
-    }
-    return new File(computedName)
-  }
-
-  private String computeClass() {
-    def mainclass = ["qt3" : "QT3TestDriver${testRelease.toUpperCase()}",
-                     "qt3extra": "QT3TestDriver${testRelease.toUpperCase()}",
-                     "qt4" : "QT3TestDriver${testRelease.toUpperCase()}",
-                     "xslt30": "Xslt30TestSuiteDriver${testRelease.toUpperCase()}",
-                     "xslt30extra": "Xslt30TestSuiteDriver${testRelease.toUpperCase()}",
-                     "xsd": "ee.SchemaTestSuiteDriver"]
-
-    if (!mainclass.containsKey(suite)) {
-      throw new GradleException("Unexpected test suite: ${suite}")
-    }
-
-    String jpackage = "com.saxonica.testdriver"
-    if (testRelease == "he") {
-      jpackage = "net.sf.saxon.testdriver"
-    }
-
-    return "${jpackage}.${mainclass[suite]}"
-  }
-
-  private String computeExceptions() {
-    String path = "${project.projectDir}/src/test/exceptions/${suite}.xml"
-    if (suite == "xsd" && testLang == "1.1") {
-      path = "${project.projectDir}/src/test/exceptions/xsd11.xml"
-    }
-    return path
-  }
-
-  def setupInvalidConfig(String testName) {
-    project.task(testTaskName) {
       doLast {
-        throw new GradleException("Cannot run task, configuration is incorrect.")
+        if (this.testReportArchive != null
+            && reportdir.startsWith(resultOutputPath)) {
+          if (run.executionResult.isPresent()
+              && run.executionResult.get().getExitValue() == 0) {
+            def arcpath = "${this.testReportArchive}/${options['product']}/"
+            arcpath += "${project.ext.saxonVersion}/"
+            arcpath += "${options['suite']}/${project.ext.DSTAMP}"
+            this.saveTheResults(options, arcpath)
+          }
+        }
       }
     }
-    project.task("debug_${testTaskName}") {
+
+    Task t = project.tasks.findByName("all_test_suites")
+    if (t) {
+      t.dependsOn testTask
+    }
+
+    t = project.tasks.findByName("all_${options['product']}_test_suites")
+    if (t) {
+      t.dependsOn testTask
+    }
+
+    t = project.tasks.findByName("all_${options['product']}_${options['suite']}_test_suites")
+    if (t) {
+      t.dependsOn testTask
+    }
+  }
+
+  def javaXsdTask(options) {
+    String testTaskName = options["name"]
+    String directory = this.directoryMap[options['suite']]
+    def optionMap = this.optionMap
+
+    def version = "1.0"
+    if (options['language'] == "XSD11") {
+      version = "1.1"
+    }
+
+    def resultFn = "${options['reportDirectory']}/"
+    resultFn += "SaxonResults${project.ext.saxonVersion}-"
+    resultFn += options['language'] + ".xml"
+
+    def errorFn = "${options['reportDirectory']}/"
+    errorFn += "SaxonFailures${project.ext.saxonVersion}-"
+    errorFn += options['language'] + ".xml"
+
+    Task run = project.task("${testTaskName}_test_suite", type: JavaExec) {
+      inputs.files project.fileTree(dir: "${project.projectDir}/src")
+      outputs.file resultFn
+      outputs.file errorFn
+
+      doFirst {
+        project.mkdir options["reportDirectory"]
+      }
+
+      String prod = options['product']
+      
+      def msg = "Run the ${options['suite']} test suite "
+      msg += "for ${options['language']} with ${prod}"
+      description msg
+
+      def depends = ["${prod}Compile", "${prod}_compileTestDrivers"]
+      depends += options.getOrDefault("depends", [])
+      depends.each { name ->
+        dependsOn name
+      }
+
+      classpath = project.configurations.testDrivers \
+        + project.files("${project.buildDir}/classes/${prod}") \
+        + project.files("${project.buildDir}/testdriver_classes/${prod}")
+
+      def testargs = [directory,
+                      options["catalog"],
+                      "-exceptions:${options['exceptions']}",
+                      "-reportfilename:${resultFn}",
+                      "-errorfilename:${errorFn}",
+                      "-local:${options['reportDirectory']}",
+                      "-v:${version}"]
+
+      optionMap.keySet().each { name ->
+        if (name in options) {
+          def argform = optionMap[name]
+          if (argform.endsWith(":")) {
+            argform += options[name]
+          } else {
+            if (options[name] != "on") {
+              println("Warning: option '${options[name]}' to ${name} is ignored in ${testTaskName}...")
+            }
+          }
+          testargs += [argform]
+        }
+      }
+
+      doFirst {
+        if (this.debugExec) {
+          println("Running ${options['class']} ${testargs.join(' ')}")
+        }
+      }
+
+      def stdout = new ByteArrayOutputStream()
+      def stderr = new ByteArrayOutputStream()
+
+      if (this.testDriverOutputRedirect) {
+        standardOutput = stdout
+        errorOutput = stderr
+
+        doFirst {
+          println("Redirecting output to .../${options['reportFilename']}.{out,err}")
+        }
+
+        doLast {
+          def fos = new FileOutputStream(new File("${options['report']}.out"))
+          fos.write(stdout.toByteArray())
+          fos = new FileOutputStream(new File("${options['report']}.err"))
+          fos.write(stderr.toByteArray())
+        }
+
+        doLast {
+          def result = executionResult.get()
+          result.assertNormalExitValue()
+        }
+      }
+
+      main = options['class']
+      args testargs
+      ignoreExitValue true
+    }
+
+    Task t = project.tasks.findByName("all_test_suites")
+    if (t) {
+      t.dependsOn run
+    }
+
+    t = project.tasks.findByName("all_${options['product']}_test_suites")
+    if (t) {
+      t.dependsOn run
+    }
+
+    t = project.tasks.findByName("all_${options['product']}_${options['suite']}_test_suites")
+    if (t) {
+      t.dependsOn run
+    }
+  }
+
+  // ============================================================
+
+  def dotnetTask(options) {
+    if (options['suite'] == "xsd") {
+      this.dotnetXsdTask(options)
+      return
+    }
+
+    String testTaskName = options["name"]
+    String directory = this.directoryMap[options['suite']]
+    def optionMap = this.optionMap
+
+    Task run = project.task("run__${testTaskName}", type: Exec) {
+      inputs.files project.fileTree(dir: "${project.projectDir}/src")
+      outputs.file "${options['report']}.xml"
+
+      doFirst {
+        project.mkdir options["reportDirectory"]
+      }
+
+      String prod = options['product']
+      
+      def msg = "Run the ${options['suite']} test suite "
+      msg += "for ${options['language']} with ${prod}"
+      description msg
+
+      def depends = ["dotnetTestDrivers"]
+      depends += options.getOrDefault("depends", [])
+      depends.each { name ->
+        dependsOn name
+      }
+
+      def testargs = [options["dotnet"],
+                      "${project.buildDir}/testdrivers/bin/Release/net5.0/TestDrivers.dll",
+                      directory,
+                      "-exceptions:${options['exceptions']}",
+                      "-reportfilename:${options['reportFilename']}.xml",
+                      "-o:${options['reportDirectory']}",
+                      "-lang:${options['language']}"]
+      optionMap.keySet().each { name ->
+        if (name in options) {
+          def argform = optionMap[name]
+          if (argform.endsWith(":")) {
+            argform += options[name]
+          } else {
+            if (options[name] != "on") {
+              println("Warning: option '${options[name]}' to ${name} is ignored in ${testTaskName}...")
+            }
+          }
+          testargs += [argform]
+        }
+      }
+
+      doFirst {
+        if (this.debugExec) {
+          println("Running ${testargs.join(' ')}")
+        }
+      }
+
+      def stdout = new ByteArrayOutputStream()
+      def stderr = new ByteArrayOutputStream()
+
+      if (this.testDriverOutputRedirect) {
+        standardOutput = stdout
+        errorOutput = stderr
+
+        doFirst {
+          println("Redirecting output to .../${options['reportFilename']}.{out,err}")
+        }
+
+        doLast {
+          def fos = new FileOutputStream(new File("${options['report']}.out"))
+          fos.write(stdout.toByteArray())
+          fos = new FileOutputStream(new File("${options['report']}.err"))
+          fos.write(stderr.toByteArray())
+        }
+
+        doLast {
+          def result = executionResult.get()
+          if (!this.ignoreFailures) {
+            result.assertNormalExitValue()
+          }
+        }
+      }
+
+      commandLine testargs
+      ignoreExitValue = true
+    }
+
+    Task testTask = project.task("${testTaskName}_test_suite",
+                                 dependsOn: ["run__${testTaskName}"]) {
+      String resultOutputPath = "${project.buildDir}/test-results/"
+      def reportdir = options['reportDirectory']
+
       doLast {
-        throw new GradleException("Cannot run task, configuration is incorrect.")
+        if (this.testReportArchive != null
+            && reportdir.startsWith(resultOutputPath)) {
+          if (run.executionResult.isPresent()
+              && run.executionResult.get().getExitValue() == 0) {
+            def arcpath = "${this.testReportArchive}/${options['product']}/"
+            arcpath += "${project.ext.saxonVersion}/"
+            arcpath += "${options['suite']}/${project.ext.DSTAMP}"
+            this.saveTheResults(options, arcpath)
+          }
+        }
       }
+    }
+
+    Task t = project.tasks.findByName("all_test_suites")
+    if (t) {
+      t.dependsOn testTask
+    }
+
+    t = project.tasks.findByName("all_${options['product']}_test_suites")
+    if (t) {
+      t.dependsOn testTask
+    }
+
+    t = project.tasks.findByName("all_${options['product']}_${options['suite']}_test_suites")
+    if (t) {
+      t.dependsOn testTask
     }
   }
 
-  def qt3(Closure cl) {
-    reset("qt3")
-    cl.delegate = this
-    cl()
-    if (testPlatform == "dotnet") {
-      qt3Dotnet(cl)
+  def dotnetXsdTask(options) {
+    throw new GradleException("Running XSD tests with dotnet is unconfigured")
+  }
+
+  def checkAccumulatedFailures() {
+    if (this.accumulateFailures != null && this.accumulateFailures.size() > 0) {
+      def count = 0
+      this.accumulateFailures.each { msg ->
+        println(msg)
+        count += 1
+      }
+      throw new GradleException("Regression: ${count} failures.")
+    }
+  }
+
+  // ============================================================
+
+  public void saveTheResults(options, arcpath) {
+    def reportfn = "${options['report']}.xml"
+    def arcfn = "${arcpath}/${options['reportFilename']}.xml"
+
+    String mostRecent = null
+    File compare = null
+
+    File report = new File(reportfn)
+    if (!report.exists()) {
+      if (this.ignoreFailures) {
+        println("${options['name']} did not generate a test suite report.")
+        return
+      }
+      throw new GradleException("${options['name']} did not generate a test suite report.")
+    }
+
+    File path = new File(arcpath)
+    if (! path.exists()) {
+      path.mkdirs()
+    }
+
+    File parent = path.getParentFile()
+    for (File entry : parent.listFiles()) {
+      if (entry.isDirectory()) {
+        for (File fn : entry.listFiles()) {
+          if (fn.getName() == report.getName()) {
+            if (mostRecent == null || mostRecent < entry.getName()) {
+              mostRecent = entry.getName()
+              compare = fn
+            }
+          }
+        }
+      }
+    }
+
+    if (compare != null) {
+      if (!this.compareTheResults(options, compare, new File(reportfn))) {
+        return
+      }
     } else {
-      qt3Java(cl)
+      println("No previous results for ${options['name']}.")
+      this.summarize(options, new File(reportfn))
     }
+
+    Files.copy(Paths.get(reportfn), Paths.get(arcfn),
+               StandardCopyOption.REPLACE_EXISTING)
   }
 
-  def qt3Java(Closure cl) {
-    require("language", testLang)
-    require("directory", testDir)
-    require("release", testRelease)
-    forbid("jit", testJit)
-    forbid("export", testExport)
+  private boolean compareTheResults(options, File previous, File current) {
+    def slurper = new XmlSlurper()
+    GPathResult root = slurper.parse(previous)
+      .declareNamespace(fots: "http://www.w3.org/2012/08/qt-fots-results")
 
-    testCatalog = testCatalog ?: "catalog.xml"
-    testTaskName = testTaskName ?: computeTaskName()
-    testClass = testClass ?: computeClass()
-    testEx = testEx ?: computeExceptions()
+    def prevPass = [:]
 
-    def testReport = computeReport()
-    testReportDirectory = getReportDirectory(testReport.getAbsolutePath())
-    testReportFilename = getReportFilename(testReport.getAbsolutePath())
-
-    if (testDebug) {
-      dumpConfiguration()
-    }
-
-    if (!configOk) {
-      setupInvalidConfig(testTaskName)
-      return
-    }
-
-    project.task(testTaskName, type: JavaExec) {
-      inputs.files project.fileTree(dir: "${project.projectDir}/src")
-      outputs.file "${testReportDirectory}/${testReportFilename}.xml"
-      outputs.upToDateWhen { false }
-
-      def msg = "Run the QT3 test suite driver for ${testLang} with ${testRelease.toUpperCase()}"
-      if (testByteCode != null || testUnfolded != null) {
-        msg += " (bytecode: ${testByteCode ? 'on' : 'off'}, unfolded: ${testUnfolded ? 'yes' : 'no'})"
+    def sets = root.'**'.findAll { it.name() == "test-set" }
+    sets.each { tset ->
+      def setName = tset.attributes()['name']
+      def tests = tset.'**'.findAll { it.name() == 'test-case' }
+      tests.each { t->
+        def testName = t.attributes()['name']
+        def result = t.attributes()['result']
+        prevPass["${setName}/${testName}"] = result
       }
-      description msg
-      dependsOn "${testRelease}jCompile", "${testRelease}j_compileTestDrivers", "cloneQT3TestSuite"
-      classpath = project.configurations.testDrivers \
-      + project.files("${project.buildDir}/classes/${testRelease}j") \
-      + project.files("${project.buildDir}/testdriver_classes/${testRelease}j")
-
-      doFirst {
-        project.mkdir testReportDirectory
-      }
-
-      main = testClass
-      def testargs = [testDir, testCatalog,
-                      "-exceptions:${testEx}",
-                      "-reportfilename:${testReportFilename}.xml",
-                      "-o:${testReportDirectory}",
-                      "-lang:${testLang}",
-                      "-bytecode:${testByteCode ? 'on' : 'off'}"]
-
-      if (testUnfolded) {
-        testargs += ["-unfolded"]
-      }
-
-      testargs += testOptions
-
-      //println(testargs)
-
-      args testargs
     }
 
-    project.task("debug_${testTaskName}", type: JavaExec) {
-      inputs.files project.fileTree(dir: "${project.projectDir}/src")
-      outputs.file "${testReportDirectory}/${testReportFilename}.xml"
-      outputs.upToDateWhen { false }
+    root = slurper.parse(current)
+      .declareNamespace(fots: "http://www.w3.org/2012/08/qt-fots-results")
 
-      def msg = "Debug the QT3 test suite driver for ${testLang} with ${testRelease.toUpperCase()}"
-      if (testByteCode != null || testUnfolded != null) {
-        msg += " (bytecode: ${testByteCode ? 'on' : 'off'}, unfolded: ${testUnfolded ? 'yes' : 'no'})"
+    int failing = 0
+    sets = root.'**'.findAll { it.name() == "test-set" }
+    sets.each { tset ->
+      def setName = tset.attributes()['name']
+      def tests = tset.'**'.findAll { it.name() == 'test-case' }
+      tests.each { t->
+        def testName = t.attributes()['name']
+        def result = t.attributes()['result']
+        def prevResult = prevPass["${setName}/${testName}"]
+        if (prevResult == "pass" && result != "pass") {
+          def msg = "👎 ${setName}/${testName} was ${prevResult} is now ${result}"
+          println(msg)
+          failing += 1
+          if (this.accumulateFailures != null) {
+            this.accumulateFailures += "${options['name']}: ${msg}"
+          }
+        }
       }
-      description msg
-      dependsOn "compileJava", "cloneQT3TestSuite"
-      classpath = project.configurations.testDrivers \
-      + project.files("${project.buildDir}/classes/java/main")
+    }
 
-      doFirst {
-        project.mkdir testReportDirectory
+    if (failing > 0) {
+      def msg = "Regression: ${failing} previously passing"
+      if (failing > 1) {
+        msg += " tests are failing."
+      } else {
+        msg += " test is failing."
       }
-
-      main = testClass
-      def testargs = [testDir, testCatalog,
-                      "-exceptions:${testEx}",
-                      "-reportfilename:${testReportFilename}.xml",
-                      "-o:${testReportDirectory}",
-                      "-lang:${testLang}",
-                      "-bytecode:${testByteCode ? 'on' : 'off'}",
-                      "-unfolded:${testUnfolded ? 'on' : 'off'}"]
-
-      testargs += testOptions
-      args testargs
+      if (this.ignoreFailures || this.accumulateFailures != null) {
+        println(msg)
+      } else {
+        throw new GradleException(msg)
+      }
     }
 
-    Task t = project.tasks.findByName("qt3TestsJava")
-    if (t) {
-      t.dependsOn testTaskName
-    }
-    t = project.tasks.findByName("${testRelease}jTestSuitesJava")
-    if (t) {
-      t.dependsOn testTaskName
-    }
+    summarize(options, current)
+
+    return failing == 0
   }
 
-  def qt3Dotnet(Closure cl) {
-    require("language", testLang)
-    require("directory", testDir)
-    require("release", testRelease)
-    forbid("jit", testJit)
-    forbid("export", testExport)
+  public void summarize(options, File current) {
+    def slurper = new XmlSlurper()
+    GPathResult root = slurper.parse(current)
+      .declareNamespace(fots: "http://www.w3.org/2012/08/qt-fots-results")
 
-    testCatalog = testCatalog ?: "catalog.xml"
-    testTaskName = testTaskName ?: computeTaskName()
-    testEx = testEx ?: computeExceptions()
+    def results = [:]
 
-    def testReport = computeReport()
-    testReportDirectory = getReportDirectory(testReport.getAbsolutePath())
-    testReportFilename = getReportFilename(testReport.getAbsolutePath())
-
-    if (testDebug) {
-      dumpConfiguration()
-    }
-
-    if (!configOk) {
-      setupInvalidConfig(testTaskName)
-      return
-    }
-
-    // There's no bytecode generation and it's only EE
-    testTaskName = testTaskName.replace("_bcoff", "").replace("dotnetee", "dotnet")
-
-    project.task(testTaskName, type: Exec) {
-      inputs.files project.fileTree(dir: "${project.projectDir}/src")
-      outputs.file "${testReportDirectory}/${testReportFilename}.xml"
-      outputs.upToDateWhen { false }
-
-      def msg = "Run the QT3 test suite driver for ${testLang} with dotnet"
-      if (testByteCode != null || testUnfolded != null) {
-        msg += " (unfolded: ${testUnfolded ? 'yes' : 'no'})"
+    def sets = root.'**'.findAll { it.name() == "test-set" }
+    sets.each { tset ->
+      def setName = tset.attributes()['name']
+      def tests = tset.'**'.findAll { it.name() == 'test-case' }
+      tests.each { t->
+        def result = t.attributes()['result']
+        if (result in results) {
+          results[result] += 1
+        } else {
+          results[result] = 1
+        }
       }
-      description msg
-      dependsOn "dotnetTestDrivers", "cloneQT3TestSuite"
-
-      doFirst {
-        project.mkdir testReportDirectory
-      }
-
-      def driver = "${project.buildDir}/testdrivers/bin/Release/net5.0/TestDrivers.dll"
-
-      def testargs = [testDotnet, driver,
-                      testDir,
-                      "-exceptions:${testEx}",
-                      "-reportfilename:${testReportFilename}.xml",
-                      "-o:${testReportDirectory}",
-                      "-lang:${testLang}"]
-
-      if (testUnfolded) {
-        testargs += ["-unfolded"]
-      }
-
-      testargs += testOptions
-
-      commandLine testargs
     }
 
-    Task t = project.tasks.findByName("qt3TestsDotnet")
-    if (t) {
-      t.dependsOn testTaskName
-    }
-    t = project.tasks.findByName("${testRelease}jTestSuitesDotnet")
-    if (t) {
-      t.dependsOn testTaskName
-    }
-  }
-
-  def qt3extra(Closure cl) {
-    reset("qt3extra")
-    cl.delegate = this
-    cl()
-    if (testPlatform == "dotnet") {
-      qt3extraDotnet(cl)
-    } else {
-      qt3extraJava(cl)
-    }
-  }
-
-  def qt3extraJava(Closure cl) {
-    require("language", testLang)
-    require("directory", testDir)
-    require("release", testRelease)
-    forbid("unfolded", testUnfolded)
-    forbid("jit", testJit)
-    forbid("export", testExport)
-
-    testCatalog = testCatalog ?: "catalog.xml"
-    testTaskName = testTaskName ?: computeTaskName()
-    testClass = testClass ?: computeClass()
-    testEx = testEx ?: computeExceptions()
-
-    def testReport = computeReport()
-    testReportDirectory = getReportDirectory(testReport.getAbsolutePath())
-    testReportFilename = getReportFilename(testReport.getAbsolutePath())
-
-    if (testDebug) {
-      dumpConfiguration()
-    }
-
-    if (!configOk) {
-      setupInvalidConfig(testTaskName)
-      return
-    }
-
-    project.task(testTaskName, type: JavaExec) {
-      inputs.files project.fileTree(dir: "${project.projectDir}/src")
-      outputs.file "${testReportDirectory}/${testReportFilename}.xml"
-      outputs.upToDateWhen { false }
-
-      def msg = "Run the QT3 extra test suite driver for ${testLang} with ${testRelease.toUpperCase()}"
-      if (testByteCode != null || testUnfolded != null) {
-        msg += " (bytecode: ${testByteCode ? 'on' : 'off'}, unfolded: ${testUnfolded ? 'yes' : 'no'})"
-      }
-      description msg
-      dependsOn "${testRelease}jCompile", "${testRelease}j_compileTestDrivers"
-      classpath = project.configurations.testDrivers \
-      + project.files("${project.buildDir}/classes/${testRelease}j") \
-      + project.files("${project.buildDir}/testdriver_classes/${testRelease}j")
-
-      doFirst {
-        project.mkdir testReportDirectory
-      }
-
-      main = testClass
-      def testargs = [testDir, testCatalog,
-                      "-exceptions:${testEx}",
-                      "-reportfilename:${testReportFilename}.xml",
-                      "-o:${testReportDirectory}",
-                      "-lang:${testLang}",
-                      "-bytecode:${testByteCode ? 'on' : 'off'}",
-                      "-unfolded:${testUnfolded ? 'on' : 'off'}"]
-
-      testargs += testOptions
-
-      //println(testargs)
-
-      args testargs
-    }
-
-    project.task("debug_${testTaskName}", type: JavaExec) {
-      inputs.files project.fileTree(dir: "${project.projectDir}/src")
-      outputs.file "${testReportDirectory}/${testReportFilename}.xml"
-      outputs.upToDateWhen { false }
-
-      def msg = "Debug the QT3 extra test suite driver for ${testLang} with ${testRelease.toUpperCase()}"
-      if (testByteCode != null || testUnfolded != null) {
-        msg += " (bytecode: ${testByteCode ? 'on' : 'off'}, unfolded: ${testUnfolded ? 'yes' : 'no'})"
-      }
-      description msg
-      dependsOn "compileJava",
-      classpath = project.configurations.testDrivers \
-      + project.files("${project.buildDir}/classes/java/main")
-
-      doFirst {
-        project.mkdir testReportDirectory
-      }
-
-      main = testClass
-      def testargs = [testDir, testCatalog,
-                      "-exceptions:${testEx}",
-                      "-reportfilename:${testReportFilename}.xml",
-                      "-o:${testReportDirectory}",
-                      "-lang:${testLang}",
-                      "-bytecode:${testByteCode ? 'on' : 'off'}",
-                      "-unfolded:${testUnfolded ? 'on' : 'off'}"]
-
-      testargs += testOptions
-      args testargs
-    }
-
-    Task t = project.tasks.findByName("qt3ExtraTestsJava")
-    if (t) {
-      t.dependsOn testTaskName
-    }
-    t = project.tasks.findByName("${testRelease}jTestSuitesJava")
-    if (t) {
-      t.dependsOn testTaskName
-    }
-  }
-
-  def qt3extraDotnet(Closure cl) {
-    require("language", testLang)
-    require("directory", testDir)
-    require("release", testRelease)
-    forbid("unfolded", testUnfolded)
-    forbid("jit", testJit)
-    forbid("export", testExport)
-
-    testCatalog = testCatalog ?: "catalog.xml"
-    testTaskName = testTaskName ?: computeTaskName()
-    testClass = testClass ?: computeClass()
-    testEx = testEx ?: computeExceptions()
-
-    def testReport = computeReport()
-    testReportDirectory = getReportDirectory(testReport.getAbsolutePath())
-    testReportFilename = getReportFilename(testReport.getAbsolutePath())
-
-    if (testDebug) {
-      dumpConfiguration()
-    }
-
-    if (!configOk) {
-      setupInvalidConfig(testTaskName)
-      return
-    }
-
-    // There's no bytecode generation and it's only EE
-    testTaskName = testTaskName.replace("_bcoff", "").replace("dotnetee", "dotnet")
-
-    project.task(testTaskName, type: Exec) {
-      inputs.files project.fileTree(dir: "${project.projectDir}/src")
-      outputs.file "${testReportDirectory}/${testReportFilename}.xml"
-      outputs.upToDateWhen { false }
-
-      def msg = "Run the QT3 extra test suite driver for ${testLang} with dotnet"
-      if (testByteCode != null || testUnfolded != null) {
-        msg += " (unfolded: ${testUnfolded ? 'yes' : 'no'})"
-      }
-      description msg
-      dependsOn "dotnetTestDrivers", "cloneQT3TestSuite"
-
-      doFirst {
-        project.mkdir testReportDirectory
-      }
-
-      def driver = "${project.buildDir}/testdrivers/bin/Release/net5.0/TestDrivers.dll"
-
-      def testargs = [testDotnet, driver,
-                      testDir,
-                      "-exceptions:${testEx}",
-                      "-reportfilename:${testReportFilename}.xml",
-                      "-o:${testReportDirectory}",
-                      "-lang:${testLang}"]
-
-      testargs += testOptions
-
-      //println(testargs)
-
-      commandLine testargs
-    }
-
-    Task t = project.tasks.findByName("qt3ExtraTestsDotnet")
-    if (t) {
-      t.dependsOn testTaskName
-    }
-    t = project.tasks.findByName("${testRelease}jTestSuitesDotnet")
-    if (t) {
-      t.dependsOn testTaskName
-    }
-  }
-
-  def qt4(Closure cl) {
-    reset("qt4")
-    cl.delegate = this
-    cl()
-
-    require("language", testLang)
-    require("directory", testDir)
-    require("release", testRelease)
-    forbid("jit", testJit)
-    forbid("export", testExport)
-
-    testCatalog = testCatalog ?: "catalog.xml"
-    testTaskName = testTaskName ?: computeTaskName()
-    testClass = testClass ?: computeClass()
-    testEx = testEx ?: computeExceptions()
-
-    def testReport = computeReport()
-    testReportDirectory = getReportDirectory(testReport.getAbsolutePath())
-    testReportFilename = getReportFilename(testReport.getAbsolutePath())
-
-    if (testDebug) {
-      dumpConfiguration()
-    }
-
-    if (!configOk) {
-      setupInvalidConfig(testTaskName)
-      return
-    }
-
-    project.task(testTaskName, type: JavaExec) {
-      inputs.files project.fileTree(dir: "${project.projectDir}/src")
-      outputs.file "${testReportDirectory}/${testReportFilename}.xml"
-      outputs.upToDateWhen { false }
-
-      def msg = "Run the QT4 test suite driver for ${testLang} with ${testRelease.toUpperCase()}"
-      if (testByteCode != null || testUnfolded != null) {
-        msg += " (bytecode: ${testByteCode ? 'on' : 'off'}, unfolded: ${testUnfolded ? 'yes' : 'no'})"
-      }
-      description msg
-      dependsOn "${testRelease}jCompile", "${testRelease}j_compileTestDrivers", "cloneQT4TestSuite"
-      classpath = project.configurations.testDrivers \
-      + project.files("${project.buildDir}/classes/${testRelease}j") \
-      + project.files("${project.buildDir}/testdriver_classes/${testRelease}j")
-
-      doFirst {
-        project.mkdir testReportDirectory
-      }
-
-      main = testClass
-      def testargs = [testDir, testCatalog,
-                      "-exceptions:${testEx}",
-                      "-reportfilename:${testReportFilename}.xml",
-                      "-o:${testReportDirectory}",
-                      "-lang:${testLang}",
-                      "-bytecode:${testByteCode ? 'on' : 'off'}"]
-
-      if (testUnfolded) {
-        testargs += ["-unfolded"]
-      }
-
-      testargs += testOptions
-
-      //println(testargs)
-
-      args testargs
-    }
-
-    project.task("debug_${testTaskName}", type: JavaExec) {
-      inputs.files project.fileTree(dir: "${project.projectDir}/src")
-      outputs.file "${testReportDirectory}/${testReportFilename}.xml"
-      outputs.upToDateWhen { false }
-
-      def msg = "Debug the QT4 test suite driver for ${testLang} with ${testRelease.toUpperCase()}"
-      if (testByteCode != null || testUnfolded != null) {
-        msg += " (bytecode: ${testByteCode ? 'on' : 'off'}, unfolded: ${testUnfolded ? 'yes' : 'no'})"
-      }
-      description msg
-      dependsOn "compileJava", "cloneQT4TestSuite"
-      classpath = project.configurations.testDrivers \
-      + project.files("${project.buildDir}/classes/java/main")
-
-      doFirst {
-        project.mkdir testReportDirectory
-      }
-
-      main = testClass
-      def testargs = [testDir, testCatalog,
-                      "-exceptions:${testEx}",
-                      "-reportfilename:${testReportFilename}.xml",
-                      "-o:${testReportDirectory}",
-                      "-lang:${testLang}",
-                      "-bytecode:${testByteCode ? 'on' : 'off'}",
-                      "-unfolded:${testUnfolded ? 'on' : 'off'}"]
-
-      testargs += testOptions
-      args testargs
-    }
-
-    Task t = project.tasks.findByName("qt4TestsJava")
-    if (t) {
-      t.dependsOn testTaskName
-    }
-    t = project.tasks.findByName("${testRelease}jTestSuitesJava")
-    if (t) {
-      t.dependsOn testTaskName
-    }
-  }
-
-  def xslt30(Closure cl) {
-    reset("xslt30")
-    cl.delegate = this
-    cl()
-
-    if (testPlatform == "dotnet") {
-      xslt30Dotnet(cl)
-    } else {
-      xslt30Java(cl)
-    }
-  }
-
-  def xslt30Java(Closure cl) {
-    require("language", testLang)
-    require("directory", testDir)
-    require("release", testRelease)
-    forbid("unfolded", testUnfolded)
-
-    testCatalog = testCatalog ?: "catalog.xml"
-    testTaskName = testTaskName ?: computeTaskName()
-    testClass = testClass ?: computeClass()
-    testEx = testEx ?: computeExceptions()
-
-    def testReport = computeReport()
-    testReportDirectory = getReportDirectory(testReport.getAbsolutePath())
-    testReportFilename = getReportFilename(testReport.getAbsolutePath())
-
-    if (testDebug) {
-      dumpConfiguration()
-    }
-
-    if (!configOk) {
-      setupInvalidConfig(testTaskName)
-      return
-    }
-
-    project.task(testTaskName, type: JavaExec) {
-      inputs.files project.fileTree(dir: "${project.projectDir}/src")
-      outputs.file "${testReportDirectory}/${testReportFilename}.xml"
-      outputs.upToDateWhen { false }
-
-      def msg = "Run the XSLT 3.0 test suite driver for ${testLang} with ${testRelease.toUpperCase()}"
-      if (testByteCode != null || testExport != null || testJit != null) {
-        msg += " (bytecode: ${testByteCode ? 'on' : 'off'}, export: ${testExport ? 'yes' : 'no'}, "
-        msg += "jit: ${testJit ? 'on' : 'off'})"
-      }
-      description msg
-      dependsOn "${testRelease}jCompile", "${testRelease}j_compileTestDrivers", "cloneXslt30TestSuite"
-      classpath = project.configurations.testDrivers \
-      + project.files("${project.buildDir}/classes/${testRelease}j") \
-      + project.files("${project.buildDir}/testdriver_classes/${testRelease}j")
-
-      doFirst {
-        project.mkdir testReportDirectory
-      }
-
-      main = testClass
-      def testargs = [testDir, testCatalog,
-                      "-exceptions:${testEx}",
-                      "-reportfilename:${testReportFilename}.xml",
-                      "-o:${testReportDirectory}",
-                      "-lang:${testLang}",
-                      "-bytecode:${testByteCode ? 'on' : 'off'}"]
-      if (testExport) {
-        testargs += ["-export"]
-      }
-      if (testJit) {
-        testargs += ["-jit"]
-      }
-
-      testargs += testOptions
-
-      //println(testargs)
-
-      args testargs
-    }
-
-    project.task("debug_${testTaskName}", type: JavaExec) {
-      inputs.files project.fileTree(dir: "${project.projectDir}/src")
-      outputs.file "${testReportDirectory}/${testReportFilename}.xml"
-      outputs.upToDateWhen { false }
-
-      def msg = "Debug the XSLT 3.0 test suite driver for ${testLang} with ${testRelease.toUpperCase()}"
-      if (testByteCode != null || testExport != null || testJit != null) {
-        msg += " (bytecode: ${testByteCode ? 'on' : 'off'}, export: ${testExport ? 'yes' : 'no'}, "
-        msg += "jit: ${testJit ? 'on' : 'off'})"
-      }
-      description msg
-      dependsOn "compileJava", "cloneXslt30TestSuite"
-      classpath = project.configurations.testDrivers \
-      + project.files("${project.buildDir}/classes/java/main")
-
-      doFirst {
-        project.mkdir testReportDirectory
-      }
-
-      main = testClass
-      def testargs = [testDir, testCatalog,
-                      "-exceptions:${testEx}",
-                      "-reportfilename:${testReportFilename}.xml",
-                      "-o:${testReportDirectory}",
-                      "-lang:${testLang}",
-                      "-bytecode:${testByteCode ? 'on' : 'off'}"]
-      if (testExport) {
-        testargs += ["-export"]
-      }
-      if (testJit) {
-        testargs += ["-jit"]
-      }
-
-      testargs += testOptions
-      args testargs
-    }
-
-    Task t = project.tasks.findByName("xslt30TestsJava")
-    if (t) {
-      t.dependsOn testTaskName
-    }
-    t = project.tasks.findByName("${testRelease}jTestSuitesJava")
-    if (t) {
-      t.dependsOn testTaskName
-    }
-  }
-
-  def xslt30Dotnet(Closure cl) {
-    require("language", testLang)
-    require("directory", testDir)
-    require("release", testRelease)
-    forbid("unfolded", testUnfolded)
-
-    testCatalog = testCatalog ?: "catalog.xml"
-    testTaskName = testTaskName ?: computeTaskName()
-    testClass = testClass ?: computeClass()
-    testEx = testEx ?: computeExceptions()
-
-    def testReport = computeReport()
-    testReportDirectory = getReportDirectory(testReport.getAbsolutePath())
-    testReportFilename = getReportFilename(testReport.getAbsolutePath())
-
-    if (testDebug) {
-      dumpConfiguration()
-    }
-
-    // There's no bytecode generation and it's only EE
-    testTaskName = testTaskName.replace("_bcoff", "").replace("dotnetee", "dotnet")
-
-    if (!configOk) {
-      setupInvalidConfig(testTaskName)
-      return
-    }
-
-    project.task(testTaskName, type: Exec) {
-      inputs.files project.fileTree(dir: "${project.projectDir}/src")
-      outputs.file "${testReportDirectory}/${testReportFilename}.xml"
-      outputs.upToDateWhen { false }
-
-      def msg = "Run the XSLT 3.0 test suite driver for ${testLang} with dotnet"
-      description msg
-      dependsOn "dotnetTestDrivers", "cloneQT3TestSuite"
-
-      doFirst {
-        project.mkdir testReportDirectory
-      }
-
-      def driver = "${project.buildDir}/testdrivers/bin/Release/net5.0/TestDrivers.dll"
-
-      def testargs = [testDotnet, driver,
-                      testDir,
-                      "-exceptions:${testEx}",
-                      "-reportfilename:${testReportFilename}.xml",
-                      "-o:${testReportDirectory}",
-                      "-lang:${testLang}"]
-
-      testargs += testOptions
-
-      //println(testargs)
-
-      commandLine testargs
-    }
-
-    Task t = project.tasks.findByName("xslt30TestsDotnet")
-    if (t) {
-      t.dependsOn testTaskName
-    }
-    t = project.tasks.findByName("${testRelease}jTestSuitesDotnet")
-    if (t) {
-      t.dependsOn testTaskName
-    }
-  }
-
-  def xslt30extra(Closure cl) {
-    reset("xslt30extra")
-    cl.delegate = this
-    cl()
-
-    require("language", testLang)
-    require("directory", testDir)
-    require("release", testRelease)
-    forbid("unfolded", testUnfolded)
-
-    testCatalog = testCatalog ?: "catalog.xml"
-    testTaskName = testTaskName ?: computeTaskName()
-    testClass = testClass ?: computeClass()
-    testEx = testEx ?: computeExceptions()
-
-    def testReport = computeReport()
-    testReportDirectory = getReportDirectory(testReport.getAbsolutePath())
-    testReportFilename = getReportFilename(testReport.getAbsolutePath())
-
-    if (testDebug) {
-      dumpConfiguration()
-    }
-
-    if (!configOk) {
-      setupInvalidConfig(testTaskName)
-      return
-    }
-
-    project.task(testTaskName, type: JavaExec) {
-      inputs.files project.fileTree(dir: "${project.projectDir}/src")
-      outputs.file "${testReportDirectory}/${testReportFilename}.xml"
-      outputs.upToDateWhen { false }
-
-      def msg = "Run the XSLT 3.0 extra test suite driver for ${testLang} with ${testRelease.toUpperCase()}"
-      if (testByteCode != null || testExport != null || testJit != null) {
-        msg += " (bytecode: ${testByteCode ? 'on' : 'off'}, export: ${testExport ? 'yes' : 'no'}, "
-        msg += "jit: ${testJit ? 'on' : 'off'})"
-      }
-      description msg
-      dependsOn "${testRelease}jCompile", "${testRelease}j_compileTestDrivers"
-      classpath = project.configurations.testDrivers \
-      + project.files("${project.buildDir}/classes/${testRelease}j") \
-      + project.files("${project.buildDir}/testdriver_classes/${testRelease}j")
-
-      doFirst {
-        project.mkdir testReportDirectory
-      }
-
-      main = testClass
-      def testargs = [testDir, testCatalog,
-                      "-exceptions:${testEx}",
-                      "-reportfilename:${testReportFilename}.xml",
-                      "-o:${testReportDirectory}",
-                      "-lang:${testLang}",
-                      "-bytecode:${testByteCode ? 'on' : 'off'}"]
-      if (testExport) {
-        testargs += ["-export"]
-      }
-      if (testJit) {
-        testargs += ["-jit"]
-      }
-
-      testargs += testOptions
-
-      //println(testargs)
-
-      args testargs
-    }
-
-    project.task("debug_${testTaskName}", type: JavaExec) {
-      inputs.files project.fileTree(dir: "${project.projectDir}/src")
-      outputs.file "${testReportDirectory}/${testReportFilename}.xml"
-      outputs.upToDateWhen { false }
-
-      def msg = "Debug the XSLT 3.0 extra test suite driver for ${testLang} with ${testRelease.toUpperCase()}"
-      if (testByteCode != null || testExport != null || testJit != null) {
-        msg += " (bytecode: ${testByteCode ? 'on' : 'off'}, export: ${testExport ? 'yes' : 'no'}, "
-        msg += "jit: ${testJit ? 'on' : 'off'})"
-      }
-      description msg
-      dependsOn "compileJava"
-      classpath = project.configurations.testDrivers \
-      + project.files("${project.buildDir}/classes/java/main")
-
-      doFirst {
-        project.mkdir testReportDirectory
-      }
-
-      main = testClass
-      def testargs = [testDir, testCatalog,
-                      "-exceptions:${testEx}",
-                      "-reportfilename:${testReportFilename}.xml",
-                      "-o:${testReportDirectory}",
-                      "-lang:${testLang}",
-                      "-bytecode:${testByteCode ? 'on' : 'off'}"]
-      if (testExport) {
-        testargs += ["-export"]
-      }
-      if (testJit) {
-        testargs += ["-jit"]
-      }
-
-      testargs += testOptions
-      args testargs
-    }
-
-    Task t = project.tasks.findByName("xslt30ExtraTestsJava")
-    if (t) {
-      t.dependsOn testTaskName
-    }
-    t = project.tasks.findByName("${testRelease}jTestSuitesJava")
-    if (t) {
-      t.dependsOn testTaskName
-    }
-  }
-
-  def xsd(Closure cl) {
-    reset("xsd")
-    cl.delegate = this
-    cl()
-
-    require("language", testLang)
-    require("directory", testDir)
-    require("release", testRelease)
-    forbid("unfolded", testUnfolded)
-    forbid("jit", testJit)
-    forbid("export", testExport)
-
-    testCatalog = testCatalog ?: "catalog.xml"
-    testTaskName = testTaskName ?: computeTaskName()
-    testClass = testClass ?: computeClass()
-    testEx = testEx ?: computeExceptions()
-
-    def computedReportFn = "${project.buildDir}/test-results/${testRelease}j/xsd/${project.ext.DSTAMP}"
-    computedReportFn = "${computedReportFn}/SaxonResults${project.ext.saxonVersion}-${testLang}"
-    if (testByteCode != null && testByteCode) {
-      computedReportFn += "_bc${testByteCode ? 'on' : 'off'}"
-    }
-
-    def computedErrorFn = "${project.buildDir}/test-results/${testRelease}j/xsd/${project.ext.DSTAMP}"
-    computedErrorFn = "${computedErrorFn}/SaxonFailures${project.ext.saxonVersion}-${testLang}"
-    if (testByteCode != null && testByteCode) {
-      computedErrorFn += "_bc${testByteCode ? 'on' : 'off'}"
-    }
-
-    def testReport = null
-    if (project.findProperty("tdReport") != null) {
-      testReport = new File(project.findProperty("tdReport"))
-    } else {
-      testReport = new File(computedReportFn)
-    }
-
-    testReportDirectory = getReportDirectory(testReport.getAbsolutePath())
-    testReportFilename = getReportFilename(testReport.getAbsolutePath())
-    def testErrorFilename = getReportFilename(new File(computedErrorFn).getAbsolutePath())
-
-    if (testDebug) {
-      dumpConfiguration()
-    }
-
-    if (!configOk) {
-      setupInvalidConfig(testTaskName)
-      return
-    }
-
-    project.task(testTaskName, type: JavaExec) {
-      inputs.files project.fileTree(dir: "${project.projectDir}/src")
-      outputs.file "${testReportDirectory}/${testReportFilename}.xml"
-      outputs.file "${testReportDirectory}/${testErrorFilename}.xml"
-      outputs.upToDateWhen { false }
-
-      def msg = "Run the XSD test suite driver for ${testLang} with ${testRelease.toUpperCase()}"
-      if (testByteCode != null) {
-        msg += " (bytecode: ${testByteCode ? 'on' : 'off'})"
-      }
-      description msg
-      dependsOn "${testRelease}jCompile", "${testRelease}j_compileTestDrivers", "cloneXsdTestSuite"
-      classpath = project.configurations.testDrivers \
-      + project.files("${project.buildDir}/classes/${testRelease}j") \
-      + project.files("${project.buildDir}/testdriver_classes/${testRelease}j")
-
-      doFirst {
-        project.mkdir testReportDirectory
-      }
-
-      main = testClass
-      def testargs = [testDir, testCatalog,
-                      "-exceptions:${testEx}",
-                      "-reportfilename:${testReportFilename}.xml",
-                      "-errorfilename:${testErrorFilename}.xml",
-                      "-local:${testReportDirectory}",
-                      "-summarizeresults:${project.projectDir}/src/test/extra/tools/summarize-results.xsl",
-                      "-v:${testLang}",
-                      "-bytecode:${testByteCode ? 'on' : 'off'}"]
-
-      testargs += testOptions
-
-      // println(testargs)
-
-      args testargs
-    }
-
-    project.task("debug_${testTaskName}", type: JavaExec) {
-      inputs.files project.fileTree(dir: "${project.projectDir}/src")
-      outputs.file "${testReportDirectory}/${testReportFilename}.xml"
-      outputs.file "${testReportDirectory}/${testErrorFilename}.xml"
-      outputs.upToDateWhen { false }
-
-      def msg = "Debug the XSD test suite driver for ${testLang} with ${testRelease.toUpperCase()}"
-      if (testByteCode != null) {
-        msg += " (bytecode: ${testByteCode ? 'on' : 'off'})"
-      }
-      description msg
-      dependsOn "compileJava", "cloneXsdTestSuite"
-      classpath = project.configurations.testDrivers \
-      + project.files("${project.buildDir}/classes/java/main")
-
-      doFirst {
-        project.mkdir testReportDirectory
-      }
-
-      main = testClass
-      def testargs = [testDir, testCatalog,
-                      "-exceptions:${testEx}",
-                      "-reportfilename:${testReportFilename}.xml",
-                      "-errorfilename:${testErrorFilename}.xml",
-                      "-local:${testReportDirectory}",
-                      "-summarizeresults:${project.projectDir}/src/test/extra/tools/summarize-results.xsl",
-                      "-v:${testLang}",
-                      "-bytecode:${testByteCode ? 'on' : 'off'}"]
-
-      testargs += testOptions
-
-      args testargs
-    }
-
-    Task t = project.tasks.findByName("XsdTestsJava")
-    if (t) {
-      t.dependsOn testTaskName
-    }
-    t = project.tasks.findByName("${testRelease}jTestSuitesJava")
-    if (t) {
-      t.dependsOn testTaskName
-    }
+    println("Summary: ${results}")
   }
 }
