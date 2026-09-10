@@ -78,6 +78,7 @@ ext {
   // Docker containers
   c_sqlserver = "sqlserver"
   dotnetex = null
+  csver = null
   csrid = null
   csplatform = null
 }

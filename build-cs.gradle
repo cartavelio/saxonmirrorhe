@@ -17,6 +17,8 @@ if (csplatform == null) {
   throw new GradleException("Unrecognized OS: ${systemOs}")
 }
 
+csver = "${saxonMajorVersion}.${saxonMinorVersion}.${saxonPatchVersion}"
+
 task eecs_featureKeys(
   type: JavaExec,
   description: "Construct the feature keys for Saxon-CS"
@@ -375,11 +377,9 @@ task eecs_dll(
 task dotnetTestDrivers(
   dependsOn: ['dotnetRelease']
 ) {
-  def sver = "${saxonMajorVersion}.${saxonMinorVersion}.${saxonPatchVersion}"
-
   inputs.file "${buildDir}/cs/bin/Release/net5.0/SaxonCS.dll"
   inputs.files fileTree(dir: "${projectDir}/src/test/cstestrunner")
-  outputs.file "${buildDir}/testdrivers/bin/Release/TestDrivers.${sver}.nupkg"
+  outputs.file "${buildDir}/testdrivers/bin/Release/TestDrivers.${csver}.nupkg"
 
   doLast {
     copy {
@@ -400,7 +400,7 @@ task dotnetTestDrivers(
       workingDir = "${projectDir}/build/testdrivers"
       commandLine dotnetex, 'build', 'TestDrivers.sln', '--verbosity', 'Normal',
         '--configuration', 'Release',  '/nodereuse:false', '--no-restore',
-        "-p:Version=${sver}", "-p:PackageVersion=${sver}"
+        "-p:Version=${csver}", "-p:PackageVersion=${csver}"
     }
   }
 }
@@ -408,11 +408,9 @@ task dotnetTestDrivers(
 task dotnetExamples(
   dependsOn: ['dotnetRelease']
 ) {
-  def sver = "${saxonMajorVersion}.${saxonMinorVersion}.${saxonPatchVersion}"
-
   inputs.file "${buildDir}/cs/bin/Release/net5.0/SaxonCS.dll"
   inputs.files fileTree(dir: "${projectDir}/src/samples/cs/Examples.cs")
-  outputs.file "${buildDir}/examples/bin/Release/Examples.${sver}.nupkg"
+  outputs.file "${buildDir}/examples/bin/Release/Examples.${csver}.nupkg"
 
   doLast {
     copy {
@@ -433,7 +431,7 @@ task dotnetExamples(
       workingDir = "${buildDir}/examples"
       commandLine dotnetex, 'build', 'Examples.sln', '--verbosity', 'Normal',
         '--configuration', 'Release',  '/nodereuse:false', '--no-restore',
-        "-p:Version=${sver}", "-p:PackageVersion=${sver}"
+        "-p:Version=${csver}", "-p:PackageVersion=${csver}"
     }
   }
 }
@@ -445,7 +443,6 @@ task dotnetRelease(
   inputs.files fileTree(dir: "${projectDir}/src/main/saxon-cs")
   outputs.file "${buildDir}/cs/bin/Release/net5.0/SaxonCS.dll"
 
-  def sver = "${saxonMajorVersion}.${saxonMinorVersion}.${saxonPatchVersion}"
   doLast {
     copy {
       // Copy the csproj and sln files, renaming them so that the release
@@ -471,12 +468,13 @@ task dotnetRelease(
       commandLine dotnetex, 'restore', 'SaxonCS.sln', '--verbosity', 'Normal'
     }
   }
+
   doLast {
     exec {
       workingDir = "${buildDir}/cs"
       commandLine dotnetex, 'build', 'SaxonCS.sln', '--verbosity', 'Normal',
         '--configuration', 'Release',  '/nodereuse:false', '--no-restore',
-        "-p:Version=${sver}", "-p:PackageVersion=${sver}"
+        "-p:Version=${csver}", "-p:PackageVersion=${csver}"
     }
   }
 }
@@ -491,7 +489,8 @@ task dotnetPublish(
     exec {
       workingDir = "${buildDir}/cs"
       commandLine dotnetex, 'publish', 'SaxonCS.sln',
-        '--configuration', 'Release', '-r', csrid
+        '--configuration', 'Release', '-r', csrid,
+        "-p:Version=${csver}", "-p:PackageVersion=${csver}"
     }
   }
   doLast {
