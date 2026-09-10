@@ -140,8 +140,23 @@ as required; implementing-classes key correction
     </xsl:template>
 
 
-    <!-- not yet required so omit from output -->
-    <xsl:template match="interface/fields|interface/methods"/>
+    <!-- include inherited fields and methods -->
+    <xsl:template match="interface/fields">
+        <fields>
+            <xsl:apply-templates select="field">
+                <xsl:sort select="upper-case(.)"/>
+            </xsl:apply-templates>
+        </fields>
+    </xsl:template>
+    
+    <xsl:template match="interface/methods">
+        <methods>
+            <xsl:apply-templates select="method">
+                <xsl:sort select="upper-case(.)"/>
+            </xsl:apply-templates>
+        </methods>
+    </xsl:template>
+    
 
     <!-- we shouldn't show importedtypes - only for resolving tag links -->
     <xsl:template match="importedTypes"/>
