@@ -595,7 +595,11 @@ public class XMLEmitter extends Emitter {
             } else {
                 writer.write("=");
                 writer.write(delimiter);
-                writeEscape(StringView.tidy(value), true);
+                if (ReceiverOption.contains(properties, ReceiverOption.DISABLE_ESCAPING)) {
+                    writer.write(value);
+                } else {
+                    writeEscape(StringView.tidy(value), true);
+                }
                 writer.write(delimiter);
             }
         } catch (java.io.IOException err) {

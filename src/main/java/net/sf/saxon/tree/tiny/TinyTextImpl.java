@@ -45,11 +45,11 @@ public final class TinyTextImpl extends TinyNodeImpl {
      */
 
     public static UnicodeString getStringValue(TinyTree tree, int nodeNr) {
-        return tree.textChunks[tree.alpha[nodeNr]];
-//        int start = tree.alpha[nodeNr];
-//        int len = tree.beta[nodeNr];
-//        //System.err.println("TinyTextImpl.getXdmStringValue node=" + nodeNr + " s=" + start + " len=" + len);
-//        return tree.textBuffer.substring(start, start + len);
+//        return tree.textChunks[tree.alpha[nodeNr]];
+        int start = tree.alpha[nodeNr];
+        int len = tree.beta[nodeNr];
+        //System.err.println("TinyTextImpl.getXdmStringValue node=" + nodeNr + " s=" + start + " len=" + len);
+        return tree.textBuffer.substring(start, start + len);
     }
 
     /**

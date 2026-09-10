@@ -271,6 +271,8 @@ public abstract class FeatureCode {
     /** @see Feature#ALLOW_UNRESOLVED_SCHEMA_COMPONENTS  */
     public final static int ALLOW_UNRESOLVED_SCHEMA_COMPONENTS = 126;
 
+    public final static int ZIP_URI_PATTERN = 127;
+
 
     public final static int MAX = 127;
 

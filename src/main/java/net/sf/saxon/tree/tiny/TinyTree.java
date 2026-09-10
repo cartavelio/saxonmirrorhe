@@ -41,11 +41,9 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
 
     // the contents of the document
 
-    //protected LargeTextBuffer textBuffer;
+    protected LargeTextBuffer textBuffer;
     /*@Nullable*/
     protected UnicodeString commentBuffer = null; // created when needed
-    protected UnicodeString[] textChunks;
-    protected int textChunksUsed = 0;
 
 
     protected int numberOfNodes = 0;    // excluding attributes and namespaces
@@ -204,9 +202,9 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
         namespaceMaps = new NamespaceMap[namespaces];
 
         //charBuffer = characters > 65000 ? new LargeStringBuffer() : new StringBuilder(characters);
-        //textBuffer = new LargeTextBuffer();
-        textChunks = new UnicodeString[16]; // TODO: use the stats
-        textChunksUsed = 0;
+        textBuffer = new LargeTextBuffer();
+        //textChunks = new UnicodeString[16]; // TODO: use the stats
+        //textChunksUsed = 0;
 
         setConfiguration(config);
     }
@@ -283,15 +281,15 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
         }
     }
 
-    private void ensureTextCapacity(int needed) {
-        if (textChunks.length < textChunksUsed + needed) {
-            int k = Math.max(textChunksUsed * 2, textChunksUsed + needed);
-            if (k == 0) {
-                k = 10;
-            }
-            textChunks = Arrays.copyOf(textChunks, k);
-        }
-    }
+//    private void ensureTextCapacity(int needed) {
+//        if (textChunks.length < textChunksUsed + needed) {
+//            int k = Math.max(textChunksUsed * 2, textChunksUsed + needed);
+//            if (k == 0) {
+//                k = 10;
+//            }
+//            textChunks = Arrays.copyOf(textChunks, k);
+//        }
+//    }
 
     /**
      * Get the prefix pool
@@ -386,9 +384,9 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      */
 
     void appendChars(UnicodeString chars) {
-        //chars.supplyContent(textBuffer, 0, chars.length());
-        ensureTextCapacity(1);
-        textChunks[textChunksUsed++] = chars;
+        chars.supplyContent(textBuffer, 0, chars.length());
+//        ensureTextCapacity(1);
+//        textChunks[textChunksUsed++] = chars;
     }
 
     /**
@@ -465,7 +463,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
 
         prefixPool.condense();
 
-        statistics.updateStatistics(numberOfNodes, numberOfAttributes, numberOfNamespaces, textChunksUsed);
+        statistics.updateStatistics(numberOfNodes, numberOfAttributes, numberOfNamespaces, textBuffer.length());
 //        System.err.println("STATS: " + averageNodes + ", " + averageAttributes + ", "
 //                + averageNamespaces + ", " + averageCharacters);
 
@@ -977,10 +975,10 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
                 if (depth[next] <= level) {
                     return StringItem.ZERO_LENGTH_UNTYPED;
                 } else if (nodeKind[next] == Type.TEXT && depth[next + 1] <= level) {
-                    return new UntypedAtomicValue(textChunks[alpha[next]]);
-//                    int length = beta[next];
-//                    int start = alpha[next];
-//                    return new UntypedAtomicValue(textBuffer.substring(start, start + length));
+                    //return new UntypedAtomicValue(textChunks[alpha[next]]);
+                    int length = beta[next];
+                    int start = alpha[next];
+                    return new UntypedAtomicValue(textBuffer.substring(start, start + length));
                 } else if (nodeKind[next] == Type.WHITESPACE_TEXT && depth[next + 1] <= level) {
                     long compressedValue = ((long) alpha[next] << 32) | ((long) beta[next] & 0xffffffffL);
                     return new UntypedAtomicValue(new CompressedWhitespace(compressedValue));
@@ -1460,7 +1458,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      */
 
     public void showSize() {
-        System.err.println("Tree size: " + numberOfNodes + " nodes, " + textChunksUsed + " text chunks, " +
+        System.err.println("Tree size: " + numberOfNodes + " nodes, " + textBuffer.length() + " characters, " +
                                    numberOfAttributes + " attributes");
     }
 
@@ -1586,9 +1584,9 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      * @return the character buffer
      */
 
-//    public LargeTextBuffer getCharacterBuffer() {
-//        return textBuffer;
-//    }
+    public LargeTextBuffer getCharacterBuffer() {
+        return textBuffer;
+    }
 
     /**
      * Get the character buffer used to hold all the comment data of the document

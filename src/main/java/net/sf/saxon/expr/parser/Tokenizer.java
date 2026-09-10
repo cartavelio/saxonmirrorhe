@@ -479,6 +479,13 @@ public final class Tokenizer {
                     nextToken = Token.AT;
                     return;
                 case '?':
+                    if (inputOffset < inputLength) {
+                        if (input.charAt(inputOffset) == '?') {
+                            inputOffset++;
+                            nextToken = Token.QMARK_QMARK;
+                            return;
+                        }
+                    }
                     nextToken = Token.QMARK;
                     return;
                 case '[':
@@ -572,11 +579,16 @@ public final class Tokenizer {
                     nextToken = Token.EQUALS;
                     return;
                 case '!':
-                    if (inputOffset < inputLength
-                            && input.charAt(inputOffset) == '=') {
-                        inputOffset++;
-                        nextToken = Token.NE;
-                        return;
+                    if (inputOffset < inputLength) {
+                        if (input.charAt(inputOffset) == '=') {
+                            inputOffset++;
+                            nextToken = Token.NE;
+                            return;
+                        } else if (input.charAt(inputOffset) == '!') {
+                            inputOffset++;
+                            nextToken = Token.BANG_BANG;
+                            return;
+                        }
                     }
                     nextToken = Token.BANG;
                     return;
@@ -945,6 +957,8 @@ public final class Tokenizer {
                 return Token.AS;
             case "before":
                 return Token.BEFORE;
+            case "by":
+                return Token.BY;
             case "case":
                 return Token.CASE;
             case "default":

@@ -43,6 +43,7 @@ public class ForEachGroup extends Instruction
     public static final int GROUP_ADJACENT = 1;
     public static final int GROUP_STARTING = 2;
     public static final int GROUP_ENDING = 3;
+    public static final int GROUP_BREAKING_WHEN = 4;
 
     private final byte algorithm;
     private int keyItemType;
@@ -689,6 +690,10 @@ public class ForEachGroup extends Instruction
                 break;
             case GROUP_ENDING:
                 groupIterator = new GroupEndingIterator(select, (Pattern) getGroupingKey(), context);
+                break;
+            case GROUP_BREAKING_WHEN:
+                Function breakWhen = (Function)getGroupingKey().evaluateItem(context);
+                groupIterator = new GroupBreakingIterator(select, breakWhen, context);
                 break;
             default:
                 throw new AssertionError("Unknown grouping algorithm");

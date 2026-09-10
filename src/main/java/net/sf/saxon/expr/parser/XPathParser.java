@@ -750,8 +750,29 @@ public class XPathParser {
                 // else drop through
 
             default:
-                return parseBinaryExpression(parseUnaryExpression(), 4);
+                Expression e1 = parseBinaryExpression(parseUnaryExpression(), 4);
+                // Process ternary conditional
+                if (t.currentToken == Token.QMARK_QMARK) {
+                    if (!allowSaxonExtensions) {
+                        grumble("Ternary conditionals (A ?? B !! C) require Saxon extensions to be enabled");
+                    }
+                    return parseTernaryExpression(e1);
+                }
+                return e1;
         }
+    }
+
+    /**
+     * Parse a ternary conditional expression
+     */
+
+    private Expression parseTernaryExpression(Expression condition) throws XPathException {
+        nextToken();
+        Expression e2 = parseExprSingle();
+        expect(Token.BANG_BANG);
+        nextToken();
+        Expression e3 = parseExprSingle();
+        return Choose.makeConditional(condition, e2, e3);
     }
 
     /**
@@ -876,6 +897,9 @@ public class XPathParser {
 
     public static int operatorPrecedence(int operator) {
         switch (operator) {
+            case Token.QMARK_QMARK:
+            case Token.BANG_BANG:
+                return 3;
             case Token.OR:
             case Token.OR_ELSE:
                 return 4;
@@ -900,33 +924,36 @@ public class XPathParser {
                 return 6;
             case Token.CONCAT:
                 return 7;
-            case Token.TO:
+            case Token.BY:
+                // parse (A BY B TO C) as (A BY (B TO C)) though this doesn't reflect the semantics
                 return 8;
+            case Token.TO:
+                return 9;
             case Token.PLUS:
             case Token.MINUS:
-                return 9;
+                return 10;
             case Token.MULT:
             case Token.DIV:
             case Token.IDIV:
             case Token.MOD:
-                return 10;
-            case Token.OTHERWISE:
                 return 11;
-            case Token.UNION:
+            case Token.OTHERWISE:
                 return 12;
+            case Token.UNION:
+                return 13;
             case Token.INTERSECT:
             case Token.EXCEPT:
-                return 13;
-            case Token.INSTANCE_OF:
                 return 14;
-            case Token.TREAT_AS:
+            case Token.INSTANCE_OF:
                 return 15;
-            case Token.CASTABLE_AS:
+            case Token.TREAT_AS:
                 return 16;
-            case Token.CAST_AS:
+            case Token.CASTABLE_AS:
                 return 17;
-            case Token.ARROW:
+            case Token.CAST_AS:
                 return 18;
+            case Token.ARROW:
+                return 19;
             // remainder commented out because not used in precedence parsing (but perhaps they could be)
 //            case Token.BANG:
 //                return 20;
@@ -966,6 +993,11 @@ public class XPathParser {
             case Token.PRECEDES:
             case Token.FOLLOWS:
                 return new IdentityComparison(lhs, operator, rhs);
+            case Token.BY:
+                if (!allowSaxonExtensions) {
+                    grumble("Range operator 'by' requires Saxon extensions to be enabled");
+                }
+                return RangeExpression.makeSteppingExpression(lhs, rhs);
             case Token.TO:
                 return new RangeExpression(lhs, rhs);
             case Token.CONCAT: {
