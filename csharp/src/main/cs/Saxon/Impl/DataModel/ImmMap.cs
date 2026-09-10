@@ -34,14 +34,14 @@ namespace Saxon.Impl.DataModel {
                 = SCI.ImmutableDictionary.Create<AtomicMatchKey, SaxonKVP>();
 
             public virtual void put(Saxon.Hej.value.AtomicValue key, Saxon.Hej.om.GroundedValue value) {
-                imap = imap.Add(key.asMapKey(), new SaxonKVP(key, value));
+                imap = imap.Add(key.asMapKey(40), new SaxonKVP(key, value));
             }
             public virtual void put(string key, Saxon.Hej.om.GroundedValue value) {
                 put(new Saxon.Hej.value.StringValue(key), value);
             }
 
             protected virtual void put(SaxonKVP kvp) {
-                imap = imap.Add(kvp.key.asMapKey(), kvp);
+                imap = imap.Add(kvp.key.asMapKey(40), kvp);
             }
             
             public virtual bool contains(string key) {
@@ -51,7 +51,7 @@ namespace Saxon.Impl.DataModel {
                 return get(new Saxon.Hej.value.StringValue(key));
             }
             public virtual Saxon.Hej.om.GroundedValue get(Saxon.Hej.value.AtomicValue key) {
-                AtomicMatchKey matchKey = key.asMapKey();
+                AtomicMatchKey matchKey = key.asMapKey(40);
                 if (imap.ContainsKey(matchKey)) {
                     return imap[matchKey].value;
                 }
@@ -155,7 +155,7 @@ namespace Saxon.Impl.DataModel {
         }
 
         private AtomicMatchKey makeKey(AtomicValue key) {
-            return key.asMapKey();
+            return key.asMapKey(40);
         }
 
 
