@@ -219,6 +219,11 @@ public abstract class Verifier {
 
 
     private License configure(Reader reader, boolean embedded) {
+        // Historically, the verifier used the last Signature in the file for verification.
+        // In 2024, we introduced a new signature with a more modern hashing algorithm.
+        // To support verification using either signature, we place the new signature
+        // *before* the old one (so that it's included in the computation of the old one).
+        // The new signature is distinguished from the old with a new name.
         License license;
         Reader lineReader = makeLineReader(reader);
         try {
@@ -229,6 +234,7 @@ public abstract class Verifier {
             Properties features = new Properties();
             license = new License(features);
             String signature = "";
+            String signature2024 = "";
             while ((line = readLine(lineReader)) != null) {
                 if (line.trim().indexOf('#') == 0 || line.trim().indexOf('!') == 0) {
                     continue;
@@ -242,17 +248,31 @@ public abstract class Verifier {
                     value = "";
                 }
 
-                if (!"".equals(name)) {
+                if (!name.isEmpty()) {
                     features.setProperty(name, value);
 
-                    if ("Signature".equals(name)) {
+                    if ("Signature2024".equals(name)) {
+                        signature2024 = value;
+                        // We found a 2024 signature, so that's what we're going to use.
+                        // By not adding the Signature2024 line to the buffer, we're
+                        // guaranteeing that it won't validate with the old signature.
+                        // (An older version of Saxon won't recognize this line, so it'll be
+                        // added to the buffer and the old signature can be valid.)
+                    } else if ("Signature".equals(name)) {
                         signature = value;
                     } else {
                         buffer.append(name).append('=').append(value).append('\n');
                     }
                 }
             }
-            boolean valid = verify(buffer.toString(), signature);
+
+            final boolean valid;
+            if (!signature2024.isEmpty()) {
+                valid = verify2(buffer.toString(), signature2024);
+            } else {
+                valid = verify(buffer.toString(), signature);
+            }
+
             String licenseDesc = embedded ? "embedded license" : "license file";
             if (!valid) {
                 throw new LicenseException("Invalid " + licenseDesc + " found", LicenseException.INVALID);
@@ -379,6 +399,17 @@ public abstract class Verifier {
             throws LicenseException;
 
 
+    /**
+     * This method validates license data based on the V2 signature and the public key.
+     *
+     * @param data             the license data.
+     * @param signature        the digital signature
+     * @return a boolean whether or the license is valid.
+     * @throws LicenseException if a failure occurs in the verification process
+     */
+    protected abstract boolean verify2(String data, String signature)
+        throws LicenseException;
+
 
     protected static class License {
 
@@ -456,7 +487,6 @@ public abstract class Verifier {
         }
 
     }
-
 
     //#if CSHARP==false
     /**

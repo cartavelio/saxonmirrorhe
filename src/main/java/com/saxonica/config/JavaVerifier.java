@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 public class JavaVerifier extends Verifier {
@@ -31,6 +32,8 @@ public class JavaVerifier extends Verifier {
             "8C4BE6651020A69AFD533630172D6F96F928667D7705D46E56D364E8E967002A7D864BACB02225F52B271BA1F6522D98FF8299C6273B24B" +
             "C41202C8857897E46B40FD7624A9CB0CC9E8";
 
+
+    private static final String PUBLIC_KEY2 = "MCowBQYDK2VwAyEAuJ5NKT1yC2v1G1XomulNaQDbsM6Be/RUumghBAmg5dY=";
 
     private static final byte[] ENCODED_PUBLIC_KEY = convertHexToBinary(PUBLIC_KEY);
 
@@ -100,6 +103,34 @@ public class JavaVerifier extends Verifier {
             sig.update(data.getBytes(StandardCharsets.UTF_8));
             // Verify the data against the signature
             return sig.verify(convertHexToBinary(signature));
+        } catch (GeneralSecurityException e) {
+            throw new LicenseException("Failed to verify license signature: " + e.getMessage(), LicenseException.INVALID);
+        }
+    }
+
+    /**
+     * This method validates license data based on the signature and the public key.
+     *
+     * @param data             the license data to be verified
+     * @param signature        the digital signature, in X509 format (ASN.1 DER encoding)
+     * @return a boolean indicating whether or not the license is valid.
+     * @throws LicenseException if a failure occurs in the verification process
+     */
+    protected boolean verify2(String data, String signature)
+            throws LicenseException {
+        try {
+            // Create an object to hold the signature
+            Signature sig = Signature.getInstance("ED25519");
+            // Create an object to hold the public key, and populate it with the known key
+            byte[] encoded = Base64.getDecoder().decode(PUBLIC_KEY2);
+            PublicKey key = KeyFactory.getInstance("ED25519").generatePublic(new X509EncodedKeySpec(encoded));
+            // Supply the public key to the Signature object
+            sig.initVerify(key);
+            // Supply the data to be verified to the Signature object
+            sig.update(data.getBytes(StandardCharsets.UTF_8));
+            // Verify the data against the signature
+            encoded = Base64.getDecoder().decode(signature);
+            return sig.verify(encoded);
         } catch (GeneralSecurityException e) {
             throw new LicenseException("Failed to verify license signature: " + e.getMessage(), LicenseException.INVALID);
         }
