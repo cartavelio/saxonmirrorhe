@@ -127,12 +127,12 @@
                <p>-ext:(on|off)</p>
             </td>
             <td>
-               <p>If <code>ext:off</code> is specified, suppress calls on dynamically-loaded
-                  external Java functions. This does not affect calls on integrated extension
-                  functions, including Saxon and EXSLT extension functions. This option is useful
+               <p>If <code>ext:off</code> is specified, suppress access to certain external resources.
+                  Specifically it sets the configuration option <a class="feature" href="ALLOW_EXTERNAL_FUNCTIONS"/>,
+                  whose effect is rather wider than the name suggests. This option is useful
                   when loading an untrusted schema, perhaps from a remote site using an
-                  <code>http://</code> URL; it ensures that the schema cannot call arbitrary Java
-                  methods and thereby gain privileged access to resources on your machine. </p>
+                  <code>http://</code> URL; it ensures that the schema cannot call arbitrary
+                  Java methods and thereby gain privileged access to resources on your machine. </p>
             </td>
          </tr>
          <tr class="javaonly">
@@ -424,6 +424,7 @@
             </td>
             <td>
                <p>Display command syntax.</p>
+               <p><i>Note: under some shell languages, this needs to be escaped as <code>-\?</code>.</i></p>
             </td>
          </tr>
          <tr>
@@ -431,7 +432,8 @@
                <p>--?</p>
             </td>
             <td>
-               <p>Display a list of features that are available using the <code>--feature:value</code> syntax</p>
+               <p>Display a list of features that are available using the <code>--feature:value</code> syntax.</p>
+               <p><i>Note: under some shell languages, this needs to be escaped as <code>--\?</code>.</i></p>
             </td>
          </tr>
       </table> 

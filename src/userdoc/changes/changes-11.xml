@@ -468,8 +468,8 @@
         
         
         <p>Implemented <code>xsl:for-each-group break-when="expression"</code>. For example, <code>&lt;xsl:for-each-group
-            break-when="sum($group!@length) + $next!@length) gt 30" ...&gt;</code> starts a new group based on a calculation
-            applied to the current candidate group.</p>
+            break-when="sum($group!@length) + $next!@length) gt 30" ...&gt;</code> starts a new group when the total of the <code>@length</code>
+            attributes of the elements in a group would otherwise exceed 30.</p>
         
         <p>Implemented the proposed <code>array</code> and <code>map</code> attributes as alternatives to <code>select</code>
         on <code>xsl:for-each</code>, <code>xsl:iterate</code>, and <code>xsl:for-each-group</code>, to allow these instructions
