@@ -17,6 +17,7 @@ import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.FunctionItem;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
@@ -74,6 +75,9 @@ public class UnboundFunctionLibrary implements FunctionLibrary {
             // The function call matched a private function in another module; don't attempt a late binding
             return null;
         }
+        if (NamespaceUri.isReserved(functionName.getComponentName().getNamespaceUri())) {
+            return null;
+        }
         UnboundFunctionCallDetails details = new UnboundFunctionCallDetails(functionName, arguments, keywords, env);
         UserFunctionCall ufc = new UserFunctionCall(details);
         unboundFunctionReferences.add(ufc);
@@ -96,6 +100,9 @@ public class UnboundFunctionLibrary implements FunctionLibrary {
     @Override
     public FunctionItem getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) {
         if (resolving) {
+            return null;
+        }
+        if (NamespaceUri.isReserved(functionName.getComponentName().getNamespaceUri())) {
             return null;
         }
         XQueryFunctionLibrary.UnresolvedCallable uc = new XQueryFunctionLibrary.UnresolvedCallable(functionName);
