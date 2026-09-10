@@ -247,27 +247,7 @@ public class TypeHierarchy {
                 ChoiceItemType c1 = t1 instanceof ChoiceItemType ? (ChoiceItemType) t1 : ChoiceItemType.of(t1);
                 ChoiceItemType c2 = t2 instanceof ChoiceItemType ? (ChoiceItemType) t2 : ChoiceItemType.of(t2);
                 return choiceItemRelationship(c1, c2);
-//                boolean allSubsumes = true;
-//                boolean allDisjoint = true;
-//                for (ItemType it : ((ChoiceItemType)t2).getMemberTypes()) {
-//                    Affinity a0 = relationship(t1, it);
-//                    if (a0 == SAME_TYPE || a0 == SUBSUMED_BY) {
-//                        return SUBSUMED_BY;
-//                    }
-//                    if (a0 != DISJOINT) {
-//                        allDisjoint = false;
-//                    }
-//                    if (a0 != SUBSUMES) {
-//                        allSubsumes = false;
-//                    }
-//                }
-//                if (allDisjoint) {
-//                    return DISJOINT;
-//                }
-//                if (allSubsumes) {
-//                    return SUBSUMES;
-//                }
-//                return OVERLAPS;
+
             } else if (t1.isPlainType()) {
                 if (t2 instanceof NodeTest || t2 instanceof FunctionItemType || t2 instanceof JavaExternalObjectType) {
                     return DISJOINT;
