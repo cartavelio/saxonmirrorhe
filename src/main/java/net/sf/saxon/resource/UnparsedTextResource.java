@@ -88,7 +88,7 @@ public class UnparsedTextResource implements Resource {
     public String getContent() throws XPathException {
         if (unparsedText == null) {
             try {
-                InputStream stream = Loader.urlStream(new URL(href));
+                InputStream stream = ResourceLoader.urlStream(new URL(href));
                 String enc = encoding;
                 if (enc == null) {
                     enc = EncodingDetector.inferStreamEncoding(stream, null);

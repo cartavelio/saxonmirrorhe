@@ -8,6 +8,7 @@
 package net.sf.saxon.query;
 
 import net.sf.saxon.functions.UnparsedTextFunction;
+import net.sf.saxon.resource.ResourceLoader;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -59,7 +60,7 @@ public class QueryReader {
         } else if (ss.getSystemId() != null) {
             try {
                 URL url = new URL(ss.getSystemId());
-                InputStream stream = url.openStream();
+                InputStream stream = ResourceLoader.urlStream(url);
                 stream = InputStreamMarker.ensureMarkSupported(stream);
                 String encoding = readEncoding(stream);
                 queryText = readInputStream(stream, encoding, charChecker);

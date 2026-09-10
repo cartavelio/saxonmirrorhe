@@ -233,7 +233,7 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
          * @throws IOException if the input cannot be read
          */
         public InputStream getInputStream() throws IOException {
-            return Loader.urlStream(new URL(resourceUri));
+            return ResourceLoader.urlStream(new URL(resourceUri));
         }
 
         /**
@@ -313,7 +313,7 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
                     inputDetails.contentType = guessContentTypeFromName(resourceURI);
                 }
             } else {
-                URLConnection connection = Loader.urlConnection(uri.toURL());
+                URLConnection connection = ResourceLoader.urlConnection(uri.toURL());
                 inputDetails.contentType = connection.getContentType();
                 inputDetails.encoding = connection.getContentEncoding();
                 for (String param : inputDetails.contentType.replace(" ", "").split(";")) {
@@ -337,7 +337,7 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
                         stream = new ByteArrayInputStream(inputDetails.binaryContent);
                     }
                 } else {
-                    stream = Loader.urlStream(uri.toURL());
+                    stream = ResourceLoader.urlStream(uri.toURL());
                 }
                 inputDetails.contentType = guessContentTypeFromContent(stream);
                 stream.close();

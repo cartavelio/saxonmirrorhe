@@ -61,7 +61,9 @@ public abstract class Sender {
             options = new ParseOptions(options);
         }
         String systemId = source.getSystemId();
+        AugmentedSource originalAugmentedSource = null;
         if (source instanceof AugmentedSource) {
+            originalAugmentedSource = (AugmentedSource)source;
             options.merge(((AugmentedSource) source).getParseOptions());
             systemId = source.getSystemId();
             source = ((AugmentedSource) source).getContainedSource();
@@ -100,6 +102,10 @@ public abstract class Sender {
         }
 
         ((ActiveSource) source).deliver(next, options);
+
+        if (originalAugmentedSource != null && originalAugmentedSource.isPleaseCloseAfterUse()) {
+            originalAugmentedSource.close();
+        }
 
 
 //

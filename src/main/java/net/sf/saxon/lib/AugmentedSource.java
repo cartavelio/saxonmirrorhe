@@ -509,7 +509,7 @@ public class AugmentedSource implements Source {
 
 
     /**
-     * Set whether or not the user of this Source is encouraged to close it as soon as reading is finished.
+     * Say whether the user of this Source is encouraged to close it as soon as reading is finished.
      * Normally the expectation is that any Stream in a StreamSource will be closed by the component that
      * created the Stream. However, in the case of a Source returned by a URIResolver, there is no suitable
      * interface (the URIResolver has no opportunity to close the stream). Also, in some cases such as reading
@@ -526,7 +526,7 @@ public class AugmentedSource implements Source {
     }
 
     /**
-     * Determine whether or not the user of this Source is encouraged to close it as soon as reading is
+     * Ask whether the user of this Source is encouraged to close it as soon as reading is
      * finished.
      *
      * @return true if the source should be closed as soon as it has been consumed

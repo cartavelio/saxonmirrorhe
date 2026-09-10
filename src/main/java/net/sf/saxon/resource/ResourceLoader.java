@@ -20,7 +20,7 @@ import java.util.zip.GZIPInputStream;
  * This method follows HTTP 301 and 302 redirects.
  */
 
-public class Loader {
+public class ResourceLoader {
     /**
      * The maximum number of redirects to follow before throwing an IOException.
      * If you allow the underlying Java URL class to follow redirects, it gives
@@ -87,7 +87,7 @@ public class Loader {
      * @throws IOException If more than MAX_REDIRECTS are occur or if a loop is detected.
      */
     public static InputStream urlStream(URL url) throws IOException  {
-        URLConnection conn = Loader.urlConnection(url);
+        URLConnection conn = ResourceLoader.urlConnection(url);
         InputStream inputStream =  conn.getInputStream();
         String contentEncoding = conn.getContentEncoding();
         if ("gzip".equals(contentEncoding)) {

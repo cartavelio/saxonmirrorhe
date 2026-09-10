@@ -18,7 +18,7 @@ import net.sf.saxon.functions.URIQueryParameters;
 import net.sf.saxon.om.SpaceStrippingRule;
 import net.sf.saxon.resource.BinaryResource;
 import net.sf.saxon.resource.DataURIScheme;
-import net.sf.saxon.resource.Loader;
+import net.sf.saxon.resource.ResourceLoader;
 import net.sf.saxon.resource.UnparsedTextResource;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.Maker;
@@ -354,7 +354,7 @@ public class StandardURIResolver implements NonDelegatingURIResolver {
         }
 
         try {
-            InputStream is = Loader.urlStream(new URL(uriString));
+            InputStream is = ResourceLoader.urlStream(new URL(uriString));
             source.setInputSource(new InputSource(is));
             source.setSystemId(uriString);
         } catch (IOException e) {
