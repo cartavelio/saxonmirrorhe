@@ -1,13 +1,11 @@
 package com.saxonica.functions.extfn.EXPathArchive;
 
-import com.saxonica.functions.extfn.EXPathBinary;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.ma.map.HashTrieMap;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.om.ZeroOrMore;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.QName;
 import net.sf.saxon.sapling.SaplingElement;
@@ -29,6 +27,7 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CoderResult;
 import java.nio.charset.CodingErrorAction;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.zip.*;
@@ -316,14 +315,18 @@ public class Archive {
 
     public static ArchiveType archiveType(Base64BinaryValue in)
             throws XPathException {
-        Base64BinaryValue zipID = new Base64BinaryValue(new byte[]{0x50, 0x4b, 0x3, 0x4});
-        Base64BinaryValue gzipID = new Base64BinaryValue(new byte[]{0x1f, (byte) 0x8b});
-        if (EXPathBinary.part(new One(in), One.integer(0), One.integer(4)).head().equals(zipID)) {
+        byte[] supplied = in.getBinaryValue();
+
+        byte[] zipID = new byte[]{0x50, 0x4b, 0x3, 0x4};
+        if (Arrays.equals(supplied, 0, 4, zipID, 0, 4)) {
             return ArchiveType.ZIP;
         }
-        if (EXPathBinary.part(new One(in), One.integer(0), One.integer(2)).head().equals(gzipID)) {
+
+        byte[] gzipID = new byte[]{0x1f, (byte) 0x8b};
+        if (Arrays.equals(supplied, 0, 2, gzipID, 0, 2)) {
             return ArchiveType.GZIP;
         }
+
         return ArchiveType.UNKNOWN;
     }
 

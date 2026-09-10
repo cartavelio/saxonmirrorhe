@@ -425,7 +425,7 @@ public abstract class SchemaElement extends ElementImpl {
      */
 
     protected void warning(String err) {
-        XmlProcessingIncident exception = new XmlProcessingIncident(err, SaxonErrorCode.SXWN9009, this).asWarning();
+        XmlProcessingIncident exception = new XmlProcessingIncident(err, SaxonErrorCode.SXWN9018, this).asWarning();
         ErrorReporter reporter = getSchemaNodeFactory().getPipelineConfiguration().getErrorReporter();
         reporter.report(exception);
     }

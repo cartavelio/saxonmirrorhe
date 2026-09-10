@@ -23,7 +23,7 @@ import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.iter.TextLinesIterator;
 import net.sf.saxon.type.AnyItemType;
-import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.BuiltInAtomicType;        
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntPredicateLambda;
 import org.jetbrains.annotations.NotNull;
@@ -1041,10 +1041,8 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
                 }
             }
         } catch (URISyntaxException e) {
-            e.printStackTrace();
             throw new XPathException("URISyntax error in file path:" + path);
         } catch (IOException e) {
-            e.printStackTrace();
             throw new XPathException("IO error in file path:" + path);
         }
         // return null;
@@ -1218,6 +1216,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
         }
     }
 
+    @CSharpReplaceBody(code="System.IO.File.Copy(sourceFile.getPath(), destFile.getPath(), true);")
     private static void copyFile(File sourceFile, File destFile) throws XPathException {
         try {
             Files.copy(sourceFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
@@ -1262,7 +1261,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
             this.file = file;
             reader = new LineNumberReader(getInputStreamReader(file, encoding));
             uri = file.toURI();
-            checker = IntPredicateLambda.of(XMLCharacterData::isValid11);
+            checker = IntPredicateLambda.of(ch -> XMLCharacterData.isValid11(ch));
         }
 
         @Override
@@ -1285,6 +1284,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
      * @throws XPathException                               if the file cannot be read
      */
 
+    @CSharpReplaceBody(code="return file.getInputStreamReader(encoding);")
     private static Reader getInputStreamReader(File file, String encoding) throws XPathException {
         InputStream in = null;
         try {

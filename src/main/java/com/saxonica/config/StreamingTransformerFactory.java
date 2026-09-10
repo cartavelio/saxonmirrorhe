@@ -30,9 +30,7 @@ public class StreamingTransformerFactory extends EnterpriseTransformerFactory {
 
     public StreamingTransformerFactory() {
         super();
-//        EnterpriseConfiguration config = new EnterpriseConfiguration();
-//        config.setProcessor(this);
-//        setConfiguration(config);
+        getConfiguration().checkLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XSLT, "XSLT streaming", -1);
     }
 
     /**
