@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<release number="11.0" date="2029-12-31" xmlns="http://www.saxonica.com/ns/doc/changes">
+    
+    <!--<category name="documentation">
+        
+    </category>-->
+    
+    <category name="xslt30">
+      
+ 
+    </category>
+    
+    <category name="xpath31">
+      
+      <p>The higher-order functions optional feature is now available in Saxon-HE.</p>
+ 
+    </category>
+    
+    <category name="functions31">
+        
+ 
+    </category>
+    
+    <category name="s9api">
+        
+        <p>A new class <code>JsonBuilder</code> has been added, analagous to the <code>DocumentBuilder</code>. It can
+        be instantiated from a <code>Processor</code> using <code>Processor.newJsonBuilder()</code>, and allows
+        JSON documents to be parsed, returning an <code>XdmValue</code>, typically an <code>XdmMap</code> or
+        <code>XdmArray</code>.</p>
+        
+        <p>The <code>DocumentBuilder</code> class has two new methods <code>parse(Source, Destination)</code>
+        and <code>parse(File, Destination)</code> allowing parsed documents to be sent directly to a destination
+        such as a <code>Serializer</code> without building a tree in memory.</p>
+        
+ 
+    </category>
+    
+    <category name="spi">
+        
+        <h2>Strings</h2>
+        
+        <p>Extensive changes have been made to the internal representation of strings. There are a number of motivations
+        for this, including better Unicode support, capitalizing on improvements to string handling in Java 9, and most
+        notably, efficiency on the .NET platform: Saxon's extensive use of the Java <code>CharSequence</code> interface appears to translate
+        to very inefficient code on .NET.</p>
+        
+        <p>Most uses of <code>CharSequence</code> have been replaced by a new class <code>UniString</code>, which also replaces the
+            existing class <code>UnicodeString</code>. The <code>UniString</code> class has a number of implementations: all of them
+        are designed to be codepoint-addressible: they expose an indexable array of 32-bit codepoint values, and never use surrogate
+        pairs. The core implementation is <code>Twine</code>, which wraps an array of bytes, organized either as 1, 2, or 3 bytes
+        per character depending on the largest codepoint present in the string.</p>
+        
+        <p>The interface to the <code>UniString</code> class is future-proofed to accommodate strings containing more than 2^31
+        characters. That's not to say that Saxon can now support such long strings everywhere (for example, the regular expression
+        engine cannot handle such strings); but the groundwork has been laid.</p>
+        
+        <p>The class <code>StringValue</code>, used in previous releases to represent atomic values of type <code>xs:string</code>, 
+            <code>xs:anyURI</code>, and <code>xs:untypedAtomic</code>, is renamed <code>StringItem</code> (this is to eliminate the confusion
+        caused by having a method <code>getStringValue()</code> that returns a <code>String</code> rather then a <code>StringValue</code>).
+        More significantly, the implementation has changed: instead of wrapping a <code>CharSequence</code>, the class now wraps
+        a <code>UniString</code>.</p>
+        
+        <p>The method <code>Item.getStringValueCS()</code>, which returned the string value of an item as a <code>CharSequence</code>,
+            is dropped, and is replaced by a new method <code>Item.getUniStringValueCS()</code> which returns the value as a
+        <code>UniString</code>.</p>
+ 
+        <p>The effect of <code>toString()</code> on atomic values has changed: it now returns the result of casting the value
+        to a string (which is the same as the result of <code>getStringValue()</code>. To obtain the previous effect of the <code>toString()</code> method, use the new <code>show()</code>
+        method.</p>
+        
+        <p></p>
+        
+        <h2>Sequence and SequenceIterator</h2>
+        
+
+        <h2>NodeInfo</h2>
+  
+        
+        <h2>Receiver</h2>
+        
+ 
+        <h2>Miscellaneous</h2>
+        
+ 
+        <h2>Dropped interfaces</h2>
+        
+ 
+        <h2>Tracing and Diagnostics</h2>
+        
+        <p>A new class <code>SystemLogger</code> simplifies the task of sending all Saxon progress messages (as well
+        as <code>&lt;xsl:message&gt;</code> output) to a supplied <code>java.util.logging.Logger</code>.
+        This can be achieved using a call such as:</p>
+        
+        <p><code>configuration.setLogger(new SystemLogger(Logger.getAnonymousLogger()))</code></p>
+        
+ 
+        </category>
+    
+    <category name="extensibility">
+        
+ 
+    </category>
+    
+    <category name="optimization">
+      
+  
+    </category>
+
+    <category name="installation">
+ 
+         
+    </category>
+
+    <category name="serialization">
+        
+ 
+    </category>
+    
+    <category name="command-line">
+        
+        <h2>net.sf.saxon.Transform</h2>
+        
+        <p>A new argument <code>-json</code> is added to support transformation of a JSON input file. The argument
+        works like the <code>-s</code> argument for XML input: the value is the filename of a JSON file, which is parsed;
+        the resulting item (if non-null) becomes both the global context item and the initial match selection for the
+        transformation.</p>
+        
+        <h2>net.sf.saxon.Query</h2>
+        
+        <p>A new argument <code>-json</code> is added to support querying of a JSON input file. The argument
+            works like the <code>-s</code> argument for XML input: the value is the filename of a JSON file, which is parsed;
+            the resulting item (if non-null) becomes the global context item for the query.</p>
+        
+ 
+        <h2>Gizmo Commands</h2>
+        
+ 
+       
+        
+    </category>
+    
+    <category name="extensions">
+        
+        
+        
+        <h2>Extension Functions</h2>
+        
+        <p>The new function <code>saxon:unindexed()</code> returns the value of its argument unchanged,
+        and a static call will normally be optimized away. The purpose of the function is to suppress
+        optimization of a contained filter expression: for example <code>//x[@y=$z]</code> in Saxon-EE
+        would normally be optmized by building an index, but <code>saxon:unindexed(//x[@y=$z])</code>
+        suppresses this optimization. This may be useful if it is known, for example, (a) that the
+        expression will not be evaluated often enough to justify the cost of index construction, or (b)
+        that the sequence <code>//x</code> contains very few items, or (b)
+        that the predicate is likely to select a high proportion of the 
+        items in the filtered sequence.</p>
+        
+        <p>Added <code>saxon:slice()</code> based on proposed XPath 4.0 function fn:slice(). For example
+        <code>slice(("a", "b", "c"), -1)</code> returns <code>"c"</code></p>
+      
+ 
+        <h2>Extensions to Standard Functions</h2>
+        
+ 
+        
+
+ 
+        <h2>Extension Instructions</h2>
+        
+ 
+        <h2>XPath Syntax Extensions</h2>
+        
+        <p>The range expression <code>A to B</code> has been extended to allow <code>A by S to B</code>, for example
+        <code>1 by 3 to 10</code> returns <code>(1, 4, 7, 10)</code>. The step may be negative: <code>10 by -1 to 6</code>
+        returns <code>(10, 9, 8, 7, 6)</code>.</p>
+        
+        <p>The ternary conditional syntax <code>A ?? B !! C</code> is implemented (it is semantically equivalent
+        to <code>if (A) then B else C</code>). <emph>The syntax is borrowed from Perl6.</emph></p>
+        
+        <p>The Tuple type construct <code>tuple(x,y,x)</code> is now renamed <code>record(x,y,z)</code>, though
+        the old keyword is retained for compatibility. The flag "?" after a field name, indicating
+        that the field is optional, is now implemented; permitting an empty sequence is no longer
+        enough to make the field optional.</p>
+        
+ 
+        <h2>XSLT extensions</h2>
+        
+        <p>Implemented <code>xsl:for-each-group break-when="expression"</code>. For example,
+            <code>&lt;xsl:for-each-group break-when="sum($group!@length) + $next!@length) gt 30"</code>
+           starts a new group based on a calculation applied to the current candidate group.</p>
+        
+        <p>TODO: streamability.</p>
+        
+ 
+        
+        <h2>XSD extensions</h2>
+        
+ 
+ 
+       
+        
+
+        
+ 
+
+    
+    </category>
+    
+    <!--<category name="sql">
+  
+    </category>-->
+    
+    <category name="sourcedocs">
+        
+ 
+ 
+    </category>
+    
+    <category name="xsd11">
+ 
+        
+    </category>
+    
+    <!--<category name="xquery-update">
+        
+  
+    </category>-->
+    
+    <!--<category name="xquery31">
+        
+ </category>-->
+
+
+
+</release>

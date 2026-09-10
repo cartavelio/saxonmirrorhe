@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog xmlns="http://www.saxonica.com/ns/doc/catalog">
+  <section ref="about">About Saxon</section>
+  <section ref="changes">Change History</section>
+  <section ref="conditions">Licensing</section>
+  <section ref="configuration">Configuration</section>
+  <section ref="sourcedocs">Handling XML Documents</section>
+  <section ref="using-xsl">Using XSLT</section>
+  <section ref="using-xquery">Using XQuery</section>
+  <section ref="xpath-api">Using XPath</section>  
+  <section ref="schema-processing">Using XML Schema (XSD)</section>  
+  <section ref="gizmo">The Gizmo Utility</section>  
+  <section ref="dotnet">Saxon on .NET</section>
+  <section ref="extensibility">Extensibility Mechanisms</section>
+  <section ref="extensions">Saxon Extensions</section>
+  <section ref="samples">Sample Saxon Applications</section>
+  <section ref="sql-extension">Saxon SQL Extension</section>
+  <section ref="xsl-elements">Reference: XSLT Elements</section>
+  <section ref="expressions">Reference: XPath Syntax</section>
+  <section ref="functions">Reference: Function Library</section>
+  <section ref="conformance">Standards Conformance</section>
+  <section ref="javadoc">Java API</section>
+  <section ref="dotnetdoc">.NET API</section>
+  <section ref="help-system">Using this Documentation</section>
+</catalog>
