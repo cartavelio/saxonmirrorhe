@@ -13,7 +13,6 @@ cimport saxoncClasses
 from libcpp cimport bool
 from libcpp.string cimport string
 from libcpp.map cimport map
-from nodekind import *
 from cython.operator import dereference, postincrement
 from os.path import isfile
 
