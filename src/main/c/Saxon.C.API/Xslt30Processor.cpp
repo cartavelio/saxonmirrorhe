@@ -342,38 +342,7 @@ XdmValue * Xslt30Processor::transformFileToValue(const char* sourcefile,const ch
         processorDataRef = -1;
     }
     if (result > 0) {
-                int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)result);
-			    XdmValue * value = new XdmValue();
-          		XdmItem * xdmItem = nullptr;
-
-
-          			if(typeRef == 1) {
-          				xdmItem = new XdmAtomicValue(result);
-                        value->addXdmItem(xdmItem);
-                        return value;
-
-          			} else if(typeRef == 2) {
-          				xdmItem = new XdmNode(result);
-                        value->addXdmItem(xdmItem);
-                        return value;
-
-          			}  else if (typeRef == 4) {
-                        xdmItem =  new XdmMap(result);
-                        value->addXdmItem(xdmItem);
-                        return value;
-
-                    } else if (typeRef == 3) {
-                        xdmItem =  new XdmArray(result);
-                        value->addXdmItem(xdmItem);
-                        return value;
-
-                    } else if (typeRef == 5) {
-                        xdmItem =  new XdmFunctionItem(result);
-                        value->addXdmItem(xdmItem);
-                        return value;
-                    }
-				    value = new XdmValue(result, false);
-          		    return value;
+         return SaxonProcessor::makeXdmValueFromRef(result);
     }else if(result == -2) {
 
 			createException();

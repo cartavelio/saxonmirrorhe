@@ -436,7 +436,6 @@ void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
     	setProperty("resources", resources_dir.c_str());
 
         int additions = 0;
-        int iadd = 0;
         /*if(saxonMessageListenerRef != -1 ) {
             additions++;
         }
@@ -484,7 +483,6 @@ const char *XsltExecutable::applyTemplatesReturningString() {
     setProperty("resources", resources_dir.c_str());
 
     int additions = 0;
-    int iadd = 0;
     /*if(saxonMessageListenerRef != -1 ) {
         additions++;
     }
@@ -522,7 +520,7 @@ XdmValue *XsltExecutable::applyTemplatesReturningValue() {
     setProperty("resources", resources_dir.c_str());
 
     int additions = 0;
-    int iadd = 0;
+
     /*if(saxonMessageListenerRef != -1 ) {
         additions++;
     }
@@ -549,38 +547,7 @@ XdmValue *XsltExecutable::applyTemplatesReturningValue() {
         processorDataRef = -1;
     }
     if (result > 0) {
-
-        int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)result);
-        XdmValue * value = new XdmValue();
-        XdmItem * xdmItem = nullptr;
-
-        if(typeRef == 1) {
-            xdmItem = new XdmAtomicValue(result);
-            value->addXdmItem(xdmItem);
-            return value;
-
-        } else if(typeRef == 2) {
-            xdmItem = new XdmNode(result);
-            value->addXdmItem(xdmItem);
-            return value;
-
-        }  else if (typeRef == 4) {
-            xdmItem =  new XdmMap(result);
-            value->addXdmItem(xdmItem);
-            return value;
-
-        } else if (typeRef == 3) {
-            xdmItem =  new XdmArray(result);
-            value->addXdmItem(xdmItem);
-            return value;
-
-        } else if (typeRef == 5) {
-            xdmItem =  new XdmFunctionItem(result);
-            value->addXdmItem(xdmItem);
-            return value;
-        }
-        value = new XdmValue(result, false);
-        return value;
+        return SaxonProcessor::makeXdmValueFromRef(result);
     }else if(result==-2){
         exceptionFound = true;
 
@@ -601,7 +568,6 @@ void XsltExecutable::callFunctionReturningFile(const char *functionName, XdmValu
     	setProperty("resources", resources_dir.c_str());
 
         int additions = 0;
-        int iadd = 0;
         /*if(saxonMessageListenerRef != -1 ) {
             additions++;
         }
@@ -645,7 +611,7 @@ XsltExecutable::callFunctionReturningString(const char *functionName, XdmValue *
     setProperty("resources", resources_dir.c_str());
 
     int additions = 0;
-    int iadd = 0;
+
     /*if(saxonMessageListenerRef != -1 ) {
         additions++;
     }
@@ -690,7 +656,7 @@ XsltExecutable::callFunctionReturningValue(const char *functionName, XdmValue **
     setProperty("resources", resources_dir.c_str());
 
     int additions = 0;
-    int iadd = 0;
+
     /*if(saxonMessageListenerRef != -1 ) {
         additions++;
     }
@@ -723,39 +689,7 @@ XsltExecutable::callFunctionReturningValue(const char *functionName, XdmValue **
         processorDataRef = -1;
     }
     if (result > 0) {
-        int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)result);
-        XdmValue * value = new XdmValue();
-        XdmItem * xdmItem = nullptr;
-
-
-        if(typeRef == 1) {
-            xdmItem = new XdmAtomicValue(result);
-            value->addXdmItem(xdmItem);
-            return value;
-
-        } else if(typeRef == 2) {
-            xdmItem = new XdmNode(result);
-            value->addXdmItem(xdmItem);
-            return value;
-
-        }  else if (typeRef == 4) {
-            xdmItem =  new XdmMap(result);
-            value->addXdmItem(xdmItem);
-            return value;
-
-        } else if (typeRef == 3) {
-            xdmItem =  new XdmArray(result);
-            value->addXdmItem(xdmItem);
-            return value;
-
-        } else if (typeRef == 5) {
-            xdmItem =  new XdmFunctionItem(result);
-            value->addXdmItem(xdmItem);
-            return value;
-        }
-        xdmItem = new XdmItem(result);
-        value->addXdmItem(xdmItem);
-        return value;
+        return SaxonProcessor::makeXdmValueFromRef(result);
     }else if(result== -2){
 
         exceptionFound = true;
@@ -772,7 +706,7 @@ void XsltExecutable::callTemplateReturningFile(const char *templateName, const c
     setProperty("resources", resources_dir.c_str());
 
     int additions = 0;
-    int iadd = 0;
+
     if(saxonMessageListenerRef != -1 ) {
         additions++;
     }
@@ -806,7 +740,7 @@ const char * XsltExecutable::callTemplateReturningString(const char *templateNam
     setProperty("resources", resources_dir.c_str());
 
     int additions = 0;
-    int iadd = 0;
+
     /*if(saxonMessageListenerRef != -1 ) {
         additions++;
     }
@@ -841,7 +775,7 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
     setProperty("resources", resources_dir.c_str());
 
     int additions = 0;
-    int iadd = 0;
+
     /*if(saxonMessageListenerRef != -1 ) {
         additions++;
     }
@@ -868,40 +802,7 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
         processorDataRef = -1;
     }
     if (result > 0) {
-        int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,(void *)result);
-
-        XdmValue * value = new XdmValue();
-        XdmItem * xdmItem = nullptr;
-
-
-        if(typeRef == 1) {
-            xdmItem = new XdmAtomicValue(result);
-            value->addXdmItem(xdmItem);
-            return value;
-
-        } else if(typeRef == 2) {
-            xdmItem = new XdmNode(result);
-            value->addXdmItem(xdmItem);
-            return value;
-
-        }  else if (typeRef == 4) {
-            xdmItem =  new XdmMap(result);
-            value->addXdmItem(xdmItem);
-            return value;
-
-        } else if (typeRef == 3) {
-            xdmItem =  new XdmArray(result);
-            value->addXdmItem(xdmItem);
-            return value;
-
-        } else if (typeRef == 5) {
-            xdmItem =  new XdmFunctionItem(result);
-            value->addXdmItem(xdmItem);
-            return value;
-        }
-        xdmItem = new XdmItem(result);
-        value->addXdmItem(xdmItem);
-        return value;
+        return SaxonProcessor::makeXdmValueFromRef(result);
     }else if(result == -2) {
 
         exceptionFound = true;
@@ -924,7 +825,7 @@ XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
     setProperty("resources", resources_dir.c_str());
 
     int additions = 0;
-    int iadd = 0;
+
     /*if(saxonMessageListenerRef != -1 ) {
         additions++;
     }
@@ -952,40 +853,7 @@ XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
         processorDataRef = -1;
     }
     if (result > 0) {
-        int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,(void *)result);
-
-        XdmValue * value = new XdmValue();
-        XdmItem * xdmItem = nullptr;
-
-
-        if(typeRef == 1) {
-            xdmItem = new XdmAtomicValue(result);
-            value->addXdmItem(xdmItem);
-            return value;
-
-        } else if(typeRef == 2) {
-            xdmItem = new XdmNode(result);
-            value->addXdmItem(xdmItem);
-            return value;
-
-        }  else if (typeRef == 4) {
-            xdmItem =  new XdmMap(result);
-            value->addXdmItem(xdmItem);
-            return value;
-
-        } else if (typeRef == 3) {
-            xdmItem =  new XdmArray(result);
-            value->addXdmItem(xdmItem);
-            return value;
-
-        } else if (typeRef == 5) {
-            xdmItem =  new XdmFunctionItem(result);
-            value->addXdmItem(xdmItem);
-            return value;
-        }
-        xdmItem = new XdmItem(result);
-        value->addXdmItem(xdmItem);
-        return value;
+          return SaxonProcessor::makeXdmValueFromRef(result);
     }else if(result == -2){
 
         //createException();
@@ -1006,7 +874,7 @@ void XsltExecutable::transformFileToFile(const char *source, const char *outputf
     setProperty("resources", resources_dir.c_str());
 
     int additions = 0;
-    int iadd = 0;
+
     /*if(saxonMessageListenerRef != -1 ) {
         additions++;
     }
