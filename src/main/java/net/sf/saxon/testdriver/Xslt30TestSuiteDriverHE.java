@@ -584,6 +584,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             if (outcome.getWrongErrorMessage() != null) {
                 outcome.setComment(outcome.getWrongErrorMessage());
                 if (strict) {
+                    noteFailure(testSetName, testName);
                     resultsDoc.writeTestcaseElement(testName, "fail", outcome.getComment());
                 } else {
                     wrongErrorResults++;
