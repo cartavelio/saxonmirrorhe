@@ -508,7 +508,7 @@ public class TinyTextualElement extends TinyElementImpl {
 
         @Override
         public SequenceIterator iterateAncestorAxis(NodePredicate predicate) {
-            return element.iterateAncestorAxis(predicate);
+            return element.iterateAncestorOrSelfAxis(predicate);
         }
 
         /**
