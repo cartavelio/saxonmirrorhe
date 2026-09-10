@@ -446,7 +446,7 @@
         <name>DISABLE_XSL_EVALUATE</name>
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/disableXslEvaluate</uri>
-        <editions>EE</editions>
+        <editions>HE PE EE</editions>
         <platforms>J CS</platforms>
         <configfile>xslt/@disableXslEvaluate</configfile>
         <configfiledesc>
@@ -1470,18 +1470,25 @@
                     <code>System.err</code>, to this file.</p>
         </configfiledesc>
         <typedesc>A file name</typedesc>
-        <desc>
-            <p><code>STANDARD_ERROR_OUTPUT_FILE</code> is the name of a file to which Saxon will
+        <p><code>STANDARD_ERROR_OUTPUT_FILE</code> is the name of a file to which Saxon will
                 redirect output that would otherwise go to the operating system standard error
                 stream (System.err). This is the fallback destination for various tracing and
                 diagnostic output. In some cases a more specific mechanism exists to select the
                 destination for particular kinds of output.</p>
+            <p>Saxon generally writes such messages via the <code>net.sf.saxon.lib.Logger</code> object
+               registered with the <code>Configuration</code> object. The default <code>Logger</code>
+               writes to the standard error output by default, but this can be changed by setting
+               this feature. For finer control (for example, sending different messages to different
+            destinations, or suppressing some entirely) it is possible to register a user-defined
+            <code>Logger</code> with the <code>Configuration.</code> Saxon also supplies a <code>Logger</code>
+            implementation <code>net.sf.saxon.lib.SystemLogger</code> which directs output to 
+            the standard JDK <code>java.util.logging.Logger</code> framework. In such cases this
+            feature will have no effect.</p>
             <p>Note that if the <code>Configuration</code> is used in more than one processing
                 thread, the messages from different threads will be interleaved in the output file.
                 A more selective approach is to use a different <code>ErrorListener</code> in
                 different processing threads, and arrange for each <code>ErrorListener</code> to
                 write to its own logging destination.</p>
-        </desc>
     </feature>
     <feature>
         <featureCode>68</featureCode>
@@ -1702,17 +1709,33 @@
         <getter class="net.sf.saxon.Configuration">isTiming</getter>
         <configfile>global/@timing</configfile>
         <configfiledesc>
-            <p>Outputs progress messages to <code>System.err</code>. Equivalent to the
-                    <code>-t</code> option on the command line.</p>
+            <p>Outputs progress messages to the <code>Logger</code>, which by default
+                writes to <code>System.err</code>. Enabled by the
+                <code>-t</code> option on the command line.</p>
         </configfiledesc>
         <commandline for="TQV">-t</commandline>
         <desc>
             <p>This is set to true to cause basic timing and tracing information to be output to the
-                standard error output stream.</p>
+                registered <code>Logger</code>, which by default writes to the standard error output stream.</p>
             <p>The name of the feature is poorly chosen, since much
                 of the information that is output has nothing to do with timing, for example the
                 names of output files for <code>xsl:result-document</code> are traced, as are the
                 names of schema documents loaded.</p>
+            <p>The <code>-t</code> command line option enables this configuration feature, and also
+               outputs additional information such as product version information, and stylesheet/query
+               compilation time and execution time.</p>
+            <p>Messages output when this feature is enabled include:</p>
+            <ul>
+                <li><p>Identifying external resources that are loaded;</p></li>
+                <li><p>Information about the Saxon license file;</p></li>
+                <li><p>Indicating when files are processed in streaming mode;</p></li>
+                <li><p>Enabling JDBC diagnostics when the SQL extensions are used;</p></li>
+                <li><p>Reporting details of any parser loaded using JAXP;</p></li>
+                <li><p>Statistics for documents loaded using the DocumentBuilder;</p></li>
+                <li><p>Identifying documents written using <code>xsl:result-document</code>;</p></li>
+                <li><p>Tracing execution of <code>fn:transform()</code>;</p></li>
+                <li><p>Tracing calls on the standard <code>URIResolver</code>.</p></li>
+            </ul>
         </desc>
     </feature>
     <feature>
@@ -1720,19 +1743,23 @@
         <name>TRACE_EXTERNAL_FUNCTIONS</name>
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/trace-external-functions</uri>
-        <editions>PE EE</editions>
-        <platforms>J</platforms>
+        <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <configfile>global/@traceExternalFunctions</configfile>
         <configfiledesc>
-            <p>Provides diagnostics when external functions are dynamically loaded.</p>
+            <p>Provides diagnostics when functions are loaded.</p>
         </configfiledesc>
         <commandline for="TQ">-TJ</commandline>
         <desc>
-            <p>If this option is set, Saxon will output (to the standard error output) progress
+            <p>If this option is set, Saxon will output progress
                 information about its attempts to locate and disambiguate references to functions.
                 This is intended primarily to assist with problems loading external/extension
                 functions, but it actually traces all functions other than those in reserved
                 namespaces (including user-written functions in XSLT or XQuery).</p>
+            <p>The output messages are sent to the <code>Logger</code> registered with
+            the Saxon <code>Configuration</code>. By default this writes to the standard error output,
+            but this may be redirected using the <code>http://saxon.sf.net/feature/standardErrorOutput</code>
+            configuration property.</p>
         </desc>
     </feature>
     <feature>
@@ -1802,7 +1829,7 @@
         <name>TRACE_OPTIMIZER_DECISIONS</name>
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/trace-optimizer-decisions</uri>
-        <editions>PE EE</editions>
+        <editions>HE PE EE</editions>
         <platforms>J CS</platforms>
         <configfile>global/@traceOptimizerDecisions</configfile>
         <configfiledesc>
@@ -1815,6 +1842,10 @@
                 information is mainly useful for internal system debugging, but it is also possible
                 to digest it to analyze the ways in which the expression has been optimized for the
                 purpose of performance analysis and tuning.</p>
+            <p>This option produces the same trace information as the <code>-explain</code>
+            command line option, but without the final display of the expression tree. That display
+            can be achieved by calling the <code>explain</code> method of the <code>XsltExecutable</code>
+            or <code>XQueryExecutable</code> objects.</p>
         </desc>
     </feature>
     <feature>
@@ -2490,7 +2521,7 @@
         <name>XSLT_ENABLE_ASSERTIONS</name>
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/enableAssertions</uri>
-        <editions>PE EE</editions>
+        <editions>HE PE EE</editions>
         <platforms>J CS</platforms>
         <commandline for="T">-ea</commandline>
         <configfile>xslt/@enableAssertions</configfile>
