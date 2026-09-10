@@ -310,6 +310,21 @@ public class StreamInstr extends SourceDocument implements Pusher {
         return new PushToPull(makeElaborator().elaborateForPush(), context).getIterator();
     }
 
+    /**
+     * Process the instruction, without returning any tail calls
+     *
+     * @param output  the destination for the result
+     * @param context The dynamic context, giving access to the current node
+     */
+    @Override
+    public void process(Outputter output, XPathContext context) throws XPathException {
+        try {
+            super.process(output, context);
+        } catch (QuitParsingException e) {
+            // no action, this indicates early exit after producing a successful result
+        }
+    }
+
     @Override
     public String getExportTag() {
         return "stream";
