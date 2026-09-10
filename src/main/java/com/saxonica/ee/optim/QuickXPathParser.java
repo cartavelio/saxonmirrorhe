@@ -197,7 +197,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
 
         // nodekind() - select children with given node kind.
         patterns.put(
-                key(Token.KEYWORD_LBRA, Token.RPAREN),
+                key(Token.NAME, Token.LPAREN, Token.RPAREN),
                 (values, env) -> {
                     String kind = values.get(0);
                     NodeTest test = null;
@@ -257,9 +257,9 @@ public class QuickXPathParser implements XPathParser.Accelerator {
                                               new NameTest(Type.ELEMENT, name.getNamespaceUri(), name.getLocalPart(), env.getConfiguration().getNamePool()));
                 });
 
-        // keyword { } - for example, empty map constructor
+        // keyword { } - for example, empty map or array constructor
         patterns.put(
-                key(Token.KEYWORD_CURLY, Token.RCURLY),
+                key(Token.NAME, Token.LCURLY, Token.RCURLY),
                 (values, env) -> {
                     String name = values.get(0);
                     if (name.equals("map")) {
@@ -270,6 +270,11 @@ public class QuickXPathParser implements XPathParser.Accelerator {
                         return null;
                     }
                 });
+
+        // { } - for example, empty map or array constructor
+        patterns.put(
+                key(Token.LCURLY, Token.RCURLY),
+                (values, env) -> Literal.makeLiteral(EmptyMap.getInstance()));
         
         // fn() - function with no arguments
         patterns.put(
