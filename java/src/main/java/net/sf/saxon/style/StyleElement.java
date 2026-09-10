@@ -2211,10 +2211,12 @@ public abstract class StyleElement extends ElementImpl {
                 }
             }
         }
+        Expression block;
         if (containsSpecials) {
-            return new ConditionalBlock(contents);
+            block = new ConditionalBlock(contents);
+        } else {
+            block = Block.makeBlock(contents);
         }
-        Expression block = Block.makeBlock(contents);
         if (block.getLocation() == null) {
             block.setLocation(locationId);
         }
