@@ -160,7 +160,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             register("foot", 1, e -> e.populate(ArrayFoot::new, AnyItemType.getInstance(), STAR, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
 
-            register("truncate", 1, e -> e.populate(ArrayTruncate::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+            register("trunk", 1, e -> e.populate(ArrayTrunk::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
 
             register("of", 1, e -> e.populate(ArrayOf::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, SEQV)
@@ -660,7 +660,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
     /**
      * Implementation of the function array:tail(array) =&gt; item()*
      */
-    public static class ArrayTruncate extends SystemFunction {
+    public static class ArrayTrunk extends SystemFunction {
 
         @Override
         public ArrayItem call(XPathContext context, Sequence[] arguments) throws XPathException {
