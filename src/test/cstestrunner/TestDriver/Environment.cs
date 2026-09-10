@@ -60,6 +60,7 @@ namespace TestDriver {
         public XsltCompiler xsltCompiler;
         public XsltExecutable xsltExecutable;
         public XdmItem contextItem;
+        public XsdSchema schema;
         public SysCollGen.Dictionary<QName, XdmValue> params1 = new();
         public bool xml11 = false;
         public bool usable = true;
@@ -208,12 +209,11 @@ namespace TestDriver {
 
             // load the requested schema documents
 
-            Saxon.Api.SchemaManager manager = environment.processor.SchemaManager;
-            bool validateSources = LoadSchemaDocuments(driver, xpc, env, environment, manager);
+            bool validateSources = LoadSchemaDocuments(driver, xpc, env, environment);
 
             // load the requested source documents
 
-            LoadSourceDocuments(driver, xpc, env, environment, builder, manager, validateSources);
+            LoadSourceDocuments(driver, xpc, env, environment, builder, validateSources);
 
             // register the requested collections
 
@@ -362,25 +362,27 @@ namespace TestDriver {
         }
 
         private static bool LoadSchemaDocuments(Driver driver, XPathCompiler xpc, XdmNode env,
-                Environment environment, Saxon.Api.SchemaManager manager) {
+                Environment environment) {
             bool validateSources = false;
             Configuration config = environment.processor.Implementation;
             XmlUrlResolver res = new TracingXmlResolver(env.BaseUri);
+            XsdCompiler compiler = environment.processor.NewXsdCompiler();
+            List<XsdCompiler.SchemaSource> sources = new List<XsdCompiler.SchemaSource>();
             foreach (XdmNode schema in env.Children("schema")) {
                 string role = schema.GetAttributeValue(new QName("role"));
                 string xsdVersion = schema.GetAttributeValue(new QName("xsd-version"));
-                if (manager == null || !driver.schemaAware) {
+                if (compiler == null || !driver.schemaAware) {
                     driver.println("** Processor is not schema aware **");
                     environment.usable = false;
                     return false;
                 }
 
                 if (xsdVersion != null) {
-                    manager.XsdVersion = xsdVersion;
+                    compiler.XsdVersion = xsdVersion;
                 }
 
                 if (!"secondary".Equals(role)) {
-                    string href = ((XdmNode) schema).GetAttributeValue(new QName("file"));
+                    string href = schema.GetAttributeValue("file");
                     string ns = schema.GetAttributeValue("uri");
                     if (href == null) {
                         if (ns == "http://www.w3.org/2005/xpath-functions") {
@@ -389,31 +391,33 @@ namespace TestDriver {
                         else {
                             Uri uri = res.ResolveUri(null, ns);
                             Console.Error.WriteLine("Load schema document " + uri);
-                            Stream file = null; //KnownResourceFinder.fetchSystemId(uri.ToString(), config).stream;
-                            if (file == null) {
-                                file = new FileStream(uri.AbsolutePath, FileMode.Open, FileAccess.Read);
-                            }
-
-                            try {
-                                manager.Compile(file, uri);
-                            }
-                            catch (Exception err) {
-                                System.Console.WriteLine("*** Failed to load schema: " + err.Message + ", Trace:" +
-                                                         err.StackTrace);
-                            }
+                            // Stream file = null; //KnownResourceFinder.fetchSystemId(uri.ToString(), config).stream;
+                            // if (file == null) {
+                            //     file = new FileStream(uri.AbsolutePath, FileMode.Open, FileAccess.Read);
+                            // }
+                            sources.Add(new XsdCompiler.SchemaSource(uri));
+                            // try {
+                            //     compiler.Compile(file, uri);
+                            // }
+                            // catch (Exception err) {
+                            //     System.Console.WriteLine("*** Failed to load schema: " + err.Message + ", Trace:" +
+                            //                              err.StackTrace);
+                            // }
                         }
                     }
                     else {
                         Uri uri = res.ResolveUri(((XdmNode) env).BaseUri, href);
                         Console.Error.WriteLine("Load schema document " + uri + " ~ " + href);
-                        FileStream file = new FileStream(uri.AbsolutePath, FileMode.Open, FileAccess.Read);
-                        try {
-                            manager.Compile(file, uri);
-                        }
-                        catch (Exception err) {
-                            System.Console.WriteLine("*** Failed to load schema: " + err.Message + ", Trace:" +
-                                                     err.StackTrace);
-                        }
+                        sources.Add(new XsdCompiler.SchemaSource(uri));
+                        // FileInfo file = new FileInfo()
+                        // FileStream file = new FileStream(uri.AbsolutePath, FileMode.Open, FileAccess.Read);
+                        // try {
+                        //     manager.Compile(file, uri);
+                        // }
+                        // catch (Exception err) {
+                        //     System.Console.WriteLine("*** Failed to load schema: " + err.Message + ", Trace:" +
+                        //                              err.StackTrace);
+                        // }
                     }
 
                     xpc.ImportSchemaNamespace(ns);
@@ -428,7 +432,12 @@ namespace TestDriver {
                 }
             }
 
-            return validateSources;
+            if (sources.Count > 0) {
+                environment.schema = compiler.Compile(sources.ToArray());
+                return validateSources;
+            }
+
+            return false;
         }
 
         private static void DeclareExternalVariables(Driver driver, XPathCompiler xpc, XdmItem env,
@@ -843,7 +852,7 @@ namespace TestDriver {
         // }
 
         private static void LoadSourceDocuments(Driver driver, XPathCompiler xpc, XdmItem env,
-            Environment environment, DocumentBuilder builder, SchemaManager manager, bool validateSources) {
+            Environment environment, DocumentBuilder builder, bool validateSources) {
             XmlUrlResolver res = new XmlUrlResolver();
             
             foreach (XdmItem source in xpc.Evaluate("source", env)) {
@@ -876,12 +885,9 @@ namespace TestDriver {
                 if (!validateSources && validation.Equals("skip")) {
                     builder.SchemaValidationMode = SchemaValidationMode.None;
                     builder.SchemaValidator = null;
-                } else if (manager == null)
-                {
-                    environment.usable = false;
-                }
+                } 
                 else {
-                    SchemaValidator validator = manager.NewSchemaValidator();
+                    SchemaValidator validator = environment.schema.NewValidator();
                     if ("lax".Equals(validation)) {
                         validator.Lax = true;
                         builder.SchemaValidator = validator;
