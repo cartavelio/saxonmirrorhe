@@ -1,5 +1,6 @@
 package com.saxonica.config;
 
+import com.saxonica.Validate;
 import com.saxonica.ee.domino.DominoTreeModel;
 import com.saxonica.functions.extfn.EXPathArchive.Archive;
 import net.sf.saxon.Configuration;
@@ -101,7 +102,7 @@ public class NativePlatformPE extends NativePlatform {
 
 
     @CEntryPoint(name = "j_run_validate", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long run_query(IsolateThread thread, ObjectHandle processorDataRef){
+    public static long j_run_validate(IsolateThread thread, ObjectHandle processorDataRef){
 
         String[] args;
 
@@ -113,9 +114,9 @@ public class NativePlatformPE extends NativePlatform {
            args = processorDataAccumulator.getParameterNames();
         }
 
-        // This attempted to do validation?
+        Validate.main(args);
 
-        return -1;
+        return SaxonCAPI.STATUS_OK;
     }
 
 
