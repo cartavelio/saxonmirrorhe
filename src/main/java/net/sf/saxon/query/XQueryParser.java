@@ -1612,7 +1612,7 @@ public class XQueryParser extends XPathParser {
             nextToken();
             int refs = ((QueryModule) env).getForwardReferenceCount(varQName);
             Expression exp = parseStandaloneExpr();
-            if (((QueryModule) env).getForwardReferenceCount(varQName) > refs) {
+            if (((QueryModule) env).getForwardReferenceCount(varQName) > refs && env.getXPathVersion() < 40) {
                 grumble("Variable $" + var.getVariableQName().getDisplayName()
                                 + " is referenced within its own declaration", "XPST0008");
             }
