@@ -176,12 +176,12 @@ task rejar_Xerces(
           exclude "Saxon.C.API/dllmain.cpp"
           exclude "Saxon.C.API/readme.txt"
           exclude "Saxon.C.API/targetver.h"
-          include "Saxon.C.API/python-saxon/*.py
-          include "Saxon.C.API/python-saxon/cat.xml
-          include "Saxon.C.API/python-saxon/test.xsl
-          include "Saxon.C.API/python-saxon/*.pxd
-          include "Saxon.C.API/python-saxon/*.pyx
-          include "Saxon.C.API/python-saxon/readme.txt
+          include "Saxon.C.API/python-saxon/*.py"
+          include "Saxon.C.API/python-saxon/cat.xml"
+          include "Saxon.C.API/python-saxon/test.xsl"
+          include "Saxon.C.API/python-saxon/*.pxd"
+          include "Saxon.C.API/python-saxon/*.pyx"
+          include "Saxon.C.API/python-saxon/readme.txt"
           include "samples/cppTests/*.cpp"
           include "samples/cppTests/*.h"
           include "samples/cTests/*.h"
