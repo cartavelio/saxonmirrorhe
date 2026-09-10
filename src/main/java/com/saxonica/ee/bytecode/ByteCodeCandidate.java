@@ -17,6 +17,7 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -162,9 +163,14 @@ public class ByteCodeCandidate extends UnaryExpression implements TailCallReturn
             e.maybeSetFailingExpression(this);
             e.maybeSetContext(context);
             throw e;
+        } catch (UncheckedXPathException e1) {
+            XPathException xe = e1.getXPathException();
+            xe.maybeSetFailingExpression(this);
+            xe.maybeSetContext(context);
+            throw xe;
         } catch (Exception e2) {
             Location loc = getLocation();
-            String message = "Internal error evaluating template rule "
+            String message = "Internal error evaluating byte code candidate "
                     + (loc.getLineNumber() > 0 ? " at line " + loc.getLineNumber() : "")
                     + (loc.getSystemId() != null ? " in module " + loc.getSystemId() : "");
             e2.printStackTrace();
