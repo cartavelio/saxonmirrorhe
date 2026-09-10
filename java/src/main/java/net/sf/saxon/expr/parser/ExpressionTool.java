@@ -1078,6 +1078,12 @@ public class ExpressionTool {
      */
 
     public static Expression resolveCallsToCurrentFunction(Expression exp) {
+        // In 4.0, the current() function becomes available in XQuery, and we compile it to
+        // a CurrentValueSetter which sets the value explicitly in the XPathContext. This is
+        // needed because the value is set globally and is available within user-defined functions.
+        // In XSLT however we continue to use the old mechanism of setting an internal local
+        // variable. There are two reasons for this: (a) to avoid impact on SEF export files,
+        // and (b) to avoid redesigning the streaming code.
         if (exp.isCallOn(Current.class)) {
             ContextItemExpression cie = new ContextItemExpression();
             copyLocationInfo(exp, cie);
@@ -1089,7 +1095,7 @@ public class ExpressionTool {
         }
     }
 
-    public static Expression resolveCallsToCurrentFunction0(Expression exp) {
+    public static Expression resolveCallsToCurrentFunctionInXslt(Expression exp) {
         if (exp.isCallOn(Current.class)) {
             ContextItemExpression cie = new ContextItemExpression();
             copyLocationInfo(exp, cie);

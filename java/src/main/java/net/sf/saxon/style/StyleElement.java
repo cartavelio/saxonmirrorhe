@@ -1717,7 +1717,7 @@ public abstract class StyleElement extends ElementImpl {
             exp = exp.typeCheck(makeExpressionVisitor(),
                                 config.makeContextItemStaticInfo(Type.ITEM_TYPE, Optionality.OPTIONAL));
             if (!(this instanceof XSLLocalParam && name.equals("select") && getParent() instanceof XSLFunction)) {
-                exp = ExpressionTool.resolveCallsToCurrentFunction(exp);
+                exp = ExpressionTool.resolveCallsToCurrentFunctionInXslt(exp);
             }
             return exp;
         } catch (XPathException err) {
