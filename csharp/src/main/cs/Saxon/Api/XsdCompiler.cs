@@ -1,10 +1,12 @@
 using System;
+using System.Impl.Helpers;
 using System.IO;
 using System.Xml;
 using Saxon.Ejava.lang;
 using Saxon.Ejava.net;
 using Saxon.Ejavax.xml.transform;
 using Saxon.Ejavax.xml.transform.stream;
+using Saxon.Hej.pull;
 using File = Saxon.Ejava.io.File;
 
 namespace Saxon.Api {
@@ -37,6 +39,12 @@ namespace Saxon.Api {
         /// </remarks>
         /// 
         public abstract string XsdVersion { get; set; }
+        
+        /// <summary>
+        /// The <c>Processor</c> that was used to create this <c>XsdCompiler</c>
+        /// </summary>
+        
+        public abstract Processor Processor { get; }
 
         /// <summary>The <c>ErrorReporter</c> to be used when compiling schema documents.</summary>
 
@@ -148,7 +156,7 @@ namespace Saxon.Api {
         /// <returns>The schema constructed from this input document.</returns>
         /// 
         public XsdSchema Compile(XmlReader reader) {
-            return Compile(new SchemaSource(reader));
+            return Compile(new SchemaSource(Processor, reader));
         }
         
         /// <summary>
@@ -212,6 +220,15 @@ namespace Saxon.Api {
             }
             
             /// <summary>
+            /// A schema document supplied in the form of a stream. No base URI is defined,
+            /// so resolving any <c>xs:include</c> or <c>xs:import</c> declarations is likely to fail.
+            /// </summary>
+            /// <param name="stream">The input stream</param>
+            public SchemaSource(System.IO.Stream stream) {
+                jSource = new StreamSource(stream, null);
+            }
+            
+            /// <summary>
             /// A schema document supplied in the form of a text reader, together with a Uri that defines
             /// the base URI for resolving any <c>xs:include</c> or <c>xs:import</c> declarations.
             /// </summary>
@@ -220,16 +237,24 @@ namespace Saxon.Api {
             public SchemaSource(System.IO.TextReader reader, System.Uri uri) {
                 jSource = new StreamSource(reader, uri.AbsoluteUri);
             }
-
+            
             /// <summary>
             /// A schema document supplied in the form of a Uri, which is dereferenced directly
             /// (without using any resolver)
             /// </summary>
             /// <param name="uri">The base URI</param>
+            /// 
             public SchemaSource(System.Uri uri) {
                 jSource = new StreamSource(uri.AbsoluteUri);
             }
-
+            /// <summary>
+            /// A schema document supplied in the form of a text reader. No base URI is defined,
+            /// so resolving any <c>xs:include</c> or <c>xs:import</c> declarations is likely to fail.
+            /// </summary>
+            /// <param name="reader">The text reader</param>
+            public SchemaSource(System.IO.TextReader reader) {
+                jSource = new StreamSource(reader, null);
+            }
             /// <summary>
             /// A schema document supplied in the form of a <c>FileInfo</c>
             /// </summary>
@@ -251,11 +276,14 @@ namespace Saxon.Api {
             /// <summary>
             /// A schema document supplied in the form of an <c>XmlReader</c>
             /// </summary>
-            /// <param name="node">The XML reader</param>
+            /// <param name="processor">The Saxon Processor</param>
+            /// <param name="reader">The XML Reader (that is, the Microsoft XML parser)</param>
 
-            public SchemaSource(XmlReader parser) {
-                throw new UnsupportedOperationException(); // TODO
-                //jSource = node.Implementation.asActiveSource();
+            public SchemaSource(Processor processor, XmlReader reader) {
+                PullProvider pp = new DotNetPullProvider(reader);
+                pp.setPipelineConfiguration(processor.Implementation.makePipelineConfiguration());
+                jSource = new PullSource(pp);
+                jSource.setSystemId(reader.BaseURI);
             }
 
             internal Source getSource() {

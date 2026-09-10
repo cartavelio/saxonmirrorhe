@@ -31,12 +31,14 @@ namespace Saxon.Api.Support {
             set => xsdCompilerJ.setXsdVersion(value);
         }
 
-        /// <summary>The <c>ErrorReporter</c> to be used when compiling schema documents.</summary>
-
         /// <summary>
-        /// The <code>ErrorReporter</code> to be used at run-time to notify any dynamic
-        /// errors that occur.
+        /// The <c>Processor</c> that was used to create this <c>XsdCompiler</c>
         /// </summary>
+
+        public override Processor Processor => processor;
+
+        /// <summary>The <c>ErrorReporter</c> to be used when compiling schema documents.</summary>
+        
 
         public override ErrorReporter ErrorReporter {
             get => _errorReporter;
