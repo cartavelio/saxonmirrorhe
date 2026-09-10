@@ -1128,6 +1128,30 @@ public class ParseOptions {
     }
 
     /**
+     * Ask whether the document (or collection) should be trusted, that is, if it is allowed
+     * to reference external entities (including external DTDs). By default, at this level of the system,
+     * documents and collections are trusted.
+     *
+     * @return true if the document or collection is trusted
+     */
+
+    public boolean isTrusted() {
+        return getBooleanProperty(Key.STABLE, true);
+    }
+
+    /**
+     * Say whether the document (or collection) should be trusted, that is, if it is allowed
+     * to reference external entities (including external DTDs). By default, at this level of the system,
+     * documents and collections are trusted.
+     *
+     * @param trusted true if the document or collection is trusted
+     */
+
+    public ParseOptions withTrusted(boolean trusted) {
+        return withProperty(Key.TRUSTED, trusted);
+    }
+
+    /**
      * Get the callback for reporting validation errors
      *
      * @return the registered InvalidityHandler
