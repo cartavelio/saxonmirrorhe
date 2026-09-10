@@ -107,18 +107,20 @@ public class TestLocalization {
     }
 
     @Test
-    public void testHyphenationICU(){
-        assertEquals("Twenty Two", s22(true, "en-GB"), "a");
-        assertEquals("Twenty Two", s22(true, "en-US"), "b");
+    public void testHyphenationICU() {
+        // Changes in Saxon 13 to use hyphens consistently
+        assertEquals("Twenty-Two", s22(true, "en-GB"), "a");
+        assertEquals("Twenty-Two", s22(true, "en-US"), "b");
         assertEquals("Twenty-Two", s22(true, "en-x-hyphen"), "c");
         assertEquals("Twenty-Two", s22(true, "en-GB-x-hyphen"), "d");
         assertEquals("Twenty-Two", s22(true, "en-US-x-hyphen"), "e");
     }
 
     @Test
-    public void testHyphenationSansICU(){
-        assertEquals("Twenty Two", s22(false, "en-GB"), "p");
-        assertEquals("Twenty Two", s22(false, "en-US"), "q");
+    public void testHyphenationSansICU() {
+        // Changes in Saxon 13 to use hyphens consistently
+        assertEquals("Twenty-Two", s22(false, "en-GB"), "p");
+        assertEquals("Twenty-Two", s22(false, "en-US"), "q");
         assertEquals("Twenty-Two", s22(false, "en-x-hyphen"), "r");
         assertEquals("Twenty-Two", s22(false, "en-GB-x-hyphen"), "s");
         assertEquals("Twenty-Two", s22(false, "en-US-x-hyphen"), "t");
@@ -140,12 +142,13 @@ public class TestLocalization {
 
     @Test
     public void testHyphenationOrdinalICU() {
-        assertEquals("Twenty Third", s22o(true, "en-GB"), "a");
-        assertEquals("Twenty Third", s22o(true, "en-US"), "b");
+        // Changes in Saxon 13 to use hyphens consistently
+        assertEquals("Twenty-Third", s22o(true, "en-GB"), "a");
+        assertEquals("Twenty-Third", s22o(true, "en-US"), "b");
         assertEquals("Twenty-Third", s22o(true, "en-x-hyphen"), "c");
         assertEquals("Twenty-Third", s22o(true, "en-GB-x-hyphen"), "d");
         assertEquals("Twenty-Third", s22o(true, "en-US-x-hyphen"), "e");
-        assertEquals("Twenty Third", s22o(true, "en-x-nohyphen"), "f");
+        assertEquals("Twenty-Third", s22o(true, "en-x-nohyphen"), "f");
     }
 
     @Test
