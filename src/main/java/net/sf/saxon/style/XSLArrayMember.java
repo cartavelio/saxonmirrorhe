@@ -29,7 +29,7 @@ public class XSLArrayMember extends XSLSequence {
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         if (isInXsltNamespace()) {
-            requireXslt40(null);
+            requireXslt40Element();
         } else if (!getConfiguration().isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
             compileError("xsl:array requires a Saxon-PE or -EE license");
         }

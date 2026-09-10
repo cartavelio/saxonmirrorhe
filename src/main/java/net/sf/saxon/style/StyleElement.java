@@ -2443,18 +2443,31 @@ public abstract class StyleElement extends ElementImpl {
     }
 
     /**
-     * Report an error unless XSLT 4.0 syntax is enabled. This currently requires the XSLT version to be set to "4.0"
-     * in the XSLT compiler, AND the effective version in the stylesheet to be 4.0 or greater.
-     * @param attributeName the name of the attribute if relevant, or null if no specific attribute is concerned
+     * Report an error unless XSLT 4.0 syntax is enabled in the XSLT compiler
+     * @param attributeName the name of the attribute
+     * @return true if OK, false if the attribute should be ignored (in forwards compatibility mode)
      */
-    protected void requireXslt40(String attributeName) {
+    protected boolean requireXslt40Attribute(String attributeName) {
+        Objects.requireNonNull(attributeName);
         if (compilation.getCompilerInfo().getXsltVersion() != 40) {
-            if (attributeName == null) {
-                compileError("Element " + getDisplayName() + " is allowed only if XSLT 4.0 is enabled", "XTSE0010");
+            if (forwardsCompatibleModeIsEnabled()) {
+                compileWarning("Attribute " + getDisplayName() + "/@" + attributeName + " is ignored in forwards compatibility mode " +
+                                       "(running an XSLT 3.0 processor against an XSLT 4.0 stylesheet)", "XTSE0090");
+                return false;
             } else {
                 compileErrorInAttribute("Attribute " + getDisplayName() + "/@" + attributeName + " is allowed only if XSLT 4.0 is enabled",
                                         "XTSE0020", attributeName);
             }
+        }
+        return true;
+    }
+
+    /**
+     * Report an error unless XSLT 4.0 syntax is enabled in the XSLT compiler
+     */
+    protected void requireXslt40Element() {
+        if (compilation.getCompilerInfo().getXsltVersion() != 40) {
+            compileError("Element " + getDisplayName() + " is allowed only if XSLT 4.0 is enabled", "XTSE0010");
         }
     }
 
@@ -2587,47 +2600,45 @@ public abstract class StyleElement extends ElementImpl {
 
         // first search for a local variable declaration
         if (!isTopLevel()) {
-            while (curr instanceof StyleElement && !((StyleElement) curr).seesAvuncularVariables()) {
-                // a local variable is not visible within a sibling xsl:fallback or xsl:catch element
-                curr = curr.getParent();
-            }
-            AxisIterator preceding = curr.iterateAxis(AxisInfo.PRECEDING_SIBLING);
-            while (true) {
-                curr = preceding.next();
-                while (curr == null) {
-                    curr = prev.getParent();
-                    if (curr instanceof StyleElement) {
-                        implicit = ((StyleElement) curr).hasImplicitBinding(qName);
-                        if (implicit != null) {
-                            return implicit;
+            if (seesAvuncularVariables()) {
+                AxisIterator preceding = curr.iterateAxis(AxisInfo.PRECEDING_SIBLING);
+                while (true) {
+                    curr = preceding.next();
+                    while (curr == null) {
+                        curr = prev.getParent();
+                        if (curr instanceof StyleElement) {
+                            implicit = ((StyleElement) curr).hasImplicitBinding(qName);
+                            if (implicit != null) {
+                                return implicit;
+                            }
+                        }
+                        while (curr instanceof StyleElement && !((StyleElement) curr).seesAvuncularVariables()) {
+                            // a local variable is not visible within a sibling xsl:fallback or xsl:catch element
+                            curr = curr.getParent();
+                        }
+                        prev = curr;
+                        if (curr.getParent() instanceof XSLModuleRoot) {
+                            break;   // top level
+                        }
+                        preceding = curr.iterateAxis(AxisInfo.PRECEDING_SIBLING);
+                        curr = preceding.next();
+                    }
+                    if (curr.getParent() instanceof XSLModuleRoot) {
+                        break;
+                    }
+                    if (curr instanceof XSLGeneralVariable) {
+                        SourceBinding sourceBinding = ((XSLGeneralVariable) curr).getBindingInformation(qName);
+                        if (sourceBinding != null) {
+                            return sourceBinding;
                         }
                     }
-                    while (curr instanceof StyleElement && !((StyleElement) curr).seesAvuncularVariables()) {
-                        // a local variable is not visible within a sibling xsl:fallback or xsl:catch element
-                        curr = curr.getParent();
-                    }
-                    prev = curr;
-                    if (curr.getParent() instanceof XSLModuleRoot) {
-                        break;   // top level
-                    }
-                    preceding = curr.iterateAxis(AxisInfo.PRECEDING_SIBLING);
-                    curr = preceding.next();
-                }
-                if (curr.getParent() instanceof XSLModuleRoot) {
-                    break;
-                }
-                if (curr instanceof XSLGeneralVariable) {
-                    SourceBinding sourceBinding = ((XSLGeneralVariable) curr).getBindingInformation(qName);
-                    if (sourceBinding != null) {
-                        return sourceBinding;
-                    }
-                }
 
+                }
             }
         }
         return null;
     }
-    
+
     /**
      * Ask whether variables declared in an "uncle" element are visible.
      *

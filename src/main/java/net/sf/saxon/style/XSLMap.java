@@ -80,8 +80,9 @@ public class XSLMap extends StyleElement {
             String value = att.getValue();
             if (attName.getLocalPart().equals("on-duplicates")) {
                 if (attName.getNamespaceUri().isEmpty()) {
-                    requireXslt40("on-duplicates");
-                    onDuplicates = makeExpression(value, att);
+                    if ( requireXslt40Attribute("on-duplicates")) {
+                        onDuplicates = makeExpression(value, att);
+                    }
                 } else if (attName.hasURI(NamespaceUri.SAXON)) {
                     if (getConfiguration().isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
                         onDuplicates = makeExpression(value, att);
