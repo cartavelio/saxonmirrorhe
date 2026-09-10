@@ -91,8 +91,8 @@ const char *SaxonProcessor::checkException() {
 
 
 
-SaxonApiException *SaxonProcessor::checkAndCreateException(/*jclass cppClass*/) {
-    /*SaxonProcessor::attachCurrentThread();
+/*SaxonApiException *SaxonProcessor::checkAndCreateException() {
+    SaxonProcessor::attachCurrentThread();
     if (SaxonProcessor::sxn_environ->env->ExceptionCheck()) {
         SaxonApiException *exception = checkForExceptionCPP(SaxonProcessor::sxn_environ->env, cppClass, nullptr);
 #ifdef DEBUG
@@ -102,16 +102,17 @@ SaxonApiException *SaxonProcessor::checkAndCreateException(/*jclass cppClass*/) 
     }
     return nullptr;
 }
-
+*/
 const char *SaxonProcessor::getErrorMessage() {
     SaxonProcessor::attachCurrentThread();
     if(exception == nullptr) {
-        exception =  SaxonProcessor::checkForExceptionCPP(SaxonProcessor::sxn_environ->env,
-                                                                            saxonCAPIClass,nullptr);
+       // exception =  SaxonProcessor::checkForExceptionCPP(SaxonProcessor::sxn_environ->env,
+         //                                                                   saxonCAPIClass,nullptr);
     }
     if (exception == nullptr) { return nullptr; }
-    return exception->getMessage(); - TODO remove comment*/
-    return nullptr;
+    return exception->getMessage(); //- TODO remove comment
+
+
 }
 
 void SaxonProcessor::exceptionClear() {
@@ -282,7 +283,7 @@ void SaxonProcessor::initialize(bool l) {
 #endif
 
     }
-    procRef = createSaxonProcessor2((environi->thread), 0);
+    procRef = createSaxonProcessor2((SaxonProcessor::sxn_environ->thread), 0);
 
 
 #ifdef DEBUG
@@ -367,9 +368,9 @@ SaxonProcessor::SaxonProcessor(const char *configFile) {
 SaxonProcessor::~SaxonProcessor() {
     //SaxonProcessor::attachCurrentThread();
     clearConfigurationProperties();
-    if(proc != nullptr) {
+    if(procRef != -1) {
     	//SaxonProcessor::sxn_environ->env->DeleteGlobalRef(proc);
-	proc = nullptr;
+	procRef = -1;
     }
     if (!versionStr.empty()) {
         versionStr.clear();
@@ -383,14 +384,15 @@ bool SaxonProcessor::isSchemaAwareProcessor() {
     if (!licensei) {
         return false;
     } else {
-        static jmethodID MID_schema = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(procClass,
+        //TODO add isSchemaAwareProcessor
+        /*static jmethodID MID_schema = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(procClass,
                                                                                                 "isSchemaAware", "()Z");
         if (!MID_schema) {
             std::cerr << "\nError: Saxonc.SaxonProcessor.isSchemaAware()" << " not found" << std::endl;
             return false;
         }
 
-        licensei = (jboolean) (SaxonProcessor::sxn_environ->env->CallBooleanMethod(proc, MID_schema));
+        licensei = (jboolean) (SaxonProcessor::sxn_environ->env->CallBooleanMethod(proc, MID_schema));*/
         return licensei;
 
     }
@@ -422,14 +424,14 @@ void SaxonProcessor::applyConfigurationProperties() {
         for (iter = configProperties.begin(); iter != configProperties.end(); ++iter, i++) {
             //cnames[i] = (iter->first).c_str();
             //cvalues[i] = (iter->second).c_str();
-            addProcessorPropertyPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (iter->first).c_str(), (iter->second).c_str());
+            addProcessorPropertyPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)(iter->first).c_str(), (char *)(iter->second).c_str());
 
         }
 
         /* if (exceptionOccurred()) {
             createException();
         } */
-        j_applyToConfiguration(SaxonProcessor::sxn_environ->thread, procRef, (void *) processorDataRef);
+        j_applyToConfiguration(SaxonProcessor::sxn_environ->thread, (void *)procRef, (void *) processorDataRef);
 
 
     }
@@ -515,13 +517,13 @@ int64_t SaxonProcessor::createParameterJArray(std::map<std::string, XdmValue *> 
             }}
 #endif
 
-            addProcessorParameters(SaxonProcessor::sxn_environ->thread, processorDataRef, (iter->first).c_str(),iter->second)->getUnderlyingValue());
+            addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)(iter->first).c_str(), (void *)(iter->second)->getUnderlyingValue());
 
         }
 
         for (std::map<std::string, std::string>::iterator iter =
                 properties.begin(); iter != properties.end(); ++iter, i++) {
-            addProcessorPropertyPair(SaxonProcessor::sxn_environ->thread, processorDataRef, (iter->first).c_str(),(iter->second).c_str());
+            addProcessorPropertyPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)(iter->first).c_str(),(char *)(iter->second).c_str());
         }
 
         return processorDataRef;
@@ -534,7 +536,7 @@ int64_t SaxonProcessor::createParameterJArray(std::map<std::string, XdmValue *> 
 int64_t SaxonProcessor::createParameterJArray2(std::map<std::string, XdmValue *> parameters) {
 
     int size = parameters.size();
-    int64_t processorDataRef = createProcessorData(SaxonProcessor::sxn_environ->thread, size);
+    int64_t processorDataRef = createProcessorDataWithCapacity(SaxonProcessor::sxn_environ->thread, size);
 
 
 #ifdef DEBUG
@@ -555,7 +557,7 @@ int64_t SaxonProcessor::createParameterJArray2(std::map<std::string, XdmValue *>
 
 #endif
 
-            addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, (iter->first).c_str(),(iter->second)->getUnderlyingValue());
+            addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)(iter->first).c_str(), (void *)(iter->second)->getUnderlyingValue());
 #ifdef DEBUG
             std::string s1 = typeid(iter->second).name();
             std::cerr<<"Type of itr:"<<s1<<std::endl;
@@ -615,7 +617,7 @@ SaxonProcessor::SaxonProcessor(const SaxonProcessor &other) {
 
 DocumentBuilder * SaxonProcessor::newDocumentBuilder(){
 
-    int64_t  docBuilderRef = createDocumentBuilder(SaxonProcessor::sxn_environ->thread, procRef);
+    int64_t  docBuilderRef = createDocumentBuilder(SaxonProcessor::sxn_environ->thread, (void *)procRef);
 
     DocumentBuilder * builder = new DocumentBuilder(this, docBuilderRef, cwd);
 
@@ -638,7 +640,7 @@ XPathProcessor *SaxonProcessor::newXPathProcessor() {
     return (new XPathProcessor(this, cwd));
 }
 
-SchemaValidator *SaxonProcessor::newSchemaValidator() {
+/*SchemaValidator *SaxonProcessor::newSchemaValidator() {
     if (licensei) {
         applyConfigurationProperties();
         return (new SchemaValidator(this, cwd));
@@ -646,7 +648,7 @@ SchemaValidator *SaxonProcessor::newSchemaValidator() {
         std::cerr << "\nError: Processor is not licensed for schema processing!!" << std::endl;
         return nullptr;
     }
-}
+}*/
 
 
 const char *SaxonProcessor::version() {
@@ -703,7 +705,7 @@ void SaxonProcessor::setCatalog(const char *catalogFile) {
         return;
     }
 
-    setCatalogFile(sxn_environ->thread, (void *)catalogFile);
+    setCatalogFile(sxn_environ->thread, (void *)procRef, (char *)catalogFile);
 }
 
 
@@ -711,7 +713,7 @@ XdmNode *SaxonProcessor::parseXmlFromString(const char *source, SchemaValidator 
     //SaxonProcessor::attachCurrentThread();
 
 
-    int64_t xdmNodeRef = parseXmlStringWithValidator(sxn_environ->thread, procRef, (validator != nullptr ? validator->getUnderlyingValidator() : -1, source);
+    int64_t xdmNodeRef = parseXmlStringWithValidator(sxn_environ->thread, (void*)procRef, (void *)(validator != nullptr ? validator->getUnderlyingValidator() : -1), (char *)source);
     if (xdmNodeRef != -1) {
         XdmNode *value = nullptr;
         value = new XdmNode(xdmNodeRef);
@@ -725,7 +727,7 @@ XdmNode *SaxonProcessor::parseXmlFromString(const char *source, SchemaValidator 
 
 int SaxonProcessor::getNodeKind(int64_t nodeRef) {
 
-    int nodeKind = j_getNodeKind(sxn_environ->thread, nodeRef);
+    int nodeKind = j_getNodeKind(sxn_environ->thread, (void *)nodeRef);
 
 
    return nodeKind;
@@ -733,7 +735,7 @@ int SaxonProcessor::getNodeKind(int64_t nodeRef) {
 
 
 XdmNode *SaxonProcessor::parseXmlFromFile(const char *filename, SchemaValidator * validator) {
-    int64_t xdmNodeRef = parseXmlFileWithValidator(sxn_environ->thread, procRef, (validator != nullptr ? validator->getUnderlyingValidator() : -1, filename);
+    int64_t xdmNodeRef = parseXmlFileWithValidator(sxn_environ->thread, (char *)cwd.c_str(), (void *)procRef, (void *)(validator != nullptr ? validator->getUnderlyingValidator() : -1), (char *)filename);
     if (xdmNodeRef != -1) {
         XdmNode *value = nullptr;
         value = new XdmNode(xdmNodeRef);
@@ -745,7 +747,7 @@ XdmNode *SaxonProcessor::parseXmlFromFile(const char *filename, SchemaValidator 
 }
 
 XdmNode *SaxonProcessor::parseXmlFromUri(const char *uri, SchemaValidator * validator) {
-    int64_t xdmNodeRef = parseXmlFileWithValidator(sxn_environ->thread, procRef, (validator != nullptr ? validator->getUnderlyingValidator() : -1, uri);
+    int64_t xdmNodeRef = parseXmlFileWithValidator(sxn_environ->thread, (char *) cwd.c_str(), (void *)procRef, (void *)(validator != nullptr ? validator->getUnderlyingValidator() : -1), (char *)uri);
     if (xdmNodeRef != -1) {
         XdmNode *value = nullptr;
         value = new XdmNode(xdmNodeRef);
@@ -781,11 +783,15 @@ void SaxonProcessor::release() {
 #ifdef DEBUG
         std::cerr<<"SaxonProc: JVM finalized calling !"<<std::endl;
 #endif
-        finalizeJavaRT(SaxonProcessor::sxn_environ->jvm);
+        //finalizeJavaRT(SaxonProcessor::sxn_environ->jvm);
 
-        delete SaxonProcessor::sxn_environ;
-        /*clearParameters();
-        clearProperties();*/
+        //delete SaxonProcessor::sxn_environ;
+
+        if (graal_detach_thread(sxn_environ->thread) != 0) {
+            fprintf(stderr, "graal_detach_thread error\n");
+            return;
+        }
+
     } else {
 #ifdef DEBUG                                           
         std::cerr << "SaxonProc: JVM finalize not called!" << std::endl;
@@ -798,8 +804,8 @@ void SaxonProcessor::release() {
 
 XdmAtomicValue *SaxonProcessor::makeStringValue(const char *str) {
     SaxonProcessor::attachCurrentThread();
-    int64_t stringValueRef = j_makeStringValue(sxn_environ->isolate, (char *) str);
-    XdmAtomicValue value = new XdmAtomicValue(stringValueRef, "xs:string");
+    int64_t stringValueRef = j_makeStringValue(sxn_environ->thread, (char *) str);
+    XdmAtomicValue * value = new XdmAtomicValue(stringValueRef, "xs:string");
     return value;
 }
 
@@ -807,8 +813,8 @@ XdmAtomicValue *SaxonProcessor::makeStringValue(const char *str) {
 XdmAtomicValue *SaxonProcessor::makeStringValue(std::string str) {
     //SaxonProcessor::attachCurrentThread();
 
-    int64_t stringValueRef = j_makeStringValue(sxn_environ->isolate, str.c_str());
-    XdmAtomicValue value = new XdmAtomicValue(stringValueRef, "xs:string");
+    int64_t stringValueRef = j_makeStringValue(sxn_environ->thread, (char *)str.c_str());
+    XdmAtomicValue * value = new XdmAtomicValue(stringValueRef, "xs:string");
     return value;
 }
 
@@ -816,22 +822,22 @@ XdmAtomicValue *SaxonProcessor::makeIntegerValue(int i) {
     //SaxonProcessor::attachCurrentThread();
     //jobject obj = integerValue(*SaxonProcessor::sxn_environ, i);
 
-    int64_t intValueRef = j_makeDoubleValue(sxn_environ->isolate, i);
-    XdmAtomicValue value = new XdmAtomicValue(intValueRef, "Q{http://www.w3.org/2001/XMLSchema}integer");
+    int64_t intValueRef = j_makeDoubleValue(sxn_environ->thread, i);
+    XdmAtomicValue * value = new XdmAtomicValue(intValueRef, "Q{http://www.w3.org/2001/XMLSchema}integer");
     return value;
 }
 
 XdmAtomicValue *SaxonProcessor::makeDoubleValue(double d) {
     //SaxonProcessor::attachCurrentThread();
 
-    int64_t doubleValueRef = j_makeDoubleValue(sxn_environ->isolate, d);
-    XdmAtomicValue value = new XdmAtomicValue(doubleValueRef, "Q{http://www.w3.org/2001/XMLSchema}double");
+    int64_t doubleValueRef = j_makeDoubleValue(sxn_environ->thread, d);
+    XdmAtomicValue *value = new XdmAtomicValue(doubleValueRef, "Q{http://www.w3.org/2001/XMLSchema}double");
     return value;
 }
 
 XdmAtomicValue *SaxonProcessor::makeFloatValue(float d) {
-    int64_t floatValueRef = j_makeFloatValue(sxn_environ->isolate, d);
-    XdmAtomicValue value = new XdmAtomicValue(floatValueRef, "Q{http://www.w3.org/2001/XMLSchema}float");
+    int64_t floatValueRef = j_makeFloatValue(sxn_environ->thread, d);
+    XdmAtomicValue * value = new XdmAtomicValue(floatValueRef, "Q{http://www.w3.org/2001/XMLSchema}float");
     return value;
 }
 
@@ -839,22 +845,22 @@ XdmAtomicValue *SaxonProcessor::makeLongValue(long l) {
     //SaxonProcessor::attachCurrentThread();
     //jobject obj = longValue(*SaxonProcessor::sxn_environ, l);
 
-    int64_t longValueRef = j_makeBooleanValue(sxn_environ->isolate, l);
-    XdmAtomicValue value = new XdmAtomicValue(longValueRef, "Q{http://www.w3.org/2001/XMLSchema}long");
+    int64_t longValueRef = j_makeBooleanValue(sxn_environ->thread, l);
+    XdmAtomicValue *value = new XdmAtomicValue(longValueRef, "Q{http://www.w3.org/2001/XMLSchema}long");
     return value;
 }
 
 XdmAtomicValue *SaxonProcessor::makeBooleanValue(bool b) {
     //SaxonProcessor::attachCurrentThread();
-    int64_t boolValueRef = j_makeBooleanValue(sxn_environ->isolate, (int)b);
-    XdmAtomicValue value = new XdmAtomicValue(boolValueRef, "Q{http://www.w3.org/2001/XMLSchema}boolean");
+    int64_t boolValueRef = j_makeBooleanValue(sxn_environ->thread, (int)b);
+    XdmAtomicValue *value = new XdmAtomicValue(boolValueRef, "Q{http://www.w3.org/2001/XMLSchema}boolean");
     return value;
 }
 
 XdmAtomicValue *SaxonProcessor::makeQNameValue(const char *str) {
     SaxonProcessor::attachCurrentThread();
-    int64_t qnameValueRef = j_makeQNameValue(sxn_environ->isolate, str);
-    XdmAtomicValue value = new XdmAtomicValue(qnameValueRef, "QName");
+    int64_t qnameValueRef = j_makeQNameValue(sxn_environ->thread, (char *)str);
+    XdmAtomicValue *value = new XdmAtomicValue(qnameValueRef, "QName");
     return value;
 
 }
@@ -870,7 +876,7 @@ XdmAtomicValue *SaxonProcessor::makeAtomicValue(const char *typei, const char *s
 }
 
 const char *SaxonProcessor::getStringValue(XdmItem *item) {
-    const char *result = getStringValue(SaxonProcessor::sxn_environ->thread, item->getUnderlyingValue());
+    const char *result = j_getStringValue(SaxonProcessor::sxn_environ->thread, (void *)item->getUnderlyingValue());
 #ifdef DEBUG
     if(result == nullptr) {
         std::cerr<<"getStringValue of XdmItem is nullptr"<<std::endl;
@@ -942,17 +948,17 @@ XdmArray *SaxonProcessor::makeArray(XdmValue **input, int length) {
         }
 
         for (int i = 0; i < length; i++) {
-            if (input[i] == nullptr || !input[i]->getUnderlyingValue() != -1) {
+            if (input[i] == nullptr || input[i]->getUnderlyingValue() != -1) {
                 std::cerr << "Error found when converting array of XdmValue to XdmArray";
                 return nullptr;
             }
-            addProcessorValue(sxn_environ->thread, processorDataRef,input[i]->getUnderlyingValue());
+            addProcessorValue(sxn_environ->thread, (void *)processorDataRef, (void *)input[i]->getUnderlyingValue());
 
         }
 
-        int64_t  xdmArrayRef = j_makeXdmArray(sxn_environ->thread, processorDataRef);
+        int64_t  xdmArrayRef = j_makeXdmArray(sxn_environ->thread, (void *)processorDataRef);
 
-        XdmArray newArray = new XdmArray(xdmArrayRef, length);
+        XdmArray * newArray = new XdmArray(xdmArrayRef, length);
         return newArray;
 
 
@@ -967,13 +973,13 @@ XdmArray *SaxonProcessor::makeArray(int *input, int length) {
     }
     int64_t  xdmArrayRef = j_makeXdmArrayFromInt(sxn_environ->thread, input, length);
 
-    XdmArray newArray = new XdmArray(xdmArrayRef, length);
+    XdmArray * newArray = new XdmArray(xdmArrayRef, length);
     return newArray;
 
 
 }
 
-XdmArray *SaxonProcessor::makeArray(long *input, int length) {
+XdmArray *SaxonProcessor::makeArray(long long *input, int length) {
     //SaxonProcessor::attachCurrentThread();
     if (input == nullptr) {
         std::cerr << "Error found when converting string to XdmArray";
@@ -981,7 +987,7 @@ XdmArray *SaxonProcessor::makeArray(long *input, int length) {
     }
     int64_t  xdmArrayRef = j_makeXdmArrayFromLong(sxn_environ->thread, input, length);
 
-    XdmArray newArray = new XdmArray(xdmArrayRef, length);
+    XdmArray * newArray = new XdmArray(xdmArrayRef, length);
     return newArray;
 }
 
@@ -1000,7 +1006,7 @@ XdmArray *SaxonProcessor::makeArray(bool *input, int length) {
 
 
     int64_t  xdmArrayRef = j_makeXdmArrayFromBool(sxn_environ->thread, inputAsInts, length);
-    XdmArray newArray = new XdmArray(xdmArrayRef, length);
+    XdmArray * newArray = new XdmArray(xdmArrayRef, length);
     return newArray;
 
 }
@@ -1012,10 +1018,17 @@ XdmArray *SaxonProcessor::makeArray(const char **input, int length) {
         std::cerr << "Error found when converting string to XdmArray";
         return nullptr;
     }
-    int64_t  xdmArrayRef = j_makeXdmArrayFromStrings(sxn_environ->thread, input, length);
+  /*  int64_t  xdmArrayRef = j_makeXdmArrayFromStrings(sxn_environ->thread, input, length);
 
-    XdmArray newArray = new XdmArray(xdmArrayRef, length);
-    return newArray;
+    int64_t processorDataRef = createProcessorDataWithCapacity(SaxonProcessor::sxn_environ->thread, length);
+
+    for (int i =0 ; i< length; i++) {
+        add
+    }
+
+    XdmArray * newArray = new XdmArray(xdmArrayRef, length);
+    return newArray;*/
+  return nullptr;
 }
 
 

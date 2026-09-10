@@ -6,7 +6,7 @@
 
 
     DocumentBuilder::DocumentBuilder(){
-        SaxonProcessor::attachCurrentThread();
+       /* SaxonProcessor::attachCurrentThread();
 	    SaxonProcessor *p = new SaxonProcessor(false);
 	    procClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/Processor");
         static jmethodID xdocBuilderID = nullptr;
@@ -20,21 +20,21 @@
         DocumentBuilder(p, docBuilderObject, "");
         SaxonProcessor::sxn_environ->env->DeleteLocalRef(docBuilderObject);
     }
-
+*/
     }
 
 
-    DocumentBuilder::DocumentBuilder(SaxonProcessor* p, jobject docObject, std::string cwd) {
+    DocumentBuilder::DocumentBuilder(SaxonProcessor* p, int64_t docObject, std::string cwd) {
         SaxonProcessor::attachCurrentThread();
            /*
              * Look for class.
              */
-            docBuilderClass = lookForClass(SaxonProcessor::sxn_environ->env,
+            /*docBuilderClass = lookForClass(SaxonProcessor::sxn_environ->env,
                                     "net/sf/saxon/s9api/DocumentBuilder");
-            saxonCAPIClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/SaxonCAPI");
+            saxonCAPIClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/SaxonCAPI");*/
 
 
-           docBuilderObject = SaxonProcessor::sxn_environ->env->NewGlobalRef(docObject);
+           docBuilderObject = docObject;
            lineNumbering = false;
            dtdVal = false;
            schemaValidator = nullptr;
@@ -48,12 +48,8 @@
 
     DocumentBuilder::DocumentBuilder(const DocumentBuilder &other) {
         SaxonProcessor::attachCurrentThread();
-        docBuilderClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                    "net/sf/saxon/s9api/DocumentBuilder");
 
-
-        saxonCAPIClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/SaxonCAPI");
-        docBuilderObject = SaxonProcessor::sxn_environ->env->NewGlobalRef(other.docBuilderObject);
+        docBuilderObject = other.docBuilderObject;
         lineNumbering = other.lineNumbering;
         schemaValidator = other.schemaValidator;
         dtdVal = other.dtdVal;
@@ -63,8 +59,8 @@
 
     DocumentBuilder::~DocumentBuilder(){
         SaxonProcessor::attachCurrentThread();
-        if(docBuilderObject) {
-            SaxonProcessor::sxn_environ->env->DeleteGlobalRef(docBuilderObject);
+        if(docBuilderObject != -1) {
+            docBuilderObject = -1;
         }
         cwdDB.erase();
         exceptionClear();
@@ -73,13 +69,13 @@
 
     void DocumentBuilder::setLineNumbering(bool option){
         SaxonProcessor::attachCurrentThread();
-        static jmethodID db_lineID = nullptr;
+        /*static jmethodID db_lineID = nullptr;
 
 			db_lineID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(docBuilderClass,
 					"setLineNumbering",
 					"(Z)");
         lineNumbering = option;
-        SaxonProcessor::sxn_environ->env->CallVoidMethod(docBuilderObject, db_lineID, option);
+        SaxonProcessor::sxn_environ->env->CallVoidMethod(docBuilderObject, db_lineID, option);*/
 
 
     }
@@ -95,7 +91,7 @@
 
     void DocumentBuilder::setSchemaValidator(SchemaValidator * validator){
         SaxonProcessor::attachCurrentThread();
-        static jmethodID db_schemaID = nullptr;
+        /*static jmethodID db_schemaID = nullptr;
 	    if (!db_schemaID || validator == nullptr) {
 
 	        return;
@@ -104,7 +100,7 @@
 		db_schemaID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(docBuilderClass,
 					"setSchemaValidator",
 					"(Lnet/sf/saxon/s9api/SchemaValidator;)");
-        SaxonProcessor::sxn_environ->env->CallVoidMethod(docBuilderObject, db_schemaID, validator->getUnderlyingValidator());
+        SaxonProcessor::sxn_environ->env->CallVoidMethod(docBuilderObject, db_schemaID, validator->getUnderlyingValidator());*/
 
 
     }
@@ -118,7 +114,7 @@
 
     void DocumentBuilder::setDTDValidation(bool option) {
         SaxonProcessor::attachCurrentThread();
-        static jmethodID db_dtdID = nullptr;
+        /*static jmethodID db_dtdID = nullptr;
 	    if (!db_dtdID ) {
 
 	        return;
@@ -127,7 +123,7 @@
 					"setDTDValidation",
 					"(Z)");
         dtdVal= option;
-        SaxonProcessor::sxn_environ->env->CallVoidMethod(docBuilderObject, db_dtdID, dtdVal);
+        SaxonProcessor::sxn_environ->env->CallVoidMethod(docBuilderObject, db_dtdID, dtdVal);*/
 
 
     }
@@ -143,7 +139,7 @@
 
     void DocumentBuilder::setBaseUri(const char* uri) {
         SaxonProcessor::attachCurrentThread();
-        static jmethodID db_dtdID = nullptr;
+        /*static jmethodID db_dtdID = nullptr;
 	    if (!db_dtdID ) {
 
 	        return;
@@ -152,7 +148,7 @@
 					"setBaseURI",
 					"(Z)");
         baseURI= std::string(uri);
-        SaxonProcessor::sxn_environ->env->CallVoidMethod(docBuilderObject, db_dtdID, dtdVal);
+        SaxonProcessor::sxn_environ->env->CallVoidMethod(docBuilderObject, db_dtdID, dtdVal);*/
 
     }
 
@@ -165,13 +161,13 @@
 
     XdmNode* DocumentBuilder::parseXmlFromString(const char * source){
         SaxonProcessor::attachCurrentThread();
-    jmethodID mdpID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(saxonCAPIClass, "parseXmlString",
+    /*jmethodID mdpID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(saxonCAPIClass, "parseXmlString",
                                                                                     "(Ljava/lang/String;Lnet/sf/saxon/s9api/Processor;Lnet/sf/saxon/s9api/DocumentBuilder;Lnet/sf/saxon/s9api/SchemaValidator;Ljava/lang/String;)Lnet/sf/saxon/s9api/XdmNode;");
     if (!mdpID) {
         std::cerr << "\nError: Saxonc." << "parseXmlString()" << " not found" << std::endl;
         return nullptr;
     }
-//TODO SchemaValidator
+
     if(source == nullptr) {
         createException("Source string is NULL");
         return nullptr;
@@ -188,7 +184,7 @@
         return value;
     } else if (exceptionOccurred()) {
         createException();
-    }
+    }*/
 
     return nullptr;
 
@@ -199,7 +195,7 @@
 
    XdmNode* DocumentBuilder::parseXmlFromFile(const char * filename){
        SaxonProcessor::attachCurrentThread();
-    jmethodID mID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(saxonCAPIClass, "parseXmlFile",
+    /*jmethodID mID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(saxonCAPIClass, "parseXmlFile",
                                                                                     "(Lnet/sf/saxon/s9api/Processor;Ljava/lang/String;Lnet/sf/saxon/s9api/DocumentBuilder;Lnet/sf/saxon/s9api/SchemaValidator;Ljava/lang/String;)Lnet/sf/saxon/s9api/XdmNode;");
     if (!mID) {
         std::cerr << "\nError: Saxonc.Dll " << "parseXmlFromFile()" << " not found" << std::endl;
@@ -217,13 +213,15 @@
         return value;
     } else if (exceptionOccurred()) {
         createException();
-    }
+    }*/
+
+    return nullptr;
   }
 
 
    XdmNode* DocumentBuilder::parseXmlFromUri(const char * uri){
        SaxonProcessor::attachCurrentThread();
-    jmethodID mID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(saxonCAPIClass, "parseXmlFile",
+   /* jmethodID mID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(saxonCAPIClass, "parseXmlFile",
                                                                                     "(Lnet/sf/saxon/s9api/Processor;Ljava/lang/String;Lnet/sf/saxon/s9api/DocumentBuilder;Lnet/sf/saxon/s9api/SchemaValidator;Ljava/lang/String;)Lnet/sf/saxon/s9api/XdmNode;");
     if (!mID) {
         std::cerr << "\nError: Saxonc.Dll " << "parseXmlFromFile()" << " not found" << std::endl;
@@ -241,10 +239,10 @@
         return value;
     } else if (exceptionOccurred()) {
         createException();
-    }
+    } */
 
 
-
+        return nullptr;
    }
 
 
@@ -252,7 +250,7 @@
 
 void DocumentBuilder::exceptionClear(){
     SaxonProcessor::attachCurrentThread();
-    SaxonProcessor::sxn_environ->env->ExceptionClear();
+
     if(exception != nullptr) {
         delete exception;
         exception = nullptr;
@@ -288,7 +286,7 @@ void DocumentBuilder::createException(const char * message) {
         exception = nullptr;
     }
     if(message == nullptr) {
-        exception = proc->checkAndCreateException(docBuilderClass);
+        //exception = proc->checkAndCreateException(docBuilderClass);
     } else {
         exception = new SaxonApiException(message);
     }

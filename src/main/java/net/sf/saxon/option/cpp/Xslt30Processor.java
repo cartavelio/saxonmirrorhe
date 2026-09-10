@@ -234,7 +234,7 @@ public class Xslt30Processor extends SaxonCAPI {
     }
 
     @CEntryPoint(name = "j_compileFromAssociatedFile")
-    public static XsltExecutable compileFromAssociatedFile(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer cwd, CCharPointer filename, int cjit, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    public static long compileFromAssociatedFile(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer cwd, CCharPointer filename, int cjit, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
         try {
             Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
@@ -255,7 +255,9 @@ public class Xslt30Processor extends SaxonCAPI {
             //compiler.setErrorListener(errorListener);
             compiler.setSchemaAware(xslt30Processor.schemaAware);
             executable = compiler.compile(compiler.getAssociatedStylesheet(source, null, null, null));
-            return executable;
+            ObjectHandle handle = SaxonCAPI.objectHandles.create(executable);
+
+            return handle.rawValue();
         } catch (SaxonApiException ex) {
             throw ex;
         }
@@ -272,7 +274,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
 
     @CEntryPoint(name = "j_compileFromFile")
-   public static XsltExecutable compileFromFile(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer cfilename, int cjit, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+   public static long compileFromFile(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer cfilename, int cjit, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
         Processor processor = xslt30Processor.getProcessor();
@@ -289,7 +291,9 @@ public class Xslt30Processor extends SaxonCAPI {
         //compiler.setErrorListener(errorListener);
         compiler.setSchemaAware(xslt30Processor.schemaAware);
         executable = compiler.compile(source);
-        return executable;
+        ObjectHandle handle = SaxonCAPI.objectHandles.create(executable);
+
+        return handle.rawValue();
 
     }
 
@@ -308,7 +312,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
 
     @CEntryPoint(name = "j_compileFromString")
-    public static XsltExecutable compileFromString(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer stylesheet, int cjit , ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    public static long compileFromString(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer stylesheet, int cjit , ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
         XsltCompiler compiler = xslt30Processor.getProcessor().newXsltCompiler();
         setStaticParametersFromArray(compiler, processorDataAccumulatorRef);
@@ -330,8 +334,9 @@ public class Xslt30Processor extends SaxonCAPI {
         }
 
         XsltExecutable executable = compiler.compile(source);
-        return executable;
+        ObjectHandle handle = SaxonCAPI.objectHandles.create(executable);
 
+        return handle.rawValue();
 
     }
 
@@ -345,7 +350,7 @@ public class Xslt30Processor extends SaxonCAPI {
      * @return XsltExecutable
      */
     @CEntryPoint(name = "j_compileFromXdmNode")
-    public static XsltExecutable compileFromXdmNode(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd,  ObjectHandle xdmNodeRef, int cjit , ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    public static long compileFromXdmNode(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd,  ObjectHandle xdmNodeRef, int cjit , ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
         XsltCompiler compiler = xslt30Processor.getProcessor().newXsltCompiler();
@@ -367,7 +372,9 @@ public class Xslt30Processor extends SaxonCAPI {
             compilePackages(compiler);
         }  */
         XsltExecutable executable = compiler.compile(node.asSource());
-        return executable;
+        ObjectHandle handle = SaxonCAPI.objectHandles.create(executable);
+
+        return handle.rawValue();
 
 
     }

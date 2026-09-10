@@ -17,11 +17,11 @@
    
 	
 
-    XdmFunctionItem::XdmFunctionItem(jobject obj):XdmItem(obj), arity(-1){
+    XdmFunctionItem::XdmFunctionItem(int64_t obj):XdmItem(obj), arity(-1){
     }
 
     const char* XdmFunctionItem::getName(){
-          if(fname.empty()) {
+          /*if(fname.empty()) {
              jclass xdmUtilsClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XdmUtils");
              		static jmethodID xmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(xdmUtilsClass,"getFunctionName",
              					"(Lnet/sf/saxon/s9api/XdmFunctionItem;)Ljava/lang/String;");
@@ -43,12 +43,14 @@
 
           } else {
             return fname.c_str();
-          }
+          }*/
+
+          return nullptr;
 
     }
 
     int XdmFunctionItem::getArity(){
-          if(arity == -1) {
+         /* if(arity == -1) {
              jclass xdmFunctionClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmFunctionItem");
              		static jmethodID bfmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmFunctionClass,
              					"getArity",
@@ -64,12 +66,14 @@
 
           } else {
             return arity;
-          }
+          }*/
+
+          return 0;
 
     }
 
     XdmFunctionItem * XdmFunctionItem::getSystemFunction(SaxonProcessor * processor, const char * name, int arity){
-        if(processor == nullptr || name == nullptr) {
+        /*if(processor == nullptr || name == nullptr) {
             std::cerr << "Error in getSystemFunction. Please make sure processor and name are not nullptr." << std::endl;
              return nullptr;
         }
@@ -96,14 +100,16 @@
 
                 }
 
-        }
+        }*/
+
+        return nullptr;
 
 
 
     }
 
     XdmValue * XdmFunctionItem::call(SaxonProcessor * processor, XdmValue ** arguments, int argument_length) {
-          if(argument_length == 0 || arguments == nullptr || processor == nullptr) {
+          /*if(argument_length == 0 || arguments == nullptr || processor == nullptr) {
                       std::cerr << "Error in XdmFunctionItem.call.  nullptr arguments found." << std::endl;
                       return nullptr;
           }
@@ -164,7 +170,9 @@
 
                                  }
 
-                       }
+                       }*/
+
+          return nullptr;
 
     }
 

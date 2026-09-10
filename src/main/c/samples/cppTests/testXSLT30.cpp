@@ -10,7 +10,7 @@
 #include "../../Saxon.C.API/DocumentBuilder.h"
 #include "../../Saxon.C.API/XdmMap.h"
 #include "../../Saxon.C.API/XdmArray.h"
-#include "cppExtensionFunction.h"
+//#include "cppExtensionFunction.h"
 #include "CppTestUtils.h"
 #include <string>
 #include <thread>
@@ -29,7 +29,7 @@ using namespace std;
 
 
 
-char fname[] = "_nativeCall";
+/*char fname[] = "_nativeCall";
 char funcParameters[] = "(Ljava/lang/String;[Ljava/lang/Object;[Ljava/lang/String;)Ljava/lang/Object;";
 
 JNINativeMethod cppMethods[] =
@@ -39,7 +39,7 @@ JNINativeMethod cppMethods[] =
                         funcParameters,
                         (void *) &cppExtensionFunction::cppNativeCall
                 }
-        };
+        }; */
 
 
 /*
@@ -91,7 +91,7 @@ void testApplyTemplatesString1(Xslt30Processor *trans, sResultCount *sresult) {
 */
 void testTransformToStringExtensionFunc(const char * cwd,SaxonProcessor *processor, Xslt30Processor *trans, sResultCount *sresult) {
 
-    cout << endl << "Test: TransformToStringExtensionFunc:" << endl;
+    /*cout << endl << "Test: TransformToStringExtensionFunc:" << endl;
 
     bool nativeFound = processor->registerNativeMethods(SaxonProcessor::sxn_environ->env,
                                                         "com/saxonica/functions/extfn/cpp/NativeCall",
@@ -116,7 +116,7 @@ void testTransformToStringExtensionFunc(const char * cwd,SaxonProcessor *process
         const char *output = executable->transformFileToString("../data/cat.xml");
 
         if (output == nullptr) {
-            SaxonProcessor::sxn_environ->env->ExceptionDescribe();
+
             printf("result is null ====== FAIL ======  \n");
             sresult->failure++;
             sresult->failureList.push_back("testTransformToStringExtensionFunc");
@@ -131,7 +131,7 @@ void testTransformToStringExtensionFunc(const char * cwd,SaxonProcessor *process
         sresult->failure++;
         sresult->failureList.push_back("testTransformToStringExtensionFunc");
     }
-    delete executable;
+    delete executable;*/
 }
 
 
@@ -1234,8 +1234,8 @@ void xmarkTest1(Xslt30Processor *proc, sResultCount *sresult) {
 		proc->exceptionClear();
             } else {
                 cerr << "Message is nullptr" << endl;
-                SaxonProcessor::sxn_environ->env->ExceptionDescribe();
-		SaxonProcessor::sxn_environ->env->ExceptionClear();
+               // SaxonProcessor::sxn_environ->env->ExceptionDescribe();
+		//SaxonProcessor::sxn_environ->env->ExceptionClear();
             }
         }
     }
@@ -2157,7 +2157,7 @@ void testCatalog(const char * cwd, SaxonProcessor * proc, sResultCount *sresult)
     cout << endl << "Test: testCatalog" << endl;
     bool trace = false;
     proc->setcwd(cwd);
-    proc->setCatalog("../php/catalog-test/catalog.xml", trace);
+    proc->setCatalog("../php/catalog-test/catalog.xml");
     if (proc->exceptionOccurred()) {
         const char *message = proc->getErrorMessage();
         if(message != nullptr) {
@@ -2336,12 +2336,12 @@ void testSaxSourceDTDValidation(SaxonProcessor * proc, sResultCount *sresult) {
 static int NUM_THREADS = 10;
 
 void RunThread(XsltExecutable * executable, int tid, const std::string filename) {
-    JavaVMAttachArgs att_arg;
+    /*JavaVMAttachArgs att_arg;
     att_arg.version = JNI_VERSION_1_2;
     att_arg.name = NULL;
-    att_arg.group = NULL;
+    att_arg.group = NULL;*/
 
-    SaxonProcessor::sxn_environ->jvm->AttachCurrentThread((void**)&SaxonProcessor::sxn_environ->env, NULL);
+    //SaxonProcessor::sxn_environ->jvm->AttachCurrentThread((void**)&SaxonProcessor::sxn_environ->env, NULL);
     cerr<<endl<<"RunThread cp0,  THEAD ID="<<tid<<endl;
     fflush(stderr);
     fflush(stdout);
@@ -2378,7 +2378,7 @@ void RunThread(XsltExecutable * executable, int tid, const std::string filename)
         cerr << "XsltExecutable is nullptr" << endl;
     }
 
-    (   SaxonProcessor::sxn_environ->jvm)->DetachCurrentThread();
+  //  (   SaxonProcessor::sxn_environ->jvm)->DetachCurrentThread();
 
 }
 
@@ -2439,6 +2439,7 @@ int main(int argc, char* argv[]) {
     }
 
     sResultCount *sresult = new sResultCount();
+    std::cerr << "testXSLT30 cp0" << std::endl;
     Xslt30Processor *trans = processor->newXslt30Processor();
 
     if( trans == nullptr) {
@@ -2450,7 +2451,7 @@ int main(int argc, char* argv[]) {
         return -1;
     }
     //testValidation(trans,sresult);
-
+    std::cerr << "testXSLT30 cp1" << std::endl;
     testInitialTemplate(processor, trans, sresult);
 
     cout<<endl<<"============================================================="<<endl<<endl;
