@@ -402,6 +402,7 @@ public class SortExpression extends Expression
      *
      * @param n the requested index
      * @param c the XPath context
+     * @return the evaluated sort key
      * @throws XPathException if any error occurs
      */
 
