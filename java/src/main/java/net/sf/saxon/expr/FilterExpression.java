@@ -114,6 +114,11 @@ public final class FilterExpression extends BinaryExpression implements ContextS
         return "filter";
     }
 
+    @Override
+    public boolean isNavigational() {
+        return getBase().isNavigational();
+    }
+
     /**
      * Get the data type of the items returned
      *

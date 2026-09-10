@@ -56,6 +56,11 @@ public class ContextItemExpression extends Expression {
         return "dot";
     }
 
+    @Override
+    public boolean isNavigational() {
+        return true;
+    }
+
     /**
      * Create a clone copy of this expression
      *

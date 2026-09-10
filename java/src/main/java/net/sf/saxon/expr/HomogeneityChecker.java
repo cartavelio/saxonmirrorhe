@@ -43,6 +43,11 @@ public class HomogeneityChecker extends UnaryExpression {
         return OperandRole.INSPECT;
     }
 
+    @Override
+    public boolean isNavigational() {
+        return getBaseExpression().isNavigational();
+    }
+
     /**
      * Type-check the expression. Default implementation for unary operators that accept
      * any kind of operand

@@ -114,6 +114,11 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
         return "axisStep";
     }
 
+    @Override
+    public boolean isNavigational() {
+        return true;
+    }
+
     /**
      * Simplify an expression
      */

@@ -295,6 +295,15 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
     }
 
     /**
+     * Ask whether the expression is navigational as defined in the QT 4.0 specification
+     * @return true if the expression is classed as navigational
+     */
+
+    public boolean isNavigational() {
+        return false;
+    }
+
+    /**
      * Ask whether the expression can be lifted out of a loop, assuming it has no dependencies
      * on the controlling variable/focus of the loop
      * @param forStreaming true if we are optimizing for streamed evaluation

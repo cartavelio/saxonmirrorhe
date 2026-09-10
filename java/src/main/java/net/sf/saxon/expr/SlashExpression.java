@@ -10,7 +10,6 @@ package net.sf.saxon.expr;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.elab.*;
-import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.instruct.CopyOf;
 import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.parser.*;
@@ -19,6 +18,7 @@ import net.sf.saxon.expr.sort.DocumentSorter;
 import net.sf.saxon.functions.Doc;
 import net.sf.saxon.functions.DocumentFn;
 import net.sf.saxon.functions.KeyFn;
+import net.sf.saxon.functions.Reverse;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.arrays.SquareArrayConstructor;
 import net.sf.saxon.ma.jnode.AnyJNodeType;
@@ -62,6 +62,7 @@ public class SlashExpression extends BinaryExpression
 
     private boolean contextFree;
     private boolean indexingDisabled;
+    private boolean stepIsNavigational;
 
     /**
      * Constructor
@@ -73,6 +74,7 @@ public class SlashExpression extends BinaryExpression
 
     public SlashExpression(Expression start, Expression step) {
         super(start, OperatorSymbol.SLASH, step);
+        stepIsNavigational = step.isNavigational(); // doesn't change if the step is rewritten
     }
 
     @Override
@@ -119,6 +121,11 @@ public class SlashExpression extends BinaryExpression
     @Override
     public String getExpressionName() {
         return "pathExpression";
+    }
+
+    @Override
+    public boolean isNavigational() {
+        return getLhsExpression().isNavigational() && getRhsExpression().isNavigational();
     }
 
     /**
@@ -305,21 +312,32 @@ public class SlashExpression extends BinaryExpression
     // are in flux, at present we only allow literals and variable references, or a sequence thereof
 
     private static boolean isChildSelectorExpression(Expression expr) {
-        if (expr instanceof Literal || expr instanceof VariableReference) {
-            return true;
-        }
-        if (ExpressionTool.dependsOnFocus(expr)) {
+        if (expr.isNavigational()) {
             return false;
         }
-        if (expr instanceof Block block) {
-            for (Operand child : block.operands()) {
-                if (!isChildSelectorExpression(child.getChildExpression())) {
-                    return false;
-                }
+        // cases that we generate as part of optimization rewrites...
+        if (expr instanceof SystemFunctionCall functionCall) {
+            Expression arg0 = functionCall.getArg(0);
+            if (expr.isCallOn(Reverse.class) && arg0.isNavigational()) {
+                return false;
             }
-            return true;
         }
-        return false;
+        return true;
+//        if (expr instanceof Literal || expr instanceof VariableReference) {
+//            return true;
+//        }
+//        if (ExpressionTool.dependsOnFocus(expr)) {
+//            return false;
+//        }
+//        if (expr instanceof Block block) {
+//            for (Operand child : block.operands()) {
+//                if (!isChildSelectorExpression(child.getChildExpression())) {
+//                    return false;
+//                }
+//            }
+//            return true;
+//        }
+//        return false;
     }
 
     // Simplify an expression of the form a//b, where b has no positional filters.
@@ -689,8 +707,9 @@ public class SlashExpression extends BinaryExpression
     public Expression copy(RebindingMap rebindings) {
         Expression exp = ExpressionTool.makePathExpression(getStart().copy(rebindings), getStep().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, exp);
-        if (exp instanceof SlashExpression) {
-            ((SlashExpression)exp).indexingDisabled = indexingDisabled;
+        if (exp instanceof SlashExpression slash) {
+            slash.indexingDisabled = indexingDisabled;
+            slash.stepIsNavigational = stepIsNavigational;
         }
         return exp;
     }
@@ -1170,19 +1189,41 @@ public class SlashExpression extends BinaryExpression
      */
 
     public static class SlashExprElaborator extends PullElaborator {
-
-        // TODO: combine ForEach and SlashExpression
-
+        
         @Override
         public PullEvaluator elaborateForPull() {
             SlashExpression expr = (SlashExpression) getExpression();
             PullEvaluator select = expr.getStart().makeElaborator().elaborateForPull();
             if (expr.contextFree && expr.getStep() instanceof AxisExpression step) {
                 return context -> MappingIterator.map(select.iterate(context), item -> step.iterate((GNode) item));
-            } else if (isChildSelectorExpression(expr.getStep())) {
-                // We don't know whether the LHS will return XNodes or JNodes, which affects
-                // the interpretation of the RHS; but we do know that the RHS doesn't
-                // depend on the focus
+            }
+            if (ExpressionTool.dependsOnFocus(expr.getStep())) {
+                PullEvaluator action = expr.getStep().makeElaborator().elaborateForPull();
+                boolean isNavigational = expr.getStep().isNavigational();
+                ContextMappingFunction mapper = cxt -> {
+                    Item cxtItem = cxt.getContextItem();
+                    if (cxtItem instanceof NodeInfo) {
+                        return action.iterate(cxt);
+                    } else if (cxtItem instanceof JNode) {
+                        if (isNavigational) {
+                            return action.iterate(cxt);
+                        } else {
+                            throw new XPathException("When the left-hand operand of '/' selects a JNode, "
+                                                             + "the right-hand operand must either be independent of the context, "
+                                                             + "or must be a navigational expression. Expression " + expr.getStep() + " is neither");
+                        }
+                    } else {
+                        throw new XPathException("The left-hand operand of '/' must select XNodes or GNodes", "XPTY0004")
+                                .asTypeError();
+                    }
+                };
+                return context -> {
+                    XPathContextMinor c2 = context.newMinorContext();
+                    c2.trackFocus(select.iterate(context));
+                    return new ContextMappingIterator(mapper, c2);
+                };
+            } else {
+                // The RHS doesn't depend on the focus
                 SequenceEvaluator action = expr.getStep().makeElaborator().eagerly();
                 return context -> {
                     GroundedValue rhs = action.evaluate(context).materialize();
@@ -1216,16 +1257,7 @@ public class SlashExpression extends BinaryExpression
                     return new MappingIterator(select.iterate(context), mapper);
                 };
 
-            } else {
-                @SuppressWarnings("Convert2MethodRef")
-                PullEvaluator action = expr.getStep().makeElaborator().elaborateForPull();
-                ContextMappingFunction mapper = cxt -> action.iterate(cxt);
-                return context -> {
-                    XPathContextMinor c2 = context.newMinorContext();
-                    c2.trackFocus(select.iterate(context));
-                    return new ContextMappingIterator(mapper, c2);
-                };
-            }
+            } 
         }
 
         @Override

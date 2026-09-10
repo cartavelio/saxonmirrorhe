@@ -119,6 +119,11 @@ public final class FirstItemExpression extends SingleItemFilter {
         return EVALUATE_METHOD;
     }
 
+    @Override
+    public boolean isNavigational() {
+        return true;
+    }
+
     /**
      * Evaluate the expression
      */

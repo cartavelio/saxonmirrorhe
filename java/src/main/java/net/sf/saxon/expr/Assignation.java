@@ -59,6 +59,11 @@ public abstract class Assignation extends Expression implements LocalBinding {
         return operandList(sequenceOp, actionOp);
     }
 
+    @Override
+    public boolean isNavigational() {
+        return getAction().isNavigational();
+    }
+
 
     /**
      * Set the required type (declared type) of the variable

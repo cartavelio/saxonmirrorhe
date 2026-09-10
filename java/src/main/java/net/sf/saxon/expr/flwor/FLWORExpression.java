@@ -64,6 +64,11 @@ public class FLWORExpression extends Expression {
                 || c.getClauseKey() == Clause.ClauseName.WINDOW;
     }
 
+    @Override
+    public boolean isNavigational() {
+        return getReturnClause().isNavigational();
+    }
+
     /**
      * Get the return clause of the FLWOR expression
      *

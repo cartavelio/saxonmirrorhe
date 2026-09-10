@@ -245,6 +245,16 @@ public class Choose extends Instruction implements ConditionalInstruction {
         return new ConcatenatingIterable<>(Arrays.asList(conditionOps), Arrays.asList(actionOps));
     }
 
+    @Override
+    public boolean isNavigational() {
+        for (int i=0; i<conditionOps.length; i++) {
+            if (!getAction(i).isNavigational()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * Ask whether common subexpressions found in the operands of this expression can
      * be extracted and evaluated outside the expression itself. The result is irrelevant

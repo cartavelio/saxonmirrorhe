@@ -264,8 +264,7 @@ public class ExpressionTool {
 
     public static boolean containsLocalVariableReference(final Expression exp) {
         return contains(exp, false, e -> {
-            if (e instanceof LocalVariableReference) {
-                LocalVariableReference vref = (LocalVariableReference) e;
+            if (e instanceof LocalVariableReference vref) {
                 LocalBinding binding = vref.getBinding();
                 return !(binding instanceof Expression && contains(exp, (Expression) binding));
             }
@@ -468,8 +467,7 @@ public class ExpressionTool {
         Expression child = exp;
         Expression parent = child.getParentExpression();
         while (parent != null) {
-            if (parent instanceof ContextSwitchingExpression) {
-                ContextSwitchingExpression switcher = (ContextSwitchingExpression) parent;
+            if (parent instanceof ContextSwitchingExpression switcher) {
                 if (child == switcher.getActionExpression()) {
                     if (switcher.getSelectExpression().hasSpecialProperty(StaticProperty.CONTEXT_DOCUMENT_NODESET)) {
                         parent.resetLocalStaticProperties();
@@ -606,20 +604,18 @@ public class ExpressionTool {
                 }
             }
         }
-        if (exp instanceof VariableReference) {
-            VariableReference var = (VariableReference) exp;
+        if (exp instanceof VariableReference var) {
             Binding binding = var.getBinding();
-            if (exp instanceof LocalVariableReference) {
-                ((LocalVariableReference) var).setSlotNumber(((LocalBinding) binding).getLocalSlotNumber());
+            if (exp instanceof LocalVariableReference lVar) {
+                lVar.setSlotNumber(((LocalBinding) binding).getLocalSlotNumber());
             }
-            if (binding instanceof Assignation && ((LocalBinding) binding).getLocalSlotNumber() < 0) {
+            if (binding instanceof Assignation decl && ((LocalBinding) binding).getLocalSlotNumber() < 0) {
                 // This indicates something badly wrong: we've found a variable reference on the tree, that's
                 // bound to a variable declaration that is no longer on the tree. All we can do is print diagnostics.
                 // The most common reason for this failure is that the declaration of the variable was removed
                 // from the tree in the mistaken belief that there were no references to the variable. Variable
                 // references are counted during the typeCheck phase, so this can happen if typeCheck() fails to
                 // visit some branch of the expression tree.
-                Assignation decl = (Assignation) binding;
                 Logger err;
                 try {
                     err = exp.getConfiguration().getLogger();
@@ -687,12 +683,11 @@ public class ExpressionTool {
                         ebvError("a sequence of two or more items starting with a string ('" + first.getStringValue() + "')");
                     }
                     return !((StringValue) first).isEmpty();
-                } else if (first instanceof NumericValue) {
+                } else if (first instanceof NumericValue n) {
                     if (iterator.next() != null) {
                         iterator.close();
                         ebvError("a sequence of two or more items starting with a numeric value (" + first.getStringValue() + ")");
                     }
-                    final NumericValue n = (NumericValue) first;
                     return (n.compareTo(0) != 0) && !n.isNaN();
                 } else {
                     iterator.close();
@@ -744,8 +739,7 @@ public class ExpressionTool {
                 return ((BooleanValue) item).getBooleanValue();
             } else if (item instanceof StringValue) {   // includes anyURI value
                 return !((StringValue) item).isEmpty();
-            } else if (item instanceof NumericValue) {
-                final NumericValue n = (NumericValue) item;
+            } else if (item instanceof NumericValue n) {
                 return (n.compareTo(0) != 0) && !n.isNaN();
             } else if (item.getGenre() == Genre.EXTERNAL) {
                 return true;
@@ -1063,8 +1057,7 @@ public class ExpressionTool {
 
     public static void resetPropertiesWithinSubtree(Expression exp) {
         exp.resetLocalStaticProperties();
-        if (exp instanceof LocalVariableReference) {
-            LocalVariableReference ref = (LocalVariableReference) exp;
+        if (exp instanceof LocalVariableReference ref) {
             Binding binding = ref.getBinding();
             if (binding instanceof Assignation) {
                 binding.addReference(ref, ref.isInLoop());
@@ -1318,8 +1311,7 @@ public class ExpressionTool {
         // appear, e.g. //b/../<d/>. So we only do this rewrite if the step is a path
         // expression in which both operands are axis expressions optionally with predicates
 
-        if (step instanceof SlashExpression) {
-            SlashExpression stepPath = (SlashExpression) step;
+        if (step instanceof SlashExpression stepPath) {
             if (isFilteredAxisPath(stepPath.getSelectExpression()) && isFilteredAxisPath(stepPath.getActionExpression())) {
                 expr.setStart(ExpressionTool.makePathExpression(start, stepPath.getSelectExpression()));
                 expr.setStep(stepPath.getActionExpression());
@@ -1569,7 +1561,7 @@ public class ExpressionTool {
     @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public static String parenthesize(Expression exp) {
         if (exp.operands().iterator().hasNext()) {
-            return "(" + exp.toString() + ")";
+            return "(" + exp + ")";
         } else {
             return exp.toString();
         }

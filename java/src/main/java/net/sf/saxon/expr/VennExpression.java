@@ -51,6 +51,11 @@ public class VennExpression extends BinaryExpression {
         super(p1, op, p2);
     }
 
+    @Override
+    public boolean isNavigational() {
+        return getLhsExpression().isNavigational() && getRhsExpression().isNavigational();
+    }
+
     /**
      * Simplify an expression. This performs any static optimization (by rewriting the expression
      * as a different expression). The default implementation simplifies its operands.

@@ -76,6 +76,11 @@ public class DocumentSorter extends UnaryExpression {
         return "docOrder";
     }
 
+    @Override
+    public boolean isNavigational() {
+        return true;
+    }
+
     public Comparator<? super GNode> getComparer() {
         return comparer;
     }

@@ -62,6 +62,11 @@ public class ContextValueExpression extends Expression {
         return "dott";
     }
 
+    @Override
+    public boolean isNavigational() {
+        return true;
+    }
+
     /**
      * Create a clone copy of this expression
      *

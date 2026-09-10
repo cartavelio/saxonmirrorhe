@@ -75,6 +75,18 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
         }
     }
 
+    @Override
+    public boolean isNavigational() {
+        if (getArity() >= 1 && getArg(0).isNavigational()) {
+            if (isCallOn(Reverse.class)) {
+                // Not true according to the spec, but we generate a call on reverse internally
+                // right from the XPath parser...
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Type-check the expression. This also calls preEvaluate() to evaluate the function
      * if all the arguments are constant; functions that do not require this behavior

@@ -89,6 +89,11 @@ public final class DynamicNodeTestExpr extends UnaryExpression implements Genera
         return "axisGet";
     }
 
+    @Override
+    public boolean isNavigational() {
+        return true;
+    }
+
     /**
      * Type-check the expression
      */

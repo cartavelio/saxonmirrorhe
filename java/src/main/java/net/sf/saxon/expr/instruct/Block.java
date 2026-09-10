@@ -62,6 +62,16 @@ public class Block extends Instruction {
         return false;
     }
 
+    @Override
+    public boolean isNavigational() {
+        for (Operand o : operanda) {
+            if (!o.getChildExpression().isNavigational()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * Get the n'th child expression
      * @param n the position of the child expression required (zero-based)
