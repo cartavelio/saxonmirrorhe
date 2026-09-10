@@ -17,33 +17,51 @@
    non-conformances are found that cannot be fixed without serious risk of disruption, the fix may be deferred
    to the next major release of Saxon.</p>
    
+   <section id="xslt10" title="XSLT 1.0 conformance">
+      <h1>XSLT 1.0 conformance</h1>
+      
+      <p>If a stylesheet specifies <code>version="1.0"</code>, Saxon will execute it according to the
+      rules for <i>backwards compatibility mode</i> in the XSLT 3.0 specification.</p>
+      
+      <p>In most cases (but not all) this will deliver the same result as a conformant XSLT 1.0 processor.
+      There are a few exceptions, noted in the <i>Compatibility</i> sections of the W3C specifications.
+      For example, the expression <code>2 &lt; 3 &lt; 4</code> returns <code>false</code> under XSLT 1.0; because
+      this is so counter-intuitive, XSLT 2.0 changed the rules (even under backwards compatibility mode)
+      to make the expression throw an error.</p>
+   </section>
    <section id="xslt20" title="XSLT 2.0 conformance">
       <h1>XSLT 2.0 conformance</h1>
       
-      <p>Since Saxon 9.8, Saxon no longer offers an XSLT 2.0 processor: the product now implements
-      XSLT 3.0 only, and is not tested for XSLT 2.0 conformance.</p>
+      <p>Since Saxon 9.8, Saxon no longer offers XSLT 2.0 conformance.</p>
       
-      <p>XSLT 3.0 has a very high level of backwards compatibility with XSLT 2.0, so all
-      existing stylesheets should continue to run. The only significant difference when you process
-      a 2.0 stylesheet with a 3.0 processor is that you will no longer get errors if you use constructs
-      that are permitted in 3.0 but not in 2.0.</p>
+      <p>The vast majority of XSLT 2.0 stylesheets will work correctly, because 3.0 is backwards compatible.
+         There are a few very minor incompatibilities between XSLT 3.0 and XSLT 2.0 listed in the W3C specifications: for example,
+         some error codes have changed.</p>
       
-      <p>There are a few very minor incompatibilities between XSLT 3.0 and XSLT 2.0 listed in the W3C specifications: for example,
-      some error codes have changed.</p>
+      <p>However, consider an XSLT stylesheet containing an <code>xsl:mode</code> declaration:</p>
+      
+      <ol>
+         <li>If the stylesheet specifies <code>version="2.0"</code>, an XSLT 2.0 processor is required
+         to reject this as an error, but Saxon will accept it and interpret it according to the XSLT 3.0
+         specification.</li>
+         <li>If the stylesheet specifies <code>version="3.0"</code>, an XSLT 2.0 processor is required
+            to ignore the declaration under the rules for forwards compatibility mode, 
+            but Saxon will accept it and interpret it according to the XSLT 3.0
+            specification.</li>
+      </ol>
+      
 
 
    </section>
    <section id="xslt30" title="XSLT 3.0 conformance">
       <h1>XSLT 3.0 conformance</h1>
 
-      <p>The release of Saxon 9.8 was timed to coincide with the final publication of the <a
-            href="http://www.w3.org/TR/xslt-30/" class="bodylink">XSLT 3.0 
-            Recommendation</a>, published in June 2017 (at http://www.w3.org/TR/xslt-30/). The
-         implementation of Saxon 9.8 was closely aligned with this specification with very few
-         restrictions. Some of these restrictions, noted below, are lifted in 9.9.</p>
+      <p>Saxon offers a very high level of conformance to the XSLT 3.0 specifications. Known exceptions are listed in this section.</p>
       
       
       <h2 class="subtitle">Test results</h2>
+      
+      <p>TBA: update for Saxon 11.</p>
       
       <p>At the time of release Saxon-EE 9.9 passes all 11435 applicable tests in the W3C XSLT 3.0 test suite. For the first time,
          this includes testing that it always returns the right error code in the case of error tests. Tests are run
@@ -57,7 +75,7 @@
       
       <ul>
          <li>3 tests (document-2004/5/6) that use non-ASCII characters in test filenames, which causes problems
-         for the Mercurial client used by our test driver.</li>
+         for the GIT client used by our test driver.</li>
          <li>1178 tests labeled with dependencies that Saxon does not satisfy. These have not been analyzed in detail. Many of them are specifically intended
             only to be run with an XSLT 2.0 processor. Some of them depend on specific Unicode versions or specific localization languages.</li>
          <li>Tests in the <code>regex-classes</code> test set, which have not been updated to the latest Unicode standards: minor changes to the list
@@ -86,17 +104,11 @@
                <li>Basic Conformance</li>
                <li>Serialization</li>
                <li>XPath 3.1</li>
-               <li>Compatibility* (that is, XSLT 1.0 compatibility mode)</li>
-              <li>Dynamic Evaluation§ (the <code>xsl:evaluate</code> instruction)</li>
-              <li>Higher-Order Functions§</li>
+               <li>Compatibility (that is, XSLT 1.0 compatibility mode)</li>
+              <li>Dynamic Evaluation (the <code>xsl:evaluate</code> instruction)</li>
+              <li>Higher-Order Functions</li>
             </ul>
-            
-            <p>* From 9.8.0.7, XSLT 1.0 backwards-compatibility mode was reinstated in Saxon-HE. In
-               earlier versions of 9.8, this mode required
-               Saxon-PE or higher (that is, Saxon-HE will reject stylesheets that specify <code>version="1.0"</code>).</p>  
-            
-            <p>§ Support for dynamic evaluation and higher-order functions moved into Saxon-HE
-            with the 10.0 release; previously these features required Saxon-PE or higher.</p>
+
             
            <p>Saxon-HE includes support for the language features associated with XSLT 3.0 packages, but with limited operational
                support. Specifically, Saxon-HE allows compiled stylesheet packages to be loaded from filestore, but creating such packages
@@ -124,23 +136,44 @@
                the ability to export packages in compiled form, and multi-threaded execution.</p>
          </li>
       </ul>
+      
+      <p>Saxon-CS corresponds to Saxon-EE on Java.</p>
 
       <p>For information on streaming, see <a class="bodylink" href="/sourcedocs/streaming"
             >Streaming of Large Documents</a>.</p>
 
       <p>For information on using packages, see <a class="bodylink" href="/using-xsl/compiling">Compiling a Stylesheet</a>.</p>
 
-      <p>Saxon (from release 9.8) acts as an XSLT 3.0 processor whether this is explicitly requested or not.
-         Specifying <code>version="1.0"</code> or <code>version="2.0"</code> does not prevent the use of 3.0 features;
-         rather it switches on "backwards compatibility mode" as defined in the XSLT 3.0 specification.</p> 
+
+      <h2>Non-Conformances</h2>
+      
+      <p>The following non-conformances are known:</p>
+      
+      <ol>
+         <li><p>The W3C specification requires that vendor-defined extensions must only change the processor's
+         behavior to the extent that the specification leaves the behavior implementation-defined. Some Saxon-defined
+         extensions do not follow this rule: they explicitly change the behavior to make it non-conformant.</p>
+         <p>For example:</p>
+         <ul>
+            <li>Calling <code>saxon:discard-document()</code> means that a subsequent call on <code>fn:doc()</code>
+            with the same URI will not return the same document node.</li>
+            <li>The extension attribute <code>xsl:map/@saxon:on-duplicates</code> defines non-conformant ways
+            of handling duplicate entries in a constructed map.</li>
+            <li>The serialization attribute <code>xsl:output/@saxon:canonical</code> causes Saxon to produce
+            output conforming with the W3C canonicalization specification, even where this conflicts with the
+            XSLT-defined serialization rules (for example, empty elements are output as <code><![CDATA[<hr></hr>]]></code>).</li>
+         </ul></li>
+         <li><p>The XSLT 3.0 specification requires a processor to offer a mode of processing in which XPath 3.1 constructs
+         such as array constructors (which are not part of XPath 3.0) are rejected. Saxon does not have such a processing
+         mode: all XPath 3.1 constructs are accepted unconditionally.</p></li>
+         <li><p>A small number of constructs that should be streamable according to the XSLT 3.0 specification are
+         not streamable in Saxon; and vice versa.</p></li>
+      </ol>
          
  
-      <p>The XSLT 3.0 specification requires support for XPath 3.0 plus selected features from XPath 3.1: let's call the resulting combination
-      XPath 3.0+. Support for XPath 3.1 is optional, but even if it is available, XSLT 3.0 processors are required to provide a mode of operation
-      that is restricted to XPath 3.0+. Saxon provides such a mode of operation, but there may be edge cases where it is not 100% conformant, behaving as specified
-      in XPath 3.1 rather than as specified in XPath 3.0.</p>
+      <h2>Summary of new XSLT 3.0 features</h2>
 
-      <p>There are no known restrictions.</p>
+ 
 
  
       <p>New XSLT 3.0 features implemented in Saxon include the following. The links are to sections
@@ -758,6 +791,8 @@
                </p>
                <p>&#x25BA; Both 1.0 and 1.1 are supported provided support is available from the chosen XML parser.
                XML 1.1 is available only if explicitly requested.</p>
+               <p for="CS">Saxon-CS does not support XML 1.1 because the Microsoft <code>System.Xml.XmlReader</code> family
+               of parsers do not support it.</p>
             </li>
             <li>
                <p>
@@ -766,6 +801,7 @@
                      declaration. (See 26 Serialization)</i>
                </p>
                <p>&#x25BA; XML 1.0 and 1.1 are supported; HTML 4 and 5 are supported; XHTML 1 and 5 are supported.</p>
+               <p for="CS">Note that XML 1.1 serialization is supported even in Saxon-CS.</p>
             </li>
             <li>
                <p>
@@ -893,11 +929,12 @@
       
       <p>Recent Saxon releases focus primarily on XPath 3.1 support, and deliver XPath 2.0 when required by restricting some of the
          capabilities of the XPath 3.1 processor. For example, this is the default for XPath expressions appearing
-         within assertions or conditional type alternatives in XSD 1.1 schemas. In particular,</p>
+         within assertions or conditional type alternatives in XSD 1.1 schemas. However, a few constructs behave as defined
+         in XPath 3.1 even when 2.0 is requested: details appear below.</p>
      
       
       <ul>
-         <li><p>During parsing of the XPath expression, new syntatic constructs are disallowed. These include:</p>
+         <li><p>In 2.0 mode,  syntatic constructs defined only in 3.0/3.1 are generally disallowed. These include:</p>
          <ul>
             <li>Let expressions</li>
             <li>Inline functions, dynamic function calls, function literals, and partially-applied functions</li>
@@ -935,7 +972,9 @@
    <section id="xpath31" title="XPath 3.1 Conformance">
       <h1>XPath 3.1 Conformance</h1>
 
-      <p>Saxon 10 implements the final XPath 3.1 Recommendation in its entirety.</p>
+      <p>Saxon implements the final XPath 3.1 Recommendation in its entirety.</p>
+      
+      <p>TODO: update test results</p>
       
       <p>At the time of release Saxon-EE 10.0 passes all 22049 applicable tests in the W3C XPath/XQuery test suite (QT3). Tests are run on both
          the Java and .NET platforms.
@@ -948,7 +987,7 @@
          Conformance issues raised by Saxon users typically
          result in new test cases being added to the test suite.</p>
       
-      <p>New features that were introduced in XPath 3.0 include the following:</p>
+      <p>New features that were introduced in XPath 3.0 or 3.1 include the following:</p>
       
       <ul>
          <li>
@@ -980,11 +1019,7 @@
          <li>
             <p>EQNames (<code>Q{uri}local</code>) wherever QNames are allowed</p>
          </li>
-      </ul>
 
-      <p>XPath 3.1 added:</p>
-
-      <ul>
          <li>
             <p>Support for maps and arrays</p>
          </li>
@@ -1131,674 +1166,20 @@
       </ol>
    </section>
 
-   <!--<section id="xquery" title="XQuery 1.0 Conformance">
-      <h1>XQuery 1.0 Conformance</h1>
-
-
-      <p>This release of Saxon implements the full XQuery 1.0 language as defined in the Second
-         Edition <a href="http://www.w3.org/TR/xquery/" class="bodylink">Recommendation</a> of 14
-         December 2010. The <a class="bodylink" href="../xpath20">restrictions</a> noted with
-         respect to XPath 2.0 apply equally to Saxon's support for XQuery 1.0.</p>
-
-      <p>XQuery conformance levels are described in <a
-            href="http://www.w3.org/TR/xquery/#id-xquery-conformance" class="bodylink">Section 5 of
-            the XQuery specification</a>.</p>
-
-      <p>Saxon-HE and Saxon-PE provide <strong>Minimal Conformance</strong> plus the following
-            <strong>Optional Features</strong>:</p>
-      <ul>
-         <li>
-            <p>Full Axis Feature</p>
-         </li>
-         <li>
-            <p>Module Feature</p>
-         </li>
-         <li>
-            <p>Serialization Feature</p>
-         </li>
-      </ul>
-
-      <p>Saxon-EE provides <strong>Minimal Conformance</strong> plus the following <strong>Optional
-            Features</strong>:</p>
-      <ul>
-         <li>
-            <p>Schema Import Feature</p>
-         </li>
-         <li>
-            <p>Schema Validation Feature</p>
-         </li>
-         <li>
-            <p>Full Axis Feature</p>
-         </li>
-         <li>
-            <p>Module Feature</p>
-         </li>
-         <li>
-            <p>Serialization Feature</p>
-         </li>
-      </ul>
-
-      <p>None of the Saxon products supports the Static Typing Feature, and there are no plans to do
-         so.</p>
-
-      <p>There are some known non-conformances if the product is used in particular ways:</p>
-      <ul>
-         <li>
-            <p>In pull mode (<code>-pull</code> on the command line) there is a restriction that
-               namespace undeclaration is not supported; this means that the query prolog option
-                  <code>copy-namespaces no-inherit</code> has no effect.</p>
-         </li>
-         <li>
-            <p>Under .NET, if the <code>System.Xml</code> parser is selected, attributes declared in
-               the DTD as being of type <code>ID</code> are not accessible using the
-                  <code>id()</code> function. This is because the <code>System.Xml</code> parser
-               does not make the DTD-defined attribute type available to the application. </p>
-         </li>
-
-      </ul>
-      <h2 class="subtitle">Conformance Tests</h2>
-
-      <p>Saxonica has submitted results for the published <a
-            href="http://www.w3.org/XML/Query/test-suite/" class="bodylink">W3C XQuery Test
-            suite</a>. W3C has published both <a
-            href="http://www.w3.org/XML/Query/test-suite/XQTSReportSimple.html" class="bodylink"
-            >summary</a> and <a href="http://www.w3.org/XML/Query/test-suite/XQTSReport.html"
-            class="bodylink">detail</a> reports from the results; at the time of submission Saxon-EE
-         was the only product to achieve a 100% pass rate.</p>
-
-      <p>The test driver used to measure these results is included in the Saxon distribution as part
-         of the <code>saxon-resources-9.n</code> download.</p>
-      <h2 class="subtitle">Checklist of Implementation-Defined Items</h2>
-
-      <p>Appendix D of the XQuery specification lists a number of features whose behaviour is
-         implementation-defined. For Saxon, the behaviour is as follows:</p>
-      <ol>
-         <li>
-
-            <p>
-               <i>The version of Unicode that is used to construct expressions.</i>
-            </p>
-
-            <p>&#x25BA; For details of Saxon Unicode support, see <a class="bodylink" href="../xslt20">XSLT
-                  2.0 Conformance.</a></p>
-         </li>
-         <li>
-
-            <p>
-               <i>The statically-known collations.</i>
-            </p>
-
-            <p>&#x25BA; Collation URIs of the form
-                     <code>http://saxon.sf.net/collation?<i>param=value;param=value...</i></code>
-               are always available: these map to the collations offered by the locales available
-               within the Java VM in use. Additional collation URIs may be implemented by users and
-               registered with the Saxon configuration via the Java API.</p>
-         </li>
-         <li>
-
-            <p>
-               <i>The implicit timezone.</i>
-            </p>
-
-            <p>&#x25BA; The implicit timezone is normally taken from the system clock. This may, however, be
-               overridden via the Java API.</p>
-         </li>
-         <li>
-
-            <p>
-               <i>The circumstances in which warnings are raised, and the ways in which warnings are
-                  handled.</i>
-            </p>
-
-            <p>&#x25BA; Warnings are raised for a variety of conditions. Compile time warnings include:</p>
-            <ul>
-               <li>
-                  <p>Use of a path expression that can never select anything (for example
-                        <code>@a/@b</code>)</p>
-               </li>
-               <li>
-                  <p>Use of an expression that can only succeed if one or more operands are empty
-                     sequences</p>
-               </li>
-               <li>
-                  <p>Use of a string literal in a PITest that is not a valid NCName</p>
-               </li>
-            </ul>
-
-            <p>Warnings may also be raised at run-time, for example if the <code>collection()</code>
-               function fails to load a document and recovery has been requested.</p>
-
-            <p>Compile-time warnings are sent to the JAXP <code>ErrorListener</code> registered with
-               the <code>Configuration</code>; the default <code>ErrorListener</code> displays them
-               as messages on <code>System.err</code>. Run-time warnings are sent to the JAXP
-                  <code>ErrorListener</code> registered with the <code>Controller</code>; the
-               default is the same.</p>
-         </li>
-         <li>
-
-            <p>
-               <i>The method by which errors are reported to the external processing
-                  environment.</i>
-            </p>
-
-            <p>&#x25BA; Compile-time errors are sent to the JAXP <code>ErrorListener</code> registered with
-               the <code>Configuration</code>; the default <code>ErrorListener</code> displays them
-               as messages on <code>System.err</code>. Run-time errors are sent to the JAXP
-                  <code>ErrorListener</code> registered with the <code>Controller</code>; the
-               default is the same. When queries are invoked from a Java application, any error will
-               also be notified by throwing an exception.</p>
-         </li>
-         <li>
-
-            <p>
-               <i>Whether the implementation is based on the rules of [XML 1.0] and [XML Names] or
-                  the rules of [XML 1.1] and [XML Names 1.1]. One of these sets of rules must be
-                  applied consistently by all aspects of the implementation.</i>
-            </p>
-
-            <p>&#x25BA; Saxon gives the user the choice: see <a class="bodylink" href="/sourcedocs/xml11"
-                  >Saxon and XML 1.1</a>. Note that since Saxon allows the user to select which XML
-               parser to use on a per-document basis, achievement of consistency across "all aspects
-               of the implementation" is in part a user responsibility. Saxon will not reject any
-               attempt to use an XML 1.1 parser in a 1.0 configuration, or vice versa.</p>
-
-            <p>Since Saxon 9.4, all operations in Saxon itself (as distinct from the underlying
-               parser) that depend on the rules for XML Names use the rules that are defined in XML
-               1.0 fifth edition and in XML 1.1, rather than the rules defined in earlier XML 1.0
-               editions.</p>
-
-
-         </li>
-         <li>
-
-            <p>
-               <i>Any components of the static context or dynamic context that are overwritten or
-                  augmented by the implementation.</i>
-            </p>
-
-            <p>&#x25BA; The following table shows the components of the static context. For each component,
-               the second column shows whether the component is overwritten or augmented by Saxon
-               itself. The third column shows whether it may be overwritten or augmented by an
-               application, through facilities in the Java API.</p>
-            <table>
-               <thead>
-                  <tr>
-                     <td>
-                        <p>Component</p>
-                     </td>
-                     <td>
-                        <p>Overwritten or augmented by Saxon?</p>
-                     </td>
-                     <td>
-                        <p>Can be set from Java API?</p>
-                     </td>
-                  </tr>
-               </thead>
-               <tr>
-                  <td>
-                     <p>XPath 1.0 Compatibility Mode</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-               </tr>
-               <tr>
-                  <td>
-                     <p>Statically known namespaces</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-                  <td>
-                     <p>yes</p>
-                  </td>
-               </tr>
-               <tr>
-                  <td>
-                     <p>Default element/type namespace</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-                  <td>
-                     <p>yes</p>
-                  </td>
-               </tr>
-               <tr>
-                  <td>
-                     <p>Default function namespace</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-               </tr>
-               <tr>
-                  <td>
-                     <p>In-scope schema types</p>
-                  </td>
-                  <td>
-                     <p>yes: types corresponding to Java classes for use in extension functions</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-               </tr>
-               <tr>
-                  <td>
-                     <p>In-scope element declarations</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-               </tr>
-               <tr>
-                  <td>
-                     <p>In-scope attribute declarations</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-               </tr>
-               <tr>
-                  <td>
-                     <p>In-scope variables</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-               </tr>
-               <tr>
-                  <td>
-                     <p>Context item static type</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-               </tr>
-               <tr>
-                  <td>
-                     <p>Function signatures</p>
-                  </td>
-                  <td>
-                     <p>yes: any Java method on the classpath can be referenced</p>
-                  </td>
-                  <td>
-                     <p>yes: there is a plug-in mechanism</p>
-                  </td>
-               </tr>
-               <tr>
-                  <td>
-                     <p>Statically known collations</p>
-                  </td>
-                  <td>
-                     <p>yes: collations of the form http://saxon.sf.net/collation?<i>params</i>
-                     </p>
-                  </td>
-                  <td>
-                     <p>yes</p>
-                  </td>
-               </tr>
-               <tr>
-                  <td>
-                     <p>Default collation</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-                  <td>
-                     <p>yes</p>
-                  </td>
-               </tr>
-               <tr>
-                  <td>
-                     <p>Construction mode</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-               </tr>
-               <tr>
-                  <td>
-                     <p>Ordering mode</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-               </tr>
-               <tr>
-                  <td>
-                     <p>Default order for empty sequences</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-               </tr>
-               <tr>
-                  <td>
-                     <p>Boundary-space policy</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-               </tr>
-               <tr>
-                  <td>
-                     <p>Copy-namespaces mode</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-               </tr>
-               <tr>
-                  <td>
-                     <p>Base URI</p>
-                  </td>
-                  <td>
-                     <p>yes: inferred from the location of the query</p>
-                  </td>
-                  <td>
-                     <p>yes</p>
-                  </td>
-               </tr>
-               <tr>
-                  <td>
-                     <p>Statically known documents</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-               </tr>
-               <tr>
-                  <td>
-                     <p>Statically known collections</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-               </tr>
-               <tr>
-                  <td>
-                     <p>Statically known default collection type</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-               </tr>
-            </table>
-
-            <p>For the dynamic context, the corresponding settings are:</p>
-            <table>
-               <thead>
-                  <tr>
-                     <td>
-                        <p>Component</p>
-                     </td>
-                     <td>
-                        <p>Overwritten or augmented by Saxon?</p>
-                     </td>
-                     <td>
-                        <p>Can be set from Java API?</p>
-                     </td>
-                  </tr>
-               </thead>
-               <tr>
-                  <td>
-                     <p>Context item</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-                  <td>
-                     <p>yes</p>
-                  </td>
-               </tr>
-               <tr>
-                  <td>
-                     <p>Context position</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-               </tr>
-               <tr>
-                  <td>
-                     <p>Context size</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-               </tr>
-               <tr>
-                  <td>
-                     <p>Variable values</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-                  <td>
-                     <p>only for declared external variables</p>
-                  </td>
-               </tr>
-               <tr>
-                  <td>
-                     <p>Function implementations</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-                  <td>
-                     <p>yes (extension functions)</p>
-                  </td>
-               </tr>
-               <tr>
-                  <td>
-                     <p>Current dateTime</p>
-                  </td>
-                  <td>
-                     <p>yes (from system clock)</p>
-                  </td>
-                  <td>
-                     <p>yes</p>
-                  </td>
-               </tr>
-               <tr>
-                  <td>
-                     <p>Implicit timezone</p>
-                  </td>
-                  <td>
-                     <p>yes (from system clock)</p>
-                  </td>
-                  <td>
-                     <p>yes</p>
-                  </td>
-               </tr>
-               <tr>
-                  <td>
-                     <p>Available documents</p>
-                  </td>
-                  <td>
-                     <p>yes (all documents reachable using Java URL connections)</p>
-                  </td>
-                  <td>
-                     <p>yes (URIResolver)</p>
-                  </td>
-               </tr>
-               <tr>
-                  <td>
-                     <p>Available collections</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-                  <td>
-                     <p>yes (CollectionResolver/catalog)</p>
-                  </td>
-               </tr>
-               <tr>
-                  <td>
-                     <p>Default collection</p>
-                  </td>
-                  <td>
-                     <p>no</p>
-                  </td>
-                  <td>
-                     <p>yes (CollectionResolver/catalog)</p>
-                  </td>
-               </tr>
-            </table>
-         </li>
-         <li>
-
-            <p>
-               <i>Which of the optional axes are supported by the implementation, if the Full-Axis
-                  Feature is not supported.</i>
-            </p>
-
-            <p>&#x25BA; The Full-Axis features is supported.</p>
-         </li>
-         <li>
-
-            <p>
-               <i>The default handling of empty sequences returned by an ordering key (sortspec) in
-                  an order by clause (empty least or empty greatest).</i>
-            </p>
-
-            <p>&#x25BA; Empty least.</p>
-         </li>
-         <li>
-
-            <p>
-               <i>The names and semantics of any extension expressions (pragmas) recognized by the
-                  implementation.</i>
-            </p>
-
-            <p>&#x25BA; Saxon-EE recognizes one pragma: <code>saxon:validate-type</code>. For details, see <a
-                  class="bodylink" href="/using-xquery/extensions">XQuery Extensions</a>.</p>
-         </li>
-         <li>
-
-            <p>
-               <i>The names and semantics of any option declarations recognized by the
-                  implementation.</i>
-            </p>
-
-            <p>&#x25BA; See <a class="bodylink" href="/using-xquery/extensibility">XQuery
-               Extensibility</a>.</p>
-         </li>
-         <li>
-
-            <p>
-               <i>Protocols (if any) by which parameters can be passed to an external function, and
-                  the result of the function can be returned to the invoking query.</i>
-            </p>
-
-            <p>&#x25BA; Java methods can be called as <a class="bodylink" href="/extensibility/functions"
-                  >Extension Functions</a>.</p>
-         </li>
-         <li>
-
-            <p>
-               <i>How the implementation handles location hints in module imports, if the Module
-                  Feature is supported.</i>
-            </p>
-
-            <p>&#x25BA; The location hint is interpreted as a relative URI, relative to the base URI of the
-               referencing module. It is then dereferenced using the Java URL mechanisms, unless the
-               user has nominated a <code>ModuleURIResolver</code>, in which case the interpretation
-               is under user control.</p>
-         </li>
-         <li>
-
-            <p>
-               <i>Any static typing extensions supported by the implementation, if the Static Typing
-                  Feature is supported.</i>
-            </p>
-
-            <p>&#x25BA; Not applicable.</p>
-         </li>
-         <li>
-
-            <p>
-               <i>The means by which serialization is invoked, if the Serialization Feature is
-                  supported.</i>
-            </p>
-
-            <p>&#x25BA; Serialization may be invoked from the command line or from the Java or .NET API.
-               Serialization parameters may be supplied on the command line, from the Java or .NET
-               API, or through option declarations in the query prolog.</p>
-         </li>
-         <li>
-
-            <p>
-               <i>The default values for the byte-order-mark, encoding, media-type,
-                  normalization-form, omit-xml-declaration, standalone, and version parameters, if
-                  the Serialization Feature is supported.</i>
-            </p>
-
-            <p>&#x25BA; As specified in Appendix C.3 of the XQuery specification.</p>
-         </li>
-      </ol>
-   </section>-->
+  
    <section id="xquery31" title="XQuery 3.1 Conformance">
       <h1>XQuery 3.1 Conformance</h1>
 
 
-      <p>Saxon 10 fully implements the final XQuery 3.1 <a
-            class="bodylink" href="http://www.w3.org/TR/xquery-31/">Recommendation</a> of 21 March 2017. (Saxon 9.8 also claimed full conformance,
-      and the situation is unchanged except for a small number of bugs that have been reported.)</p>
+      <p>Saxon fully implements the final XQuery 3.1 <a
+            class="bodylink" href="http://www.w3.org/TR/xquery-31/">Recommendation</a> of 21 March 2017.</p>
 
       <p>See also <a class="bodylink" href="../xpath31">XPath 3.1 Conformance</a>; all the new
          features implemented for XPath 3.1 are also available in XQuery 3.1.</p>
       
       <h2 class="subtitle">Test results</h2>
+      
+      <p>TODO: update test results</p>
       
       <p>At the time of release Saxon-EE 10.0 passes all 31009 applicable tests in the W3C XPath/XQuery test suite (QT3). 
         Tests are run on both
@@ -1859,7 +1240,7 @@
       <h2 class="subtitle">Checklist of Implementation-Defined Items</h2>
 
 
-      <p>Appendix D of the XQuery 3.1 specification lists a number of features whose behaviour is
+      <p>Appendix D of the XQuery 3.1 specification lists a number of features whose behavior is
          implementation-defined. For Saxon, the behaviour is as follows:</p>
 
       <ol>
@@ -2230,32 +1611,7 @@
 
    </section>
 
-   <!--<section id="xquery31" title="XQuery 3.1 Conformance">
-      <h1>XQuery 3.1 Conformance</h1>
-      <p>Saxon 9.7 fully implements the XQuery 3.1 specification as defined at the time of release.</p>
-      
-      <aside>A Candidate Recommendation for XQuery 3.1 was published on 18 December 2014. At the release date
-      of Saxon 9.7, a revised version of this Candidate Recommendation is believed to be imminent, and Saxon 9.7
-      implements its expected content.</aside>
-
-      <p>All the important new features of XQuery 3.1 are also present in XPath 3.1: see <a
-            href="../xpath31" class="bodylink">XPath 3.1 Conformance</a>.</p>
-
-      <h2 class="subtitle">Test Results</h2>
-
-      <p>Saxon 9.7, at the time of release, passes all tests in the W3C test suite for XQuery 3.1, other than tests
-         for features which Saxon does not implement (for example, static typing), tests whose results have been
-         challenged by means of a bug report submitted to W3C, and tests that exceed Saxon limits (for example, a date
-         whose year component is 25 digits long).</p>
-
-      <h2 class="subtitle">Checklist of Implementation-Defined Items</h2>
-
-      <p>Appendix D of the XQuery 3.1 specification lists a number of features whose behaviour is
-         implementation-defined. The list of features is the same as those in the XQuery 3.0
-         specification, so see <a href="../xquery30" class="bodylink">XQuery 3.0 Conformance</a> for
-         details of the Saxon behaviour.</p>
-
-   </section>-->
+ 
    <section id="schema" title="XML Schema 1.0 Conformance">
       <h1>XML Schema 1.0 Conformance</h1>
 
@@ -2562,12 +1918,13 @@
       <p>The known non-conformances are:</p>
       <ul>
          <li>
-            <p>Serialization 3.1 states that characters that can be natively encoded in the chosen
-               encoding must be natively encoded and must not be represented using character or
-               entity references. Saxon behaves this way by default, but provides an extension,
-                  <code>saxon:character-representation</code>, which changes the behaviour. Such
-               extensions have been declared non-conformant, but this one is retained in
-               Saxon for backwards compatibility reasons.</p>
+            <p>The Serialization 3.1 specification allows vendor-defined serialization properties,
+               but says that these properties may only change the serialized output to the extent
+               that the specification leaves it implementation-defined. Some Saxon-defined 
+               serialization properties go beyond this and cause non-conformant output. For example, 
+                  <code>saxon:character-representation</code> may cause special characters to be output
+               as numeric character references, and <code>saxon:canonical</code> causes empty elements
+               to be output as <code><![CDATA[<hr></hr>]]></code> rather than <code><![CDATA[<hr/>]]></code>.</p>
          </li>
       </ul>
       <h2 class="subtitle">Implementation-defined aspects of Serialization</h2>
@@ -2778,25 +2135,25 @@
             <code>xml:id</code> attribute, if allowed at all, must be declared as being of type
             <code>xs:ID</code>.</p>
 
-      <p>Saxon on the Java platform works with any SAX2-conformant XML parser that is configured to
+      <p for="J">Saxon on the Java platform works with any SAX2-conformant XML parser that is configured to
          enable namespace processing. There is one limitation: on the <code>startElement()</code>
          call from the <code>XMLReader</code> to the <code>ContentHandler</code>, the QName (that
          is, the third argument) must be present. According to the SAX2 specification,
          namespace-aware parsers are not obliged to supply this argument. However, all commonly-used
          parsers appear to do so.</p>
 
-      <p>Saxon on the Java platform should work with any DOM-conformant XML parser, however, Saxon's
+      <p for="J">Saxon on the Java platform should work with any DOM-conformant XML parser, however, Saxon's
          DOM interface is tested only with the DOM implementation included in the Oracle JDK, and
          other DOM implementations are known to vary. Saxon has been used successfully with the
          Oracle XDK DOM implementation, though this is not included in the standard test suite and
          problems have occasionally been reported with this combination.</p>
 
-      <p>When a XOM tree is supplied as the transformation input, Saxon does not combine adjacent
+      <p for="J">When a XOM tree is supplied as the transformation input, Saxon does not combine adjacent
          text nodes into a single node. Adjacent text nodes can occur as the result of user
          modifications to the tree, or as a result of the presence of CDATA sections or entity
          references, depending on the options in force when the tree was constructed. <i>This
-            restriction no longer applies to DOM and JDOM trees: in these cases, the virtual XPath
-            view that is created maps one XPath text node to a sequence of adjacent DOM or JDOM
+            restriction no longer applies to DOM and JDOM2 trees: in these cases, the virtual XPath
+            view that is created maps one XPath text node to a sequence of adjacent DOM or JDOM2
             nodes.</i></p>
    </section>
    <section id="encodings" title="Character Encodings Supported">
@@ -2808,11 +2165,11 @@
       <p>On output, any encoding supported by the Java VM or the .NET platform (as appropriate) may
          be used.</p>
 
-      <p>A list of the character encodings supported by the Java VM can be obtained by using the
+      <p for="J">A list of the character encodings supported by the Java VM can be obtained by using the
          command <code>java net.sf.saxon.charcode.CharacterSetFactory</code>, with no
          parameters.</p>
    </section>
-   <section id="jaxp" title="JAXP Conformance">
+   <section id="jaxp" title="JAXP Conformance" for="J">
       <h1>JAXP Conformance</h1>
 
 
@@ -2909,7 +2266,7 @@
          internal tree model than when using the DOM (sometimes by a factor of ten). Therefore
          Saxon's <b>s9api</b> interface is recommended in preferance to JAXP.</aside>
    </section>
-   <section id="xqj" title="XQJ Conformance">
+   <section id="xqj" title="XQJ Conformance" for="J">
       <h1>XQJ Conformance</h1>
 
 
@@ -3101,7 +2458,8 @@
       <aside>Section 19 of the XQJ specification ("Interoperability") suggests that an XQJ
          implementation should accept items and built-in types that were created using a different
          vendor's XQJ implementation. In general, Saxon will only handle the Saxon implementation of
-         XQJ interfaces. At any rate, it has not been validated with third-party implementations.
+         XQJ interfaces. At any rate, it has not been validated for interoperation 
+         with third-party implementations.
       </aside>
    </section>
    

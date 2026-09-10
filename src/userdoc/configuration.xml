@@ -4,7 +4,7 @@
 
 
    <p>There are many parameters and options that can be set to control the way in which Saxon
-      options can be set. This section of the documentation brings this information together in one place.</p>
+      operates. This section of the documentation brings this information together in one place.</p>
 
    <nav>
       <ul/>
@@ -14,7 +14,7 @@
       <h1>Configuration interfaces</h1>
 
 
-      <p>At the heart of Saxon is the object <a class="javalink" href="net.sf.saxon.Configuration">net.sf.saxon.Configuration</a>. This contains all the current
+      <p>At the heart of Saxon is the class <a class="javalink" href="net.sf.saxon.Configuration">net.sf.saxon.Configuration</a>. This contains all the current
          settings of configuration options. All Saxon tasks, such as compiling and running queries and transformations, or building and validating source
          documents, happen under the control of a <code>Configuration</code>. Many resources are owned by the <code>Configuration</code>, meaning that related
          tasks must run under the same <code>Configuration</code>. Most notably, the <code>Configuration</code> holds a <a class="javalink"
@@ -77,7 +77,7 @@
          <ul/>
       </nav>
 
-      <section id="jaxp-configuration" title="JAXP Factory Interfaces">
+      <section id="jaxp-configuration" title="JAXP Factory Interfaces" for="J">
          <h1>JAXP Factory Interfaces</h1>
 
 
@@ -148,8 +148,8 @@
             implementation class and call configuration-setting methods directly.</p>
 
       </section>
-      <section id="s9api-config" title="Configuration using s9api">
-         <h1>Configuration using s9api</h1>
+      <section id="s9api-config" title="Configuration using s9api" for="J">
+         <h1>Configuration using s9api (Java)</h1>
 
 
          <p>In Saxon's s9api interface the root API object is the <a class="javalink" href="net.sf.saxon.s9api.Processor">net.sf.saxon.s9api.Processor</a>
@@ -173,20 +173,20 @@
           It's a nice snappy name, so we've retained it unchanged for Saxon 10.</aside>
       </section>
 
-      <section id="config-dotnet" title="Configuration using the .NET API">
-         <h1>Configuration using the .NET API</h1>
+      <section id="config-dotnet" title="Configuration using Saxon.Api (C#)" for="CS">
+         <h1>Configuration using Saxon.Api (C#)</h1>
 
 
 
          <p>In Saxon's Saxon.Api interface on .NET, the root API object is the <a class="javalink" href="Saxon.Api.Processor">Saxon.Api.Processor</a> object.
-            This again is a wrapper around a <a class="javalink" href="net.sf.saxon.Configuration">Configuration</a>. All the configuration properties are
+            This is a wrapper around a <a class="javalink" href="net.sf.saxon.Configuration">Configuration</a>. All the configuration properties are
             exposed via the <code>Processor</code> methods <code>getProperty(name)</code> and <code>setProperty(name, value)</code> which map directly to the
             methods <code>getConfigurationProperty(name)</code> and <code>setConfigurationProperty(name, value)</code> on the underlying
                <code>Configuration</code>.</p>
 
          <p>The Saxon.Api <code>Processor</code> object also has a constructor <code>new Processor(stream)</code> which allows the underlying
                <code>Configuration</code> to be built from a supplied configuration file, which must have the format described in <a class="bodylink"
-               href="/configuration/configuration-file">Configuration file</a>. Configuration files are available only in Saxon-PE and Saxon-EE.</p>
+               href="/configuration/configuration-file">Configuration file</a>.</p>
 
          <p>In many cases with the Saxon.Api interface it is more appropriate to set options at a finer level of granularity than the <code>Processor</code>.
             For example, options that affect XSLT stylesheet compilation can be set on the <a class="javalink" href="Saxon.Api.XsltCompiler">XsltCompiler</a>
@@ -196,9 +196,9 @@
       <section id="config-commandline" title="Configuration from the command line">
          <h1>Configuration from the command line</h1>
 
-         <p>The main command-line interfaces to Saxon are <a class="javalink" href="net.sf.saxon.Transform">net.sf.saxon.Transform</a> for running a
-            transformation, <a class="javalink" href="net.sf.saxon.Query">net.sf.saxon.Query</a> for running XQuery, and <a class="javalink"
-               href="com.saxonica.Validate">com.saxonica.Validate</a> for validating a document against a schema. These commands allow many
+         <p>The main command-line interfaces to Saxon are the <code>Transform</code> for running a
+            transformation, the <code>Query</code> command for running XQuery, and the <code>Validate</code> command
+            for validating a document against a schema. These commands allow many
             configuration options to be specified by command line options: for example if XML Schema 1.1 support is wanted, all three
             commands allow this to be requested using the option <code>-xsdversion:1.1</code> (the
             default from Saxon 9.8). Many of these options correspond directly to the configuration
@@ -221,7 +221,7 @@
          <aside>For boolean-valued configuration properties, Saxon accepts any of the values "yes", "on", "true", or "1" to switch the option on, or "no",
             "off", "false", or "0" to switch it off.</aside>
       </section>
-      <section id="config-xqj" title="Configuration using XQJ">
+      <section id="config-xqj" title="Configuration using XQJ" for="J">
          <h1>Configuration using XQJ</h1>
 
          <p>The root object in the XQJ (XQuery for Java) API is <code>javax.xml.query.XQDataSource</code>, and the Saxon implementation class is <a
@@ -255,7 +255,7 @@
          </ol>
 
       </section>
-      <section id="config-ant" title="Configuration when running Ant">
+      <section id="config-ant" title="Configuration when running Ant" for="J">
          <h1>Configuration when running Ant</h1>
 
          <p>It is possible to run XSLT transformations from Ant using the <code>xslt</code> task, selecting Saxon as the XSLT processor by setting the

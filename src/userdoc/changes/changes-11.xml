@@ -92,10 +92,17 @@
     <category name="localization">
         
         <p>Saxon now uses the Java <code>java.time.ZoneId</code> class for handling timezones in place of the
-        old <code>java.util.Timezone</code>. This may affect the set of timezone names that are recognized.
-        It also affects the way they are displayed: for example US Eastern Time is represented as "ET"
-        whether or not daylight savings time is in effect (previously "EST" was used for dates in winter,
-        and "EDT" for dates in summer.)</p>
+        old <code>java.util.Timezone</code>. This may affect the set of timezone names that are recognized.</p>
+        
+        <p>The new Java library is less US-focused and more international, and therefore deprecates use of ambiguous
+        timezone abbreviations such as "EST" and "PDT". Saxon follows suit. In the interests of backwards
+        compatibility, timezone abbreviations requested using <code>format-dateTime</code> (etc) with
+            a format specifier of "ZN" now use such timezone abbreviations only if (a) the fifth argument
+            ("place") is "us", "uk", or "gb", or an IANA timezone name starting with "America/", and (b)
+            the actual timezone is one of a small number of commonly used timezones, specifically those
+            used in North America and Europe.
+        </p>
+        
     </category>
     
     <category name="spi">
@@ -107,29 +114,40 @@
         notably, efficiency on the .NET platform: Saxon's extensive use of the Java <code>CharSequence</code> interface appears to translate
         to very inefficient code on .NET.</p>
         
-        <p>Most uses of <code>CharSequence</code> have been replaced by a new class <code>UniString</code>, which also replaces the
-            existing class <code>UnicodeString</code>. The <code>UniString</code> class has a number of implementations: all of them
+        <p>Most uses of <code>CharSequence</code> have been replaced by a new class <code>UnicodeString</code> (which also replaces the
+            old class <code>UnicodeString</code>). The <code>UnicodeString</code> class has a number of implementations: all of them
         are designed to be codepoint-addressible: they expose an indexable array of 32-bit codepoint values, and never use surrogate
-        pairs. The core implementation is <code>Twine</code>, which wraps an array of bytes, organized either as 1, 2, or 3 bytes
-        per character depending on the largest codepoint present in the string.</p>
+        pairs. The implementations of <code>UnicodeString</code> include:</p>
         
-        <p>The interface to the <code>UniString</code> class is future-proofed to accommodate strings containing more than 2^31
+        <ul>
+            <li><code>Twine8</code>: a string consisting entirely of codepoints in the range 1-255, held in an array with one byte per
+            character.</li>
+            <li><code>Twine16</code>: a string consisting entirely of codepoints in the range 1-65535, held in an array with two bytes per
+                character.</li>
+            <li><code>Twine24</code>: a string of arbitrary codepoints, held in an array with three bytes per
+                character.</li>
+            <li><code>Slice8</code>: a range of an array using one byte per character.</li>
+            <li><code>Slice16</code>: a range of an array using two bytes per character.</li>
+            <li><code>Slice24</code>: a range of an array using two bytes per character.</li>
+            <li><code>BMPString</code>: a wrapper around a Java/C# string known to contain no surrogate pairs.</li>
+            <li><code>StringView</code>: a wrapper around an arbitrary Java/C# string.</li>
+            <li><code>ZenoString</code>: a composite string held as a list of segments, each of which is itself a <code>UnicodeString</code>.
+            The name derives from the algorithm used to combine segments, which results in segments having progressively decreasing
+            lengths towards the end of the string.</li>
+        </ul>
+
+        
+        <p>The interface to the <code>UnicodeString</code> class is future-proofed to accommodate strings containing more than 2^31
         characters. That's not to say that Saxon can now support such long strings everywhere (for example, the regular expression
         engine cannot handle such strings); but the groundwork has been laid.</p>
         
-        <p>The class <code>StringValue</code>, used in previous releases to represent atomic values of type <code>xs:string</code>, 
-            <code>xs:anyURI</code>, and <code>xs:untypedAtomic</code>, is renamed <code>StringItem</code> (this is to eliminate the confusion
-        caused by having a method <code>getStringValue()</code> that returns a <code>String</code> rather then a <code>StringValue</code>).
-        More significantly, the implementation has changed: instead of wrapping a <code>CharSequence</code>, the class now wraps
-        a <code>UniString</code>.</p>
-        
         <p>The method <code>Item.getStringValueCS()</code>, which returned the string value of an item as a <code>CharSequence</code>,
-            is dropped, and is replaced by a new method <code>Item.getUniStringValueCS()</code> which returns the value as a
-        <code>UniString</code>.</p>
+            is dropped, and is replaced by a new method <code>Item.getUnicodeStringValue()</code> which returns the value as a
+        <code>UnicodeString</code>.</p>
  
         <p>The effect of <code>toString()</code> on atomic values has changed: it now returns the result of casting the value
-        to a string (which is the same as the result of <code>getStringValue()</code>. To obtain the previous effect of the <code>toString()</code> method, use the new <code>show()</code>
-        method.</p>
+        to a string (which is the same as the result of <code>getStringValue()</code>). To obtain the previous effect of the 
+            <code>toString()</code> method, use the new <code>show()</code> method.</p>
         
         <p></p>
         
@@ -144,7 +162,10 @@
         a <code>SequenceIterator</code> supports look-ahead, first test whether it is an instance of
         <code>LookaheadIterator</code>, then cast it to <code>LookaheadIterator</code> and call the
         <code>supportsHasNext()</code> method; and similarly for
-            <code>GroundedIterator</code> and <code>LastPositionFinder</code>.</p>
+            <code>GroundedIterator</code> and <code>LastPositionFinder</code>. For example:</p>
+        
+        <p><code>if (iter instanceof LookaheadIterator and ((LookaheadIterator)iter).supportsHasNext() 
+            and ((LookaheadIterator)iter).hasNext())...</code></p>
         
 
         <h2>NodeInfo</h2>
@@ -169,6 +190,9 @@
         Java to C#. These should only affect applications that use very low-level interfaces within Saxon.</p>
 
         <p>For example, </p>
+        
+        
+        <p>TBA</p>
         
  
         <h2>Dropped interfaces</h2>
@@ -246,10 +270,10 @@
         <h2>Changes to Extension Functions</h2>
         
         <p>Many of the extension functions in the <code>saxon</code> namespace have been re-implemented
-        as "integrated extension functions" where they were previously "reflexive extension functions".
+        as <i>integrated extension functions</i> where they were previously <i>reflexive extension functions</i>.
         The only noticeable effect should be that they now enforce the specification more strictly. In
         particular, the function name must be spelled as specified; it is no longer possible to use
-        alternative spellings such as <code>saxon:printStack</code> for <code>saxon:print-stack</code>,,
+        alternative spellings such as <code>saxon:printStack</code> for <code>saxon:print-stack</code>,
         or <code>saxon:stringToBase64Binary</code> for <code>saxon:string-to-base64Binary</code>.</p>
         
         <p>The functions <code>bin:encode-string()</code> and <code>bin:decode-string()</code> now accept
