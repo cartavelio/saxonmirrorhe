@@ -122,11 +122,11 @@ public class StaticQueryContext {
     public StaticQueryContext(Configuration config, boolean initialize) {
         this.config = config;
         this.namePool = config.getNamePool();
-        this.errorReporter = config.makeErrorReporter();
-        this.languageVersion = config.getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS) ? 40 : 31;
         if (initialize) {
             copyFrom(config.getDefaultStaticQueryContext());
         } else {
+            errorReporter = config.makeErrorReporter();
+            languageVersion = config.getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS) ? 40 : 31;
             predeclaredNamespaces = NamespaceMap.STANDARD_QUERY_NAMESPACES;
             userDeclaredVariables = new HashSet<>();
             optimizerOptions = config.getOptimizerOptions();
@@ -143,7 +143,6 @@ public class StaticQueryContext {
     public StaticQueryContext(/*@NotNull*/ StaticQueryContext c) {
         copyFrom(c);
     }
-
 
     /**
      * Copy details from another StaticQueryContext
@@ -174,6 +173,11 @@ public class StaticQueryContext {
         updating = c.updating;
         optimizerOptions = c.optimizerOptions;
         unprefixedElementMatchingPolicy = c.unprefixedElementMatchingPolicy;
+        languageVersion = c.languageVersion;
+        defaultCollationName = c.defaultCollationName;
+        moduleLocation = c.moduleLocation;
+        preLoadedSchema = c.preLoadedSchema;
+
     }
 
 
