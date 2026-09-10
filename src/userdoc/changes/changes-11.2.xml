@@ -22,7 +22,7 @@
 for $item in //items
 trace "item: " || $item/@id
 let $price := $item/cost + $item/markup
-trace "selling-price" || $price
+trace "selling-price: " || $price
 return "€" + $price
         </samp>
         
@@ -31,7 +31,7 @@ return "€" + $price
         where n is the sequence number of the tuple, m is the position of the item within one evaluation of the expression,
         type is the type of item displayed, and message is a representation of the item. The arrow symbol "&lt;-" is used
         when the FLWOR expression is evaluated in pull mode, and is replaced by "->" when evaluated in push mode; the distinction
-        is only of interest when doing deep diagnosis.</p>
+        is only of interest when doing internal diagnosis.</p>
         
     </category>
     
