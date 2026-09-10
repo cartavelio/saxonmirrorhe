@@ -89,6 +89,14 @@ public class SaxonOutputKeys {
     /*@NotNull*/ public static final String INDENT_SPACES = "{http://saxon.sf.net/}indent-spaces";
 
     /**
+     * saxon:internal-dtd-subset = string.
+     * <p>Contains the internal subset of the DTD, which is output as-is by the serializer</p>
+     */
+
+    /*@NotNull*/ public static final String INTERNAL_DTD_SUBSET = "{http://saxon.sf.net/}internal-dtd-subset";
+
+
+    /**
      * saxon:line-length = integer.
      * <p>Defines the desired maximum line length used when indenting output</p>
      */

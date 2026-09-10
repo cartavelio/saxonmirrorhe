@@ -444,6 +444,9 @@ public class Serialize extends SystemFunction implements Callable {
         if ((seqVal = map.get(sx("indent-spaces"))) != null) {
             props.setProperty(SaxonOutputKeys.INDENT_SPACES, seqVal.head().getStringValue());
         }
+        if ((seqVal = map.get(sx("internal-dtd-subset"))) != null) {
+            props.setProperty(SaxonOutputKeys.INTERNAL_DTD_SUBSET, seqVal.head().getStringValue());
+        }
         if ((seqVal = map.get(sx("line-length"))) != null) {
             props.setProperty(SaxonOutputKeys.LINE_LENGTH, seqVal.head().getStringValue());
         }
