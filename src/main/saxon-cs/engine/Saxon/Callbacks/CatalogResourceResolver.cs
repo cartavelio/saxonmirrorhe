@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Runtime.CompilerServices;
 using Org.XmlResolver;
 using Org.XmlResolver.Features;
@@ -31,7 +32,16 @@ namespace Saxon.Callbacks {
         public override object GetEntity(System.Uri absoluteUri, string role, System.Type ofObjectToReturn) {
             object result = null;
             if (resolver != null) {
-                result = resolver.GetEntity(absoluteUri, role, ofObjectToReturn);
+                CatalogResolver catalogResolver = resolver.CatalogResolver;
+                string arg = absoluteUri.ToString();
+                if (arg.StartsWith("-//")) {
+                    // Assume it's actually a Public ID
+                    result = catalogResolver.ResolveEntity(null, arg, null, null);
+                }
+                else {
+                    result = catalogResolver.ResolveEntity(null, null, arg, null);
+                }
+                //result = resolver.GetEntity(absoluteUri, role, ofObjectToReturn);
             }
             if (result == null && nextResourceResolver != null) {
                 result = nextResourceResolver.GetEntity(absoluteUri, role, ofObjectToReturn);
@@ -48,6 +58,11 @@ namespace Saxon.Callbacks {
         
         public override Uri ResolveUri(Uri baseUri, string relativeUri) {
             Uri result = null;
+            if (relativeUri.StartsWith("-//")) {
+                // then it's probably a Public ID, which the Microsoft parser doesn't seem to understand.
+                // We'll pass it back unresolved
+                return new Uri(relativeUri, UriKind.Relative);
+            }
             if (resolver != null) {
                 result = resolver.ResolveUri(baseUri, relativeUri);
             }
@@ -76,9 +91,17 @@ namespace Saxon.Callbacks {
 
         public override StreamSource DereferenceLocation(Uri baseUri, string href, string nature, string purpose) {
             if (resolver != null) {
-                ResolvedResource rr = resolver.CatalogResolver.ResolveUri(href, baseUri.ToString());
-                if (rr != null) {
-                    return new StreamSource(rr.GetInputStream(), rr.GetResolvedUri().ToString());
+                try {
+                    ResolvedResource rr = resolver.CatalogResolver.ResolveUri(href, baseUri.ToString());
+                    if (rr != null) {
+                        return new StreamSource(rr.GetInputStream(), rr.GetResolvedUri().ToString());
+                    }
+                }
+                catch (WebException webex) {
+                    // Shouldn't be necessary, but the 0.4.0 resolver code is throwing this for a non-existent URI
+                }
+                catch (System.ArgumentException argex) {
+                    // Thrown for an unknown URI scheme
                 }
             }
             if (nextResourceResolver != null) {

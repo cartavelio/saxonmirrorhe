@@ -21,23 +21,23 @@ namespace Saxon.Api {
         /// A URI that identifies this resource
         /// </summary>
 
-		/**public**/ Uri ResourceUri { get; }
+		Uri ResourceUri { get; }
 
-        /// <summary>
-        /// Get an XDM Item holding the contents of this resource.
-        /// </summary>
-        /// <param name="context">the XPath evaluation context</param>
-        /// <returns>an item holding the contents of the resource. The type of item will
-        /// reflect the type of the resource: a document node for XML resources, a string
-        /// for text resources, a map or array for JSON resources, a base64Binary value
-        /// for binary resource. May also return null if the resource cannot be materialized
-        /// and this is not to be treated as an error.</returns>
-		/**public**/ XdmItem GetXdmItem(DynamicContext context);
+        ///  <summary>
+        ///  Get an XDM Item holding the contents of this resource.
+        ///  </summary>
+        ///  <returns>an item holding the contents of the resource. The type of item will
+        ///  reflect the type of the resource: a document node for XML resources, a string
+        ///  for text resources, a map or array for JSON resources, a base64Binary value
+        ///  for binary resource. May also return null if the resource cannot be materialized
+        ///  and this is not to be treated as an error.</returns>
+
+        XdmItem GetXdmItem();
 
         /// <summary> 
         /// The media type (MIME type) of the resource if known (otherwise null)
         /// </summary>
-        /**public**/ string ContentType { get; }
+        string ContentType { get; }
     }
 }
 

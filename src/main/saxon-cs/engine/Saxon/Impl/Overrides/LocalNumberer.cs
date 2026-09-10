@@ -15,7 +15,12 @@ namespace Saxon.Impl.Overrides {
         private readonly CultureInfo culture;
 
         public LocalNumberer(string language, string country) {
-            culture = CultureInfo.GetCultureInfo(language);
+            try {
+                culture = CultureInfo.GetCultureInfo(language);
+            }
+            catch (System.Globalization.CultureNotFoundException) {
+                culture = CultureInfo.GetCultureInfo("en-US");
+            }
         }
         
         public override string monthName(int month, int minWidth, int maxWidth) {

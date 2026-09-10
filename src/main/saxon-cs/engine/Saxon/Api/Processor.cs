@@ -196,8 +196,7 @@ namespace Saxon.Api {
             get => textResolver;
             set {
                 textResolver = value;
-                Implementation.setUnparsedTextURIResolver((uri, encoding, config) =>
-                    value(uri, Encoding.GetEncoding(encoding)));
+                Implementation.setUnparsedTextURIResolver(Xslt30Transformer.WrapTextResolver(value));
             }
         }
 
