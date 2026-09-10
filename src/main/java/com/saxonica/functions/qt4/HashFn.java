@@ -78,9 +78,16 @@ public class HashFn extends SystemFunction {
             //String algorithm = checkedOptions.get("algorithm").getStringValue().trim().toUpperCase();
             if (algorithm.equals("CRC-32")) {
                 return crc32(binaryInput);
+            } else if (algorithm.equals("BLAKE3")) {
+                Blake3 hasher = Blake3.initHash();
+                hasher.update(binaryInput);
+                byte[] blake3Hash = new byte[32];
+                hasher.doFinalize(blake3Hash);
+                return new HexBinaryValue(blake3Hash);
+            } else {
+                byte[] hash = MessageDigest.getInstance(algorithm).digest(binaryInput);
+                return new HexBinaryValue(hash);
             }
-            byte[] hash = MessageDigest.getInstance(algorithm).digest(binaryInput);
-            return new HexBinaryValue(hash);
         } catch (NoSuchAlgorithmException e) {
             throw new XPathException("Hash algorithm " + algorithm + " not available", "FOHA0001");
         }
