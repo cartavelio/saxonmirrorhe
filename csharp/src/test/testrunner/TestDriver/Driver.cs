@@ -308,7 +308,7 @@ namespace TestDriver {
             }
             XdmNode catalog = catBuilder.Build(new Uri(Path.GetFullPath(catalogFile)));
             XPathCompiler xpc = driverProc.NewXPathCompiler();
-            //xpc.XPathLanguageVersion = "3.1";
+            xpc.XPathLanguageVersion = "4.0";
             xpc.Caching = true;
             xpc.DeclareNamespace("", catalogNamespace());
 
@@ -434,6 +434,7 @@ namespace TestDriver {
             localEnvironments.Clear();
             Environment defaultEnvironment =
                 Environment.createLocalEnvironment(testSetDocNode.BaseUri, unfolded, requestedSpec);
+            defaultEnvironment.xsltCompiler.JustInTimeCompilation = jitFlag;
             localEnvironments.Add("default", defaultEnvironment);
         }
 

@@ -268,7 +268,7 @@ namespace Saxon.Api {
             get => textWriter;
             set {
                 textWriter = value;
-                StandardLogger logger = new StandardLogger(value);
+                Logger logger = StandardLogger.makeLogger(value);
                 JProcessor.getUnderlyingConfiguration().setLogger(logger);
             }
         }

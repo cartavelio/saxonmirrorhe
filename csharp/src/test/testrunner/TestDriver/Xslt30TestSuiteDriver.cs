@@ -310,7 +310,7 @@ namespace TestDriver {
             XdmValue allDependencies = testSetDependencies.Append(testCaseDependencies);
 
             XdmNode lastSpecValue = allDependencies.Select(Path("spec", "@value")).FirstOrDefault();
-            String specAtt = lastSpecValue != null ? lastSpecValue.StringValue : "XSLT10+";
+            string specAtt = lastSpecValue != null ? lastSpecValue.StringValue : "XSLT10+";
             foreach (XdmNode dep in allDependencies.Select(Child(IsElement()))) {
                 if (!EnsureDependencySatisfied((XdmNode) dep, env)) {
                     notrun++;
@@ -508,8 +508,8 @@ namespace TestDriver {
                     testInput.Select(Child("param").Where(IsTrue("static")));
 
                 foreach (XdmNode itemxx in paramEnumerable) {
-                    String name = itemxx.GetAttributeValue("name");
-                    String select = itemxx.GetAttributeValue("select");
+                    string name = itemxx.GetAttributeValue("name");
+                    string select = itemxx.GetAttributeValue("select");
                     XdmValue value;
                     try {
                         value = xpath.Evaluate(select, null);
@@ -523,7 +523,7 @@ namespace TestDriver {
                 }
 
                 foreach (XdmNode pack in usedPackages) {
-                    String pfileName = pack.GetAttributeValue("file");
+                    string pfileName = pack.GetAttributeValue("file");
                     Uri pfileUri = res.ResolveUri(testCase.BaseUri, pfileName);
                     Stream pstyleSource = new FileStream(pfileUri.AbsolutePath, FileMode.Open, FileAccess.Read);
 
@@ -563,9 +563,15 @@ namespace TestDriver {
 
                 if (outputUri != null) {
                     if (outputUri.Equals("")) {
-                        String testSetUri = testCase.BaseUri.AbsoluteUri;
+                        string testSetUri = testCase.BaseUri.AbsoluteUri;
                         int c = testSetUri.IndexOf("/tests/");
                         outputUri = testSetUri.Substring(c + 7);
+                    }
+
+                    else if (outputUri.Equals("#absent")) {
+                        notrun++;
+                        resultsDoc.writeTestcaseElement(testName, "notRun", "requires absent output base URI");
+                        return;
                     }
 
                     baseOutputURI = (new XmlUrlResolver()).ResolveUri(new Uri(baseOutputURI), outputUri).AbsolutePath;
@@ -601,7 +607,7 @@ namespace TestDriver {
                         bool resultSerialized = serializationDeclared || assertsSerial;
 
                         if (assertsSerial) {
-                            String comment = outcome.GetComment();
+                            string comment = outcome.GetComment();
                             comment = (comment == null ? "" : comment) + "*Serialization " +
                                       (serializationDeclared ? "declared* " : "required* ");
                             outcome.SetComment(comment);
@@ -1359,8 +1365,8 @@ namespace TestDriver {
                     return value.Equals("en") || inverse;
 
                 case "combinations_for_numbering":
-                    if (value.Equals("COPTIC EPACT DIGIT ONE") || value.Equals("SINHALA ARCHAIC DIGIT ONE") ||
-                        value.Equals("MENDE KIKAKUI DIGIT ONE")) {
+                    if (value.Equals("COPTIC EPACT DIGIT ONE") || value.Equals("SINHALA ARCHAIC DIGIT ONE") 
+                        || value.Equals("MENDE KIKAKUI DIGIT ONE") ) {
                         return false;
                     }
 

@@ -959,10 +959,16 @@ namespace TestDriver {
 
                 string uri = ((XdmNode)source).GetAttributeValue(new QName("uri"));
                 string mime = ((XdmNode)source).GetAttributeValue(new QName("media-type"));
+                string dtd = ((XdmNode)source).GetAttributeValue(new QName("dtd"));
+
+                if ("true".Equals(dtd)) {
+                    environment.forceDom = true;
+                }
 
                 if (mime != null && "application/xml".Equals(mime)) {
                     continue;
                 }
+                
                 bool mutable = isTrue("mutable")(source);
                 if (mutable) {
                     builder.TreeModel = TreeModel.LinkedTree;
@@ -981,18 +987,19 @@ namespace TestDriver {
                     useTreeModel = "linked";
                 }
 
-                if (environment.forceDom || environment.name.Contains("unparsed-entity") || environment.name.StartsWith("id")) {
+                if (environment.forceDom) {  
+                    // || environment.name.Contains("unparsed-entity") || environment.name.StartsWith("id")) {
                     useTreeModel = "dom";
                 }
 
-                if (environment.name == null) {
-                    XdmNode dep = env.Select(
-                        Steps.FollowingSibling("dependencies")
-                            .Then(Steps.Child().Where(Predicates.AttributeEq("feature", "dtd")))).First();
-                    if (dep != null) {
-                        useTreeModel = "dom";
-                    }
-                }
+                // if (environment.name == null) {
+                //     XdmNode dep = env.Select(
+                //         Steps.FollowingSibling("dependencies")
+                //             .Then(Steps.Child().Where(Predicates.AttributeEq("feature", "dtd")))).First();
+                //     if (dep != null) {
+                //         useTreeModel = "dom";
+                //     }
+                // }
                 string streaming = ((XdmNode)source).GetAttributeValue(new QName("", "streaming"));
                 if (!validateSources && validation.Equals("skip")) {
                     builder.SchemaValidationMode = SchemaValidationMode.None;

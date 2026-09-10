@@ -662,23 +662,19 @@ namespace TestDriver {
                 driver.println("XPath assertion " + assertion.StringValue + " failed");
                 try {
                     string ass = assertion.StringValue;
-                    int eq = ass.IndexOf("=");
+                    int eq = ass.IndexOf('=');
                     if (eq > 0) {
                         ass = ass.Substring(0, eq);
                         exp = assertXpc.Compile(ass);
                         s = exp.Load();
-                        if (exp.GetRequiredCardinalityForVariable(resultVarName) == null) {
-                            if (result.value is XdmItem) {
-                                // this path used in XSLT tests
-                                s.ContextItem = ((XdmItem) result.value);
-                            }
+                        if (result.value is XdmItem item) {
+                            // this path used in XSLT tests
+                            s.ContextItem = item;
                         }
-                        else {
-                            s.SetVariable(resultVarName, result.value);
-                        }
+                        s.SetVariable(resultVarName, result.value);
 
                         XdmValue val = s.Evaluate();
-                        driver.println("Actual result of " + ass + ": " + val.ToString());
+                        driver.println("Actual result of " + ass + ": " + ((XdmItem)val).StringValue);
                     }
                 }
                 catch (Exception err) {

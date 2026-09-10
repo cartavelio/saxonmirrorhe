@@ -370,7 +370,7 @@ namespace Saxon.Api {
 		public TextWriter TraceFunctionDestination {
             set {
                 traceFunctionDestination = value;
-                s9Transformer.setTraceFunctionDestination(new StandardLogger(value));
+                s9Transformer.setTraceFunctionDestination(StandardLogger.makeLogger(value));
             }
             get => traceFunctionDestination;
         }

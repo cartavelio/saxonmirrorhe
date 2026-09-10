@@ -198,7 +198,7 @@ namespace Saxon.Api {
 		public TextWriter TraceFunctionDestination {
             set {
                 traceFunctionDestination = value;
-                evaluator.setTraceFunctionDestination(new StandardLogger(value));
+                evaluator.setTraceFunctionDestination(StandardLogger.makeLogger(value));
             }
             get => traceFunctionDestination;
         }

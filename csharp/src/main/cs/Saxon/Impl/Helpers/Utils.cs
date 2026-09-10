@@ -57,6 +57,27 @@ namespace Saxon.Impl.Helpers {
 
             throw new NotSupportedException("Unsupported number radix " + radix);
         }
+        
+        // Replacement for Java Math.round(double). The midpoint rules are different.
+        public static double roundDouble(double value) {
+            if (System.Double.IsNaN(value) || System.Double.IsInfinity(value) || value == 0.0) {
+                return value;
+            }
+            
+            if (value > 0.0) {
+                return System.Math.Round(value, System.MidpointRounding.AwayFromZero);
+            } else if (value >= -0.5) {
+                return -0.0;
+            } else {
+                // For negative numbers, the XPath/Java rule is to round towards positive
+                // infinity - which C# doesn't support (MidpointRounding.ToPositiveInfinity
+                // is misleadingly named, it rounds 1.2 to 2.0).
+                return (double)Singulink.Numerics.BigDecimal.Round(
+                    Singulink.Numerics.BigDecimal.FromDouble(value, 
+                        Singulink.Numerics.FloatConversion.Truncate), 0,
+                    Singulink.Numerics.RoundingMode.MidpointToPositiveInfinity);
+            }
+        }
 
 
         // public static double roundDouble(double value, int scale) {
