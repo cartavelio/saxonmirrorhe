@@ -159,6 +159,7 @@
          <ul>
             <li>The methods <code>getLineNumber()</code> and <code>getColumnNumber()</code> have been added to the
                <code>XdmNode</code> class in the C++, Python and PHP APIs.</li>
+            <li>The <code>clearXslMessages()</code> method has been added to the <code>XsltExecutable</code> class in C++, Python and PHP APIs.</li>
 
          </ul>
 

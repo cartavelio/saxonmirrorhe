@@ -499,6 +499,13 @@ public:
   XdmValue *getXslMessages();
 
   /**
+   * Clear xsl:message data that are held in the Processor.
+   * If the save to file has been enabled then clearXslMessages
+   * does not take affect
+   */
+  void clearXslMessages();
+
+  /**
    * Checks for pending exceptions without creating a local reference to the
    * exception object
    * @return bool - true when there is a pending exception; otherwise return
