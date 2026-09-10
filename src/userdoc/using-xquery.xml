@@ -66,7 +66,8 @@
 
       <p>A command is available to run a query contained in a file.</p> 
       <div class="javaonly">
-      <p>The form of command on the Java platform is:</p>
+      <p>The form of command on the Java
+         platform is:</p>
       <kbd>java  net.sf.saxon.Query   [options]  [ <i>params...</i>] </kbd>
       </div>
       
@@ -82,12 +83,12 @@
       </div>
 
       <div class="conly">
-         <p>For SaxonC, the <code>query</code> executable file must first be built. To do this, compile
-            the <code>Query.c</code> C command line program by running the batch script
-            <code>./build-saxonc-commands.sh</code> on Linux or MacOS, or
-            <code>build-saxonc-commands.bat</code> on Windows.</p>
-         <p>Then the command takes the form:</p>
-         <kbd>./query   [options]  [ <i>params...</i>] </kbd>
+       <p>The form of command on the SaxonC platform is:</p>
+       <kbd>./query [options] [ <i>params...</i>] </kbd>
+         <p class="conly">We must first compile the <code>Query.c</code> C
+                    program which builds the command line program by running the batch script <code>./build-saxonc-commands.sh</code>
+                     on linux or MacOS and <code>build-saxonc-commands.bat</code> for Windows:</p>
+                 <p>A command is available to run a query contained in a file.</p>
        </div>
 
       <p>The options will generally include either <code>-q:queryFile</code> which takes the query from a file,
@@ -963,7 +964,7 @@
    </section>
    
    <section id="saxon-api-query" title="From a C# application" class="csonly">
-      <h1>XQuery from a C# application</h1>
+      <h1>Using XQuery from C#</h1>
       
       <aside>The same classes and methods can be used from .NET languages other than C#, but
       all the examples here are written in C# terms.</aside>
@@ -1052,7 +1053,7 @@
          supplied, it will be ignored.</p>
       
    </section>
-   
+
    <section id="saxonc-query" title="From a C/C++, Python or PHP application" class="conly">
       <h1>XQuery from a C/C++, Python or PHP application</h1>
       
@@ -1311,7 +1312,7 @@
       
       
    </section>
-   
+
    <section id="update" title="Using XQuery Update">
       <h1>Using XQuery Update</h1>
 

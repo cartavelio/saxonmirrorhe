@@ -3,12 +3,13 @@
    <h1>Using XPath</h1>
 
 
-   <p>This section describes how to use Saxon as a class library for XPath processing from Java, C#, C/C++,
-      Python or PHP, without making any use of XSLT stylesheets or XQuery queries. It includes information on
-      the XPath API, and the API for the Saxon implementation of the XPath object model. In other sections you
-      will find the information for <a class="bodylink" href="/using-xsl">Using XSLT</a>, <a class="bodylink"
-         href="/using-xquery">Using XQuery</a>, and <a class="bodylink" href="/schema-processing">Using XML
-            Schema</a> from applications in Java, C#, etc.</p>
+   <p>This section describes how to use Saxon as a class library for XPath processing from Java or C#, without
+      making any use of XSLT stylesheets. It includes information on the XPath API, and the API for
+      the Saxon implementation of the XPath object model. On other pages you will find the <a
+         class="bodylink" href="/using-xsl/embedding">API for XSLT transformation</a>, the <a
+         class="bodylink" href="/using-xquery/api-query">API for running XQuery</a>, and the <a
+         class="bodylink" href="/schema-processing/validation-api">API for schema
+      validation.</a></p>
 
    <p>For information about the different ways of loading source documents, see <a class="bodylink"
          href="/sourcedocs">Handling XML documents</a>.</p>
@@ -36,11 +37,15 @@
    </ul>
    </div>
    
-   <p class="csonly">On .NET, XPath processing is available via classes in the Saxon.Api namespace, as described at <a
-      class="bodylink" href="dotnet-xpath">Evaluating XPath expressions from a C# application</a>.</p>
-   
-   <p class="conly">For details about XPath processing from SaxonC, see <a class="bodylink"
-      href="saxonc-xpath">Evaluating XPath expressions from a C/C++, Python or PHP application</a>.</p>
+   <div class="csonly">
+   <ul>
+      <li>
+         <p>On .NET, XPath processing is available via classes in the Saxon.Api namespace,
+            as described at <a
+               class="bodylink" href="dotnet-xpath">Evaluating XPath expressions from C#</a>.</p>
+      </li>
+   </ul>
+   </div>
    
    <p>Saxon allows XPath expressions to be evaluated either against its own native tree models of
       XML (the tiny tree and linked tree), or against trees built using external third-party libraries:</p>
@@ -158,18 +163,13 @@
       XPath expression returns an <code>xs:dateTime</code> value or a map or array derived from a JSON query. For these reasons, use of
       the JAXP API is discouraged.</p>
       
-      <p>The native Saxon APIs for Java, C# and C++ all have classes that represent the XDM data model more accurately. The
-         Java and C# implementations are essentially identical in structure so a single description will
-         suffice. The C++ implementation is different.</p>
+      <p>The native Saxon APIs for Java, C++ and C# both have classes that represent the XDM data model more accurately. The
+      Java and C# implementations are essentially identical in structure so a single description will suffice for both.</p>
       
-      <p>Values returned by XPath expressions are represented as instances of the <code>XdmValue</code>
-         class: <code java="net.sf.saxon.s9api.XdmValue">XdmValue</code> in Java, <code
-            cs="Saxon.Api.XdmValue">XdmValue</code> in C#, <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc12/html/classXdmValue.html">XdmValue</a> in C++,
-         <a href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_xdmvalue"
-            class="bodylink code">XdmValue</a> in PHP,
-         <a href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXdmValue" class="bodylink
-            code">PyXdmValue</a> in Python.
+      <p>Values returned by XPath expressions are represented as instances of the
+         class <code java="net.sf.saxon.s9api.XdmValue">XdmValue</code> (<code
+                 cs="Saxon.Api.XdmValue">XdmValue</code> in C# and in SaxonC see: <a href="https://www.saxonica.com/saxon-c/doc12/html/classXdmValue.html"><code>XdmValue</code></a> for C++,
+         <a href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXdmValue"><code>PyXdmValue</code></a>).
          The <code>XdmValue</code> class is also used to supply parameters to stylesheets and transformations,
          and to return the results of XSLT or XQuery evaluation.</p>
       
@@ -185,14 +185,23 @@
       XdmExternalObject (an item that encapsulates a Java or .NET object)   
    XdmEmptySequence (a sequence containing no items)      
 ]]></samp>
-      
-      <p class="conly"><code>XdmExternalObject</code> and <code>XdmEmptySequence</code> are not available in SaxonC.</p>
+
+      <div class="conly"><p>For SaxonC the subclasses of <code>XdmValue</code> directly reflect the XDM model:</p><samp><![CDATA[XdmValue (any sequence)
+         XdmItem (any single item, that is, a sequence of length one)
+            XdmNode (any node)
+            XdmAtomicValue (any atomic value)
+            XdmFunctionItem (a function item)
+               XdmMap (a map)
+               XdmArray (an array)
+      ]]></samp>
+         <!-- TODO add XdmEmptySequence (a sequence containing no items) to SaxonC -->
+      </div>
       
       <p>These objects are generally immutable: at any rate, the API offers no methods to modify them. (It is possible
          to subvert this, for example by having an <code>XdmNode</code> that wraps a DOM node, and then modifying the DOM node: this
          is strongly discouraged.)</p>
       
-      <p>A variety of methods are provided to convert between these classes and "ordinary" Java, C#, or C++ equivalents. For example:</p>
+      <p>A variety of methods are provided to convert between these classes and "ordinary" Java or C# equivalents. For example:</p>
       <ul>
          <li class="javaonly"><p>In Java, an <code>XdmAtomicValue</code> can be constructed directly from a Java <code>boolean</code>, <code>String</code>, <code>long</code>, 
             <code>BigDecimal</code>, or <code>Instant</code> (inter alia), and methods such as <code>getBooleanValue()</code>
@@ -200,16 +209,18 @@
          <li class="csonly"><p>In C#, an <code>XdmAtomicValue</code> can be constructed directly from a C# <code>bool</code>, <code>string</code>, <code>long</code>, 
             <code>decimal</code>, or <code>DateTime</code> (inter alia), and methods such as <code>AsBoolean()</code>
             and <code>AsDouble()</code> are available to convert in the other direction.</p></li>
-         <li class="conly"><p>In C++, an <code>XdmAtomicValue</code> can be constructed directly from a C++ <code>bool</code>, <code>std::string</code>, char pointer array, <code>long</code>,
-            <code>double</code>, <code>float</code> or <code>int</code>, and methods such as <code>getBooleanValue()</code>
-             and <code>getStringValue()</code> are available to convert in the other direction. Similarly for PHP.</p></li>
-         <li class="conly"><p>In Python, an <code>PyXdmAtomicValue</code> can be constructed directly from a Python <code>bool</code>, <code>str</code>, <code>long</code>,
-            or <code>float</code>, and methods such as <code>double_value()</code>
-            and <code>integer_value()</code> are available to convert in the other direction.</p></li>
+
+                  <li class="conly"><p>In C++, an <code>XdmAtomicValue</code> can be constructed directly from a C++ <code>bool</code>, <code>std::string</code>, char pointer array, <code>long</code>,
+                     <code>double</code>, float or <code>int</code>, and methods such as <code>getBooleanValue()</code>
+                     and <code>getStringValue()</code> are available to convert in the other direction. Similar for PHP.</p></li>
+                  <li class="conly"><p>In Python, an <code>PyXdmAtomicValue</code> can be constructed directly from a Python <code>bool</code>, <code>str</code>, <code>long</code>,
+                     <code>float</code>, and methods such as <code>double_value</code>
+                     and <code>integer_value</code> are available to convert in the other direction.</p></li>
+
       </ul>
          
       
-      <p>In Java and C#, as an alternative to use of XPath, the <code>select()</code> (or <code>Select()</code>) 
+      <p>As an alternative to use of XPath, the <code>select()</code> (or <code>Select()</code>) 
          method on <code>XdmValue</code> provides powerful
          navigation capability around XDM trees. This method takes as argument a
          <code java="net.sf.saxon.s9api.streams.Step">Step</code> (<code cs="Saxon.Api.Step">Step</code> in C#) (which is
@@ -577,8 +588,8 @@ XPath xpath = xpathFactory.newXPath();
       </section>
    </section>
    
-   <section id="dotnet-xpath" title="From a C# application" class="csonly">
-         <h1>Evaluating XPath expressions from a C# application</h1>
+   <section id="dotnet-xpath" title="Evaluating XPath expressions from C#" class="csonly">
+         <h1>Evaluating XPath expressions from C#</h1>
          
          
          
@@ -617,7 +628,7 @@ XPath xpath = xpathFactory.newXPath();
                      href="Saxon.Api.XPathSelector">XPathSelector</a>. The
                   <code>XPathSelector</code> can be serially reused, but it must not be shared
                   across multiple threads. Set any options required for the specific XPath execution
-                  (for example, the initial context node, and the values of any variables referenced in the
+                  (for example, the initial context node, the values of any variables referenced in the
                   expression), and then call one of the methods <code>GetEnumerator()</code>,
                   <code>Evaluate()</code>, or <code>EvaluateSingle()</code> to execute the XPath
                   expression.</p>
@@ -653,6 +664,7 @@ XPath xpath = xpathFactory.newXPath();
       
    </section>
    
+
    <section id="saxonc-xpath" title="From a C/C++, Python or PHP application" class="conly">
       <h1>Evaluating XPath expressions from a C/C++, Python or PHP application</h1>
       
@@ -997,6 +1009,7 @@ XPath xpath = xpathFactory.newXPath();
       
    </section>
    
+
    
    <section id="nodeinfo" title="NodeInfo interface">
       <h1>NodeInfo interface</h1>

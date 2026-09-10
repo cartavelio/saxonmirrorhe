@@ -4,19 +4,15 @@
 
 
    <p>This section describes how to use XSLT stylesheets with Saxon, either from the command line,
-      from the <dfn>Java API</dfn>, <dfn>C# API</dfn>, or SaxonC C/C++, Python or PHP APIs, or from <dfn>Ant</dfn>:</p>
+      from the <dfn>Java API</dfn> or <dfn>C# API</dfn>, or from <dfn>Ant</dfn>:</p>
 
-   <nav except="xslt30 compiling stylesheet-output performanceanalysis">
+   <nav except="xslt30 compiling performanceanalysis">
       <ul/>
    </nav>
-   
-   <!--<p class="conly">For information on using XSLT from a SaxonC application in C/C++, Python or PHP, see the
-      corresponding <a class="bodylink" href="https://www.saxonica.com/saxon-c/documentation12/#!using-xsl"
-         >Using XSLT</a> section in the SaxonC documentation.</p>-->
 
    <p>It also includes useful information on <a class="bodylink" href="compiling">Compiling a
-      stylesheet</a>, <a class="bodylink" href="stylesheet-output">Handling output</a>, and <a
-         class="bodylink" href="performanceanalysis">Performance analysis</a>.</p>
+         stylesheet</a>, and <a class="bodylink" href="performanceanalysis">Performance
+      analysis</a>.</p>
 
    <p>Furthermore, a summary description of the current Saxon implementation of <a class="bodylink"
          href="xslt30">XSLT 3.0</a> is provided, with links to other relevant sections of the
@@ -52,12 +48,13 @@
       </div>
 
       <div class="conly">
-         <p>For SaxonC, the <code>transform</code> executable file must first be built. To do this, compile
-            the <code>Transform.c</code> C command line program by running the batch script
-            <code>./build-saxonc-commands.sh</code> on Linux or MacOS, or
-            <code>build-saxonc-commands.bat</code> on Windows.</p>
-         <p>Then the command takes the form:</p>
-         <kbd>./transform -s:<i>source</i> -xsl:<i>stylesheet</i> -o:<i>output</i></kbd>
+         <p>For SaxonC we must first compile the <code>Transform.c</code> C
+                  program in the <code>command</code> directory which builds the command line program by running the batch script <code>./build-saxonc-commands.sh</code>
+                   on linux or MacOS and <code>build-saxonc-commands.bat</code> for Windows:</p>
+               <p>A command is available to apply a given stylesheet to a given source XML document.</p>
+      <p>This creates the <code>transform</code> executable file. The corresponding command (on MacOS and Linux) is:</p>
+      <kbd>./transform -s:<i>source</i> -xsl:<i>stylesheet</i> -o:<i>output</i>
+      </kbd>
       </div>
       
       <p>Here <i>source</i>, <i>stylesheet</i>, and <i>output</i> are the source XML file, the XSLT
@@ -108,7 +105,7 @@
                         <code>-a</code> option</a>.</p>
             </td>
          </tr>
-         <tr>
+         <tr class="javaonly">
             <td>
                <p>-catalog:filenames</p>
             </td>
@@ -119,7 +116,7 @@
                   to be redirected, typically to resources available locally. For more details see
                   <a class="bodylink" href="/sourcedocs/resources-and-uris/xml-catalogs">Using XML catalogs</a>.
                </p>
-               <p class="csonly">This option is not available on SaxonCS.</p>
+               <p class="conly">Also available as an option on SaxonC.</p>
             </td>
          </tr>
          <tr>
@@ -455,6 +452,7 @@
                      <code>OutputURIResolver</code> is a user-defined class that implements the <a
                      class="javalink" href="net.sf.saxon.lib.OutputURIResolver"
                      >net.sf.saxon.lib.OutputURIResolver</a> interface.</p>
+               <p class="conly">This option is not available on SaxonC.</p>
             </td>
          </tr>
          <tr>
@@ -520,6 +518,7 @@
                      <code>xsl:include</code> and <code>xsl:import</code> elements, and (if
                      <code>-u</code> is also specified) to process the URIs of the source file and
                   stylesheet file provided on the command line.</p>
+               <p class="conly">This option is not available on SaxonC.</p>
             </td>
          </tr>
          <tr>
@@ -1399,7 +1398,7 @@ transformer.transform(new StreamSource(new File("data/books.xml")), out);]]></co
       </section>
    </section>
    
-   <section id="saxon-api-transformation" title="From a C# application" class="csonly">
+   <section id="Saxon-Api-transformation" title="From a C# application" class="csonly">
       <h1>XSLT transformations from C#</h1>
       
       
@@ -1601,6 +1600,7 @@ Console.WriteLine("\nOutput written to " + outfile + "\n");]]></code></pre>
          
    </section>
    
+
    <section id="saxonc-transformation" title="From a C/C++, Python or PHP application" class="conly">
       <h1>XSLT transformations from a C/C++, Python or PHP application</h1>
       
@@ -1988,6 +1988,7 @@ freeSaxonc(&environi, &processor, &parameters, &properties);]]></code></pre>
       </section>
    </section>
    
+
    <section id="xsltfromant" title="From Ant" class="javaonly">
 
       <h1>XSLT transformations from Ant</h1>
@@ -2082,10 +2083,9 @@ freeSaxonc(&environi, &processor, &parameters, &properties);]]></code></pre>
             files using a single invocation of the <code>Transform</code> command on the command
             line.</li>
          <li>All the transformation APIs separate the process of compiling a stylesheet and
-            the process of using it to transform a source document. With JAXP the object
+            the process of using it to transform a source document. (With JAXP the object
             representing the compiled stylesheet is the <code>javax.xml.transform.Templates</code>
-            object, with s9api on Java, Saxon.Api on C#, or with the SaxonC API on C++/PHP/Python it is the
-            <code>XsltExecutable</code>. If you run
+            object, with s9api or with SaxonC on C++/PHP/Python or with Saxon.Api on C# it is the <code>XsltExecutable</code>. If you run
             transformations within a web service then it is always a good idea to cache the compiled
             form of the stylesheets it uses.</li>
          <li>With Saxon-EE it is also possible to export the compiled form of a stylesheet as an
@@ -2131,6 +2131,8 @@ freeSaxonc(&environi, &processor, &parameters, &properties);]]></code></pre>
          are active at the same time. Different
             <code>XsltCompiler</code> instances with different option settings can run concurrently
          with each other.</p>
+
+
          
          <p class="conly">In the SaxonC API (for C++, PHP and Python), a compiled stylesheet is also
             represented by an <code>XsltExecutable</code> object, but the API design differs to Java
@@ -2143,6 +2145,7 @@ freeSaxonc(&environi, &processor, &parameters, &properties);]]></code></pre>
             <code>compile_stylesheet()</code> in Python. The <code>Xslt30Processor</code> holds
             compile-time options such as the output base URI for the stylesheet, values of static
             parameters, etc. Compile-time errors are thrown as exceptions in C++, PHP and Python.</p>
+
 
       <p>XSLT 3.0 packages have been supported since Saxon 9.6. A package may consist of a single module,
          or of a number of modules connected using <code>xsl:include</code>/<code>xsl:import</code>;
@@ -2184,15 +2187,13 @@ freeSaxonc(&environi, &processor, &parameters, &properties);]]></code></pre>
          different stylesheets, it makes sense to define it as a reusable package, since this avoids
          the cost of compiling the code repeatedly, and avoids the need to keep multiple copies in
          memory.</p>
-         
-         <p class="conly">There is no object corresponding to <code>XsltPackage</code> in the SaxonC API. But
-            a package can be exported as an stylesheet export file (SEF) which can then we imported again (see
-            also <a class="bodylink" href="../packages">Using packages</a>). The
+
+         <p class="conly">In the SaxonC APIs, a package is exported as an stylesheet export file (sef) which can then we imported again. The
                <code>Xslt30Processor</code> has methods <code>compileFromStringAndSave</code>,
                            <code>compileFromFileAndSave</code> and <code>compileFromXdmNodeAndSave</code> which exports the
                <code>xsl:package</code> to file store if successful. From 12.4, the package may be made available for use by
             other packages being compiled, in the same or in a different <code>Xslt30Processor</code>, by
-            the <code>Xslt30Processor</code>'s <code>importPackage</code> method which takes the SEF file name as argument. When an
+            the <code>Xslt30Processor</code>'s <code>importPackage</code> method which takes the sef file name as argument. When an
                <code>xsl:use-package</code> declaration is found while compiling one package, the
             compiler searches for a matching package among those that have been imported by the
                <code>Xslt30Processor</code> in this way. It is possible to import several different
@@ -2219,11 +2220,11 @@ freeSaxonc(&environi, &processor, &parameters, &properties);]]></code></pre>
       <p>A consequence of this is that static errors (for example, invalid path expressions) in such templates
       may go undetected if the code is not actually executed.</p>
       
-         <p>JIT compilation is enabled by default. It can be suppressed from the command line by setting <code>-jit:off</code>.
-            Setting the <code>export</code>, <code>explain</code>, or <code>nogo</code> options also has the side-effect
-            of suppressing JIT compilation. There is also an option <code>setJustInTimeCompilation()</code>
-            available on the <code>XsltCompiler</code> object on Java and C#, and on the
-            <code>Xslt30Processor</code> object in SaxonC.</p>
+      <p>JIT compilation is enabled by default. It can be suppressed from the command line by setting <code>-jit:off</code>.
+      Setting the <code>export</code>, <code>explain</code>, or <code>nogo</code> options also has the side-effect
+      of suppressing JIT compilation. There is also an option available on the <code>XsltCompiler</code> object.</p>
+
+      <p class="conly">On SAxonC there is also the method <code>setJustInTimeCompilation()</code> available on the <code>Xslt30Processor</code> object.</p>
 
       <p>It probably makes sense to suppress JIT compilation in any workload where the compiled stylesheet is
       cached and used repeatedly.</p>
@@ -2246,11 +2247,13 @@ freeSaxonc(&environi, &processor, &parameters, &properties);]]></code></pre>
          resist determined attempts at reverse engineering. Indeed, in the interests of run-time
          diagnostics, it preserves information such as variable names and line numbers that are not
          strictly needed at execution time.</p>
+
          
          <p class="conly">There is no object corresponding to <code>XsltPackage</code> in the SaxonC
             API, but a package can be exported and saved as a stylesheet export file (SEF) using
             methods on <code>Xslt30Processor</code> (e.g. <code>compileFromStringAndSave</code>,
             <code>compileFromFileAndSave</code> and <code>compileFromXdmNodeAndSave</code> in C++).</p>
+
       
       <p>The simplest way to generate an export file is from the command line, for example with
          Saxon-EE 12.0:</p>
@@ -2285,7 +2288,9 @@ freeSaxonc(&environi, &processor, &parameters, &properties);]]></code></pre>
       a source stylesheet should always work.</p>
       
       <p class="javaonly">In particular, stylesheet export files can be passed to the JAXP <code>newTemplates()</code>
-      method in place of a source stylesheet.</p></aside>
+      method in place of a source stylesheet.</p>
+         <p class="conly">In SaxonC, stylesheet export files can be passed to the <code>Xslt30Processor</code>
+               method in place of a source stylesheet. For example, <code>compileFromFile()</code> to create an <code>XsltExecutable</code></p></aside>
       
       
       <p>When exporting a package, all components (templates, functions, etc) from the packages it
@@ -2295,15 +2300,17 @@ freeSaxonc(&environi, &processor, &parameters, &properties);]]></code></pre>
       
       <p>Packages that are used by a stylesheet can be identified in a number of ways.
          They can be listed on the command line in the <code>-pack</code> option, or 
-         imported to the <code>XsltCompiler</code> API in Java and C# using the methods
+         imported to the <code>XsltCompiler</code> API using the methods
             <code>loadLibraryPackage</code> and <code>loadExecutablePackage</code> (Java),
          or <code>LoadLibraryPackage</code> and <code>LoadExecutablePackage</code> (C#).
       Another option, probably the best option if many library packages are used, is to list
       them in a <a class="bodylink" href="/configuration/configuration-file">configuration file</a>.</p>
 
+
          <p class="conly">From SaxonC 12.4, packages can be imported to the
             <code>Xslt30Processor</code> API using the <code>importPackage</code> method
             (<code>import_package</code> in Python).</p>
+
 
       <p>In the case of schema-aware stylesheets, the schema components needed by a stylesheet are
          not exported along with the stylesheet code. The user of the stylesheet needs to import the
@@ -2326,8 +2333,7 @@ freeSaxonc(&environi, &processor, &parameters, &properties);]]></code></pre>
          cannot be incorporated as libraries into larger applications.</p>
 
       <p>Exporting stylesheet packages requires Saxon-EE, optionally with the Developer Master Key
-         if stylesheets with embedded license information are to be exported. From Saxon 9.9 (or from 11.1 for
-         SaxonC), importing stylesheet 
+         if stylesheets with embedded license information are to be exported. From Saxon 9.9 (and for SaxonC 11.1), importing stylesheet
          packages is possible using any Saxon edition, provided that the run-time software and the
          run-time license key (where needed) support the features used by the stylesheet in question.</p>
       
@@ -2395,10 +2401,8 @@ freeSaxonc(&environi, &processor, &parameters, &properties);]]></code></pre>
          <ul/>
       </nav>
 
-      <!--<p class="conly">In SaxonC, the mechanisms for controlling the stylesheet output are different to Java
-         and C#. For details, please see the SaxonC specific information provided in the SaxonC documentation:
-         <a href="https://www.saxonica.com/saxon-c/documentation12/#!using-xsl/stylesheet-output"
-            class="bodylink">Handling output</a>.</p>-->
+      <p>In SaxonC, the mechanism for controlling the stylesheet output is different to Java and C#. Therefore we provide specific information in the section
+         SaxonC documentation, see: <a href="https://www.saxonica.com/saxon-c/documentation12/#!using-xsl/stylesheet-output">Handling output</a></p>
       
       <section id="principal-output" title="Principal output">
          <h1>Principal output</h1>
@@ -2462,28 +2466,6 @@ freeSaxonc(&environi, &processor, &parameters, &properties);]]></code></pre>
                   for further transformation.</p>
                
             </li>
-            
-            <li class="conly">In the SaxonC C interface, transformation output is returned as a serialized
-               string (pointer to a char array) or sent to a specified file.</li>
-            
-            <li class="conly"><p>In the SaxonC C++, Python and PHP interfaces, there are multiple transform
-               methods on <code>XsltExecutable</code> which specify how to handle the output from the
-               different kinds of transformation invocation. These methods have the naming convention of
-               <code>[prefix]ReturningValue</code>, <code>[prefix]ReturningString</code> and
-               <code>[prefix]ReturningFile</code> (or <code>[prefix]_returning_value</code>, etc. in Python);
-               where <code>[prefix]</code> is <code>applyTemplates</code>, <code>callTemplate</code>, or
-               <code>callFunction</code>.</p>
-               <p>The output can be returned as a serialized string (pointer to a char array) using the
-                  <code>[prefix]ReturningString</code> methods, or sent to a specified file using the
-                  <code>[prefix]ReturningFile</code> methods.</p>
-               <p>You can capture the raw output of the transformation as an <code>XdmValue</code> by calling
-                  the <code>XsltExecutable</code> method <code>setResultAsRawValue()</code>
-                  (<code>set_result_as_raw_value()</code> in Python), and using one of the
-                  <code>[prefix]ReturningValue</code> methods.</p>
-               <p>If you want to perform further processing on the output, you can send it to a
-                  <code>SchemaValidator</code> for validation, or to an <code>XsltExecutable</code> for
-                  further transformation.</p>
-            </li>
          </ul>
       </section>
       
@@ -2506,7 +2488,7 @@ freeSaxonc(&environi, &processor, &parameters, &properties);]]></code></pre>
          against the <b>base output URI</b> of the transformation. The
          base output URI defaults to the destination of the principal output.</p>
          <p>The destination and format of secondary outputs can be influenced using the
-         API:</p>
+         Java or C# API:</p>
          
          <ul>
             <li class="javaonly"><p>The JAXP interface was designed for XSLT 1.0 and it
@@ -2570,6 +2552,7 @@ result = xslt_executable.call_template_returning_value(template_name='main', bas
 result_documents = xslt_executable.get_result_documents()]]></code></pre>
                
             </li>
+
          </ul>
          <p>In the case of an <code>xsl:result-document</code> instruction
             with no <code>href</code> attribute, the output is sent to the principal output destination,
@@ -2601,8 +2584,7 @@ result_documents = xslt_executable.get_result_documents()]]></code></pre>
          <div class="javaonly">
          <p>A Java application can customize the handling of <code>xsl:message</code>
             output by calling the <code>setMessageHandler()</code> method on the <code java="net.sf.saxon.s9api.XsltTransformer">XsltTransformer</code>
-            or <code java="net.sf.saxon.s9api.Xslt30Transformer">Xslt30Transformer</code>. The argument to the
-            method is of type <code>Consumer&lt;Message&gt;</code>
+            or <code java="net.sf.saxon.s9api.Xslt30Transformer">Xslt30Transformer</code>. The argument to the message is of type <code>Consumer&lt;Message&gt;</code>
          and it will typically be supplied as a lambda expression, for example:</p>
          
             <pre><code class="language-java"><![CDATA[transformer.setMessageHandler(msg -> System.err.println(">>" +
@@ -2612,13 +2594,14 @@ result_documents = xslt_executable.get_result_documents()]]></code></pre>
          <div class="csonly">
             <p>A C# application can customize the handling of <code>xsl:message</code>
                output by setting the <code>MessageListener</code> property on the <code cs="Saxon.Api.XsltTransformer">XsltTransformer</code>
-               or <code cs="Saxon.Api.Xslt30Transformer">Xslt30Transformer</code>. The value of the property should be of type <code>Action&lt;Message&gt;</code>
+               or <code cs="Saxon.Api.Xslt30Transformer">Xslt30Transformer</code>. The argument to the message is of type <code>Action&lt;Message&gt;</code>
                and it will typically be supplied as a lambda expression, for example:</p>
             
             <pre><code class="language-cs"><![CDATA[transformer.MessageListener = msg => Console.Error.WriteLine(">>" +
    msg.Content.StringValue);]]></code></pre>
             
          </div>
+
          <div class="conly">
             <p>A SaxonC application in C++, Python or PHP can customize the handling of
                <code>xsl:message</code> output by calling the <code>setSaveXslMessage(bool show, const char*
@@ -2636,8 +2619,9 @@ result = executable->transformToString();
 XdmValue * messages = executable->getXslMessages();]]></code></pre>
             
          </div>
+
          
-         <p>In Java and C#, the <code>Message</code> object passed to the supplied message handler contains the content of
+         <p>The <code>Message</code> object passed to the supplied message handler contains the content of
          the message as an <code>XdmNode</code>, the location of the <code>xsl:message</code> instruction,
          the error code to be used, and a boolean value indicating whether <code>terminate="yes"</code>
          was specified.</p>
@@ -2662,15 +2646,15 @@ XdmValue * messages = executable->getXslMessages();]]></code></pre>
       <p>To run this tool, first execute the transformation with the <code>-TP:filename</code>
          option, which will gather timed tracing information and create a profile report to the
          specified file (or to the standard error output if no filename is given). For example:</p>
-      <kbd class="javaonly">java   net.sf.saxon.Transform   -TP:profile.html   -s:<i>source</i>  
+      <kbd>java   net.sf.saxon.Transform   -TP:profile.html   -s:<i>source</i>  
             -xsl:<i>stylesheet</i>
       </kbd>
-      <kbd class="csonly">dotnet SaxonCS transform   -TP:profile.html   -s:<i>source</i>  
+      <kbd>dotnet SaxonCS transform   -TP:profile.html   -s:<i>source</i>  
          -xsl:<i>stylesheet</i>
       </kbd>
-      <kbd class="conly">./transform    -TP:profile.html   -s:<i>source</i>  
-         -xsl:<i>stylesheet</i>
-      </kbd>
+      <p> On SaxonC:
+      <kbd>./transform    -TP:profile.html   -s:<i>source</i>  
+         -xsl:<i>stylesheet</i></kbd></p>
       <p>Then view the resulting <code>profile.html</code> file in your browser.</p>
       <p>The output identifies templates and functions in the original stylesheet by their name or
          match pattern, line number, and the last part of the URI of their module. For
