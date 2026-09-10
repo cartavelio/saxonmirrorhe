@@ -1478,26 +1478,35 @@ void testPackage1(Xslt30Processor *trans, sResultCount *sresult) {
     cout << endl << "Test: testPackage1 - Saving and loading Packages:" << endl;
     trans->clearParameters();
 
+    try {
+        trans->compileFromFileAndSave("../data/test.xsl", "test1.sef");
+        const char *output = trans->transformFileToString("../data/cat.xml", "test1.sef");
 
-    trans->compileFromFileAndSave("../data/test.xsl", "test1.sef");
-    const char *output = trans->transformFileToString("../data/cat.xml", "test1.sef");
 
-    if (output== nullptr) {
-        printf("result is null \n");
-        const char *message = trans->getErrorMessage();
-        if (message != NULL) {
-            cout << "Error message =" << message << endl;
+
+        if (output== nullptr) {
+            printf("result is null \n");
+            sresult->failure++;
+            sresult->failureList.push_back("testPackage1-1");
+
+        } else {
+            printf("%s", output);
+            printf("result is OK \n");
+            sresult->success++;
         }
-        sresult->failure++;
-        sresult->failureList.push_back("testPackage1");
+        fflush(stdout);
+        delete output;
 
-    } else {
-        printf("%s", output);
-        printf("result is OK \n");
-        sresult->success++;
+    } catch(SaxonApiException &e){
+         printf("testPackage1 failed - Exception thrown \n");
+         const char *message = e.getMessage();
+         if (message != NULL) {
+                   cout << "Exception message =" << message << endl;
+         }
+         sresult->failure++;
+         sresult->failureList.push_back("testPackage1");
+
     }
-    fflush(stdout);
-    delete output;
 }
 
 
