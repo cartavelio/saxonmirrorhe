@@ -296,6 +296,7 @@ val binDirName = saxonBuild.targetHost.map {
     "${os}-${arch}"
 }
 val readmeTask = tasks.register<TemplatedDocTask>("readme") {
+    group = LifecycleTasks.DOCUMENTATION_GROUP
     templateRoot = layout.projectDirectory.dir("../README.in")
     if (editionReadmeTemplateDir.asFile.exists()) {
         editionTemplateRoot = editionReadmeTemplateDir
@@ -306,8 +307,8 @@ val readmeTask = tasks.register<TemplatedDocTask>("readme") {
         productVersion = saxonBuild.version.get(),
         edition = extension.edition.get(),
         host = saxonBuild.targetHost.get(),
+        releaseDirName = extension.package_file_name.get(),
         binaries = extension.binaries.get().toTypedArray(),
-        binDirName = binDirName.get()
     )
 }
 
@@ -366,8 +367,8 @@ val releaseFolderTask = tasks.register<Copy>("build_release_zip_contents_folder"
 
     // Binary artifacts
     val saxonCCoreCMakePackageDir = saxonCCoreReleaseCMakePackageDir.elements.map { it.first() }
-    val saxonCCoreDestDirName = binDirName.map { "${it}/SaxonCCore${extension.edition.get().uppercase()}" }
-    val saxonCDestDirName = binDirName.map { "${it}/${extension.package_name.get()}" }
+    val saxonCCoreDestDirName = extension.edition.map { "SaxonCCore${extension.edition.get().uppercase()}" }
+    val saxonCDestDirName = extension.package_name
 
     // libsaxonc-core
     fromPreservingSymlinks(saxonCCoreCMakePackageDir.map { it.asFile }, dest) {
