@@ -3,7 +3,6 @@ package nativetests;
 import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.type.Schema;
 import org.junit.jupiter.api.Test;
@@ -23,7 +22,7 @@ public class FnSchemaTest {
     public void testSchema() {
         try {
             EnterpriseConfiguration config = new EnterpriseConfiguration();
-            Schema schema = config.getSchemaForBuiltInNamespace(NamespaceUri.FN);
+            Schema schema = config.getSchemaForFnNamespace();
             String instance = "<fn:analyze-string-result xmlns:fn=\"http://www.w3.org/2005/xpath-functions\">" +
                     "<fn:non-match>(</fn:non-match><fn:match>(banana)</fn:match><fn:non-match>)</fn:non-match>" +
                     "</fn:analyze-string-result>";
@@ -42,7 +41,7 @@ public class FnSchemaTest {
     public void testSchema2() {
         try {
             EnterpriseConfiguration config = new EnterpriseConfiguration();
-            Schema schema = config.getSchemaForBuiltInNamespace(NamespaceUri.FN);
+            Schema schema = config.getSchemaForFnNamespace();
             String instance = "<fn:analyze-string-result xmlns:fn=\"http://www.w3.org/2005/xpath-functions\">" +
                     "<fn:match><fn:group nr=\"1\">b<fn:group nr=\"2\"/></fn:group></fn:match>" +
                     "<fn:non-match>anana</fn:non-match></fn:analyze-string-result>";
@@ -63,7 +62,7 @@ public class FnSchemaTest {
         // 2016-11-03: the instance actually validates, see bug 29976. Changed to an instance that doesn't validate.
         try {
             EnterpriseConfiguration config = new EnterpriseConfiguration();
-            config.getSchemaForBuiltInNamespace(NamespaceUri.FN);
+            config.getSchemaForFnNamespace();
             config.setSchemaValidationMode(Validation.STRICT);
             String instance = "<fn:analyze-string-result xmlns:fn=\"http://www.w3.org/2005/xpath-functions\">" +
                     "<fn:match><fn:group nr=\"1\">b<fn:group nr=\"2\"/></fn:group></fn:match>" +

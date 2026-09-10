@@ -610,7 +610,7 @@ public class TestXQueryCompiler {
             Processor p = new Processor(false);
             XQueryCompiler c = p.newXQueryCompiler();
             XQueryExecutable q = c.compile(query);
-            Iterator<GlobalVariable> vars = q.getUnderlyingCompiledQuery().getMainModule().getModuleVariables();
+            Iterator<GlobalVariable> vars = q.getUnderlyingCompiledQuery().getMainModule().getModuleVariables().iterator();
             int count = 0;
             while (vars.hasNext()) {
                 GlobalVariable v = vars.next();
