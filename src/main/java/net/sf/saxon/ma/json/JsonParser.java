@@ -273,7 +273,7 @@ public class JsonParser {
         JsonToken tok = tokenizer.next();
         while (tok != JsonToken.RCURLY) {
             if (tok != JsonToken.STRING_LITERAL && !(tok == JsonToken.UNQUOTED_STRING && liberal)) {
-                invalidJSON("Property name must be a string literal (found " + showToken(tok, tokenizer.currentTokenValue.toString() + ")"),
+                invalidJSON("Property name must be a string literal (found " + showToken(tok, tokenizer.currentTokenValue) + ")",
                             ERR_GRAMMAR, tokenizer.lineNumber);
             }
             UnicodeString key = tokenizer.currentTokenValue;
@@ -356,7 +356,7 @@ public class JsonParser {
             } else if (tok == JsonToken.RSQB) {
                 break;
             } else {
-                invalidJSON("Unexpected token (" + showToken(tok, tokenizer.currentTokenValue.toString()) +
+                invalidJSON("Unexpected token (" + showToken(tok, tokenizer.currentTokenValue) +
                                     ") after entry in array", ERR_GRAMMAR, tokenizer.lineNumber);
             }
         }
@@ -746,7 +746,7 @@ public class JsonParser {
     }
 
 
-    public static String showToken(JsonToken token, String currentTokenValue) {
+    public static String showToken(JsonToken token, UnicodeString currentTokenValue) {
         switch (token) {
             case LSQB:
                 return "[";

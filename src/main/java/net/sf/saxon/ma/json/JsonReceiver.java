@@ -22,6 +22,7 @@ import net.sf.saxon.type.StringConverter;
 import net.sf.saxon.value.DoubleValue;
 import net.sf.saxon.value.StringToDouble11;
 import net.sf.saxon.value.Whitespace;
+import net.sf.saxon.z.IntIterator;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -371,35 +372,35 @@ public class JsonReceiver implements Receiver {
     private static UnicodeString handleEscapedString(UnicodeString str) throws XPathException {
         // check that escape sequences are valid
         unescape(str);
-        UnicodeBuilder out = new UnicodeBuilder();
+        TwineBuilder tb = TwineBuilder.make(str.length32());
+        IntIterator cp = str.codePoints();
         boolean afterEscapeChar = false;
-        for (int i = 0; i < str.length(); i++) {
-            int c = str.codePointAt(i);
+        while(cp.hasNext()) {
+            int c = cp.next();
             if (c == '"' && !afterEscapeChar) {
-                out.append("\\\"");
+                tb = tb.append('\\').append('"');
             } else if (c < 32 || (c >= 127 && c < 160)) {
                 if (c == '\b') {
-                    out.append("\\b");
+                    tb = tb.append('\\').append('b');
                 } else if (c == '\f') {
-                    out.append("\\f");
+                    tb = tb.append('\\').append('f');
                 } else if (c == '\n') {
-                    out.append("\\n");
+                    tb = tb.append('\\').append('n');
                 } else if (c == '\r') {
-                    out.append("\\r");
+                    tb = tb.append('\\').append('r');
                 } else if (c == '\t') {
-                    out.append("\\t");
+                    tb = tb.append('\\').append('t');
                 } else {
-                    out.append("\\u");
-                    out.append(hex4(c));
+                    tb = tb.append('\\').append('u').append(hex4(c));
                 }
             } else if (c == '/' && !afterEscapeChar) {
-                out.append("\\/");
+                tb = tb.append('\\').append('/');
             } else {
-                out.append(c);
+                tb = tb.append(c);
             }
             afterEscapeChar = c == '\\' && !afterEscapeChar;
         }
-        return out.toUnicodeString();
+        return tb.toUnicodeString();
     }
 
 
@@ -414,46 +415,53 @@ public class JsonReceiver implements Receiver {
      * @throws XPathException if the input contains invalid escape sequences
      */
 
-    public static UnicodeString escape(UnicodeString in, boolean retainQuot, boolean retainSlash, IntPredicate hexEscapes) throws XPathException {
-        UnicodeBuilder out = new UnicodeBuilder();
-        for (int i=0; i<in.length(); i++) {
-            int c = in.codePointAt(i);
+    public static UnicodeString escape(UnicodeString in, boolean retainQuot,
+                                       boolean retainSlash, IntPredicate hexEscapes) throws XPathException {
+        TwineBuilder tb = TwineBuilder.make(in.length32());
+        IntIterator cp = in.codePoints();
+        while (cp.hasNext()) {
+            int c = cp.next();
             switch (c) {
                 case '"':
-                    out.append(retainQuot ? "\"" : "\\\"");
+                    if (!retainQuot) {
+                        tb = tb.append('\\');
+                    }
+                    tb = tb.append('"');
                     break;
                 case '\b':
-                    out.append("\\b");
+                    tb = tb.append('\\').append('b');
                     break;
                 case '\f':
-                    out.append("\\f");
+                    tb = tb.append('\\').append('f');
                     break;
                 case '\n':
-                    out.append("\\n");
+                    tb = tb.append('\\').append('n');
                     break;
                 case '\r':
-                    out.append("\\r");
+                    tb = tb.append('\\').append('r');
                     break;
                 case '\t':
-                    out.append("\\t");
+                    tb = tb.append('\\').append('t');
                     break;
                 case '/':
-                    out.append(retainSlash ? "/" : "\\/");  // spec bug 29665, saxon bug 2849
+                    if (!retainSlash) {
+                        tb = tb.append('\\');
+                    }
+                    tb = tb.append('/');  // spec bug 29665, saxon bug 2849
                     break;
                 case '\\':
-                    out.append("\\\\");
+                    tb = tb.append('\\').append('\\');
                     break;
                 default:
                     if (hexEscapes.test(c)) {
-                        out.append("\\u");
-                        out.append(hex4(c));
+                        tb = tb.append('\\').append('u').append(hex4(c));
                     } else {
-                        out.append(c);
+                        tb = tb.append(c);
                     }
                     break;
             }
         }
-        return out.toUnicodeString();
+        return tb.toUnicodeString();
     }
 
     @CSharpReplaceBody(code="return Int32.ToString(\"X4\")")

@@ -18,7 +18,7 @@ import net.sf.saxon.regex.ARegularExpression;
 import net.sf.saxon.regex.JavaRegularExpression;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.str.StringView;
-import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.TwineBuilder;
 import net.sf.saxon.trans.Instantiator;
 import net.sf.saxon.trans.Maker;
 import net.sf.saxon.trans.XPathException;
@@ -152,26 +152,26 @@ public class URIQueryParameters {
     }
 
     public static FilenameFilter makeGlobFilter(String value) throws XPathException {
-        UnicodeBuilder sb = new UnicodeBuilder();
-        sb.append('^');
+        TwineBuilder tb = TwineBuilder.make(128);
+        tb = tb.append('^');
         for (int i = 0; i < value.length(); i++) {
             char c = value.charAt(i);
             if (c == '.') {
                 // replace "." with "\."
-                sb.appendLatin("\\.");
+                tb = tb.append('\\').append('.');
             } else if (c == '*') {
                 // replace "*" with ".*"
-                sb.appendLatin(".*");
+                tb = tb.append('.').append('*');
             } else if (c == '?') {
                 // replace "?" with ".?"
-                sb.appendLatin(".?");
+                tb = tb.append('.').append('?');
             } else {
-                sb.append(c);
+                tb = tb.append(c);
             }
         }
-        sb.append('$');
+        tb = tb.append('$');
         try {
-            return new RegexFilter(new JavaRegularExpression(sb.toUnicodeString(), ""));
+            return new RegexFilter(new JavaRegularExpression(tb.toUnicodeString(), ""));
         } catch (XPathException e) {
             throw new XPathException("Invalid glob " + value + " in collection URI", "FODC0004");
         }

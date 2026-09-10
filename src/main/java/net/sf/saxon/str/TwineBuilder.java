@@ -53,7 +53,7 @@ public abstract class TwineBuilder {
      * @param chars the string to be appended
      * @return the new TwineBuilder to be used for subsequent calls
      */
-    public final TwineBuilder append(UnicodeString chars) {
+    public TwineBuilder append(UnicodeString chars) {
         TwineBuilder tb = this;
         IntIterator codePoints = chars.codePoints();
         while (codePoints.hasNext()) {
@@ -123,6 +123,22 @@ public abstract class TwineBuilder {
                 byte[] buffer24 = new byte[Integer.max(used * 6, buffer.length*3)];
                 StringTool.copy8to24(buffer, 0, buffer24, 0, used);
                 return new T24(buffer24, used).append(codepoint);
+            }
+        }
+
+        @Override
+        public TwineBuilder append(UnicodeString chars) {
+            if (chars instanceof Twine8) {
+                // special-case this one to achieve a bulk move
+                int len = chars.length32();
+                if (used + len > buffer.length) {
+                    buffer = Arrays.copyOf(buffer, Integer.max(used * 2, used + len));
+                }
+                System.arraycopy(((Twine8)chars).getByteArray(), 0, buffer, used, len);
+                used += len;
+                return this;
+            } else {
+                return super.append(chars);
             }
         }
 
