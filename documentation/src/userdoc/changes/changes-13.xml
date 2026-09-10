@@ -484,7 +484,7 @@ TODO: rethink redefines and override
             <li><p>PR1674 - composite sort keys in xsl:sort</p></li>
             <li><p>PR1622 - XSLT map-for-key function</p></li>
             <li><p>Deep lookup expressions with wildcards ??* (works in XQuery, not in XPath)</p></li>
-            <li><p></p></li>
+            <li><p>xsl:record instruction</p></li>
             <li><p></p></li>
             <li><p></p></li>
             <li><p></p></li>
