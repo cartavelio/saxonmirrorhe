@@ -11,7 +11,7 @@
 
 
 
-#include <libsaxon-@@edition@@c-12.1.h>
+#include <libsaxon-@@edition@@c-@@VERSION@@.h>
 
 #include <stdio.h>
 #if defined __linux__ || defined __APPLE__

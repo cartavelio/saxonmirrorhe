@@ -54,7 +54,7 @@ ext_modules = [Extension(
                 ]
 setup(
     name='saxonc@@edition@@',
-    version='12.1.0',
+    version='@@VERSION@@.0',
     description='A python package for the SaxonC-@@EDITION@@ @@VERSION@@, an XSLT 3.0, XQuery 3.1, XPath 3.1 and Schema Validator processor by Saxonica.',
     long_description=long_description,
     long_description_content_type='text/markdown',
