@@ -145,6 +145,9 @@ public class Literal extends Expression {
         if (value instanceof IntegerRange) {
             return th.isSubType(BuiltInAtomicType.INTEGER, requiredType);
         }
+        if (value instanceof Item it) {
+            return requiredType.matches(it, th);
+        }
         for (Item item : value.asIterable()) {
             if (!requiredType.matches(item, th)) {
                 return false;
@@ -183,7 +186,7 @@ public class Literal extends Expression {
     protected int computeCardinality() {
         if (value.getLength() == 0) {
             return StaticProperty.EMPTY;
-        } else if (value instanceof AtomicValue) {
+        } else if (value instanceof Item) {
             return StaticProperty.EXACTLY_ONE;
         }
         SequenceIterator iter = value.iterate();
