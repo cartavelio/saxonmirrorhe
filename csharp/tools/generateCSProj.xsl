@@ -145,9 +145,42 @@ latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Descri
     </ItemGroup>
 
    <xsl:if test="$edition != 'ee'">
+<<<<<<< HEAD
     <!-- <ItemGroup>
        <Compile Remove="..\..\..\..\cs\Saxon\Impl\Helpers\UcaCollatorUsingCSharp.cs" />
        <Compile Remove="..\..\..\..\cs\Saxon\Ejava\text\CollationKeyUsingCSharp.cs" />
+=======
+     <!--<ItemGroup>
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Api/**" />
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Callbacks/**" />
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Cmd/**" />
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Ejava/**" />
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Ejavax/**" />
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/DataModel/**" />
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Dom/**" />
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Helpers/**" />
+
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/DotNetLocalizerFactory.cs" />
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/FormatNumberSubPicture.cs" />
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/LocalNumberer.cs" />
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/LoggingWriter.cs" />
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/MappingEnumerator.cs" />
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/ResourceLoader.cs" />
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/ICULibrary.cs" />
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/Vavr.cs" />
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/ZenoStringCodepoints.cs" />
+
+
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/XDoc/**" />
+
+
+       <Compile Remove="..\..\..\..\cs\Saxon\Impl\Helpers\UcaCollatorUsingCSharp.cs" />
+       <Compile Remove="..\..\..\..\cs\Saxon\Ejava\text\CollationKeyUsingCSharp.cs" />
+       <Compile Remove="..\..\..\..\src\main\cs\Saxon/Api/Support/XsdCompilerEE.cs" />
+       <Compile Remove="..\..\..\..\src\main\cs\Saxon/Api/Support/XsdSchemaEE.cs" />
+       <Compile Remove="..\..\..\..\src\main\cs\Saxon/Impl/Parallel" />
+       <Compile Remove="..\..\..\..\src\main\cs\Saxon/commands/*.cs" />
+>>>>>>> d5ca50c97 (Update to xsl for HE build)
      </ItemGroup> -->
    </xsl:if>
   </Project>
