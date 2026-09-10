@@ -38,6 +38,7 @@ abstract class TestSuitesExtension
   abstract val arch: Property<String>
   abstract val edition: Property<String>
   abstract val dotnet: Property<String>
+  abstract val dotnetBuildType: Property<String>
   abstract val netver: Property<String>
   abstract val submodulesDir: DirectoryProperty
   abstract val exceptionsDir: DirectoryProperty
@@ -185,6 +186,9 @@ abstract class TestSuitesExtension
     tasks.named(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME) {
       dependsOn(thisSuite)
     }
+//    tasks.named(LifecycleTasks.ACCEPTANCE_JAVA_TEST_TASK_NAME) {
+//      dependsOn(thisSuite)
+//    }   
     return thisSuite as TaskProvider<DefaultTask>
   }
 
@@ -235,6 +239,9 @@ abstract class TestSuitesExtension
     tasks.named(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME) {
       dependsOn(thisSuite)
     }
+//    tasks.named(LifecycleTasks.ACCEPTANCE_JAVA_TEST_TASK_NAME) {
+//      dependsOn(thisSuite)
+//    }
 
     return thisSuite as TaskProvider<DefaultTask>
   }
@@ -263,6 +270,7 @@ abstract class TestSuitesExtension
       this.arch = plugin.arch
       this.netver = plugin.netver
       this.dotnet = plugin.dotnet
+      this.dotnetBuildType = plugin.dotnetBuildType
       this.platform = plugin.platform
       this.options = options
       exceptionsFile = exceptions(suite)
@@ -276,6 +284,18 @@ abstract class TestSuitesExtension
         into(layout.buildDirectory.dir("suite/expath/${taskName}"))
         from(submodulesDir.dir("expath/tests/qt3")) {
           exclude("archive/sandpit2/**")
+        }
+
+        doLast {
+          // Also, make sure that the file "test.bin" exists
+          // or some tests will fail.
+          project.copy {
+            into(layout.buildDirectory.dir("suite/expath/${taskName}/file/sandpit"))
+            from(submodulesDir.dir("expath/tests/qt3")) {
+              include("catalog.xml")
+            }
+            rename { "test.bin" }
+          }
         }
       }
 
@@ -297,6 +317,9 @@ abstract class TestSuitesExtension
     tasks.named(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME) {
       dependsOn(thisSuite)
     }
+//    tasks.named(LifecycleTasks.ACCEPTANCE_CSHARP_TEST_TASK_NAME) {
+//      dependsOn(thisSuite)
+//    }
 
     return thisSuite as TaskProvider<DefaultTask>
   }
@@ -316,7 +339,7 @@ abstract class TestSuitesExtension
 
     val reportDir = layout.buildDirectory.file("test-results/${suite}/${dateStamp}").get()
 
-    val relprefix = "${arch.get()}/TestDrivers/bin/Release"
+    val relprefix = "${arch.get()}/TestDrivers/bin/${dotnetBuildType.get()}"
     val relarch = "${netver.get()}/${platform.get()}-${arch.get()}/TestDrivers.dll"
 
     val testDrivers = layout.buildDirectory.file("${relprefix}/${relarch}")
@@ -369,7 +392,12 @@ abstract class TestSuitesExtension
       }
     }
 
-    allSuites.dependsOn(thisSuite)
+    tasks.named(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME) {
+      dependsOn(thisSuite)
+    }
+//    tasks.named(LifecycleTasks.ACCEPTANCE_CSHARP_TEST_TASK_NAME) {
+//      dependsOn(thisSuite)
+//    }
 
     return thisSuite as TaskProvider<DefaultTask>
   }
@@ -397,5 +425,10 @@ class TestSuitesPlugin : Plugin<Project> {
     extension.edition.convention("")
     extension.dotnet.convention(saxonBuild.dotnet.get())
     extension.netver.convention("net${saxonBuild.dotnetversion.get()}")
+    if (saxonBuild.releaseBuild.get()) {
+      extension.dotnetBuildType.convention("Release")
+    } else {
+      extension.dotnetBuildType.convention("Debug")
+    }
   }
 }

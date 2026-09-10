@@ -42,6 +42,8 @@ abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations):
   @get:Internal
   abstract val dotnet: Property<String>
   @get:Internal
+  abstract val dotnetBuildType: Property<String>
+  @get:Internal
   abstract val platform: Property<String>
   @get:Internal
   abstract val options: MapProperty<String,String>
@@ -89,7 +91,7 @@ abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations):
       }
     }
 
-    val relprefix = "${arch.get()}/TestDrivers/bin/Release"
+    val relprefix = "${arch.get()}/TestDrivers/bin/${dotnetBuildType.get()}"
     val relarch = "${netver.get()}/${platform.get()}-${arch.get()}/TestDrivers.dll"
     val testDrivers = project.layout.buildDirectory.file("${relprefix}/${relarch}")
 
@@ -119,12 +121,20 @@ abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations):
       }
     }
 
+    //testargs.add("-s:expath-file")
+    //testargs.add("-t:EXPath-file-exists-001")
+    //testargs.add("-debug")
+
+    //println(listOf(testargs))
+
     ex.exec {
       if (!showOutput) {
         println("(buffering output)")
         standardOutput = stdOutput
         errorOutput = errOutput
       }
+
+      workingDir = suiteDir.get().asFile
 
       commandLine = testargs
     }
