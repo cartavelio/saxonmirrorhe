@@ -309,21 +309,27 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
      * @param checkpoint A checkpoint object returned by a previous call to the {@link #checkpoint} method.
      * @param error The error that was caught
      */
+
     @Override
     public void recover(Object checkpoint, XPathException error) {
         out.info(AbstractTraceListener.spaces(indent) + "<error code='"
                          + error.getErrorCodeQName().getLocalPart()
                          + "'>" + error.getMessage() + "</error>");
-        while (stack.size() > (int)checkpoint) {
+        while (stack.size() > (int) checkpoint) {
+            int size = stack.size();
             Object o = stack.peek();
-            if (o instanceof Item) {
-                endCurrentItem((Item)o);
-            } else if (o instanceof Traceable) {
-                leave((Traceable)o);
+            if (o instanceof Traceable) {
+                leave((Traceable) o);
+            } else if (o instanceof Item) {
+                endCurrentItem((Item) o);
+            }
+            if (stack.size() == size) {
+                stack.pop();
             }
         }
         out.info(AbstractTraceListener.spaces(indent) + "<catch/>");
     }
+
 
     /**
      * Set the output destination (default is System.err)
