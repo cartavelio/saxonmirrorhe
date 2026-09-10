@@ -798,7 +798,7 @@ public class Query {
             request.uri = cwd.resolve(sourceFileName).toString();
             request.nature = ResourceRequest.XML_NATURE;
             request.purpose = ResourceRequest.ANY_PURPOSE;
-            sourceInput = request.resolve(config.getResourceResolver());
+            sourceInput = request.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
         } else if (sourceFileName.equals("-")) {
             // take input from stdin
             String sysId = new File(System.getProperty("user.dir")).toURI().toASCIIString();
