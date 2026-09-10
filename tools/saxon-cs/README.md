@@ -17,7 +17,7 @@ saxon-orders@saxonica.com.
 ## How does it relate to other Saxon products?
 
 SaxonCS is built from the same source code as the long-established Java product. 
-It was created by converting the source code of Saxon-J to C# source 
+It was created by converting the source code of SaxonJ to C# source 
 code, using a custom transpiler written by Saxonica
 (primarily in XSLT 3.0, since you asked).
 
@@ -32,11 +32,11 @@ high-performance features exclusive to the EE version, such as advanced
 optimization, schema-awareness, streaming, and multi-threading. 
 Some platform-specific features such as bytecode generation are excluded.
 
-License files are compatible between SaxonCS and Saxon-J.
+License files are compatible between SaxonCS and SaxonJ.
 
-Stylesheet export files (SEF files) are compatible between SaxonCS, Saxon-C, and Saxon-J.
+Stylesheet export files (SEF files) are compatible between SaxonCS, SaxonC, and SaxonJ.
 
-SaxonCS can also generate SEF files for Saxon-JS.
+SaxonCS can also generate SEF files for SaxonJS.
 
 ## How does it relate to other XML libraries on .NET?
 
@@ -81,7 +81,7 @@ but will not be further developed.
 
 ## What's new in this version?
 
-SaxonCS is based on version 11 of the source code, and is being released
+SaxonCS is based on version 11 of the source code, and was released
 ahead of the Java version. As usual there's a comprehensive list of changes
 in the documentation. Apart from supporting .NET 5, you'll find there are
 lots of new features to make processing JSON easier; it's getting close to
@@ -89,11 +89,24 @@ the point where JSON is supported almost as well as XML. Certainly, there's
 no better library available for applications that need to mix and match XML
 and JSON, or do custom conversions from one to the other.
 
+For a record of bugs fixed in each maintenance release, please consult the
+[issues list](https://saxonica.plan.io/projects/saxon/issues) — you can filter
+the list on the property "Fixed in maintenance release". This is also the place
+to report any problems you find.
+
 ## Where do I find documentation?
 
 It's all [online](https://www.saxonica.com/documentation11/). 
 
 (Delivered, in case you're interested, by Saxon-JS running in your browser.)
+
+## What if I hit problems?
+
+If you have coding problems with XSLT, XPath, XQuery, or XSD, you will usually be
+able to get help by asking on StackOverflow.
+
+If you suspect a Saxon bug, please report it on the
+[issues list](https://saxonica.plan.io/projects/saxon/issues).
 
 ## Will SaxonCS be integrated in Biztalk?
 
