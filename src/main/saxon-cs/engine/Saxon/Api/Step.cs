@@ -4,8 +4,10 @@ using System.Linq;
 
 namespace Saxon.Api {
     /// <summary>
-    /// A <c>Step</c> class wraps a delegate method that can be applied to an item
-    /// to return a <c>XdmValue</c> of items.
+    /// A <c>Step</c> represents a function from an XDM item to a sequence of items. Steps
+    /// are most commonly used as the argument to the method <c>XdmValue.Select()</c>. A wide
+    /// selection of system-defined steps are available from static methods of the <c>Saxon.Api.Steps</c>
+    /// class. It is possible, however, to create user-defined Steps.
     /// </summary>
     public class Step<TInput, TResult>
         where TInput : XdmItem
@@ -22,12 +24,17 @@ namespace Saxon.Api {
 
 
         /// <summary>
-        /// Obtain a <c>Step</c> that filters the results of this <c>Step</c> using a supplied <c>Func</c> predicate.
-        /// <p>For example, <c>Child.Where(Predicate.IsText())</c>
-        /// returns a <c>Step</c> whose effect is to select the text node children 
-        /// of a supplied element or document node.</p>
+        /// Obtain a <c>Step</c> that filters the results of this <c>Step</c> using a supplied <c>Predicate</c>.
         /// </summary>
-        /// <param name="predicate">The predicate is a <c>Func</c> delegate encapsulating the filter which will be applied to the results of this <c>Step</c></param>
+        /// <remarks>
+        /// <para>For example, <c>Child().Where(Predicates.IsText())</c>
+        /// returns a <c>Step</c> whose effect is to select the text node children 
+        /// of a supplied element or document node.</para>
+        /// <para>Similarly, <c>Child("*").Where(n => n.NodeName.LocalName.StartsWith("h"))</c> selects
+        /// element children whose names begin with "h".</para>
+        /// </remarks>
+        /// <param name="predicate">The predicate is a function that is applied to each item in the results
+        /// of this step, and returns a boolean indicating whether that item should be included in the result.</param>
         /// <returns>A new <c>Step</c> (that is, a wrapped delegate from one <c>Step</c> of items to another) that
         /// filters the results of this step by selecting only the items that satisfy the predicate.</returns>
 
@@ -38,6 +45,12 @@ namespace Saxon.Api {
         /// <summary>
         /// Obtain a <c>Step</c> that combines the results of this step with the results of another step.
         /// </summary>
+        /// <remarks>
+        /// <para>In XPath terms, this corresponds to the "!" operator. It differs from the "/" operator
+        /// in that there is no elimination of duplicates or sorting into document order.</para>
+        /// <para>In function programming theory this operation is often referred to as "flatMap";
+        /// in LINQ it corresponds to <c>SelectMany</c>.</para>
+        /// </remarks>
         /// <param name="next">The step which will be applied to the results of this step</param>
         /// <returns>A new <c>Step</c> (that is, a function from one <c>IEnumerable</c> of items to another) that
         /// performs this step and the next step in turn. The result is equivalent to the <c>IEnumerable</c> method <c>SelectMany()</c>
@@ -50,6 +63,10 @@ namespace Saxon.Api {
         /// <summary>
         /// Obtain a <c>Step</c> that selects the Nth item in the results of this step.
         /// </summary>
+        /// <remarks>
+        /// <para>The standard LINQ methods <c>First()</c> and <c>Last()</c> methods can be
+        /// used on the results of a step to select the first and last items in the result.</para>
+        /// </remarks>
         /// <param name="index">The zero-based index of the item to be selected</param>
         /// <returns>A new <c>Step</c> (that is, a function from one <c>IEnumerable</c> of items to another) that
         /// filters the results of this step by selecting only the items that satisfy the predicate.</returns>
@@ -76,7 +93,7 @@ namespace Saxon.Api {
 
 
         /// <summary>
-        /// The <c>Func</c> property that represents the wrapped delegate method which can be invoked.
+        /// The underlying function corresponding to this <c>Step</c>
         /// </summary>
         public Func<TInput, IEnumerable<TResult>> Func => function;
 

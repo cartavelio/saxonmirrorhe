@@ -9,9 +9,17 @@ using Saxon.Api.Support;
 namespace Saxon.Api {
     /// <summary>
     /// This non-instantiable class provides a number of useful implementations of the <c>Step</c>
-    /// class which wraps a <c>Func</c> object, used to navigate XDM trees, typically getting the <c>Func</c> property 
-    /// and used as an argument to <c>XdmValue#Select</c> and <c>XdmValue#SelectMany</c>.
+    /// class. For example, <c>Steps.Child()</c> returns a <c>Step</c> which can be used as an
+    /// argument to the <c>XdmValue.Select()</c> method, in order to select the children of an XDM
+    /// node.
     /// </summary>
+    /// <remarks>
+    /// <para>It is often useful to reference this class with a <c>using static</c> declaration
+    /// of the form: <c>using static Saxon.Api.Steps;</c>
+    /// </para>
+    /// <para>For example, <code>origin.Select(FollowingSibling("para")).First()</code> selects the
+    /// first following sibling element named "para" after <code>origin</code>.</para>
+    /// </remarks>
     public class Steps {
         /// <summary>
         /// Obtain a <c>Step</c> that selects the root node of the containing document (which may or may not
