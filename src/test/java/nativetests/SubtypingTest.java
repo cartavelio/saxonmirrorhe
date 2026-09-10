@@ -118,6 +118,38 @@ public class SubtypingTest {
         }
     }
 
+    @Test
+    public void testElementUnionNameTests() {
+        try {
+            Processor proc = new Processor(true);
+            proc.setConfigurationProperty(Feature.XQUERY_VERSION, "4.0");
+            TypeHierarchy th = proc.getUnderlyingConfiguration().getTypeHierarchy();
+
+            ItemTypeFactory itf = new ItemTypeFactory(proc);
+            ItemType t0 = itf.parseItemType("element(a|b)");
+            ItemType t1 = itf.parseItemType("element(b|a)");
+            ItemType t2 = itf.parseItemType("element(a)");
+            ItemType t3 = itf.parseItemType("(element(a)|element(b))");
+            ItemType t4 = itf.parseItemType("(element(b)|element(a))");
+            assertEquals(Affinity.SAME_TYPE, rel(th, t0, t1));
+            assertEquals(Affinity.SAME_TYPE, rel(th, t0, t3));
+            assertEquals(Affinity.SAME_TYPE, rel(th, t3, t4));
+            assertEquals(Affinity.SAME_TYPE, rel(th, t0, t4));
+            assertEquals(Affinity.SUBSUMES, rel(th, t0, t2));
+            assertEquals(Affinity.SUBSUMES, rel(th, t1, t2));
+            assertEquals(Affinity.SUBSUMES, rel(th, t3, t2));
+            assertEquals(Affinity.SUBSUMES, rel(th, t4, t2));
+            assertEquals(Affinity.SUBSUMED_BY, rel(th, t2, t0));
+            assertEquals(Affinity.SUBSUMED_BY, rel(th, t2, t1));
+            assertEquals(Affinity.SUBSUMED_BY, rel(th, t2, t3));
+            assertEquals(Affinity.SUBSUMED_BY, rel(th, t2, t4));
+
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
     private static Affinity rel(TypeHierarchy th, ItemType s, ItemType t) {
         return th.relationship(u(s), u(t));
     }
