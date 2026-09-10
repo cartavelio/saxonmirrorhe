@@ -1,7 +1,6 @@
 import urllib.parse
 
-'''from saxonc@@edition@@ import *'''
-from saxoncee import *
+from saxonc@@edition@@ import *
 import os
 import psutil
 from Environment import Environment
