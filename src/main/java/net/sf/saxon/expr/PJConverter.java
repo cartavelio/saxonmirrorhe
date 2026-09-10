@@ -222,7 +222,7 @@ public abstract class PJConverter {
                     if (converter != null) {
                         return converter;
                     }
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     config.deregisterExternalObjectModel(model);
                 }
             }
