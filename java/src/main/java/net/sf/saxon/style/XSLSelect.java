@@ -117,6 +117,10 @@ public class XSLSelect extends StyleElement implements AutoDocumentInhibitor {
             if (n.getNodeKind() == Type.ELEMENT) {
                 if (!(n instanceof XSLFallback)) {
                     compileError("Invalid child of xsl:select - " + n.getDisplayName());
+                } else {
+                    if (content != null) {
+                        compileError("Within xsl:select, text nodes cannot precede xsl:fallback");
+                    }
                 }
             } else if (n.getNodeKind() == Type.TEXT) {
                 UnicodeString s = n.getUnicodeStringValue();
