@@ -10,10 +10,7 @@ package net.sf.saxon.pattern;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Choose;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.functions.Doc;
-import net.sf.saxon.functions.KeyFn;
-import net.sf.saxon.functions.Root_1;
-import net.sf.saxon.functions.SuperId;
+import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.hof.FunctionLiteral;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.*;
@@ -522,6 +519,16 @@ public class PatternParser extends XPathParser {
         if (inPredicate <= 0 && !fn.isCallOn(SuperId.class) && !fn.isCallOn(KeyFn.class) &&
                 !fn.isCallOn(Doc.class) && !(fn.isCallOn(Root_1.class) && argumentsParsed == 0)) {
             grumble("The " + fn + " function is not allowed in a pattern (unless in a predicate)", "XTSE0340", offset);
+        }
+        if (fn instanceof CurrentGroupCall) {
+            grumble("The current-group() function cannot be used in a pattern",
+                    "XTSE1060", offset);
+            return new ErrorExpression();
+        }
+        if (fn instanceof CurrentGroupingKeyCall) {
+            grumble("The current-grouping-key() function cannot be used in a pattern",
+                    "XTSE1070", offset);
+            return new ErrorExpression();
         }
         return fn;
     }
