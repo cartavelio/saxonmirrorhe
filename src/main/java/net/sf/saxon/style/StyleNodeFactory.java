@@ -275,7 +275,7 @@ public class StyleNodeFactory implements NodeFactory {
                     s = "";
                 }
                 NamespaceUri ns = namespaces.getURIForPrefix(s, false);
-                if (ns.equals(uri)) {
+                if (uri.equals(ns)) {
                     return true;
                 }
             }
