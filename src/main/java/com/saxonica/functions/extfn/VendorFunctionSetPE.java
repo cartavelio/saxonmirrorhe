@@ -622,7 +622,7 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
 
     public static class DiscardDocument extends SystemFunction {
         @Override
-        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+        public synchronized Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             NodeInfo doc = (NodeInfo)arguments[0].head();
             if (doc == null) {
                 return EmptySequence.getInstance();
