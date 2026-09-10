@@ -319,21 +319,24 @@ public final class ValueOf extends SimpleNodeConstructor {
             // Try to stream the value direct to the serializer where possible
             // Note: see bug 4944, which is why we don't use this path if the select
             //       expression might return an empty sequence.
+            Location instructionLoc = getLocation();
             Outputter toText = new ProxyOutputter(output) {
                 @Override
                 public void append(Item item) throws XPathException {
-                    getNextOutputter().characters(item.getUnicodeStringValue(), Loc.NONE, options);
+                    getNextOutputter().characters(item.getUnicodeStringValue(), instructionLoc, options);
                 }
 
                 @Override
-                public void append(Item item, Location locationId, int properties) throws XPathException {
-                    getNextOutputter().characters(item.getUnicodeStringValue(), locationId, properties | options);
+                public void append(Item item, Location loc, int properties) throws XPathException {
+                    Location location = loc.getLineNumber() == -1 ? instructionLoc : loc;
+                    getNextOutputter().characters(item.getUnicodeStringValue(), location, properties | options);
                 }
 
                 @Override
                 @CSharpModifiers(code = {"public", "override"})
-                public UniStringConsumer getStringReceiver(boolean asTextNode) {
-                    return getNextOutputter().getStringReceiver(true);
+                public UniStringConsumer getStringReceiver(boolean asTextNode, Location loc) {
+                    Location location = loc.getLineNumber() == -1 ? instructionLoc : loc;
+                    return getNextOutputter().getStringReceiver(true, location);
                 }
 
             };

@@ -674,12 +674,12 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
      */
 
     @Override
-    public UniStringConsumer getStringReceiver(boolean asTextNode) {
+    public UniStringConsumer getStringReceiver(boolean asTextNode, Location loc) {
         if (level >= 0) {
-            return new UnicodeStringReceiver(this, previousAtomic, asTextNode,
+            return new UnicodeStringReceiver(this, previousAtomic, asTextNode, loc,
                                              prev -> {previousAtomic = prev;});
         } else {
-            return super.getStringReceiver(asTextNode);
+            return super.getStringReceiver(asTextNode, loc);
         }
     }
 
@@ -689,29 +689,32 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
         private final ComplexContentOutputter cco;
         private final boolean previousAtomic;
         private final boolean asTextNode;
+        private final Location location;
         private final Consumer<Boolean> resetPreviousAtomic;
 
         public UnicodeStringReceiver(ComplexContentOutputter cco,
                                      boolean previousAtomic,
                                      boolean asTextNode,
+                                     Location loc,
                                      Consumer<Boolean> resetPreviousAtomic
         ) {
             this.cco = cco;
             this.previousAtomic = previousAtomic;
             this.asTextNode = asTextNode;
+            this.location = loc;
             this.resetPreviousAtomic = resetPreviousAtomic;
         }
 
         @Override
         public void open () throws XPathException {
             if (previousAtomic && !asTextNode) {
-                cco.characters(StringConstants.SINGLE_SPACE, Loc.NONE, ReceiverOption.NONE);
+                cco.characters(StringConstants.SINGLE_SPACE, location, ReceiverOption.NONE);
             }
         }
 
         @Override
         public UniStringConsumer accept (UnicodeString chars) throws XPathException {
-            cco.characters(chars, Loc.NONE, ReceiverOption.NONE);
+            cco.characters(chars, location, ReceiverOption.NONE);
             return this;
         }
 
