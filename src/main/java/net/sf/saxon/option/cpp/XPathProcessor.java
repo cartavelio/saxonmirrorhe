@@ -367,6 +367,7 @@ public class XPathProcessor extends SaxonCAPI {
      * @param params   - Parameters and properties names required by the XPath expression. This could contain the context node , source as string or file name, etc
      * @param values   -  The values for the parameters and properties required by the XPath expression
      **/
+    @CEntryPoint(name = "j_effectiveBooleanValue")
     public static byte effectiveBooleanValue(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer c_cwd, CCharPointer c_xpathStr, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
         Map<QName, XdmValue> parameters = new HashMap<>();
