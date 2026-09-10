@@ -36,7 +36,7 @@ task eecs_featureKeys(
 
 task eecs_setupPreprocess(
   type: Copy,
-  dependsOn: ["eecs_featureKeys"],
+  dependsOn: ["eecs_featureKeys", "hej_featureKeys"],
   description: "Copy EE sources for preprocessing EE"
 ) {
   inputs.files fileTree(dir: "${projectDir}/src/main/java")
