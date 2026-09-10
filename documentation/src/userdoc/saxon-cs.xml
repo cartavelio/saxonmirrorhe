@@ -388,7 +388,7 @@ need to mix use of the .NET API with the internal classes converted from the ori
    </section>
    <section id="localization" title="Localization" class="csonly">
       <h1>Localization</h1>
-      <p>Collation URIs for the Unicode Collation Algorithm are implemented using the ICU4N library, which is not as complete
+      <p>In SaxonCS-EE, collation URIs for the Unicode Collation Algorithm are implemented using the ICU4N library, which is not as complete
       as its Java counterpart, ICU4J.</p>
       
       <!--<p>One known restriction is that the value <code>alternate=blanked</code> is not recognized.</p>
@@ -464,13 +464,13 @@ need to mix use of the .NET API with the internal classes converted from the ori
       <p>Absolute URIs with single-character scheme names (for example, <code>a:/x/y/z</code>) are not handled correctly. 
          (This is a limitation of the .NET <code>System.Uri</code> class - it treats such names as DOS filenames).</p>
       
-      <h2>Restrictions relative to Saxon-EE 11 on Java</h2>
+      <h2>Restrictions relative to Saxon-EE 13 on Java</h2>
       
       <p>The <code>xsl:result-document</code> instruction is executed synchronously.</p>
       
       <h2>Restrictions and changes relative to Saxon-EE 10 on .NET</h2>
       
-      <p>The only supported parser is the Microsoft System.Xml parser. (Saxon 10 on .NET also worked with
+      <p>The only supported parser is the Microsoft <code>System.Xml</code> parser. (Saxon 10 on .NET also worked with
          a port of Apache Xerces.) See <a href="../xmlparsing" class="bodylink">XML parsing in SaxonCS</a>.</p>
       
       

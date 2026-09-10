@@ -64,7 +64,7 @@
         providing plug-ins for some common European languages.</li>
       <li class="javaonly">In SaxonJ-PE and -EE, spellout numbering is available via the ICU4J library, which
         supports a large variety of languages. This does not require any special configuration.</li>
-      <li class="csonly">In SaxonCS, spellout numbering is available via the ICU4N library.</li>
+      <li class="csonly">In SaxonCS-EE, spellout numbering is available via the ICU4N library.</li>
     </ul>
 
     <p>As well as spellout numbering, the choice of language also affects ordinal numbering, for example 10 is
