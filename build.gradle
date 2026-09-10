@@ -1354,6 +1354,7 @@ tasks.withType(Test) {
 
 task eejTests(
   type: Test,
+  group: 'Verification',
   dependsOn: ["eej_compile_junit_tests"]
 ) {
   classpath = (files("${buildDir}/classes/java/test")
