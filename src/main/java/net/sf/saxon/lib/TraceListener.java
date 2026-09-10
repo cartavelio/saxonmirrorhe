@@ -35,8 +35,10 @@ public interface TraceListener {
     default void setOutputDestination(Logger stream) {}
 
     /**
-     * Method called at the start of execution, that is, when the run-time transformation starts.
-     * The default implementation does nothing.
+     * Method called at the start of a run-time transformation. If a transformer
+     * is invoked multiple times, the method is called at the start of each transformation.
+     * This applies whether the call uses apply-templates, call-template, or invoke-function
+     * invocation. The default implementation does nothing.
      *
      * @param controller identifies the transformation controller, and provides the listener with
      *                   access to context and configuration information
@@ -45,7 +47,7 @@ public interface TraceListener {
     default void open(Controller controller) {};
 
     /**
-     * Method called at the end of execution, that is, when the run-time execution ends. The default
+     * Method called at the end of each transformation, whether it succeeds or fails. The default
      * implementation does nothing.
      */
 
@@ -103,7 +105,9 @@ public interface TraceListener {
      * Method that is called when an instruction has finished processing a new current item
      * and is ready to select a new current item or revert to the previous current item.
      * The method will be called before the leave() method for the instruction that made this
-     * item current. The default implementation does nothing.
+     * item current. Calls on endCurrentItem() should be properly paired with calls
+     * on startCurrentItem(), but this is not guaranteed in the event of dynamic errors.
+     * The default implementation does nothing.
      *
      * @param currentItem the item that was current, whose processing is now complete. This will represent
      *                    the same underlying item as the corresponding startCurrentItem() call, though it will
@@ -134,13 +138,16 @@ public interface TraceListener {
     default void recover(Object checkpoint, XPathException err) {}
 
     /**
-     * Method called when a search for a template rule is about to start
+     * Method called when a search for a template rule is about to start. The default implementation
+     * does nothing.
      */
+
 
     default void startRuleSearch() {}
 
     /**
-     * Method called when a rule search has completed.
+     * Method called when a rule search has completed. The default implementation
+     * does nothing.
      *
      * @param rule the rule (or possible built-in ruleset) that has been selected
      * @param mode the mode in operation

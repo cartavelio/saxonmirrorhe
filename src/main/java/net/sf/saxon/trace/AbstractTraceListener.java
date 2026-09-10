@@ -62,15 +62,15 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
 
     @Override
     public void open(Controller controller) {
-        if (indent == 0) {
-            out.info("<trace " +
-                             "saxon-version=\"" + Version.getProductVersion() + "\" " +
-                             getOpeningAttributes() + '>');
-            indent++;
-        }
+        out.info("<trace " +
+                         "saxon-version=\"" + Version.getProductVersion() + "\" " +
+                         getOpeningAttributes() + '>');
+        indent++;
     }
 
-    protected abstract String getOpeningAttributes();
+    protected String getOpeningAttributes() {
+        return "";
+    }
 
     /**
      * Called at end
@@ -205,7 +205,17 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
         return level(info) <= detail;
     }
 
-    protected abstract String tag(Traceable info);
+    /**
+     * Get the trace element tagname to be used for a particular construct. Return null for
+     * trace events that are ignored by this trace listener.
+     *
+     * @param info trace information
+     */
+
+    protected String tag(Traceable info) {
+        return "expr";
+    }
+
 
     protected int level(Traceable info) {
         if (info instanceof TraceableComponent || info instanceof ApplyTemplates || info instanceof CallTemplate) {

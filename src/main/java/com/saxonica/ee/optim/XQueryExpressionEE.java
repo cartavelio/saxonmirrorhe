@@ -247,6 +247,7 @@ public class XQueryExpressionEE extends XQueryExpression {
 
         Configuration config = executable.getConfiguration();
         Controller controller = newController(dynamicEnv);
+        controller.openTraceEpisode();
         XPathContextMajor context = initialContext(dynamicEnv, controller);
         try {
             PendingUpdateList pul = config.newPendingUpdateList(getPackageData().getImportedSchema());
@@ -261,9 +262,7 @@ public class XQueryExpressionEE extends XQueryExpression {
             }
             throw e;
         } finally {
-            if (controller.getTraceListener() != null) {
-                controller.getTraceListener().close();
-            }
+            controller.closeTraceEpisode();
         }
     }
 
@@ -292,6 +291,7 @@ public class XQueryExpressionEE extends XQueryExpression {
 
         Configuration config = executable.getConfiguration();
         Controller controller = newController(dynamicEnv);
+        controller.openTraceEpisode();
         XPathContextMajor context = initialContext(dynamicEnv, controller);
         try {
             PendingUpdateList pul = config.newPendingUpdateList(getPackageData().getImportedSchema());
@@ -307,9 +307,7 @@ public class XQueryExpressionEE extends XQueryExpression {
             }
             throw e;
         } finally {
-            if (controller.getTraceListener() != null) {
-                controller.getTraceListener().close();
-            }
+            controller.closeTraceEpisode();
         }
     }
 
@@ -331,6 +329,7 @@ public class XQueryExpressionEE extends XQueryExpression {
 
 
         Controller controller = newController(dynamicEnv);
+        controller.openTraceEpisode();
         XPathContextMajor context = controller.newXPathContext();
         PipelineConfiguration pipe = controller.makePipelineConfiguration();
         pipe.setHostLanguage(HostLanguage.XQUERY);
@@ -371,9 +370,7 @@ public class XQueryExpressionEE extends XQueryExpression {
             controller.reportFatalError(err);
             throw err;
         } finally {
-            if (controller.getTraceListener() != null) {
-                controller.getTraceListener().close();
-            }
+            controller.closeTraceEpisode();
         }
 
         receiver.close();

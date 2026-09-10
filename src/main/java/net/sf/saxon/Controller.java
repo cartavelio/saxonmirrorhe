@@ -1068,6 +1068,19 @@ public class Controller implements ContextOriginator {
         traceListener = TraceEventMulticaster.remove(traceListener, trace);
     }
 
+
+    public void openTraceEpisode() {
+        if (traceListener != null) {
+            traceListener.open(this);
+        }
+    }
+
+    public void closeTraceEpisode() {
+        if (traceListener != null) {
+            traceListener.close();
+        }
+    }
+
     /**
      * Set the destination for output from the fn:trace() function.
      * By default, the destination is System.err. If a TraceListener is in use,
@@ -1129,7 +1142,6 @@ public class Controller implements ContextOriginator {
         globalContextItem = executable.checkInitialContextItem(globalContextItem, newXPathContext());
 
         if (traceListener != null) {
-            traceListener.open(this);
             preEvaluateGlobals(newXPathContext());
         }
     }

@@ -602,9 +602,6 @@ public class XsltController extends Controller {
             handleXPathException(err);
         } finally {
             inUse = false;
-            if (traceListener != null) {
-                traceListener.close();
-            }
             principalResultURI = null;
         }
     }
@@ -781,9 +778,6 @@ public class XsltController extends Controller {
         } catch (XPathException err) {
             handleXPathException(err);
         } finally {
-            if (traceListener != null) {
-                traceListener.close();
-            }
             inUse = false;
         }
     }
