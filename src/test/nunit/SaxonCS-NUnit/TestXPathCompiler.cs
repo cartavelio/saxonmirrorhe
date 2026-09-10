@@ -687,5 +687,33 @@ namespace SaxonCS_NUnit {
                 Assert.AreEqual("XPST0017", e.ErrorCode.LocalName);
             }
         }
+        
+        [Test]
+        public void TestUnprefixedElementPolicy() {
+            try {
+                Processor p = new Processor();
+                DocumentBuilder db = p.NewDocumentBuilder();
+                XdmNode doc =
+                    db.Build(new StringReader(
+                        "<doc><p>one</p><p xmlns='n2'>two</p><n3:p xmlns:n3='n3'>three</n3:p></doc>"));
+                XPathCompiler c = p.NewXPathCompiler();
+                c.XPathLanguageVersion = ("3.1");
+                XdmItem result = c.EvaluateSingle("string-join(//p)", doc);
+                Assert.AreEqual("one", result.GetStringValue());
+                c.UnprefixedElementMatchingPolicy = UnprefixedElementMatchingPolicy.AnyNamespace;
+                result = c.EvaluateSingle("string-join(//p)", doc);
+                Assert.AreEqual("onetwothree", result.GetStringValue());
+                c.UnprefixedElementMatchingPolicy = UnprefixedElementMatchingPolicy.DefaultNamespace;
+                c.DeclareNamespace("", "n2");
+                result = c.EvaluateSingle("string-join(//p)", doc);
+                Assert.AreEqual("two", result.GetStringValue());
+                c.UnprefixedElementMatchingPolicy = UnprefixedElementMatchingPolicy.DefaultNamespaceOrNone;
+                result = c.EvaluateSingle("string-join(//p)", doc);
+                Assert.AreEqual("onetwo", result.GetStringValue());
+            }
+            catch (Exception e) {
+                Assert.Fail();
+            }
+        }
     }
 }
