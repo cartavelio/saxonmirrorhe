@@ -206,8 +206,9 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
                     () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:accumulator-rule/select", 0);
             newValueExp = config.getTypeChecker(false).staticTypeCheck(newValueExp, accumulator.getType(), role, visitor);
             newValueExp = newValueExp.optimize(visitor, getConfiguration().makeContextItemStaticInfo(pattern.getItemType(), false));
-            slotManager.allocateSlotNumber(NamespaceUri.NULL.qName("value"), null);
-            ExpressionTool.allocateSlots(newValueExp, 1, slotManager);
+            // Note, rather unnecessarily, all rules for an accumulator allocate slots on the same stackframe
+            int nextFree = slotManager.allocateSlotNumber(NamespaceUri.NULL.qName("value"), null);
+            ExpressionTool.allocateSlots(newValueExp, nextFree, slotManager);
             boolean isPreDescent = !rule.isPostDescent();
             SimpleMode mode = isPreDescent ? accumulator.getPreDescentRules() : accumulator.getPostDescentRules();
             AccumulatorRule action = new AccumulatorRule(newValueExp, slotManager, rule.isPostDescent());
