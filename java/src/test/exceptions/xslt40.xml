@@ -31,6 +31,16 @@
   </exception>
   
   <!-- Exceptions applying to all language versions -->
+  
+  <exception test-set="document" test-case="document-4044
+                                            document-4045
+                                            document-4051
+                                            document-4066
+                                            document-4067" 
+             run="false" report="Not implemented">
+    <created by="Michael Kay" on="2026-06-15"/>
+    <reason>PR2419 only partially implemented: some spec issues remain</reason>
+  </exception>
 
    
    <exception test-case="si-group-064" run="false" report="Not implemented">

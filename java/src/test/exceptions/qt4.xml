@@ -182,13 +182,7 @@
       <created by="Michael Kay" on="2026-01-07"/>
       <reason>Canonical XHTML serialization not yet implemented</reason>
    </exception>
-   
-   <exception test-set="fn-serialize" 
-      test-case="serialize-json-340 serialize-json-341 serialize-json-342" 
-      run="false" report="n/a">
-      <created by="Michael Kay" on="2026-01-20"/>
-      <reason>PR2372 not yet implemented (JSON representation of INF and NaN)</reason>
-   </exception>
+
    
    <exception test-set="fn-unparsed-text" 
       test-case="fn-unparsed-text-054a" 
@@ -237,25 +231,18 @@
       <reason>Functionality not yet implemented: recursive record types</reason>
    </exception>
    
-   <exception test-set="method-html" 
-      test-case="Serialization-html-59a" 
-      run="false" report="n/a">
-      <created by="Michael Kay" on="2026-01-06"/>
-      <reason>Functionality not yet implemented: PR2372 - processing instructions in HTML5</reason>
-   </exception>
-   
    <exception test-set="fn-element-to-map" 
       test-case="element-to-map-017" 
       run="false" report="n/a">
       <created by="Michael Kay" on="2026-02-06"/>
-      <reason>Test results anticipate a spec change not yet agreed or implemented: issue 2445</reason>
+      <reason>Test results anticipate a spec change not yet implemented: issue 2445, PR 2449</reason>
    </exception>
    
    <exception test-set="fn-element-to-map" 
-      test-case="element-to-map-023" 
+      test-case="element-to-map-024 element-to-map-025" 
       run="false" report="n/a">
-      <created by="Michael Kay" on="2026-02-06"/>
-      <reason>Test result challenged - see spec issue #1948</reason>
+      <created by="Michael Kay" on="2026-06-15"/>
+      <reason>Awaiting decision/implementation for PR2688</reason>
    </exception>
    
    <exception test-set="EXPath-file" 
