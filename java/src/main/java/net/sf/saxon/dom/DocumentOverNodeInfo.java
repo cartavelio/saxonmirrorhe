@@ -366,11 +366,11 @@ public class DocumentOverNodeInfo extends NodeOverNodeInfo implements Document {
      * <a href='http://www.w3.org/TR/2004/REC-xml-20040204#NT-XMLDecl'>XML declaration</a>,
      * whether this document is standalone. This is <code>false</code> when
      * unspecified.
-     * <p ><b>Note:</b>  No verification is done on the value when setting
+     * <p><b>Note:</b>  No verification is done on the value when setting
      * this attribute. Applications should use
      * <code>Document.normalizeDocument()</code> with the "validate"
      * parameter to verify if the value matches the <a href='http://www.w3.org/TR/2004/REC-xml-20040204#sec-rmd'>validity
-     * constraint for standalone document declaration</a> as defined in [<a href='http://www.w3.org/TR/2004/REC-xml-20040204'>XML 1.0</a>].
+     * constraint for standalone document declaration</a> as defined in [<a href='http://www.w3.org/TR/2004/REC-xml-20040204'>XML 1.0</a>].</p>
      *
      * @since DOM Level 3
      */
@@ -382,11 +382,11 @@ public class DocumentOverNodeInfo extends NodeOverNodeInfo implements Document {
     /**
      * An attribute specifying, as part of the <a href='http://www.w3.org/TR/2004/REC-xml-20040204#NT-XMLDecl'>XML declaration</a>, whether this document is standalone. This is <code>false</code> when
      * unspecified.
-     * <p ><b>Note:</b>  No verification is done on the value when setting
+     * <p><b>Note:</b>  No verification is done on the value when setting
      * this attribute. Applications should use
      * <code>Document.normalizeDocument()</code> with the "validate"
      * parameter to verify if the value matches the <a href='http://www.w3.org/TR/2004/REC-xml-20040204#sec-rmd'>validity
-     * constraint for standalone document declaration</a> as defined in [<a href='http://www.w3.org/TR/2004/REC-xml-20040204'>XML 1.0</a>].
+     * constraint for standalone document declaration</a> as defined in [<a href='http://www.w3.org/TR/2004/REC-xml-20040204'>XML 1.0</a>].</p>
      *
      * @throws org.w3c.dom.DOMException NOT_SUPPORTED_ERR: Raised if this document does not support the
      *                                  "XML" feature.
@@ -624,15 +624,15 @@ public class DocumentOverNodeInfo extends NodeOverNodeInfo implements Document {
      * this method updates the replacement tree of
      * <code>EntityReference</code> nodes and normalizes <code>Text</code>
      * nodes, as defined in the method <code>Node.normalize()</code>.
-     * <br> Otherwise, the actual result depends on the features being set on
+     * <p> Otherwise, the actual result depends on the features being set on
      * the <code>Document.domConfig</code> object and governing what
      * operations actually take place. Noticeably this method could also
      * make the document namespace well-formed according to the algorithm
      * described in , check the character normalization, remove the
      * <code>CDATASection</code> nodes, etc. See
-     * <code>DOMConfiguration</code> for details.
-     * <pre>// Keep in the document
-     * the information defined // in the XML Information Set (Java example)
+     * <code>DOMConfiguration</code> for details.</p>
+     * <pre>// Keep in the document the information defined
+     * // in the XML Information Set (Java example)
      * DOMConfiguration docConfig = myDocument.getDomConfig();
      * docConfig.setParameter("infoset", Boolean.TRUE);
      * myDocument.normalizeDocument();</pre>
