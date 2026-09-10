@@ -152,7 +152,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
 
             SpecificFunctionType mapBuildKeyArg = new SpecificFunctionType(
                     new SequenceType[]{SequenceType.SINGLE_ITEM},
-                    SequenceType.OPTIONAL_ATOMIC);
+                    SequenceType.ATOMIC_SEQUENCE);
 
             SpecificFunctionType mapBuildValueArg = new SpecificFunctionType(
                     new SequenceType[]{SequenceType.SINGLE_ITEM},
@@ -614,8 +614,9 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             FunctionItem combineFunction = (FunctionItem) arguments[3].head();
             SequenceIterator iter = arguments[0].iterate();
             for (Item item; (item = iter.next()) != null; ) {
-                AtomicValue key = (AtomicValue)dynamicCall(keyFunction, context, item).head();
-                if (key != null) {
+                SequenceIterator keys = dynamicCall(keyFunction, context, item).iterate();
+                AtomicValue key;
+                while ((key = (AtomicValue)keys.next()) != null) {
                     GroundedValue value = dynamicCall(valueFunction, context, item).materialize();
                     GroundedValue existing = map.get(key);
                     if (existing != null) {
