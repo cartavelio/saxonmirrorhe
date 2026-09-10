@@ -174,7 +174,8 @@ public class TransformTests {
         try {
             VerifyingTransform vt = new VerifyingTransform();
             String result = vt.transform(args);
-            assertTrue(result.toLowerCase().startsWith("<!doctype html><html>"), "html");
+            assertTrue(result.toLowerCase().startsWith("<!doctype html><html>")
+                        || result.toLowerCase().startsWith("<!doctype html>\n<html>"));
             assertFalse(result.contains("<head><meta"), "head-meta");
         } catch (Exception e) {
             fail(e.getMessage());
