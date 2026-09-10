@@ -8,6 +8,20 @@
              empty context can be achieved by wrapping the expression as the
              body of a function -->
     </environment>
+
+    <test-set name="fn-local-name"                      file="fn/local-name.xml"/>
+    <test-set name="fn-local-name-from-QName"           file="fn/local-name-from-QName.xml"/>
+
+    <test-set name="fn-name"                            file="fn/name.xml"/>
+    <test-set name="fn-namespace-uri"                   file="fn/namespace-uri.xml"/>
+    <test-set name="fn-namespace-uri-for-prefix"        file="fn/namespace-uri-for-prefix.xml"/>
+    <test-set name="fn-namespace-uri-from-QName"        file="fn/namespace-uri-from-QName.xml"/>
+    <test-set name="fn-nilled"                          file="fn/nilled.xml"/>
+    <test-set name="fn-node-name"                       file="fn/node-name.xml"/>
+    <test-set name="fn-normalize-space"                 file="fn/normalize-space.xml"/>
+    <test-set name="fn-normalize-unicode"               file="fn/normalize-unicode.xml"/>
+    <test-set name="fn-not"                             file="fn/not.xml"/>
+    <test-set name="fn-number"                          file="fn/number.xml"/>
    
    <!-- LANGUAGE CONSTRUCTS -->
    
@@ -22,6 +36,22 @@
    <test-set name="prod-AxisStep.static-typing"         file="prod/AxisStep.static-typing.xml"/>
    <test-set name="prod-AxisStep.unabbr"                file="prod/AxisStep.unabbr.xml"/>
    <test-set name="prod-BaseURIDecl"                    file="prod/BaseURIDecl.xml"/>
+
+   <test-set name="prod-Comment"                        file="prod/Comment.xml"/>
+   <test-set name="prod-CompAttrConstructor"            file="prod/CompAttrConstructor.xml"/>
+   <test-set name="prod-CompDocConstructor"             file="prod/CompDocConstructor.xml"/>  
+   <test-set name="prod-CompCommentConstructor"         file="prod/CompCommentConstructor.xml"/>
+   <test-set name="prod-CompElemConstructor"            file="prod/CompElemConstructor.xml"/>
+   <test-set name="prod-CompNamespaceConstructor"       file="prod/CompNamespaceConstructor.xml"/>
+   <test-set name="prod-CompPIConstructor"              file="prod/CompPIConstructor.xml"/>
+   <test-set name="prod-CompTextConstructor"            file="prod/CompTextConstructor.xml"/>
+   <test-set name="prod-ConstructionDecl"               file="prod/ConstructionDecl.xml"/>
+   <test-set name="prod-ConstructionDecl.schema"        file="prod/ConstructionDecl.schema.xml"/>
+   <test-set name="prod-ContextItemDecl"                file="prod/ContextItemDecl.xml"/>
+   <test-set name="prod-ContextItemExpr"                file="prod/ContextItemExpr.xml"/>
+   <test-set name="prod-CopyNamespacesDecl"             file="prod/CopyNamespacesDecl.xml"/>
+   <test-set name="prod-CountClause"                    file="prod/CountClause.xml"/>
+   <test-set name="prod-CurlyArrayConstructor"          file="prod/CurlyArrayConstructor.xml"/>
    
    <!-- SERIALIZATION -->
    
