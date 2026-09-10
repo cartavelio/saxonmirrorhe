@@ -627,7 +627,7 @@ namespace Saxon.Api {
             }
         }
         /// <summary>
-        /// Construct an XdmItemType object by parsing an item type definition in XPath syntax
+        /// Construct an <c>XdmItemType</c> object by parsing an item type definition in XPath syntax
         /// </summary>
         /// <param name="input">The input string, in XPath syntax (for example <c>array(xs:integer)</c>). The only
         /// namespace prefix recognized is "xs", representing the XML Schema namespace.</param>
@@ -637,8 +637,9 @@ namespace Saxon.Api {
             try {
                 XPathParser parser = new ();
                 IndependentContext env = new IndependentContext(Implementation);
+                env.setXPathLanguageLevel(40);
                 env.declareNamespace("xs", NamespaceConstant.SCHEMA);
-                parser.setLanguage(XPathParser.ParsedLanguage.SEQUENCE_TYPE, 31);
+                parser.setLanguage(XPathParser.ParsedLanguage.SEQUENCE_TYPE, 40);
                 SequenceType st = parser.parseSequenceType(input, env);
                 if (st.getCardinality() != StaticProperty.EXACTLY_ONE) {
                     throw new XPathException("Item type must not have an occurrence indicator", "XPST0003");
