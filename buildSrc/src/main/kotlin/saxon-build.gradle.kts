@@ -62,6 +62,11 @@ tasks.register(LifecycleTasks.DEBUG_TASK_NAME) {
   description = "Build debug-enabled release artifacts"
 }
 
+tasks.withType<AbstractArchiveTask>().configureEach {
+  isPreserveFileTimestamps = true
+  isReproducibleFileOrder = true
+}
+
 tasks.register(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME) {
   group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
   description = "Run acceptance tests, like the W3C/QTCG test suites"
