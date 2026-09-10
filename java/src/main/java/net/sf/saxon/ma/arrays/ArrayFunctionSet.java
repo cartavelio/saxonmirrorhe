@@ -202,10 +202,6 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         //#if EE==true || PE==true
         if (version >= 40) {
 
-            ItemType fallbackType = new SpecificFunctionType(
-                    SequenceType.SINGLE_INTEGER,
-                    SequenceType.ANY_SEQUENCE);
-
             register("get", 3, e -> e.populate(ArrayGet::new, AnyItemType.getInstance(), STAR, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                     .arg(1, BuiltInAtomicType.INTEGER, ONE | ABS, null)

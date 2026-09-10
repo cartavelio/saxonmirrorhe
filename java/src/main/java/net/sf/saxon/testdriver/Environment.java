@@ -251,9 +251,11 @@ public class Environment implements ResourceResolver {
 
         // load the requested schema documents
 
-        XsdCompiler xsdCompiler = environment.processor.newXsdCompiler();
-        environment.xsdSchema = loadSchemaDocuments(driver, xpc, env, environment, xsdCompiler);
-
+        if (xpc.isSchemaAware()) {
+            XsdCompiler xsdCompiler = environment.processor.newXsdCompiler();
+            environment.xsdSchema = loadSchemaDocuments(driver, xpc, env, environment, xsdCompiler);
+        }
+        
         // load the requested source documents
 
         loadSourceDocuments(driver, xpc, env, environment, builder, environment.xsdSchema);

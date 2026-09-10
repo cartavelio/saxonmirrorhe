@@ -7,7 +7,6 @@
 
 package net.sf.saxon.ma.arrays;
 
-import com.saxonica.functions.qt4.UnparcelFn;
 import net.sf.saxon.expr.Atomizer;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.CallableDelegate;
@@ -70,7 +69,7 @@ public class ArraySort extends ArrayFunctionSet.ArrayGeneratingFunction {
 
         List<GroundedValue> members = new ArrayList<>(expectedSize());
         for (Item parcel : sortedParcels.asIterable()) {
-            members.add(UnparcelFn.unparcel(parcel, context));
+            members.add(((Parcel)parcel).getValue());
         }
         return makeArray(members);
 
