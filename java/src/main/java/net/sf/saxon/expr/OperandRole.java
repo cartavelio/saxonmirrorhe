@@ -229,6 +229,10 @@ public class OperandRole {
         return new OperandRole(newProp, usage, requiredType);
     }
 
+    public OperandRole withUsage(OperandUsage usage) {
+        return new OperandRole(properties, usage, requiredType);
+    }
+
     public int getProperties() {
         return properties;
     }
