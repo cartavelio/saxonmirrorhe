@@ -896,14 +896,10 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 		<section id="kindtests" title="KindTests and NodeTests" class="qt4">
 			<h1>KindTests and NodeTests</h1>
 			<aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled. Available since Saxon 10.</aside>
-			<p>The syntax for the <code>element()</code> and <code>attribute()</code><code>KindTests</code> is extended to allow constructs of the form</p>
-			<pre>
-            <code class="language-xquery">element(*:div)</code>
-         </pre>
+			<p>The syntax for the <code>element()</code> and <code>attribute()</code> <code>KindTests</code> is extended to allow constructs of the form</p>
+			<pre><code class="language-xquery">element(*:div)</code></pre>
 			<p>or </p>
-			<pre>
-            <code class="language-xquery">attribute(myns:*, myns:someType)</code>
-         </pre>
+			<pre><code class="language-xquery">attribute(myns:*, myns:someType)</code></pre>
 			<p>More specifically, the grammar for <code>ElementNameOrWildCard</code> changes from <code>ElementName | "*"</code> to simply <code>NameTest</code>; and similarly <code>AttribNameOrWildCard</code> also expands simply to <code>NameTest</code>. This change is made largely for orthogonality reasons (there is no reason to have different rules for the two constructs) and also because it provides some useful extra functionality: for example in XSLT it is now possible to match all elements in a particular namespace having a particular type with a template rule that specifies <code>match="element(my:*, my:type)"</code>.</p>
 			<p>The default priority for an XSLT pattern in the form <code>element(X)</code> is always the same as the default priority for <code>X</code>, so for example the default priority of <code>element(my:*)</code> is -0.25. If a type is present, then we follow the principle that the default priority of <code>element(my:*, T)</code> is midway between the priorities of <code>element(*, T)</code> and <code>element(E, T)</code>: that is, 0.125.</p>
 			<p>From Saxon 12, NodeTests used in steps are extended to allow, for example, <code>ancestor::(section|appendix)</code>. This will select all ancestors named <code>section</code> or <code>appendix</code>. The meaning is similar to <code>ancestor::section|ancestor::appendix</code>, except when a numeric predicate is used: because <code>ancestor</code> is a reverse axis, <code>ancestor::(section|appendix)[1]</code> selects the innermost ancestor that satisfies the node test. As well as simple names, the options used within the parentheses can include kind tests (such as <code>comment()</code> and <code>text()</code>) and wild cards (such as <code>*:code</code> and <code>ns:*</code>). There must be an explicit axis, but <code>@</code> can be used as an abbreviation for <code>attribute::</code>. For example, <code>@(name, id)</code> selects the <code>name</code> and <code>id</code> axes.</p>
