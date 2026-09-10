@@ -173,13 +173,13 @@ provide any other feedback.</p>
                   the command line using a set command like:</p>
                   <kbd>set PATH="%PATH%;C:\Program Files\Saxonica\Saxon[EDITION][VERSION]\libs\win"</kbd>
       </li>
-      <li>
-        <!-- <p><b>Set the SAXONC_HOME environment variable</b></p>
+      <!--<li>
+         <p><b>Set the SAXONC_HOME environment variable</b></p>
         <p>If the SaxonC files were installed to a location other than the default
         <code>C:\Program Files\Saxonica\Saxon[EDITION][VERSION]</code>, then the
-        SAXONC_HOME variable must be set to the correct location.</p> -->
+        SAXONC_HOME variable must be set to the correct location.</p> 
 
-      </li>
+      </li>-->
     </ol>
 
     <p>SaxonC is now installed, and ready to run. Please see <a href="../../running">Running
@@ -207,8 +207,8 @@ provide any other feedback.</p>
       <h3>Location of the Saxon license file</h3>
 
       <p>SaxonC looks in the path relative to where the main library has been installed. For
-         example, in <code>/usr/lib</code> if this is where <code>libsaxon[EDITION]c.so</code> has
-          been installed.</p> <!-- Alternatively, Saxon also looks for the license according to the
+        example, in <code>/usr/lib</code> if this is where <code>libsaxon-[EDITION]c-[VERSION].so</code> has
+          been installed for Linux.</p> <!-- Alternatively, Saxon also looks for the license according to the
          environment variable <code>SAXONC_HOME</code>, if this has been set.</p>
       <p>The license file can also be placed in the same directory as the stylesheet, but we advise
          against this for PHP servers where the license might be compromised.</p>-->
