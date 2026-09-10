@@ -1143,9 +1143,12 @@ def compareManifests(File jarfile, File jargold) {
   ZipInputStream zs = new ZipInputStream(new BufferedInputStream(new FileInputStream(jarfile)))
   println("COMPARE: $jarfile")
   println("       : $jargold")
+
+  boolean signature = false;
   ZipEntry entry
   while ((entry = zs.getNextEntry()) != null) {
-    if (!entry.getName().contains('$') && !entry.getName().contains('META-INF/TE-')) {
+    signature = signature || entry.getName().contains('META-INF/TE-')
+    if (!entry.getName().contains('$')) {
       jarmanifest.add(entry.getName())
     }
   }
@@ -1167,10 +1170,13 @@ def compareManifests(File jarfile, File jargold) {
 
   boolean missing = false;
   goldmanifest.each { fn ->
-    if (!jarmanifest.contains(fn)) {
+    if (!jarmanifest.contains(fn) && !fn.contains('META-INF/TE-')) {
       println("Missing file: ${fn}")
       missing = true;
     }
+  }
+  if (jarsigner.makeSignedJars && !signature) {
+    println("WARNING: did not find expected jar signature!")
   }
 
   if (releaseBuild && missing) {
