@@ -152,7 +152,6 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
             } else {
                 checkUnknownAttribute(attName);
             }
-            // TODO: add saxon:as
         }
 
         if (accumulator.getType() == null) {

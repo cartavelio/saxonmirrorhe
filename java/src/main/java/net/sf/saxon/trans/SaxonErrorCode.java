@@ -683,6 +683,12 @@ public class SaxonErrorCode {
     public static final String SXWN9053 = "SXWN9053";
 
     /**
+     * SXWN9054: saxon:capture is deprecated in Saxon 13
+     */
+
+    public static final String SXWN9054 = "SXWN9054";
+
+    /**
      * SXSD1000: unknown attribute group
      */
     public static final String SXSD1000 = "SXSD1000";

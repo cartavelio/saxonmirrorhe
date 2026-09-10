@@ -13,6 +13,7 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Whitespace;
 
@@ -70,6 +71,8 @@ public class XSLAccumulatorRule extends StyleElement {
             } else if (attName.hasURI(NamespaceUri.SAXON)) {
                 if (isExtensionAttributeAllowed(attName.getDisplayName())) {
                     if (attName.getLocalPart().equals("capture")) {
+                        compileWarning("The `saxon:capture` attribute is superseded by the standard XSLT 4.0 attribute `capture`",
+                                       SaxonErrorCode.SXWN9054);
                         capture = processBooleanAttribute("saxon:capture", value);
                     }
                 }
