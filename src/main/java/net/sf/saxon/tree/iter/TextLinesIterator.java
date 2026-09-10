@@ -9,6 +9,7 @@ package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.UnparsedTextFunction;
+import net.sf.saxon.java.CleanerProxy;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
@@ -21,7 +22,6 @@ import net.sf.saxon.z.IntPredicateProxy;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.Reader;
-import java.lang.ref.Cleaner;
 import java.net.URI;
 
 /**
@@ -37,7 +37,7 @@ public abstract class TextLinesIterator implements SequenceIterator {
     protected Location location;
     protected URI uri;
     //#if CSHARP==false
-    private Cleaner.Cleanable cleanable;
+    private CleanerProxy.CleanableProxy cleanable;
     //#endif
     protected TextLinesIterator() {
     }
@@ -116,8 +116,7 @@ public abstract class TextLinesIterator implements SequenceIterator {
 
     protected void arrangeCleanup(Reader reader, XPathContext context) {
         //#if CSHARP==false
-        Cleaner cleaner = context.getConfiguration().getCleaner();
-        cleanable = cleaner.register(this, () -> {
+        cleanable = context.getConfiguration().registerCleanupAction(this, () -> {
             try {
                 reader.close();
             } catch (Exception err) {

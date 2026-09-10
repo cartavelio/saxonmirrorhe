@@ -6,13 +6,13 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.expr.XPathContextMinor;
 import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.java.CleanerProxy;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.tree.iter.ManualIterator;
 
-import java.lang.ref.Cleaner;
 import java.util.concurrent.*;
 import java.util.function.Supplier;
 
@@ -37,8 +37,7 @@ public final class MultithreadedContextMappingIterator implements SequenceIterat
     private final ExecutorService service;
     private final BlockingQueue<Future<GroundedValue>> resultQueue = new LinkedBlockingQueue<>();
     private SequenceIterator dischargedIterator;
-    private Cleaner cleaner;
-    private Cleaner.Cleanable cleanable;
+    private CleanerProxy.CleanableProxy cleanable;
 
     /**
      * Construct an Iterator that will apply a specified action expression to
@@ -82,8 +81,7 @@ public final class MultithreadedContextMappingIterator implements SequenceIterat
         }
 
         // This code modelled on https://howtodoinjava.com/java/basics/java-cleaners/
-        cleaner = config.getCleaner();
-        cleanable = cleaner.register(this, getCleaningAction(service));
+        cleanable = config.registerCleanupAction(this, getCleaningAction(service));
     }
 
     @Override

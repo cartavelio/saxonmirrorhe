@@ -20,6 +20,7 @@ import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.expr.sort.HTML5CaseBlindCollator;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.registry.*;
+import net.sf.saxon.java.CleanerProxy;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.map.MapFunctionSet;
@@ -68,7 +69,6 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.*;
 import java.io.*;
-import java.lang.ref.Cleaner;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -208,7 +208,7 @@ public class Configuration implements SourceResolver, NotationSet {
 
     private final TreeStatistics treeStatistics = new TreeStatistics();
     //#if CSHARP==false
-    private Cleaner cleaner = null;    // created on demand
+    private CleanerProxy cleaner = null;    // created on demand
     //#endif
     /**
      * Constant indicating the XML Version 1.0
@@ -5536,11 +5536,15 @@ public class Configuration implements SourceResolver, NotationSet {
 
 
     //#if CSHARP==false
-    public Cleaner getCleaner() {
+    private CleanerProxy getCleaner() {
         if (cleaner == null) {
-            cleaner = Cleaner.create();
+            cleaner = new CleanerProxy();
         }
         return cleaner;
+    }
+
+    public CleanerProxy.CleanableProxy registerCleanupAction(Object obj, Runnable action) {
+        return getCleaner().registerCleanupAction(obj, action);
     }
     //#endif
 

@@ -9,6 +9,7 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.java.CleanerProxy;
 import net.sf.saxon.lib.CollectionFinder;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.Resource;
@@ -27,7 +28,6 @@ import net.sf.saxon.value.ObjectValue;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.lang.ref.Cleaner;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
@@ -148,15 +148,14 @@ public class CollectionFn extends SystemFunction implements Callable {
 
         private final Iterator<? extends Resource> sources;
         //#if CSHARP==false
-        private Cleaner.Cleanable cleanable;
+        private CleanerProxy.CleanableProxy cleanable;
         //#endif
 
         public CollectionIterator(Iterator<? extends Resource> sources, XPathContext context) {
             this.sources = sources;
             //#if CSHARP==false
             if (sources instanceof Closeable) {
-                Cleaner cleaner = context.getConfiguration().getCleaner();
-                cleanable = cleaner.register(this, getCleaningAction((Closeable)sources));
+                cleanable = context.getConfiguration().registerCleanupAction(this, getCleaningAction((Closeable)sources));
             }
             //#endif
         }

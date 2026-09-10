@@ -9,6 +9,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.instruct.TailCall;
+import net.sf.saxon.java.CleanerProxy;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.QuitParsingException;
@@ -17,7 +18,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.StringValue;
 
 import java.io.Closeable;
-import java.lang.ref.Cleaner;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -151,14 +151,13 @@ public class PushToPull {
         private final Thread provider;
         private final BlockingQueue<Outcome<Item>> queue;
         private boolean allDone = false;
-        private Cleaner.Cleanable cleanable;
+        private final CleanerProxy.CleanableProxy cleanable;
 
         public PushToPullIterator(Thread provider, BlockingQueue<Outcome<Item>> queue, XPathContext context) {
             this.provider = provider;
             this.queue = queue;
 
-            Cleaner cleaner = context.getConfiguration().getCleaner();
-            cleanable = cleaner.register(provider, getCleaningAction(provider));
+            cleanable = context.getConfiguration().registerCleanupAction(provider, getCleaningAction(provider));
         }
 
         @Override
