@@ -780,6 +780,7 @@ public:
    */
   void createHeapDump(bool live);
 
+  static XdmItem *makeXdmItemFromRef(int64_t valueRef);
 
   static XdmValue *makeXdmValueFromRef(int64_t valueRef);
 
@@ -819,10 +820,6 @@ private:
   createParameterJArray2(std::map<std::string, XdmValue *> parameters);
 
   static int64_t createJArray(XdmValue **values, int length);
-
-  static XdmValue *makeXdmValueFromRef(int64_t valueRef);
-
-  static XdmItem *makeXdmItemFromRef(int64_t valueRef);
 
   static const char *checkException();
 
