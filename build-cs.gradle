@@ -664,6 +664,7 @@ task hecs_generateCSharp(
   classpath = configurations.transpiler
   main = "ToXml"
   args "-cs:${buildDir}/cs",
+    "-repo:${projectDir}",
     "-xml:${buildDir}/he_xmlout",
     "-digest:${buildDir}/he_refined-digest.xml",
     "-debug"
@@ -683,6 +684,7 @@ task eecs_generateCSharp(
   classpath = configurations.transpiler
   main = "ToXml"
   args "-cs:${buildDir}/cs",
+    "-repo:${projectDir}",
     "-xml:${buildDir}/ee_xmlout",
     "-digest:${buildDir}/ee_refined-digest.xml",
     "-debug"
