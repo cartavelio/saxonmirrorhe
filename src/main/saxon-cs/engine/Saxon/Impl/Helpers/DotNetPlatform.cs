@@ -291,10 +291,13 @@ namespace Saxon.Impl.Helpers {
                 return new Saxon.Hej.regex.JavaRegularExpression(regex, flags);
             }
             else {
-                if (useDotNet)
+                if (useDotNet) {
+                    flags = flags.Substring(0, semi);
                     return new Saxon.Hej.regex.JavaRegularExpression(regex, flags);
-                else
+                }
+                else {
                     return new Saxon.Hej.regex.ARegularExpression(regex, flags, hostLanguage, warnings, config);
+                }
             }
         }
 
