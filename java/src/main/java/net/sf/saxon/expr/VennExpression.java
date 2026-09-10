@@ -270,27 +270,25 @@ public class VennExpression extends BinaryExpression {
         getLhs().typeCheck(visitor, contextInfo);
         getRhs().typeCheck(visitor, contextInfo);
 
-        Expression lhs2 = null;
-        if (!(getLhsExpression() instanceof Pattern)) {
+        Expression lhs2 = getLhsExpression();
+        if (!(lhs2 instanceof Pattern)) {
             Supplier<RoleDiagnostic> role0 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, operator.toString(), 0);
             lhs2 = tc.staticTypeCheck(getLhsExpression(), SequenceType.GNODE_SEQUENCE, role0, visitor);
         }
 
-        Expression rhs2 = null;
+        Expression rhs2 = getRhsExpression();
         if (!(getRhsExpression() instanceof Pattern)) {
             Supplier<RoleDiagnostic> role1 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, operator.toString(), 1);
             rhs2 = tc.staticTypeCheck(getRhsExpression(), SequenceType.GNODE_SEQUENCE, role1, visitor);
         }
 
-        if (lhs2 != null || rhs2 != null) {
-            if (Literal.isEmptySequence(lhs2)) {
-                return lhs2;
-            } else if (Literal.isEmptySequence(rhs2)) {
-                return operator == OperatorSymbol.INTERSECT ? rhs2 : lhs2;
-            } else {
-                return new VennExpression(lhs2, operator, rhs2);
-            }
-        }
+
+        if (Literal.isEmptySequence(lhs2)) {
+            return operator == OperatorSymbol.UNION ? sorted(rhs2) : lhs2;
+        } else if (Literal.isEmptySequence(rhs2)) {
+            return operator == OperatorSymbol.INTERSECT ? rhs2 : sorted(lhs2);
+        } 
+
 
         // For the intersect and except operators, if the types are disjoint then we can simplify
         if (operator != OperatorSymbol.UNION) {
@@ -311,6 +309,13 @@ public class VennExpression extends BinaryExpression {
         }
 
         return this;
+    }
+
+    private Expression sorted(Expression operand) {
+        if ((operand.getSpecialProperties() & StaticProperty.ORDERED_NODESET) != 0) {
+            return operand;
+        }
+        return new DocumentSorter(operand);
     }
 
 
