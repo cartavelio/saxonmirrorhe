@@ -130,7 +130,7 @@ public class Assign extends Instruction implements BindingReference {
             SequenceEvaluator select = expr.getSelectExpr().makeElaborator().eagerly();
             return (output, context) -> {
 
-                GroundedValue value = (GroundedValue)select.evaluate(context);
+                GroundedValue value = select.evaluate(context).materialize();
                 final Controller controller = context.getController();
                 assert controller != null;
                 controller.getBindery(expr.getPackageData()).setGlobalVariable(expr.binding, value);
