@@ -148,7 +148,7 @@
    </table>
 
 
-   <p>The Schema APIs are split into 3 main classes:</p>
+   <p>For schema validation, the SaxonC API provides three main classes:</p>
 
    <table>
       <thead>
@@ -166,9 +166,10 @@
                </p>
             </td>
             <td>
-               <p>A <code>XsdCompiler</code> acts as a factory for generating the XsdSchema.
+               <p>An <code>XsdCompiler</code> acts as a factory for generating
+                  <code>XsdSchema</code> objects.
                   The <code>XsdCompiler</code> is used to load schema documents, and to set options for the way in which they are loaded.
-                  The XsdCompiler is new in Saxon 13.</p>
+                  (New in Saxon 13.)</p>
             </td>
             <td>
                <p>
@@ -176,7 +177,7 @@
                           href="https://www.saxonica.com/saxon-c/doc13/html/classXsdCompiler.html"
                   >C++</a>
                   <br/>
-                  <a href="/api/saxon_c_php_api/saxon_c_php_xsdcompiller">PHP</a>
+                  <a href="/api/saxon_c_php_api/saxon_c_php_xsdcompiler">PHP</a>
                   <br/>
                   <a href="https://www.saxonica.com/saxon-c/doc13/python/xsdcompiler.html"
                   >Python</a>
@@ -190,8 +191,9 @@
                </p>
             </td>
             <td>
-               <p>An <code>XdSchema</code> represents This class represents an XSD Schema - that is,
-                  a set of schema components, typically resulting from compiling a collection of one or more source schema documents.</p>
+               <p>An <code>XsdSchema</code> represents an XSD schema - that is,
+                  a set of schema components, typically resulting from compiling a collection of one
+                  or more source schema documents. (New in Saxon 13.)</p>
             </td>
             <td>
                <p>
@@ -213,9 +215,9 @@
                </p>
             </td>
             <td>
-               <p>AA SchemaValidator is an object that is used for validating instance documents against a schema.
+               <p>A <code>SchemaValidator</code> is an object that is used for validating instance documents against a schema.
                   A schema (represented by class <code>XsdSchema</code>) is a collection of schema components,
-                  typically obtained by compiling a set of source schema documents using an XsdCompiler.</p>
+                  typically obtained by compiling a set of source schema documents using an <code>XsdCompiler</code>.</p>
             </td>
             <td>
                <p>
@@ -319,6 +321,16 @@
             <a class="bodylink code"
                href="https://www.saxonica.com/saxon-c/doc13/html/classXPathProcessor.html"
             >XPathProcessor</a>
+         </li>
+         <li>
+            <a class="bodylink code"
+               href="https://www.saxonica.com/saxon-c/doc13/html/classXsdCompiler.html"
+               >XsdCompiler</a>
+         </li>
+         <li>
+            <a class="bodylink code"
+               href="https://www.saxonica.com/saxon-c/doc13/html/classXsdSchema.html"
+               >XsdSchema</a>
          </li>
          <li>
             <a class="bodylink code"
@@ -673,12 +685,12 @@
                      environment. A SchemaValidator provides capabilities to load and cache
                      XML schema definitions. You can also validate source documents with
                      registered XML schema definitions.<br/>
-                     Deprecated since 13.0. Use newXsdCompiler()</div>
+                     Deprecated from 13.0. Use <code>newXsdCompiler()</code></div>
                </td>
             </tr>
             <tr>
                <td>
-                  <a class="bodylink code" href="../saxon_c_php_schemavalidator"
+                  <a class="bodylink code" href="../saxon_c_php_xsdcompiler"
                   >Saxon\XsdCompiler</a>
                </td>
                <td>
@@ -1057,6 +1069,17 @@
                <td>
                   <span class="signature">clearParameters()</span>
                   <div class="fcomment">Clear parameter values set.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">useSchema(<a class="bodylink code"
+                     href="../saxon_c_php_xsdschema">XsdSchema</a> $schema)</span>
+                  <div class="fcomment">Set the <code>XsdSchema</code> to be used with this <code>Xslt30Processor</code> for a schema-aware
+                     transformation (requires Saxon-EE).</div>
                </td>
             </tr>
 
@@ -1814,6 +1837,17 @@
                   <div class="fcomment">Clear property values set.</div>
                </td>
             </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">useSchema(<a class="bodylink code"
+                     href="../saxon_c_php_xsdschema">XsdSchema</a> $schema)</span>
+                  <div class="fcomment">Set the <code>XsdSchema</code> to be used with this <code>XQueryProcessor</code> for a schema-aware
+                     query (requires Saxon-EE).</div>
+               </td>
+            </tr>
 
 
          </table>
@@ -2080,6 +2114,17 @@
                   <div class="fcomment">Clear property values set.</div>
                </td>
             </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">useSchema(<a class="bodylink code"
+                     href="../saxon_c_php_xsdschema">XsdSchema</a> $schema)</span>
+                  <div class="fcomment">Set the <code>XsdSchema</code> to be used with this <code>XPathProcessor</code> for schema-aware
+                     XPath expression processing (requires Saxon-EE).</div>
+               </td>
+            </tr>
 
 
 
@@ -2090,25 +2135,26 @@
 
 
       <section id="saxon_c_php_xsdcompiler" title="Saxon\XsdCompiler">
-         <h1>Saxon\SchemaValidator</h1>
+         <h1>Saxon\XsdCompiler</h1>
 
          <p>The <code>XsdCompiler</code> is used to load schema documents, and to set options for the way in which they are loaded.</p>
 
-         <p>The <code>XsdCompiler</code> is new in Saxon 13; it replaces the one-shot methods registerSchemaFrom[Node|String|File] on the
+         <p>The <code>XsdCompiler</code> is new in Saxon 13; it replaces the one-shot methods <code>registerSchemaFrom[Node|String|File]</code> on the
             <code>SchemaValidator</code> which are retained (but deprecated) to provide a degree of backwards compatibility.</p>
 
          <p>A schema, represented by an <a class="bodylink code"
                                            href="../saxon_c_php_xsdschema">XsdSchema</a> object, is a collection of schema components, which may come from one
-            schema document or from a collection of schema documents. An <code>XsdCompiler</code> is used to create <a class="bodylink code"
-                                                                                                                       href="../saxon_c_php_xsdschema">XsdSchema</a> objects from source schema documents.</p>
+            schema document or from a collection of schema documents. An <code>XsdCompiler</code> is
+            used to create <code>XsdSchema</code> objects from source schema documents.</p>
 
-         <p>Schema processing requires SaxonC-EE. The abstract class XsdCompiler exists in Saxon-HE and Saxon-PE, but is never instantiated.</p>
+         <p>Schema processing requires SaxonC-EE. The abstract class <code>XsdCompiler</code> exists in Saxon-HE and Saxon-PE, but is never instantiated.</p>
 
-         <p>An XsdCompiler is created using the factory method newXsdCompiler. The normal pattern of usage is to set options, then call
-            compilefromFile(filename...) or
-            compileFromString(content) or compileFromNode(node) to compile one or more schema documents into a schema.
-            The schema can be used to validate instance documents using the method newValidator(), and it can be added to the static context
-            of XQuery queries and XSLT stylesheets using the methods useSchema(XsdSchema) and useSchema(String, XsdSchema).</p>
+         <p>An <code>XsdCompiler</code> is created using the factory method <code>newXsdCompiler</code>. The normal pattern of usage is to set options, then call
+            <code>compilefromFile(String)</code>,
+            <code>compileFromString(String)</code> or <code>compileFromNode(XdmNode)</code> to compile one or more schema documents into a schema.
+            The schema can be used to validate instance documents using the method <code>XsdSchema.newValidator()</code>, and it can be added to the static context
+            of XQuery queries and XSLT stylesheets using the methods
+            <code>XQueryProcessor.useSchema(XsdSchema)</code> and <code>Xslt30Processor.useSchema(XsdSchema)</code>.</p>
 
          <table>
             <thead>
@@ -2120,44 +2166,46 @@
 
             <tr>
                <td>
-                  <code><a class="bodylink code"
-                           href="../saxon_c_php_xsdschema">XsdSchema</a></code>
+                  <a class="bodylink code"
+                           href="../saxon_c_php_xsdschema">XsdSchema</a>
                </td>
                <td>
                   <span class="signature">compileFromString(string $schema)</span>
-                  <div class="fcomment">Compile schema document from a given string content.</div>
+                  <div class="fcomment">Compile a schema document supplied as a string.</div>
                </td>
             </tr>
             <tr>
                <td>
-                  <code><a class="bodylink code"
-                           href="../saxon_c_php_xsdschema">XsdSchema</a></code>
+                  <a class="bodylink code"
+                           href="../saxon_c_php_xsdschema">XsdSchema</a>
                </td>
                <td>
                   <span class="signature">compileFromFile(string $filename)</span>
-                  <div class="fcomment">Compile schema document from a given file name.</div>
+                  <div class="fcomment">Compile a schema document supplied
+                     as a file as specified by the $fileName argument.</div>
                </td>
             </tr>
             <tr>
                <td>
-                  <code><a class="bodylink code"
-                           href="../saxon_c_php_xsdschema">XsdSchema</a></code>
+                  <a class="bodylink code"
+                           href="../saxon_c_php_xsdschema">XsdSchema</a>
                </td>
                <td>
                   <span class="signature">compileFromNode(<a class="bodylink code"
                                                              href="../saxon_c_php_xdmnode">XdmNode</a> $node)</span>
-                  <div class="fcomment">Compile schema document from a given <a
-                          class="bodylink code" href="../saxon_c_php_xdmnode">XdmNode</a> object.</div>
+                  <div class="fcomment">Compile a schema document supplied as an <a
+                          class="bodylink code" href="../saxon_c_php_xdmnode">XdmNode</a>.</div>
                </td>
             </tr>
             <tr>
                <td>
-                  <code>XsdSchema</code>
+                  <a class="bodylink code"
+                     href="../saxon_c_php_xsdschema">XsdSchema</a>
                </td>
                <td>
                   <span class="signature">combine(array $schemas)</span>
-                  <div class="fcomment">Combine a set of schemas into one. schemas - the input schemas. These are not modified.
-                     Throw exception if the schemas are not compatible, for example if they contain duplicate names.</div>
+                  <div class="fcomment">Combine a set of schemas into one. The input schemas are not modified.
+                     Throws an exception if the schemas are not compatible, for example if they contain duplicate names.</div>
                </td>
             </tr>
             <tr>
@@ -2180,7 +2228,8 @@
             </tr>
             <tr>
                <td>
-                  <code>XsdSchema</code>
+                  <a class="bodylink code"
+                     href="../saxon_c_php_xsdschema">XsdSchema</a>
                </td>
                <td>
                   <span class="signature">emptySchema()</span>
@@ -2189,7 +2238,8 @@
             </tr>
             <tr>
                <td>
-                  <code>XsdSchema</code>
+                  <a class="bodylink code"
+                     href="../saxon_c_php_xsdschema">XsdSchema</a>
                </td>
                <td>
                   <span class="signature">importComponentsFromNode(XdmNode $node)</span>
@@ -2198,7 +2248,8 @@
             </tr>
             <tr>
                <td>
-                  <code>XsdSchema</code>
+                  <a class="bodylink code"
+                     href="../saxon_c_php_xsdschema">XsdSchema</a>
                </td>
                <td>
                   <span class="signature">importComponents(string $filename)</span>
@@ -2234,7 +2285,7 @@
                </td>
                <td>
                   <span class="signature">setProperty(string $name, string $value)</span>
-                  <div class="fcomment">Set properties for this SchemaValidator. For the full
+                  <div class="fcomment">Set properties for this <code>XsdCompiler</code>. For the full
                      list of properties see: <a href="/configuration/schema">Schema validator
                         configuration</a>.</div>
                </td>
@@ -2259,8 +2310,9 @@
       <section id="saxon_c_php_xsdschema" title="Saxon\XsdSchema">
          <h1>Saxon\XsdSchema</h1>
 
-         <p>A <code>SchemaValidator</code> represents a factory for validating instance documents
-            against a schema.</p>
+         <p>An <code>XsdSchema</code> represents an XSD schema - that is,
+            a set of schema components, typically resulting from compiling a collection of one
+            or more source schema documents. (New in Saxon 13.)</p>
 
          <table>
             <thead>
@@ -2279,30 +2331,32 @@
                   <span class="signature">newValidator()</span>
                   <div class="fcomment">Create a <a class="bodylink code"
                                                     href="../saxon_c_php_schemavalidator">SchemaValidator</a> which can be used to validate
-                     instance documents against this schema. Since 13.0</div>
+                     instance documents against this schema.</div>
                </td>
             </tr>
             <tr>
                <td>
-                  <code>XsdSchema</code>
+                  <a class="bodylink code"
+                     href="../saxon_c_php_xsdschema">XsdSchema</a>
                </td>
                <td>
-                  <span class="signature">combine(XsdSchema $schemas)</span>
-                  <div class="fcomment">Combine this schema with another, to form a new combined schema.</div>
-
-                  <div class="fcomment">Note: in relatively unusual circumstances, a document that is valid against one of the two
-                     input schemas might not be valid against the combined schema. For example, if the first schema has a wildcard
-                     with processContents="lax" then an element might be laxly validated when assessed using that schema,
-                     but strictly validated when assessed against the combined schema; and strict validation may fail while lax
-                     validation succeeded.</div>
+                  <span class="signature">combine(XsdSchema $other)</span>
+                  <div class="fcomment"><p>Combine this schema with another, to form a new combined schema.</p>
+                     <p>Note: in relatively unusual circumstances, a document that is valid against one of the two
+                        input schemas might not be valid against the combined schema. For example, if the first schema has a wildcard
+                        with <code>processContents="lax"</code> then an element might be laxly validated when assessed using that schema,
+                        but strictly validated when assessed against the combined schema; and strict validation may fail while lax
+                        validation succeeded.</p>
+                  </div>
                </td>
             </tr>
             <tr>
                <td>
-                  <code>XsdSchema</code>
+                  <a class="bodylink code"
+                     href="../saxon_c_php_xsdschema">XsdSchema</a>
                </td>
                <td>
-                  <span class="signature">exportComponents(XsdSchema $schemas)</span>
+                  <span class="signature">exportComponents(string $filename)</span>
                   <div class="fcomment">Export a precompiled Schema Component Model containing all the components
                      (except built-in components) in this schema.</div>
                </td>
@@ -2383,8 +2437,9 @@
                   <div class="fcomment">Register a schema document supplied as an <a
                           class="bodylink code" href="../saxon_c_php_xdmnode">XdmNode</a>, as
                      specified by the $node argument.<br/>
-                     Deprecated: from 13.0. This method is still available for backward compatibility, but users
-                     should now use the XsdCompiler available via SaxonProcessor.newXsdCompiler() to compile a XSD Schema.</div>
+                     Deprecated from 13.0. This method is still available for backward compatibility, but users
+                     should now use the <code>XsdCompiler</code> available via
+                     <code>SaxonProcessor.newXsdCompiler()</code> to compile schemas.</div>
                </td>
             </tr>
             <tr>
@@ -2397,8 +2452,9 @@
                      specified by the $fileName argument. The document may be either a schema
                      document in source XSD format, or a compiled schema in Saxon-defined SCM
                      format (as produced using the <code>exportSchema()</code> method).<br/>
-                     Deprecated: from 13.0. This method is still available for backward compatibility, but users
-                     should now use the XsdCompiler available via SaxonProcessor.newXsdCompiler() to compile a XSD Schema.</div>
+                     Deprecated from 13.0. This method is still available for backward compatibility, but users
+                     should now use the <code>XsdCompiler</code> available via
+                     <code>SaxonProcessor.newXsdCompiler()</code> to compile schemas.</div>
                </td>
             </tr>
             <tr>
@@ -2408,8 +2464,9 @@
                <td>
                   <span class="signature">registerSchemaFromString(string $schemaStr)</span>
                   <div class="fcomment">Register a schema supplied as a string.<br/>
-                     Deprecated: from 13.0. This method is still available for backward compatibility, but users
-                     should now use the XsdCompiler available via SaxonProcessor.newXsdCompiler() to compile a XSD Schema.</div>
+                     Deprecated from 13.0. This method is still available for backward compatibility, but users
+                     should now use the <code>XsdCompiler</code> available via
+                     <code>SaxonProcessor.newXsdCompiler()</code> to compile schemas.</div>
                </td>
             </tr>
             <tr>
@@ -3636,7 +3693,17 @@
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc13/python/schema_validator.html"
+               href="https://www.saxonica.com/saxon-c/doc13/python/xsd/compiler.html"
+               >PyXsdCompiler</a>
+         </li>
+         <li>
+            <a class="bodylink code"
+               href="https://www.saxonica.com/saxon-c/doc13/python/xsd/schema.html"
+               >PyXsdSchema</a>
+         </li>
+         <li>
+            <a class="bodylink code"
+               href="https://www.saxonica.com/saxon-c/doc13/python/xsd/schema_validator.html"
             >PySchemaValidator</a>
          </li>
          <li>
@@ -3707,12 +3774,12 @@
          <li>
             <a class="bodylink code"
                href="https://www.saxonica.com/saxon-c/doc13/html/SaxonCProcessor_8h.html"
-            >SaxonCProcessor.h</a> - consists of functions to compile and execute XSLT 3.0
-            stylesheets and XQuery 3.1 queries. </li>
+            >SaxonCProcessor.h</a> - consists of functions to compile and execute XSLT
+            stylesheets and XQuery queries. </li>
          <li>
             <a class="bodylink code"
                href="https://www.saxonica.com/saxon-c/doc13/html/SaxonCXPath_8h.html"
-            >SaxonCXPath.h</a> - consists of functions to compile and evaluate XPath 3.1
+            >SaxonCXPath.h</a> - consists of functions to compile and evaluate XPath
             expressions. </li>
       </ul>
 
