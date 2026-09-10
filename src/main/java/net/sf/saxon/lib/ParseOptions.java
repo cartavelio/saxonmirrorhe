@@ -19,6 +19,8 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.trans.Maker;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
+import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.ValidationParams;
 import org.xml.sax.EntityResolver;
@@ -46,6 +48,7 @@ import java.util.*;
 @SuppressWarnings("WeakerAccess")
 public class ParseOptions {
 
+    @CSharpSimpleEnum
     private enum Key {
         ADD_COMMENTS_AFTER_VALIDATION_ERRORS,
         APPLICABLE_ACCUMULATORS,
@@ -90,7 +93,7 @@ public class ParseOptions {
      */
 
     public ParseOptions() {
-        properties = ImmutableHashTrieMap.empty();
+        properties = init();
     }
 
     /**
@@ -101,6 +104,10 @@ public class ParseOptions {
         this.properties = properties;
     }
 
+    @CSharpReplaceBody(code = "return System.Collections.Immutable.ImmutableDictionary<Saxon.Hej.lib.ParseOptions.Key,System.Object>.Empty;")
+    private ImmutableMap<Key, Object> init() {
+        return ImmutableHashTrieMap.empty();
+    }
     /**
      * Look to see if the result of an update is already cached.
      * Return the result if so; otherwise return null
@@ -1188,9 +1195,9 @@ public class ParseOptions {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (TrieKVP<Key, Object> entry : properties) {
-            sb.append(entry.key);
+            sb.append(entry.getKey());
             sb.append('=');
-            sb.append(entry.value);
+            sb.append(entry.getValue());
             sb.append(' ');
         }
         return sb.toString();

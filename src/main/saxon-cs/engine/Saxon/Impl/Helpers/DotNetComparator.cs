@@ -84,6 +84,15 @@ namespace Saxon.Impl.Helpers {
         public bool comparesEqual(UnicodeString s1, UnicodeString s2) {
             return comparer.Compare(s1.ToString(), s2.ToString(), options) == 0;
         }
+        
+        /**
+         * Test if a string is empty (under this collation)
+         * @param s1 the string
+         * @return true if the string is empty
+         */
+        public bool isEqualToEmpty(UnicodeString s1) {
+            return comparesEqual(s1, EmptyUnicodeString.getInstance());
+        }
 
         /**
          * Test whether one string contains another, according to the rules
