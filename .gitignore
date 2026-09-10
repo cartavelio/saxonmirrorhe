@@ -9,7 +9,7 @@ python/.pyenv/
 .classpath
 .vs/
 java_*.hprof
-/*.xpr
+*.xpr
 
 # Ephemeral artefacts
 out/
@@ -25,6 +25,7 @@ sandpit/
 /extra/lib/
 csharp/ee/bin/Debug/
 csharp/ee/obj/
+
 
 
 # Created by running the unit tests :-(
