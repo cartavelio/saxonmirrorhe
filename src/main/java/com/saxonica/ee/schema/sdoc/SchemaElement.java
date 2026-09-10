@@ -81,7 +81,7 @@ public abstract class SchemaElement extends ElementImpl {
 
     protected boolean isTopLevel() {
         NodeInfo parent = getParent();
-        return (parent instanceof XSDSchemaElement || parent instanceof XSDRedefine || parent instanceof XSDOverride);
+        return (parent instanceof XSDSchema || parent instanceof XSDRedefine || parent instanceof XSDOverride);
     }
 
     /**
@@ -104,6 +104,22 @@ public abstract class SchemaElement extends ElementImpl {
     public SchemaNodeFactory getSchemaNodeFactory() {
         return factory;
     }
+
+    /**
+     * Set the line number
+     */
+
+//    public void setLineNumber(int line) {
+//        lineNumber = line;
+//    }
+
+    /**
+     * Get the line number
+     */
+
+//    public int getLineNumber() {
+//        return lineNumber;
+//    }
 
     /**
      * Process the attributes of this element and all its children
@@ -162,7 +178,6 @@ public abstract class SchemaElement extends ElementImpl {
 
     /**
      * Recursive walk through the schema to validate all nodes
-     * against the XML Representation constraints
      *
      * @param compiler used for error reporting
      */
@@ -239,11 +254,11 @@ public abstract class SchemaElement extends ElementImpl {
      * @throws SchemaException if none is found (which means the schema is invalid)
      */
 
-    public XSDSchemaElement getXSDSchemaElement() throws SchemaException {
+    public XSDSchema getXSDSchema() throws SchemaException {
         NodeInfo n = this;
         while (true) {
-            if (n instanceof XSDSchemaElement) {
-                return (XSDSchemaElement) n;
+            if (n instanceof XSDSchema) {
+                return (XSDSchema) n;
             }
             n = n.getParent();
             if (n == null) {
@@ -261,7 +276,7 @@ public abstract class SchemaElement extends ElementImpl {
      */
 
     public SingleNamespaceSchema getSchema() throws SchemaException {
-        return getXSDSchemaElement().getSchema();
+        return getXSDSchema().getSchema();
     }
 
     /**
@@ -369,7 +384,7 @@ public abstract class SchemaElement extends ElementImpl {
     protected void error(String err) throws SchemaException {
         ErrorReporter reporter = getSchemaNodeFactory().getPipelineConfiguration().getErrorReporter();
         try {
-            getXSDSchemaElement().incrementErrorCount();
+            getXSDSchema().incrementErrorCount();
         } catch (SchemaException e2) {
             throw new IllegalStateException("Schema document contains no xs:schema element. " +
                                                     "Problem occurred while reporting error: " + e2.getMessage());
@@ -394,7 +409,7 @@ public abstract class SchemaElement extends ElementImpl {
     protected void error(SchemaException exception) throws SchemaException {
         ErrorReporter reporter = getSchemaNodeFactory().getPipelineConfiguration().getErrorReporter();
         try {
-            getXSDSchemaElement().incrementErrorCount();
+            getXSDSchema().incrementErrorCount();
         } catch (SchemaException e2) {
             throw new IllegalStateException("Schema document contains no xs:schema element. " +
                     "Problem occurred while reporting error: " + exception.getMessage());
@@ -420,7 +435,7 @@ public abstract class SchemaElement extends ElementImpl {
 
     protected void warning(String err) throws SchemaException {
         XmlProcessingIncident exception = new XmlProcessingIncident(err, SaxonErrorCode.SXWN9018, this).asWarning();
-        ErrorReporter reporter = getSchemaNodeFactory().getSchemaCompiler().getErrorReporter();
+        ErrorReporter reporter = getSchemaNodeFactory().getPipelineConfiguration().getErrorReporter();
         reporter.report(exception);
         if (exception.getTerminationMessage() != null) {
             throw new SchemaException(exception.getTerminationMessage());
@@ -469,7 +484,7 @@ public abstract class SchemaElement extends ElementImpl {
     protected StructuredQName getComponentName(String name, int option)
         throws SchemaException {
         try {
-            XSDSchemaElement root = getXSDSchemaElement();
+            XSDSchema root = getXSDSchema();
             String[] parts = NameChecker.getQNameParts(Whitespace.trim(name));
             NamespaceUri uri = null;
             if (parts[0].isEmpty()) {
@@ -547,7 +562,7 @@ public abstract class SchemaElement extends ElementImpl {
     protected void illegalElement(NodeInfo child) throws SchemaException {
         if (child.getNodeKind() == Type.TEXT) {
             // Invalid character data has already been reported
-        } else if (child instanceof XSDSchemaElement) {
+        } else if (child instanceof XSDSchema) {
             // this one needs care; if there is a misplaced XSDSchema element the normal error reporting
             // would increment the error count on this wrong element, leading to the error being undetected later.
             // See test mgO026
@@ -588,12 +603,12 @@ public abstract class SchemaElement extends ElementImpl {
      *          thrown if the errorListener
      *          decides that it's a fatal error.
      */
-    
-    protected void duplicate(String category, StructuredQName name) throws SchemaException {
+
+    protected void duplicate(String category, String name) throws SchemaException {
         error("The schema already contains " +
-                      indefiniteArticle(category, "a") +
-                      ' ' + category +
-                      " named " + name.getEQName());
+                indefiniteArticle(category, "a") +
+                ' ' + category +
+                " named " + Err.wrap(name));
     }
 
 
@@ -1000,9 +1015,7 @@ public abstract class SchemaElement extends ElementImpl {
 
             StringBuilder msg = new StringBuilder(64);
             if (child.getNodeKind() == Type.ELEMENT) {
-                msg.append("Element ")
-                        .append(Err.wrap(child.getDisplayName(), Err.ELEMENT))
-                        .append(" cannot appear here: expected ");
+                msg.append("Element " + Err.wrap(child.getDisplayName(), Err.ELEMENT) + " cannot appear here: expected ");
                 if (terms.length == 0) {
                     msg.append("no more child elements");
                 } else if (terms.length == 1) {
@@ -1019,9 +1032,7 @@ public abstract class SchemaElement extends ElementImpl {
                     msg.append(" or nothing");
                 }
             } else {
-                msg.append("Text node '")
-                        .append(Err.wrap(child.getUnicodeStringValue()))
-                        .append("' cannot appear here");
+                msg.append("Text node '" + Err.wrap(child.getUnicodeStringValue()) + "' cannot appear here");
             }
 
             if (child instanceof SchemaElement) {
@@ -1069,7 +1080,6 @@ public abstract class SchemaElement extends ElementImpl {
                 //need to retrieve all the namespaces
                 String ns = tokenizer.nextToken();
                 //if there is more than one namespace ##any or ##other should not appear
-                //appear
                 if (count > 1 &&
                         (NAMESPACE_ANY.equals(ns) ||
                                 NAMESPACE_OTHER.equals(ns))) {
@@ -1077,12 +1087,12 @@ public abstract class SchemaElement extends ElementImpl {
                     return;
                 }
                 if (ns.equals(NAMESPACE_TARGET)) {
-                    wildcard.addAllowedNamespace(getXSDSchemaElement().getTargetNamespace());
+                    wildcard.addAllowedNamespace(getXSDSchema().getTargetNamespace());
                 } else if (ns.equals(NAMESPACE_LOCAL)) {
                     wildcard.addAllowedNamespace(NamespaceUri.NULL);
                 } else if (ns.equals(NAMESPACE_OTHER)) {
                     wildcard.addDisallowedNamespace(NamespaceUri.NULL);
-                    wildcard.addDisallowedNamespace(getXSDSchemaElement().getTargetNamespace());
+                    wildcard.addDisallowedNamespace(getXSDSchema().getTargetNamespace());
                 } else if (ns.equals(NAMESPACE_ANY)) {
                     // do nothing, this is the default
                 } else if (ns.contains("##")) {
@@ -1112,7 +1122,7 @@ public abstract class SchemaElement extends ElementImpl {
             //need to retrieve all the namespaces
             String ns = tokenizer.nextToken();
             if (ns.equals(XSDAny.NAMESPACE_TARGET)) {
-                wildcard.addDisallowedNamespace(getXSDSchemaElement().getTargetNamespace());
+                wildcard.addDisallowedNamespace(getXSDSchema().getTargetNamespace());
             } else if (ns.equals(XSDAny.NAMESPACE_LOCAL)) {
                 wildcard.addDisallowedNamespace(NamespaceUri.NULL);
             } else if (ns.contains("##")) {
@@ -1231,7 +1241,7 @@ public abstract class SchemaElement extends ElementImpl {
         @Override
         public Executable getExecutable() {
             try {
-                return schemaElement.getXSDSchemaElement().getExecutable();
+                return schemaElement.getXSDSchema().getExecutable();
             } catch (SchemaException e) {
                 return null;
             }
