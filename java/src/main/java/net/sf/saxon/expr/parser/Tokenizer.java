@@ -42,8 +42,8 @@ import java.util.function.Predicate;
 
 public final class Tokenizer {
 
-    public static final char FULL_WIDTH_LT = '＜'; // xFF1C
-    public static final char FULL_WIDTH_GT = '＞'; // xFF1E
+//    public static final char FULL_WIDTH_LT = '＜'; // xFF1C
+//    public static final char FULL_WIDTH_GT = '＞'; // xFF1E
 
     @CSharpModifiers(code={"public", "const"})    // The transpiler handles this for int but not for char??
     public final static char NUL = (char)0;
@@ -454,7 +454,7 @@ public final class Tokenizer {
                         nextToken = Token.FAT_ARROW;
                         return;
                     }
-                    if (isFollowedBy("!>") || isFollowedBy("!" + FULL_WIDTH_GT)) {
+                    if (isFollowedBy("!>") /*|| isFollowedBy("!" + FULL_WIDTH_GT) */) {
                         inputOffset+=2;
                         nextToken = Token.MAPPING_ARROW;  // Accepted in 4.0 only
                         return;
@@ -518,22 +518,22 @@ public final class Tokenizer {
                         throw new XPathException("Tilde '~' can appear only as part of the token '~['");
                     }
 
-                case FULL_WIDTH_GT:
-                    if (languageLevel < 40) {
-                        throw new XPathException("Operator character FULL_WIDTH_GREATER_THAN (xFF1E) requires XPath 4.0 to be enabled");
-                    }
-                    if (isFollowedBy('=')) {
-                        inputOffset++;
-                        nextToken = Token.GE;
-                        return;
-                    }
-                    if (isFollowedBy(FULL_WIDTH_GT)) {
-                        inputOffset++;
-                        nextToken = Token.FOLLOWS;
-                        return;
-                    }
-                    nextToken = Token.GT;
-                    return;
+//                case FULL_WIDTH_GT:
+//                    if (languageLevel < 40) {
+//                        throw new XPathException("Operator character FULL_WIDTH_GREATER_THAN (xFF1E) requires XPath 4.0 to be enabled");
+//                    }
+//                    if (isFollowedBy('=')) {
+//                        inputOffset++;
+//                        nextToken = Token.GE;
+//                        return;
+//                    }
+//                    if (isFollowedBy(FULL_WIDTH_GT)) {
+//                        inputOffset++;
+//                        nextToken = Token.FOLLOWS;
+//                        return;
+//                    }
+//                    nextToken = Token.GT;
+//                    return;
                 case '>':
                     if (isFollowedBy('=')) {
                         inputOffset++;
@@ -580,22 +580,22 @@ public final class Tokenizer {
                     }
                     nextToken = Token.LT;
                     return;
-                case FULL_WIDTH_LT:
-                    if (languageLevel < 40) {
-                        throw new XPathException("Operator character FULL_WIDTH_LESS_THAN (xFF1C) requires XPath 4.0 to be enabled");
-                    }
-                    if (isFollowedBy('=')) {
-                        inputOffset++;
-                        nextToken = Token.LE;
-                        return;
-                    }
-                    if (inputOffset < inputLength && input.charAt(inputOffset) == FULL_WIDTH_LT) {
-                        inputOffset++;
-                        nextToken = Token.PRECEDES;
-                        return;
-                    }
-                    nextToken = Token.LT;
-                    return;
+//                case FULL_WIDTH_LT:
+//                    if (languageLevel < 40) {
+//                        throw new XPathException("Operator character FULL_WIDTH_LESS_THAN (xFF1C) requires XPath 4.0 to be enabled");
+//                    }
+//                    if (isFollowedBy('=')) {
+//                        inputOffset++;
+//                        nextToken = Token.LE;
+//                        return;
+//                    }
+//                    if (inputOffset < inputLength && input.charAt(inputOffset) == FULL_WIDTH_LT) {
+//                        inputOffset++;
+//                        nextToken = Token.PRECEDES;
+//                        return;
+//                    }
+//                    nextToken = Token.LT;
+//                    return;
                 case '|':
                     if (isFollowedBy('|')) {
                         inputOffset++;
@@ -1003,7 +1003,7 @@ public final class Tokenizer {
     }
 
     private boolean isGreaterThanChar(char c) {
-        return c == '>' || (languageLevel >= 40 && c == FULL_WIDTH_GT);
+        return c == '>' /* || (languageLevel >= 40 && c == FULL_WIDTH_GT ) */;
     }
 
     /**
@@ -1149,7 +1149,7 @@ public final class Tokenizer {
     public void incrementLineNumber(int offset) {
         nextLineNumber++;
         if (newlineOffsets == null) {
-            newlineOffsets = new ArrayList<Integer>(20);
+            newlineOffsets = new ArrayList<>(20);
         }
         newlineOffsets.add(offset);
     }

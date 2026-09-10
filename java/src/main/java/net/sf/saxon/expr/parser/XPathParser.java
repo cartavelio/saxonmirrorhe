@@ -3333,7 +3333,7 @@ public class XPathParser {
             return parseDirectElementConstructor(false);
 
         } else {
-            grumble("Unexpected token " + currentTokenDisplay() + " after " + t.recentText(t.inputOffset));
+            grumble("Unexpected token " + currentTokenDisplay() + " before " + t.recentText(t.inputOffset));
             return null;
         }
 
