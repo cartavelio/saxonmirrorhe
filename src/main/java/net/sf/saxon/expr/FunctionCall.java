@@ -52,7 +52,7 @@ public abstract class FunctionCall extends Expression {
     @Override
     public Iterable<Operand> operands() {
         if (operanda != null) {
-            return operanda.operands();
+            return operanda;
         } else {
             // happens during expression tree construction
             return Collections.emptyList();

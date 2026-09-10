@@ -121,12 +121,12 @@ public class OperandArray implements Iterable<Operand> {
      */
 
     public Iterable<Operand> operands() {
-        return Arrays.asList(operandArray);
+        return this;
     }
 
     public Iterable<Expression> operandExpressions() {
         List<Expression> list = new ArrayList<Expression>(operandArray.length);
-        for (Operand o : operands()) {
+        for (Operand o : this) {
             list.add(o.getChildExpression());
         }
         return list;
