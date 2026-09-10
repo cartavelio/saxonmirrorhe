@@ -3,6 +3,7 @@ package com.saxonica.ee.bytecode.util;
 
 import com.saxonica.ee.bytecode.*;
 import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.ConsumingOperand;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.instruct.IterateInstr;
@@ -39,7 +40,6 @@ public class ExpressionCompilerMap {
         map.put("xsl:attribute", new ComputedAttributeCompiler());
         map.put("xsl:element", new ComputedElementCompiler());
         map.put("conditionalSort", new ConditionalSorterCompiler());
-        map.put("consume", new SuppliedParameterReferenceCompiler());
         map.put("convertUntyped", new AtomicSequenceConverterCompiler());
         map.put("dot", new ContextItemCompiler());
         map.put("xsl:copy", new CopyCompiler());
@@ -117,6 +117,9 @@ public class ExpressionCompilerMap {
     public static ExpressionCompiler getExpressionCompiler(Expression expr, ICompilerService compiler) throws CannotCompileException {
         if (expr instanceof ByteCodeCandidate) {
             expr = ((ByteCodeCandidate) expr).getBaseExpression();
+        }
+        if (expr instanceof ConsumingOperand) {
+            expr = ((ConsumingOperand)expr).getBaseExpression();
         }
         if (expr instanceof SystemFunctionCall) {
             SystemFunctionCall fc = (SystemFunctionCall) expr;
