@@ -310,11 +310,11 @@ public class TestPackage {
 
     @Test
     public void testExportToHEworking() {
-        // Export now working in 10.0 because HE does support higher-order-functions
+        // Export now working since 10.0 because HE does support higher-order-functions
         try {
             Processor processor = new Processor(true);
             XsltCompiler compiler = processor.newXsltCompiler();
-            compiler.setTargetEdition("JS");
+            compiler.setTargetEdition("HE");
             String xsl = "<xsl:package\n" +
                     "    name = \"package-002.xsl\"\n" +
                     "    package-version = \"2.1.0.5\"\n" +
@@ -345,7 +345,7 @@ public class TestPackage {
         try {
             Processor processor = new Processor(true);
             XsltCompiler compiler = processor.newXsltCompiler();
-            compiler.setTargetEdition("JS");
+            compiler.setTargetEdition("HE");
             String xsl = "<xsl:package\n" +
                     "    name = \"package-002.xsl\"\n" +
                     "    package-version = \"2.1.0.5\"\n" +
@@ -368,6 +368,34 @@ public class TestPackage {
             fail("Unexpected success");
         } catch (SaxonApiException e) {
             // OK
+        }
+    }
+
+    /**
+     * Basic test: compile a package, save it to filestore, load it as a library package that overrides it,
+     * then export for JS
+     */
+
+    @Test
+    public void testPackageExportToJS() {
+        try {
+            Processor proc = new Processor(true);
+            XsltCompiler xc = proc.newXsltCompiler();
+            XsltPackage pack = xc.compilePackage(new StreamSource(Testdata.file("packages/override-base-f-001.xsl")));
+            File file = Testdata.file("sandpit/test-package-002.pack");
+            pack.save(file);
+
+            Processor proc2 = new Processor(true);
+            XsltCompiler xc2 = proc2.newXsltCompiler();
+            XsltPackage xp = xc2.loadLibraryPackage(Testdata.file("sandpit/test-package-002.pack").toURI());
+            xc2.importPackage(xp);
+            xc2.setTargetEdition("JS");
+            XsltPackage pack2 = xc2.compilePackage(new StreamSource(Testdata.file("packages/override-f-001.xsl")));
+            File file2 = Testdata.file("sandpit/test-JSpackage-002.sef.json");
+            pack2.save(file2);
+            System.err.println("Package written to " + file2.getAbsolutePath());
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
         }
     }
 
