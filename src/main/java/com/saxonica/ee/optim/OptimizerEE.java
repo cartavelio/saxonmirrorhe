@@ -1670,8 +1670,8 @@ public class OptimizerEE extends Optimizer {
             return false;
         }
         if (((ComparisonExpression) condition).getAtomicComparer() instanceof UntypedNumericComparer) {
-            // Bug 4738
-            lhs = new UntypedSequenceConverter(lhs, BuiltInAtomicType.DOUBLE);
+            // Bug 4738, 5000
+            lhs = new UntypedSequenceConverter(lhs.copy(new RebindingMap()), BuiltInAtomicType.DOUBLE);
         }
         if (switchCaseInfo.commonlhs == null) {
             switchCaseInfo.commonlhs = lhs;
