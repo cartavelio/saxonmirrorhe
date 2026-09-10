@@ -882,6 +882,16 @@ task "eej_preprocess"(
   }
 }
 
+tasks.register("eej_preprocess_graal", Copy) {
+  from(layout.projectDirectory.dir("src/main/java")) {
+    include "net/sf/saxon/option/cpp/**"
+    include "com/saxonica/functions/extfn/cpp/*.java"
+  }
+
+  into layout.buildDirectory.dir("src/eej")
+}
+
+
 // ============================================================
 
 task record_branch(
@@ -933,6 +943,16 @@ task eejCompile(
   classpath = configurations.compileClasspath
   source eej_preprocess.outputs
   destinationDirectory = new File("${buildDir}/classes/eej")
+}
+
+task eejCompileIncludingGraal(
+        type: JavaCompile,
+        dependsOn: ["eej_preprocess", "eej_preprocess_graal"],
+        description: "Compile EE for Saxon/Java"
+) {
+  classpath = configurations.compileClasspath
+  source  layout.buildDirectory.dir("src/eej")
+  destinationDirectory = layout.buildDirectory.dir("classes/eej")
 }
 
 // ============================================================
@@ -1379,7 +1399,7 @@ eejJarSql.finalizedBy(testEejJarSql)
 
 task eej_compile_junit_tests(
   type: JavaCompile,
-  dependsOn: ["eejCompile"],
+  dependsOn: ["eejCompileIncludingGraal"],
   description: "Compile JUnit tests for Saxon-EE Java"
 ) {
   classpath = configurations.productTests + files("${buildDir}/classes/eej")
