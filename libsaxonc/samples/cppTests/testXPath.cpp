@@ -443,7 +443,7 @@ void testNodeAxis(SaxonProcessor *processor, XPathProcessor *xpath,
       cout << "child node:" << (childStr) << endl;
       operator delete((char *)childStr);
     }
-    XdmNode **namespaces = child->axisNodes(EnumXdmAxis::NAMESPACE);
+    XdmNode **namespaces = child->axisNodes(EnumXdmAxis::FOLLOWING_SIBLING);
     int namespaceCount = child->axisNodeCount();
 
     cout << "namespace count=" << namespaceCount << endl;

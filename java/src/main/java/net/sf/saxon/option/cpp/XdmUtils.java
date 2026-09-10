@@ -1604,10 +1604,6 @@ public class XdmUtils {
         XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
         XdmSequenceIterator iter = XdmSequenceIterator.ofNodes(node.getUnderlyingNode().iterateAxis(axisNum));
 
-        if(SaxonCAPI.debug) {
-            System.err.println("Java Debug: axisNum=" + axisNum );
-        }
-
         long[] childRefs = null;
         if(iter.hasNext()) {
             childRefs = iter.stream().mapToLong(i -> {
@@ -1615,10 +1611,16 @@ public class XdmUtils {
                 return objectHandle.rawValue();
             }).toArray();
         }else {
+            if(SaxonCAPI.debug) {
+                System.err.println("Java Debug: axisIterator is empty, axisNum=" + axisNum );
+            }
             return WordFactory.nullPointer();
         }
-        CLongPointer addr = SaxonCAPI.longArrayToNativeWithLength(alloc, childRefs);
-        return addr;
+
+        if(SaxonCAPI.debug) {
+            System.err.println("Java Debug: +axisNum=" + axisNum+", childRefs[0]= " + childRefs[0] + " childRef.length = " + childRefs.length );
+        }
+        return SaxonCAPI.longArrayToNativeWithLength(alloc, childRefs);
     }
 
 
