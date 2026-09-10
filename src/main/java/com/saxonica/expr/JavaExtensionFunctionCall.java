@@ -929,8 +929,8 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
     throws XPathException {
         Supplier<RoleDiagnostic> role =
                 () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, functionName.getDisplayName(), argPosition);
-        return CoercionRules.forVersion(31).coerce(
-                suppliedValue.materialize(), requiredType, context.getConfiguration(), role, Loc.NONE);
+        return CoercionRules.forVersion(context.getConfiguration(), 31).coerce(
+                suppliedValue.materialize(), requiredType, SequenceType.ANY_SEQUENCE, context.getConfiguration(), role, Loc.NONE);
     }
 
     /**
