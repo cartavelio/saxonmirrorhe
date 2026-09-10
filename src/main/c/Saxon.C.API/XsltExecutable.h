@@ -75,7 +75,7 @@ public:
     //! Create a clone object of this XsltExecutable object
     /**
      *
-     * @return
+     * @return XsltExecutable - new copy of this object
      */
     XsltExecutable *clone();
 
@@ -278,7 +278,7 @@ public:
      */
     void setSaveXslMessage(bool show, const char* filename=nullptr);
 
-    //! Enable the capture of the result-document ouput into a std:map
+    //! Enable the capture of the result-document output into an std:map
    /**
      * When the xsl:result-document is used and is evaluated this method enables handling of the documents as the destination
      * via a user defined std::map object where we have the pair document URI and XdmNode object.
@@ -439,9 +439,8 @@ public:
     //! Execute transformation to file. Properties supplied in advance.
     /**
      * Perform the transformation based upon cached stylesheet and source document.
-     * Assume the outputfile has been set in advance
-     * @param source - source document suppplied as an XdmNode object
-     * @return as an XdmValue.
+     * Assume the output file has been set in advance
+     * @param source - source document supplied as an XdmNode object
      *
 
      */

@@ -84,11 +84,9 @@ public:
      */
     XdmValue * get(XdmAtomicValue* key);
 
-    //! Returns the value to which the specified string-valued key is mapped,
-    //! or NULL if this map contains no mapping for the key. This is a convenience
-    //! method to save the trouble of converting the String to an <code>XdmAtomicValue</code>.
+    //! Returns the value to which the specified string-valued key is mapped, or NULL if this map contains no mapping for the key.
     /**
-     *
+     * This is a convenience method to save the trouble of converting the String to an <code>XdmAtomicValue</code>.
      * @param key the key whose associated value is to be returned. This is treated
      *            as an instance of <code>xs:string</code> (which will also match
      *            entries whose key is <code>xs:untypedAtomic</code> or <code>xs:anyURI</code>)
@@ -97,10 +95,9 @@ public:
      */
     XdmValue * get(const char * key);
 
-    //!  Returns the value to which the specified integer-valued key is mapped
-    //! or NULL if this map contains no mapping for the key. This is a convenience
-    //! method to save the trouble of converting the integer to an <code>XdmAtomicValue</code>.
+    //!  Returns the value to which the specified integer-valued key is mapped or NULL if this map contains no mapping for the key.
     /**
+     * This is a convenience method to save the trouble of converting the integer to an <code>XdmAtomicValue</code>.
      *
      * @param key the key whose associated value is to be returned. This is treated
      *            as an instance of <code>xs:integer</code> (which will also match

@@ -71,7 +71,7 @@ public:
 
     //! Get a system function
     /**
-     * Get a system function. This can be any function defined in XPath 3.1 functions and operators,
+     * This can be any function defined in XPath 3.1 functions and operators,
      * including functions in the math, map, and array namespaces. It can also be a Saxon extension
      * function, provided a licensed Processor is used.
      * @return the requested function, or null if there is no such function. Note that some functions
@@ -92,9 +92,11 @@ public:
     /**
      * Call the function
      *
-     * @param arguments the values to be supplied as arguments to the function. The "function
+     * @param processor - the SaxonProcessor object required in the call of the function
+     * @param arguments  - the values to be supplied as arguments to the function. The "function
      *                  conversion rules" will be applied to convert the arguments to the required
      *                  type when necessary.
+     * @param argument_length - the length of the array
      * @return the result of calling the function
      */
     XdmValue * call(SaxonProcessor * processor, XdmValue ** arguments, int argument_length);

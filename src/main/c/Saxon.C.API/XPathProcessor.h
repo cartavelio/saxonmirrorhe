@@ -160,8 +160,8 @@ public:
     /**
      * Here we add the element and attribute declarations and type definitions
      * contained in a given namespace to the static context for the XPath expression.
-     * <p>This method will not cause the schema to be loaded. That must be done separately, using the
-     * {@link SchemaManager}. This method will not fail if the schema has not been loaded (but in that case
+     * <p>This method will not cause the schema to be loaded.
+     * This method will not fail if the schema has not been loaded (but in that case
      * the set of declarations and definitions made available to the XPath expression is empty). The schema
      * document for the specified namespace may be loaded before or after this method is called.</p>
      * <p>This method does not bind a prefix to the namespace. That must be done separately, using the
