@@ -1148,18 +1148,8 @@ public class SaxonCAPI {
         String ccwd = null;
         String ffilename = filename;
 
-        if(debug && cwd != null) {
-            System.err.println("Setting xmlresolver property file = " + cwd + "/xmlresolver.properties");
-             Properties props = System.getProperties();
-             props.setProperty("xmlresolver.properties", cwd + "/xmlresolver.properties");
-
-             //System.setProperty("xml.catalog.logging","*:debug");
-            //System.setProperty("xml.catalog.defaultLoggerLogLevel","debug");
-
-         }
-
         //if(File.separatorChar != '/' && cwd != null) {
-            ccwd = new File(cwd).toURI().toString();
+        ccwd = new File(cwd).toURI().toString();
         /*} else {
 
             ccwd = cwd;
