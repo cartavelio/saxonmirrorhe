@@ -13,6 +13,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.ApplyTemplates;
 import net.sf.saxon.expr.instruct.CallTemplate;
+import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.functions.TransformFn;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.StandardDiagnostics;
@@ -24,6 +25,7 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Mode;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.AttributeLocation;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
@@ -88,7 +90,7 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
     public void enter(Traceable info, Map<String, Object> properties, XPathContext context) {
         if (isApplicable(info)) {
             stack.push(info);
-            Location loc = info.getLocation();
+            Location loc = getLocation(info);
             String file = abbreviateLocationURI(loc.getSystemId());
             String elementTag = tag(info);
 
@@ -124,6 +126,27 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
             out.info(msg.toString());
             indent++;
         }
+    }
+
+
+    /**
+     * Get the location information for the traceble expression or instruction.
+     * This method adjusts the location for XPath expressions contained in attributes
+     * of XSLT instructions, to give the location of the containing element, which
+     * supplies a simple line number and column number.
+     *
+     * @param info the traceable whose location is required
+     * @return a sanitised Location object
+     */
+    public static Location getLocation(Traceable info) {
+        Location rawLocation = info.getLocation();
+        if (rawLocation instanceof XPathParser.NestedLocation) {
+            Location container = ((XPathParser.NestedLocation) rawLocation).getContainingLocation();
+            if (container instanceof AttributeLocation) {
+                return container;
+            }
+        }
+        return rawLocation;
     }
 
     /**
