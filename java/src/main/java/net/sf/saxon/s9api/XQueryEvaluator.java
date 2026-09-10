@@ -156,24 +156,72 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
             if (gcr != null && !gcr.isExternal()) {
                 throw new SaxonApiException("The context item for the query is not defined as external");
             }
-            context.setContextItem(item.getUnderlyingValue());
+            context.setContextValue(item.getUnderlyingValue());
         }
     }
 
     /**
-     * Get the initial context item for the query, if one has been set
+     * Set the initial context value for the query. From 4.0, XQuery allows the initial context
+     * value to be a general sequence, not necessarily a single item.
+     *
+     * @param value the initial context value, or null if there is to be no initial context value
+     * @throws SaxonApiException if the query declares the context value and does not define
+     *                           it to be external
+     */
+
+    public void setContextValue(XdmValue value) throws SaxonApiException {
+        if (value != null) {
+            GlobalContextRequirement gcr = expression.getExecutable().getGlobalContextRequirement();
+            if (gcr != null && !gcr.isExternal()) {
+                throw new SaxonApiException("The context value for the query is not defined as external");
+            }
+            context.setContextValue(value.getUnderlyingValue());
+        }
+    }
+
+    /**
+     * Get the initial context item for the query, if one has been set.
+     *
+     * <p>From 4.0, XQuery allows setting of an initial context value (which need not be
+     * a single item).</p>
      *
      * @return the initial context item, or null if none has been set. This will not necessarily
      *         be the same object as was supplied, but it will be an XdmItem object that represents
      *         the same underlying node or atomic value.
+     * @since 13.0
      */
 
     public XdmItem getContextItem() {
-        Item item = context.getContextItem();
-        if (item == null) {
+        GroundedValue val = context.getContextValue();
+        if (val == null) {
             return null;
+        } else if (val.getLength() == 1) {
+            return (XdmItem) XdmValue.wrap(val.head());
+        } else {
+            throw new IllegalStateException("Context value is a sequence of length " + val.getLength());
         }
-        return (XdmItem) XdmValue.wrap(item);
+    }
+
+    /**
+     * Get the initial context item for the query, if one has been set.
+     *
+     * <p>From 4.0, XQuery allows setting of an initial context value (which need not be
+     * a single item). If the context value is a single item, this method will return it.
+     * If the context value is absent, this method returns null. If the context value
+     * is anything other than a singleton, this method throws an IllegalStateException.</p>
+     *
+     * @return the initial context item, or null if none has been set. This will not necessarily
+     * be the same object as was supplied, but it will be an XdmItem object that represents
+     * the same underlying node or atomic value.
+     */
+
+    public XdmValue getContextValue() {
+        GroundedValue val = context.getContextValue();
+        if (val == null) {
+            return null;
+        } else {
+            return XdmValue.wrap(val.head());
+        }
     }
 
     /**

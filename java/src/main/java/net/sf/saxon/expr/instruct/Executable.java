@@ -14,7 +14,7 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.Optionality;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.functions.FunctionLibraryList;
-import net.sf.saxon.om.Item;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
@@ -24,9 +24,9 @@ import net.sf.saxon.serialize.CharacterMapIndex;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.coercion.CoercionRules;
+import net.sf.saxon.value.SequenceExtent;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.*;
@@ -564,24 +564,24 @@ public class Executable {
     }
 
     /**
-     * Check that the supplied global context item meets all requirements, and perform any required
+     * Check that the supplied global context value meets all requirements, and perform any required
      * conversions or defaulting
-     * @param contextItem the supplied context item
+     * @param contextValue the supplied context value
      * @param context a context for evaluation (in which the context item will be absent)
      * @return a new/converted context item, or null if the global context item is to be absent
      * @throws XPathException if the supplied item does not meet requirements, for example if it is the
      * wrong type.
      */
 
-    public Item checkInitialContextItem(Item contextItem, XPathContext context) throws XPathException {
+    public GroundedValue checkInitialContextValue(GroundedValue contextValue, XPathContext context) throws XPathException {
         if (globalContextRequirement == null) {
-            return contextItem;
+            return contextValue;
         }
-        if (contextItem != null && globalContextRequirement.getContextValueOptionality() == Optionality.PROHIBITED) {
-            throw new XPathException("The global context item is required to be absent", "XPDY0002");
+        if (contextValue != null && globalContextRequirement.getContextValueOptionality() == Optionality.PROHIBITED) {
+            throw new XPathException("The global context value is required to be absent", "XPDY0002");
         }
         TypeHierarchy th = config.getTypeHierarchy();
-        if (contextItem == null) {
+        if (contextValue == null) {
             if (globalContextRequirement.getContextValueOptionality() == Optionality.REQUIRED) {
                 // Bug 30173 allocates an error code
                 throw new XPathException("A global context item is required, but none has been supplied", "XTDE3086");
@@ -589,7 +589,7 @@ public class Executable {
             if (globalContextRequirement.getDefaultValue() != null) {
                 // XQuery only
                 try {
-                    contextItem = globalContextRequirement.getDefaultValue().evaluateItem(context);
+                    contextValue = SequenceExtent.from(globalContextRequirement.getDefaultValue().iterate(context));
                 } catch (XPathException e) {
                     // XPDY0002 here means there is no context item, which means the default value
                     // of the context item depends on the context item: a circularity.
@@ -602,38 +602,32 @@ public class Executable {
                     }
                     throw e;
                 }
-                if (contextItem == null) {
-                    throw new XPathException("The context item cannot be initialized to an empty sequence", "XPTY0004");
-                }
-                // Issue 2040. For the time being, in 4.0, do coercion if there is only one required item type
-                if (topLevelPackage.getHostLanguageVersion() >= 40 &&
-                        globalContextRequirement.getRequiredItemTypes().size() == 1) {
-                    ItemType type = globalContextRequirement.getRequiredItemTypes().get(0);
-                    CoercionRules rules = CoercionRules.forVersion(config, topLevelPackage.getHostLanguageVersion());
-                    Sequence converted = rules.coerce(contextItem, SequenceType.one(type), SequenceType.ANY_SEQUENCE,
-                                                      config,
-                                                      () -> new RoleDiagnostic(RoleDiagnostic.MISC, "defaulted global context item", 0),
-                                                      Loc.NONE);
-                    contextItem = converted.head();
-                }
-                for (ItemType type : globalContextRequirement.getRequiredItemTypes()) {
-                    if (!type.matches(contextItem, th)) {
-                        RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.MISC, "defaulted global context item", 0);
-                        String s = role.composeErrorMessage(type, contextItem, th);
-                        throw new XPathException(s, "XPTY0004");
-                    }
-                }
             }
-        } else {
-            for (ItemType type : globalContextRequirement.getRequiredItemTypes()) {
-                if (!type.matches(contextItem, config.getTypeHierarchy())) {
-                    RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.MISC, "supplied global context item", 0);
-                    String s = role.composeErrorMessage(type, contextItem, th);
-                    throw new XPathException(s, getHostLanguage() == HostLanguage.XSLT ? "XTTE0590" : "XPTY0004");
+        }
+//                if (contextValue == null) {
+//                    throw new XPathException("The context item cannot be initialized to an empty sequence", "XPTY0004");
+//                }
+        // Issue 2040. For the time being, in 4.0, do coercion if there is only one required item type
+        if (contextValue != null) {
+            if (topLevelPackage.getHostLanguageVersion() >= 40 &&
+                    globalContextRequirement.getRequiredTypes().size() == 1) {
+                SequenceType type = globalContextRequirement.getRequiredTypes().get(0);
+                CoercionRules rules = CoercionRules.forVersion(config, topLevelPackage.getHostLanguageVersion());
+                Sequence converted = rules.coerce(contextValue, type, SequenceType.ANY_SEQUENCE,
+                                                  config,
+                                                  () -> new RoleDiagnostic(RoleDiagnostic.MISC, "defaulted global context item", 0),
+                                                  Loc.NONE);
+                contextValue = converted.materialize();
+            }
+            for (SequenceType type : globalContextRequirement.getRequiredTypes()) {
+                if (!type.matches(contextValue, th)) {
+                    RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.MISC, "defaulted global context item", 0);
+                    String s = role.composeErrorMessage(type.getPrimaryType(), contextValue.head(), th);
+                    throw new XPathException(s, "XPTY0004");
                 }
             }
         }
-        return contextItem;
+        return contextValue;
     }
 
     /**

@@ -24,10 +24,10 @@ import net.sf.saxon.value.SequenceType;
 
 public class ContextItemStaticInfo {
 
-    private final SequenceType sequenceType;
-    private final Optionality status;
-    private Expression contextSettingExpression;
-    private boolean parentless;
+    protected final SequenceType sequenceType;
+    protected final Optionality status;
+    protected Expression contextSettingExpression;
+    protected boolean parentless;
 
     public ContextItemStaticInfo(ItemType itemType) {
         this(itemType, Optionality.REQUIRED);
@@ -50,7 +50,7 @@ public class ContextItemStaticInfo {
         this.status = status;
     }
 
-    private ContextItemStaticInfo(SequenceType sequenceType, Optionality status,
+    protected ContextItemStaticInfo(SequenceType sequenceType, Optionality status,
                                   boolean parentless) {
         this(sequenceType, status);
         this.parentless = parentless;
@@ -61,7 +61,8 @@ public class ContextItemStaticInfo {
     }
 
     public ContextItemStaticInfo withContextSetter(Expression setter) {
-        return new ContextItemStaticInfo(sequenceType, status, parentless);
+        setContextSettingExpression(setter);
+        return this;
     }
 
     public void setContextSettingExpression(Expression setter) {

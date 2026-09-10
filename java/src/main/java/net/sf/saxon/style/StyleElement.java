@@ -1615,8 +1615,8 @@ public abstract class StyleElement extends ElementImpl {
             return exp;
         }
         try {
-            exp = exp.typeCheck(makeExpressionVisitor(), config.makeContextItemStaticInfo(Type.ITEM_TYPE)
-                    .withStatusUnknown());
+            exp = exp.typeCheck(makeExpressionVisitor(),
+                                config.makeContextItemStaticInfo(Type.ITEM_TYPE, Optionality.OPTIONAL));
             exp = ExpressionTool.resolveCallsToCurrentFunction(exp);
             return exp;
         } catch (XPathException err) {
@@ -1682,8 +1682,7 @@ public abstract class StyleElement extends ElementImpl {
         try {
             ExpressionVisitor visitor = makeExpressionVisitor();
             ItemType cit = Type.ITEM_TYPE;
-            ContextItemStaticInfo cisi = getConfiguration().makeContextItemStaticInfo(cit)
-                    .withStatusUnknown();
+            ContextItemStaticInfo cisi = getConfiguration().makeContextItemStaticInfo(cit, Optionality.OPTIONAL);
             pattern = pattern.typeCheck(visitor, cisi);
             boolean usesCurrent = false;
 

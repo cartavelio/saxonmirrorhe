@@ -112,7 +112,7 @@ public class XsltController extends Controller {
 
         setModel(config.getParseOptions().getModel());
 
-        globalContextItem = null;
+        globalContextValue = null;
         initialMode = null;
         clearPerTransformationData();
     }
@@ -667,7 +667,7 @@ public class XsltController extends Controller {
                     throw new XPathException("Cannot use a schema-validated source document unless the stylesheet is schema-aware");
                 }
 
-                if (isStylesheetStrippingTypeAnnotations() && node != globalContextItem) {
+                if (isStylesheetStrippingTypeAnnotations() && node != globalContextValue) {
                     TreeInfo docInfo = node.getTreeInfo();
                     if (docInfo.isTyped()) {
                         TypeStrippedDocument strippedDoc = new TypeStrippedDocument(docInfo);
@@ -677,7 +677,7 @@ public class XsltController extends Controller {
 
                 SpaceStrippingRule spaceStrippingRule = getSpaceStrippingRule();
                 if (isStylesheetContainingStripSpace() && isStripSourceTree() && !(node instanceof SpaceStrippedNode)
-                        && node != globalContextItem && node.getTreeInfo().getSpaceStrippingRule() != spaceStrippingRule) {
+                        && node != globalContextValue && node.getTreeInfo().getSpaceStrippingRule() != spaceStrippingRule) {
                     SpaceStrippedDocument strippedDoc = new SpaceStrippedDocument(node.getTreeInfo(), spaceStrippingRule);
                     // Edge case: the item might itself be a whitespace text node that is stripped
                     if (!SpaceStrippedNode.isPreservedNode(node, strippedDoc, node.getParent())) {
@@ -732,8 +732,8 @@ public class XsltController extends Controller {
             initialContext.createThreadManager();
             initialContext.setOrigin(this);
 
-            if (globalContextItem != null) {
-                initialContext.setCurrentIterator(new ManualIterator(globalContextItem));
+            if (globalContextValue != null) {
+                initialContext.setCurrentIterator(new ManualIterator(globalContextValue.head()));
             }
 
             // Process the source document by invoking the initial named template
@@ -924,7 +924,7 @@ public class XsltController extends Controller {
         initialContext.setOrigin(this);
         //initialContext.setReceiver(dest);
 
-        globalContextItem = null;
+        globalContextValue = null;
 
         // Process the source document by applying template rules to the initial context node
 

@@ -3442,7 +3442,7 @@ public class Configuration implements SourceResolver {
      *
      * @param itemType       the item type of the context item. If the context item is absent, set this to
      *                       {@link net.sf.saxon.type.ErrorType#getInstance()}.
-     * @param maybeUndefined set to true if it is possible (or certain) that the context item will be absent.
+     * @param status indicates whether the context item is required, optional, or prohibited.
      * @return the ContextItemStaticInfo
      */
 
@@ -3456,6 +3456,10 @@ public class Configuration implements SourceResolver {
 
     public ContextItemStaticInfo makeContextItemStaticInfo(SequenceType sequenceType) {
         return new ContextItemStaticInfo(sequenceType, Optionality.REQUIRED);
+    }
+
+    public ContextItemStaticInfo makeContextItemStaticInfo(SequenceType seqType, Optionality status) {
+        return new ContextItemStaticInfo(seqType, status);
     }
 
     /**

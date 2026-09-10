@@ -30,6 +30,7 @@ import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Schema;
+import net.sf.saxon.value.SequenceType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -459,6 +460,19 @@ public abstract class AbstractStaticContext implements StaticContext {
     @Override
     public ItemType getRequiredContextItemType() {
         return AnyItemType.getInstance();
+    }
+
+    /**
+     * Get the required type of the context value. If no type has been explicitly declared for the context
+     * value, the SequenceType item() is returned.
+     *
+     * @return the required type of the context value
+     * @since 13.0
+     */
+
+    @Override
+    public SequenceType getRequiredContextValueType() {
+        return SequenceType.one(getRequiredContextItemType());
     }
 
     /**

@@ -479,7 +479,7 @@ public class Gizmo {
 
     private SequenceIterator evaluateQuery(XQueryExpression expr, Item contextItem) throws XPathException {
         DynamicQueryContext context = new DynamicQueryContext(config);
-        context.setContextItem(contextItem);
+        context.setContextValue(contextItem);
         return expr.iterator(context);
     }
 

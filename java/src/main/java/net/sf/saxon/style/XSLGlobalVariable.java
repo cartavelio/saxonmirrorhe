@@ -381,7 +381,7 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
 
             exp2 = ExpressionTool.optimizeComponentBody(
                     exp2, getCompilation(), visitor,
-                    getConfiguration().makeContextItemStaticInfo(AnyItemType.getInstance()).withStatusUnknown(), false);
+                    getConfiguration().makeContextItemStaticInfo(AnyItemType.getInstance(), Optionality.OPTIONAL), false);
 
             allocateLocalSlots(exp2);
             if (slotManager != null && slotManager.getNumberOfVariables() > 0) {

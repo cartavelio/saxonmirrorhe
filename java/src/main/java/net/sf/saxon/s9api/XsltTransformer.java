@@ -12,6 +12,7 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.SequenceNormalizerWithSpaceSeparator;
 import net.sf.saxon.expr.instruct.GlobalContextRequirement;
 import net.sf.saxon.expr.instruct.GlobalParameterSet;
+import net.sf.saxon.expr.parser.Optionality;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
@@ -335,7 +336,7 @@ public class XsltTransformer extends AbstractXsltTransformer implements Destinat
         try {
             Receiver out = getDestinationReceiver(controller, destination);
             GlobalContextRequirement gcr = controller.getExecutable().getGlobalContextRequirement();
-            if ((gcr == null || !gcr.isAbsentFocus()) && initialSelection != null) {
+            if ((gcr == null || gcr.getContextValueOptionality() != Optionality.PROHIBITED) && initialSelection != null) {
                 if (initialSelection instanceof NodeInfo) {
                     reset = maybeSetGlobalContextItem((NodeInfo) initialSelection);
                     //#if CSHARP==false

@@ -32,6 +32,7 @@ import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.value.SequenceType;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -81,7 +82,7 @@ public class QueryModule implements StaticContext {
     private String defaultCollationName;
     private int revalidationMode = Validation.SKIP;
     private boolean updating = false;
-    private ItemType requiredContextItemType = AnyItemType.getInstance(); // must be the same for all modules
+    private SequenceType requiredContextValueType = SequenceType.SINGLE_ITEM; // must be the same for all modules
     private DecimalFormatManager decimalFormatManager = null;   // used only in XQuery 3.0
     private CodeInjector codeInjector;
     private PackageData packageData;
@@ -209,7 +210,7 @@ public class QueryModule implements StaticContext {
                 // if not schema-aware, generate untyped output by default
                 constructionMode = Validation.STRIP;
             }
-            requiredContextItemType = sqc.getRequiredContextItemType();
+            requiredContextValueType = sqc.getRequiredContextValueType();
             updating = sqc.isUpdatingEnabled();
             codeInjector = sqc.getCodeInjector();
             optimizerOptions = sqc.getOptimizerOptions();
@@ -921,8 +922,8 @@ public class QueryModule implements StaticContext {
         if (isMainModule()) {
             GlobalContextRequirement gcr = executable.getGlobalContextRequirement();
             if (gcr != null && gcr.getDefaultValue() != null) {
-                ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(AnyItemType.getInstance())
-                        .withStatusUnknown();
+                ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(
+                        AnyItemType.getInstance(), Optionality.OPTIONAL);
                 gcr.setDefaultValue(gcr.getDefaultValue().typeCheck(visitor, info));
             }
         }
@@ -1622,7 +1623,12 @@ public class QueryModule implements StaticContext {
 
     @Override
     public ItemType getRequiredContextItemType() {
-        return requiredContextItemType;
+        return requiredContextValueType.getPrimaryType();
+    }
+
+    @Override
+    public SequenceType getRequiredContextValueType() {
+        return requiredContextValueType;
     }
 
     /**

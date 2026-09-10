@@ -22,6 +22,7 @@ import net.sf.saxon.trans.KeyManager;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Schema;
+import net.sf.saxon.value.SequenceType;
 
 /**
  * A StaticContext contains the information needed while an expression or pattern
@@ -197,6 +198,8 @@ public interface StaticContext {
      */
 
     ItemType getRequiredContextItemType();
+
+    SequenceType getRequiredContextValueType();
 
     /**
      * Get a DecimalFormatManager to resolve the names of decimal formats used in calls

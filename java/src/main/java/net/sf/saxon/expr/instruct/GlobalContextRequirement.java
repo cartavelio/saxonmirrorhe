@@ -16,24 +16,27 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ErrorType;
 import net.sf.saxon.type.ItemType;
+import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Information about the requirements placed by a query or stylesheet on the global
- * context item: whether it is mandatory or optional, what its type must be, and
+ * context item (or value): whether it is mandatory or optional, what its type must be, and
  * whether it has a default value.
  *
- * In XSLT, if more than one module specifies a global context item type, they must be the same.
+ * <p>In XSLT, if more than one module specifies a global context item type, they must be the same.
  * In XQuery, several modules can specify different required types, and the actual context item
- * must satisfy them all.
+ * must satisfy them all.</p>
+ *
+ * <p>In XQuery 4.0, the global context value can be any sequence, not just a singleton item.</p>
  */
 public class GlobalContextRequirement {
 
     private Optionality optionality = Optionality.OPTIONAL;
     private boolean external;   // XQuery only
-    private final List<ItemType> requiredItemTypes = new ArrayList<>();
+    private final List<SequenceType> requiredTypes = new ArrayList<>();
     private Expression defaultValue = null;  // Used in XQuery only
 
     /**
@@ -43,30 +46,45 @@ public class GlobalContextRequirement {
      */
 
     public ItemType getRequiredItemType() {
-        if (requiredItemTypes.isEmpty()) {
+        if (requiredTypes.isEmpty()) {
             return AnyItemType.getInstance();
         } else {
-            return requiredItemTypes.get(0);
+            return requiredTypes.get(0).getPrimaryType();
         }
     }
 
     /**
-     * Get all the required item types. In XSLT there can only be one, but in XQuery there can be several,
+     * Get the required item type of the context item. If several required item types have been registered
+     * (which only happens in XQuery with multiple modules) then this returns the first.
+     *
+     * @return The first registered required item type
+     */
+
+    public SequenceType getRequiredSequenceType() {
+        if (requiredTypes.isEmpty()) {
+            return SequenceType.SINGLE_ITEM;
+        } else {
+            return requiredTypes.get(0);
+        }
+    }
+
+    /**
+     * Get all the required sequence types. In XSLT there can only be one, but in XQuery there can be several,
      * one for each module (the actual context item must satisfy them all)
      * @return the list of required item types
      */
 
-    public List<ItemType> getRequiredItemTypes() {
-        return requiredItemTypes;
+    public List<SequenceType> getRequiredTypes() {
+        return requiredTypes;
     }
 
     /**
-     * Specify the required item type of the context item
-     * @param requiredItemType the required item type
+     * Specify the required type of the context item / context value
+     * @param requiredType the required item type
      */
 
-    public void addRequiredItemType(ItemType requiredItemType) {
-        requiredItemTypes.add(requiredItemType);
+    public void addRequiredSequenceType(SequenceType requiredType) {
+        requiredTypes.add(requiredType);
     }
 
     /**
@@ -90,7 +108,8 @@ public class GlobalContextRequirement {
     }
 
     /**
-     * Export the global context item declaration to an SEF export file
+     * Export the global context item declaration to an SEF export file.
+     * Note this only needs to handle the situations that arise in XSLT.
      * @param out the export destination
      * @throws XPathException if things go wrong
      */
@@ -116,33 +135,22 @@ public class GlobalContextRequirement {
         out.endElement();
     }
 
+    /**
+     * Say whether the context item/value is required, optional, or disallowed
+     * @param status the relevant status
+     */
     public void setContextValueOptionality(Optionality status) {
         this.optionality = status;
     }
 
+    /**
+     * Ask whether the context item/value is required, optional, or disallowed
+     * @return the relevant status
+     */
     public Optionality getContextValueOptionality() {
         return optionality;
     }
 
-    /**
-     * Say whether the global context item for a query or stylesheet will be absent.
-     * @param absent true if there will be no context item (externally or internally supplied).
-     */
-
-    public void setAbsentFocus(boolean absent) {
-        this.optionality = absent ? Optionality.PROHIBITED : Optionality.OPTIONAL;
-    }
-
-    /**
-     * Ask whether the global context item for a query or stylesheet will be absent. This is relevant
-     * only for XSLT.
-     *
-     * @return true if there will be no context item (externally or internally supplied).
-     */
-
-    public boolean isAbsentFocus() {
-        return this.optionality == Optionality.PROHIBITED;
-    }
 
 
     public Optionality getOptionality() {
@@ -173,9 +181,9 @@ public class GlobalContextRequirement {
      * @return a suitable ContextItemStaticInfo
      */
     public ContextItemStaticInfo makeGlobalContextInfo(Configuration config) {
-        ItemType type = isAbsentFocus() ? ErrorType.getInstance() : getRequiredItemType();
-        return config.makeContextItemStaticInfo(type, getOptionality());
+        ItemType type = optionality == Optionality.PROHIBITED ? ErrorType.getInstance() : getRequiredItemType();
+        return config.makeContextItemStaticInfo(type, getContextValueOptionality());
     }
 }
 
-// Copyright (c) 2018-2023 Saxonica Limited
+// Copyright (c) 2018-2025 Saxonica Limited

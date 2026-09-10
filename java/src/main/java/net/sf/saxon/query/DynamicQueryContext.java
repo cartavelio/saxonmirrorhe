@@ -12,6 +12,7 @@ import net.sf.saxon.Controller;
 import net.sf.saxon.expr.instruct.GlobalParameterSet;
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.lib.*;
+import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
@@ -34,7 +35,7 @@ import javax.xml.transform.ErrorListener;
 //})
 public class DynamicQueryContext {
 
-    /*@Nullable*/ private Item contextItem;
+    /*@Nullable*/ private GroundedValue contextValue;
     /*@Nullable*/ private GlobalParameterSet parameters = new GlobalParameterSet();
     private final Configuration config;
     private ResourceResolver resourceResolver;
@@ -118,43 +119,46 @@ public class DynamicQueryContext {
     }
 
     /**
-     * Set the context item for evaluating the expression. If this method is not called,
-     * the context node will be undefined. The context item is available as the value of
+     * Set the context value for evaluating the expression. If this method is not called,
+     * the context value will be undefined. The context item is available as the value of
      * the expression ".".
      * To obtain a node by parsing a source document, see the method
      * {@link net.sf.saxon.Configuration#buildDocumentTree} in the Configuration class.
      *
-     * @param item The item that is to be the context item for the query
+     * @param value The value that is to be the context value for the query. Prior to XQuery 4.0,
+     *              this must be a single item.
      * @throws IllegalArgumentException if the supplied item is a node that was built under the wrong
      *                                  Saxon Configuration
      * @throws NullPointerException     if the supplied item is null
-     * @since 8.4
+     * @since 8.4. Changed from setContextItem() to setContextValue() in 13.0
      */
 
-    public void setContextItem(Item item) {
-        if (item == null) {
+    public void setContextValue(GroundedValue value) {
+        if (value == null) {
             throw new NullPointerException("Context item cannot be null");
         }
-        if (item instanceof NodeInfo) {
-            if (!((NodeInfo) item).getConfiguration().isCompatible(config)) {
-                throw new IllegalArgumentException(
-                        "Supplied node must be built using the same or a compatible Configuration");
+        for (Item it : value.asIterable()) {
+            if (it instanceof NodeInfo) {
+                if (!((NodeInfo) it).getConfiguration().isCompatible(config)) {
+                    throw new IllegalArgumentException(
+                            "Supplied node must be built using the same or a compatible Configuration");
+                }
             }
         }
-        contextItem = item;
+        contextValue = value;
         //parameters.put(StandardNames.SAXON_CONTEXT_ITEM, item);
     }
 
     /**
-     * Get the context item for the query, as set using setContextItem().
+     * Get the context value for the query, as set using {@link #setContextValue}.
      *
      * @return the context item if set, or null otherwise.
-     * @since 8.4
+     * @since 8.4. Changed in 13.0 from getContextItem() to getContextValue().
      */
 
     /*@Nullable*/
-    public Item getContextItem() {
-        return contextItem;
+    public GroundedValue getContextValue() {
+        return contextValue;
     }
 
     /**
@@ -443,11 +447,11 @@ public class DynamicQueryContext {
                 throw new AssertionError(e);    // the value should already have been checked
             }
         }
-        controller.setGlobalContextItem(contextItem);
+        if (contextValue != null) {
+            controller.setGlobalContextItem(contextValue.getLength() == 1 ? contextValue.head() : new Parcel(contextValue));
+        } 
         controller.initializeController(parameters);
         controller.setApplyFunctionConversionRulesToExternalVariables(applyConversionRules);
-        //controller.getExecutable().checkAllRequiredParamsArePresent(parameters);
-        //controller.getBindery().defineGlobalParameters(parameters);
     }
 
 }

@@ -12,6 +12,7 @@ import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.pattern.SameNameTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
+import net.sf.saxon.value.SequenceType;
 
 /**
  * An xsl:global-context-item declaration in the stylesheet
@@ -55,7 +56,7 @@ public class XSLGlobalContextItem extends XSLContextItem {
         prepareAttributes();
         GlobalContextRequirement req = new GlobalContextRequirement();
         req.setContextValueOptionality(getContextValueOptionality());
-        req.addRequiredItemType(getRequiredContextItemType());
+        req.addRequiredSequenceType(SequenceType.one(getRequiredContextItemType()));
         try {
             top.getStylesheetPackage().setContextItemRequirements(req);
         } catch (XPathException e) {

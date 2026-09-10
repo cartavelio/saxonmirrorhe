@@ -60,7 +60,7 @@ public class XSLUsePackage extends StyleElement {
             }
             GlobalContextRequirement gcr = usedPackage.getContextItemRequirements();
             if (gcr != null) {
-                if (!(gcr.getOptionality() != Optionality.REQUIRED)) {
+                if (gcr.getContextValueOptionality() == Optionality.REQUIRED) {
                     compileError("Package " + getAttributeValue("name") +
                                          " requires a global context item, so it cannot be used as a library package", "XTTE0590");
                 }

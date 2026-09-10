@@ -388,7 +388,7 @@ public class PackageLoaderHE implements IPackageLoader {
             }
             ItemType requiredType = parseItemTypeAttribute(varElement, "type");
             if (requiredType != null) {
-                req.addRequiredItemType(requiredType);
+                req.addRequiredSequenceType(SequenceType.one(requiredType));
             }
         }
     }
@@ -2140,7 +2140,8 @@ public class PackageLoaderHE implements IPackageLoader {
             SequenceType st = loader.parseAlphaCode(element, "type");
             ItemType type = st.getPrimaryType();
             boolean maybeAbsent = "a".equals(element.getAttributeValue(NamespaceUri.NULL, "flags"));
-            ContextItemStaticInfo info = loader.getConfiguration().makeContextItemStaticInfo(type);
+            ContextItemStaticInfo info = loader.getConfiguration()
+                    .makeContextItemStaticInfo(type, maybeAbsent ? Optionality.OPTIONAL : Optionality.REQUIRED);
             if (maybeAbsent) {
                 info = info.withStatusUnknown();
             }

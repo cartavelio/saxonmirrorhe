@@ -12,10 +12,7 @@ import net.sf.saxon.expr.ContextOriginator;
 import net.sf.saxon.expr.PackageData;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
-import net.sf.saxon.expr.instruct.Bindery;
-import net.sf.saxon.expr.instruct.Executable;
-import net.sf.saxon.expr.instruct.GlobalParameterSet;
-import net.sf.saxon.expr.instruct.GlobalVariable;
+import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.sort.GroupIterator;
 import net.sf.saxon.functions.AccessorFn;
@@ -38,6 +35,7 @@ import net.sf.saxon.tree.wrapper.TypeStrippedDocument;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.Untyped;
 import net.sf.saxon.value.DateTimeValue;
+import net.sf.saxon.value.SequenceExtent;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.z.IntHashMap;
 import org.xml.sax.SAXParseException;
@@ -91,8 +89,8 @@ public class Controller implements ContextOriginator {
     private final Configuration config;
     protected Executable executable;
 
-    protected Item globalContextItem;
-    private boolean globalContextItemPreset;
+    protected GroundedValue globalContextValue;
+    private boolean globalContextValuePreset;
     private Map<PackageData, Bindery> binderies;
     private GlobalParameterSet globalParameters;
     private boolean convertParameters = true;
@@ -204,7 +202,7 @@ public class Controller implements ContextOriginator {
 
         setModel(config.getParseOptions().getModel());
 
-        globalContextItem = null;
+        globalContextValue = null;
         currentDateTime = null;
         dateTimePreset = false;
         clearPerTransformationData();
@@ -223,8 +221,8 @@ public class Controller implements ContextOriginator {
         lastRememberedNumber = -1;
         stylesheetCache = null;
         localIndexes = null;
-        if (!globalContextItemPreset) {
-            globalContextItem = null;
+        if (!globalContextValuePreset) {
+            globalContextValue = null;
         }
     }
 
@@ -570,7 +568,7 @@ public class Controller implements ContextOriginator {
     public void setGlobalContextItem(Item contextItem, boolean alreadyStripped) throws XPathException {
         if (!alreadyStripped) {
             // Bug 2929 - don't do space-stripping twice
-            if (globalContextItem instanceof SpaceStrippedNode && ((SpaceStrippedNode) globalContextItem).getUnderlyingNode() == contextItem) {
+            if (globalContextValue instanceof SpaceStrippedNode && ((SpaceStrippedNode) globalContextValue).getUnderlyingNode() == contextItem) {
                 return;
             }
             if (contextItem instanceof NodeInfo) {
@@ -603,8 +601,8 @@ public class Controller implements ContextOriginator {
             }
         }
 
-        this.globalContextItem = contextItem;
-        this.globalContextItemPreset = true;
+        this.globalContextValue = contextItem;
+        this.globalContextValuePreset = true;
     }
 
     /**
@@ -613,8 +611,8 @@ public class Controller implements ContextOriginator {
      */
 
     public void clearGlobalContextItem() {
-        this.globalContextItem = null;
-        this.globalContextItemPreset = false;
+        this.globalContextValue = null;
+        this.globalContextValuePreset = false;
     }
 
 
@@ -629,8 +627,30 @@ public class Controller implements ContextOriginator {
 
     /*@Nullable*/
     public Item getGlobalContextItem() {
-        return globalContextItem;
-        // See W3C bug 5224, which points out that the rules for XQuery 1.0 weren't clearly defined
+        if (globalContextValue == null) {
+            return null;
+        }
+        if (globalContextValue.getLength() == 1) {
+            return globalContextValue.head();
+        } else {
+            throw new IllegalStateException("Global context value is not a single item");
+        }
+        // See also W3C bug 5224, which points out that the rules for XQuery 1.0 weren't clearly defined
+    }
+
+    /**
+     * Get the value used as the context value for evaluating global variables. In XQuery this
+     * is the same as the initial context value; in XSLT 1.0 and 2.0 it is the root of the tree containing
+     * the initial context node; in XSLT 3.0 it can be set independently of the initial match selection.
+     * XQuery 4.0 allows an arbitrary value; XSLT, and earlier XQuery releases, require a single item.
+     *
+     * @return the context item for evaluating global variables, or null if there is none
+     * @since 9.7
+     */
+
+    /*@Nullable*/
+    public GroundedValue getGlobalContextValue() {
+        return globalContextValue;
     }
 
     /**
@@ -1134,7 +1154,14 @@ public class Controller implements ContextOriginator {
 
         // Check the global context item
 
-        globalContextItem = executable.checkInitialContextItem(globalContextItem, newXPathContext());
+        GlobalContextRequirement gcr = executable.getGlobalContextRequirement();
+        if (gcr != null && globalContextValue == null && gcr.getDefaultValue() != null) {
+            SequenceIterator iter = gcr.getDefaultValue().iterate(newXPathContext());
+            globalContextValue = SequenceExtent.from(iter);
+        }
+        if (globalContextValue != null) {
+            globalContextValue = executable.checkInitialContextValue(globalContextValue, newXPathContext());
+        }
 
         if (traceListener != null) {
             preEvaluateGlobals(newXPathContext());

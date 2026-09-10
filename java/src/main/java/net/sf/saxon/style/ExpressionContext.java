@@ -30,6 +30,7 @@ import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.value.SequenceType;
 
 /**
  * An ExpressionContext represents the context for an XPath expression written
@@ -204,6 +205,11 @@ public class ExpressionContext implements StaticContext {
     @Override
     public ItemType getRequiredContextItemType() {
         return AnyItemType.getInstance();
+    }
+
+    @Override
+    public SequenceType getRequiredContextValueType() {
+        return SequenceType.SINGLE_ITEM;
     }
 
     /**

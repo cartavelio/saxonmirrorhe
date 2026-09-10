@@ -27,7 +27,6 @@ import net.sf.saxon.trace.TraceCodeInjector;
 import net.sf.saxon.trace.XQueryTraceCodeInjector;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Schema;
 import net.sf.saxon.value.SequenceType;
@@ -78,7 +77,7 @@ public class StaticQueryContext {
     private int constructionMode = Validation.PRESERVE;
     private NamespaceUri defaultFunctionNamespace = NamespaceUri.FN;
     /*@Nullable*/ private NamespaceUri defaultElementNamespace = NamespaceUri.NULL;
-    private ItemType requiredContextItemType = AnyItemType.getInstance();
+    private SequenceType requiredContextValueType = SequenceType.SINGLE_ITEM;
     private boolean preserveSpace = false;
     private boolean defaultEmptyLeast = true;
     /*@Nullable*/ private ModuleURIResolver moduleURIResolver;
@@ -167,7 +166,7 @@ public class StaticQueryContext {
         constructionMode = c.constructionMode;
         defaultElementNamespace = c.defaultElementNamespace;
         defaultFunctionNamespace = c.defaultFunctionNamespace;
-        requiredContextItemType = c.requiredContextItemType;
+        requiredContextValueType = c.requiredContextValueType;
         preserveSpace = c.preserveSpace;
         defaultEmptyLeast = c.defaultEmptyLeast;
         errorReporter = c.errorReporter;
@@ -191,7 +190,7 @@ public class StaticQueryContext {
                 Validation.PRESERVE : Validation.STRIP;
         preserveSpace = false;
         defaultEmptyLeast = true;
-        requiredContextItemType = AnyItemType.getInstance();
+        requiredContextValueType = SequenceType.SINGLE_ITEM;
         defaultFunctionNamespace = NamespaceUri.FN;
         defaultElementNamespace = NamespaceUri.NULL;
         moduleURIResolver = null;
@@ -1012,7 +1011,19 @@ public class StaticQueryContext {
      */
 
     public void setRequiredContextItemType(ItemType type) {
-        requiredContextItemType = type;
+        requiredContextValueType = SequenceType.one(type);
+    }
+
+    /**
+     * Declare the static type of the context value. If this type is declared, and if a context value
+     * is supplied when the query is invoked, then the context value must conform to this type (no
+     * type conversion will take place to force it into this type).
+     *
+     * @param type the required type of the context item
+     */
+
+    public void setRequiredContextValueType(SequenceType type) {
+        requiredContextValueType = type;
     }
 
     /**
@@ -1023,7 +1034,18 @@ public class StaticQueryContext {
      */
 
     public ItemType getRequiredContextItemType() {
-        return requiredContextItemType;
+        return requiredContextValueType.getPrimaryType();
+    }
+
+    /**
+     * Get the required type of the context value. If no type has been explicitly declared for the context
+     * value, an type representing the type item() is returned.
+     *
+     * @return the required type of the context value
+     */
+
+    public SequenceType getRequiredContextValueType() {
+        return requiredContextValueType;
     }
 
     /**

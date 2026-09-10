@@ -25,7 +25,6 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.DecimalValue;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.QNameValue;
@@ -210,15 +209,15 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
 
         // Get the context item supplied, and set it on the new Controller
         if (contextItemOption != null) {
-            Item contextItem = contextItemOption.head();
+            GroundedValue contextValue = contextItemOption.materialize();
             GlobalContextRequirement gcr = main.getExecutable().getGlobalContextRequirement();
             if (gcr != null) {
-                ItemType req = gcr.getRequiredItemType();
-                if (req != null && !req.matches(contextItem, config.getTypeHierarchy())) {
+                SequenceType req = gcr.getRequiredSequenceType();
+                if (req != null && !req.matches(contextValue, config.getTypeHierarchy())) {
                     throw new XPathException("Required context item type is " + req, "FOQM0005");
                 }
             }
-            dqc.setContextItem(contextItemOption.head());
+            dqc.setContextValue(contextValue);
         }
 
         Controller newController = xqe.newController(dqc);

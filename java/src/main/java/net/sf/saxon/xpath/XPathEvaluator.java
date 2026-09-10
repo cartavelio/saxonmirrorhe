@@ -223,7 +223,7 @@ public class XPathEvaluator implements XPath {
             Expression exp = ExpressionTool.make(expr, staticContext, 0, Tokenizer.END_OF_INPUT, null);
             ExpressionVisitor visitor = ExpressionVisitor.make(staticContext);
             final ContextItemStaticInfo contextItemType =
-                    config.makeContextItemStaticInfo(Type.ITEM_TYPE).withStatusUnknown();
+                    config.makeContextItemStaticInfo(Type.ITEM_TYPE, Optionality.OPTIONAL);
             exp = exp.typeCheck(visitor, contextItemType).optimize(visitor, contextItemType);
             SlotManager map = config.makeSlotManager();
             ExpressionTool.allocateSlots(exp, 0, map);

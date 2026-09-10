@@ -599,11 +599,10 @@ public final class EvaluateInstr extends Expression {
                     expr = ExpressionTool.resolveCallsToCurrentFunction(expr);
                     ContextItemStaticInfo cit;
                     if (instr.getContextItemExpr() != null) {
+                        boolean allowsEmpty = Cardinality.allowsZero(instr.getContextItemExpr().getCardinality());
                         cit = config.makeContextItemStaticInfo(
-                                instr.getContextItemExpr().getItemType());
-                        if (Cardinality.allowsZero(instr.getContextItemExpr().getCardinality())) {
-                            cit = cit.withStatusUnknown();
-                        };
+                                instr.getContextItemExpr().getItemType(),
+                                allowsEmpty ? Optionality.OPTIONAL : Optionality.REQUIRED);
                     } else {
                         cit = ContextItemStaticInfo.ABSENT;
                     }

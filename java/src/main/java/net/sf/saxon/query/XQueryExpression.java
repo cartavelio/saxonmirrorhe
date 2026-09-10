@@ -24,6 +24,7 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.SerializerFactory;
 import net.sf.saxon.lib.TraceListener;
+import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
@@ -36,8 +37,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.tree.iter.GroundedIterator;
 import net.sf.saxon.tree.iter.ManualIterator;
-import net.sf.saxon.type.AnyItemType;
-import net.sf.saxon.type.ItemType;
+import net.sf.saxon.value.SequenceType;
 
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
@@ -90,9 +90,8 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
             exp = exp.simplify();
             exp.checkForUpdatingSubexpressions();
             GlobalContextRequirement contextReq = exec.getGlobalContextRequirement();
-            ItemType req = contextReq == null ? AnyItemType.getInstance() : contextReq.getRequiredItemType();
-            ContextItemStaticInfo cit = config.makeContextItemStaticInfo(req)
-                    .withStatusUnknown();
+            SequenceType req = contextReq == null ? SequenceType.SINGLE_ITEM : contextReq.getRequiredSequenceType();
+            ContextItemStaticInfo cit = config.makeContextItemStaticInfo(req, Optionality.OPTIONAL);
             Expression e2 = exp.typeCheck(visitor, cit);
             if (e2 != exp) {
                 e2.setRetainedStaticContext(exp.getRetainedStaticContext());
@@ -367,9 +366,12 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
         Controller controller = newController(env);
 
         try {
-            Item contextItem = controller.getGlobalContextItem();
-            if (contextItem instanceof NodeInfo && ((NodeInfo)contextItem).getTreeInfo().isTyped() && !getExecutable().isSchemaAware()) {
-                throw new XPathException("A typed input document can only be used with a schema-aware query");
+            if (controller.getGlobalContextValue() != null) {
+                for (Item it : controller.getGlobalContextValue().asIterable()) {
+                    if (it instanceof NodeInfo && ((NodeInfo) it).getTreeInfo().isTyped() && !getExecutable().isSchemaAware()) {
+                        throw new XPathException("A typed input document can only be used with a schema-aware query");
+                    }
+                }
             }
 
             XPathContextMajor context = initialContext(env, controller);
@@ -387,6 +389,7 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
             } else {
                 return new ErrorReportingIterator(iterator, controller.getErrorReporter(), getLocation());
             }
+
         } catch (XPathException err) {
             TransformerException terr = err;
             while (terr.getException() instanceof TransformerException) {
@@ -436,9 +439,13 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
         if (!env.getConfiguration().isCompatible(getExecutable().getConfiguration())) {
             throw new XPathException("The query must be compiled and executed under the same Configuration", SaxonErrorCode.SXXP0004);
         }
-        Item contextItem = env.getContextItem();
-        if (contextItem instanceof NodeInfo && ((NodeInfo) contextItem).getTreeInfo().isTyped() && !getExecutable().isSchemaAware()) {
-            throw new XPathException("A typed input document can only be used with a schema-aware query");
+        GroundedValue contextValue = env.getContextValue();
+        if (contextValue != null) {
+            for (Item it : contextValue.asIterable()) {
+                if (it instanceof NodeInfo && ((NodeInfo) it).getTreeInfo().isTyped() && !getExecutable().isSchemaAware()) {
+                    throw new XPathException("A typed input document can only be used with a schema-aware query");
+                }
+            }
         }
         Controller controller = newController(env);
         controller.openTraceEpisode();
@@ -610,10 +617,11 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
 
     protected XPathContextMajor initialContext(DynamicQueryContext dynamicEnv, Controller controller) throws XPathException {
 
-        Item contextItem = controller.getGlobalContextItem();
+        GroundedValue contextValue = controller.getGlobalContextValue();
         XPathContextMajor context = controller.newXPathContext();
 
-        if (contextItem != null) {
+        if (contextValue != null) {
+            Item contextItem = contextValue.getLength() == 1 ? contextValue.head() : new Parcel(contextValue);
             ManualIterator single = new ManualIterator(contextItem);
             context.setCurrentIterator(single);
             controller.setGlobalContextItem(contextItem);

@@ -165,12 +165,12 @@ public class XQueryParser extends XPathParser {
             }
             GlobalContextRequirement requirement = exec.getGlobalContextRequirement();
             if (requirement != null) {
-                requirement.addRequiredItemType(mainModule.getRequiredContextItemType());
+                requirement.addRequiredSequenceType(mainModule.getRequiredContextValueType());
             } else if (mainModule.getRequiredContextItemType() != null
                     && mainModule.getRequiredContextItemType() != AnyItemType.getInstance()) {
                 GlobalContextRequirement req = new GlobalContextRequirement();
                 req.setExternal(true);
-                req.addRequiredItemType(mainModule.getRequiredContextItemType());
+                req.addRequiredSequenceType(mainModule.getRequiredContextValueType());
                 exec.setGlobalContextRequirement(req);
             }
 
@@ -1702,8 +1702,8 @@ public class XQueryParser extends XPathParser {
 
 
     /**
-     * Parse a context item declaration.
-     * "declare" "context" "item"  TypeDeclaration?
+     * Parse a context item or value declaration.
+     * "declare" "context" "item"|"value"  TypeDeclaration?
      * ((":=" ExprSingle ) | ("external" (":=" ExprSingle ))
      *
      * @throws XPathException if parsing fails
@@ -1712,29 +1712,39 @@ public class XQueryParser extends XPathParser {
     private void parseContextItemDeclaration() throws XPathException {
         int offset = t.currentTokenStartOffset;
 
-        if (!isKeyword("item")) {
+        boolean isItemDeclaration = isKeyword("item");
+        if (!isItemDeclaration) {
             if (isKeyword("value")) {
-                grumble("'declare context value' is not yet implemented"); // TODO: implement this
+                if (!isAllowXPath40Syntax()) {
+                    grumble("'declare context value' requires XQuery 4.0");
+                }
             } else {
-                grumble("After 'declare context', expected 'item'");
+                grumble("After 'declare context', expected 'item' (or, in 4.0, 'value')");
             }
         }
+
         if (foundContextItemDeclaration) {
             grumble("More than one context item declaration found", "XQST0099", offset);
         }
         foundContextItemDeclaration = true;
 
         GlobalContextRequirement req = new GlobalContextRequirement();
-        req.setAbsentFocus(false);
+        req.setContextValueOptionality(Optionality.OPTIONAL);
 
         nextToken();
-        ItemType requiredType = AnyItemType.getInstance();
+
+        SequenceType requiredSequenceType =
+                isItemDeclaration ? SequenceType.SINGLE_ITEM : SequenceType.ANY_SEQUENCE;
         if (isKeyword("as")) {
             nextToken();
-            requiredType = parseItemType();
+            if (isItemDeclaration) {
+                ItemType requiredType = parseItemType();
+                requiredSequenceType = SequenceType.one(requiredType);
+            } else {
+                requiredSequenceType = parseSequenceType();
+            }
         }
-        req.addRequiredItemType(requiredType);
-
+        req.addRequiredSequenceType(requiredSequenceType);
         if (t.currentToken == Token.COLON_EQUALS) {
             if (!((QueryModule) env).isMainModule()) {
                 grumble("The context item must not be initialized in a library module", "XQST0113");
@@ -1742,19 +1752,15 @@ public class XQueryParser extends XPathParser {
             nextToken();
             Expression exp = parseExprSingle();
             exp.setRetainedStaticContext(env.makeRetainedStaticContext());
-            Supplier<RoleDiagnostic> role =
-                    () -> new RoleDiagnostic(RoleDiagnostic.CONTEXT_ITEM, "context item declaration", 0);
-            exp = CardinalityChecker.makeCardinalityChecker(exp, StaticProperty.EXACTLY_ONE, role);
             ExpressionVisitor visitor = ExpressionVisitor.make(env);
             exp = exp.simplify();
-            ContextItemStaticInfo info = env.getConfiguration().makeContextItemStaticInfo(AnyItemType.getInstance())
-                    .withStatusUnknown();
+            ContextItemStaticInfo info = env.getConfiguration().makeContextItemStaticInfo(requiredSequenceType, Optionality.OPTIONAL);
             exp.setRetainedStaticContext(env.makeRetainedStaticContext());
             exp = exp.typeCheck(visitor, info);
             req.setDefaultValue(exp);
             req.setExternal(false);
         } else if (tryKeyword("external")) {
-            req.setAbsentFocus(false);
+            req.setContextValueOptionality(Optionality.OPTIONAL);
             req.setExternal(true);
             if (t.currentToken == Token.COLON_EQUALS) {
                 if (!((QueryModule) env).isMainModule()) {
@@ -1779,17 +1785,17 @@ public class XQueryParser extends XPathParser {
             if (gcr.getDefaultValue() == null && req.getDefaultValue() != null) {
                 gcr.setDefaultValue(req.getDefaultValue());
             }
-            for (ItemType otherType : gcr.getRequiredItemTypes()) {
-                if (otherType != AnyItemType.getInstance()) {
+            for (SequenceType otherType : gcr.getRequiredTypes()) {
+                if (otherType != SequenceType.ANY_SEQUENCE) {
                     TypeHierarchy th = env.getConfiguration().getTypeHierarchy();
-                    Affinity rel = th.relationship(requiredType, otherType);
+                    Affinity rel = th.sequenceTypeRelationship(requiredSequenceType, otherType);
                     if (rel == Affinity.DISJOINT) {
                         // the two types are incompatible: fail now
                         grumble("Different modules specify incompatible requirements for the type of the initial context item", "XPTY0004");
                     }
                 }
             }
-            gcr.addRequiredItemType(requiredType);
+            gcr.addRequiredSequenceType(requiredSequenceType);
         } else {
             exec.setGlobalContextRequirement(req);
         }

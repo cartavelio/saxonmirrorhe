@@ -13,17 +13,17 @@ import net.sf.saxon.expr.LocalVariableReference;
 import net.sf.saxon.expr.PackageData;
 import net.sf.saxon.expr.instruct.Executable;
 import net.sf.saxon.expr.instruct.SlotManager;
-import net.sf.saxon.om.*;
-import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.expr.parser.OptimizerOptions;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.functions.FunctionLibraryList;
+import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.QNameValue;
+import net.sf.saxon.value.SequenceType;
 
 import java.util.*;
 
@@ -44,7 +44,7 @@ public class IndependentContext extends AbstractStaticContext
     protected HashMap<String, NamespaceUri> namespaces = new HashMap<>(10);
     protected HashMap<StructuredQName, XPathVariable> variables = new HashMap<>(20);
     protected NamespaceResolver externalResolver = null;
-    protected ItemType requiredContextItemType = AnyItemType.getInstance();
+    protected SequenceType requiredContextValueType = SequenceType.SINGLE_ITEM;
     protected Set<NamespaceUri> importedSchemaNamespaces = new HashSet<>();
     protected boolean autoDeclare = false;
     protected Executable executable;
@@ -106,7 +106,7 @@ public class IndependentContext extends AbstractStaticContext
         externalResolver = ic.externalResolver;
         autoDeclare = ic.autoDeclare;
         setUnprefixedElementMatchingPolicy(ic.getUnprefixedElementMatchingPolicy());
-        requiredContextItemType = ic.requiredContextItemType;
+        requiredContextValueType = ic.requiredContextValueType;
         setExecutable(ic.getExecutable());
         setOptimizerOptions(ic.getOptimizerOptions());
         retainedStaticContext = null;
@@ -492,7 +492,20 @@ public class IndependentContext extends AbstractStaticContext
      */
 
     public void setRequiredContextItemType(ItemType type) {
-        requiredContextItemType = type;
+        requiredContextValueType = SequenceType.one(type);
+    }
+
+    /**
+     * Declare the static type of the context item. If this type is declared, and if a context value
+     * is supplied when the query is invoked, then the context value must conform to this type (no
+     * type conversion will take place to force it into this type).
+     *
+     * @param type the required type of the context item
+     * @since 13.0
+     */
+
+    public void setRequiredContextValueType(SequenceType type) {
+        requiredContextValueType = type;
     }
 
     /**
@@ -505,7 +518,20 @@ public class IndependentContext extends AbstractStaticContext
 
     @Override
     public ItemType getRequiredContextItemType() {
-        return requiredContextItemType;
+        return requiredContextValueType.getPrimaryType();
+    }
+
+    /**
+     * Get the required type of the context item. If no type has been explicitly declared for the context
+     * item, an instance of AnyItemType (representing the type item()) is returned.
+     *
+     * @return the required type of the context item
+     * @since 9.3
+     */
+
+    @Override
+    public SequenceType getRequiredContextValueType() {
+        return requiredContextValueType;
     }
 
     /**

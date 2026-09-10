@@ -323,8 +323,7 @@ public class ForClause extends Clause {
                         }
                         selection = new FilterExpression(selection, predicate);
                         ExpressionTool.copyLocationInfo(predicate, selection);
-                        ContextItemStaticInfo cit = config.makeContextItemStaticInfo(selectionContextItemType)
-                                .withStatusUnknown();
+                        ContextItemStaticInfo cit = config.makeContextItemStaticInfo(selectionContextItemType, Optionality.OPTIONAL);
                         selection = selection.typeCheck(visitor, cit);
                         if (!ExpressionTool.dependsOnVariable(flwor, new Binding[]{positionVariable})) {
                             positionVariable = null;
@@ -350,8 +349,7 @@ public class ForClause extends Clause {
 
                 boolean found = ExpressionTool.inlineVariableReferences(condition, this.getRangeVariable(), replacement);
                 if (found) {
-                    ContextItemStaticInfo cit = config.makeContextItemStaticInfo(getSequence().getItemType())
-                            .withStatusUnknown();
+                    ContextItemStaticInfo cit = config.makeContextItemStaticInfo(getSequence().getItemType(), Optionality.OPTIONAL);
                     Expression predicate = condition.typeCheck(visitor, cit);
                     // If the result of the predicate might be a number, wrap it in a call of boolean()
                     Affinity rel = th.relationship(predicate.getItemType(), BuiltInAtomicType.INTEGER);
@@ -361,8 +359,7 @@ public class ForClause extends Clause {
                     }
                     selection = new FilterExpression(selection, predicate);
                     ExpressionTool.copyLocationInfo(predicate, selection);
-                    cit = config.makeContextItemStaticInfo(selectionContextItemType)
-                            .withStatusUnknown();
+                    cit = config.makeContextItemStaticInfo(selectionContextItemType, Optionality.OPTIONAL);
                     selection = selection.typeCheck(visitor, cit);
                     changed = true;
                 }
