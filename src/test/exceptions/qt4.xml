@@ -222,6 +222,17 @@
       <reason>Function fn:function-annotations not yet implemented</reason>
    </exception>
    
+   <exception test-set="fn-iterate-while" test-case=" 
+      iterate-while-019
+      iterate-while-020
+      iterate-while-021
+      iterate-while-022
+      iterate-while-023" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-28"/>
+      <reason>Two-argument callback not yet implemented</reason>
+   </exception>
+   
+   
    <exception test-set="fn-duplicate-values" test-case="cbcl-duplicate-values-002c
       fn-duplicate-values-1a
       fn-duplicate-values-mixed-args-012
@@ -430,6 +441,12 @@
    </exception>
    
  
+   <exception test-set="app-spec-examples" test-case="
+      fo-test-fn-transitive-closure-001" run="false" edition="HE PE" report="n/a">
+      <created by="Michael Kay" on="2023-11-21"/>
+      <reason>Spec has changed, implementation needs updating.</reason>
+   </exception>
+   
    
  
    

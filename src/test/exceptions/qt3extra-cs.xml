@@ -16,6 +16,11 @@
       <reason>Function not supported in Saxon-CS</reason>
    </exception>
    
+   <exception test-set="saxon-analyze-uri" test-case="analyze-uri-008" run="false" report="Not supported">
+      <created by="Michael Kay" on="2023-11-21"/>
+      <reason>Can't see how to get the escaped path component from .NET</reason>
+   </exception>
+   
    <exception test-set="fn-transform" test-case="fn-transform-2 fn-transform-3" run="false" report="Not supported">
       <created by="Michael Kay" on="2021-08-31"/>
       <reason>Requires localization options not supported in Saxon-CS</reason>
