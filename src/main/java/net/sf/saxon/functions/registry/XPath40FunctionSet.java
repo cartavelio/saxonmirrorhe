@@ -74,7 +74,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.STRING, ONE, null));
 
         register("characters", 1, e -> e.populate( CharactersFn::new, BuiltInAtomicType.STRING, STAR, 0)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null));
+                .arg(0, BuiltInAtomicType.STRING, OPT, null));
 
         // codepoints-to-string becomes variadic in 4.0:
         register("codepoints-to-string", 1, e -> e.populate( CodepointsToString::new, BuiltInAtomicType.STRING, ONE, SEQV)
@@ -147,11 +147,11 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, predicate, ONE, null));
 
-        register("items-until", 2, e -> e.populate(ItemsEnding.ItemsUntil::new, AnyItemType.getInstance(), STAR, LATE)
+        register("items-ending-where", 2, e -> e.populate(ItemsEnding.ItemsUntil::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, predicate, ONE, null));
 
-        register("items-from", 2, e -> e.populate(ItemsStarting.ItemsFrom::new, AnyItemType.getInstance(), STAR, LATE)
+        register("items-starting-where", 2, e -> e.populate(ItemsStarting.ItemsFrom::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, predicate, ONE, null));
 
@@ -241,7 +241,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 new SequenceType[]{SequenceType.ANY_SEQUENCE},
                 SequenceType.ANY_SEQUENCE);
 
-        register("while", 3, e -> e.populate(WhileFn::new, AnyItemType.getInstance(), STAR, 0)
+        register("iterate-while", 3, e -> e.populate(WhileFn::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, valuePredicate, ONE, null)
                 .arg(2, valueAction, ONE, null));

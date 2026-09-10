@@ -64,21 +64,22 @@ public class XSLOriginalLibrary implements FunctionLibrary {
     @Override
     public FunctionItem getFunctionItem(SymbolicName.F functionName, StaticContext env) throws XPathException {
         if (functionName.getComponentKind() == StandardNames.XSL_FUNCTION &&
-            functionName.getComponentName().hasURI(NamespaceUri.XSLT) &&
-            functionName.getComponentName().getLocalPart().equals("original") &&
-            env instanceof ExpressionContext) {
+                functionName.getComponentName().hasURI(NamespaceUri.XSLT) &&
+                functionName.getComponentName().getLocalPart().equals("original") &&
+                env instanceof ExpressionContext) {
             ExpressionContext expressionContext = (ExpressionContext) env;
-            StyleElement overridingFunction = expressionContext.getStyleElement();
-            while (!(overridingFunction instanceof XSLFunction)) {
-                NodeInfo parent = overridingFunction.getParent();
-                if (!(parent instanceof StyleElement)) {
-                    return null;
-                }
-                overridingFunction = (StyleElement) parent;
+            StyleElement containingElement = expressionContext.getStyleElement();
+            XSLFunction overridingFunction = (XSLFunction)containingElement.findAncestorElement(StandardNames.XSL_FUNCTION);
+            if (overridingFunction == null) {
+                throw new XPathException("Function name xsl:original can only be used within xsl:function", "XTSE3058");
             }
-            SymbolicName originalName = ((XSLFunction) overridingFunction).getSymbolicName();
-            XSLOverride override = (XSLOverride) overridingFunction.getParent();
+            SymbolicName originalName = overridingFunction.getSymbolicName();
+            StyleElement override = (StyleElement)overridingFunction.getParent();
+            if (!(override instanceof XSLOverride)) {
+                throw new XPathException("Function name xsl:original can only be used within xsl:override", "XPST0017");
+            }
             XSLUsePackage use = (XSLUsePackage) override.getParent();
+            assert use != null;
             Component overridden = use.getUsedPackage().getComponent(originalName);
             if (overridden == null) {
                 throw new XPathException("Function " + originalName + " does not exist in used package", "XTSE3058");

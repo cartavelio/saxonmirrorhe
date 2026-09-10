@@ -7,6 +7,8 @@
 
 package net.sf.saxon.ma.arrays;
 
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.elab.Pingable;
 import net.sf.saxon.functions.Fold;
@@ -17,6 +19,7 @@ import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -28,6 +31,7 @@ import net.sf.saxon.z.IntSet;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Function signatures (and pointers to implementations) of the functions defined in XPath 3.1
@@ -176,6 +180,11 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
 
 
         }
+    }
+
+    @Override
+    public Expression bind(SymbolicName.F symbolicName, Expression[] staticArgs, Map<StructuredQName, Integer> keywords, StaticContext env, List<String> reasons) throws XPathException {
+        return super.bind(symbolicName, staticArgs, keywords, env, reasons);
     }
 
     @Override

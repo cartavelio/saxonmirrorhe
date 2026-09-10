@@ -191,7 +191,7 @@ public class Configuration implements SourceResolver, NotationSet {
 
     private transient ResourceResolver commonResolver;
     private ProtocolRestrictor protocolRestrictor = new ProtocolRestrictor("all");
-    protected FunctionLibraryList builtInExtensionLibraryList;
+    protected IntHashMap<FunctionLibraryList> builtInExtensionLibraryList = new IntHashMap<>(4);
     protected int xsdVersion = XSD11;
     private int xmlVersion = XML10;
     private int xpathVersionForXsd = 20;
@@ -1420,16 +1420,22 @@ public class Configuration implements SourceResolver, NotationSet {
     }
 
 
-    public FunctionLibraryList getBuiltInExtensionLibraryList(int version) {
-        if (builtInExtensionLibraryList == null) {
-            builtInExtensionLibraryList = new FunctionLibraryList();
-            builtInExtensionLibraryList.addFunctionLibrary(VendorFunctionSetHE.getInstance());
-            builtInExtensionLibraryList.addFunctionLibrary(MathFunctionSet.getInstance());
-            builtInExtensionLibraryList.addFunctionLibrary(MapFunctionSet.getInstance(version));
-            builtInExtensionLibraryList.addFunctionLibrary(ArrayFunctionSet.getInstance(version));
-            builtInExtensionLibraryList.addFunctionLibrary(ExsltCommonFunctionSet.getInstance());
+    public synchronized FunctionLibraryList getBuiltInExtensionLibraryList(int version) {
+        FunctionLibraryList result = builtInExtensionLibraryList.get(version);
+        if (result == null) {
+            result = makeBuiltInExtensionLibraryList(version);
         }
-        return builtInExtensionLibraryList;
+        return result;
+    }
+
+    protected FunctionLibraryList makeBuiltInExtensionLibraryList(int version) {
+        FunctionLibraryList result = new FunctionLibraryList();
+        result.addFunctionLibrary(VendorFunctionSetHE.getInstance());
+        result.addFunctionLibrary(MathFunctionSet.getInstance());
+        result.addFunctionLibrary(MapFunctionSet.getInstance(version));
+        result.addFunctionLibrary(ArrayFunctionSet.getInstance(version));
+        result.addFunctionLibrary(ExsltCommonFunctionSet.getInstance());
+        return result;
     }
 
     /**

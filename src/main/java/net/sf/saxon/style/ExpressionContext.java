@@ -13,7 +13,6 @@ import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.expr.parser.OptimizerOptions;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.functions.FunctionLibrary;
-import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.VendorFunctionSetHE;
 import net.sf.saxon.lib.Feature;
@@ -21,7 +20,10 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.UnprefixedElementMatchingPolicy;
-import net.sf.saxon.trans.*;
+import net.sf.saxon.trans.DecimalFormatManager;
+import net.sf.saxon.trans.KeyManager;
+import net.sf.saxon.trans.SymbolicName;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.AttributeLocation;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.AnyItemType;
@@ -302,16 +304,8 @@ public class ExpressionContext implements StaticContext {
 
     @Override
     public FunctionLibrary getFunctionLibrary() {
-        FunctionLibrary lib = element.getContainingPackage().getFunctionLibrary();
-        StyleElement containingOverride = element.findAncestorElement(StandardNames.XSL_OVERRIDE);
-        if (containingOverride != null) {
-            // Within xsl:override, recognize the function name xsl:original
-            FunctionLibraryList libList = new FunctionLibraryList();
-            libList.addFunctionLibrary(lib);
-            ((XSLOverride)containingOverride).addXSLOverrideFunctionLibrary(libList);
-            return libList;
-        }
-        return lib;
+        // Note, the xsl:original library is now present in the package function library unconditionally
+        return element.getContainingPackage().getFunctionLibrary();
     }
 
     /**
