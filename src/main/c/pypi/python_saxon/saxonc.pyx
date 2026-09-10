@@ -93,7 +93,7 @@ def create_xdm_dict(proc, mmap):
             xdmKey_ = proc.make_string_value(key)
 
             if isinstance(value, str):
-                xdmValue_ = proc.make_sting_value(value)
+                xdmValue_ = proc.make_string_value(value)
             elif isinstance(value,int):
                 xdmValue_ = proc.make_integer_value(value)
             elif isinstance(value,float):
