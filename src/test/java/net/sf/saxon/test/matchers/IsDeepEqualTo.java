@@ -9,7 +9,10 @@ import net.sf.saxon.expr.sort.GenericAtomicComparer;
 import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.s9api.XdmNode;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.Type;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
@@ -26,7 +29,7 @@ public class IsDeepEqualTo extends TypeSafeDiagnosingMatcher<GroundedValue> {
         try {
             boolean ok = check(actual);
             if (!ok) {
-                mismatchDescription.appendText("was ").appendValue(actual);
+                appendExpectedTypeAndValue(mismatchDescription.appendText("was "), actual);
             }
             return ok;
         } catch (XPathException ex) {
@@ -37,7 +40,23 @@ public class IsDeepEqualTo extends TypeSafeDiagnosingMatcher<GroundedValue> {
 
     @Override
     public void describeTo(Description description) {
-        description.appendText("XDM value ").appendValue(expected);
+        appendExpectedTypeAndValue(description, expected);
+    }
+
+    private Description appendExpectedTypeAndValue(Description description, GroundedValue value) {
+        return description.appendText(getExpectedType(value)).appendText(" ").appendValue(value);
+    }
+
+    private String getExpectedType(GroundedValue value) {
+        if (value instanceof NodeInfo) {
+            switch (((NodeInfo) value).getNodeKind()) {
+                case Type.DOCUMENT:
+                    return "XML Document node";
+                case Type.ELEMENT:
+                    return "XML Element node";
+            }
+        }
+        return "XDM value";
     }
 
     private boolean check(GroundedValue actual) throws XPathException {
