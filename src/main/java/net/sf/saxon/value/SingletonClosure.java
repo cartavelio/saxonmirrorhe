@@ -53,13 +53,6 @@ public class SingletonClosure extends Closure implements Sequence {
         //Instrumentation.count("SingletonClosure.new()");
     }
 
-    public SingletonClosure(Expression exp, XPathContext context) throws XPathException {
-        setInputEvaluator(exp.makeElaborator().elaborateForPull());
-        savedXPathContext = context.newContext();
-        saveContext(exp, context);
-        //Instrumentation.count("SingletonClosure.new()");
-    }
-
     /**
      * Evaluate the expression in a given context to return an iterator over a sequence
      */
@@ -106,7 +99,7 @@ public class SingletonClosure extends Closure implements Sequence {
      */
 
     /*@Nullable*/
-    public Item asItem() throws XPathException {
+    public synchronized Item asItem() throws XPathException {   // bug 6161
         if (!built) {
             value = inputEvaluator.iterate(savedXPathContext).next();
             built = true;
