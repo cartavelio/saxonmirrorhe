@@ -41,7 +41,7 @@ public class ShallowCopyRuleSet implements BuiltInRuleSet {
         return THE_INSTANCE;
     }
 
-    private ShallowCopyRuleSet() {
+    protected ShallowCopyRuleSet() {
     }
 
     /**
