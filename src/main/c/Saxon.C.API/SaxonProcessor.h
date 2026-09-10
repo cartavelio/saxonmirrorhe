@@ -701,6 +701,8 @@ private:
 
     static XdmValue * makeXdmValueFromRef(int64_t valueRef);
 
+    static XdmItem * makeXdmItemFromRef(int64_t valueRef);
+
     static const char *checkException();
 };
 
