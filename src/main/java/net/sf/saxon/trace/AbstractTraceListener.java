@@ -12,7 +12,6 @@ import net.sf.saxon.Version;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.ApplyTemplates;
 import net.sf.saxon.expr.instruct.Instruction;
-import net.sf.saxon.expr.parser.CodeInjector;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.StandardDiagnostics;
 import net.sf.saxon.lib.StandardLogger;
@@ -39,14 +38,6 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
     private int detail = 2; // none=0; low=1; normal=2; high=3
     protected Logger out = new StandardLogger();
     /*@NotNull*/ private static final StringBuilder spaceBuffer = new StringBuilder("                ");
-
-    /**
-     * Get the associated CodeInjector to be used at compile time to generate the tracing calls
-     */
-
-    public CodeInjector getCodeInjector() {
-        return new TraceCodeInjector();
-    }
 
     /**
      * Set the level of detail required

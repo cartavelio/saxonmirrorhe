@@ -41,7 +41,7 @@ public class TraceClausePush extends TuplePush {
         if (controller.isTracing()) {
             ClauseInfo baseInfo = new ClauseInfo(baseClause);
             baseInfo.setNamespaceResolver(traceClause.getNamespaceResolver());
-            controller.getTraceListener().enter(baseInfo, Collections.emptyMap(), context);
+            controller.getTraceListener().enter(baseInfo, baseClause.getTraceInfo(), context);
             destination.processTuple(context);
             controller.getTraceListener().leave(baseInfo);
         } else {

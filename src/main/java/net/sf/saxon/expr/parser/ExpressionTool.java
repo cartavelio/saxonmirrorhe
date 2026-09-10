@@ -169,7 +169,13 @@ public class ExpressionTool {
     public static Expression injectCode(Expression exp, CodeInjector injector) {
         if (exp instanceof FLWORExpression) {
             ((FLWORExpression) exp).injectCode(injector);
-        } else if (!(exp instanceof TraceExpression)) {
+        } else if (exp instanceof TraceExpression) {
+            for (Operand o : ((TraceExpression) exp).getChild().operands()) {
+                if (!o.getOperandRole().isConstrainedClass()) {
+                    o.setChildExpression(injectCode(o.getChildExpression(), injector));
+                }
+            }
+        } else {
             for (Operand o : exp.operands()) {
                 if (!o.getOperandRole().isConstrainedClass()) {
                     o.setChildExpression(injectCode(o.getChildExpression(), injector));

@@ -296,9 +296,6 @@ public class Query {
             if (updating) {
                 compiler.setUpdatingEnabled(true);
             }
-            if (config.getTraceListener() != null) {
-                compiler.setCompileWithTracing(true);
-            }
 
             if (moduleURIResolverClass != null) {
                 Object mr = config.getInstance(moduleURIResolverClass);

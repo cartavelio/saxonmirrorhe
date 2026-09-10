@@ -16,7 +16,10 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A "Clause" refers specifically to one of the clauses of a FLWOR expression, for example the "for"
@@ -214,6 +217,24 @@ public abstract class Clause {
 
     public String toShortString() {
         return toString();
+    }
+
+
+    /**
+     * Get information for inclusion in trace output
+     *
+     * @return a map containing the properties to be output
+     */
+
+    public Map<String, Object> getTraceInfo() {
+        LocalVariableBinding[] vars = getRangeVariables();
+        if (vars.length == 0) {
+            return Collections.emptyMap();
+        } else {
+            Map<String, Object> info = new HashMap<>(1);
+            info.put("var", "$" + vars[0].getVariableQName().getDisplayName());
+            return info;
+        }
     }
 }
 

@@ -10,7 +10,6 @@ package net.sf.saxon.trace;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.LetExpression;
 import net.sf.saxon.expr.instruct.*;
-import net.sf.saxon.expr.parser.CodeInjector;
 import net.sf.saxon.functions.Trace;
 import net.sf.saxon.lib.NamespaceConstant;
 
@@ -19,11 +18,6 @@ import net.sf.saxon.lib.NamespaceConstant;
  */
 
 public class XSLTTraceListener extends AbstractTraceListener {
-
-    @Override
-    public CodeInjector getCodeInjector() {
-        return new XSLTTraceCodeInjector();
-    }
 
     /**
      * Generate attributes to be included in the opening trace element

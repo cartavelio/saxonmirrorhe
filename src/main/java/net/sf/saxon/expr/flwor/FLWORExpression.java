@@ -363,6 +363,12 @@ public class FLWORExpression extends Expression {
 
     public void injectCode(CodeInjector injector) {
         if (injector != null) {
+            for (Clause clause : clauses) {
+                // if there are already trace clauses present, do nothing
+                if (clause instanceof TraceClause) {
+                    return;
+                }
+            }
             List<Clause> expandedList = new ArrayList<>(clauses.size() * 2);
             expandedList.add(clauses.get(0));
             for (int i = 1; i < clauses.size(); i++) {
@@ -669,11 +675,14 @@ public class FLWORExpression extends Expression {
                             boolean added = ((ForClause) clause).addPredicate(this, visitor, contextItemType, term);
                             //If we cannot add the WhereClause term as a predicate then put it back into the list of clauses
                             if (!added) {
-                                clauses.add(c + 1, new WhereClause(this, removedExpr));
+                                WhereClause newWhere = new WhereClause(this, removedExpr);
+                                newWhere.setLocation(clause.getLocation());
+                                clauses.add(c + 1, newWhere);
                             }
                         } else {
                             // the clause is not a "for" clause, so just move the "where" to this place in the list of clauses
                             WhereClause newWhere = new WhereClause(this, term);
+                            newWhere.setLocation(clause.getLocation());
                             clauses.add(c + 1, newWhere);
                         }
                         // we found a variable on which the term depends so we can't move it any further
@@ -688,6 +697,7 @@ public class FLWORExpression extends Expression {
                         whereClause.setPredicate(makeAndCondition(list));
                     }
                     WhereClause newWhere = new WhereClause(this, term);
+                    newWhere.setLocation(condition.getLocation());
                     clauses.add(0, newWhere);
                 }
             }
