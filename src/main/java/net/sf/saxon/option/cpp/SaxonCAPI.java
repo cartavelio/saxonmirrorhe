@@ -46,6 +46,8 @@ import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 import java.net.MalformedURLException;
@@ -1143,7 +1145,17 @@ public class SaxonCAPI {
      * @throws SaxonApiException
      */
     public static File resolveFile(Processor processor, String cwd, String filename, String nature) throws SaxonApiException {
-        return new File(resolveFileToSource(processor, cwd, filename, nature).getSystemId());
+        String pathStr = null;
+        try {
+            pathStr = (new URI(resolveFileToSource(processor, cwd, filename, nature).getSystemId())).getPath();
+        } catch (URISyntaxException e) {
+            throw  new SaxonApiException(e);
+        }
+
+        if(SaxonCAPI.debug) {
+            System.err.println("DEBUG resolveFile path ="+pathStr);
+        }
+        return new File(pathStr);
 
     }
 
@@ -1165,9 +1177,9 @@ public class SaxonCAPI {
         URI cwdURI = null;
         String ffilename = filename;
 
+
         if(cwd != null) {
             cwdURI =  new File(cwd).toURI();
-           // ccwd = new File(cwd).toURI().toString();
         } /*else {
 
             ccwd = "";
@@ -1183,20 +1195,27 @@ public class SaxonCAPI {
         }
 
         if(debug) {
-            System.err.println("ccwd = " + cwdURI.toString());
+            System.err.println("ccwd = " + cwd);
+            System.err.println("ccwdURI = " + cwdURI.toString());
             System.err.println("filename = " + filename);
             System.err.println("request.uri = " + ffilename);
+            System.err.println("(cwdURI != null ? cwdURI.resolve(ffilename).toString() : ffilename) = "+(cwdURI != null ? cwdURI.resolve(ffilename).getPath() : ffilename));
+           // System.err.println("path.resolve(ffilename).toString() = "+path.resolve(ffilename).toString());
         }
 
         ResourceRequest request = new ResourceRequest();
         request.baseUri = (cwdURI != null ? cwdURI.toString() : null);
-        request.uri = (cwdURI != null ? cwdURI.resolve(ffilename).toString() : ffilename);
+        request.uri = (cwdURI != null ? cwdURI.resolve(ffilename).getPath() : ffilename);
         request.nature = nature;
 
         try {
             //source = resolver.resolve(request);
             Configuration config = processor.getUnderlyingConfiguration();
             source = request.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
+
+            if(debug) {
+                System.err.println("DEBUG source.getSystemID()="+source.getSystemId());
+            }
             if (source == null) {
                 if(debug) {
                     System.err.println("DEBUG: Using resolver fallback");
@@ -1346,6 +1365,20 @@ public class SaxonCAPI {
         return serializer;
     }
 
+    public static void testj() throws SaxonApiException {
+        SaxonCAPI.debug  = true;
+        Processor processor = new Processor(true);
+        processor.setConfigurationProperty(Feature.LICENSE_FILE_LOCATION, "/Users/ond1/work/development/git/private/saxon-license.lic");
+
+        Source source = SaxonCAPI.resolveFileToSource(processor, "/Users/ond1/work/development/git/saxon-dev/saxondev/build/releases/libsaxon-EEC-mac-x86_64-v12.1/samples/cppTests/", "../data/test.xsl", ResourceRequest.XSLT_NATURE);
+
+        XsltCompiler compiler = processor.newXsltCompiler();
+        XsltPackage pack = compiler.compilePackage(source);
+        File file = SaxonCAPI.resolveFile(processor, "/Users/ond1/work/development/git/saxon-dev/saxondev/build/releases/libsaxon-EEC-mac-x86_64-v12.1/samples/cppTests", "test.sef", ResourceRequest.XSLT_NATURE);
+        pack.save(file);
+
+    }  
+
    /* public static void testj() throws SaxonApiException {
         SaxonCAPI.debug  = true;
         Processor processor = new Processor(false);
@@ -1422,9 +1455,9 @@ public class SaxonCAPI {
 
 
 
-    /*public static void main(String [] args) throws SaxonApiException, URISyntaxException {
+    public static void main(String [] args) throws SaxonApiException, URISyntaxException {
           SaxonCAPI.testj();
 
-    }   */
+    }
 
 }
