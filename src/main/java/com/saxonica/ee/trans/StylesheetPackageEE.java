@@ -26,6 +26,8 @@ public class StylesheetPackageEE extends StylesheetPackage {
 
     private boolean fallbackToNonStreaming = false;
     private boolean justInTimeCompilation = false;
+    private String errorMessageOnExport;
+    private String errorCodeOnExport;
 
     public StylesheetPackageEE(Configuration config) {
         super(config);
@@ -78,6 +80,18 @@ public class StylesheetPackageEE extends StylesheetPackage {
     }
 
     /**
+     * Mark the package as non-exportable, supplying an error message to be reported if export is attempted
+     *
+     * @param message   the error message to report indicating why export is not possible
+     * @param errorCode
+     */
+
+    public void markNonExportable(String message, String errorCode) {
+        errorMessageOnExport = message;
+        errorCodeOnExport = errorCode;
+    }
+
+    /**
      * Output the abstract expression tree to the supplied destination.
      *
      * @param presenter the expression presenter used to display the structure
@@ -105,6 +119,9 @@ public class StylesheetPackageEE extends StylesheetPackage {
     }
 
     private void export(ExpressionPresenter presenter, boolean topLevel) throws XPathException {
+        if (errorMessageOnExport != null) {
+            throw new XPathException("Stylesheet package cannot be exported: " + errorMessageOnExport, errorCodeOnExport);
+        }
         ExpressionPresenter.ExportOptions options = (ExpressionPresenter.ExportOptions) presenter.getOptions();
         Map<Component, Integer> componentIdMap = options.componentMap;
         Map<StylesheetPackage, Integer> packageIdMap = options.packageMap;

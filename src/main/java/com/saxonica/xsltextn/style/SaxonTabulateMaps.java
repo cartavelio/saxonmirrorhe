@@ -8,6 +8,7 @@ import net.sf.saxon.om.NodeName;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.style.StyleElement;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 
 
@@ -77,6 +78,8 @@ public class SaxonTabulateMaps extends StyleElement {
                                                 getPackageData().getLocalLicenseId());
         root = typeCheck("root", root);
         select = typeCheck("select", select);
+
+        getContainingPackage().markNonExportable("Contains saxon:tabulate-maps instruction", SaxonErrorCode.SXST0071);
     }
 
     @Override
