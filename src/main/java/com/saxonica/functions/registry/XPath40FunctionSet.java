@@ -358,14 +358,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(2, MapType.ANY_MAP_TYPE, OPT, null)
                 .setOptionDetails(HashFn.getOptionDetails()));
 
-        register("highest", 1, e -> e.populate(HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
-                .arg(0, AnyItemType.getInstance(), STAR, null));
-
-        register("highest", 2, e -> e.populate(HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
-                .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, BuiltInAtomicType.STRING, OPT, null));
-
-        register("highest", 3, e -> e.populate(HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
+        register("highest", 1, 3, e -> e.populate(HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
                 .arg(2, ft, ONE, null));
@@ -439,6 +432,9 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
                 .setOptionDetails(JsonToXMLFn.makeOptionsParameter(40)));
 
+        register("node-kind", 1, e -> e.populate(NodeKind_1::new, BuiltInAtomicType.STRING, OPT, 0)
+                .arg(0, Type.NODE_TYPE, OPT | INS, EMPTY));
+
         register("label", 1, e -> e.populate(LabelFn::new, MapType.getInstance(), ONE, 0)
                 .arg(0, AnyItemType.getInstance(), ONE, null));
 
@@ -446,15 +442,8 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.STRING, ONE, null) // null or EMPTY?
                 .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
                 .setOptionDetails(LoadXqueryModule.makeOptionsParameter(40)));
-
-        register("lowest", 1, e -> e.populate(HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
-                .arg(0, AnyItemType.getInstance(), STAR, null));
-
-        register("lowest", 2, e -> e.populate(HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
-                .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, BuiltInAtomicType.STRING, OPT, null));
-
-        register("lowest", 3, e -> e.populate(HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
+        
+        register("lowest", 1, 3, e -> e.populate(HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
                 .arg(2, ft, ONE, null));
