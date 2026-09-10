@@ -999,6 +999,13 @@ public class XsltCompiler {
      * or <code>ErrorList</code> associated with the compiler: more specifically, the <code>ErrorListener</code>
      * or <code>ErrorList</code> that was associated with the <code>XsltCompiler</code> at the time
      * <code>compile()</code> was invoked.</p>
+     * <p>If the source is a {@code StreamSource} or a {@code SAXSource} with no user-supplied {@code XmlReader},
+     * then Saxon will allocate and configure an {@code XmlReader}. This will NOT take account of any configuration
+     * level parser settings (such as DTD validation, XInclude processing, and so on). The recommended way to customise
+     * parsing options is by creating an {@code XmlReader} and supplying this as a property of a {@code SAXSource}. For
+     * options when parsing included or imported stylesheet modules, it is possible to do the same in the
+     * {@link ResourceResolver} set using the {@link #setResourceResolver(ResourceResolver)} method.</p>
+     * </p>
      *
      * @param source Source object representing the principal stylesheet module to be compiled.
      *               Must not be null. If the {@code Source} wraps a resource such as a {@link java.io.Reader}

@@ -110,6 +110,13 @@ public abstract class XsdCompiler {
      *
      * <p>This method can only be called once on a given {@code SchemaManager} object.</p>
      *
+     * <p>If the source is a {@code StreamSource} or a {@code SAXSource} with no user-supplied {@code XmlReader},
+     * then Saxon will allocate and configure an {@code XmlReader}. This will NOT take account of any configuration
+     * level parser settings (such as DTD validation, XInclude processing, and so on). The recommended way to customise
+     * parsing options is by creating an {@code XmlReader} and supplying this as a property of a {@code SAXSource}. For
+     * options when parsing included or imported stylesheet modules, it is possible to do the same in the
+     * {@link SchemaURIResolver} set using the {@link #setSchemaURIResolver(SchemaURIResolver)} method.</p>
+     *
      * @param source the documents containing the schema. The getSystemId() method applied to each Source
      *               must return a base URI suitable for resolving <code>xs:include</code> and <code>xs:import</code>
      *               directives. The document may be either a schema document in source XSD format, or a compiled
