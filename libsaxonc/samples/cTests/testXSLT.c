@@ -33,22 +33,29 @@ void test_xinclude(sxnc_environment *environi, sxnc_processor *processor, char *
   sxnc_property *properties;
   int propLen = 0;
 
+  parameters = (sxnc_parameter *)calloc(cap, sizeof(sxnc_parameter));
+  properties = (sxnc_property *)calloc(cap, sizeof(sxnc_property));
+
+  printf("test xinclude cp0\n");
   setCatalog(environi, processor, cwd, "catalog.xml");
+  printf("test xinclude cp1\n");
   setConfigurationProperty(environi, processor, "http://saxon.sf.net/feature/xinclude-aware", "on");
+
+  printf("test xinclude cp3\n");
 
   char sample1_xml_file[FILENAME_MAX];
   path_join(sample1_xml_file, data_dir, "/sample1.xml");
 
   char identity_xsl_file[FILENAME_MAX];
   path_join(identity_xsl_file, data_dir, "/identity.xsl");
-
+  printf("test xinclude cp4\n");
     const char* result =
         xsltApplyStylesheet(environi, processor, cwd, sample1_xml_file,
-            "../data/identity.xsl", 0, properties, 0, 1);
-
+            identity_xsl_file, 0, properties, 0, 1);
+  printf("test xinclude cp5\n");
     xsltSaveResultToFile(environi, processor, cwd, sample1_xml_file,
         identity_xsl_file, "xinclude-xslt-result.xml", 0, properties, 0, 1);
-
+  printf("test xinclude cp6\n");
     if (!result) {
         printf("result is null \n");
         const char* errorMessage = c_getErrorMessage(environi);
@@ -130,6 +137,11 @@ int main(int argc, char *argv[]) {
   } else {
     printf("Test 2 - Fail: outputFile.xml not found \n");
   }
+
+
+  test_xinclude(environi, processor, cwd, data_dir);
+
+
 
   fflush(stdout);
 
