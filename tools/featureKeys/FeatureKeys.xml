@@ -1729,9 +1729,10 @@
         <commandline for="TQ">-TJ</commandline>
         <desc>
             <p>If this option is set, Saxon will output (to the standard error output) progress
-                information about its attempts to locate and disambiguate references to reflexive
-                Java extension functions. This is useful for diagnostics if the XQuery or XSLT
-                compiler is failing to locate user-written extension functions.</p>
+                information about its attempts to locate and disambiguate references to functions.
+                This is intended primarily to assist with problems loading external/extension
+                functions, but it actually traces all functions other than those in reserved
+                namespaces (including user-written functions in XSLT or XQuery).</p>
         </desc>
     </feature>
     <feature>
