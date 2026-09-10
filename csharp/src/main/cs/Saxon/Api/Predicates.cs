@@ -176,6 +176,17 @@ namespace Saxon.Api {
             };
         }
 
+        /// <summary>
+        /// Obtain a predicate that tests whether an item is a node with a given name.
+        /// </summary>
+        /// <param name="name">The required name</param>
+        /// <returns>A predicate that returns true if and only if the supplied item is a node with the given name.</returns>
+        public static Predicate<XdmNode> HasName(QName name) {
+            return item =>
+            {
+                return item.NodeName != null && item.NodeName.Equals(name);
+            };
+        }
 
         internal static Predicate<XdmItem> ExpandedNamePredicate(string ns, string local) {
             return item => {
@@ -185,6 +196,17 @@ namespace Saxon.Api {
 
                 return node.NodeKind == XdmNodeKind.Element
                        && node.NodeName.LocalName.Equals(local) && node.NodeName.Uri.Equals(ns);
+            };
+        }
+
+        internal static Predicate<XdmItem> ExpandedNamePredicate(QName name) {
+            return item => {
+                if (item is not XdmNode node) {
+                    return false;
+                }
+
+                return node.NodeKind == XdmNodeKind.Element
+                       && node.NodeName.Equals(name);
             };
         }
 

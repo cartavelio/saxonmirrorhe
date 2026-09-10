@@ -91,6 +91,19 @@ namespace Saxon.Api {
 
 
         /// <summary>
+        /// Return a <c>Step</c> that navigates from a node to its ancestors having a specified
+        /// name, in reverse document order (that is, nearest ancestor first,
+        /// root node last).
+        /// </summary>
+        /// <param name="name">The name of the ancestors to be selected by the <c>Step</c></param>
+        /// <returns>A <c>Step</c>, which selects the ancestors (at most one) of a supplied node that have the
+        /// required local name and namespace URI.</returns>
+        public static Step<XdmNode, XdmNode> Ancestor(QName name) {
+            return Ancestor().Where(Predicates.HasName(name));
+        }
+
+
+        /// <summary>
         /// Obtain a <c>Step</c> that filters the nodes found on the ancestor axis using a supplied <c>Predicate</c>.
         /// Nodes are returned in reverse document order (that is, nearest ancestor first, root node last).
         /// </summary>
@@ -137,6 +150,18 @@ namespace Saxon.Api {
         /// required local name and namespace URI.</returns>
         public static Step<XdmNode, XdmNode> AncestorOrSelf(string uri, string localName) {
             return Ancestor().Where(Predicates.HasName(uri, localName));
+        }
+
+
+        /// <summary>
+        /// Obtain a <c>Step</c> that navigates from a node to its ancestors-or-self having a specified
+        /// name, in reverse document order (that is, nearest ancestor first, root node last).
+        /// </summary>
+        /// <param name="name">The name of the ancestors to be selected by the <c>Step</c></param>
+        /// <returns>A <c>Step</c>, which selects the ancestors-or-self of a supplied node that have the
+        /// required local name and namespace URI.</returns>
+        public static Step<XdmNode, XdmNode> AncestorOrSelf(QName name) {
+            return Ancestor().Where(Predicates.HasName(name));
         }
 
 
@@ -194,6 +219,18 @@ namespace Saxon.Api {
 
 
         /// <summary>
+        /// Return a <c>Step</c> that navigates from a node to its attribute having a specified
+        /// name.
+        /// </summary>
+        /// <param name="name">The name of the attributes to be selected by the <c>Step</c></param>
+        /// <returns>A <c>Step</c>, which selects the attributes (at most one) of a supplied node that have the
+        /// required local name and namespace URI.</returns>
+        public static Step<XdmNode, XdmNode> Attribute(QName name) {
+            return AxisStep(XdmAxis.Attribute).Where(Predicates.HasName(name));
+        }
+
+
+        /// <summary>
         /// Obtain a <c>Step</c> that filters the nodes found on the attribute axis using a supplied <c>Predicate</c>.
         /// The function call <c>Attribute(predicate)</c> is equivalent to <c>Attribute.Where(predicate)</c>.
         /// </summary>
@@ -234,6 +271,17 @@ namespace Saxon.Api {
         /// required local name and namespace URI.</returns>
         public static Step<XdmNode, XdmNode> Child(string uri, string localName) {
             return AxisStep(XdmAxis.Child).Where(Predicates.ExpandedNamePredicate(uri, localName));
+        }
+
+        /// <summary>
+        /// Obtain a <c>Step</c> that navigates from a node to the element children having a specified
+        /// name.
+        /// </summary>
+        /// <param name="name">The name of the child elements to be selected by the <c>Step</c></param>
+        /// <returns>A <c>Step</c>, which selects the element children of a supplied node that have the
+        /// required local name and namespace URI.</returns>
+        public static Step<XdmNode, XdmNode> Child(QName name) {
+            return AxisStep(XdmAxis.Child).Where(Predicates.ExpandedNamePredicate(name));
         }
 
         /// <summary>
@@ -283,6 +331,17 @@ namespace Saxon.Api {
         }
 
         /// <summary>
+        /// Obtain a <c>Step</c> that navigates from a node to the descendant elements having a specified
+        /// name.
+        /// </summary>
+        /// <param name="name">The name of the elements to be selected by the <c>Step</c></param>
+        /// <returns>A <c>Step</c>, which selects the element descendants of a supplied node that have the required
+        /// local name and namespace URI.</returns>
+        public static Step<XdmNode, XdmNode> Descendant(QName name) {
+            return Descendant().Where(Predicates.HasName(name));
+        }
+
+        /// <summary>
         /// Obtain a <c>Step</c> that filters the nodes found on the descendant axis using a supplied <c>Predicate</c>.
         /// The function call <c>Descendant(predicate)</c> is equivalent to <c>Descendant.Where(predicate)</c>.
         /// For example, <c>Steps.Descendant(Predicates.IsElement())</c>
@@ -329,6 +388,17 @@ namespace Saxon.Api {
         /// local name and namespace URI.</returns>
         public static Step<XdmNode, XdmNode> DescendantOrSelf(string uri, string localName) {
             return DescendantOrSelf().Where(Predicates.HasName(uri, localName));
+        }
+
+        /// <summary>
+        /// Obtain a <c>Step</c> that navigates from a node to the descendant-or-self elements having a specified
+        /// name.
+        /// </summary>
+        /// <param name="name">The name of the elements to be selected by the <c>Step</c></param>
+        /// <returns>A <c>Step</c>, which selects the descendant-or-self elements of a supplied node that have the required
+        /// local name and namespace URI.</returns>
+        public static Step<XdmNode, XdmNode> DescendantOrSelf(QName name) {
+            return DescendantOrSelf().Where(Predicates.HasName(name));
         }
 
         /// <summary>
@@ -384,6 +454,18 @@ namespace Saxon.Api {
 
 
         /// <summary>
+        /// Obtain a <c>Step</c> that navigates from a node to the following elements having a specified
+        /// name. These are returned in document order.
+        /// </summary>
+        /// <param name="name">The name of the following elements to be selected by the <c>Step</c></param>
+        /// <returns>A <c>Step</c>, which selects the following elements of a supplied node that have the
+        /// required local name and namespace URI.</returns>
+        public static Step<XdmNode, XdmNode> Following(QName name) {
+            return AxisStep(XdmAxis.Following).Where(Predicates.HasName(name));
+        }
+
+
+        /// <summary>
         /// Obtain a <c>Step</c> that filters the nodes found on the following axis using a supplied <c>Predicate</c>.
         /// The function call <c>Following(predicate)</c> is equivalent to <c>Following().Where(predicate)</c>.
         /// For example, <c>Following(IsElement())</c> returns a <c>Step</c> that selects the following elements
@@ -428,6 +510,17 @@ namespace Saxon.Api {
         /// required local name and namespace URI.</returns>
         public static Step<XdmNode, XdmNode> FollowingSibling(string uri, string localName) {
             return AxisStep(XdmAxis.FollowingSibling).Where(Predicates.HasName(uri, localName));
+        }
+
+        /// <summary>
+        /// Obtain a <c>Step</c> that navigates from a node to the following sibling elements having a specified
+        /// name. These are returned in document order.
+        /// </summary>
+        /// <param name="name">The name of the following sibling elements to be selected by the <c>Step</c></param>
+        /// <returns>A <c>Step</c>, which selects the following sibling elements of a supplied node that have the
+        /// required local name and namespace URI.</returns>
+        public static Step<XdmNode, XdmNode> FollowingSibling(QName name) {
+            return AxisStep(XdmAxis.FollowingSibling).Where(Predicates.HasName(name));
         }
 
         /// <summary>
@@ -519,6 +612,17 @@ namespace Saxon.Api {
         }
 
         /// <summary>
+        /// Obtain a <c>Step</c> that navigates from a node to the parent element provided it has a specified
+        /// name.
+        /// </summary>
+        /// <param name="name">The name of the parent element to be selected by the <c>Step</c></param>
+        /// <returns>A <c>Step</c>, which selects the parent element of a supplied node provided it is an 
+        /// element with the required name.</returns>
+        public static Step<XdmNode, XdmNode> Parent(QName name) {
+            return AxisStep(XdmAxis.Parent).Where(Predicates.HasName(name));
+        }
+
+        /// <summary>
         /// Obtain a <c>Step</c> that filters the node found on the parent axis using a supplied <c>Predicate</c>.
         /// The function call <c>Parent(filter)</c> is equivalent to <c>Parent(filter).where(Predicate)</c>.
         /// For example, <c>Parent(Predicate.IsElement()).GetFunc</c> returns a <c>Step</c> that selects the parent node provided it is an element
@@ -563,6 +667,18 @@ namespace Saxon.Api {
         /// required local name and namespace URI.</returns>
         public static Step<XdmNode, XdmNode> PrecedingSibling(string uri, string localName) {
             return PrecedingSibling().Where(Predicates.ExpandedNamePredicate(uri, localName));
+        }
+
+
+        /// <summary>
+        /// Obtain a <c>Step</c> that navigates from a node to the preceding sibling elements having a specified
+        /// name. These are returned in reverse document order.
+        /// </summary>
+        /// <param name="name">The name of the preceding sibling elements to be selected by the <c>Step</c></param>
+        /// <returns>A <c>Step</c>, which selects the preceding sibling elements of a supplied node that have the
+        /// required local name and namespace URI.</returns>
+        public static Step<XdmNode, XdmNode> PrecedingSibling(QName name) {
+            return PrecedingSibling().Where(Predicates.ExpandedNamePredicate(name));
         }
 
 
@@ -618,6 +734,18 @@ namespace Saxon.Api {
 
 
         /// <summary>
+        /// Obtain a <c>Step</c> that navigates from a node to the preceding elements having a specified
+        /// name. These are returned in reverse document order.
+        /// </summary>
+        /// <param name="name">The name of the preceding elements to be selected by the <c>Step</c></param>
+        /// <returns>A <c>Step</c>, which selects the preceding elements of a supplied node that have the
+        /// required name.</returns>
+        public static Step<XdmNode, XdmNode> Preceding(QName name) {
+            return Preceding().Where(Predicates.ExpandedNamePredicate(name));
+        }
+
+
+        /// <summary>
         /// Obtain a Step that filters the nodes found on the preceding axis using a supplied <c>Predicate</c> .
         /// The function call <c>Preceding(predicate)</c> is equivalent to <c>Preceding().Where(predicate)</c>.
         /// For example, <c>Preceding(isElement())</c> returns a <c>Step</c> that selects the preceding elements 
@@ -662,6 +790,17 @@ namespace Saxon.Api {
         /// <returns>A <c>Step</c>, which selects the supplied node provided it is an element with a given local name and namespace URI.</returns>
         public static Step<XdmNode, XdmNode> Self(string uri, string localName) {
             return AxisStep(XdmAxis.Self).Where(Predicates.HasName(uri, localName));
+        }
+
+
+        /// <summary>
+        /// Obtain a <c>Step</c> that navigates from a node to itself provided it has a specified
+        /// name.
+        /// </summary>
+        /// <param name="name">The name of the element to be selected by the <c>Step</c></param>
+        /// <returns>A <c>Step</c>, which selects the supplied node provided it is an element with a given name.</returns>
+        public static Step<XdmNode, XdmNode> Self(QName name) {
+            return AxisStep(XdmAxis.Self).Where(Predicates.HasName(name));
         }
 
 
