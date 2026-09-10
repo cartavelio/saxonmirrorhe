@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 /*
  * A C# emulation of java.util.Properties, incomplete but sufficient for use in Saxon
@@ -45,7 +46,15 @@ namespace Saxon.Ejava.util {
         }
         
         public IEnumerable<string> stringPropertyNames() {
-            return dict.Keys;
+            if (defaults == null) {
+                return dict.Keys;
+            }
+            System.Collections.Generic.HashSet<string> result = new(defaults.stringPropertyNames());
+            foreach (string k in dict.Keys)
+            {
+                result.Add(k);
+            }
+            return result;
         }
 
         public bool isEmpty() {

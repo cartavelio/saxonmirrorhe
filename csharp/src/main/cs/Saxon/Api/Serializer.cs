@@ -18,8 +18,7 @@ namespace Saxon.Api {
     /// serialize arbitrary CLI objects.
     /// </remarks>
 
-    public class Serializer : IDestination
-    {
+    public class Serializer : IDestination {
 
         private readonly Saxon.Hej.s9api.Serializer jSerializer;
         private readonly Properties props = new();
@@ -36,7 +35,7 @@ namespace Saxon.Api {
 
         public static readonly QName ALLOW_DUPLICATE_NAMES =
             new QName("", "allow-duplicate-names");
-        
+
         /// <summary>QName identifying the serialization parameter "byte-order-mark".
         /// The value is the string "yes" or "no".</summary>
 
@@ -105,7 +104,7 @@ namespace Saxon.Api {
         /// HTML version number
         /// </summary>
         public static readonly QName HTML_VERSION =
-            new QName("" , "html-version");
+            new QName("", "html-version");
 
 
         /// <summary>
@@ -265,6 +264,13 @@ namespace Saxon.Api {
         public static readonly QName SAXON_WRAP =
             new QName(SAXON, "wrap-result-sequence");
 
+        public interface PropertySet {
+
+            ISet<string> GetPropertyNames();
+            string GetProperty(string name);
+        }
+        public record SerializationEvent(string outputUri, PropertySet properties);
+
         /// <summary>Create a Serializer</summary>
 
         internal Serializer(Processor processor, Saxon.Hej.s9api.Serializer s) {
@@ -293,8 +299,7 @@ namespace Saxon.Api {
         /// <param name="value">The value to be set for the serialization property. May be null
         /// to unset the property (that is, to set it back to the default value).</param>
 
-        public void SetOutputProperty(QName name, string value)
-        {
+        public void SetOutputProperty(QName name, string value) {
             props.setProperty(name.ClarkName, value);
             jSerializer.setOutputProperty(Saxon.Hej.s9api.Serializer.getProperty(name), value);
         }
@@ -304,10 +309,10 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="name">The name of the character map, as a QName</param>
         /// <returns>A dictionary that maps integer Unicode codepoint values to strings</returns>
-        
+
         public IDictionary<int, string> GetCharacterMap(QName name) {
-            Saxon.Hej.serialize.CharacterMap map = 
-                    jSerializer.getCharacterMapIndex().getCharacterMap(name.GetStructuredQName());
+            Saxon.Hej.serialize.CharacterMap map =
+                jSerializer.getCharacterMapIndex().getCharacterMap(name.GetStructuredQName());
             if (map != null) {
                 IntHashMap<string> content = map.getMap();
                 SysCollGen.Dictionary<int, string> result = new();
@@ -316,8 +321,10 @@ namespace Saxon.Api {
                     int key = iter.next();
                     result.Add(key, content.get(key));
                 }
+
                 return result;
             }
+
             return null;
         }
 
@@ -335,7 +342,7 @@ namespace Saxon.Api {
 
         public void SetCharacterMap(QName name, IDictionary<int, string> charMap) {
             IntHashMap<string> content = new IntHashMap<string>();
-            foreach(SysCollGen.KeyValuePair<int, string> pair in charMap) {
+            foreach (SysCollGen.KeyValuePair<int, string> pair in charMap) {
                 content.put(pair.Key, pair.Value);
             }
 
@@ -399,8 +406,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="node">The node to be serialized</param>
         /// <remarks>since 9.8</remarks>
-        public void SerializeXdmNode(XdmNode node)
-        {
+        public void SerializeXdmNode(XdmNode node) {
             jSerializer.serializeNode(node);
         }
 
@@ -415,9 +421,8 @@ namespace Saxon.Api {
         /// <param name="value"> The value to be serialized</param>
         /// <remarks>since 9.8</remarks>
         public void SerializeXdmValue(XdmValue value) {
-            if (value is XdmNode node)
-            {
-                SerializeXdmNode(node);  
+            if (value is XdmNode node) {
+                SerializeXdmNode(node);
             }
             else {
                 jSerializer.serializeXdmValue(value);
@@ -425,17 +430,16 @@ namespace Saxon.Api {
 
         }
 
-        
+
         /// <summary>
         /// Close any resources associated with this destination. Note that this does <b>not</b>
         /// close any user-supplied OutputStream or Writer; those must be closed explicitly
         /// by the calling application.
         /// </summary>
-        public void Close()
-        {
+        public void Close() {
             jSerializer.close();
         }
-        
+
         /// <summary>
         /// Define an action to be performed when writing to the Destination is complete.
         /// </summary>
@@ -465,12 +469,20 @@ namespace Saxon.Api {
         /// <summary>This property determines the base Uri of the constructed <c>Serializer</c>. 
         /// </summary>
 
-        public Uri BaseUri
-        {
+        public Uri BaseUri {
             get => new Uri(jSerializer.getDestinationBaseURI().OriginalString);
             set => jSerializer.setDestinationBaseURI(new Uri(value.OriginalString));
         }
 
+        ///<summary>A callback that will be invoked when serialization takes
+        /// place. The callback receives a <c>SerializationEvent</c> record, which
+        /// includes a string containing the output URI
+        /// (null if not known), and the values of the serialization parameters</summary>
+
+        public Action<SerializationEvent> SerializationListener {
+            get => se => jSerializer.getSerializationListener();
+            set => jSerializer.setSerializationListener(value.Invoke);
+        }
 
 
     }
