@@ -205,19 +205,20 @@ public final class Navigator {
             return baseURI.toString();
         }
         String startSystemId = node.getSystemId();
-        if (startSystemId == null) {
-            return null;
-        }
         NodeInfo parent = (NodeInfo)node.getParent();
         if (parent == null) {
             return startSystemId;
         }
-        String parentSystemId = parent.getSystemId();
-        if (startSystemId.equals(parentSystemId) || parentSystemId.isEmpty()) {
-            return parent.getBaseURI();
-        } else {
-            return startSystemId;
+
+        if (startSystemId != null) {
+            String parentSystemId = parent.getSystemId();
+            if (!startSystemId.equals(parentSystemId)) {
+                // We're at an entity/transclusion boundary; "this" is the base URI
+                return startSystemId;
+            }
         }
+
+        return parent.getBaseURI();
     }
 
     /**
