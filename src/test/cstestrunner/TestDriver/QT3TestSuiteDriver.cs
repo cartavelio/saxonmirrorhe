@@ -207,7 +207,7 @@ namespace TestDriver {
                     return value.Equals("FULLY-NORMALIZED", StringComparison.OrdinalIgnoreCase) ? inverse : !inverse;
                 }
                 case "unicode-version": {
-                    return !inverse;
+                    return value.Equals("13") != inverse;
                 }
                 case "put": {
                     return ("comment" == value || "text" == value
