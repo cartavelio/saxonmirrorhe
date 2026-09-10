@@ -117,7 +117,7 @@ public final class FixedAttribute extends AttributeCreator {
             if (validation == Validation.STRICT) {
                 Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
                 StructuredQName attributeName = nodeName.getStructuredQName();
-                SchemaDeclaration decl = schema.getAttributeDecl(attributeName);
+                IAttributeDecl decl = schema.getAttributeDecl(attributeName);
                 if (decl == null) {
                     throw new XPathException(
                             "Strict validation fails: there is no global attribute declaration for " +
@@ -129,7 +129,7 @@ public final class FixedAttribute extends AttributeCreator {
             } else if (validation == Validation.LAX) {
                 StructuredQName attributeName = nodeName.getStructuredQName();
                 Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
-                SchemaDeclaration decl = schema.getAttributeDecl(attributeName);
+                IAttributeDecl decl = schema.getAttributeDecl(attributeName);
                 if (decl != null) {
                     schemaType = (SimpleType) decl.getType();
                     errorCode = "XTTE1515";

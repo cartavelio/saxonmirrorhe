@@ -11,11 +11,11 @@ import net.sf.saxon.om.StructuredQName;
 
 /**
  * This is a marker interface that acts as a surrogate for an object representing
- * a global element or attribute declaration.
+ * a global element declaration.
  * The real implementation of these declarations is available in the schema-aware
  * version of the Saxon product.
  */
-public interface SchemaDeclaration {
+public interface IElementDecl {
 
     /**
      * Get the name of the schema component

@@ -37,7 +37,7 @@ public interface Schema {
      * been registered.
      */
 
-    SchemaDeclaration getAttributeDecl(int fingerprint);
+    IAttributeDecl getAttributeDecl(int fingerprint);
 
     /**
      * Get a global attribute declaration by QName
@@ -48,7 +48,7 @@ public interface Schema {
      * been registered.
      */
 
-    SchemaDeclaration getAttributeDecl(StructuredQName name);
+    IAttributeDecl getAttributeDecl(StructuredQName name);
 
     /**
      * Get the global element declaration with a given fingerprint
@@ -57,7 +57,7 @@ public interface Schema {
      * @return the element declaration, or null if not found.
      */
 
-    SchemaDeclaration getElementDecl(int fingerprint);
+    IElementDecl getElementDecl(int fingerprint);
 
 
     /**
@@ -67,7 +67,7 @@ public interface Schema {
      * @return the element declaration, or null if not found.
      */
 
-    SchemaDeclaration getElementDecl(StructuredQName name);
+    IElementDecl getElementDecl(StructuredQName name);
 
     /**
      * Get the top-level schema type definition with a given QName.

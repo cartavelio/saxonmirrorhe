@@ -329,7 +329,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                             Affinity e = th.relationship(in, NodeKindTest.ELEMENT);
                             if (e == Affinity.SAME_TYPE || e == Affinity.SUBSUMED_BY) {
                                 Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
-                                SchemaDeclaration elem = schema.getElementDecl(fp);
+                                IElementDecl elem = schema.getElementDecl(fp);
                                 if (elem != null) {
                                     try {
                                         return new ContentTypeTest(Type.ELEMENT, AnyQNameTest.getInstance(), elem.getType(), false, config);
@@ -344,7 +344,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                             Affinity a = th.relationship(in, NodeKindTest.ATTRIBUTE);
                             if (a == Affinity.SAME_TYPE || a == Affinity.SUBSUMED_BY) {
                                 Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
-                                SchemaDeclaration attr = schema.getElementDecl(fp);
+                                IAttributeDecl attr = schema.getAttributeDecl(fp);
                                 if (attr != null) {
                                     try {
                                         return new ContentTypeTest(Type.ATTRIBUTE, AnyQNameTest.getInstance(), attr.getType(), false, config);

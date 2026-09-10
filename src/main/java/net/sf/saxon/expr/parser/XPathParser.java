@@ -3785,7 +3785,7 @@ public class XPathParser {
                     fp = makeFingerprint(name, false);
                     expect(Token.RPAREN);
                     nextToken();
-                    SchemaDeclaration decl = env.getPackageData().getImportedSchema().getAttributeDecl(fp);
+                    IAttributeDecl decl = env.getPackageData().getImportedSchema().getAttributeDecl(fp);
                     if (decl == null) {
                         grumble("There is no declaration for attribute @" + name + " in an imported schema", "XPST0008");
                         return null;
@@ -3802,7 +3802,7 @@ public class XPathParser {
                     fp = makeFingerprint(name, true);
                     expect(Token.RPAREN);
                     nextToken();
-                    SchemaDeclaration decl = env.getPackageData().getImportedSchema().getElementDecl(fp);
+                    IElementDecl decl = env.getPackageData().getImportedSchema().getElementDecl(fp);
 
                     if (decl == null) {
                         grumble("There is no declaration for element " + name + " in an imported schema", "XPST0008");

@@ -281,7 +281,7 @@ public final class AxisExpression extends Expression {
                                     outermostElementNames.get().size() == 1) {
                                 IntIterator oeni = outermostElementNames.get().iterator();
                                 int outermostElementName = oeni.hasNext() ? oeni.next() : -1;
-                                SchemaDeclaration decl = env.getPackageData().getImportedSchema().getElementDecl(outermostElementName);
+                                IElementDecl decl = env.getPackageData().getImportedSchema().getElementDecl(outermostElementName);
                                 if (decl == null) {
                                     if (warnings) {
                                         visitor.issueWarning("Element " + config.getNamePool().getEQName(outermostElementName) +

@@ -39,7 +39,7 @@ public class MinimalSchema implements Schema {
      * been registered.
      */
     @Override
-    public SchemaDeclaration getAttributeDecl(int fingerprint) {
+    public IAttributeDecl getAttributeDecl(int fingerprint) {
         return null;
     }
 
@@ -52,7 +52,7 @@ public class MinimalSchema implements Schema {
      * been registered.
      */
     @Override
-    public SchemaDeclaration getAttributeDecl(StructuredQName name) {
+    public IAttributeDecl getAttributeDecl(StructuredQName name) {
         return null;
     }
 
@@ -63,7 +63,7 @@ public class MinimalSchema implements Schema {
      * @return the element declaration, or null if not found.
      */
     @Override
-    public SchemaDeclaration getElementDecl(int fingerprint) {
+    public IElementDecl getElementDecl(int fingerprint) {
         return null;
     }
 
@@ -74,7 +74,7 @@ public class MinimalSchema implements Schema {
      * @return the element declaration, or null if not found.
      */
     @Override
-    public SchemaDeclaration getElementDecl(StructuredQName name) {
+    public IElementDecl getElementDecl(StructuredQName name) {
         return null;
     }
 

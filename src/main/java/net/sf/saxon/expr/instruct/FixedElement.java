@@ -201,7 +201,7 @@ public class FixedElement extends ElementCreator {
         if (schemaType == null) {
             if (validation == Validation.STRICT) {
                 Schema schema = env.getPackageData().getImportedSchema();
-                SchemaDeclaration decl = schema.getElementDecl(fp);
+                IElementDecl decl = schema.getElementDecl(fp);
                 if (decl == null) {
                     throw new XPathException("There is no global element declaration for " +
                             elementName.getStructuredQName().getEQName() + ", so strict validation will fail")
@@ -250,7 +250,7 @@ public class FixedElement extends ElementCreator {
                 }
             } else if (validation == Validation.LAX) {
                 Schema schema = env.getPackageData().getImportedSchema();
-                SchemaDeclaration decl = schema.getElementDecl(fp);
+                IElementDecl decl = schema.getElementDecl(fp);
                 if (decl == null) {
                     env.issueWarning("There is no global element declaration for " +
                             elementName.getDisplayName(), SaxonErrorCode.SXWN9031, instr.getLocation());

@@ -11,11 +11,11 @@ import net.sf.saxon.om.StructuredQName;
 
 /**
  * This is a marker interface that acts as a surrogate for an object representing
- * a global element or attribute declaration.
+ * a global attribute declaration.
  * The real implementation of these declarations is available in the schema-aware
  * version of the Saxon product.
  */
-public interface SchemaDeclaration {
+public interface IAttributeDecl {
 
     /**
      * Get the name of the schema component
@@ -34,33 +34,12 @@ public interface SchemaDeclaration {
     StructuredQName getComponentName();
 
     /**
-     * Get the simple or complex type associated with the element or attribute declaration
+     * Get the simple type associated with the  attribute declaration
      *
-     * @return the simple or complex type
+     * @return the simple type
      */
 
-    SchemaType getType() throws MissingComponentException;
-
-    /**
-     * Determine, in the case of an Element Declaration, whether it is nillable.
-     */
-
-    boolean isNillable();
-
-    /**
-     * Determine, in the case of an Element Declaration, whether the declaration is abstract
-     */
-
-    boolean isAbstract();
-
-    /**
-     * Determine, in the case of an Element Declaration, whether there are type alternatives defined
-     *
-     * @return true if the element uses conditional type assignment
-     */
-
-    boolean hasTypeAlternatives();
-
+    SimpleType getType() throws MissingComponentException;
 
 }
 

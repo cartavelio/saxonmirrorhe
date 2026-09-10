@@ -888,7 +888,7 @@ public class AlphaCode {
                             break;
                         case "NES": {
                             assert qName != null;
-                            SchemaDeclaration decl = schema.getElementDecl(qName);
+                            IElementDecl decl = schema.getElementDecl(qName);
                             if (decl != null) {
                                 try {
                                     itemType = schema.makeSchemaElementTest(decl.getFingerprint());
@@ -905,7 +905,7 @@ public class AlphaCode {
                         }
                         case "NAS": {
                             assert qName != null;
-                            SchemaDeclaration decl = schema.getAttributeDecl(qName);
+                            IAttributeDecl decl = schema.getAttributeDecl(qName);
                             if (decl != null) {
                                 try {
                                     itemType = schema.makeSchemaAttributeTest(decl.getFingerprint());

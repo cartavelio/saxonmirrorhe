@@ -15,10 +15,7 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.AlphaCode;
-import net.sf.saxon.type.Schema;
-import net.sf.saxon.type.SchemaDeclaration;
-import net.sf.saxon.type.UType;
+import net.sf.saxon.type.*;
 
 /**
  * A NodeTestPattern is a pattern that consists simply of a NodeTest
@@ -132,7 +129,7 @@ public class NodeTestPattern extends Pattern {
         if (nodeTest instanceof NameTest && nodeTest.getUType() == UType.ELEMENT) {
             StructuredQName qName = nodeTest.getMatchingNodeName();
             Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
-            SchemaDeclaration decl = schema.getElementDecl(qName);
+            IElementDecl decl = schema.getElementDecl(qName);
             if (decl == null) {
                 if ("lax".equals(val)) {
                     return this;

@@ -158,7 +158,7 @@ public class DocumentInstr extends ParentNodeConstructor {
                     if (validation == Validation.STRICT && component instanceof FixedElement) {
                         int fingerprint = ((FixedElement) component).getFixedElementName().getFingerprint();
                         Schema schema = env.getPackageData().getImportedSchema();
-                        SchemaDeclaration decl = schema.getElementDecl(fingerprint);
+                        IElementDecl decl = schema.getElementDecl(fingerprint);
                         if (decl != null) {
                             ((FixedElement) component).getContentExpression().
                                     checkPermittedContents(decl.getType(), true);

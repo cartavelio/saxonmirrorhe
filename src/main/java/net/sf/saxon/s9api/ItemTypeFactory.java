@@ -366,7 +366,7 @@ public class ItemTypeFactory {
     public ItemType getSchemaElementTest(QName name) throws SaxonApiException {
         requireSchema();
         StructuredQName qName = name.getStructuredQName();
-        SchemaDeclaration decl = schema.getElementDecl(qName);
+        IElementDecl decl = schema.getElementDecl(qName);
         if (decl == null) {
             throw new SaxonApiException("No global declaration found for element " + name.getClarkName());
         }
@@ -439,7 +439,7 @@ public class ItemTypeFactory {
     public ItemType getSchemaAttributeTest(QName name) throws SaxonApiException {
         requireSchema();
         StructuredQName nn = new StructuredQName("", name.getNamespaceUri(), name.getLocalName());
-        SchemaDeclaration decl = schema.getAttributeDecl(nn);
+        IAttributeDecl decl = schema.getAttributeDecl(nn);
         if (decl == null) {
             throw new SaxonApiException("No global declaration found for attribute " + name.getClarkName());
         }
