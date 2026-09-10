@@ -10,7 +10,7 @@ import net.sf.saxon.expr.InstanceOfExpression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
@@ -107,7 +107,7 @@ public class InstanceOfAdjunct extends InspectionAdjunct implements FeedMaker {
                 orphan.setNodeKind(Type.ELEMENT);
                 orphan.setNodeName(elemName);
                 orphan.setTypeAnnotation(type);
-                orphan.setStringValue(EmptyUniString.getInstance());
+                orphan.setStringValue(EmptyUnicodeString.getInstance());
                 append(orphan);
             }
             level++;

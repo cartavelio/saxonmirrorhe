@@ -70,8 +70,7 @@ public class ComputedElementCompiler extends ElementCreatorCompiler {
         ga.ifNotInstance(StringValue.class, notStrInstance);
 
         ga.invokeInstanceMethod(AtomicValue.class, "getStringValue");
-        ga.invokeStaticMethod(Whitespace.class, "trimWhitespace", CharSequence.class);
-        ga.invokeInstanceMethod(CharSequence.class, "toString");
+        ga.invokeStaticMethod(Whitespace.class, "trim", String.class);
         ga.storeLocal(rawNameVar);
         ga.loadLocal(rawNameVar);
 
@@ -80,7 +79,8 @@ public class ComputedElementCompiler extends ElementCreatorCompiler {
         ga.invokeInstanceMethod(String.class, "startsWith", String.class);
         ga.ifFalse(notEQName);
         ga.loadLocal(rawNameVar);
-        ga.invokeStaticMethod(StructuredQName.class, "fromEQName", CharSequence.class);
+        ga.push(compElement.isXSLT() ? "XTDE0820" : "XQDY0074");
+        ga.invokeStaticMethod(Callback.class, "sqNameFromValidatedEQName", String.class, String.class);
         ga.dup();
         ga.invokeInstanceMethod(StructuredQName.class, "getLocalPart");
         ga.storeLocal(localNameVar);
@@ -98,7 +98,7 @@ public class ComputedElementCompiler extends ElementCreatorCompiler {
         ga.visitTryCatchBlock(tryBegin, tryEnd, catchBegin, "net/sf/saxon/om/QNameException");
 
         methodInfo.placeLabel(tryBegin);
-        ga.invokeStaticMethod(NameChecker.class, "getQNameParts", CharSequence.class);
+        ga.invokeStaticMethod(NameChecker.class, "getQNameParts", String.class);
         methodInfo.placeLabel(tryEnd);
 
         ga.dup();
@@ -191,7 +191,7 @@ public class ComputedElementCompiler extends ElementCreatorCompiler {
 
                 ga.invokeStaticMethod(StandardURIChecker.class, "getInstance");
                 ga.loadLocal(uriVar);
-                ga.invokeInstanceMethod(StandardURIChecker.class, "isValidURI", CharSequence.class);
+                ga.invokeInstanceMethod(StandardURIChecker.class, "isValidURI", String.class);
                 ga.ifTrue(uriNotNull);
                 compiler.generateDynamicError("The value of the namespace attribute must be a valid URI", "XTDE0835", compElement.getLocation(), false);
                 ga.goTo(end);

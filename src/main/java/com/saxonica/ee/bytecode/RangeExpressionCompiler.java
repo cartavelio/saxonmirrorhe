@@ -51,7 +51,7 @@ public class RangeExpressionCompiler extends ToIteratorCompiler {
 
             LabelInfo rangeReturn = methodInfo.newLabel("rangeReturn");
             LabelInfo returnEmpty = methodInfo.newLabel("rangeReturnEmpty");
-            Stack<Class> unwindStack = new Stack<>();
+            Stack<Class<?>> unwindStack = new Stack<>();
             compiler.compileToPrimitive(start, Long.TYPE, new OnEmpty.UnwindAndJump(returnEmpty));
             unwindStack.push(Long.TYPE);
             compiler.compileToPrimitive(step, Long.TYPE, new OnEmpty.UnwindAndJump(unwindStack, returnEmpty));

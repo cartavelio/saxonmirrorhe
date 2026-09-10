@@ -5,6 +5,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.IntegerRangeTest;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 import org.objectweb.asm.commons.GeneratorAdapter;
@@ -175,15 +176,15 @@ public class IntegerRangeTestCompiler extends ToBooleanCompiler {
     private void untypedAtomicChecker(IntegerRangeTest test, Generator ga, GeneratedMethodInfo methodInfo, int valueVar, int toDoubleVar, int atomicValueVar, LabelInfo checkWholeNumber_lb) {
         ga.loadLocal(toDoubleVar);
         ga.loadLocal(atomicValueVar);
-        ga.invokeInstanceMethod(AtomicValue.class, "getStringValueCS");
-        ga.invokeInstanceMethod(StringConverter.class, "convertString", CharSequence.class);
+        ga.invokeInstanceMethod(AtomicValue.class, "getUnicodeStringValue");
+        ga.invokeInstanceMethod(StringConverter.class, "convertString", UnicodeString.class);
         ga.dup();
         LabelInfo notValidationFailure_lb = methodInfo.newLabel("notValidationFailure_label");
         ga.ifNotInstance(ValidationFailure.class, notValidationFailure_lb);
         ga.pop();
         ga.push("Failed to convert untypedAtomic value {");
         ga.loadLocal(atomicValueVar);
-        ga.invokeInstanceMethod(AtomicValue.class, "getStringValueCS");
+        ga.invokeInstanceMethod(AtomicValue.class, "getStringValue");
         ga.checkClass(String.class);
         ga.push("}  to xs:integer");
 

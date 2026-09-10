@@ -34,7 +34,7 @@ public class IntegerToDoubleCompiler extends ConverterCompiler {
         ga.dup();
         if (allowsEmpty) {
             LabelInfo empty = methodInfo.newLabel("returnEmpty");
-            Stack<Class> classStack = new Stack<Class>();
+            Stack<Class<?>> classStack = new Stack<>();
             classStack.push(DoubleValue.class);
             classStack.push(DoubleValue.class);
             OnEmpty.UnwindAndJump unwindAndJump = new OnEmpty.UnwindAndJump(classStack, empty);

@@ -365,7 +365,7 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
                 ga.ifNotInstance(Closure.class, doneEvalMaterialize);
                 ga.checkCast(Type.getType(Closure.class));
                 ga.invokeInstanceMethod(Closure.class, "iterate");
-                ga.invokeInstanceMethod(SequenceIterator.class, "materialize");
+                ga.invokeStaticMethod(SequenceTool.class, "toGroundedValue", SequenceIterator.class);
                 methodInfo.placeLabel(doneEvalMaterialize);
                 break;
             case CALL_EVALUATE_OPTIONAL_ITEM:
@@ -396,7 +396,7 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
                     // return SequenceExtent.makeSequenceExtent(expression.iterate(context));
                     visitLineNumber(compiler, ga, exp);
                     compiler.compileToIterator(exp);
-                    ga.invokeInstanceMethod(SequenceIterator.class, "materialize");
+                    ga.invokeStaticMethod(SequenceTool.class, "toGroundedValue", SequenceIterator.class);
                 }
                 break;
 
@@ -441,7 +441,7 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
                             ga.dup();
                             compiler.compileToIterator(child);
                             // Stack: Chain Chain ArrayList ArrayList SeqIterator
-                            ga.invokeInstanceMethod(SequenceIterator.class, "materialize");
+                            ga.invokeStaticMethod(SequenceTool.class, "toGroundedValue", SequenceIterator.class);
                             // Stack: Chain Chain ArrayList ArrayList Sequence
                             ga.invokeInstanceMethod(List.class, "add", Object.class);
                             // Stack: Chain Chain ArrayList boolean
@@ -516,7 +516,7 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
                         }
                     }
                     // Stack: Chain Chain ArrayList
-                    ga.invokeConstructor(ZenoSequence.class, List.class);
+                    ga.invokeStaticMethod(ZenoSequence.class, "fromList", List.class);
                     // Stack: Chain
 
                 }

@@ -8,9 +8,10 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.sort.DocumentOrderIterator;
 import net.sf.saxon.expr.sort.GlobalOrderComparer;
-import net.sf.saxon.expr.sort.ItemOrderComparer;
 import net.sf.saxon.om.SequenceIterator;
 import org.objectweb.asm.Type;
+
+import java.util.Comparator;
 
 public class VennExpressionCompiler extends ToIteratorCompiler {
 
@@ -54,7 +55,7 @@ public class VennExpressionCompiler extends ToIteratorCompiler {
             ga.dup();
             ga.loadLocal(iter0Var);
             ga.invokeStaticMethod(GlobalOrderComparer.class, "getInstance");
-            ga.invokeConstructor(DocumentOrderIterator.class, SequenceIterator.class, ItemOrderComparer.class);
+            ga.invokeConstructor(DocumentOrderIterator.class, SequenceIterator.class, Comparator.class);
             ga.storeLocal(iter0Var);
         }
 
@@ -66,7 +67,7 @@ public class VennExpressionCompiler extends ToIteratorCompiler {
             ga.dup();
             ga.loadLocal(iter1Var);
             ga.invokeStaticMethod(GlobalOrderComparer.class, "getInstance");
-            ga.invokeConstructor(DocumentOrderIterator.class, SequenceIterator.class, ItemOrderComparer.class);
+            ga.invokeConstructor(DocumentOrderIterator.class, SequenceIterator.class, Comparator.class);
             ga.storeLocal(iter1Var);
         }
 
@@ -77,7 +78,7 @@ public class VennExpressionCompiler extends ToIteratorCompiler {
                 ga.loadLocal(iter0Var);
                 ga.loadLocal(iter1Var);
                 ga.invokeStaticMethod(GlobalOrderComparer.class, "getInstance");
-                ga.invokeConstructor(UnionEnumeration.class, SequenceIterator.class, SequenceIterator.class, ItemOrderComparer.class);
+                ga.invokeConstructor(UnionEnumeration.class, SequenceIterator.class, SequenceIterator.class, Comparator.class);
                 return;
             case Token.INTERSECT:
                 ga.newInstance(Type.getType(IntersectionEnumeration.class));
@@ -85,7 +86,7 @@ public class VennExpressionCompiler extends ToIteratorCompiler {
                 ga.loadLocal(iter0Var);
                 ga.loadLocal(iter1Var);
                 ga.invokeStaticMethod(GlobalOrderComparer.class, "getInstance");
-                ga.invokeConstructor(IntersectionEnumeration.class, SequenceIterator.class, SequenceIterator.class, ItemOrderComparer.class);
+                ga.invokeConstructor(IntersectionEnumeration.class, SequenceIterator.class, SequenceIterator.class, Comparator.class);
                 return;
             case Token.EXCEPT:
                 ga.newInstance(Type.getType(DifferenceEnumeration.class));
@@ -93,7 +94,7 @@ public class VennExpressionCompiler extends ToIteratorCompiler {
                 ga.loadLocal(iter0Var);
                 ga.loadLocal(iter1Var);
                 ga.invokeStaticMethod(GlobalOrderComparer.class, "getInstance");
-                ga.invokeConstructor(DifferenceEnumeration.class, SequenceIterator.class, SequenceIterator.class, ItemOrderComparer.class);
+                ga.invokeConstructor(DifferenceEnumeration.class, SequenceIterator.class, SequenceIterator.class, Comparator.class);
                 return;
         }
         allocateStatic(compiler, new UnsupportedOperationException("Unknown operator in Venn Expression"));

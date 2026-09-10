@@ -13,7 +13,7 @@ import net.sf.saxon.value.StringValue;
 public class TranslateCompiler extends ToStringCompiler {
 
     @Override
-    public void compileToPrimitive(CompilerService compiler, Expression expression, Class requiredClass, OnEmpty onEmpty)
+    public void compileToPrimitive(CompilerService compiler, Expression expression, Class<?> requiredClass, OnEmpty onEmpty)
             throws CannotCompileException {
         SystemFunctionCall fnc = (SystemFunctionCall) expression;
         final Translate fn = (Translate) fnc.getTargetFunction();
@@ -39,7 +39,9 @@ public class TranslateCompiler extends ToStringCompiler {
             ga.invokeStaticMethod(Translate.class, "translate", StringValue.class, StringValue.class, StringValue.class);
         }
         if (requiredClass == String.class) {
-            ga.invokeInstanceMethod(CharSequence.class, "toString");
+            ga.invokeInstanceMethod(StringValue.class, "getStringValue");
+        } else {
+            ga.invokeInstanceMethod(StringValue.class, "getUnicodeStringValue");
         }
 
         methodInfo.placeLabel(translateReturn);

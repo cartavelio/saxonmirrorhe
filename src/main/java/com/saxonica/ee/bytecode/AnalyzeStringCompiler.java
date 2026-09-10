@@ -10,6 +10,7 @@ import net.sf.saxon.om.FocusTrackingIterator;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.regex.RegularExpression;
+import net.sf.saxon.str.UnicodeString;
 
 import java.util.List;
 
@@ -31,8 +32,8 @@ public class AnalyzeStringCompiler extends ToIteratorCompiler {
 
 
         compileRegex(compiler, ga, mi, analyzeStr, re);
-        compiler.compileToPrimitive(analyzeStr.getSelect(), CharSequence.class, OnEmpty.RETURN_EMPTY_STRING);
-        ga.invokeInstanceMethod(RegularExpression.class, "analyze", CharSequence.class);
+        compiler.compileToPrimitive(analyzeStr.getSelect(), UnicodeString.class, OnEmpty.RETURN_EMPTY_STRING);
+        ga.invokeInstanceMethod(RegularExpression.class, "analyze", UnicodeString.class);
         //RegexIterator on stack
         int iterVar = ga.newLocal(RegexIterator.class);
         ga.storeLocal(iterVar);
@@ -103,8 +104,8 @@ public class AnalyzeStringCompiler extends ToIteratorCompiler {
 
 
         compileRegex(compiler, ga, mi, analyzeStr, re);
-        compiler.compileToPrimitive(analyzeStr.getSelect(), CharSequence.class, OnEmpty.RETURN_EMPTY_STRING);
-        ga.invokeInstanceMethod(RegularExpression.class, "analyze", CharSequence.class);
+        compiler.compileToPrimitive(analyzeStr.getSelect(), UnicodeString.class, OnEmpty.RETURN_EMPTY_STRING);
+        ga.invokeInstanceMethod(RegularExpression.class, "analyze", UnicodeString.class);
         //RegexIterator on stack
         int iterVar = ga.newLocal(RegexIterator.class);
         ga.storeLocal(iterVar);
@@ -189,11 +190,11 @@ public class AnalyzeStringCompiler extends ToIteratorCompiler {
         if (re == null) {
             compiler.generateGetContext();
             ga.invokeInstanceMethod(XPathContext.class, "getConfiguration");
-            compiler.compileToPrimitive(analyzeStr.getRegex(), CharSequence.class, OnEmpty.RETURN_EMPTY_STRING);
+            compiler.compileToPrimitive(analyzeStr.getRegex(), UnicodeString.class, OnEmpty.RETURN_EMPTY_STRING);
             compiler.compileToPrimitive(analyzeStr.getFlags(), String.class, OnEmpty.RETURN_EMPTY_STRING);
             ga.push("XP30");
             ga.pushNull();
-            ga.invokeInstanceMethod(Configuration.class, "compileRegularExpression", CharSequence.class, String.class, String.class, List.class);
+            ga.invokeInstanceMethod(Configuration.class, "compileRegularExpression", UnicodeString.class, String.class, String.class, List.class);
 
         } else {
             allocateStatic(compiler, re);

@@ -8,6 +8,8 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.Comment;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 
 
 /**
@@ -17,8 +19,8 @@ public class CommentCompiler extends SimpleNodeConstructorCompiler {
 
     /**
      * Compile code to check the content of the node, and adjust it if necessary
-     * On entry the proposed content is on the stack as a CharSequence; on exit the revised content
-     * must be on the stack as a CharSequence.
+     * On entry the proposed content is on the stack as a UnicodeString; on exit the revised content
+     * must be on the stack as a UnicodeString.
      *
      * @param compiler      the compiler service
      * @param expression    the expression to be compiled
@@ -30,9 +32,9 @@ public class CommentCompiler extends SimpleNodeConstructorCompiler {
         Generator ga = compiler.getCurrentGenerator();
         ga.invokeInstanceMethod(Object.class, "toString");
         if (comment.isXSLT()) {
-            ga.invokeStaticMethod(Comment.class, "checkContentXSLT", String.class);
+            ga.invokeStaticMethod(Comment.class, "checkContentXSLT", UnicodeString.class);
         } else {
-            ga.invokeStaticMethod(Comment.class, "checkContentXQuery", String.class);
+            ga.invokeStaticMethod(Comment.class, "checkContentXQuery", UnicodeString.class);
         }
     }
 
@@ -48,7 +50,7 @@ public class CommentCompiler extends SimpleNodeConstructorCompiler {
         Generator ga = compiler.getCurrentGenerator();
         allocateStatic(compiler, Loc.NONE);
         ga.push(ReceiverOption.NONE);
-        ga.invokeInstanceMethod(Outputter.class, "comment", CharSequence.class, Location.class, Integer.TYPE);
+        ga.invokeInstanceMethod(Outputter.class, "comment", CodePoints.class, Location.class, Integer.TYPE);
     }
 }
 

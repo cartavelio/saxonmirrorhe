@@ -1,14 +1,15 @@
 package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.*;
-import net.sf.saxon.functions.hof.CurriedFunction;
-import net.sf.saxon.functions.hof.PartialApply;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.s9api.Location;
+import net.sf.saxon.functions.hof.CurriedFunction;
+import net.sf.saxon.functions.hof.PartialApply;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import org.objectweb.asm.Type;
 
@@ -53,7 +54,7 @@ public class PartialApplyCompiler extends ToItemCompiler {
                 ga.loadLocal(valuesVar);
                 ga.push(i);
                 compiler.compileToIterator(expr);
-                ga.invokeInstanceMethod(SequenceIterator.class, "materialize");
+                ga.invokeStaticMethod(SequenceTool.class, "toGroundedValue", SequenceIterator.class);
                 ga.arrayStore(Type.getType(Sequence.class));
             }
         }

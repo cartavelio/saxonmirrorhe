@@ -4,7 +4,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.Comment;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.*;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
@@ -32,7 +32,7 @@ public class NewComment extends SystemFunction {
         Orphan orphan = new Orphan(context.getConfiguration());
         orphan.setNodeKind(Type.COMMENT);
         Item first = arguments[0].head();
-        UnicodeString value = first == null ? EmptyUniString.getInstance() : first.getUnicodeStringValue();
+        UnicodeString value = first == null ? EmptyUnicodeString.getInstance() : first.getUnicodeStringValue();
         value = Comment.checkContentXSLT(value);
         orphan.setStringValue(value);
         return orphan;

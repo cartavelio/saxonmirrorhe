@@ -2,7 +2,9 @@ package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.value.*;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.value.Cardinality;
+import net.sf.saxon.value.StringValue;
 
 /**
  * Generate bytecode for evaluation of expressions that return a single string (or an empty sequence)
@@ -38,15 +40,15 @@ public abstract class ToStringCompiler extends ToItemCompiler {
         if (Cardinality.allowsZero(expression.getCardinality())) {
             LabelInfo returnNull = methodInfo.newLabel("returnNull");
             LabelInfo exit = methodInfo.newLabel("exit");
-            compileToPrimitive(compiler, expression, CharSequence.class, new OnEmpty.UnwindAndJump(returnNull));
-            ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
+            compileToPrimitive(compiler, expression, UnicodeString.class, new OnEmpty.UnwindAndJump(returnNull));
+            ga.invokeStaticMethod(StringValue.class, "makeUStringValue", UnicodeString.class);
             ga.goTo(exit);
             methodInfo.placeLabel(returnNull);
             ga.pushNull();
             methodInfo.placeLabel(exit);
         } else {
-            compileToPrimitive(compiler, expression, CharSequence.class, OnEmpty.RETURN_NULL);
-            ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
+            compileToPrimitive(compiler, expression, UnicodeString.class, OnEmpty.RETURN_NULL);
+            ga.invokeStaticMethod(StringValue.class, "makeUStringValue", UnicodeString.class);
         }
 
     }

@@ -23,8 +23,8 @@ public class StringToIntegerCompiler extends ConverterCompiler.GenericConverterC
         if (allowsEmpty) {
             LabelInfo empty = methodInfo.newLabel("returnEmpty");
             LabelInfo end = methodInfo.newLabel("end");
-            compiler.compileToPrimitive(base, CharSequence.class, new OnEmpty.UnwindAndJump(empty));
-            ga.invokeStaticMethod(IntegerValue.class, "stringToInteger", CharSequence.class);
+            compiler.compileToPrimitive(base, String.class, new OnEmpty.UnwindAndJump(empty));
+            ga.invokeStaticMethod(IntegerValue.class, "stringToInteger", String.class);
             ga.invokeInstanceMethod(ConversionResult.class, "asAtomic");
             ga.checkClass(IntegerValue.class);
             ga.goTo(end);
@@ -32,8 +32,8 @@ public class StringToIntegerCompiler extends ConverterCompiler.GenericConverterC
             ga.pushNull();
             methodInfo.placeLabel(end);
         } else {
-            compiler.compileToPrimitive(base, CharSequence.class, OnEmpty.RETURN_NULL);
-            ga.invokeStaticMethod(IntegerValue.class, "stringToInteger", CharSequence.class);
+            compiler.compileToPrimitive(base, String.class, OnEmpty.RETURN_NULL);
+            ga.invokeStaticMethod(IntegerValue.class, "stringToInteger", String.class);
             ga.invokeInstanceMethod(ConversionResult.class, "asAtomic");
             ga.checkClass(IntegerValue.class);
         }

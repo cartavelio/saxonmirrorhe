@@ -8,7 +8,6 @@ import net.sf.saxon.expr.TailIterator;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.MemoSequence;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.GroundedIterator;
 import net.sf.saxon.type.TypeHierarchy;
@@ -17,8 +16,6 @@ import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.NumericValue;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
-
-import java.util.EnumSet;
 
 /**
  * Bytecode generator for the saxon:item-at() function
@@ -41,6 +38,7 @@ public class SubscriptExpressionCompiler extends ToItemCompiler {
             GroundedValue value = ((Literal) index).getGroundedValue();
             if (value instanceof NumericValue && ((NumericValue) value).isWholeNumber()) {
                 LabelInfo grounded = methodInfo.newLabel("grounded");
+                LabelInfo notGrounded = methodInfo.newLabel("notGrounded");
                 LabelInfo memo = methodInfo.newLabel("memo");
                 LabelInfo end = methodInfo.newLabel("end");
                 int i;
@@ -57,13 +55,14 @@ public class SubscriptExpressionCompiler extends ToItemCompiler {
                 ga.ifInstance(MemoSequence.ProgressiveIterator.class, memo);
                 // assert stack SequenceIterator
                 ga.dup();
-                // assert stack SequenceIterator SequenceIterator
-                ga.invokeInstanceMethod(SequenceIterator.class, "getProperties");
-                // assert stack SequenceIterator EnumSet
-                allocateStatic(compiler, SequenceIteratorProperty.GROUNDED);
-                // assert stack SequenceIterator EnumSet Enum
-                ga.invokeInstanceMethod(EnumSet.class, "contains", Object.class);
+
+                ga.ifNotInstance(GroundedIterator.class, notGrounded);
+                ga.dup();
+                ga.checkClass(GroundedIterator.class);
+                ga.invokeInstanceMethod(GroundedIterator.class, "isActuallyGrounded");
                 ga.ifTrue(grounded);
+                methodInfo.placeLabel(notGrounded);
+
                 // assert stack SequenceIterator
                 ga.push(i);
                 // assert stack SequenceIterator int
@@ -133,6 +132,7 @@ public class SubscriptExpressionCompiler extends ToItemCompiler {
         LabelInfo nonZero = methodInfo.newLabel("nonZero");
         LabelInfo memo = methodInfo.newLabel("memo");
         LabelInfo grounded = methodInfo.newLabel("grounded");
+        LabelInfo notGrounded = methodInfo.newLabel("notGrounded");
 
         ga.push(1);
         ga.math(Generator.SUB, Type.INT_TYPE);
@@ -158,12 +158,13 @@ public class SubscriptExpressionCompiler extends ToItemCompiler {
         // Stack: baseIter
         ga.dup();
         // Stack: baseIter baseIter
-        ga.invokeInstanceMethod(SequenceIterator.class, "getProperties");
-        // Stack: baseIter EnumSet
-        allocateStatic(compiler, SequenceIteratorProperty.GROUNDED);
-        ga.invokeInstanceMethod(EnumSet.class, "contains", Object.class);
+        ga.ifNotInstance(GroundedIterator.class, notGrounded);
+        ga.dup();
+        ga.checkClass(GroundedIterator.class);
+        ga.invokeInstanceMethod(GroundedIterator.class, "isActuallyGrounded");
         ga.ifTrue(grounded);
         // Stack: baseIter
+        methodInfo.placeLabel(notGrounded);
         ga.loadLocal(indexVar);
         ga.push(1);
         ga.math(GeneratorAdapter.ADD, Type.INT_TYPE);

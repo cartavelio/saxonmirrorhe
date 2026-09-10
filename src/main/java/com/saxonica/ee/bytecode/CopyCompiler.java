@@ -18,6 +18,8 @@ import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.*;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.commons.TableSwitchGenerator;
@@ -456,10 +458,10 @@ public class CopyCompiler extends ToPushCompiler {
 
                     allocateStatic(compiler, schemaType);
                     ga.loadLocal(selectedItemVar);
-                    ga.invokeInstanceMethod(Item.class, "getStringValueCS");
+                    ga.invokeInstanceMethod(Item.class, "getUnicodeStringValue");
                     allocateStatic(compiler, DummyNamespaceResolver.getInstance());
                     allocateStatic(compiler, compiler.getConfiguration().getConversionRules());
-                    ga.invokeInstanceMethod(SimpleType.class, "validateContent", CharSequence.class, NamespaceResolver.class, ConversionRules.class);
+                    ga.invokeInstanceMethod(SimpleType.class, "validateContent", UnicodeString.class, NamespaceResolver.class, ConversionRules.class);
                     LabelInfo validationOk = mi.newLabel("validationOk");
                     ga.dup();
                     // assert stack: err err
@@ -486,11 +488,11 @@ public class CopyCompiler extends ToPushCompiler {
                     ga.pop();
                     allocateStatic(compiler, schemaType);
                     ga.loadLocal(selectedItemVar);
-                    ga.invokeInstanceMethod(Item.class, "getStringValueCS");
+                    ga.invokeInstanceMethod(Item.class, "getStringValue");
                     allocateStatic(compiler, ((Expression) expression).getLocation());
                     ga.push(ReceiverOption.NONE);
                     ga.invokeInstanceMethod(Outputter.class, "attribute", NodeName.class, SimpleType.class,
-                                            CharSequence.class, Location.class, Integer.TYPE);
+                                            String.class, Location.class, Integer.TYPE);
                 }
             } else {
                 compiler.generateDynamicError("Cannot validate an attribute against a complex type",
@@ -520,12 +522,13 @@ public class CopyCompiler extends ToPushCompiler {
             ga.getStaticField(BuiltInAtomicType.class, "UNTYPED_ATOMIC", BuiltInAtomicType.class);
         }
         ga.loadLocal(selectedItemVar);
-        ga.invokeInstanceMethod(Item.class, "getStringValueCS");
+        ga.invokeInstanceMethod(Item.class, "getUnicodeStringValue");
         FixedAttributeCompiler.generateAttributeValidationPushCode(compiler, expression, null, nodeNameVar);
+        ga.invokeInstanceMethod(UnicodeString.class, "toString" );
         allocateStatic(compiler, ((Expression) expression).getLocation());
         ga.push(ReceiverOption.NONE);
         ga.invokeInstanceMethod(Outputter.class, "attribute", NodeName.class, SimpleType.class,
-                                CharSequence.class, Location.class, Integer.TYPE);
+                                String.class, Location.class, Integer.TYPE);
 
     }
 
@@ -560,11 +563,11 @@ public class CopyCompiler extends ToPushCompiler {
         compiler.generateGetOutputter();
         ga.loadLocal(selectedItemVar);
         ga.checkClass(NodeInfo.class);
-        ga.invokeInstanceMethod(NodeInfo.class, "getStringValueCS");
+        ga.invokeInstanceMethod(NodeInfo.class, "getUnicodeStringValue");
         LabelInfo nonEmptyFi = mi.newLabel("nonEmptyFi");
         allocateStatic(compiler, expression.getLocation());
         ga.push(ReceiverOption.NONE);
-        ga.invokeInstanceMethod(Outputter.class, "characters", CharSequence.class, Location.class, Integer.TYPE);
+        ga.invokeInstanceMethod(Outputter.class, "characters", UnicodeString.class, Location.class, Integer.TYPE);
 
     }
 
@@ -575,10 +578,10 @@ public class CopyCompiler extends ToPushCompiler {
         compiler.generateGetOutputter();
         ga.loadLocal(selectedItemVar);
         ga.checkClass(NodeInfo.class);
-        ga.invokeInstanceMethod(NodeInfo.class, "getStringValueCS");
+        ga.invokeInstanceMethod(NodeInfo.class, "getUnicodeStringValue");
         allocateStatic(compiler, expression.getLocation());
         ga.push(ReceiverOption.NONE);
-        ga.invokeInstanceMethod(Outputter.class, "comment", CharSequence.class, Location.class, Integer.TYPE);
+        ga.invokeInstanceMethod(Outputter.class, "comment", UnicodeString.class, Location.class, Integer.TYPE);
 
     }
 
@@ -593,10 +596,10 @@ public class CopyCompiler extends ToPushCompiler {
         ga.invokeInstanceMethod(NodeInfo.class, "getDisplayName");
         ga.loadLocal(selectedItemVar);
         ga.checkClass(NodeInfo.class);
-        ga.invokeInstanceMethod(NodeInfo.class, "getStringValueCS");
+        ga.invokeInstanceMethod(NodeInfo.class, "getUnicodeStringValue");
         allocateStatic(compiler, expression.getLocation());
         ga.push(ReceiverOption.NONE);
-        ga.invokeInstanceMethod(Outputter.class, "processingInstruction", String.class, CharSequence.class, Location.class, Integer.TYPE);
+        ga.invokeInstanceMethod(Outputter.class, "processingInstruction", String.class, CodePoints.class, Location.class, Integer.TYPE);
 
     }
 

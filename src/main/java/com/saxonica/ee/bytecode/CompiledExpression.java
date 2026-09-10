@@ -10,6 +10,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SchemaType;
@@ -209,6 +210,10 @@ public class CompiledExpression extends Expression {
         } catch (XPathException e) {
             e.maybeSetLocation(getInterpretedExpression().getLocation());
             throw e;
+        } catch (UncheckedXPathException e) {
+            XPathException xe = e.getXPathException();
+            xe.maybeSetLocation(getInterpretedExpression().getLocation());
+            throw e;
         }
     }
 
@@ -219,6 +224,10 @@ public class CompiledExpression extends Expression {
         } catch (XPathException e) {
             e.maybeSetLocation(getInterpretedExpression().getLocation());
             throw e;
+        } catch (UncheckedXPathException e) {
+            XPathException xe = e.getXPathException();
+            xe.maybeSetLocation(getInterpretedExpression().getLocation());
+            throw xe;
         }
     }
 
@@ -228,6 +237,10 @@ public class CompiledExpression extends Expression {
             return byteCode.effectiveBooleanValue(context);
         } catch (XPathException e) {
             e.maybeSetLocation(getInterpretedExpression().getLocation());
+            throw e;
+        } catch (UncheckedXPathException e) {
+            XPathException xe = e.getXPathException();
+            xe.maybeSetLocation(getInterpretedExpression().getLocation());
             throw e;
         }
     }

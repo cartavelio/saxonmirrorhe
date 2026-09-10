@@ -7,12 +7,11 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.TypeHierarchy;
-
-import java.util.function.Predicate;
 
 /**
  * Generate bytecode for evaluation of an AxisExpression
@@ -114,13 +113,13 @@ public class AxisExpressionCompiler extends ToIteratorCompiler {
                 default:
                     throw new AssertionError();
             }
-            ga.invokeInstanceMethod(NodeInfo.class, "iterateAxis", Integer.TYPE, Predicate.class);
+            ga.invokeInstanceMethod(NodeInfo.class, "iterateAxis", Integer.TYPE, NodePredicate.class);
 
         } else {
 
             ga.push(axis);
             allocateStatic(compiler, test);
-            ga.invokeInstanceMethod(NodeInfo.class, "iterateAxis", Integer.TYPE, Predicate.class);
+            ga.invokeInstanceMethod(NodeInfo.class, "iterateAxis", Integer.TYPE, NodePredicate.class);
         }
     }
 

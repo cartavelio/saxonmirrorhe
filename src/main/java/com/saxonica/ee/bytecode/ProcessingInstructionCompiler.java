@@ -5,8 +5,10 @@ import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.ProcessingInstruction;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.NameChecker;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.AnyURIValue;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
@@ -53,7 +55,7 @@ public class ProcessingInstructionCompiler extends SimpleNodeConstructorCompiler
             ga.ifNotInstance(StringValue.class, isNotString);
             ga.dup();
             ga.ifInstance(AnyURIValue.class, isNotString);
-            ga.invokeInstanceMethod(AtomicValue.class, "getStringValueCS");
+            ga.invokeInstanceMethod(AtomicValue.class, "getStringValue");
             ga.goTo(isString);
 
             methodInfo.placeLabel(isNotString);
@@ -61,11 +63,11 @@ public class ProcessingInstructionCompiler extends SimpleNodeConstructorCompiler
 
             methodInfo.placeLabel(isString);
         }
-        ga.invokeStaticMethod(Whitespace.class, "trim", CharSequence.class);
+        ga.invokeStaticMethod(Whitespace.class, "trim", String.class);
         LabelInfo validNCName = methodInfo.newLabel("validNCName");
         LabelInfo notEqualXML = methodInfo.newLabel("PINotEqualXML");
         ga.dup();
-        ga.invokeStaticMethod(NameChecker.class, "isValidNCName", CharSequence.class);
+        ga.invokeStaticMethod(NameChecker.class, "isValidNCName", String.class);
         ga.ifTrue(validNCName);
         compiler.generateParameterizedDynamicError(
                 new MessageTemplate(ga, "Invalid processing instruction name: {$1}", -1),
@@ -92,9 +94,9 @@ public class ProcessingInstructionCompiler extends SimpleNodeConstructorCompiler
         Generator ga = compiler.getCurrentGenerator();
         ga.invokeInstanceMethod(Object.class, "toString");
         if (procInstr.isXSLT()) {
-            ga.invokeStaticMethod(ProcessingInstruction.class, "checkContentXSLT", String.class);
+            ga.invokeStaticMethod(ProcessingInstruction.class, "checkContentXSLT", UnicodeString.class);
         } else {
-            ga.invokeStaticMethod(ProcessingInstruction.class, "checkContentXQuery", String.class);
+            ga.invokeStaticMethod(ProcessingInstruction.class, "checkContentXQuery", UnicodeString.class);
         }
     }
 
@@ -110,7 +112,7 @@ public class ProcessingInstructionCompiler extends SimpleNodeConstructorCompiler
         Generator ga = compiler.getCurrentGenerator();
         allocateStatic(compiler, expression.getLocation());
         ga.push(ReceiverOption.NONE);
-        ga.invokeInstanceMethod(Outputter.class, "processingInstruction", String.class, CharSequence.class, Location.class, Integer.TYPE);
+        ga.invokeInstanceMethod(Outputter.class, "processingInstruction", String.class, CodePoints.class, Location.class, Integer.TYPE);
     }
 
 

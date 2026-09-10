@@ -7,10 +7,11 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.ComputedAttribute;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardURIChecker;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SimpleType;
@@ -54,7 +55,7 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
 
 
         // push the content onto the stack
-        compiler.compileToPrimitive(select, CharSequence.class, OnEmpty.RETURN_EMPTY_STRING);
+        compiler.compileToPrimitive(select, UnicodeString.class, OnEmpty.RETURN_EMPTY_STRING);
 
         FixedAttributeCompiler.generateAttributeValidationPushCode(compiler, (ComputedAttribute) expression, null, nodeNameVar);
 
@@ -62,14 +63,14 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
         ga.invokeInstanceMethod(NodeName.class, "getFingerprint");
         ga.push(StandardNames.XML_ID);
         ga.ifICmp(Generator.NE, notEqual.label());
-        ga.invokeStaticMethod(Whitespace.class, "collapseWhitespace", CharSequence.class);
+        ga.invokeStaticMethod(Whitespace.class, "collapseWhitespace", UnicodeString.class);
         methodInfo.placeLabel(notEqual);
-
+        ga.invokeInstanceMethod(UnicodeString.class, "toString");
         // Complete the call on receiver.attribute()
         allocateStatic(compiler, locationId);
         ga.push(opt);
         visitAnnotation(compiler, "ComputedAttributeCompiler - call attribute()");
-        ga.invokeInstanceMethod(Outputter.class, "attribute", NodeName.class, SimpleType.class, CharSequence.class, Location.class, Integer.TYPE);
+        ga.invokeInstanceMethod(Outputter.class, "attribute", NodeName.class, SimpleType.class, String.class, Location.class, Integer.TYPE);
         if (done != null) {
             methodInfo.placeLabel(done);
         }
@@ -85,9 +86,9 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
         ComputedAttribute instr = (ComputedAttribute) expression;
 
         Expression select = instr.getSelect();
-        compiler.compileToPrimitive(select, CharSequence.class, OnEmpty.RETURN_EMPTY_STRING);
+        compiler.compileToPrimitive(select, UnicodeString.class, OnEmpty.RETURN_EMPTY_STRING);
 
-        int contentVar = methodInfo.allocateLocal(CharSequence.class);
+        int contentVar = methodInfo.allocateLocal(UnicodeString.class);
         ga.storeLocal(contentVar);
 
         LabelInfo done = null;
@@ -104,7 +105,7 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
         ga.invokeInstanceMethod(Orphan.class, "setNodeKind", Short.TYPE);
         ga.loadLocal(oVar);
         ga.loadLocal(contentVar);
-        ga.invokeInstanceMethod(Orphan.class, "setStringValue", CharSequence.class);
+        ga.invokeInstanceMethod(Orphan.class, "setStringValue", UnicodeString.class);
         ga.loadLocal(oVar);
         pushNodeName(compiler, expression);
         ga.invokeInstanceMethod(Orphan.class, "setNodeName", NodeName.class);
@@ -165,8 +166,7 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
         ga.dup();
         ga.ifNotInstance(StringValue.class, notStrInstance);
         ga.invokeInstanceMethod(Item.class, "getStringValue");
-        ga.invokeStaticMethod(Whitespace.class, "trimWhitespace", CharSequence.class);
-        ga.invokeInstanceMethod(CharSequence.class, "toString");
+        ga.invokeStaticMethod(Whitespace.class, "trim", String.class);
         // rawName
         int rawNameVar = methodInfo.allocateLocal(String.class);
         ga.storeLocal(rawNameVar);
@@ -174,7 +174,6 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
         // rawName
         if (namespace == null) {
             ga.dup();
-            ga.invokeInstanceMethod(CharSequence.class, "toString");
             ga.push("xmlns");
             ga.invokeInstanceMethod(String.class, "equals", Object.class);
             ga.ifFalse(notEqual_rawName);
@@ -191,7 +190,8 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
         ga.invokeInstanceMethod(String.class, "startsWith", String.class);
         ga.ifFalse(notEQName);
         ga.loadLocal(rawNameVar);
-        ga.invokeStaticMethod(StructuredQName.class, "fromEQName", CharSequence.class);
+        ga.push(compAttr.isXSLT() ? "XTDE0860" : "XQDY0044");
+        ga.invokeStaticMethod(Callback.class, "sqNameFromValidatedEQName", String.class, String.class);
         ga.dup();
         ga.invokeInstanceMethod(StructuredQName.class, "getLocalPart");
         ga.storeLocal(localNameVar);
@@ -210,7 +210,7 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
         ga.visitTryCatchBlock(tryBegin, tryEnd, catchBegin, "net/sf/saxon/om/QNameException");
 
         methodInfo.placeLabel(tryBegin);
-        ga.invokeStaticMethod(NameChecker.class, "getQNameParts", CharSequence.class);
+        ga.invokeStaticMethod(NameChecker.class, "getQNameParts", String.class);
         methodInfo.placeLabel(tryEnd);
         ga.dup();
         //retrieve prefix
@@ -379,7 +379,7 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
 
                 ga.invokeStaticMethod(StandardURIChecker.class, "getInstance");
                 ga.loadLocal(uriVar);
-                ga.invokeInstanceMethod(StandardURIChecker.class, "isValidURI", CharSequence.class);
+                ga.invokeInstanceMethod(StandardURIChecker.class, "isValidURI", String.class);
                 ga.ifTrue(uriNotNull);
                 compiler.generateDynamicError("The value of the namespace attribute must be a valid URI", "XTDE0865", compAttr.getLocation(), false);
                 ga.goTo(end);

@@ -7,7 +7,10 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.CodepointCollatingComparer;
+import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.expr.sort.ContextFreeAtomicComparer;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
@@ -101,7 +104,7 @@ public class ValueComparisonCompiler extends ToBooleanCompiler {
         LabelInfo returnTrue = methodInfo.newLabel("returnTrueValueComp");
         //LabelInfo returnNullItem = methodInfo.newLabel("returnNullItem");
         LabelInfo returnEmpty = null;
-        Stack<Class> stack = new Stack<>();
+        Stack<Class<?>> stack = new Stack<>();
 
 
         boolean finished = false;
@@ -121,7 +124,6 @@ public class ValueComparisonCompiler extends ToBooleanCompiler {
                 emptyOperandReturn = returnFalse;
             }
             OnEmpty onEmptyBoolean = new OnEmpty.UnwindAndJump(stack, emptyOperandReturn);
-            OnEmpty onEmptyItem = new OnEmpty.UnwindAndJump(stack, emptyOperandReturn);
 
             if (type0 == BuiltInAtomicType.BOOLEAN && !maybeEmpty0 && !maybeEmpty1) {
                 compiler.compileToBoolean(lhs);
@@ -344,9 +346,13 @@ public class ValueComparisonCompiler extends ToBooleanCompiler {
                     case Token.FLT:
                     case Token.FGE:
                     case Token.FLE:
+                        ga.invokeStaticMethod(CodepointCollator.class, "getInstance");
                         ga.loadLocal(op0Var);
+                        ga.invokeInstanceMethod(Item.class, "getUnicodeStringValue");
                         ga.loadLocal(op1Var);
-                        ga.invokeInstanceMethod(StringValue.class, "compareTo", StringValue.class);
+                        ga.invokeInstanceMethod(Item.class, "getUnicodeStringValue");
+                        ga.invokeInstanceMethod(CodepointCollator.class, "compareStrings",
+                                                UnicodeString.class, UnicodeString.class);
                         ga.ifZCmp(translateOperator(op), returnTrue.label());
                         ga.goTo(returnFalse);
                         break;

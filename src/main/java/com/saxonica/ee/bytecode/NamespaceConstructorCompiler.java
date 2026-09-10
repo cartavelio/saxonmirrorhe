@@ -48,7 +48,7 @@ public class NamespaceConstructorCompiler extends SimpleNodeConstructorCompiler 
         LabelInfo nameOK = methodInfo.newLabel("nameOK");
         if (((NamespaceConstructor) expression).isXSLT()) {
             // Value is always a string in XSLT
-            compiler.compileToPrimitive(instr.getNameExp(), CharSequence.class, OnEmpty.RETURN_NULL);
+            compiler.compileToPrimitive(instr.getNameExp(), String.class, OnEmpty.RETURN_NULL);
         } else {
             // In XQuery, need to check the returned type
             compiler.compileToItem(instr.getNameExp());
@@ -68,7 +68,7 @@ public class NamespaceConstructorCompiler extends SimpleNodeConstructorCompiler 
             ga.ifNotInstance(StringValue.class, isNotString);
             ga.dup();
             ga.ifInstance(AnyURIValue.class, isNotString);
-            ga.invokeInstanceMethod(AtomicValue.class, "getStringValueCS");
+            ga.invokeInstanceMethod(AtomicValue.class, "getStringValue");
             ga.goTo(isString);
 
             methodInfo.placeLabel(isNotString);
@@ -80,15 +80,14 @@ public class NamespaceConstructorCompiler extends SimpleNodeConstructorCompiler 
 
         // assert stack: prefix
 
-        ga.invokeStaticMethod(Whitespace.class, "trim", CharSequence.class);
-        ga.invokeInstanceMethod(Object.class, "toString");
+        ga.invokeStaticMethod(Whitespace.class, "trim", String.class);
 
         ga.dup();
-        ga.invokeInstanceMethod(CharSequence.class, "length");
+        ga.invokeInstanceMethod(String.class, "length");
         ga.ifZCmp(GeneratorAdapter.EQ, nameOK.label());
 
         ga.dup();
-        ga.invokeStaticMethod(NameChecker.class, "isValidNCName", CharSequence.class);
+        ga.invokeStaticMethod(NameChecker.class, "isValidNCName", String.class);
         LabelInfo validNCName = methodInfo.newLabel("validNCName");
         ga.ifTrue(validNCName);
         compiler.generateDynamicError("Namespace prefix is invalid",
@@ -127,7 +126,7 @@ public class NamespaceConstructorCompiler extends SimpleNodeConstructorCompiler 
         // assert stack : Receiver prefix uri prefix uri
         ga.dup();
         // assert stack : Receiver prefix uri prefix uri uri
-        ga.invokeInstanceMethod(CharSequence.class, "length");
+        ga.invokeInstanceMethod(String.class, "length");
         // assert stack : Receiver prefix uri prefix uri length
         LabelInfo nonEmpty = methodInfo.newLabel("nonEmptyUri");
         ga.ifZCmp(GeneratorAdapter.NE, nonEmpty.label());
@@ -170,7 +169,7 @@ public class NamespaceConstructorCompiler extends SimpleNodeConstructorCompiler 
             // StandardURIChecker.getInstance().isValidURI(uri)
             ga.invokeStaticMethod(StandardURIChecker.class, "getInstance");
             ga.swap();
-            ga.invokeInstanceMethod(StandardURIChecker.class, "isValidURI", CharSequence.class);
+            ga.invokeInstanceMethod(StandardURIChecker.class, "isValidURI", String.class);
             ga.ifTrue(validURI);
             compiler.generateDynamicError("The string value of the constructed namespace node must be a valid URI", "XTDE0905", expression.getLocation(), false);
             methodInfo.placeLabel(validURI);

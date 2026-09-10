@@ -4,6 +4,7 @@ import com.saxonica.ee.bytecode.ExpressionCompiler;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.CastExpression;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.Converter;
 import net.sf.saxon.type.TypeHierarchy;
@@ -31,20 +32,20 @@ public class IntegerToStringCompiler extends ConverterCompiler {
         if (allowsEmpty) {
             LabelInfo empty = methodInfo.newLabel("returnEmpty");
             LabelInfo end = methodInfo.newLabel("end");
-            compileToPrimitive(compiler, expression, CharSequence.class, new OnEmpty.UnwindAndJump(empty));
-            ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
+            compileToPrimitive(compiler, expression, UnicodeString.class, new OnEmpty.UnwindAndJump(empty));
+            ga.invokeStaticMethod(StringValue.class, "makeUStringValue", UnicodeString.class);
             ga.goTo(end);
             methodInfo.placeLabel(empty);
             ga.pushNull();
             methodInfo.placeLabel(end);
         } else {
-            compileToPrimitive(compiler, expression, CharSequence.class, OnEmpty.RETURN_NULL);
-            ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
+            compileToPrimitive(compiler, expression, UnicodeString.class, OnEmpty.RETURN_NULL);
+            ga.invokeStaticMethod(StringValue.class, "makeUStringValue", UnicodeString.class);
         }
     }
 
     @Override
-    public void compileToPrimitive(CompilerService compiler, Expression expression, Class requiredClass, OnEmpty onEmpty) throws CannotCompileException {
+    public void compileToPrimitive(CompilerService compiler, Expression expression, Class<?> requiredClass, OnEmpty onEmpty) throws CannotCompileException {
         CastExpression cast = (CastExpression) expression;
         final Expression base = cast.getBaseExpression();
         final Generator ga = compiler.getCurrentGenerator();
@@ -71,7 +72,7 @@ public class IntegerToStringCompiler extends ConverterCompiler {
             if (requiredClass == String.class) {
                 ga.invokeInstanceMethod(IntegerValue.class, "getStringValue");
             } else {
-                ga.invokeInstanceMethod(IntegerValue.class, "getStringValueCS");
+                ga.invokeInstanceMethod(IntegerValue.class, "getUnicodeStringValue");
             }
         }
         methodInfo.placeLabel(end);

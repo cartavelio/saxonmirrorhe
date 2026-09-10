@@ -176,7 +176,7 @@ public class GeneratedMethodInfo {
      * @return the slot number on the stack to be used for the variable
      */
 
-    public int allocateLocal(Class theClass) {
+    public int allocateLocal(Class<?> theClass) {
         for (LocalSlotInfo slot : slotList) {
             if (slot.theClass == theClass && !slot.inUse) {
                 //System.err.println("ALLOCATE " + theClass + " - REUSE " + slot.slotNumber);

@@ -8,6 +8,7 @@ import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
@@ -117,8 +118,8 @@ public class SingletonAtomizerCompiler extends ToItemCompiler {
                 ga.ifICmp(GeneratorAdapter.GT, moreThanOne.label());
 
                 ga.loadLocal(itemVar);
-                ga.invokeInstanceMethod(Item.class, "getStringValue");
-                ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
+                ga.invokeInstanceMethod(Item.class, "getUnicodeStringValue");
+                ga.invokeStaticMethod(StringValue.class, "makeUStringValue", UnicodeString.class);
                 ga.storeLocal(resultVar);
                 ga.goTo(loop);
                 methodInfo.placeLabel(notExternalLab);

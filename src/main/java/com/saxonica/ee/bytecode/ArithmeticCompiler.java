@@ -6,6 +6,7 @@ import net.sf.saxon.expr.Calculator;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Token;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
@@ -124,7 +125,7 @@ public class ArithmeticCompiler extends ToItemCompiler {
 
         ItemType t0 = exp.getLhsExpression().getItemType();
         ItemType t1 = exp.getRhsExpression().getItemType();
-        if (requiredClass == String.class || requiredClass == CharSequence.class) {
+        if (requiredClass == String.class || requiredClass == UnicodeString.class) {
             compiler.compileToItem(exp.getLhsExpression());
             ga.checkClass(NumericValue.class);
             ga.invokeInstanceMethod(NumericValue.class, "getDoubleValue");
@@ -134,7 +135,7 @@ public class ArithmeticCompiler extends ToItemCompiler {
             generateDoubleOperator((ArithmeticExpression) expression, ga);
             ga.invokeStaticMethod(DoubleValue.class, "doubleToString", Double.TYPE);
             if (requiredClass == String.class) {
-                ga.invokeInstanceMethod(CharSequence.class, "toString");
+                ga.invokeInstanceMethod(UnicodeString.class, "toString");
             }
 
         } else if (requiredClass == Double.TYPE) {

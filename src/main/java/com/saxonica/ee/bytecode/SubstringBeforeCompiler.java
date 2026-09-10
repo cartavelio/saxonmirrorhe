@@ -6,6 +6,7 @@ import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.functions.SubstringBefore;
 import net.sf.saxon.lib.SubstringMatcher;
+import net.sf.saxon.str.UnicodeString;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 /**
@@ -56,10 +57,10 @@ public class SubstringBeforeCompiler extends ToStringCompiler {
             // Either a non-standard collator was specified statically, or the collator is determined dynamically
             allocateStatic(compiler, stringCollator);
 
-            compiler.compileToPrimitive(fnc.getArg(0), String.class, OnEmpty.RETURN_EMPTY_STRING);
-            compiler.compileToPrimitive(fnc.getArg(1), String.class, OnEmpty.RETURN_EMPTY_STRING);
+            compiler.compileToPrimitive(fnc.getArg(0), UnicodeString.class, OnEmpty.RETURN_EMPTY_STRING);
+            compiler.compileToPrimitive(fnc.getArg(1), UnicodeString.class, OnEmpty.RETURN_EMPTY_STRING);
 
-            ga.invokeInstanceMethod(SubstringMatcher.class, "substringBefore", String.class, String.class);
+            ga.invokeInstanceMethod(SubstringMatcher.class, "substringBefore", UnicodeString.class, UnicodeString.class);
         }
 
         methodInfo.placeLabel(substringReturn);

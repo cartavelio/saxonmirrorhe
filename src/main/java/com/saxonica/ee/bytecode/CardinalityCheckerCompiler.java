@@ -4,16 +4,13 @@ import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.TypeCheckingFilter;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.DocumentNodeTest;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.type.ItemType;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
-
-import java.util.EnumSet;
 
 public class CardinalityCheckerCompiler extends ToIteratorCompiler {
 
@@ -130,12 +127,15 @@ public class CardinalityCheckerCompiler extends ToIteratorCompiler {
         if (CountCompiler.maybeLastPositionFinder(base)) {
             ga.dup();
             // assert stack : iterator iterator
-            ga.invokeInstanceMethod(SequenceIterator.class, "getProperties");
-            // assert stack : iterator properties
-            allocateStatic(compiler, SequenceIteratorProperty.LAST_POSITION_FINDER);
-            ga.invokeInstanceMethod(EnumSet.class, "contains", Object.class);
+            ga.ifNotInstance(LastPositionFinder.class, notLastFinder);
+            // assert stack : iterator iterator
+            ga.dup();
+            ga.checkClass(LastPositionFinder.class);
+            // assert stack : iterator iterator
+            ga.invokeInstanceMethod(LastPositionFinder.class, "supportsGetLength");
             ga.ifFalse(notLastFinder);
             // assert stack : iterator
+            
             ga.dup();
             // assert stack : iterator iterator
             ga.checkClass(LastPositionFinder.class);

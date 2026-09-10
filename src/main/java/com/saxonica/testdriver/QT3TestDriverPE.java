@@ -9,6 +9,7 @@ package com.saxonica.testdriver;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
+import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.parser.CodeInjector;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.Sequence;
@@ -103,6 +104,10 @@ public class QT3TestDriverPE extends QT3TestDriverHE {
         @Override
         public Expression inject(Expression exp) {
             if (exp instanceof Literal) {
+                if (exp instanceof StringLiteral && ((StringLiteral)exp).getString().toString().startsWith("http://www.w3.org/")) {
+                    // This is to avoid dynamic computation of Collation uris, which tends to disable bytecode generation
+                    return exp;
+                }
                 StructuredQName name = new StructuredQName("saxon", NamespaceConstant.SAXON, "lazy-literal");
                 com.saxonica.expr.JavaExtensionFunctionCall wrapper = new com.saxonica.expr.JavaExtensionFunctionCall();
                 try {

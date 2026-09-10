@@ -12,6 +12,7 @@ import net.sf.saxon.expr.oper.OperandArray;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.ma.arrays.SquareArrayConstructor;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +62,7 @@ public class SquareArrayConstructorCompiler extends ToItemCompiler {
                     compiler.compileToItem(child);
                 } else {
                     compiler.compileToIterator(child);
-                    ga.invokeInstanceMethod(SequenceIterator.class, "materialize");
+                    ga.invokeStaticMethod(SequenceTool.class, "toGroundedValue", SequenceIterator.class);
                 }
                 ga.invokeInstanceMethod(List.class, "add", Object.class);
                 ga.pop(); // List.add() returns true

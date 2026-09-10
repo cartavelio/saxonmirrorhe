@@ -4,7 +4,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
@@ -65,7 +65,7 @@ public class NewAttribute extends SystemFunction {
         name = new StructuredQName(prefix, uri, local);
         orphan.setNodeName(new FingerprintedQName(name, context.getNamePool()));
         Item first = arguments[1].head();
-        orphan.setStringValue(first == null ? (UnicodeString) EmptyUniString.getInstance() : first.getUnicodeStringValue());
+        orphan.setStringValue(first == null ? (UnicodeString) EmptyUnicodeString.getInstance() : first.getUnicodeStringValue());
         return orphan;
     }
 

@@ -8,18 +8,14 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.expr.parser.ICompilerService;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.om.IdentityComparable;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.HostLanguage;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.SingletonIterator;
-
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.value.*;
 import org.objectweb.asm.ClassVisitor;
@@ -221,7 +217,7 @@ public class CompilerService implements ICompilerService {
             }
         } else if (Cardinality.allowsMany(expression.getCardinality())) {
             compileToIterator(expression);
-            ga.invokeInstanceMethod(SequenceIterator.class, "materialize");
+            ga.invokeStaticMethod(SequenceTool.class, "toGroundedValue", SequenceIterator.class);
         } else {
             compileToItem(expression);
             if (Cardinality.allowsZero(expression.getCardinality())) {
@@ -836,7 +832,7 @@ public class CompilerService implements ICompilerService {
      * @param expr          the expression to be compiled
      * @param requiredClass the required class. For an expression with static type xs:double, this will be
      *                      Double.TYPE; for xs:float it will be Float.TYPE; for xs:string and xs:untypedAtomic it may be either
-     *                      String.class or CharSequence.class. The expression compiler MUST generate code that leaves this class
+     *                      String.class or UnicodeString.class. The expression compiler MUST generate code that leaves this class
      *                      of value on the top of the bytecode stack.
      *                      For an expression whose static type is xs:integer, the requiredClass may be Integer.TYPE or Long.TYPE,
      *                      provided that either (a) the expression is known always to deliver a value in the range of an int or long
@@ -847,7 +843,7 @@ public class CompilerService implements ICompilerService {
      * @throws CannotCompileException if the expression cannot be compiled
      */
 
-    public void compileToPrimitive(Expression expr, Class requiredClass, OnEmpty onEmpty) throws CannotCompileException {
+    public void compileToPrimitive(Expression expr, Class<?> requiredClass, OnEmpty onEmpty) throws CannotCompileException {
         ExpressionCompiler comp = getExpressionCompiler(expr);
         if (expr instanceof ByteCodeCandidate) {
             expr = ((ByteCodeCandidate) expr).getBaseExpression();

@@ -7,14 +7,16 @@ import net.sf.saxon.event.*;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.DocumentInstr;
-import net.sf.saxon.s9api.HostLanguage;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.s9api.HostLanguage;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
-
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.TextFragmentValue;
 import org.objectweb.asm.Type;
@@ -85,13 +87,12 @@ public class DocumentInstrCompiler extends ToPushCompiler {
             } else {
 //                StringBuilder sb = new StringBuilder(StringBuilder.SMALL);
 //                SequenceIterator iter = content.iterate(context);
-                int fsbVar = methodInfo.allocateLocal(StringBuilder.class);
+                int fsbVar = methodInfo.allocateLocal(UnicodeBuilder.class);
                 int iterVar = methodInfo.allocateLocal(SequenceIterator.class);
 
-                ga.newInstance(StringBuilder.class);
+                ga.newInstance(UnicodeBuilder.class);
                 ga.dup();
-                ga.push(64);
-                ga.invokeConstructor(StringBuilder.class, Integer.TYPE);
+                ga.invokeConstructor(UnicodeBuilder.class);
                 ga.storeLocal(fsbVar);
 
                 compiler.compileToIterator(instr.getContentExpression());
@@ -108,25 +109,25 @@ public class DocumentInstrCompiler extends ToPushCompiler {
                 ga.invokeInstanceMethod(SequenceIterator.class, "next");
                 ga.dup();
                 ga.ifNull(loopDone.label());
-                ga.invokeInstanceMethod(Item.class, "getStringValueCS");
+                ga.invokeInstanceMethod(Item.class, "getUnicodeStringValue");
                 ga.loadLocal(fsbVar);
                 ga.swap();
-                ga.invokeInstanceMethod(StringBuilder.class, "append", CharSequence.class);
+                ga.invokeInstanceMethod(UnicodeBuilder.class, "append", CodePoints.class);
                 ga.goTo(loop);
 
                 methodInfo.placeLabel(loopDone);
                 ga.pop();
 //                textValue = sb.condense();
                 ga.loadLocal(fsbVar);
-                ga.invokeInstanceMethod(StringBuilder.class, "condense");
+                ga.invokeInstanceMethod(UnicodeBuilder.class, "trimToSize");
 
                 methodInfo.releaseLocal(fsbVar);
                 methodInfo.releaseLocal(iterVar);
             }
-
+            ga.invokeInstanceMethod(UnicodeBuilder.class, "toUnicodeString");
 //            root = TextFragmentValue.makeTextFragment(config, textValue, getBaseURI());
             ga.push(instr.getStaticBaseURIString());
-            ga.invokeStaticMethod(TextFragmentValue.class, "makeTextFragment", Configuration.class, CharSequence.class, String.class);
+            ga.invokeStaticMethod(TextFragmentValue.class, "makeTextFragment", Configuration.class, UnicodeString.class, String.class);
 ////            ((TextFragmentValue)root).setConfiguration(controller.getConfiguration());
 //            ga.dup();
 //            allocateStatic(compiler, compiler.getConfiguration());

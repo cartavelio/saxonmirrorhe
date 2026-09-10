@@ -78,14 +78,12 @@ public class SubstringCompiler extends ToItemCompiler {
             compiler.compileToItem(fnc.getArg(1));
             ga.checkClass(NumericValue.class);
             ga.invokeStaticMethod(Substring.class, "substring", StringValue.class, NumericValue.class);
-            ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
         } else {
             compiler.compileToItem(fnc.getArg(1));
             ga.checkClass(NumericValue.class);
             compiler.compileToItem(fnc.getArg(2));
             ga.checkClass(NumericValue.class);
             ga.invokeStaticMethod(Substring.class, "substring", StringValue.class, NumericValue.class, NumericValue.class);
-            ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
         }
 
         methodInfo.placeLabel(substringReturn);

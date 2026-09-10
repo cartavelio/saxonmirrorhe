@@ -19,7 +19,7 @@ public abstract class ConverterCompiler {
     public abstract void compileToItem(CompilerService compiler, Expression expression)
             throws CannotCompileException;
 
-    public void compileToPrimitive(CompilerService compiler, Expression expression, Class requiredClass, OnEmpty onEmpty) throws CannotCompileException {
+    public void compileToPrimitive(CompilerService compiler, Expression expression, Class<?> requiredClass, OnEmpty onEmpty) throws CannotCompileException {
         throw new CannotCompileException();
     }
 

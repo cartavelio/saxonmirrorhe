@@ -6,7 +6,7 @@ import com.saxonica.ee.schema.TypeReference;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegularExpression;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaException;
@@ -84,7 +84,7 @@ public class XSDList extends SchemaElement {
             try {
                 RegularExpression regex = getConfiguration().compileRegularExpression(
                         StringView.tidy(separator), "", "XSD11", warnings);
-                if (regex.matches(EmptyUniString.getInstance())) {
+                if (regex.matches(EmptyUnicodeString.getInstance())) {
                     error("The regular expression in saxon:separator must not be one that matches a zero-length string");
                 }
                 for (String message : warnings) {

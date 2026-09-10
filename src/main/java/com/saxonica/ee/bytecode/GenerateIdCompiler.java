@@ -4,7 +4,8 @@ import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.om.NodeInfo;
-
+import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.UnicodeString;
 import org.objectweb.asm.Type;
 
 /**
@@ -13,7 +14,7 @@ import org.objectweb.asm.Type;
 public class GenerateIdCompiler extends ToStringCompiler {
 
     @Override
-    public void compileToPrimitive(CompilerService compiler, Expression expression, Class requiredClass, OnEmpty onEmpty) throws CannotCompileException {
+    public void compileToPrimitive(CompilerService compiler, Expression expression, Class<?> requiredClass, OnEmpty onEmpty) throws CannotCompileException {
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         final SystemFunctionCall fnc = (SystemFunctionCall) expression;
@@ -31,11 +32,12 @@ public class GenerateIdCompiler extends ToStringCompiler {
         ga.storeLocal(bufferVar);
         ga.invokeInstanceMethod(NodeInfo.class, "generateId", StringBuilder.class);
         ga.loadLocal(bufferVar);
-        ga.invokeInstanceMethod(StringBuilder.class, "condense");
+        ga.invokeInstanceMethod(StringBuilder.class, "trimToSize");
         methodInfo.placeLabel(generateIdReturn);
         methodInfo.releaseLocal(bufferVar);
-        if (requiredClass == String.class) {
-            ga.invokeInstanceMethod(Object.class, "toString");
+        ga.invokeInstanceMethod(Object.class, "toString");
+        if (requiredClass == UnicodeString.class) {
+            ga.invokeStaticMethod(BMPString.class, "of", String.class);
         }
     }
 }

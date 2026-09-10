@@ -1,15 +1,18 @@
 package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.*;
-import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.ComparisonExpression;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.GeneralComparison;
+import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.sort.*;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
-import org.objectweb.asm.commons.GeneratorAdapter;
 
 import java.util.Stack;
 
@@ -55,7 +58,7 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
 
         if ((type0.equals(BuiltInAtomicType.UNTYPED_ATOMIC) || th.isSubType(type0, BuiltInAtomicType.STRING)) &&
                 (type1.equals(BuiltInAtomicType.UNTYPED_ATOMIC) || th.isSubType(type1, BuiltInAtomicType.STRING))) {
-            Stack<Class> unwindStack = new Stack<>();
+            Stack<Class<?>> unwindStack = new Stack<>();
             compiler.compileToPrimitive(arg0, String.class, new OnEmpty.UnwindAndJump(unwindStack, returnFalse));
             unwindStack.add(String.class);
             compiler.compileToPrimitive(arg1, String.class, new OnEmpty.UnwindAndJump(unwindStack, returnFalse));
@@ -71,7 +74,7 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
                         ga.goTo(end);
                         break;
                     default:
-                        ga.invokeStaticMethod(CodepointCollator.class, "compareCS", CharSequence.class, CharSequence.class);
+                        ga.invokeStaticMethod(CodepointCollator.class, "compareStrings", UnicodeString.class, UnicodeString.class);
                         ga.ifZCmp(ValueComparisonCompiler.translateOperator(comparison.getSingletonOperator()), returnTrue.label());
                         ga.goTo(returnFalse);
                 }
@@ -79,7 +82,7 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
                 allocateStatic(compiler, comparison.getAtomicComparer().getCollator());
                 ga.dupX2();
                 ga.pop();
-                ga.invokeInstanceMethod(StringCollator.class, "compareStrings", CharSequence.class, CharSequence.class);
+                ga.invokeInstanceMethod(StringCollator.class, "compareStrings", UnicodeString.class, UnicodeString.class);
                 ga.ifZCmp(ValueComparisonCompiler.translateOperator(comparison.getSingletonOperator()), returnTrue.label());
                 ga.goTo(returnFalse);
             }
@@ -390,8 +393,9 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
                 ga.checkClass(NumericValue.class);
                 ga.push(Token.inverse(comparison.getSingletonOperator()));
                 allocateStatic(compiler, compiler.getConfiguration().getConversionRules());
+                // static boolean quickCompare(StringValue a0, NumericValue a1, int operator, ConversionRules rules)
                 ga.invokeStaticMethod(UntypedNumericComparer.class, "quickCompare",
-                        UntypedAtomicValue.class, NumericValue.class, Integer.TYPE, ConversionRules.class);
+                                      StringValue.class, NumericValue.class, Integer.TYPE, ConversionRules.class);
                 ga.goTo(end);
 //                Converter untypedToDouble = rules.getConverter(BuiltInAtomicType.UNTYPED_ATOMIC, BuiltInAtomicType.DOUBLE);
 //                allocateStatic(compiler, untypedToDouble);
@@ -530,54 +534,14 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
                 case Token.FLT:
                 case Token.FGE:
                 case Token.FLE:
-                    //                    if (as.containsSurrogatePairs() || bs.containsSurrogatePairs()) {
-                    //                        return collator.compareCS(as.getStringValueCS(), bs.getStringValueCS());
-                    //                    } else {
-                    //                        // optimize to use UTF-16 binary comparison
-                    //                        return as.getStringValue().compareTo(bs.getStringValue());
-                    //                    }
-//                    boolean lhsIsBmp = comparison.getLhsExpression() instanceof StringLiteral &&
-//                            !UnicodeString.containsSurrogatePairs(((StringLiteral) comparison.getLhsExpression()).getStringValue());
-//                    boolean rhsIsBmp = comparison.getRhsExpression() instanceof StringLiteral &&
-//                            !UnicodeString.containsSurrogatePairs(((StringLiteral) comparison.getRhsExpression()).getStringValue());
-                    boolean lhsIsBmp = false;
-                    boolean rhsIsBmp = false;
-                    // TODO: needs rewriting
-
-                    LabelInfo hasSurrogates = methodInfo.newLabel("hasSurrogates");
-                    LabelInfo noSurrogates = methodInfo.newLabel("noSurrogates");
-                    LabelInfo comparisonDone = methodInfo.newLabel("comparisonDone");
-                    if (!lhsIsBmp) {
-                        ga.loadLocal(item0Var);
-                        ga.checkClass(StringValue.class);
-                        ga.invokeInstanceMethod(StringValue.class, "containsSurrogatePairs");
-                        ga.ifZCmp(GeneratorAdapter.NE, hasSurrogates.label());
-                    }
-                    if (rhsIsBmp) {
-                        ga.goTo(noSurrogates.label());
-                    } else {
-                        ga.loadLocal(item1Var);
-                        ga.checkClass(StringValue.class);
-                        ga.invokeInstanceMethod(StringValue.class, "containsSurrogatePairs");
-                        ga.ifZCmp(GeneratorAdapter.EQ, noSurrogates.label());
-                    }
-                    methodInfo.placeLabel(hasSurrogates);
 
                     ga.loadLocal(item0Var);
-                    ga.invokeInstanceMethod(AtomicValue.class, "getStringValueCS");
+                    ga.invokeInstanceMethod(AtomicValue.class, "getUnicodeStringValue");
                     ga.loadLocal(item1Var);
-                    ga.invokeInstanceMethod(AtomicValue.class, "getStringValueCS");
-                    ga.invokeStaticMethod(CodepointCollator.class, "compareCS", CharSequence.class, CharSequence.class);
-                    ga.goTo(comparisonDone);
+                    ga.invokeInstanceMethod(AtomicValue.class, "getUnicodeStringValue");
+                    ga.invokeStaticMethod(CodepointCollator.class, "getInstance");
+                    ga.invokeInstanceMethod(CodepointCollator.class, "compareStrings", UnicodeString.class, UnicodeString.class);
 
-                    methodInfo.placeLabel(noSurrogates);
-                    ga.loadLocal(item0Var);
-                    ga.invokeInstanceMethod(AtomicValue.class, "getStringValue");
-                    ga.loadLocal(item1Var);
-                    ga.invokeInstanceMethod(AtomicValue.class, "getStringValue");
-                    ga.invokeInstanceMethod(String.class, "compareTo", Object.class);
-
-                    methodInfo.placeLabel(comparisonDone);
                     ga.ifZCmp(ValueComparisonCompiler.translateOperator(op), returnTrue.label());
                     ga.goTo(returnFalse);
 

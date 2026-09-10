@@ -29,7 +29,7 @@ public class BooleanToIntegerCompiler extends ConverterCompiler {
         if (allowsEmpty) {
             LabelInfo empty = methodInfo.newLabel("returnEmpty");
             LabelInfo end = methodInfo.newLabel("end");
-            compileToPrimitive(compiler, expression, Boolean.TYPE, new OnEmpty.UnwindAndJump(new Stack<Class>(), empty));
+            compileToPrimitive(compiler, expression, Boolean.TYPE, new OnEmpty.UnwindAndJump(new Stack<>(), empty));
             ga.cast(Type.INT_TYPE, Type.LONG_TYPE);
             ga.invokeStaticMethod(Int64Value.class, "makeIntegerValue", Long.TYPE);
             ga.goTo(end);
@@ -44,7 +44,7 @@ public class BooleanToIntegerCompiler extends ConverterCompiler {
     }
 
     @Override
-    public void compileToPrimitive(CompilerService compiler, Expression expression, Class requiredClass, OnEmpty onEmpty) throws CannotCompileException {
+    public void compileToPrimitive(CompilerService compiler, Expression expression, Class<?> requiredClass, OnEmpty onEmpty) throws CannotCompileException {
         CastExpression cast = (CastExpression) expression;
         final Expression base = cast.getBaseExpression();
 //        final Generator ga = compiler.getCurrentGenerator();

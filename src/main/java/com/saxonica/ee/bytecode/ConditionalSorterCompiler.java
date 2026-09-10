@@ -5,8 +5,9 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.sort.ConditionalSorter;
 import net.sf.saxon.expr.sort.DocumentOrderIterator;
 import net.sf.saxon.expr.sort.DocumentSorter;
-import net.sf.saxon.expr.sort.ItemOrderComparer;
 import net.sf.saxon.om.SequenceIterator;
+
+import java.util.Comparator;
 
 
 /**
@@ -44,7 +45,7 @@ public class ConditionalSorterCompiler extends ToIteratorCompiler {
         // stack: sortIterator sortIterator baseIterator
 
         ExpressionCompiler.allocateStatic(compiler, docSortExpr.getComparer());
-        ga.invokeConstructor(DocumentOrderIterator.class, SequenceIterator.class, ItemOrderComparer.class);
+        ga.invokeConstructor(DocumentOrderIterator.class, SequenceIterator.class, Comparator.class);
 
         methodInfo.placeLabel(end);
         ga.checkClass(SequenceIterator.class);

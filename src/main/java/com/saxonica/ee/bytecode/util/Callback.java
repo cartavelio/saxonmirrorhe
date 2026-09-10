@@ -7,8 +7,9 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.str.StringView;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.JavaExternalObjectType;
 import net.sf.saxon.type.StringToDouble;
@@ -156,13 +157,13 @@ public class Callback {
      * Convert a string to a double number, returning NaN if the string is not numeric
      *
      * @param s2d    the string to double converter to be used
-     * @param string the string to be converted
+     * @param str    the string to be converted
      * @return the returned number
      */
 
-    public static double stringToNumberOrNaN(StringToDouble s2d, CharSequence string) {
+    public static double stringToNumberOrNaN(StringToDouble s2d, UnicodeString str) {
         try {
-            return s2d.stringToNumber(StringView.tidy(string.toString()));
+            return s2d.stringToNumber(str);
         } catch (NumberFormatException err) {
             return Double.NaN;
         }
@@ -196,27 +197,35 @@ public class Callback {
      * @return the relevant BooleanValue if validation succeeds; or a ValidationFailure if not.
      */
 
-    public static int booleanFromString(CharSequence s) {
+    public static int booleanFromString(UnicodeString s) {
         // implementation designed to avoid creating new objects
-        s = Whitespace.trim(s.toString());
-        int len = s.length();
+        s = Whitespace.trim(s);
+        int len = s.length32();
         if (len == 1) {
-            char c = s.charAt(0);
+            int c = s.codePointAt(0);
             if (c == '1') {
                 return 1;
             } else if (c == '0') {
                 return 0;
             }
         } else if (len == 4) {
-            if (s.charAt(0) == 't' && s.charAt(1) == 'r' && s.charAt(2) == 'u' && s.charAt(3) == 'e') {
+            if (s.codePointAt(0) == 't' && s.codePointAt(1) == 'r' && s.codePointAt(2) == 'u' && s.codePointAt(3) == 'e') {
                 return 1;
             }
         } else if (len == 5) {
-            if (s.charAt(0) == 'f' && s.charAt(1) == 'a' && s.charAt(2) == 'l' && s.charAt(3) == 's' && s.charAt(4) == 'e') {
+            if (s.codePointAt(0) == 'f' && s.codePointAt(1) == 'a' && s.codePointAt(2) == 'l' && s.codePointAt(3) == 's' && s.codePointAt(4) == 'e') {
                 return 0;
             }
         }
         return -1;
+    }
+
+    public static StructuredQName sqNameFromValidatedEQName(String eqName, String errorCode) throws XPathException {
+        try {
+            return StructuredQName.fromEQName(eqName);
+        } catch (IllegalArgumentException e) {
+            throw new XPathException(e.getMessage(), errorCode);
+        }
     }
 
 

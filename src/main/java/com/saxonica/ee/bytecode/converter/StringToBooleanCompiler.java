@@ -4,6 +4,7 @@ import com.saxonica.ee.bytecode.ExpressionCompiler;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.CastExpression;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.Converter;
 import net.sf.saxon.type.TypeHierarchy;
@@ -43,29 +44,24 @@ public class StringToBooleanCompiler extends ConverterCompiler {
     }
 
     @Override
-    public void compileToPrimitive(CompilerService compiler, Expression expression, Class requiredClass, OnEmpty onEmpty) throws CannotCompileException {
+    public void compileToPrimitive(CompilerService compiler, Expression expression, Class<?> requiredClass, OnEmpty onEmpty) throws CannotCompileException {
         CastExpression cast = (CastExpression) expression;
         final Expression base = cast.getBaseExpression();
-        final AtomicType targetType = cast.getTargetType();
-        final Converter converter = cast.getConverter();
         final Generator ga = compiler.getCurrentGenerator();
         final GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
-        TypeHierarchy th = compiler.getConfiguration().getTypeHierarchy();
-        AtomicType sourceType = (AtomicType) base.getItemType();
         boolean allowsEmpty = Cardinality.allowsZero(cast.getCardinality());
         ExpressionCompiler.visitAnnotation(compiler, "StringToBooleanConverter-Primitive");
         if (allowsEmpty && !(onEmpty instanceof OnEmpty.UnwindAndJump)) {
             throw new IllegalArgumentException();
         }
 
-        LabelInfo notEmpty = methodInfo.newLabel("notEmpty_cast");
         LabelInfo end = methodInfo.newLabel("castEnd");
 
-        compiler.compileToPrimitive(base, CharSequence.class, onEmpty);
-        final int strVar = ga.newLocal(CharSequence.class);
+        compiler.compileToPrimitive(base, UnicodeString.class, onEmpty);
+        final int strVar = ga.newLocal(UnicodeString.class);
         ga.storeLocal(strVar);
         ga.loadLocal(strVar);
-        ga.invokeStaticMethod(Callback.class, "booleanFromString", CharSequence.class);
+        ga.invokeStaticMethod(Callback.class, "booleanFromString", UnicodeString.class);
         ga.dup();
         ga.ifZCmp(GeneratorAdapter.GE, end.label());
         ga.pop();

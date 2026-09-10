@@ -7,6 +7,7 @@ import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.regex.RegularExpression;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.StringConverter;
 import net.sf.saxon.type.ValidationFailure;
@@ -72,7 +73,7 @@ public class AtomicTypeValidatorCompiler {
             if (needUnicode) {
                 unicodeLoc = ga.newLocal(StringValue.class);
                 ga.loadArg(0);
-                ga.invokeStaticMethod(StringValue.class, "makeUnicodeString", CharSequence.class);   // TODO: needs fixing
+                ga.invokeStaticMethod(StringValue.class, "makeUStringValue", UnicodeString.class);
                 ga.storeLocal(unicodeLoc);
             }
             if (needLength) {
@@ -83,7 +84,7 @@ public class AtomicTypeValidatorCompiler {
                     ga.storeLocal(lengthLoc);
                 } else {
                     ga.loadArg(0);
-                    ga.invokeStaticMethod(StringValue.class, "getStringLength", CharSequence.class);
+                    ga.invokeInstanceMethod(UnicodeString.class, "length32");
                     ga.storeLocal(lengthLoc);
                 }
             }
@@ -120,7 +121,7 @@ public class AtomicTypeValidatorCompiler {
                     RegularExpression regex = ((PatternFacet) f).getRegularExpression();
                     ExpressionCompiler.allocateStatic(compiler, regex);
                     ga.loadLocal(unicodeLoc);
-                    ga.invokeInstanceMethod(RegularExpression.class, "matches", CharSequence.class);
+                    ga.invokeInstanceMethod(RegularExpression.class, "matches", UnicodeString.class);
                     LabelInfo ok = mi.newLabel("patternOK");
                     ga.ifTrue(ok);
                     ExpressionCompiler.allocateStatic(compiler, f);
@@ -143,7 +144,7 @@ public class AtomicTypeValidatorCompiler {
                     // TODO: compile the XPath assertion to bytecode
                     ExpressionCompiler.allocateStatic(compiler, f);
                     ga.loadArg(0);
-                    ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
+                    ga.invokeStaticMethod(StringValue.class, "makeUStringValue", UnicodeString.class);
                     ExpressionCompiler.allocateStatic(compiler, rules);
                     ga.invokeInstanceMethod(AssertionFacet.class, "testAtomicValue", AtomicValue.class, ConversionRules.class);
                     LabelInfo ok = mi.newLabel("assertOK");
@@ -164,7 +165,7 @@ public class AtomicTypeValidatorCompiler {
 
             // Stack: facet
             ga.loadArg(0);
-            ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
+            ga.invokeStaticMethod(StringValue.class, "makeUStringValue", UnicodeString.class);
             // Stack: facet StringValue
             ga.swap();
             // Stack: StringValue facet
@@ -190,7 +191,7 @@ public class AtomicTypeValidatorCompiler {
             StringConverter converter = (StringConverter) rules.getConverter(BuiltInAtomicType.STRING, builtInBase);
             ExpressionCompiler.allocateStatic(compiler, converter);
             ga.loadArg(0);
-            ga.invokeInstanceMethod(StringConverter.class, "convertString", CharSequence.class);
+            ga.invokeInstanceMethod(StringConverter.class, "convertString", UnicodeString.class);
             ga.dup();
             LabelInfo failBasic = mi.newLabel("failBasic");
             ga.ifInstance(ValidationFailure.class, failBasic);
@@ -263,15 +264,15 @@ public class AtomicTypeValidatorCompiler {
     private void compileWhitespaceProcessing(Generator ga, int action) {
         if (action == Whitespace.COLLAPSE) {
             ga.loadArg(0);
-            ga.invokeStaticMethod(Whitespace.class, "collapseWhitespace", CharSequence.class);
+            ga.invokeStaticMethod(Whitespace.class, "collapseWhitespace", UnicodeString.class);
             ga.storeArg(0);
         } else if (action == Whitespace.TRIM) {
             ga.loadArg(0);
-            ga.invokeStaticMethod(Whitespace.class, "trim", CharSequence.class);
+            ga.invokeStaticMethod(Whitespace.class, "trim", UnicodeString.class);
             ga.storeArg(0);
         } else if (action == Whitespace.REPLACE) {
             ga.loadArg(0);
-            ga.invokeStaticMethod(Whitespace.class, "normalizeWhitespace", CharSequence.class);
+            ga.invokeStaticMethod(Whitespace.class, "normalize", UnicodeString.class);
             ga.storeArg(0);
         }
     }

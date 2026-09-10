@@ -114,7 +114,7 @@ public class StringJoinCompiler extends ToStringCompiler {
         if (fnc.getArity() == 1) {
             ga.loadLocal(sbVar);
             ga.swap();
-            ga.invokeInstanceMethod(Item.class, "getStringValueCS");
+            ga.invokeInstanceMethod(Item.class, "getStringValue");
             ga.invokeInstanceMethod(StringBuilder.class, "append", String.class);
         } else {
             compiler.compileToPrimitive(((SystemFunctionCall) expression).getArg(1), String.class, OnEmpty.RETURN_EMPTY_STRING);

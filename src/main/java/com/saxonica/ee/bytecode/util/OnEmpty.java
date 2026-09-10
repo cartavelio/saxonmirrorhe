@@ -24,7 +24,7 @@ public abstract class OnEmpty {
     public static class UnwindAndJump extends OnEmpty {
 
         LabelInfo label;
-        /*@Nullable*/ Stack<Class> theUnwindStack;
+        /*@Nullable*/ Stack<Class<?>> theUnwindStack;
 
         /**
          * @param unwindStack Information about the classes of object that will be on the bytecode stack and must be
@@ -36,7 +36,7 @@ public abstract class OnEmpty {
          *                    subexpression, there is a "longjump" treating this as an exception case.
          */
 
-        public UnwindAndJump(Stack<Class> unwindStack, LabelInfo label) {
+        public UnwindAndJump(Stack<Class<?>> unwindStack, LabelInfo label) {
             this.label = label;
             this.theUnwindStack = unwindStack;
         }
@@ -60,10 +60,10 @@ public abstract class OnEmpty {
 
         @Override
         public void generate(Generator ga) {
-            Stack<Class> u = theUnwindStack;
+            Stack<Class<?>> u = theUnwindStack;
             if (u != null) {
                 for (int i = u.size() - 1; i >= 0; i--) {
-                    Class c = u.get(i);
+                    Class<?> c = u.get(i);
                     if (c == Double.TYPE || c == Long.TYPE) {
                         ga.pop2();
                     } else {
@@ -93,9 +93,9 @@ public abstract class OnEmpty {
          */
 
         /*@NotNull*/
-        public Stack<Class> getUnwindStack() {
+        public Stack<Class<?>> getUnwindStack() {
             if (theUnwindStack == null) {
-                theUnwindStack = new Stack<Class>();
+                theUnwindStack = new Stack<>();
             }
             return theUnwindStack;
         }

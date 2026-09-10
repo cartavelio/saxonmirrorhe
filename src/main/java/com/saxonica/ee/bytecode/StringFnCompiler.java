@@ -28,11 +28,8 @@ public class StringFnCompiler extends ToStringCompiler {
         compiler.compileToItem(fnc.getArg(0));
         returnZeroLengthStringIfNull(fnc.getArg(0), ga, methodInfo, stringReturn, 0);
 
-        ga.invokeInstanceMethod(Item.class, "getStringValueCS");
+        ga.invokeInstanceMethod(Item.class, "getStringValue");
         methodInfo.placeLabel(stringReturn);
-        if (requiredClass == String.class) {
-            ga.invokeInstanceMethod(Object.class, "toString");
-        }
         methodInfo.placeLabel(L1);
         ga.goTo(end.label());
         /*catch block*/

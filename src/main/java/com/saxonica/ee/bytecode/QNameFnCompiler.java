@@ -57,9 +57,9 @@ public class QNameFnCompiler extends ToItemCompiler {
 
         ga.newInstance(QNameValue.class);
         ga.dup();
-        compiler.compileToPrimitive(fn.getArg(1), CharSequence.class, OnEmpty.RETURN_EMPTY_STRING);
+        compiler.compileToPrimitive(fn.getArg(1), String.class, OnEmpty.RETURN_EMPTY_STRING);
 
-        ga.invokeStaticMethod(NameChecker.class, "getQNameParts", CharSequence.class);
+        ga.invokeStaticMethod(NameChecker.class, "getQNameParts", String.class);
 
         final int partsVar = mi.allocateLocal(String[].class);
         ga.storeLocal(partsVar);
@@ -72,7 +72,7 @@ public class QNameFnCompiler extends ToItemCompiler {
         ga.loadLocal(partsVar);
         ga.push(0);
         ga.arrayLoad(Type.getType(String.class));
-        ga.invokeStaticMethod(NameChecker.class, "isValidNCName", CharSequence.class);
+        ga.invokeStaticMethod(NameChecker.class, "isValidNCName", String.class);
         ga.ifTrue(nameOK);
 
         ga.loadLocal(partsVar);

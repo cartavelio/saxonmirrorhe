@@ -6,6 +6,7 @@ import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.functions.Contains;
 import net.sf.saxon.lib.SubstringMatcher;
+import net.sf.saxon.str.UnicodeString;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 /**
@@ -48,9 +49,9 @@ public class ContainsCompiler extends ToBooleanCompiler {
         } else {
 
             allocateStatic(compiler, stringCollator);
-            compiler.compileToPrimitive(arg0, String.class, OnEmpty.RETURN_EMPTY_STRING);
-            compiler.compileToPrimitive(arg1, String.class, OnEmpty.RETURN_EMPTY_STRING);
-            ga.invokeInstanceMethod(SubstringMatcher.class, "contains", String.class, String.class);
+            compiler.compileToPrimitive(arg0, UnicodeString.class, OnEmpty.RETURN_EMPTY_STRING);
+            compiler.compileToPrimitive(arg1, UnicodeString.class, OnEmpty.RETURN_EMPTY_STRING);
+            ga.invokeInstanceMethod(SubstringMatcher.class, "contains", UnicodeString.class, UnicodeString.class);
         }
 
     }

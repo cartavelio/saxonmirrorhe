@@ -1,14 +1,14 @@
 package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.converter.*;
-import com.saxonica.ee.bytecode.util.*;
+import com.saxonica.ee.bytecode.util.CannotCompileException;
+import com.saxonica.ee.bytecode.util.CompilerService;
+import com.saxonica.ee.bytecode.util.OnEmpty;
 import net.sf.saxon.expr.CastExpression;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.type.AtomicType;
-import net.sf.saxon.type.Converter;
 import net.sf.saxon.type.PlainType;
-import net.sf.saxon.type.TypeHierarchy;
 
 
 /**
@@ -45,18 +45,15 @@ public class CastExpressionCompiler extends ToItemCompiler {
      * @param compiler      the compiler service
      * @param expression    the expression to be compiled
      * @param requiredClass the class of the Java value that is to be left on the stack if the generated code
-     *                      exits normally. This must be one of Integer.TYPE, Double.TYPE, Float.TYPE, BigDecimal.class, CharSequence.class.
+     *                      exits normally. This must be one of Integer.TYPE, Double.TYPE, Float.TYPE, BigDecimal.class,
+     *                      UnicodeString.class.
      * @param onEmpty       action to be taken if the result of the expression is an empty sequence
      */
     @Override
-    public void compileToPrimitive(CompilerService compiler, Expression expression, Class requiredClass, OnEmpty onEmpty) throws CannotCompileException {
+    public void compileToPrimitive(CompilerService compiler, Expression expression, Class<?> requiredClass, OnEmpty onEmpty) throws CannotCompileException {
         final CastExpression cast = (CastExpression) expression;
         final Expression base = cast.getBaseExpression();
         final AtomicType targetType = cast.getTargetType();
-        final Converter converter = cast.getConverter();
-        final Generator ga = compiler.getCurrentGenerator();
-        final GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
-        TypeHierarchy th = compiler.getConfiguration().getTypeHierarchy();
         PlainType sourceType = (PlainType) base.getItemType();
         visitAnnotation(compiler, "CastExpression-Primitive");
 

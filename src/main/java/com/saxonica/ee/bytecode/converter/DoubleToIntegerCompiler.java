@@ -4,10 +4,7 @@ import com.saxonica.ee.bytecode.ExpressionCompiler;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.CastExpression;
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.ConversionResult;
-import net.sf.saxon.type.Converter;
-import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.IntegerValue;
 
@@ -19,19 +16,15 @@ public class DoubleToIntegerCompiler extends ConverterCompiler {
     public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         CastExpression cast = (CastExpression) expression;
         final Expression base = cast.getBaseExpression();
-        final AtomicType targetType = cast.getTargetType();
-        final Converter converter = cast.getConverter();
         final Generator ga = compiler.getCurrentGenerator();
         final GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
-        TypeHierarchy th = compiler.getConfiguration().getTypeHierarchy();
-        AtomicType sourceType = (AtomicType) base.getItemType();
         boolean allowsEmpty = Cardinality.allowsZero(cast.getCardinality());
         ExpressionCompiler.visitAnnotation(compiler, "DoubleToIntegerConverter-Item");
         if (allowsEmpty) {
             LabelInfo empty = methodInfo.newLabel("returnEmpty");
             LabelInfo end = methodInfo.newLabel("end");
             compiler.compileToPrimitive(base, Double.TYPE, new OnEmpty.UnwindAndJump(empty));
-            ga.invokeStaticMethod(IntegerValue.class, "makeIntegerValue", Double.TYPE);
+            ga.invokeStaticMethod(IntegerValue.class, "fromDouble", Double.TYPE);
             ga.invokeInstanceMethod(ConversionResult.class, "asAtomic");
             ga.goTo(end);
             methodInfo.placeLabel(empty);
@@ -39,7 +32,7 @@ public class DoubleToIntegerCompiler extends ConverterCompiler {
             methodInfo.placeLabel(end);
         } else {
             compiler.compileToPrimitive(base, Double.TYPE, OnEmpty.RETURN_NULL);
-            ga.invokeStaticMethod(IntegerValue.class, "makeIntegerValue", Double.TYPE);
+            ga.invokeStaticMethod(IntegerValue.class, "fromDouble", Double.TYPE);
             ga.invokeInstanceMethod(ConversionResult.class, "asAtomic");
         }
     }

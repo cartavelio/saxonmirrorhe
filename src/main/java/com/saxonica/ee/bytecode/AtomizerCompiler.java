@@ -7,6 +7,7 @@ import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.Cardinality;
 
@@ -56,8 +57,8 @@ public class AtomizerCompiler extends ToIteratorCompiler {
     }
 
     @Override
-    public void compileToPrimitive(CompilerService compiler, Expression expression, Class requiredClass, OnEmpty onEmpty) throws CannotCompileException {
-        if ((requiredClass == String.class || requiredClass == CharSequence.class) && ((Atomizer) expression).isUntyped()) {
+    public void compileToPrimitive(CompilerService compiler, Expression expression, Class<?> requiredClass, OnEmpty onEmpty) throws CannotCompileException {
+        if ((requiredClass == String.class || requiredClass == UnicodeString.class) && ((Atomizer) expression).isUntyped()) {
             Atomizer atomizer = (Atomizer) expression;
             Expression arg = ((Atomizer) expression).getBaseExpression();
             Generator ga = compiler.getCurrentGenerator();
@@ -79,10 +80,7 @@ public class AtomizerCompiler extends ToIteratorCompiler {
                 methodInfo.placeLabel(notNull);
             }
 
-            ga.invokeInstanceMethod(Item.class, "getStringValueCS");
-            if (requiredClass == String.class) {
-                ga.invokeInstanceMethod(Object.class, "toString");
-            }
+            ga.invokeInstanceMethod(Item.class, requiredClass == String.class ? "getStringValue" : "getUnicodeStringValue");
 
             if (exit != null) {
                 methodInfo.placeLabel(exit);

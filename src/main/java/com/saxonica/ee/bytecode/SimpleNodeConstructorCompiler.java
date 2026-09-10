@@ -6,6 +6,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.SimpleNodeConstructor;
 import net.sf.saxon.om.FingerprintedQName;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.Cardinality;
@@ -30,7 +31,7 @@ public abstract class SimpleNodeConstructorCompiler extends ToPushCompiler {
 
         // push the content onto the stack
         visitAnnotation(compiler, "SimpleNodeConstructor-Push-content");
-        compiler.compileToPrimitive(content, CharSequence.class, OnEmpty.RETURN_NULL);
+        compiler.compileToPrimitive(content, UnicodeString.class, OnEmpty.RETURN_NULL);
         LabelInfo done = null;
         if (Cardinality.allowsZero(content.getCardinality())) {
             LabelInfo notNull = methodInfo.newLabel("simpleNodeNotNull");
@@ -71,8 +72,8 @@ public abstract class SimpleNodeConstructorCompiler extends ToPushCompiler {
 
     /**
      * Compile code to check the content of the node, and adjust it if necessary
-     * On entry the proposed content is on the stack as a CharSequence; on exit the revised content
-     * must be on the stack as a CharSequence.
+     * On entry the proposed content is on the stack as a UnicodeString; on exit the revised content
+     * must be on the stack as a UnicodeString.
      *
      * @param compiler      the compiler service
      * @param expression    the expression to be compiled
@@ -100,7 +101,7 @@ public abstract class SimpleNodeConstructorCompiler extends ToPushCompiler {
     /**
      * Generate code to write the node to the current receiver. On entry the stack holds the
      * current receiver, the node name (for named node kinds only) and the content (for all nodes),
-     * in general as instances of CharSequence
+     * in general as instances of UnicodeString
      *
      * @param compiler      the compiler service
      * @param expression    the expression to be compiled
@@ -159,13 +160,13 @@ public abstract class SimpleNodeConstructorCompiler extends ToPushCompiler {
         Expression content = simpleNode.getSelect();
 
         // push the content onto the stack
-        compiler.compileToPrimitive(content, CharSequence.class, OnEmpty.RETURN_EMPTY_STRING);
+        compiler.compileToPrimitive(content, UnicodeString.class, OnEmpty.RETURN_EMPTY_STRING);
 
         // check and adjust the content if necessary
         checkContent(compiler, expression);
 
         // set the string value of the Orphan node
-        ga.invokeInstanceMethod(Orphan.class, "setStringValue", CharSequence.class);
+        ga.invokeInstanceMethod(Orphan.class, "setStringValue", UnicodeString.class);
 
         // return with the Orphan node on the top of stack
 

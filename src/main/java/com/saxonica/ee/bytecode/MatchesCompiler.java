@@ -6,6 +6,7 @@ import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.Matches;
 import net.sf.saxon.regex.RegularExpression;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
 
@@ -59,16 +60,16 @@ public class MatchesCompiler extends ToBooleanCompiler {
             if (fn.getArity() == 2) {
                 ga.push("");
             } else {
-                compiler.compileToPrimitive(fnc.getArg(2), CharSequence.class, OnEmpty.RETURN_EMPTY_STRING);
+                compiler.compileToPrimitive(fnc.getArg(2), UnicodeString.class, OnEmpty.RETURN_EMPTY_STRING);
             }
             compiler.generateGetContext();
-            ga.invokeInstanceMethod(Matches.class, "evalMatches", AtomicValue.class, AtomicValue.class, CharSequence.class, XPathContext.class);
+            ga.invokeInstanceMethod(Matches.class, "evalMatches", AtomicValue.class, AtomicValue.class, UnicodeString.class, XPathContext.class);
             methodInfo.placeLabel(end);
         } else {
             // return re.containsMatch(sv0.getStringValueCS())
             allocateStatic(compiler, re);
-            compiler.compileToPrimitive(arg0, CharSequence.class, OnEmpty.RETURN_EMPTY_STRING);
-            ga.invokeInstanceMethod(RegularExpression.class, "containsMatch", CharSequence.class);
+            compiler.compileToPrimitive(arg0, UnicodeString.class, OnEmpty.RETURN_EMPTY_STRING);
+            ga.invokeInstanceMethod(RegularExpression.class, "containsMatch", UnicodeString.class);
         }
 
     }

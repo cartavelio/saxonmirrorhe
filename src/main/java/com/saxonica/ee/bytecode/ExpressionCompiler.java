@@ -5,6 +5,7 @@ import com.saxonica.ee.bytecode.util.*;
 import com.saxonica.ee.bytecode.util.CompilerService.StaticVariableInfo;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.*;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -70,14 +71,15 @@ public abstract class ExpressionCompiler {
      * @param compiler      the compiler service
      * @param expression    the expression to be compiled
      * @param requiredClass the class of the Java value that is to be left on the stack if the generated code
-     *                      exits normally. This must be one of Integer.TYPE, Double.TYPE, Float.TYPE, BigDecimal.class, CharSequence.class.
+     *                      exits normally. This must be one of Integer.TYPE, Double.TYPE, Float.TYPE, BigDecimal.class,
+     *                      String.class, UnicodeString.class.
      * @param onEmpty       defines the action to be taken if the expression evaluates to the empty sequence.
      *                      May be null if the expression is known statically not to evaluate to an empty sequence. If the return
      *                      class is a primitive type (double, float, etc) this must be an instance of {@link com.saxonica.ee.bytecode.util.OnEmpty.UnwindAndJump}
      * @throws CannotCompileException if the expression cannot be compiled to bytecode
      */
 
-    public void compileToPrimitive(CompilerService compiler, Expression expression, Class requiredClass,
+    public void compileToPrimitive(CompilerService compiler, Expression expression, Class<?> requiredClass,
                                    OnEmpty onEmpty) throws CannotCompileException {
         // This is a fallback implementation that uses compileToItem - which should not normally be
         // used because it incurs the overhead of boxing and unboxing
@@ -139,7 +141,7 @@ public abstract class ExpressionCompiler {
             if (requiredClass == Integer.TYPE) {
                 ga.cast(Type.LONG_TYPE, Type.INT_TYPE);
             }
-        } else if (requiredClass == CharSequence.class || requiredClass == String.class) {
+        } else if (requiredClass == String.class) {
             LabelInfo exit = null;
             if (Cardinality.allowsZero(expression.getCardinality())) {
                 LabelInfo notNull = methodInfo.newLabel("ECstrNotNull");
@@ -150,11 +152,22 @@ public abstract class ExpressionCompiler {
                 methodInfo.placeLabel(notNull);
             }
             ga.checkClass(StringValue.class);
-            if (requiredClass == CharSequence.class) {
-                ga.invokeInstanceMethod(StringValue.class, "getStringValueCS"); // TODO: no longer exists
-            } else {
-                ga.invokeInstanceMethod(StringValue.class, "getStringValue");
+            ga.invokeInstanceMethod(StringValue.class, "getStringValue");
+            if (exit != null) {
+                methodInfo.placeLabel(exit);
             }
+        } else if (requiredClass == UnicodeString.class) {
+            LabelInfo exit = null;
+            if (Cardinality.allowsZero(expression.getCardinality())) {
+                LabelInfo notNull = methodInfo.newLabel("ECstrNotNull");
+                ga.dup();
+                ga.ifNonNull(notNull.label());
+                exit = methodInfo.newLabel("itemToStringExit");
+                handleEmptyStringResult(onEmpty, ga, methodInfo, exit);
+                methodInfo.placeLabel(notNull);
+            }
+            ga.checkClass(StringValue.class);
+            ga.invokeInstanceMethod(StringValue.class, "getUnicodeStringValue");
             if (exit != null) {
                 methodInfo.placeLabel(exit);
             }

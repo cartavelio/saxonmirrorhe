@@ -9,9 +9,10 @@ import net.sf.saxon.expr.ItemMappingIterator;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.ConversionResult;
 import net.sf.saxon.type.Converter;
-import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.*;
 import org.objectweb.asm.Type;
 
@@ -56,8 +57,8 @@ public class AtomicSequenceConverterCompiler extends ToIteratorCompiler {
             methodInfo.placeLabel(notNull);
         }
         if (converter instanceof Converter.ToStringConverter) {
-            ga.invokeInstanceMethod(Item.class, "getStringValueCS");
-            ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
+            ga.invokeInstanceMethod(Item.class, "getUnicodeStringValue");
+            ga.invokeStaticMethod(StringValue.class, "makeUStringValue", UnicodeString.class);
         } else {
             allocateStatic(compiler, converter);
             ga.swap();
@@ -69,9 +70,8 @@ public class AtomicSequenceConverterCompiler extends ToIteratorCompiler {
     }
 
     @Override
-    public void compileToPrimitive(CompilerService compiler, Expression expression, Class requiredClass, OnEmpty onEmpty) throws CannotCompileException {
-        if (requiredClass == String.class || requiredClass == CharSequence.class) {
-            TypeHierarchy th = compiler.getConfiguration().getTypeHierarchy();
+    public void compileToPrimitive(CompilerService compiler, Expression expression, Class<?> requiredClass, OnEmpty onEmpty) throws CannotCompileException {
+        if (requiredClass == String.class || requiredClass == UnicodeString.class) {
             Expression operand = ((AtomicSequenceConverter) expression).getBaseExpression();
             Generator ga = compiler.getCurrentGenerator();
             GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
@@ -88,25 +88,33 @@ public class AtomicSequenceConverterCompiler extends ToIteratorCompiler {
                 compiler.compileToPrimitive(operand, Integer.TYPE, oe2);
                 ga.invokeStaticMethod(Integer.class, "toString", Integer.TYPE);
                 postpareForEmptiness(onEmpty, ga, methodInfo, needToHandleEmpty, handleEmpty);
-
+                if (requiredClass == UnicodeString.class) {
+                    ga.invokeStaticMethod(BMPString.class, "of", String.class);
+                }
             } else if (operandType == StandardNames.XS_INTEGER && compiler.isInRangeForLong(operand)) {
                 oe2 = prepareForEmptiness(oe2, needToHandleEmpty, handleEmpty);
                 compiler.compileToPrimitive(operand, Long.TYPE, oe2);
                 ga.invokeStaticMethod(Long.class, "toString", Long.TYPE);
                 postpareForEmptiness(onEmpty, ga, methodInfo, needToHandleEmpty, handleEmpty);
-
+                if (requiredClass == UnicodeString.class) {
+                    ga.invokeStaticMethod(BMPString.class, "of", String.class);
+                }
             } else if (operandType == StandardNames.XS_DOUBLE) {
                 oe2 = prepareForEmptiness(oe2, needToHandleEmpty, handleEmpty);
                 compiler.compileToPrimitive(operand, Double.TYPE, oe2);
                 ga.invokeStaticMethod(DoubleValue.class, "doubleToString", Double.TYPE);
                 postpareForEmptiness(onEmpty, ga, methodInfo, needToHandleEmpty, handleEmpty);
-
+                if (requiredClass == UnicodeString.class) {
+                    ga.invokeStaticMethod(BMPString.class, "of", String.class);
+                }
             } else if (operandType == StandardNames.XS_FLOAT) {
                 oe2 = prepareForEmptiness(oe2, needToHandleEmpty, handleEmpty);
                 compiler.compileToPrimitive(operand, Float.TYPE, oe2);
                 ga.invokeStaticMethod(FloatValue.class, "floatToString", Float.TYPE);
                 postpareForEmptiness(onEmpty, ga, methodInfo, needToHandleEmpty, handleEmpty);
-
+                if (requiredClass == UnicodeString.class) {
+                    ga.invokeStaticMethod(BMPString.class, "of", String.class);
+                }
             } else if (operandType == StandardNames.XS_STRING || operandType == StandardNames.XS_UNTYPED_ATOMIC) {
                 compiler.compileToPrimitive(operand, requiredClass, onEmpty);
 
@@ -123,10 +131,7 @@ public class AtomicSequenceConverterCompiler extends ToIteratorCompiler {
                     handleEmptyStringResult(onEmpty, ga, methodInfo, end);
                     methodInfo.placeLabel(notNull);
                 }
-                ga.invokeInstanceMethod(Item.class, "getStringValueCS");
-                if (requiredClass == String.class) {
-                    ga.invokeInstanceMethod(Object.class, "toString");
-                }
+                ga.invokeInstanceMethod(Item.class, requiredClass == String.class ? "getStringValue" : "getUnicodeStringValue");
                 methodInfo.placeLabel(end);
             }
         } else {

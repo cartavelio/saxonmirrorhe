@@ -6,8 +6,7 @@ import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.StringLength_1;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.value.StringValue;
-import org.objectweb.asm.Type;
+import net.sf.saxon.str.UnicodeString;
 
 /**
  * Generate bytecode for a call to the StringLength Function
@@ -15,7 +14,7 @@ import org.objectweb.asm.Type;
 public class StringLengthCompiler extends ToItemCompiler {
 
     @Override
-    public void compileToPrimitive(CompilerService compiler, Expression expression, Class requiredClass, OnEmpty onEmpty)
+    public void compileToPrimitive(CompilerService compiler, Expression expression, Class<?> requiredClass, OnEmpty onEmpty)
             throws CannotCompileException {
 
         SystemFunctionCall fnc = (SystemFunctionCall) expression;
@@ -33,16 +32,12 @@ public class StringLengthCompiler extends ToItemCompiler {
                 compiler.generateDynamicError("The context item for string-length() is absent", "XPDY0002", expression.getLocation(), false);
                 methodInfo.placeLabel(notNull);
             }
-            ga.invokeInstanceMethod(Item.class, "getStringValueCS");
+            ga.invokeInstanceMethod(Item.class, "getUnicodeStringValue");
         } else {
-            compiler.compileToPrimitive(fnc.getArg(0), CharSequence.class, OnEmpty.RETURN_EMPTY_STRING);
+            compiler.compileToPrimitive(fnc.getArg(0), UnicodeString.class, OnEmpty.RETURN_EMPTY_STRING);
         }
 
-        ga.invokeStaticMethod(StringValue.class, "getStringLength", CharSequence.class);
-
-        if (requiredClass == Long.TYPE) {
-            ga.cast(Type.INT_TYPE, Type.LONG_TYPE);
-        }
+        ga.invokeInstanceMethod(UnicodeString.class, requiredClass == Long.TYPE ? "length" : "length32");
 
     }
 

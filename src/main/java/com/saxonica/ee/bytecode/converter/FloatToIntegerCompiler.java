@@ -33,7 +33,7 @@ public class FloatToIntegerCompiler extends ConverterCompiler {
             LabelInfo end = methodInfo.newLabel("end");
             compiler.compileToPrimitive(base, Float.TYPE, new OnEmpty.UnwindAndJump(empty));
             ga.cast(Type.FLOAT_TYPE, Type.DOUBLE_TYPE);
-            ga.invokeStaticMethod(IntegerValue.class, "makeIntegerValue", Double.TYPE);
+            ga.invokeStaticMethod(IntegerValue.class, "fromDouble", Double.TYPE);
             ga.invokeInstanceMethod(ConversionResult.class, "asAtomic");
             ga.goTo(end);
             methodInfo.placeLabel(empty);
@@ -42,13 +42,13 @@ public class FloatToIntegerCompiler extends ConverterCompiler {
         } else {
             compiler.compileToPrimitive(base, Float.TYPE, OnEmpty.RETURN_NULL);
             ga.cast(Type.FLOAT_TYPE, Type.DOUBLE_TYPE);
-            ga.invokeStaticMethod(IntegerValue.class, "makeIntegerValue", Double.TYPE);
+            ga.invokeStaticMethod(IntegerValue.class, "fromDouble", Double.TYPE);
             ga.invokeInstanceMethod(ConversionResult.class, "asAtomic");
         }
     }
 
     @Override
-    public void compileToPrimitive(CompilerService compiler, Expression expression, Class requiredClass, OnEmpty onEmpty) throws CannotCompileException {
+    public void compileToPrimitive(CompilerService compiler, Expression expression, Class<?> requiredClass, OnEmpty onEmpty) throws CannotCompileException {
         CastExpression cast = (CastExpression) expression;
         final Expression base = cast.getBaseExpression();
         final Generator ga = compiler.getCurrentGenerator();

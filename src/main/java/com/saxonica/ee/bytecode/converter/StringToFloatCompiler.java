@@ -4,9 +4,7 @@ import com.saxonica.ee.bytecode.ExpressionCompiler;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.CastExpression;
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.type.AtomicType;
-import net.sf.saxon.type.Converter;
-import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.FloatValue;
 import org.objectweb.asm.Type;
@@ -19,12 +17,8 @@ public class StringToFloatCompiler extends ConverterCompiler {
     public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         CastExpression cast = (CastExpression) expression;
         final Expression base = cast.getBaseExpression();
-        final AtomicType targetType = cast.getTargetType();
-        final Converter converter = cast.getConverter();
         final Generator ga = compiler.getCurrentGenerator();
         final GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
-        TypeHierarchy th = compiler.getConfiguration().getTypeHierarchy();
-        AtomicType sourceType = (AtomicType) base.getItemType();
         boolean allowsEmpty = Cardinality.allowsZero(cast.getCardinality());
         ExpressionCompiler.visitAnnotation(compiler, "StringToFloatConverter-Item");
         if (allowsEmpty) {
@@ -32,34 +26,32 @@ public class StringToFloatCompiler extends ConverterCompiler {
             LabelInfo end = methodInfo.newLabel("end");
             compileToPrimitive(compiler, expression, CharSequence.class, new OnEmpty.UnwindAndJump(empty));
             ga.invokeStaticMethod(FloatValue.class, "makeFloatValue", Float.TYPE);
+            // TODO: looks wrong, we have a CharSequence on the stack, not a float
             ga.goTo(end);
             methodInfo.placeLabel(empty);
             ga.pushNull();
             methodInfo.placeLabel(end);
         } else {
             compileToPrimitive(compiler, expression, CharSequence.class, OnEmpty.RETURN_NULL);
+            // TODO: looks wrong, we have a CharSequence on the stack, not a float
             ga.invokeStaticMethod(FloatValue.class, "makeFloatValue", Float.TYPE);
         }
     }
 
     @Override
-    public void compileToPrimitive(CompilerService compiler, Expression expression, Class requiredClass, OnEmpty onEmpty) throws CannotCompileException {
+    public void compileToPrimitive(CompilerService compiler, Expression expression, Class<?> requiredClass, OnEmpty onEmpty) throws CannotCompileException {
         CastExpression cast = (CastExpression) expression;
         final Expression base = cast.getBaseExpression();
-        final AtomicType targetType = cast.getTargetType();
-        final Converter converter = cast.getConverter();
         final Generator ga = compiler.getCurrentGenerator();
         final GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
-        TypeHierarchy th = compiler.getConfiguration().getTypeHierarchy();
-        AtomicType sourceType = (AtomicType) base.getItemType();
         boolean allowsEmpty = Cardinality.allowsZero(cast.getCardinality());
         ExpressionCompiler.visitAnnotation(compiler, "StringToFloatConverter-Primitive");
         if (allowsEmpty && !(onEmpty instanceof OnEmpty.UnwindAndJump)) {
             throw new IllegalArgumentException();
         }
 
-        compiler.compileToPrimitive(base, CharSequence.class, onEmpty);
-        final int strValue = methodInfo.allocateLocal(CharSequence.class);
+        compiler.compileToPrimitive(base, UnicodeString.class, onEmpty);
+        final int strValue = methodInfo.allocateLocal(UnicodeString.class);
         ga.storeLocal(strValue);
         ExpressionCompiler.allocateStatic(compiler, compiler.getConfiguration().getConversionRules().getStringToDoubleConverter());
         ga.loadLocal(strValue);
@@ -71,7 +63,7 @@ public class StringToFloatCompiler extends ConverterCompiler {
         ga.visitTryCatchBlock(L0, L1, L2, "java/lang/NumberFormatException");
         /* try block*/
         methodInfo.placeLabel(L0);
-        ga.invokeInstanceMethod(net.sf.saxon.type.StringToDouble.class, "stringToNumber", CharSequence.class);
+        ga.invokeInstanceMethod(net.sf.saxon.type.StringToDouble.class, "stringToNumber", UnicodeString.class);
         ga.cast(Type.DOUBLE_TYPE, Type.FLOAT_TYPE);
         methodInfo.placeLabel(L1);
         ga.goTo(done.label());

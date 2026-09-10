@@ -39,7 +39,7 @@ public class NamespaceUriFnCompiler extends ToItemCompiler {
         ga.newInstance(Type.getType(AnyURIValue.class));
         ga.dup();
         ga.loadLocal(uriVar);
-        ga.invokeConstructor(AnyURIValue.class, CharSequence.class);
+        ga.invokeConstructor(AnyURIValue.class, String.class);
         methodInfo.placeLabel(namespaceUriReturn);
 
         methodInfo.releaseLocal(uriVar);

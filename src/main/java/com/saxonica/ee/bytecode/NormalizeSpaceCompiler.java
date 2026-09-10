@@ -5,6 +5,8 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.Whitespace;
 
 /**
@@ -13,7 +15,7 @@ import net.sf.saxon.value.Whitespace;
 public class NormalizeSpaceCompiler extends ToStringCompiler {
 
     @Override
-    public void compileToPrimitive(CompilerService compiler, Expression expression, Class requiredClass, OnEmpty onEmpty) throws CannotCompileException {
+    public void compileToPrimitive(CompilerService compiler, Expression expression, Class<?> requiredClass, OnEmpty onEmpty) throws CannotCompileException {
 
         final SystemFunctionCall fnc = (SystemFunctionCall) expression;
         Generator ga = compiler.getCurrentGenerator();
@@ -21,15 +23,11 @@ public class NormalizeSpaceCompiler extends ToStringCompiler {
         visitAnnotation(compiler, "NormalizeSpace-str");
 
         formInputString(compiler, expression, requiredClass, fnc, ga, methodInfo);
-
-        ga.invokeStaticMethod(Whitespace.class, "collapseWhitespace", CharSequence.class);
-        if (requiredClass == String.class) {
-            ga.invokeInstanceMethod(CharSequence.class, "toString");
-        }
-
+        ga.invokeStaticMethod(Whitespace.class, "collapseWhitespace", requiredClass);
+        
     }
 
-    private void formInputString(CompilerService compiler, Expression expression, Class requiredClass, SystemFunctionCall fnc, Generator ga, GeneratedMethodInfo methodInfo) throws CannotCompileException {
+    private void formInputString(CompilerService compiler, Expression expression, Class<?> requiredClass, SystemFunctionCall fnc, Generator ga, GeneratedMethodInfo methodInfo) throws CannotCompileException {
         if (fnc.getArity() == 0) {
 
             LabelInfo nonNull = methodInfo.newLabel("nonNull");
@@ -40,17 +38,15 @@ public class NormalizeSpaceCompiler extends ToStringCompiler {
             ga.pop();
             compiler.generateDynamicError("Context item for normalize-space() is absent", "XPDY0002", expression.getLocation(), false);
             methodInfo.placeLabel(nonNull);
-            ga.invokeInstanceMethod(Item.class, "getStringValueCS");
             if (requiredClass == String.class) {
-                ga.invokeInstanceMethod(CharSequence.class, "toString");
+                ga.invokeInstanceMethod(Item.class, "getStringValue");
+            } else {
+                ga.invokeInstanceMethod(Item.class, "getUnicodeStringValue");
             }
 
         } else {
 
-            compiler.compileToPrimitive(fnc.getArg(0), CharSequence.class, OnEmpty.RETURN_EMPTY_STRING);
-            if (requiredClass == String.class) {
-                ga.invokeInstanceMethod(CharSequence.class, "toString");
-            }
+            compiler.compileToPrimitive(fnc.getArg(0), requiredClass, OnEmpty.RETURN_EMPTY_STRING);
 
         }
     }
@@ -62,13 +58,13 @@ public class NormalizeSpaceCompiler extends ToStringCompiler {
         Generator ga = compiler.getCurrentGenerator();
         formInputString(compiler,
                         expression,
-                        CharSequence.class,
+                        UnicodeString.class,
                         (SystemFunctionCall) expression,
                         ga,
                         compiler.getCurrentMethod());
 
         //return !Whitespace.isWhite(cs);
-        ga.invokeStaticMethod(Whitespace.class, "isWhite", CharSequence.class);
+        ga.invokeStaticMethod(Whitespace.class, "isAllWhite", CodePoints.class);
         ga.not();
     }
 }

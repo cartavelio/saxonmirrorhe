@@ -5,6 +5,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 import org.objectweb.asm.Type;
@@ -54,11 +55,11 @@ public class NumberFnCompiler extends ToItemCompiler {
             ga.cast(Type.LONG_TYPE, Type.DOUBLE_TYPE);
 
         } else if (type == StandardNames.XS_STRING || type == StandardNames.XS_UNTYPED_ATOMIC) {
-            compiler.compileToPrimitive(arg, CharSequence.class, onEmptyReturnNaN);
+            compiler.compileToPrimitive(arg, UnicodeString.class, onEmptyReturnNaN);
             StringToDouble s2d = compiler.getConfiguration().getConversionRules().getStringToDoubleConverter();
             allocateStatic(compiler, s2d);
             ga.swap();
-            ga.invokeStaticMethod(Callback.class, "stringToNumberOrNaN", StringToDouble.class, CharSequence.class);
+            ga.invokeStaticMethod(Callback.class, "stringToNumberOrNaN", StringToDouble.class, UnicodeString.class);
         } else {
             compiled = false;
         }

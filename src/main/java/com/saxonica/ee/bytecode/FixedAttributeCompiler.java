@@ -9,10 +9,11 @@ import net.sf.saxon.expr.instruct.AttributeCreator;
 import net.sf.saxon.expr.instruct.DummyNamespaceResolver;
 import net.sf.saxon.expr.instruct.FixedAttribute;
 import net.sf.saxon.expr.instruct.ValidatingInstruction;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -53,9 +54,9 @@ public class FixedAttributeCompiler extends ToPushCompiler {
         compiler.compileToPrimitive(select, String.class, OnEmpty.RETURN_EMPTY_STRING);
 
         generateAttributeValidationPushCode(compiler, instr, nodeName, -1);
-
+        ga.invokeInstanceMethod(UnicodeString.class, "toString");
         if (nodeName.getFingerprint() == StandardNames.XML_ID) {
-            ga.invokeStaticMethod(Whitespace.class, "collapseWhitespace", CharSequence.class);
+            ga.invokeStaticMethod(Whitespace.class, "collapseWhitespace", String.class);
         }
 
         // Complete the call on receiver.attribute()
@@ -67,7 +68,8 @@ public class FixedAttributeCompiler extends ToPushCompiler {
 
     /**
      * Generate code to validate the contents of the attribute against schema definitions.
-     * Both on entry and exit, the bytecode stack holds: SequenceReceiver(out), NodeName(nodeName) int(annotation) CharSequence(value)
+     * Both on entry and exit, the bytecode stack holds: SequenceReceiver(out), NodeName(nodeName) int(annotation),
+     * UnicodeString(value)
      * As well as validating the value, the method may modify the type annotation that is held on the stack.
      *
      * @param compiler    the compiler service
@@ -91,7 +93,7 @@ public class FixedAttributeCompiler extends ToPushCompiler {
             ga.swap();
             allocateStatic(compiler, DummyNamespaceResolver.getInstance());
             allocateStatic(compiler, compiler.getConfiguration().getConversionRules());
-            ga.invokeInstanceMethod(SimpleType.class, "validateContent", CharSequence.class, NamespaceResolver.class, ConversionRules.class);
+            ga.invokeInstanceMethod(SimpleType.class, "validateContent", UnicodeString.class, NamespaceResolver.class, ConversionRules.class);
 
             LabelInfo valFail = methodInfo.newLabel("valFail");
             LabelInfo valSuccess = methodInfo.newLabel("valSuccess");
@@ -149,7 +151,7 @@ public class FixedAttributeCompiler extends ToPushCompiler {
             ga.visitTryCatchBlock(L0, L1, L2, "net/sf/saxon/type/ValidationException");
             /* try block*/
             methodInfo.placeLabel(L0);
-            ga.invokeInstanceMethod(Configuration.class, "validateAttribute", StructuredQName.class, CharSequence.class, Integer.TYPE);
+            ga.invokeInstanceMethod(Configuration.class, "validateAttribute", StructuredQName.class, UnicodeString.class, Integer.TYPE);
             methodInfo.placeLabel(L1);
             // assert stack: out nodeName ann value ann2
             ga.dupX2();
@@ -229,8 +231,8 @@ public class FixedAttributeCompiler extends ToPushCompiler {
         // set the string value
 
         ga.dup();
-        compiler.compileToPrimitive(expr, CharSequence.class, OnEmpty.RETURN_EMPTY_STRING);
-        ga.invokeInstanceMethod(Orphan.class, "setStringValue", CharSequence.class);
+        compiler.compileToPrimitive(expr, UnicodeString.class, OnEmpty.RETURN_EMPTY_STRING);
+        ga.invokeInstanceMethod(Orphan.class, "setStringValue", UnicodeString.class);
 
         validateOrphanAttribute(compiler, instr);
 
@@ -247,12 +249,12 @@ public class FixedAttributeCompiler extends ToPushCompiler {
                         "XTTE1545", instr.getLocation(), true);
             } else {
                 ga.dup();
-                ga.invokeInstanceMethod(NodeInfo.class, "getStringValueCS");
+                ga.invokeInstanceMethod(NodeInfo.class, "getUnicodeStringValue");
                 allocateStatic(compiler, instr.getSchemaType());
                 ga.swap();
                 allocateStatic(compiler, DummyNamespaceResolver.getInstance());
                 allocateStatic(compiler, compiler.getConfiguration().getConversionRules());
-                ga.invokeInstanceMethod(SimpleType.class, "validateContent", CharSequence.class, NamespaceResolver.class, ConversionRules.class);
+                ga.invokeInstanceMethod(SimpleType.class, "validateContent", UnicodeString.class, NamespaceResolver.class, ConversionRules.class);
 
 //            ValidationFailure err = schemaType.validateContent(
 //                    o.getStringValueCS(), DummyNamespaceResolver.getInstance(), rules);
@@ -301,11 +303,11 @@ public class FixedAttributeCompiler extends ToPushCompiler {
             // assert stack: Orphan Orphan Configuration Orphan nameCode
             ga.swap();
             // assert stack: Orphan Orphan Configuration nameCode Orphan
-            ga.invokeInstanceMethod(NodeInfo.class, "getStringValueCS");
+            ga.invokeInstanceMethod(NodeInfo.class, "getUnicodeStringValue");
             // assert stack: Orphan Orphan Configuration nameCode stringValue
             ga.push(instr.getValidationAction());
             // assert stack: Orphan Orphan Configuration nameCode stringValue int
-            ga.invokeInstanceMethod(Configuration.class, "validateAttribute", Integer.TYPE, CharSequence.class, Integer.TYPE);
+            ga.invokeInstanceMethod(Configuration.class, "validateAttribute", Integer.TYPE, UnicodeString.class, Integer.TYPE);
             // assert stack: Orphan Orphan SchemaType
             ga.invokeInstanceMethod(Orphan.class, "setTypeAnnotation", SchemaType.class);
             // assert stack: Orphan

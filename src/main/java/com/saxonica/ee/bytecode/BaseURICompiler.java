@@ -28,7 +28,7 @@ public class BaseURICompiler extends ToItemCompiler {
         ga.newInstance(AnyURIValue.class);
         ga.dupX1();
         ga.swap();
-        ga.invokeConstructor(AnyURIValue.class, CharSequence.class);
+        ga.invokeConstructor(AnyURIValue.class, String.class);
         ga.goTo(end);
 
         methodInfo.placeLabel(nullLab);

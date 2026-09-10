@@ -18,12 +18,8 @@ public class BooleanToStringCompiler extends ConverterCompiler {
     public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         CastExpression cast = (CastExpression) expression;
         final Expression base = cast.getBaseExpression();
-        final AtomicType targetType = cast.getTargetType();
-        final Converter converter = cast.getConverter();
         final Generator ga = compiler.getCurrentGenerator();
         final GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
-        TypeHierarchy th = compiler.getConfiguration().getTypeHierarchy();
-        AtomicType sourceType = (AtomicType) base.getItemType();
         boolean allowsEmpty = Cardinality.allowsZero(cast.getCardinality());
         ExpressionCompiler.visitAnnotation(compiler, "BooleanToStringConverter-Item");
         if (allowsEmpty) {
@@ -31,6 +27,8 @@ public class BooleanToStringCompiler extends ConverterCompiler {
             LabelInfo end = methodInfo.newLabel("end");
             compileToPrimitive(compiler, expression, Boolean.TYPE, new OnEmpty.UnwindAndJump(empty));
             ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
+            // TODO: this looks wrong: there's a boolean on the stack but we're expecting a CharSequence.
+            //  Test fn-not-19 goes down this path and succeeds, but why?
             ga.goTo(end);
             methodInfo.placeLabel(empty);
             ga.pushNull();
@@ -38,11 +36,12 @@ public class BooleanToStringCompiler extends ConverterCompiler {
         } else {
             compileToPrimitive(compiler, expression, Boolean.TYPE, OnEmpty.RETURN_NULL);
             ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
+            // TODO: this looks wrong, see above
         }
     }
 
     @Override
-    public void compileToPrimitive(CompilerService compiler, Expression expression, Class requiredClass, OnEmpty onEmpty) throws CannotCompileException {
+    public void compileToPrimitive(CompilerService compiler, Expression expression, Class<?> requiredClass, OnEmpty onEmpty) throws CannotCompileException {
         CastExpression cast = (CastExpression) expression;
         final Expression base = cast.getBaseExpression();
         final AtomicType targetType = cast.getTargetType();

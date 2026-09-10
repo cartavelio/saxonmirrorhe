@@ -5,7 +5,6 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.IdentityComparison;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.sort.GlobalOrderComparer;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.value.BooleanValue;
@@ -32,7 +31,7 @@ public class IdentityComparisonCompiler extends ToItemCompiler {
 
         compiler.compileToItem(operand0);
         ga.checkClass(NodeInfo.class);
-        int operand0Var = methodInfo.allocateLocal(SequenceIterator.class);
+        int operand0Var = methodInfo.allocateLocal(NodeInfo.class);
         ga.storeLocal(operand0Var);
 
         LabelInfo notNull0 = methodInfo.newLabel("notNull0");
@@ -50,7 +49,7 @@ public class IdentityComparisonCompiler extends ToItemCompiler {
 
         compiler.compileToItem(operand1);
         ga.checkClass(NodeInfo.class);
-        int operand1Var = methodInfo.allocateLocal(SequenceIterator.class);
+        int operand1Var = methodInfo.allocateLocal(NodeInfo.class);
         ga.storeLocal(operand1Var);
         visitLineNumber(compiler, ga, expression);
         if (Cardinality.allowsZero(operand1.getCardinality()) && !generateIdEmulation) {
@@ -96,7 +95,7 @@ public class IdentityComparisonCompiler extends ToItemCompiler {
                 ga.invokeStaticMethod(GlobalOrderComparer.class, "getInstance");
                 ga.loadLocal(operand0Var);
                 ga.loadLocal(operand1Var);
-                ga.invokeInstanceMethod(GlobalOrderComparer.class, "compare", Item.class, Item.class);
+                ga.invokeInstanceMethod(GlobalOrderComparer.class, "compare", NodeInfo.class, NodeInfo.class);
                 ga.ifZCmp(GeneratorAdapter.LT, trueLab.label());
                 ga.getStaticField(BooleanValue.class, "FALSE", BooleanValue.class);
                 ga.goTo(end);
@@ -106,7 +105,7 @@ public class IdentityComparisonCompiler extends ToItemCompiler {
                 ga.invokeStaticMethod(GlobalOrderComparer.class, "getInstance");
                 ga.loadLocal(operand0Var);
                 ga.loadLocal(operand1Var);
-                ga.invokeInstanceMethod(GlobalOrderComparer.class, "compare", Item.class, Item.class);
+                ga.invokeInstanceMethod(GlobalOrderComparer.class, "compare", NodeInfo.class, NodeInfo.class);
                 ga.ifZCmp(GeneratorAdapter.GT, trueLab.label());
                 ga.getStaticField(BooleanValue.class, "FALSE", BooleanValue.class);
                 ga.goTo(end);
@@ -201,7 +200,7 @@ public class IdentityComparisonCompiler extends ToItemCompiler {
                 ga.invokeStaticMethod(GlobalOrderComparer.class, "getInstance");
                 ga.loadLocal(operand0Var);
                 ga.loadLocal(operand1Var);
-                ga.invokeInstanceMethod(GlobalOrderComparer.class, "compare", Item.class, Item.class);
+                ga.invokeInstanceMethod(GlobalOrderComparer.class, "compare", NodeInfo.class, NodeInfo.class);
                 ga.ifZCmp(GeneratorAdapter.LT, trueLab.label());
                 ga.push(false);
                 ga.goTo(end);
@@ -211,7 +210,7 @@ public class IdentityComparisonCompiler extends ToItemCompiler {
                 ga.invokeStaticMethod(GlobalOrderComparer.class, "getInstance");
                 ga.loadLocal(operand0Var);
                 ga.loadLocal(operand1Var);
-                ga.invokeInstanceMethod(GlobalOrderComparer.class, "compare", Item.class, Item.class);
+                ga.invokeInstanceMethod(GlobalOrderComparer.class, "compare", NodeInfo.class, NodeInfo.class);
                 ga.ifZCmp(GeneratorAdapter.GT, trueLab.label());
                 ga.push(false);
                 ga.goTo(end);

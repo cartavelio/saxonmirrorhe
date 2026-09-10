@@ -746,7 +746,7 @@ public class DominoNode implements NodeInfo, VirtualNode {
                     DOMNodeWrapper.expandStringValue(children1, sb1);
                     return sb1.toUnicodeString();
                 } else {
-                    return EmptyUniString.getInstance();
+                    return EmptyUnicodeString.getInstance();
                 }
 
             case Type.ATTRIBUTE:
@@ -771,12 +771,12 @@ public class DominoNode implements NodeInfo, VirtualNode {
                 return emptyIfNull(getDomNode().getNodeValue());
 
             default:
-                return EmptyUniString.getInstance();
+                return EmptyUnicodeString.getInstance();
         }
     }
 
     private static UnicodeString emptyIfNull(String s) {
-        return s == null ? EmptyUniString.getInstance() : StringView.of(s).tidy();
+        return s == null ? EmptyUnicodeString.getInstance() : StringView.of(s).tidy();
     }
 
     /**

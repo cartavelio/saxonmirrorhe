@@ -9,6 +9,7 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
@@ -100,7 +101,7 @@ public class LiteralCompiler extends ExpressionCompiler {
             ga.push(((DoubleValue) literal.getGroundedValue()).getDoubleValue());
         } else if (requiredClass == Float.TYPE) {
             ga.push(((FloatValue) literal.getGroundedValue()).getFloatValue());
-        } else if (requiredClass == String.class || requiredClass == CharSequence.class) {
+        } else if (requiredClass == String.class) {
             GroundedValue value = ((Literal) expression).getGroundedValue();
             if (value instanceof StringValue) {
                 ga.push(((StringValue) value).getStringValue());
@@ -108,6 +109,15 @@ public class LiteralCompiler extends ExpressionCompiler {
                 compileToItem(compiler, expression);
                 ga.checkClass(StringValue.class);
                 ga.invokeInstanceMethod(StringValue.class, "getStringValue");
+            }
+        } else if (requiredClass == UnicodeString.class) {
+            GroundedValue value = ((Literal) expression).getGroundedValue();
+            if (value instanceof StringValue) {
+                allocateStatic(compiler, ((StringValue) value).getUnicodeStringValue());
+            } else {
+                compileToItem(compiler, expression);
+                ga.checkClass(UnicodeString.class);
+                ga.invokeInstanceMethod(StringValue.class, "getUnicodeStringValue");
             }
         } else if (requiredClass == Long.TYPE) {
             try {

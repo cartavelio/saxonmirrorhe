@@ -10,7 +10,6 @@ import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.GroundedIterator;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
@@ -18,8 +17,6 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.*;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
-
-import java.util.EnumSet;
 
 /**
  * Generate bytecode to evaluate a filter expression
@@ -330,11 +327,13 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
                     compiler.compileToIterator(start);
                     ga.dup();
 
-                    ga.invokeInstanceMethod(SequenceIterator.class, "getProperties");
-                    allocateStatic(compiler, SequenceIteratorProperty.GROUNDED);
-                    ga.invokeInstanceMethod(EnumSet.class, "contains", Object.class);
                     LabelInfo notGrounded = methodInfo.newLabel("notGrounded");
+                    ga.ifNotInstance(GroundedIterator.class, notGrounded);
+                    ga.dup();
+                    ga.checkClass(GroundedIterator.class);
+                    ga.invokeInstanceMethod(GroundedIterator.class, "isActuallyGrounded");
                     ga.ifFalse(notGrounded);
+                    
                     ga.checkClass(GroundedIterator.class);
                     ga.invokeInstanceMethod(GroundedIterator.class, "materialize");
                     ga.checkClass(GroundedValue.class);
@@ -725,7 +724,7 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
             }
             ga.loadLocal(itemVar);
             ga.checkClass(StringValue.class);
-            ga.invokeInstanceMethod(StringValue.class, "isZeroLength");
+            ga.invokeInstanceMethod(StringValue.class, "isEmpty");
             ga.not();
             ga.storeLocal(resultVar);
             ga.goTo(checkNoMoreItems);
@@ -805,7 +804,7 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
             }
             ga.loadLocal(firstVar);
             ga.checkClass(StringValue.class);
-            ga.invokeInstanceMethod(StringValue.class, "isZeroLength");
+            ga.invokeInstanceMethod(StringValue.class, "isEmpty");
             ga.not();
             ga.storeLocal(resultVar);
             if (oneOrMoreCheck) {

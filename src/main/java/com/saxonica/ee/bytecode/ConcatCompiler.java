@@ -6,7 +6,9 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.LocalVariableReference;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.SystemFunctionCall;
-
+import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.AtomicValue;
@@ -19,8 +21,16 @@ import org.objectweb.asm.Type;
 public class ConcatCompiler extends ToStringCompiler {
 
     @Override
-    public void compileToPrimitive(CompilerService compiler, Expression expression, Class requiredClass, OnEmpty onEmpty)
+    public void compileToPrimitive(CompilerService compiler, Expression expression, Class<?> requiredClass, OnEmpty onEmpty)
             throws CannotCompileException {
+        Class<?> builderClass;
+        if (requiredClass == String.class) {
+            builderClass = StringBuilder.class;
+        } else if (requiredClass == UnicodeString.class) {
+            builderClass = UnicodeBuilder.class;
+        } else {
+            throw new IllegalArgumentException(requiredClass.toString());
+        }
         Configuration config = compiler.getConfiguration();
         TypeHierarchy th = config.getTypeHierarchy();
         SystemFunctionCall fnc = (SystemFunctionCall)expression;
@@ -30,19 +40,19 @@ public class ConcatCompiler extends ToStringCompiler {
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         visitAnnotation(compiler, "Concat-item");
         int valVar = methodInfo.allocateLocal(AtomicValue.class);
-        int sbVar = methodInfo.allocateLocal(StringBuilder.class);
-        ga.newInstance(Type.getType(StringBuilder.class));
+        int sbVar = methodInfo.allocateLocal(builderClass);
+        ga.newInstance(Type.getType(builderClass));
         ga.dup();
         ga.push(64);
-        ga.invokeConstructor(StringBuilder.class, Integer.TYPE);
+        ga.invokeConstructor(builderClass, Integer.TYPE);
         ga.storeLocal(sbVar);
         for (int i = 0; i < numArgs; i++) {
             if (th.isSubType(fnc.getArg(i).getItemType(), BuiltInAtomicType.STRING) &&
                     fnc.getArg(i).getCardinality() == StaticProperty.EXACTLY_ONE) {
                 // this path is particularly useful for literal arguments
                 ga.loadLocal(sbVar);
-                compiler.compileToPrimitive(fnc.getArg(i), CharSequence.class, OnEmpty.RETURN_EMPTY_STRING);
-                ga.invokeInstanceMethod(StringBuilder.class, "append", CharSequence.class);
+                compiler.compileToPrimitive(fnc.getArg(i), requiredClass, OnEmpty.RETURN_EMPTY_STRING);
+                ga.invokeInstanceMethod(builderClass, "append", requiredClass==String.class ? String.class : CodePoints.class);
             } else {
                 compiler.compileToItem(fnc.getArg(i));
                 ga.checkClass(AtomicValue.class);
@@ -55,15 +65,15 @@ public class ConcatCompiler extends ToStringCompiler {
                 }
                 ga.loadLocal(sbVar);
                 ga.loadLocal(valVar);
-                ga.invokeInstanceMethod(AtomicValue.class, "getStringValueCS");
-                ga.invokeInstanceMethod(StringBuilder.class, "append", CharSequence.class);
+                ga.invokeInstanceMethod(AtomicValue.class, requiredClass == String.class ? "getStringValue" : "getUnicodeStringValue");
+                ga.invokeInstanceMethod(builderClass, "append", requiredClass == String.class ? String.class : CodePoints.class);
                 if (nullLab != null) {
                     methodInfo.placeLabel(nullLab);
                 }
             }
         }
         ga.loadLocal(sbVar);
-        ga.invokeInstanceMethod(StringBuilder.class, "condense");
+        ga.invokeInstanceMethod(builderClass, "trimToSize");
         methodInfo.releaseLocal(valVar);
         methodInfo.releaseLocal(sbVar);
         if (requiredClass == String.class) {

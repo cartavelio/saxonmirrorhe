@@ -6,8 +6,11 @@ import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.ValueOf;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.EmptyUnicodeString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.TypeHierarchy;
@@ -42,10 +45,10 @@ public class ValueOfCompiler extends SimpleNodeConstructorCompiler {
         LabelInfo notNull = methodInfo.newLabel("notNullValOf");
         LabelInfo done = methodInfo.newLabel("doneValOf");
         LabelInfo end = methodInfo.newLabel("endValOf");
-        int valVar = methodInfo.allocateLocal(CharSequence.class);
+        int valVar = methodInfo.allocateLocal(UnicodeString.class);
         if (th.isSubType(select.getItemType(), BuiltInAtomicType.STRING) &&
                 !Cardinality.allowsZero(select.getCardinality())) {
-            compiler.compileToPrimitive(select, CharSequence.class, OnEmpty.RETURN_EMPTY_STRING);
+            compiler.compileToPrimitive(select, UnicodeString.class, OnEmpty.RETURN_EMPTY_STRING);
             ga.storeLocal(valVar);
         } else {
             compiler.compileToItem(select);
@@ -57,14 +60,14 @@ public class ValueOfCompiler extends SimpleNodeConstructorCompiler {
                     ga.pushNull();
                     ga.goTo(end);
                 } else {
-                    ga.push("");
+                    ga.invokeStaticMethod(EmptyUnicodeString.class, "getInstance");
                     ga.storeLocal(valVar);
                     ga.goTo(done);
                 }
                 methodInfo.placeLabel(notNull);
             }
             visitLineNumber(compiler, ga, expression);
-            ga.invokeInstanceMethod(Item.class, "getStringValueCS");
+            ga.invokeInstanceMethod(Item.class, "getUnicodeStringValue");
             ga.storeLocal(valVar);
             methodInfo.placeLabel(done);
         }
@@ -80,7 +83,7 @@ public class ValueOfCompiler extends SimpleNodeConstructorCompiler {
         ga.invokeInstanceMethod(Orphan.class, "setNodeKind", Short.TYPE);
         ga.loadLocal(oVar);
         ga.loadLocal(valVar);
-        ga.invokeInstanceMethod(Orphan.class, "setStringValue", CharSequence.class);
+        ga.invokeInstanceMethod(Orphan.class, "setStringValue", UnicodeString.class);
         ga.loadLocal(oVar);
 
         methodInfo.placeLabel(end);
@@ -113,7 +116,8 @@ public class ValueOfCompiler extends SimpleNodeConstructorCompiler {
         Generator ga = compiler.getCurrentGenerator();
         allocateStatic(compiler, expr.getLocation());
         ga.push(expr.getOptions());
-        ga.invokeInstanceMethod(Outputter.class, "characters", CharSequence.class, Location.class, Integer.TYPE);
+        //public void characters(CodePoints chars, Location location, int properties)
+        ga.invokeInstanceMethod(Outputter.class, "characters", CodePoints.class, Location.class, Integer.TYPE);
     }
 }
 

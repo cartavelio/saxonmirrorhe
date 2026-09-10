@@ -534,7 +534,7 @@ public class UcaCollatorUsingIcu implements SubstringMatcher {
         if (ba) {
             return s1.substring(ia[1]);
         } else {
-            return EmptyUniString.getInstance();
+            return EmptyUnicodeString.getInstance();
         }
     }
 
@@ -558,7 +558,7 @@ public class UcaCollatorUsingIcu implements SubstringMatcher {
         if (bb) {
             return s1.substring(0, ib[0]);
         } else {
-            return EmptyUniString.getInstance();
+            return EmptyUnicodeString.getInstance();
         }
     }
 
