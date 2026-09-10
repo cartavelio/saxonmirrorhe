@@ -1,7 +1,7 @@
 using System;
 using System.Xml;
 using NUnit.Framework;
-using Org.XmlResolver.Features;
+using XmlResolver.Features;
 using Saxon.Api;
 using Saxon.Callbacks;
 using Saxon.Eej.config;
@@ -81,7 +81,7 @@ namespace SaxonCS_NUnit {
                 return resolver.getFeature(resolverFeature);
             }
 
-            public override XmlResolver GetEntityResolver() {
+            public override XmlResolver.XmlResolver GetEntityResolver() {
                 throw new NotImplementedException();
             }
             
