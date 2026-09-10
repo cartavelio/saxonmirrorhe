@@ -2,7 +2,7 @@
   
   <!-- Exceptions file for Saxon-CS -->
   
-  <exception test-case="avt-0901" run="false" report="not-implemented">
+ <!-- <exception test-case="avt-0901" run="false" report="not-implemented">
     <created by="Michael Kay" on="2021-06-02"/>
     <reason>Collations</reason>
   </exception>
@@ -136,6 +136,67 @@
     <created by="Michael Kay" on="2023-11-02"/>
     <reason>Coercion of record arguments is not implemented.</reason>
   </exception>
+-->
+  
+  <exceptions>
+   
+   <exception test-case="si-group-064" run="false" report="Not implemented">
+      <created by="Michael Kay" on="2020-09-09"/>
+      <reason>The streaming spec allows calling last() on a grounding consuming sequence but we don't know how to implement this.</reason>
+   </exception>
+   
+   <exception test-case="function-40-012" run="false" report="Not implemented">
+      <created by="Michael Kay" on="2023-03-02"/>
+      <reason>Imposing a temporary restriction on default function parameters until spec clarified.</reason>
+   </exception>
+   
+   <exception test-case="next-match-420" run="false" report="Not implemented">
+      <created by="Michael Kay" on="2023-03-30"/>
+      <reason>Default priorities on record type patterns are not implemented.</reason>
+   </exception>
+   
+   <exception test-case="current-401" run="false" report="Not implemented">
+      <created by="Michael Kay" on="2023-03-30"/>
+      <reason>Dynamic evaluation of fn:current#0 is not implemented.</reason>
+   </exception>
+   
+   <exception test-case="sort-081b" run="false" report="Not implemented">
+      <created by="Michael Kay" on="2026-01-30"/>
+      <reason>xsl:sort does not yet allow composite sort keys (PR1674).</reason>
+   </exception>
+   
+   <exception test-case="error-1020b" run="false" report="Not implemented">
+      <created by="Michael Kay" on="2026-01-30"/>
+      <reason>xsl:sort does not yet allow composite sort keys (PR1674).</reason>
+   </exception>
+ 
+   <exception test-case="record-023" run="false" report="Not implemented">
+      <created by="Michael Kay" on="2026-01-30"/>
+      <reason>xsl:record-type is not implemented.</reason>
+   </exception>
+   
+   <exception test-set="package-location" run="false" report="Not implemented">
+      <created by="Michael Kay" on="2026-01-30"/>
+      <reason>xsl:package-location is not implemented.</reason>
+   </exception>
+    
+    <exception test-set="su-absorbing" 
+      test-case="su-absorbing-204 su-absorbing-301" run="false" report="bug">
+      <created by="Michael Kay" on="2026-01-30"/>
+      <reason>Causing StackOverflow exception</reason>
+   </exception>
+    
+    <exception test-case="su-absorbing-301" run="false" report="bug">
+      <created by="Michael Kay" on="2026-01-30"/>
+      <reason>Causing StackOverflow exception</reason>
+   </exception>
+    
+    <exception  test-case="su-absorbing-204" run="false" report="bug">
+      <created by="Michael Kay" on="2026-01-30"/>
+      <reason>Causing StackOverflow exception</reason>
+   </exception>
+    
+ 
 
 
 </exceptions>
