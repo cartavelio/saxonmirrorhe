@@ -7,8 +7,8 @@
 
 package net.sf.saxon.lib;
 
-import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.transpile.CSharpModifiers;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 
 import javax.xml.transform.stream.StreamResult;
 import java.io.Writer;
@@ -111,11 +111,12 @@ public abstract class Logger {
      * @return a suitable {@code Writer}
      */
 
+    @CSharpReplaceBody(code="return new Saxon.Impl.Overrides.LoggingWriter(this);")
     public Writer asWriter() {
         return new LoggingWriter(this);
     }
 
-    @CSharpInjectMembers(code="public override System.Text.Encoding Encoding => System.Text.Encoding.UTF8;")
+    //#if CSHARP==false
     private static class LoggingWriter extends Writer {
         private final StringBuilder builder = new StringBuilder();
         private final Logger logger;
@@ -150,6 +151,7 @@ public abstract class Logger {
             flush();
         }
     }
+    //#endif
 
     /**
      * Get a JAXP {@link StreamResult} object allowing serialized XML to be written to the
