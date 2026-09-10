@@ -1,0 +1,796 @@
+if (project.findProperty("buildMacArch") != null) {
+  csbuildarch = project.findProperty("buildMacArch")
+  if (csbuildarch == "arm64") {
+    csarcarch = "aarch64"
+  } else {
+    csarcarch = "x86_64"
+  }
+  print("Forcing macOS build architecture: ${csbuildarch} / ${csarcarch}")
+} else {
+  if (System.getProperty("os.arch") == "aarch64") {
+     csbuildarch = "arm64"
+     csarcarch = "aarch64"
+  } else {
+     csbuildarch = "x64"
+     csarcarch = "x86_64"
+  }
+}
+
+if (systemOs.isWindows()) {
+  csplatform = "Windows-${csarcarch}"
+  csrid = "win-${csbuildarch}"
+}
+
+if (systemOs.isMacOsX()) {
+  csplatform = "MacOS-${csarcarch}"
+  csrid = "osx-${csbuildarch}"
+}
+
+if (systemOs.isLinux()) {
+  csplatform = "Linux-${csarcarch}"
+  csrid= "linux-${csbuildarch}"
+}
+
+if (csplatform == null) {
+  throw new GradleException("Unrecognized OS: ${systemOs}")
+}
+
+csver = "${saxonMajorVersion}.${saxonMinorVersion}.${saxonPatchVersion}"
+
+task hecs_featureKeys(
+  type: JavaExec,
+  description: "Construct the feature keys for SaxonCS"
+) {
+  // Task name is misleading: the output is used unchanged for HE and PE
+  inputs.files fileTree(dir: "${projectDir}/tools/featureKeys")
+  outputs.file "${projectDir}/src/main/saxon-cs/engine/Saxon/Api/Feature.cs"
+  outputs.file "${projectDir}/src/main/saxon-cs/engine/Saxon/Api/FeatureKeys.cs"
+  classpath = configurations.preprocessor
+  mainClass = "net.sf.saxon.Transform"
+  args "${projectDir}/tools/featureKeys/FeatureKeys.xml",
+    "-xsl:${projectDir}/tools/featureKeys/FeatureKeysForSaxonCS.xsl",
+    "-o:${projectDir}/src/main/saxon-cs/engine/Saxon/Api/establish-an-output-base-uri"
+}
+
+task hecs_setupPreprocess(
+  type: Copy,
+  dependsOn: ["hecs_featureKeys", "hej_featureKeys"],
+  description: "Copy HE sources for preprocessing HE"
+) {
+  inputs.files fileTree(dir: "${projectDir}/src/main/java")
+  from "${projectDir}/src/main/java"
+  into "${buildDir}/filtered/hecs"
+  include "net/sf/saxon/**/*.java"
+  include "net/sf/saxon/data/**"
+  
+  exclude "**/package-info.java"
+  
+  exclude "net/sf/saxon/dotnet/**"
+  exclude "net/sf/saxon/event/ContentHandlerProxy.java"
+  exclude "net/sf/saxon/event/ContentHandlerProxyLocator.java"
+  exclude "net/sf/saxon/event/PIGrabber.java"
+  exclude "net/sf/saxon/event/ReceivingContentHandler.java"
+  exclude "net/sf/saxon/event/RepairingContentHandler.java"
+  exclude "net/sf/saxon/event/StreamWriterToReceiver.java"
+  exclude "net/sf/saxon/expr/JavaExtensionFunctionCall.java"
+  exclude "net/sf/saxon/expr/JPConverter.java"
+  exclude "net/sf/saxon/expr/PJConverter.java"
+  exclude "net/sf/saxon/expr/SimpleExpression.java"
+  exclude "net/sf/saxon/expr/sort/ItemOrderComparer.java"
+  exclude "net/sf/saxon/expr/sort/RuleBasedSubstringMatcher.java"
+  exclude "net/sf/saxon/expr/sort/UcaCollatorUsingJava.java"
+  exclude "net/sf/saxon/functions/registry/OnDemandFunctionSet.java"
+  exclude "net/sf/saxon/functions/registry/OnDemandFunctionSet.java"
+  exclude "net/sf/saxon/lib/CatalogResourceResolver.java"
+  exclude "net/sf/saxon/lib/DigestMaker.java"
+  exclude "net/sf/saxon/lib/ChainedEntityResolver.java"
+  exclude "net/sf/saxon/lib/ConfigurableResourceResolver.java"
+  exclude "net/sf/saxon/lib/DirectResourceResolver.java"
+  exclude "net/sf/saxon/lib/EntityResolverWrappingResourceResolver.java"
+  exclude "net/sf/saxon/lib/ErrorReporterToListener.java"
+  exclude "net/sf/saxon/lib/ExternalObjectModel.java"
+  exclude "net/sf/saxon/lib/InvalidityHandlerWrappingErrorListener.java"  
+  exclude "net/sf/saxon/lib/RelativeURIResolver.java" 
+  exclude "net/sf/saxon/lib/ResourceResolverWrappingURIResolver.java" 
+  exclude "net/sf/saxon/lib/StandardEntityResolver.java"
+  exclude "net/sf/saxon/lib/StandardErrorHandler.java"
+  exclude "net/sf/saxon/lib/StandardErrorListener.java"
+  exclude "net/sf/saxon/lib/StandardLogger.java"
+  exclude "net/sf/saxon/lib/StandardMessageHandler.java"
+  //exclude "net/sf/saxon/lib/StandardModuleURIResolver.java"
+  exclude "net/sf/saxon/lib/StandardOutputResolver.java"
+  //exclude "net/sf/saxon/lib/StandardUnparsedTextResolver.java"
+  exclude "net/sf/saxon/lib/StandardURIResolver.java"
+  exclude "net/sf/saxon/lib/SystemLogger.java"
+  exclude "net/sf/saxon/ma/arrays/ImmutableArrayItem.java"
+  exclude "net/sf/saxon/ma/map/HashTrieMap.java"
+  exclude "net/sf/saxon/ma/trie/**"
+  exclude "net/sf/saxon/om/EnumSetTool.java"
+  exclude "net/sf/saxon/om/One.java"
+  exclude "net/sf/saxon/om/OneOrMore.java"
+  exclude "net/sf/saxon/om/ZeroOrMore.java"
+  exclude "net/sf/saxon/om/ZeroOrOne.java"
+  exclude "net/sf/saxon/pull/ActiveStAXSource.java"
+  exclude "net/sf/saxon/pull/NamespaceContextImpl.java"
+  exclude "net/sf/saxon/pull/StaxBridge.java"
+  exclude "net/sf/saxon/resource/ActiveSAXSource.java"
+  exclude "net/sf/saxon/resource/ActiveStreamSource.java"
+  exclude "net/sf/saxon/resource/JarCollection.java"
+  exclude "net/sf/saxon/resource/ResourceLoader.java"
+  exclude "net/sf/saxon/sapling/*.java"
+  exclude "net/sf/saxon/s9api/BuildingContentHandler.java"
+  exclude "net/sf/saxon/s9api/BuildingStreamWriter.java"
+  exclude "net/sf/saxon/s9api/BuildingStreamWriterImpl.java"
+  exclude "net/sf/saxon/s9api/DOMDestination.java"
+  exclude "net/sf/saxon/s9api/HostLanguage.java"
+  exclude "net/sf/saxon/s9api/ItemType.java"
+  exclude "net/sf/saxon/s9api/ItemTypeFactory.java"
+  exclude "net/sf/saxon/s9api/JdomBuilder.java"
+  exclude "net/sf/saxon/s9api/MessageListener2Proxy.java"
+  exclude "net/sf/saxon/s9api/SaxonApiException.java"
+  exclude "net/sf/saxon/s9api/SaxonApiUncheckedException.java"
+  exclude "net/sf/saxon/s9api/SequenceType.java"
+  exclude "net/sf/saxon/s9api/SAXDestination.java"
+  exclude "net/sf/saxon/s9api/SequenceType.java"
+  exclude "net/sf/saxon/s9api/streams/**"
+  exclude "net/sf/saxon/s9api/QName.java"
+  exclude "net/sf/saxon/s9api/ValidationStatistics.java"
+  exclude "net/sf/saxon/s9api/WhitespaceStrippingPolicy.java"
+  exclude "net/sf/saxon/s9api/XdmExternalObject.java"
+  exclude "net/sf/saxon/s9api/XdmArray.java"
+  exclude "net/sf/saxon/s9api/XdmAtomicValue.java"
+  exclude "net/sf/saxon/s9api/XdmEmptySequence.java"
+  exclude "net/sf/saxon/s9api/XdmFunctionItem.java"
+  exclude "net/sf/saxon/s9api/XdmItem.java"
+  exclude "net/sf/saxon/s9api/XdmItemType.java"
+  exclude "net/sf/saxon/s9api/XdmMap.java"
+  exclude "net/sf/saxon/s9api/XdmNode.java"
+  exclude "net/sf/saxon/s9api/XdmValue.java"
+  exclude "net/sf/saxon/serialize/charcode/JavaCharacterSet.java"
+  exclude "net/sf/saxon/serialize/codenorm/NormalizerData.java"
+  exclude "net/sf/saxon/sort/ItemOrderComparer.java"
+  exclude "net/sf/saxon/trace/ExitCounter.java"
+  exclude "net/sf/saxon/trace/Locksmith.java"
+  exclude "net/sf/saxon/trace/TracingFilter.java"
+  exclude "net/sf/saxon/trace/TimingTraceListener.java"
+  exclude "net/sf/saxon/trace/TracingFilter.java"
+  exclude "net/sf/saxon/trans/DynamicLoader.java"
+  exclude "net/sf/saxon/trans/NonDelegatingURIResolver.java"
+  exclude "net/sf/saxon/trans/XmlCatalogResolver.java"
+  exclude "net/sf/saxon/tree/iter/NodeWrappingAxisIterator.java"
+  exclude "net/sf/saxon/tree/iter/NodeWrappingFunction.java"
+  exclude "net/sf/saxon/tree/jiter/TopDownStackIterable.java"
+  exclude "net/sf/saxon/tree/jiter/MappingJavaIterator.java"
+  exclude "net/sf/saxon/tree/lib/StandardEntityResolver.java"
+  exclude "net/sf/saxon/tree/lib/StandardErrorHandler.java"
+  exclude "net/sf/saxon/tree/util/AttributeCollectionImpl.java"
+  exclude "net/sf/saxon/tree/util/ProcInstParser.java"
+  exclude "net/sf/saxon/value/SaxonDuration.java"
+  exclude "net/sf/saxon/value/SaxonXMLGregorianCalendar.java"
+  
+  exclude "**/TransformerFactoryImpl.java"
+  exclude "net/sf/saxon/BasicTransformerFactory.java"
+  exclude "net/sf/saxon/Gizmo.java"
+  exclude "net/sf/saxon/ma/parray/**"
+  exclude "**/ant/**"
+  exclude "**/dom/**"
+  exclude "**/dom4j/**"
+  exclude "**/gizmo/**"
+  exclude "**/java/**"
+  exclude "**/option/**"
+  exclude "**/testdriver/**"
+  exclude "**/jaxp/**"
+  exclude "**/jdom/**"
+  exclude "**/jdom2/**"
+  exclude "**/axiom/**"
+  //exclude "**/sapling/**"
+  exclude "**/sql/**"
+  exclude "**/transpile/**"
+  exclude "**/xom/**"
+  exclude "**/xpath/**"
+  exclude "**/xqj/**"
+  exclude "**/stax/**"
+  
+  exclude "com/saxonica/Idempotency.java"
+  exclude "com/saxonica/config/DotNetExtensionFunctionFactory.java"
+  exclude "com/saxonica/config/DotNetExtensionLibrary.java"
+  exclude "com/saxonica/config/DotNetLocalizerFactory.java"
+  exclude "com/saxonica/config/DotNetPlatformPE.java"
+  exclude "com/saxonica/config/EnterpriseTransformerFactory.java"
+  exclude "com/saxonica/config/EnterpriseXPathFactory.java"
+  exclude "com/saxonica/config/ICULibrary.java"
+  exclude "com/saxonica/config/JavaExtensionFunctionFactory.java"
+  exclude "com/saxonica/config/JavaExtensionLibrary.java"
+  exclude "com/saxonica/config/JavaLocalizerFactory.java"
+  exclude "com/saxonica/config/JavaPlatformEE.java"
+  exclude "com/saxonica/config/JavaPlatformPE.java"
+  exclude "com/saxonica/config/JavaVerifier.java"
+  exclude "com/saxonica/config/NativePlatformPE.java"
+  exclude "com/saxonica/config/ProfessionalTransformerFactory.java"
+  exclude "com/saxonica/config/ProfessionalXPathFactory.java"
+  exclude "com/saxonica/config/StreamingTransformerFactory.java"
+  exclude "com/saxonica/config/pe/DotNetExtensionFunctionFactory.java"
+  exclude "com/saxonica/config/pe/DotNetExtensionLibrary.java"
+  exclude "com/saxonica/config/pe/DynamicLoaderPE.java"
+  exclude "com/saxonica/config/pe/ICUNumberer_de.java"
+  exclude "com/saxonica/config/pe/ICUNumbererEnUnhyphenated.java"
+  exclude "com/saxonica/config/pe/ICUNumbererPE.java"
+  exclude "com/saxonica/config/pe/NativePlatformPE.java"
+  exclude "com/saxonica/ee/bytecode/**"
+  exclude "com/saxonica/ee/domino/**"
+  exclude "com/saxonica/ee/config/DynamicLoaderEE.java"
+  exclude "com/saxonica/ee/extfn/ExperimentalSequenceTypeMarshaller.java"
+  exclude "com/saxonica/ee/extfn/ExperimentalXPathCompiler.java"
+  exclude "com/saxonica/ee/jaxp/**"
+  exclude "com/saxonica/ee/parallel/MultithreadedContextMappingIterator.java"
+  exclude "com/saxonica/ee/parallel/MultithreadedItemMappingIterator.java"
+  exclude "com/saxonica/ee/parallel/PushToPull.java"
+  exclude "com/saxonica/ee/schema/sdoc/LSSchemaResolver.java"
+  exclude "com/saxonica/ee/validate/StatisticsReporter.java"
+  exclude "com/saxonica/expr/DotNetExtensionFunctionCall.java"
+  exclude "com/saxonica/expr/JavaExtensionFunctionCall.java"
+  exclude "com/saxonica/expr/ObjectLookupExpression.java"
+  //exclude "com/saxonica/expr/sort/UcaCollationKeyUsingIcu.java"
+  //exclude "com/saxonica/expr/sort/UcaCollatorUsingIcu.java"
+  exclude "com/saxonica/functions/sql/**"
+  exclude "com/saxonica/functions/extfn/cpp/**"
+  exclude "com/saxonica/functions/extfn/EXPathArchive/**"
+  exclude "com/saxonica/functions/extfn/LastModified.java"
+  exclude "com/saxonica/functions/extfn/Mailer2.java"
+  exclude "com/saxonica/functions/extfn/ObjectMap.java"
+  exclude "com/saxonica/functions/qt4/ParseHtml.java"
+  //exclude "com/saxonica/functions/extfn/ReadBinaryResource.java"
+  exclude "com/saxonica/functions/extfn/SendMail.java"
+  exclude "com/saxonica/xqj/**"
+}
+
+task hecs_preprocess(
+  type: JavaExec,
+  dependsOn: ["hecs_setupPreprocess"],
+  description: "Preprocess HE sources"
+) {
+  inputs.files fileTree(dir: "${buildDir}/filtered/hecs")
+  outputs.files fileTree(dir: "${buildDir}/preprocess/hecs")
+  classpath = configurations.preprocessor
+  mainClass = "com.igormaznitsa.jcp.JcpPreprocessor"
+  args "/c",
+    "/i:${buildDir}/filtered/hecs", "/o:${buildDir}/preprocess/hecs",
+    "/p:EE=false", "/p:PE=false",
+    "/p:SAXONC=false", "/p:BYTECODE=false", "/p:HOF=true",
+    "/p:STREAM=false", "/p:SCHEMA=false", "/p:CSHARP=true"
+  doFirst {
+    mkdir "${buildDir}/preprocess/hecs"
+  }
+}
+
+task hecs_sources(
+  type: Copy,
+  dependsOn: ["hecs_preprocess"],
+  description: "Collect the preprocessed HE sources for compilation"
+) {
+  from "${buildDir}/preprocess/hecs"
+  into "${buildDir}/src/hecs"
+  filter { line ->
+    if (line.contains("net.sf.saxon.xpath.JAXPXPathStaticContext")
+        || line.contains("import net.sf.saxon.stax")
+        || line.contains("import net.sf.saxon.jaxp")) {
+      null
+    } else {
+      line
+    }
+  }
+  doFirst {
+    mkdir "${buildDir}/src/hecs"
+  }
+}
+
+task build_he_transpiler(
+  type: JavaCompile,
+  dependsOn: ["hecs_featureKeys", "hejJar"],
+  description: "Compile the ToXml transpiler}"
+) {
+  inputs.files fileTree(dir: "${projectDir}/tools/transpiler/src")
+  outputs.files fileTree(dir: "${buildDir}/transpiler")
+  source("${projectDir}/tools/transpiler/src/ToXml.java")
+  source("${projectDir}/tools/transpiler/src/XmlPrinterMHK.java")
+  classpath = configurations.transpiler \
+        + files("${buildDir}/libs/saxon-he-${saxonVersion}.jar")
+  destinationDirectory = new File("${buildDir}/transpiler")
+  doFirst {
+    mkdir("build")
+  }
+}
+
+task hecs_transpile_to_xml(
+  type: JavaExec,
+  dependsOn: ["hecs_sources", "build_he_transpiler"],
+  description: "Transpile the HECS Java to XML"
+) {
+  inputs.files fileTree(dir: "${buildDir}/src/hecs")
+  outputs.files fileTree(dir: "${buildDir}/he_xmlout")
+  classpath = configurations.transpiler \
+        + files("${buildDir}/libs/saxon-he-${saxonVersion}.jar")
+  mainClass = "ToXml"
+  args "-j:${buildDir}/src/hecs",
+    "-repo:${projectDir}",
+    "-xml:${buildDir}/he_xmlout",
+    "-h:${projectDir}/src/main/java",
+    "-src:${projectDir}/src/main/java",
+    "-he:${saxonVersion}",
+    "-icu4j:${icu4jJar}"
+  doFirst {
+    mkdir("${buildDir}/he_xmlout")
+  }
+}
+
+task hecs_xml_digest(
+  type: JavaExec,
+  dependsOn: ["hecs_transpile_to_xml"],
+  description: "Make a digest of the transpiled XML for HECS"
+) {
+  inputs.files fileTree(dir: "${buildDir}/ee_xmlout")
+  inputs.files fileTree(dir: "${projectDir}/tools/transpiler/xslt")
+  inputs.file "${projectDir}/tools/transpiler/xslt/xml-to-digest.xsl"
+  outputs.files "${buildDir}/he_digest.xml"
+  classpath = configurations.preprocessor
+  mainClass = "net.sf.saxon.Transform"
+  args "-it",
+    "-xsl:${projectDir}/tools/transpiler/xslt/xml-to-digest.xsl",
+    "-o:${buildDir}/he_digest.xml",
+    "xmlDir=../../../build/he_xmlout"
+}
+
+task hecs_refine_digest(
+  type: JavaExec,
+  dependsOn: ["hecs_xml_digest"],
+  description: "Refine the digest of the transpiled XML for HECS"
+) {
+  inputs.file "${buildDir}/he_digest.xml"
+  inputs.file "${projectDir}/tools/transpiler/xslt/refine-digest.xsl"
+  outputs.files "${buildDir}/he_refined-digest.xml"
+  classpath = configurations.preprocessor
+  mainClass = "net.sf.saxon.Transform"
+  args "-xsl:${projectDir}/tools/transpiler/xslt/refine-digest.xsl",
+    "-s:${buildDir}/he_digest.xml",
+    "-o:${buildDir}/he_refined-digest.xml",
+    "xmlDir=${buildDir}/he_xmlout"
+}
+
+task hecs_generateCSharp(
+  type: JavaExec,
+  dependsOn: ["hecs_refine_digest", "build_he_transpiler", "hecs_transpile_to_xml"],
+  description: "Create the CS files for HE"
+) {
+  inputs.files fileTree(dir: "${buildDir}/he_xmlout")
+  inputs.file "${buildDir}/he_refined-digest.xml"
+  inputs.files fileTree(dir: "${projectDir}/tools/transpiler/xslt")
+  outputs.files fileTree(dir: "${buildDir}/cs/he")
+  classpath = configurations.transpiler \
+        + files("${buildDir}/libs/saxon-he-${saxonVersion}.jar")
+  mainClass = "ToXml"
+  args "-cs:${buildDir}/cs/he",
+    "-repo:${projectDir}",
+    "-xml:${buildDir}/he_xmlout",
+    "-digest:${buildDir}/he_refined-digest.xml",
+    "-he:${saxonVersion}",
+    "-icu4j:${icu4jJar}"
+    "-debug"
+  doFirst {
+    mkdir("${buildDir}/cs/he")
+  }
+}
+
+/*
+// This is the start of building the csproj and sln files automatically but
+// I've decided it's not the best use of my time today.
+tasks.register('hecs_solution_csproj') {
+  //dependsOn = ['hecs_generateCSharp', 'processResources']
+  //inputs.dir layout.buildDirectory.file("cs/Saxon")
+  //inputs.dir layout.projectDirectory.file("src/main/saxon-cs/engine/Saxon")
+
+  doLast {
+    fileTree(dir: layout.buildDirectory.file("cs/Saxon")).each { fn ->
+      println(fn)
+    }
+  }
+
+  doLast {
+    javaexec {
+      classpath = configurations.transpiler + files("${buildDir}/libs/saxon-he-${saxonVersion}.jar")
+      mainClass = "net.sf.saxon.Transform"
+      args "-it", "-xsl:${projectDir}/tools/saxon-cs/csproj.xsl",
+        "-o:${buildDir}/test.csproj"
+    }
+  }
+}
+*/
+  
+
+task hecs_project_files (
+  type: Copy,
+  dependsOn: ["hecs_generateCSharp", "processResources"],
+  description: "Prepare the project files used for HECS build"
+) {
+  from "src/main/saxon-cs/csproj"
+  into "${buildDir}/cs/he"
+  include "*.csproj"
+  filter { line ->
+    line.replaceAll("@@optimize@@", csoptimize)
+    .replaceAll("@@csrid@@", csrid)
+  }
+}
+
+task hecs_dll(
+  dependsOn: ["hecs_project_files"],
+  description: "Compile SaxonCS DLL for HE"
+) {
+  inputs.files fileTree(dir: "${buildDir}/cs/he/Saxon")
+  inputs.files fileTree(dir: "${projectDir}/src/main/saxon-cs")
+  outputs.dir "${buildDir}/cs/csout"
+
+  doLast {
+    if (dotnetex == null) {
+      throw new GradleException("Cannot build: failed to find dotnet[.exe] on path.")
+    }
+
+    exec {
+        workingDir = "${buildDir}/cs/he"
+        commandLine dotnetex, 'build', '--nologo', '-o', '../csout', 'engine.csproj'
+    }
+  }
+}
+
+task hecsTest(
+  dependsOn: ["dotnetRelease_he"],
+  group: "Verification",
+  description: "Run SaxonCS nUnit tests"
+) {
+  def reportDir = layout.buildDirectory.dir("reports/tests/hecsTest")
+  inputs.files fileTree(dir: "${buildDir}/cs/he/Saxon")
+  inputs.files fileTree(dir: "${projectDir}/src/test/nunit")
+  outputs.dir reportDir
+
+  doLast {
+    if (dotnetex == null) {
+      throw new GradleException("Cannot build: failed to find dotnet[.exe] on path.")
+    }
+
+    exec {
+      workingDir = "${projectDir}/src/test/nunit"
+      commandLine dotnetex, 'test', '--nologo', '--',
+              "NUnit.TestOutputXml=${reportDir.get()}"
+    }
+  }
+}
+
+
+task he_dotnetTestDrivers(
+  dependsOn: ['dotnetRelease_he']
+) {
+  inputs.file "${buildDir}/cs/he/bin/${csconfiguration}/net6.0/${csrid}/SaxonCS.dll"
+  inputs.files fileTree(dir: "${projectDir}/src/test/cstestrunner")
+  outputs.file "${buildDir}/testdrivers/bin/${csconfiguration}/TestDrivers.${csver}.nupkg"
+
+  doFirst {
+    delete "${buildDir}/testdrivers/bin/${csconfiguration}/TestDrivers.${csver}.nupkg"
+  }
+
+  doLast {
+    copy {
+      from "${projectDir}/tools/saxon-cs"
+      into "${buildDir}/testdrivers"
+      include "TestDrivers.*"
+      filter { line ->
+        line.replaceAll("@@csrid@@", csrid)
+      }
+    }
+  }
+
+  doLast {
+    exec {
+      workingDir = "${projectDir}/build/testdrivers"
+      commandLine dotnetex, 'restore', 'TestDrivers.sln', '--verbosity', 'Normal',
+        '-p:Platform=Any CPU'
+    }
+  }
+
+  doLast {
+    exec {
+      workingDir = "${projectDir}/build/testdrivers"
+      commandLine dotnetex, 'build', 'TestDrivers.sln', '--verbosity', 'Normal',
+        '--configuration', csconfiguration,  '/nodereuse:false', '--no-restore',
+        "-p:Version=${csver}", "-p:PackageVersion=${csver}",
+        '-p:Platform=Any CPU'
+    }
+  }
+
+  doLast {
+    if (!systemOs.isWindows()) {
+      signExe("${buildDir}/testdrivers/bin/${csconfiguration}/TestDrivers.${csver}.nupkg")
+    }
+  }
+}
+
+task dotnetExamples_he(
+  dependsOn: ['dotnetRelease_he']
+) {
+  inputs.file "${buildDir}/cs/he/bin/${csconfiguration}/net6.0/${csrid}/SaxonCS.dll"
+  inputs.files fileTree(dir: "${projectDir}/src/samples/cs/Examples.cs")
+  outputs.file "${buildDir}/examples/bin/${csconfiguration}/Examples.${csver}.nupkg"
+
+  doFirst {
+    delete "${buildDir}/examples/bin/${csconfiguration}/Examples.${csver}.nupkg"
+  }
+
+  doLast {
+    copy {
+      from "${projectDir}/tools/saxon-cs"
+      into "${buildDir}/examples"
+      include "Examples.*"
+      filter { line ->
+        line.replaceAll("@@csrid@@", csrid)
+      }
+    }
+  }
+
+  doLast {
+    exec {
+      workingDir = "${buildDir}/examples"
+      commandLine dotnetex, 'restore', 'Examples.sln', '--verbosity', 'Normal'
+    }
+  }
+
+  doLast {
+    exec {
+      workingDir = "${buildDir}/examples"
+      commandLine dotnetex, 'build', 'Examples.sln', '--verbosity', 'Normal',
+        '--configuration', csconfiguration,  '/nodereuse:false', '--no-restore',
+        "-p:Version=${csver}", "-p:PackageVersion=${csver}"
+    }
+  }
+
+  doLast {
+    if (!systemOs.isWindows()) {
+      signExe("${buildDir}/examples/bin/${csconfiguration}/Examples.${csver}.nupkg")
+    }
+  }
+}
+
+task dotnetRelease_he(
+  dependsOn: ['hecs_dll']
+) {
+  inputs.files fileTree(dir: "${buildDir}/cs/he/Saxon")
+  inputs.files fileTree(dir: "${projectDir}/src/main/saxon-cs")
+  outputs.file "${buildDir}/cs/he/bin/${csconfiguration}/net6.0/${csrid}/SaxonCS.dll"
+  outputs.file "${buildDir}/cs/he/bin/${csconfiguration}/SaxonCS.${csver}.nupkg"
+
+  doFirst {
+    // Delete them if they exist so that they always get rewritten
+    // so that the subsequent attempt to sign them doesn't fail.
+    delete "${buildDir}/cs/he/bin/${csconfiguration}/net6.0/${csrid}/SaxonCS.dll"
+    delete "${buildDir}/cs/he/bin/${csconfiguration}/SaxonCS.${csver}.nupkg"
+  }
+
+  doLast {
+    copy {
+      // Copy the csproj and sln files, renaming them so that the release
+      // build uses the names we want the packages to have
+      from "${projectDir}/src/main/saxon-cs/csproj"
+      into "${buildDir}/cs/he"
+      rename { String filename ->
+        filename.replace("engine", "SaxonCS")
+      }
+      filter { line ->
+        line.replaceAll("@@optimize@@", csoptimize)
+        .replaceAll("@@csrid@@", csrid)
+      }
+    }
+  }
+  doLast {
+    copy {
+      from "${projectDir}/tools/saxon-cs"
+      into "${buildDir}/cs/he"
+      include "SaxonCS.sln"
+    }
+  }
+
+  doLast {
+    exec {
+      workingDir = "${buildDir}/cs/he"
+      commandLine dotnetex, 'restore', 'SaxonCS.sln', '--verbosity', 'Normal',
+        "-p:Configuration=${csconfiguration}", '-p:Platform=Any CPU'
+    }
+  }
+
+  doLast {
+    exec {
+      workingDir = "${buildDir}/cs/he"
+      commandLine dotnetex, 'build', 'SaxonCS.sln', '--verbosity', 'Normal',
+        '--configuration', csconfiguration,  '/nodereuse:false', '--no-restore',
+        '-p:SelfContained=true', '-p:PublishSingleFile=true',
+        "-p:Version=${csver}", "-p:PackageVersion=${csver}",
+        "-p:Configuration=${csconfiguration}", '-p:Platform=Any CPU'
+    }
+  }
+
+  doLast {
+    signExe("${buildDir}/cs/he/bin/${csconfiguration}/net6.0/${csrid}/SaxonCS.dll")
+    if (systemOs.isWindows()) {
+      signNuget("${buildDir}/cs/he/bin/${csconfiguration}/SaxonCS.${csver}.nupkg")
+    } else {
+      signExe("${buildDir}/cs/he/bin/${csconfiguration}/SaxonCS.${csver}.nupkg")
+    }
+  }
+}
+
+task copyNuGetPackage_he(
+  dependsOn: ["dotnetRelease_he"],
+  description: "Copy the architecture-independent .nupkg file"
+) {
+  inputs.file "${buildDir}/cs/he/bin/${csconfiguration}/SaxonCS.${csver}.nupkg"
+  outputs.file "${buildDir}/distributions/SaxonCS.${csver}.nupkg"
+
+  // This only works on the build/release machine, Wynngifu.
+  def nugetsign = new File("/Users/norm/bin/nuget.exe").exists()
+
+  doLast {
+    if (nugetsign && jarsigner.makeSignedExes) {
+      println("Creating signed NuGet package")
+      exec {
+        commandLine "/Users/norm/bin/nuget.exe", "sign",
+          "${buildDir}\\cs\\bin\\${csconfiguration}\\SaxonCS.${csver}.nupkg",
+          "-CertificatePath", "C:\\Users\\norm\\java\\saxonica_certificate.pfx",
+          "-Timestamper", "http://timestamp.digicert.com",
+          "-OutputDirectory", "${buildDir}\\distributions",
+          "-Verbosity", "detailed", "-CertificatePassword",
+          project.findProperty("saxonSignPassword")
+      }
+    } else {
+      println("Creating UNSIGNED NuGet package")
+      copy {
+        from "${buildDir}/cs/he/bin/${csconfiguration}"
+        into "${buildDir}/distributions"
+        include "SaxonCS.${csver}.nupkg"
+      }
+    }
+  }
+}
+dotnetRelease_he.finalizedBy copyNuGetPackage
+
+task he_pushNuGetPackage(
+  dependsOn: ["dotnetRelease_he", "copyNuGetPackage_he"],
+  description: "Publish the NuGet package on nuget.org"
+) {
+  inputs.file "${buildDir}/distributions/SaxonCS.${csver}.nupkg"
+
+  doLast {
+    exec {
+      commandLine "dotnet", "nuget", "push",
+         "${buildDir}/distributions/SaxonCS.${csver}.nupkg",
+         "-k", project.findProperty("nugetApiKey"),
+         "-s", project.findProperty("nugetSource")
+    }
+  }
+}
+
+task dotnetPublish_he(
+  dependsOn: ['dotnetRelease_he']
+) {
+  inputs.file "${buildDir}/cs/he/bin/${csconfiguration}/net6.0/${csrid}/SaxonCS.dll"
+  outputs.files fileTree(dir: "${buildDir}/cs/he/bin/${csconfiguration}/net6.0/${csrid}/publish")
+
+  doLast {
+    exec {
+      workingDir = "${buildDir}/cs/he"
+      commandLine dotnetex, 'publish', 'SaxonCS.sln',
+        '--configuration', csconfiguration, '-r', csrid,
+        '--self-contained', 'true',
+        "-p:PublishSingleFile=true",
+        "-p:Version=${csver}", "-p:PackageVersion=${csver}",
+        "-p:Configuration=${csconfiguration}", '-p:Platform=Any CPU'
+    }
+  }
+  doLast {
+    println("Published SaxonCS release for ${csplatform}")
+  }
+
+/*
+  doLast {
+    signExe("${buildDir}/cs/he/bin/${csconfiguration}/net6.0/${csrid}/publish/SaxonCS", true)
+  }
+*/
+}
+
+task he_dotnetMakeApp(
+  dependsOn: ['dotnetPublish_he'],
+) {
+  doLast {
+    exec {
+      workingDir "${buildDir}/cs/he"
+      commandLine dotnetex, 'msbuild', '-t:BundleApp',
+        "-p:Configuration=${csconfiguration}", 'SaxonCS.csproj'
+    }
+  }
+
+// Don't sign the individual binaries; we're going to sign the universal binary
+//  doLast {
+//    exec {
+//      workingDir "${buildDir}/cs/he"
+//      commandLine 'codesign', '--force', '--options', 'runtime',
+//        '--entitlements', "${projectDir}/tools/saxon-cs/entitlements.plist",
+//        '--deep', '--sign', 'Developer ID Application: Saxonica Limited',
+//        '--timestamp', "bin/${csconfiguration}/net6.0/${csrid}/publish/SaxonCS.app"
+//    }
+//  }
+}
+
+task dotnetPublish_heZip(
+  dependsOn: ['dotnetPublish_he'],
+  type: Zip
+) {
+  doFirst {
+    copy {
+      into "${buildDir}/cs/he/bin/${csconfiguration}/net6.0/${csrid}/publish/doc"
+      from "${projectDir}/src/docs/doc"
+    }
+  }
+
+  archiveFileName = "SaxonCS-${csver.replaceAll("\\.", "-")}-${csplatform}.zip"
+  from "${buildDir}/cs/he/bin/${csconfiguration}/net6.0/${csrid}/publish"
+  into "/SaxonCS-${saxonVersion}/"
+}
+
+task he_dotnetArchive(
+  dependsOn: ["dotnetRelease_he", "he_dotnetTestDrivers", "dotnetExamples_he"],
+  description: "Archives the generated CS sources"
+) {
+  doLast {
+    copy {
+      from "${buildDir}/cs/he/"
+      into "${projectDir}/src/archive/csharp/build/cs"
+      exclude "bin/**"
+      exclude "obj/**"
+    }
+    copy {
+      from "${projectDir}/src/main/saxon-cs/"
+      into "${projectDir}/src/archive/csharp/src/main/saxon-cs/"
+      exclude "not-yet-needed/**"
+    }
+    copy {
+      from "${buildDir}/testdrivers/"
+      into "${projectDir}/src/archive/csharp/build/testdrivers/"
+      exclude "bin/**"
+      exclude "obj/**"
+    }
+    copy {
+      from "${projectDir}/src/test/cstestrunner/"
+      into "${projectDir}/src/archive/csharp/src/test/cstestrunner/"
+    }
+    copy {
+      from "${buildDir}/examples/"
+      into "${projectDir}/src/archive/csharp/build/examples/"
+      exclude "bin/**"
+      exclude "obj/**"
+    }
+    copy {
+      from "${projectDir}/src/samples/cs/"
+      into "${projectDir}/src/archive/csharp/src/samples/cs/"
+    }
+  }
+}
+
+task hecs_hello_world(
+  dependsOn: ["hecs_dll"],
+  description: "Execute a Hello World query"
+) {
+  doLast {
+    if (dotnetex == null) {
+      throw new GradleException("Cannot run: failed to find dotnet[.exe] on path.")
+    }
+
+    exec {
+        workingDir = "${buildDir}/csout"
+        commandLine dotnetex, "engine.dll", "query", "-qs:'Hello World at ' || current-dateTime()", "-t" 
+    }
+  }
+}
