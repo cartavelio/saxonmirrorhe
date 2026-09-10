@@ -230,6 +230,7 @@ testSuites {
   exceptionsDir = layout.projectDirectory.dir("../src/test/exceptions")
 }
 
+testSuites.configure("qt3", "XP20")
 testSuites.configure("qt3", "XP31")
 testSuites.configure("qt3", "XP31", mapOf("linq" to "on"))
 testSuites.configure("qt3", "XP31", mapOf("unfolded" to "on"))
