@@ -13,6 +13,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
@@ -351,6 +352,7 @@ public abstract class Outputter implements Receiver {
      *                   as a text node item rather than a string
      */
 
+    @CSharpInnerClass(outer = true, extra = {"Saxon.Hej.s9api.Location loc"})
     public UniStringConsumer getStringReceiver(boolean asTextNode, Location loc) {
         if (asTextNode) {
             return new AbstractUniStringConsumer() {

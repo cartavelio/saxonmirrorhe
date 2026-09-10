@@ -5,17 +5,19 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This annotation appears on the declation of a method that creates an instance of
+ * This annotation appears on the declaration of a method that creates an instance of
  * an anonymous inner class, and it is used to define what information needs to be
- * passed to the inner class.
+ * passed to the generated C# inner class.
  *
- * The parameter {@code outer} indicates whether a reference to the outer class ("this")
+ * <p>The parameter {@code outer} indicates whether a reference to the outer class ("this")
  * should be passed. This defaults to true and should be set to false only if the
- * containing method is non-static.
+ * containing method is non-static.</p>
  *
- * The parameter {@code extra} is multi-valued, and contains one entry for each extra
+ * <p>The parameter {@code extra} is multi-valued, and contains one entry for each extra
  * parameter to be passed through. Parameters already present in the constructor of the
- * inner class are included automatically.
+ * inner class are included automatically. The value of the each entry is in the form
+ * of a variable parameter declaration (type, then name, whitespace separated), for example
+ * <code>"Saxon.Hej.s9api.Location loc"</code>.</p>
  */
 
 @Retention(RetentionPolicy.SOURCE)
