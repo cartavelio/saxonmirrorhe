@@ -347,7 +347,10 @@ public class StreamInstr extends SourceDocument implements Pusher {
                 try {
                     expr.push(output, context);
                 } catch (QuitParsingException q) {
-                    throw q;
+                    if (q.isNotifiedByConsumer()) {
+                        throw q;
+                    }
+                    // otherwise, no action
                 } catch (XPathException e) {
                     e.maybeSetLocation(expr.getLocation());
                     if (e.getErrorCodeQName() == null) {
