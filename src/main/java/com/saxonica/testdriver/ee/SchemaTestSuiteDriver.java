@@ -79,7 +79,7 @@ public class SchemaTestSuiteDriver {
     boolean showWarnings = false;
     boolean onwards = false;
     boolean useSCM = false;
-    boolean useTV = false;
+    boolean useTV = false; // Switch to use the experimental validation engine written in XSLT
     boolean allowDangling = false;
     String versionUnderTest = "1.1";
     private TestDriverShell shell = new TestDriverShell();
@@ -163,6 +163,7 @@ public class SchemaTestSuiteDriver {
             } else if (args[i].startsWith("-local:")) {
                 localDir = args[i].substring(7);
             } else if (args[i].equals("-tv")) {
+                // Switch to use the experimental validation engine written in XSLT
                 useTV = true;
             } else if (args[i].equals("-dangle")) {
                 allowDangling = true;
@@ -484,7 +485,8 @@ public class SchemaTestSuiteDriver {
                                             if (showWarnings) {
                                                 System.err.println(scm);
                                             }
-                                            Source xsltVal = new StreamSource(new File("/Users/mike/repo2/tools/xslt-val/validator.xsl"));
+                                            // TODO: adjust path to the current repository location (if we ever productise this code)
+                                            Source xsltVal = new StreamSource(new File("/Users/mike/GitHub/tools/xslt-val/validator.xsl"));
                                             testProcessor.setConfigurationProperty(Feature.OPTIMIZATION_LEVEL, 0);
                                             XsltCompiler xsltCompiler = testProcessor.newXsltCompiler();
                                             if (showWarnings) {
