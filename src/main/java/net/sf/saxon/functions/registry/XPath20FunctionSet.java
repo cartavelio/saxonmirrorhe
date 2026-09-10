@@ -501,7 +501,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
         register("substring", 3, e -> e.populate(Substring::new, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING)
                 .arg(1, NumericType.getInstance(), ONE, null)
-                .arg(2, NumericType.getInstance(), ONE, null));
+                .arg(2, NumericType.getInstance(), OPT, null));
 
         register("substring-after", 2, e -> e.populate(SubstringAfter::new, BuiltInAtomicType.STRING, ONE, DCOLL)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)

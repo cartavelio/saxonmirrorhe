@@ -194,6 +194,16 @@ public class Substring extends SystemFunction implements Callable {
             return substring(arg0, arg1);
         } else {
             NumericValue arg2 = (NumericValue) arguments[2].head();
+            if (arg2 == null) {
+                // Third argument can be an empty sequence in 4.0
+                if (getRetainedStaticContext().getPackageData().getHostLanguageVersion() < 40) {
+                    XPathException err = new XPathException("3rd argument of substring() must not be an empty sequence (unless 4.0 is enabled)", "XPTY0004");
+                    err.setIsTypeError(true);
+                    throw err;
+                } else {
+                    return substring(arg0, arg1);
+                }
+            }
             return substring(arg0, arg1, arg2);
         }
     }
@@ -226,6 +236,7 @@ public class Substring extends SystemFunction implements Callable {
                 };
             } else {
                 final ItemEvaluator arg2Eval = fnc.getArg(2).makeElaborator().elaborateForItem();
+                final boolean disallowEmpty = fnc.getRetainedStaticContext().getPackageData().getHostLanguageVersion() < 40;
                 return context -> {
                     StringValue sv = (StringValue) arg0Eval.eval(context);
                     if (nullable && sv == null) {
@@ -233,6 +244,16 @@ public class Substring extends SystemFunction implements Callable {
                     }
                     NumericValue start = (NumericValue) arg1Eval.eval(context);
                     NumericValue len = (NumericValue) arg2Eval.eval(context);
+                    if (len == null) {
+                        // Third argument can be an empty sequence in 4.0
+                        if (disallowEmpty) {
+                            XPathException err = new XPathException("3rd argument of substring() must not be an empty sequence (unless 4.0 is enabled)", "XPTY0004");
+                            err.setIsTypeError(true);
+                            throw err;
+                        } else {
+                            return substring(sv, start);
+                        }
+                    }
                     return substring(sv, start, len);
                 };
             }
