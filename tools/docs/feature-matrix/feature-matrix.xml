@@ -1,4 +1,4 @@
-<featureMatrix version="11" release="Oct 2021" Jrelease="Feb 2022" Crelease="Feb 2022" JSversion="2" JSrelease="Jun 2020">
+<featureMatrix version="12" release="Dec 2022" Jrelease="Dec 2022" Crelease="Dec 2022" JSversion="2" JSrelease="Jun 2020">
   
   <!-- For different descriptions in the Product Descriptions, but not the feature matrix table,
       use description and alt-description elements.
@@ -362,19 +362,6 @@
 
   <feature class="heading">
     <shortName>Performance Features</shortName>
-  </feature>
-
-  <feature class="Performance">
-    <shortName>Byte code generation</shortName>
-    <description>
-      <p>Allows hot-spot code generation for XSLT, XQuery, XPath, and XML Schema, typically giving a
-        25% performance boost.</p>
-    </description>
-    <details link="using-xsl/compiling" name="Compiling a stylesheet"/>
-    <details link="using-xquery/querycompilation" name="Compiling queries"/>
-    <products>
-      <product J="EEV"/>
-    </products>
   </feature>
 
   <feature class="Performance">
