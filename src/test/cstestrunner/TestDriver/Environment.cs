@@ -23,19 +23,11 @@ using JNamespaceConstant = Saxon.Hej.lib.NamespaceConstant;
 using JExpression = Saxon.Hej.expr.Expression;
 using JStructuredQName = Saxon.Hej.om.StructuredQName;
 using Saxon.Hej;
-using Saxon.Hej.expr;
 using Saxon.Hej.lib;
-using Saxon.Hej.om;
-using Saxon.Hej.resource;
-using Saxon.Hej.style;
 using Saxon.Callbacks;
-using Saxon.Ejava.util;
 using Saxon.Impl.Helpers;
-using TestRunner;
 using DocumentBuilder = Saxon.Api.DocumentBuilder;
-using Environment = System.Environment;
 using Processor = Saxon.Api.Processor;
-using Resource = Saxon.Hej.lib.Resource;
 using XPathCompiler = Saxon.Api.XPathCompiler;
 using XPathSelector = Saxon.Api.XPathSelector;
 using XQueryCompiler = Saxon.Api.XQueryCompiler;
@@ -330,8 +322,8 @@ namespace TestDriver {
 
         private static void DeclareNamespaces(XPathCompiler xpc, XdmItem env, Environment environment) {
             foreach (XdmItem nsElement in xpc.Evaluate("namespace", env)) {
-                String prefix = ((XdmNode) nsElement).GetAttributeValue(new QName("prefix"));
-                String uri = ((XdmNode) nsElement).GetAttributeValue(new QName("uri"));
+                string prefix = ((XdmNode) nsElement).GetAttributeValue(new QName("prefix"));
+                string uri = ((XdmNode) nsElement).GetAttributeValue(new QName("uri"));
                 environment.xpathCompiler.DeclareNamespace(prefix, uri);
                 environment.xqueryCompiler.DeclareNamespace(prefix, uri);
                 if (uri.Equals("http://expath.org/ns/file")) {
@@ -479,9 +471,12 @@ namespace TestDriver {
             Environment environment) {
             foreach (XdmItem decimalFormat in xpc.Evaluate("decimal-format", env)) {
                 //DecimalFormatManager dfm = environment.xpathCompiler..getUnderlyingStaticContext().getDecimalFormatManager();
-
+                if (SpecAttr.ShortNameOf(driver.RequestedSpec) == "XP") {
+                    environment.usable = false;
+                    return;
+                } 
                 XdmNode formatElement = (XdmNode) decimalFormat;
-                String formatName = formatElement.GetAttributeValue(new QName("name"));
+                string formatName = formatElement.GetAttributeValue(new QName("name"));
                 QName formatQName = null;
                 if (formatName != null) {
                     if (formatName.IndexOf(':') < 0) {

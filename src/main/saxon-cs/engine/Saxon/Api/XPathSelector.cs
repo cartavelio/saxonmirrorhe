@@ -56,7 +56,7 @@ namespace Saxon.Api {
         /// Escape hatch to the <c>Saxon.Hej.s9api.XPathSelector</c> object in the underlying Java implementation
         /// </summary>
 
-        private Saxon.Hej.s9api.XPathSelector Implementation => selector;
+        public Saxon.Hej.sxpath.XPathDynamicContext Implementation => selector.getUnderlyingXPathContext();
 
         /// <summary>
         /// Set the value of a variable
