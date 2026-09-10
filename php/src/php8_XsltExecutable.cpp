@@ -300,7 +300,7 @@ PHP_METHOD(XsltExecutable, callFunctionReturningValue) {
 
   if (xsltExecutable != nullptr) {
     ZEND_HASH_FOREACH_KEY_VAL(arr_hash, num_key, key, val) {
-      if (Z_TYPE_P(val) != NULL) {
+      if (Z_TYPE_P(val) != IS_NULL) {
         const char *objName = ZSTR_VAL(Z_OBJCE_P(val)->name);
 
         if (strcmp(objName, "Saxon\\XdmNode") == 0) {
@@ -441,7 +441,7 @@ PHP_METHOD(XsltExecutable, callFunctionReturningString) {
 
   if (xsltExecutable != nullptr) {
     ZEND_HASH_FOREACH_KEY_VAL(arr_hash, num_key, key, val) {
-      if (Z_TYPE_P(val) != NULL) {
+      if (Z_TYPE_P(val) != IS_NULL) {
         const char *objName = ZSTR_VAL(Z_OBJCE_P(val)->name);
 
         if (strcmp(objName, "Saxon\\XdmNode") == 0) {
@@ -528,7 +528,7 @@ PHP_METHOD(XsltExecutable, callFunctionReturningFile) {
 
   if (xsltExecutable != nullptr) {
     ZEND_HASH_FOREACH_KEY_VAL(arr_hash, num_key, key, val) {
-      if (Z_TYPE_P(val) != NULL) {
+      if (Z_TYPE_P(val) != IS_NULL) {
         const char *objName = ZSTR_VAL(Z_OBJCE_P(val)->name);
         /*std::cerr<<"test type:"<<(Z_OBJCE_P(val)->name)<<std::endl;
           php_printf("num_key %d =>", num_key);
@@ -882,7 +882,7 @@ PHP_METHOD(XsltExecutable, setInitialTemplateParameters) {
   std::map<std::string, XdmValue *> parameters;
   if (xsltExecutable != nullptr) {
     ZEND_HASH_FOREACH_KEY_VAL(arr_hash, num_key, key, val) {
-      if (Z_TYPE_P(val) != NULL) {
+      if (Z_TYPE_P(val) != IS_NULL) {
         const char *objName = ZSTR_VAL(Z_OBJCE_P(val)->name);
         /*std::cerr<<"test type:"<<(Z_OBJCE_P(val)->name)<<std::endl;
           php_printf("num_key %d =>", num_key);
