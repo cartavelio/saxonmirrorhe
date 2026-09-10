@@ -1266,9 +1266,11 @@ public class Controller implements ContextOriginator {
     public NodeInfo makeSourceTree(Source source, int validationMode) throws XPathException {
         if (source instanceof NodeSource) {
             return ((NodeSource) source).getNode();
-        //#if CSHARP==false
+        } else if (source instanceof TreeInfo) {
+            return ((TreeInfo) source).getRootNode();
         } else if (source instanceof NodeInfo) {
             return ((NodeInfo)source);
+        //#if CSHARP==false
         } else if (source instanceof SAXSource && config.getBooleanProperty(Feature.IGNORE_SAX_SOURCE_PARSER)) {
             // This option is provided to allow the parser set by applications such as Ant to be overridden by
             // the parser requested using FeatureKeys.SOURCE_PARSER
