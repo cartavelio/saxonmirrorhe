@@ -210,6 +210,9 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                     .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null));
 
+            register("values", 1, e -> e.populate(MapValues::new, AnyItemType.getInstance(), STAR, 0)
+                    .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
+
             SpecificFunctionType FILTER_TYPE = new SpecificFunctionType(
                     new SequenceType[]{SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE},
                     SequenceType.SINGLE_BOOLEAN
@@ -512,10 +515,10 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             MapItem map = (MapItem) arguments[0].head();
-            return getMapEntries(map);
+            return new LazySequence(map.entries());
         }
 
-        public static GroundedValue getMapEntries(MapItem map) throws XPathException {
+        public static GroundedValue getMapEntries(MapItem map) {
             ZenoSequence results = new ZenoSequence();
             for (KeyValuePair pair : map.keyValuePairs()) {
                 SingleEntryMap entry = new SingleEntryMap(pair.key, pair.value);
@@ -555,6 +558,22 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 kvp.initialPut("key", pair.key);
                 kvp.initialPut("value", pair.value);
                 results = results.appendSequence(kvp);
+            }
+            return results;
+        }
+    }
+
+    /**
+     * Implementation of the proposed 4.0 function map:values(Map) =&gt; item()*
+     */
+    public static class MapValues extends SystemFunction {
+
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            MapItem map = (MapItem) arguments[0].head();
+            ZenoSequence results = new ZenoSequence();
+            for (KeyValuePair pair : map.keyValuePairs()) {
+                results = results.appendSequence(pair.value);
             }
             return results;
         }

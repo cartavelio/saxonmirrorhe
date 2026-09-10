@@ -13,18 +13,25 @@ import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.ma.arrays.ArrayItem;
-import net.sf.saxon.ma.map.*;
+import net.sf.saxon.ma.map.HashTrieMap;
+import net.sf.saxon.ma.map.MapFunctionSet;
+import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.SingleEntryMap;
 import net.sf.saxon.ma.zeno.ZenoSequence;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NameChecker;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomizingIterator;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.AnyItemType;
+import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.UType;
 import net.sf.saxon.value.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 
@@ -273,40 +280,41 @@ public class DeepLookupExpression extends BinaryExpression {
                 }
                 return result.iterate();
             };
-//            return context -> {
-//                // Initial implementation is eager for simplicity
-//                SequenceIterator keyIter = new AtomizingIterator(
-//                        rhs.iterate(context));
-//                MapItem keySet = new HashTrieMap();
-//                Item key;
-//                while ((key = keyIter.next()) != null) {
-//                    keySet = keySet.addEntry((AtomicValue)key, BooleanValue.TRUE);
-//                }
-//                final MapItem finalKeySet = keySet;
-//                List<Item> result = new ArrayList<>();
-//                gatherContent(lhs.iterate(context), false, k -> finalKeySet.get(k) != null, result, 0);
-//                return SequenceExtent.makeSequenceExtent(result).iterate();
-//            };
-
         }
     }
 
-    private static GroundedValue immediateContent(Item item) throws XPathException {
+    /**
+     * Return a sequence of singleton maps representing the entries in a map or the members in an array
+     * @param item typically a map or array
+     * @return for a map, the result of map:entries(). For an array, a sequence of singleton maps, one
+     * per member of the array, where the map key is the integer position of the member and the corresponding
+     * value is the member value. Otherwise, an empty sequence.
+     */
+    private static GroundedValue immediateContent(Item item)  {
         if (item instanceof MapItem) {
             return MapFunctionSet.MapEntries.getMapEntries((MapItem)item);
         } else if (item instanceof ArrayItem) {
-            ZenoSequence result = new ZenoSequence();
+            List<SingleEntryMap> result = new ArrayList<>(((ArrayItem)item).arrayLength());
             long pos = 1;
             for (GroundedValue member : ((ArrayItem)item).members()) {
-                result = result.append(new SingleEntryMap(Int64Value.makeIntegerValue(pos++), member));
+                result.add(new SingleEntryMap(Int64Value.makeIntegerValue(pos++), member));
             }
-            return result;
+            return SequenceExtent.makeSequenceExtent(result);
         } else {
             return EmptySequence.getInstance();
         }
     }
 
-    public static void gatherRecursiveContent(Item item, List<Item> result) throws XPathException {
+    /**
+     * Gather the recursive content of a map or array
+     * @param item typically a map or array; supplying any other item leaves the result array unchanged
+     * @param result a mutable list to receive the results. The items in this list will be singleton maps;
+     *               when expanding a map, these represent entries in the supplied map and its content,
+     *               expanded recursively; when expanding an array, these represent members of the
+     *               supplied array, mapped to their position in the array.
+     */
+
+    public static void gatherRecursiveContent(Item item, List<Item> result) {
         for (Item child : immediateContent(item).asIterable()) {
             result.add(child);
             for (Item childItem : ((SingleEntryMap)child).getValue().asIterable()) {
@@ -315,42 +323,6 @@ public class DeepLookupExpression extends BinaryExpression {
         }
     }
 
-    public static void gatherContent(SequenceIterator lhs,
-                                     boolean selectAll,
-                                     Predicate<AtomicValue> keys,
-                                     List<Item> result,
-                                     int level) throws XPathException {
-        Item it;
-        while ((it = lhs.next()) != null) {
-            if (selectAll) {
-                result.add(it);
-            }
-            if (it instanceof ArrayItem) {
-                int pos = 1;
-                for (GroundedValue val : ((ArrayItem) it).members()) {
-                    gatherContent(val.iterate(), selectAll, keys, result, level+1);
-                    if (keys != null && keys.test(Int64Value.makeIntegerValue(pos++))) {
-                        for (Item valItem : val.asIterable()) {
-                            result.add(valItem);
-                        }
-                    }
-                }
-            } else if (it instanceof MapItem) {
-                for (KeyValuePair pair : ((MapItem) it).keyValuePairs()) {
-                    gatherContent(pair.value.iterate(), selectAll, keys, result, level+1);
-                    if (keys != null && keys.test(pair.key)) {
-                        for (Item valItem : pair.value.asIterable()) {
-                            result.add(valItem);
-                        }
-                    }
-                }
-            } else {
-                if (level > 0) {
-                    result.add(it);
-                }
-            }
-        }
-    }
 
 
 
