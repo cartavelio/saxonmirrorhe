@@ -16,7 +16,6 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
-import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trans.XPathException;
@@ -99,17 +98,19 @@ public class XPathEvaluator {
         Configuration config = getConfiguration();
         Executable exec = new Executable(config);
 
-        exec.setTopLevelPackage(staticContext.getPackageData());
+        PackageData pack = staticContext.getPackageData();
+        exec.setTopLevelPackage(pack);
         exec.setSchemaAware(staticContext.getPackageData().isSchemaAware());
         exec.setHostLanguage(HostLanguage.XPATH);
+        int version = pack.getHostLanguageVersion();
 
         // Make the function library that's available at run-time (e.g. for saxon:evaluate() and function-lookup()).
         // This includes all user-defined functions regardless of which module they are in
 
         FunctionLibrary userlib = exec.getFunctionLibrary();
         FunctionLibraryList lib = new FunctionLibraryList();
-        lib.addFunctionLibrary(XPath31FunctionSet.getInstance());
-        lib.addFunctionLibrary(config.getBuiltInExtensionLibraryList(31));
+        lib.addFunctionLibrary(config.getXPathFunctionSet(version));
+        lib.addFunctionLibrary(config.getBuiltInExtensionLibraryList(version));
         lib.addFunctionLibrary(new ConstructorFunctionLibrary(config));
         lib.addFunctionLibrary(config.getIntegratedFunctionLibrary());
         config.addExtensionBinders(lib);

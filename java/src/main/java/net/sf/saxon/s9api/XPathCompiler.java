@@ -574,9 +574,10 @@ public class XPathCompiler {
         IndependentContext ic = env;
         String module = getBaseURI() == null ? null : getBaseURI().toString();
         env.setContainingLocation(new Loc(module, 1, 1));
-        if (ic.isAllowUndeclaredVariables()) {
+        if (ic.isAllowUndeclaredVariables() || env.getXPathVersion() >= 40) {
             // self-declaring variables modify the static context. The XPathCompiler must not change state
             // as the result of compiling an expression, so we need to copy the static context.
+            // In XPath 4.0, the declare namespace declaration similarly changes the static context
             eval = new XPathEvaluator(processor.getUnderlyingConfiguration());
             ic = new IndependentContext(env);
             eval.setStaticContext(ic);

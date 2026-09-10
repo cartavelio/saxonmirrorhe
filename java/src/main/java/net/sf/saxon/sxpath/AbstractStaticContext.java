@@ -57,12 +57,12 @@ public abstract class AbstractStaticContext implements StaticContext {
     private NamespaceUri defaultFunctionNamespace = NamespaceUri.FN;
     private NamespaceUri defaultElementNamespace = NamespaceUri.NULL;
     private boolean backwardsCompatible = false;
-    private int xpathLanguageLevel = 31;
+    protected int xpathLanguageLevel = 31;
     protected boolean usingDefaultFunctionLibrary;
     private final Map<StructuredQName, ItemType> typeAliases = new HashMap<>();
     private UnprefixedElementMatchingPolicy unprefixedElementPolicy = UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE;
     private WarningHandler warningHandler;
-    private NamespaceMap prologNamespaces = NamespaceMap.emptyMap();
+    protected NamespaceMap prologNamespaces = NamespaceMap.emptyMap();
 
     /**
      * Set the Configuration. This is protected so it can be used only by subclasses;
@@ -185,6 +185,9 @@ public abstract class AbstractStaticContext implements StaticContext {
             throw new XPathException("Duplicate declaration of namespace prefix \"" + prefix + '"', "XQST0033");
         } else {
             prologNamespaces = prologNamespaces.put(prefix, uri);
+        }
+        if (prefix.isEmpty()) {
+            defaultElementNamespace = uri;
         }
     }
 

@@ -71,14 +71,26 @@ public class IndependentContext extends AbstractStaticContext
      */
 
     public IndependentContext(Configuration config) {
+        this(config, 31);
+    }
+
+    /**
+     * Create an IndependentContext using a specific Configuration
+     *
+     * @param config the Saxon configuration to be used
+     * @param version the XPath language version (31 = XPath 3.1, 40 = XPath 4.0)
+     */
+
+    public IndependentContext(Configuration config, int version) {
         setConfiguration(config);
         clearNamespaces();
-        setDefaultFunctionLibrary(31);
+        xpathLanguageLevel = version;
+        setDefaultFunctionLibrary(version);
         usingDefaultFunctionLibrary = true;
         setDefaultCollationName(config.getDefaultCollationName());
         setOptimizerOptions(config.getOptimizerOptions());
         PackageData pd = new PackageData(config);
-        pd.setHostLanguage(HostLanguage.XPATH, 31);
+        pd.setHostLanguage(HostLanguage.XPATH, version);
         pd.setSchemaAware(false);
         setPackageData(pd);
     }
@@ -90,14 +102,14 @@ public class IndependentContext extends AbstractStaticContext
      */
 
     public IndependentContext(IndependentContext ic) {
-        this(ic.getConfiguration());
-        setXPathLanguageLevel(ic.getXPathVersion());
+        this(ic.getConfiguration(), ic.getXPathVersion());
         setPackageData(ic.getPackageData());
         setBaseURI(ic.getStaticBaseURI());
         setContainingLocation(ic.getContainingLocation());
         setDefaultElementNamespace(ic.getDefaultElementNamespace());
         setDefaultFunctionNamespace(ic.getDefaultFunctionNamespace());
         setBackwardsCompatibilityMode(ic.isInBackwardsCompatibleMode());
+        setImportedSchema(ic.getImportedSchema());
         namespaces = new HashMap<>(ic.namespaces);
         variables = new HashMap<>(10);
         FunctionLibraryList libList = (FunctionLibraryList) ic.getFunctionLibrary();
@@ -401,7 +413,11 @@ public class IndependentContext extends AbstractStaticContext
         if (prefix.isEmpty()) {
             return useDefault ? getDefaultElementNamespace() : NamespaceUri.NULL;
         } else {
-            return namespaces.get(prefix);
+            NamespaceUri uri = prologNamespaces.getNamespaceUri(prefix);
+            if (uri == null) {
+                uri = namespaces.get(prefix);
+            }
+            return uri;
         }
     }
 
