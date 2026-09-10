@@ -20,6 +20,8 @@ import net.sf.saxon.value.DoubleValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.NumericValue;
 
+import java.util.function.Function;
+
 
 /**
  * Abstract class providing functionality common to functions math:sin(), math:cos(), math:sqrt() etc;
@@ -37,8 +39,8 @@ public class MathFunctionSet extends BuiltInFunctionSet {
         init();
     }
 
-    private void reg1(String name, Class<? extends SystemFunction> implementation) {
-        register(name, 1, implementation, BuiltInAtomicType.DOUBLE, OPT, CARD0)
+    private void reg1(String name, Function<Double, Double> method) {
+        register(name, 1, () -> new TrigFn1(method), BuiltInAtomicType.DOUBLE, OPT, CARD0)
                 .arg(0, BuiltInAtomicType.DOUBLE, OPT, EMPTY);
     }
 
@@ -47,29 +49,29 @@ public class MathFunctionSet extends BuiltInFunctionSet {
 
         // Arity 0 functions
 
-        register("pi", 0, PiFn.class, BuiltInAtomicType.DOUBLE, ONE, 0);
+        register("pi", 0, PiFn::new, BuiltInAtomicType.DOUBLE, ONE, 0);
 
         // Arity 1 functions
 
-        reg1("sin", SinFn.class);
-        reg1("cos", CosFn.class);
-        reg1("tan", TanFn.class);
-        reg1("asin", AsinFn.class);
-        reg1("acos", AcosFn.class);
-        reg1("atan", AtanFn.class);
-        reg1("sqrt", SqrtFn.class);
-        reg1("log", LogFn.class);
-        reg1("log10", Log10Fn.class);
-        reg1("exp", ExpFn.class);
-        reg1("exp10", Exp10Fn.class);
+        reg1("sin", Math::sin);
+        reg1("cos", Math::cos);
+        reg1("tan", Math::tan);
+        reg1("asin", Math::asin);
+        reg1("acos", Math::acos);
+        reg1("atan", Math::atan);
+        reg1("sqrt", Math::sqrt);
+        reg1("log", Math::log);
+        reg1("log10", Math::log10);
+        reg1("exp", Math::exp);
+        reg1("exp10", input -> Math.pow(10, input));
 
         // Arity 2 functions
 
-        register("pow", 2, PowFn.class, BuiltInAtomicType.DOUBLE, OPT, CARD0)
+        register("pow", 2, PowFn::new, BuiltInAtomicType.DOUBLE, OPT, CARD0)
                 .arg(0, BuiltInAtomicType.DOUBLE, OPT, EMPTY)
                 .arg(1, BuiltInAtomicType.DOUBLE, ONE, null);
 
-        register("atan2", 2, Atan2Fn.class, BuiltInAtomicType.DOUBLE, ONE, 0)
+        register("atan2", 2, Atan2Fn::new, BuiltInAtomicType.DOUBLE, ONE, 0)
                 .arg(0, BuiltInAtomicType.DOUBLE, ONE, null)
                 .arg(1, BuiltInAtomicType.DOUBLE, ONE, null);
 
@@ -105,9 +107,13 @@ public class MathFunctionSet extends BuiltInFunctionSet {
      * Generic superclass for all the arity-1 trig functions
      */
 
-    public static abstract class TrigFn1 extends SystemFunction {
+    public static class TrigFn1 extends SystemFunction {
 
-        protected abstract double compute(double input);
+        private final Function<Double, Double> method;
+
+        public TrigFn1(Function<Double, Double> method) {
+            this.method = method;
+        }
 
         @Override
         public GroundedValue call(XPathContext context, Sequence[] args) throws XPathException {
@@ -115,142 +121,11 @@ public class MathFunctionSet extends BuiltInFunctionSet {
             if (in == null) {
                 return EmptySequence.getInstance();
             } else {
-                return new DoubleValue(compute(in.getDoubleValue()));
+                return new DoubleValue(method.apply(in.getDoubleValue()));
             }
         }
     }
 
-    /**
-     * Implement math:sin
-     */
-
-    public static class SinFn extends TrigFn1 {
-
-        @Override
-        protected double compute(double input) {
-            return Math.sin(input);
-        }
-    }
-
-    /**
-     * Implement math:cos
-     */
-
-    public static class CosFn extends TrigFn1 {
-
-        @Override
-        protected double compute(double input) {
-            return Math.cos(input);
-        }
-    }
-
-    /**
-     * Implement math:tan
-     */
-
-    public static class TanFn extends TrigFn1 {
-
-        @Override
-        protected double compute(double input) {
-            return Math.tan(input);
-        }
-    }
-
-    /**
-     * Implement math:asin
-     */
-
-    public static class AsinFn extends TrigFn1 {
-
-        @Override
-        protected double compute(double input) {
-            return Math.asin(input);
-        }
-    }
-
-    /**
-     * Implement math:acos
-     */
-
-    public static class AcosFn extends TrigFn1 {
-
-        @Override
-        protected double compute(double input) {
-            return Math.acos(input);
-        }
-    }
-
-    /**
-     * Implement math:atan
-     */
-
-    public static class AtanFn extends TrigFn1 {
-
-        @Override
-        protected double compute(double input) {
-            return Math.atan(input);
-        }
-    }
-
-    /**
-     * Implement math:sqrt
-     */
-
-    public static class SqrtFn extends TrigFn1 {
-
-        @Override
-        protected double compute(double input) {
-            return Math.sqrt(input);
-        }
-    }
-
-    /**
-     * Implement math:log
-     */
-
-    public static class LogFn extends TrigFn1 {
-
-        @Override
-        protected double compute(double input) {
-            return Math.log(input);
-        }
-    }
-
-    /**
-     * Implement math:log10
-     */
-
-    public static class Log10Fn extends TrigFn1 {
-
-        @Override
-        protected double compute(double input) {
-            return Math.log10(input);
-        }
-    }
-
-    /**
-     * Implement math:exp
-     */
-
-    public static class ExpFn extends TrigFn1 {
-
-        @Override
-        protected double compute(double input) {
-            return Math.exp(input);
-        }
-    }
-
-    /**
-     * Implement math:exp10
-     */
-
-    public static class Exp10Fn extends TrigFn1 {
-
-        @Override
-        protected double compute(double input) {
-            return Math.pow(10, input);
-        }
-    }
 
     /**
      * Implement math:pow

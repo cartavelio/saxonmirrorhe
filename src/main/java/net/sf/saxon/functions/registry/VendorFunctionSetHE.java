@@ -55,38 +55,38 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
     private void init() {
 
         // Test whether supplied argument is equal to an integer
-        register("is-whole-number", 1, () -> new IsWholeNumberFn(), BuiltInAtomicType.BOOLEAN, ONE, 0)
+        register("is-whole-number", 1, IsWholeNumberFn::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, NumericType.getInstance(), OPT, EMPTY);
 
         // Evaluate the value of a try-catch variable such as $err:code
-        register("dynamic-error-info", 1, () -> new DynamicErrorInfoFn(), AnyItemType.getInstance(), STAR, FOCUS | LATE | SIDE)
+        register("dynamic-error-info", 1, DynamicErrorInfoFn::new, AnyItemType.getInstance(), STAR, FOCUS | LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
 
         // saxon:apply is the same as fn:apply, but does not require the HOF feature
-        register("apply", 2, () -> new ApplyFn(), AnyItemType.getInstance(), STAR, LATE)
+        register("apply", 2, ApplyFn::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyFunctionType.getInstance(), ONE, null)
                 .arg(1, ArrayItemType.ANY_ARRAY_TYPE, ONE, null);
 
         // Create a map according to the semantics of the XPath map constructor and XSLT xsl:map instruction
-        register("create-map", 1, () -> new MapCreate(), MapType.ANY_MAP_TYPE, ONE, 0)
+        register("create-map", 1, MapCreate::new, MapType.ANY_MAP_TYPE, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, STAR, null);
 
         // Variant of the doc() function with an options parameter
-        register("doc", 2, () -> new Doc_2(), NodeKindTest.DOCUMENT, ONE, LATE)
+        register("doc", 2, Doc_2::new, NodeKindTest.DOCUMENT, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, EMPTY)
                 .setOptionDetails(Doc_2.makeOptionsParameter());
 
         // Ask whether the supplied element node has any local namespace declarations
-        register("has-local-namespaces", 1, () -> new HasLocalNamespaces(), BuiltInAtomicType.BOOLEAN, ONE, 0)
+        register("has-local-namespaces", 1, HasLocalNamespaces::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, NodeKindTest.ELEMENT, ONE, null);
 
         // Ask whether the supplied element node has consistent in scope namespaces throughout its subtree
-        register("has-uniform-namespaces", 1, () -> new HasUniformNamespaces(), BuiltInAtomicType.BOOLEAN, ONE, 0)
+        register("has-uniform-namespaces", 1, HasUniformNamespaces::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, NodeKindTest.ELEMENT, ONE, null);
 
         // Function analogous to map:contains except in the way it handles untyped key values
-        register("map-untyped-contains", 2, () -> new MapUntypedContains(), BuiltInAtomicType.BOOLEAN, ONE, 0)
+        register("map-untyped-contains", 2, MapUntypedContains::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, STAR, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE, null);
 
@@ -95,7 +95,7 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
 //                Collections.singletonList(SequenceType.ANY_SEQUENCE),
 //                Collections.emptyList(),
 //                false);
-//        register("array-as-sequence-of-maps", 1, () -> new ArrayAsSequenceOfMaps(), arrayRepresentation, STAR, 0)
+//        register("array-as-sequence-of-maps", 1, ArrayAsSequenceOfMaps::new, arrayRepresentation, STAR, 0)
 //                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE,null);
 
         @SuppressWarnings("RedundantArrayCreation") RecordTest mapRepresentation = new RecordTest(
@@ -103,10 +103,10 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                 Arrays.asList(new SequenceType[]{SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE}),
                 Collections.emptyList(),
                 false);
-        register("map-as-sequence-of-maps", 1, () -> new MapAsSequenceOfMaps(), mapRepresentation, STAR, 0)
+        register("map-as-sequence-of-maps", 1, MapAsSequenceOfMaps::new, mapRepresentation, STAR, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE, null);
 
-        register("yes-no-boolean", 1, () -> new YesNoBoolean(), BuiltInAtomicType.BOOLEAN, ONE, 0)
+        register("yes-no-boolean", 1, YesNoBoolean::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
 
     }

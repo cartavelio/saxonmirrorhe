@@ -38,28 +38,28 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
 
         importFunctionSet(XPath20FunctionSet.getInstance());
 
-        register("analyze-string", 2, () -> new RegexFunctionSansFlags(), NodeKindTest.ELEMENT,
+        register("analyze-string", 2, RegexFunctionSansFlags::new, NodeKindTest.ELEMENT,
                  ONE, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
 
-        register("analyze-string", 3, () -> new AnalyzeStringFn(), NodeKindTest.ELEMENT,
+        register("analyze-string", 3, AnalyzeStringFn::new, NodeKindTest.ELEMENT,
                  ONE, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, ONE, null);
 
-        register("apply", 2, () -> new ApplyFn(), AnyItemType.getInstance(),
+        register("apply", 2, ApplyFn::new, AnyItemType.getInstance(),
                  STAR, LATE)
                 .arg(0, AnyFunctionType.getInstance(), ONE, null)
                 .arg(1, ArrayItemType.ANY_ARRAY_TYPE, ONE, null);
 
-        register("available-environment-variables", 0, () -> new AvailableEnvironmentVariables(), BuiltInAtomicType.STRING,
+        register("available-environment-variables", 0, AvailableEnvironmentVariables::new, BuiltInAtomicType.STRING,
                  STAR, LATE);
 
-        register("data", 0, () -> new ContextItemAccessorFunction(), BuiltInAtomicType.ANY_ATOMIC, STAR, CITEM | LATE);
+        register("data", 0, ContextItemAccessorFunction::new, BuiltInAtomicType.ANY_ATOMIC, STAR, CITEM | LATE);
 
-        register("document-uri", 0, () -> new ContextItemAccessorFunction(),
+        register("document-uri", 0, ContextItemAccessorFunction::new,
                  BuiltInAtomicType.ANY_URI, OPT, CITEM | LATE);
 
         register("element-with-id", 1, () -> new SuperId.ElementWithId(), NodeKindTest.ELEMENT, STAR, CITEM | LATE | UO)
@@ -69,7 +69,7 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.STRING, STAR, EMPTY)
                 .arg(1, Type.NODE_TYPE, ONE, null);
 
-        register("environment-variable", 1, () -> new EnvironmentVariable(), BuiltInAtomicType.STRING,
+        register("environment-variable", 1, EnvironmentVariable::new, BuiltInAtomicType.STRING,
                  OPT, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
 
@@ -77,7 +77,7 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
                 new SequenceType[]{SequenceType.SINGLE_ITEM},
                 SequenceType.SINGLE_BOOLEAN);
 
-        register("filter", 2, () -> new FilterFn(), AnyItemType.getInstance(),
+        register("filter", 2, FilterFn::new, AnyItemType.getInstance(),
                  STAR, AS_ARG0 | LATE)
                 .arg(0, AnyItemType.getInstance(), STAR | TRA, EMPTY)
                 .arg(1, predicate, ONE, null);
@@ -85,7 +85,7 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
         SpecificFunctionType foldLeftArg = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_ITEM},
                 SequenceType.ANY_SEQUENCE);
-        register("fold-left", 3, () -> new FoldLeftFn(), AnyItemType.getInstance(),
+        register("fold-left", 3, FoldLeftFn::new, AnyItemType.getInstance(),
                  STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, AnyItemType.getInstance(), STAR, null)
@@ -95,7 +95,7 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
                 new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.ANY_SEQUENCE},
                 SequenceType.ANY_SEQUENCE);
 
-        register("fold-right", 3, () -> new FoldRightFn(), AnyItemType.getInstance(),
+        register("fold-right", 3, FoldRightFn::new, AnyItemType.getInstance(),
                  STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, AnyItemType.getInstance(), STAR, null)
@@ -104,7 +104,7 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
         SpecificFunctionType forEachArg = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_ITEM},
                 SequenceType.ANY_SEQUENCE);
-        register("for-each", 2, () -> new ForEachFn(), AnyItemType.getInstance(),
+        register("for-each", 2, ForEachFn::new, AnyItemType.getInstance(),
                  STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
                 .arg(1, forEachArg, ONE, null);
@@ -112,19 +112,19 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
         SpecificFunctionType forEachPairArg = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_ITEM},
                 SequenceType.ANY_SEQUENCE);
-        register("for-each-pair", 3, () -> new ForEachPairFn(), AnyItemType.getInstance(),
+        register("for-each-pair", 3, ForEachPairFn::new, AnyItemType.getInstance(),
                  STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
                 .arg(1, AnyItemType.getInstance(), STAR, EMPTY)
                 .arg(2, forEachPairArg, ONE, null);
 
 
-        register("format-date", 2, () -> new FormatDate(), BuiltInAtomicType.STRING,
+        register("format-date", 2, FormatDate::new, BuiltInAtomicType.STRING,
                  OPT, CARD0)
                 .arg(0, BuiltInAtomicType.DATE, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
 
-        register("format-date", 5, () -> new FormatDate(), BuiltInAtomicType.STRING,
+        register("format-date", 5, FormatDate::new, BuiltInAtomicType.STRING,
                  OPT, CARD0)
                 .arg(0, BuiltInAtomicType.DATE, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
@@ -132,12 +132,12 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
                 .arg(3, BuiltInAtomicType.STRING, OPT, null)
                 .arg(4, BuiltInAtomicType.STRING, OPT, null);
 
-        register("format-dateTime", 2, () -> new FormatDate(), BuiltInAtomicType.STRING,
+        register("format-dateTime", 2, FormatDate::new, BuiltInAtomicType.STRING,
                  OPT, CARD0)
                 .arg(0, BuiltInAtomicType.DATE_TIME, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
 
-        register("format-dateTime", 5, () -> new FormatDate(), BuiltInAtomicType.STRING,
+        register("format-dateTime", 5, FormatDate::new, BuiltInAtomicType.STRING,
                  OPT, CARD0)
                 .arg(0, BuiltInAtomicType.DATE_TIME, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
@@ -145,30 +145,30 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
                 .arg(3, BuiltInAtomicType.STRING, OPT, null)
                 .arg(4, BuiltInAtomicType.STRING, OPT, null);
 
-        register("format-integer", 2, () -> new FormatInteger(), AnyItemType.getInstance(), ONE, 0)
+        register("format-integer", 2, FormatInteger::new, AnyItemType.getInstance(), ONE, 0)
                 .arg(0, BuiltInAtomicType.INTEGER, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
 
-        register("format-integer", 3, () -> new FormatInteger(), AnyItemType.getInstance(), ONE, 0)
+        register("format-integer", 3, FormatInteger::new, AnyItemType.getInstance(), ONE, 0)
                 .arg(0, BuiltInAtomicType.INTEGER, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, OPT, null);
         
-        register("format-number", 2, () -> new FormatNumber(), BuiltInAtomicType.STRING, ONE, LATE)
+        register("format-number", 2, FormatNumber::new, BuiltInAtomicType.STRING, ONE, LATE)
                 .arg(0, NumericType.getInstance(), OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
 
-        register("format-number", 3, () -> new FormatNumber(), BuiltInAtomicType.STRING, ONE, NS | LATE)
+        register("format-number", 3, FormatNumber::new, BuiltInAtomicType.STRING, ONE, NS | LATE)
                 .arg(0, NumericType.getInstance(), OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, OPT, null);
 
-        register("format-time", 2, () -> new FormatDate(), BuiltInAtomicType.STRING,
+        register("format-time", 2, FormatDate::new, BuiltInAtomicType.STRING,
                  OPT, CARD0)
                 .arg(0, BuiltInAtomicType.TIME, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
 
-        register("format-time", 5, () -> new FormatDate(), BuiltInAtomicType.STRING,
+        register("format-time", 5, FormatDate::new, BuiltInAtomicType.STRING,
                  OPT, CARD0)
                 .arg(0, BuiltInAtomicType.TIME, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
@@ -176,110 +176,110 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
                 .arg(3, BuiltInAtomicType.STRING, OPT, null)
                 .arg(4, BuiltInAtomicType.STRING, OPT, null);
 
-        register("function-arity", 1, () -> new FunctionArity(), BuiltInAtomicType.INTEGER,
+        register("function-arity", 1, FunctionArity::new, BuiltInAtomicType.INTEGER,
                  ONE, 0)
                 .arg(0, AnyFunctionType.getInstance(), ONE, null);
 
-        register("function-lookup", 2, () -> new FunctionLookup(), AnyFunctionType.getInstance(),
+        register("function-lookup", 2, FunctionLookup::new, AnyFunctionType.getInstance(),
                  OPT,
                  FOCUS | DEPENDS_ON_STATIC_CONTEXT | LATE)
                 .arg(0, BuiltInAtomicType.QNAME, ONE, null)
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null);
 
-        register("function-name", 1, () -> new FunctionName(), BuiltInAtomicType.QNAME,
+        register("function-name", 1, FunctionName::new, BuiltInAtomicType.QNAME,
                  OPT, 0)
                 .arg(0, AnyFunctionType.getInstance(), ONE, null);
 
-        register("generate-id", 0, () -> new ContextItemAccessorFunction(), BuiltInAtomicType.STRING, ONE, CITEM | LATE);
+        register("generate-id", 0, ContextItemAccessorFunction::new, BuiltInAtomicType.STRING, ONE, CITEM | LATE);
 
-        register("generate-id", 1, () -> new GenerateId_1(), BuiltInAtomicType.STRING, ONE, 0)
+        register("generate-id", 1, GenerateId_1::new, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, Type.NODE_TYPE, OPT | INS, StringValue.EMPTY_STRING);
 
-        register("has-children", 0, () -> new ContextItemAccessorFunction(), BuiltInAtomicType.BOOLEAN,
+        register("has-children", 0, ContextItemAccessorFunction::new, BuiltInAtomicType.BOOLEAN,
                  ONE, CITEM | LATE);
 
-        register("has-children", 1, () -> new HasChildren_1(), BuiltInAtomicType.BOOLEAN,
+        register("has-children", 1, HasChildren_1::new, BuiltInAtomicType.BOOLEAN,
                  OPT, 0)
                 .arg(0, AnyNodeTest.getInstance(), OPT | INS, null);
 
-        register("head", 1, () -> new HeadFn(), AnyItemType.getInstance(),
+        register("head", 1, HeadFn::new, AnyItemType.getInstance(),
                  OPT, FILTER)
                 .arg(0, AnyItemType.getInstance(), STAR | TRA, null);
 
-        register("innermost", 1, () -> new Innermost(), AnyNodeTest.getInstance(),
+        register("innermost", 1, Innermost::new, AnyNodeTest.getInstance(),
                  STAR, 0)
                 .arg(0, AnyNodeTest.getInstance(), STAR | NAV, null);
 
-        register("nilled", 0, () -> new ContextItemAccessorFunction(), BuiltInAtomicType.BOOLEAN, OPT, CITEM | LATE);
+        register("nilled", 0, ContextItemAccessorFunction::new, BuiltInAtomicType.BOOLEAN, OPT, CITEM | LATE);
 
-        register("node-name", 0, () -> new ContextItemAccessorFunction(), BuiltInAtomicType.QNAME, OPT, CITEM | LATE);
+        register("node-name", 0, ContextItemAccessorFunction::new, BuiltInAtomicType.QNAME, OPT, CITEM | LATE);
 
-        register("outermost", 1, () -> new Outermost(), AnyNodeTest.getInstance(), STAR, AS_ARG0 | FILTER)
+        register("outermost", 1, Outermost::new, AnyNodeTest.getInstance(), STAR, AS_ARG0 | FILTER)
                 .arg(0, AnyNodeTest.getInstance(), STAR | TRA, null);
 
-        register("parse-xml", 1, () -> new ParseXml(), NodeKindTest.DOCUMENT, OPT, LATE | NEW)
+        register("parse-xml", 1, ParseXml::new, NodeKindTest.DOCUMENT, OPT, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY);
 
-        register("parse-xml-fragment", 1, () -> new ParseXmlFragment(), NodeKindTest.DOCUMENT, OPT, LATE | NEW)
+        register("parse-xml-fragment", 1, ParseXmlFragment::new, NodeKindTest.DOCUMENT, OPT, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY);
 
-        register("path", 0, () -> new ContextItemAccessorFunction(), BuiltInAtomicType.STRING, OPT, CITEM | LATE);
+        register("path", 0, ContextItemAccessorFunction::new, BuiltInAtomicType.STRING, OPT, CITEM | LATE);
 
-        register("path", 1, () -> new Path_1(), BuiltInAtomicType.STRING, OPT, 0)
+        register("path", 1, Path_1::new, BuiltInAtomicType.STRING, OPT, 0)
                 .arg(0, AnyNodeTest.getInstance(), OPT | NAV, null);
 
-        register("round", 2, () -> new Round(), NumericType.getInstance(), OPT, AS_PRIM_ARG0)
+        register("round", 2, Round::new, NumericType.getInstance(), OPT, AS_PRIM_ARG0)
                 .arg(0, NumericType.getInstance(), OPT, EMPTY)
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null);
 
-        register("serialize", 1, () -> new Serialize(), BuiltInAtomicType.STRING, ONE, 0)
+        register("serialize", 1, Serialize::new, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null);
 
-//        register("serialize", 2, () -> new Serialize(), BuiltInAtomicType.STRING, ONE, XPATH30, 0)
+//        register("serialize", 2, Serialize::new, BuiltInAtomicType.STRING, ONE, XPATH30, 0)
 //                .arg(0, AnyItemType.getInstance(), STAR, null)
 //                .arg(1, NodeKindTest.ELEMENT, OPT, null);
 
-        register("sort", 1, () -> new Sort_1(), AnyItemType.getInstance(), STAR, 0)
+        register("sort", 1, Sort_1::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null);
 
-        register("string-join", 1, () -> new StringJoin(), BuiltInAtomicType.STRING, ONE, 0)
+        register("string-join", 1, StringJoin::new, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, StringValue.EMPTY_STRING);
 
-//        register("string-join", 2, () -> new StringJoin(), BuiltInAtomicType.STRING, ONE, CORE, 0)
+//        register("string-join", 2, StringJoin::new, BuiltInAtomicType.STRING, ONE, CORE, 0)
 //                .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, StringValue.EMPTY_STRING)
 //                .arg(1, BuiltInAtomicType.STRING, ONE, null);
 
-        register("tail", 1, () -> new TailFn(), AnyItemType.getInstance(), STAR, AS_ARG0 | FILTER)
+        register("tail", 1, TailFn::new, AnyItemType.getInstance(), STAR, AS_ARG0 | FILTER)
                 .arg(0, AnyItemType.getInstance(), STAR | TRA, null);
 
-        register("unparsed-text", 1, () -> new UnparsedText(),
+        register("unparsed-text", 1, UnparsedText::new,
                  BuiltInAtomicType.STRING, OPT, BASE | LATE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null);
 
-        register("unparsed-text", 2, () -> new UnparsedText(),
+        register("unparsed-text", 2, UnparsedText::new,
                  BuiltInAtomicType.STRING, OPT, BASE | LATE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
 
-        register("unparsed-text-available", 1, () -> new UnparsedTextAvailable(),
+        register("unparsed-text-available", 1, UnparsedTextAvailable::new,
                  BuiltInAtomicType.BOOLEAN, ONE, BASE | LATE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, BooleanValue.FALSE);
 
-        register("unparsed-text-available", 2, () -> new UnparsedTextAvailable(),
+        register("unparsed-text-available", 2, UnparsedTextAvailable::new,
                  BuiltInAtomicType.BOOLEAN, ONE, BASE | LATE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, BooleanValue.FALSE)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
 
-        register("unparsed-text-lines", 1, () -> new UnparsedTextLines(), BuiltInAtomicType.STRING, STAR, BASE | LATE)
+        register("unparsed-text-lines", 1, UnparsedTextLines::new, BuiltInAtomicType.STRING, STAR, BASE | LATE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null);
 
-        register("unparsed-text-lines", 2, () -> new UnparsedTextLines(), BuiltInAtomicType.STRING, STAR, BASE | LATE)
+        register("unparsed-text-lines", 2, UnparsedTextLines::new, BuiltInAtomicType.STRING, STAR, BASE | LATE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
 
-        register("uri-collection", 0, () -> new UriCollection(), BuiltInAtomicType.ANY_URI, STAR, LATE);
+        register("uri-collection", 0, UriCollection::new, BuiltInAtomicType.ANY_URI, STAR, LATE);
 
-        register("uri-collection", 1, () -> new UriCollection(), BuiltInAtomicType.ANY_URI, STAR, LATE)
+        register("uri-collection", 1, UriCollection::new, BuiltInAtomicType.ANY_URI, STAR, LATE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null);
 
 

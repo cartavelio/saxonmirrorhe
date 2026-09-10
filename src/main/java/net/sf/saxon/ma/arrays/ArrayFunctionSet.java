@@ -48,7 +48,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
     private void init() {
 
 
-        register("append", 2, () -> new ArrayAppend(), ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+        register("append", 2, ArrayAppend::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, AnyItemType.getInstance(), STAR | NAV, null);
 
@@ -56,23 +56,23 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                 new SequenceType[]{SequenceType.ANY_SEQUENCE},
                 SequenceType.SINGLE_BOOLEAN);
 
-        register("filter", 2, () -> new ArrayFilter(), ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+        register("filter", 2, ArrayFilter::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, filterFunctionType, ONE | INS, null);
 
-        register("flatten", 1, () -> new ArrayFlatten(), AnyItemType.getInstance(), STAR, 0)
+        register("flatten", 1, ArrayFlatten::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR | ABS, null);
 
         ItemType foldFunctionType = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE},
                 SequenceType.ANY_SEQUENCE);
 
-        register("fold-left", 3, () -> new ArrayFoldLeft(), AnyItemType.getInstance(), STAR, 0)
+        register("fold-left", 3, ArrayFoldLeft::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, AnyItemType.getInstance(), STAR | NAV, null)
                 .arg(2, foldFunctionType, ONE | INS, null);
 
-        register("fold-right", 3, () -> new ArrayFoldRight(), AnyItemType.getInstance(), STAR, 0)
+        register("fold-right", 3, ArrayFoldRight::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, AnyItemType.getInstance(), STAR | NAV, null)
                 .arg(2, foldFunctionType, ONE | INS, null);
@@ -81,87 +81,87 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                 new SequenceType[]{SequenceType.ANY_SEQUENCE},
                 SequenceType.ANY_SEQUENCE);
 
-        register("for-each", 2, () -> new ArrayForEach(), AnyItemType.getInstance(), STAR, 0)
+        register("for-each", 2, ArrayForEach::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, forEachFunctionType, ONE | INS, null);
 
-        register("for-each-pair", 3, () -> new ArrayForEachPair(), AnyItemType.getInstance(), STAR, 0)
+        register("for-each-pair", 3, ArrayForEachPair::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(2, foldFunctionType, ONE | INS, null);
 
-        register("get", 2, () -> new ArrayGet(), AnyItemType.getInstance(), STAR, 0)
+        register("get", 2, ArrayGet::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.INTEGER, ONE | ABS, null);
 
-        register("head", 1, () -> new ArrayHead(), AnyItemType.getInstance(), STAR, 0)
+        register("head", 1, ArrayHead::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null);
 
-        register("insert-before", 3, () -> new ArrayInsertBefore(), ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+        register("insert-before", 3, ArrayInsertBefore::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.INTEGER, STAR | ABS, null)
                 .arg(2, AnyItemType.getInstance(), STAR | NAV, null);
 
-        register("join", 1, () -> new ArrayJoin(), ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+        register("join", 1, ArrayJoin::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, STAR | INS, null);
 
-        register("put", 3, () -> new ArrayPut(), ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+        register("put", 3, ArrayPut::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.INTEGER, STAR | INS, null)
                 .arg(2, AnyItemType.getInstance(), STAR | NAV, null);
 
-        register("remove", 2, () -> new ArrayRemove(), ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+        register("remove", 2, ArrayRemove::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.INTEGER, STAR | ABS, null);
 
-        register("reverse", 1, () -> new ArrayReverse(), ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+        register("reverse", 1, ArrayReverse::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null);
 
-        register("size", 1, () -> new ArraySize(), BuiltInAtomicType.INTEGER, ONE, 0)
+        register("size", 1, ArraySize::new, BuiltInAtomicType.INTEGER, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null);
 
         ItemType sortFunctionType = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.ANY_SEQUENCE},
                 SequenceType.ATOMIC_SEQUENCE);
 
-        register("sort", 1, () -> new ArraySort(), ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+        register("sort", 1, ArraySort::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null);
 
-        register("sort", 2, () -> new ArraySort(), ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+        register("sort", 2, ArraySort::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT | ABS, null);
 
-        register("sort", 3, () -> new ArraySort(), ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+        register("sort", 3, ArraySort::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT | ABS, null)
                 .arg(2, sortFunctionType, ONE | INS, null);
 
-        register("subarray", 2, () -> new ArraySubarray(), ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+        register("subarray", 2, ArraySubarray::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.INTEGER, ONE | ABS, null);
 
-        register("subarray", 3, () -> new ArraySubarray(), ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+        register("subarray", 3, ArraySubarray::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.INTEGER, ONE | ABS, null)
                 .arg(2, BuiltInAtomicType.INTEGER, ONE | ABS, null);
 
-        register("tail", 1, () -> new ArrayTail(), ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+        register("tail", 1, ArrayTail::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null);
 
         // TODO: the following functions should be private
 
-        register("_to-sequence", 1, () -> new ArrayToSequence(), AnyItemType.getInstance(), STAR, 0)
+        register("_to-sequence", 1, ArrayToSequence::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null);
 
-        register("_from-sequence", 1, () -> new ArrayFromSequence(), ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+        register("_from-sequence", 1, ArrayFromSequence::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR | INS, null);
 
         // TODO: the following functions should be XPath 4.0 only
 
-        register("of", 1, () -> new ArrayOf(), ArrayItemType.ANY_ARRAY_TYPE, ONE, SEQV)
+        register("of", 1, ArrayOf::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, SEQV)
                 .arg(0, Parcel.TYPE, STAR, null);
 
-        register("members", 1, () -> new ArrayMembers(), Parcel.TYPE, STAR, SEQV)
+        register("members", 1, ArrayMembers::new, Parcel.TYPE, STAR, SEQV)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null);
 
 
