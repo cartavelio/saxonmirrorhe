@@ -46,7 +46,11 @@ public class AtomicCoercionPlan extends CoercionPlan {
                 RoleDiagnostic role = request.roleSupplier.get();
                 ValidationFailure vf = new ValidationFailure(
                         "Failed to atomize the " + role.getMessage() + ": " + e.getMessage());
-                vf.setErrorCode("XPTY0004");
+                if (e.getErrorCodeQName() == null) {
+                    vf.setErrorCode("XPTY0004");
+                } else {
+                    vf.setErrorCodeQName(e.getErrorCodeQName());
+                }
                 throw vf.makeException().asTypeError();
             }
             if (seq instanceof AtomicValue) {
