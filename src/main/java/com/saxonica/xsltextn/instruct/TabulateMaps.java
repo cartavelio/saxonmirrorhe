@@ -1,13 +1,11 @@
 package com.saxonica.xsltextn.instruct;
 
-import com.saxonica.functions.extfn.WithPedigree;
 import com.saxonica.xsltextn.pedigree.Pedigree;
 import com.saxonica.xsltextn.pedigree.PedigreeMapItem;
 import com.saxonica.xsltextn.pedigree.PedigreeValue;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Instruction;
-import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
@@ -18,7 +16,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Int64Value;
@@ -152,23 +149,6 @@ public class TabulateMaps extends Instruction {
     @Override
     public ItemType getItemType() {
         return MapType.ANY_MAP_TYPE;
-    }
-
-    /*@Nullable*/
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        Item root;
-        SequenceIterator rootIterator = getRootExpression().iterate(context);
-        SequenceIterator mappedRootIterator =
-                MappingIterator.map(rootIterator,
-                                    item -> SingletonIterator.makeIterator(WithPedigree.makeRootWithPedigree(item)));
-
-        XPathContext c2 = context.newMinorContext();
-        FocusIterator trackingIterator = c2.trackFocus(mappedRootIterator);
-        while ((root = trackingIterator.next()) != null) {
-            processRootItem(output, root, c2);
-        }
-        return null;
     }
 
     private void processRootItem(Outputter output, Item root, XPathContext c2) throws XPathException {

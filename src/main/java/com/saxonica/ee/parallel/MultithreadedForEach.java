@@ -1,15 +1,14 @@
 package com.saxonica.ee.parallel;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.instruct.ForEach;
-import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 
@@ -65,24 +64,6 @@ public class MultithreadedForEach extends ForEach {
         return PROCESS_METHOD;
     }
 
-    /*@Nullable*/
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        final XPathContextMajor c2 = context.newContext();
-        FocusIterator fit = c2.getController().getFocusTrackerFactory(true).apply(getSelect().iterate(context));
-        c2.setCurrentIterator(fit);
-        int maxThreads = evaluateThreads(context);
-        if (maxThreads <= 1) {
-            return super.processLeavingTail(output, context);
-        } else {
-            MultithreadedContextMappingIterator mapper =
-                    new MultithreadedContextMappingIterator(getAction(), c2, maxThreads);
-            SequenceTool.supply(mapper, (ItemConsumer<? super Item>) output::append);
-            mapper.close();
-            return null;
-        }
-    }
-
     /**
      * Evaluate the value of the "threads" attribute, indicating how many threads should be used
      *
@@ -123,10 +104,7 @@ public class MultithreadedForEach extends ForEach {
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
-        int threads = evaluateThreads(context);
-        XPathContextMinor c2 = context.newMinorContext();
-        c2.trackFocus(getSelect().iterate(context));
-        return new MultithreadedContextMappingIterator(getAction(), c2, threads);
+        return makeElaborator().elaborateForPull().iterate(context);
     }
 
     /**
@@ -152,6 +130,68 @@ public class MultithreadedForEach extends ForEach {
     protected void explainThreads(ExpressionPresenter out) throws XPathException {
         out.setChildRole("threads");
         getThreads().export(out);
+    }
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new MultithreadedForEachElaborator();
+    }
+
+    public static class MultithreadedForEachElaborator extends PullElaborator {
+
+        private StringEvaluator threadsEvaluator;
+
+        private void makeThreadsEvaluator(MultithreadedForEach forEach) {
+            if (forEach.threadsOp == null) {
+                threadsEvaluator = context -> "1";
+            } else {
+                threadsEvaluator = forEach.getThreads().makeElaborator().elaborateForString(true);
+            }
+        }
+
+        private int evaluateThreads(MultithreadedForEach forEach, XPathContext context) throws XPathException {
+            if (forEach.threadsOp == null) {
+                return 1;
+            } else {
+                String threadsValue = threadsEvaluator.eval(context);
+                int threads;
+                try {
+                    threads = Integer.parseInt(threadsValue);
+                } catch (NumberFormatException e) {
+                    XPathException err = new XPathException("Value of 'threads' is not an integer (" + threadsValue + ")");
+                    err.setLocation(forEach.getLocation());
+                    err.setXPathContext(context);
+                    throw err;
+                }
+                return threads;
+            }
+        }
+
+        @Override
+        public PullEvaluator elaborateForPull() {
+            MultithreadedForEach forEach = (MultithreadedForEach) getExpression();
+            PullEvaluator select = forEach.getSelectExpression().makeElaborator().elaborateForPull();
+            PullEvaluator action = forEach.getActionExpression().makeElaborator().elaborateForPull();
+            makeThreadsEvaluator(forEach);
+
+            return context -> {
+                int threads = evaluateThreads(forEach, context);
+                XPathContextMinor c2 = context.newMinorContext();
+                c2.trackFocus(select.iterate(context));
+                return new MultithreadedContextMappingIterator(action, c2, threads);
+            };
+        }
+
+        @Override
+        public UpdateEvaluator elaborateForUpdate() {
+            throw new UnsupportedOperationException("Multi-threading is not supported for updating expressions");
+        }
     }
 }
 

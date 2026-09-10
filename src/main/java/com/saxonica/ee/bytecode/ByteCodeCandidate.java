@@ -4,8 +4,7 @@ import com.saxonica.ee.bytecode.util.CompilerService;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.instruct.TailCall;
-import net.sf.saxon.expr.instruct.TailCallReturner;
+import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NamespaceResolver;
@@ -27,7 +26,7 @@ import net.sf.saxon.trans.XPathException;
  * changes to the expression tree cause problems, for example when evaluating a closure which saves
  * a reference to the tree.</p>
  */
-public class ByteCodeCandidate extends UnaryExpression implements TailCallReturner {
+public class ByteCodeCandidate extends UnaryExpression  {
 
     private final String objectName;
     private long countDown = 100;
@@ -168,38 +167,38 @@ public class ByteCodeCandidate extends UnaryExpression implements TailCallReturn
         }
     }
 
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException { // bug3838
-        Expression body = targetExpression(context, Expression.PROCESS_METHOD);
-        if (body instanceof TailCallReturner) {
-            if (byteCodeMonitor != null) {
-                long time = System.nanoTime();
-                TailCall tc = ((TailCallReturner) body).processLeavingTail(output, context);
-                // if tc==null, we're returning a tail-call, so no real work has been done, so
-                // there's no point capturing the timing.
-                // Also, if the body returns a tail-call, then we don't want to generate bytecode,
-                // because the bytecode won't be a TailCallReturner. So forcibly suppress bytecode generation.
-                if (tc != null) {
-                    countDown = Integer.MAX_VALUE;
-                    return tc;
-                }
-                time = System.nanoTime() - time;
-                byteCodeMonitor.logExecution(this, "process", time);
-                return null;
-            } else {
-                TailCall tc = ((TailCallReturner) body).processLeavingTail(output, context);
-                if (tc != null) {
-                    // If the body returns a tail-call, then we don't want to generate bytecode,
-                    // because the bytecode won't be a TailCallReturner. So forcibly suppress bytecode generation.
-                    countDown = Integer.MAX_VALUE;
-                }
-                return tc;
-            }
-        } else {
-            process(output, context);
-            return null;
-        }
-    }
+//    @Override
+//    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException { // bug3838
+//        Expression body = targetExpression(context, Expression.PROCESS_METHOD);
+//        if (body instanceof TailCallReturner) {
+//            if (byteCodeMonitor != null) {
+//                long time = System.nanoTime();
+//                TailCall tc = ((TailCallReturner) body).processLeavingTail(output, context);
+//                // if tc==null, we're returning a tail-call, so no real work has been done, so
+//                // there's no point capturing the timing.
+//                // Also, if the body returns a tail-call, then we don't want to generate bytecode,
+//                // because the bytecode won't be a TailCallReturner. So forcibly suppress bytecode generation.
+//                if (tc != null) {
+//                    countDown = Integer.MAX_VALUE;
+//                    return tc;
+//                }
+//                time = System.nanoTime() - time;
+//                byteCodeMonitor.logExecution(this, "process", time);
+//                return null;
+//            } else {
+//                TailCall tc = ((TailCallReturner) body).processLeavingTail(output, context);
+//                if (tc != null) {
+//                    // If the body returns a tail-call, then we don't want to generate bytecode,
+//                    // because the bytecode won't be a TailCallReturner. So forcibly suppress bytecode generation.
+//                    countDown = Integer.MAX_VALUE;
+//                }
+//                return tc;
+//            }
+//        } else {
+//            process(output, context);
+//            return null;
+//        }
+//    }
 
 
     /**
@@ -334,7 +333,15 @@ public class ByteCodeCandidate extends UnaryExpression implements TailCallReturn
         }
     }
 
-
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return an appropriate {@link Elaborator}
+     */
+    @Override
+    public Elaborator getElaborator() {
+        throw new UnsupportedOperationException("Bytecode is currently out of action");
+    }
 }
 
 // Copyright (c) 2018-2022 Saxonica Limited

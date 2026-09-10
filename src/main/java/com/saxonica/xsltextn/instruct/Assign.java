@@ -1,14 +1,10 @@
 package com.saxonica.xsltextn.instruct;
 
-import net.sf.saxon.Controller;
-import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.expr.instruct.Instruction;
-import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -93,19 +89,6 @@ public class Assign extends Instruction implements BindingReference {
         return StandardNames.SAXON_ASSIGN;
     }
 
-
-    /*@Nullable*/
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        if (binding == null) {
-            throw new IllegalStateException("saxon:assign binding has not been fixed up");
-        }
-        GroundedValue value = SequenceTool.toGroundedValue(getSelectExpr().iterate(context));
-        final Controller controller = context.getController();
-        assert controller != null;
-        controller.getBindery(getPackageData()).setGlobalVariable(binding, value);
-        return null;
-    }
 
     /**
      * Diagnostic print of expression structure. The abstract expression tree

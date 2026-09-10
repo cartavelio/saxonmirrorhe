@@ -1,9 +1,7 @@
 package com.saxonica.xsltextn.instruct;
 
-import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Instruction;
-import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.*;
@@ -60,13 +58,6 @@ public class DoInstr extends Instruction  {
         return StandardNames.SAXON_DO;
     }
 
-
-    /*@Nullable*/
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        GroundedValue value = SequenceTool.toGroundedValue(getActionExpr().iterate(context));
-        return null;
-    }
 
     /**
      * Diagnostic print of expression structure. The abstract expression tree

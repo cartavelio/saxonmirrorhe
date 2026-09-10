@@ -1,16 +1,10 @@
 package com.saxonica.ee.optim;
 
-import net.sf.saxon.expr.elab.ItemEvaluator;
-import net.sf.saxon.expr.elab.PullEvaluator;
-import net.sf.saxon.expr.elab.PushEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.instruct.Choose;
 import net.sf.saxon.expr.instruct.ConditionalInstruction;
-import net.sf.saxon.expr.instruct.TailCall;
-import net.sf.saxon.expr.instruct.TailCallReturner;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.CodepointCollator;
@@ -29,14 +23,17 @@ import net.sf.saxon.value.CalendarValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * An optimized Choose expression in which all the branches are tests of the same expression for equality
  * with some value. Note this is not quite the same as the XQuery 3.1 switch expression; this switch expression
  * is usually generated as the result of optimizing an xsl:choose or extended if/then/else expression.
  */
-public class SwitchExpression extends Expression implements TailCallReturner, ConditionalInstruction {
+public class SwitchExpression extends Expression implements ConditionalInstruction {
 
     private final Operand subjectOp;
     private final List<Operand> actions;
@@ -381,11 +378,6 @@ public class SwitchExpression extends Expression implements TailCallReturner, Co
     @Override
     public void process(Outputter output, XPathContext context) throws XPathException {
         dispatchTailCall(makeElaborator().elaborateForPush().processLeavingTail(output, context));
-    }
-
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        return makeElaborator().elaborateForPush().processLeavingTail(output, context);
     }
 
     @Override

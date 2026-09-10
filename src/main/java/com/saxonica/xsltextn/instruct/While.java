@@ -1,13 +1,11 @@
 package com.saxonica.xsltextn.instruct;
 
-import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.BooleanEvaluator;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PushElaborator;
 import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.instruct.Instruction;
-import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.StandardNames;
@@ -110,13 +108,6 @@ public class While extends Instruction {
     @Override
     public final boolean mayCreateNewNodes() {
         return !getAction().hasSpecialProperty(StaticProperty.NO_NODES_NEWLY_CREATED);
-    }
-
-
-    /*@Nullable*/
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        return makeElaborator().elaborateForPush().processLeavingTail(output, context);
     }
 
 

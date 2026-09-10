@@ -4,10 +4,8 @@ import com.saxonica.xsltextn.pedigree.Pedigree;
 import com.saxonica.xsltextn.pedigree.PedigreeArrayItem;
 import com.saxonica.xsltextn.pedigree.PedigreeMapItem;
 import com.saxonica.xsltextn.pedigree.PedigreeValue;
-import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Instruction;
-import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.MapItem;
@@ -15,7 +13,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.SequenceType;
 
@@ -135,24 +132,6 @@ public class DeepUpdate extends Instruction {
     @Override
     public ItemType getItemType() {
         return getRootExpression().getItemType();
-    }
-
-    /*@Nullable*/
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        Item root;
-        SequenceIterator rootIterator = getRootExpression().iterate(context);
-        SequenceIterator mappedRootIterator =
-                MappingIterator.map(rootIterator,
-                                    item -> SingletonIterator.makeIterator(makeRootWithPedigree(item)));
-
-        XPathContext c2 = context.newMinorContext();
-        FocusIterator trackingIterator = c2.trackFocus(mappedRootIterator);
-        while ((root = trackingIterator.next()) != null) {
-            Item replacedRoot = processRootItem(root, c2);
-            output.append(replacedRoot);
-        }
-        return null;
     }
 
     private static Item makeRootWithPedigree(Item root) {

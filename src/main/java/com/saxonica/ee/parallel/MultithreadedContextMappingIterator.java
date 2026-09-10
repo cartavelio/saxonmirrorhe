@@ -2,10 +2,10 @@ package com.saxonica.ee.parallel;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.expr.XPathContextMinor;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -29,7 +29,7 @@ import java.util.function.Supplier;
 public final class MultithreadedContextMappingIterator implements SequenceIterator {
 
     private final FocusIterator base;
-    private final Expression action;
+    private final PullEvaluator action;
     private final XPathContextMinor context;
     private SequenceIterator stepIterator = null;
     private final Supplier<Integer> lastPositionFinder;
@@ -50,7 +50,7 @@ public final class MultithreadedContextMappingIterator implements SequenceIterat
      *                in the right order.
      */
 
-    public MultithreadedContextMappingIterator(Expression action, final XPathContextMinor context, int threads)
+    public MultithreadedContextMappingIterator(PullEvaluator action, final XPathContextMinor context, int threads)
             throws XPathException {
         //context.getConfiguration().getStandardErrorOutput().println("Using MultithreadedContextMappingIterator");
         base = context.getCurrentIterator();
