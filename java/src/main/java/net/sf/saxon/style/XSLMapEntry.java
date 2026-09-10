@@ -22,7 +22,7 @@ import net.sf.saxon.type.ItemType;
  * Handler for xsl:map-entry instructions in an XSLT 3.0 stylesheet. <br>
  */
 
-public class XSLMapEntry extends StyleElement {
+public class XSLMapEntry extends StyleElement implements AutoDocumentInhibitor {
 
     Expression key = null;
     Expression select = null;
@@ -36,6 +36,11 @@ public class XSLMapEntry extends StyleElement {
     @Override
     public boolean isInstruction() {
         return true;
+    }
+
+    @Override
+    public ItemType getItemType() {
+        return MapType.ANY_MAP_TYPE;
     }
 
     /**
