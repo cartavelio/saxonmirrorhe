@@ -777,6 +777,7 @@ task graal_eec_jar(
   def graalEdition = edition == "he" ? "graal_ce_home" : "graal_ee_home"
   def pypiDir = "${buildDir}/${edition}c_pypi"
 
+  def libpath = ''
   def lastLinePatch = ''
   if (systemOsName == 'linux') {
     lastLinePatch = ('[tool.cibuildwheel]\n'
@@ -787,7 +788,9 @@ task graal_eec_jar(
   } else if (systemOsName == 'windows') {
     lastLinePatch = ('[tool.cibuildwheel]\n'
                      + 'build = "*"\n'
-                     + 'skip = ["cp36*", "cp37*", "pp37*", "cp*musl*"]\n')
+                     + 'archs = ["AMD64"]\n'
+                     + 'skip = ["*-win32", "cp36*", "cp37*", "pp37*", "cp*musl*"]\n')
+    libpath = 'libs\\\\win\\\\'
   }
 
   task "setup_${edition}c_pypi"(
@@ -805,6 +808,7 @@ task graal_eec_jar(
           line.replaceAll('@@VERSION@@', saxonVersion)
             .replace('@@edition@@', edition)
             .replace('@@EDITION@@', edition.toUpperCase())
+	    .replace('@@libpath@@', libpath)
             .replace('[LAST-LINE-BUILD-PATCH]', lastLinePatch)
         }
       }
