@@ -16,14 +16,27 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.ParseOptions;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.Sequence;
+import net.sf.saxon.lib.Validation;
+import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.om.*;
+import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.transpile.CSharpInnerClass;
+import net.sf.saxon.type.Schema;
+import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
+import net.sf.saxon.value.Whitespace;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParserFactory;
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * Implement the fn:doc() function - a simplified form of the Document function
@@ -137,7 +150,145 @@ public class Doc extends SystemFunction implements Callable {
         }
         String href = hrefVal.getStringValue();
         PackageData packageData = getRetainedStaticContext().getPackageData();
-        NodeInfo item = DocumentFn.makeDoc(href, getRetainedStaticContext().getStaticBaseUriString(), packageData, getParseOptions(), context, null, false);
+
+        if (getArity() >= 2) {
+            // 4.0 spec provides an options parameter. For this case we create a clean
+            // XML parser rather than using one from the pool. This is (a) to avoid the problems
+            // of resetting it to a virgin state before returning it to the pool, and (b)
+            // to ensure we get the default JDK parser implementation, rather than picking a parser
+            // off the classpath.
+            MapItem options = (MapItem) arguments[1].head();
+            if (options != null && !options.isEmpty()) {
+                Map<String, GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
+
+                // TODO: (a) reuse the factory, (b) avoid Java 13 dependency
+                SAXParserFactory factory = SAXParserFactory.newDefaultNSInstance();
+                XMLReader parser;
+                try {
+                    parser = factory.newSAXParser().getXMLReader();
+                } catch (SAXException | ParserConfigurationException e) {
+                    throw new RuntimeException(e);
+                }
+                parseOptions = new ParseOptions();
+                parseOptions = parseOptions.withXMLReader(parser);
+
+                GroundedValue val = checkedOptions.get("dtd-validation");
+                boolean dtdValidating = val != null && val.effectiveBooleanValue();
+                if (dtdValidating) {
+                    try {
+                        parser.setFeature("http://xml.org/sax/features/validation", true);
+                    } catch (SAXException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
+                val = checkedOptions.get("allow-external-entities");
+                if (val != null && !val.effectiveBooleanValue()) {
+                    parser.setEntityResolver(new EntityResolver() {
+
+                        @Override
+                        public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+                            throw new SAXException(
+                                    new XPathException("The parse-xml input references '" + systemId +
+                                                               "' but external entity expansion is disallowed", "FODC0006"));
+                        }
+                    });
+                }
+
+                val = checkedOptions.get("entity-expansion-limit").head();
+                if (val != null) {
+                    try {
+                        parser.setProperty("http://www.oracle.com/xml/jaxp/properties/entityExpansionLimit", Integer.parseInt(val.getStringValue()));
+                    } catch (SAXException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
+                val = checkedOptions.get("xsi-schema-location");
+                if (val != null) {
+                    parseOptions = parseOptions.withUseXsiSchemaLocation(val.effectiveBooleanValue());
+                }
+
+
+                val = checkedOptions.get("xsd-validation");
+                boolean xsdValidating = false;
+                if (val == null) {
+                    // In 3.1 we defaulted from the configuration values, in 4.0 it has to be explicit
+                    parseOptions = parseOptions.withSchemaValidationMode(Validation.SKIP);
+                } else {
+                    String validationValue = Whitespace.normalize(val.getStringValue());
+                    xsdValidating = !"skip".equals(validationValue);
+                    if (validationValue.equals("strict")) {
+                        parseOptions = parseOptions.withSchemaValidationMode(Validation.STRICT);
+                        parseOptions = parseOptions.withSchema(getRetainedStaticContext().getImportedSchema());
+                    } else if (validationValue.equals("lax")) {
+                        parseOptions = parseOptions.withSchemaValidationMode(Validation.LAX);
+                        parseOptions = parseOptions.withSchema(getRetainedStaticContext().getImportedSchema());
+                    } else if (validationValue.equals("skip")) {
+                        parseOptions = parseOptions.withSchemaValidationMode(Validation.SKIP);
+                    } else if (validationValue.startsWith("type ")) {
+                        String eqName = validationValue.substring(5).trim();
+                        if (!eqName.startsWith("Q{")) {
+                            throw new XPathException("Type name in xsd-validation option of fn:parse-xml must start with 'Q{'", "FODC0008");
+                        }
+                        StructuredQName typeName;
+                        try {
+                            typeName = StructuredQName.fromLexicalQName(eqName, false, true, null);
+                        } catch (XPathException e) {
+                            throw e.withErrorCode("FODC0008");
+                        }
+                        Schema schema = getRetainedStaticContext().getImportedSchema();
+                        SchemaType type = schema.getSchemaType(typeName);
+                        if (type == null) {
+                            throw new XPathException("Unknown type " + eqName, "FODC0008");
+                        }
+                        parseOptions = parseOptions
+                                .withSchema(schema)
+                                .withSchemaValidationMode(Validation.BY_TYPE)
+                                .withTopLevelType(type);
+                    } else {
+                        throw new XPathException("Unknown xsd-validation option of fn:parse-xml: " + validationValue, "FODC0008");
+                    }
+
+
+                    val = checkedOptions.get("strip-space");
+                    if (val != null) {
+                        SpaceStrippingRule rule;
+                        if (xsdValidating || dtdValidating) {
+                            rule = IgnorableSpaceStrippingRule.getInstance();
+                        } else if (val.effectiveBooleanValue()) {
+                            rule = AllElementsSpaceStrippingRule.getInstance();
+                        } else {
+                            rule = NoElementsSpaceStrippingRule.getInstance();
+                        }
+                        parseOptions = parseOptions.withSpaceStrippingRule(rule);
+                    }
+
+                    val = checkedOptions.get("xinclude");
+                    if (val != null && val.effectiveBooleanValue()) {
+
+                        parseOptions = parseOptions.withXIncludeAware(true);
+                        //throw new XPathException("XIncude processing in fn:parse-xml is not supported", "FODC0013");
+                    }
+
+
+                }
+            }
+        } else {
+            ParseOptions parseOptions = context.getConfiguration().getParseOptions();
+
+            PackageData pd = getRetainedStaticContext().getPackageData();
+            if (pd instanceof StylesheetPackage) {
+                parseOptions = parseOptions.withSpaceStrippingRule(((StylesheetPackage) pd).getSpaceStrippingRule());
+            } else {
+                parseOptions = parseOptions.withSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
+            }
+
+
+        }
+
+
+        NodeInfo item = DocumentFn.makeDoc(href, getRetainedStaticContext().getStaticBaseUriString(), packageData, parseOptions, context, null, false);
         if (item == null) {
             // we failed to read the document
             throw new XPathException("Failed to load document " + href, "FODC0002", context);

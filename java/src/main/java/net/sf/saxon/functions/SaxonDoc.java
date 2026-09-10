@@ -37,12 +37,13 @@ import java.util.Set;
 /**
  * Implement the saxon:doc() function - a variant of the fn:doc function with
  * a second argument to supply option parameters. Used to underpin the xsl:source-document
- * instruction with streamable="no".
+ * instruction with streamable="no". A lot of this is superseded by the fn:doc#2 function
+ * in QT4.
  */
 
-public class Doc_2 extends SystemFunction implements Callable {
+public class SaxonDoc extends SystemFunction implements Callable {
 
-    public Doc_2() {
+    public SaxonDoc() {
     }
 
     public static OptionsParameter makeOptionsParameter(int version) {

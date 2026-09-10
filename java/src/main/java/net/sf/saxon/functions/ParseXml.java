@@ -51,6 +51,7 @@ public class ParseXml extends SystemFunction implements Callable {
         parseOptions.addAllowedOption("entity-expansion-limit", SequenceType.OPTIONAL_INTEGER, EmptySequence.getInstance());
         parseOptions.addAllowedOption("strip-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         parseOptions.addAllowedOption("xsd-validation", SequenceType.SINGLE_STRING, StringValue.bmp("skip"));
+        parseOptions.addAllowedOption("xsi-schema-location", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         parseOptions.addAllowedOption("xinclude", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         return parseOptions;
     }

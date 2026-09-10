@@ -443,7 +443,7 @@ public class ParseOptions {
      * @param value The value given to the properties as a string
      */
     public ParseOptions withParserProperty(String uri, Object value) {
-        Map<String, Object> parserProperties = (Map<String, Object>) getProperty(Key.PARSER_FEATURES);
+        Map<String, Object> parserProperties = (Map<String, Object>) getProperty(Key.PARSER_PROPERTIES);
         Map<String, Object> parserProperties2;
         if (parserProperties == null) {
             parserProperties2 = new HashMap<>(4);
@@ -750,13 +750,10 @@ public class ParseOptions {
      *               requested, but validation failures are treated as warnings only.</p>
      */
 
+    @CSharpReplaceBody(code="return withProperty(Key.DTD_VALIDATION, option);")
     public ParseOptions withDTDValidationMode(int option) {
-        return
-        //#if CSHARP==false
-                withParserFeature("http://xml.org/sax/features/validation",
-                                 option == Validation.STRICT || option == Validation.LAX).
-        //#endif
-                withProperty(Key.DTD_VALIDATION, option);
+        return withParserFeature("http://xml.org/sax/features/validation",
+                                 option == Validation.STRICT || option == Validation.LAX);
     }
 
     /**

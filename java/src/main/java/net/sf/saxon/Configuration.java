@@ -2835,13 +2835,11 @@ public class Configuration implements SourceResolver {
         } catch (XPathException err) {
             throw new TransformerFactoryConfigurationError(err);
         }
-        //if (isValidation()) {
-            try {
-                parser.setFeature("http://xml.org/sax/features/validation", isValidation());
-            } catch (SAXException err) {
-                throw new TransformerFactoryConfigurationError("The XML parser does not support validation");
-            }
-        //}
+//        try {
+//            parser.setFeature("http://xml.org/sax/features/validation", isValidation());
+//        } catch (SAXException err) {
+//            throw new TransformerFactoryConfigurationError("The XML parser does not support validation");
+//        }
 
         return parser;
     }

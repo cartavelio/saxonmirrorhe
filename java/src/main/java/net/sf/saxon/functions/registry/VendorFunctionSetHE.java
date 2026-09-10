@@ -54,10 +54,10 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
         // Variant of the doc() function with an options parameter
-        register("doc", 2, e -> e.populate(Doc_2::new, NodeKindTest.DOCUMENT, ONE, LATE)
+        register("doc", 2, e -> e.populate(SaxonDoc::new, NodeKindTest.DOCUMENT, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, EMPTY)
-                .setOptionDetails(Doc_2.makeOptionsParameter(31)));
+                .setOptionDetails(SaxonDoc.makeOptionsParameter(31)));
 
         // Ask whether the supplied element node has any local namespace declarations
         register("has-local-namespaces", 1, e -> e.populate(HasLocalNamespaces::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
