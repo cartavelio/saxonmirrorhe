@@ -52,7 +52,7 @@ int main() {
 
   const char *result =
       xsltApplyStylesheet(environi, processor, cwd, "../data/cat.xml",
-                          "data/test.xsl", 0, 0, 0, 0);
+                          "../data/test.xsl", 0, 0, 0, 0);
 
   xsltSaveResultToFile(environi, processor, cwd, "../data/cat.xml",
                        "../data/test.xsl", "../outputFile.xml", 0, 0, 0, 0);
