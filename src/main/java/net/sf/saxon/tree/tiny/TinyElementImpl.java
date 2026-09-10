@@ -250,6 +250,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
     public void copy(/*@NotNull*/ Receiver receiver, int copyOptions, Location location) throws XPathException {
 
         boolean copyTypes = CopyOptions.includes(copyOptions, CopyOptions.TYPE_ANNOTATIONS);
+        final boolean copyForUpdate = CopyOptions.includes(copyOptions, CopyOptions.FOR_UPDATE);
 
         short level = -1;
         boolean closePending = false;
@@ -290,6 +291,10 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                 case Type.ELEMENT:
                 case Type.TEXTUAL_ELEMENT: {
 
+                    int receiverOptions = ReceiverOption.BEQUEATH_INHERITED_NAMESPACES_ONLY;
+                    if (copyForUpdate) {
+                        receiverOptions |= ReceiverOption.MUTABLE_TREE;
+                    }
                     // start element
                     if (copyTypes) {
                         elementType = tree.getSchemaType(next);
@@ -343,7 +348,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                                               EmptyAttributeMap.getInstance(),
                                               namespaces,
                                               location,
-                                              ReceiverOption.BEQUEATH_INHERITED_NAMESPACES_ONLY);
+                                              receiverOptions);
                         // output characters
                         final UnicodeString value = TinyTextImpl.getStringValue(tree, next);
                         receiver.characters(value, location, ReceiverOption.WHOLE_TEXT_NODE);
@@ -402,7 +407,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                                               elementType,
                                               attributes, namespaces,
                                               location,
-                                              ReceiverOption.BEQUEATH_INHERITED_NAMESPACES_ONLY);
+                                              receiverOptions);
 
                     }
                     break;

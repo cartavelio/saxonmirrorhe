@@ -302,6 +302,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
     public void copy(Receiver out, int copyOptions, Location location) throws XPathException {
 
         final boolean copyTypes = CopyOptions.includes(copyOptions, CopyOptions.TYPE_ANNOTATIONS);
+        final boolean copyForUpdate = CopyOptions.includes(copyOptions, CopyOptions.FOR_UPDATE);
         SchemaType typeCode = copyTypes ?
                 getSchemaType() : Untyped.getInstance();
         java.util.function.Function<NodeInfo, Object> informee = out.getPipelineConfiguration().getCopyInformee();
@@ -342,9 +343,12 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
             atts.add(new AttributeInfo(att.getNodeName(), attributeType, att.getValue(), att.getLocation(), 0));
         }
 
+        int receiverOptions = ReceiverOption.BEQUEATH_INHERITED_NAMESPACES_ONLY | ReceiverOption.NAMESPACE_OK;
+        if (copyForUpdate) {
+            receiverOptions |= ReceiverOption.MUTABLE_TREE;
+        }
         out.startElement(NameOfNode.makeName(this), typeCode, SequenceTool.attributeMapFromList(atts),
-                         ns, location,
-                         ReceiverOption.BEQUEATH_INHERITED_NAMESPACES_ONLY | ReceiverOption.NAMESPACE_OK);
+                         ns, location, receiverOptions);
 
         // output the children
 
