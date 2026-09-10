@@ -9,6 +9,9 @@ package net.sf.saxon.pattern;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.BooleanElaborator;
+import net.sf.saxon.expr.elab.BooleanEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -517,6 +520,18 @@ public abstract class Pattern extends PseudoExpression {
 //    }
 //
 //    //#endif
+
+    public Elaborator getElaborator() {
+        return new PatternElaborator();
+    }
+
+    private static class PatternElaborator extends BooleanElaborator {
+        @Override
+        public BooleanEvaluator elaborateForBoolean() {
+            Pattern pat = (Pattern)getExpression();
+            return context -> pat.matches(context.getContextItem(), context);
+        }
+    }
 
 
 }
