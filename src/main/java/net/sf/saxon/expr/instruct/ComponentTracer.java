@@ -12,8 +12,10 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.lib.TraceListener;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trace.TraceableComponent;
 import net.sf.saxon.trans.XPathException;
@@ -308,8 +310,9 @@ public class ComponentTracer extends Instruction {
                     TraceListener listener = controller.getTraceListener();
                     listener.enter(expr.component, expr.properties, context);
                     SequenceIterator result = baseEval.iterate(context);
+                    GroundedValue extent = SequenceTool.toGroundedValue(result);
                     listener.leave(expr.component);
-                    return result;
+                    return extent.iterate();
                 } else {
                     return baseEval.iterate(context);
                 }
