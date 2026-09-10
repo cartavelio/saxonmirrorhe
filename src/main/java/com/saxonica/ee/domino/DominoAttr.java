@@ -205,13 +205,27 @@ public class DominoAttr implements NodeInfo {
     /**
      * Get the local part of the name of this node. This is the name after the ":" if any.
      *
-     * @return the local part of the name. For an unnamed node, returns "". Unlike the DOM
-     * interface, this returns the full name in the case of a non-namespaced name.
+     * @return the local part of the name. For a namespace-aware DOM this returns the
+     * value of <code>attr.getLocalName()</code> where <code>attr</code> is the DOM attribute
+     * node. For a non-namespace-aware DOM it examines <code>attr.getNodeName()</code>,
+     * returning either the full string, or the part after the colon if the name contains
+     * a colon.
      * @since 8.4
      */
     @Override
     public String getLocalPart() {
-        return domAttr.getLocalName();
+        String s = domAttr.getLocalName();
+        if (s == null) {
+            // true if the node was created using a DOM level 1 method
+            String n = domAttr.getNodeName();
+            int colon = n.indexOf(':');
+            if (colon >= 0) {
+                return n.substring(colon + 1);
+            }
+            return n;
+        } else {
+            return s;
+        }
     }
 
     /**
