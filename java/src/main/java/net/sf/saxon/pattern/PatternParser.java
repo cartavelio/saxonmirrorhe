@@ -455,7 +455,7 @@ public class PatternParser extends XPathParser {
                 return parseStringLiteral(true);
             } else if (tok instanceof Token.NumericLiteral) {
                 return parseNumericLiteral(true);
-            } else if (tok == Token.MINUS || isKeyword("true") || isKeyword("false")) {
+            } else if (tok == Token.MINUS || tok == Token.HASH || isKeyword("true") || isKeyword("false")) {
                 if (languageVersion >= 40) {
                     AtomicValue val = parseConstant();
                     return Literal.makeLiteral(val);
