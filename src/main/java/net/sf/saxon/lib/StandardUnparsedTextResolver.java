@@ -85,8 +85,6 @@ public class StandardUnparsedTextResolver
             Source resolved = rr.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
             if (resolved instanceof StreamSource) {
                 InputStream inputStream = ((StreamSource) resolved).getInputStream();
-                // We're going to want to peek at the encoding, so make sure the marker will work.
-                inputStream = InputStreamMarker.ensureMarkSupported(inputStream);
 
                 if (inputStream == null) {
                     if (((StreamSource) resolved).getReader() != null) {
@@ -172,6 +170,9 @@ public class StandardUnparsedTextResolver
                 }
 
                 try {
+                    // We're going to want to peek at the encoding, so make sure the marker will work.
+                    inputStream = InputStreamMarker.ensureMarkSupported(inputStream);
+
                     if (encoding == null || isXmlMediaType) {
                         encoding = EncodingDetector.inferStreamEncoding(inputStream, debug ? err : null);
                         if (debug) {
