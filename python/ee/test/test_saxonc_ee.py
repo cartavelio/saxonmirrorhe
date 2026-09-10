@@ -131,7 +131,7 @@ def testUserFunction():
                                                                              "      ],"
                                                                              "      \"arity\": [1]"
                                                                              "    }"
-                                                                             "}", use_python_types=False)
+                                                                             "}", use_python_types=False, pass_processor=True)
         #add flag to prevent auto converted values
 
         xpath_processor = proc.new_xpath_processor()

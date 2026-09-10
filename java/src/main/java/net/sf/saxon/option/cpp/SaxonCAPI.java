@@ -200,12 +200,14 @@ public class SaxonCAPI {
 
 
     @CEntryPoint(name = "j_registerFunctionDefinition", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long j_registerFunctionDefinition(IsolateThread thread, ObjectHandle procRef, CCharPointer c_namespace, ObjectHandle signatureRef, CFunctionPointer pythonProc, CFunctionPointer func, AllocatorFn alloc, int c_useNativeTypes) throws SaxonApiException {
+    public static long j_registerFunctionDefinition(IsolateThread thread, ObjectHandle procRef, CCharPointer c_namespace, ObjectHandle signatureRef, CFunctionPointer pythonProc, CFunctionPointer func, AllocatorFn alloc, int c_useProc, int c_useNativeTypes) throws SaxonApiException {
         if (SaxonCAPI.debug) {
             System.err.println("Java DEBUG entered setLibrary!!");
         }
 //#if EE==true || PE==true
         boolean isNativeType = CTypeConversion.toBoolean(c_useNativeTypes);
+
+        boolean useProc = CTypeConversion.toBoolean(c_useProc);
 
         if (procRef == WordFactory.nullPointer()) {
             return net.sf.saxon.option.cpp.SaxonCAPI.STATUS_FAIL;
@@ -224,11 +226,11 @@ public class SaxonCAPI {
 
         }
 
-        return registerFunctionDefinition(processor, namespaceStr, signatureValue, pythonProc, func, alloc, isNativeType);
+        return registerFunctionDefinition(processor, namespaceStr, signatureValue, pythonProc, func, alloc, useProc, isNativeType);
 
     }
 
-    public static long registerFunctionDefinition(Processor processor, String namespaceStr, XdmValue signatureValue, CFunctionPointer pythonProc, CFunctionPointer func, AllocatorFn alloc, boolean useNativeTypes) throws SaxonApiException{
+    public static long registerFunctionDefinition(Processor processor, String namespaceStr, XdmValue signatureValue, CFunctionPointer pythonProc, CFunctionPointer func, AllocatorFn alloc, boolean useProc, boolean useNativeTypes) throws SaxonApiException{
 
         QName funcQname = null;
 
@@ -285,7 +287,7 @@ public class SaxonCAPI {
             throw new SaxonApiException("Invalid signature value");
         }
 
-        processor.registerExtensionFunction(new NativeCall(funcQname, sequenceTypes, returnSequenceType, pythonProc, func, alloc, useNativeTypes));
+        processor.registerExtensionFunction(new NativeCall(funcQname, sequenceTypes, returnSequenceType, pythonProc, func, alloc, useProc, useNativeTypes));
 
 //#endif
         return  SaxonCAPI.STATUS_OK;
@@ -684,7 +686,7 @@ public class SaxonCAPI {
          * call of the function pointer.
          */
         @InvokeCFunctionPointer
-        VoidPointer invoke(IsolateThread thread, CCharPointer functionName, CFunctionPointer proc, CFunctionPointer pythonFunc, CFunctionPointer func, int phpFlag, int useNativeTypes, int numArgs, CLongPointer args);
+        VoidPointer invoke(IsolateThread thread, CCharPointer functionName, CFunctionPointer proc, CFunctionPointer pythonFunc, CFunctionPointer func, int langFlag, int useProc, int useNativeTypes, int numArgs, CLongPointer args);
     }
 
 

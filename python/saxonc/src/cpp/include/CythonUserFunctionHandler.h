@@ -244,7 +244,7 @@ PyObject *makePythonValue(void * value){
 }
 }
 
-void * userFunctionPythonNativeCall(void * proc, void * func, int useNativeTypes, int numOfArguments,  void ** argumentsi){
+void * userFunctionPythonNativeCall(void * proc, void * func, int useProc, int useNativeTypes, int numOfArguments,  void ** argumentsi){
     //PyObject_CallNoArgs((PyObject *)func);
     XdmValue ** arguments;
     //PyObject* argsList = nullptr;
@@ -265,11 +265,15 @@ void * userFunctionPythonNativeCall(void * proc, void * func, int useNativeTypes
     }
 
 
-    if(proc != nullptr && numOfArguments>0) {
+    if(numOfArguments>0) {
 
         graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
 
         //argsList = PyList_New(numOfArguments);
+
+        if(useProc) {
+            numOfArguments++;
+        }
 
         args = PyTuple_New(numOfArguments);   // n = number of arguments
 
@@ -284,54 +288,51 @@ void * userFunctionPythonNativeCall(void * proc, void * func, int useNativeTypes
         } */
 
         XdmValue * tempValue = nullptr;
+        Py_ssize_t i = 0;
 
-        for(Py_ssize_t i = 0; i < numOfArguments; i++) {
+        if(useProc) {
             if (getenv("SAXONC_DEBUG_FLAG")) {
-                fprintf(stdout, "Making XdmValue ref=%ld.\n", (long)argumentsi[i]);
+                fprintf(stdout, "proc found !!!!.\n");
+            }
+            Py_INCREF((PyObject *) proc);
+            PyTuple_SET_ITEM(args, i, (PyObject *) proc);
+            i++;
+        }
+
+
+        for(Py_ssize_t j = 0; i < numOfArguments; i++, j++) {
+            if (getenv("SAXONC_DEBUG_FLAG")) {
+                fprintf(stdout, "Making XdmValue ref=%ld.\n", (long)argumentsi[j]);
             }
 
-            long argxi = (long)argumentsi[i];//j_copy_handles(thread, (void *)argumentsi[i]);
+            long argxi = (long)argumentsi[j];//j_copy_handles(thread, (void *)argumentsi[i]);
             //arguments[i] = SaxonProcessor::makeXdmValueFromRef((int64_t)argxi);//, (void *)argumentsi[i]));
 
-
-
-
             if(useNativeTypes) {
-                argi = makePythonValue(argumentsi[i]);
+                argi = makePythonValue(argumentsi[j]);
             } else {
+                //TODO how to we handle a emptySequence??
                 argi = PyObject_CallMethodOneArg((PyObject *) proc, PyUnicode_FromString("convert_c_obj"), PyLong_FromLong(argxi));
             }
 
-            if(argi == nullptr){
-                    fprintf(stdout, "after arg convert/make call cp0.\n");
-            }
+            if(argi == Py_None ||  argi == nullptr) {
+                if (getenv("SAXONC_DEBUG_FLAG")) {
+                    PyErr_Print();
+                }
 
-           /*argi = PyObject_CallMethodOneArg((PyObject *) proc, PyUnicode_FromString("convert_c_obj"),
-                                              (PyObject *) arguments[i]); */
+                return nullptr;
+            }
 
             Py_INCREF(argi);        // Ensure ownership
             PyTuple_SET_ITEM(args, i, argi);  // steals reference
-
-            if(argi == Py_None ||  argi == nullptr) {
-                //PyErr_Print();
-
-                return nullptr;
-            }
-            /*err = PyList_SetItem(argsList, i, argi);
-            if (err < 0) {
-                //std::cerr << "Failed construction of Argument for list i="<<i << std::endl;
-                //std::cerr << "Error code"<<err << std::endl;
-                return nullptr;
-            }*/
         }
 
     }
-PyErr_Print();
-    if (getenv("SAXONC_DEBUG_FLAG")) {
-        fprintf(stdout, "Before func call cp1.\n");
-    }
-    PyObject* result = PyObject_Call((PyObject *)func, (PyObject *) proc, args); //PyObject_CallMethodObjArgs((PyObject *)func, (PyObject *) proc, args, NULL);
- PyErr_Print();
+    //PyErr_Print();
+
+    PyObject* result = PyObject_Call((PyObject *)func, args, NULL); //PyObject_CallMethodObjArgs((PyObject *)func, (PyObject *) proc, args, NULL);
+    //PyErr_Print();
+
     if(args != nullptr){
         //TODO decrement ref counts
         Py_DECREF(args);
@@ -342,25 +343,60 @@ PyErr_Print();
     }
 
     if(result == Py_None ||  result == nullptr) {
-    fprintf(stderr, "We are in a CythonUserFunctionHandler is null\n");
-    PyErr_Print();
+        if (getenv("SAXONC_DEBUG_FLAG")) {
+            fprintf(stdout, "user function result is NULL\n");
+        }
         return nullptr;
     }
 
-    //fprintf(stderr, "We are in a CythonUserFunctionHandler cp1\n");
-
     PyTypeObject * typeObj = Py_TYPE(result);
 
+    graal_isolatethread_t *thread1 = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+
     if(typeObj != nullptr) {
-        //TODO special case Xdm types. The primitive types need to be handled too
+
+        if (PyLong_Check(result)) {
+            long valueL = PyLong_AsLong(result);
+            int64_t longValueRef = j_makeLongValue(thread1, valueL);
+            return (void *)longValueRef;
+        } else if (PyFloat_Check(result)) {
+            double valueD = PyFloat_AsDouble(result);
+            int64_t doubleValueRef = j_makeDoubleValue(thread1, valueD);
+            return (void *)doubleValueRef;
+        } else if(PyBool_Check(result)) {
+            int truth = PyObject_IsTrue(result);
+            if (truth < 0) {
+                return nullptr;
+            }
+            int64_t boolValueRef = j_makeBooleanValue(thread1, truth);
+            return (void *)boolValueRef;
+
+        } else if(PyUnicode_Check(result)) {
+
+            const char* ss = PyUnicode_AsUTF8(result);
+            if (ss == NULL) {
+                return nullptr;
+            }
+            int64_t stringValueRef = j_makeStringValue(thread1, (char *)ss, nullptr);
+
+            return (void *)stringValueRef;
+
+        }
+
+        //TODO handle other python types - e.g Set, Dict, list
+
+
+
         //PyObject * typeObji = PyType_GetName(typeObj);
         const char* c_typeObjStr = Py_TYPE(result)->tp_name; //PyUnicode_AsUTF8(typeObji);
 
         std::string typeObjStr = std::string(c_typeObjStr);
 
         std::string prefix("PyXdm");
-        fprintf(stderr, "We are in a CythonUserFunctionHandler type= %s\n", c_typeObjStr);
-        fflush(stdout);
+        if (getenv("SAXONC_DEBUG_FLAG")) {
+            fprintf(stderr, "We are in a CythonUserFunctionHandler type= %s\n", c_typeObjStr);
+            fflush(stdout);
+        }
 
         if(typeObjStr.find(prefix) == std::string::npos) {
             //TODO try to handle Python primitive types

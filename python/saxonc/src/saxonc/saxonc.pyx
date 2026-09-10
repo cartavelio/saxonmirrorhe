@@ -761,7 +761,7 @@ cdef class PySaxonProcessor:
         cdef char * c_str_ = py_value_string if str_ is not None else ""
         return self.wrap_atomic_value(self.thisptr.makeQNameValue(c_str_))
 
-    def register_user_function(self, ns, func, signatureJSON, encoding=None, use_python_types=False):
+    def register_user_function(self, ns, func, signatureJSON, encoding=None, use_python_types=False, pass_processor=False):
 
         '''PyObject_CallNoArgs(func)'''
         if encoding is None:
@@ -772,6 +772,7 @@ cdef class PySaxonProcessor:
         cdef void *proc_ptr
         cdef void *python_func_ptr
         cdef bool useNativeTypes = use_python_types
+        cdef bool useProcessor = pass_processor
         py_signatureJSON_str = signatureJSON.encode(encoding) if signatureJSON is not None else None
         py_ns_str = ns.encode(encoding) if ns is not None else None
 
@@ -783,8 +784,9 @@ cdef class PySaxonProcessor:
 
         ptr = <void *>func
         proc_ptr = <void *>self
+
         saxoncClasses.setNativePythonFunction()
-        self.thisptr.registerUserFunctionWithProcessor(proc_ptr, c_ns_str_, ptr, c_signatureJSON_str_, useNativeTypes)
+        self.thisptr.registerUserFunctionWithProcessor(proc_ptr, c_ns_str_, ptr, c_signatureJSON_str_, useProcessor, useNativeTypes)
 
     def make_atomic_value(self, value_type, value, encoding=None):
         """
