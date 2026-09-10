@@ -342,6 +342,7 @@ public class XPathProcessor extends SaxonCAPI {
         setupXPathCompiler(compiler, optionsMap);
 
         XPathSelector selector = compiler.compile(xpathStr).load();
+        selector.setErrorReporter(SaxonCException.errorReporter);
         applyXPathProperties(xPathProcessor, cwd, xPathProcessor.getProcessor(), selector, optionsMap, parameters);
         /*if (contextItem != null) {
             selector.setContextItem(contextItem);
@@ -470,6 +471,7 @@ public class XPathProcessor extends SaxonCAPI {
         Map<String, Object> optionsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, null, parameters, null, null, null, false);
         setupXPathCompiler(compiler, optionsMap);
         XPathSelector selector = compiler.compile(xpathStr).load();
+        selector.setErrorReporter(SaxonCException.errorReporter);
         applyXPathProperties(xPathProcessor, cwd, xPathProcessor.getProcessor(), selector, optionsMap, parameters);
 
 
@@ -513,6 +515,7 @@ public class XPathProcessor extends SaxonCAPI {
         }
         setupXPathCompiler(compiler, optionsMap);
         XPathSelector selector = compiler.compile(xpathStr).load();
+        selector.setErrorReporter(SaxonCException.errorReporter);
 
         applyXPathProperties(xPathProcessor, cwd, xPathProcessor.getProcessor(), selector, optionsMap, parameters);
 

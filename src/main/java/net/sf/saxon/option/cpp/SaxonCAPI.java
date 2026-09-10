@@ -1091,8 +1091,17 @@ public class SaxonCAPI {
                         if(SaxonCAPI.debug) {
                             System.err.println("JAVA DEBUG: standErrorOutputFile set name=" + value);
                         }
-                        processor.setConfigurationProperty(Feature.STANDARD_ERROR_OUTPUT_FILE,value);
+                        //processor.setConfigurationProperty(Feature.STANDARD_ERROR_OUTPUT_FILE,value);
                         SaxonCException.errorOutputFile = value;
+
+
+                        try {
+                            boolean append = true;
+                            boolean autoFlush = true;
+                            SaxonCException.errorReporter.setStandardErrorOutput(new PrintStream(new FileOutputStream((String) value, append), autoFlush));
+                        } catch (FileNotFoundException fnf) {
+                            throw new IllegalArgumentException(fnf);
+                        }
 
                     }else if (name.startsWith("http://saxon.sf.net/feature/")) {
                         processor.setConfigurationProperty(name, value);

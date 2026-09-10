@@ -614,6 +614,7 @@ void testTransformFromstring2Err(SaxonProcessor *processor,
 
     const char *smessages = e.getCombinedStaticErrorMessages();
     const char *ecmessage = e.getMessageWithErrorCode();
+    cerr << endl << "Test: testTransfromFromstring2-Error:" << endl;
     cerr << "Static Error count: " << e.staticErrorCount() << endl;
     if (smessages != nullptr) {
       cerr << "Static Error expected: " << smessages << endl;
@@ -631,14 +632,17 @@ void testTransformFromstring2Err(SaxonProcessor *processor,
     if (systemID != nullptr) {
       cerr << "system ID for Exception =  " << systemID << endl;
     }
+
+    std::cout << '\n' << std::flush;
     fflush(stdout);
     fflush(stderr);
-    std::cout << '\n' << std::flush;
     return;
   }
 
   sresult->failure++;
   sresult->failureList.push_back("testTransfromFromstring2-Error");
+  fflush(stdout);
+  fflush(stderr);
   delete executable;
 }
 
@@ -686,13 +690,13 @@ void testTransformFromstring2Err2(sResultCount *sresult) {
     const char *ecmessage = e.getMessageWithErrorCode();
     cout << "Static Error count: " << e.staticErrorCount() << endl;
     if (smessages != nullptr) {
-      cout << "Static Error expected: " << smessages << endl;
-      cout << "Test other exception methods: " << e.getMessage() << endl;
+      cerr << "Static Error expected: " << smessages << endl;
+      cerr << "Test other exception methods: " << e.getMessage() << endl;
     } else {
       cerr << "Static Errors is null: " << endl;
     }
     if (ecmessage != nullptr) {
-      cout << "Static Error with error code expected: " << ecmessage << endl;
+      cerr << "Static Error with error code expected: " << ecmessage << endl;
     } else {
       cerr << "Static Errors with error code is null: " << endl;
     }

@@ -36,7 +36,6 @@ SaxonApiException::SaxonApiException(bool staticError) {
   systemId = "";
   cppException = false;
   isStaticError = staticError;
-  j_errorOutputFileCheckAndSave(SaxonProcessor::sxn_environ->thread);
 }
 
 SaxonApiException::SaxonApiException(const SaxonApiException &ex) {

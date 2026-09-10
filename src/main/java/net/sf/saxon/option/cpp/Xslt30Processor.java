@@ -10,10 +10,7 @@ package net.sf.saxon.option.cpp;
 import com.saxonica.functions.extfn.cpp.CPPFunctionSet;
 import com.saxonica.functions.extfn.cpp.PHPFunctionSet;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.lib.AugmentedSource;
-import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.lib.ResourceRequest;
-import net.sf.saxon.lib.Validation;
+import net.sf.saxon.lib.*;
 import net.sf.saxon.s9api.*;
 
 import javax.xml.transform.Source;
@@ -249,7 +246,7 @@ public class Xslt30Processor extends SaxonCAPI {
         setStaticParametersFromArray(compiler, cwd, processorDataAccumulatorRef, null);
 
 
-        compiler.setErrorList(SaxonCException.errorList);
+        compiler.setErrorReporter(SaxonCException.errorReporter);
 
 
         return compiler.compilePackage(xslSource);
@@ -330,7 +327,7 @@ public class Xslt30Processor extends SaxonCAPI {
             throw new SaxonApiException("Stylesheet string or output filename is null");
         }
 
-        compiler.setErrorList(SaxonCException.errorList);
+        compiler.setErrorReporter(SaxonCException.errorReporter);
         XsltPackage pack = null;
         try {
             //StreamSource stream = new StreamSource(sr);
@@ -383,7 +380,7 @@ public class Xslt30Processor extends SaxonCAPI {
             SaxonApiException ex = new SaxonApiException("Failed to create Stylesheet from XdmNode");
             throw ex;
         }
-        compiler.setErrorList(SaxonCException.errorList);
+        compiler.setErrorReporter(SaxonCException.errorReporter);
         XsltPackage pack = compiler.compilePackage(node.asSource());
 
         String filename = SaxonCAPI.toJavaString(cfilename, WordFactory.nullPointer());
@@ -441,7 +438,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
             //compiler.setErrorListener(errorListener);
             compiler.setSchemaAware(xslt30Processor.schemaAware);
-            compiler.setErrorList(SaxonCException.errorList);
+            compiler.setErrorReporter(SaxonCException.errorReporter);
             executable = compiler.compile(compiler.getAssociatedStylesheet(source, null, null, null));
             ObjectHandle handle = SaxonCAPI.createHandle(executable);
 
@@ -500,7 +497,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
         //compiler.setErrorListener(errorListener);
         compiler.setSchemaAware(xslt30Processor.schemaAware);
-        compiler.setErrorList(SaxonCException.errorList);
+        compiler.setErrorReporter(SaxonCException.errorReporter);
         executable = compiler.compile(source);
         ObjectHandle handle = SaxonCAPI.createHandle(executable);
 
@@ -552,7 +549,7 @@ public class Xslt30Processor extends SaxonCAPI {
         if (cwd != null && cwd.length() > 0) {
             source.setSystemId(cwd + (!cwd.endsWith("/") ? "/" : ""));
         }
-        compiler.setErrorList(SaxonCException.errorList);
+        compiler.setErrorReporter(SaxonCException.errorReporter);
         
         XsltExecutable executable = compiler.compile(source);
         ObjectHandle handle = SaxonCAPI.createHandle(executable);
@@ -601,7 +598,7 @@ public class Xslt30Processor extends SaxonCAPI {
         /* if (packagesToLoad.size() > 0) {
             compilePackages(compiler);
         }  */
-        compiler.setErrorList(SaxonCException.errorList);
+        compiler.setErrorReporter(SaxonCException.errorReporter);
         XsltExecutable executable = compiler.compile(node.asSource());
         ObjectHandle handle = SaxonCAPI.createHandle(executable);
 
@@ -729,7 +726,9 @@ public class Xslt30Processor extends SaxonCAPI {
                     compiler.setParameter(entry.getKey(), entry.getValue());
                 }
             }
+            compiler.setErrorReporter(SaxonCException.errorReporter);
             transformer = compiler.compile(source).load30();
+            transformer.setErrorReporter(SaxonCException.errorReporter);
             return transformer;
         }
 
@@ -772,6 +771,7 @@ public class Xslt30Processor extends SaxonCAPI {
             throw new SaxonApiException("executable is null");
         }
         Xslt30Transformer transformer = executable.load30();
+        transformer.setErrorReporter(SaxonCException.errorReporter);
         Processor processor = executable.getProcessor();
         String cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         Object sourceObj = getMatchSelectionObject(sourceObjRef, paramsMap);
@@ -923,6 +923,7 @@ public class Xslt30Processor extends SaxonCAPI {
         Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
 
         Xslt30Transformer transformer = executable.load30();
+        transformer.setErrorReporter(SaxonCException.errorReporter);
         Processor processor = executable.getProcessor();
         Serializer serializer = null;
         String outFilename = SaxonCAPI.toJavaString(coutFilename, WordFactory.nullPointer());
@@ -1037,7 +1038,7 @@ public class Xslt30Processor extends SaxonCAPI {
             throw new SaxonApiException(ex);
 
         }
-
+        transformer.setErrorReporter(SaxonCException.errorReporter);
         if (sourceObj instanceof String) {
             Source source = resolveFileToSource(processor, cwd, (String) sourceObj, ResourceRequest.XML_NATURE);
             if (paramsMap.containsKey("dtd")) {
@@ -1150,6 +1151,7 @@ public class Xslt30Processor extends SaxonCAPI {
             throw new SaxonApiException("Error XsltExecutable is null");
         }
         Xslt30Transformer transformer = executable.load30();
+        transformer.setErrorReporter(SaxonCException.errorReporter);
         Processor processor = executable.getProcessor();
         Serializer serializer = null;
         if (outFilename != null) {
@@ -1216,6 +1218,7 @@ public class Xslt30Processor extends SaxonCAPI {
             ProcessorDataAccumulator argumentsAccumulator = objectHandles.get(argumentsRef);
             arguments = argumentsAccumulator.getValues();
         }
+        transformer.setErrorReporter(SaxonCException.errorReporter);
         XdmValue result = transformer.callFunction(qname, getArguments(arguments));
         ObjectHandle handle = SaxonCAPI.createHandle(result);
         return handle.rawValue();
@@ -1266,6 +1269,7 @@ public class Xslt30Processor extends SaxonCAPI {
             ProcessorDataAccumulator argumentsAccumulator = objectHandles.get(argumentsRef);
             arguments = argumentsAccumulator.getValues();
         }
+        transformer.setErrorReporter(SaxonCException.errorReporter);
         transformer.callFunction(qname, getArguments(arguments), serializer);
 
         CCharPointer a = SaxonCAPI.stringToNative(alloc, bStream);
@@ -1329,7 +1333,7 @@ public class Xslt30Processor extends SaxonCAPI {
         }
 
         applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters);
-
+        transformer.setErrorReporter(SaxonCException.errorReporter);
         transformer.callTemplate(qname, serializer);
         return SaxonCAPI.STATUS_OK;
     }
@@ -1399,7 +1403,7 @@ public class Xslt30Processor extends SaxonCAPI {
         } else {
             xdmResult = new XdmDestination();
         }
-
+        transformer.setErrorReporter(SaxonCException.errorReporter);
         transformer.callTemplate(qname, xdmResult);
 
         XdmValue value = getXdmValue(xdmResult, paramsMap);
@@ -1482,6 +1486,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
         Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
         Xslt30Transformer transformer = executable.load30();
+        transformer.setErrorReporter(SaxonCException.errorReporter);
         Processor processor = executable.getProcessor();
 
         ByteArrayOutputStream bStream = new ByteArrayOutputStream();
@@ -1566,6 +1571,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
             if (executable != null) {
                 transformer = executable.load30();
+                transformer.setErrorReporter(SaxonCException.errorReporter);
                 processor = executable.getProcessor();
             } else if (xslt30Processor != null) {
                 processor = xslt30Processor.getProcessor();
@@ -1620,13 +1626,11 @@ public class Xslt30Processor extends SaxonCAPI {
                 }
 
             }
-
             if (sourceFilename == null && doc != null) {
                 transformer.setGlobalContextItem(doc);
                 transformer.transform(doc.asSource(), serializer);
             } else if (sourceFilename != null) {
                 source = resolveFileToSource(processor, cwd, sourceFilename, ResourceRequest.XML_NATURE);
-
                 transformer.transform(source, serializer);
             } else {
                 throw new SaxonApiException("Stylesheet source document not found");
@@ -1883,6 +1887,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
             if (executable != null) {
                 transformer = executable.load30();
+                transformer.setErrorReporter(SaxonCException.errorReporter);
                 processor = executable.getProcessor();
             } else if (xslt30Processor != null) {
                 processor = xslt30Processor.getProcessor();
@@ -1934,7 +1939,7 @@ public class Xslt30Processor extends SaxonCAPI {
                 transformer.transform(doc.asSource(), destination);
             } else if (sourceFile != null) {
                 source = resolveFileToSource(processor, cwd, sourceFile, ResourceRequest.XML_NATURE);
-
+                transformer.setErrorReporter(SaxonCException.errorReporter);
                 transformer.transform(source, destination);
 
             } else {
@@ -2010,6 +2015,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
             if (executable != null) {
                 transformer = executable.load30();
+                transformer.setErrorReporter(SaxonCException.errorReporter);
                 processor = executable.getProcessor();
             } else if (xslt30Processor != null) {
                 processor = xslt30Processor.getProcessor();
@@ -2058,7 +2064,7 @@ public class Xslt30Processor extends SaxonCAPI {
                 }
                 source = resolveFileToSource(processor, cwd, sourceFile, ResourceRequest.XML_NATURE);
             }
-            //transformer.setErrorListener(errorListener);
+            transformer.setErrorReporter(SaxonCException.errorReporter);
             if (debug) {
                 if (source == null)
                     System.err.println("DEBUG: before transformer.transform(source, serializer), source is null");
@@ -2088,29 +2094,53 @@ public class Xslt30Processor extends SaxonCAPI {
             throw new SaxonApiException(e);
         }
     }    */
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         String cwd2 = "/Users/ond1/work/development/svn/archive/opensource/latest9.9/hec/samples/php/trax";
-        String cwd = "/Users/ond1/work/development/tests/jeroen";
-        // String cwd = "C:///www///html///trax";
-        //String cwd = "http://localhost/trax";
-        /*if (args.length > 0) {
-            cwd = args[0];
+        String cwd = "/Users/ond1/work/development/git/saxon-dev/misc";
+
+        Processor processor = new Processor(false);
+
+        XsltCompiler compiler = processor.newXsltCompiler();
+
+        String sourceFilename = "sample2.xml";
+        Source source = null;
+        Xslt30Transformer transformer;
+        Serializer serializer = null;
+        String style = "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><test/><xsl:output omit-xml-declaration=\"true\" /><xsl:variable name='x' select='.'/><xsl:template match='/'>errorA</xsl:template><xsl:template name='main'>[<xsl:value-of select='name($x)'/>]</xsl:template></xsl:stylesheet>";
+        StringReader reader = new StringReader(style);
+
+        source = new StreamSource(reader);
+        if (cwd != null && cwd.length() > 0) {
+            source.setSystemId(cwd + (!cwd.endsWith("/") ? "/" : ""));
+        }
+        try {
+        boolean append = true;
+        boolean autoFlush = true;
+        SaxonCException.errorReporter.setStandardErrorOutput(new PrintStream(new FileOutputStream("SaxonHE12JavaErrorOutputTest1.text", append), autoFlush));
+        compiler.setErrorReporter(SaxonCException.errorReporter);
+
+
+
+            XsltExecutable executable = compiler.compile(source);
+            serializer = resolveOutputFile(processor, cwd, "outputTest.xml", ResourceRequest.XML_NATURE);
+            source = resolveFileToSource(processor, cwd, sourceFilename, ResourceRequest.XML_NATURE);
+            transformer = executable.load30();
+
+            System.err.println("Java DEBUG: transformToFile cp1");
+
+
+
+            transformer.setErrorReporter(SaxonCException.errorReporter);
+            transformer.transform(source, serializer);
+
+        } catch (SaxonApiException e) {
+           //System.err.println("found errors=" + SaxonCException.staticErrorList.size());
+           System.err.println(e.getMessage());
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
         }
 
-             String */
-        
-
-
-        /*
-        XdmNode node = cpp.parseXmlString("<doc><e>text</e></doc>");
-        String [] pname =  {"node"};
-        Object [] pObj = {node};
-        String style = "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:output omit-xml-declaration=\"true\" /><xsl:variable name='x' select='.'/><xsl:template match='/'>errorA</xsl:template><xsl:template name='main'>[<xsl:value-of select='name($x)'/>]</xsl:template></xsl:stylesheet>";
-        XsltExecutable executable = cpp.compileFromString(null, style, false, null, null);
-        String result = new String(net.sf.saxon.option.cpp.Xslt30Processor.callTemplateReturningString(null,executable, "main", pname, pObj));
-        System.out.println("Result = "+ result);   */
-
-    }
+    }*/
 
 
 }
