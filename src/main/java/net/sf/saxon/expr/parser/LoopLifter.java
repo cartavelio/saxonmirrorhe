@@ -44,7 +44,7 @@ public class LoopLifter {
 
     public static Expression process(Expression exp, ExpressionVisitor visitor, ContextItemStaticInfo contextInfo)
     throws XPathException {
-        exp.verifyParentPointers();
+        //exp.verifyParentPointers();
         if (exp instanceof Literal || exp instanceof VariableReference) {
             return exp;
         } else {
