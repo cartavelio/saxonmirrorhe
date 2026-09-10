@@ -119,6 +119,7 @@ public class ApplyFn extends SystemFunction  {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+        boolean is40 = getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40;
         final FunctionItem function = (FunctionItem) arguments[0].head();
         Configuration config = context.getConfiguration();
         CoercionRules coercionRules = CoercionRules.forVersion(
@@ -127,6 +128,11 @@ public class ApplyFn extends SystemFunction  {
         FunctionItemType fit = function.getFunctionItemType();
 
         ArrayItem args = (ArrayItem) arguments[1].head();
+
+        if (is40 && function.getArity() != args.arrayLength()) {
+            // In 4.0, excess arguments are ignored
+            args = args.subArray(0, function.getArity());
+        }
 
         if (function.getArity() != args.arrayLength()) {
             String errorCode = "FOAP0001";

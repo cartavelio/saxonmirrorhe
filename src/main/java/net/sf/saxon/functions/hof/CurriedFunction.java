@@ -43,7 +43,8 @@ public class CurriedFunction extends AbstractFunction {
      *                       unbound values (placeholders) by null. So if the arguments
      *                       are (4, ?, 5) then this array will be [4, null, 5]. If keywords
      *                       are used in the call then they will have been resolved to
-     *                       argument positions.
+     *                       argument positions. The values supplied must conform to
+     *                       the required type: coercion is the responsibility of the caller.
      * @param unboundArgMap  for unbound arguments (placeholders), mapping from
      *                       argument positions in the curried function to argument
      *                       positions in the target function. If the arguments are
