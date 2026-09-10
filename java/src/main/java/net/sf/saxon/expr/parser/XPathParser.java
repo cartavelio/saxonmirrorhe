@@ -3108,6 +3108,10 @@ public class XPathParser {
                 return parseInlineFunction(annotations);
             }
 
+        } else if (token == Token.HASH && isAllowXPath40Syntax()) {
+            StructuredQName qn = parseVariableName();  // it does the job...
+            return Literal.makeLiteral(new QNameValue(qn,BuiltInAtomicType.QNAME));
+
         } else if (token instanceof Token.StringTemplate) {
             checkLanguageVersion40("a string template");
             return parseStringTemplate();
