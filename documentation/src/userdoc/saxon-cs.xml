@@ -325,7 +325,8 @@ need to mix use of the .NET API with the internal classes converted from the ori
          Saxon parses the supplied HTML content using <code>AngleSharp</code>, returning a Saxon wrapper around the resulting
          <code>AngleSharp.Dom.IDocument</code> node, from which XPath navigation is possible.</p>
       
-      <aside>As well as changing the underlying technology, the function is also much more thoroughly tested
+      <aside>SaxonCS 11 used <code>HtmlAgilityPack</code> as the underlying parser.
+         As well as changing the underlying technology, the function is also much more thoroughly tested
          since SaxonCS 12, and conformance with HTML5 has been checked by comparing the results of nearly 1400 test cases
          with other implementations. About 30 of these tests return different results across SaxonJ and SaxonCS; these
          are being investigated. The differences are almost exclusively concerned with the way in which the parser repairs
