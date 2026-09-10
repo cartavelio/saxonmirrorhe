@@ -726,13 +726,15 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     maybeCombined = false;
                 } else if (args[1] instanceof Literal) {
                     MapItem options = (MapItem) ((Literal) args[1]).getGroundedValue().head();
-                    GroundedValue dupes = options.get(StringValue.bmp("duplicates"));
-                    try {
-                        if (dupes != null && !"combine".equals(dupes.getStringValue())) {
-                            maybeCombined = false;
+                    if (options != null) {
+                        GroundedValue dupes = options.get(StringValue.bmp("duplicates"));
+                        try {
+                            if (dupes != null && !"combine".equals(dupes.getStringValue())) {
+                                maybeCombined = false;
+                            }
+                        } catch (XPathException e) {
+                            //
                         }
-                    } catch (XPathException e) {
-                        //
                     }
                 }
                 if (maybeCombined) {
