@@ -145,17 +145,15 @@ public class MultithreadedForEach extends ForEach {
 
     public static class MultithreadedForEachElaborator extends PullElaborator {
 
-        private StringEvaluator threadsEvaluator;
-
-        private void makeThreadsEvaluator(MultithreadedForEach forEach) {
+        private StringEvaluator makeThreadsEvaluator(MultithreadedForEach forEach) {
             if (forEach.threadsOp == null) {
-                threadsEvaluator = context -> "1";
+                return context -> "1";
             } else {
-                threadsEvaluator = forEach.getThreads().makeElaborator().elaborateForString(true);
+                return forEach.getThreads().makeElaborator().elaborateForString(true);
             }
         }
 
-        private int evaluateThreads(MultithreadedForEach forEach, XPathContext context) throws XPathException {
+        private int evaluateThreads(MultithreadedForEach forEach, StringEvaluator threadsEvaluator, XPathContext context) throws XPathException {
             if (forEach.threadsOp == null) {
                 return 1;
             } else {
@@ -177,10 +175,10 @@ public class MultithreadedForEach extends ForEach {
             MultithreadedForEach forEach = (MultithreadedForEach) getExpression();
             PullEvaluator select = forEach.getSelectExpression().makeElaborator().elaborateForPull();
             PullEvaluator action = forEach.getActionExpression().makeElaborator().elaborateForPull();
-            makeThreadsEvaluator(forEach);
+            StringEvaluator threadsEvaluator = makeThreadsEvaluator(forEach);
 
             return context -> {
-                int threads = evaluateThreads(forEach, context);
+                int threads = evaluateThreads(forEach, threadsEvaluator, context);
                 XPathContextMinor c2 = context.newMinorContext();
                 SequenceIterator iter = select.iterate(context);
                 FocusIterator fit = c2.getController().makeFocusTracker(iter, true);
