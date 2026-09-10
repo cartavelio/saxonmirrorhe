@@ -242,7 +242,7 @@ public class IdValidator extends ValidatingFilter {
             ve.setErrorCode(getPipelineConfiguration().isXSLT() ? "XTTE1555" : "XQDY0027");
             ve.setConstraintReference(1, "cvc-id", "1");
             reportValidationError(ve, Loc.NONE);
-            throw ve.makeException();
+            //throw ve.makeException();
         }
     }
 

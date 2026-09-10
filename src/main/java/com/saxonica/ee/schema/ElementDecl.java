@@ -1049,7 +1049,7 @@ public class ElementDecl extends SchemaStructure
         }
         // rule 2.2
         boolean found = false;
-        Set<ElementDecl> unsearched = new HashSet<>(4);
+        LinkedList<ElementDecl> unsearched = new LinkedList<>();
         unsearched.add(this);
         while (!unsearched.isEmpty()) {
             // NOTE: relies on the fact that we have already detected any cycles
@@ -1057,8 +1057,8 @@ public class ElementDecl extends SchemaStructure
                 found = true;
                 break;
             }
-            ElementDecl first = unsearched.iterator().next();
-            unsearched.remove(first);
+            ElementDecl first = unsearched.pollFirst();
+            //unsearched.remove(first);
             unsearched.addAll(first.getSubstitutionGroupOwners());
         }
         if (!found) {

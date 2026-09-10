@@ -319,8 +319,7 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
 
-        LocalUnionType stringOrQName = new LocalUnionType(
-                Arrays.asList(BuiltInAtomicType.STRING, BuiltInAtomicType.QNAME));
+        LocalUnionType stringOrQName = new LocalUnionType(BuiltInAtomicType.STRING, BuiltInAtomicType.QNAME);
 
         register("new-attribute", 2, NewAttribute.class, NodeKindTest.ATTRIBUTE, ONE, LATE | SIDE | NEW)
                 .arg(0, stringOrQName, ONE, null)

@@ -19,10 +19,7 @@ import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * An object belonging to this class represents an atomic type: either a built-in
@@ -33,16 +30,17 @@ import java.util.Set;
 public class UserAtomicType extends UserSimpleType implements AtomicType {
 
     // Flag indicating whether the type is namespace-sensitive: null means not yet computed
-    private Boolean namespaceSensitive;
+    private Optional<Boolean> namespaceSensitive = Optional.empty();
     // Converter to be used for converting strings to this type
     private StringConverter stringConverter;
-//#if BYTECODE == true
+    
+    //#if BYTECODE == true
     private AtomicTypeValidator compiledValidator;
-//#endif
     private ConversionRules compiledConversionRules;
     private int counter = 0;
     private int thresholdForCompilation = 100;
     private boolean uncompilable = false;
+    //#endif
 
     private final static Set<Class<? extends Facet>> STRING_FACETS = newFacetSet();
     private final static Set<Class<? extends Facet>> BOOLEAN_FACETS = newFacetSet();
@@ -117,7 +115,9 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
 
     public UserAtomicType(EnterpriseConfiguration config) {
         setConfiguration(config);
+        //#if BYTECODE == true
         thresholdForCompilation = config.getConfigurationProperty(Feature.THRESHOLD_FOR_COMPILING_TYPES);
+        //#endif
     }
 
     /**
@@ -528,8 +528,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
     @Override
     public boolean isNamespaceSensitive() {
         // This is implemented as a memo function
-        Boolean sensitive = namespaceSensitive;
-        if (sensitive == null) {
+        if (namespaceSensitive.isEmpty()) {
             SimpleType base = this;
             int fp = base.getFingerprint();
             while (fp > 1023) {
@@ -545,11 +544,12 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
                 }
                 fp = base.getFingerprint();
             }
-
-            namespaceSensitive = sensitive =
-                    fp == StandardNames.XS_QNAME || fp == StandardNames.XS_NOTATION;
+            boolean sensitive = fp == StandardNames.XS_QNAME || fp == StandardNames.XS_NOTATION;
+            namespaceSensitive = Optional.of(sensitive);
+            return sensitive;
+        } else {
+            return namespaceSensitive.get();
         }
-        return sensitive;
     }
 
 
@@ -683,9 +683,9 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      * @param flag true if bytecode generation has failed
      */
 
-    public void setUncompilable(boolean flag) {
-        uncompilable = flag;
-    }
+//    public void setUncompilable(boolean flag) {
+//        uncompilable = flag;
+//    }
 
 }
 

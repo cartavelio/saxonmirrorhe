@@ -552,7 +552,7 @@ public class FiniteStateMachine {
 
         FiniteStateMachine dfsa = new FiniteStateMachine(nfsa.complexType, true);
         dfsa.setOpenContentWildcard(nfsa.openContentWildcard, nfsa.openContentInterleaved);
-        Set<AutomatonState> unmarkedStatesOfD = new HashSet<>(20);
+        LinkedList<AutomatonState> unmarkedStatesOfD = new LinkedList<>();
         HashMap<IntSet, AutomatonState> statesOfD = new HashMap<>(20);
                 // the states of D, indexed by their provenance
         DeterminizedState initialD = (DeterminizedState) dfsa.getInitialState();
@@ -564,9 +564,9 @@ public class FiniteStateMachine {
 
         // while there is an unmarked state x of D do
         while (!unmarkedStatesOfD.isEmpty()) {
-            DeterminizedState x = (DeterminizedState) unmarkedStatesOfD.iterator().next();
+            DeterminizedState x = (DeterminizedState) unmarkedStatesOfD.pollFirst();
             // mark x
-            unmarkedStatesOfD.remove(x);
+            //unmarkedStatesOfD.remove(x);
             // for each input symbol a do
             for (TermParticlePair pair : nfsa.alphabet) {
                 Particle particle = pair.particle;

@@ -46,6 +46,7 @@ import net.sf.saxon.style.StyleNodeFactory;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.transpile.CSharpModifiers;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.JavaExternalObjectType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.ObjectValue;
@@ -123,11 +124,13 @@ public class ProfessionalConfiguration extends Configuration {
 
     public ProfessionalConfiguration() {
         super();
+        //#if CSHARP==false
         if (!("com.saxonica.config.ProfessionalConfiguration".equals(getClass().getName()) ||
                 "com.saxonica.config.EnterpriseConfiguration".equals(getClass().getName()))) {
             throw new LicenseException("Unauthorized subclass of Configuration", LicenseException.WRONG_CONFIGURATION);
         }
-        verifier = new Verifier();
+        //#endif
+        verifier = makeVerifier();
         declareBuiltInExtensionElementNamespaces();
         declareBuiltInExtensionFunctions();
         setSerializerFactory(new SerializerFactoryPE(this));
@@ -138,6 +141,11 @@ public class ProfessionalConfiguration extends Configuration {
             }
         });
         internalSetBooleanProperty(FeatureCode.DISABLE_XSL_EVALUATE, FeatureKeys.DISABLE_XSL_EVALUATE, false);
+    }
+
+    @CSharpReplaceBody(code="return new Saxon.Impl.Overrides.Verifier();")
+    private Verifier makeVerifier() {
+        return new JavaVerifier();
     }
 
 
@@ -784,8 +792,8 @@ public class ProfessionalConfiguration extends Configuration {
 
     public void declareBuiltInExtensionElementNamespaces() {
         try {
-            setExtensionElementNamespace(NamespaceConstant.SAXON, SaxonElementFactory.class.getName());
-            setExtensionElementNamespace(NamespaceConstant.SAXON6, Saxon6ElementFactory.class.getName());
+            setExtensionElementNamespace(NamespaceConstant.SAXON, new SaxonElementFactory());
+            setExtensionElementNamespace(NamespaceConstant.SAXON6, new Saxon6ElementFactory());
             //setExtensionElementNamespace(NamespaceConstant.SQL, "net.sf.saxon.option.sql.SQLElementFactory");
         } catch (XPathException e) {
             throw new IllegalStateException(e.getMessage());
@@ -796,15 +804,14 @@ public class ProfessionalConfiguration extends Configuration {
      * Set a namespace used to refer to a library of XSLT extension elements
      *
      * @param namespace the namespace used for the extension elements
-     * @param className the classname of the implementation of the ExtensionElementFactory
+     * @param factory the implementation of the ExtensionElementFactory
      *                  that instantiates extension elements in this namespace
      * @throws net.sf.saxon.trans.XPathException
-     *          if (for example) the supplied class does not implement
-     *          the ExtensionElementFactory interface
+     *          if the namespace is reserved
      * @since 9.2
      */
 
-    public void setExtensionElementNamespace(String namespace, String className) throws XPathException {
+    public void setExtensionElementNamespace(String namespace, ExtensionElementFactory factory) throws XPathException {
         if (NamespaceConstant.isReserved(namespace)) {
             throw new XPathException("Namespace " + namespace +
                                              " is reserved: it cannot be used for extension instructions");
@@ -812,13 +819,29 @@ public class ProfessionalConfiguration extends Configuration {
         if (xsltExtensionElementNamespaceMap == null) {
             xsltExtensionElementNamespaceMap = new HashMap<>(4);
         }
-        try {
-            ExtensionElementFactory factory = (ExtensionElementFactory) getInstance(className);
-            xsltExtensionElementNamespaceMap.put(namespace, factory);
-        } catch (ClassCastException e) {
-            throw new XPathException("Class " + className + " is not an ExtensionElementFactory");
-        }
+        xsltExtensionElementNamespaceMap.put(namespace, factory);
     }
+
+    //#if CSHARP==false
+    /**
+     * Set a namespace used to refer to a library of XSLT extension elements
+     *
+     * @param namespace the namespace used for the extension elements
+     * @param factory   the name of the class implementing the ExtensionElementFactory
+     *                  that instantiates extension elements in this namespace
+     * @throws net.sf.saxon.trans.XPathException if (for example) the supplied class does not implement
+     *                                           the ExtensionElementFactory interface
+     * @since 9.2
+     */
+
+    public void setExtensionElementNamespace(String namespace, String className) throws XPathException {
+        Object o = getDynamicLoader().getInstance(className, null);
+        if (!(o instanceof ExtensionElementFactory)) {
+            throw new XPathException("Class " + className + " does not implement ExtensionElementFactory");
+        }
+        setExtensionElementNamespace(namespace, (ExtensionElementFactory)o);
+    }
+    //#endif
 
     /**
      * Get the XSLT extension element factory for a given namespace

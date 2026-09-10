@@ -83,7 +83,7 @@ public class Xslt30TestSuiteDriverPE extends Xslt30TestSuiteDriverHE {
             if (processor.getUnderlyingConfiguration() instanceof ProfessionalConfiguration) {
                 //environment.processor.setConfigurationProperty(FeatureKeys.TRACE_EXTERNAL_FUNCTIONS, true);
                 ((ProfessionalConfiguration) processor.getUnderlyingConfiguration())
-                        .setExtensionElementNamespace("http://saxon.sf.net/sql", "net.sf.saxon.option.sql.SQLElementFactory");
+                        .setExtensionElementNamespace("http://saxon.sf.net/sql", new net.sf.saxon.option.sql.SQLElementFactory());
             }
         } catch (XPathException e) {
             e.printStackTrace();

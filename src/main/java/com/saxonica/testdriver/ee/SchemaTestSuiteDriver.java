@@ -12,6 +12,7 @@ import net.sf.saxon.om.NamePool;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.testdriver.TestDriverShell;
+import net.sf.saxon.trans.CommandLineOptions;
 import net.sf.saxon.trans.XPathException;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
@@ -63,11 +64,14 @@ public class SchemaTestSuiteDriver {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
+        long startTime = System.nanoTime();
         if (args.length == 0 || args[0].equals("-?")) {
             System.err.println("SchemaTestSuiteDriver testDir -local:dir [-w] [-onwards] [-scm:scmschema.xsd] [-tv] [-dangle] -v:1.0|1.1 -c:contributor? -s:setName? -g:groupName?");
         }
         System.err.println("Testing Saxon " + Version.getProductVersion());
         new SchemaTestSuiteDriver().go(args);
+        long endTime = System.nanoTime();
+        System.err.println("Execution time: " + CommandLineOptions.showExecutionTimeNano(endTime-startTime));
     }
 
     String testSuiteDir;

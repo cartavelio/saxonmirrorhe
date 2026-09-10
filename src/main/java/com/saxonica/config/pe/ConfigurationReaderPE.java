@@ -37,7 +37,8 @@ public class ConfigurationReaderPE extends ConfigurationReader {
         }
         if (namespace != null && className != null) {
             try {
-                ((ProfessionalConfiguration) targetConfig).setExtensionElementNamespace(namespace, className);
+                ExtensionElementFactory factory = (ExtensionElementFactory)targetConfig.getDynamicLoader().getInstance(className, null);
+                ((ProfessionalConfiguration) targetConfig).setExtensionElementNamespace(namespace, factory);
             } catch (XPathException e) {
                 errorClass("extensionElement", null, className, ExtensionElementFactory.class, e);
             }

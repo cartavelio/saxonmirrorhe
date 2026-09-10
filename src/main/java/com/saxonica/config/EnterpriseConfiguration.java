@@ -28,7 +28,6 @@ import com.saxonica.expr.XQueryParserExtensionPE;
 import com.saxonica.functions.extfn.EXPathBinaryFunctionSet;
 import com.saxonica.functions.extfn.EXPathFileFunctionSet;
 import com.saxonica.trans.ModePE;
-import com.saxonica.xsltextn.style.Saxon6ElementFactory;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.PreparedStylesheet;
@@ -2109,9 +2108,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     @Override
     public void declareBuiltInExtensionElementNamespaces() {
         try {
-            setExtensionElementNamespace(NamespaceConstant.SAXON, SaxonElementFactoryEE.class.getName());
-            setExtensionElementNamespace(NamespaceConstant.SAXON6, Saxon6ElementFactory.class.getName());
-            setExtensionElementNamespace("http://saxonica.com/ns/interactiveXSLT", IXSLElementFactory.class.getName());
+            super.declareBuiltInExtensionElementNamespaces();
+            setExtensionElementNamespace("http://saxonica.com/ns/interactiveXSLT", new IXSLElementFactory());
             //setExtensionElementNamespace(NamespaceConstant.SQL, "net.sf.saxon.option.sql.SQLElementFactory");
         } catch (XPathException e) {
             throw new IllegalStateException(e.getMessage());

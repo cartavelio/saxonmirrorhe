@@ -8,6 +8,7 @@ import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.LicenseException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.Base64BinaryValue;
 import net.sf.saxon.value.DateValue;
 import net.sf.saxon.value.DayTimeDurationValue;
@@ -16,19 +17,12 @@ import net.sf.saxon.z.IntHashMap;
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.security.*;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
 import java.util.Properties;
 
 /**
  * A helper class for EnterpriseConfiguration that handles license keys as issued for the Java platform.
- * From Saxon 9.2 the same license keys are also used on the .NET platform, though the option of using older
- * .NET license keys is retained for the time being.
  */
-public class Verifier {
+public abstract class Verifier {
 
     private final static boolean DISABLED = false;
 
@@ -42,28 +36,19 @@ public class Verifier {
     private static final int AVAILABLE = 1;
     private static final int UNAVAILABLE = 2;
 
-    // beware: access to this Properties object is synchronized, so it needs to be infrequent
 
-    private final static String LICENSE_FILE_NAME = "saxon-license.lic";
+    protected final static String LICENSE_FILE_NAME = "saxon-license.lic";
 
-    // Public key created by the KeyManager for Saxon.
-
-    private static final String PUBLIC_KEY = "308201B73082012C06072A8648CE3804013082011F02818100FD7F53811D75122952DF4A9" +
-            "C2EECE4E7F611B7523CEF4400C31E3F80B6512669455D402251FB593D8D58FABFC5F5BA30F6CB9B556CD7813B801D346FF26660B76B9950" +
-            "A5A49F9FE8047B1022C24FBBA9D7FEB7C61BF83B57E7C6A8A6150F04FB83F6D3C51EC3023554135A169132F675F3AE2B61D72AEFF222031" +
-            "99DD14801C70215009760508F15230BCCB292B982A2EB840BF0581CF502818100F7E1A085D69B3DDECBBCAB5C36B857B97994AFBBFA3AEA" +
-            "82F9574C0B3D0782675159578EBAD4594FE67107108180B449167123E84C281613B7CF09328CC8A6E13C167A8B547C8D28E0A3AE1E2BB3A" +
-            "675916EA37F0BFA213562F1FB627A01243BCCA4F1BEA8519089A883DFE15AE59F06928B665E807B552564014C3BFECF492A038184000281" +
-            "806CA067E469754A2F98D08965D35AB41252974F69FCD260152CFB58F94D8B956D6A1A91CC213A11107301DD37C85B383DDA409EC067D2A" +
-            "8C4BE6651020A69AFD533630172D6F96F928667D7705D46E56D364E8E967002A7D864BACB02225F52B271BA1F6522D98FF8299C6273B24B" +
-            "C41202C8857897E46B40FD7624A9CB0CC9E8";
-
-
-    private static final byte[] key = convertHexToBinary(PUBLIC_KEY);
 
     Verifier() { }
 
+    protected void setPrimaryLicense(License license) {
+        primaryLicense = license;
+    }
 
+    protected License getPrimaryLicense() {
+        return primaryLicense;
+    }
 
     /**
      * Display a message about the license status
@@ -103,7 +88,7 @@ public class Verifier {
         }
         if (status == UNREAD) {
             try {
-                primaryLicense = loadLicense(config);
+                loadLicense(config);
                 status = AVAILABLE;
             } catch (LicenseException e) {
                 primaryLicense = null;
@@ -113,99 +98,14 @@ public class Verifier {
         }
     }
 
-    @CSharpModifiers(code = {"internal"})
-    final License loadLicense(Configuration config) {
-        InputStream is = null;
-        try {
-            List<String> attempts = new ArrayList<>(4);
-            is = lookInCodeLocation(attempts);
-            if (is == null) {
-                is = lookInInstallationDirectory(config, attempts);
-            }
-            if (is == null) {
-                is = lookInClassPath();
-            }
-            if (is == null) {
-                attempts.add("classpath");
-                StringBuilder message = new StringBuilder("License file " + LICENSE_FILE_NAME + " not found. Tried in ");
-                for (int i = 0; i < attempts.size(); i++) {
-                    message.append(attempts.get(i));
-                    if (i < attempts.size() - 2) {
-                        message.append(", ");
-                    } else if (i == attempts.size() - 2) {
-                        message.append(", and ");
-                    }
-                }
-                throw new LicenseException(message.toString(), LicenseException.NOT_FOUND);
-            }
-            return readLicenseFile(is);
-        } finally {
-            try {
-                if (is != null) {
-                    is.close();
-                }
-            } catch (IOException e) {
-                //
-            }
-        }
 
-    }
+    /**
+     * Locate the license file, read it, and verify it
+     * @param config the Saxon configuration
+     * @throws LicenseException if, for example, a license is found and is invalid
+     */
+    protected abstract void loadLicense(Configuration config);
 
-    private static InputStream lookInClassPath() {
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        if (cl == null) {
-            cl = ClassLoader.getSystemClassLoader();
-        }
-        return cl.getResourceAsStream(LICENSE_FILE_NAME);
-    }
-
-    private static InputStream lookInInstallationDirectory(Configuration config, List<String> attempts) {
-        String home = Version.platform.getInstallationDirectory(Version.softwareEdition, config);
-        String path;
-        InputStream is = null;
-        if (home != null) {
-            // For backwards compatibility (/bin/ no longer exists)
-            if (home.endsWith("/") || home.endsWith("\\")) {
-                path = home + "bin/" + LICENSE_FILE_NAME;
-            } else {
-                path = home + "/bin/" + LICENSE_FILE_NAME;
-            }
-            attempts.add(path);
-            try {
-                is = new FileInputStream(path);
-            } catch (FileNotFoundException e) {
-                if (home.endsWith("/") || home.endsWith("\\")) {
-                    path = home + LICENSE_FILE_NAME;
-                } else {
-                    path = home + "/" + LICENSE_FILE_NAME;
-                }
-                attempts.add(path);
-                try {
-                    is = new FileInputStream(path);
-                } catch (FileNotFoundException e2) {
-                    //
-                }
-            }
-        }
-        return is;
-    }
-
-    private InputStream lookInCodeLocation(List<String> attempts) {
-        try {
-            CodeSource codeSource = getClass().getProtectionDomain().getCodeSource();
-            if (codeSource != null) {
-                URL sourceLoc = codeSource.getLocation();
-                if (sourceLoc != null) {
-                    URL licenseLoc = new URL(sourceLoc, LICENSE_FILE_NAME);
-                    attempts.add(licenseLoc.toString());
-                    return licenseLoc.openStream();
-                }
-            }
-        } catch (Exception e) {
-            // try elsewhere
-        }
-        return null;
-    }
 
     /**
      * Read the primary license file directly from a specified file
@@ -219,7 +119,7 @@ public class Verifier {
         boolean exists = false;
         try {
             if (filename.startsWith("file:")) {
-                is = new URL(filename).openStream();
+                is = connectToURI(filename);
             } else {
                 exists = new File(filename).exists();
                 is = new FileInputStream(filename);
@@ -235,6 +135,11 @@ public class Verifier {
         }
     }
 
+    @CSharpReplaceBody(code="new System.Net.WebClient().OpenRead(uri)")
+    protected InputStream connectToURI(String uri) throws IOException {
+        return new URL(uri).openStream();
+    }
+
     /**
      * Register a license held locally within a compiled stylesheet or schema
      * @param dmk the binary representation of the local license
@@ -248,8 +153,7 @@ public class Verifier {
             Base64BinaryValue b64 = new Base64BinaryValue(StringView.of(dmk).tidy());
             byte[] binary = b64.getBinaryValue();
             ByteArrayInputStream is = new ByteArrayInputStream(binary);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
-            License license = configure(reader, true);
+            License license = configure(new InputStreamReader(is, StandardCharsets.UTF_8), true);
             int id = dmk.hashCode() & 0x3ffff;
             while (secondaryLicenses.get(id) != null) {
                 id++;
@@ -286,10 +190,8 @@ public class Verifier {
         }
     }
 
-    private License readLicenseFile(InputStream is) {
-        BufferedReader reader;
-        reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
-        return configure(reader, false);
+    protected License readLicenseFile(InputStream is) {
+        return configure(new InputStreamReader(is, StandardCharsets.UTF_8), false);
     }
 
     /**
@@ -315,7 +217,7 @@ public class Verifier {
     }
 
 
-    private static License configure(Reader reader, boolean embedded) {
+    private License configure(Reader reader, boolean embedded) {
         License license;
         BufferedReader bufferedReader = new BufferedReader(reader);
         try {
@@ -349,7 +251,7 @@ public class Verifier {
                     }
                 }
             }
-            boolean valid = verify(buffer.toString(), convertHexToBinary(signature), key);
+            boolean valid = verify(buffer.toString(), signature);
             String licenseDesc = embedded ? "embedded license" : "license file";
             if (!valid) {
                 throw new LicenseException("Invalid " + licenseDesc + " found", LicenseException.INVALID);
@@ -402,15 +304,11 @@ public class Verifier {
                     LicenseException.INVALID);
         } catch (java.io.IOException e) {
             throw new LicenseException(e.getMessage(), LicenseException.NOT_FOUND);
-        } catch (GeneralSecurityException e) {
-            throw new LicenseException(e.getMessage(), LicenseException.INVALID);
         } catch (XPathException e) {
             throw new LicenseException("Invalid date in license file", LicenseException.INVALID);
         }
         return license;
     }
-
-
 
     /**
      * Get the serial number of the license
@@ -429,7 +327,8 @@ public class Verifier {
      * @param hex Hexadecimal digits representation
      * @return byte Byte array
      */
-    private static byte[] convertHexToBinary(String hex) {
+    @CSharpReplaceBody(code="return System.Convert.FromHexString(hex);")
+    protected static byte[] convertHexToBinary(String hex) {
         int len = hex.length() / 2;
         byte[] out = new byte[len];
         for (int i = 0; i < len; i++) {
@@ -457,45 +356,18 @@ public class Verifier {
      * This method validates license data based on the signature and the public key.
      *
      * @param data             the license data.
-     * @param signature        the digital sugnature
-     * @param encodedPublicKey the public key.
+     * @param signature        the digital signature
      * @return a boolean whether or the license is valid.
-     * @throws java.security.GeneralSecurityException
-     *          if a failure occurs in the verification process
+     * @throws LicenseException if a failure occurs in the verification process
      */
-    private static boolean verify(String data, byte[] signature, byte[] encodedPublicKey)
-            throws GeneralSecurityException {
-        Signature sig = Signature.getInstance("DSA");
-        PublicKey key = KeyFactory.getInstance("DSA").generatePublic(new X509EncodedKeySpec(encodedPublicKey));
-        sig.initVerify(key);
-        sig.update(data.getBytes(StandardCharsets.UTF_8));
-        return sig.verify(signature);
-    }
+    protected abstract boolean verify(String data, String signature)
+            throws LicenseException;
 
-    //#if CSHARP==false
-    /**
-     * Test program to verify that a license contained in a specific file is valid
-     *
-     * @param args Command line arguments. First argument is the filename of the license
-     *             file to be tested.
-     * @throws Exception if any failure occurs
-     */
 
-    public static void main(String[] args) throws Exception {
-        File licenseFile = new File(args[0]);
-        Verifier v = new Verifier();
-        License license = v.readLicenseFile(new FileInputStream(licenseFile));
-        System.err.println("License OK");
-        for (Enumeration<?> en = license.features.propertyNames(); en.hasMoreElements(); ) {
-            String s = (String) en.nextElement();
-            System.err.println("Feature " + s + " = " + license.features.getProperty(s));
-        }
-    }
-    //#endif
 
-    private static class License {
+    protected static class License {
 
-        private final Properties features;
+        protected final Properties features;
 
         public License(Properties features) {
             this.features = features;
@@ -544,6 +416,7 @@ public class Verifier {
             return features.getProperty(name);
         }
 
+        @CSharpModifiers(code={"public"})
         private void clearFeatures() {
             if (features != null) {
                 features.clear();

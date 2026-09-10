@@ -846,7 +846,7 @@ public abstract class SchemaElement extends ElementImpl {
         String moduleName = getSystemId();
         while (true) {
             int slash = moduleName.indexOf('/');
-            if (slash <= 0) {
+            if (slash < 0) {
                 break;
             } else if (slash == moduleName.length() - 1) {
                 moduleName = moduleName.substring(0, slash);
