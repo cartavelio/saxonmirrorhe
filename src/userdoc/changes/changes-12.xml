@@ -4,9 +4,10 @@
     
     <category name="installation">
         
-        <p class="javaonly">SaxonJ 12 is built and tested using Java 11, but is supported with Java 8 or later.</p>
-        
-        <p class="javaonly">Note: 12.0 did not work under Java 8; this is fixed in 12.1</p>
+        <div class="javaonly">
+            <p>SaxonJ 12 is built and tested using Java 11, but is supported with Java 8 or later.</p>
+            <p>Note: 12.0 did not work under Java 8; this is fixed in 12.1.</p>
+        </div>
         
         <p class="csonly">SaxonCS 12 is targeted at .NET 6.</p>
         
@@ -231,13 +232,13 @@
         <p>A potential problem that has existed for many years, but which rarely surfaces, arises when a <code>SequenceIterator</code>
         holds external resources (for example an <code>UnparsedTextLines</code> iterator, which keeps a text file open), and the iterator
         is neither read to completion, nor explicitly closed. This typically occurs as a consequence of lazy evaluation. When such an iterator
-        is created, Saxon now uses a Java <code>Cleaner</code> thread (owned by the <code>Configuration</code>) to close the relevant
+        is created, Saxon now uses a Java <code>Cleaner</code> thread (owned by the <code java="net.sf.saxon.Configuration">Configuration</code>) to close the relevant
         resources as soon as the iterator is garbage-collected. This extra thread may be visible in Java monitoring output. The thread
         shuts down when the <code>Cleaner</code> is garbage-collected, which typically happens when the <code>Configuration</code>
         is garbage collected; it can also be forced by calling <code>Configuration.close()</code>.</p>
         
-        <p><i>The <code>Cleaner</code> class requires Java 9 or later. Under Java 8, no equivalent is available, so under some
-        circumstances, files that are not read to completion may be left open.</i></p>
+        <aside>The <code>Cleaner</code> class requires Java 9 or later. Under Java 8, no equivalent is available, so under some
+        circumstances, files that are not read to completion may be left open.</aside>
         
         <p>Saxon's original XQuery API, in which a query is compiled using a <code>StaticQueryContext</code> object
             and executed using a <code>DynamicQueryContext</code> object, has been gradually downgraded over
@@ -302,7 +303,7 @@
             <code>fn:items-after()</code>, <code>fn:items-at()</code>, <code>fn:items-before()</code>, <code>fn:items-ending-where()</code>, <code>fn:items-starting-where()</code>, 
             <code>fn:iterate-while()</code>, <code>fn:lowest()</code>, <code>fn:op()</code>, <code>fn:parcel()*</code>, 
             <code>fn:parse-html()</code>, <code>fn:parse-QName()</code>, <code>fn:parts()*</code>, 
-            <code>fn:replicate()</code>, <code>fn:slice()*</code>, <code>fn:some()</code>, <code>fn:starts-with-sequence()</code>,
+            <code>fn:replicate()</code>, <code>fn:some()</code>, <code>fn:starts-with-sequence()</code>,
             <code>fn:trunk()</code>, and <code>fn:unparcel()*</code>. Specifications of these functions
             can be found in the <a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html">QT4CG draft specification</a>.</p>
         
@@ -322,7 +323,7 @@
         
         <p>From Saxon 12.1, the <code>fn:atomic-equal()</code> function is implemented.</p>
         
-        <p>From Saxon 12.1, the <code>fn:slice()</code> function is dropped.</p>
+        <p>From Saxon 12.1, the <code>fn:slice()</code> function (available in 12.0) is dropped.</p>
         
         <h2>Dropped or Changed Extension Functions</h2>
         
@@ -360,11 +361,13 @@
         <p>From Saxon 12.1, XPath 4.0 string templates are implemented. 
             Example: <code>let $message := `{$day} of {$month}, {$year}`</code>.</p>
         
-        <p>From Saxon 12.1, XPath braced if expressions are implemented. Examples: 
-            (1) <code>if ($condition) {&lt;x>It's true&lt;/x>}</code>;
-            (2) <code>if ($condition) {&lt;x>It's true&lt;/x>} else {&lt;x>It's a lie&lt;/x>}</code>;
-            (2) <code>if ($condition) {&lt;x>It's true&lt;/x>} else if ($polite) {&lt;x>He mis-spoke&lt;/x>} else {&lt;x>It's a lie&lt;/x>}</code>;
+        <p>From Saxon 12.1, XPath "braced if" expressions are implemented. Examples:
         </p>
+        <ol>
+            <li><code>if ($condition) {&lt;x>It's true&lt;/x>}</code></li>
+            <li><code>if ($condition) {&lt;x>It's true&lt;/x>} else {&lt;x>It's a lie&lt;/x>}</code></li>
+            <li><code>if ($condition) {&lt;x>It's true&lt;/x>} else if ($polite) {&lt;x>He mis-spoke&lt;/x>} else {&lt;x>It's a lie&lt;/x>}</code></li>
+        </ol>
         
         <h2>XQuery 4.0 extensions</h2>
         
