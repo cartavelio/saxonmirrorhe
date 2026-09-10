@@ -336,6 +336,7 @@ public class ConfigTest {
             assertTrue(config.isLineNumbering(), "lineNumbering?");
             assertEquals(Boolean.TRUE, config.getConfigurationProperty(Feature.USE_TYPED_VALUE_CACHE), "tvc?");
         } catch (Exception e) {
+            e.printStackTrace();
             fail(e.getMessage());
         }
     }
