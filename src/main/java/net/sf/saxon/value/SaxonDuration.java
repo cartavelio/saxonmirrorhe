@@ -118,7 +118,7 @@ public class SaxonDuration extends Duration {
         } else if (field == DatatypeConstants.MINUTES) {
             return BigInteger.valueOf(((Int64Value) duration.getComponent(AccessorFn.Component.MINUTES)).longValue());
         } else if (field == DatatypeConstants.SECONDS) {
-            return ((BigDecimalValue) duration.getComponent(AccessorFn.Component.SECONDS)).getDecimalValue();
+            return ((DecimalValue) duration.getComponent(AccessorFn.Component.SECONDS)).getDecimalValue();
         } else {
             throw new IllegalArgumentException("Invalid field");
         }

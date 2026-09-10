@@ -583,7 +583,7 @@ public class UseWhenFilter extends ProxyReceiver {
             if (cr instanceof ValidationFailure) {
                 throw new XPathException("Invalid version number: " + version, "XTSE0110");
             }
-            BigDecimalValue d = (BigDecimalValue) cr.asAtomic();
+            DecimalValue d = (DecimalValue) cr.asAtomic();
             return d.getDecimalValue().multiply(BigDecimal.TEN).intValue();
         } else {
             return Integer.MIN_VALUE;

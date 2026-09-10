@@ -397,8 +397,8 @@ public class XdmAtomicValue extends XdmItem {
             return ((FloatValue) av).getFloatValue();
         } else if (av instanceof BooleanValue) {
             return ((BooleanValue) av).getBooleanValue();
-        } else if (av instanceof BigDecimalValue) {
-            return ((BigDecimalValue) av).getDecimalValue();
+        } else if (av instanceof DecimalValue) {
+            return ((DecimalValue) av).getDecimalValue();
         } else if (av instanceof DateTimeValue) {
             if (((DateTimeValue) av).hasTimezone()) {
                 return ((DateTimeValue) av).toZonedDateTime();

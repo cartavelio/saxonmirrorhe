@@ -635,8 +635,8 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
                     formatInteger(value, sb);
                 }
 
-            } else if (value instanceof BigDecimalValue) {
-                formatDecimal(((BigDecimalValue) value).getDecimalValue(), sb);
+            } else if (value instanceof DecimalValue) {
+                formatDecimal(((DecimalValue) value).getDecimalValue(), sb);
             }
 
             // System.err.println("Justified number: " + sb.toString());

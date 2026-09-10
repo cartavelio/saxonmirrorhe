@@ -14,6 +14,7 @@ import net.sf.saxon.om.QNameException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.value.BigDecimalValue;
+import net.sf.saxon.value.DecimalValue;
 
 import javax.xml.transform.OutputKeys;
 import java.math.BigDecimal;
@@ -398,7 +399,7 @@ public class SaxonOutputKeys {
         String htmlVersion = properties.getProperty(SaxonOutputKeys.HTML_VERSION);
         try {
             return htmlVersion != null &&
-                    ((BigDecimalValue)BigDecimalValue.makeDecimalValue(htmlVersion, false).asAtomic())
+                    ((DecimalValue)BigDecimalValue.makeDecimalValue(htmlVersion, false).asAtomic())
                             .getDecimalValue().equals(BigDecimal.valueOf(5));
         } catch (ValidationException e) {
             return false;
@@ -421,7 +422,7 @@ public class SaxonOutputKeys {
         }
         if (htmlVersion != null) {
             try {
-                return ((BigDecimalValue)BigDecimalValue.makeDecimalValue(htmlVersion, false).asAtomic())
+                return ((DecimalValue)BigDecimalValue.makeDecimalValue(htmlVersion, false).asAtomic())
                                 .getDecimalValue().equals(BigDecimal.valueOf(5));
             } catch (ValidationException e) {
                 return false;
