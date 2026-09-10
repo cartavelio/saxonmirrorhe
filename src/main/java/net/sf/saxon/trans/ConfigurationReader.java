@@ -393,7 +393,7 @@ public class ConfigurationReader implements Receiver {
         applyProperty(props, "treeModel", FeatureCode.TREE_MODEL_NAME, "JN");
         applyProperty(props, "unparsedTextUriResolver", FeatureCode.UNPARSED_TEXT_URI_RESOLVER_CLASS, "J");
         applyProperty(props, "uriResolver", FeatureCode.URI_RESOLVER_CLASS, "J");
-        applyProperty(props, "saxonResourceResolver", FeatureCode.SAXON_RESOURCE_RESOLVER_CLASS, "J");
+        applyProperty(props, "commonResourceResolver", FeatureCode.COMMON_RESOURCE_RESOLVER_CLASS, "J");
         applyProperty(props, "usePiDisableOutputEscaping", FeatureCode.USE_PI_DISABLE_OUTPUT_ESCAPING, "JN");
         applyProperty(props, "useTypedValueCache", FeatureCode.USE_TYPED_VALUE_CACHE, "JN");
         applyProperty(props, "validationComments", FeatureCode.VALIDATION_COMMENTS, "JN");
