@@ -51,6 +51,16 @@
     <reason>We make no attempt to exit early.</reason>
   </exception>
   
+  <exception test-case="sort-079" run="false" edition="HE">
+    <created by="Michael Kay" on="2023-02-02"/>
+    <reason>Saxon-HE sorts this one incorrectly because of Java collations.</reason>
+  </exception>
+  
+  <exception test-case="docbook-001" run="false" edition="HE">
+    <created by="Michael Kay" on="2023-02-02"/>
+    <reason>Stylesheet says "Can't make chunks with Saxonica's processor. Uses saxon:output which required PE.</reason>
+  </exception>
+  
   <!--<exception test-case="function-available-1017" run="false" report="bug">
     <created by="Michael Kay" on="2022-08-15"/>
     <reason>We report map:key-value-pairs as available though it shouldn't be available with a 3.0 processor.</reason>
