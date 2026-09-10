@@ -101,7 +101,7 @@ public class ForExpressionCompiler extends ToIteratorCompiler {
             ga.goTo(endLabel);
             methodInfo.placeLabel(nullLabel);
             ga.pop();
-            allocateStatic(compiler, EmptyIterator.emptyIterator());
+            allocateStatic(compiler, EmptyIterator.getInstance());
             methodInfo.placeLabel(endLabel);
             return new IteratorDetails(SequenceIterator.class, Item.class);
 

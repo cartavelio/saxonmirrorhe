@@ -328,12 +328,12 @@ public class MultiIndex {
 
         // if no values found, return an empty sequence
         if (selectedItems == null) {
-            return EmptyIterator.emptyIterator();
+            return EmptyIterator.getInstance();
         }
 
         int size = selectedItems.size();
         if (size == 0) {
-            return EmptyIterator.emptyIterator();
+            return EmptyIterator.getInstance();
         } else if (size == 1) {
             IntIterator it = selectedItems.iterator();
             if (it.hasNext()) {

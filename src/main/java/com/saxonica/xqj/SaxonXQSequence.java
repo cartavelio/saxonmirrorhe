@@ -434,7 +434,7 @@ public class SaxonXQSequence extends Closable implements XQResultSequence, Saxon
             if (position == 0) {
                 return value.iterate();
             } else if (position < 0) {
-                return EmptyIterator.emptyIterator();
+                return EmptyIterator.getInstance();
             } else {
                 return TailIterator.make(value.iterate(), position);
             }

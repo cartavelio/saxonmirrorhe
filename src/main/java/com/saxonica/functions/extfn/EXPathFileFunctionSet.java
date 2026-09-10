@@ -1305,7 +1305,6 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
             + "            }\n"
             + "            catch (Saxon.Ejava.io.IOException) {\n"
             + "                throw error(\"Unsupported encoding \" + encoding, ERROR_UNKNOWN_ENCODING);\n"
-            + "                return null;\n"
             + "            }")
     private static Reader getInputStreamReader(File file, String encoding) throws XPathException {
         InputStream in = null;

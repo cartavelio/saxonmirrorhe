@@ -5,10 +5,12 @@ import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.watch.*;
 import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.instruct.ForEachGroup;
 import net.sf.saxon.expr.sort.GroupIterator;
 import net.sf.saxon.expr.sort.SortExpression;
@@ -151,7 +153,7 @@ public class ForEachGroupAdjunct extends ForEachAdjunct  {
     pattern registered with the WatchManager.
 
     (b) The events fired when this pattern is matched go first to the Feed representing
-    the current-group() call, and then filter their way up the expression tree.
+    the current-group() call, and then bubble their way up the expression tree.
 
     (c) When a group starts or ends, the open() and close() events for the outer expression are
     called; these calls are suppressed at inner levels.
@@ -326,10 +328,11 @@ public class ForEachGroupAdjunct extends ForEachAdjunct  {
             FocusIterator focusIterator = c2.trackFocus(groupIterator);
             c2.setCurrentGroupIterator(groupIterator);
             c2.setCurrentTemplateRule(null);
-            //c2.setReceiver(getResult().getOutputter());
 
+            PushEvaluator action = inst.getActionExpression().makeElaborator().elaborateForPush();
+            Outputter output = getNextOutputter();
             while (focusIterator.next() != null) {
-                inst.getActionExpression().process(getNextOutputter(), c2);
+                Expression.dispatchTailCall(action.processLeavingTail(output, c2));
             }
 
             super.close();

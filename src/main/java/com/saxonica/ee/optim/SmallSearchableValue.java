@@ -47,7 +47,7 @@ class SmallSearchableValue extends SearchableValue {
         List<AtomicValue> soughtValues = new ArrayList<>();
         SequenceTool.supply(values, (ItemConsumer<? super Item>) item -> soughtValues.add((AtomicValue) item));
         if (soughtValues.isEmpty()) {
-            return EmptyIterator.emptyIterator();
+            return EmptyIterator.getInstance();
         }
 
         EqualityComparer compare;

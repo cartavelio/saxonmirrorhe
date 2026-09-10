@@ -12,6 +12,7 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.ContextSwitchingExpression;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.ItemConsumer;
@@ -39,6 +40,7 @@ public class ForEachAction extends ItemFeed {
 
     private final Expression action;
     private Inversion inversion;
+    protected PullEvaluator actionPuller;
     private final boolean actionIsConsuming;
 
     public ForEachAction(WatchManager watchManager, Expression expression, ItemFeed result, XPathContext context) {
@@ -47,6 +49,9 @@ public class ForEachAction extends ItemFeed {
         this.watchManager = watchManager;
         action = ((ContextSwitchingExpression)expression).getActionExpression();
         actionIsConsuming = Streamability.getSweep(action) == Sweep.CONSUMING;
+        if (actionPuller == null && !actionIsConsuming) {
+            actionPuller = action.makeElaborator().elaborateForPull();
+        }
     }
 
     /**
@@ -119,7 +124,7 @@ public class ForEachAction extends ItemFeed {
             iter.incrementPosition();
 
             //localContext.setCurrentTemplateRule(rule);     // TODO: clear current template rule
-            SequenceIterator stepIter = action.iterate(bodyContext);
+            SequenceIterator stepIter = actionPuller.iterate(bodyContext);
             processItems(stepIter, getResultFeed());
             return null;
         }
@@ -170,7 +175,7 @@ public class ForEachAction extends ItemFeed {
             iterator.incrementPosition();
             Outputter out = getNextOutputter();
             try {
-                SequenceTool.supply(action.iterate(context), (ItemConsumer<? super Item>) out::append);
+                SequenceTool.supply(actionPuller.iterate(context), (ItemConsumer<? super Item>) out::append);
             } catch (UncheckedXPathException e) {
                 throw e.getXPathException();
             }

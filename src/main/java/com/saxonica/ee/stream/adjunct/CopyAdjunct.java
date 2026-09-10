@@ -14,10 +14,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.Copy;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NameOfNode;
-import net.sf.saxon.om.NoElementsSpaceStrippingRule;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -95,8 +92,15 @@ public class CopyAdjunct extends StreamingAdjunct implements FeedMaker {
                         next.startElement(elemName, typeCode,
                                               expression.getLocation(), properties);
 
-                        // output the required namespace nodes via a callback
-                        expression.outputNamespaceNodes(next, elemName, expression.makeElementCreationDetails(node));
+                        if (expression.isCopyNamespaces()) {
+                            next.namespaces(node.getAllNamespaces(), ReceiverOption.NAMESPACE_OK);
+                        } else {
+                            // Always output the namespace of the element name itself
+                            NamespaceBinding ns = elemName.getNamespaceBinding();
+                            if (!ns.isDefaultUndeclaration()) {
+                                next.namespace(ns.getPrefix(), ns.getNamespaceUri(), ReceiverOption.NONE);
+                            }
+                        }
 
                         break;
                     }

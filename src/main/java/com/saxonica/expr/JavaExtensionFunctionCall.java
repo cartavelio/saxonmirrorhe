@@ -1019,7 +1019,8 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
          *                         will be true for user-written functions, false for system functions,
          *                         where the implementation is arranged to only use the value once.
          */
-        public void allocateArgumentEvaluators(FunctionCall expr, boolean allowRepeatedUse) {
+        @Override
+        protected void allocateArgumentEvaluators(FunctionCall expr, boolean allowRepeatedUse) {
             int arity = expr.getArity();
             argumentEvaluators = new SequenceEvaluator[arity];
             for (int i = 0; i < arity; i++) {

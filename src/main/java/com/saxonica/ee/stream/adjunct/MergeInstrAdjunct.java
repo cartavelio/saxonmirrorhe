@@ -1,7 +1,6 @@
 package com.saxonica.ee.stream.adjunct;
 
 import com.saxonica.ee.parallel.PushToPull;
-import com.saxonica.ee.parallel.Pusher;
 import com.saxonica.ee.stream.*;
 import com.saxonica.ee.stream.watch.StreamWatch;
 import com.saxonica.ee.stream.watch.WatchManager;
@@ -26,6 +25,7 @@ import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingIncident;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -122,7 +122,7 @@ public class MergeInstrAdjunct extends StreamingAdjunct {
      * @throws XPathException if anything goes wrong
      */
 
-    public static List<ContextMappingIterator> makeSourceIterators(
+    public static List<ContextMappingIterator> makeSourceIterators (
             final MergeInstr.MergeSource ms, final PackageData pd, XPathContext c1) throws XPathException {
         List<ContextMappingIterator> result = new ArrayList<>();
         SequenceIterator uriIter = ms.getForEachSource().iterate(c1);
@@ -136,7 +136,7 @@ public class MergeInstrAdjunct extends StreamingAdjunct {
             final String href = uri.getStringValue();
             MergePusher pusher = new MergePusher(ms, pd, href, options);
 
-            SequenceIterator iter = new PushToPull(pusher, c1).getIterator();
+            SequenceIterator iter = pushToPull(pusher, c1);
             XPathContext c2 = c1.newMinorContext();
             c2.trackFocus(iter);
             MergeInstr.MergeKeyMappingFunction addMergeKeys = new MergeInstr.MergeKeyMappingFunction(c2, ms);
@@ -147,7 +147,16 @@ public class MergeInstrAdjunct extends StreamingAdjunct {
         return result;
     }
 
-    public static class MergePusher implements PushEvaluator {
+    @CSharpReplaceBody(code="return new Saxon.Impl.Parallel.PushToPull((o,c) => pusher.processLeavingTail(o,c), c1).getIterator();")
+    private static SequenceIterator pushToPull(MergePusher pusher, XPathContext c1) {
+        return new PushToPull(pusher, c1).getIterator();
+    }
+
+    public static class MergePusher
+            //#if CSHARP==false
+            implements PushEvaluator
+            //#endif
+    {
         private final MergeInstr.MergeSource ms;
         private final PackageData pd;
         private final String href;

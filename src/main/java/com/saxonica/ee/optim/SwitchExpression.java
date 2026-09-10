@@ -320,17 +320,7 @@ public class SwitchExpression extends Expression implements ConditionalInstructi
 
     @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
-        AtomicValue subjectValue = (AtomicValue) getSubjectExpression().evaluateItem(context);
-        if (subjectValue == null) {
-            return getOtherwiseExpression().evaluateItem(context);
-        }
-        AtomicMatchKey key = subjectValue.getXPathMatchKey(collation, context.getImplicitTimezone());
-        int selection = getIndex(key);
-        if (selection == -1) {
-            return getOtherwiseExpression().evaluateItem(context);
-        } else {
-            return actions.get(selection).getChildExpression().evaluateItem(context);
-        }
+        return makeElaborator().elaborateForItem().eval(context);
     }
 
     public int getIndex(AtomicMatchKey key) {
@@ -355,17 +345,7 @@ public class SwitchExpression extends Expression implements ConditionalInstructi
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
-        AtomicValue subjectValue = (AtomicValue) getSubjectExpression().evaluateItem(context);
-        if (subjectValue == null) {
-            return getOtherwiseExpression().iterate(context);
-        }
-        AtomicMatchKey key = subjectValue.getXPathMatchKey(collation, context.getImplicitTimezone());
-        int selection = getIndex(key);
-        if (selection == -1) {
-            return getOtherwiseExpression().iterate(context);
-        } else {
-            return actions.get(selection).getChildExpression().iterate(context);
-        }
+        return makeElaborator().elaborateForPull().iterate(context);
     }
 
     /**

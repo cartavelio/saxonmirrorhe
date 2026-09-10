@@ -451,7 +451,7 @@ public final class IndexedFilterExpression extends Expression {
                 if (baseExp instanceof VariableReference) {
                     Sequence base = ((VariableReference) baseExp).evaluateVariable(context);
                     if (base instanceof EmptySequence) {
-                        return EmptyIterator.emptyIterator();
+                        return EmptyIterator.getInstance();
                     } else if (base instanceof SearchableValue) {
                         indexedValue = (SearchableValue) base;
                     } else {
@@ -471,7 +471,7 @@ public final class IndexedFilterExpression extends Expression {
                 // filter expression
 
                 if (indexedValue.getLength() == 0) {
-                    return EmptyIterator.emptyIterator();
+                    return EmptyIterator.getInstance();
                 }
                 AtomicComparer comparer = expr.comparer.provideContext(context);
                 SequenceIterator values = searchPullEvaluator.iterate(context);

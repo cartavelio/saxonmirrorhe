@@ -2,10 +2,7 @@ package com.saxonica.xsltextn.instruct;
 
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.elab.EagerEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.PushElaborator;
-import net.sf.saxon.expr.elab.PushEvaluator;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.expr.instruct.Instruction;
 import net.sf.saxon.expr.parser.*;
@@ -122,10 +119,10 @@ public class Assign extends Instruction implements BindingReference {
             if (expr.binding == null) {
                 throw new IllegalStateException("saxon:assign binding has not been fixed up");
             }
-            EagerEvaluator select = expr.getSelectExpr().makeElaborator().eagerly();
+            SequenceEvaluator select = expr.getSelectExpr().makeElaborator().eagerly();
             return (output, context) -> {
 
-                GroundedValue value = select.evaluate(context);
+                GroundedValue value = (GroundedValue)select.evaluate(context);
                 final Controller controller = context.getController();
                 assert controller != null;
                 controller.getBindery(expr.getPackageData()).setGlobalVariable(expr.binding, value);
