@@ -27,7 +27,6 @@
         <Compile Include="..\src\main\cs\Saxon/Impl/Overrides/MappingEnumerator.cs" />
         <Compile Include="..\src\main\cs\Saxon/Impl/Overrides/ResourceLoader.cs" />
         <Compile Include="..\src\main\cs\Saxon/Impl/Overrides/ICULibrary.cs" />
-        <Compile Include="..\src\main\cs\Saxon/Impl/Overrides/Vavr.cs" />
         <Compile Include="..\src\main\cs\Saxon/Impl/Overrides/ZenoStringCodepoints.cs" />
 
 

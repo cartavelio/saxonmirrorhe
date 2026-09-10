@@ -82,11 +82,6 @@
       'com.saxonica.ee.parallel.PushToPull.Pusher': 'Saxon.Impl.Parallel.PushToPull.Pusher',
       'com.saxonica.functions.qt4.ParseHtml': 'Saxon.Impl.Helpers.ParseHtml',
       'com.saxonica.functions.qt4.ma.OrderedMap': 'Saxon.Impl.DataModel.ImmOrderedMap',
-      (:'io.vavr.collection.List': 'System.Collections.Immutable.ImmutableList',
-      'io.vavr.collection.HashMap': 'System.Collections.Immutable.ImmutableDictionary',
-      'io.vavr.collection.LinkedHashMap': 'System.Collections.Immutable.ImmutableDictionary',
-      'io.vavr.collection.Map': 'System.Collections.Immutable.ImmutableDictionary',
-      'io.vavr.collection.TreeMap': 'System.Collections.Immutable.ImmutableSortedDictionary', :)
       'java.io.BufferedInputStream': 'System.IO.BufferedStream',
       'java.io.BufferedOutputStream': 'System.IO.BufferedStream',
       'java.io.BufferedReader': 'Saxon.Impl.Helpers.BufferedReader',
@@ -180,7 +175,6 @@
       'net.sf.saxon.ma.trie.ImmutableMap': 'System.Collections.Immutable.ImmutableDictionary',
       'net.sf.saxon.ma.trie.ImmutableList': 'System.Collections.Immutable.ImmutableList',
       'net.sf.saxon.ma.trie.TrieKVP': 'System.Collections.Generic.KeyValuePair', 
-      (:'net.sf.saxon.ma.map.Vavr': 'Saxon.Impl.Overrides.Vavr', :)
       'net.sf.saxon.s9api.ExtensionFunction': 'Saxon.Api.ExtensionFunction',
       'net.sf.saxon.s9api.HostLanguage': 'Saxon.Api.HostLanguage',
       'net.sf.saxon.s9api.ItemType': 'Saxon.Api.XdmItemType',
