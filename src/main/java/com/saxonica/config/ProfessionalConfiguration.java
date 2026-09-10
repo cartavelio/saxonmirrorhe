@@ -19,6 +19,7 @@ import com.saxonica.xsltextn.ExtensionElementFactory;
 import com.saxonica.xsltextn.style.Saxon6ElementFactory;
 import com.saxonica.xsltextn.style.SaxonElementFactory;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.Version;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.Expression;
@@ -133,6 +134,7 @@ public class ProfessionalConfiguration extends Configuration {
         verifier = makeVerifier();
         declareBuiltInExtensionElementNamespaces();
         declareBuiltInExtensionFunctions();
+        Version.platform.registerAllBuiltInObjectModels(this);
         setSerializerFactory(new SerializerFactoryPE(this));
         setStaticQueryContextFactory(new StaticQueryContextFactory() {
             @Override
