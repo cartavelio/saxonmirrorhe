@@ -7,6 +7,8 @@
 
 package net.sf.saxon;
 
+import com.saxonica.config.EnterpriseConfiguration;
+import com.saxonica.config.ProfessionalConfiguration;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.accum.AccumulatorRegistry;
@@ -264,6 +266,38 @@ public class Configuration implements SourceResolver, NotationSet {
             e.printStackTrace();
             throw new RuntimeException("Cannot instantiate a Configuration", e);
         }
+    }
+
+    /**
+     * Factory method to create a Configuration, of the class defined using conditional
+     * compilation tags when compiling this version of Saxon: that is,
+     * the type of Configuration appropriate to the edition of the software
+     * being used, taking into account the license available. For example if the
+     * software is EE, but only a PE license is available, the method returns
+     * a ProfessionalConfiguration.
+     *
+     * @return a Configuration object of the class appropriate to the Saxon edition in use.
+     * @since 9.2
+     */
+
+    public static Configuration newLicensedConfiguration() {
+        //#if EE==true
+        EnterpriseConfiguration eeConfig = new EnterpriseConfiguration();
+        if (eeConfig.isLicensedFeature(LicenseFeature.SCHEMA_VALIDATION)) {
+            return eeConfig;
+        } else if (eeConfig.isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
+            ProfessionalConfiguration peConfig = new ProfessionalConfiguration();
+            peConfig.importLicenseDetails(eeConfig);
+            return peConfig;
+        }
+        //#endif
+        //#if PE==true
+        ProfessionalConfiguration peConfig2 = new ProfessionalConfiguration();
+        if (peConfig2.isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
+            return peConfig2;
+        }
+        //#endif
+        return new Configuration();
     }
 
     /**

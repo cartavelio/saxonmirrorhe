@@ -52,8 +52,22 @@ public class Processor implements Configuration.ApiProvider {
     private Configuration config;
     private SchemaManager schemaManager;
 
+
     /**
-     * Create a Processor
+     * Create a Processor according to the capabilities available.
+     * <p>This will examine what software is installed, and whether or not a license key is available,
+     * and return the most capable configuration available within these constraints. For example
+     * if the software is Saxon-EE but the license only allows PE capability, it will return
+     * a processor with Saxon-PE capabilities.</p>
+     * @since 12.0
+     */
+
+    public Processor() {
+        this(Configuration.newLicensedConfiguration());
+    }
+
+    /**
+     * Create a Processor, specifying whether a licensed configuration is required
      *
      * @param licensedEdition indicates whether the Processor requires features of Saxon that need a license
      *                        file (that is, features not available in Saxon HE (Home Edition). If true, the method will create
