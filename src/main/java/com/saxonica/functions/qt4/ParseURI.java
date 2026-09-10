@@ -38,7 +38,7 @@ public class ParseURI extends URIFunctions {
 
         int pos = uristr.indexOf("#");
         if (pos >= 0) {
-            map = map.addEntry(FRAGMENT, new StringValue(uristr.substring(pos + 1)));
+            map = map.addEntry(FRAGMENT, new StringValue(DecodeFromURI.decode(uristr.substring(pos + 1))));
             uristr = uristr.substring(0, pos);
         }
 

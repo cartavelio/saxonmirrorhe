@@ -67,7 +67,6 @@ abstract public class URIFunctions extends SystemFunction {
         chars.add('.');
         chars.add('_');
         chars.add('~');
-        chars.add('%');
         chars.add('!');
         chars.add('$');
         chars.add('&');
