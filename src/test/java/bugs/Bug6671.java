@@ -1,20 +1,42 @@
-package bugs;public class Bug6671 {
+package bugs;
+
+
+import net.sf.saxon.Configuration;
+import net.sf.saxon.lib.Feature;
+import net.sf.saxon.s9api.*;
+import net.sf.saxon.trans.XPathException;
+
+import javax.xml.transform.stream.StreamSource;
+import java.io.File;
+
+public class Bug6671 {
+
+    private final static String XML = "/Users/mike/bugs/2025/6671-Uschakov/issue-to-repo/input.xml";
+    private final static String XSL = "/Users/mike/bugs/2025/6671-Uschakov/issue-to-repo/sample.xsl";
+    private final static String CONFIG = "/Users/mike/bugs/2025/6671-Uschakov/issue-to-repo/saxon-config.xml";
+
+
+    public static void main(String[] args) throws InterruptedException {
+
+        for (int i = 0; i < 100; i++) {
+            try {
+                System.err.println("Run " + i);
+                Configuration config = Configuration.readConfiguration(new StreamSource(new File(CONFIG)));
+                Processor proc = new Processor(config);
+                proc.setConfigurationProperty(Feature.TIMING, true);
+                DocumentBuilder builder = proc.newDocumentBuilder();
+                XdmNode doc = builder.build(new File(XML));
+                XsltCompiler compiler = proc.newXsltCompiler();
+                XsltExecutable exec = compiler.compile(new StreamSource(new File(XSL)));
+                Xslt30Transformer trans = exec.load30();
+                trans.applyTemplates(doc.asSource());
+            } catch (SaxonApiException | XPathException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
 }
 
-//
-// The contents of this file are subject to the Mozilla Public License Version 1.0 (the "License");
-// you may not use this file except in compliance with the License. You may obtain a copy of the
-// License at http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied.
-// See the License for the specific language governing rights and limitations under the License.
-//
-// The Original Code is: all this file.
-//
-// The Initial Developer of the Original Code is Saxonica Limited
-//
-// Portions created by (your name) are Copyright (C) (your legal entity). All Rights Reserved.
-//
-// Contributor(s): none.
-//
+
+
