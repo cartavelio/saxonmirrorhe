@@ -237,9 +237,9 @@ public:
    */
   XdmNode **getAttributeNodes(bool cache = false);
 
-  //! Get array of nodes reachable from this node via a given axis.
+  //! Get the array of nodes reachable from this node via a given axis.
   /**
-         * @param EnumXdmAxis - axis identifies which axis is to be navigated.
+         * @param EnumXdmAxis - identifies which axis is to be navigated.
          * Axis options are as follows: ANCESTOR = 0,
          * ANCESTOR_OR_SELF = 1, ATTRIBUTE = 2, CHILD = 3,
          * DESCENDANT  = 4, DESCENDANT_OR_SELF = 5, FOLLOWING = 6,

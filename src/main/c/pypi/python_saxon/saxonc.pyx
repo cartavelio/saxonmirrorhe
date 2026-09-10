@@ -1652,7 +1652,7 @@ cdef class PyXsltExecutable:
         """
         xsl_messages
         Get the messages written using the xsl:message instruction. Return NULL if the user has not
-        enabled of capturing of xsl:messages via setSaveXslMessage
+        enabled capturing of xsl:messages via the method set_save_xsl_message.
 
 
         :return: value (PyXdmValue):
@@ -4430,14 +4430,14 @@ cdef class PyXdmNode(PyXdmItem):
      def axis_nodes(self, axis):
         """
         axis_nodes(self, int axis)
-        Get array of nodes reachable from this node via a given axis.
+        Get the array of nodes reachable from this node via a given axis.
         Axis options are as follows: ANCESTOR = 0,
         ANCESTOR_OR_SELF = 1, ATTRIBUTE = 2, CHILD = 3,
         DESCENDANT  = 4, DESCENDANT_OR_SELF = 5, FOLLOWING = 6,
         FOLLOWING_SIBLING = 7, NAMESPACE = 8, PARENT = 9, PRECEDING = 10,
         PRECEDING_SIBLING = 11, SELF = 12
         Args:
-            axis (int): The axis identifies which axis is to be navigated.
+            axis (int): Identifies which axis is to be navigated.
         Returns:
             list[PyXdmNode]: List of PyXdmNode objects
         """
