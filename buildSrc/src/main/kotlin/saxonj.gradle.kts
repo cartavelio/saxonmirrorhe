@@ -62,6 +62,7 @@ val resources by configurations.consumable("resources")
 val filteredSourcesDir by configurations.consumable("filteredSourcesDir")
 val xmldocletArtifacts by configurations.consumable("xmldocletArtifacts")
 val javadocArtifacts by configurations.consumable("javadocArtifacts")
+val saxonJarArtifact by configurations.consumable("saxonJarArtifact")
 
 val releaseZips by configurations.consumable("releaseZips")
 val releaseMaven by configurations.consumable("releaseMaven")
@@ -600,5 +601,6 @@ val query = tasks.register<JavaExec>("query") {
   mainClass = "net.sf.saxon.Query"
 }
 
+saxonJarArtifact.outgoing.artifact(editionMavenJarTask) { builtBy(editionMavenJarTask) }
 releaseZips.outgoing.artifact(downloadRelease) { builtBy(downloadRelease) }
 releaseMaven.outgoing.artifact(stageMaven) { builtBy(stageMaven)}

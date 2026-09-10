@@ -17,11 +17,6 @@ saxoncs {
   edition = "ee"
 }
 
-dependencies {
-  compileOnly("com.saxonica:Saxon-EE:12.4")
-  preprocessor("com.saxonica:Saxon-EE:12.4")
-}
-
 tasks.filteredSources {
   from(configurations.javaSources) {
     include("net/sf/saxon/**/*.java")
