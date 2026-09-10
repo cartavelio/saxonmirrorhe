@@ -347,7 +347,7 @@ public final class BigIntegerValue extends IntegerValue {
             BigInteger awayFromZero = negative ? towardsZero.subtract(factorB) : towardsZero.add(factorB);
             BigInteger floor = negative ? awayFromZero : towardsZero;
             BigInteger ceiling = negative ? towardsZero : awayFromZero;
-            BigInteger midpoint = floor.add(ceiling.subtract(floor).divide(BigInteger.TWO));
+            BigInteger midpoint = floor.add(ceiling.subtract(floor).divide(BigInteger.valueOf(2)));
             boolean midway = value.equals(midpoint);
             BigInteger nearest = value.compareTo(midpoint) > 0 ? ceiling : floor;
             switch (roundingRule) {
@@ -371,7 +371,7 @@ public final class BigIntegerValue extends IntegerValue {
                 case HALF_TO_EVEN:
                     return IntegerValue.makeIntegerValue(
                             midway
-                                    ? (floor.divide(factorB).mod(BigInteger.TWO).signum() == 0 ? floor : ceiling)
+                                    ? (floor.divide(factorB).mod(BigInteger.valueOf(2)).signum() == 0 ? floor : ceiling)
                                     : nearest);
             }
         }
