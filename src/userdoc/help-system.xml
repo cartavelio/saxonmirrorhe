@@ -1,8 +1,8 @@
 <article id="help-system" title="Using this Documentation">
     <h1>Using this Documentation</h1>
-    <p>This documentation system runs as a single-page web application, implemented using Saxon-JS 
+    <p>This documentation system runs as a single-page web application, implemented using SaxonJS 
         (XSLT 3.0 running in the browser). This section provides extra detail on how to get the most out of the documentation,
-        along with some extra details on how Saxon-JS is used to run the application.</p>
+        along with some extra details on how SaxonJS is used to run the application.</p>
     <nav>
         <ul/>
     </nav>
@@ -45,7 +45,7 @@
     <section id="technical" title="Technical Details">
         <h1>Technical Details</h1>
         <p>This section provides information on the design of this application, which is implemented
-            using XSLT 3.0 running in the browser under Saxon-JS, plus a very small amount of 
+            using XSLT 3.0 running in the browser under SaxonJS, plus a very small amount of 
             Javascript (mainly to do highlighting of search terms). </p>
         
         <p>The underlying documents are maintained largely in XHTML5 (plus a few custom extensions) throughout
@@ -62,7 +62,7 @@
             <li>At this stage, two versions of the text are created, one for delivery as static HTML
             pages, one for interactive delivery in the browser.</li>
             <li>The responsibility for formatting the text in the browser, and for handling
-            interaction, is split between the browser and the Saxon-JS XSLT stylesheets.
+            interaction, is split between the browser and the SaxonJS XSLT stylesheets.
             Routine text rendition of static text is done using standard CSS; XSLT is used to handle
             more complex interactions such as maintaining of breadcrumbs, cross-section
             linking, and filtering of the change history section by topic and version history.</li>
@@ -82,7 +82,7 @@
                         <td><p>xsl/viewer_app.sef.json</p></td>
                         <td>
                             <p>Stylesheet Export File (SEF) generated from the viewer_app.xsl stylesheet using
-                                Saxon-EE, for use with Saxon-JS.</p>
+                                Saxon-EE, for use with SaxonJS.</p>
                             <p/>
                         </td>
                     </tr>
@@ -114,7 +114,7 @@
                     </tr>
                     <tr>
                         <td><p>index.html</p></td>
-                        <td><p>The host HTML page - loads the Saxon-JS processor and contains the
+                        <td><p>The host HTML page - loads the SaxonJS processor and contains the
                             'skeleton' on which to hang the dynamic elements of the
                             application.</p></td>
                     </tr>
@@ -174,7 +174,7 @@
                     </tr>
                     <tr>
                         <td><p>Saxon-JS/*.*</p></td>
-                        <td><p>Saxon-JS processor.</p></td>
+                        <td><p>SaxonJS processor.</p></td>
                     </tr>
                     <!-- The following are now "external" -->
                     <!--<tr>
