@@ -1763,6 +1763,7 @@
       </class>
    </xsl:variable>
    
+   
    <xsl:template match="*[@nodeType='MethodReferenceExpr'][scope/type/@RESOLVED_TYPE]" priority="15">
       <xsl:choose>
          <xsl:when test="some $c in $staticMethodReferences/class
@@ -1778,16 +1779,62 @@
    </xsl:template>
    
    <!-- Try converting a non static method reference (out::append) to (it => out.append(it)) -->
-   <xsl:template match="*[@nodeType='MethodReferenceExpr'][scope/type/@UNRESOLVED]" priority="16">
+   <!--<xsl:template match="*[@nodeType='MethodReferenceExpr'][scope/type/@UNRESOLVED]" priority="16">
       <xsl:text>it => </xsl:text>
       <xsl:apply-templates select="scope"/>
       <xsl:text>.{f:renameMethod(@identifier, .)}(it) /* instance method reference */</xsl:text>
+   </xsl:template>-->
+   
+   <!-- Try converting a non static method reference (out::append) to (out.append) -->
+   <xsl:template match="*[@nodeType='MethodCallExpr'][@RESOLVED_TYPE='net.sf.saxon.transpile.CSharp'][name/@identifier='methodRef']
+      /arguments/argument[@nodeType='MethodReferenceExpr']" priority="16">
+      <xsl:apply-templates select="scope"/>
+      <xsl:text>.{f:renameMethod(@identifier, .)} /* instance method reference */</xsl:text>
    </xsl:template>
    
+   <!-- Try converting a static method reference (Thing::append) to (Thing.append) -->
+   <xsl:template match="*[@nodeType='MethodCallExpr'][@RESOLVED_TYPE='net.sf.saxon.transpile.CSharp'][name/@identifier='staticRef']
+      /arguments/argument[@nodeType='MethodReferenceExpr']" priority="16">
+      <xsl:apply-templates select="scope"/>
+      <xsl:text>.{f:renameMethod(@identifier, .)} /* static method reference */</xsl:text>
+   </xsl:template>
+   
+   <!-- Try converting a constructor reference (Thing::new) to ((a, b, c) => new Thing(a, b, c)) -->
+   <xsl:template match="*[@nodeType='MethodCallExpr'][@RESOLVED_TYPE='net.sf.saxon.transpile.CSharp'][name/@identifier='constructorRef']
+      /arguments/argument[@nodeType='MethodReferenceExpr']" priority="25">
+      <xsl:variable name="arity" select="xs:integer(../../arguments/argument[2]/@value)"/>
+      <xsl:text>/* ctor#{$arity} */ ({string-join((1 to $arity)!format-integer(., 'a'), ', ')}) => new </xsl:text>
+      <xsl:apply-templates select="scope"/>
+      <xsl:text>({string-join((1 to $arity)!format-integer(., 'a'), ', ')})</xsl:text>
+   </xsl:template>
+   
+   
+   <!--<initializer nodeType="MethodCallExpr" RETURN="T"
+                        RESOLVED_TYPE="net.sf.saxon.transpile.CSharp">
+                        <name nodeType="SimpleName" identifier="constructorRef"/>
+                        <scope nodeType="NameExpr" UNRESOLVED="CSharp">
+                           <name nodeType="SimpleName" identifier="CSharp"/>
+                        </scope>
+                        <arguments>
+                           <argument nodeType="MethodReferenceExpr" identifier="new">
+                              <scope nodeType="TypeExpr">
+                                 <type nodeType="ClassOrInterfaceType"
+                                    RESOLVED_TYPE="net.sf.saxon.value.Whitespace.Tokenizer">
+                                    <name nodeType="SimpleName" identifier="Tokenizer"/>
+                                    <scope nodeType="ClassOrInterfaceType"
+                                       RESOLVED_TYPE="net.sf.saxon.value.Whitespace">
+                                       <name nodeType="SimpleName" identifier="Whitespace"/>
+                                    </scope>
+                                 </type>
+                              </scope>
+                           </argument>
+                           <argument nodeType="IntegerLiteralExpr" value="1"/>
+                        </arguments>
+   -->
    <xsl:template match="*[@nodeType='MethodReferenceExpr']" priority="10">
       <xsl:text>/* Unresolved method reference */</xsl:text>
       <xsl:apply-templates select="scope"/>
-      <xsl:text>::{@identifier}</xsl:text>
+      <xsl:text>.{@identifier}</xsl:text>
    </xsl:template>
    
    

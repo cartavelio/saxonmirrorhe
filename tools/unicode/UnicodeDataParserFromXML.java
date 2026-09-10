@@ -64,8 +64,7 @@ class UnicodeDataParserFromXML {
         NodeInfo decompositionValues = null;
 
         AxisIterator iter = doc.getRootNode().iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
-        NodeInfo item;
-        while ((item = iter.next()) != null) {
+        for (Item item; (item = iter.next()) != null; ) {
             switch (item.getLocalPart()) {
                 case "CanonicalClassKeys":
                     canonicalClassKeys = item;
