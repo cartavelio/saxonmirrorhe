@@ -216,70 +216,6 @@
          '*':                 '%scope%.%Name%(%args%)' 
          })"/>
       
-      <!--<xsl:message>String.{name/@identifier}()</xsl:message>-->
-      <!--<xsl:variable name="renamedMethods" as="map(*)" select="map{
-         'toLowerCase': 'ToLower',
-         'toUpperCase': 'ToUpper',
-         'hashCode':    'GetHashCode'}"/>
-      <xsl:choose>
-         <xsl:when test="name/@identifier = 'charAt'">
-            <xsl:sequence select="f:formatCall(., '%scope%[%args%]')"/>
-         </xsl:when>
-         <xsl:when test="name/@identifier = 'equalsIgnoreCase'">
-            <!-\- Java str.getChars(begin, end, array, dest) => C# str.CopyTo(begin, array, dest, count) -\->
-            <xsl:sequence select="f:formatCall(., 'Saxon.Impl.Helpers.StringUtils.stringEqualsIgnoreCase(%scope%, %args%)')"/>
-         </xsl:when>
-         <xsl:when test="name/@identifier = 'getChars'">
-            <!-\- Java str.getChars(begin, end, array, dest) => C# str.CopyTo(begin, array, dest, count) -\->
-            <xsl:sequence select="f:formatCall(., 'Saxon.Impl.Helpers.StringUtils.stringToCharArray(%scope%, %args%)')"/>
-         </xsl:when> 
-         <xsl:when test="name/@identifier = 'intern'">
-            <xsl:sequence select="f:formatCall(., 'System.String.Intern(%scope%)')"/>
-         </xsl:when> 
-         <xsl:when test="name/@identifier = 'isEmpty'">
-            <xsl:sequence select="f:formatCall(., '(%scope%.Length==0)')"/>
-         </xsl:when>
-         <xsl:when test="name/@identifier = 'length'">
-            <xsl:sequence select="f:formatCall(., '%scope%.Length')"/>
-         </xsl:when>
-         <xsl:when test="name/@identifier = 'matches'">
-            <xsl:sequence select="f:formatCall(., 'System.Text.RegularExpressions.Regex.IsMatch(%scope%, %args%)')"/>
-         </xsl:when>
-         <xsl:when test="name/@identifier = 'replaceFirst'">
-            <!-\- Java str.replaceFirst(pattern, replacement) ==> C# new Regex(pattern).Replace(str, replacement, 1) -\->
-            <xsl:sequence select="f:formatCall(., 
-               'new System.Text.RegularExpressions.Regex(%arg1%).Replace(%scope%, %arg2%, 1)')"/>
-         </xsl:when>         
-         <xsl:when test="name/@identifier = 'replaceAll'">
-            <!-\- Java str.replaceAll(pattern, replacement) ==> C# Regex.Replace(str, pattern, replacement) -\->
-            <xsl:sequence select="f:formatCall(., 'System.Text.RegularExpressions.Regex.Replace(%scope%, %args%)')"/>
-         </xsl:when> 
-         <xsl:when test="name/@identifier = 'split'">
-            <xsl:sequence select="f:formatCall(., 'System.Text.RegularExpressions.Regex.Split(%scope%, %args%)')"/>
-         </xsl:when>
-         <xsl:when test="name/@identifier = ('substring', 'subSequence')">
-            <xsl:choose>
-               <xsl:when test="count(arguments/argument)=1">
-                  <xsl:sequence select="f:formatCall(., '%scope%.Substring(%args%)')"/>
-               </xsl:when>
-               <xsl:otherwise>
-                  <!-\- Java has substring(start, end), C# has Substring(start, length) -\->
-                  <xsl:sequence select="f:formatCall(., '%scope%.Substring(%arg1%, %arg2%-%arg1%)')"/>
-               </xsl:otherwise>
-            </xsl:choose>
-         </xsl:when> 
-         <xsl:when test="map:contains($renamedMethods, name/@identifier)">
-            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
-            <xsl:text>.</xsl:text>
-            <xsl:value-of select="$renamedMethods(name/@identifier)"/>
-            <xsl:text>(</xsl:text>
-            <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
-            <xsl:text>)</xsl:text>
-         </xsl:when>
-         <xsl:otherwise>
-            <xsl:sequence select="f:formatCall(., '%scope%.%Name%(%args%)')"/>
-         </xsl:otherwise>
-      </xsl:choose>-->
    </xsl:template>
    
 
@@ -1074,6 +1010,16 @@
       <xsl:sequence select="f:applyFormat(., map{
          'getCode#1':         'ICU4N.Globalization.UScript.GetCode(%args%)',
          '*':                 '%scope%.%Name%(%args%)' 
+         })"/>     
+   </xsl:template>
+   
+   <!-- com.ibm.icu.text.BreakIterator (=ICU4N.Text.BreakIterator) -->
+   
+   <xsl:template match="*[f:targetType(.) = 'com.ibm.icu.text.BreakIterator']" 
+      priority="20" mode="methods">
+      <xsl:sequence select="f:applyFormat(., map{
+         'getCharacterInstance#0':     'ICU4N.Text.BreakIterator.GetCharacterInstance()',
+         '*':                          '%scope%.%Name%(%args%)' 
          })"/>     
    </xsl:template>
    

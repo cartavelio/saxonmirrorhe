@@ -65,6 +65,7 @@
    <xsl:variable name="specialTypes" as="map(xs:string, xs:string)" select="map{
       'boolean': 'bool',
       'com.ibm.icu.lang.UScript': 'ICU4N.Globalization.UScript',
+      'com.ibm.icu.text.BreakIterator': 'ICU4N.Text.BreakIterator',
       'com.ibm.icu.text.CollationElementIterator': 'ICU4N.Text.CollationElementIterator',
       'com.ibm.icu.text.CollationKey': 'ICU4N.Text.CollationKey',
       'com.ibm.icu.text.Collator': 'ICU4N.Text.Collator',
@@ -152,7 +153,7 @@
       'net.sf.saxon.expr.sort.LFUCache.EntryWithCounter': 'net.sf.saxon.expr.sort.LFUCache&lt;K,V>.EntryWithCounter',
       (: 'net.sf.saxon.lib.ExtensionFunctionCall': 'Saxon.Api.ExtensionFunctionCall', :)
       (: 'net.sf.saxon.lib.ExtensionFunctionDefinition': 'Saxon.Api.ExtensionFunctionDefinition', :)
-      'net.sf.saxon.functions.ParseXmlFragment': 'Saxon.Impl.Helpers.ParseXmlFragment',
+      (:'net.sf.saxon.functions.ParseXmlFragment': 'Saxon.Impl.Helpers.ParseXmlFragment',  :)
       'net.sf.saxon.lib.CatalogResourceResolver': 'Saxon.Callbacks.CatalogResourceResolver',
       'net.sf.saxon.lib.ConfigurableResourceResolver': 'Saxon.Callbacks.ConfigurableResourceResolver',
       (:'net.sf.saxon.lib.CommonResourceResolver': 'Saxon.Callbacks.CommonResourceResolver',:)

@@ -258,6 +258,16 @@
       </xsl:choose>
    </xsl:template>
    
+   <!-- Fields on com.ibm.icu.text.BreakIterator -->
+   <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'com.ibm.icu.text.BreakIterator']" priority="20">
+      <xsl:choose>
+         <xsl:when test="name/@identifier='DONE'">(int)ICU4N.Text.BreakIterator.Done</xsl:when>
+         <xsl:otherwise>
+            <xsl:next-match/>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
    <!-- Fields on com.ibm.icu.text.Collator -->
    <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'com.ibm.icu.text.Collator']" priority="20">
       <xsl:choose>
