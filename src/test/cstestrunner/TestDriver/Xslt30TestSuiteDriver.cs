@@ -532,17 +532,23 @@ namespace TestDriver {
                 Stream styleSource = new FileStream(fileUri.AbsolutePath, FileMode.Open, FileAccess.Read);
                 compiler.ErrorReporter = err => outcome.ReportError(err.ErrorCode);
                 compiler.BaseUri = fileUri;
+                // try {
+                //     XsltPackage xpack = compiler.CompilePackage(styleSource, fileUri);
+                //     sheet = xpack.Link();
+                // }
+                // catch (Exception err) {
+                //     println(err.Message);
+                //     outcome.SetException(err);
+                // }
+
                 try {
-                    XsltPackage xpack = compiler.CompilePackage(styleSource, fileUri);
-                    sheet = xpack.Link();
+                    sheet = exportImport(testName, testSetName, outcome, compiler, sheet, styleSource);
                 }
                 catch (Exception err) {
-                    println(err.Message);
+                    Console.WriteLine(err.Message);
                     outcome.SetException(err);
                 }
 
-
-                sheet = exportImport(testName, testSetName, outcome, compiler, sheet, styleSource);
             }
 
             if (sheet != null) {
