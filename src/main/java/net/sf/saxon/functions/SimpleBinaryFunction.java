@@ -108,7 +108,7 @@ public class SimpleBinaryFunction extends AbstractFunction {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] args) throws XPathException {
-        return lambda.call(args[0], args[2]);
+        return lambda.call(args[0], args[1]);
     }
 
 
