@@ -9,7 +9,6 @@ package net.sf.saxon.expr.parser;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
-import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.Err;
@@ -257,7 +256,7 @@ public class RoleDiagnostic {
     public String composeErrorMessage(ItemType requiredItemType, Expression supplied, TypeHierarchy th) {
         if (supplied instanceof Literal) {
             String s = composeRequiredMessage(requiredItemType);
-            Optional<String> more = SequenceType.makeSequenceType(requiredItemType, StaticProperty.ALLOWS_ZERO_OR_MORE)
+            Optional<String> more = SequenceType.zeroOrMore(requiredItemType)
                     .explainMismatch(((Literal)supplied).getGroundedValue(), th);
             if (more.isPresent()) {
                 s = s + ". " + more.get();

@@ -133,8 +133,7 @@ public class ForExpression extends Assignation {
         if (requiredType != null) {
             // if declaration is null, we've already done the type checking in a previous pass
             SequenceType decl = requiredType;
-            SequenceType sequenceType = SequenceType.makeSequenceType(
-                    decl.getPrimaryType(), StaticProperty.ALLOWS_ZERO_OR_MORE);
+            SequenceType sequenceType = SequenceType.zeroOrMore(decl.getPrimaryType());
             Supplier<RoleDiagnostic> role =
                     () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, variableName.getDisplayName(), 0);
             if (visitor.getStaticContext().getXPathVersion() < 40) {

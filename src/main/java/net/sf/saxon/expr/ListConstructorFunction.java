@@ -91,7 +91,7 @@ public class ListConstructorFunction extends AbstractFunction {
 
         return new SpecificFunctionType(
                 new SequenceType[]{argType},
-                SequenceType.makeSequenceType(resultType, StaticProperty.ALLOWS_ZERO_OR_MORE));
+                SequenceType.zeroOrMore(resultType));
     }
 
     /**

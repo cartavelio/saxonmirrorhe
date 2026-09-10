@@ -39,8 +39,7 @@ public class MapType extends AnyFunctionType {
      */
     public static final SequenceType OPTIONAL_MAP_ITEM = SequenceType.optional(ANY_MAP_TYPE);
     public static final SequenceType SINGLE_MAP_ITEM = SequenceType.one(ANY_MAP_TYPE);
-    public static final SequenceType SEQUENCE_OF_MAPS =
-            SequenceType.makeSequenceType(ANY_MAP_TYPE, StaticProperty.ALLOWS_ZERO_OR_MORE);
+    public static final SequenceType SEQUENCE_OF_MAPS = SequenceType.zeroOrMore(ANY_MAP_TYPE);
 
     private final PlainType keyType;
     private final SequenceType valueType;

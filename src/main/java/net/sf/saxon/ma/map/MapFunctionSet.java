@@ -775,7 +775,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 }
                 if (maybeCombined) {
                     return new MapType(((MapType) it).getKeyType(),
-                                       SequenceType.makeSequenceType(((MapType) it).getValueType().getPrimaryType(), StaticProperty.ALLOWS_ZERO_OR_MORE));
+                                       SequenceType.zeroOrMore(((MapType) it).getValueType().getPrimaryType()));
                 } else {
                     return it;
                 }

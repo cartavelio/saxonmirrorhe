@@ -281,7 +281,7 @@ public class Block extends Instruction {
         Expression[] checked = new Expression[operanda.length];
         SequenceType subReq = req;
         if (req.getCardinality() != StaticProperty.ALLOWS_ZERO_OR_MORE) {
-            subReq = SequenceType.makeSequenceType(req.getPrimaryType(), StaticProperty.ALLOWS_ZERO_OR_MORE);
+            subReq = SequenceType.zeroOrMore(req.getPrimaryType());
         }
         for (int i=0; i<operanda.length; i++) {
             checked[i] = tc.staticTypeCheck(operanda[i].getChildExpression(), subReq, roleSupplier, visitor);

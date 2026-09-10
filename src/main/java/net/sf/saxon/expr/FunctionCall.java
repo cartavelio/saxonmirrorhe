@@ -230,7 +230,7 @@ public abstract class FunctionCall extends Expression {
                 Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, name, finalA);
                 setArg(a, tc.staticTypeCheck(
                         getArg(a),
-                        new SequenceType(argTypes[0].getPrimaryType(), StaticProperty.ALLOWS_ZERO_OR_MORE),
+                        SequenceType.zeroOrMore(argTypes[0].getPrimaryType()),
                         role, visitor));
             }
         } else {

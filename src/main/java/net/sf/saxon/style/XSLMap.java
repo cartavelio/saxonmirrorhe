@@ -10,7 +10,6 @@ package net.sf.saxon.style;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
-import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.instruct.SequenceInstr;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.expr.parser.TypeChecker;
@@ -107,7 +106,7 @@ public class XSLMap extends StyleElement {
                 () -> new RoleDiagnostic(RoleDiagnostic.MISC, "xsl:map sequence constructor", 0, "XTTE3375");
         select = tc.staticTypeCheck(
                 select,
-                SequenceType.makeSequenceType(MapType.ANY_MAP_TYPE, StaticProperty.ALLOWS_ZERO_OR_MORE),
+                SequenceType.zeroOrMore(MapType.ANY_MAP_TYPE),
                 role, makeExpressionVisitor());
 
         Expression optionsExp;

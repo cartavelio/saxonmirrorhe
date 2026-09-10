@@ -182,8 +182,7 @@ public class ForClause extends Clause {
                             getSequence(), StaticProperty.ALLOWS_ONE_OR_MORE, emptyRole);
             setSequence(checker);
         }
-        SequenceType sequenceType = SequenceType.makeSequenceType(
-                decl.getPrimaryType(), StaticProperty.ALLOWS_ZERO_OR_MORE);
+        SequenceType sequenceType = SequenceType.zeroOrMore(decl.getPrimaryType());
         Supplier<RoleDiagnostic> role =
                 () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, rangeVariable.getVariableQName().getDisplayName(), 0);
         if (visitor.getStaticContext().getXPathVersion() < 40) {

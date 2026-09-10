@@ -114,11 +114,11 @@ public abstract class PJConverter {
             Class<?> memberClass = javaClass.getComponentType();
             if (memberClass == byte.class) {
                 // special-case byte[] which maps to xs:unsignedByte* - see bugs 3525, 3818
-                return SequenceType.makeSequenceType(BuiltInAtomicType.UNSIGNED_BYTE, StaticProperty.ALLOWS_ZERO_OR_MORE);
+                return BuiltInAtomicType.UNSIGNED_BYTE.zeroOrMore();
             } else {
                 SequenceType memberType = getEquivalentSequenceType(memberClass);
                 if (memberType != null) {
-                    return SequenceType.makeSequenceType(memberType.getPrimaryType(), StaticProperty.ALLOWS_ZERO_OR_MORE);
+                    return SequenceType.zeroOrMore(memberType.getPrimaryType());
                 }
             }
         }

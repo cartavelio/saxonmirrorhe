@@ -46,7 +46,7 @@ public class Doc_2 extends SystemFunction implements Callable {
     }
 
     public static OptionsParameter makeOptionsParameter(int version) {
-        SequenceType listOfQNames = SequenceType.makeSequenceType(BuiltInAtomicType.QNAME, StaticProperty.ALLOWS_ZERO_OR_MORE);
+        SequenceType listOfQNames = BuiltInAtomicType.QNAME.zeroOrMore();
         OptionsParameter op = new OptionsParameter(version);
         op.addAllowedOption("base-uri", SequenceType.SINGLE_STRING);
         op.addAllowedOption("validation", SequenceType.SINGLE_STRING);
