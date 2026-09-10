@@ -87,6 +87,13 @@ public final class SequenceType {
             BuiltInAtomicType.UNTYPED_ATOMIC.one();
 
     /**
+     * A type that allows a zero or more untyped atomic items
+     */
+    
+    public static final SequenceType UNTYPED_ATOMIC_SEQUENCE =
+            BuiltInAtomicType.UNTYPED_ATOMIC.zeroOrMore();
+
+    /**
      * A type that allows a single optional string
      */
 

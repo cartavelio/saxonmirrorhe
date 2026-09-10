@@ -103,6 +103,11 @@ public class AnalyzeStringFn extends RegexFunction {
         RegularExpression re = getRegularExpression(arguments, 1, 2);
         RegexIterator iter = re.analyze(input);
 
+        return buildResult(context, iter);
+
+    }
+
+    public NodeInfo buildResult(XPathContext context, RegexIterator iter) throws XPathException {
         //#if EE==true
         if (vocab.resultName == null) {
             boolean schemaAware = context.getController().getExecutable().isSchemaAware();
@@ -146,7 +151,6 @@ public class AnalyzeStringFn extends RegexFunction {
         out.endElement();
         out.close();
         return builder.getCurrentRoot();
-
     }
 
     private static class LocalRegexMatchHandler implements RegexMatchHandler {

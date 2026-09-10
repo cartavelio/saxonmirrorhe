@@ -26,6 +26,8 @@ import java.util.Optional;
 
 public class DocumentNodeType extends XNodeType {
 
+    public final static DocumentNodeType WELL_FORMED = new DocumentNodeType(NodeKindType.ELEMENT);
+
 
     private final XNodeType elementTest;
 
