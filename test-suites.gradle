@@ -20,6 +20,7 @@ testSuite.configure([
                    "qt4": testsuites.w3cQT4TestSuiteDir,
                    "xslt30": testsuites.w3cXslt30TestSuiteDir,
                    "xslt30extra": "${buildDir}/tests/extra/suites/xslt30",
+                   "xslt40": testsuites.w3cXslt40TestSuiteDir,
                    "xsd": testsuites.w3cXsdTestSuiteDir,
                    "expath": "${buildDir}/tests/expath"
   ]
@@ -30,8 +31,8 @@ testSuite.configure([
 // but we haven't configured the build scripts to run test suites
 // for those products yet.
 //
-// We have six test suites: qt3, qt3extra, qt4, xslt30, xslt30extra,
-// and xsd.
+// We have seven test suites: qt3, qt3extra, qt4, xslt30, xslt30extra,
+// xslt40, and xsd.
 //
 // Each test suite supports a number of languages, XPxx, XQxx, etc.
 //
@@ -201,6 +202,15 @@ def testSuiteMatrix = [
       "XT30": [
         "": [:],
         "ex": ["export": "on"]
+      ]
+    ],
+    "xslt40": [
+      "_class": "com.saxonica.testdriver.Xslt30TestSuiteDriverEE",
+      "_exceptions": "${projectDir}/src/test/exceptions/xslt40.xml",
+      "_depends": ["cloneXslt40TestSuite"],
+
+      "XT40": [
+        "": [:]
       ]
     ],
     "xsd": [
