@@ -108,9 +108,7 @@ public class StringTool {
                         }
                         return UTF16CharacterSet.combinePair((char) c, (char) d);
                     } catch (StringIndexOutOfBoundsException e) {
-                        System.err.println("Invalid surrogate at end of string");
-                        e.printStackTrace();
-                        throw e;
+                        throw new IllegalStateException("Invalid surrogate at end of string");
                     }
                 } else {
                     return c;
