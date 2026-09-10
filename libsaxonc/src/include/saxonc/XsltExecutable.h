@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2022 - 2025 Saxonica Limited.
+// Copyright (c) 2022 - 2026 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License,
 // v. 2.0. If a copy of the MPL was not distributed with this file, You can
 // obtain one at http://mozilla.org/MPL/2.0/. This Source Code Form is
@@ -25,7 +25,9 @@ class XdmFunctionItem;
 
 /** An <code>XsltExecutable</code> represents the compiled form of a stylesheet.
  * <p>An XsltExecutable is created by using one of the <code>compile</code>
- * methods on the Xslt30Processor class.</p>
+ * methods on the Xslt30Processor class.
+ * The XsltExecutable class is not thread-safe; therefore to run it in multiple transformations,
+ * in series or concurrently you must clone the object for each thread using the clone() method.</p>
  */
 class SAXONC_EXPORT XsltExecutable {
 
