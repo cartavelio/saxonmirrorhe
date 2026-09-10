@@ -9,7 +9,6 @@ import net.sf.saxon.value.StringValue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * A {@code Shape} represents the common structure of a set of {@code ShapedMap} objects,
@@ -39,7 +38,7 @@ public class Shape {
      *
      * @param recordTypeDefinition - an instance of RecordTest, populated with a list of field names
      */
-    public Shape(RecordTest recordTypeDefinition) {
+    public Shape(RecordType recordTypeDefinition) {
         this(unicodeStringArrayFromStringList((ArrayList<String>) recordTypeDefinition.getFieldNames()));
     }
 
