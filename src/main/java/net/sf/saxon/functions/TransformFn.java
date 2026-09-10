@@ -551,6 +551,7 @@ public class TransformFn extends SystemFunction implements Callable {
         Sequence vendorOptionsValue = options.get("vendor-options");
         MapItem vendorOptions = vendorOptionsValue == null ? null : (MapItem) vendorOptionsValue.head();
 
+        Controller controller = context.getController();
         Configuration targetConfig = context.getConfiguration();
         boolean allowTypedNodes = true;
         boolean tracing = targetConfig.isTiming();
@@ -740,7 +741,6 @@ public class TransformFn extends SystemFunction implements Callable {
         }
 
         if (baseOutputUri == null) {
-            Controller controller = context.getController();
             if (controller instanceof XsltController) {
                 baseOutputUri = controller.getBaseOutputURI();
             }
@@ -766,7 +766,6 @@ public class TransformFn extends SystemFunction implements Callable {
         deliverer.setPostProcessor(postProcessor, context);
 
         if (writeResultDocuments) {
-            Controller controller = context.getController();
             if (controller instanceof XsltController) {
                 deliverer = new DelegatingDeliverer(deliverer,
                                                     ((XsltController) controller).getResultDocumentResolver());
@@ -775,8 +774,8 @@ public class TransformFn extends SystemFunction implements Callable {
             }
         }
 
-        XsltController controller = transformer.getUnderlyingController();
-        controller.setResultDocumentResolver(deliverer);
+        XsltController newController = transformer.getUnderlyingController();
+        newController.setResultDocumentResolver(deliverer);
 
         Destination destination = deliverer.getPrimaryDestination(serializationParamsMap);
         Sequence result;

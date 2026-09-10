@@ -85,9 +85,11 @@ public class JsonDoc extends SystemFunction  {
         Map<String, GroundedValue> checkedOptions;
         if (getArity() == 2) {
             MapItem options = (MapItem) arguments[1].head();
-            checkedOptions = options == null
-                    ? new HashMap<>()
-                    : getDetails().optionDetails.processSuppliedOptions(options, context);
+            if (options == null) {
+                checkedOptions = new HashMap<>();
+            } else {
+                checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
+            }
         } else {
             checkedOptions = ParseJsonFn.makeOptionsParameter(
                     getRetainedStaticContext().getPackageData().getHostLanguageVersion())
