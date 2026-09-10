@@ -1514,7 +1514,7 @@ public class OptimizerEE extends Optimizer {
         // optimizeForStreaming() is set). However it causes one or two unexplained test failures.
         if (function.getDeclaredStreamability() != FunctionStreamability.UNCLASSIFIED) {
             isInlineable = false;
-        } else if (functionInlineable.isEmpty()) {
+        } else if (!functionInlineable.isPresent()) {
             if (function.getBody() == null) {
                 // bug 2226
                 return functionCall;
