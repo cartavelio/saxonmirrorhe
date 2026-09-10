@@ -187,7 +187,8 @@
     <xsl:sort select="current-grouping-key()"/>
     <xsl:variable name="p" select="current-grouping-key()"/>
     <xsl:if
-     test="not($p = 'xslt20' and contains($all-spec, 'xpath20')) and not($p = 'xslt30' and contains($all-spec, 'xpath30'))">
+     test="not($p = ('xpath20', 'xpath30', 'xslt20')) and 
+     not($p = 'xslt20' and contains($all-spec, 'xpath20')) and not($p = 'xslt30' and contains($all-spec, 'xpath30'))">
      <p>
       <a href="{fc:spec-href($p, $fname)}">
        <xsl:value-of select="fc:spec-link-name($p)"/>
