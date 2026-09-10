@@ -7,20 +7,19 @@
 
 package net.sf.saxon.expr.flwor;
 
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.Sequence;
+import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.ObjectValue;
 
 /**
  * A tuple, as it appears in an XQuery tuple stream handled by extended FLWOR expressions.
  */
-public class Tuple extends ObjectValue<Sequence[]> {
+public class GroupingTuple extends ObjectValue<AtomicValue[]> {
 
-    public Tuple(Sequence[] members) {
-        super(members);
+    public GroupingTuple(AtomicValue[] values) {
+        super(values);
     }
 
-    public Sequence[] getMembers() {
+    public AtomicValue[] getValues() {
         return getObject();
     }
 }
