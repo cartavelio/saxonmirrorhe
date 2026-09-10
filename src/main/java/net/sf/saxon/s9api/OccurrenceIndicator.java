@@ -79,6 +79,31 @@ public enum OccurrenceIndicator {
     }
 
     /**
+     * Ask whether this occurrence indicator permits a sequence of a given size
+     * @param size the number of items in the sequence
+     * @return true if this number of items is permitted by the occurrence indicator
+     * @since 12.0
+     */
+
+    public boolean allows(int size) {
+        OccurrenceIndicator indicator = this;
+        switch (indicator) {
+            case ZERO:
+                return size == 0;
+            case ZERO_OR_ONE:
+                return size <= 1;
+            case ZERO_OR_MORE:
+                return true;
+            case ONE:
+                return size == 1;
+            case ONE_OR_MORE:
+                return size > 0;
+            default:
+                return false;
+        }
+    }
+
+    /**
      * Ask whether one occurrence indicator subsumes another. Specifically,
      * <code>A.subsumes(B)</code> is true if every sequence that satisfies the occurrence
      * indicator B also satisfies the occurrence indicator A.

@@ -21,9 +21,12 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.s9api.streams.Step;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.NumericValue;
+
+import java.util.function.Predicate;
 
 /**
  * An item type, as defined in the XPath/XQuery specifications.
@@ -34,11 +37,15 @@ import net.sf.saxon.value.NumericValue;
  * on a later version.</p>
  * <p>More complicated item types, especially those that are dependent on information in a schema,
  * are available using factory methods on the {@link ItemTypeFactory} object. The factory methods can
- * also be used to create variants of the types that use the rules given in the XML 1.1 and/or XSD 1.1 specifications.</p>
+ * also be used to create variants of the types that use the rules given in the XML 1.1 and/or XSD 1.1
+ * specifications. In addition the method {@link ItemTypeFactory#parseItemType} can be used to construct
+ * <code>ItemType</code> objects from their representation in XPath syntax.</p>
+ * <p>An <code>ItemType</code> can be used as a predicate in contexts where a predicate is required
+ * to filter items, for example in {@link Step#where}.</p>
  */
 
 @SuppressWarnings("WeakerAccess")
-public abstract class ItemType {
+public abstract class ItemType implements Predicate<XdmItem> {
 
     protected final net.sf.saxon.type.ItemType underlyingType;
 
@@ -52,6 +59,61 @@ public abstract class ItemType {
         defaultConversionRules.setStringToDoubleConverter(StringToDouble.getInstance());
         defaultConversionRules.setNotationSet(null);
         defaultConversionRules.setURIChecker(StandardURIChecker.getInstance());
+    }
+
+    /**
+     * Combine an item type with an occurrence indicator to produce a SequenceType. For example
+     * <code>ItemType.ANY_ITEM.with(OccurrenceIndicator.ONE_OR_MORE)</code> returns the sequence
+     * type <code>item()+</code>.
+     * @param occurrenceIndicator the occurrence indicator to be used
+     * @return the corresponding sequence type
+     */
+
+    public SequenceType with(OccurrenceIndicator occurrenceIndicator) {
+        return SequenceType.makeSequenceType(this, occurrenceIndicator);
+    }
+
+    /**
+     * Combine the item type with the occurrence indicator "exactly one"
+     * to form a sequence type.
+     * @return the result of <code>with(OccurrenceIndicator.ONE)</code>
+     */
+
+    public SequenceType one() {
+        return SequenceType.makeSequenceType(this, OccurrenceIndicator.ONE);
+    }
+
+    /**
+     * Combine the item type with the occurrence indicator "one or more" (+)
+     * to form a sequence type.
+     *
+     * @return the result of <code>with(OccurrenceIndicator.ONE_OR_MORE)</code>
+     */
+
+    public SequenceType oneOrMore() {
+        return SequenceType.makeSequenceType(this, OccurrenceIndicator.ONE_OR_MORE);
+    }
+
+    /**
+     * Combine the item type with the occurrence indicator "zero or more" (*)
+     * to form a sequence type.
+     *
+     * @return the result of <code>with(OccurrenceIndicator.ZERO_OR_MORE)</code>
+     */
+
+    public SequenceType zeroOrMore() {
+        return SequenceType.makeSequenceType(this, OccurrenceIndicator.ZERO_OR_MORE);
+    }
+
+    /**
+     * Combine the item type with the occurrence indicator "zero or one" (?)
+     * to form a sequence type.
+     *
+     * @return the result of <code>with(OccurrenceIndicator.ZERO_OR_ONE)</code>
+     */
+
+    public SequenceType zeroOrOne() {
+        return SequenceType.makeSequenceType(this, OccurrenceIndicator.ZERO_OR_ONE);
     }
 
     /**
@@ -295,19 +357,7 @@ public abstract class ItemType {
      * ItemType representing the type xs:anyAtomicType, that is, any atomic value
      */
 
-    public static final ItemType ANY_ATOMIC_VALUE = new ItemType(BuiltInAtomicType.ANY_ATOMIC) {
-
-        @Override
-        public boolean matches(XdmItem item) {
-            return item.getUnderlyingValue() instanceof AtomicValue;
-        }
-
-        @Override
-        public boolean subsumes(ItemType other) {
-            return other.getUnderlyingItemType() instanceof AtomicType;
-        }
-
-    };
+    public static final ItemType ANY_ATOMIC_VALUE = atomic(BuiltInAtomicType.ANY_ATOMIC, defaultConversionRules);
 
     /**
      * ItemType representing the type xs:error: a type with no instances
@@ -387,6 +437,11 @@ public abstract class ItemType {
         @Override
         public net.sf.saxon.type.ItemType getUnderlyingItemType() {
             return underlyingType;
+        }
+
+        @Override
+        public String toString() {
+            return "xs:" + ((BuiltInAtomicType)underlyingType).getStructuredQName().getLocalPart();
         }
     }
 
@@ -709,6 +764,19 @@ public abstract class ItemType {
     }
 
     /**
+     * Determine whether this item type matches a given item. This is a synonym of
+     * the {@link #matches} method, provided so that an <code>ItemType</code> can be
+     * used as a <code>Predicate</code>.
+     *
+     * @param item the item to be tested against this item type
+     * @return true if the item matches this item type, false if it does not match.
+     */
+
+    public boolean test(XdmItem item) {
+        return matches(item);
+    }
+
+    /**
      * Determine whether this item type matches a given item.
      *
      * @param item the item to be tested against this item type
@@ -783,10 +851,19 @@ public abstract class ItemType {
     }
 
     /**
-     * Get a string representation of the type. This will be a string that conforms to the
-     * XPath ItemType production, for example a QName (always in "Q{uri}local" format, or a construct
-     * such as "node()" or "map(*)". If the type is an anonymous schema type, the name of the nearest
-     * named base type will be given, preceded by the character "&lt;".
+     * Get a string representation of the type. This will be generally a string that conforms to the
+     * XPath ItemType production, for example a QName, or a construct
+     * such as "node()" or "map(*)".
+     *
+     * <p>QNames are generally in EQName (<code>Q{uri}local</code>) format, except that
+     * the prefix <code>xs:</code> is used for the XML Schema namespace.</p>
+     *
+     * <p>If the type is an anonymous schema type, the name of the nearest
+     * named base type will be given, preceded by the character "&lt;".</p>
+     *
+     * <p>In the case of a function item type, the returned string will be
+     * in parentheses (for example <code>(function() as xs:string)</code>) so
+     * that an occurrence indicator can be added without ambiguity.</p>
      *
      * @return a string representation of the type
      * @since 9.7

@@ -15,9 +15,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceType;
 
 /**
- * Higher-order functions in XPath 3.0 introduce a third kind of Item, namely a Function Item.
- * This type is represented here by a placeholder interfaces. The implementation of this type
- * is found only in Saxon-EE
+ * An ItemType representing the type of a function item (subclasses are used for maps and arrays)
  */
 
 public interface FunctionItemType extends ItemType {
