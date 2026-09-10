@@ -927,7 +927,24 @@ public class XPathParser {
                         at = (CastingTarget)parseItemType();
                     } else {
                         expect(Token.NAME);
-                        at = getSimpleType(t.currentTokenValue);
+                        StructuredQName sq = null;
+                        try {
+                            sq = qNameParser.parse(t.currentTokenValue, env.getDefaultElementNamespace());
+                        } catch (XPathException e) {
+                            grumble(e.getMessage(), e.getErrorCodeQName());
+                            assert false;
+                        }
+                        ItemType alias = env.resolveTypeAlias(sq);
+                        if (alias != null) {
+                            if (alias instanceof CastingTarget) {
+                                at = (CastingTarget) alias;
+                            } else {
+                                grumble("The type " + t.currentTokenValue + " cannot be used as the target of a cast");
+                                at = null;
+                            }
+                        } else {
+                            at = getSimpleType(t.currentTokenValue);
+                        }
                         nextToken();
                     }
                     if (at == BuiltInAtomicType.ANY_ATOMIC) {
@@ -1582,6 +1599,12 @@ public class XPathParser {
         } else if (uri.equals(NamespaceUri.DOT_NET_TYPE)) {
             return Version.platform.getExternalObjectType(config, uri, local);
         } else {
+            if (allowXPath40Syntax) {
+                ItemType it = env.resolveTypeAlias(sq);
+                if (it != null) {
+                    return it;
+                }
+            }
             SchemaType st = config.getSchemaType(sq);
             if (st == null) {
                 grumble("Unknown simple type " + qname, "XPST0051");

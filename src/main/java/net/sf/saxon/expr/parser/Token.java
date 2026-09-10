@@ -528,8 +528,9 @@ public abstract class Token {
     /**
      * Saxon extension: declare type
      */
-    public static final int DECLARE_TYPE = 124;
+    public static final int DECLARE_ITEM_TYPE = 124;
     public static final int SWITCH_CASE = 125;
+
     /**
      * semicolon separator
      */
@@ -792,7 +793,7 @@ public abstract class Token {
         mapDouble("declare copy-namespaces", DECLARE_COPY_NAMESPACES);
         mapDouble("declare option", DECLARE_OPTION);
         mapDouble("declare revalidation", DECLARE_REVALIDATION);
-        mapDouble("declare type", DECLARE_TYPE); // Saxon extension
+        mapDouble("declare item-type", DECLARE_ITEM_TYPE);
         mapDouble("import schema", IMPORT_SCHEMA);
         mapDouble("import module", IMPORT_MODULE);
         mapDouble("declare variable", DECLARE_VARIABLE);

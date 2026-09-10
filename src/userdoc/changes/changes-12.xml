@@ -507,6 +507,8 @@
         and <code>attribute(A|B)</code> to accept a union of names. Wildcards are also allowed,
         for example <code>element(p:*|q:*)</code></p>
         
+        <p>From 12.4, casting to locally-defined union types and enumeration types is supported.</p>
+        
         
         <h2>XQuery 4.0 extensions</h2>
         
@@ -532,7 +534,12 @@
         XQuery versions, only string literals and numeric literals were allowed).</p>
         
         <p>From 12.4, the comparand expression in a switch expression can be omitted, and defaults to <code>true()</code>.</p>
-        <h2>XSLT extensions</h2>
+        
+        <p>From 12.4, the XQuery syntax for declaring named item types is changed to match the syntax in the
+        draft specification (`declare item-type my:type as union(x, y);` in place of 
+        `declare type my:type = union(x, y)`.</p>
+        
+        <h2>XSLT 4.0 extensions</h2>
         
         
         <p>If XSLT 4.0 extensions are enabled, two new (experimental) values are available for <code>xsl:mode/@on-no-match</code>,

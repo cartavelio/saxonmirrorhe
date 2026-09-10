@@ -633,6 +633,9 @@ public class XQueryParser extends XPathParser {
                         } else if (isKeyword("variable")) {
                             annotationList.check(env.getConfiguration(), "DV");
                             parseVariableDeclaration(annotationList);
+                        } else if (isKeyword("item-type")) {
+                            annotationList.check(env.getConfiguration(), "DI");
+                            parseItemTypeDeclaration(annotationList);
                         } else {
                             grumble("Annotations can appear only in 'declare variable' and 'declare function'");
                         }
@@ -765,13 +768,13 @@ public class XQueryParser extends XPathParser {
                         }
                         parseOptionDeclaration();
                         break;
-                    case Token.DECLARE_TYPE:
-                        checkSyntaxExtensions("declare type");
+                    case Token.DECLARE_ITEM_TYPE:
+                        checkSyntaxExtensions("declare item-type");
                         if (allowDeclarations) {
                             sealNamespaces(namespacesToBeSealed, env.getConfiguration());
                             allowDeclarations = false;
                         }
-                        parseTypeAliasDeclaration();
+                        parseItemTypeDeclaration(AnnotationList.EMPTY);
                         break;
                     case Token.DECLARE_CONSTRUCTION:
                         if (!allowDeclarations) {
@@ -2101,8 +2104,8 @@ public class XQueryParser extends XPathParser {
      * @throws XPathException if parsing fails
      */
 
-    protected void parseTypeAliasDeclaration() throws XPathException {
-        parserExtension.parseTypeAliasDeclaration(this);
+    protected void parseItemTypeDeclaration(AnnotationList annotations) throws XPathException {
+        parserExtension.parseItemTypeDeclaration(this);
     }
 
     /**
