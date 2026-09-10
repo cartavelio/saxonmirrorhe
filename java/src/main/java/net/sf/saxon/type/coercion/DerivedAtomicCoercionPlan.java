@@ -25,8 +25,9 @@ public class DerivedAtomicCoercionPlan extends AtomicCoercionPlan {
         AtomicType prim = (AtomicType) req.getPrimitiveItemType();   // cast needed for C#
         if (prim == BuiltInAtomicType.INTEGER) {
             prim = BuiltInAtomicType.DECIMAL;
-        }
-        if (prim == BuiltInAtomicType.DAY_TIME_DURATION) {
+        } else if (prim == BuiltInAtomicType.DAY_TIME_DURATION) {
+            prim = BuiltInAtomicType.DURATION;
+        } else if (prim == BuiltInAtomicType.YEAR_MONTH_DURATION) {
             prim = BuiltInAtomicType.DURATION;
         }
         ConversionRules rules = request.config.getConversionRules();

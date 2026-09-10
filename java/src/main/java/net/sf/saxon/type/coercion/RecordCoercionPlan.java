@@ -64,38 +64,8 @@ public final class RecordCoercionPlan extends CoercionPlan {
                      }
                  }
             }
-            // Drop any extra entries
             return builder.getCompletedMapConfidently();
-//            MapItem resultMap = null;
-//            if (suppliedMap.size() > test.getSize()) {
-//                if (!test.isExtensible()) {
-//                    throw coercionError(item, requiredType, request);
-//                }
-//                for (KeyValuePair kvp : suppliedMap.keyValuePairs()) {
-//                    if (kvp.key().getItemType() == BuiltInAtomicType.STRING) {
-//                        if (test.getFieldType(kvp.key().getStringValue()) != null) {
-//                            // Skip this entry, we have already dealt with it
-//                            continue;
-//                        }
-//                        if (resultMap == null) {
-//                            builder.put(kvp.key().getUnicodeStringValue(), kvp.value());
-//                            continue;
-//                        }
-//                    }
-//                    if (resultMap == null) {
-//                        // We have found an entry whose key is not an instance of xs:string, so we need
-//                        // to abandon the StringMapBuilder approach
-//                        resultMap = builder.getCompletedMapConfidently();
-//                    }
-//                    resultMap.put(kvp.key(), kvp.value());
-//                }
-//            }
-//            if (resultMap == null) {
-//                resultMap = builder.getCompletedMapConfidently();
-//            }
-//            return resultMap;
-            //check(m2, test, request);  // TODO: is this needed?
-            //return m2;
+
         } else {
             throw coercionError(item, requiredType, request);
         }
