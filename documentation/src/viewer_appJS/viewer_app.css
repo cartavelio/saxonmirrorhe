@@ -393,6 +393,10 @@ div.section h2{
    background-origin: content-box;
    min-height: 60px;
 }
+td .qt4 {
+	background-size: 2em;
+	min-height: 2em;
+}
 .flink-qt4 {
    padding-right: .5em;
    border-right: .5em;
