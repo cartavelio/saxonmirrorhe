@@ -820,10 +820,23 @@ public class SlashExpression extends BinaryExpression
         Expression head = getLeadingSteps();
         Expression tail = getLastStep();
         if (head instanceof ItemChecker) {
-            // No need to typecheck the context item
+            // No need to type check the context item
             ItemChecker checker = (ItemChecker) head;
             if (checker.getBaseExpression() instanceof ContextItemExpression) {
                 return tail.toPattern(config);
+            }
+        } else if (tail instanceof VennExpression) {
+            // Bug 4645. Rewrite a/(b|c) as (a/b union a/c). Note this rewrite isn't safe for
+            // the "intersect" and "except" operators, except in special cases
+            VennExpression ve = (VennExpression)tail;
+            if (ve.operator == Token.UNION) {
+                Expression lhExpansion = new SlashExpression(
+                        head.copy(new RebindingMap()), ve.getLhsExpression());
+                Expression rhExpansion = new SlashExpression(
+                        head.copy(new RebindingMap()), ve.getRhsExpression());
+                VennExpression topExpansion = new VennExpression(
+                        lhExpansion, ve.operator, rhExpansion);
+                return topExpansion.toPattern(config);
             }
         }
 
@@ -850,19 +863,8 @@ public class SlashExpression extends BinaryExpression
             }
         }
         if (headPattern == null) {
-            if (tail instanceof VennExpression) {
-                // Bug 4645. Rewrite a/(b|c) as (a/b union a/c)
-                Expression lhExpansion = new SlashExpression(
-                        head.copy(new RebindingMap()), ((VennExpression) tail).getLhsExpression());
-                Expression rhExpansion = new SlashExpression(
-                        head.copy(new RebindingMap()), ((VennExpression) tail).getRhsExpression());
-                VennExpression topExpansion = new VennExpression(
-                        lhExpansion, ((VennExpression) tail).operator, rhExpansion);
-                return topExpansion.toPattern(config);
-            } else {
-                axis = PatternMaker.getAxisForPathStep(tail);
-                headPattern = head.toPattern(config);
-            }
+            axis = PatternMaker.getAxisForPathStep(tail);
+            headPattern = head.toPattern(config);
         }
         return new AncestorQualifiedPattern(tailPattern, headPattern, axis);
     }

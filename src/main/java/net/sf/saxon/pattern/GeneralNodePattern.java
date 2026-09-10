@@ -30,10 +30,9 @@ import net.sf.saxon.type.*;
 
 public final class GeneralNodePattern extends Pattern {
 
-    private Expression equivalentExpr = null;
-    private NodeTest itemType = null;
-    private NodeTest topNodeTest = null;
-    private Expression rump = null;
+    private Expression equivalentExpr;
+    private final NodeTest itemType;
+    private Expression topNodeEquivalent = null;
 
     /**
      * Create a GeneralNodePattern
@@ -45,14 +44,35 @@ public final class GeneralNodePattern extends Pattern {
     public GeneralNodePattern(Expression expr, NodeTest itemType) {
         equivalentExpr = expr;
         this.itemType = itemType;
-        if (expr instanceof SlashExpression) {
-            Expression head = ((SlashExpression)expr).getFirstStep();
-            if (head instanceof SimpleStepExpression) {
-                head = ((SimpleStepExpression)head).getAxisExpression();
-            }
-            if (head instanceof AxisExpression && ((AxisExpression)head).getAxis() == AxisInfo.CHILD) {
-                topNodeTest = ((AxisExpression) head).getNodeTest();
-                rump = ((SlashExpression) expr).getRemainingSteps();
+        makeTopNodeEquivalent();
+    }
+
+    /**
+     * A pattern whose first step uses the child axis is treated as using the child-or-top axis,
+     * which selects a node that is either (a) a child, or (b) a parentless element, comment,
+     * text node, or PI. We handle this by creating a variant of the equivalent expression that
+     * uses the self axis instead of child, and using this variant if matching a tree that satisfies
+     * the other conditions.
+     */
+    private void makeTopNodeEquivalent() {
+        if (equivalentExpr instanceof SlashExpression) {
+            Expression head = ((SlashExpression) equivalentExpr).getFirstStep();
+            if (ExpressionTool.getAxisNavigation(head) == AxisInfo.CHILD) {
+                SlashExpression copy = (SlashExpression) equivalentExpr.copy(new RebindingMap());
+                Expression copyHead = copy.getFirstStep();
+                while (true) {
+                    if (copyHead instanceof FilterExpression) {
+                        copyHead = ((FilterExpression) copyHead).getBase();
+                    } else if (copyHead instanceof SingleItemFilter) {
+                        copyHead = ((SingleItemFilter) copyHead).getBaseExpression();
+                    } else {
+                        break;
+                    }
+                }
+                if (copyHead instanceof AxisExpression) {
+                    ((AxisExpression)copyHead).setAxis(AxisInfo.SELF);
+                    topNodeEquivalent = copy;
+                }
             }
         }
     }
@@ -192,8 +212,8 @@ public final class GeneralNodePattern extends Pattern {
             NodeInfo a = anc.next();
             if (a == null) {
                 // The first step in a pattern, if it uses the child axis, is interpreted as "child-or-top" (test case match-274)
-                if (topNodeTest != null && UType.CHILD_NODE_KINDS.matches(top)) {
-                    return topNodeTest.test(top) && isSelected(((NodeInfo) item), top, rump, context);
+                if (topNodeEquivalent != null && UType.CHILD_NODE_KINDS.matches(top)) {
+                    return isSelected(((NodeInfo) item), top, topNodeEquivalent, context);
                 }
                 return false;
             }
