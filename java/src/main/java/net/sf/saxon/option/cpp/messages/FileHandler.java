@@ -2,6 +2,7 @@ package net.sf.saxon.option.cpp.messages;
 
 import net.sf.saxon.lib.ResourceRequest;
 import net.sf.saxon.option.cpp.SaxonCAPI;
+import net.sf.saxon.option.cpp.SaxonCDebug;
 import net.sf.saxon.option.cpp.SaxonCExceptionHandler;
 import net.sf.saxon.option.cpp.SaxonError;
 import net.sf.saxon.s9api.Message;
@@ -18,9 +19,7 @@ import java.util.List;
 
 public class FileHandler implements MessageHandler, AutoCloseable {
     private final File output;
-    private final FileWriter fileWriter;
-    private final BufferedWriter bufferedWriter;
-    private final PrintWriter out;
+    private  PrintWriter out;
 
     @CEntryPoint(name = "j_xsltExecutable_messageHandler_file")
     public static long createHandler(IsolateThread thread, ObjectHandle procRef, CCharPointer cCwd, CCharPointer cFilename, SaxonError saxonError) {
@@ -47,18 +46,41 @@ public class FileHandler implements MessageHandler, AutoCloseable {
 
     public FileHandler(File f) throws IOException {
         output =  f;
-        fileWriter = new FileWriter(output, true);
-        bufferedWriter = new BufferedWriter(fileWriter);
-        out = new PrintWriter(bufferedWriter);
     }
 
     @Override
     public void close() throws Exception {
-        bufferedWriter.close();
+        if (SaxonCDebug.debug) {
+            SaxonCDebug.err("Closing xsl:message file handler");
+        }
+        if (out != null) {
+            out.close();
+            out = null;
+        }
     }
 
     @Override
     public void accept(Message message) {
-        out.println(message.toString());
+        if (SaxonCDebug.debug) {
+            if (out == null) {
+                SaxonCDebug.err("Opening file \"" + output + "\" for appending");
+            }
+            SaxonCDebug.err("Received message with string content: " + message.getContent().getStringValue());
+            SaxonCDebug.err("<message.toString()>: " + message.toString());
+        }
+        if (out == null) {
+            try {
+                open();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        out.println(message.getStringValue());
+        out.flush();
+    }
+
+    private void open() throws IOException {
+        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(output, true));
+        out = new PrintWriter(bos);
     }
 }

@@ -96,11 +96,13 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:6.1.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.junit.jupiter:junit-jupiter-api")
-//    testImplementation("org.apiguardian:apiguardian-api:1.0.0")
     testImplementation("org.hamcrest:hamcrest:2.2")
+//    testImplementation("org.apiguardian:apiguardian-api:1.0.0")
 //    testImplementation("org.apache.ant:ant:1.10.9")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     testImplementation("com.sparkjava:spark-core:2.9.4")
+    testImplementation("org.graalvm.sdk:graal-sdk:${project.findProperty("graalSdkVersion")}")
+
 }
 
 java {

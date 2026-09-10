@@ -1121,12 +1121,12 @@ void XsltExecutable::setSaveXslMessage(bool create, const char *filename) {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   saxon_error_t r = SAXON_ERROR_DEFAULT;
   if (create) {
+    if (saxonMessageHandlerRef != SXN_UNSET) {
+      j_handles_destroy(thread,
+                (void *)saxonMessageHandlerRef);
+      saxonMessageHandlerRef = SXN_UNSET;
+    }
     if (filename == nullptr) {
-      if (saxonMessageHandlerRef != SXN_UNSET) {
-        j_handles_destroy(thread,
-                  (void *)saxonMessageHandlerRef);
-        saxonMessageHandlerRef = SXN_UNSET;
-      }
       saxonMessageHandlerRef = j_xsltExecutable_messageHandler_store(thread, &r);
     } else {
       saxonMessageHandlerRef = j_xsltExecutable_messageHandler_file(thread, (void *)procRef,

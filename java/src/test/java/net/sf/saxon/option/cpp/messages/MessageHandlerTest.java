@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -74,7 +75,7 @@ public class MessageHandlerTest {
 
         @Test
         @DisplayName("FileHandler should write the message contents to the specified file")
-        public void testFileHandler(@TempDir Path temp) throws Exception {
+        void testFileHandler(@TempDir Path temp) throws Exception {
             Path f = temp.resolve("messages.txt");
 
             try (FileHandler fh = new FileHandler(f.toFile())) {
@@ -96,6 +97,50 @@ public class MessageHandlerTest {
             }
 
             assertIterableEquals(List.of(), handler.getMessages());
+        }
+
+        @Test
+        @DisplayName("Can be closed outside of a try-with-resources block")
+        void canBeSeparatelyClosed(@TempDir Path temp) throws Exception {
+            Path f = temp.resolve("messages.txt");
+
+            FileHandler fh = new FileHandler(f.toFile());
+            handler = fh;
+            List.of(messageFixture).forEach(handler);
+
+            handler.close();
+
+            assertEquals(messageFixture.toString() + "\n", Files.readString(f));
+        }
+
+
+        @Test
+        @DisplayName("Messages are flushed to the file immediately")
+        void messagesAreFlushedToFileImmediately(@TempDir Path temp) throws Exception {
+            Path f = temp.resolve("messages.txt");
+
+            FileHandler fh = new FileHandler(f.toFile());
+            handler = fh;
+            List.of(messageFixture).forEach(handler);
+
+            assertEquals(messageFixture.toString() + "\n", Files.readString(f));
+        }
+
+        @Test
+        @DisplayName("A closed FileHandler will automatically re-open its file and append to it if asked to consume more messages")
+        void canBeReused(@TempDir Path temp) throws Exception {
+            Path f = temp.resolve("messages.txt");
+
+            FileHandler fh = new FileHandler(f.toFile());
+            handler = fh;
+            List.of(messageFixture).forEach(handler);
+
+            handler.close();
+
+            List.of(messageFixture).forEach(handler);
+            String expected = List.of(messageFixture, messageFixture).stream().map(m -> m.toString() + "\n")
+                    .collect(Collectors.joining());
+            assertEquals(expected, Files.readString(f));
         }
     }
 

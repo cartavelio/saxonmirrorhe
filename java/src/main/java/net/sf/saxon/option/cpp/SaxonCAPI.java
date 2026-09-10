@@ -345,6 +345,7 @@ public class SaxonCAPI {
         String debugFlag = System.getenv("SAXONC_DEBUG_FLAG");
         if (debugFlag != null && debugFlag.equals("true")) {
             SaxonCAPI.debug = true;
+            SaxonCDebug.debug = true;
             PathHelper.debug = true;
             //com.oracle.svm.core.SubstrateGCOptions.VerboseGC.update(true);
         }
@@ -2183,6 +2184,7 @@ public class SaxonCAPI {
 
     public static void testj() throws SaxonApiException {
         SaxonCAPI.debug = true;
+        SaxonCDebug.debug = true;
 
 
         //Source result = SaxonCAPI.resolveFileToSource(processor, "/Users/ond1/work/development/git/saxon-dev/saxondev/build/releases/libsaxon-EEC-mac-x86_64-v12.3/samples/cppTests", "../php/xsl/foo.xsl", ResourceRequest.XSLT_NATURE);

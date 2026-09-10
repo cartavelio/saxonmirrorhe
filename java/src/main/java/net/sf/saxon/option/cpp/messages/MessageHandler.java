@@ -1,6 +1,7 @@
 package net.sf.saxon.option.cpp.messages;
 
 import net.sf.saxon.option.cpp.SaxonCAPI;
+import net.sf.saxon.option.cpp.SaxonCDebug;
 import net.sf.saxon.s9api.Message;
 import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.ObjectHandle;
@@ -18,8 +19,9 @@ public interface MessageHandler extends Consumer<Message> {
         return emptyMessages;
     }
 
-    default void clear() {
-    }
+    default void clear() {}
+
+    default void close() throws Exception {}
 
     /**
      * Get the xsl:messages  as an array of XdmNode objects in the C memory space
@@ -32,8 +34,8 @@ public interface MessageHandler extends Consumer<Message> {
     public static CLongPointer getXslMessages(IsolateThread thread, SaxonCAPI.AllocatorFn alloc, ObjectHandle messageHandlerRef) {
         MessageHandler handler = SaxonCAPI.objectHandles.get(messageHandlerRef);
         List<Message> xslMessages = handler.getMessages();
-        if(SaxonCAPI.debug) {
-            System.err.println("SaxonCMessageListener getXslMessage size = " + xslMessages.size());
+        if(SaxonCDebug.debug) {
+            SaxonCDebug.err("SaxonCMessageListener getXslMessage size = " + xslMessages.size());
         }
         if( xslMessages.size() == 0 ) {
             return WordFactory.nullPointer();
@@ -53,12 +55,12 @@ public interface MessageHandler extends Consumer<Message> {
     @CEntryPoint(name = "j_clearXslMessages")
     public static void  clearXslMessages(IsolateThread thread, ObjectHandle messageHandlerRef) {
         MessageHandler handler = SaxonCAPI.objectHandles.get(messageHandlerRef);
-        if(SaxonCAPI.debug) {
-            System.err.println("Before clear - SaxonCMessageListener getXslMessage size = " + handler.getMessages().size());
+        if(SaxonCDebug.debug) {
+            SaxonCDebug.err("Before clear - SaxonCMessageListener getXslMessage size = " + handler.getMessages().size());
         }
         handler.clear();
-        if(SaxonCAPI.debug) {
-            System.err.println("After clear - SaxonCMessageListener getXslMessage size = " + handler.getMessages().size());
+        if(SaxonCDebug.debug) {
+            SaxonCDebug.err("After clear - SaxonCMessageListener getXslMessage size = " + handler.getMessages().size());
         }
 
     }
