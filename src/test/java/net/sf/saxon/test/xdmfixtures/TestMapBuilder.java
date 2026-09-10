@@ -2,14 +2,15 @@ package net.sf.saxon.test.xdmfixtures;
 
 import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.EmptyMap;
+import net.sf.saxon.ma.map.MapBuilder;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 
-public class MapBuilder implements BuilderDsl {
-    DictionaryMap map = new DictionaryMap();
+public class TestMapBuilder implements BuilderDsl {
+    MapBuilder map = DictionaryMap.getBuilder();
 
-    public static MapItem build(DslLambda<MapBuilder> definition) {
-        MapBuilder builder = new MapBuilder();
+    public static MapItem build(DslLambda<TestMapBuilder> definition) {
+        TestMapBuilder builder = new TestMapBuilder();
         definition.buildWith(builder);
         return builder.getValue();
     }
@@ -20,26 +21,26 @@ public class MapBuilder implements BuilderDsl {
 
     @Override
     public MapItem getValue() {
-        return map;
+        return map.getCompletedMap();
     }
 
-    public MapBuilder put(String name, DslLambda<SequenceBuilder> definition) {
-        map.initialPut(name, SequenceBuilder.build(definition));
+    public TestMapBuilder put(String name, DslLambda<SequenceBuilder> definition) {
+        map.put(name, SequenceBuilder.build(definition));
         return this;
     }
 
-    public MapBuilder put(String name, GroundedValue value) {
-        map.initialPut(name, value);
+    public TestMapBuilder put(String name, GroundedValue value) {
+        map.put(name, value);
         return this;
     }
 
-    public MapBuilder put(String name, String value) {
-        map.initialPut(name, AtomicValueBuilder.string(value));
+    public TestMapBuilder put(String name, String value) {
+        map.put(name, AtomicValueBuilder.string(value));
         return this;
     }
 
-    public MapBuilder put(String name, Integer value) {
-        map.initialPut(name, AtomicValueBuilder.integer(value));
+    public TestMapBuilder put(String name, Integer value) {
+        map.put(name, AtomicValueBuilder.integer(value));
         return this;
     }
 

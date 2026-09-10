@@ -1,11 +1,7 @@
 package net.sf.saxon.test.xdmfixtures;
 
-import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.value.Int64Value;
-import net.sf.saxon.value.IntegerValue;
-import net.sf.saxon.value.StringValue;
 
 import java.util.stream.Stream;
 
@@ -28,8 +24,8 @@ public interface BuilderDsl {
         return SequenceBuilder.empty();
     }
 
-    default MapItem map(DslLambda<MapBuilder> definition) {
-        return MapBuilder.build(definition);
+    default MapItem map(DslLambda<TestMapBuilder> definition) {
+        return TestMapBuilder.build(definition);
     }
 
     default GroundedValue array(DslLambda<ArrayBuilder> definition) {
@@ -53,7 +49,7 @@ public interface BuilderDsl {
     }
 
     default MapItem map() {
-        return MapBuilder.empty();
+        return TestMapBuilder.empty();
     }
 
 }

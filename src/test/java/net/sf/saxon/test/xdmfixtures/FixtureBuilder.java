@@ -5,12 +5,12 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 
 public class FixtureBuilder {
-    public static MapItem map(DslLambda<MapBuilder> definition) {
-        return (MapItem) MapBuilder.build(definition);
+    public static MapItem map(DslLambda<TestMapBuilder> definition) {
+        return (MapItem) TestMapBuilder.build(definition);
     }
 
     public static MapItem map() {
-        return MapBuilder.empty();
+        return TestMapBuilder.empty();
     }
 
     public static GroundedValue sequence(DslLambda<SequenceBuilder> definition) {
