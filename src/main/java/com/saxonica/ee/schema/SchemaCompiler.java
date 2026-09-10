@@ -9,10 +9,7 @@ import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.instruct.GlobalParam;
 import net.sf.saxon.expr.instruct.GlobalParameterSet;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.lib.ErrorReporter;
-import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.lib.SchemaURIResolver;
+import net.sf.saxon.lib.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
@@ -128,6 +125,9 @@ public class SchemaCompiler {
      *
      * @param sources       the JAXP Source objects identifying the schema documents to be loaded. These may be either
      *                      source schema documents in XSD format, or a compiled schema in Saxon's SCM format
+     *                      If any {@code Source} is an {@link AugmentedSource} with a required target namespace,
+     *                      then a {@code SchemaException} is thrown if the schema document that is read does
+     *                      not have the required namespace.
      * @return a PreparedSchema containing the compiled schema.
      * @throws SchemaException if the schema cannot be read or parsed or if it is invalid
      */
@@ -168,6 +168,20 @@ public class SchemaCompiler {
                         throw new SchemaException(e);
                     }
                 } else {
+                    if (source instanceof AugmentedSource) {
+                        NamespaceUri required = ((AugmentedSource)source).getRequiredTargetNamespace();
+                        if (required != null) {
+                            if (required.equals(NamespaceUri.NULL) && schemadoc.getTargetNamespace() != NamespaceUri.NULL) {
+                                throw new SchemaException("The schema document at " + source.getSystemId() +
+                                        " is required to be a no-namespace schema, but has a target namespace of " +
+                                        schemadoc.getTargetNamespace());
+                            } else if (!required.equals(schemadoc.getTargetNamespace())) {
+                                throw new SchemaException("The schema document at " + source.getSystemId() +
+                                        " does not have the required target namespace " + required);
+                            }
+                        }
+
+                    }
                     schemaDocuments.add(schemadoc);
                     xsdSchema.addSchemaDocument(source.getSystemId());
                 }
@@ -409,7 +423,6 @@ public class SchemaCompiler {
      * set, the schema document will be fully validated and integrated with other schema documents
      * previously loaded
      *
-     * @param pipe           the pipeline configuration
      * @param baseURI        the base URI for resolving relative URIs
      * @param schemaLocation the location "hint" where to find the schema document. Must not be null.
      * @param expected       the target namespace expected; null if there is no
@@ -417,7 +430,7 @@ public class SchemaCompiler {
      * @return the actual target namespace of the schema
      */
 
-    public PreparedSchema readSchema(PipelineConfiguration pipe, String baseURI, String schemaLocation, NamespaceUri expected)
+    public PreparedSchema readSchema(String baseURI, String schemaLocation, NamespaceUri expected)
             throws SchemaException {
         Source source = SchemaReader.getSource(baseURI, schemaLocation, this, expected);
         if (source == null) {

@@ -381,7 +381,7 @@ public class Validate {
 
             // Validate the document instances
 
-            final SchemaValidator validator = schema.getValidator();
+            final SchemaValidator validator = schema.newValidator();
             validator.setLax("lax".equals(validationMode));
             if (topLevelElementName != null) {
                 validator.setDocumentElementName(QName.fromClarkName(topLevelElementName));

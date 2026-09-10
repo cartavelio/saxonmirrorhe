@@ -59,7 +59,7 @@ public class PackageLoaderPE extends PackageLoaderHE {
                                 (ns.isEmpty() ? "a no-namespace schema" : "a schema for namespace " + ns) +
                                 ", but this is not available in this Configuration", SaxonErrorCode.SXPK0003);
             }
-            packStack.peek().getSchemaNamespaces().add(NamespaceUri.of(ns));
+            packStack.peek().getImportedSchemaNamespaces().add(NamespaceUri.of(ns));
         }
     }
 

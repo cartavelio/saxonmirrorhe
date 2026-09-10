@@ -126,7 +126,7 @@ public class SchemaTestSuiteDriver {
         String href = element.getAttributeValue(QN_xlink_href);
         URI target = element.getBaseURI().resolve(href);
         Source ss = new StreamSource(target.toString());
-        SchemaValidator validator = schema.getValidator();
+        SchemaValidator validator = schema.newValidator();
         StandardErrorReporter reporter = new StandardErrorReporter();
         reporter.setMaximumNumberOfErrors(500);
         validator.setInvalidityHandler(new InvalidityHandlerWrappingErrorReporter(reporter));

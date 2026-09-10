@@ -216,7 +216,7 @@ public class StylesheetPackageEE extends StylesheetPackage {
     }
 
     private void exportSchemaNamespaces(ExpressionPresenter presenter) {
-        for (NamespaceUri ns : schemaIndex) {
+        for (NamespaceUri ns : importedSchemaNamespaces) {
             presenter.startElement("schema");
             presenter.emitAttribute("ns", ns.toString());
             presenter.endElement();

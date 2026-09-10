@@ -1,24 +1,23 @@
 
 package com.saxonica.ee.trans;
 
+import com.saxonica.config.EnterpriseConfiguration;
+import com.saxonica.ee.schema.PreparedSchema;
+import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.ee.stream.Posture;
 import com.saxonica.ee.stream.PostureAndSweep;
 import com.saxonica.ee.stream.Streamability;
-import net.sf.saxon.om.NamespaceUri;
-import net.sf.saxon.style.XSLItemType;
-import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.instruct.AttributeSet;
 import net.sf.saxon.expr.instruct.GlobalParam;
 import net.sf.saxon.expr.instruct.GlobalVariable;
-import net.sf.saxon.style.ComponentDeclaration;
-import net.sf.saxon.style.PrincipalStylesheetModule;
-import net.sf.saxon.style.XSLImportSchema;
-import net.sf.saxon.style.XSLPackage;
+import net.sf.saxon.style.*;
+import net.sf.saxon.trans.CompilerInfo;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyItemType;
 
+import javax.xml.transform.Source;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,6 +47,12 @@ public class PrincipalStylesheetModuleEE extends PrincipalStylesheetModule {
     @Override
     protected void importSchemata() throws XPathException {
 
+        CompilerInfo compilerInfo = getRootElement().getCompilation().getCompilerInfo();
+        PreparedSchema preloadedSchema = (PreparedSchema) compilerInfo.getPreLoadedSchema();
+        if (preloadedSchema != null) {
+            getStylesheetPackage().setImportedSchema(preloadedSchema);
+        }
+
         boolean importsSchemas = false;
         for (ComponentDeclaration decl : topLevel) {
             if (decl.getSourceElement() instanceof XSLImportSchema) {
@@ -56,23 +61,36 @@ public class PrincipalStylesheetModuleEE extends PrincipalStylesheetModule {
             }
         }
         if (importsSchemas) {
-            synchronized (getConfiguration()) {
-                // Scan the declarations in reverse order, that is, highest precedence first
-                for (int i = topLevel.size() - 1; i >= 0; i--) {
-                    ComponentDeclaration decl = topLevel.get(i);
-                    if (decl.getSourceElement() instanceof XSLImportSchema) {
-                        ((XSLImportSchema) decl.getSourceElement()).readSchema();
-                    }
-                    if (decl.getSourceElement() instanceof XSLItemType) {
-                        ((XSLItemType) decl.getSourceElement()).indexTypeAlias(decl, this);
+            EnterpriseConfiguration config = (EnterpriseConfiguration) getConfiguration();
+            List<Source> sources = new ArrayList<>();
+            SchemaCompiler schemaCompiler = new SchemaCompiler(config);
+            // Scan the declarations in reverse order, that is, highest precedence first
+            for (int i = topLevel.size() - 1; i >= 0; i--) {
+                ComponentDeclaration decl = topLevel.get(i);
+                if (decl.getSourceElement() instanceof XSLImportSchema) {
+                    XSLImportSchema is = (XSLImportSchema) decl.getSourceElement();
+                    final Source source = is.asSource(schemaCompiler);
+                    if (source != null) {
+                        sources.add(source);
                     }
                 }
-                // Now seal all the schemas that have been imported to guarantee consistency with instance documents
-                Configuration config = getConfiguration();
-                for (NamespaceUri ns : getStylesheetPackage().getSchemaNamespaces()) {
-                    config.sealNamespace(ns);
+                // TODO: this doesn't belong here
+                if (decl.getSourceElement() instanceof XSLItemType) {
+                    ((XSLItemType) decl.getSourceElement()).indexTypeAlias(decl, this);
                 }
             }
+            if (!sources.isEmpty()) {
+                PreparedSchema assembledSchema = schemaCompiler.loadSources(sources);
+                if (preloadedSchema != null) {
+                    preloadedSchema.copyTo(assembledSchema, schemaCompiler);
+                }
+                getStylesheetPackage().setImportedSchema(assembledSchema);
+            }
+            // Now seal all the schemas that have been imported to guarantee consistency with instance documents
+//            for (NamespaceUri ns : getStylesheetPackage().getSchemaNamespaces()) {
+//                config.sealNamespace(ns);
+//            }
+
         }
     }
 

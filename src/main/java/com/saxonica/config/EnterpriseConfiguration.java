@@ -562,54 +562,54 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         return new PreparedSchema(this);
     }
 
-    /**
-     * Read a schema from a given schema location
-     *
-     * @param pipe           the PipelineConfiguration
-     * @param baseURI        the base URI for resolving relative URIs
-     * @param schemaLocation the location "hint" where to find the schema document. Must not be null.
-     *                       The document located may be either an XSD schema document or an SCM compiled schema.
-     * @param expected       the target namespace expected; null if there is no
-     *                       expectation
-     * @return the actual target namespace of the schema
-     */
+//    /**
+//     * Read a schema from a given schema location
+//     *
+//     * @param pipe           the PipelineConfiguration
+//     * @param baseURI        the base URI for resolving relative URIs
+//     * @param schemaLocation the location "hint" where to find the schema document. Must not be null.
+//     *                       The document located may be either an XSD schema document or an SCM compiled schema.
+//     * @param expected       the target namespace expected; null if there is no
+//     *                       expectation
+//     * @return the actual target namespace of the schema
+//     */
+//
+//    @Override
+//    public Schema readSchema(PipelineConfiguration pipe, String baseURI, String schemaLocation, NamespaceUri expected)
+//            throws SchemaException {
+//        int status = getNamespaceStatus(expected);
+//        if (status == PreparedSchema.NAMESPACE_UNKNOWN || (status == PreparedSchema.NAMESPACE_KNOWN && getConfigurationProperty(Feature.MULTIPLE_SCHEMA_IMPORTS))) {
+//            SchemaCompiler schemaCompiler = newSchemaCompiler();
+//            if (pipe.getErrorReporter() != null) {
+//                schemaCompiler.setErrorReporter(pipe.getErrorReporter());
+//            }
+//            PreparedSchema schema = schemaCompiler.readSchema(baseURI, schemaLocation, expected);
+//            schemaCompiler.setPreparedSchema(schema);
+//            schemaCompiler.makeAllAutomata();
+//            schemaCompiler.checkAllAutomata();
+//            return schema;
+//        } else {
+//            return null;
+//        }
+//    }
 
-    @Override
-    public Schema readSchema(PipelineConfiguration pipe, String baseURI, String schemaLocation, NamespaceUri expected)
-            throws SchemaException {
-        int status = getNamespaceStatus(expected);
-        if (status == PreparedSchema.NAMESPACE_UNKNOWN || (status == PreparedSchema.NAMESPACE_KNOWN && getConfigurationProperty(Feature.MULTIPLE_SCHEMA_IMPORTS))) {
-            SchemaCompiler schemaCompiler = newSchemaCompiler();
-            if (pipe.getErrorReporter() != null) {
-                schemaCompiler.setErrorReporter(pipe.getErrorReporter());
-            }
-            PreparedSchema schema = schemaCompiler.readSchema(pipe, baseURI, schemaLocation, expected);
-            schemaCompiler.setPreparedSchema(schema);
-            schemaCompiler.makeAllAutomata();
-            schemaCompiler.checkAllAutomata();
-            return schema;
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Read an inline schema from a stylesheet
-     *
-     * @param root          the xs:schema element in the stylesheet
-     * @param expected      the target namespace expected; "" if there is no
-     *                      expectation
-     * @param errorReporter The destination for error messages. May be null, in which case
-     *                      the errorListener registered with this Configuration is used.
-     * @return the actual target namespace of the schema
-     */
-
-    @Override
-    public NamespaceUri readInlineSchema(NodeInfo root, NamespaceUri expected, ErrorReporter errorReporter)
-            throws SchemaException {
-        Schema schema = newSchemaCompiler().readInlineSchema(root, expected, errorReporter);
-        return NamespaceUri.NULL; // TODO
-    }
+//    /**
+//     * Read an inline schema from a stylesheet
+//     *
+//     * @param root          the xs:schema element in the stylesheet
+//     * @param expected      the target namespace expected; "" if there is no
+//     *                      expectation
+//     * @param errorReporter The destination for error messages. May be null, in which case
+//     *                      the errorListener registered with this Configuration is used.
+//     * @return the actual target namespace of the schema
+//     */
+//
+//    @Override
+//    public NamespaceUri readInlineSchema(NodeInfo root, NamespaceUri expected, ErrorReporter errorReporter)
+//            throws SchemaException {
+//        Schema schema = newSchemaCompiler().readInlineSchema(root, expected, errorReporter);
+//        return NamespaceUri.NULL; // TODO
+//    }
 
     /**
      * Load a schema, which will be available for use by all subsequent operations using

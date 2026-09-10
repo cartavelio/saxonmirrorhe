@@ -25,7 +25,7 @@ public class XsdSchemaImpl extends XsdSchema {
      * @since 13.0
      */
     @Override
-    public SchemaValidator getValidator() {
+    public SchemaValidator newValidator() {
         return new SchemaValidatorImpl(processor, this);
     }
 

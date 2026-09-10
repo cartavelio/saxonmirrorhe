@@ -29,10 +29,7 @@ import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.tree.tiny.TinyNodeImpl;
 import net.sf.saxon.tree.util.Orphan;
-import net.sf.saxon.type.Schema;
-import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SimpleType;
-import net.sf.saxon.type.Type;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.z.IntHashMap;
 
@@ -136,6 +133,16 @@ public class CopyOfFeed extends AbsorptionFeed {
         this.type = type;
     }
 
+    public static Schema getImportedSchema(CopyOfFeed feed) {
+        Schema schema;
+        if (feed.validation == Validation.STRIP) {
+            schema = feed.getConfiguration().emptySchema();
+        } else {
+            schema = feed.getExpression().getRetainedStaticContext().getPackageData().getImportedSchema();
+        }
+        return schema;
+    }
+
     @Override
     protected PendingItem makePendingItem(int sequenceNr, FleetingParentNode node) {
         return new PendingCopyAction(this, sequenceNr, node);
@@ -158,7 +165,7 @@ public class CopyOfFeed extends AbsorptionFeed {
                     if (type != null && !type.isSimpleType()) {
                         throw new XPathException("When copying an attribute with schema validation, the requested type must not be a complex type", "XTTE1535", getExpression().getLocation());
                     }
-                    Schema schema = getExpression().getRetainedStaticContext().getPackageData().getImportedSchema();
+                    Schema schema = getImportedSchema(this);
                     SchemaType annotation = CopyOf.validateAttribute(schema, node, (SimpleType) type, validation, getContext());
                     orphan.setTypeAnnotation(annotation);
                 }
@@ -174,7 +181,7 @@ public class CopyOfFeed extends AbsorptionFeed {
                     ParseOptions validationOptions = new ParseOptions()
                             .withSchemaValidationMode(validation)
                             .withTopLevelType(type);
-                    Schema schema = getExpression().getRetainedStaticContext().getPackageData().getImportedSchema();
+                    Schema schema = getImportedSchema(this);
                     SequenceCollector writer = new SequenceCollector(getPipelineConfiguration());
                     Receiver copier;
                     if (kind == Type.DOCUMENT) {
@@ -354,7 +361,7 @@ public class CopyOfFeed extends AbsorptionFeed {
                 ParseOptions validationOptions = new ParseOptions()
                         .withSchemaValidationMode(feed.validation)
                         .withTopLevelType(feed.type);
-                Schema schema = feed.getExpression().getRetainedStaticContext().getPackageData().getImportedSchema();
+                Schema schema = getImportedSchema(feed);
                 Location loc = feed.getExpression() == null ? Loc.NONE : feed.getExpression().getLocation();
                 if (rootOfCopy.getNodeKind() == Type.DOCUMENT) {
                     copier = new ComplexContentOutputter(

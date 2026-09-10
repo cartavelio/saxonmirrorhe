@@ -237,9 +237,9 @@ public class XMarkBenchmark {
         JsonBuilder jsonBuilder = processor.newJsonBuilder();
         XQueryCompiler compiler = processor.newXQueryCompiler();
         if (schemaAware) {
-            SchemaManager schemaManager = processor.getSchemaManager();
-            schemaManager.load(new File(dir + "schema.xsd"));
-            builder.setSchemaValidator(schemaManager.newSchemaValidator());
+            XsdCompiler schemaManager = processor.newXsdCompiler();
+            XsdSchema schema = schemaManager.compile(new File(dir + "schema.xsd"));
+            builder.setSchemaValidator(schema.newValidator());
             compiler.setSchemaAware(true);
         }
 
