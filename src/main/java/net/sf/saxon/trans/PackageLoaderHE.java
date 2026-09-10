@@ -2596,7 +2596,12 @@ public class PackageLoaderHE implements IPackageLoader {
         eMap.put("is", (loader, element) -> {
             Expression lhs = loader.getFirstChildExpression(element);
             Expression rhs = loader.getSecondChildExpression(element);
-            return new IdentityComparison(lhs, Token.IS, rhs);
+            String op = element.getAttributeValue(NamespaceUri.NULL, "op");
+            IdentityComparison comp = new IdentityComparison(lhs, Token.IS, rhs);
+            if ("is-g".equals(op)) {
+                comp.setGenerateIdEmulation(true);
+            }
+            return comp;
         });
 
         eMap.put("isLast", (loader, element) -> {
