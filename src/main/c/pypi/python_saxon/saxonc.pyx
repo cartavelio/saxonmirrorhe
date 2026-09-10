@@ -300,12 +300,13 @@ cdef class PySaxonProcessor:
 
     def set_configuration_property(self, name, value, encoding=None):
         """
-        set_configuration_property(self, name, value)
+        set_configuration_property(self, name, value, encoding=None)
         Set configuration property specific to the processor in use.
         Properties set here are common across all processors.
         Args:
             name (str): The name of the property
             value (str): The value of the property
+            encoding (str): The encoding of the string. If not specified then the platform default encoding is used.
         Example:
             'l': 'on' or 'off' - to enable the line number
         """
@@ -399,12 +400,13 @@ cdef class PySaxonProcessor:
 
     def eqname_to_clark_name(self, name, encoding=None):
         """
-        eqname_to_clark_name(self, name)
+        eqname_to_clark_name(self, name, encoding=None)
         Convert EQName string to clark name notation.
         Args:
             name (str): The URI in EQName notation: <code>Q{uri}local</code> if the name is in a namespace.
                 For a name in no namespace, either of the forms <code>Q{}local</code> or simply <code>local</code>
                 are accepted.
+            encoding (str): The encoding of the string. If not specified then the platform default encoding is used.
         Returns:
             str: the URI inb clark notation
         """
@@ -420,13 +422,14 @@ cdef class PySaxonProcessor:
 
     def clark_name_to_eqname(self, name, encoding=None):
         """
-        clark_name_to_eqname(self, name)
+        clark_name_to_eqname(self, name, encoding=None)
         Convert clark name string to EQName notation; i.e. the expanded name, as a string using the notation defined
         by the EQName production in XPath 3.0. If the name is in a namespace, the resulting string takes the form
         <code>Q{uri}local</code>. Otherwise, the value is the local part of the name.
         Args:
             name (str): The URI in Clark notation: <code>{uri}local</code> if the name is in a namespace,
                 or simply <code>local</code> if not.
+            encoding (str): The encoding of the string. If not specified then the platform default encoding is used.
         Returns:
             str: the expanded name, as a string using the notation defined by the EQName production in XPath 3.0.
         """
@@ -443,12 +446,12 @@ cdef class PySaxonProcessor:
 
     def make_string_value(self, value, encoding = None):
         """
-        make_string_value(self, value)
+        make_string_value(self, value, encoding = None)
         Factory method. Unlike the constructor, this avoids creating a new StringValue in the case
         of a zero-length string (and potentially other strings, in future)
         Args:
-            value (str): the String value. NULL is taken as equivalent to "".
-            encoding (str): the encoding of the string. If not specified then the platform default encoding is used.
+            value (str): The String value. NULL is taken as equivalent to "".
+            encoding (str): The encoding of the string. If not specified then the platform default encoding is used.
         Returns:
             PyXdmAtomicValue: The corresponding XDM string value
         """
@@ -531,10 +534,11 @@ cdef class PySaxonProcessor:
         return val
     def make_qname_value(self, str_, encoding=None):
         """
-        make_qname_value(self, str_)
+        make_qname_value(self, str_, encoding=None)
         Create a QName XDM value from string representation in clark notation
         Args:
             str_ (str): The value given in a string form in clark notation {uri}local
+            encoding (str): The encoding of the string. If not specified then the platform default encoding is used.
         Returns:
             PyXdmAtomicValue: The corresponding XDM value
         """
@@ -547,13 +551,13 @@ cdef class PySaxonProcessor:
         return val
     def make_atomic_value(self, value_type, value, encoding=None):
         """
-        make_atomic_value(self, value_type, value)
+        make_atomic_value(self, value_type, value, encoding=None)
         Create an XDM atomic value from string representation
         Args:
             value_type (str): Local name of a type in the XML Schema namespace
             value (str): The value given in a string form. In the case of a QName the value supplied must be
                 in clark notation {uri}local.
-            encoding (str): The encoding of the value_type. None or omit argument to use the default
+            encoding (str): The encoding of the value_type. If not specified then the platform default encoding is used.
         Returns:
             PyXdmAtomicValue: The corresponding XDM value
         """
@@ -686,11 +690,11 @@ cdef class PySaxonProcessor:
 
     def make_map2(self, dict dataMap, encoding = None):
         """
-        make_map2(self, dict dataMap)
+        make_map2(self, dict dataMap, encoding = None)
         Make a PyXdmMap from a dict type whose entries are key-value pairs of type (str, PyXdmValue).
         Args:
             dataMap (dict): Dictionary of (str, PyXdmValue) pairs
-            encoding (str): the encoding of the string. If not specified then the platform default encoding is used.
+            encoding (str): The encoding of the string. If not specified then the platform default encoding is used.
         Returns:
             PyXdmMap: The corresponding value
         """
@@ -765,7 +769,7 @@ cdef class PySaxonProcessor:
         set_catalog_files(self, str file_name)
         Set the XML catalog files to be used in Saxon
         Args:
-            file_names list: list of strings for the XML catalog file names
+            file_names list: List of strings for the XML catalog file names
         """
         cdef const char * c_filename_string = NULL
         '''make_c_str(file_name)'''
@@ -975,11 +979,16 @@ cdef class PyDocumentBuilder:
 
     @property
     def line_numbering(self):
-        """bool: true if line numbering is enabled"""
+        """
+        line_numbering(self)
+        bool: true if line numbering is enabled
+        """
         return self.thisdbptr.isLineNumbering()
 
     def set_line_numbering(self, value):
-        """Set whether line and column numbering and is to be enabled for documents constructed using this
+        """
+        set_line_numbering(self, value)
+        Set whether line and column numbering and is to be enabled for documents constructed using this
         PyDocumentBuilder. By default, line and column numbering is disabled.
         Args:
             value (bool): true if line numbers are to be maintained, false otherwise
@@ -991,11 +1000,16 @@ cdef class PyDocumentBuilder:
 
     @property
     def dtd_validation(self):
-        """bool: Ask whether DTD validation is to be applied to documents loaded using this PyDocumentBuilder"""
+        """
+        dtd_validation(self)
+        bool: Ask whether DTD validation is to be applied to documents loaded using this PyDocumentBuilder
+        """
         return self.thisdbptr.isDTDValidation()
 
     def set_dtd_validation(self, value):
-        """Set whether DTD validation should be applied to documents loaded using this PyDocumentBuilder.
+        """
+        set_dtd_validation(self, value)
+        Set whether DTD validation should be applied to documents loaded using this PyDocumentBuilder.
         By default, no DTD validation takes place.
         Args:
             value (bool): true if DTD validation should be applied to loaded documents
@@ -1005,7 +1019,9 @@ cdef class PyDocumentBuilder:
         self.thisdbptr.setDTDValidation(c_dtd)
 
     def set_schema_validator(self, PySchemaValidator val):
-       """Set the PySchemaValidator to be used. This determines whether schema validation is applied to an input
+       """
+       set_schema_validator(self, PySchemaValidator val)
+       Set the PySchemaValidator to be used. This determines whether schema validation is applied to an input
        document and whether type annotations in a supplied document are retained. If no PySchemaValidator is supplied,
        then schema validation does not take place.
        This option requires the schema-aware version of the Saxon product (SaxonC-EE).
@@ -1013,7 +1029,7 @@ cdef class PyDocumentBuilder:
        the PyDocumentBuilder is shared between threads.
        Args:
            val (PySchemaValidator): the schema validator to be used
-        """
+       """
        if val is None:
            self.thisdbptr.setSchemaValidator(NULL)
        else:
@@ -1169,13 +1185,13 @@ cdef class PyXslt30Processor:
 
      def set_parameter(self, name, PyXdmValue value, encoding = None):
         """
-        set_parameter(self, name, PyXdmValue value)
+        set_parameter(self, name, PyXdmValue value, encoding = None)
         Set the value of a stylesheet parameter
         Args:
             name (str): the name of the stylesheet parameter, as a string. For a namespaced parameter use
                 clark notation {uri}local
             value (PyXdmValue): the value of the stylesheet parameter, or NULL to clear a previously set value
-            encoding (str): To specify the encoding of the name string. If not specified then the platform default encoding is used.
+            encoding (str): The encoding of the name string. If not specified then the platform default encoding is used.
         """
         cdef const char * c_str = NULL
         '''make_c_str(name)'''
@@ -1191,10 +1207,11 @@ cdef class PyXslt30Processor:
 
      def get_parameter(self, name, encoding=None):
         """
-        get_parameter(self, name)
+        get_parameter(self, name, encoding=None)
         Get a parameter value by a given name
         Args:
             name (str): The name of the stylesheet parameter
+            encoding (str): The encoding of the name string. If not specified then the platform default encoding is used.
         Returns:
             PyXdmValue: The XDM value of the parameter
         """
@@ -1207,12 +1224,12 @@ cdef class PyXslt30Processor:
         return val
      def remove_parameter(self, name, encoding=None):
         """
-        remove_parameter(self, name)
+        remove_parameter(self, name, encoding=None)
         Remove the parameter given by name from the PyXslt30Processor. The parameter will not have any effect on the
         stylesheet if it has not yet been executed.
         Args:
             name (str): The name of the stylesheet parameter
-            encoding (str): The encoding of the name argument. Can be omitted or None
+            encoding (str): The encoding of the name string. If not specified then the platform default encoding is used
         Returns:
             bool: True if the removal of the parameter has been successful, False otherwise.
         """
@@ -1433,7 +1450,7 @@ cdef class PyXslt30Processor:
         compile_stylesheet method to compile the stylesheet to a PyXsltExecutable, and use the methods of that class.
         Args:
             **kwds: Required keyword arguments: source_file (str) and stylesheet_file (str).
-                Possible argument: base_output_uri (str) which is used for resolving relative URIs in the href
+                Possible arguments: base_output_uri (str) which is used for resolving relative URIs in the href
                 attribute of the xsl:result-document instruction. Also accept the keyword 'encoding' (str) to
                 specify the encoding of the output string. This must be the same used in the transformation. If not specified then the platform default encoding is used.
         Example:
@@ -3241,10 +3258,12 @@ cdef class PyXQueryProcessor:
         run_query_to_file(self, **kwds)
         Execute a query with the result saved to file.
         Args:
-            **kwds: Possible arguments: output_file_name (str) to specify the output file, if omitted then the output file name needs to be supplied as a property.
+            **kwds: Possible arguments: output_file_name (str) to specify the output file, if
+                omitted then the output file name needs to be supplied as a property;
                 input_file_name (str) or input_xdm_item (PyXdmItem) can be used to supply
                 the input; query_file (str) or query_text (str) can be used to supply the query;
-                lang (str) can be used to specify which version of XQuery should be used, options: '3.1' or '4.0'
+                lang (str) can be used to specify which version of XQuery should be used,
+                options: '3.1' or '4.0'
         Raises:
             PySaxonApiError: Error if failure to run query
             Exception: Error if invalid use of keywords
@@ -4001,13 +4020,13 @@ cdef class PySchemaValidator:
 
      def set_property(self, name, value, encoding = None):
         """
-        set_property(self, name, value)
+        set_property(self, name, value, encoding = None)
         Set a property specific to the processor in use.
         Args:
             name (str): The name of the property
             value (str): The value of the property
             encoding (str): The encoding of the name argument. Argument can be omitted or None.
-             If not specified then the platform default encoding is used.
+                If not specified then the platform default encoding is used.
         Example:
             PySchemaValidator: set serialization properties (names start with '!' i.e. name "!method" -> "xml")\r
             'o': output file name,\r
@@ -4260,7 +4279,7 @@ cdef class PyXdmValue:
 
      def __getitem__(self, index):
          """
-         __getitem__(self)
+         __getitem__(self, index)
          Implement the built-in subscript operator (i.e. square brackets []) to return the ith item in the sequence
 
          Returns:
@@ -4320,7 +4339,7 @@ cdef class PyXdmItem(PyXdmValue):
 
      def __cinit__(self):
         """
-         cinit(self)
+         __cinit__(self)
          Constructor for PyXdmItem
         """
         if type(self) is PyXdmItem:
@@ -4352,7 +4371,7 @@ cdef class PyXdmItem(PyXdmValue):
         get_string_value(self, encoding=None)
         Property to get the string value of the item as defined in the XPath data model
         Args:
-            encoding (str): the encoding to be used to get the string value. Can be omitted or set as None to use the system default
+            encoding (str): The encoding of the string. If not specified then the platform default encoding is used.
         Returns:
             str: The string value of this node
         """
@@ -4601,7 +4620,7 @@ cdef class PyXdmNode(PyXdmItem):
      @property
      def local_name(self):
         """
-        name(self)
+        local_name(self)
         Get the local name of the node, as a string
         Returns:
             str: the local name of the node. In the case of unnamed nodes (e.g. text and comment nodes) returns None
@@ -4664,7 +4683,7 @@ cdef class PyXdmNode(PyXdmItem):
         get_string_value(self, encoding=None)
         Property to get the string value of the node as defined in the XPath data model
         Args:
-            encoding (str): the encoding to be used to get the string value. Can be omitted or set as None to use the system default         
+            encoding (str): The encoding of the string. If not specified then the platform default encoding is used.
         Returns:
             str: The string value of this node
         """
@@ -4689,10 +4708,10 @@ cdef class PyXdmNode(PyXdmItem):
 
      def to_string(self, encoding=None):
         """
-        __str__(self)
+        to_string(self, encoding=None)
         The string value of the node as returned by the toString method
         Args:
-              encoding (str): the encoding to be used to get the string value. Can be omitted or set as None to use the system default
+            encoding (str): The encoding of the string. If not specified then the platform default encoding is used.
         Returns:
             str: String value of this node
         """
@@ -4705,7 +4724,7 @@ cdef class PyXdmNode(PyXdmItem):
 
      def __getitem__(self, index):
         """
-        __getitem__(self)
+        __getitem__(self, index)
         Implement the built-in subscript operator (i.e. square brackets []) to return the ith child node of the current node
 
         Returns:
@@ -4763,12 +4782,12 @@ cdef class PyXdmNode(PyXdmItem):
 
      def get_attribute_value(self, name, encoding=None):
         """
-        get_attribute_value(self, name)
+        get_attribute_value(self, name, encoding=None)
         Get the value of a named attribute
         Args:
             name (str): the EQName of the required attribute
-            encoding (str): The encoding of the name argument. Argument can be omitted or None
-            in which case the platform default encoding is used
+            encoding (str): The encoding of the name argument. Argument can be omitted or None.
+                If not specified then the platform default encoding is used.
         """
         if encoding is None:
             encoding = sys.getdefaultencoding()
@@ -4890,7 +4909,7 @@ cdef class PyXdmAtomicValue(PyXdmItem):
      @property
      def primitive_type_name(self):
         """
-        primitive_type_name()
+        primitive_type_name(self)
         Get the primitive type name of the PyXdmAtomicValue
         Returns:
             str: String of the primitive type name
@@ -4900,6 +4919,7 @@ cdef class PyXdmAtomicValue(PyXdmItem):
      @property
      def boolean_value(self):
         """
+        boolean_value(self)
         Get the boolean value of the PyXdmAtomicValue, converted using the XPath casting rules
         Returns:
             bool: the result of converting to a boolean
@@ -4908,6 +4928,7 @@ cdef class PyXdmAtomicValue(PyXdmItem):
      @property
      def double_value(self):
         """
+        double_value(self)
         Get the double value of the PyXdmAtomicValue, converted using the XPath casting rules
         Returns:
             double: the result of converting to a double
@@ -4951,7 +4972,7 @@ cdef class PyXdmAtomicValue(PyXdmItem):
         get_string_value(self, encoding=None)
         Property to get the string value of the atomic value as defined in the XPath data model
         Args:
-            encoding (str): the encoding to be used to get the string value. Can be omitted or set as None to use the system default
+            encoding (str): The encoding of the string. If not specified then the platform default encoding is used.
         Returns:
             str: The string value of this node
         """
@@ -5078,7 +5099,7 @@ cdef class PyXdmFunctionItem(PyXdmItem):
 
      def get_system_function(self, PySaxonProcessor proc, str name, arity, encoding=None):
          """
-         get_system_function(self, PySaxonProcessor proc, str name, arity)
+         get_system_function(self, PySaxonProcessor proc, str name, arity, encoding=None)
          Get a system function. This can be any function defined in XPath 3.1 functions and operators,
          including functions in the math, map, and array namespaces. It can also be a Saxon extension
          function, provided a licensed Processor is used.
@@ -5086,7 +5107,7 @@ cdef class PyXdmFunctionItem(PyXdmItem):
              proc (PySaxonProcessor): the Saxon processor
              name (str): the name of the requested function as an EQName or clark name
              arity (int): the arity of the requested function
-             encoding (str): the encoding of the name argument. If argument is omitted or None then the platform default encoding is used
+             encoding (str): the encoding of the name string. If not specified then the platform default encoding is used.
          Returns:
              PyXdmFunctionItem: the requested function
          """
@@ -5227,13 +5248,15 @@ cdef class PyXdmMap(PyXdmFunctionItem):
 
      def get(self, key, encoding=None):
          """
-         get(self, key)
+         get(self, key, encoding=None)
          Returns the value to which the specified key is mapped, or NULL if this map contains no mapping for the key.
          All keys in the PyXdmMap are of type PyXdmAtomicValue, but for convenience, this method also accepts keys of
          primitive type (str, int and float), which will be converted to PyXdmAtomicValue internally.
          Args:
              key: the key whose associated value is to be returned. The key supports the following types:
                 PyXdmAtomicValue, str, int and float
+             encoding (str): The encoding of the key, if supplied as a string. If not specified then the platform
+                default encoding is used.
          Returns:
              PyXdmValue: the value to which the specified key is mapped, or NULL if this map contains no
              mapping for the key
