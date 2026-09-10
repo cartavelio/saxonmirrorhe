@@ -739,7 +739,7 @@ PHP_METHOD(SaxonProcessor, parseXmlFromString) {
              zend_parse_parameters(ZEND_NUM_ARGS(), "sz", &source, &len1,
                                    &oth) == FAILURE) {
     RETURN_NULL();
-  }  if (ZEND_NUM_ARGS() == 3 &&
+  }  else if (ZEND_NUM_ARGS() == 3 &&
               zend_parse_parameters(ZEND_NUM_ARGS(), "szs", &source, &len1, &oth, &encoding, &len2) == FAILURE) {
             RETURN_NULL();
   }else {
