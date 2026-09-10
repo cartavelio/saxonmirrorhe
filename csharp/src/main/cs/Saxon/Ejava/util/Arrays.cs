@@ -94,10 +94,13 @@ namespace Saxon.Ejava.util
             return h;
         }
         
-        public static bool Equals<T>(T[] first, T[] second)
+        public static bool Equals<T>(T[] first, T[] second) {
+            return first.SequenceEqual(second);
+        }
+        
+        public static bool Equals(byte[] a1, int start1, int end1, byte[] a2, int start2, int end2)
         {
-            // TODO: there are apparently much faster approaches, especially for byte arrays
-            return Enumerable.SequenceEqual(first, second);
+            return a1[start1..end1].SequenceEqual(a2[start2..end2]);
         }
     }
 }

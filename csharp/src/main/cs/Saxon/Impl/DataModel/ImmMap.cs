@@ -28,46 +28,6 @@ namespace Saxon.Impl.DataModel {
         protected SCI.ImmutableDictionary<AtomicMatchKey, Saxon.Hej.ma.map.KeyValuePair> imap;
 
         
-        
-        protected class GeneralMapBuilder : Saxon.Hej.ma.map.MapBuilder {
-            protected SCI.ImmutableDictionary<Saxon.Hej.expr.sort.AtomicMatchKey,Saxon.Hej.ma.map.KeyValuePair>? imap 
-                = SCI.ImmutableDictionary.Create<AtomicMatchKey, SaxonKVP>();
-
-            public virtual void put(Saxon.Hej.value.AtomicValue key, Saxon.Hej.om.GroundedValue value) {
-                imap = imap.Add(key.asMapKey(40), new SaxonKVP(key, value));
-            }
-            public virtual void put(string key, Saxon.Hej.om.GroundedValue value) {
-                put(new Saxon.Hej.value.StringValue(key), value);
-            }
-
-            protected virtual void put(SaxonKVP kvp) {
-                imap = imap.Add(kvp.key.asMapKey(40), kvp);
-            }
-            
-            public virtual bool contains(string key) {
-                return (get(key) != null);
-            }
-            public virtual Saxon.Hej.om.GroundedValue get(string key) {
-                return get(new Saxon.Hej.value.StringValue(key));
-            }
-            public virtual Saxon.Hej.om.GroundedValue get(Saxon.Hej.value.AtomicValue key) {
-                AtomicMatchKey matchKey = key.asMapKey(40);
-                if (imap.ContainsKey(matchKey)) {
-                    return imap[matchKey].value;
-                }
-                return null;
-            }
-            public virtual Saxon.Hej.ma.map.MapItem getCompletedMap() {
-                Saxon.Impl.DataModel.ImmMap result = new Saxon.Impl.DataModel.ImmMap(imap);
-                imap = null;
-                return result;
-            }
-        
-        }
-        public static Saxon.Hej.ma.map.MapBuilder getBuilder() {
-            return new GeneralMapBuilder();
-        }
-
         /**
          * Create an empty map
          */
