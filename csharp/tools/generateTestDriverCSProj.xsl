@@ -19,6 +19,7 @@
       <Import Project="core.csproj"/>
       <ItemGroup>
         <Compile Include="..\..\..\..\src\test\testrunner\**"/>
+        <Compile Remove="..\..\..\..\**\.DS_Store"/>
       </ItemGroup>
     </Project>
   </xsl:result-document>

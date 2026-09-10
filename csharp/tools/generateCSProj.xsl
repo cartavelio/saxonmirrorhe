@@ -25,6 +25,7 @@
         <Compile Include="..\..\generated\**"/>
         <Compile Include="..\..\..\..\src\main\cs\**"/>
         <Compile Include="..\..\..\..\keys\build\cs\**"/>
+        <Compile Remove="..\..\..\..\**\.DS_Store"/>
       </ItemGroup>
     </Project>
   </xsl:result-document>
