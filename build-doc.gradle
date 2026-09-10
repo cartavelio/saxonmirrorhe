@@ -590,6 +590,13 @@ task userdoc_functions(
     "-o:${buildDir}/userdoc/expanded/functions-article.xml"
 }
 
+task userdoc_articles(
+  dependsOn: ["expand_userdoc_sections", "userdoc_changes", "userdoc_functions"],
+  description: "Process all the articles"
+) {
+  // Just a place to hang dependencies
+}
+
 // ============================================================
 
 task viewer_app_sef(
@@ -607,32 +614,11 @@ task viewer_app_sef(
     "SEFbuildDate=${DSTAMP}"
 }
 
-// ============================================================
-
-task userdoc_html(
-  dependsOn: ["userdoc_articles"],
-  description: "Creates the static HTML version of the user documentation"
+task userdoc_xml(
+  dependsOn: ["userdoc_articles", "app_javadoc", "app_dotnetdoc"],
+  description: "Creates the XML version of the user documentation"
 ) {
   // Just a place to hang dependencies
-}
-
-task userdoc_articles(
-  type: JavaExec,
-  dependsOn: ["expand_userdoc_sections", "app_javadoc", "app_dotnetdoc",
-              "userdoc_changes", "userdoc_functions"],
-  description: "Process all the articles"
-) {
-  inputs.files fileTree(dir: "${buildDir}/userdoc/expanded")
-  inputs.files fileTree(dir: "${projectDir}/tools/docs/to-static")
-  outputs.files fileTree(dir: "${buildDir}/userdoc/html")
-  classpath = configurations.documentation
-  mainClass = "com.saxonica.Transform"
-  args "-s:${buildDir}/userdoc/expanded/catalog.xml",
-    "-xsl:${projectDir}/tools/docs/to-static/s-viewer_app.xsl",
-    "-o:${buildDir}/userdoc/html/dummy.xml",
-    "changes-article=${buildDir}/userdoc/expanded/changes-article.xml",
-    "functions-article=${buildDir}/userdoc/expanded/functions-article.xml",
-    "base-uri=${buildDir}/userdoc/html/"
 }
 
 task userdoc_publish_viewer_appJS(
@@ -647,7 +633,7 @@ task userdoc_publish_viewer_appJS(
 
 task userdoc_viewer_appJS(
   type: Copy,
-  dependsOn: ["userdoc_articles", "userdoc_publish_viewer_appJS", "viewer_app_sef"],
+  dependsOn: ["userdoc_xml", "userdoc_publish_viewer_appJS", "viewer_app_sef"],
   description: "Copy transformed articles to app docs"
 ) {
   into "${buildDir}/userdoc/viewer_appJS/doc"
@@ -658,15 +644,47 @@ task userdoc_viewer_appJS(
   }
 }
 
+// ============================================================
+
+task userdoc_html(
+  type: JavaExec,
+  dependsOn: ["userdoc_articles"],
+  description: "Creates the static HTML version of the user documentation"
+) {
+  inputs.files fileTree(dir: "${buildDir}/userdoc/expanded")
+  inputs.files fileTree(dir: "${projectDir}/tools/docs/to-static")
+  outputs.files fileTree(dir: "${buildDir}/userdoc/html")
+  classpath = configurations.documentation
+  mainClass = "com.saxonica.Transform"
+  args "-s:${buildDir}/userdoc/expanded/catalog.xml",
+          "-xsl:${projectDir}/tools/docs/to-static/s-viewer_app.xsl",
+          "-o:${buildDir}/userdoc/html/dummy.xml",
+          "changes-article=${buildDir}/userdoc/expanded/changes-article.xml",
+          "functions-article=${buildDir}/userdoc/expanded/functions-article.xml",
+          "base-uri=${buildDir}/userdoc/html/"
+}
+
 task userdoc_publish_javadoc_html(
   type: Copy,
-  dependsOn: ["userdoc_html", "product_javadoc"],
+  dependsOn: ["product_javadoc"],
   description: "Copy javadoc docs into HTML output"
 ) {
   into "${buildDir}/userdoc/html/javadoc"
   from "build/javadoc"
   doFirst {
     mkdir "${buildDir}/userdoc/html/javadoc"
+  }
+}
+
+task userdoc_publish_dotnet_html(
+  type: Copy,
+  dependsOn: ["dotnet_doc_html"],
+  description: "Copy dotnetdoc docs into HTML output"
+) {
+  into "${buildDir}/userdoc/html/dotnetdoc"
+  from "build/dotnetdoc-html"
+  doFirst {
+    mkdir "${buildDir}/userdoc/html/dotnetdoc"
   }
 }
 
@@ -692,16 +710,11 @@ task userdoc_publish_html_style(
 }
 
 task userdoc_publish_html(
-  type: Copy,
-  dependsOn: ["userdoc_publish_javadoc_html", "dotnet_doc_html",
+  dependsOn: ["userdoc_html", "userdoc_publish_javadoc_html", "userdoc_publish_dotnet_html",
               "userdoc_publish_html_style", "userdoc_publish_html_images"],
   description: "Publish the HTML documentation"
 ) {
-  into "${buildDir}/userdoc/html/dotnetdoc"
-  from "build/dotnetdoc-html"
-  doFirst {
-    mkdir "${buildDir}/userdoc/html/dotnetdoc"
-  }
+  // Just a place to hang dependencies
 }
 
 // ============================================================
