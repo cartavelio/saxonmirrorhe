@@ -62,6 +62,8 @@ public class TestXsltCompiler {
                     "</xsl:template>" +
                     "</xsl:stylesheet>";
             comp.compile(new StreamSource(new StringReader(xsl), "xsl0"));
+            assertEquals(decimalVersion, comp.getXsltLanguageVersion());
+            assertFalse(comp.isJustInTimeCompilation());
             if (!expectSuccess) {
                 fail(label + ": expected failure");
             }
@@ -484,6 +486,7 @@ public class TestXsltCompiler {
             }
             XdmNode in = proc.newDocumentBuilder().build(
                     new StreamSource(new StringReader("<a>xxx</a>")));
+            assertTrue(xqcomp.isJustInTimeCompilation());
             try {
                 XdmValue out = exec.load30().applyTemplates(in);
                 fail("Unexected success");
@@ -503,25 +506,25 @@ public class TestXsltCompiler {
 
     @Test
     public void testErrorNotificationFromImportError() {
-        final List<TransformerException> warnings = new ArrayList<TransformerException>(4);
-        final List<TransformerException> errors = new ArrayList<TransformerException>(4);
-        final List<TransformerException> fatals = new ArrayList<TransformerException>(4);
+        final List<TransformerException> warnings = new ArrayList<>(4);
+        final List<TransformerException> errors = new ArrayList<>(4);
+        final List<TransformerException> fatals = new ArrayList<>(4);
         ErrorListener listener = new ErrorListener() {
 
             @Override
-            public void warning(TransformerException exception) throws TransformerException {
+            public void warning(TransformerException exception) {
                 System.out.println("Warning: " + exception + "\nlocation: " + exception.getLocator());
                 warnings.add(exception);
             }
 
             @Override
-            public void error(TransformerException exception) throws TransformerException {
+            public void error(TransformerException exception) {
                 System.out.println("Error: " + exception + "\nlocation: " + exception.getLocator());
                 errors.add(exception);
             }
 
             @Override
-            public void fatalError(TransformerException exception) throws TransformerException {
+            public void fatalError(TransformerException exception) {
                 if (!exception.getMessage().contains("No such file or directory")) {
                     System.out.println("Fatal: " + exception + "\nlocation: " + exception.getLocator());
                 }

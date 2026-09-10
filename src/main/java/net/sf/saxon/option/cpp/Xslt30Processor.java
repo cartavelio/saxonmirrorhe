@@ -10,20 +10,22 @@ package net.sf.saxon.option.cpp;
 import com.saxonica.functions.extfn.cpp.CPPFunctionSet;
 import com.saxonica.functions.extfn.cpp.PHPFunctionSet;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.lib.*;
+import net.sf.saxon.lib.AugmentedSource;
+import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.lib.ResourceRequest;
+import net.sf.saxon.lib.Validation;
 import net.sf.saxon.s9api.*;
+import org.graalvm.nativeimage.IsolateThread;
+import org.graalvm.nativeimage.ObjectHandle;
+import org.graalvm.nativeimage.c.function.CEntryPoint;
+import org.graalvm.nativeimage.c.type.CCharPointer;
+import org.graalvm.nativeimage.c.type.CTypeConversion;
+import org.graalvm.word.WordFactory;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.util.*;
-
-import org.graalvm.nativeimage.IsolateThread;
-import org.graalvm.nativeimage.c.function.CEntryPoint;
-import org.graalvm.nativeimage.c.type.CCharPointer;
-import org.graalvm.nativeimage.c.type.CTypeConversion;
-import org.graalvm.nativeimage.ObjectHandle;
-import org.graalvm.word.WordFactory;
 
 class Encoding {
     private String encoding;
@@ -43,7 +45,7 @@ class Encoding {
     public void setEncoding(String encoding) {
         this.encoding = encoding;
     }
-};
+}
 
 
 /**
@@ -654,11 +656,7 @@ public class Xslt30Processor extends SaxonCAPI {
                     compiler.setTargetEdition(value);
                 } else if (sparams[i].equals("-relocate")) {
                     String value = (String) values[i];
-                    if (value.equals("1")) {
-                        compiler.setRelocatable(true);
-                    } else {
-                        compiler.setRelocatable(false);
-                    }
+                    compiler.setRelocatable(value.equals("1"));
                 } else if (sparams[i].equals("-lang")) {
                     String value = (String) values[i];
                     compiler.setXsltLanguageVersion(value);
@@ -672,8 +670,8 @@ public class Xslt30Processor extends SaxonCAPI {
 
                     String[] packageFileNames = packageValue.getParameterNames();
 
-                    for (int z = 0; z < packageFileNames.length; z++) {
-                        Source source = resolveFileToSource(processor, cwd, packageFileNames[z], ResourceRequest.XSLT_NATURE);
+                    for (String packageFileName : packageFileNames) {
+                        Source source = resolveFileToSource(processor, cwd, packageFileName, ResourceRequest.XSLT_NATURE);
                         XsltPackage pack = compiler.loadLibraryPackage(source);
                         compiler.importPackage(pack);
                     }

@@ -170,12 +170,14 @@ public class XPathCompiler {
      * Say whether an XPath 2.0, XPath 3.0, XPath 3.1 or XPath 4.0 processor is required.
      *
      * @param value One of the values 1.0, 2.0, 3.0, 3.05, 3.1, 4.0.
-     *              <p>Setting the option to 1.0 requests an XPath 2.0 processor running in 1.0 compatibility mode;
-     *              this is equivalent to setting the language version to 2.0 and backwards compatibility mode to true.
+     *              <p>Setting the option to 1.0 requests an XPath 3.0 processor running in 1.0 compatibility mode;
+     *              this is equivalent to setting the language version to 3.0 and backwards compatibility mode to true.
      *              Requesting "3.05" gives XPath 3.0 plus the extensions defined in the XSLT 3.0 specification
      *              (map types and map constructors).</p>
-     * @throws IllegalArgumentException if the version is not numerically equal to 1.0, 2.0, 3.0, 3.05, 3.1, or 4.0.
-     * @since 9.3
+     * @throws IllegalArgumentException if the version is not one of the strings "1.0", "2.0", "3.0", "3.05",
+     * "3.1", or "4.0". Version "4.0" is experimental (subject to change without notice) and is available only
+     * in Saxon-PE or Saxon-EE.
+     * @since 9.3 (permitted versions vary by Saxon release)
      */
 
     public void setLanguageVersion(String value) {
@@ -209,16 +211,12 @@ public class XPathCompiler {
      */
 
     public String getLanguageVersion() {
-        if (env.getXPathVersion() == 20) {
-            return "2.0";
-        } else if (env.getXPathVersion() == 30) {
-            return "3.0";
-        } else if (env.getXPathVersion() == 31) {
-            return "3.1";
-        } else if (env.getXPathVersion() == 40) {
-            return "4.0";
-        } else {
-            throw new IllegalStateException("Unknown XPath version " + env.getXPathVersion());
+        switch (env.getXPathVersion()) {
+            case 20: return "2.0";
+            case 30: return "3.0";
+            case 31: return "3.1";
+            case 40: return "4.0";
+            default: throw new IllegalStateException("Unknown XPath version " + env.getXPathVersion());
         }
     }
 
@@ -338,6 +336,7 @@ public class XPathCompiler {
 
     @Deprecated
     public void importSchemaNamespace(String uri) {
+        assert uri != null;
     }
 
     /**
@@ -359,7 +358,7 @@ public class XPathCompiler {
 
     /**
      * Ask whether undeclared variables are allowed. By default, they are not allowed. When
-     * undeclared variables are allowed, it is not necessary to predeclare the variables that
+     * undeclared variables are allowed, it is not necessary to pre-declare the variables that
      * may be used in the XPath expression; instead, a variable is automatically declared when a reference
      * to the variable is encountered within the expression.
      *
@@ -614,6 +613,10 @@ public class XPathCompiler {
      */
 
     public XdmValue evaluate(String expression, /*@Nullable*/ XdmItem contextItem) throws SaxonApiException {
+        return prepareSelector(expression, contextItem).evaluate();
+    }
+
+    private XPathSelector prepareSelector(String expression, XdmItem contextItem) throws SaxonApiException {
         Objects.requireNonNull(expression);
         boolean oldFastCompileOption = isFastCompilation();
         if (!isCaching()) {
@@ -626,7 +629,7 @@ public class XPathCompiler {
         if (contextItem != null) {
             selector.setContextItem(contextItem);
         }
-        return selector.evaluate();
+        return selector;
     }
 
     /**
@@ -647,28 +650,17 @@ public class XPathCompiler {
      */
 
     public XdmItem evaluateSingle(String expression, XdmItem contextItem) throws SaxonApiException {
-        Objects.requireNonNull(expression);
-        boolean oldFastCompileOption = isFastCompilation();
-        if (!isCaching()) {
-            setFastCompilation(true);
-        }
-        XPathSelector selector = compile(expression).load();
-        if (!isCaching()) {
-            setFastCompilation(oldFastCompileOption);
-        }
-        if (contextItem != null) {
-            selector.setContextItem(contextItem);
-        }
-        return selector.evaluateSingle();
+        return prepareSelector(expression, contextItem).evaluateSingle();
     }
 
     /**
-     * Compile an XSLT 2.0 pattern, supplied as a character string. The compiled pattern behaves as a boolean
+     * Compile an XSLT pattern, supplied as a character string. The compiled pattern behaves as a boolean
      * expression which, when evaluated in a particular context, returns true if the context node matches
      * the pattern, and false if it does not. An error is reported if there is no context item or it the context
      * item is not a node.
      *
-     * @param source A non-null string conforming to the syntax of XSLT 2.0 patterns
+     * @param source A non-null string conforming to the syntax of XSLT patterns. The language level supported
+     *               depends on the setting of {@link #setLanguageVersion(String)}
      * @return An XPathExecutable representing an expression which evaluates to true when the context node matches
      * the pattern, and false when it does not.
      * @throws SaxonApiException if the pattern contains static errors: for example, if its syntax is incorrect,

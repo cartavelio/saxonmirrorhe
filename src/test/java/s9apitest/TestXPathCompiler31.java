@@ -7,6 +7,7 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -173,6 +174,7 @@ public class TestXPathCompiler31 {
     @Test
     public void testGenerateId() {
         String result = good("generate-id(/)");
+        assertNotNull(result);
         assertTrue(result.length() > 0);
     }
 
@@ -274,6 +276,24 @@ public class TestXPathCompiler31 {
             c.setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE_OR_NONE);
             result = c.evaluateSingle("string-join(//p)", doc);
             assertEquals("onetwo", result.getStringValue());
+        } catch (Exception e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testUndeclaredVariables() {
+        try {
+            Processor p = new Processor(false);
+            XPathCompiler c = p.newXPathCompiler();
+            c.setLanguageVersion("3.1");
+            c.setAllowUndeclaredVariables(true);
+            assertTrue(c.isAllowUndeclaredVariables());
+            XPathExecutable exec = c.compile("$x + 1");
+            XPathSelector selector = exec.load();
+            selector.setVariable(new QName("x"), new XdmAtomicValue(23));
+            XdmItem result = selector.evaluateSingle();
+            assertEquals("24", result.getStringValue());
         } catch (Exception e) {
             fail();
         }
