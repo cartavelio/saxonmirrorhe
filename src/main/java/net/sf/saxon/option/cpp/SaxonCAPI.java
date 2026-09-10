@@ -755,6 +755,9 @@ public class SaxonCAPI {
     public static XdmValue convertObjectToXdmValue(Object value) {
 
         XdmValue valueForCpp = null;
+        if (value instanceof ProcessorDataAccumulator) {
+            value = ((ProcessorDataAccumulator) value).getValues();
+        }
         if (value instanceof XdmValue) {
             valueForCpp = (XdmValue) value;
             if (debug) {
