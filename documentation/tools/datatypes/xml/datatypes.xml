@@ -27,6 +27,8 @@
 		<source id="xpath-40-jnode" href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#dt-JNode"/>
 		<source id="xpath-40-matching-item" href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-matching-item"/>
 		<source id="xpath-40-namespace-sensitive-datatypes" href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-namespace-sensitive">Listed in the definition.</source>
+		<source id="xpath-40-subtyping-attributes" href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-item-subtype-attributes" />
+		<source id="xpath-40-subtyping-elements" href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-item-subtype-elements" />
 		<source id="xpath-40-sequence-types" href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-sequencetype-syntax"/>
 		<source id="xpath-40-xnode" href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#dt-XNode"/>
 	</sources>
@@ -1241,6 +1243,23 @@
 												<sources>
 													<source ref="xpath-40-matching-item"/>
 												</sources>
+												<sub-types>
+													<datatype id="schema-attribute" first-introduced="XDM 4.0">
+														<name>schema-attribute()</name>
+														<description>A schema attribute.</description>
+														<category>
+															<type name="Item" />
+														</category>
+														<comparison-family>Schema Attribute</comparison-family>
+														<notes>
+															<p class="qt4">While the concept of a <xref ref="schema-attribute"/> existed before 4.0, XPath 4.0 classifies it as a sub-type of <xref ref="attribute"/>.</p>
+														</notes>
+														<sources>
+															<source ref="xpath-40-matching-item" />
+															<source ref="xpath-40-subtyping-attributes" />
+														</sources>
+													</datatype>
+												</sub-types>
 											</datatype>
 											<datatype id="comment">
 												<name>comment()</name>
@@ -1277,6 +1296,23 @@
 												<sources>
 													<source ref="xpath-40-matching-item"/>
 												</sources>
+												<sub-types>
+													<datatype id="schema-element">
+														<name>schema-element()</name>
+														<description>A schema element.</description>
+														<category>
+															<type name="Item" />
+														</category>
+														<comparison-family>Schema Element</comparison-family>
+														<notes>
+															<p class="qt4">While the concept of a <xref ref="schema-element"/> existed before 4.0, XPath 4.0 classifies it as a sub-type of <xref ref="element"/>.</p>
+														</notes>
+														<sources>
+															<source ref="xpath-40-subtyping-elements" />
+															<source ref="xpath-40-matching-item" />
+														</sources>
+													</datatype>
+												</sub-types>
 											</datatype>
 											<datatype id="namespace-node">
 												<name>namespace-node()</name>
