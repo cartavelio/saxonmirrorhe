@@ -137,9 +137,10 @@ public class StringValue extends AtomicValue {
      * (codepoints less than 65536, with no surrogate pairs)
      * @param content the content of the string, which the caller guarantees to contain
      *                no surrogate pairs
-     * @return the corresponding StringItem
+     * @return the corresponding StringValue
      */
     public static StringValue bmp(String content) {
+        //TODO: most if not all calls supply a literal String. Use a static constant pool.
         return new StringValue(BMPString.of(content));
     }
 
