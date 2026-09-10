@@ -7,18 +7,22 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.elab.ItemEvaluator;
-import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.ItemElaborator;
-import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.functions.hof.FunctionLiteral;
-import net.sf.saxon.om.*;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.ConversionRules;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
+
+import java.math.BigInteger;
 
 
 /**
@@ -81,25 +85,6 @@ public class Sum extends FoldingFunction {
             return new SumFold(context, z);
         } else {
             return new SumFold(context, Int64Value.ZERO);
-        }
-    }
-
-    /**
-     * Static method to compute a total, invoked from compiled bytecode
-     * @param in the sequence of items to be summed
-     * @param context dynamic context for evaluation
-     * @param locator expression location for diagnostics
-     * @return null if the input is empty, otherwise the total as defined by the semantics of the sum() function
-     * @throws XPathException if a dynamic error occurs
-     */
-
-    public static AtomicValue total(SequenceIterator in, XPathContext context, Location locator) throws XPathException {
-        try {
-            SumFold fold = new SumFold(context, null);
-            SequenceTool.supply(in, (ItemConsumer<? super Item>) fold::processItem);
-            return (AtomicValue)fold.result().head();
-        } catch (XPathException e) {
-            throw e.maybeWithLocation(locator).maybeWithContext(context);
         }
     }
 
@@ -221,6 +206,12 @@ public class Sum extends FoldingFunction {
             ItemEvaluator zero = defaultSecondArg
                     ? context -> Int64Value.ZERO
                     : fnc.getArg(1).makeElaborator().elaborateForItem();
+            ItemType argType = fnc.getArg(0).getItemType();
+            if (argType == BuiltInAtomicType.DOUBLE) {
+                return context -> sumDoubles(context, puller, zero);
+            } else if (argType == BuiltInAtomicType.INTEGER) {
+                return context -> sumIntegers(context, puller, zero);
+            }
             return context -> {
                 SumFold fold = new SumFold(context, (AtomicValue)zero.eval(context));
                 SequenceIterator iter = puller.iterate(context);
@@ -229,6 +220,51 @@ public class Sum extends FoldingFunction {
                 }
                 return fold.result().head();
             };
+        }
+
+        /**
+         * Fast path for use when the argument of sum() has static type xs:double*
+         * @param context the evaluation context
+         * @param puller used to iterate over the argument values
+         * @param zero used to compute the result for an empty sequence
+         * @return the total
+         * @throws XPathException if a failure occurs
+         */
+
+        private Item sumDoubles(XPathContext context, PullEvaluator puller, ItemEvaluator zero) throws XPathException {
+            SequenceIterator iter = puller.iterate(context);
+            Item it = iter.next();
+            if (it == null) {
+                return zero.eval(context);
+            }
+            double total = ((DoubleValue) it).getDoubleValue();
+            while ((it = iter.next()) != null) {
+                total += ((DoubleValue)it).getDoubleValue();
+            }
+            return new DoubleValue(total);
+        }
+
+        /**
+         * Fast path for use when the argument of sum() has static type xs:integer*
+         *
+         * @param context the evaluation context
+         * @param puller  used to iterate over the argument values
+         * @param zero    used to compute the result for an empty sequence
+         * @return the total
+         * @throws XPathException if a failure occurs
+         */
+
+        private Item sumIntegers(XPathContext context, PullEvaluator puller, ItemEvaluator zero) throws XPathException {
+            SequenceIterator iter = puller.iterate(context);
+            Item it = iter.next();
+            if (it == null) {
+                return zero.eval(context);
+            }
+            BigInteger total = ((IntegerValue) it).asBigInteger();
+            while ((it = iter.next()) != null) {
+                total = total.add(((IntegerValue) it).asBigInteger());
+            }
+            return new BigIntegerValue(total);
         }
 
 
