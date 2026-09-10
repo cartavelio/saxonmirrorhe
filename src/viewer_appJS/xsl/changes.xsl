@@ -113,6 +113,7 @@
                     <h3>Changes <xsl:if test="following-sibling::*">from <xsl:value-of
                         select="following-sibling::*[1]/@number"/></xsl:if> to <xsl:value-of
                             select="@number"/></h3>
+                    <xsl:apply-templates select="ch:head"/>
                     <xsl:choose>
                         <xsl:when test="'all' = $catName">
                             <!-- Work from ch:changes/ch:categories/ch:cat to ensure categories
@@ -213,8 +214,6 @@
         </xsl:call-template>
     </xsl:template>
 
-
-
     <xsl:template match="ch:category">
         <xsl:apply-templates/>
     </xsl:template>
@@ -239,7 +238,7 @@
         <xsl:apply-templates/>
     </xsl:template>
 
-    <xsl:template match="ch:category//ch:*" priority="4">
+    <xsl:template match="ch:category//ch:*|ch:head//ch:*" priority="4">
         <xsl:element name="{local-name()}">
             <xsl:copy-of select="@*"/>
             <xsl:apply-templates/>

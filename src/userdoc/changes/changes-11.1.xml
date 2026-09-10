@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<release number="11.1" date="2021-12-31" xmlns="http://www.saxonica.com/ns/doc/changes">
+<release number="11.1" date="2022-01-27" xmlns="http://www.saxonica.com/ns/doc/changes">
     
+    <head>
+        <p><b>Note that this section only covers changes from 11.0 to 11.1. Version 11.0 was released
+            for SaxonCS only, not for SaxonJ. For the Java platform, you will also need to view the
+            changes from version 10 to 11.</b></p>
+    </head>
  
     
     <category name="s9api">
         
         <div class="javaonly">
-            
-            <p><b>Note that this section only covers changes from 11.0 to 11.1. Version 11.0 was released
-            for SaxonCS only, not for SaxonJ. For the Java platform, you will also need to view the
-            changes from version 10 to 11.</b></p>
             
             <p>Extensive changes have been made to integrate catalog-based URI resolution using the open-source
             <code>XmlResolver</code> developed by Norm Tovey-Walsh.</p>
