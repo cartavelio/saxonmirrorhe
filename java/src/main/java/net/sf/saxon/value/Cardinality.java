@@ -221,22 +221,15 @@ public final class Cardinality {
      */
 
     public static String describe(int cardinality) {
-        switch (cardinality) {
-            case StaticProperty.ALLOWS_ZERO_OR_ONE:
-                return "zero or one";
-            case StaticProperty.EXACTLY_ONE:
-                return "exactly one";
-            case StaticProperty.ALLOWS_ZERO_OR_MORE:
-                return "zero or more";
-            case StaticProperty.ALLOWS_ONE_OR_MORE:
-                return "one or more";
-            case StaticProperty.EMPTY:
-                return "exactly zero";
-            case StaticProperty.ALLOWS_MANY:
-                return "more than one";
-            default:
-                return "code " + cardinality;
-        }
+        return switch (cardinality) {
+            case StaticProperty.ALLOWS_ZERO_OR_ONE -> "zero or one";
+            case StaticProperty.EXACTLY_ONE -> "exactly one";
+            case StaticProperty.ALLOWS_ZERO_OR_MORE -> "zero or more";
+            case StaticProperty.ALLOWS_ONE_OR_MORE -> "one or more";
+            case StaticProperty.EMPTY -> "exactly zero";
+            case StaticProperty.ALLOWS_MANY -> "more than one";
+            default -> "code " + cardinality;
+        };
     }
 
     /**
@@ -248,42 +241,27 @@ public final class Cardinality {
 
     /*@NotNull*/
     public static String getOccurrenceIndicator(int cardinality) {
-        switch (cardinality) {
-            case StaticProperty.ALLOWS_ZERO_OR_ONE:
-                return "?";
-            case StaticProperty.EXACTLY_ONE:
-                return "";
-            case StaticProperty.ALLOWS_ZERO_OR_MORE:
-                return "*";
-            case StaticProperty.ALLOWS_ONE_OR_MORE:
-                return "+";
-            case StaticProperty.ALLOWS_MANY:
-                return "+";
-            case StaticProperty.EMPTY:
-                return "0";
-            default:
-                return "*";
-                // Covers no bits set (which shouldn't arise) and zero_or_many (which can arise, but is too specific for our purposes)
-        }
+        return switch (cardinality) {
+            case StaticProperty.ALLOWS_ZERO_OR_ONE -> "?";
+            case StaticProperty.EXACTLY_ONE -> "";
+            case StaticProperty.ALLOWS_ZERO_OR_MORE -> "*";
+            case StaticProperty.ALLOWS_ONE_OR_MORE -> "+";
+            case StaticProperty.ALLOWS_MANY -> "+";
+            case StaticProperty.EMPTY -> "0";
+            default -> "*";
+            // Covers no bits set (which shouldn't arise) and zero_or_many (which can arise, but is too specific for our purposes)
+        };
     }
 
     public static int fromOccurrenceIndicator(String indicator) {
-        switch (indicator) {
-            case "?":
-                return StaticProperty.ALLOWS_ZERO_OR_ONE;
-            case "*":
-                return StaticProperty.ALLOWS_ZERO_OR_MORE;
-            case "+":
-                return StaticProperty.ALLOWS_ONE_OR_MORE;
-            case "1":
-                return StaticProperty.ALLOWS_ONE;
-            case "":
-                return StaticProperty.ALLOWS_ONE;
-            case "\u00B0":  // TODO: obsolescent, delete this
-            case "0":
-            default:
-                return StaticProperty.ALLOWS_ZERO;
-        }
+        return switch (indicator) {
+            case "?" -> StaticProperty.ALLOWS_ZERO_OR_ONE;
+            case "*" -> StaticProperty.ALLOWS_ZERO_OR_MORE;
+            case "+" -> StaticProperty.ALLOWS_ONE_OR_MORE;
+            case "1" -> StaticProperty.ALLOWS_ONE;
+            case "" -> StaticProperty.ALLOWS_ONE;  // TODO: obsolescent, delete this
+            default -> StaticProperty.ALLOWS_ZERO;
+        };
     }
 
     /**

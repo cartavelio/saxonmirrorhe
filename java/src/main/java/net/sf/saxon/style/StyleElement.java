@@ -2232,8 +2232,7 @@ public abstract class StyleElement extends ElementImpl {
                     }
                 }
 
-            } else if (node instanceof XSLLocalVariable) {
-                XSLLocalVariable var = (XSLLocalVariable) node;
+            } else if (node instanceof XSLLocalVariable var) {
                 SourceBinding sourceBinding = var.getSourceBinding();
                 var.compileLocalVariable(compilation, decl);
 
