@@ -46,17 +46,17 @@ import static org.junit.jupiter.api.Assertions.fail;
  * originally created by Scott Boag, but much evolved since.
  */
 public class TraxTest {
-    private final String foo_xml = Testdata.pathString("xml/foo.xml");
-    private final String foo_xsl = Testdata.pathString("xsl/foo.xsl");
-    private final String baz_xml = Testdata.pathString("xml/baz.xml");
-    private final String baz_xsl = Testdata.pathString("xsl/baz.xsl");
-    private final String foo2_xsl = Testdata.pathString("xsl/foo2.xsl");
-    private final String foo3_xsl = Testdata.pathString("xsl/foo3.xsl");
-    private final String text_xsl = Testdata.pathString("xsl/text.xsl");
-    private final String cities_xml = Testdata.pathString("xml/cities.xml");
-    private final String embedded_xml = Testdata.pathString("xml/embedded.xml");
-    private final String multidoc_xsl = Testdata.pathString("xsl/multidoc.xsl");
-    private final String identity_xsl = Testdata.pathString("xsl/identity.xsl");
+    private final String foo_xml = Testdata.pathString("trax/xml/foo.xml");
+    private final String foo_xsl = Testdata.pathString("trax/xsl/foo.xsl");
+    private final String baz_xml = Testdata.pathString("trax/xml/baz.xml");
+    private final String baz_xsl = Testdata.pathString("trax/xsl/baz.xsl");
+    private final String foo2_xsl = Testdata.pathString("trax/xsl/foo2.xsl");
+    private final String foo3_xsl = Testdata.pathString("trax/xsl/foo3.xsl");
+    private final String text_xsl = Testdata.pathString("trax/xsl/text.xsl");
+    private final String cities_xml = Testdata.pathString("trax/xml/cities.xml");
+    private final String embedded_xml = Testdata.pathString("trax/xml/embedded.xml");
+    private final String multidoc_xsl = Testdata.pathString("trax/xsl/multidoc.xsl");
+    private final String identity_xsl = Testdata.pathString("trax/xsl/identity.xsl");
 
 
     private static TransformerFactory makeFactory() {

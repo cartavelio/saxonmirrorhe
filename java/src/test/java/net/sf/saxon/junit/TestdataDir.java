@@ -10,7 +10,7 @@ public class TestdataDir {
 
     TestdataDir(Path baseDir) {
         this.baseDir = baseDir;
-        this.baseURI = baseDir.toUri().resolve(baseDir.toFile().getName() + "/");
+        this.baseURI = baseDir.toUri();
     }
 
     public Path dir() {
