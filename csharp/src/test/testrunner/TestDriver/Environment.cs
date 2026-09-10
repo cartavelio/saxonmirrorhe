@@ -152,7 +152,7 @@ namespace TestDriver {
                 environment.name = name;
             }
 
-            environment.processor = new Processor(true);
+            environment.processor = new Processor(driver.edition == "EE");
             if (defaultEnvironment != null) {
                 environment.processor.SetProperty(JFeatureKeys.XSD_VERSION,
                     defaultEnvironment.processor.Implementation.getConfigurationProperty(JFeatureKeys.XSD_VERSION)
@@ -424,15 +424,18 @@ namespace TestDriver {
             bool validateSources = false;
             Configuration config = environment.processor.Implementation;
             XmlUrlResolver res = new TracingXmlResolver(env.BaseUri);
-            XsdCompiler compiler = environment.processor.NewXsdCompiler();
+            XsdCompiler compiler = null;
             SysCollGen.List<XsdCompiler.SchemaSource> sources = new SysCollGen.List<XsdCompiler.SchemaSource>();
             foreach (XdmNode schema in env.Children("schema")) {
                 string role = schema.GetAttributeValue(new QName("role"));
                 string xsdVersion = schema.GetAttributeValue(new QName("xsd-version"));
-                if (compiler == null || !driver.schemaAware) {
-                    driver.println("** Processor is not schema aware **");
-                    environment.usable = false;
-                    return false;
+                if (compiler == null) {
+                    if (!driver.schemaAware || driver.edition == "HE") {
+                        driver.println("** Processor is not schema aware **");
+                        environment.usable = false;
+                        return false;
+                    }
+                    compiler = environment.processor.NewXsdCompiler();
                 }
 
                 environment.schemaAware = true;

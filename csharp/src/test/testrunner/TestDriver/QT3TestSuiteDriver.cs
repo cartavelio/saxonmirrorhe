@@ -28,13 +28,6 @@ namespace TestDriver {
     public class QT3TestSuiteDriver : Driver {
         public static string RNS = "http://www.w3.org/2012/08/qt-fots-results";
         public static string CNS = "http://www.w3.org/2010/09/qt-fots-catalog";
-
-
-        public object getDependencyDictionary() {
-            return dependencyDictionary;
-        }
-
-        private readonly SysCollGen.Dictionary<string, Dependency> dependencyDictionary = new ();
         
 
         public override string catalogNamespace() {
@@ -1030,45 +1023,38 @@ namespace TestDriver {
          * @
          */
         private void buildDependencyDictionary(Processor processor, Environment env, XdmNode catalog) {
-            XQueryCompiler xqCompiler = processor.NewXQueryCompiler();
-            xqCompiler.XQueryLanguageVersion = "3.1";
-            xqCompiler.BaseUri = new Uri("file://" + System.IO.Path.GetFullPath(testSuiteDir) + "/", UriKind.RelativeOrAbsolute);
-            XQueryExecutable exec = xqCompiler.Compile(
-                "        declare namespace fots = \"http://www.w3.org/2010/09/qt-fots-catalog\";\n" +
-                "        let $testsets := //fots:test-set/@file/doc(resolve-uri(., exactly-one(base-uri(.))))\n" +
-                "        for $dependencyTS in $testsets//fots:dependency\n" +
-                "        let $name := $dependencyTS/@type\n" +
-                "        let $value := $dependencyTS/@value\n" +
-                "        group by $name, $value\n" +
-                "        order by $name, $value\n" +
-                "        return <dependency type='{$name}' value='{$value}' />");
-            XQueryEvaluator selector = exec.Load();
-            selector.ContextItem = catalog;
-            XdmValue result = selector.Evaluate();
-            
-            foreach (XdmItem item in result) {
-                XdmNode node = (XdmNode) item;
-                string type = node.GetAttributeValue(new QName("type"));
-                string value = node.GetAttributeValue(new QName("value"));
-                addDependency(type, value, EnsureDependencySatisfied(node, env));
-            }
+            // XQueryCompiler xqCompiler = processor.NewXQueryCompiler();
+            // xqCompiler.XQueryLanguageVersion = "3.1";
+            // xqCompiler.BaseUri = new Uri("file://" + System.IO.Path.GetFullPath(testSuiteDir) + "/", UriKind.RelativeOrAbsolute);
+            // XQueryExecutable exec = xqCompiler.Compile(
+            //     "        declare namespace fots = \"http://www.w3.org/2010/09/qt-fots-catalog\";\n" +
+            //     "        let $testsets := //fots:test-set/@file/doc(resolve-uri(., exactly-one(base-uri(.))))\n" +
+            //     "        for $dependencyTS in $testsets//fots:dependency\n" +
+            //     "        let $name := $dependencyTS/@type\n" +
+            //     "        let $value := $dependencyTS/@value\n" +
+            //     "        group by $name, $value\n" +
+            //     "        order by $name, $value\n" +
+            //     "        return <dependency type='{$name}' value='{$value}' />");
+            // XQueryEvaluator selector = exec.Load();
+            // selector.ContextItem = catalog;
+            // XdmValue result = selector.Evaluate();
+            //
+            // foreach (XdmItem item in result) {
+            //     XdmNode node = (XdmNode) item;
+            //     string type = node.GetAttributeValue(new QName("type"));
+            //     string value = node.GetAttributeValue(new QName("value"));
+            //     addDependency(type, value, EnsureDependencySatisfied(node, env));
+            // }
         }
 
 
-        protected class Dependency {
-            public string dType;
-            public bool satisfied;
-        }
+        // protected class Dependency {
+        //     public string dType;
+        //     public bool satisfied;
+        // }
 
 
-        public void addDependency(string depStr, string value, bool satisfied) {
-            if (!dependencyDictionary.ContainsKey(value)) {
-                Dependency dep = new Dependency();
-                dep.dType = depStr;
-                dep.satisfied = satisfied;
-                dependencyDictionary.Add(value, dep);
-            }
-        }
+        
     }
 }
 

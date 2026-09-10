@@ -64,13 +64,10 @@ namespace Saxon.Api {
         /// <summary>
         /// Create a <c>Processor</c>.
         /// </summary>
-        /// <param name="licensedEdition">Must be set to true (kept for future use).</param>
-        // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
+        /// <param name="licensedEdition">Set to true to request Saxon-EE capability (in which case a license
+        /// is required), or false to request Saxon-HE capability.
         public Processor(bool licensedEdition) {
-            if (!licensedEdition) {
-                throw new IllegalArgumentException("Argument to new Processor() must be set to true if supplied");
-            }
-            JProcessor = new Saxon.Hej.s9api.Processor(true);
+            JProcessor = new Saxon.Hej.s9api.Processor(licensedEdition);
             JProcessor.getUnderlyingConfiguration().setProcessor(this);
             init();
         }

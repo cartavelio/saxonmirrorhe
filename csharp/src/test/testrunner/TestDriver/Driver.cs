@@ -45,9 +45,9 @@ namespace TestDriver {
         protected bool strict = false;
         protected bool jitFlag = false;
 #if EE        
-        protected string edition = "EE";
+        public string edition = "EE";
 #else
-        protected string edition = "HE";
+        public string edition = "HE";
 #endif        
         public bool schemaAware = false;
 
@@ -166,6 +166,12 @@ namespace TestDriver {
                 string specStr = null;
 
                 for (int i = 1; i < args.Length; i++) {
+                    if (args[i] == "-edition:EE") {
+                        edition = "EE";
+                    } else if (args[i] == "-edition:HE") {
+                        edition = "HE";
+                    } 
+
                     if (args[i].StartsWith("-catalog")) {
                         catalogFile = args[i].Substring(9);
                     }
