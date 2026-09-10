@@ -16,7 +16,6 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.Schema;
 
 import java.util.List;
 import java.util.Map;
@@ -84,9 +83,9 @@ public class OnDemandFunctionSet implements FunctionLibrary {
     }
 
     @Override
-    public boolean isAvailable(SymbolicName.F functionName, Schema schema, int languageLevel) {
+    public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
         boolean match = load(functionName, null);
-        return match && library.isAvailable(functionName, schema, languageLevel);
+        return match && library.isAvailable(functionName, languageLevel);
     }
 
     @Override
@@ -95,6 +94,10 @@ public class OnDemandFunctionSet implements FunctionLibrary {
                            List<String> reasons) throws XPathException {
         boolean match = load(functionName, reasons);
         if (match) {
+            if (keywords != null && !keywords.isEmpty()) {
+                reasons.add("Calls to Saxon SQL functions cannot use keyword arguments");
+                return null;
+            }
             return library.bind(functionName, staticArgs, null, env, reasons);
         } else {
             return null;

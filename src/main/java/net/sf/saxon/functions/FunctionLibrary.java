@@ -14,7 +14,6 @@ import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.Schema;
 
 import java.util.List;
 import java.util.Map;
@@ -30,22 +29,26 @@ import java.util.Map;
 
 public interface FunctionLibrary {
 
+    /**
+     * Supply details of the configuration in use.
+     * @param config the configuration. The default implementation does nothing (many function libraries
+     *               do not need to know any configuration details)
+     */
+
     default void setConfiguration(Configuration config) {}
 
     /**
      * Test whether a function with a given name and arity is available
      * <p>This supports the function-available() function in XSLT.</p>
      *
-     * @param functionName  the qualified name of the function being called, together with its arity.
-     *                      For legacy reasons, the arity may be set to -1 to mean any arity will do
-     * @param schema the in-scope schema definitions: this affects what constructor functions
-     *               are available for user-defined atomic types
+     * @param functionName the qualified name of the function being called, together with its arity.
+     *                     For legacy reasons, the arity may be set to -1 to mean any arity will do
      * @param languageLevel the XPath language level (times 10, e.g. 31 for XPath 3.1)
      * @return true if a function of this name and arity is available for calling
      */
 
     /*@Nullable*/
-    boolean isAvailable(SymbolicName.F functionName, Schema schema, int languageLevel);
+    boolean isAvailable(SymbolicName.F functionName, int languageLevel);
 
 
     /**

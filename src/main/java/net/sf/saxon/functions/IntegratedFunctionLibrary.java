@@ -15,7 +15,6 @@ import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.Schema;
 
 import java.util.HashMap;
 import java.util.List;
@@ -73,6 +72,10 @@ public class IntegratedFunctionLibrary implements FunctionLibrary {
         if (defn == null) {
             return null;
         }
+        if (keywords != null && !keywords.isEmpty()) {
+            reasons.add("Calls to external Java functions cannot use keyword arguments");
+            return null;
+        }
         return makeFunctionCall(defn, staticArgs);
     }
 
@@ -117,13 +120,12 @@ public class IntegratedFunctionLibrary implements FunctionLibrary {
      * Test whether a function with a given name and arity is available
      * <p>This supports the function-available() function in XSLT.</p>
      *
-     * @param functionName  the qualified name of the function being called
-     * @param schema
+     * @param functionName the qualified name of the function being called
      * @param languageLevel the XPath language level, times 10 (31 = XPath 3.1)
      * @return true if a function of this name and arity is available for calling
      */
     @Override
-    public boolean isAvailable(SymbolicName.F functionName, Schema schema, int languageLevel) {
+    public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
         ExtensionFunctionDefinition defn = functions.get(functionName.getComponentName());
         int arity = functionName.getArity();
         return defn != null && defn.getMaximumNumberOfArguments() >= arity && defn.getMinimumNumberOfArguments() <= arity;
