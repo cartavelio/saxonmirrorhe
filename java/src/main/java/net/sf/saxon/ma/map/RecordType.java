@@ -564,16 +564,16 @@ public class RecordType implements FunctionItemType {
     public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
         if (item instanceof MapItem) {
             for (Map.Entry<String, SequenceType> entry : fieldTypes.entrySet()) {
-                String key = entry.getKey();
+                String entryKey = entry.getKey();
                 SequenceType required = entry.getValue();
-                GroundedValue value = ((MapItem) item).get(new StringValue(key));
+                GroundedValue value = ((MapItem) item).get(new StringValue(entryKey));
                 if (value == null) {
                     if (!Cardinality.allowsZero(required.getCardinality())) {
-                        return Optional.of("Field " + key + " is absent; it must have a value");
+                        return Optional.of("Field " + entryKey + " is absent; it must have a value");
                     }
                 } else {
                     if (!required.matches(value)) {
-                        String s = "Field " + key + " has value "
+                        String s = "Field " + entryKey + " has value "
                                 + Err.depictSequence(value)
                                 + " which does not match the required type "
                                 + required;

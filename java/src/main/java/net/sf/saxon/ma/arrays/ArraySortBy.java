@@ -116,7 +116,7 @@ public class ArraySortBy extends SystemFunction {
         }
 
         try {
-            inputList.sort((a, b) -> {
+            inputList.sort((MemberToBeSorted a, MemberToBeSorted b) -> {
                 for (int k = 0; k < sortKeys.size(); k++) {
                     int result = ArraySort.compareSortKeys(a.sortKeys()[k], b.sortKeys()[k], comparers.get(k));
                     if (result != 0) {

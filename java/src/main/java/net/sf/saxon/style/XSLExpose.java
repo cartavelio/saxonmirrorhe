@@ -150,6 +150,7 @@ public class XSLExpose extends XSLAcceptExpose {
                         if (found) {
                             checkCompatibility(sName, type.visibility(), getVisibility());
                         }
+                        break;
                 }
                 if (!found && !qName.equals(new StructuredQName("saxon", NamespaceUri.SAXON, "error-name"))) {
                     compileError("No " + sName + " exists in the containing package", "XTSE3020");
