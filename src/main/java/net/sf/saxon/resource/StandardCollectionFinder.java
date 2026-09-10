@@ -104,7 +104,7 @@ public class StandardCollectionFinder
 
         String regex = context.getConfiguration().getConfigurationProperty(Feature.ZIP_URI_PATTERN);
         if (regex == null) {
-            regex = "^jar:|\\.jar$|\\.zip|\\.docx$$";
+            regex = "^jar:|\\.jar$|\\.zip$|\\.docx$|\\.xlsx$";
         }
         if (isJarFileURI(collectionURI) || ARegularExpression.compile(regex, "").containsMatch(StringView.of(collectionURI).tidy())) {
             return new JarCollection(context, collectionURI, params);
