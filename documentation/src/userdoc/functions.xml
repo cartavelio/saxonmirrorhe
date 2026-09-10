@@ -5165,10 +5165,12 @@
           <in-spec>xslt40</in-spec>
         </proto>
       </signatures>
-      <p>Available with all versions of SaxonJ and SaxonC. With SaxonCS, implemented since Saxon 13.0,
+      <status>
+        <p>Available with all versions of SaxonJ and SaxonC. With SaxonCS, implemented since Saxon 13.0,
           but works only on documents that wrap a DOM <code>XmlDocument</code> tree.</p>
-      <p>The <code>XmlDocument</code> implementation used in SaxonCS does not follow the rule that when two entity
-         declarations have the same name, only the first is retained; instead, it appears to retain neither.</p>
+        <p>The <code>XmlDocument</code> implementation used in SaxonCS does not follow the rule that when two entity
+          declarations have the same name, only the first is retained; instead, it appears to retain neither.</p>
+      </status>
       <saxon-edition>ALL</saxon-edition>
       <description>
         <p>Returns the public ID of an unparsed entity, given its name.</p>
@@ -5186,10 +5188,12 @@
           <in-spec>xslt40</in-spec>s
         </proto>
       </signatures>
-      <p>Available with all versions of SaxonJ and SaxonC. With SaxonCS, implemented since Saxon 13.0,
+      <status>
+        <p>Available with all versions of SaxonJ and SaxonC. With SaxonCS, implemented since Saxon 13.0,
           but works only on documents that wrap a DOM <code>XmlDocument</code> tree.</p>
-      <p>The <code>XmlDocument</code> implementation used in SaxonCS does not follow the rule that when two entity
-         declarations have the same name, only the first is retained; instead, it appears to retain neither.</p>
+        <p>The <code>XmlDocument</code> implementation used in SaxonCS does not follow the rule that when two entity
+          declarations have the same name, only the first is retained; instead, it appears to retain neither.</p>
+      </status>
       <saxon-edition>ALL</saxon-edition>
       <description>
         <p>Returns the system ID of an unparsed entity, given its name.</p>
@@ -8896,17 +8900,21 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
       </status>
       <saxon-edition>PE/EE</saxon-edition>
       <details>
-        <div> <p>The function <code>saxon:map-search</code> is similar to <a class="bodylink code"
-              href="/functions/map/find">map:find</a>, in that it searches recursively through
+        <div>
+          <p>The function <code>saxon:map-search</code> is similar to <a class="bodylink code"
+            href="/functions/map/find">map:find</a>, in that it searches recursively through
             nested maps and arrays, but is more versatile. It differs from <code>map:find</code> in
-            two main respects:</p> <ol>
+            two main respects:</p>
+          <ol>
             <li>Whereas <code>map:find</code> only takes as input the key value to look for,
-                <code>saxon:map-search</code> also takes a function that can be used to test the
+              <code>saxon:map-search</code> also takes a function that can be used to test the
               associated value. </li>
             <li>Whereas <code>map:find</code> returns the value associated with the specified key,
-                <code>saxon:map-search</code> returns a JNode, which contains much more information about where the match
-              was found.</li>
-          </ol> <p>In more detail:</p> <p>The function <code>saxon:map-search</code> searches the
+              <code>saxon:map-search</code> returns a JNode, which contains much more information
+              about where the match was found.</li>
+          </ol>
+          <p>In more detail:</p>
+          <p>The function <code>saxon:map-search</code> searches the
             sequence supplied as <code>$input</code> looking for map entries whose key is the same
             key as <code>$key</code>. When such an entry is found, the associated value is passed to
             the supplied <code>$condition</code> function. If the <code>$condition</code> function
@@ -8914,7 +8922,7 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
             returned value of the function: so the returned value is a sequence containing one item
             for each search "hit". The actual item representing a hit is a JNode, allowing use of 
             axes such as the parent and ancestor axes to navigate from the returned JNode to related
-            nodes in the tree that was searched.
+            nodes in the tree that was searched.</p>
           <p>The search processes the <code>$input</code> sequence using the following
             recursively-defined rules:</p>
           <ul>
@@ -8924,7 +8932,8 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
             <li>To process an item that is an array, then process each of the array's members in
               order (each member is, in general, a sequence).</li>
             <li>To process an item that is a map, then for each key-value entry (K, V) in the map
-              (in implementation-dependent order) perform both of the following steps, in order: <ul>
+              (in implementation-dependent order) perform both of the following steps, in order: 
+              <ul>
                 <li>If K is the same key as <code>$key</code>, then add a new map to the result
                   sequence (with entries "key", "value", and "map" as described above).</li>
                 <li>Process V (which is, in general, a sequence).</li>
@@ -8932,7 +8941,8 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
             </li>
             <li>To process an item that is neither a map nor an array, do nothing. (Such items are
               ignored).</li>
-          </ul> </div>
+          </ul> 
+        </div>
       </details>
     </function>
 
