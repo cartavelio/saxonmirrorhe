@@ -282,7 +282,7 @@ public class Block extends Instruction {
         }
         Expression[] checked = new Expression[operanda.length];
         SequenceType subReq = req;
-        if (req.getCardinality() != StaticProperty.ALLOWS_ZERO_OR_MORE) {
+        if (req.getCardinality() != StaticProperty.ALLOWS_ZERO_OR_MORE && req.getCardinality() != StaticProperty.ALLOWS_ZERO) {
             subReq = SequenceType.zeroOrMore(req.getPrimaryType());
         }
         for (int i=0; i<operanda.length; i++) {
