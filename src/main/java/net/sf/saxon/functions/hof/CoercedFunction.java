@@ -149,7 +149,7 @@ public class CoercedFunction extends AbstractFunction {
 
     @Override
     public int getArity() {
-        return targetFunction.getArity();
+        return requiredType.getArity();
     }
 
     /**

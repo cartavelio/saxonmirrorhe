@@ -202,6 +202,22 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
     }
 
     /**
+     * Get the type of the function when invoked with a specific number of arguments
+     *
+     * @return the function type
+     */
+
+    public FunctionItemType getFunctionItemType(int arity) {
+        SequenceType[] argTypes = new SequenceType[arity];
+        for (int i = 0; i < arity; i++) {
+            UserFunctionParameter ufp = parameterDefinitions[i];
+            argTypes[i] = ufp.getRequiredType();
+        }
+        return new SpecificFunctionType(argTypes, resultType, annotations);
+    }
+
+
+    /**
      * Get the roles of the arguments, for the purposes of streaming
      *
      * @return an array of OperandRole objects, one for each argument

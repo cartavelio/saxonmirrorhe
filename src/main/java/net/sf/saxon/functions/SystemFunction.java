@@ -377,7 +377,11 @@ public abstract class SystemFunction extends AbstractFunction {
     @Override
     public FunctionItemType getFunctionItemType() {
         SequenceType resultType = SequenceType.makeSequenceType(getResultItemType(), details.cardinality);
-        return new SpecificFunctionType(details.paramTypes, resultType);
+        SequenceType[] paramTypes = details.paramTypes;
+        if (paramTypes.length != arity) {
+            paramTypes = Arrays.copyOf(paramTypes, arity);
+        }
+        return new SpecificFunctionType(paramTypes, resultType);
     }
 
     /**
