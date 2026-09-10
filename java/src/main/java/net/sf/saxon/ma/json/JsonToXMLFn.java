@@ -7,26 +7,30 @@
 
 package net.sf.saxon.ma.json;
 
-import com.saxonica.functions.qt4.csv.CsvDoc;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.functions.UnparsedTextFunction;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.PortableNamedType;
 import net.sf.saxon.pattern.qname.NamespaceQNameTest;
+import net.sf.saxon.resource.EncodingDetector;
+import net.sf.saxon.resource.ResourceLoader;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.gnode.DocumentNodeType;
-import net.sf.saxon.value.BinaryValue;
-import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.value.SequenceType;
+import net.sf.saxon.value.*;
+import net.sf.saxon.z.IntPredicateProxy;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.util.Map;
 
 /**
@@ -54,6 +58,20 @@ public class JsonToXMLFn extends SystemFunction {
     public static ItemType RESULT_TYPE = new DocumentNodeType(
             new PortableNamedType(Type.ELEMENT, new NamespaceQNameTest(NamespaceUri.FN)));
 
+    public static StringValue decodeBinary(XPathContext context, byte[] binaryValue)
+            throws XPathException, IOException {
+        InputStream inputStream = new ByteArrayInputStream(binaryValue);
+        // TODO: make CsvParser.parse() accept binary input? Where does the encoding come from?
+
+        String encoding = EncodingDetector.inferStreamEncoding(inputStream, "UTF-8", null);
+
+        UnicodeBuilder uBuilder = new UnicodeBuilder();
+        Reader reader = ResourceLoader.getReaderFromStream(inputStream, encoding);
+        IntPredicateProxy checker = context.getConfiguration().getValidCharacterChecker();
+        UnparsedTextFunction.readFile(checker, reader, uBuilder);
+        return new StringValue(uBuilder.toUnicodeString());
+    }
+
     /**
      * Evaluate the expression
      *
@@ -73,7 +91,7 @@ public class JsonToXMLFn extends SystemFunction {
         // Following needed for parse-json but not for json-to-xml, see PR 2205
         if (arg0 instanceof BinaryValue) {
             try {
-                arg0 = CsvDoc.decodeBinary(context, ((BinaryValue) arg0).getBinaryValue());
+                arg0 = decodeBinary(context, ((BinaryValue) arg0).getBinaryValue());
             } catch (IOException e) {
                 throw new XPathException("Failed to decode binary JSON input", "FOUT1200");
             }
