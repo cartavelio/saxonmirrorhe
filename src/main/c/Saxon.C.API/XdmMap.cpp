@@ -177,7 +177,7 @@ std::list<XdmValue *> XdmMap::valuesAsList() {
   int sizex = mapSize();
   long long *results = nullptr;
 
-  if(value != SXN_UNSET) {
+  if(sizex > 0 || value != SXN_UNSET) {
 
   	results = j_xdmMap_values(SaxonProcessor::sxn_environ->thread,
                                        (void *)fn, (void *)value);

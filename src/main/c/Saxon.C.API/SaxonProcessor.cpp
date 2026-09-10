@@ -1171,8 +1171,6 @@ XdmArray *SaxonProcessor::makeArray(XdmValue **input, int length) {
 
   if (length == 0) {
     processorDataRef = createProcessorData(sxn_environ->thread);
-    std::cerr << "Converting array of XdmValue to XdmArray length=0"
-              << std::endl;
   } else {
     processorDataRef =
         createProcessorDataWithCapacity(sxn_environ->thread, length);

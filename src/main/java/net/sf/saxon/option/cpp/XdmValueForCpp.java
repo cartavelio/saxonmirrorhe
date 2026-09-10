@@ -199,10 +199,15 @@ public class XdmValueForCpp {
      */
     @CEntryPoint(name = "j_getBooleanValue")
     public static byte getBooleanValue(IsolateThread thread, ObjectHandle valueRef) throws SaxonApiException {
-        XdmAtomicValue value = SaxonCAPI.objectHandles.get(valueRef);
+        try {
+            XdmAtomicValue value = SaxonCAPI.objectHandles.get(valueRef);
 
-        byte result =CTypeConversion.toCBoolean(value.getBooleanValue());
-        return result;
+            byte result = CTypeConversion.toCBoolean(value.getBooleanValue());
+            return result;
+        } catch(SaxonApiException ex) {
+            SaxonCException.throwable = ex;
+            return -2;
+        }
     }
 
     /**
@@ -215,10 +220,10 @@ public class XdmValueForCpp {
      * @return  the result of converting to a double - reference to XdmAtomicValue given as long
      * @throws SaxonApiException
      */
-    @CEntryPoint(name = "j_getDoubleValue")
+    @CEntryPoint(name = "j_getDoubleValue", exceptionHandler = SaxonCExceptionDoubleHandler.class)
     public static double getDoubleValue(IsolateThread thread, ObjectHandle valueRef) throws SaxonApiException {
-        XdmAtomicValue value = SaxonCAPI.objectHandles.get(valueRef);
-        return value.getDoubleValue();
+            XdmAtomicValue value = SaxonCAPI.objectHandles.get(valueRef);
+            return value.getDoubleValue();
     }
 
     /**
@@ -228,7 +233,7 @@ public class XdmValueForCpp {
      * @return  long value as reference for the XdmAtomicValue - the result of converting to an integer
      * @throws SaxonApiException
      */
-    @CEntryPoint(name = "j_getLongValue")
+    @CEntryPoint(name = "j_getLongValue", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long getLongValue(IsolateThread thread, ObjectHandle valueRef) throws SaxonApiException {
         XdmAtomicValue value = SaxonCAPI.objectHandles.get(valueRef);
         return value.getLongValue();

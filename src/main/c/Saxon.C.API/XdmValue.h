@@ -230,6 +230,7 @@ protected:
   int xdmSize;  /*!< Cached. The count of items in the XdmValue */
   int refCount; /*!< The reference count of this XdmValue. If >1 this object
                    should not be deleted */
+  int64_t value;            /*!< The Java XdmItem reference in Graalvm  */
 
 private:
   char *toStringValue; /*!< Cached. String representation of the XdmValue, if

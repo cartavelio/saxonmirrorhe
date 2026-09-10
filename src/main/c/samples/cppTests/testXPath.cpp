@@ -513,6 +513,23 @@ void testXPathOnFile(SaxonProcessor *processor, XPathProcessor *xpath,
   }
 }
 
+void testGetDoubleFromString(SaxonProcessor* processor, sResultCount *sresult) {
+  cout << endl << " testgetDoubleFromString" << endl;
+  try {
+    XdmAtomicValue *v = processor->makeStringValue("Hello");
+    double d = v->getDoubleValue();
+    sresult->failure++;
+    sresult->failureList.push_back("testgetDoubleFromString");
+  } catch (SaxonApiException &e) {
+
+    const char *message = e.getMessage();
+    cout << "Error Message = " << message << endl;
+
+    sresult->success++;
+
+  }
+}
+
 void testEmptyXdmMap(sResultCount *sresult) {
   cout << endl << " testEmptyXdmMap" << endl;
   try {
@@ -527,6 +544,78 @@ void testEmptyXdmMap(sResultCount *sresult) {
     sresult->failure++;
     sresult->failureList.push_back("tesEmptyXdmMap");
   }
+}
+
+void testEmptyXdmArray(SaxonProcessor * processor, sResultCount *sresult) {
+  cout << endl << " testEmptyXdmArray" << endl;
+
+    XdmArray *d = new XdmArray();
+    int lengthi = d->arrayLength();
+    if(lengthi == 0) {
+      sresult->success++;
+    } else {
+      std::cerr<<"arr length="<<lengthi<<std::endl;
+      sresult->failure++;
+      sresult->failureList.push_back("testEmptyXdmArray");
+      delete d;
+      return;
+    }
+  try {
+    bool r = d->get(0);
+    sresult->failure++;
+    sresult->failureList.push_back("testEmptyXdmArray1");
+    delete d;
+
+  } catch (SaxonApiException &e) {
+
+    const char *message = e.getMessage();
+    cerr << "Test should throw exception with Message = " << message << endl;
+    sresult->success++;
+
+  }
+
+
+  try {
+    std::list<XdmValue *> myList = d->asList();
+    if(myList.size() == 0) {
+      sresult->success++;
+    } else {
+      sresult->failure++;
+      sresult->failureList.push_back("testEmptyXdmArray2");
+      delete d;
+      return;
+    }
+
+    XdmValue ** valuesi = d->values();
+
+    if(valuesi == nullptr) {
+      sresult->success++;
+    } else {
+      sresult->failure++;
+      sresult->failureList.push_back("testEmptyXdmArray3");
+      delete d;
+      return;
+    }
+    XdmArray * d1 = d->addMember(processor->makeIntegerValue(1));
+
+    if(d1 != nullptr) {
+      sresult->success++;
+      delete d;
+      delete d1;
+    } else {
+      sresult->failure++;
+      sresult->failureList.push_back("testEmptyXdmArray4");
+      delete d;
+      return;
+    }
+  } catch (SaxonApiException &e) {
+
+    const char *message = e.getMessage();
+    cerr << "Error Message = " << message << endl;
+
+    sresult->failure++;
+    sresult->failureList.push_back("tesEmptyXdmArray5");
+  }
 
 }
 
@@ -537,14 +626,36 @@ void testXdmArray(SaxonProcessor *processor, sResultCount *sresult) {
     int values[3] = {1,2,3};
     XdmArray *a = processor->makeArray(values, 3);
     XdmArray *b = new XdmArray(*a);
-    XdmAtomicValue item1 = (XdmAtomicValue *)b->get(1)->getHead();
-    long value1 = item1.getLongValue();
+    XdmAtomicValue * item1 = (XdmAtomicValue *)(b->get(1)->getHead());
+    long value1 = item1->getLongValue();
 
     if(value1 == 2) {
       sresult->success++;
     } else {
       sresult->failure++;
       sresult->failureList.push_back("testXdmArray");
+    }
+
+    XdmValue * xdmvalue = (XdmValue *)b;
+    XdmItem * firstItem = xdmvalue->getHead();
+    if(firstItem->isArray()) {
+      std::cerr<<"Array Found!"<<std::endl;
+    }
+    if(firstItem == nullptr) {
+      sresult->failure++;
+      sresult->failureList.push_back("testXdmArray1");
+    } else {
+      cerr<<"XdmArray size = "<<(((XdmArray *)firstItem)->arrayLength())<<endl;
+      XdmAtomicValue * item2 = (XdmAtomicValue *)(((XdmArray *)b)->get(0));
+      if(item2 != nullptr) {
+        long value2 = item2->getLongValue();
+        if(value1 == 2) {
+          sresult->success++;
+        }
+      } else {
+        sresult->failure++;
+        sresult->failureList.push_back("testXdmArray2");
+      }
     }
   } catch (SaxonApiException &e) {
 
@@ -681,6 +792,13 @@ int main() {
        << endl
        << endl;
 
+  testEmptyXdmArray(processor, sresult);
+
+  cout << endl
+     << "============================================================="
+     << endl
+     << endl;
+
   testXdmArray(processor, sresult);
   cout << endl
      << "============================================================="
@@ -714,6 +832,14 @@ int main() {
        << "============================================================="
        << endl
        << endl;
+
+  testGetDoubleFromString(processor, sresult);
+
+  cout << endl
+     << "============================================================="
+     << endl
+     << endl;
+
   testXPathOnFile(processor, xpathProc, sresult);
   cout << endl
        << "============================================================="
