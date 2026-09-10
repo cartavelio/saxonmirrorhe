@@ -51,6 +51,10 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 new SequenceType[]{SequenceType.SINGLE_NODE},
                 SequenceType.NODE_SEQUENCE);
 
+        SpecificFunctionType replaceAction = new SpecificFunctionType(
+                new SequenceType[]{BuiltInAtomicType.UNTYPED_ATOMIC.one(), BuiltInAtomicType.UNTYPED_ATOMIC.zeroOrMore()},
+                SequenceType.OPTIONAL_ITEM);
+
         // TODO: superseded by "every"
         register("all", 1, e -> e.populate(EveryFn::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, BooleanValue.TRUE));
@@ -318,11 +322,13 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, Type.ITEM_TYPE, STAR | TRA, EMPTY)
                 .arg(1, BuiltInAtomicType.INTEGER, STAR, null));
 
-        register("replace", 4, e -> e.populate(Replace::new, BuiltInAtomicType.STRING, ONE, 0)
+
+        register("replace", 2, 5, e -> e.populate(Replace::new, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
-                .arg(2, BuiltInAtomicType.STRING, ONE, null)
-                .arg(3, BuiltInAtomicType.STRING, OPT, null));
+                .arg(2, BuiltInAtomicType.STRING, OPT, null)
+                .arg(3, BuiltInAtomicType.STRING, OPT, null)
+                .arg(4, replaceAction, OPT, null));
 
         register("replicate", 2, e -> e.populate(Replicate::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)

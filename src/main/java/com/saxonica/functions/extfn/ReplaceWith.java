@@ -13,6 +13,8 @@ import net.sf.saxon.value.StringValue;
 /**
  * This class implements the saxon:replace-with() function for replacing
  * substrings that match a regular expression by means of a callback to a user-supplied function
+ *
+ * <p>The function is obsolescent: use {@code fn:replace} with the {@code action} parameter in preference.</p>
  */
 
 public class ReplaceWith extends RegexFunction  {
@@ -44,7 +46,7 @@ public class ReplaceWith extends RegexFunction  {
             arguments = extra;
         }
         FunctionItem arg2 = (FunctionItem) arguments[2].head();
-        java.util.function.Function<UnicodeString, UnicodeString> fn = in -> {
+        java.util.function.BiFunction<UnicodeString, UnicodeString[], UnicodeString> fn = (in, groups) -> {
                 try {
                     Sequence result = arg2.call(context, new Sequence[]{new StringValue(in)});
                     return result.head().getUnicodeStringValue();
@@ -53,7 +55,7 @@ public class ReplaceWith extends RegexFunction  {
                 }
             };
 
-        RegularExpression re = getRegularExpression(arguments);
+        RegularExpression re = getRegularExpression(arguments, 1, 2);
         return new StringValue(re.replaceWith(input.getUnicodeStringValue(), fn));
     }
 
