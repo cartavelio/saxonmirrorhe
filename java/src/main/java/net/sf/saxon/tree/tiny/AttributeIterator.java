@@ -59,7 +59,7 @@ final class AttributeIterator implements SequenceIterator, AtomizedValueIterator
                 return false;
             }
             TinyAttributeImpl att = tree.getAttributeNode(index);
-            if (predicate.test(att)) {
+            if (predicate == null || predicate.test(att)) {
                 current = att;
                 index++;
                 return true;
