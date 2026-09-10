@@ -12,6 +12,7 @@
       <cat name="xpath20" title="XPath 2.0 implementation"/>
       <cat name="xpath30" title="XPath 3.0 implementation"/>
       <cat name="xpath31" title="XPath 3.1 implementation"/>
+      <cat name="xpath40" title="XPath 4.0 implementation"/>
       <cat name="functions20" title="Functions, operators, and data types for XPath 2.0"/>    
       <cat name="functions30" title="Functions, operators, and data types for XPath 3.0"/>
       <cat name="functions31" title="Functions, operators, and data types for XPath 3.1"/>
