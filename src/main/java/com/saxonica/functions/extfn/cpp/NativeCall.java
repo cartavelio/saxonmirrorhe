@@ -33,6 +33,7 @@ public class NativeCall implements ExtensionFunction {
     private CFunctionPointer func;
     private CFunctionPointer pythonProc;
     SaxonCAPI.AllocatorFn alloc;
+    private boolean useNativeTypes;
 
 
 
@@ -40,7 +41,7 @@ public class NativeCall implements ExtensionFunction {
         this.name = qn;
     }
 
-    public NativeCall(QName funcQname, SequenceType[] sequenceTypes, SequenceType returnSequenceType, CFunctionPointer pythonProc, CFunctionPointer func, SaxonCAPI.AllocatorFn alloc) {
+    public NativeCall(QName funcQname, SequenceType[] sequenceTypes, SequenceType returnSequenceType, CFunctionPointer pythonProc, CFunctionPointer func, SaxonCAPI.AllocatorFn alloc, boolean useNativeTypes) {
         this.name = funcQname;
         this.sequenceType = sequenceTypes;
         this.returnType = returnSequenceType;
@@ -166,7 +167,7 @@ public class NativeCall implements ExtensionFunction {
 
     // Declare a native method _native()
     @CFunction
-    public static native ObjectHandle c_nativeCall(CCharPointer c_funcName, CFunctionPointer proc,  CFunctionPointer func, int length, CLongPointer addr);
+    public static native ObjectHandle c_nativeCall(CCharPointer c_funcName, CFunctionPointer proc,  CFunctionPointer func, int useNativeTypes, int length, CLongPointer addr);
 
 
     @Override
@@ -209,7 +210,7 @@ public class NativeCall implements ExtensionFunction {
             System.err.println("Java SaxonC Debug NativeCall.call= " + arguments.length);
 
 
-            ObjectHandle valueRef = c_nativeCall(holder.get(), pythonProc, func, arguments.length, addr); // pass arguments as an array
+            ObjectHandle valueRef = c_nativeCall(holder.get(), pythonProc, func, (useNativeTypes? 1 : 0), arguments.length, addr); // pass arguments as an array
 
              // get info on the return type
             if (valueRef != WordFactory.nullPointer()) {
