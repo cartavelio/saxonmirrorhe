@@ -219,7 +219,6 @@
         <platforms>J</platforms>
         <setter class="net.sf.saxon.Configuration">setCollectionFinder</setter>
         <getter class="net.sf.saxon.Configuration">getCollectionFinder</getter>
-        <commandline for="TQ">-cf</commandline>
         <configfile>global/@collectionFinder</configfile>
         <configfiledesc>
             <p>User-supplied class used for retrieving the <link>net.sf.saxon.lib.ResourceCollection</link> to resolve the URI supplied to the <a
@@ -683,7 +682,6 @@
         <uri>http://saxon.sf.net/feature/expathFileDeleteTemporaryFiles</uri>
         <editions>PE EE</editions>
         <platforms>J</platforms>
-        <commandline for="TQ">-expathFileDeleteTemporaryFiles:(on|off)</commandline>
         <desc>
             <p><code>EXPATH_FILE_DELETE_TEMPORARY_FILES</code> determines whether temporary files
                 and directories created in the EXPath File module should be automatically deleted on
@@ -701,7 +699,6 @@
         <editions>EE</editions>
         <platforms>J</platforms>
         <obsolete>12.0</obsolete>
-        <commandline for="TQ">--generateByteCode:(on|off)</commandline>
         <configfile>global/@generateByteCode</configfile>
         <configfiledesc>
             <p>Obsolete and ignored from Saxon 12.0.</p>
@@ -1772,7 +1769,7 @@
         <platforms>J CS</platforms>
         <setter class="net.sf.saxon.Configuration">setTraceListener</setter>
         <getter class="net.sf.saxon.Configuration">getTraceListener</getter>
-        <commandline for="TQ">-TL:classname</commandline>
+        <commandline for="TQ">-T:classname</commandline>
         <desc>
             <p>The <code>TraceListener</code> will be notified of significant events occurring
                 during a query or transformation, for tracing or debugging purposes.</p>
@@ -1797,7 +1794,7 @@
         <configfiledesc>
             <p>User-defined class to be used for handling run-time trace output.</p>
         </configfiledesc>
-        <commandline for="TQ">-TL:classname</commandline>
+        <commandline for="TQ">-T:classname</commandline>
         <desc>
             <p>The class will be instantiated once for each query or transformation, and the
                 resulting <code>TraceListener</code> will be notified of significant events
@@ -2096,7 +2093,7 @@
                 as the version in the <code>xsl:stylesheet</code> element. From Saxon 9.8, the
                 warning is no longer output, so this attribute is ignored.</p>
         </configfiledesc>
-        <commandline for="T">-versmsg:(on|off)</commandline>
+        <commandline for="T">-versionmsg:(on|off)</commandline>
         <desc>
             <p>Indicates whether a warning message should be notified (to the
                 <code>ErrorListener</code>) if running Saxon against an XSLT stylesheet that
