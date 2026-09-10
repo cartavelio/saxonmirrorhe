@@ -1,73 +1,42 @@
 package s9apitest;
 
-import net.sf.saxon.s9api.SaxonApiException;
-import net.sf.saxon.s9api.XdmAtomicValue;
+import jaxptest.ConfigTest;
+import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringWriter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * test XdmAtomicValue class especially conversions
+ * Test XSD processing
  */
-public class TestAtomicValues {
+public class TestSchemaProcessing {
+
+    private ConfigTest configTest = new ConfigTest();
 
     @Test
-    public void testInteger() {
+    public void testBug6050() {
         try {
-            assertEquals(23, new XdmAtomicValue(23).getLongValue());
-        } catch (SaxonApiException e) {
-            fail();
+            Processor processor = new Processor(true);
+            SchemaManager mgr = processor.getSchemaManager();
+            mgr.load(new File(configTest.getDataDir() + "bug6050/person.xsd"));
+            //mgr.load(new File("src/test/java/bugs/bug6050/simple.xsd"));
+
+            XQueryCompiler compiler = processor.newXQueryCompiler();
+            XQueryExecutable exec = compiler.compile(new File(configTest.getDataDir() + "bug6050/common.xq"));
+            XQueryEvaluator eval = exec.load();
+            eval.setExternalVariable(new QName("phoneNumber"), new XdmAtomicValue("1189482766"));
+            StringWriter sw = new StringWriter();
+            eval.setDestination(processor.newSerializer(sw));
+            eval.run();
+            assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>1189482766", sw.toString());
+        } catch (SaxonApiException | IOException e) {
+            fail(e.getMessage());
         }
-    }
-
-    @Test
-    public void testDouble() {
-        try {
-            assertEquals(23e3, new XdmAtomicValue(23e3).getDoubleValue());
-        } catch (SaxonApiException e) {
-            fail();
-        }
-    }
-
-    @Test
-    public void testDecimal() {
-        try {
-            assertEquals(BigDecimal.valueOf(500), new XdmAtomicValue(500).getDecimalValue());
-        } catch (SaxonApiException e) {
-            fail();
-        }
-    }
-
-    @Test
-    public void testInstant() {
-        Instant now = Instant.now();
-        assertEquals(now, new XdmAtomicValue(now).getInstant());
-    }
-
-    @Test
-    public void testZonedDateTime() {
-        // Note that information about the civil date time is lost on round-tripping
-        ZonedDateTime now = ZonedDateTime.now();
-        assertEquals(now.toOffsetDateTime(), new XdmAtomicValue(now).getZonedDateTime().toOffsetDateTime());
-    }
-
-    @Test
-    public void testLocalDateTime() {
-        LocalDateTime now = LocalDateTime.now();
-        assertEquals(now, new XdmAtomicValue(now).getLocalDateTime());
-    }
-
-    @Test
-    public void testLocalDate() {
-        LocalDate now = LocalDate.now();
-        assertEquals(now, new XdmAtomicValue(now).getLocalDate());
     }
 
 }
