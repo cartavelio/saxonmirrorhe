@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemaCoverage>
+   <component namespace="" kind="complexType" count="6" name="weightType"/>
+   <component namespace="" kind="element" count="6" name="LANGUAGE"/>
+   <component namespace="http://www.w3.org/2001/XMLSchema"
+              kind="simpleType"
+              count="18"
+              name="string"/>
+   <component namespace="http://ns.saxonica.com/anonymous-type"
+              kind="complexType"
+              count="1"
+              name="CATEGORIES_anonymous_type_1_at_line_21_of_books.xsd"/>
+   <component namespace="" kind="element" count="6" name="PRICE"/>
+   <component namespace="" kind="element" count="6" name="TITLE"/>
+   <component namespace="http://ns.saxonica.com/anonymous-type"
+              kind="complexType"
+              count="3"
+              name="CATEGORY_anonymous_type_1_at_line_29_of_books.xsd"/>
+   <component namespace="" kind="element" count="6" name="ISBN"/>
+   <component namespace="" kind="element" count="6" name="AUTHOR"/>
+   <component namespace="" kind="element" count="6" name="PUBLISHER"/>
+   <component namespace="" kind="element" count="6" name="DIMENSIONS"/>
+   <component namespace="http://www.w3.org/2001/XMLSchema"
+              kind="simpleType"
+              count="6"
+              name="date"/>
+   <component namespace="" kind="element" count="6" name="WEIGHT"/>
+   <component namespace="" kind="element" count="6" name="PAGES"/>
+   <component namespace="" kind="simpleType" count="6" name="languageType"/>
+   <component namespace="" kind="element" count="1" name="BOOKS"/>
+   <component namespace="" kind="element" count="1" name="CATEGORIES"/>
+   <component namespace="http://www.w3.org/2001/XMLSchema"
+              kind="simpleType"
+              count="12"
+              name="integer"/>
+   <component namespace="http://ns.saxonica.com/anonymous-type"
+              kind="complexType"
+              count="6"
+              name="ITEM_anonymous_type_1_at_line_37_of_books.xsd"/>
+   <component namespace="" kind="element" count="3" name="CATEGORY"/>
+   <component namespace="" kind="simpleType" count="6" name="ISBNType"/>
+   <component namespace="" kind="complexType" count="6" name="moneyType"/>
+   <component namespace="http://ns.saxonica.com/anonymous-type"
+              kind="complexType"
+              count="1"
+              name="BOOKS_anonymous_type_1_at_line_13_of_books.xsd"/>
+   <component namespace="" kind="element" count="6" name="PUB-DATE"/>
+   <component namespace="" kind="element" count="6" name="ITEM"/>
+   <component namespace="" kind="element" count="6" name="QUANTITY"/>
+   <component namespace="" kind="complexType" count="6" name="dimensionsType"/>
+</schemaCoverage>

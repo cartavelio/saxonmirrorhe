@@ -1,0 +1,206 @@
+// class version 49.0 (49)
+// access flags 0x1
+public class TYPE_percentage_0 extends com/saxonica/ee/bytecode/simtype/AtomicTypeValidator  {
+
+
+  // access flags 0x1
+  public <init>()V
+    ALOAD 0
+    INVOKESPECIAL com/saxonica/ee/bytecode/simtype/AtomicTypeValidator.<init> ()V
+    RETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+
+  // access flags 0x1
+  public validate(Ljava/lang/CharSequence;)Lnet/sf/saxon/type/ValidationFailure; throws net/sf/saxon/trans/XPathException 
+    ALOAD 1
+    INVOKESTATIC net/sf/saxon/value/Whitespace.collapseWhitespace (Ljava/lang/CharSequence;)Ljava/lang/CharSequence;
+    ASTORE 1
+    GETSTATIC TYPE_percentage_0.nStringToDecimal1 : Lnet/sf/saxon/type/StringConverter$StringToDecimal;
+    ALOAD 1
+    INVOKEVIRTUAL net/sf/saxon/type/StringConverter.convertString (Ljava/lang/CharSequence;)Lnet/sf/saxon/type/ConversionResult;
+    DUP
+    INSTANCEOF net/sf/saxon/type/ValidationFailure
+    IFNE L0
+    CHECKCAST net/sf/saxon/value/AtomicValue
+    ASTORE 2
+    GETSTATIC TYPE_percentage_0.nMinInclusiveFacet2 : Lcom/saxonica/ee/schema/MinInclusiveFacet;
+    ALOAD 2
+    INVOKEVIRTUAL com/saxonica/ee/schema/Facet.testAtomicValue (Lnet/sf/saxon/value/AtomicValue;)Z
+    IFNE L1
+    GETSTATIC TYPE_percentage_0.nMinInclusiveFacet2 : Lcom/saxonica/ee/schema/MinInclusiveFacet;
+    GOTO L2
+   L1
+    ICONST_0
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    GETSTATIC TYPE_percentage_0.nMaxInclusiveFacet3 : Lcom/saxonica/ee/schema/MaxInclusiveFacet;
+    ALOAD 2
+    INVOKEVIRTUAL com/saxonica/ee/schema/Facet.testAtomicValue (Lnet/sf/saxon/value/AtomicValue;)Z
+    IFNE L3
+    GETSTATIC TYPE_percentage_0.nMaxInclusiveFacet3 : Lcom/saxonica/ee/schema/MaxInclusiveFacet;
+    GOTO L2
+   L3
+    ICONST_1
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    GETSTATIC TYPE_percentage_0.nTotalDigitsFacet4 : Lcom/saxonica/ee/schema/TotalDigitsFacet;
+    ALOAD 2
+    INVOKEVIRTUAL com/saxonica/ee/schema/Facet.testAtomicValue (Lnet/sf/saxon/value/AtomicValue;)Z
+    IFNE L4
+    GETSTATIC TYPE_percentage_0.nTotalDigitsFacet4 : Lcom/saxonica/ee/schema/TotalDigitsFacet;
+    GOTO L2
+   L4
+    ICONST_2
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    GETSTATIC TYPE_percentage_0.nFractionDigitsFacet5 : Lcom/saxonica/ee/schema/FractionDigitsFacet;
+    ALOAD 2
+    INVOKEVIRTUAL com/saxonica/ee/schema/Facet.testAtomicValue (Lnet/sf/saxon/value/AtomicValue;)Z
+    IFNE L5
+    GETSTATIC TYPE_percentage_0.nFractionDigitsFacet5 : Lcom/saxonica/ee/schema/FractionDigitsFacet;
+    GOTO L2
+   L5
+    ICONST_3
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ACONST_NULL
+    GOTO L6
+   L0
+    ICONST_4
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    CHECKCAST net/sf/saxon/type/ValidationFailure
+    GOTO L6
+   L2
+    ICONST_5
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ALOAD 2
+    SWAP
+    GETSTATIC TYPE_percentage_0.nUserAtomicType6 : Lcom/saxonica/ee/schema/UserAtomicType;
+    SWAP
+    INVOKESTATIC com/saxonica/ee/schema/UserSimpleType.makeValidationFailure (Lnet/sf/saxon/om/AtomicSequence;Lnet/sf/saxon/type/SimpleType;Lcom/saxonica/ee/schema/Facet;)Lnet/sf/saxon/type/ValidationFailure;
+   L6
+    BIPUSH 6
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ARETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+}
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/schema/TotalDigitsFacet; nTotalDigitsFacet4
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/schema/UserAtomicType; nUserAtomicType6
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/schema/MaxInclusiveFacet; nMaxInclusiveFacet3
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/schema/MinInclusiveFacet; nMinInclusiveFacet2
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/type/StringConverter$StringToDecimal; nStringToDecimal1
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/schema/FractionDigitsFacet; nFractionDigitsFacet5
+}
+// class version 49.0 (49)
+// access flags 0x1
+public class TYPE_percentage_0 extends com/saxonica/ee/bytecode/simtype/AtomicTypeValidator  {
+
+
+  // access flags 0x1
+  public <init>()V
+    ALOAD 0
+    INVOKESPECIAL com/saxonica/ee/bytecode/simtype/AtomicTypeValidator.<init> ()V
+    RETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+
+  // access flags 0x1
+  public validate(Ljava/lang/CharSequence;)Lnet/sf/saxon/type/ValidationFailure; throws net/sf/saxon/trans/XPathException 
+    ALOAD 1
+    INVOKESTATIC net/sf/saxon/value/Whitespace.collapseWhitespace (Ljava/lang/CharSequence;)Ljava/lang/CharSequence;
+    ASTORE 1
+    GETSTATIC TYPE_percentage_0.nStringToDecimal1 : Lnet/sf/saxon/type/StringConverter$StringToDecimal;
+    ALOAD 1
+    INVOKEVIRTUAL net/sf/saxon/type/StringConverter.convertString (Ljava/lang/CharSequence;)Lnet/sf/saxon/type/ConversionResult;
+    DUP
+    INSTANCEOF net/sf/saxon/type/ValidationFailure
+    IFNE L0
+    CHECKCAST net/sf/saxon/value/AtomicValue
+    ASTORE 2
+    GETSTATIC TYPE_percentage_0.nMinInclusiveFacet2 : Lcom/saxonica/ee/schema/MinInclusiveFacet;
+    ALOAD 2
+    INVOKEVIRTUAL com/saxonica/ee/schema/Facet.testAtomicValue (Lnet/sf/saxon/value/AtomicValue;)Z
+    IFNE L1
+    GETSTATIC TYPE_percentage_0.nMinInclusiveFacet2 : Lcom/saxonica/ee/schema/MinInclusiveFacet;
+    GOTO L2
+   L1
+    ICONST_0
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    GETSTATIC TYPE_percentage_0.nMaxInclusiveFacet3 : Lcom/saxonica/ee/schema/MaxInclusiveFacet;
+    ALOAD 2
+    INVOKEVIRTUAL com/saxonica/ee/schema/Facet.testAtomicValue (Lnet/sf/saxon/value/AtomicValue;)Z
+    IFNE L3
+    GETSTATIC TYPE_percentage_0.nMaxInclusiveFacet3 : Lcom/saxonica/ee/schema/MaxInclusiveFacet;
+    GOTO L2
+   L3
+    ICONST_1
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    GETSTATIC TYPE_percentage_0.nTotalDigitsFacet4 : Lcom/saxonica/ee/schema/TotalDigitsFacet;
+    ALOAD 2
+    INVOKEVIRTUAL com/saxonica/ee/schema/Facet.testAtomicValue (Lnet/sf/saxon/value/AtomicValue;)Z
+    IFNE L4
+    GETSTATIC TYPE_percentage_0.nTotalDigitsFacet4 : Lcom/saxonica/ee/schema/TotalDigitsFacet;
+    GOTO L2
+   L4
+    ICONST_2
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    GETSTATIC TYPE_percentage_0.nFractionDigitsFacet5 : Lcom/saxonica/ee/schema/FractionDigitsFacet;
+    ALOAD 2
+    INVOKEVIRTUAL com/saxonica/ee/schema/Facet.testAtomicValue (Lnet/sf/saxon/value/AtomicValue;)Z
+    IFNE L5
+    GETSTATIC TYPE_percentage_0.nFractionDigitsFacet5 : Lcom/saxonica/ee/schema/FractionDigitsFacet;
+    GOTO L2
+   L5
+    ICONST_3
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ACONST_NULL
+    GOTO L6
+   L0
+    ICONST_4
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    CHECKCAST net/sf/saxon/type/ValidationFailure
+    GOTO L6
+   L2
+    ICONST_5
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ALOAD 2
+    SWAP
+    GETSTATIC TYPE_percentage_0.nUserAtomicType6 : Lcom/saxonica/ee/schema/UserAtomicType;
+    SWAP
+    INVOKESTATIC com/saxonica/ee/schema/UserSimpleType.makeValidationFailure (Lnet/sf/saxon/om/AtomicSequence;Lnet/sf/saxon/type/SimpleType;Lcom/saxonica/ee/schema/Facet;)Lnet/sf/saxon/type/ValidationFailure;
+   L6
+    BIPUSH 6
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ARETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+}
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/type/StringConverter$StringToDecimal; nStringToDecimal1
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/schema/TotalDigitsFacet; nTotalDigitsFacet4
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/schema/UserAtomicType; nUserAtomicType6
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/schema/FractionDigitsFacet; nFractionDigitsFacet5
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/schema/MinInclusiveFacet; nMinInclusiveFacet2
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/schema/MaxInclusiveFacet; nMaxInclusiveFacet3
+}

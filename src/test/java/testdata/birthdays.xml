@@ -1,0 +1,8 @@
+<?xml-stylesheet type="text/xsl" href="bills.xsl"?>
+<!--instance for use with schema-with-param.xsd-->
+<outer>
+  <date>1901-06-06</date>
+  <date>1920-03-04</date>
+  <date>1951-10-11</date>
+  <date>1987-12-13</date>
+</outer>  

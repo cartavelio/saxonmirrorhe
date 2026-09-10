@@ -1,0 +1,10 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" 
+    xmlns:ns1="defAttrNS">
+    
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd"/>
+    <xs:element name="root">
+        <xs:complexType>
+            <xs:attribute ref="xml:lang" default="en-GB"/>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

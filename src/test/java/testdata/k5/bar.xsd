@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema 
+    xmlns:foo="http://foo"
+    xmlns:bar="http://bar"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns="http://www.w3.org/2001/XMLSchema"
+    attributeFormDefault="unqualified"
+    blockDefault=""
+    elementFormDefault="qualified"
+    finalDefault=""
+    targetNamespace="http://bar"
+    version="0102">
+
+    <xs:import namespace="http://foo"
+        schemaLocation="foo.xsd"/>
+
+
+    <xs:complexType abstract="false" mixed="false" name="Bar">
+        <xs:sequence maxOccurs="1" minOccurs="1">
+            <xs:element maxOccurs="1" minOccurs="0" ref="foo:foo">
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:element abstract="false" name="bar" type="bar:Bar"/>
+    
+</schema>        

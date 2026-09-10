@@ -1,0 +1,7 @@
+<page title="A">
+        <page title="B">
+                <page title="C">
+                        <page title="D"/>
+                </page>
+        </page>
+</page>

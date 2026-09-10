@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns='http://ns.saxonica.com/xslt/export' xmlns:fn='http://www.w3.org/2005/xpath-functions' xmlns:java-type='http://saxon.sf.net/java-type' xmlns:vv='http://saxon.sf.net/generated-variable' xmlns:xs='http://www.w3.org/2001/XMLSchema' when='2020-12-01T12:14:34.032Z' id='0' version='30' packageVersion='1' saxonProduct='SAXON-EE' saxonVersion='11.0' buildDateTime='2020-12-01T12:14:34.032Z' target='EE' targetVersion='1' relocatable='false' implicit='true'>
+ <co id='0' binds=''>
+  <globalVariable name='Q{}MappingElements' as='*NE nQ{http://www.cdosuite.com/schemas/Mapping.xsd}Mapping' line='15' module='file:/Volumes/Saxonica/src/saxonica/dev/tests/junit/testdata/caffo/Transform2Streamable.xslt' visibility='PRIVATE'>
+   <slash baseUri='file:/Volumes/Saxonica/src/saxonica/dev/tests/junit/testdata/caffo/Transform2Streamable.xslt' ns='=http://tempuri.org cdo=http://www.cdosuite.com/schemas cv=http://www.cdosuite.com/schemas/CustomValue.xsd lc=http://www.cdosuite.com/schemas/LookupCodes.xsd map=http://www.cdosuite.com/schemas/Mapping.xsd mstns=http://tempuri.org ps=http://www.cdosuite.com/schemas/PortfolioSnapshot.xsd rt=http://www.cdosuite.com/schemas/Ratings.xsd xs=~ xsi=~ xsl=~ xml=~' line='15' simple='1'>
+    <fn name='document'>
+     <str val='Lookup.xml'/>
+    </fn>
+    <axis name='descendant' nodeTest='NE nQ{http://www.cdosuite.com/schemas/Mapping.xsd}Mapping'/>
+   </slash>
+  </globalVariable>
+ </co>
+ <co id='1' binds=''>
+  <globalVariable name='Q{}CopyNonMatches' as='1AS' line='14' module='file:/Volumes/Saxonica/src/saxonica/dev/tests/junit/testdata/caffo/Transform2Streamable.xslt' visibility='PRIVATE'>
+   <str val='false'/>
+  </globalVariable>
+ </co>
+ <co id='2' binds=''>
+  <function name='Q{http://tempuri.org}PathToNode' line='113' module='file:/Volumes/Saxonica/src/saxonica/dev/tests/junit/testdata/caffo/Transform2Streamable.xslt' eval='8' flags='pC' as='1AS' slots='1'>
+   <arg name='Q{}n' as='1N'/>
+   <cvUntyped role='body' baseUri='file:/Volumes/Saxonica/src/saxonica/dev/tests/junit/testdata/caffo/Transform2Streamable.xslt' ns='=http://tempuri.org cdo=http://www.cdosuite.com/schemas cv=http://www.cdosuite.com/schemas/CustomValue.xsd lc=http://www.cdosuite.com/schemas/LookupCodes.xsd map=http://www.cdosuite.com/schemas/Mapping.xsd mstns=http://tempuri.org ps=http://www.cdosuite.com/schemas/PortfolioSnapshot.xsd rt=http://www.cdosuite.com/schemas/Ratings.xsd xs=~ xsi=~ xsl=~ xml=~' line='116' to='AS' diag='5|0|XTTE0780|mstns:PathToNode#1'>
+    <cast flags='a' as='1AZ'>
+     <fn name='string-join'>
+      <convert from='AZ' to='AS'>
+       <data>
+        <mergeAdj>
+         <forEach>
+          <slash>
+           <varRef name='Q{}n' slot='0'/>
+           <fn name='reverse'>
+            <axis name='ancestor-or-self' nodeTest='NE'/>
+           </fn>
+          </slash>
+          <sequence line='117'>
+           <valueOf>
+            <fn name='name'>
+             <dot type='1NE'/>
+            </fn>
+           </valueOf>
+           <valueOf flags='S'>
+            <str val='/'/>
+           </valueOf>
+          </sequence>
+         </forEach>
+        </mergeAdj>
+       </data>
+      </convert>
+      <str val=''/>
+     </fn>
+    </cast>
+   </cvUntyped>
+  </function>
+ </co>
+ <co id='3' binds=''>
+  <globalVariable name='Q{}Mapping' as='1AS' line='16' module='file:/Volumes/Saxonica/src/saxonica/dev/tests/junit/testdata/caffo/Transform2Streamable.xslt' visibility='PRIVATE'>
+   <str val='XSDtoSQL'/>
+  </globalVariable>
+ </co>
+ <co id='4' binds='4 4 4 4 4 4 2 0 4'>
+  <mode onNo='TC' flags='sdW' patternSlots='0'>
+   <templateRule prec='0' prio='0.5' seq='4' rank='2' minImp='0' slots='0' matches='NE' flags='s' line='59' module='file:/Volumes/Saxonica/src/saxonica/dev/tests/junit/testdata/caffo/Transform2Streamable.xslt' streamable='1'>
+    <p.withPredicate role='match'>
+     <p.nodeTest test='NE'/>
+     <axis baseUri='file:/Volumes/Saxonica/src/saxonica/dev/tests/junit/testdata/caffo/Transform2Streamable.xslt' ns='=http://tempuri.org cdo=http://www.cdosuite.com/schemas cv=http://www.cdosuite.com/schemas/CustomValue.xsd lc=http://www.cdosuite.com/schemas/LookupCodes.xsd map=http://www.cdosuite.com/schemas/Mapping.xsd mstns=http://tempuri.org ps=http://www.cdosuite.com/schemas/PortfolioSnapshot.xsd rt=http://www.cdosuite.com/schemas/Ratings.xsd xs=~ xsi=~ xsl=~ xml=~' line='59' name='parent' nodeTest='NE nQ{http://www.cdosuite.com/schemas/PortfolioSnapshot.xsd}Issue'/>
+    </p.withPredicate>
+    <elem role='action' baseUri='file:/Volumes/Saxonica/src/saxonica/dev/tests/junit/testdata/caffo/Transform2Streamable.xslt' ns='=http://tempuri.org cdo=http://www.cdosuite.com/schemas cv=http://www.cdosuite.com/schemas/CustomValue.xsd lc=http://www.cdosuite.com/schemas/LookupCodes.xsd map=http://www.cdosuite.com/schemas/Mapping.xsd mstns=http://tempuri.org ps=http://www.cdosuite.com/schemas/PortfolioSnapshot.xsd rt=http://www.cdosuite.com/schemas/Ratings.xsd xs=~ xsi=~ xsl=~ xml=~' line='60' name='mstns:Issue' nsuri='http://tempuri.org' namespaces='# map mstns'>
+     <applyT line='61' flags='i' bSlot='0'>
+      <axis role='select' name='child' nodeTest='N'/>
+     </applyT>
+    </elem>
+   </templateRule>
+   <templateRule prec='0' prio='0.0' seq='1' rank='1' minImp='0' slots='0' matches='NE nQ{http://www.cdosuite.com/schemas/PortfolioSnapshot.xsd}PortfolioSnapshot' flags='s' line='32' module='file:/Volumes/Saxonica/src/saxonica/dev/tests/junit/testdata/caffo/Transform2Streamable.xslt' streamable='1'>
+    <p.nodeTest role='match' test='NE nQ{http://www.cdosuite.com/schemas/PortfolioSnapshot.xsd}PortfolioSnapshot'/>
+    <elem role='action' baseUri='file:/Volumes/Saxonica/src/saxonica/dev/tests/junit/testdata/caffo/Transform2Streamable.xslt' ns='=http://tempuri.org cdo=http://www.cdosuite.com/schemas cv=http://www.cdosuite.com/schemas/CustomValue.xsd lc=http://www.cdosuite.com/schemas/LookupCodes.xsd map=http://www.cdosuite.com/schemas/Mapping.xsd mstns=http://tempuri.org ps=http://www.cdosuite.com/schemas/PortfolioSnapshot.xsd rt=http://www.cdosuite.com/schemas/Ratings.xsd xs=~ xsi=~ xsl=~ xml=~' line='33' name='mstns:CSES_PS_Portfolio_Snapshot' nsuri='http://tempuri.org' namespaces='# map mstns'>
+     <sequence line='34'>
+      <elem name='mstns:ps_id' nsuri='http://tempuri.org' flags='l' namespaces='# map mstns'>
+       <valueOf line='35' flags='l'>
+        <convert from='ADI' to='AS'>
+         <fn name='position'/>
+        </convert>
+       </valueOf>
+      </elem>
+      <applyT line='37' flags='i' bSlot='1'>
+       <axis role='select' name='child' nodeTest='N'/>
+      </applyT>
+     </sequence>
+    </elem>
+   </templateRule>
+   <templateRule prec='0' prio='0.0' seq='3' rank='1' minImp='0' slots='0' matches='NE nQ{http://www.cdosuite.com/schemas/PortfolioSnapshot.xsd}Issuer' flags='s' line='52' module='file:/Volumes/Saxonica/src/saxonica/dev/tests/junit/testdata/caffo/Transform2Streamable.xslt' streamable='1'>
+    <p.nodeTest role='match' test='NE nQ{http://www.cdosuite.com/schemas/PortfolioSnapshot.xsd}Issuer'/>
+    <elem role='action' baseUri='file:/Volumes/Saxonica/src/saxonica/dev/tests/junit/testdata/caffo/Transform2Streamable.xslt' ns='=http://tempuri.org cdo=http://www.cdosuite.com/schemas cv=http://www.cdosuite.com/schemas/CustomValue.xsd lc=http://www.cdosuite.com/schemas/LookupCodes.xsd map=http://www.cdosuite.com/schemas/Mapping.xsd mstns=http://tempuri.org ps=http://www.cdosuite.com/schemas/PortfolioSnapshot.xsd rt=http://www.cdosuite.com/schemas/Ratings.xsd xs=~ xsi=~ xsl=~ xml=~' line='53' name='mstns:Issuer' nsuri='http://tempuri.org' namespaces='# map mstns'>
+     <applyT line='54' flags='i' bSlot='2'>
+      <axis role='select' name='child' nodeTest='N'/>
+     </applyT>
+    </elem>
+   </templateRule>
+   <templateRule prec='0' prio='0.0' seq='5' rank='1' minImp='0' slots='0' matches='NE nQ{http://www.cdosuite.com/schemas/PortfolioSnapshot.xsd}PurchaseLot' flags='s' line='66' module='file:/Volumes/Saxonica/src/saxonica/dev/tests/junit/testdata/caffo/Transform2Streamable.xslt' streamable='1'>
+    <p.nodeTest role='match' test='NE nQ{http://www.cdosuite.com/schemas/PortfolioSnapshot.xsd}PurchaseLot'/>
+    <elem role='action' baseUri='file:/Volumes/Saxonica/src/saxonica/dev/tests/junit/testdata/caffo/Transform2Streamable.xslt' ns='=http://tempuri.org cdo=http://www.cdosuite.com/schemas cv=http://www.cdosuite.com/schemas/CustomValue.xsd lc=http://www.cdosuite.com/schemas/LookupCodes.xsd map=http://www.cdosuite.com/schemas/Mapping.xsd mstns=http://tempuri.org ps=http://www.cdosuite.com/schemas/PortfolioSnapshot.xsd rt=http://www.cdosuite.com/schemas/Ratings.xsd xs=~ xsi=~ xsl=~ xml=~' line='67' name='mstns:PurchaseLot' nsuri='http://tempuri.org' namespaces='# map mstns'>
+     <applyT line='68' flags='i' bSlot='3'>
+      <axis role='select' name='child' nodeTest='N'/>
+     </applyT>
+    </elem>
+   </templateRule>
+   <templateRule prec='0' prio='0.0' seq='2' rank='1' minImp='0' slots='0' matches='NE nQ{http://www.cdosuite.com/schemas/PortfolioSnapshot.xsd}Obligor' flags='s' line='42' module='file:/Volumes/Saxonica/src/saxonica/dev/tests/junit/testdata/caffo/Transform2Streamable.xslt' streamable='1'>
+    <p.nodeTest role='match' test='NE nQ{http://www.cdosuite.com/schemas/PortfolioSnapshot.xsd}Obligor'/>
+    <elem role='action' baseUri='file:/Volumes/Saxonica/src/saxonica/dev/tests/junit/testdata/caffo/Transform2Streamable.xslt' ns='=http://tempuri.org cdo=http://www.cdosuite.com/schemas cv=http://www.cdosuite.com/schemas/CustomValue.xsd lc=http://www.cdosuite.com/schemas/LookupCodes.xsd map=http://www.cdosuite.com/schemas/Mapping.xsd mstns=http://tempuri.org ps=http://www.cdosuite.com/schemas/PortfolioSnapshot.xsd rt=http://www.cdosuite.com/schemas/Ratings.xsd xs=~ xsi=~ xsl=~ xml=~' line='43' name='mstns:Obligor' nsuri='http://tempuri.org' namespaces='# map mstns'>
+     <sequence line='44'>
+      <elem name='mstns:obligor_id' nsuri='http://tempuri.org' flags='l' namespaces='# map mstns'>
+       <valueOf line='45' flags='l'>
+        <convert from='ADI' to='AS'>
+         <fn name='position'/>
+        </convert>
+       </valueOf>
+      </elem>
+      <applyT line='47' flags='i' bSlot='4'>
+       <axis role='select' name='child' nodeTest='N'/>
+      </applyT>
+     </sequence>
+    </elem>
+   </templateRule>
+   <templateRule prec='0' prio='0.5' seq='0' rank='2' minImp='0' slots='0' matches='NE nQ{http://www.cdosuite.com/schemas/PortfolioSnapshot.xsd}Root' flags='s' line='20' module='file:/Volumes/Saxonica/src/saxonica/dev/tests/junit/testdata/caffo/Transform2Streamable.xslt' streamable='1'>
+    <p.withUpper role='match' axis='parent' upFirst='false'>
+     <p.nodeTest test='NE nQ{http://www.cdosuite.com/schemas/PortfolioSnapshot.xsd}Root'/>
+     <p.nodeTest test='ND'/>
+    </p.withUpper>
+    <elem role='action' baseUri='file:/Volumes/Saxonica/src/saxonica/dev/tests/junit/testdata/caffo/Transform2Streamable.xslt' ns='=http://tempuri.org cdo=http://www.cdosuite.com/schemas cv=http://www.cdosuite.com/schemas/CustomValue.xsd lc=http://www.cdosuite.com/schemas/LookupCodes.xsd map=http://www.cdosuite.com/schemas/Mapping.xsd mstns=http://tempuri.org ps=http://www.cdosuite.com/schemas/PortfolioSnapshot.xsd rt=http://www.cdosuite.com/schemas/Ratings.xsd xs=~ xsi=~ xsl=~ xml=~' line='21' name='mstns:dsPortfolioSnapshot' nsuri='http://tempuri.org' namespaces='# map mstns'>
+     <sequence line='24'>
+      <att name='xsi:schemaLocation' nsuri='http://www.w3.org/2001/XMLSchema-instance' flags='l'>
+       <str val='http://tempuri.org PortfolioSnapshot_CdoSuite.xsd'/>
+      </att>
+      <applyT line='27' bSlot='5'>
+       <slash role='select' simple='2'>
+        <axis name='child' nodeTest='NE nQ{http://www.cdosuite.com/schemas/PortfolioSnapshot.xsd}PortfolioSnapshots'/>
+        <axis name='child' nodeTest='NE nQ{http://www.cdosuite.com/schemas/PortfolioSnapshot.xsd}PortfolioSnapshot'/>
+       </slash>
+      </applyT>
+     </sequence>
+    </elem>
+   </templateRule>
+   <templateRule prec='0' prio='-0.5' seq='6' rank='0' minImp='0' slots='4' matches='N' flags='s' line='73' module='file:/Volumes/Saxonica/src/saxonica/dev/tests/junit/testdata/caffo/Transform2Streamable.xslt' streamable='1'>
+    <p.nodeTest role='match' test='N u[NP,NT,NE,NC]'/>
+    <choose role='action' baseUri='file:/Volumes/Saxonica/src/saxonica/dev/tests/junit/testdata/caffo/Transform2Streamable.xslt' ns='=http://tempuri.org cdo=http://www.cdosuite.com/schemas cv=http://www.cdosuite.com/schemas/CustomValue.xsd lc=http://www.cdosuite.com/schemas/LookupCodes.xsd map=http://www.cdosuite.com/schemas/Mapping.xsd mstns=http://tempuri.org ps=http://www.cdosuite.com/schemas/PortfolioSnapshot.xsd rt=http://www.cdosuite.com/schemas/Ratings.xsd xs=~ xsi=~ xsl=~ xml=~' line='76'>
+     <fn name='not'>
+      <fn name='has-children'>
+       <dot type='1N u[NP,NT,NE,NC]'/>
+      </fn>
+     </fn>
+     <let line='80' var='Q{}PathToCurrentNode' slot='0' eval='16'>
+      <ufCall name='Q{http://tempuri.org}PathToNode' tailCall='false' bSlot='6' eval='16'>
+       <dot type='1N u[NP,NT,NE,NC]'/>
+      </ufCall>
+      <let line='83' var='Q{}MappingElement' as='*NE nQ{http://www.cdosuite.com/schemas/Mapping.xsd}Mapping' slot='1' eval='4'>
+       <filter flags='b'>
+        <gVarRef name='Q{}MappingElements' bSlot='7'/>
+        <vc op='eq' onEmpty='0' comp='GAC|http://www.w3.org/2005/xpath-functions/collation/codepoint'>
+         <cast flags='ae' as='?AS'>
+          <attVal name='Q{}xsd' chk='0'/>
+         </cast>
+         <varRef name='Q{}PathToCurrentNode' slot='0'/>
+        </vc>
+       </filter>
+       <choose line='86'>
+        <fn name='exists'>
+         <varRef name='Q{}MappingElement' slot='1'/>
+        </fn>
+        <let line='92' var='Q{}To' as='*NA' slot='2' eval='3'>
+         <slash simple='2'>
+          <varRef name='Q{}MappingElement' slot='1'/>
+          <axis name='attribute' nodeTest='NA nQ{}sql'/>
+         </slash>
+         <choose line='93'>
+          <gc op='!=' card='N:1' comp='CCC'>
+           <data diag='1|0||!='>
+            <varRef name='Q{}To' slot='2'/>
+           </data>
+           <str val='(SKIP)'/>
+          </gc>
+          <let line='94' var='Q{}ToValue' as='1AS' slot='3' eval='8'>
+           <fn name='string'>
+            <dot type='1N u[NP,NT,NE,NC]'/>
+           </fn>
+           <forEach line='95'>
+            <fn name='tokenize'>
+             <check card='?' diag='0|0||fn:tokenize'>
+              <cvUntyped to='AS'>
+               <data diag='0|0||fn:tokenize'>
+                <varRef name='Q{}To' slot='2'/>
+               </data>
+              </cvUntyped>
+             </check>
+             <str val=','/>
+             <str val=''/>
+            </fn>
+            <compElem line='96'>
+             <fn role='name' name='normalize-space'>
+              <dot type='1AS'/>
+             </fn>
+             <valueOf role='content' line='97' flags='l'>
+              <varRef name='Q{}ToValue' slot='3'/>
+             </valueOf>
+            </compElem>
+           </forEach>
+          </let>
+         </choose>
+        </let>
+       </choose>
+      </let>
+     </let>
+     <true/>
+     <applyT line='108' flags='t' bSlot='8'>
+      <axis role='select' name='child' nodeTest='NE'/>
+     </applyT>
+    </choose>
+   </templateRule>
+  </mode>
+ </co>
+ <overridden/>
+ <output>
+  <property name='indent' value='yes'/>
+  <property name='version' value='1.0'/>
+  <property name='encoding' value='utf-8'/>
+  <property name='Q{http://saxon.sf.net/}stylesheet-version' value='30'/>
+  <property name='method' value='xml'/>
+ </output>
+ <decimalFormat/>
+</package>
+<?Σ fe31297a?>

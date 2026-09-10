@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" version="0.6.3" targetNamespace="http://www.millicom.com" xmlns="http://www.millicom.com" xmlns:tigo="http://www.millicom.com" xmlns:saxon="http://saxon.sf.net/">
+	<xs:element name="root">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element minOccurs="1" maxOccurs="unbounded" ref="r"/>
+			</xs:sequence>
+			<xs:attribute name="VersionXSD" use="required" type="xs:normalizedString"/>
+			<xs:attribute name="Currency" use="optional" type="CurrencyType"/>
+			<xs:attribute name="DataFeed" use="required" type="PeriodType"/>
+			<xs:attribute name="DataProcessDate" use="required" type="DateTimeType"/>
+			<xs:assert test="if ((count(r[DeviceCost = 0]) div count(r)) le 0.01) then true() else false()" saxon:message="Rule #15: Just one percent or less of the DeviceCost values could be zero" xpathDefaultNamespace="##targetNamespace">
+				<xs:annotation>
+					<xs:documentation>Rule #15</xs:documentation>
+					<xs:documentation>Just one percent or less of the DeviceCost values could be zero</xs:documentation>
+				</xs:annotation>
+			</xs:assert>
+		</xs:complexType>
+		<xs:key name="RowKey">
+			<xs:selector xpath="./tigo:r"/>
+			<xs:field xpath="tigo:Date"/>
+			<xs:field xpath="tigo:AnalyticsArrangementKey"/>
+			<xs:field xpath="tigo:PaymentType"/>
+		</xs:key>
+		<xs:keyref name="MonthlyPaymentKeyRef" refer="RowKey">
+			<xs:selector xpath="./tigo:r/tigo:MonthlyPayments/tigo:MonthlyPayment"/>
+			<xs:field xpath="tigo:Date"/>
+			<xs:field xpath="tigo:AnalyticsArrangementKey"/>
+			<xs:field xpath="tigo:PaymentType"/>
+		</xs:keyref>
+	</xs:element>
+
+	<xs:element name="r">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="CountryCode" type="CountryType"/>
+				<xs:element name="Date" type="DateType"/>
+				<xs:element name="AnalyticsArrangementKey" type="LocalSubscriberKeyType"/>
+				<xs:element name="PaymentType" type="PaymentType"/>
+				<xs:element name="SubsidizedDeviceTAC" type="DeviceCodeType"/>
+				<xs:element name="SubsidizedDeviceIMEI" type="IMEIType"/>
+				<xs:element ref="SubsidyDate"/>
+				<xs:element ref="ContractEffectiveDate"/>
+				<xs:element ref="ContractEndDate"/>
+				<xs:element name="ContractLength" type="ContractMonthType"/>
+				<xs:element name="ElapsedMonths" type="ElapsedMonthType"/>
+				<xs:element name="SubsidyType" type="SubsidyType"/>
+				<xs:element name="SubsidyActivationSalesChannel" type="SalesChannelType"/>
+				<xs:element name="SubsidyAmount" type="PositiveOrZeroMoneyType"/>
+				<!-- PositiveMoneyType -->
+				<xs:element name="DeviceCost" type="PositiveOrZeroMoneyType"/>
+				<xs:element minOccurs="1" maxOccurs="1" ref="MonthlyPayments"/>
+			</xs:sequence>
+			<xs:assert test="if (deep-equal((MonthlyPayments/MonthlyPayment/MonthNumber/number()),(1 to xs:integer(ContractLength)))) then true() else false()" saxon:message="Rule #0: The MonthNumber value shall be a sequence from 1 to ContractLength"
+			           xpathDefaultNamespace="##targetNamespace">
+				<xs:annotation>
+					<xs:documentation>Rule #0</xs:documentation>
+					<xs:documentation>MonthNumber value shall be a sequence from 1 to ContractLength</xs:documentation>
+				</xs:annotation>
+			</xs:assert>
+			<xs:assert test="if ((year-from-date(xs:date(ContractEndDate)) - year-from-date(xs:date(ContractEffectiveDate)))*12 + (month-from-date(xs:date(ContractEndDate)) - month-from-date(ContractEffectiveDate))  eq ContractLength) then true() else false()"
+			           xpathDefaultNamespace="##targetNamespace">
+				<xs:annotation>
+					<xs:documentation>Rule #2</xs:documentation>
+					<xs:documentation>ContractEndDate - ContractEffectiveDate = ContractLength in # of months</xs:documentation>
+				</xs:annotation>
+			</xs:assert>
+			<xs:assert test="if (ContractEndDate gt ContractEffectiveDate) then true() else false()" xpathDefaultNamespace="##targetNamespace">
+				<xs:annotation>
+					<xs:documentation>Rule #3</xs:documentation>
+					<xs:documentation>ContractEndDate shall be greater than ContractEffectiveDate</xs:documentation>
+				</xs:annotation>
+			</xs:assert>
+			<xs:assert test="if (ContractLength ge ElapsedMonths) then true() else false()" xpathDefaultNamespace="##targetNamespace">
+				<xs:annotation>
+					<xs:documentation>Rule #5</xs:documentation>
+					<xs:documentation>ElapsedMonths shall be less or equal to ContractLength</xs:documentation>
+				</xs:annotation>
+			</xs:assert>
+			<xs:assert test="if ((year-from-date(xs:date(Date)) - year-from-date(xs:date(ContractEffectiveDate)))*12 + (month-from-date(xs:date(Date)) - month-from-date(ContractEffectiveDate))  eq ElapsedMonths ) then true() else false()"
+			           saxon:message="Rule #6: The ElapsedMonths value shall be Date minus ContractEffectiveDate in # of months." xpathDefaultNamespace="##targetNamespace">
+				<xs:annotation>
+					<xs:documentation>Rule #6</xs:documentation>
+					<xs:documentation>ElapsedMonths = (Date (i.e. Closing Date) - ContractEffectiveDate), in # of months</xs:documentation>
+				</xs:annotation>
+			</xs:assert>
+			<xs:assert test="if (count(MonthlyPayments/MonthlyPayment) eq ContractLength) then true() else false()" xpathDefaultNamespace="##targetNamespace">
+				<xs:annotation>
+					<xs:documentation>Rule #7</xs:documentation>
+					<xs:documentation>Count of MonthlyPayments shall be  equal to ContractLength</xs:documentation>
+				</xs:annotation>
+			</xs:assert>
+			<!--
+			<xs:assert test="if ((SubsidizedDeviceTAC eq 'TBD') or (substring(SubsidizedDeviceIMEI, 1, string-length(SubsidizedDeviceTAC))) eq SubsidizedDeviceTAC) then true() else false()"
+			           saxon:message="Rule #9: First 6 - 8 digits of SubsidizedDeviceIMEI shall be equal to SubsidizedDeviceTAC, or SubsidizedDeviceTAC='TBD'" xpathDefaultNamespace="##targetNamespace">
+				<xs:annotation>
+					<xs:documentation>Rule #9</xs:documentation>
+					<xs:documentation>First 6 - 8 digits of SubsidizedDeviceIMEI shall be equal to SubsidizedDeviceTAC, or SubsidizedDeviceTAC='TBD'</xs:documentation>
+				</xs:annotation>
+			</xs:assert>
+			-->
+			<xs:assert test="if (every $i in MonthlyPayments/MonthlyPayment[number(MonthNumber) le number(ElapsedMonths)] satisfies $i/Scenario eq 'REAL') then true() else false()" xpathDefaultNamespace="##targetNamespace">
+				<xs:annotation>
+					<xs:documentation>Rule #14a</xs:documentation>
+					<xs:documentation>If MonthNumber is less or equal to ElapsedMonths, then Scenario = 'REAL'</xs:documentation>
+				</xs:annotation>
+			</xs:assert>
+			<xs:assert test="if (every $i in MonthlyPayments/MonthlyPayment[number(MonthNumber) gt number(ElapsedMonths)] satisfies  $i/Scenario eq 'FORECAST') then true() else false()" xpathDefaultNamespace="##targetNamespace">
+				<xs:annotation>
+					<xs:documentation>Rule #14b</xs:documentation>
+					<xs:documentation>If MonthNumber is greater than ElapsedMonths, then Scenario = 'FORECAST'</xs:documentation>
+				</xs:annotation>
+			</xs:assert>
+			<xs:assert test="if ((xs:gYearMonth(xs:date(Date)) eq xs:gYearMonth(xs:date(SubsidyDate))) and (SubsidyAmount le 0)) then false() else true()"
+			           saxon:message="Rule #16: The SubsidyAmount value shall be greater than zero for new Subsidies of month." xpathDefaultNamespace="##targetNamespace">
+				<xs:annotation>
+					<xs:documentation>Rule #16</xs:documentation>
+					<xs:documentation>SubsidyAmount > 0 If the SubsidyDate is the same month of data (Date)</xs:documentation>
+				</xs:annotation>
+			</xs:assert>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="MonthlyPayments">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="MonthlyPayment" minOccurs="1" maxOccurs="36"/>
+			</xs:sequence>
+		</xs:complexType>
+
+		<xs:key name="MonthlyPaymentKey">
+			<xs:selector xpath="./tigo:MonthlyPayment"/>
+			<xs:field xpath="tigo:Date"/>
+			<xs:field xpath="tigo:AnalyticsArrangementKey"/>
+			<xs:field xpath="tigo:PaymentType"/>
+			<xs:field xpath="tigo:MonthNumber"/>
+		</xs:key>
+	</xs:element>
+
+	<xs:element name="MonthlyPayment">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="MonthNumber" type="ContractMonthType"/>
+				<xs:element name="Date" type="DateType"/>
+				<xs:element name="AnalyticsArrangementKey" type="LocalSubscriberKeyType"/>
+				<xs:element name="PaymentType" type="PaymentType"/>
+				<xs:element name="Scenario" type="ScenarioType"/>
+				<xs:element name="Quantity" type="QuantityType"/>
+				<xs:element name="Revenue" type="PositiveOrZeroMoneyType"/>
+				<xs:element name="DirectCost" type="PositiveOrZeroMoneyType"/>
+				<xs:element name="GrossMargin" type="MoneyType"/>
+				<xs:element name="SalesMarketingCost" type="PositiveOrZeroMoneyType"/>
+				<xs:element name="ContributionMargin" type="MoneyType"/>
+			</xs:sequence>
+			<xs:assert test="if (abs(GrossMargin - (Revenue - DirectCost)) le 0.01 ) then true() else false()" xpathDefaultNamespace="##targetNamespace">
+				<xs:annotation>
+					<xs:documentation>Rule #11</xs:documentation>
+					<xs:documentation>GrossMargin = (Revenue - DirectCost)</xs:documentation>
+				</xs:annotation>
+			</xs:assert>
+			<xs:assert test="if (abs(ContributionMargin - (GrossMargin - SalesMarketingCost)) le 0.01) then true() else false()" xpathDefaultNamespace="##targetNamespace">
+				<xs:annotation>
+					<xs:documentation>Rule #12</xs:documentation>
+					<xs:documentation>abs(ContributionMargin - (GrossMargin - SalesMarketingCost)) le 0.01</xs:documentation>
+				</xs:annotation>
+			</xs:assert>
+		</xs:complexType>
+	</xs:element>
+
+	<!-- XML Type definitions -->
+	<xs:simpleType name="CurrencyType">
+		<xs:restriction base="xs:token">
+			<xs:maxLength value="3"/>
+			<xs:enumeration value="BOB"/>
+			<xs:enumeration value="COP"/>
+			<xs:enumeration value="USD"/>
+			<xs:enumeration value="GTQ"/>
+			<xs:enumeration value="HNL"/>
+			<xs:enumeration value="PYG"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="PeriodType">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="7"/>
+			<xs:pattern value="([2][0-9]{3})-(0[1-9]|1[0-2])|1900-01"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="DateTimeType">
+		<xs:annotation>
+			<xs:documentation>Time zone can be specified either in UTC
+	                                                or by the time difference with UTC (GMT):
+	                                                2012-10-25T14:15:00Z
+	                                                2012-10-25T14:15:00-05:00
+	                                                =====================================
+	                                                CO Colombia                    -05:00
+	                                                US Central Standard Time (CST) -06:00
+	                                                US Mountain Standard Time (MST)-07:00
+	                                                US Pacific Standard Time (PST) -08:00
+	                                                US Alaska Standard Time (AKST) -09:00
+	                                                US Hawaii Standard Time (HST)  -10:00
+	                                                =====================================
+	                                                US Eastern Daylight Time (EDT) -04:00
+	                                                US Central Daylight Time (CDT) -05:00
+	                                                US Mountain Daylight Time (MDT)-06:00
+	                                                US Pacific Daylight Time (PDT) -07:00
+	                                                US Alaska Daylight Time (AKDST)-08:00</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:dateTime">
+			<xs:pattern value=".+(\-10:00|\-09:00|\-08:00|\-07:00|\-06:00|\-05:00|\-04:00|\+00:00|Z|-04:00)"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+
+	<xs:simpleType name="DateType">
+		<xs:restriction base="xs:date">
+			<!--<xs:minInclusive value="2014-04-28"/>-->
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="LocalSubscriberKeyType">
+		<xs:restriction base="xs:long">
+			<xs:minExclusive value="0"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="CountryType">
+		<xs:restriction base="xs:token">
+			<xs:maxLength value="2"/>
+			<xs:enumeration value="CO"/>
+			<xs:enumeration value="BO"/>
+			<xs:enumeration value="PY"/>
+			<xs:enumeration value="GT"/>
+			<xs:enumeration value="HN"/>
+			<xs:enumeration value="SV"/>
+			<xs:enumeration value="GH"/>
+			<xs:enumeration value="MU"/>
+			<xs:enumeration value="TZ"/>
+			<xs:enumeration value="DR"/>
+			<xs:enumeration value="CH"/>
+			<xs:enumeration value="RW"/>
+			<xs:enumeration value="SN"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="PaymentType">
+		<xs:restriction base="xs:normalizedString">
+			<xs:maxLength value="20"/>
+			<xs:enumeration value="PREPAID"/>
+			<xs:enumeration value="POSTPAID PURE"/>
+			<xs:enumeration value="POSTPAID HYBRID"/>
+			<xs:enumeration value="TO BE DETERMINED"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="DeviceCodeType">
+		<xs:annotation>
+			<xs:documentation>It can have one of 2 types of values:
+            1. numeric string
+            2. TBD</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:NMTOKEN">
+			<xs:maxLength value="8"/>
+			<xs:pattern value="[0-9]{6,8}|TBD"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!--<xs:simpleType name="DeviceCodeType">
+		<xs:annotation>
+			<xs:documentation>It can have one of 2 types of values:
+			1. numeric string
+			2. TBD</xs:documentation>
+		</xs:annotation>
+		<xs:union>
+			<xs:simpleType>
+				<xs:restriction base="xs:token">
+					<xs:maxLength value="8"/>
+					<xs:pattern value="[0-9]{6,8}"/>
+				</xs:restriction>
+			</xs:simpleType>
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:maxLength value="8"/>
+					<xs:enumeration value="TBD"/>
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:union>
+	</xs:simpleType>-->
+
+	<xs:simpleType name="IMEIType">
+		<xs:restriction base="xs:token">
+			<xs:maxLength value="15"/>
+			<xs:pattern value="[0-9]{15}"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ContractMonthType">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="1"/>
+			<xs:maxInclusive value="36"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ElapsedMonthType">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="0"/>
+			<xs:maxInclusive value="35"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="SubsidyType">
+		<xs:restriction base="xs:normalizedString">
+			<xs:maxLength value="20"/>
+			<xs:enumeration value="ACQUISITION"/>
+			<xs:enumeration value="RETENTION"/>
+			<xs:enumeration value="TO BE DETERMINED"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="SalesChannelType">
+		<xs:restriction base="xs:normalizedString">
+			<xs:maxLength value="35"/>
+			<xs:enumeration value="CORPORATE CHANNEL"/>
+			<xs:enumeration value="DEALER MANAGED POINT OF SALES"/>
+			<xs:enumeration value="DIRECT SALES FORCE"/>
+			<xs:enumeration value="INDEPENDENT TIGO BRANDED STORES"/>
+			<xs:enumeration value="MULTIBRAND WHOLESALERS"/>
+			<xs:enumeration value="ONLINE"/>
+			<xs:enumeration value="OTHERS"/>
+			<xs:enumeration value="OWN STORES"/>
+			<xs:enumeration value="RETAIL"/>
+			<xs:enumeration value="TO BE DETERMINED"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="MoneyType">
+		<xs:restriction base="xs:decimal">
+			<xs:totalDigits value="19"/>
+			<xs:fractionDigits value="4"/>
+			<xs:pattern value="[+-]?[0-9]{1,15}[.][0-9]{2,4}"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="QuantityType">
+		<xs:restriction base="xs:nonNegativeInteger">
+			<xs:minInclusive value="0"/>
+			<xs:maxInclusive value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ScenarioType">
+		<xs:restriction base="xs:token">
+			<xs:maxLength value="10"/>
+			<xs:enumeration value="REAL"/>
+			<xs:enumeration value="FORECAST"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="ContractEndDate">
+		<xs:simpleType>
+			<xs:restriction base="xs:date">
+				<xs:minInclusive value="2013-01-01"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="ContractEffectiveDate">
+		<xs:simpleType>
+			<xs:restriction base="xs:date">
+				<xs:minInclusive value="2012-01-01"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="SubsidyDate">
+		<xs:simpleType>
+			<xs:restriction base="xs:date">
+				<xs:minInclusive value="2012-01-01"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:simpleType name="PositiveMoneyType">
+		<xs:restriction base="xs:decimal">
+			<xs:totalDigits value="19"/>
+			<xs:fractionDigits value="4"/>
+			<xs:pattern value="[+-]?[0-9]{1,15}[.][0-9]{2,4}"/>
+			<xs:minExclusive value="0"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="PositiveOrZeroMoneyType">
+		<xs:restriction base="xs:decimal">
+			<xs:totalDigits value="19"/>
+			<xs:fractionDigits value="4"/>
+			<xs:pattern value="[+-]?[0-9]{1,15}[.][0-9]{2,4}"/>
+			<xs:minInclusive value="0"/>
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>

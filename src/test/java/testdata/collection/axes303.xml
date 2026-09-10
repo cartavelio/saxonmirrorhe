@@ -1,0 +1,5 @@
+<a xmlns:a="http://alpha/">
+  <b>
+    <c xmlns:a="http://gamma/"/>
+  </b>
+</a>
