@@ -1086,7 +1086,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
             Affinity rel = config.getTypeHierarchy().relationship(contextItemType, requiredContextItemType);
             switch (rel) {
                 case DISJOINT:
-                    XPathException e = new XPathException("The declared context item type is inconsistent with the match pattern", "XPTY0004", this);
+                    XPathException e = new XPathException("The declared context item type is inconsistent with the match pattern", "XTTE0590", this);
                     e.setIsTypeError(true);
                     throw e;
                 case SUBSUMED_BY:

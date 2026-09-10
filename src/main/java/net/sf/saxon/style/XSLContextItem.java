@@ -81,7 +81,8 @@ public class XSLContextItem extends StyleElement {
             }
         }
         if (asAtt != null && absentFocus) {
-            compileError("The 'as' attribute must be omitted when use='absent' is specified", "XTSE3089");
+            compileError("The 'as' attribute must be omitted when use='absent' is specified",
+                         this instanceof XSLGlobalContextItem ? "XTSE3089": "XTSE3088");
         }
     }
 
