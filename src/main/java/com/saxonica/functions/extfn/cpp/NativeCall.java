@@ -1,7 +1,9 @@
 package com.saxonica.functions.extfn.cpp;
 
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.option.cpp.ProcessorDataAccumulator;
 import net.sf.saxon.option.cpp.SaxonCAPI;
+import net.sf.saxon.option.cpp.XdmValueForCpp;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
@@ -138,17 +140,15 @@ public class NativeCall implements ExtensionFunction {
 
              // get info on the return type
             if (valueRef != WordFactory.nullPointer()) {
-                XdmAtomicValue xdmValue = SaxonCAPI.objectHandles.get(valueRef);
+                Object obj = SaxonCAPI.objectHandles.get(valueRef);
+
+                XdmValue xdmValue = SaxonCAPI.convertObjectToXdmValue(obj);
 
                 if (xdmValue != null) {
                     return xdmValue;
 
-                } else if (useNativeTypes) {
-                    System.err.println("xdmValue in userFunction is null!!");
                 }
 
-            } else if (useNativeTypes) {
-                System.err.println("ObjectHandle value in userFunction is null!!");
             }
         }
 
