@@ -992,7 +992,8 @@ public class XPathParser {
         return operatorPrecedenceTable.get(operator);
     }
 
-    /*@NotNull*/
+
+        /*@NotNull*/
     private Expression makeBinaryExpression(Expression lhs, int operator, Expression rhs) throws XPathException {
         switch (operator) {
             case Token.OR:
