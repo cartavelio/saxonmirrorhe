@@ -11,6 +11,7 @@
   <section ref="schema-processing">Using XML Schema (XSD)</section>  
   <section ref="gizmo">The Gizmo Utility</section>  
   <section ref="saxon-cs">SaxonCS</section>
+  <section ref="localization">Localization</section>
   <section ref="extensibility">Extensibility Mechanisms</section>
   <section ref="extensions">Saxon Extensions</section>
   <section ref="v4extensions">Experimental 4.0 Extensions</section>
