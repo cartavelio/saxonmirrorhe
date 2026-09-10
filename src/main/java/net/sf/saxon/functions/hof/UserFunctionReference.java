@@ -81,9 +81,12 @@ public class UserFunctionReference extends Expression
     @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         // if this is an inline function, typecheck that function now
-        if (nominalTarget.getFunctionName().hasURI(NamespaceConstant.ANONYMOUS) && typeCheckCounter++ < 10) {
-            // Prevent recursive optimization: test case -s:misc-HigherOrderFunctions -t:xqhof2
+        System.err.println("typeCheck " + this);
+        if (nominalTarget.getFunctionName().hasURI(NamespaceConstant.ANONYMOUS) && typeCheckCounter == 0) {
+            // Prevent recursive type-checking: test case -s:misc-HigherOrderFunctions -t:xqhof2
+            typeCheckCounter++;
             nominalTarget.typeCheck(visitor);
+            typeCheckCounter--;
         }
         return this;
     }
@@ -106,6 +109,7 @@ public class UserFunctionReference extends Expression
     @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         // if this is an inline function, optimize that function now
+        System.err.println("optimize " + this);
         if (nominalTarget.getFunctionName().hasURI(NamespaceConstant.ANONYMOUS) && optimizeCounter == 0) {
             // Prevent recursive optimization: test case -s:misc-HigherOrderFunctions -t:xqhof2 ; and bug #5054
             optimizeCounter++;
@@ -144,6 +148,10 @@ public class UserFunctionReference extends Expression
     @Override
     public Component getFixedTarget() {
         return nominalTarget.getDeclaringComponent();
+    }
+
+    public UserFunction getNominalTarget() {
+        return nominalTarget;
     }
 
     /**
