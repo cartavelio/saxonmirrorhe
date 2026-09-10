@@ -385,7 +385,7 @@ task eecs_dll(
 ) {
   inputs.files fileTree(dir: "${buildDir}/cs/Saxon")
   inputs.files fileTree(dir: "${projectDir}/src/main/saxon-cs")
-  outputs.file "${buildDir}/cs/obj/Debug/net5.0/engine.dll"
+  outputs.file "${buildDir}/cs/obj/Debug/net6.0/engine.dll"
 
   doLast {
     if (dotnetex == null) {
@@ -402,7 +402,7 @@ task eecs_dll(
 task dotnetTestDrivers(
   dependsOn: ['dotnetRelease']
 ) {
-  inputs.file "${buildDir}/cs/bin/Release/net5.0/SaxonCS.dll"
+  inputs.file "${buildDir}/cs/bin/Release/net6.0/SaxonCS.dll"
   inputs.files fileTree(dir: "${projectDir}/src/test/cstestrunner")
   outputs.file "${buildDir}/testdrivers/bin/Release/TestDrivers.${csver}.nupkg"
 
@@ -444,7 +444,7 @@ task dotnetTestDrivers(
 task dotnetExamples(
   dependsOn: ['dotnetRelease']
 ) {
-  inputs.file "${buildDir}/cs/bin/Release/net5.0/SaxonCS.dll"
+  inputs.file "${buildDir}/cs/bin/Release/net6.0/SaxonCS.dll"
   inputs.files fileTree(dir: "${projectDir}/src/samples/cs/Examples.cs")
   outputs.file "${buildDir}/examples/bin/Release/Examples.${csver}.nupkg"
 
@@ -488,13 +488,13 @@ task dotnetRelease(
 ) {
   inputs.files fileTree(dir: "${buildDir}/cs/Saxon")
   inputs.files fileTree(dir: "${projectDir}/src/main/saxon-cs")
-  outputs.file "${buildDir}/cs/bin/Release/net5.0/SaxonCS.dll"
+  outputs.file "${buildDir}/cs/bin/Release/net6.0/SaxonCS.dll"
   outputs.file "${buildDir}/cs/bin/Release/SaxonCS.${csver}.nupkg"
 
   doFirst {
     // Delete them if they exist so that they always get rewritten
     // so that the subsequent attempt to sign them doesn't fail.
-    delete "${buildDir}/cs/bin/Release/net5.0/SaxonCS.dll"
+    delete "${buildDir}/cs/bin/Release/net6.0/SaxonCS.dll"
     delete "${buildDir}/cs/bin/Release/SaxonCS.${csver}.nupkg"
   }
 
@@ -534,7 +534,7 @@ task dotnetRelease(
   }
 
   doLast {
-    signExe("${buildDir}/cs/bin/Release/net5.0/SaxonCS.dll")
+    signExe("${buildDir}/cs/bin/Release/net6.0/SaxonCS.dll")
     if (systemOs.isWindows()) {
       signNuget("${buildDir}/cs/bin/Release/SaxonCS.${csver}.nupkg")
     } else {
@@ -596,12 +596,12 @@ task pushNuGetPackage(
 task dotnetPublish(
   dependsOn: ['dotnetRelease']
 ) {
-  inputs.file "${buildDir}/cs/bin/Release/net5.0/SaxonCS.dll"
-  outputs.files fileTree(dir: "${buildDir}/cs/bin/Release/net5.0/${csrid}/publish")
+  inputs.file "${buildDir}/cs/bin/Release/net6.0/SaxonCS.dll"
+  outputs.files fileTree(dir: "${buildDir}/cs/bin/Release/net6.0/${csrid}/publish")
 
   def singleFile="true"
   if (systemOs.isMacOsX()) {
-    singleFile="false"
+    singleFile="true"
   }
 
   doLast {
@@ -617,9 +617,12 @@ task dotnetPublish(
   doLast {
     println("Published SaxonCS release for ${csplatform}")
   }
+
+/*
   doLast {
-    signExe("${buildDir}/cs/bin/Release/net5.0/${csrid}/publish/SaxonCS", true)
+    signExe("${buildDir}/cs/bin/Release/net6.0/${csrid}/publish/SaxonCS", true)
   }
+*/
 }
 
 task dotnetPublishZip(
@@ -628,13 +631,13 @@ task dotnetPublishZip(
 ) {
   doFirst {
     copy {
-      into "${buildDir}/cs/bin/Release/net5.0/${csrid}/publish/doc"
+      into "${buildDir}/cs/bin/Release/net6.0/${csrid}/publish/doc"
       from "${projectDir}/src/docs/doc"
     }
   }
 
   archiveFileName = "SaxonCS-${csver.replaceAll("\\.", "-")}-${csplatform}.zip"
-  from "${buildDir}/cs/bin/Release/net5.0/${csrid}/publish"
+  from "${buildDir}/cs/bin/Release/net6.0/${csrid}/publish"
   into "/SaxonCS-${saxonVersion}/"
 }
 
