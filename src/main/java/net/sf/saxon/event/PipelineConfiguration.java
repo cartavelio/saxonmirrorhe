@@ -68,7 +68,7 @@ public class PipelineConfiguration {
     public PipelineConfiguration(PipelineConfiguration p) {
         config = p.config;
         controller = p.controller;
-        parseOptions = new ParseOptions(p.parseOptions);
+        parseOptions = p.parseOptions;
         hostLanguage = p.hostLanguage;
         if (p.components != null) {
             components = new HashMap<>(p.components);
@@ -121,7 +121,7 @@ public class PipelineConfiguration {
      */
 
     public void setErrorReporter(ErrorReporter errorReporter) {
-        getParseOptions().setErrorReporter(errorReporter);
+        parseOptions = getParseOptions().withErrorReporter(errorReporter);
     }
 
     /**
@@ -156,7 +156,7 @@ public class PipelineConfiguration {
      */
 
     public void setUseXsiSchemaLocation(boolean recognize) {
-        getParseOptions().setUseXsiSchemaLocation(recognize);
+        parseOptions = getParseOptions().withUseXsiSchemaLocation(recognize);
     }
 
     /**
@@ -173,7 +173,7 @@ public class PipelineConfiguration {
      */
 
     public void setRecoverFromValidationErrors(boolean recover) {
-        getParseOptions().setContinueAfterValidationErrors(recover);
+        parseOptions = getParseOptions().withContinueAfterValidationErrors(recover);
     }
 
     /**
@@ -250,18 +250,6 @@ public class PipelineConfiguration {
 
     public void setHostLanguage(HostLanguage language) {
         hostLanguage = language;
-    }
-
-    /**
-     * Set whether attribute defaults defined in a schema or DTD are to be expanded or not
-     * (by default, fixed and default attribute values are expanded, that is, they are inserted
-     * into the document during validation as if they were present in the instance being validated)
-     *
-     * @param expand true if defaults are to be expanded, false if not
-     */
-
-    public void setExpandAttributeDefaults(boolean expand) {
-        getParseOptions().setExpandAttributeDefaults(expand);
     }
 
     /**

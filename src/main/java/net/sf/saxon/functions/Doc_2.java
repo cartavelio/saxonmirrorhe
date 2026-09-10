@@ -64,7 +64,7 @@ public class Doc_2 extends SystemFunction implements Callable {
 
     public static ParseOptions setParseOptions(
             RetainedStaticContext rsc, Map<String, Sequence> checkedOptions, XPathContext context) throws XPathException {
-        ParseOptions result = new ParseOptions(context.getConfiguration().getParseOptions());
+        ParseOptions result = context.getConfiguration().getParseOptions();
 
         Sequence value = checkedOptions.get("validation");
         if (value != null) {
@@ -76,39 +76,40 @@ public class Doc_2 extends SystemFunction implements Callable {
             if (v == Validation.INVALID) {
                throw new XPathException("Invalid validation value " + valStr, "SXZZ0002");
             }
-            result.setSchemaValidationMode(v);
+            result = result.withSchemaValidationMode(v);
         }
         value = checkedOptions.get("type");
         if (value != null) {
             QNameValue qval = (QNameValue) value.head();
-            result.setTopLevelType(context.getConfiguration().getSchemaType(qval.getStructuredQName()));
-            result.setSchemaValidationMode(Validation.BY_TYPE);
+            result = result
+                    .withTopLevelType(context.getConfiguration().getSchemaType(qval.getStructuredQName()))
+                    .withSchemaValidationMode(Validation.BY_TYPE);
         }
         value = checkedOptions.get("strip-space");
         if (value != null) {
             String s = value.head().getStringValue();
             switch (s) {
                 case "all":
-                    result.setSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
+                    result = result.withSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
                     break;
                 case "none":
-                    result.setSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
+                    result = result.withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
                     break;
                 case "ignorable":
-                    result.setSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
+                    result = result.withSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
                     break;
                 case "package-defined":
                 case "default":
                     PackageData data = rsc.getPackageData();
                     if (data instanceof StylesheetPackage) {
-                        result.setSpaceStrippingRule(((StylesheetPackage) data).getSpaceStrippingRule());
+                        result = result.withSpaceStrippingRule(((StylesheetPackage) data).getSpaceStrippingRule());
                     }
                     break;
             }
         }
         value = checkedOptions.get("dtd-validation");
         if (value != null) {
-            result.setDTDValidationMode(((BooleanValue)value.head()).getBooleanValue() ? Validation.STRICT : Validation.SKIP);
+            result = result.withDTDValidationMode(((BooleanValue)value.head()).getBooleanValue() ? Validation.STRICT : Validation.SKIP);
         }
         value = checkedOptions.get("accumulators");
         if (value != null) {
@@ -122,11 +123,11 @@ public class Doc_2 extends SystemFunction implements Callable {
                 Accumulator acc = reg.getAccumulator(name.getStructuredQName());
                 accumulators.add(acc);
             }
-            result.setApplicableAccumulators(accumulators);
+            result = result.withApplicableAccumulators(accumulators);
         }
         value = checkedOptions.get("use-xsi-schema-location");
         if (value != null) {
-            result.setUseXsiSchemaLocation(((BooleanValue) value.head()).getBooleanValue());
+            result = result.withUseXsiSchemaLocation(((BooleanValue) value.head()).getBooleanValue());
         }
         return result;
     }

@@ -265,17 +265,17 @@ public class URIQueryParameters {
         ParseOptions options = new ParseOptions();
         Optional<SpaceStrippingRule> stripSpace = getSpaceStrippingRule();
         if (stripSpace.isPresent()) {
-            options.setSpaceStrippingRule(stripSpace.get());
+            options = options.withSpaceStrippingRule(stripSpace.get());
         }
 
         Optional<Integer> validation = getValidationMode();
         if (validation.isPresent()) {
-            options.setSchemaValidationMode(validation.get());
+            options = options.withSchemaValidationMode(validation.get());
         }
 
         Optional<Boolean> xinclude = getXInclude();
         if (xinclude.isPresent()) {
-            options.setXIncludeAware(xinclude.get());
+            options = options.withXIncludeAware(xinclude.get());
         }
 
         return options;

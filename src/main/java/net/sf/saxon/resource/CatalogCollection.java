@@ -98,8 +98,8 @@ public class CatalogCollection extends AbstractResourceCollection {
                     }
                 } else {
                     InputDetails id = getInputDetails(uri);
-                    id.parseOptions = new ParseOptions(context.getConfiguration().getParseOptions());
-                    id.parseOptions.setSpaceStrippingRule(whitespaceRules);
+                    id.parseOptions = context.getConfiguration().getParseOptions()
+                        .withSpaceStrippingRule(whitespaceRules);
                     id.resourceUri = uri;
                     return makeResource(context, id);
                 }
@@ -160,9 +160,9 @@ public class CatalogCollection extends AbstractResourceCollection {
             throws XPathException {
 
         Source source = DocumentFn.resolveURI(href, null, null, context);
-        ParseOptions options = new ParseOptions();
-        options.setSchemaValidationMode(Validation.SKIP);
-        options.setDTDValidationMode(Validation.SKIP);
+        ParseOptions options = new ParseOptions()
+                .withSchemaValidationMode(Validation.SKIP)
+                .withDTDValidationMode(Validation.SKIP);
         TreeInfo catalog = context.getConfiguration().buildDocumentTree(source, options);
         if (catalog == null) {
             // we failed to read the catalogue

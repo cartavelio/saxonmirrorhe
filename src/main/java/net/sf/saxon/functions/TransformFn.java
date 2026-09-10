@@ -781,8 +781,8 @@ public class TransformFn extends SystemFunction implements Callable {
                         Source ss = rr.resolve(xsltCompiler.getResourceResolver(),
                                                targetConfig.getResourceResolver(),
                                                new DirectResourceResolver(targetConfig));
-                        ParseOptions parseOptions = new ParseOptions(targetConfig.getParseOptions());
-                        parseOptions.setSchemaValidationMode(schemaValidation);
+                        ParseOptions parseOptions = targetConfig.getParseOptions()
+                                .withSchemaValidationMode(schemaValidation);
                         TreeInfo tree = targetConfig.buildDocumentTree(ss, parseOptions);
                         sourceNode = tree.getRootNode();
                         sourceLocation = null;
@@ -904,8 +904,8 @@ public class TransformFn extends SystemFunction implements Callable {
     }
 
     private static NodeInfo validate(NodeInfo node, Configuration config, int validation) throws XPathException {
-        ParseOptions options = new ParseOptions(config.getParseOptions());
-        options.setSchemaValidationMode(validation);
+        ParseOptions options = config.getParseOptions()
+                .withSchemaValidationMode(validation);
         return config.buildDocumentTree(node.asActiveSource(), options).getRootNode();
     }
 

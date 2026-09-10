@@ -58,15 +58,13 @@ public abstract class Sender {
         Source suppliedSource = source;
         PipelineConfiguration pipe = receiver.getPipelineConfiguration();
         if (options == null) {
-            options = new ParseOptions(pipe.getParseOptions());
-        } else {
-            options = new ParseOptions(options);
+            options = pipe.getParseOptions();
         }
         String systemId = source.getSystemId();
         AugmentedSource originalAugmentedSource = null;
         if (source instanceof AugmentedSource) {
             originalAugmentedSource = (AugmentedSource)source;
-            options.merge(((AugmentedSource) source).getParseOptions());
+            options = options.merge(((AugmentedSource) source).getParseOptions());
             systemId = source.getSystemId();
             source = ((AugmentedSource) source).getContainedSource();
         }

@@ -69,18 +69,19 @@ public class TransformerHandlerImpl extends ReceivingContentHandler implements T
             ((TinyBuilder) builder).setStatistics(config.getTreeStatistics().SOURCE_DOCUMENT_STATISTICS);
         }
         PipelineConfiguration pipe = builder.getPipelineConfiguration();
-        ParseOptions options = pipe.getParseOptions();
-        options.setCheckEntityReferences(true);
+        ParseOptions options = pipe.getParseOptions()
+                .withCheckEntityReferences(true);
         setPipelineConfiguration(pipe);
         receiver = controller.makeStripper(builder);
         if (controller.isStylesheetStrippingTypeAnnotations()) {
             receiver = config.getAnnotationStripper(receiver);
         }
         if (validation != Validation.PRESERVE) {
-            options.setSchemaValidationMode(validation);
-            options.setSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
+            options = options.withSchemaValidationMode(validation);
+            options = options.withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
             receiver = config.getDocumentValidator(receiver, getSystemId(), options, null);
         }
+        pipe.setParseOptions(options);
         setReceiver(receiver);
     }
 

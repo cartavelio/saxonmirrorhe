@@ -71,6 +71,10 @@ public abstract class ParentNodeConstructor extends Instruction
         return validationOptions;
     }
 
+    public void setValidationOptions(ParseOptions options) {
+        this.validationOptions = options;
+    }
+
     /**
      * Set the validation mode for the new document or element node
      *
@@ -87,10 +91,10 @@ public abstract class ParentNodeConstructor extends Instruction
                 validationOptions = new ParseOptions();
             }
             if (schemaType == Untyped.getInstance()) {
-                validationOptions.setSchemaValidationMode(Validation.SKIP);
+                validationOptions = validationOptions.withSchemaValidationMode(Validation.SKIP);
             } else {
-                validationOptions.setSchemaValidationMode(mode);
-                validationOptions.setTopLevelType(schemaType);
+                validationOptions = validationOptions.withSchemaValidationMode(mode)
+                        .withTopLevelType(schemaType);
             }
         }
     }

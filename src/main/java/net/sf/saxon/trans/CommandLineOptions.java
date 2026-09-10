@@ -322,21 +322,23 @@ public class CommandLineOptions {
 
         optionValue = getOptionValue("dtd");
         if (optionValue != null) {
+            int mode = Validation.DEFAULT;
             switch (optionValue) {
                 case "on":
                     config.setBooleanProperty(Feature.DTD_VALIDATION, true);
-                    config.getParseOptions().setDTDValidationMode(Validation.STRICT);
+                    mode = Validation.STRICT;
                     break;
                 case "off":
                     config.setBooleanProperty(Feature.DTD_VALIDATION, false);
-                    config.getParseOptions().setDTDValidationMode(Validation.SKIP);
+                    mode = Validation.SKIP;
                     break;
                 case "recover":
                     config.setBooleanProperty(Feature.DTD_VALIDATION, true);
                     config.setBooleanProperty(Feature.DTD_VALIDATION_RECOVERABLE, true);
-                    config.getParseOptions().setDTDValidationMode(Validation.LAX);
+                    mode = Validation.LAX;
                     break;
             }
+            config.setParseOptions(config.getParseOptions().withDTDValidationMode(mode));
         }
 
         optionValue = getOptionValue("ea");
@@ -348,7 +350,7 @@ public class CommandLineOptions {
         optionValue = getOptionValue("expand");
         if (optionValue != null) {
             boolean on = Configuration.requireBoolean("expand", optionValue);
-            config.getParseOptions().setExpandAttributeDefaults(on);
+            config.setParseOptions(config.getParseOptions().withExpandAttributeDefaults(on));
         }
 
         optionValue = getOptionValue("ext");

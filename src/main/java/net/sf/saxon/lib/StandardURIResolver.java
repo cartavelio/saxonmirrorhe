@@ -299,7 +299,9 @@ public class StandardURIResolver implements NonDelegatingURIResolver {
             Optional<SpaceStrippingRule> stripSpace = params.getSpaceStrippingRule();
             source = AugmentedSource.makeAugmentedSource(source);
             if (stripSpace.isPresent()) {
-                ((AugmentedSource) source).getParseOptions().setSpaceStrippingRule(stripSpace.get());
+                ParseOptions options = ((AugmentedSource) source).getParseOptions()
+                        .withSpaceStrippingRule(stripSpace.get());
+                ((AugmentedSource) source).setParseOptions(options);
             }
         }
 

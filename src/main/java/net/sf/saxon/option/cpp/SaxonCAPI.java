@@ -401,20 +401,19 @@ public class SaxonCAPI {
                             "on".equals(value));
                 }
             } else if (name.equals("dtd")) {
+                int validationMode = Validation.DEFAULT;
                 if ("on".equals(value)) {
-                    config.getParseOptions().setDTDValidationMode(Validation.STRICT);
+                    validationMode = Validation.STRICT;
                 } else if ("off".equals(value)) {
-                    config.getParseOptions().setDTDValidationMode(Validation.SKIP);
+                    validationMode = Validation.SKIP;
                 } else if ("recover".equals(value)) {
-                    config.getParseOptions().setDTDValidationMode(Validation.LAX);
+                    validationMode = Validation.LAX;
                 }
-
+                config.setParseOptions(config.getParseOptions().withDTDValidationMode(validationMode));
             } else if (name.equals("expand")) {
-                config.getParseOptions().setExpandAttributeDefaults("on".equals(value));
+                config.setParseOptions(config.getParseOptions().withExpandAttributeDefaults("on".equals(value)));
             } else if (name.equals("opt")) {
-                if (value != null) {
-                    config.setConfigurationProperty(Feature.OPTIMIZATION_LEVEL, value);
-                }
+                config.setConfigurationProperty(Feature.OPTIMIZATION_LEVEL, value);
 
             } else if (name.equals("outval")) {
 

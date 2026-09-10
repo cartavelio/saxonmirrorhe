@@ -238,9 +238,9 @@ public class SerializerFactory {
 
             Source source = rr.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
 
-            ParseOptions options = new ParseOptions();
-            options.setSchemaValidationMode(Validation.LAX);
-            options.setDTDValidationMode(Validation.SKIP);
+            ParseOptions options = new ParseOptions()
+                    .withSchemaValidationMode(Validation.LAX)
+                    .withDTDValidationMode(Validation.SKIP);
             TreeInfo doc = config.buildDocumentTree(source);
             SerializationParamsHandler ph = new SerializationParamsHandler();
             ph.setSerializationParams(doc.getRootNode());

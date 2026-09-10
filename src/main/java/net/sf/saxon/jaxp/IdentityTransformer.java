@@ -358,9 +358,9 @@ public class IdentityTransformer extends Transformer {
             Receiver receiver = sf.getReceiver(result, new SerializationProperties(getOutputProperties()));
             ParseOptions options = receiver.getPipelineConfiguration().getParseOptions();
             if (errorListener != null) {
-                options.setErrorReporter(new ErrorReporterToListener(errorListener));
+                options = options.withErrorReporter(new ErrorReporterToListener(errorListener));
             }
-            options.setContinueAfterValidationErrors(true);
+            options = options.withContinueAfterValidationErrors(true);
             Sender.send(source, receiver, options);
         } catch (XPathException err) {
             Throwable cause = err.getException();

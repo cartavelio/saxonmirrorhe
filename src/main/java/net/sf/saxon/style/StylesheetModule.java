@@ -130,11 +130,11 @@ public class StylesheetModule {
         } else {
             options = new ParseOptions();
         }
-        options.setSchemaValidationMode(Validation.STRIP);
-        options.setDTDValidationMode(Validation.STRIP);
-        options.setLineNumbering(true);
-        options.setSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
-        options.setErrorReporter(pipe.getErrorReporter());
+        options = options.withSchemaValidationMode(Validation.STRIP)
+                .withDTDValidationMode(Validation.STRIP)
+                .withLineNumbering(true)
+                .withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance())
+                .withErrorReporter(pipe.getErrorReporter());
         return options;
     }
 
@@ -149,7 +149,7 @@ public class StylesheetModule {
             Sender.send(styleSource, sourcePipeline, options);
         } else {
             XMLReader styleParser = config.getStyleParser();
-            options.setXMLReader(styleParser);
+            options = options.withXMLReader(styleParser);
             Sender.send(styleSource, sourcePipeline, options);
             config.reuseStyleParser(styleParser);
         }

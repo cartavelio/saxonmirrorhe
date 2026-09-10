@@ -226,8 +226,8 @@ public class JarCollection extends AbstractResourceCollection {
             this.context = context;
             this.filter = filter;
             this.zipInputStream = zipInputStream;
-            this.options = optionsFromQueryParameters(params, context);
-            this.options.setSpaceStrippingRule(whitespaceRules);
+            this.options = optionsFromQueryParameters(params, context)
+                    .withSpaceStrippingRule(whitespaceRules);
             Optional<Boolean> metadataParam = params == null ? Optional.empty() : params.getMetaData();
             metadata = metadataParam.isPresent() && metadataParam.get();
 

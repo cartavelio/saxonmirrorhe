@@ -966,7 +966,7 @@ public class XsltController extends Controller {
                 despatcher = makeStripper(despatcher);
             }
             PipelineConfiguration pipe = despatcher.getPipelineConfiguration();
-            pipe.getParseOptions().setSchemaValidationMode(this.validationMode);
+            pipe.setParseOptions(pipe.getParseOptions().withSchemaValidationMode(this.validationMode));
             boolean verbose = getConfiguration().isTiming();
             if (verbose) {
                 getConfiguration().getLogger().info("Streaming " + source.getSystemId());

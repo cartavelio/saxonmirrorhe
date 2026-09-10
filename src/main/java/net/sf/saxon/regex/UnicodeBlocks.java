@@ -74,11 +74,11 @@ public class UnicodeBlocks {
             throw new RESyntaxException("Unable to read unicodeBlocks.xml file");
         }
 
-        ParseOptions options = new ParseOptions();
-        options.setSchemaValidationMode(Validation.SKIP);
-        options.setDTDValidationMode(Validation.SKIP);
-        options.setSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
-        options.setPleaseCloseAfterUse(true);
+        ParseOptions options = new ParseOptions()
+                .withSchemaValidationMode(Validation.SKIP)
+                .withDTDValidationMode(Validation.SKIP)
+                .withSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance())
+                .withPleaseCloseAfterUse(true);
         TreeInfo doc;
         try {
             doc = config.buildDocumentTree(new StreamSource(in, "unicodeBlocks.xml"), options);

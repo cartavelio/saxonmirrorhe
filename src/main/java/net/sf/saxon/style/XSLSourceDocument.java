@@ -68,7 +68,7 @@ public class XSLSourceDocument extends StyleElement {
     @Override
     protected void prepareAttributes() {
 
-        parseOptions = new ParseOptions(getConfiguration().getParseOptions());
+        parseOptions = getConfiguration().getParseOptions();
 
         String hrefAtt = null;
         String validationAtt = null;
@@ -96,16 +96,16 @@ public class XSLSourceDocument extends StyleElement {
                 String local = attName.getLocalPart();
                 switch (local) {
                     case "dtd-validation":
-                        parseOptions.setDTDValidationMode(processBooleanAttribute(f, value) ? Validation.STRICT : Validation.SKIP);
+                        parseOptions = parseOptions.withDTDValidationMode(processBooleanAttribute(f, value) ? Validation.STRICT : Validation.SKIP);
                         break;
                     case "expand-attribute-defaults":
-                        parseOptions.setExpandAttributeDefaults(processBooleanAttribute(f, value));
+                        parseOptions = parseOptions.withExpandAttributeDefaults(processBooleanAttribute(f, value));
                         break;
                     case "line-numbering":
-                        parseOptions.setLineNumbering(processBooleanAttribute(f, value));
+                        parseOptions = parseOptions.withLineNumbering(processBooleanAttribute(f, value));
                         break;
                     case "xinclude":
-                        parseOptions.setXIncludeAware(processBooleanAttribute(f, value));
+                        parseOptions = parseOptions.withXIncludeAware(processBooleanAttribute(f, value));
 //                } else if (local.equals("tree-model")) {
 //                    List<TreeModel> models = getConfiguration().getExternalObjectModels()
 //                    parseOptions.setModel(processBooleanAttribute(f, value));
@@ -116,16 +116,16 @@ public class XSLSourceDocument extends StyleElement {
                     case "strip-space":
                         switch (Whitespace.normalizeWhitespace(StringView.of(value)).toString()) {
                             case "#all":
-                                parseOptions.setSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
+                                parseOptions = parseOptions.withSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
                                 break;
                             case "#none":
-                                parseOptions.setSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
+                                parseOptions = parseOptions.withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
                                 break;
                             case "#ignorable":
-                                parseOptions.setSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
+                                parseOptions = parseOptions.withSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
                                 break;
                             case "#default":
-                                parseOptions.setSpaceStrippingRule(null);
+                                parseOptions = parseOptions.withSpaceStrippingRule(null);
                                 break;
                             default:
                                 invalidAttribute("saxon:strip-space", "#all|#none|#ignorable|#default");
@@ -147,15 +147,15 @@ public class XSLSourceDocument extends StyleElement {
 
         if (validationAtt != null) {
             int validation = validateValidationAttribute(validationAtt);
-            parseOptions.setSchemaValidationMode(validation);
+            parseOptions = parseOptions.withSchemaValidationMode(validation);
         }
         
         if (typeAtt != null) {
             if (!isSchemaAware()) {
                 compileError("The @type attribute is available only with a schema-aware XSLT processor", "XTSE1660");
             }
-            parseOptions.setSchemaValidationMode(Validation.BY_TYPE);
-            parseOptions.setTopLevelType(getSchemaType(typeAtt));
+            parseOptions = parseOptions.withSchemaValidationMode(Validation.BY_TYPE);
+            parseOptions = parseOptions.withTopLevelType(getSchemaType(typeAtt));
         }
 
         if (typeAtt != null && validationAtt != null) {
@@ -186,9 +186,9 @@ public class XSLSourceDocument extends StyleElement {
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         Configuration config = getConfiguration();
         if (parseOptions.getSpaceStrippingRule() == null) {
-            parseOptions.setSpaceStrippingRule(getPackageData().getSpaceStrippingRule());
+            parseOptions = parseOptions.withSpaceStrippingRule(getPackageData().getSpaceStrippingRule());
         }
-        parseOptions.setApplicableAccumulators(accumulators);
+        parseOptions = parseOptions.withApplicableAccumulators(accumulators);
         Expression action = compileSequenceConstructor(exec, decl, false);
         if (action == null) {
             // body of xsl:source-document is empty: it's a no-op.

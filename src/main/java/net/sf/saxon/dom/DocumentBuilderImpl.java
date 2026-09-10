@@ -106,7 +106,7 @@ public class DocumentBuilderImpl extends DocumentBuilder {
      */
 
     public void setValidating(boolean state) {
-        parseOptions.setDTDValidationMode(state ? Validation.STRICT : Validation.SKIP);
+        parseOptions = parseOptions.withDTDValidationMode(state ? Validation.STRICT : Validation.SKIP);
     }
 
     /**
@@ -201,7 +201,7 @@ public class DocumentBuilderImpl extends DocumentBuilder {
 
     @Override
     public void setEntityResolver(EntityResolver er) {
-        parseOptions.setEntityResolver(er);
+        parseOptions = parseOptions.withEntityResolver(er);
     }
 
     /**
@@ -213,7 +213,7 @@ public class DocumentBuilderImpl extends DocumentBuilder {
 
     @Override
     public void setErrorHandler(ErrorHandler eh) {
-        parseOptions.setErrorHandler(eh);
+        parseOptions = parseOptions.withErrorHandler(eh);
     }
 
     /**
@@ -238,7 +238,7 @@ public class DocumentBuilderImpl extends DocumentBuilder {
      *              <code>false</code>
      */
     public void setXIncludeAware(boolean state) {
-        parseOptions.setXIncludeAware(state);
+        parseOptions = parseOptions.withXIncludeAware(state);
     }
 
 
@@ -270,22 +270,24 @@ public class DocumentBuilderImpl extends DocumentBuilder {
 
     @Deprecated
     public void setStripSpace(int stripAction) {
+        SpaceStrippingRule rule;
         switch (stripAction) {
             case Whitespace.ALL:
-                parseOptions.setSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
+                rule = AllElementsSpaceStrippingRule.getInstance();
                 break;
             case Whitespace.NONE:
-                parseOptions.setSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
+                rule = NoElementsSpaceStrippingRule.getInstance();
                 break;
             case Whitespace.IGNORABLE:
-                parseOptions.setSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
+                rule = IgnorableSpaceStrippingRule.getInstance();
                 break;
             case Whitespace.UNSPECIFIED:
-                parseOptions.setSpaceStrippingRule(null);
+                rule = null;
                 break;
             default:
                 throw new IllegalArgumentException();
         }
+        parseOptions = parseOptions.withSpaceStrippingRule(rule);
     }
 
     /**

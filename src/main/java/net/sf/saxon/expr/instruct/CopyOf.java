@@ -588,8 +588,8 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
 
                 Outputter eval = out;
                 if (validating) {
-                    ParseOptions options = new ParseOptions();
-                    options.setSchemaValidationMode(validation);
+                    ParseOptions options = new ParseOptions()
+                            .withSchemaValidationMode(validation);
                     SchemaType type = schemaType;
                     if (type == null && (validation == Validation.STRICT || validation == Validation.LAX)) {
                         // Bug 3062
@@ -612,9 +612,10 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                             }
                         }
                     }
-                    options.setTopLevelType(type);
-                    options.setTopLevelElement(NameOfNode.makeName(item).getStructuredQName());
-                    options.setErrorReporter(context.getErrorReporter());
+                    options = options
+                            .withTopLevelType(type)
+                            .withTopLevelElement(NameOfNode.makeName(item).getStructuredQName())
+                            .withErrorReporter(context.getErrorReporter());
                     config.prepareValidationReporting(context, options);
                     Receiver validator = config.getElementValidator(out, options, getLocation());
                     eval = new ComplexContentOutputter(validator);
@@ -681,11 +682,11 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                 break;
 
             case Type.DOCUMENT: {
-                ParseOptions options = new ParseOptions();
-                options.setSchemaValidationMode(validation);
-                options.setSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
-                options.setTopLevelType(schemaType);
-                options.setErrorReporter(context.getErrorReporter());
+                ParseOptions options = new ParseOptions()
+                        .withSchemaValidationMode(validation)
+                        .withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance())
+                        .withTopLevelType(schemaType)
+                        .withErrorReporter(context.getErrorReporter());
                 config.prepareValidationReporting(context, options);
                 Receiver val = config.getDocumentValidator(out, item.getBaseURI(), options, getLocation());
                 if (copyBaseURI) {
