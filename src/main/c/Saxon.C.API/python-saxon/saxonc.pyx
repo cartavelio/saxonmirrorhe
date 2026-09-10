@@ -1965,8 +1965,6 @@ cdef class PyXsltExecutable:
         cdef PyXdmFunctionItem valuef_ = None
         cdef PyXdmMap valuem_ = None
         cdef PyXdmArray valuear_ = None
-        py_source_string = None
-        py_stylesheet_string = None
         for key, value in kwds.items():
           if isinstance(value, str):
             if key == "source_file":
@@ -2072,8 +2070,6 @@ cdef class PyXsltExecutable:
         cdef PyXdmFunctionItem valuef_ = None
         cdef PyXdmMap valuem_ = None
         cdef PyXdmArray valuear_ = None
-        py_source_string = None
-        py_stylesheet_string = None
         for key, value in kwds.items():
           if isinstance(value, str):
             if key == "source_file":
@@ -2138,8 +2134,6 @@ cdef class PyXsltExecutable:
         cdef PyXdmFunctionItem valuef_ = None
         cdef PyXdmMap valuem_ = None
         cdef PyXdmArray valuear_ = None
-        py_source_string = None
-        py_stylesheet_string = None
         py_output_string = None
         for key, value in kwds.items():
           if isinstance(value, str):
@@ -2199,18 +2193,6 @@ cdef class PyXsltExecutable:
                result = executable.call_template_returning_value("main")
         """
         cdef const char * c_templateName = NULL
-        cdef const char * c_sourcefile = NULL
-        cdef const char * c_stylesheetfile = NULL
-        cdef PyXdmValue value_ = None
-        cdef PyXdmItem valuei_ = None
-        cdef PyXdmNode valuen_ = None
-        cdef PyXdmAtomicValue valueav_ = None
-        cdef PyXdmFunctionItem valuef_ = None
-        cdef PyXdmMap valuem_ = None
-        cdef PyXdmArray valuear_ = None
-        py_source_string = None
-        py_template_name_str = None
-        py_stylesheet_string = None
         for key, value in kwds.items():
           if isinstance(value, str):
             if key == "base_output_uri":
@@ -2277,18 +2259,7 @@ cdef class PyXsltExecutable:
                result = executable.call_template_returning_string()
 			   print(result)
         """
-        cdef const char * c_sourcefile = NULL
         cdef const char * c_templateName = NULL
-        cdef PyXdmValue value_ = None
-        cdef PyXdmItem valuei_ = None
-        cdef PyXdmNode valuen_ = None
-        cdef PyXdmAtomicValue valueav_ = None
-        cdef PyXdmFunctionItem valuef_ = None
-        cdef PyXdmMap valuem_ = None
-        cdef PyXdmArray valuear_ = None
-        py_source_string = None
-        py_template_name_str = None
-        py_stylesheet_string = None
         cdef const char* c_string = NULL
         for key, value in kwds.items():
           if isinstance(value, str):
@@ -2317,22 +2288,12 @@ cdef class PyXsltExecutable:
             2) executable.set_global_context_item(file_name="cat.xml")\r
                executable.call_template_returning_file("main", output_file="result.xml")
             3) executable.set_global_context_item(file_name="cat.xml")\r
-               executable.call_template_returning_file(output_file="result.xml")
+               executable.set_output_file("result.xml")\r
+               executable.call_template_returning_file()
 			   print(result)
         """
         cdef char * c_outputfile = NULL
         cdef const char * c_templateName = NULL
-        cdef const char * c_sourcefile = NULL
-        cdef PyXdmValue value_ = None
-        cdef PyXdmItem valuei_ = None
-        cdef PyXdmNode valuen_ = None
-        cdef PyXdmAtomicValue valueav_ = None
-        cdef PyXdmFunctionItem valuef_ = None
-        cdef PyXdmMap valuem_ = None
-        cdef PyXdmArray valuear_ = None
-        py_source_string = None
-        py_template_name_str = None
-        py_stylesheet_string = None
         py_output_string = None
         for key, value in kwds.items():
           if isinstance(value, str):
@@ -2352,9 +2313,7 @@ cdef class PyXsltExecutable:
      def call_function_returning_value(self, str function_name, list args, **kwds):
         """
         call_function_returning_value(self, str function_name, list args, **kwds)
-        Invoke a transformation by calling a named function and return the result as a PyXdmValue. This method does not
-        set the global context item for the transformation; if that is required, it can be done separately using the
-        set_global_context_item method.
+        Invoke a transformation by calling a named function and return the result as a PyXdmValue.
         Args:
 			function_name (str): The name of the function to invoke, in clark notation {uri}local
 			args (list[PyXdmValue]): Pointer array of PyXdmValue objects - the values of the arguments to be supplied
@@ -2367,21 +2326,10 @@ cdef class PyXsltExecutable:
             1) result = executable.call_function_returning_value("{http://localhost/example}func", [])
             2) executable.set_global_context_item(file_name="cat.xml")\r
                result = executable.call_function_returning_value("{http://localhost/test}add", [saxonproc.make_integer_value(2)])
-            3) result = executable.call_function_returning_value("{http://example.com}func1", [], source_file="cat.xml")
             
         """
         cdef const char * c_functionName = NULL
-        cdef const char * c_sourcefile = NULL
-
         cdef PyXdmValue value_ = None
-        cdef PyXdmItem valuei_ = None
-        cdef PyXdmNode valuen_ = None
-        cdef PyXdmAtomicValue valueav_ = None
-        cdef PyXdmFunctionItem valuef_ = None
-        cdef PyXdmMap valuem_ = None
-        cdef PyXdmArray valuear_ = None
-        py_source_string = None
-        py_template_name_str = None
         for key, value in kwds.items():
           if isinstance(value, str):
               if key == "base_output_uri":
@@ -2397,7 +2345,7 @@ cdef class PyXsltExecutable:
 
         for x in range(len(args)):
           if isinstance(args[x], PyXdmValue):
-            value_ = args[x];
+            value_ = args[x]
             argumentV[x] = value_.thisvptr
           else:
             raise Exception("Argument value at position " , x , " is not a PyXdmValue. The following object found: ", type(args[x]))
@@ -2446,8 +2394,6 @@ cdef class PyXsltExecutable:
         """
         call_function_returning_string(self, str function_name, list args, **kwds)
         Invoke a transformation by calling a named function and return the result as a serialized string.
-        This method does not set the global context item for the transformation; if that is required, it can be done
-        separately using the set_global_context_item method.
         Args:
 			function_name (str): The name of the function to invoke, in clark notation {uri}local
 			args (list[PyXdmValue]): Pointer array of PyXdmValue objects - the values of the arguments to be supplied
@@ -2460,19 +2406,9 @@ cdef class PyXsltExecutable:
             1) result = executable.call_function_returning_string("{http://localhost/example}func", [])
             2) executable.set_global_context_item(file_name="cat.xml")\r
                result = executable.call_function_returning_string("{http://localhost/test}add", [saxonproc.make_integer_value(2)])
-            3) result = executable.call_function_returning_string("{http://example.com}func1", [], source_file="cat.xml")
         """
         cdef const char * c_functionName = NULL
-        cdef const char * c_sourcefile = NULL
         cdef PyXdmValue value_ = None
-        cdef PyXdmItem valuei_ = None
-        cdef PyXdmNode valuen_ = None
-        cdef PyXdmAtomicValue valueav_ = None
-        cdef PyXdmFunctionItem valuef_ = None
-        cdef PyXdmMap valuem_ = None
-        cdef PyXdmArray valuear_ = None
-        py_source_string = None
-        py_template_name_str = None
         for key, value in kwds.items():
           if isinstance(value, str):
             if key == "base_output_uri":
@@ -2503,9 +2439,7 @@ cdef class PyXsltExecutable:
         """
         call_function_returning_file(self, str function_name, list args, **kwds)
         Invoke a transformation by calling a named function with the result saved to file. It is possible to specify
-        the output file as an argument or using the set_output_file method. This method does not set the global
-        context item for the transformation; if that is required, it can be done separately using the
-        set_global_context_item method.
+        the output file as an argument or using the set_output_file method.
         Args:
 			function_name(str): The name of the function to invoke, in clark notation {uri}local
 			args (list[PyXdmValue]): Pointer array of PyXdmValue objects - the values of the arguments to be supplied
@@ -2517,21 +2451,10 @@ cdef class PyXsltExecutable:
 			   executable.call_function_returning_file("{http://localhost/example}func", [])
             2) executable.set_global_context_item(file_name="cat.xml")\r
                executable.call_function_returning_file("{http://localhost/test}add", [saxonproc.make_integer_value(2)], output_file="result.xml")
-            3) executable.call_function_returning_file("{http://example.com}func1", [], output_file="result.xml", source_file="cat.xml")
         """
         cdef const char * c_functionName = NULL
-        cdef const char * c_sourcefile = NULL
         cdef const char * c_outputfile = NULL
         cdef PyXdmValue value_ = None
-        cdef PyXdmItem valuei_ = None
-        cdef PyXdmNode valuen_ = None
-        cdef PyXdmAtomicValue valueav_ = None
-        cdef PyXdmFunctionItem valuef_ = None
-        cdef PyXdmMap valuem_ = None
-        cdef PyXdmArray valuear_ = None
-        cdef PyXdmValue valueArgs_ = None
-        py_source_string = None
-        py_template_name_str = None
         for key, value in kwds.items():
           if isinstance(value, str):
             if key == "base_output_uri":
