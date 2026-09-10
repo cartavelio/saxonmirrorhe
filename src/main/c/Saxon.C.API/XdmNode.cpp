@@ -158,7 +158,7 @@ return this;}
         allocFn fn = operator new;
         const char * str = xdmNodeToString(SaxonProcessor::sxn_environ->thread, (void *)fn,(void *)value);
         if(str == nullptr) {
-            return nullptr;
+            throw SaxonApiException();
         }
         return str;
         	

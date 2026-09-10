@@ -842,7 +842,7 @@ public class XsltProcessor extends SaxonCAPI {
 
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         String cwd2 = "/Users/ond1/work/development/svn/archive/opensource/latest9.8/hec/samples/php/trax";
         String cwd = "/Users/ond1/work/development/tests/jeroen";
         // String cwd = "C:///www///html///trax";

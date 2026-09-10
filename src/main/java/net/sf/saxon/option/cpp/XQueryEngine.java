@@ -481,7 +481,7 @@ public class XQueryEngine extends SaxonCAPI {
 
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args){
 
 
         String sourcefile = "xmark10.xml";

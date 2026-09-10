@@ -438,9 +438,6 @@ def testNamedTemplateToFileDefault(saxonproc):
     assert executable is not None
 
     executable.call_template_returning_file(output_file="result_For_call_template.xml")
-    if executable.exception_occurred:
-        print(executable.error_message)
-        executable.exception_clear
     assert isfile("result_For_call_template.xml") == True
 
 
@@ -1050,7 +1047,7 @@ def test_node():
     assert node.size == 1
     outNode = node.children[0]
     assert outNode.name == 'out'
-    assert outNode.node_kind == ELEMENT
+    assert outNode.node_kind == 1
     children = outNode.children
     attrs = children[1].attributes
     assert len(attrs) == 2

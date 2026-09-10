@@ -122,7 +122,7 @@ public class SaxonCAPI {
     public static long createSaxonProcessor(IsolateThread thread, int license) {
         boolean licensei = CTypeConversion.toBoolean(license);
         String debugFlag  = System.getenv("SAXONC_DEBUG_FLAG");
-        if(debugFlag.equals("true")) {
+        if(debugFlag != null && debugFlag.equals("true")) {
             SaxonCAPI.debug = true;
         }
         if (debug && licensei) {
@@ -1155,11 +1155,11 @@ public class SaxonCAPI {
         String ccwd = null;
         String ffilename = filename;
 
-        //if(File.separatorChar != '/' && cwd != null) {
-        ccwd = new File(cwd).toURI().toString();
-        /*} else {
+        if(cwd != null) {
+            ccwd = new File(cwd).toURI().toString();
+        } /*else {
 
-            ccwd = cwd;
+            ccwd = "";
         } */
 
         char separatorChar = '/';
@@ -1337,5 +1337,54 @@ public class SaxonCAPI {
         serializer = processor.newSerializer(file);
         return serializer;
     }
+
+    /* public static void testj() throws SaxonApiException {
+
+        String xml = "<out><person att1='value1' att2='value2'>text1</person>\n" +
+                "        <person>text2</person>\n" +
+                "        <person>text3</person>\n" +
+                "    </out>";
+        StringReader reader = new StringReader(xml);
+        Processor processor = new Processor(false);
+        DocumentBuilder builder = processor.newDocumentBuilder();
+
+        Source source = new SAXSource(new InputSource(reader));
+
+        source.setSystemId("file:///example");
+
+
+        XdmNode doc = builder.build(source);
+        XdmNode node= doc.children().iterator().next();
+        System.err.println("outer node="+node.toString());
+        Iterator<XdmNode> iterx = node.children().iterator();
+        XdmNode node1 = iterx.next();
+
+        if(iterx.hasNext()){
+            iterx.next();
+            XdmNode nodexx = iterx.next();
+            System.err.println("nodexx="+nodexx.getNodeKind());
+            System.err.println("nodexx="+nodexx);
+        }
+        Iterator<XdmNode> iter = node1.axisIterator(Axis.CHILD);
+        XdmNode node2 = iter.next();
+        
+        System.err.println("test method");
+        System.err.println("node1="+node1.toString());
+        XdmSequenceIterator<XdmNode> iteryy = node1.axisIterator(Axis.CHILD);
+
+        while(iteryy.hasNext()) {
+            System.err.println("test method cp0");
+            XdmNode attrNode = iteryy.next();
+            System.err.println(attrNode.toString());
+        }
+
+
+
+    }
+
+    public static void main(String [] args) throws SaxonApiException {
+          SaxonCAPI.testj();
+
+    }    */
 
 }
