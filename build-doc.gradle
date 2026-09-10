@@ -899,7 +899,7 @@ task gen_prod_desc_xml(
 
 task gen_prod_desc_fo(
         type: JavaExec,
-        dependsOn: ["gen_prod_desc_xml"],
+        dependsOn: ["gen_prod_desc_xml", "setup_fop"],
         description: "Creates the FO and HTML versions of the product descriptions"
 ) {
   inputs.file "${buildDir}/proddesc/prod-desc.xml"

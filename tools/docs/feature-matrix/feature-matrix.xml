@@ -311,7 +311,7 @@
       </p>
       <p><i>XQuery Update in SaxonCS is offered "as is": the feature is present, but has not been extensively tested.</i></p>
     </description>
-    <spec level="Recommendation" date="17 March 2011" link="http://www.w3.org/TR/xquery-update-10/"/>
+    <spec level="Recommendation" date="17 March 2011" link="https://www.w3.org/TR/xquery-update-10/"/>
     <details link="conformance/update" name="XQuery Update 1.0 conformance"/>
     <products>
       <product J="EEQ" CS="EEQ" C="EEQ"/>
@@ -335,7 +335,7 @@
         of backwards compatibility, except in a few areas where the XSD 1.0 rules were unclear and have
         been clarified in the XSD 1.1 recommendation.</i></p>
     </description>
-    <spec level="Recommendation" date="28 October 2004" link="http://www.w3.org/TR/xmlschema-1/"
+    <spec level="Recommendation" date="28 October 2004" link="https://www.w3.org/TR/xmlschema-1/"
       name="XML Schema 1.0"/>
     <details link="conformance/schema" name="XML Schema 1.0 conformance"/>
     <products>
@@ -352,7 +352,7 @@
         it is a <i>General-Purpose Web-Aware Validator</i>. Also includes Saxon extension functions
         to provide access to a compiled schema.</p>
     </description>
-    <spec level="Recommendation" date="05 April 2012" link="http://www.w3.org/TR/xmlschema11-1/"
+    <spec level="Recommendation" date="05 April 2012" link="https://www.w3.org/TR/xmlschema11-1/"
       name="XML Schema 1.1"/>
     <details link="conformance/schema11" name="XML Schema 1.1 conformance"/>
     <products>
