@@ -14,6 +14,14 @@ import javax.xml.transform.sax.SAXSource;
 import java.util.Map;
 import java.util.function.Consumer;
 
+/**
+ * This class extends the standard SAXSource class by providing a {@link #deliver(Receiver, ParseOptions)}
+ * method, meaning that Saxon can treat it just like any other {@link ActiveSource} implementation.
+ *
+ * <p>This makes it easier to extract code from the product that's specific to the Java platform
+ * (in particular, support for SAX APIs).</p>
+ */
+
 public class ActiveSAXSource extends SAXSource implements ActiveSource  {
 
     Consumer<XMLReader> parserPool;
