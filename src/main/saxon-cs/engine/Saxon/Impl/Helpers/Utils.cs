@@ -41,7 +41,12 @@ namespace Saxon.Impl.Helpers {
                 throw new NumberFormatException("Leading 0x not allowed in number");
             }
             if (radix == 2 || radix == 8 || radix == 10 || radix == 16) {
-                return System.Convert.ToInt32(input, radix);
+                try {
+                    return Convert.ToInt32(input, radix);
+                }
+                catch (System.Exception e) when (e is FormatException or ArgumentException or OverflowException) {
+                    throw new NumberFormatException(e.Message);
+                }
             }
 
             throw new NotSupportedException("Unsupported number radix " + radix);
