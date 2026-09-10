@@ -5,7 +5,7 @@ import net.sf.saxon.expr.OperandRole;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicMatcher;
 import net.sf.saxon.functions.DeepEqual;
-import net.sf.saxon.ma.map.StringMap;
+import net.sf.saxon.ma.map.StringMapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.str.UnicodeString;
@@ -22,7 +22,7 @@ import net.sf.saxon.value.AtomicValue;
 public class LabeledFunctionItem implements FunctionItem, LabeledItem {
 
     private final FunctionItem f;
-    private final StringMap label;
+    private final StringMapItem label;
 
 
     /**
@@ -31,7 +31,7 @@ public class LabeledFunctionItem implements FunctionItem, LabeledItem {
      * @param label the label
      */
 
-    public LabeledFunctionItem(FunctionItem subject, StringMap label) {
+    public LabeledFunctionItem(FunctionItem subject, StringMapItem label) {
         this.f = subject;
         this.label = label;
     }
@@ -54,7 +54,7 @@ public class LabeledFunctionItem implements FunctionItem, LabeledItem {
      * @return the associated {@code Pedigree}.
      */
     @Override
-    public StringMap getLabel() {
+    public StringMapItem getLabel() {
         return label;
     }
 

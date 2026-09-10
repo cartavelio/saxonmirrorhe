@@ -10,11 +10,9 @@ import net.sf.saxon.lib.Invalidity;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.StandardInvalidityHandler;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.ma.map.DictionaryMap;
-import net.sf.saxon.ma.map.KeyValuePair;
-import net.sf.saxon.ma.map.MapBuilder;
-import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.Twine8;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
@@ -39,6 +37,10 @@ import java.util.List;
  */
 
 public class ValidateFn extends SystemFunction {
+
+    private static Shape validateResult = new Shape(new Twine8("valid"),
+                                                    new Twine8("node"),
+                                                    new Twine8("errors"));
 
 
     /**
@@ -253,62 +255,60 @@ public class ValidateFn extends SystemFunction {
                 throw new XPathException("Input to saxon:validate must be a document, element, or attribute node", "XPTY0004");
         }
 
-        MapBuilder result = DictionaryMap.getBuilder();
         if (errorList.isEmpty()) {
-            if (buildTree) {
-                result.put("node", resultNode);
-            }
-            result.put("valid", BooleanValue.TRUE);
-            return result.getCompletedMap();
+            return new ShapedMap(validateResult,
+                                 BooleanValue.TRUE,
+                                 resultNode,
+                                 EmptySequence.getInstance());
 
         } else {
 
-            result.put("valid", BooleanValue.FALSE);
-            if (returnTreeOnFailure) {
-                result.put("node", resultNode);
-            }
+
+
             List<Item> errors = new ArrayList<>(errorList.size());
             for (Invalidity te : errorList) {
 
                 ValidationFailure v = (ValidationFailure) te;
-                MapBuilder im = DictionaryMap.getBuilder();
+                StringMapBuilder im = new StringMapBuilder(10).unordered();
                 if (v.getErrorCodeQName() != null) {
-                    im.put("code", new QNameValue(v.getErrorCodeQName(), BuiltInAtomicType.QNAME));
+                    im.put(new Twine8("code"), new QNameValue(v.getErrorCodeQName(), BuiltInAtomicType.QNAME));
                 }
-                im.put("message", new StringValue(v.getMessage()));
+                im.put(new Twine8("message"), new StringValue(v.getMessage()));
 
                 if (v.getSchemaPart() != -1) {
-                    im.put("specPart", new Int64Value(v.getSchemaPart()));
+                    im.put(new Twine8("specPart"), new Int64Value(v.getSchemaPart()));
                 }
                 if (v.getConstraintName() != null) {
-                    im.put("constraint", new StringValue(v.getConstraintName()));
+                    im.put(new Twine8("constraint"), new StringValue(v.getConstraintName()));
                 }
                 if (v.getConstraintClauseNumber() != null) {
-                    im.put("clause", new StringValue(v.getConstraintClauseNumber()));
+                    im.put(new Twine8("clause"), new StringValue(v.getConstraintClauseNumber()));
                 }
                 if (v.getLineNumber() != -1) {
-                    im.put("line", new Int64Value(v.getLineNumber()));
+                    im.put(new Twine8("line"), new Int64Value(v.getLineNumber()));
                 }
                 if (v.getColumnNumber() != -1) {
-                    im.put("colummn", new Int64Value(v.getColumnNumber()));
+                    im.put(new Twine8("colummn"), new Int64Value(v.getColumnNumber()));
                 }
                 if (v.getSystemId() != null) {
-                    im.put("systemId", new StringValue(v.getSystemId()));
+                    im.put(new Twine8("systemId"), new StringValue(v.getSystemId()));
                 }
                 if (v.getPublicId() != null) {
-                    im.put("publicId", new StringValue(v.getPublicId()));
+                    im.put(new Twine8("publicId"), new StringValue(v.getPublicId()));
                 }
                 if (v.getInvalidNode() != null) {
-                    im.put("node", v.getInvalidNode());
+                    im.put(new Twine8("node"), v.getInvalidNode());
                 }
                 if (v.getPath() != null) {
-                    im.put("path", new StringValue(v.getPath().getPathUsingUris()));
+                    im.put(new Twine8("path"), new StringValue(v.getPath().getPathUsingUris()));
                 }
 
-                errors.add(im.getCompletedMap());
+                errors.add(im.getCompletedMapConfidently());
             }
-            result.put("errors", SequenceExtent.makeSequenceExtent(errors));
-            return result.getCompletedMap();
+            return new ShapedMap(validateResult,
+                                 BooleanValue.FALSE,
+                                 returnTreeOnFailure ? resultNode : EmptySequence.getInstance(),
+                                 SequenceExtent.makeSequenceExtent(errors));
 
 
         }

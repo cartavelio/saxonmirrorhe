@@ -155,7 +155,7 @@ public class NewMapStreamer extends StreamingAdjunct implements FeedMaker {
                                     "Duplicate key value in map: " + Err.depict(pair.key), "XTDE3365");
                             dynamicError(err);
                         } else {
-                            resultMap = resultMap.addEntry(pair.key, pair.value);
+                            resultMap = resultMap.put(pair.key, pair.value);
                         }
                     }
                 }
@@ -210,7 +210,7 @@ public class NewMapStreamer extends StreamingAdjunct implements FeedMaker {
         }
 
         public void addEntry(AtomicValue key, GroundedValue value) {
-            resultMap = resultMap.addEntry(key, value);
+            resultMap = resultMap.put(key, value);
         }
 
     }

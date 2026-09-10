@@ -576,9 +576,6 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR | INS, null)
                 .arg(1, partitionFunctionType, ONE | INS, null));
 
-        register("parts", 1, e -> e.populate(Parts::new, new MapType(BuiltInAtomicType.STRING, SequenceType.ANY_SEQUENCE), ONE, 0)
-                .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE, null));
-
         register("parse-QName", 1, e -> e.populate(ParseQNameFn::new, BuiltInAtomicType.QNAME, OPT, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null));
 

@@ -4,7 +4,7 @@ import net.sf.saxon.expr.DefaultedArgumentExpression;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.ma.map.DictionaryMap;
+import net.sf.saxon.ma.map.EmptyMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
@@ -97,7 +97,7 @@ abstract public class URIFunctions extends SystemFunction {
         Expression[] newArgs = new Expression[2];
         newArgs[0] = arguments[0];
         if (arguments.length < 2 || arguments[1] instanceof DefaultedArgumentExpression) {
-            newArgs[1] = Literal.makeLiteral(new DictionaryMap());
+            newArgs[1] = Literal.makeLiteral(EmptyMap.getInstance());
         } else {
             newArgs[1] = arguments[1];
         }
@@ -109,7 +109,7 @@ abstract public class URIFunctions extends SystemFunction {
         if (getArity() == 2) {
             MapItem options = (MapItem) arguments[1].head();
             if (options == null) {
-                options = new DictionaryMap();
+                options = EmptyMap.getInstance();
             }
             allowDeprecatedFeatures = options.get(ALLOW_DEPRECATED_FEATURES) != null && options.get(ALLOW_DEPRECATED_FEATURES).effectiveBooleanValue();
             omitDefaultPorts = options.get(OMIT_DEFAULT_PORTS) != null && options.get(OMIT_DEFAULT_PORTS).effectiveBooleanValue();

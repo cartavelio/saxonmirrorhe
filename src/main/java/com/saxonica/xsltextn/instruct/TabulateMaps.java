@@ -188,14 +188,14 @@ public class TabulateMaps extends Instruction {
                         if (!k.isIdentical(pedigree.getKey())) {
                             GroundedValue value = selectedMap.get(k);
                             if (value == null) {
-                                selectedMap = selectedMap.addEntry(k, kvp.value);
+                                selectedMap = selectedMap.put(k, kvp.value);
                             } else if (k instanceof StringValue) {
                                 String ks = k.getStringValue();
                                 for (int suffix = 1; suffix < Integer.MAX_VALUE; suffix++) {
                                     ks = ks + (suffix + "");
                                     StringValue sv = new StringValue(ks);
                                     if (selectedMap.get(sv) == null) {
-                                        selectedMap = selectedMap.addEntry(sv, kvp.value);
+                                        selectedMap = selectedMap.put(sv, kvp.value);
                                         break;
                                     }
                                 }
@@ -213,8 +213,8 @@ public class TabulateMaps extends Instruction {
                 keysKey = keysKey + "_";
             }
             List<GroundedValue> copy = new ArrayList<>(keys);
-            selectedMap = selectedMap.addEntry(new StringValue(keysKey),
-                                               new SimpleArrayItem(copy));
+            selectedMap = selectedMap.put(new StringValue(keysKey),
+                                          new SimpleArrayItem(copy));
             output.append(selectedMap);
         }
     }

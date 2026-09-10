@@ -2,6 +2,7 @@
 
 package com.saxonica.ee.extfn;
 
+import com.saxonica.functions.qt4.ma.OrderedStringMap;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.Builder;
@@ -20,10 +21,13 @@ import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.functions.registry.XSLT30FunctionSet;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.ma.map.*;
+import net.sf.saxon.ma.map.KeyValuePair;
+import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.str.Twine8;
 import net.sf.saxon.style.PublicStylesheetFunctionLibrary;
 import net.sf.saxon.style.StylesheetFunctionLibrary;
 import net.sf.saxon.style.StylesheetPackage;
@@ -271,10 +275,10 @@ public class CompileXPath extends SystemFunction {
         expr.export(out);
         NodeInfo node = b.getCurrentRoot().iterateAxis(AxisInfo.CHILD).next();
         StringValue st = new StringValue(expr.getStaticType().toAlphaCode());
-        MapBuilder result = DictionaryMap.getBuilder();
-        result.put("expr", node);
-        result.put("type", st);
-        return result.getCompletedMap();
+        OrderedStringMap result = new OrderedStringMap();
+        result = result.putU(new Twine8("expr"), node);
+        result = result.putU(new Twine8("type"), st);
+        return result;
     }
 
     private static class LocalFunctionLibrary extends ExecutableFunctionLibrary {

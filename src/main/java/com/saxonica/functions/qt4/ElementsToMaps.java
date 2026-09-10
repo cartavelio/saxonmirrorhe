@@ -16,6 +16,8 @@ import net.sf.saxon.query.QueryResult;
 import net.sf.saxon.serialize.JSONEmitter;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.serialize.UnicodeWriterResult;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.Twine8;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
@@ -544,12 +546,13 @@ public class ElementsToMaps extends SystemFunction {
      * @param cc     the conversion context
      */
     private MapItem makeEmptyPlusElementContent(NodeInfo element, ConversionContext cc) {
-        MapBuilder innerMap = DictionaryMap.getBuilder();
+        StringMapBuilder innerMap = new StringMapBuilder().unordered();
         addAttributes(element, cc, innerMap);
         if (element.isNilled()) {
-            innerMap.put("#content", JSONEmitter.JSON_NULL);
+            innerMap.put(new Twine8("#content"), JSONEmitter.JSON_NULL);
         }
-        return new SingleEntryMap(new StringValue(cc.makeName(element)), innerMap.getCompletedMap());
+        return new SingleEntryMap(new StringValue(cc.makeName(element)),
+                                  innerMap.getCompletedMapConfidently());
     }
 
     /**
@@ -574,17 +577,19 @@ public class ElementsToMaps extends SystemFunction {
      */
 
     private MapItem makeSimplePlusElementContent(NodeInfo element, ConversionContext cc) {
-        MapBuilder innerMap = DictionaryMap.getBuilder();
+        StringMapBuilder innerMap = new StringMapBuilder().unordered();
         addAttributes(element, cc, innerMap);
-        innerMap.put("#content", element.isNilled() ? JSONEmitter.JSON_NULL : cc.makeSimpleContent(element));
-        return new SingleEntryMap(new StringValue(cc.makeName(element)), innerMap.getCompletedMap());
+        innerMap.put(new Twine8("#content"),
+                     element.isNilled() ? JSONEmitter.JSON_NULL : cc.makeSimpleContent(element));
+        return new SingleEntryMap(new StringValue(cc.makeName(element)),
+                                  innerMap.getCompletedMapConfidently());
     }
 
-    private static void addAttributes(NodeInfo element, ConversionContext cc, MapBuilder map) {
+    private static void addAttributes(NodeInfo element, ConversionContext cc, StringMapBuilder map) {
         AxisIterator atts = element.iterateAxis(AxisInfo.ATTRIBUTE);
         for (NodeInfo att; (att = atts.next()) != null; ) {
             if (att.getNamespaceUri() != NamespaceUri.SCHEMA_INSTANCE) {
-                map.put(cc.makeName(att), cc.makeSimpleContent(att));
+                map.put(StringView.of(cc.makeName(att)), cc.makeSimpleContent(att));
             }
         }
     }
@@ -635,7 +640,7 @@ public class ElementsToMaps extends SystemFunction {
         AxisIterator atts = element.iterateAxis(AxisInfo.ATTRIBUTE);
         for (NodeInfo att; (att = atts.next()) != null; ) {
             if (att.getNamespaceUri() != NamespaceUri.SCHEMA_INSTANCE) {
-                innerMap = innerMap.addEntry(new StringValue(cc.makeName(att)), cc.makeSimpleContent(att));
+                innerMap = innerMap.put(new StringValue(cc.makeName(att)), cc.makeSimpleContent(att));
             }
         }
         if (element.isNilled()) {
@@ -655,12 +660,12 @@ public class ElementsToMaps extends SystemFunction {
             }
         }
         if (innerKey != null) {
-            innerMap = innerMap.addEntry(innerKey, new SimpleArrayItem(list));
+            innerMap = innerMap.put(innerKey, new SimpleArrayItem(list));
         } else if (childFingerprint > 0) {
             Orphan e = new Orphan(cc.config);
             e.setNodeKind(Type.ELEMENT);
             e.setNodeName(new FingerprintedQName(cc.config.getNamePool().getStructuredQName(childFingerprint)));
-            innerMap = innerMap.addEntry(new StringValue(cc.makeName(e)), SimpleArrayItem.EMPTY_ARRAY);
+            innerMap = innerMap.put(new StringValue(cc.makeName(e)), SimpleArrayItem.EMPTY_ARRAY);
         }
         cc.elementNameStack.pop();
         return new SingleEntryMap(new StringValue(cc.makeName(element)), innerMap);
@@ -686,7 +691,7 @@ public class ElementsToMaps extends SystemFunction {
             }
         }
         if (element.isNilled()) {
-            innerMap = innerMap.addEntry(new StringValue("#content"), EmptySequence.getInstance());
+            innerMap = innerMap.put(new StringValue("#content"), EmptySequence.getInstance());
         } else {
             for (NodeInfo child : element.children()) {
                 if (child.getNodeKind() == Type.ELEMENT) {
@@ -705,19 +710,21 @@ public class ElementsToMaps extends SystemFunction {
     private MapItem addCombiningDuplicates(MapItem map, AtomicValue key, GroundedValue value) {
         GroundedValue existing = map.get(key);
         if (existing == null) {
-            return map.addEntry(key, value);
+            return map.put(key, value);
         } else if (existing instanceof ArrayItem) {
             ArrayItem extended = ((ArrayItem)existing).append(value);
-            return map.addEntry(key, extended);
+            return map.put(key, extended);
         } else {
             ArrayItem extended = SimpleArrayItem.of(existing, value);
-            return map.addEntry(key, extended);
+            return map.put(key, extended);
         }
     }
 
     private MapItem makeSequenceElementContent(NodeInfo element, ConversionContext cc) throws XPathException {
         return makeMixedElementContent(element, cc, true);
     }
+    private final static Shape PI_SHAPE = new Shape(new Twine8("#target"), new Twine8("#data"));
+
     private MapItem makeMixedElementContent(NodeInfo element, ConversionContext cc, boolean stripSpace) throws XPathException {
         cc.elementNameStack.push(element.getQName());
         List<GroundedValue> list = new ArrayList<>();
@@ -741,10 +748,10 @@ public class ElementsToMaps extends SystemFunction {
                         list.add(new SingleEntryMap(new StringValue("#comment"), new StringValue(child.getStringValue())));
                         break;
                     case Type.PROCESSING_INSTRUCTION:
-                        MapBuilder inner = DictionaryMap.getBuilder(2);
-                        inner.put("#target", new StringValue(child.getLocalPart(), BuiltInAtomicType.NCNAME));
-                        inner.put("#data", new StringValue(child.getStringValue()));
-                        list.add(new SingleEntryMap(new StringValue("#processing-instruction"), inner.getCompletedMap()));
+                        ShapedMap inner = new ShapedMap(PI_SHAPE,
+                                                        new StringValue(child.getLocalPart(), BuiltInAtomicType.NCNAME),
+                                                        new StringValue(child.getStringValue()));
+                        list.add(new SingleEntryMap(new StringValue("#processing-instruction"), inner));
                         break;
                     case Type.ELEMENT:
                         list.add(processElement(child, cc));

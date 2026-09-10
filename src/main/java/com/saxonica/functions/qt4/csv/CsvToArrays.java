@@ -2,9 +2,12 @@ package com.saxonica.functions.qt4.csv;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.OptionsParameter;
-import net.sf.saxon.ma.map.DictionaryMap;
+import net.sf.saxon.ma.map.EmptyMap;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.LazySequence;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.StringValue;
@@ -34,9 +37,11 @@ public class CsvToArrays extends CsvFunction {
             return EmptySequence.getInstance();
         }
         StringValue input = (StringValue) arg0;
-        MapItem options = new DictionaryMap();
+        MapItem options;
         if (arguments.length >= 2) {
             options = (MapItem) arguments[1].head();
+        } else {
+            options = EmptyMap.getInstance();
         }
 
         final Map<String, GroundedValue> csvOptions = getDetails().optionDetails.processSuppliedOptions(options, context);

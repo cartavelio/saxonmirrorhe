@@ -778,8 +778,8 @@ public class LookupExpression40 extends LookupExpression {
         List<Item> ancestorItems = new ArrayList<>();
         ancestorItems.add(container);
         while (container instanceof LabeledItem) {
-            StringMap label = container.getLabel();
-            Item gp = (Item) label.get("parent");
+            StringMapItem label = container.getLabel();
+            Item gp = (Item) label.getU(new Twine8("parent"));
             if (gp != null) {
                 ancestorItems.add(gp);
                 rootItem = gp;

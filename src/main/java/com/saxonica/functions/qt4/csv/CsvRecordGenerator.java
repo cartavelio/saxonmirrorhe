@@ -16,6 +16,7 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.LocalUnionType;
 import net.sf.saxon.value.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -121,15 +122,16 @@ public class CsvRecordGenerator extends CsvRepresentationGenerator {
      */
 
     private MapItem makeColumnIndex(List<StringValue> names) {
-        MapBuilder index = DictionaryMap.getBuilder(names.size());
+        Map<String, GroundedValue> index = new HashMap<>(names.size());
         int pos = 1;
         for (StringValue name : names) {
-            if (!name.isEmpty() && index.get(name) == null) {
-                index.put(name, Int64Value.makeIntegerValue(pos));
+            String s = name.getStringValue();
+            if (!s.isEmpty() && index.get(s) == null) {
+                index.put(s, Int64Value.makeIntegerValue(pos));
             }
             pos++;
         }
-        return index.getCompletedMap();
+        return new DictionaryMap(index);
     }
 
     /**
@@ -141,7 +143,7 @@ public class CsvRecordGenerator extends CsvRepresentationGenerator {
      */
 
     private MapItem makeColumnIndex(GroundedValue names) {
-        MapBuilder index = DictionaryMap.getBuilder(names.getLength());
+        Map<String, GroundedValue> index = new HashMap<>(names.getLength());
         int pos = 1;
         for (Item item : names.asIterable()) {
             String name = item.getStringValue();
@@ -150,7 +152,7 @@ public class CsvRecordGenerator extends CsvRepresentationGenerator {
             }
             pos++;
         }
-        return index.getCompletedMap();
+        return new DictionaryMap(index);
     }
 
     /**

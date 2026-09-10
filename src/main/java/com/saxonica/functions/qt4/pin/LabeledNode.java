@@ -1,6 +1,6 @@
 package com.saxonica.functions.qt4.pin;
 
-import net.sf.saxon.ma.map.StringMap;
+import net.sf.saxon.ma.map.StringMapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.pattern.NodeTest;
@@ -20,7 +20,7 @@ import java.util.HashMap;
 public class LabeledNode implements NodeInfo, LabeledItem {
 
     private final NodeInfo subjectNode;
-    private final StringMap label;
+    private final StringMapItem label;
 
 
     /**
@@ -29,7 +29,7 @@ public class LabeledNode implements NodeInfo, LabeledItem {
      * @param label the label
      */
 
-    public LabeledNode(NodeInfo subject, StringMap label) {
+    public LabeledNode(NodeInfo subject, StringMapItem label) {
         this.subjectNode = subject;
         this.label = label;
     }
@@ -52,7 +52,7 @@ public class LabeledNode implements NodeInfo, LabeledItem {
      * @return the associated {@code Pedigree}.
      */
     @Override
-    public StringMap getLabel() {
+    public StringMapItem getLabel() {
         return label;
     }
 

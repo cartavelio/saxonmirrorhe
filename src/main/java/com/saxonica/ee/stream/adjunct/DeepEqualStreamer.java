@@ -12,9 +12,9 @@ import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.functions.DeepEqual;
-import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.HashTrieMap;
 import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.SingleEntryMap;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
@@ -110,18 +110,15 @@ public class DeepEqualStreamer extends StreamingAdjunct implements FeedMaker {
                     String collationName = optionsVal == null
                             ? call.getRetainedStaticContext().getDefaultCollationName()
                             : optionsVal.getStringValue();
-                    suppliedOptions = new DictionaryMap().addEntry(
-                            new StringValue("collation"),
-                            new StringValue(collationName));
+                    suppliedOptions = new SingleEntryMap(new StringValue("collation"),
+                                                         new StringValue(collationName));
                 } else {
                     suppliedOptions = (MapItem)optionsVal;
                 }
-                if (suppliedOptions != null) {
-                    try {
-                        options = new DeepEqual.DeepEqualOptions(suppliedOptions, context, 31);
-                    } catch (XPathException e) {
-                        dynamicError(e);
-                    }
+                try {
+                    options = new DeepEqual.DeepEqualOptions(suppliedOptions, context, 31);
+                } catch (XPathException e) {
+                    dynamicError(e);
                 }
             }
             if (options == null) {

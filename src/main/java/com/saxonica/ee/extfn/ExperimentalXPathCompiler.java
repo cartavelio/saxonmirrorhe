@@ -695,15 +695,15 @@ public class ExperimentalXPathCompiler {
         }
     }
 
-    public static MapItem makeMap(SequenceType st) {
+    public static MapItem makeMap(SequenceType st) throws XPathException {
         ItemType primary = st.getPrimaryType();
 
-        MapBuilder result = DictionaryMap.getBuilder();
+        StringMapBuilder result = new StringMapBuilder(10).unordered();
         //result.initialPut("t", new StringValue(st.toExportString()));
 
         String occurrenceIndicator = Cardinality.getOccurrenceIndicator(st.getCardinality());
         if (!occurrenceIndicator.isEmpty()) {
-            result.put("o", new StringValue(occurrenceIndicator));
+            result.put(new Twine8("o"), new StringValue(occurrenceIndicator));
         }
 
         if (st == SequenceType.EMPTY_SEQUENCE) {
@@ -711,59 +711,59 @@ public class ExperimentalXPathCompiler {
         }
 
         String alphaCode = primary.getBasicAlphaCode();
-        result.put("p", new StringValue(alphaCode));
+        result.put(new Twine8("p"), new StringValue(alphaCode));
 
         if (primary instanceof UserAtomicType) {
-            result.put("t", new StringValue(((UserAtomicType) primary).getEQName()));
+            result.put(new Twine8("t"), new StringValue(((UserAtomicType) primary).getEQName()));
         } else if (primary instanceof UnionType) {
             try {
                 List<GroundedValue> memberMaps = new ArrayList<>();
                 for (PlainType pt : ((UnionType) primary).getPlainMemberTypes()) {
                     memberMaps.add(makeMap(SequenceType.one(pt)));
                 }
-                result.put("u", new SimpleArrayItem(memberMaps));
+                result.put(new Twine8("u"), new SimpleArrayItem(memberMaps));
             } catch (MissingComponentException e) {
                 // no action
             }
         } else if (primary instanceof NameTest) {
             String name = ((NameTest) primary).getMatchingNodeName().getEQName();
-            result.put("n", new StringValue(name));
+            result.put(new Twine8("n"), new StringValue(name));
         } else if (primary instanceof LocalNameTest) {
-            result.put("n", StringValue.bmp("*:" + ((LocalNameTest) primary).getLocalName()));
+            result.put(new Twine8("n"), StringValue.bmp("*:" + ((LocalNameTest) primary).getLocalName()));
         } else if (primary instanceof NamespaceTest) {
-            result.put("n", StringValue.bmp("Q{" + ((NamespaceTest) primary).getNamespaceURI() + "}*"));
+            result.put(new Twine8("n"), StringValue.bmp("Q{" + ((NamespaceTest) primary).getNamespaceURI() + "}*"));
         } else if (primary instanceof CombinedNodeTest) {
             ((CombinedNodeTest) primary).addTypeDetails(result);
         } else if (primary instanceof ContentTypeTest) {
             String annotation = ((ContentTypeTest)primary).getContentType().getEQName();
-            result.put("c", new StringValue(annotation));
+            result.put(new Twine8("c"), new StringValue(annotation));
         } else if (primary instanceof DocumentNodeTest) {
             ItemType content = ((DocumentNodeTest) primary).getElementTest();
             MapItem contentMap = makeMap(SequenceType.one(content));
-            result.put("e", contentMap);
+            result.put(new Twine8("e"), contentMap);
         } else if (primary instanceof FunctionItemType) {
             if (primary instanceof ArrayItemType) {
                 SequenceType memberType = ((ArrayItemType) primary).getMemberType();
                 if (memberType != SequenceType.ANY_SEQUENCE) {
                     MapItem contentMap = makeMap(memberType);
-                    result.put("v", contentMap);
+                    result.put(new Twine8("v"), contentMap);
                 }
             } else if (primary instanceof MapType) {
                 PlainType keyType = ((MapType) primary).getKeyType();
                 if (keyType != BuiltInAtomicType.ANY_ATOMIC) {
                     MapItem keyMap = makeMap(new SequenceType(keyType, StaticProperty.EXACTLY_ONE));
-                    result.put("k", keyMap);
+                    result.put(new Twine8("k"), keyMap);
                 }
                 SequenceType valueType = ((MapType) primary).getValueType();
                 if (valueType != SequenceType.ANY_SEQUENCE) {
                     MapItem contentMap = makeMap(valueType);
-                    result.put("v", contentMap);
+                    result.put(new Twine8("v"), contentMap);
                 }
             } else {
                 SequenceType valueType = ((FunctionItemType) primary).getResultType();
                 if (valueType != SequenceType.ANY_SEQUENCE) {
                     MapItem contentMap = makeMap(valueType);
-                    result.put("r", contentMap);
+                    result.put(new Twine8("r"), contentMap);
                 }
                 SequenceType[] argTypes = ((FunctionItemType) primary).getArgumentTypes();
                 if (argTypes != null) {
@@ -772,7 +772,7 @@ public class ExperimentalXPathCompiler {
                         argMaps.add(makeMap(at));
                     }
                     ArrayItem arrayItem = new SimpleArrayItem(argMaps);
-                    result.put("a", arrayItem);
+                    result.put(new Twine8("a"), arrayItem);
                 }
             }
         }

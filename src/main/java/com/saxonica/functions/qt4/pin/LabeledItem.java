@@ -1,6 +1,6 @@
 package com.saxonica.functions.qt4.pin;
 
-import net.sf.saxon.ma.map.StringMap;
+import net.sf.saxon.ma.map.StringMapItem;
 import net.sf.saxon.om.Item;
 
 /**
@@ -19,7 +19,7 @@ public interface LabeledItem extends Item {
      * @return the associated {@code Pedigree}.
      */
 
-    StringMap getLabel();
+    StringMapItem getLabel();
 
     /**
      * Get the subject item without its label

@@ -2,7 +2,7 @@ package com.saxonica.functions.qt4.pin;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.ma.map.DictionaryMap;
+import net.sf.saxon.ma.map.EmptyMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
@@ -21,7 +21,7 @@ public class LabelFn extends SystemFunction {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Item in = arguments[0].head();
         MapItem label = in.getLabel();
-        return label == null ? new DictionaryMap() : label;
+        return label == null ? EmptyMap.getInstance() : label;
     }
 
 }

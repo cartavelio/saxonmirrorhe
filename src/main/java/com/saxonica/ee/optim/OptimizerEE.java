@@ -879,11 +879,11 @@ public class OptimizerEE extends Optimizer {
                 }
             }
             if (allStrings) {
-                MapBuilder dict = DictionaryMap.getBuilder();
+                Map<String, GroundedValue> dict = new HashMap<>();
                 for (Item item : literal.getGroundedValue().asIterable()) {
                     dict.put(item.getStringValue(), BooleanValue.TRUE);
                 }
-                map = dict.getCompletedMap();
+                map = new DictionaryMap(dict);
             } else {
                 MapBuilder trie = HashTrieMap.getBuilder();
                 for (Item item : literal.getGroundedValue().asIterable()) {

@@ -16,7 +16,7 @@ import net.sf.saxon.value.SequenceType;
  * is implemented by delegating all map-related functionality to another map.
  * Unless any methods are overridden, the functionality is identical to that
  * of the wrapped map item.
- * <p>Note that methods such as {@link #addEntry} that create a new map will
+ * <p>Note that methods such as {@link #put} that create a new map will
  * (unless overridden) simply delegate to the base map, and the new map will
  * therefore not be a delegating map.</p>
  */
@@ -61,8 +61,8 @@ public abstract class DelegatingMapItem extends MapItem {
     }
 
     @Override
-    public MapItem addEntry(AtomicValue key, GroundedValue value) {
-        return base.addEntry(key, value);
+    public MapItem put(AtomicValue key, GroundedValue value) {
+        return base.put(key, value);
     }
 
     @Override

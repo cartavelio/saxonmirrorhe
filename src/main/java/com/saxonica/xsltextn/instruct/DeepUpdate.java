@@ -233,7 +233,7 @@ public class DeepUpdate extends Instruction {
                             if (latestParent instanceof ArrayItem) {
                                 val = ((ArrayItem) latestParent).put(pedigree.getIndex(), val);
                             } else if (latestParent instanceof MapItem) {
-                                val = ((MapItem) latestParent).addEntry(pedigree.getKey(), val);
+                                val = ((MapItem) latestParent).put(pedigree.getKey(), val);
                             } else {
                                 assert false;
                             }

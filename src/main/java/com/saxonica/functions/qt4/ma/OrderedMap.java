@@ -149,7 +149,7 @@ public class OrderedMap extends MapTypeMaintainer {
      * @return the new map containing the additional entry
      */
     @Override
-    public MapItem addEntry(AtomicValue key, GroundedValue value) {
+    public MapItem put(AtomicValue key, GroundedValue value) {
         return new OrderedMap(baseMap.put(key.asMapKey(), new KeyValuePair(key, value)));
     }
 

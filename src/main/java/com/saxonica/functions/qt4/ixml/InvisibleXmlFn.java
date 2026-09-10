@@ -12,7 +12,7 @@ import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.SerializerFactory;
-import net.sf.saxon.ma.map.DictionaryMap;
+import net.sf.saxon.ma.map.EmptyMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.GroundedValue;
@@ -78,7 +78,7 @@ public class InvisibleXmlFn extends SystemFunction {
             options = (MapItem)arguments[1].head();
         }
         if (options == null) {
-            options = new DictionaryMap();
+            options = EmptyMap.getInstance();
         }
         Map<String, GroundedValue> checkedOptions =
                 getDetails().optionDetails.processSuppliedOptions(options, context);

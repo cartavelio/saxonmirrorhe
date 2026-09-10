@@ -1,8 +1,6 @@
 package com.saxonica.functions.qt4.pin;
 
-import net.sf.saxon.ma.map.DictionaryMap;
-import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.ma.map.StringMap;
+import net.sf.saxon.ma.map.StringMapItem;
 import net.sf.saxon.type.AtomicMetadata;
 import net.sf.saxon.type.AtomicType;
 
@@ -15,9 +13,9 @@ import net.sf.saxon.type.AtomicType;
 public class TypeAndLabel implements AtomicMetadata {
 
     private final AtomicType type;
-    private final StringMap label;
+    private final StringMapItem label;
 
-    public TypeAndLabel(AtomicType type, StringMap label) {
+    public TypeAndLabel(AtomicType type, StringMapItem label) {
         this.type = type;
         this.label = label;
     }
@@ -28,7 +26,7 @@ public class TypeAndLabel implements AtomicMetadata {
     }
 
     @Override
-    public StringMap getLabel() {
+    public StringMapItem getLabel() {
         return label;
     }
 }

@@ -2,7 +2,7 @@ package com.saxonica.functions.qt4.csv;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.OptionsParameter;
-import net.sf.saxon.ma.map.DictionaryMap;
+import net.sf.saxon.ma.map.EmptyMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
@@ -28,9 +28,11 @@ public class CsvToXml extends CsvFunction {
             return EmptySequence.getInstance();
         }
         StringValue input = (StringValue) arg0;
-        MapItem unparsedOptions = new DictionaryMap();
+        MapItem unparsedOptions;
         if (arguments.length >= 2) {
             unparsedOptions = (MapItem) arguments[1].head();
+        } else {
+            unparsedOptions = EmptyMap.getInstance();
         }
 
         options = getDetails().optionDetails.processSuppliedOptions(unparsedOptions, context);

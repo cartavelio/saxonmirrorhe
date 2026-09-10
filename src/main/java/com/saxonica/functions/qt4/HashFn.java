@@ -10,7 +10,7 @@ package com.saxonica.functions.qt4;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.ma.map.DictionaryMap;
+import net.sf.saxon.ma.map.EmptyMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
@@ -71,7 +71,7 @@ public class HashFn extends SystemFunction {
                 options = (MapItem)arguments[2].head();
             }
             if (options == null) {
-                options = new DictionaryMap();
+                options = EmptyMap.getInstance();
             }
             Map<String, GroundedValue> checkedOptions =
                     getDetails().optionDetails.processSuppliedOptions(options, context);

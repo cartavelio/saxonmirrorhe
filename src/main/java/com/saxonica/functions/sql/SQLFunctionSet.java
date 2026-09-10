@@ -7,13 +7,9 @@ import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.ma.map.DictionaryMap;
-import net.sf.saxon.ma.map.MapBuilder;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NamespaceUri;
-import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyFunctionType;
@@ -24,7 +20,9 @@ import net.sf.saxon.value.*;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The SQLFunctionSet is a set of Saxon vendor-supplied
@@ -53,7 +51,7 @@ public class SQLFunctionSet extends BuiltInFunctionSet {
         int icol = rs.getMetaData().getColumnCount();
         while (rs.next()) {                            // next row
             //System.out.print("<- SQL : "+ rowStart);
-            MapBuilder map = DictionaryMap.getBuilder(icol);
+            Map<String, GroundedValue> map = new HashMap<>(icol);
             for (int col = 1; col <= icol; col++) {     // next column
                 // Read result from RS only once, because
                 // of JDBC-Specifications
@@ -71,7 +69,7 @@ public class SQLFunctionSet extends BuiltInFunctionSet {
                 map.put(sqlName, result == null ? EmptySequence.getInstance() : new StringValue(result));
                 // TODO: use SQL data type
             }
-            out.add(map.getCompletedMap());
+            out.add(new DictionaryMap(map));
             //System.out.println(rowEnd);
         }
         return out;

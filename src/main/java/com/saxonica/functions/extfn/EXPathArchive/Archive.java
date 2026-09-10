@@ -348,12 +348,12 @@ public class Archive {
 
     /* Helper functions to add to immutable maps */
     private static HashTrieMap add(HashTrieMap map, String key, HashTrieMap val) {
-        return map.addEntry(new StringValue(key), val);
+        return map.put(new StringValue(key), val);
     }
 
     /* the following can be used externally */
     public static HashTrieMap add(HashTrieMap map, String key, AtomicValue val) throws XPathException {
-        return map.addEntry(new StringValue(key), val);
+        return map.put(new StringValue(key), val);
     }
 
     public static HashTrieMap add(HashTrieMap map, String key, String val) throws XPathException {

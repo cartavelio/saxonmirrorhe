@@ -27,7 +27,7 @@ public class ParseURI extends URIFunctions {
         String uristr = arg0.getStringValue();
         MapItem map = new HashTrieMap();
 
-        map = map.addEntry(URI, new StringValue(uristr));
+        map = map.put(URI, new StringValue(uristr));
         uristr = uristr.replaceAll("\\\\", "/");
 
         try {
@@ -41,7 +41,7 @@ public class ParseURI extends URIFunctions {
         if (pos >= 0) {
             fragid = DecodeFromURI.decode(uristr.substring(pos + 1));
             if (!fragid.trim().isEmpty()) {
-                map = map.addEntry(FRAGMENT, new StringValue(fragid));
+                map = map.put(FRAGMENT, new StringValue(fragid));
             }
             uristr = uristr.substring(0, pos);
         } else {
@@ -56,7 +56,7 @@ public class ParseURI extends URIFunctions {
                 query = null;
             } else {
                 query = querystr;
-                map = map.addEntry(QUERY, new StringValue(query));
+                map = map.put(QUERY, new StringValue(query));
             }
             uristr = uristr.substring(0, pos);
         } else {
@@ -88,19 +88,19 @@ public class ParseURI extends URIFunctions {
         }
 
         if (scheme != null) {
-            map = map.addEntry(SCHEME, new StringValue(scheme));
+            map = map.put(SCHEME, new StringValue(scheme));
         }
 
         if (scheme != null && hierarchicalSchemes.contains(scheme)) {
             hierarchical = true;
-            map = map.addEntry(HIERARCHICAL, BooleanValue.get(hierarchical));
+            map = map.put(HIERARCHICAL, BooleanValue.get(hierarchical));
         } else if (scheme != null && nonHierarchicalSchemes.contains(scheme)) {
             hierarchical = false;
-            map = map.addEntry(HIERARCHICAL, BooleanValue.get(hierarchical));
+            map = map.put(HIERARCHICAL, BooleanValue.get(hierarchical));
         } else {
             hierarchical = uristr.startsWith("/");
             if (!uristr.isEmpty()) {
-                map = map.addEntry(HIERARCHICAL, BooleanValue.get(hierarchical));
+                map = map.put(HIERARCHICAL, BooleanValue.get(hierarchical));
             }
         }
 
@@ -109,7 +109,7 @@ public class ParseURI extends URIFunctions {
         }
 
         if (absolute) {
-            map = map.addEntry(ABSOLUTE, BooleanValue.get(absolute));
+            map = map.put(ABSOLUTE, BooleanValue.get(absolute));
         }
 
         String filepath = null;
@@ -154,7 +154,7 @@ public class ParseURI extends URIFunctions {
         }
 
         if (authority != null) {
-            map = map.addEntry(AUTHORITY, new StringValue(authority));
+            map = map.put(AUTHORITY, new StringValue(authority));
         }
 
         String port = null;
@@ -169,13 +169,13 @@ public class ParseURI extends URIFunctions {
             }
 
             if (userinfo != null) {
-                map = map.addEntry(USERINFO, new StringValue(userinfo));
+                map = map.put(USERINFO, new StringValue(userinfo));
             }
 
             pattern = Pattern.compile("^([^@]*@)?(\\[[^]]*])(:([^:]*))?$");
             matcher = pattern.matcher(authority);
             if (matcher.find()) {
-                map = map.addEntry(HOST, new StringValue(matcher.group(2)));
+                map = map.put(HOST, new StringValue(matcher.group(2)));
                 port = "".equals(matcher.group(4)) ? null : matcher.group(4);
             } else {
                 pattern = Pattern.compile("^([^@]*@)?\\[.*$");
@@ -186,7 +186,7 @@ public class ParseURI extends URIFunctions {
                     pattern = Pattern.compile("^([^@]*@)?([^:]+)(:([^:]*))?$");
                     matcher = pattern.matcher(authority);
                     if (matcher.find()) {
-                        map = map.addEntry(HOST, new StringValue(matcher.group(2)));
+                        map = map.put(HOST, new StringValue(matcher.group(2)));
                         port = "".equals(matcher.group(4)) ? null : matcher.group(4);
                     }
                 }
@@ -198,14 +198,14 @@ public class ParseURI extends URIFunctions {
         }
 
         if (port != null) {
-            map = map.addEntry(PORT, new StringValue(port));
+            map = map.put(PORT, new StringValue(port));
         }
 
         if (!"".equals(uristr)) {
             if (filepath == null && (scheme == null || "file".equals(scheme))) {
                 filepath = uristr;
             }
-            map = map.addEntry(PATH, new StringValue(uristr));
+            map = map.put(PATH, new StringValue(uristr));
             GroundedValue pathSegments = EmptySequence.getInstance();
             // Can't use string split here because it collapses leading, trailing, and repeated delimiters
             pos = uristr.indexOf("/");
@@ -219,12 +219,12 @@ public class ParseURI extends URIFunctions {
                 pos = uristr.indexOf("/");
             }
             pathSegments = pathSegments.concatenate(new StringValue(DecodeFromURI.decode(uristr)));
-            map = map.addEntry(PATH_SEGMENTS, pathSegments);
+            map = map.put(PATH_SEGMENTS, pathSegments);
         }
 
         if (filepath != null) {
              String decoded = DecodeFromURI.decode(filepath);
-            map = map.addEntry(FILEPATH, new StringValue(decoded));
+            map = map.put(FILEPATH, new StringValue(decoded));
         }
 
         if (query != null) {
@@ -244,12 +244,12 @@ public class ParseURI extends URIFunctions {
                 GroundedValue currentValue = querySegments.get(key);
                 if (currentValue == null) {
                     // Cast needed for transpiled C#
-                    querySegments = (HashTrieMap) querySegments.addEntry(key, value);
+                    querySegments = (HashTrieMap) querySegments.put(key, value);
                 } else {
-                    querySegments = (HashTrieMap) querySegments.addEntry(key, currentValue.concatenate(value));
+                    querySegments = (HashTrieMap) querySegments.put(key, currentValue.concatenate(value));
                 }
             }
-            map = map.addEntry(QUERY_PARAMETERS, querySegments);
+            map = map.put(QUERY_PARAMETERS, querySegments);
         }
 
         return map;

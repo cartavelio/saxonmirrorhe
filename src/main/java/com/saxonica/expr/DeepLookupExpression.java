@@ -284,7 +284,7 @@ public class DeepLookupExpression extends BinaryExpression {
                 } else {
                     keySet = new HashTrieMap();
                     for (Item key : keys.asIterable()) {
-                        keySet = keySet.addEntry((AtomicValue) key, BooleanValue.TRUE);
+                        keySet = keySet.put((AtomicValue) key, BooleanValue.TRUE);
                     }
                 }
                 final MapItem finalKeySet = keySet;
@@ -313,7 +313,7 @@ public class DeepLookupExpression extends BinaryExpression {
                     SequenceIterator keyIter = rhs.iterate(context);
                     Item key;
                     while ((key = keyIter.next()) != null) {
-                        keySet = keySet.addEntry((AtomicValue) key, BooleanValue.TRUE);
+                        keySet = keySet.put((AtomicValue) key, BooleanValue.TRUE);
                     }
                     final MapItem finalKeySet = keySet;
 

@@ -4,7 +4,7 @@ import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.Shape;
 import net.sf.saxon.ma.map.ShapedMap;
-import net.sf.saxon.ma.map.StringMap;
+import net.sf.saxon.ma.map.StringMapItem;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
@@ -35,7 +35,7 @@ public class LabelTool {
     private LabelTool() {
     }
 
-    public static Item addLabel(Item item, StringMap label) {
+    public static Item addLabel(Item item, StringMapItem label) {
         switch (item.getGenre()) {
             case MAP:
                 if (item instanceof LabeledMapItem) {

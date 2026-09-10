@@ -9,13 +9,15 @@ import net.sf.saxon.functions.ConstantFunction;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.hof.CurriedFunction;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.ma.map.DictionaryMap;
-import net.sf.saxon.ma.map.MapBuilder;
+import net.sf.saxon.ma.map.EmptyMap;
 import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.StringMapBuilder;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.Twine8;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
@@ -76,10 +78,9 @@ public class ObjectMap extends SystemFunction {
 
     public static MapItem toMap(Configuration config, ObjectValue<?> value, String required) {
         Object obj = value.getObject();
-        MapBuilder mapView = DictionaryMap.getBuilder();
         if (!config.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION) ||
                 !config.getBooleanProperty(Feature.ALLOW_EXTERNAL_FUNCTIONS)) {
-            return mapView.getCompletedMap(); // empty map; method calls not available
+            return EmptyMap.getInstance(); // empty map; method calls not available
         }
 
         // See bug 6286. To try and prevent reflexive use of methods on an inaccessible class, we
@@ -87,6 +88,7 @@ public class ObjectMap extends SystemFunction {
         // then we supplement this with methods from the instance class (which may turn out
         // to be inaccessible, but this only matters if they are called).
 
+        StringMapBuilder builder = new StringMapBuilder();
         Map<String, FunctionItem> interfaceMap = null;
         if (value.getInterface() != null) {
             interfaceMap = makeMethodMap(config, value.getInterface(), required);
@@ -99,7 +101,7 @@ public class ObjectMap extends SystemFunction {
                     unboundArgs[i] = i + 1;
                 }
                 CurriedFunction fn = new CurriedFunction(method, boundArgs, unboundArgs);
-                mapView.put(key, fn);
+                builder.put(StringView.of(key), fn);
             }
         }
 
@@ -114,12 +116,12 @@ public class ObjectMap extends SystemFunction {
                     unboundArgs[i] = i + 1;
                 }
                 CurriedFunction fn = new CurriedFunction(method, boundArgs, unboundArgs);
-                mapView.put(key, fn);
+                builder.put(StringView.of(key), fn);
             }
         }
 
-        mapView.put("this", new ConstantFunction(value, SequenceType.SINGLE_FUNCTION));
-        return mapView.getCompletedMap();
+        builder.put(new Twine8("this"), new ConstantFunction(value, SequenceType.SINGLE_FUNCTION));
+        return builder.getCompletedMapConfidently();
     }
 
     /**

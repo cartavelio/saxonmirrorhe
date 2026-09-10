@@ -3,7 +3,7 @@ package com.saxonica.functions.qt4.pin;
 import com.saxonica.xsltextn.pedigree.DelegatingArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
-import net.sf.saxon.ma.map.StringMap;
+import net.sf.saxon.ma.map.StringMapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.z.IntSet;
@@ -17,14 +17,14 @@ import java.util.List;
  */
 public class LabeledArrayItem extends DelegatingArrayItem implements LabeledItem {
 
-    StringMap label;
+    StringMapItem label;
 
     /**
      * Create a PedigreeArrayItem with an empty pedigree
      * @param base the underlying array item
      */
 
-    public LabeledArrayItem(ArrayItem base, StringMap label) {
+    public LabeledArrayItem(ArrayItem base, StringMapItem label) {
         super(base);
         this.label = label;
     }
@@ -147,7 +147,7 @@ public class LabeledArrayItem extends DelegatingArrayItem implements LabeledItem
      */
 
     @Override
-    public StringMap getLabel() {
+    public StringMapItem getLabel() {
         return label;
     }
 

@@ -5,7 +5,7 @@ import net.sf.saxon.functions.SimpleLazyFunction;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.ShapedMap;
-import net.sf.saxon.ma.map.StringMap;
+import net.sf.saxon.ma.map.StringMapItem;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
@@ -21,7 +21,7 @@ import java.util.List;
 
 public class LabeledMapItem extends DelegatingMapItem implements LabeledItem {
 
-    private final StringMap label;
+    private final StringMapItem label;
 
     /**
      * Create a LabeledMapItem with a supplied label
@@ -29,7 +29,7 @@ public class LabeledMapItem extends DelegatingMapItem implements LabeledItem {
      * @param label the label
      */
 
-    public LabeledMapItem(MapItem base, StringMap label) {
+    public LabeledMapItem(MapItem base, StringMapItem label) {
         super(base);
         this.label = label;
     }
@@ -165,7 +165,7 @@ public class LabeledMapItem extends DelegatingMapItem implements LabeledItem {
      */
 
     @Override
-    public StringMap getLabel() {
+    public StringMapItem getLabel() {
         return label;
     }
 

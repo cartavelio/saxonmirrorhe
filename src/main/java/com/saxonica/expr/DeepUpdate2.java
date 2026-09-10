@@ -14,7 +14,7 @@ import net.sf.saxon.functions.hof.FilterFn;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.ma.map.StringMap;
+import net.sf.saxon.ma.map.StringMapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
@@ -204,7 +204,7 @@ public class DeepUpdate2 extends Instruction {
                     Item selected;
                     Item finalRoot = null;
                     while ((selected = selectIterator.next()) != null) {
-                        StringMap label = selected.getLabel();
+                        StringMapItem label = selected.getLabel();
                         if (label == null) {
                             throw new XPathException(
                                     "Update expression: selected value " + Err.depict(selected) +
@@ -234,7 +234,7 @@ public class DeepUpdate2 extends Instruction {
                                 AtomicValue keyVal = (AtomicValue) label.getU(LabelTool.KEY_KEY);
                                 GroundedValue oldMember = ((MapItem) latestParent).get(keyVal);
                                 GroundedValue newMember = replaceItem(oldMember, position, val);
-                                val = ((MapItem) latestParent).addEntry(
+                                val = ((MapItem) latestParent).put(
                                         ((AtomicValue) label.getU(LabelTool.KEY_KEY)), newMember);
                             } else {
                                 assert false;

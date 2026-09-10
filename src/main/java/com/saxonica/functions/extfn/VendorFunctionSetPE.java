@@ -121,9 +121,6 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.DATE_TIME, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null));
 
-        register("analyze-uri", 1, e -> e.populate( AnalyzeUri::new, analyzeUriResult, ONE, 0)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null));
-
         register("array-member", 1, e -> e.populate(ParcelFn::new, Parcel.TYPE, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null));
 
