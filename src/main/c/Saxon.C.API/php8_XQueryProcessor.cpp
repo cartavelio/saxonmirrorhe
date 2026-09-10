@@ -88,13 +88,13 @@ PHP_METHOD(XQueryProcessor, runQueryToString) {
     try {
       const char *result = xqueryProcessor->runQueryToString();
       RETVAL_STRING(result);
-      saxonProcessor->deleteString(result);
+      SaxonProcessor::deleteString(result);
       return;
-      }
+
     } catch (SaxonApiException &e) {
       zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
     }
-  }
+   }
   RETURN_NULL();
 }
 

@@ -463,7 +463,7 @@ PHP_METHOD(XsltExecutable, callFunctionReturningString) {
           functionName, arguments, argument_length);
       if (result != nullptr) {
       RETVAL_STRING(result);
-      saxonProcessor->deleteString(result);
+      SaxonProcessor::deleteString(result);
       return;
       }
     } catch (SaxonApiException &e) {
@@ -637,7 +637,7 @@ PHP_METHOD(XsltExecutable, callTemplateReturningString) {
           (len2 == 0 ? NULL : templateName));
       if (result != nullptr) {
       RETVAL_STRING(result);
-      saxonProcessor->deleteString(result);
+      SaxonProcessor::deleteString(result);
       return;
       }
     } catch (SaxonApiException &e) {
@@ -740,7 +740,7 @@ PHP_METHOD(XsltExecutable, applyTemplatesReturningString) {
 
       if (result != nullptr) {
       RETVAL_STRING(result);
-      saxonProcessor->deleteString(result);
+      SaxonProcessor::deleteString(result);
       return;
       }
     } catch (SaxonApiException &e) {
@@ -1197,7 +1197,7 @@ PHP_METHOD(XsltExecutable, transformFileToString) {
       const char *result = xsltExecutable->transformFileToString(infilename);
       if (result != nullptr) {
       RETVAL_STRING(result);
-      saxonProcessor->deleteString(result);
+      SaxonProcessor::deleteString(result);
       return;
       }
     } catch (SaxonApiException &e) {
@@ -1232,7 +1232,7 @@ PHP_METHOD(XsltExecutable, transformToString) {
         result = xsltExecutable->transformToString();
         if (result != nullptr) {
             RETVAL_STRING(result);
-            saxonProcessor->deleteString(result);
+            SaxonProcessor::deleteString(result);
             return;
         }
 
@@ -1262,7 +1262,7 @@ PHP_METHOD(XsltExecutable, transformToString) {
         }
         if (result != nullptr) {
             RETVAL_STRING(result);
-            saxonProcessor->deleteString(result);
+            SaxonProcessor::deleteString(result);
             return;
         }
       }
