@@ -60,6 +60,9 @@
         <p>The <code>SchemaManager</code> has a new convenience method: the <code>load()</code> 
             method now has an overload that takes a <code>java.io.File</code> as its argument.</p>
         
+        <p>The output of <code>XdmNode.toString()</code> has changed so it is now consistent with the output of <code>XdmValue.toString()</code>
+        in the case where the <code>XdmValue</code> comprises a single node. That is, it is now output using the adaptive serialization method.</p>
+        
         
         
         
