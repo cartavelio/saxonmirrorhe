@@ -13,10 +13,10 @@ import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.SequenceType;
 
 /**
- * This class implements the function fn:all(), which is a proposed function for XPath 4.0
+ * This class implements the function fn:every(), which is a proposed function for XPath 4.0
  */
 
-public class AllFn extends SystemFunction {
+public class EveryFn extends SystemFunction {
 
     /**
      * Evaluate the expression

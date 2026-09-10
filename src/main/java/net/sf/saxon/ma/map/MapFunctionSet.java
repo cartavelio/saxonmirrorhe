@@ -191,10 +191,10 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             register("entries", 1, e -> e.populate(MapEntries::new, MapType.ANY_MAP_TYPE, STAR, 0)
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
 
-            register("of", 1, e -> e.populate(MapOf::new, MapType.ANY_MAP_TYPE, ONE, 0)
+            register("of-pairs", 1, e -> e.populate(MapOfPairs::new, MapType.ANY_MAP_TYPE, ONE, 0)
                     .arg(0, KVP_TYPE, STAR | INS, null));
 
-            register("of", 2, e -> e.populate(MapOf::new, MapType.ANY_MAP_TYPE, ONE, 0)
+            register("of-pairs", 2, e -> e.populate(MapOfPairs::new, MapType.ANY_MAP_TYPE, ONE, 0)
                     .arg(0, MapType.ANY_MAP_TYPE, STAR | INS, null)
                     .arg(1, ON_DUPLICATES_CALLBACK_TYPE, ONE | INS, null));
 
@@ -911,9 +911,9 @@ public class MapFunctionSet extends BuiltInFunctionSet {
     }
 
     /**
-     * Implementation of the function map:of() =&gt; Map
+     * Implementation of the function map:of-pairs() =&gt; Map
      */
-    public static class MapOf extends SystemFunction {
+    public static class MapOfPairs extends SystemFunction {
 
 
         @Override

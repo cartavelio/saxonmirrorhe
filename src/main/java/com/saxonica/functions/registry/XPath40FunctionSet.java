@@ -49,12 +49,6 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 new SequenceType[]{SequenceType.SINGLE_NODE},
                 SequenceType.NODE_SEQUENCE);
 
-        register("all", 1, e -> e.populate(AllFn::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
-                .arg(0, AnyItemType.getInstance(), STAR, BooleanValue.TRUE));
-
-        register("all", 2, e -> e.populate(AllFn::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
-                .arg(0, AnyItemType.getInstance(), STAR, BooleanValue.TRUE)
-                .arg(1, predicate, ONE, null));
 
         register("all-equal", 1, e -> e.populate(AllEqual::new, BuiltInAtomicType.BOOLEAN, ONE, DCOLL | UO)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY));
@@ -148,6 +142,12 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, AnyItemType.getInstance(), STAR, BooleanValue.FALSE)
                 .arg(2, compareFnType, ONE, null));
 
+        register("every", 1, e -> e.populate(EveryFn::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, BooleanValue.TRUE));
+
+        register("every", 2, e -> e.populate(EveryFn::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, BooleanValue.TRUE)
+                .arg(1, predicate, ONE, null));
 
         register("expanded-QName", 1, e -> e.populate(ExpandedQNameFn::new, BuiltInAtomicType.STRING, OPT, 0)
                 .arg(0, BuiltInAtomicType.QNAME, OPT, null));
