@@ -593,7 +593,7 @@ val copy_feature_keys = tasks.register<Copy>("copy_feature_keys") {
 }
 
 val gizmo = tasks.register<JavaExec>("gizmo") {
-  classpath = editionSourceSet.runtimeClasspath
+  classpath = editionSourceSet.runtimeClasspath + files(saxonBuild.saxonLicenseDir.get())
 
   mainClass = "net.sf.saxon.Gizmo"
 
