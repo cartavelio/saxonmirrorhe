@@ -2,7 +2,15 @@
 <!-- exceptions file for the QT3 Test Suite -->
 <exceptions>
   
-
+   <exception test-set="app-CatalogCheck" test-case="Catalog011" run="false" report="disputed">
+      <created by="Michael Kay" on="2023-01-03"/>
+      <reason>Coverage analysis test fails because there is currently insufficient QT4 test coverage</reason>
+   </exception>
+   
+   <exception test-set="app-CatalogCheck" test-case="Catalog014" run="false" report="disputed">
+      <created by="Michael Kay" on="2023-01-03"/>
+      <reason>QT4 40-specific tests are missing covers-40 attribute</reason>
+   </exception>
   
   <exception test-set="misc-UCACollation" test-case="UCA-reorder-codes-009" run="false" report="notRun">
     <created by="Michael Kay" on="2018-02-01"/>
@@ -44,6 +52,11 @@
   <exception test-set="prod-FunctionCall" test-case="K-FunctionCallExpr-15" run="false" report="n/a">
     <created by="Michael Kay" on="2019-03-11"/>
     <reason>format-number() is allowed under XPath 2.0 though it should not be</reason>
+  </exception>
+  
+  <exception test-set="prod-MapConstructor" test-case="MapConstructor-025" run="false" report="n/a">
+    <created by="Michael Kay" on="2019-03-11"/>
+    <reason>Saxon implements the tokenization rules in 4.0, so this questionable edge case fails</reason>
   </exception>
   
   <exception test-set="app-spec-examples" test-case="
@@ -92,6 +105,17 @@
                                      run="false" report="n/a">
     <created by="Michael Kay" on="2025-10-22"/>
     <reason>Saxon outputs the meta tag in HTML5 format despite what the serialization 3.1 spec says</reason>
+  </exception>
+  
+  <exception test-set="fn-random-number-generator" 
+    test-case="fn-random-number-generator-35
+               fn-random-number-generator-36
+               fn-random-number-generator-37" 
+                                     run="false" report="bug">
+    <created by="Michael Kay" on="2026-04-11"/>
+    <reason>Saxon follows the 4.0 spec, with the return type of the next() function
+            being a record type, not simply `map(xs:string, item)`, even when running
+            in 3.1 mode.</reason>
   </exception>
   
   

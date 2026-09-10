@@ -22,6 +22,28 @@
       <reason>Test conversion problem - test requires fn-transform-XSLT30 not satisfied</reason>
    </exception>
    
+   <exception test-set="app-spec-examples" 
+      test-case="fo-test-fn-analyze-string-002 
+                 fo-test-fn-analyze-string-003
+                 fo-test-fn-analyze-string-004" run="false" report="n/a">
+      <created by="Michael Kay" on="2026-04-10"/>
+      <reason>Test conversion problem - whitespace stripping in XML result comparison</reason>
+   </exception>
+   
+   <exception test-set="app-spec-examples" 
+      test-case="fo-test-fn-codepoints-to-string-004" run="false" report="n/a">
+      <created by="Michael Kay" on="2026-04-10"/>
+      <reason>Test conversion problem - invalid character U+0000</reason>
+   </exception>
+   
+   <exception test-set="app-spec-examples" 
+      test-case="fo-test-fn-compare-003" run="false" report="n/a">
+      <created by="Michael Kay" on="2026-04-10"/>
+      <reason>Test conversion problem - default collation</reason>
+   </exception>
+   
+   
+   
    
    <!-- qt4 exceptions ======================= -->
    
