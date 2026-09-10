@@ -162,6 +162,38 @@ public class TestMessageListener {
             fail();
         }
     }
+
+    @Test
+    public void testMessageConsumerRequestingTermination() {
+        // Rewrite of above testMessage() to use current API
+        try {
+            String xsl =
+                    "<xsl:transform version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
+                            "<xsl:template name='main'>" +
+                            "<xsl:for-each select='1 to 5'>" +
+                            "<xsl:message terminate='no'><xsl:value-of select='\"message \" || .'/></xsl:message>" +
+                            "</xsl:for-each>" +
+                            "</xsl:template>" +
+                            "</xsl:transform>";
+            Processor p = new Processor(false);
+            XsltCompiler c = p.newXsltCompiler();
+            XsltExecutable e = c.compile(new StreamSource(new StringReader(xsl)));
+            XsltTransformer t = e.load();
+            t.setInitialTemplate(new QName("main"));
+            final StringBuilder sb = new StringBuilder();
+            t.setMessageHandler(msg -> {
+                if (msg.getContent().getStringValue().contains("4")) {
+                    msg.raiseDynamicError();
+                }
+            });
+            t.setDestination(p.newSerializer(System.out));
+            t.transform();
+            fail("Unexpected success");
+        } catch (SaxonApiException e1) {
+            System.err.println(e1.getMessage());
+            assertTrue(e1.getMessage().contains("Processing terminated by user-written message handler"));
+        }
+    }
     @Test
     public void testMessageLocation() {
         try {
