@@ -1938,7 +1938,7 @@ public class UserComplexType extends UserDefinedType
                 }
                 if (seq.isPointless(null)) {
                     List<Particle> contentModel = seq.getSimplifiedContentModel();
-                    if (contentModel.isEmpty()) {
+                    if (contentModel.isEmpty() && (openContentWildcard == null || !openContentAppliesToEmpty)) {
                         extendedParticle = null;
                         if (variety == ComplexVariety.ELEMENT_ONLY) {
                             variety = ComplexVariety.EMPTY;
