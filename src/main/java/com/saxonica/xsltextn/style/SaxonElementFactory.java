@@ -41,9 +41,6 @@ public class SaxonElementFactory implements ExtensionElementFactory {
         if (localname.equals("entity-ref")) {
             return SaxonEntityRef.class;
         }
-        if (localname.equals("for-each-member")) {
-            return XSLForEachMember.class;
-        }
         if (localname.equals("import-query")) {
             return SaxonImportQuery.class;
         }
