@@ -430,6 +430,42 @@
     </result>
   </test-case>
   
+  <test-case name="EXPath-binary-powerset">
+    <description>See bug #5110. An algorithm for computing a powerset that happens to
+    use some bit-twiddling</description>
+    <created by="Michael Kay after Martin Honnen" on="2021-10-06"/>
+    <dependency type="spec" value="XQ31+"/>
+    <test><![CDATA[
+        declare namespace math = 'http://www.w3.org/2005/xpath-functions/math';
+        declare namespace bin = 'http://expath.org/ns/binary';
+        declare namespace array = 'http://www.w3.org/2005/xpath-functions/array';
+        
+        declare function local:combination($counter as xs:integer, $input as item()*) as item()* {
+           let $counter-bin := bin:from-octets($counter)
+           return $input[
+             let $j:= position() - 1,
+             $bin := bin:and($counter-bin, bin:shift(bin:hex('1'), $j)) 
+             return bin:to-octets($bin) > 0]
+         };
+         
+        declare function local:powerset($input as item()*) as array(item()*) {
+          fold-left(
+            0 to (xs:integer(math:pow(2, count($input))) - 1),
+            [],
+            function($a, $i) { array:append($a, local:combination($i, $input)) }
+           )
+         };
+         
+        local:powerset(('A', 'B', 'C', 'D'))      
+      
+      ]]></test>
+    <result>
+      <assert-deep-eq>[(), "A", "B", ("A", "B"), "C", ("A", "C"), ("B", "C"), ("A", "B", "C"), 
+        "D", ("A", "D"), ("B", "D"), ("A", "B", "D"), ("C", "D"), ("A", "C", "D"), 
+        ("B", "C", "D"), ("A", "B", "C", "D")]</assert-deep-eq>
+    </result>
+  </test-case>
+  
  
   
  
