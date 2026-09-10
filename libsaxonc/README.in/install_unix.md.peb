@@ -5,7 +5,7 @@ binaries to your preferred install location, ensuring the libraries can be found
 at runtime, and the binaries are on your PATH.
 
 If you're intending to also use the C API, then you need to ensure the header 
-files and also installed somewhere your build system can find them. We do not 
+files are also installed somewhere your build system can find them. We do not
 currently recommend using the C++ API with the pre-compiled `{{ model.libsaxonc }}` in
 case of ABI conflict, for that you can compile `{{ model.libsaxonc }}` yourself.
 
@@ -30,7 +30,7 @@ For example:
 
 
 ### Set the {{model.runtimeLinkerVar}} and PATH environment variables
-The {{model.runtimeLinkerVar}} variable must be include the locations of the lib
+The {{model.runtimeLinkerVar}} variable must include the locations of the lib
 directories containing the SaxonC libraries. For instance:
 
 	export {{ model.runtimeLinkerVar }}="{{ model.SaxonCCorePackageLibPath }}:{{ model.SaxonCPackageLibPath }}:${{ model.runtimeLinkerVar }}"
