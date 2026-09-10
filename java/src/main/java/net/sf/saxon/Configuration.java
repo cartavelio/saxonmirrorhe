@@ -18,12 +18,14 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.AlphanumericCollator;
 import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.expr.sort.HTML5CaseBlindCollator;
+import net.sf.saxon.expr.sort.UnicodeCaseBlindCollator;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.registry.*;
 import net.sf.saxon.java.CleanerProxy;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
-import net.sf.saxon.ma.map.*;
+import net.sf.saxon.ma.map.MapFunctionSet;
+import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.PatternParser;
 import net.sf.saxon.query.QueryModule;
@@ -1686,6 +1688,9 @@ public class Configuration implements SourceResolver {
         }
         if (collationName.equals(NamespaceConstant.HTML5_CASE_BLIND_COLLATION_URI)) {
             return HTML5CaseBlindCollator.getInstance();
+        }
+        if (collationName.equals(NamespaceConstant.UNICODE_CASE_BLIND_COLLATION_URI)) {
+            return UnicodeCaseBlindCollator.getInstance();
         }
         if (collationName.startsWith(AlphanumericCollator.PREFIX)) {
             return new AlphanumericCollator(getCollation(

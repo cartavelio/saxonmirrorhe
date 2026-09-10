@@ -520,7 +520,10 @@ public class Processor implements Configuration.ApiProvider {
             throw new IllegalArgumentException("Cannot redeclare the Unicode codepoint collation URI");
         }
         if (uri.equals(NamespaceConstant.HTML5_CASE_BLIND_COLLATION_URI)) {
-            throw new IllegalArgumentException("Cannot redeclare the HTML5 caseblind collation URI");
+            throw new IllegalArgumentException("Cannot redeclare the HTML5 case-blind collation URI");
+        }
+        if (uri.equals(NamespaceConstant.UNICODE_CASE_BLIND_COLLATION_URI)) {
+            throw new IllegalArgumentException("Cannot redeclare the HTML5 case-blind collation URI");
         }
         StringCollator saxonCollation = makeStringCollator(uri, collation);
         config.registerCollation(uri, saxonCollation);

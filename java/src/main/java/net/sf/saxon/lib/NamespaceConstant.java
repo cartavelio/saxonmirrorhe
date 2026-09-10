@@ -251,6 +251,12 @@ public class NamespaceConstant {
     public static final String HTML5_CASE_BLIND_COLLATION_URI = "http://www.w3.org/2005/xpath-functions/collation/html-ascii-case-insensitive";
 
     /**
+     * URI identifying the Unicode case-blind collation
+     */
+
+    public static final String UNICODE_CASE_BLIND_COLLATION_URI = "http://www.w3.org/2005/xpath-functions/collation/unicode-case-insensitive";
+
+    /**
      * URI for the names of generated variables
      */
 
