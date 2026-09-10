@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using Microsoft.Net.Http.Headers;
 using XmlResolver;
 using XmlResolver.Features;
 using XmlResolver.Utils;
@@ -25,6 +26,7 @@ namespace Saxon.Callbacks {
     public class DirectResourceResolver : Saxon.Hej.lib.JJ_ResourceResolver
     {
         private Saxon.Hej.Configuration config;
+        private static HttpClient _httpClient = new HttpClient();
 
         public DirectResourceResolver(Saxon.Hej.Configuration config)
         {
@@ -53,13 +55,17 @@ namespace Saxon.Callbacks {
                 }
                 Uri abs = new Uri(new Uri(baseUri), href);
                 if (abs.Scheme == "http" || abs.Scheme == "https") {
-                    using WebClient webClient = new WebClient();
-                    byte[] octets = webClient.DownloadData(abs);
+                    HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Get, abs);
+                    HttpResponseMessage response = _httpClient.Send(req);
+                    response.EnsureSuccessStatusCode();
+                    byte[] octets = response.Content.ReadAsByteArrayAsync().Result;
 
                     // Get response header.
-                    string contentType = webClient.ResponseHeaders["Content-Type"];
+                    var contentTypeHeader = response.Content.Headers.ContentType;
                     TypedStreamSource tss = new();
-                    tss.setContentType(contentType);
+                    if (contentTypeHeader != null) {
+                        tss.setContentType(contentTypeHeader.ToString());
+                    }
                     tss.setInputStream(new MemoryStream(octets));
                     tss.setSystemId(abs.ToString());
                     return tss;
@@ -67,8 +73,6 @@ namespace Saxon.Callbacks {
 
                 Saxon.Hej.lib.JJ_ResourceResolver configResolver = config.getResourceResolver();
                 return configResolver.resolve(request);
-                // Stream stream = ResourceAccess.GetStream(configResolver. Config, abs);
-                // return new StreamSource(stream, abs.ToString());
             }
 
             catch (WebException) {

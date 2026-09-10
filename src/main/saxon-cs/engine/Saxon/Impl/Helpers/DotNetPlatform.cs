@@ -14,6 +14,8 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Text;
+using AngleSharp.Dom;
+using Saxon.Ejava.net;
 using XmlResolver.Features;
 using Saxon.Hej.om;
 using Saxon.Hej.trans;
@@ -292,7 +294,7 @@ namespace Saxon.Impl.Helpers {
 
                     Stream stream;
                     try {
-                        stream = new WebClient().OpenRead(new Uri(sysId));
+                        stream = new URL(new Uri(sysId)).openStream();
                     }
                     catch (System.Exception e) {
                         throw new XPathException("Unable to retrieve URI " + sysId);
