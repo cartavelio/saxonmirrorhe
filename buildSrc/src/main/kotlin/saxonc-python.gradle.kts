@@ -147,6 +147,7 @@ extension.supportedPythonVersions.get().forEach { pythonVersion ->
         description = "Install the release wheel into the branch's VENV"
         pipExe = venv.map { it.pipExe.get() }
         wheel = repairDevWheel.map { it.repairedWheel.get() }
+        installedWheelDigest = layout.buildDirectory.file("installed-wheel-digest/${v}_release_wheel.txt")
     }
 
     val pytestCopy = tasks.register<Copy>("${v}_pytest_copy") {
@@ -249,6 +250,7 @@ val installDevWheel = tasks.register<InstallLocalWheel>("install_wheel") {
     description = "Install the release wheel into the branch's VENV"
     pipExe = venv.map { it.pipExe.get() }
     wheel = repairDevWheel.map { it.repairedWheel.get() }
+    installedWheelDigest = layout.buildDirectory.file("installed-wheel-digest/dev-wheel.txt")
 }
 
 val installDevDebugWheel = tasks.register<InstallLocalWheel>("install_debug_wheel") {
@@ -256,6 +258,7 @@ val installDevDebugWheel = tasks.register<InstallLocalWheel>("install_debug_whee
     description = "Install the debug wheel into the branch's VENV"
     pipExe = debugVenv.map { it.pipExe.get() }
     wheel = repairDevDebugWheel.map { it.repairedWheel.get() }
+    installedWheelDigest = layout.buildDirectory.file("installed-wheel-digest/dev-debug-wheel.txt")
 }
 
 val pyTestSamples = tasks.register<Copy>("pytest_data") {
@@ -354,7 +357,7 @@ val sphinxDocTask = tasks.register<SphinxDoc>("sphinx-doc") {
     overrides.put("release", saxonBuild.version)
     docSrcDir = sphinxDocSources.map { it.destinationDir }
     docBuildDir = layout.buildDirectory.dir("doc/build")
-    wheelInstaller(installDevWheel)
+    installedWheelDigest = installDevWheel.map { it.installedWheelDigest.get() }
 }
 
 val packagedSamples by configurations.consumable("packagedSamples")

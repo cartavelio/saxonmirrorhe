@@ -24,6 +24,9 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.gradle.process.ExecOperations
 import org.gradle.process.ExecResult
 import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileInputStream
+import java.security.MessageDigest
 import javax.inject.Inject
 import kotlin.collections.forEach
 
@@ -369,12 +372,32 @@ abstract class InstallLocalWheel  @Inject constructor(private val ex: ExecOperat
     @get:InputFile
     abstract val wheel: RegularFileProperty
 
+    @get:OutputFile
+    abstract val installedWheelDigest: RegularFileProperty
+
+    private fun wheelDigest(): String {
+        val streamBufferLength = 1024
+        val digest = MessageDigest.getInstance("SHA-256")
+        wheelFile.inputStream().use {
+            val buffer = ByteArray(streamBufferLength)
+            var read = it.read(buffer, 0, streamBufferLength)
+            while (read > -1) {
+                digest.update(buffer, 0, read)
+                read = it.read(buffer, 0, streamBufferLength)
+            }
+        }
+        return digest.digest().toHexString()
+    }
+
+    private val wheelFile: File get() = wheel.get().asFile
+
     @TaskAction
     fun install() {
         ex.exec {
             executable(pipExe.get())
-            args("install", "--force-reinstall", wheel.map { it.asFile }.get())
+            args("install", "--force-reinstall", wheelFile)
         }
+        installedWheelDigest.get().asFile.writeText(wheelDigest())
     }
 }
 
