@@ -43,7 +43,6 @@ public:
      * Destructor for XdmArray
      */
     virtual ~XdmArray(){
-	    fname.clear();
 
     }
 

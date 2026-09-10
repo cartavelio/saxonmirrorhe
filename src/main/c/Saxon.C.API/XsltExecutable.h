@@ -20,8 +20,7 @@ class XdmValue;
 class XdmItem;
 class XdmNode;
 class XdmFunctionItem;
-class XdmMap;
-class XdmArray;
+
 
 /*! An <code>XsltExecutable</code> represents the compiled form of a stylesheet.
  * <p>An XsltExecutable is created by using one of the <code>compile</code> methods on the
