@@ -108,11 +108,7 @@ public class IterateAction extends ForEachAction {
     }
 
     private void checkForBreakInstruction() throws QuitParsingException {
-        XPathContext c = getContext();
-        while (!(c instanceof XPathContextMajor)) {
-            c = c.getCaller();
-        }
-        XPathContextMajor cm = (XPathContextMajor)c;
+        XPathContextMajor cm = getContext().getMajorContext();
         TailCallLoop.TailCallInfo tail = cm.getTailCallInfo();
         if (tail instanceof BreakInstr) {
             // Indicates a saxon:break instruction was encountered: break the loop
