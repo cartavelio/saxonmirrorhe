@@ -21,6 +21,7 @@ public class SaxonCExceptionHandler {
     public static void setErrorDetails(Throwable throwable, SaxonError errorStruct, SaxonCErrorReporter errorReporter) {
 
 
+        String errorMessage = null;
         if(errorReporter != null && errorReporter.getNumberOfErrors() > 0) {
             if(SaxonCAPI.debug) {
                 System.err.println("Java DEBUG: setStaticErrorDetails called = " + errorReporter.getErrors().toString());
@@ -61,6 +62,7 @@ public class SaxonCExceptionHandler {
             if (throwable instanceof SaxonApiException) {
                 exception = (SaxonApiException) throwable;
                 lineNumber = exception.getLineNumber();
+                errorMessage = exception.getMessage();
 
             } if(throwable instanceof NullPointerException) {
 
@@ -69,6 +71,7 @@ public class SaxonCExceptionHandler {
 
             } else {
                 exception = new SaxonApiException(throwable);
+                errorMessage = getAllCausedMessages(throwable);
             }
 
             errorStruct.setLineNumber(lineNumber);
@@ -81,7 +84,7 @@ public class SaxonCExceptionHandler {
 
             }
 
-            setErrorMessage(errorStruct, exception.getMessage(), "Unknown exception");
+            setErrorMessage(errorStruct, errorMessage, "Unknown exception");
 
             if (errorCode != null) {
                 try (final CTypeConversion.CCharPointerHolder holder = CTypeConversion.toCString(errorCode)) {
@@ -117,5 +120,28 @@ public class SaxonCExceptionHandler {
         try(final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(message != null ? message : defaultMessage)) {
             errorStruct.setMessage(holder.get());
         }
+    }
+
+    private static String getAllCausedMessages(Throwable throwable) {
+        StringBuilder builder = new StringBuilder();
+        String previous = null;
+
+        for (Throwable t = throwable; t != null; t = t.getCause()) {
+
+            String message = t.getMessage();
+
+            if (message == null || message.isEmpty()) {
+                message = t.getClass().getSimpleName();
+            }
+            if (!message.equals(previous)) {
+
+                if (!builder.isEmpty()) {
+                    builder.append("\nCaused by: ");
+                }
+                builder.append(message);
+                previous = message;
+            }
+        }
+        return builder.toString();
     }
 }
