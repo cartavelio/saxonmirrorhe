@@ -687,7 +687,6 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
     global wrong_error_results
     global path
     global host_lang
-    global spec
 
     xpath_proc.set_context(xdm_item=test_case_node)
     test_name = test_case_node.get_attribute_value("name")
@@ -799,7 +798,8 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
             if exp is not None:
                 if "XP" == spec.short_spec_name or "XT" == spec.short_spec_name:
                     testxpc = environment.xpath_proc
-                    '''assert_xpc.set_property("sa", "true")'''
+                    if environment.proc.is_schema_aware:
+                        assert_xpc.set_property("sa", "true")
                     testxpc.set_language_version(spec.version)
                     testxpc.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
                     testxpc.declare_namespace("xs", "http://www.w3.org/2001/XMLSchema")
@@ -851,7 +851,8 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
         func(environment.proc)
 
     assert_xpc = environment.proc.new_xpath_processor()
-    '''assert_xpc.set_property("sa", "true")'''
+    if environment.proc.is_schema_aware:
+        assert_xpc.set_property("sa", "true")
     assert_xpc.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
     assert_xpc.declare_namespace("xs", "http://www.w3.org/2001/XMLSchema")
     assert_xpc.declare_namespace("math", "http://www.w3.org/2005/xpath-functions/math")
