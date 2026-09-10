@@ -134,7 +134,7 @@ public abstract class Assignation extends Expression implements LocalBinding {
      */
     @Override
     public int computeDependencies() {
-        int d = super.computeDependencies();
+        int d = super.computeDependencies() | StaticProperty.DEPENDS_ON_OWN_RANGE_VARIABLES;
         // Unset the DEPENDS_ON_LOCAL_VARIABLES bit if the only dependencies are to
         // variables declared within the expression itself (typically, the variable
         // bound by this Assignation)
@@ -151,7 +151,7 @@ public abstract class Assignation extends Expression implements LocalBinding {
     @Override
     public Sequence evaluateVariable(XPathContext context) throws XPathException {
         Sequence actual = context.evaluateLocalVariable(slotNumber);
-        if (!(actual instanceof GroundedValue || actual instanceof NodeInfo)) {
+        if (!(actual instanceof GroundedValue)) {
             actual = actual.materialize();
             context.setLocalVariable(slotNumber, actual);
         }
@@ -362,7 +362,7 @@ public abstract class Assignation extends Expression implements LocalBinding {
      * Get the name of the range variable as a Name or EQName.
      *
      * @return the name of the range variable. For system allocated
-     *         variables, the namespace "http://ns.saxonica.com/anonymous-var"
+     *         variables, the namespace <code>http://ns.saxonica.com/anonymous-var</code>
      *         is used. For names in no namespace, the local name alone is used
      */
 
@@ -537,7 +537,6 @@ public abstract class Assignation extends Expression implements LocalBinding {
     /**
      * Replace all references to the variable bound by this let expression,
      * that occur within the action expression, with the given expression
-     *
      *
      * @param seq the expression
      * @return true if the variable was successfully inlined. (Returns false, for example,

@@ -100,7 +100,20 @@ public abstract class Closure implements Sequence, ContextOriginator {
 
                 savedXPathContext.setStackFrame(stackFrameMap, savedStackFrame);
             }
+        } else if ((expression.getDependencies() & StaticProperty.DEPENDS_ON_OWN_RANGE_VARIABLES) != 0)  {
+
+            // Bug 5913: if the expression does not access external local variables, but uses the stackframe
+            // for range variables declared within the expression itself, we need to allocate a clean
+            // stack frame for use during lazy evaluation
+
+            StackFrame localStackFrame = context.getStackFrame();
+            final SlotManager stackFrameMap = localStackFrame.getStackFrameMap();
+            final Sequence[] savedStackFrame =
+                    new Sequence[stackFrameMap.getNumberOfVariables()];
+            savedXPathContext.setStackFrame(stackFrameMap, savedStackFrame);
         }
+
+
 
         // Make a copy of the context item
         FocusIterator currentIterator = context.getCurrentIterator();
