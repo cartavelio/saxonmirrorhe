@@ -34,15 +34,16 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  */
 public class PullTest {
-
+    private final ConfigTest configTest = new ConfigTest();
+    
     @Test
     public void testPullSource() {
         try {
             // Note: this test fails with the Sun XMLStreamReader because the initial state
             // of the parser is 3 (XML Processing Instruction) rather than 7 (start document)
             // as required by the new StaxSource() constructor.
-            String strStylSheetPath = ConfigTest.DATA_DIR + "books.xsl";
-            String omElemPath = ConfigTest.DATA_DIR + "books.xml";
+            String strStylSheetPath = configTest.getDataDir() + "books.xsl";
+            String omElemPath = configTest.getDataDir() + "books.xml";
             InputStream imp = new FileInputStream(new File(omElemPath));
             InputStreamReader impsr = new InputStreamReader(imp);
             System.setProperty("javax.xml.stream.XMLInputFactory", "com.ctc.wstx.stax.WstxInputFactory");

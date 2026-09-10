@@ -17,10 +17,11 @@ import org.apache.tools.ant.ProjectHelper;
  * that could only be reproduced when Saxon was invoked from Ant.
  */
 public class AntTests {
+    private final ConfigTest configTest = new ConfigTest();
 
     @Test
     public void testTransformTask() {
-        runAnt(ConfigTest.DATA_DIR + "ant/build1.xml");
+        runAnt(configTest.getDataDir() + "ant/build1.xml");
     }
 
     //public void testValidateTask() {
@@ -50,7 +51,7 @@ public class AntTests {
 
 //    public void testXmlCatalog() {
     // removed because it depends too much on the machine setup, e.g CatalogManager.properties
-//        runAnt(ConfigTest.DATA_DIR + "ant/buildWithCatalog.xml");
+//        runAnt(configTest.getDataDir() + "ant/buildWithCatalog.xml");
 //    }
 }
 

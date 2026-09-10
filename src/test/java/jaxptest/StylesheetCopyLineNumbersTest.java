@@ -30,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * and when bytecode is generated.
  */
 public class StylesheetCopyLineNumbersTest {
+    private final ConfigTest configTest = new ConfigTest();
 
     public static void testStylesheetCopyCompiled() throws Exception {
         testStylesheetCopyTree(true);
@@ -42,6 +43,7 @@ public class StylesheetCopyLineNumbersTest {
     }
 
     public static void testStylesheetCopyTree(boolean compile) throws Exception {
+        ConfigTest ctest = new ConfigTest();
         TransformerFactoryImpl factory = new TransformerFactoryImpl();
         factory.getConfiguration().setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, compile);
 
@@ -56,7 +58,7 @@ public class StylesheetCopyLineNumbersTest {
         };
 
         // Make an in memory tiny tree for caching in memory.
-        Source sourceToCache2 = new SAXSource(new InputSource(new FileInputStream(ConfigTest.DATA_DIR + "runtime-error.xsl")));
+        Source sourceToCache2 = new SAXSource(new InputSource(new FileInputStream(ctest.getDataDir() + "runtime-error.xsl")));
         DocumentBuilder docBuilder = new Processor(false).newDocumentBuilder();
         docBuilder.setLineNumbering(true);
         Source cachedTree = docBuilder.build(sourceToCache2).asSource();
@@ -84,10 +86,11 @@ public class StylesheetCopyLineNumbersTest {
     }
 
     public static void testStylesheetCopySax(boolean compile) throws Exception {
+        ConfigTest ctest = new ConfigTest();
         TransformerFactoryImpl factory = new TransformerFactoryImpl();
         factory.getConfiguration().setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, compile);
 
-        Source sourceToCache = new SAXSource(new InputSource(new FileInputStream(ConfigTest.DATA_DIR + "runtime-error.xsl")));
+        Source sourceToCache = new SAXSource(new InputSource(new FileInputStream(ctest.getDataDir() + "runtime-error.xsl")));
 
         // Compile stylesheets from different sources.
         Templates stylesheetSax = factory.newTemplates(sourceToCache);

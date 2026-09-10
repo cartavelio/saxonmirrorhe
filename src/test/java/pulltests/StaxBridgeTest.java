@@ -23,27 +23,26 @@ import static org.junit.jupiter.api.Assertions.*;
  * Test input from a Stax (JSR173) parser
  */
 public class StaxBridgeTest {
+    private final ConfigTest configTest = new ConfigTest();
 
-
+    @Test
     public void testFromStaxToSerializer() {
         try {
             // Use Woodstox as the pull parser by default. The Sun (Zephyr) parser is too buggy...
             System.setProperty("javax.xml.stream.XMLInputFactory", "com.ctc.wstx.stax.WstxInputFactory");
             PipelineConfiguration pipe = new Configuration().makePipelineConfiguration();
             StaxBridge puller = new StaxBridge();
-            File f = new File(ConfigTest.DATA_DIR + "books.xml");
+            File f = new File(configTest.getDataDir() + "books.xml");
             puller.setInputStream(f.toURI().toString(), new FileInputStream(f));
             XMLEmitter emitter = new XMLEmitter();
             emitter.setPipelineConfiguration(pipe);
             emitter.setOutputProperties(new Properties());
-            emitter.setUnicodeWriter(new UTF8Writer(new FileOutputStream(ConfigTest.DATA_DIR + "temp/books.xml")));
+            emitter.setUnicodeWriter(new UTF8Writer(new FileOutputStream(configTest.getDataDir() + "temp/books.xml")));
             NamespaceReducer r = new NamespaceReducer(emitter);
             puller.setPipelineConfiguration(pipe);
             r.setPipelineConfiguration(pipe);
             new PullPushCopier(puller, r).copy();
-        } catch (XPathException e) {
-            fail(e.getMessage());
-        } catch (FileNotFoundException e) {
+        } catch (XPathException | FileNotFoundException e) {
             fail(e.getMessage());
         }
     }
@@ -91,7 +90,7 @@ public class StaxBridgeTest {
             String comment = null;
             String piName = null;
             String piContent = null;
-            File f = new File(ConfigTest.DATA_DIR + "birthdays.xml");
+            File f = new File(configTest.getDataDir() + "birthdays.xml");
             puller.setInputStream(f.toURI().toString(), new FileInputStream(f));
             PullEvent ev;
             while ((ev = puller.next()) != PullEvent.END_OF_INPUT) {

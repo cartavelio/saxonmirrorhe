@@ -9,6 +9,7 @@ import javax.xml.transform.TransformerException;
 //import org.apache.xerces.parsers.SAXParser;
 
 public class DefaultAttributeProblemTest {
+    private final ConfigTest configTest = new ConfigTest();
 
     private static final ErrorListener errorListener = new ErrorListener() {
         @Override
@@ -27,10 +28,10 @@ public class DefaultAttributeProblemTest {
         }
     };
 
-    private static final String dir = ConfigTest.DATA_DIR + "defaultAttTest/";
-    private static final String xslPath = dir + "samples/dita_xsd_based/copy_stylesheet.xsl";
-    private static final String xmlPath = dir + "samples/dita_xsd_based/defAttr.xml";
-    private static final String outPath = dir + "samples/dita_xsd_based/out.xml";
+    private final String dir = configTest.getDataDir() + "defaultAttTest/";
+    private final String xslPath = dir + "samples/dita_xsd_based/copy_stylesheet.xsl";
+    private final String xmlPath = dir + "samples/dita_xsd_based/defAttr.xml";
+    private final String outPath = dir + "samples/dita_xsd_based/out.xml";
 
     @Test
     public void testDummyTest() {

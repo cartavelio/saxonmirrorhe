@@ -29,7 +29,8 @@ import static org.junit.jupiter.api.Assertions.fail;
  * JUnit tests for the s9api XQueryCompiler
  */
 public class TestXQueryCompiler {
-
+    private final ConfigTest configTest = new ConfigTest();
+    
     @Test
     public void testModuleUriResolverNoBaseUri() {
         try {
@@ -435,7 +436,7 @@ public class TestXQueryCompiler {
             StringWriter sw = new StringWriter();
             Serializer out = p.newSerializer(sw);
             out.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
-            StreamSource in = new StreamSource(new File(ConfigTest.DATA_DIR + "books.xml"));
+            StreamSource in = new StreamSource(new File(configTest.getDataDir() + "books.xml"));
             eval.runStreamed(in, out);
             fail("unexpected success");
         } catch (SaxonApiException e) {

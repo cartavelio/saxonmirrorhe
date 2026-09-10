@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * JUnit tests for the s9api XsltTransformer running stylesheets using 1.0 compatibility mode
  */
 public class TestXsltIn10Mode {
+    private ConfigTest configTest = new ConfigTest();
 
     /**
      * Simple test: 1.0 mode works in PE but not in HE
@@ -51,7 +52,7 @@ public class TestXsltIn10Mode {
 
             // Load the source document
             XdmNode input = processor.newDocumentBuilder().build(
-                    new File(ConfigTest.DATA_DIR + "caffo/Input.xml"));
+                    new File(configTest.getDataDir() + "caffo/Input.xml"));
             // Set the root node of the source document to be the initial context node
             transformer.setInitialContextNode(input);
             transformer.transform();
@@ -99,7 +100,7 @@ public class TestXsltIn10Mode {
 
             // Load the source document
             XdmNode input = processor.newDocumentBuilder().build(
-                    new File(ConfigTest.DATA_DIR + "caffo/Input.xml"));
+                    new File(configTest.getDataDir() + "caffo/Input.xml"));
             // Set the root node of the source document to be the initial context node
             transformer.setInitialTemplate(new QName(execute10code ? "foo" : "bar"));
             transformer.transform();

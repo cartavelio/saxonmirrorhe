@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Loads xquery module info by parsing the module text
  */
 public class SumanGantaTest {
+    private final ConfigTest configTest = new ConfigTest();
     private final int mIterations = 2000;
 
     @Test
@@ -43,7 +44,7 @@ public class SumanGantaTest {
             String expression = getTestExpression();
             mConfig = new EnterpriseConfiguration();
             mStaticContext = new StaticQueryContextEE(mConfig);
-            mStaticContext.setBaseURI(new File(ConfigTest.DATA_DIR + "ganta/").toURI().toString());
+            mStaticContext.setBaseURI(new File(configTest.getDataDir() + "ganta/").toURI().toString());
 
             parse(mStaticContext, expression, "justParse", mIterations, aSequential);
         } catch (Exception e) {
@@ -67,9 +68,9 @@ public class SumanGantaTest {
 
             Collection<String> moduleFiles = new ArrayList<String>();
 
-            moduleFiles.add(ConfigTest.DATA_DIR + "ganta/genBPEL.xq");
-            moduleFiles.add(ConfigTest.DATA_DIR + "ganta/hello_notworking.xq");
-            moduleFiles.add(ConfigTest.DATA_DIR + "ganta/avoscentral.xq");
+            moduleFiles.add(configTest.getDataDir() + "ganta/genBPEL.xq");
+            moduleFiles.add(configTest.getDataDir() + "ganta/hello_notworking.xq");
+            moduleFiles.add(configTest.getDataDir() + "ganta/avoscentral.xq");
             addLibs(mStaticContext, moduleFiles);
 
             parse(mStaticContext, expression, "justParse", mIterations, aSequential);

@@ -23,9 +23,10 @@ import static org.junit.jupiter.api.Assertions.fail;
  * tests for handling of exceptions from extension functions while multithreading.
  */
 public class MultithreadedExtensionTest {
+    private final ConfigTest configTest = new ConfigTest();
 
-    private final static String bugs = ConfigTest.BUGS_DIR + "4788/";
-    private final static String temp = ConfigTest.TEMP_DIR;
+    private final String bugs = configTest.getBugsDir() + "4788/";
+    private final String temp = configTest.getTempDir();
 
     @Test
     public void testFailingMultithreadedExtension() { // Bug 4788
@@ -48,7 +49,7 @@ public class MultithreadedExtensionTest {
         assertEquals(threads, finalThreads);
     }
 
-    private static void test(boolean fail) throws Exception {
+    private void test(boolean fail) throws Exception {
         EnterpriseTransformerFactory transformerFactory = new EnterpriseTransformerFactory();
 
         Configuration configuration = Configuration.newConfiguration();

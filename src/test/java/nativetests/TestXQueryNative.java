@@ -42,8 +42,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 // Some tests of the "native" XQuery API
 
 public class TestXQueryNative {
+    private final ConfigTest configTest = new ConfigTest();
     private static final SequenceType showTheBug = SequenceType.ATOMIC_SEQUENCE;
-
 
     private static final String xml =
             "<?xml version='1.0' encoding='UTF-8'?><record><datafield ind1=' '></datafield></record>";
@@ -295,7 +295,7 @@ public class TestXQueryNative {
         Configuration config = Configuration.newConfiguration();
         config.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, true);
         StaticQueryContext sqc = config.newStaticQueryContext();
-        String testDir = ConfigTest.DATA_DIR;
+        String testDir = configTest.getDataDir();
         sqc.setBaseURI(testDir);
         //sqc.declareDefaultCollation("");
         DynamicQueryContext dqc = new DynamicQueryContext(config);
@@ -319,7 +319,7 @@ public class TestXQueryNative {
         Configuration config = Configuration.newConfiguration();
         config.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, true);
         StaticQueryContext sqc = config.newStaticQueryContext();
-        String testDir = ConfigTest.DATA_DIR;
+        String testDir = configTest.getDataDir();
         sqc.setBaseURI(testDir);
         //sqc.declareDefaultCollation("");
         DynamicQueryContext dqc = new DynamicQueryContext(config);

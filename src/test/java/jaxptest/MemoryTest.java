@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  */
 public class MemoryTest {
+    private final ConfigTest configTest = new ConfigTest();
 
     @Test
     @Tag("performance")
@@ -25,7 +26,7 @@ public class MemoryTest {
             System.gc();
             long initFree = getUsedMemory();
             System.err.println("init: " + initFree);
-            StreamSource source = new StreamSource(ConfigTest.XMARK_DIR + "xmark1.xml"); //Use 100Mb for real work
+            StreamSource source = new StreamSource(configTest.getXMarkDir() + "xmark1.xml"); //Use 100Mb for real work
             Configuration config = new Configuration();
             config.getParseOptions().setSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
             config.setTreeModel(Builder.TINY_TREE_CONDENSED);
@@ -47,7 +48,7 @@ public class MemoryTest {
             System.gc();
             long initFree = getUsedMemory();
             System.err.println("init: " + initFree);
-            StreamSource source = new StreamSource(ConfigTest.XMARK_DIR + "xmark1.xml");  //Use 100Mb for real work
+            StreamSource source = new StreamSource(configTest.getXMarkDir() + "xmark1.xml");  //Use 100Mb for real work
             Configuration config = new Configuration();
             config.getParseOptions().setSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
             config.setTreeModel(Builder.LINKED_TREE);

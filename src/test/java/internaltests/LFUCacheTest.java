@@ -23,6 +23,7 @@ import static org.junit.Assert.fail;
  *  Tests of caching
  */
 public class LFUCacheTest {
+    private final ConfigTest configTest = new ConfigTest();
 
     // Test that compiled XPath expressions are cached
 
@@ -32,7 +33,7 @@ public class LFUCacheTest {
             LFUCache<String, String> cache = new LFUCache<>(100);
             IdentityHashMap<XPathExecutable, XPathExecutable> executables = new IdentityHashMap<>();
             Processor processor = new Processor(false);
-//            StreamSource source = new StreamSource(new File(ConfigTest.DATA_DIR + "bible/nt.xml"));
+//            StreamSource source = new StreamSource(new File(configTest.getDataDir() + "bible/nt.xml"));
 //            DocumentBuilder builder = processor.newDocumentBuilder();
 //            XdmNode d = builder.build(source);
             XPathCompiler xpath = processor.newXPathCompiler();
@@ -55,7 +56,7 @@ public class LFUCacheTest {
         try {
             LFUCache<String, String> cache = new LFUCache<>(1000);
             Processor processor = new Processor(false);
-            StreamSource source = new StreamSource(new File(ConfigTest.DATA_DIR + "bible/nt/nt.xml"));
+            StreamSource source = new StreamSource(new File(configTest.getDataDir() + "bible/nt/nt.xml"));
             DocumentBuilder builder = processor.newDocumentBuilder();
             XdmNode doc = builder.build(source);
             int hits = 0;
@@ -84,7 +85,7 @@ public class LFUCacheTest {
         try {
             LFUCache<String, String> cache = new LFUCache<>(1000, true);
             Processor processor = new Processor(false);
-            StreamSource source = new StreamSource(new File(ConfigTest.DATA_DIR + "bible/nt/nt.xml"));
+            StreamSource source = new StreamSource(new File(configTest.getDataDir() + "bible/nt/nt.xml"));
             DocumentBuilder builder = processor.newDocumentBuilder();
             XdmNode doc = builder.build(source);
 

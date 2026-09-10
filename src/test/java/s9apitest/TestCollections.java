@@ -34,7 +34,8 @@ import static org.junit.jupiter.api.Assertions.fail;
  * JUnit tests for handling of Saxon collection URIs and collection URI resolver APIs
  */
 public class TestCollections {
-
+    private final ConfigTest configTest = new ConfigTest();
+    
     private XdmAtomicValue composeURI(String basedir, String additional) {
         if (basedir.startsWith("/")) {
             return new XdmAtomicValue("file://" + basedir + additional);
@@ -50,7 +51,7 @@ public class TestCollections {
             XPathCompiler c = p.newXPathCompiler();
             XPathExecutable exec = c.compile("collection(.)!base-uri(.)");
             XPathSelector eval = exec.load();
-            eval.setContextItem(composeURI(ConfigTest.DATA_DIR, "trax/xml/?select=*.xml"));
+            eval.setContextItem(composeURI(configTest.getDataDir(), "trax/xml/?select=*.xml"));
             XdmValue val = eval.evaluate();
             assertEquals(5, val.size());
         } catch (SaxonApiException e) {
@@ -68,7 +69,7 @@ public class TestCollections {
             c.declareVariable(new QName("b"));
             XPathExecutable exec = c.compile("collection($a||'trax/xml/?match='||encode-for-uri($b))!base-uri(.)");
             XPathSelector eval = exec.load();
-            eval.setVariable(new QName("a"), composeURI(ConfigTest.DATA_DIR, ""));
+            eval.setVariable(new QName("a"), composeURI(configTest.getDataDir(), ""));
             eval.setVariable(new QName("b"), new XdmAtomicValue("[A-Za-z]+\\.xml"));
             XdmValue val = eval.evaluate();
             assertEquals(5, val.size());
@@ -85,7 +86,7 @@ public class TestCollections {
             c.setLanguageVersion("3.0");
             XPathExecutable exec = c.compile("collection(.)!base-uri(.)");
             XPathSelector eval = exec.load();
-            eval.setContextItem(composeURI(ConfigTest.DATA_DIR, "trax/xml/?select=*.xml"));
+            eval.setContextItem(composeURI(configTest.getDataDir(), "trax/xml/?select=*.xml"));
             XdmValue val = eval.evaluate();
             assertEquals(5, val.size());
         } catch (SaxonApiException e) {
@@ -100,7 +101,7 @@ public class TestCollections {
             XPathCompiler c = p.newXPathCompiler();
             XPathExecutable exec = c.compile("collection(.)!base-uri(.)");
             XPathSelector eval = exec.load();
-            eval.setContextItem(composeURI(ConfigTest.DATA_DIR, "trax/xml/?select=*.xml;recurse=yes"));
+            eval.setContextItem(composeURI(configTest.getDataDir(), "trax/xml/?select=*.xml;recurse=yes"));
             XdmValue val = eval.evaluate();
             assertEquals(7, val.size(), "found7");
         } catch (SaxonApiException e) {
@@ -115,7 +116,7 @@ public class TestCollections {
             XPathCompiler c = p.newXPathCompiler();
             XPathExecutable exec = c.compile("collection(.)");
             XPathSelector eval = exec.load();
-            eval.setContextItem(composeURI(ConfigTest.DATA_DIR, "trax/xml/?select=*.xml;recurse=yes;content-type=text/plain"));
+            eval.setContextItem(composeURI(configTest.getDataDir(), "trax/xml/?select=*.xml;recurse=yes;content-type=text/plain"));
             XdmValue val = eval.evaluate();
             assertEquals(7, val.size(), "found7");
             assertTrue(val.itemAt(0) instanceof XdmAtomicValue, "isString");
@@ -131,7 +132,7 @@ public class TestCollections {
             XPathCompiler c = p.newXPathCompiler();
             XPathExecutable exec = c.compile("uri-collection(.)");
             XPathSelector eval = exec.load();
-            eval.setContextItem(composeURI(ConfigTest.DATA_DIR,"trax/xml/?select=*.xml"));
+            eval.setContextItem(composeURI(configTest.getDataDir(),"trax/xml/?select=*.xml"));
             XdmValue val = eval.evaluate();
             assertEquals(5, val.size());
         } catch (SaxonApiException e) {
@@ -146,7 +147,7 @@ public class TestCollections {
             XPathCompiler c = p.newXPathCompiler();
             XPathExecutable exec = c.compile("uri-collection(.)");
             XPathSelector eval = exec.load();
-            eval.setContextItem(composeURI(ConfigTest.DATA_DIR, "trax/xml/?select=*.xml;recurse=yes"));
+            eval.setContextItem(composeURI(configTest.getDataDir(), "trax/xml/?select=*.xml;recurse=yes"));
             XdmValue val = eval.evaluate();
             assertEquals(7, val.size());
         } catch (SaxonApiException e) {
@@ -177,7 +178,7 @@ public class TestCollections {
         XPathCompiler c = p.newXPathCompiler();
         XPathExecutable exec = c.compile("sum(collection(.)!count(//*))");
         XPathSelector eval = exec.load();
-        eval.setContextItem(composeURI(ConfigTest.DATA_DIR, "collection/?select=*.xml;recurse=yes"));
+        eval.setContextItem(composeURI(configTest.getDataDir(), "collection/?select=*.xml;recurse=yes"));
         XdmValue val = eval.evaluate();
         long result = System.currentTimeMillis() - startTime;
         System.err.println("Found " + val + " nodes");
@@ -191,7 +192,7 @@ public class TestCollections {
             XPathCompiler c = p.newXPathCompiler();
             XPathExecutable exec = c.compile("count(collection(.)//* | collection(.)//*)");
             XPathSelector eval = exec.load();
-            eval.setContextItem(composeURI(ConfigTest.DATA_DIR, "collection/?select=*.xml;recurse=yes;stable=yes"));
+            eval.setContextItem(composeURI(configTest.getDataDir(), "collection/?select=*.xml;recurse=yes;stable=yes"));
             XdmValue val = eval.evaluate();
             assertEquals(10680, ((XdmAtomicValue) val).getLongValue());
         } catch (SaxonApiException e) {
@@ -206,7 +207,7 @@ public class TestCollections {
             XPathCompiler c = p.newXPathCompiler();
             XPathExecutable exec = c.compile("count(collection(.)//* | collection(.)//*)");
             XPathSelector eval = exec.load();
-            eval.setContextItem(composeURI(ConfigTest.DATA_DIR, "collection/?select=*.xml;recurse=yes;stable=no"));
+            eval.setContextItem(composeURI(configTest.getDataDir(), "collection/?select=*.xml;recurse=yes;stable=no"));
             XdmValue val = eval.evaluate();
             assertEquals(21360, ((XdmAtomicValue) val).getLongValue());
         } catch (SaxonApiException e) {
@@ -221,7 +222,7 @@ public class TestCollections {
             XPathCompiler c = p.newXPathCompiler();
             XPathExecutable exec = c.compile("collection(.)/* instance of element(*, xs:untyped)");
             XPathSelector eval = exec.load();
-            eval.setContextItem(composeURI(ConfigTest.DATA_DIR, "?select=books.xml;recurse=no;validation=strict"));
+            eval.setContextItem(composeURI(configTest.getDataDir(), "?select=books.xml;recurse=no;validation=strict"));
             XdmValue val = eval.evaluate();
             assertEquals(false, ((XdmAtomicValue) val).getBooleanValue());
         } catch (SaxonApiException e) {
@@ -236,7 +237,7 @@ public class TestCollections {
             XPathCompiler c = p.newXPathCompiler();
             XPathExecutable exec = c.compile("collection(.)/* instance of element(*, xs:untyped)");
             XPathSelector eval = exec.load();
-            eval.setContextItem(composeURI(ConfigTest.DATA_DIR, "?select=books.xml;recurse=no;validation=skip"));
+            eval.setContextItem(composeURI(configTest.getDataDir(), "?select=books.xml;recurse=no;validation=skip"));
             XdmValue val = eval.evaluate();
             assertEquals(true, ((XdmAtomicValue) val).getBooleanValue());
         } catch (SaxonApiException e) {
@@ -254,7 +255,7 @@ public class TestCollections {
             XPathExecutable exec = c.compile("for $X in (collection(.))" +
                 "return (if ($X instance of node()) then name($X/*) else $X('id'))");
             XPathSelector eval = exec.load();
-            eval.setContextItem(composeURI(ConfigTest.DATA_DIR, "collection.xml"));
+            eval.setContextItem(composeURI(configTest.getDataDir(), "collection.xml"));
             XdmValue val = eval.evaluate();
             assertEquals( "1.0e0\n\"BOOKLIST\"", val.toString());
         } catch (SaxonApiException e) {
@@ -276,7 +277,7 @@ public class TestCollections {
             XPathExecutable exec = c.compile("for $X in (collection(.))" +
                                                      "return (if ($X instance of node()) then name($X/*) else $X('id'))");
             XPathSelector eval = exec.load();
-            eval.setContextItem(composeURI(ConfigTest.DATA_DIR, "collection.xml"));
+            eval.setContextItem(composeURI(configTest.getDataDir(), "collection.xml"));
             XdmValue val = eval.evaluate();
             assertEquals("1.0e0\n\"BOOKLIST\"", val.toString());
         } catch (SaxonApiException e) {
@@ -294,7 +295,7 @@ public class TestCollections {
             c.setLanguageVersion("3.1");
             XPathExecutable exec = c.compile("count(collection(.))");
             XPathSelector eval = exec.load();
-            eval.setContextItem(composeURI(ConfigTest.DATA_DIR, "collection2/?select=*"));
+            eval.setContextItem(composeURI(configTest.getDataDir(), "collection2/?select=*"));
             XdmValue val = eval.evaluate();
             assertEquals(2, Integer.parseInt(val.toString()));
         } catch (SaxonApiException e) {
@@ -310,7 +311,7 @@ public class TestCollections {
             c.setLanguageVersion("3.1");
             XPathExecutable exec = c.compile("collection(.)");
             XPathSelector eval = exec.load();
-            eval.setContextItem(composeURI(ConfigTest.DATA_DIR, "collection2/?select=*.xml;metadata=yes"));
+            eval.setContextItem(composeURI(configTest.getDataDir(), "collection2/?select=*.xml;metadata=yes"));
             XdmValue val = eval.evaluate();
             for (XdmItem item : val) {
                 assertTrue(item instanceof XdmFunctionItem);
@@ -338,7 +339,7 @@ public class TestCollections {
                            "return if ($m?content-type='application/xml') then $m?fetch() else ()";
             XPathExecutable exec = c.compile(query);
             XPathSelector eval = exec.load();
-            eval.setContextItem(composeURI(ConfigTest.DATA_DIR, "collection2"));
+            eval.setContextItem(composeURI(configTest.getDataDir(), "collection2"));
             XdmValue val = eval.evaluate();
             for (XdmItem item : val) {
                 assertTrue(item instanceof XdmNode);
@@ -375,7 +376,7 @@ public class TestCollections {
             XQueryExecutable exec = c.compile("for $X in (collection(.))" +
                 "return if ($X instance of node()) then name($X/*) else $X('id')");
             XQueryEvaluator eval = exec.load();
-            eval.setContextItem(composeURI(ConfigTest.DATA_DIR, "collection2.xml"));
+            eval.setContextItem(composeURI(configTest.getDataDir(), "collection2.xml"));
             XdmValue val = eval.evaluate();
             assertEquals("1.0e0\n\"html\"", val.toString());
         } catch (SaxonApiException e) {
@@ -390,7 +391,7 @@ public class TestCollections {
             XQueryCompiler c = p.newXQueryCompiler();
             XQueryExecutable exec = c.compile("count(collection(.))");
             XQueryEvaluator eval = exec.load();
-            eval.setContextItem(composeURI(ConfigTest.DATA_DIR, "collection3.xml"));
+            eval.setContextItem(composeURI(configTest.getDataDir(), "collection3.xml"));
             XdmValue val = eval.evaluate();
             assertEquals(3, Integer.parseInt(val.toString()));
         } catch (SaxonApiException e) {
@@ -406,7 +407,7 @@ public class TestCollections {
             c.setLanguageVersion("3.1");
             XPathExecutable exec = c.compile("count(collection(.))");
             XPathSelector eval = exec.load();
-            eval.setContextItem(composeURI(ConfigTest.DATA_DIR, "collection3/saxon9-test.jar"));
+            eval.setContextItem(composeURI(configTest.getDataDir(), "collection3/saxon9-test.jar"));
             XdmValue val = eval.evaluate();
             assertEquals(34, Integer.parseInt(val.toString()));
         } catch (SaxonApiException e) {
@@ -421,7 +422,7 @@ public class TestCollections {
             XQueryCompiler c = p.newXQueryCompiler();
             XQueryExecutable exec = c.compile("for $c at $p in collection(.) return ($p || ' ' || local-name-from-QName(saxon:type-annotation($c)))");
             XQueryEvaluator eval = exec.load();
-            eval.setContextItem(composeURI(ConfigTest.DATA_DIR, "collection3/saxon9-test.jar"));
+            eval.setContextItem(composeURI(configTest.getDataDir(), "collection3/saxon9-test.jar"));
             XdmValue val = eval.evaluate();
             assertTrue(val.toString().contains("34 base64Binary"));
         } catch (SaxonApiException e) {
@@ -437,7 +438,7 @@ public class TestCollections {
             XQueryCompiler c = p.newXQueryCompiler();
             XQueryExecutable exec = c.compile("for $x at $p in uri-collection(.) return ($p || ' ' || xs:string($x))");
             XQueryEvaluator eval = exec.load();
-            eval.setContextItem(composeURI(ConfigTest.DATA_DIR, "collection3/saxon9-test.jar"));
+            eval.setContextItem(composeURI(configTest.getDataDir(), "collection3/saxon9-test.jar"));
             XdmValue val = eval.evaluate();
             System.out.println(val.toString());
             assertTrue(true, "Uri retrieved successfully: ");
@@ -457,7 +458,7 @@ public class TestCollections {
                 "case 'SAXONICA.RSA' return true()" +
                 "default return false()");
             XQueryEvaluator eval = exec.load();
-            eval.setContextItem(composeURI(ConfigTest.DATA_DIR, "collection3/saxon9-test.jar?select=META-INF/*"));
+            eval.setContextItem(composeURI(configTest.getDataDir(), "collection3/saxon9-test.jar?select=META-INF/*"));
             XdmValue val = eval.evaluate();
             assertEquals(true, ((XdmAtomicValue) val.itemAt(1)).getBooleanValue());
         } catch (SaxonApiException e) {
@@ -473,7 +474,7 @@ public class TestCollections {
             XQueryExecutable exec = c.compile("for $x in collection(.) return " +
                 "if($x instance of node()) then true() else false()");
             XQueryEvaluator eval = exec.load();
-            eval.setContextItem(composeURI(ConfigTest.DATA_DIR, "collection3/saxon9he.jar?select=*.xsl;validation=skip"));
+            eval.setContextItem(composeURI(configTest.getDataDir(), "collection3/saxon9he.jar?select=*.xsl;validation=skip"));
             XdmValue val = eval.evaluate();
             assertEquals(true, ((XdmAtomicValue) val.itemAt(1)).getBooleanValue());
         } catch (SaxonApiException e) {
@@ -489,7 +490,7 @@ public class TestCollections {
             XQueryExecutable exec = c.compile("for $x in collection(.) return " +
                                                       "if($x instance of node()) then true() else false()");
             XQueryEvaluator eval = exec.load();
-            eval.setContextItem(composeURI(ConfigTest.DATA_DIR, "collection3/saxon9he.jar?select=*.xsl;validation=skip;content-type=text/plain"));
+            eval.setContextItem(composeURI(configTest.getDataDir(), "collection3/saxon9he.jar?select=*.xsl;validation=skip;content-type=text/plain"));
             XdmValue val = eval.evaluate();
             assertEquals(false, ((XdmAtomicValue) val.itemAt(1)).getBooleanValue());
         } catch (SaxonApiException e) {
@@ -505,7 +506,7 @@ public class TestCollections {
             c.setLanguageVersion("3.1");
             XPathExecutable exec = c.compile("collection(.)");
             XPathSelector eval = exec.load();
-            eval.setContextItem(composeURI(ConfigTest.DATA_DIR, "collection3/saxon9-test.jar?metadata=yes"));
+            eval.setContextItem(composeURI(configTest.getDataDir(), "collection3/saxon9-test.jar?metadata=yes"));
             XdmValue val = eval.evaluate();
             for (XdmItem item : val) {
                 XdmFunctionItem map = (XdmFunctionItem)item;
@@ -527,7 +528,7 @@ public class TestCollections {
             config.setCollectionFinder(new CollectionFinder() {
                 @Override
                 public ResourceCollection findCollection(XPathContext context, String collectionURI) throws XPathException {
-                    return new DirectoryCollection(config, "http://example.com/collection", new File(ConfigTest.DATA_DIR + "trax/"),
+                    return new DirectoryCollection(config, "http://example.com/collection", new File(configTest.getDataDir() + "trax/"),
                         new URIQueryParameters("select=*.xml;recurse=yes", context.getConfiguration()));
                 }
             });
@@ -550,7 +551,7 @@ public class TestCollections {
             Processor p = new Processor(true);
             final Configuration config = p.getUnderlyingConfiguration();
             config.setCollectionFinder((context, collectionUri) ->
-                                               new DirectoryCollection(config, "http://example.com/collection", new File(ConfigTest.DATA_DIR + "trax/"),
+                                               new DirectoryCollection(config, "http://example.com/collection", new File(configTest.getDataDir() + "trax/"),
                                                                        new URIQueryParameters("select=*.xml;recurse=yes", context.getConfiguration())));
 
             XQueryCompiler c = p.newXQueryCompiler();
@@ -577,7 +578,7 @@ public class TestCollections {
                     (context, collectionUri) ->
                             new DirectoryCollection(p.getUnderlyingConfiguration(),
                                                     "http://example.com/collection",
-                                                    new File(ConfigTest.DATA_DIR + "trax/"),
+                                                    new File(configTest.getDataDir() + "trax/"),
                                                     new URIQueryParameters("select=*.xml;recurse=yes",
                                                                            context.getConfiguration())));
 
@@ -602,7 +603,7 @@ public class TestCollections {
             XQueryExecutable exec = c.compile("for $x in collection(.) return " +
                                                       "if($x instance of xs:string) then true() else false()");
             XQueryEvaluator eval = exec.load();
-            eval.setContextItem(composeURI(ConfigTest.DATA_DIR, "ganta"));
+            eval.setContextItem(composeURI(configTest.getDataDir(), "ganta"));
             XdmValue val = eval.evaluate();
             assertEquals(6, val.size());
             for (XdmItem item : val) {
@@ -628,7 +629,7 @@ public class TestCollections {
             XQueryExecutable exec = c.compile("for $x in collection(.) return " +
                                                       "if($x instance of xs:string) then true() else false()");
             XQueryEvaluator eval = exec.load();
-            eval.setContextItem(composeURI(ConfigTest.DATA_DIR, "ganta"));
+            eval.setContextItem(composeURI(configTest.getDataDir(), "ganta"));
             XdmValue val = eval.evaluate();
             assertEquals(6, val.size());
             for (XdmItem item : val) {
@@ -645,8 +646,8 @@ public class TestCollections {
             Processor p = new Processor(true);
             Configuration config = p.getUnderlyingConfiguration();
             List<File> contents = new ArrayList<>();
-            contents.add(new File(ConfigTest.DATA_DIR + "trax/xml/cities.xml"));
-            contents.add(new File(ConfigTest.DATA_DIR + "trax/xml/baz.xml"));
+            contents.add(new File(configTest.getDataDir() + "trax/xml/cities.xml"));
+            contents.add(new File(configTest.getDataDir() + "trax/xml/baz.xml"));
             config.registerCollection("ftp://myCollection", new AbstractResourceCollection(config) {
                 @Override
                 public Iterator<String> getResourceURIs(XPathContext context) throws XPathException {
@@ -688,8 +689,9 @@ public class TestCollections {
     public static class Finder implements CollectionFinder {
         @Override
         public ResourceCollection findCollection(XPathContext context, String collectionURI) throws XPathException {
+            ConfigTest ctest = new ConfigTest();
             if (collectionURI.equals("http://example.com/collection")) {
-                File dir = new File(ConfigTest.DATA_DIR + "collection");
+                File dir = new File(ctest.getDataDir() + "collection");
                 URIQueryParameters params = new URIQueryParameters("select=*.xml", context.getConfiguration());
                 return new DirectoryCollection(context.getConfiguration(), collectionURI, dir, params);
             } else {
@@ -730,7 +732,7 @@ public class TestCollections {
             XQueryExecutable exec = c.compile("for $x in collection(.) return " +
                                                       "if($x instance of node()) then true() else false()");
             XQueryEvaluator eval = exec.load();
-            eval.setContextItem(composeURI(ConfigTest.DATA_DIR, "collecton_test_doc.docx?select=*.xml;validation=skip;content-type=text/plain"));
+            eval.setContextItem(composeURI(configTest.getDataDir(), "collecton_test_doc.docx?select=*.xml;validation=skip;content-type=text/plain"));
             XdmValue val = eval.evaluate();
             assertEquals(false, ((XdmAtomicValue) val.itemAt(1)).getBooleanValue());
         } catch (SaxonApiException e) {

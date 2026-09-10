@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class TestReflexion {
-
+    private final ConfigTest configTest = new ConfigTest();
     private final static boolean BYTECODE = false;
 
     private XQueryCompiler makeCompiler() {
@@ -760,6 +760,7 @@ public class TestReflexion {
     private static void testOverrideFunctionXslt(String xsl, boolean override) {
         // Bug #4111
         try {
+            ConfigTest ctest = new ConfigTest();
             Processor proc = new Processor(true);
             XsltCompiler comp = proc.newXsltCompiler();
             comp.setJustInTimeCompilation(false);
@@ -768,8 +769,8 @@ public class TestReflexion {
             XsltExecutable exec1 = comp.compile(new StreamSource(sr));
             List<XsltExecutable> execs = new ArrayList<>();
             execs.add(exec1);
-            exec1.export(new FileOutputStream(ConfigTest.DATA_DIR + "sandpit/export.sef"));
-            XsltExecutable exec2 = comp.loadExecutablePackage(new File(ConfigTest.DATA_DIR + "sandpit/export.sef").toURI());
+            exec1.export(new FileOutputStream(ctest.getDataDir() + "sandpit/export.sef"));
+            XsltExecutable exec2 = comp.loadExecutablePackage(new File(ctest.getDataDir() + "sandpit/export.sef").toURI());
             execs.add(exec2);
             for (XsltExecutable exec : execs) {
                 XsltTransformer trans = exec.load();

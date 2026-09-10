@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Test for s9api serialization
  */
 public class SerializerTests {
+    private final ConfigTest configTest = new ConfigTest();
 
     @Test
     public void testTemplatesOutputProperties() {
@@ -194,7 +195,7 @@ public class SerializerTests {
         // a problem. It's unclear to ndw how platform-specific this test
         // might be.
         String cwd = System.getProperty("user.dir");
-        String temp = ConfigTest.DATA_DIR + "temp";
+        String temp = configTest.getDataDir() + "temp";
         System.setProperty("user.dir", temp);
 
         try {
@@ -372,11 +373,11 @@ public class SerializerTests {
 
         TransformerFactory tf = new net.sf.saxon.TransformerFactoryImpl();
 
-        Source templateSource = new StreamSource(new FileInputStream(ConfigTest.DATA_DIR + "davis/formatter.xsl"));
+        Source templateSource = new StreamSource(new FileInputStream(configTest.getDataDir() + "davis/formatter.xsl"));
 
         Transformer t = tf.newTransformer(templateSource);
 
-        Source inputSource = new StreamSource(new FileInputStream(ConfigTest.DATA_DIR + "davis/inputData.xml"));
+        Source inputSource = new StreamSource(new FileInputStream(configTest.getDataDir() + "davis/inputData.xml"));
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         Result result = new StreamResult(os);
         t.transform(inputSource, result);
@@ -596,7 +597,7 @@ public class SerializerTests {
                         "</xsl:stylesheet>";
         String xslPath = "test.xsl";
         String xmlPath = "test.xml";
-        String outPath = ConfigTest.DATA_DIR + "output.xml";
+        String outPath = configTest.getDataDir() + "output.xml";
         // Create transformer
         File xslFile = new File(xslPath);
         InputSource inputSource = new InputSource(xslFile.toURI().toString());
@@ -651,8 +652,8 @@ public class SerializerTests {
     @Test
     public void testNextInChainPisoiTest() {
         try {
-            String xslPath = ConfigTest.DATA_DIR + "next-in-chain/main.xsl";
-            String xmlPath = ConfigTest.DATA_DIR + "next-in-chain/test.xml";
+            String xslPath = configTest.getDataDir() + "next-in-chain/main.xsl";
+            String xmlPath = configTest.getDataDir() + "next-in-chain/test.xml";
 
             // Create transformer
             File xslFile = new File(xslPath);
@@ -668,7 +669,7 @@ public class SerializerTests {
             // Output stream result
             StringWriter sw = new StringWriter();
             Result outputTarget = new StreamResult(sw);
-            outputTarget.setSystemId(new File(ConfigTest.DATA_DIR + "next-in-chain/dummy-output.xml").toURI().toASCIIString());
+            outputTarget.setSystemId(new File(configTest.getDataDir() + "next-in-chain/dummy-output.xml").toURI().toASCIIString());
 
             // Run transformation
             System.out.println("Run transformation...");

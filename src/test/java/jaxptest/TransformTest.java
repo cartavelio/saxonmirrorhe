@@ -33,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  */
 public class TransformTest  {
+    private final ConfigTest configTest = new ConfigTest();
 
     @Test
     public void testStreamingViaJaxp() {
@@ -98,8 +99,8 @@ public class TransformTest  {
             StreamingTransformerFactory strf = new StreamingTransformerFactory();
             strf.setAttribute(FeatureKeys.TIMING, true);
             Transformer _transformer = strf.newTransformer(src);
-            _transformer.setParameter("input-uri", new File(ConfigTest.DATA_DIR + "books.xml").toURI().toString());
-            InputStream is = new FileInputStream(new File(ConfigTest.DATA_DIR + "books.xml"));
+            _transformer.setParameter("input-uri", new File(configTest.getDataDir() + "books.xml").toURI().toString());
+            InputStream is = new FileInputStream(new File(configTest.getDataDir() + "books.xml"));
             Reader reader = new InputStreamReader(is, "ISO-8859-1");
             OutputStream out = System.out;
             _transformer.transform(new StreamSource(reader), new StreamResult(System.out));

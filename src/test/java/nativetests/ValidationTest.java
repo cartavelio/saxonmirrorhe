@@ -27,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Test options on schema validation interfaces
  */
 public class ValidationTest {
+    private final ConfigTest configTest = new ConfigTest();
 
     private class LocalErrorListener implements ErrorReporter {
         public int warnings = 0;
@@ -52,7 +53,7 @@ public class ValidationTest {
         LocalErrorListener listener = new LocalErrorListener();
         try {
             EnterpriseConfiguration config = new EnterpriseConfiguration();
-            config.addSchemaSource(new StreamSource(new File(ConfigTest.DATA_DIR + "books.xsd")), listener);
+            config.addSchemaSource(new StreamSource(new File(configTest.getDataDir() + "books.xsd")), listener);
             StringWriter sw = new StringWriter();
             Receiver out = config.getSerializerFactory().getReceiver(new StreamResult(sw));
             ParseOptions options = new ParseOptions();
@@ -82,7 +83,7 @@ public class ValidationTest {
         try {
             EnterpriseConfiguration config = new EnterpriseConfiguration();
             config.setConfigurationProperty(FeatureKeys.VALIDATION_WARNINGS, true);
-            config.addSchemaSource(new StreamSource(new File(ConfigTest.DATA_DIR + "books.xsd")), listener);
+            config.addSchemaSource(new StreamSource(new File(configTest.getDataDir() + "books.xsd")), listener);
             SerializationProperties props = new SerializationProperties();
             props.setProperty("omit-xml-declaration", "yes");
             Receiver out = config.getSerializerFactory().getReceiver(new StreamResult(sw), props);
@@ -113,7 +114,7 @@ public class ValidationTest {
             EnterpriseConfiguration config = new EnterpriseConfiguration();
             config.setConfigurationProperty(FeatureKeys.VALIDATION_WARNINGS, true);
             config.setConfigurationProperty(FeatureKeys.VALIDATION_COMMENTS, true);
-            config.addSchemaSource(new StreamSource(new File(ConfigTest.DATA_DIR + "books.xsd")), listener);
+            config.addSchemaSource(new StreamSource(new File(configTest.getDataDir() + "books.xsd")), listener);
             Properties props = new Properties();
             props.setProperty("omit-xml-declaration", "yes");
             Receiver out = config.getSerializerFactory().getReceiver(new StreamResult(sw), new SerializationProperties(props));

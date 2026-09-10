@@ -15,6 +15,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class CommandTests {
+    private final ConfigTest configTest = new ConfigTest();
     private static class RetentiveLogger extends Logger {
 
         private final List<String> output = new ArrayList<>();
@@ -66,8 +67,8 @@ public class CommandTests {
     @Test
     public void testWithoutCatalog() {
         String[] args = {
-                "-xsl:" + ConfigTest.DATA_DIR + "resolvers/style.xsl",
-                "-s:" + ConfigTest.DATA_DIR + "resolvers/input.xml",
+                "-xsl:" + configTest.getDataDir() + "resolvers/style.xsl",
+                "-s:" + configTest.getDataDir() + "resolvers/input.xml",
                 "-quit:off"
         };
         try {
@@ -82,9 +83,9 @@ public class CommandTests {
     @Test
     public void testWithCatalog() {
         String[] args = {
-                "-xsl:" + ConfigTest.DATA_DIR + "resolvers/style.xsl",
-                "-s:" + ConfigTest.DATA_DIR + "resolvers/input.xml",
-                "-catalog:" + ConfigTest.DATA_DIR + "resolvers/catalog.xml",
+                "-xsl:" + configTest.getDataDir() + "resolvers/style.xsl",
+                "-s:" + configTest.getDataDir() + "resolvers/input.xml",
+                "-catalog:" + configTest.getDataDir() + "resolvers/catalog.xml",
                 "-quit:off"
         };
         try {

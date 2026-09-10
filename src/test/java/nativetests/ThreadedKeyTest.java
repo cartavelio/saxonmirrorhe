@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Test that use of keys is threadsafe.
  */
 public class ThreadedKeyTest {
-
+    private final ConfigTest configTest = new ConfigTest();
 
     private static final String keyXsl =
             "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" version=\"2.0\">\n" +
@@ -43,7 +43,7 @@ public class ThreadedKeyTest {
     public void testKeyTransformationThreaded() {
         try {
             Configuration config = new Configuration();
-            final NodeInfo doc = config.buildDocumentTree(new StreamSource(ConfigTest.DATA_DIR + "othello.xml")).getRootNode();
+            final NodeInfo doc = config.buildDocumentTree(new StreamSource(configTest.getDataDir() + "othello.xml")).getRootNode();
             TransformerFactory factory = new net.sf.saxon.TransformerFactoryImpl(config);
             StreamSource styleSource = new StreamSource(new StringReader(keyXsl));
             final Templates templates = factory.newTemplates(styleSource);

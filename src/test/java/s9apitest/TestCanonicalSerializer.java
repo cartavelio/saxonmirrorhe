@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * The effect is tested by comparing the results with the XOM Canonicalizer.
  */
 public class TestCanonicalSerializer {
+    private final ConfigTest configTest = new ConfigTest();
 
     private void compareCanonical(File input) {
         try {
@@ -72,16 +73,16 @@ public class TestCanonicalSerializer {
 
     @Test
     public void testCanonicalization1() {
-        compareCanonical(new File(ConfigTest.DATA_DIR + "bills.xml"));
-        compareCanonical(new File(ConfigTest.DATA_DIR + "categories.xml"));
-        compareCanonical(new File(ConfigTest.DATA_DIR + "collection.xml"));
-        compareCanonical(new File(ConfigTest.DATA_DIR + "goToWork.xml"));
-        compareCanonical(new File(ConfigTest.DATA_DIR + "schema-with-param.xsd"));
+        compareCanonical(new File(configTest.getDataDir() + "bills.xml"));
+        compareCanonical(new File(configTest.getDataDir() + "categories.xml"));
+        compareCanonical(new File(configTest.getDataDir() + "collection.xml"));
+        compareCanonical(new File(configTest.getDataDir() + "goToWork.xml"));
+        compareCanonical(new File(configTest.getDataDir() + "schema-with-param.xsd"));
     }
 
     @Test
     public void testCanonicalization2() {
-        File dir = new File (ConfigTest.DATA_DIR + "collection");
+        File dir = new File (configTest.getDataDir() + "collection");
         for (File file : dir.listFiles()) {
             if (!file.isDirectory() && !file.getName().endsWith("atrs15.xml")) {
                 System.err.println("Processing " + file);
@@ -92,12 +93,12 @@ public class TestCanonicalSerializer {
 
     @Test
     public void testCanonicalization3() {
-        compareCanonical(new File(ConfigTest.DATA_DIR + "collection/axes268.xml"));
+        compareCanonical(new File(configTest.getDataDir() + "collection/axes268.xml"));
     }
 
     @Test
     public void testCanonicalization4() {
-        compareCanonical(new File(ConfigTest.DATA_DIR + "collection/expr80.xml"));
+        compareCanonical(new File(configTest.getDataDir() + "collection/expr80.xml"));
     }
 
 

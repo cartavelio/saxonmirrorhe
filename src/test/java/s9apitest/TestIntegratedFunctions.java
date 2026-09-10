@@ -31,7 +31,8 @@ import static org.junit.jupiter.api.Assertions.fail;
  *  JUnit tests for integrated extension functions in XSLT, XQuery, and XPath
  */
 public class TestIntegratedFunctions {
-
+    private final ConfigTest configTest = new ConfigTest();
+    
     /**
      * Test integrated extension function in XSLT
      */
@@ -106,6 +107,7 @@ public class TestIntegratedFunctions {
     private static void testOverrideFunctionXslt(String xsl, boolean override) {
         // Bug #4111
         try {
+            ConfigTest ctest = new ConfigTest();
             Processor proc = new Processor(true);
             proc.registerExtensionFunction(new SqrtFunction());
             XsltCompiler comp = proc.newXsltCompiler();
@@ -115,8 +117,8 @@ public class TestIntegratedFunctions {
             XsltExecutable exec1 = comp.compile(new StreamSource(sr));
             List<XsltExecutable> execs = new ArrayList<>();
             execs.add(exec1);
-            exec1.export(new FileOutputStream(ConfigTest.DATA_DIR + "sandpit/export.sef"));
-            XsltExecutable exec2 = comp.loadExecutablePackage(new File(ConfigTest.DATA_DIR + "sandpit/export.sef").toURI());
+            exec1.export(new FileOutputStream(ctest.getDataDir() + "sandpit/export.sef"));
+            XsltExecutable exec2 = comp.loadExecutablePackage(new File(ctest.getDataDir() + "sandpit/export.sef").toURI());
             execs.add(exec2);
             for (XsltExecutable exec : execs) {
                 XsltTransformer trans = exec.load();

@@ -28,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class TestIdentityTransformer {
+    private final ConfigTest configTest = new ConfigTest();
 
     @Test
     public void testIdentityTransformToDom() {
@@ -231,7 +232,7 @@ public class TestIdentityTransformer {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setNamespaceAware(true);
             DocumentBuilder db = factory.newDocumentBuilder();
-            Document doc = db.parse(new FileInputStream(ConfigTest.XMARK_DIR + "xmark1.xml"));
+            Document doc = db.parse(new FileInputStream(configTest.getXMarkDir() + "xmark1.xml"));
 
             Transformer saxon = new TransformerFactoryImpl().newTransformer();
             Transformer xalan = saxon; //new com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl().newTransformer();

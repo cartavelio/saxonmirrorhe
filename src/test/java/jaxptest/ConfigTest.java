@@ -30,13 +30,48 @@ import static org.junit.jupiter.api.Assertions.*;
  *  Test use of configuration files
  */
 public class ConfigTest {
+    private String DATA_DIR = null;
+    private String TEMP_DIR = null;
+    private String BUGS_DIR = null;
+    private String XMARK_DIR = null;
 
-    public static final String DATA_DIR = junitDataDirectory();
-    public static final String TEMP_DIR = junitTempDirectory();
-    public static final String BUGS_DIR = junitBugsDirectory();
-    public static final String XMARK_DIR = junitXMarkDirectory();
+    public ConfigTest() {
+        // The directories above used to be static final, but that had the nasty consequence
+        // that a failure of those methods caused the ConfigTest constructor to fail which
+        // in turn was quite tricky to debug, especially in a remote CI environment.
+        // Norm reworked this class, and related classes, so that the values are constructed
+        // once, but not during the constructor.
+    }
 
-    public static String junitDataDirectory() {
+    public String getDataDir() {
+        if (DATA_DIR == null) {
+            DATA_DIR = junitDataDirectory();
+        }
+        return DATA_DIR;
+    }
+
+    public String getTempDir() {
+        if (TEMP_DIR == null) {
+            TEMP_DIR = junitTempDirectory();
+        }
+        return TEMP_DIR;
+    }
+
+    public String getBugsDir() {
+        if (BUGS_DIR == null) {
+            BUGS_DIR = junitBugsDirectory();
+        }
+        return BUGS_DIR;
+    }
+
+    public String getXMarkDir() {
+        if (XMARK_DIR == null) {
+            XMARK_DIR = junitXMarkDirectory();
+        }
+        return XMARK_DIR;
+    }
+
+    private static String junitDataDirectory() {
         File dir = null;
         String envar = "SAXON_TEST_DATA";
         String env = System.getenv(envar);
@@ -59,7 +94,7 @@ public class ConfigTest {
         return path;
     }
 
-    public static String junitTempDirectory() {
+    private static String junitTempDirectory() {
         File dir = null;
         try {
             dir = null;
@@ -98,7 +133,7 @@ public class ConfigTest {
         return path;
     }
 
-    public static String junitBugsDirectory() {
+    private static String junitBugsDirectory() {
         File dir = null;
         String envar = "SAXON_BUGS_DATA";
         String env = System.getenv(envar);
@@ -121,7 +156,7 @@ public class ConfigTest {
         return path;
     }
 
-    public static String junitXMarkDirectory() {
+    private static String junitXMarkDirectory() {
         File dir = null;
         String envar = "SAXON_XMARK_DATA";
         String env = System.getenv(envar);
@@ -149,7 +184,7 @@ public class ConfigTest {
     public void testGeneralConfiguration() {
         try {
             Configuration config = new ConfigurationReader().makeConfiguration(
-                    new StreamSource(DATA_DIR + "config.xml"));
+                    new StreamSource(getDataDir() + "config.xml"));
             assertTrue(config.isLineNumbering(), "lineNumbering?");
             assertEquals(Boolean.TRUE, config.getConfigurationProperty(Feature.USE_TYPED_VALUE_CACHE), "tvc?");
         } catch (XPathException e) {
@@ -167,7 +202,7 @@ public class ConfigTest {
     public void testJaxpConfiguration() {
         try {
             TransformerFactoryImpl factory = new TransformerFactoryImpl();
-            factory.setAttribute(FeatureKeys.CONFIGURATION_FILE, DATA_DIR + "config.xml");
+            factory.setAttribute(FeatureKeys.CONFIGURATION_FILE, getDataDir() + "config.xml");
             Configuration config = factory.getConfiguration();
             assertTrue(config.isLineNumbering(), "lineNumbering?");
             assertEquals(Boolean.TRUE, config.getConfigurationProperty(Feature.USE_TYPED_VALUE_CACHE), "tvc?");
@@ -275,15 +310,15 @@ public class ConfigTest {
                             "<global timing='true'/>\n" +
                             "<xsd useXsiSchemaLocation='false'/>\n" +
                             "<resources>\n" +
-                                "<schemaDocument>file:///" + DATA_DIR + "books.xsd</schemaDocument>\n" +
+                                "<schemaDocument>file:///" + getDataDir() + "books.xsd</schemaDocument>\n" +
                             "</resources>\n" +
                         "</configuration>";
             Processor proc = new Processor(new StreamSource(new StringReader(config)));
             SchemaManager sm = proc.getSchemaManager();
             SchemaValidator v = sm.newSchemaValidator();
-            v.validate(new StreamSource(new File(DATA_DIR + "books.xml")));
+            v.validate(new StreamSource(new File(getDataDir() + "books.xml")));
             try {
-                v.validate(new StreamSource(new File(DATA_DIR + "config.xml")));
+                v.validate(new StreamSource(new File(getDataDir() + "config.xml")));
                 fail("invalidity not detected");
             } catch (SaxonApiException verr) {
                 System.err.println("Failed as expected: " + verr.getMessage());
@@ -356,8 +391,8 @@ public class ConfigTest {
         try {
             javax.xml.transform.TransformerFactory tf = new com.saxonica.config.ProfessionalTransformerFactory();
             tf.setAttribute(FeatureKeys.XSLT_VERSION, "2.0");
-            tf.setAttribute(net.sf.saxon.lib.FeatureKeys.CONFIGURATION_FILE, DATA_DIR + "config-sql.xml");
-            tf.newTemplates(new StreamSource(new File(DATA_DIR + "books-sql.xsl")));
+            tf.setAttribute(net.sf.saxon.lib.FeatureKeys.CONFIGURATION_FILE, getDataDir() + "config-sql.xml");
+            tf.newTemplates(new StreamSource(new File(getDataDir() + "books-sql.xsl")));
         } catch (TransformerException err) {
             fail(err.getMessage());
         }
@@ -370,9 +405,9 @@ public class ConfigTest {
             tf.setAttribute(FeatureKeys.XSLT_VERSION, "2.0");
 
             ConfigurationReaderPE reader = new ConfigurationReaderPE();
-            Configuration config = reader.makeConfiguration(new StreamSource(new File(DATA_DIR + "config-sql.xml")));
+            Configuration config = reader.makeConfiguration(new StreamSource(new File(getDataDir() + "config-sql.xml")));
             tf.setAttribute(FeatureKeys.CONFIGURATION, config);
-            tf.newTemplates(new StreamSource(new File(DATA_DIR + "books-sql.xsl")));
+            tf.newTemplates(new StreamSource(new File(getDataDir() + "books-sql.xsl")));
         } catch (TransformerException err) {
             fail(err.getMessage());
         }
@@ -439,7 +474,7 @@ public class ConfigTest {
                 "<xsl:template match='/'><xsl:value-of select='doc(static-base-uri())'/>" +
                 "</xsl:template></xsl:transform>";
         String xml = "<a/>";
-        String base = new File(DATA_DIR + "config.xml").toURI().toASCIIString();
+        String base = new File(getDataDir() + "config.xml").toURI().toASCIIString();
         testXsltSecureProcessing(new StreamSource(new StringReader(xml), base),
                                  new StreamSource(new StringReader(xsl), base), false);
     }

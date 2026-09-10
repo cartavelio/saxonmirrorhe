@@ -21,7 +21,8 @@ import static org.junit.jupiter.api.Assertions.fail;
  * test The features and properties of a XML Parser in s9api
  */
 public class TestXMLParserOptions {
-
+    private ConfigTest configTest = new ConfigTest();
+    
     @Test
     public void testEnableOnExternalEntityExpansion() {
         try {
@@ -145,7 +146,8 @@ public class TestXMLParserOptions {
         Processor processor = new Processor(true);
         processor.setConfigurationProperty(FeatureKeys.XML_PARSER_FEATURE + "http://xml.org/sax/features/validation", true);
         processor.setConfigurationProperty(FeatureKeys.XML_PARSER_FEATURE + "http://apache.org/xml/features/validation/schema", true);
-        processor.setConfigurationProperty(FeatureKeys.XML_PARSER_PROPERTY + "http://apache.org/xml/properties/schema/external-schemaLocation", "http://www.w3.org/2010/09/qt-fots-catalog " + ConfigTest.DATA_DIR + "catalog-schema.xsd");
+        processor.setConfigurationProperty(FeatureKeys.XML_PARSER_PROPERTY + "http://apache.org/xml/properties/schema/external-schemaLocation",
+                "http://www.w3.org/2010/09/qt-fots-catalog " + configTest.getDataDir() + "catalog-schema.xsd");
         StringReader sr = new StringReader("<catalog xmlns=\"http://www.w3.org/2010/09/qt-fots-catalog\" \n" +
                 "    test-suite=\"FOTS\" version=\"0.6\">\n" +
                 "    <environment name=\"empty\">\n" +
@@ -341,12 +343,12 @@ public class TestXMLParserOptions {
             XMLReader xmr = spf.newSAXParser().getXMLReader();
             xmr.setFeature("http://apache.org/xml/features/validation/schema", true);
 
-            XsltExecutable exp = comp.compile(new StreamSource(new File(ConfigTest.junitBugsDirectory() + "/4996/test.xsl")));
+            XsltExecutable exp = comp.compile(new StreamSource(new File(configTest.getBugsDir() + "/4996/test.xsl")));
 
             StringWriter sw = new StringWriter();
             Serializer out = proc.newSerializer(sw);
 
-            File dataFile = new File(ConfigTest.junitBugsDirectory() + "/4996/xmlSchemaDefaultAttributeA.xml");
+            File dataFile = new File(configTest.getBugsDir() + "/4996/xmlSchemaDefaultAttributeA.xml");
             InputSource inputSource = new InputSource(dataFile.toURI().toString());
             SAXSource source1 = new SAXSource(xmr, inputSource);
 
@@ -392,12 +394,12 @@ public class TestXMLParserOptions {
             XMLReader xmr = spf.newSAXParser().getXMLReader();
             xmr.setFeature("http://apache.org/xml/features/validation/schema", false);
 
-            XsltExecutable exp = comp.compile(new StreamSource(new File(ConfigTest.junitBugsDirectory() + "/4996/test.xsl")));
+            XsltExecutable exp = comp.compile(new StreamSource(new File(configTest.getBugsDir() + "/4996/test.xsl")));
 
             StringWriter sw = new StringWriter();
             Serializer out = proc.newSerializer(sw);
 
-            File dataFile = new File(ConfigTest.junitBugsDirectory() + "/4996/xmlSchemaDefaultAttributeA.xml");
+            File dataFile = new File(configTest.getBugsDir() + "/4996/xmlSchemaDefaultAttributeA.xml");
             InputSource inputSource = new InputSource(dataFile.toURI().toString());
             SAXSource source1 = new SAXSource(xmr, inputSource);
             ParseOptions options = new ParseOptions();

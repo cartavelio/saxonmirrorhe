@@ -35,12 +35,12 @@ import static org.junit.jupiter.api.Assertions.fail;
  *  Tests for queries using document projection
  */
 public class ProjectionTests {
+    private final ConfigTest configTest = new ConfigTest();
 
     @Test
     public void testProjection001() {
         try {
-
-            final String fileName = ConfigTest.DATA_DIR + "books.xml";
+            final String fileName = configTest.getDataDir() + "books.xml";
 
             Configuration config = new EnterpriseConfiguration();
             StaticQueryContext sqc = config.newStaticQueryContext();
@@ -95,7 +95,7 @@ public class ProjectionTests {
     private void projection(String lang, String expr) {
         try {
 
-            String fileName = ConfigTest.DATA_DIR + "books.xml";
+            String fileName = configTest.getDataDir() + "books.xml";
 
             Processor proc = new Processor(true);
             //Configuration config = new Configuration();

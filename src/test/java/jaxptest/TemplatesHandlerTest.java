@@ -26,13 +26,15 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  */
 public class TemplatesHandlerTest {
+    private final ConfigTest configTest = new ConfigTest();
+
     @Test
     public void testTemplatesHandler() throws SAXException,
             ParserConfigurationException,
             IOException, TransformerException {
 
-        String xsl = ConfigTest.DATA_DIR + "books.xsl";
-        String xml = ConfigTest.DATA_DIR + "books.xml";
+        String xsl = configTest.getDataDir() + "books.xsl";
+        String xml = configTest.getDataDir() + "books.xml";
 
         SAXParserFactory factory = SAXParserFactory.newInstance();
         factory.setNamespaceAware(true);
@@ -67,7 +69,7 @@ public class TemplatesHandlerTest {
                     "<xsl:variable name='x' static='yes' xmlns:t='http://www.w3.org/1999/XSL/Transform' select='system-property(\"t:schema-aware\")'/>" +
                     "<xsl:template match='/'><out x='{$x}'/></xsl:template>" +
                     "</xsl:transform>";
-            String xml = ConfigTest.DATA_DIR + "books.xml";
+            String xml = configTest.getDataDir() + "books.xml";
             SAXParserFactory factory = SAXParserFactory.newInstance();
             factory.setNamespaceAware(true);
             factory.setValidating(false);
@@ -97,8 +99,8 @@ public class TemplatesHandlerTest {
     @Test
     public void testExtensionNotFound() {
         try {
-            String inputUri = ConfigTest.DATA_DIR + "base64/books.xml";
-            String xsltUrl = ConfigTest.DATA_DIR + "base64/TextTobase64.xsl";
+            String inputUri = configTest.getDataDir() + "base64/books.xml";
+            String xsltUrl = configTest.getDataDir() + "base64/TextTobase64.xsl";
 
             TransformerFactory tFactory = new net.sf.saxon.TransformerFactoryImpl();
             tFactory.setAttribute(FeatureKeys.RECOGNIZE_URI_QUERY_PARAMETERS, Boolean.TRUE);
