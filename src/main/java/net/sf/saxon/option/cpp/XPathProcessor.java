@@ -177,7 +177,7 @@ public class XPathProcessor extends SaxonCAPI {
      * @param c_option true if XPath 1.0 backwards compatibility is to be enabled, false if it is to
      *               be disabled.
      */
-    @CEntryPoint(name = "j_setAllowUndeclaredVariables")
+    @CEntryPoint(name = "j_setBackwardsCompatible")
     public static void setBackwardsCompatible(IsolateThread thread, ObjectHandle xpathProcessorRef, int c_option) {
         boolean option = CTypeConversion.toBoolean(c_option);
         XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);
