@@ -9,6 +9,7 @@ python/.pyenv/
 .classpath
 .vs/
 java_*.hprof
+/*.xpr
 
 # Ephemeral artefacts
 out/
