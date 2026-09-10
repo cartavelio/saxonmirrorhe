@@ -36,6 +36,7 @@ public class NativeCall implements ExtensionFunction {
     private CFunctionPointer pythonProc;
     SaxonCAPI.AllocatorFn alloc;
     private boolean useNativeTypes;
+    private XdmValue returnValue;
 
 
 
@@ -43,7 +44,7 @@ public class NativeCall implements ExtensionFunction {
         this.name = qn;
     }
 
-    public NativeCall(QName funcQname, SequenceType[] sequenceTypes, SequenceType returnSequenceType, CFunctionPointer pythonProc, CFunctionPointer func, SaxonCAPI.AllocatorFn alloc, boolean useNativeTypes) {
+    public NativeCall(QName funcQname, SequenceType[] sequenceTypes, SequenceType returnSequenceType, CFunctionPointer pythonProc, CFunctionPointer func, SaxonCAPI.AllocatorFn alloc, XdmValue returnVal, boolean useNativeTypes) {
         this.name = funcQname;
         this.sequenceType = sequenceTypes;
         this.returnType = returnSequenceType;
@@ -51,6 +52,7 @@ public class NativeCall implements ExtensionFunction {
         this.alloc = alloc;
         this.pythonProc = pythonProc;
         this.useNativeTypes = useNativeTypes;
+        this.returnValue = returnVal;
 
     }
 
@@ -81,7 +83,7 @@ public class NativeCall implements ExtensionFunction {
 
     // Declare a native method _native()
     @CFunction
-    public static native ObjectHandle c_nativeCall(CCharPointer c_funcName, CFunctionPointer proc,  CFunctionPointer func, int useNativeTypes, int length, CLongPointer addr);
+    public static native ObjectHandle c_nativeCall(CCharPointer c_funcName, CFunctionPointer proc,  CFunctionPointer func, ObjectHandle returnValueRef, int occurrenceValue, int useNativeTypes, int length, CLongPointer addr);
 
 
     @Override
@@ -111,7 +113,7 @@ public class NativeCall implements ExtensionFunction {
 
         try(CTypeConversion.CCharPointerHolder holder = CTypeConversion.toCString(nameStr)) {
 
-
+            int occurrenceValue = returnType.getOccurrenceIndicator().ordinal();
 
             long[] argumentRefs = null;
             CLongPointer addr = WordFactory.nullPointer();
@@ -127,6 +129,17 @@ public class NativeCall implements ExtensionFunction {
             if(SaxonCAPI.debug) {
                 System.err.println("Java SaxonC Debug NativeCall.call= " + arguments.length);
 
+                System.err.println("Java SaxonC return OccurrenceIndicator="+returnType.getOccurrenceIndicator().toString());
+                System.err.println("Java SaxonC return OccurrenceIndicator cardinality="+occurrenceValue);
+                QName returnTypeQName = returnType.getItemType().getTypeName();
+                if(returnTypeQName != null) {
+                    System.err.println("Java SaxonC return TypeName=" + returnTypeQName);
+                } else {
+                    System.err.println("Java SaxonC return type is null");
+                    returnType.getItemType().getUnderlyingItemType();
+
+                }
+
                 if (useNativeTypes) {
                     System.err.println("Java SaxonC Debug NativeCall.call useNativeType is True ");
 
@@ -135,8 +148,12 @@ public class NativeCall implements ExtensionFunction {
                 }
             }
 
+            ObjectHandle returnValueRef = SaxonCAPI.createHandle(returnValue);
 
-            ObjectHandle valueRef = c_nativeCall(holder.get(), pythonProc, func, (useNativeTypes? 1 : 0), arguments.length, addr); // pass arguments as an array
+
+
+
+            ObjectHandle valueRef = c_nativeCall(holder.get(), pythonProc, func, returnValueRef, occurrenceValue, (useNativeTypes? 1 : 0), arguments.length, addr); // pass arguments as an array
 
              // get info on the return type
             if (valueRef != WordFactory.nullPointer()) {
