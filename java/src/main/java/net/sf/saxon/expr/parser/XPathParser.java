@@ -5846,7 +5846,7 @@ public class XPathParser {
                     int fp1 = pool.allocateFingerprint(q.getNamespaceUri(), q.getLocalPart());
                     QNameTest test1 = new SpecificQNameTest(pool, fp1);
                     int fp2 = pool.allocateFingerprint(NamespaceUri.NULL, q.getLocalPart());
-                    QNameTest test2 = new LocalQNameTest(q.getLocalPart());
+                    QNameTest test2 = new SpecificQNameTest(pool, fp2);
                     return new UnionQNameTest(test1, test2);
                 case ANY_NAMESPACE:
                     if (!NameChecker.isValidNCName(StringTool.codePoints(qname))) {
