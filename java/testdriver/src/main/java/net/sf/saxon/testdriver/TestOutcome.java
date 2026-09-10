@@ -713,7 +713,7 @@ public class TestOutcome {
             return compareExpectedError(assertion);
         } else {
             String expectedError = assertion.attribute("code");
-            driver.println("Expected serialization error " + expectedError + "; got success");
+            driver.println("Expected serialization error " + expectedError + ", got success");
             return false;
         }
 //        } else if (result.value == null) {
@@ -1044,7 +1044,7 @@ public class TestOutcome {
             StringBuilder fsb = new StringBuilder(100);
             fsb.append("Expected ");
             fsb.append(expectedErrorQ.getLocalName());
-            fsb.append("; got ");
+            fsb.append(", got ");
             for (String e : errorsReported) {
                 fsb.append(e);
                 fsb.append("|");
