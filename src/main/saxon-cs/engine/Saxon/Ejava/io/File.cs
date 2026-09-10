@@ -51,8 +51,11 @@ namespace Saxon.Ejava.io {
         }
 
         public SysUri toURI() {
-            string abs = SysIO.Path.GetFullPath(fileName);
-            return new Uri(abs); 
+            // This is horrible, but the simple "new Uri(fullPath)" generates a Uri whose OriginalString property
+            // is say "/folder/file.xml" rather than "file:///folder/file.xml". Really, we shouldn't be generating
+            // calls on OriginalString in the transpiler, but changing that just before release is a bit scary.
+            return new Uri(new Uri(fullPath).AbsoluteUri);
+            //return new Uri(fullPath); 
         }
         
         public SysUri toUri() { // method on Saxon.Ejava.nio.Path
