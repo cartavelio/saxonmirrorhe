@@ -376,8 +376,6 @@ public class StyleNodeFactory implements NodeFactory {
                 return new XSLMap();
             case StandardNames.XSL_MAP_ENTRY:
                 return new XSLMapEntry();
-            case StandardNames.XSL_MATCH:
-                return new XSLMatch();
             case StandardNames.XSL_MATCHING_SUBSTRING:
                 return new XSLMatchingSubstring();
             case StandardNames.XSL_MERGE:

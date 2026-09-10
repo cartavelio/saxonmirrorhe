@@ -66,7 +66,6 @@ public class ElementAvailable extends SystemFunction {
             case StandardNames.XSL_KEY:
             case StandardNames.XSL_MAP:
             case StandardNames.XSL_MAP_ENTRY:
-            case StandardNames.XSL_MATCH:
             case StandardNames.XSL_MATCHING_SUBSTRING:
             case StandardNames.XSL_MERGE:
             case StandardNames.XSL_MERGE_ACTION:
