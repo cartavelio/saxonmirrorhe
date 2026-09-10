@@ -172,10 +172,10 @@ public class FunctionLookup extends ContextAccessorFunction {
         if (fi == null) {
             return EmptySequence.getInstance();
         }
+        Component target = fi instanceof UserFunction ? ((UserFunction) fi).getDeclaringComponent() : null;
         if (fi instanceof ContextAccessorFunction) {
             fi = ((ContextAccessorFunction) fi).bindContext(c);
         }
-        Component target = fi instanceof UserFunction ? ((UserFunction) fi).getDeclaringComponent() : null;
         ExportAgent agent = new FunctionLookupExportAgent(this, qname, arity);
         return new UserFunctionReference.BoundUserFunction(fi, (int) arity.longValue(), target, agent, c.getController());
     }

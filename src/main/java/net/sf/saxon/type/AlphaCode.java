@@ -1084,6 +1084,10 @@ public class AlphaCode {
                 result.vennOperands[i++] = makeTree(type.toItemType());
             }
         } else if (primary instanceof ContentTypeTest) {
+            QNameTest nt = ((ContentTypeTest) primary).getQNameTest();
+            if (nt != AnyQNameTest.getInstance()) {
+                result.name = ((ContentTypeTest) primary).getQNameTest().exportQNameTest();
+            }
             result.content = ((ContentTypeTest) primary).getContentType().getEQName();
         } else if (primary instanceof DocumentNodeTest) {
             ItemType content = ((DocumentNodeTest) primary).getElementTest();

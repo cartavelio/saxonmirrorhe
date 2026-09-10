@@ -2997,7 +2997,8 @@ public class PackageLoaderHE implements IPackageLoader {
                 if (count == 0) {
                     base = loader.loadExpression(child);
                 } else if (child.getLocalPart().equals("null")) {
-                    args[count - 1] = null;
+                    int newPos = loader.getIntegerAttribute(child, "at");
+                    args[count - 1] = new PlaceHolder(newPos);
                 } else {
                     args[count - 1] = loader.loadExpression(child);
                 }

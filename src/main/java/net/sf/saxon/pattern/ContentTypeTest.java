@@ -253,7 +253,8 @@ public class ContentTypeTest extends NodeTest {
     }
 
     public String toString() {
-        return (kind == Type.ELEMENT ? "element(*, " : "attribute(*, ") +
+        return (kind == Type.ELEMENT ? "element(" : "attribute(") +
+                nameTest.toString() + ',' +
                 schemaType.getEQName() + ')';
     }
 
@@ -268,7 +269,8 @@ public class ContentTypeTest extends NodeTest {
      */
     @Override
     public String toExportString() {
-        return (kind == Type.ELEMENT ? "element(*, " : "attribute(*, ") +
+        return (kind == Type.ELEMENT ? "element(" : "attribute(") +
+                nameTest.toString() + ',' +
                 TypeHierarchy.getNearestNamedType(schemaType).getEQName() + ')';
     }
 
