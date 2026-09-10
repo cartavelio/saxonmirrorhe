@@ -73,8 +73,11 @@ public class PartialApplyFn extends SystemFunction {
             }
         }
         int[] unboundArgs = new int[function.getArity() - numberOfBoundArgs];
-        for (int i = 0; i<unboundArgs.length; i++) {
-            unboundArgs[i] = i; // indicating that there is no re-ordering of unbound arguments
+        int j = 0;
+        for (int i = 0; i<boundArgs.length; i++) {
+            if (boundArgs[i] == null) {
+                unboundArgs[j++] = i;
+            }
         }
 
         return new CurriedFunction(function, boundArgs, unboundArgs);
