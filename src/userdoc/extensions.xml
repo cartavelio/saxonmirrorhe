@@ -160,7 +160,7 @@ saxon:evaluate($expression)
     <section id="exslt" title="EXSLT extensions">
       <h1>EXSLT extensions</h1>
 
-      <p><a href="http://www.exslt.org/" class="bodylink">EXSLT</a> was an initiative to define a
+      <p><a href="http://exslt.github.io/" class="bodylink">EXSLT</a> was an initiative to define a
         standardized set of extension functions and extension elements that can be used across
         different XSLT processors. Most of its activity was in the era of XSLT 1.0, and many of the
         functions that were defined are no longer needed in an XSLT 2.0 environment because there

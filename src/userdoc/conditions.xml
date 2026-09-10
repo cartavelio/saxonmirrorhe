@@ -184,7 +184,7 @@
 
   <h2 class="subtitle">EXSLT extensions</h2>
 
-  <p class="javaonly">A substantial number of extension functions defined in <a href="http://www.exslt.org/"
+  <p class="javaonly">A substantial number of extension functions defined in <a href="http://exslt.github.io/"
       class="bodylink">EXSLT</a> are available as an open-source plug-in to SaxonJ-PE or SaxonJ-EE.
     Although not shipped with Saxon-HE, the code of the these extension functions itself
     is open-source and is issued under the Mozilla Public License 2.0, meaning that you are free to
@@ -192,7 +192,7 @@
     (See <a href="/extensions/functions/exslt" class="bodylink">EXSLT extensions</a> for more information on the
     functions available.)</p>
   
-  <p class="csonly">In SaxonCS, just two <a href="http://www.exslt.org/"
+  <p class="csonly">In SaxonCS, just two <a href="http://exslt.github.io/"
     class="bodylink">EXSLT</a> extension functions are available, both in namespace <code>http://exslt.org/common</code>:
   specifically the <code>node-set()</code> and <code>object-type()</code> extensions. Although these serve no useful
   purpose with XSLT 2.0 and later versions, they have been implemented because they are widely used in XSLT 1.0 stylesheets.
