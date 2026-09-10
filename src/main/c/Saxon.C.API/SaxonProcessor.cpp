@@ -269,7 +269,18 @@ void SaxonProcessor::initialize(bool l) {
 
 void SaxonProcessor::setExtensionLibrary(const char * libraryName){
   std::cerr << "C++ setExtensionLibrary called" << std::endl;
-    j_setLibrary(SaxonProcessor::sxn_environ->thread, (void *)procRef, (char *)cwd.c_str(), (char *)libraryName);
+  if(procRef == SXN_UNSET) {
+  std::cerr << "C++ setExtensionLibrary proc is null" << std::endl;
+  }
+
+    if(libraryName == nullptr) {
+    std::cerr << "C++ setExtensionLibrary libraryName is null" << std::endl;
+    }
+    long status = j_setLibrary(SaxonProcessor::sxn_environ->thread, (void *)procRef, (char *)cwd.c_str(), (char *)libraryName);
+
+      if (status == SXN_EXCEPTION) {
+        throw SaxonApiException();
+      }
 }
 
 void SaxonProcessor::attachCurrentThread() {

@@ -517,6 +517,9 @@ int main() {
 
   SaxonProcessor *processor = new SaxonProcessor(false);
   XPathProcessor *xpathProc = processor->newXPathProcessor();
+   std::cerr<<"cppExtensionFunction cp0"<<std::endl;
+  processor->setExtensionLibrary("cppExtensionFunction");
+ std::cerr<<"cppExtensionFunction cp1"<<std::endl;
   xpathProc->setLanguageVersion("3.1");
   sResultCount *sresult = new sResultCount();
   cout << endl
