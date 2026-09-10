@@ -31,7 +31,7 @@ public class ItemsAfterStreamer extends FilterFnStreamer {
      *          if a dynamic evaluation error occurs
      */
     @Override
-    @CSharpInnerClass(outer=false, extra={"Saxon.Hej.expr.XPathContext context", "Saxon.Hej.om.Function function"})
+    @CSharpInnerClass(outer=false, extra={"Saxon.Hej.expr.XPathContext context", "Saxon.Hej.om.FunctionItem function"})
     public FilteringFeed.Filter makeFilter(final XPathContext context, ItemFeed out) throws XPathException {
         final FunctionItem function = (FunctionItem) ((SystemFunctionCall)getExpression()).getArg(1).evaluateItem(context);
         return new FilteringFeed.Filter() {

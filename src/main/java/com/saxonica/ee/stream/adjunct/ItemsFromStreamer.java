@@ -16,7 +16,7 @@ import static com.saxonica.ee.stream.feed.FilteringFeed.FilterResult.SKIP;
 
 
 /**
- * Generate streaming code for the saxon:items-from function. The streamability rules
+ * Generate streaming code for the saxon:items-starting-with function. The streamability rules
  * are the same as for the fn:filter function.
  */
 public class ItemsFromStreamer extends FilterFnStreamer {
@@ -31,7 +31,7 @@ public class ItemsFromStreamer extends FilterFnStreamer {
      *          if a dynamic evaluation error occurs
      */
     @Override
-    @CSharpInnerClass(outer = false, extra = {"Saxon.Hej.expr.XPathContext context", "Saxon.Hej.om.Function function"})
+    @CSharpInnerClass(outer = false, extra = {"Saxon.Hej.expr.XPathContext context", "Saxon.Hej.om.FunctionItem function"})
     public FilteringFeed.Filter makeFilter(final XPathContext context, ItemFeed out) throws XPathException {
         final FunctionItem function = (FunctionItem) ((SystemFunctionCall)getExpression()).getArg(1).evaluateItem(context);
         return new FilteringFeed.Filter() {
