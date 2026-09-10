@@ -346,7 +346,6 @@ private:
   const char *baseURI;   /*!< The base URI of this node*/
   const char *nodeName;  /*!< The name of the node, in clark name format*/
   const char *localName; /*!< The local part of the name */
-  const char *nodeToString;
   XdmNode **children; /*!< Cached child nodes when getChildren method is first
                          called; */
   int childCount;     /*!< The number of child nodes on the current node*/

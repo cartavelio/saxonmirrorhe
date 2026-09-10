@@ -924,7 +924,7 @@ XdmValue *SaxonProcessor::parseJsonFromFile(const char *source) {
   applyConfigurationProperties();
   int64_t xdmValueRef = parseJsonFile(sxn_environ->thread, (void *)procRef,
                                       (char *)cwd.c_str(), (char *)source);
-  if (xdmValueRef >= 0) {
+  if (xdmValueRef > 0) {
     XdmValue *value = makeXdmValueFromRef(xdmValueRef);
 
     return value;
@@ -947,7 +947,7 @@ XdmNode *SaxonProcessor::parseXmlFromString(const char *source,
       (validator != nullptr ? (void *)validator->getUnderlyingValidator()
                             : (void *)NULL),
       (char *)source);
-  if (xdmNodeRef >= 0) {
+  if (xdmNodeRef > 0) {
     XdmNode *value = new XdmNode(xdmNodeRef);
 
     return value;
@@ -972,7 +972,7 @@ XdmNode *SaxonProcessor::parseXmlFromFile(const char *filename,
       (validator != nullptr ? (void *)validator->getUnderlyingValidator()
                             : (void *)nullptr),
       (char *)filename);
-  if (xdmNodeRef >= 1) {
+  if (xdmNodeRef > 0) {
     XdmNode *value = nullptr;
     value = new XdmNode(xdmNodeRef);
 
