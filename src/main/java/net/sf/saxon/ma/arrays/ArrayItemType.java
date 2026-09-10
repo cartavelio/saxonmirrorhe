@@ -25,7 +25,7 @@ import java.util.function.Supplier;
 
 /**
  * An instance of this class represents a specific array item type, for example
- * function(xs:int) as xs:boolean
+ * array(xs:boolean)
  */
 public class ArrayItemType extends AnyFunctionType {
 
