@@ -72,14 +72,7 @@ public class CastExpression extends CastingExpression implements Callable {
 
 
         if (sourceItemType instanceof ErrorType) {
-            if (allowsEmpty()) {
-                return Literal.makeEmptySequence();
-            } else {
-                throw new XPathException("Cast does not allow an empty sequence as input")
-                        .withErrorCode("XPTY0004")
-                        .withLocation(getLocation())
-                        .asTypeError();
-            }
+            return getBaseExpression();
         }
 
         //PlainType sourceType = (PlainType) sourceItemType;
@@ -234,8 +227,7 @@ public class CastExpression extends CastingExpression implements Callable {
         GroundedValue literalOperand = ((Literal) getBaseExpression()).getGroundedValue();
         if (literalOperand instanceof AtomicValue && converter != null) {
             ConversionResult result = converter.convert((AtomicValue) literalOperand);
-            if (result instanceof ValidationFailure) {
-                ValidationFailure err = (ValidationFailure) result;
+            if (result instanceof ValidationFailure err) {
                 String code = err.getErrorCode();
                 if (code == null) {
                     code = "FORG0001";

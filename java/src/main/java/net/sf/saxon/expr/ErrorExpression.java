@@ -20,7 +20,7 @@ import net.sf.saxon.s9api.XmlProcessingError;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingIncident;
-import net.sf.saxon.type.AnyItemType;
+import net.sf.saxon.type.ErrorType;
 import net.sf.saxon.type.ItemType;
 
 
@@ -169,7 +169,8 @@ public class ErrorExpression extends Expression {
     /*@NotNull*/
     @Override
     public ItemType getItemType() {
-        return AnyItemType.INSTANCE;
+        //return AnyItemType.INSTANCE;
+        return ErrorType.getInstance();
     }
 
     /**

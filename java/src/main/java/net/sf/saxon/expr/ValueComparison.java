@@ -573,7 +573,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
 
         private BuiltInAtomicType operandType(Expression operand) {
             ItemType type = operand.getItemType();
-            if (type == AnyItemType.INSTANCE) {
+            if (type == AnyItemType.INSTANCE || type == ErrorType.getInstance()) {
                 return BuiltInAtomicType.ANY_ATOMIC;
             } else {
                 return (BuiltInAtomicType) type.getPrimitiveItemType();

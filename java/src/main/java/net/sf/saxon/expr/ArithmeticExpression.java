@@ -116,7 +116,7 @@ public class ArithmeticExpression extends BinaryExpression {
         setLhsExpression(tc.staticTypeCheck(getLhsExpression(), atomicType, role0, visitor));
         final ItemType itemType0 = getLhsExpression().getItemType();
         if (itemType0 instanceof ErrorType) {
-            return Literal.makeEmptySequence();
+            return getLhsExpression();
         }
         AtomicType type0 = (AtomicType) itemType0.getPrimitiveItemType();
         if (type0.getFingerprint() == StandardNames.XS_UNTYPED_ATOMIC) {
@@ -135,7 +135,7 @@ public class ArithmeticExpression extends BinaryExpression {
         setRhsExpression(tc.staticTypeCheck(getRhsExpression(), atomicType, role1, visitor));
         final ItemType itemType1 = getRhsExpression().getItemType();
         if (itemType1 instanceof ErrorType) {
-            return Literal.makeEmptySequence();
+            return getRhsExpression();
         }
         AtomicType type1 = (AtomicType) itemType1.getPrimitiveItemType();
         if (type1.getFingerprint() == StandardNames.XS_UNTYPED_ATOMIC) {

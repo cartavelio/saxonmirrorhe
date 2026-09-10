@@ -193,15 +193,15 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
         register("escape-html-uri", 1, e -> e.populate(EscapeHtmlUri::new, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING));
 
-        register("error", 0, e -> e.populate(Error::new, Type.ITEM_TYPE, OPT, LATE));
+        register("error", 0, e -> e.populate(Error::new, ErrorType.getInstance(), OPT, LATE));
                 // The return type is chosen so that use of the error() function will never give a static type error,
                 // on the basis that item()? overlaps every other type, and it's almost impossible to make any
                 // unwarranted inferences from it, except perhaps count(error()) lt 2.
 
-        register("error", 1, e -> e.populate(Error::new, Type.ITEM_TYPE, OPT, LATE)
+        register("error", 1, e -> e.populate(Error::new, ErrorType.getInstance(), OPT, LATE)
                 .arg(0, BuiltInAtomicType.QNAME, OPT, null));
 
-        register("error", 2, e -> e.populate(Error::new, Type.ITEM_TYPE, OPT, LATE)
+        register("error", 2, e -> e.populate(Error::new, ErrorType.getInstance(), OPT, LATE)
                 .arg(0, BuiltInAtomicType.QNAME, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null));
 

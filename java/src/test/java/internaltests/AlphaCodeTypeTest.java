@@ -135,7 +135,7 @@ public class AlphaCodeTypeTest {
                 assertEquals(alpha, alpha2);
             }
         } catch (XPathException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             fail();
         }
 

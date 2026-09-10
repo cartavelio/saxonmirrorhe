@@ -241,17 +241,10 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
         ItemType t0 = getLhsExpression().getItemType();  // this is always an atomic type or union type or xs:error
         ItemType t1 = getRhsExpression().getItemType();  // this is always an atomic type or union type or xs:error
 
-        if (t0 instanceof ErrorType || t1 instanceof ErrorType) {
-            return Literal.makeLiteral(BooleanValue.FALSE, this);
-        }
-
         if (t0.getUType().union(t1.getUType()).overlaps(UType.EXTENSION)) {
             throw new XPathException("Cannot perform comparisons involving external objects")
                     .asTypeError().withErrorCode("XPTY0004").withLocation(getLocation());
         }
-
-        BuiltInAtomicType pt0 = (BuiltInAtomicType) t0.getPrimitiveItemType();
-        BuiltInAtomicType pt1 = (BuiltInAtomicType) t1.getPrimitiveItemType();
 
         int c0 = getLhsExpression().getCardinality();
         int c1 = getRhsExpression().getCardinality();
@@ -259,6 +252,18 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
         if (c0 == StaticProperty.EMPTY || c1 == StaticProperty.EMPTY) {
             return Literal.makeLiteral(BooleanValue.FALSE, this);
         }
+
+        // Technically, if one operand raises an error we could return false (and in the past we did so), but that's unfriendly.
+        if (t0 instanceof ErrorType) {
+            return getLhsExpression();
+        }
+
+        if (t1 instanceof ErrorType) {
+            return getRhsExpression();
+        }
+
+        BuiltInAtomicType pt0 = (BuiltInAtomicType) t0.getPrimitiveItemType();
+        BuiltInAtomicType pt1 = (BuiltInAtomicType) t1.getPrimitiveItemType();
 
         if (pt0.equals(BuiltInAtomicType.ANY_ATOMIC) || pt0.equals(BuiltInAtomicType.UNTYPED_ATOMIC) ||
                 pt1.equals(BuiltInAtomicType.ANY_ATOMIC) || pt1.equals(BuiltInAtomicType.UNTYPED_ATOMIC)) {

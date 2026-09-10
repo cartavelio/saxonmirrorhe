@@ -315,7 +315,9 @@ public abstract class VariableReference extends Expression implements BindingRef
             newItemType = type;
         }
         int newcard = cardinality & getCardinality();
-        if (newcard == 0) {
+        if (newItemType == ErrorType.getInstance()) {
+            newcard = StaticProperty.ALLOWS_ZERO_OR_MORE;
+        } else if (newcard == 0) {
             // this will probably lead to a type error later
             newcard = getCardinality();
         }
