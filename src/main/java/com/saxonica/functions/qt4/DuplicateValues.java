@@ -9,14 +9,12 @@ package com.saxonica.functions.qt4;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
+import net.sf.saxon.expr.sort.AtomicSortComparer;
 import net.sf.saxon.functions.CollatingFunctionFixed;
-import net.sf.saxon.functions.DistinctValues;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.LazySequence;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.trans.NoDynamicContextException;
-import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 
@@ -33,11 +31,11 @@ public class DuplicateValues extends CollatingFunctionFixed {
      * A match key for use in situations where NaN = NaN
      */
 
-    public static final AtomicMatchKey NaN_MATCH_KEY = DistinctValues.NaN_MATCH_KEY;
+    public static final AtomicMatchKey NaN_MATCH_KEY = AtomicSortComparer.COLLATION_KEY_NaN;
 
     @Override
     public String getStreamerName() {
-        return "DistinctValues";
+        return "DuplicateValues";
     }
 
     @Override
@@ -92,11 +90,7 @@ public class DuplicateValues extends CollatingFunctionFixed {
                 if (nextBase.isNaN()) {
                     key = NaN_MATCH_KEY;
                 } else {
-                    try {
-                        key = nextBase.getXPathMatchKey(collator, implicitTimezone);
-                    } catch (NoDynamicContextException e) {
-                        throw new UncheckedXPathException(e);
-                    }
+                    key = nextBase.getXPathTransitiveMatchKey(collator, implicitTimezone);
                 }
                 if (firstValues.add(key)) {
                     // returns true if newly added (if not, it might be a duplicate)

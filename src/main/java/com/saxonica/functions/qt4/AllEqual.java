@@ -19,7 +19,7 @@ public class AllEqual extends CollatingFunctionFixed {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringCollator collator = getStringCollator();
         DistinctValues.DistinctIterator iter =
-                new DistinctValues.DistinctIterator(arguments[0].iterate(), collator, context);
+                new DistinctValues.DistinctIterator(arguments[0].iterate(), collator, context, true);
         int count = Count.count(iter);
         return BooleanValue.get(count <= 1);
     }

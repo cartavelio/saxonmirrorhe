@@ -162,18 +162,18 @@ public class MinimaxStreamer extends StreamingAdjunct implements FeedMaker {
                     lowestCommonSuperType = (AtomicType) Type.getCommonSuperType(
                             lowestCommonSuperType, value.getItemType(), th);
 
-                    try {
+//                    try {
                         if (atomicComparer.compareAtomicValues(value, min) < 0) {
                             min = value;
                         }
-                    } catch (XPathException err) {
-                        dynamicError(err);
-                    } catch (ClassCastException err) {
-                        XPathException de = new XPathException("Cannot compare " + min.getItemType() + " with " + value.getItemType())
-                            .withErrorCode("FORG0006").withXPathContext(getContext());
-                        de.setIsTypeError(true);
-                        dynamicError(de);
-                    }
+//                    } catch (XPathException err) {
+//                        dynamicError(err);
+//                    } catch (ClassCastException err) {
+//                        XPathException de = new XPathException("Cannot compare " + min.getItemType() + " with " + value.getItemType())
+//                            .withErrorCode("FORG0006").withXPathContext(getContext());
+//                        de.setIsTypeError(true);
+//                        dynamicError(de);
+//                    }
                 }
             }
 

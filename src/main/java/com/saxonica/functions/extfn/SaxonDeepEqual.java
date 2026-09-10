@@ -2,6 +2,7 @@ package com.saxonica.functions.extfn;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.sort.AtomicMatcher;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
 import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.functions.SystemFunction;
@@ -76,7 +77,7 @@ public class SaxonDeepEqual extends SystemFunction {
         if (collator == null) {
             throw new XPathException("Unknown collation " + collation, "FOCH0002");
         }
-        GenericAtomicComparer comparer = new GenericAtomicComparer(collator, context);
+        AtomicMatcher comparer = GenericAtomicComparer.getTransitiveAtomicMatcher(collator, context.getImplicitTimezone());
         int flag = 0;
         if (flags.contains("N")) {
             flag |= DeepEqual.INCLUDE_NAMESPACES;

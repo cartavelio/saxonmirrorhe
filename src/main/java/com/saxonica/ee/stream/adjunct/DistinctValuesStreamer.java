@@ -8,6 +8,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
+import net.sf.saxon.expr.sort.AtomicSortComparer;
 import net.sf.saxon.functions.DistinctValues;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.StringCollator;
@@ -79,7 +80,7 @@ public class DistinctValuesStreamer
             if (!hasFailed()) {
                 AtomicValue next = (AtomicValue) item;
                 AtomicMatchKey key = next.isNaN()
-                        ? DistinctValues.NaN_MATCH_KEY
+                        ? AtomicSortComparer.COLLATION_KEY_NaN
                         : next.getXPathMatchKey(collator, implicitTimezone);
                 if (lookup.add(key)) {
                     // returns true if newly added

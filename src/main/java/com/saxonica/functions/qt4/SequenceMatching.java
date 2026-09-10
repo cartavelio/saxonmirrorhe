@@ -2,15 +2,13 @@ package com.saxonica.functions.qt4;
 
 import net.sf.saxon.expr.TailIterator;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.sort.AtomicComparer;
+import net.sf.saxon.expr.sort.AtomicMatcher;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
 import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.functions.Reverse;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.SingletonIterator;
-import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.BooleanValue;
 
 /**
@@ -26,11 +24,9 @@ public abstract class SequenceMatching extends SystemFunction {
                                       FunctionItem comparator) throws XPathException {
         Item it0, it1;
         if (comparator == null) {
-            AtomicComparer comparer = GenericAtomicComparer.makeAtomicComparer(
-                    BuiltInAtomicType.ANY_ATOMIC,
-                    BuiltInAtomicType.ANY_ATOMIC,
+            AtomicMatcher matcher = GenericAtomicComparer.getTransitiveAtomicMatcher(
                     context.getConfiguration().getCollation(getRetainedStaticContext().getDefaultCollationName()),
-                    context);
+                    context.getImplicitTimezone());
             while (true) {
                 it0 = iter0.next();
                 it1 = iter1.next();
@@ -40,9 +36,7 @@ public abstract class SequenceMatching extends SystemFunction {
                 if (it0 == null) {
                     return BooleanValue.FALSE;
                 }
-                boolean match = DeepEqual.deepEqual(SingletonIterator.makeIterator(it0),
-                                                    SingletonIterator.makeIterator(it1),
-                                                    comparer, context, 0);
+                boolean match = DeepEqual.deepEqual(it0, it1, matcher, context);
                 if (!match) {
                     return BooleanValue.FALSE;
                 }
