@@ -103,41 +103,41 @@ public class Replace extends RegexFunction  {
         RegularExpression re = getRegularExpression(arguments, 1, 3);
 
         Item replacementArg = arguments[2].head();
-        UnicodeString replacement = replacementArg == null ? null : replacementArg.getUnicodeStringValue();
-
+        UnicodeString replacement = null;
         java.util.function.BiFunction<UnicodeString, UnicodeString[], UnicodeString> action = null;
-        if (arguments.length == 5) {
-            FunctionItem actionFn = (FunctionItem) arguments[4].head();
-            if (actionFn != null) {
-                action = (in, groups) -> {
-                    try {
-                        // cast to UnicodeString[] is needed for the transpiler
-                        List<Item> groupItems = new ArrayList<>(((UnicodeString[])groups).length);
-                        for (UnicodeString group : groups) {
-                            groupItems.add(new StringValue(group, BuiltInAtomicType.UNTYPED_ATOMIC));
-                        }
-                        Sequence result = actionFn.call(context,
-                                                        new Sequence[]{new StringValue(in, BuiltInAtomicType.UNTYPED_ATOMIC),
-                                                                SequenceExtent.makeSequenceExtent(groupItems)});
-                        Item resultItem = result.head();
-                        if (resultItem == null) {
-                            return EmptyUnicodeString.getInstance();
-                        } else {
-                            return resultItem.getUnicodeStringValue();
-                        }
-                    } catch (XPathException e) {
-                        throw new AssertionError(e);
+
+        if (replacementArg instanceof StringValue) {
+            replacement = replacementArg.getUnicodeStringValue();
+        } else if (replacementArg instanceof FunctionItem) {
+            FunctionItem actionFn = (FunctionItem) replacementArg;
+            action = (in, groups) -> {
+                try {
+                    // cast to UnicodeString[] is needed for the transpiler
+                    List<Item> groupItems = new ArrayList<>(((UnicodeString[])groups).length);
+                    for (UnicodeString group : groups) {
+                        groupItems.add(new StringValue(group, BuiltInAtomicType.UNTYPED_ATOMIC));
                     }
-                };
-            }
+                    Sequence result = actionFn.call(context,
+                                                    new Sequence[]{new StringValue(in, BuiltInAtomicType.UNTYPED_ATOMIC),
+                                                            SequenceExtent.makeSequenceExtent(groupItems)});
+                    Item resultItem = result.head();
+                    if (resultItem == null) {
+                        return EmptyUnicodeString.getInstance();
+                    } else {
+                        return resultItem.getUnicodeStringValue();
+                    }
+                } catch (XPathException e) {
+                    throw new AssertionError(e);
+                }
+            };
 
 //            RegularExpression re = getRegularExpression(arguments, 1, 3);
 //            return new StringValue(re.replaceWith(input.getUnicodeStringValue(), fn));
         }
 
-        if (replacement != null && action != null) {
-            throw new XPathException("Cannot supply both a replacement string and a replacement action", "FORX0005");
-        }
+//        if (replacement != null && action != null) {
+//            throw new XPathException("Cannot supply both a replacement string and a replacement action", "FORX0005");
+//        }
 
         if (replacement != null && !replacementChecked && !re.getFlags().contains("q") && !re.isPlatformNative()) {
             // if it is a string literal, the check was done at compile time
