@@ -99,6 +99,7 @@ ext {
   scp = null
   csver = null
   csrid = null
+  csconfiguration = findProperty("csConfiguration") ?: "Release"
   csoptimize = findProperty("csOptimize") ?: "false"
   csplatform = null
   c_sendria = "sendriasmtp"

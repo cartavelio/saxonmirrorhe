@@ -406,12 +406,12 @@ task eecs_dll(
 task dotnetTestDrivers(
   dependsOn: ['dotnetRelease']
 ) {
-  inputs.file "${buildDir}/cs/bin/Release/net6.0/${csrid}/SaxonCS.dll"
+  inputs.file "${buildDir}/cs/bin/${csconfiguration}/net6.0/${csrid}/SaxonCS.dll"
   inputs.files fileTree(dir: "${projectDir}/src/test/cstestrunner")
-  outputs.file "${buildDir}/testdrivers/bin/Release/TestDrivers.${csver}.nupkg"
+  outputs.file "${buildDir}/testdrivers/bin/${csconfiguration}/TestDrivers.${csver}.nupkg"
 
   doFirst {
-    delete "${buildDir}/testdrivers/bin/Release/TestDrivers.${csver}.nupkg"
+    delete "${buildDir}/testdrivers/bin/${csconfiguration}/TestDrivers.${csver}.nupkg"
   }
 
   doLast {
@@ -436,14 +436,14 @@ task dotnetTestDrivers(
     exec {
       workingDir = "${projectDir}/build/testdrivers"
       commandLine dotnetex, 'build', 'TestDrivers.sln', '--verbosity', 'Normal',
-        '--configuration', 'Release',  '/nodereuse:false', '--no-restore',
+        '--configuration', csconfiguration,  '/nodereuse:false', '--no-restore',
         "-p:Version=${csver}", "-p:PackageVersion=${csver}"
     }
   }
 
   doLast {
     if (!systemOs.isWindows()) {
-      signExe("${buildDir}/testdrivers/bin/Release/TestDrivers.${csver}.nupkg")
+      signExe("${buildDir}/testdrivers/bin/${csconfiguration}/TestDrivers.${csver}.nupkg")
     }
   }
 }
@@ -451,12 +451,12 @@ task dotnetTestDrivers(
 task dotnetExamples(
   dependsOn: ['dotnetRelease']
 ) {
-  inputs.file "${buildDir}/cs/bin/Release/net6.0/${csrid}/SaxonCS.dll"
+  inputs.file "${buildDir}/cs/bin/${csconfiguration}/net6.0/${csrid}/SaxonCS.dll"
   inputs.files fileTree(dir: "${projectDir}/src/samples/cs/Examples.cs")
-  outputs.file "${buildDir}/examples/bin/Release/Examples.${csver}.nupkg"
+  outputs.file "${buildDir}/examples/bin/${csconfiguration}/Examples.${csver}.nupkg"
 
   doFirst {
-    delete "${buildDir}/examples/bin/Release/Examples.${csver}.nupkg"
+    delete "${buildDir}/examples/bin/${csconfiguration}/Examples.${csver}.nupkg"
   }
 
   doLast {
@@ -481,14 +481,14 @@ task dotnetExamples(
     exec {
       workingDir = "${buildDir}/examples"
       commandLine dotnetex, 'build', 'Examples.sln', '--verbosity', 'Normal',
-        '--configuration', 'Release',  '/nodereuse:false', '--no-restore',
+        '--configuration', csconfiguration,  '/nodereuse:false', '--no-restore',
         "-p:Version=${csver}", "-p:PackageVersion=${csver}"
     }
   }
 
   doLast {
     if (!systemOs.isWindows()) {
-      signExe("${buildDir}/examples/bin/Release/Examples.${csver}.nupkg")
+      signExe("${buildDir}/examples/bin/${csconfiguration}/Examples.${csver}.nupkg")
     }
   }
 }
@@ -498,14 +498,14 @@ task dotnetRelease(
 ) {
   inputs.files fileTree(dir: "${buildDir}/cs/Saxon")
   inputs.files fileTree(dir: "${projectDir}/src/main/saxon-cs")
-  outputs.file "${buildDir}/cs/bin/Release/net6.0/${csrid}/SaxonCS.dll"
-  outputs.file "${buildDir}/cs/bin/Release/SaxonCS.${csver}.nupkg"
+  outputs.file "${buildDir}/cs/bin/${csconfiguration}/net6.0/${csrid}/SaxonCS.dll"
+  outputs.file "${buildDir}/cs/bin/${csconfiguration}/SaxonCS.${csver}.nupkg"
 
   doFirst {
     // Delete them if they exist so that they always get rewritten
     // so that the subsequent attempt to sign them doesn't fail.
-    delete "${buildDir}/cs/bin/Release/net6.0/${csrid}/SaxonCS.dll"
-    delete "${buildDir}/cs/bin/Release/SaxonCS.${csver}.nupkg"
+    delete "${buildDir}/cs/bin/${csconfiguration}/net6.0/${csrid}/SaxonCS.dll"
+    delete "${buildDir}/cs/bin/${csconfiguration}/SaxonCS.${csver}.nupkg"
   }
 
   doLast {
@@ -535,7 +535,7 @@ task dotnetRelease(
     exec {
       workingDir = "${buildDir}/cs"
       commandLine dotnetex, 'restore', 'SaxonCS.sln', '--verbosity', 'Normal',
-        '-p:Configuration=Release', '-p:Platform=Any CPU'
+        "-p:Configuration=${csconfiguration}", '-p:Platform=Any CPU'
     }
   }
 
@@ -543,19 +543,19 @@ task dotnetRelease(
     exec {
       workingDir = "${buildDir}/cs"
       commandLine dotnetex, 'build', 'SaxonCS.sln', '--verbosity', 'Normal',
-        '--configuration', 'Release',  '/nodereuse:false', '--no-restore',
+        '--configuration', csconfiguration,  '/nodereuse:false', '--no-restore',
         '-p:SelfContained=true', '-p:PublishSingleFile=true',
         "-p:Version=${csver}", "-p:PackageVersion=${csver}",
-        '-p:Configuration=Release', '-p:Platform=Any CPU'
+        "-p:Configuration=${csconfiguration}", '-p:Platform=Any CPU'
     }
   }
 
   doLast {
-    signExe("${buildDir}/cs/bin/Release/net6.0/${csrid}/SaxonCS.dll")
+    signExe("${buildDir}/cs/bin/${csconfiguration}/net6.0/${csrid}/SaxonCS.dll")
     if (systemOs.isWindows()) {
-      signNuget("${buildDir}/cs/bin/Release/SaxonCS.${csver}.nupkg")
+      signNuget("${buildDir}/cs/bin/${csconfiguration}/SaxonCS.${csver}.nupkg")
     } else {
-      signExe("${buildDir}/cs/bin/Release/SaxonCS.${csver}.nupkg")
+      signExe("${buildDir}/cs/bin/${csconfiguration}/SaxonCS.${csver}.nupkg")
     }
   }
 }
@@ -564,7 +564,7 @@ task copyNuGetPackage(
   dependsOn: ["dotnetRelease"],
   description: "Copy the architecture-independent .nupkg file"
 ) {
-  inputs.file "${buildDir}/cs/bin/Release/SaxonCS.${csver}.nupkg"
+  inputs.file "${buildDir}/cs/bin/${csconfiguration}/SaxonCS.${csver}.nupkg"
   outputs.file "${buildDir}/distributions/SaxonCS.${csver}.nupkg"
 
   // This only works on the build/release machine, Wynngifu.
@@ -575,7 +575,7 @@ task copyNuGetPackage(
       println("Creating signed NuGet package")
       exec {
         commandLine "/Users/norm/bin/nuget.exe", "sign",
-          "${buildDir}\\cs\\bin\\Release\\SaxonCS.${csver}.nupkg",
+          "${buildDir}\\cs\\bin\\${csconfiguration}\\SaxonCS.${csver}.nupkg",
           "-CertificatePath", "C:\\Users\\norm\\java\\saxonica_certificate.pfx",
           "-Timestamper", "http://timestamp.digicert.com",
           "-OutputDirectory", "${buildDir}\\distributions",
@@ -585,7 +585,7 @@ task copyNuGetPackage(
     } else {
       println("Creating UNSIGNED NuGet package")
       copy {
-        from "${buildDir}/cs/bin/Release"
+        from "${buildDir}/cs/bin/${csconfiguration}"
         into "${buildDir}/distributions"
         include "SaxonCS.${csver}.nupkg"
       }
@@ -613,8 +613,8 @@ task pushNuGetPackage(
 task dotnetPublish(
   dependsOn: ['dotnetRelease']
 ) {
-  inputs.file "${buildDir}/cs/bin/Release/net6.0/${csrid}/SaxonCS.dll"
-  outputs.files fileTree(dir: "${buildDir}/cs/bin/Release/net6.0/${csrid}/publish")
+  inputs.file "${buildDir}/cs/bin/${csconfiguration}/net6.0/${csrid}/SaxonCS.dll"
+  outputs.files fileTree(dir: "${buildDir}/cs/bin/${csconfiguration}/net6.0/${csrid}/publish")
 
   def singleFile="true"
   if (systemOs.isMacOsX()) {
@@ -625,11 +625,11 @@ task dotnetPublish(
     exec {
       workingDir = "${buildDir}/cs"
       commandLine dotnetex, 'publish', 'SaxonCS.sln',
-        '--configuration', 'Release', '-r', csrid,
+        '--configuration', csconfiguration, '-r', csrid,
         '--self-contained', 'true',
         "-p:PublishSingleFile=${singleFile}",
         "-p:Version=${csver}", "-p:PackageVersion=${csver}",
-        '-p:Configuration=Release', '-p:Platform=Any CPU'
+        "-p:Configuration=${csconfiguration}", '-p:Platform=Any CPU'
     }
   }
   doLast {
@@ -638,7 +638,7 @@ task dotnetPublish(
 
 /*
   doLast {
-    signExe("${buildDir}/cs/bin/Release/net6.0/${csrid}/publish/SaxonCS", true)
+    signExe("${buildDir}/cs/bin/${csconfiguration}/net6.0/${csrid}/publish/SaxonCS", true)
   }
 */
 }
@@ -649,7 +649,8 @@ task dotnetMakeApp(
   doLast {
     exec {
       workingDir "${buildDir}/cs"
-      commandLine dotnetex, 'msbuild', '-t:BundleApp', '-p:Configuration=Release', 'SaxonCS.csproj'
+      commandLine dotnetex, 'msbuild', '-t:BundleApp',
+        "-p:Configuration=${csconfiguration}", 'SaxonCS.csproj'
     }
   }
 
@@ -659,7 +660,7 @@ task dotnetMakeApp(
       commandLine 'codesign', '--force', '--options', 'runtime',
         '--entitlements', "${projectDir}/tools/saxon-cs/entitlements.plist",
         '--deep', '--sign', 'Developer ID Application: Saxonica Limited',
-        '--timestamp', "bin/Release/net6.0/${csrid}/publish/SaxonCS.app"
+        '--timestamp', "bin/${csconfiguration}/net6.0/${csrid}/publish/SaxonCS.app"
     }
   }
 }
@@ -670,13 +671,13 @@ task dotnetPublishZip(
 ) {
   doFirst {
     copy {
-      into "${buildDir}/cs/bin/Release/net6.0/${csrid}/publish/doc"
+      into "${buildDir}/cs/bin/${csconfiguration}/net6.0/${csrid}/publish/doc"
       from "${projectDir}/src/docs/doc"
     }
   }
 
   archiveFileName = "SaxonCS-${csver.replaceAll("\\.", "-")}-${csplatform}.zip"
-  from "${buildDir}/cs/bin/Release/net6.0/${csrid}/publish"
+  from "${buildDir}/cs/bin/${csconfiguration}/net6.0/${csrid}/publish"
   into "/SaxonCS-${saxonVersion}/"
 }
 
