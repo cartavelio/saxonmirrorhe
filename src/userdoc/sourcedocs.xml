@@ -2829,7 +2829,7 @@ documentBuilder.build(as);]]></samp>
           <samp><![CDATA[config.setCollectionFinder((context, uri) -> 
    uri.startsWith('sql:') 
       ? sqlCollection(uri) 
-      : config.getStandardCollectionFinder().findCollection(context, uri)
+      : new StandardCollectionFinder().findCollection(context, uri)
 )]]></samp>
           <p>where <code>sqlCollection(uri)</code> returns some user-defined implementation
             of <code>ResourceCollection</code>, perhaps one that retrieves XML documents from
@@ -2850,7 +2850,7 @@ documentBuilder.build(as);]]></samp>
             <samp><![CDATA[processor.CollectionFinder = uri => 
    uri.startsWith('sql:') 
       ? sqlCollection(uri) 
-      : config.getStandardCollectionFinder().findCollection(context, uri)
+      : new StandardCollectionFinder().findCollection(context, uri)
 )]]></samp>
             <p>where <code>sqlCollection(uri)</code> returns some user-defined implementation
               of <code>IEnumerable&lt;IResource&gt;</code>, perhaps one that retrieves XML documents from
