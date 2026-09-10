@@ -58,7 +58,6 @@ public class XMLEmitter extends Emitter {
     // For other names we use a hashtable. It
 
     private boolean indenting = false;
-    private String indentChars = "\n                                                          ";
     private boolean requireWellFormed = false;
     protected CharacterReferenceGenerator characterReferenceGenerator = HexCharacterReferenceGenerator.THE_INSTANCE;
 
@@ -108,6 +107,10 @@ public class XMLEmitter extends Emitter {
 
     IntPredicate isSpecialInText;
     IntPredicate isSpecialInAttribute;
+
+    public XMLEmitter() {
+
+    }
 
     /**
      * Set the character reference generator to be used for generating hexadecimal or decimal

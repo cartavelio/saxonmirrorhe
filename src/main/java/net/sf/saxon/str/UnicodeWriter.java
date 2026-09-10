@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 /**
- * Interface that accepts strings in the form of {@link UnicodeString} objects,
+ * Interface that accepts strings in the form of {@link UnicodeString} or {@link CodePoints} objects,
  * which are written to some destination. It also accepts ordinary {@link java.lang.String}
  * objects.
  */
@@ -29,14 +29,17 @@ public interface UnicodeWriter {
 
     /**
      * Write a supplied string known to consist entirely of ASCII characters,
-     * supplied as a byte array
-     * @param content byte array holding ASCII characters only
+     * supplied as a byte array. (The significance of this is that, for a variety
+     * of encodings including UTF-8 and Latin-1, the bytes can be written to the
+     * output stream "as is", because many encodings have ASCII as a subset.)
+     * @param content byte array holding ASCII characters only (the effect if
+     *                the high-order bit is set is undefined)
      */
 
     void writeAscii(byte[] content) throws IOException;
 
     /**
-     * Process a single character. Default implementation wraps the codepoint
+     * Process a single character. The default implementation wraps the codepoint
      * into a single-character {@link UnicodeString}
      *
      * @param codepoint the character to be processed. Must not be a surrogate
@@ -48,8 +51,8 @@ public interface UnicodeWriter {
     }
 
     /**
-     * Process a single character repeatedly. Default implementation wraps the codepoint
-     * into a single-character {@link UnicodeString}
+     * Process a single character repeatedly. The default implementation fills a byte
+     * array and calls {@link #writeAscii(byte[])}.
      *
      * @param asciiChar the character to be processed.
      * @param count the number of times the character is to be output

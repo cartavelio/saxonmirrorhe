@@ -41,7 +41,8 @@ public class URIResolverTest {
         try {
 
             // Create a transform factory instance.
-            TransformerFactory tfactory = TransformerFactory.newInstance();
+            //TransformerFactory tfactory = TransformerFactory.newInstance();
+            TransformerFactory tfactory = new net.sf.saxon.TransformerFactoryImpl();
             tfactory.setAttribute(FeatureKeys.OPTIMIZATION_LEVEL, "-j"); // Disable JIT compilation
             Resolver1 phoo = new Resolver1("phoo");
             tfactory.setURIResolver(phoo);

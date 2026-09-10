@@ -339,6 +339,10 @@ public class SerializerFactory {
                     return customizeAdaptiveSerializer(je, props, characterMapExpander, normalizer);
                 }
                 default: {
+                    if (method.startsWith("{")) {
+                        // We should have an EQName name here rather than a Clark name, but handle both for robustness
+                        method = "Q" + method;
+                    }
                     if (method.startsWith("Q{" + NamespaceConstant.SAXON + "}")) {
                         CharacterMapExpander characterMapExpander = makeCharacterMapExpander(pipe, props, charMapIndex);
                         ProxyReceiver normalizer = makeUnicodeNormalizer(pipe, props);
@@ -352,6 +356,11 @@ public class SerializerFactory {
                         userReceiver = createUserDefinedOutputMethod(method, props, pipe);
                         if (userReceiver instanceof Emitter) {
                             emitter = (Emitter) userReceiver;
+                            if (uWriter == null) {
+                                assert expandedResult != null;
+                                uWriter = expandedResult.obtainUnicodeWriter();
+                            }
+                            emitter.setUnicodeWriter(uWriter);
                             target = params.makeSequenceNormalizer(emitter);
                         } else {
                             return params.makeSequenceNormalizer(userReceiver);
@@ -726,8 +735,8 @@ public class SerializerFactory {
      * Create a serialization pipeline to implement a user-defined output method. This method is protected
      * so that it can be customized in a user-written SerializerFactory
      *
-     * @param method the name of the user-defined output method, as a QName in Clark format
-     *               (that is "{uri}local").
+     * @param method the name of the user-defined output method, as a QName in EQName format
+     *               (that is "Q{uri}local").
      * @param props  the serialization properties
      * @param pipe   the pipeline configuration information
      * @return a Receiver acting as the entry point to the serialization pipeline
@@ -735,7 +744,8 @@ public class SerializerFactory {
      */
 
     protected SequenceReceiver createUserDefinedOutputMethod(String method, Properties props, PipelineConfiguration pipe) throws XPathException {
-        Receiver userReceiver;// See if this output method is recognized by the Configuration
+        Receiver userReceiver;
+        // See if this output method is recognized by the Configuration
         userReceiver = pipe.getConfiguration().makeEmitter(method, props);
         userReceiver.setPipelineConfiguration(pipe);
         //#if CSHARP==false

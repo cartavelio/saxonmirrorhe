@@ -541,7 +541,8 @@ public class TraxTest {
     public void testSaxonToSaxon() {
         try {
 
-            TransformerFactory tfactory = TransformerFactory.newInstance();
+            //TransformerFactory tfactory = TransformerFactory.newInstance();
+            TransformerFactory tfactory = new net.sf.saxon.TransformerFactoryImpl();
             Configuration config = ((TransformerFactoryImpl) tfactory).getConfiguration();
             NodeInfo doc = config.buildDocumentTree(new StreamSource(new File(foo_xsl))).getRootNode();
             Templates templates = tfactory.newTemplates(doc);
@@ -571,7 +572,8 @@ public class TraxTest {
 
         try {
 
-            TransformerFactory tfactory = TransformerFactory.newInstance();
+            //TransformerFactory tfactory = TransformerFactory.newInstance();
+            TransformerFactory tfactory = new net.sf.saxon.TransformerFactoryImpl();
             Configuration config = ((TransformerFactoryImpl) tfactory).getConfiguration();
             NodeInfo sdoc = config.buildDocumentTree(new StreamSource(new File(foo_xsl).toURI().toString())).getRootNode();
             Templates templates = tfactory.newTemplates(sdoc);
@@ -873,7 +875,8 @@ public class TraxTest {
 
             System.setProperty("javax.xml.parsers.DocumentBuilderFactory", factory);
 
-            TransformerFactory tfactory = TransformerFactory.newInstance();
+            //TransformerFactory tfactory = TransformerFactory.newInstance();
+            TransformerFactory tfactory = new net.sf.saxon.TransformerFactoryImpl();
 
             if (tfactory.getFeature(DOMSource.FEATURE)) {
                 DocumentBuilderFactory dfactory = DocumentBuilderFactory.newInstance();
@@ -914,7 +917,8 @@ public class TraxTest {
     public void testNodeInfo() {
         try {
 
-            TransformerFactory tfactory = TransformerFactory.newInstance();
+            //TransformerFactory tfactory = TransformerFactory.newInstance();
+            TransformerFactory tfactory = new net.sf.saxon.TransformerFactoryImpl();
             Templates templates = tfactory.newTemplates(new StreamSource(foo_xsl));
             Transformer transformer = templates.newTransformer();
             Configuration config = ((TransformerFactoryImpl) tfactory).getConfiguration();
@@ -1258,7 +1262,8 @@ public class TraxTest {
         try {
 
             // Create a transform factory instance.
-            TransformerFactory tfactory = TransformerFactory.newInstance();
+            //TransformerFactory tfactory = TransformerFactory.newInstance();
+            TransformerFactory tfactory = new net.sf.saxon.TransformerFactoryImpl();
 
             // Set the OutputURIResolver
             tfactory.setAttribute("http://saxon.sf.net/feature/outputURIResolver",

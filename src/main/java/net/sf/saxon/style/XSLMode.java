@@ -120,8 +120,8 @@ public class XSLMode extends StyleElement {
         } else {
             top.indexMode(decl);
             Visibility declaredVisibility = getDeclaredVisibility();
-            Visibility actualVisibility = declaredVisibility == null ? Visibility.PRIVATE : declaredVisibility;
-            VisibilityProvenance provenance = declaredVisibility == null ? VisibilityProvenance.DEFAULTED : VisibilityProvenance.EXPLICIT;
+            Visibility actualVisibility = declaredVisibility == Visibility.UNDEFINED ? Visibility.PRIVATE : declaredVisibility;
+            VisibilityProvenance provenance = declaredVisibility == Visibility.UNDEFINED ? VisibilityProvenance.DEFAULTED : VisibilityProvenance.EXPLICIT;
             mode.getDeclaringComponent().setVisibility(actualVisibility, provenance);
             top.indexMode(decl);
         }
