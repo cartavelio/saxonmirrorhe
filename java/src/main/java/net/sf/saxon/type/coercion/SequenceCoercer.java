@@ -258,7 +258,7 @@ public final class SequenceCoercer extends UnaryExpression {
         destination.startElement("coercer", this);
         destination.emitAttribute("type", requiredType.toAlphaCode());
         destination.emitAttribute("diag", roleSupplier.get().save());
-        String flags = "" + (allow40 ? "4" : "") ;
+        String flags = allow40 ? "4" : "";
         if (!flags.isEmpty()) {
             destination.emitAttribute("flags", "4");
         }
