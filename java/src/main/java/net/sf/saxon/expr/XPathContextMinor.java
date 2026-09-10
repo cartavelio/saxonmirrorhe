@@ -278,6 +278,9 @@ public class XPathContextMinor implements XPathContext {
 
     @Override
     public final boolean isAtLast() throws XPathException {
+        if (currentIterator == null) {
+            throw new XPathException("Cannot evaluate position()=last() because there is no context item", "XPDY0002");
+        }
         if (currentIterator instanceof LookaheadIterator && ((LookaheadIterator)currentIterator).supportsHasNext()) {
             return !((LookaheadIterator) currentIterator).hasNext();
         }

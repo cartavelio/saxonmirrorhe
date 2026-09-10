@@ -190,16 +190,16 @@ public final class IsLastExpression extends Expression {
      * <p>The toString() method for an expression attempts to give a representation of the expression
      * in an XPath-like form.</p>
      * <p>For subclasses of Expression that represent XPath expressions, the result should always be a string that
-     * parses as an XPath 3.0 expression.</p>
+     * parses as an XPath expression.</p>
      *
      * @return a representation of the expression as a string
      */
     @Override
     public String toString() {
         if (condition) {
-            return "position() eq last()";
+            return "isLast()";
         } else {
-            return "position() ne last()";
+            return "isNotLast()";
         }
     }
 
