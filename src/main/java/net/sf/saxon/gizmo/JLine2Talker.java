@@ -57,6 +57,7 @@ public class JLine2Talker implements Talker {
             if (DEBUG) {
                 debugLog.setLength(0);
             }
+
             if (message != null && !message.isEmpty()) {
                 console.println(message);
             }
