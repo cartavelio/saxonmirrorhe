@@ -923,15 +923,6 @@ public class SchemaCompiler {
                 }
             }
 
-            if (member != owner && config.isSealedNamespace(owner.getTargetNamespace())) {
-                String msg = "It is not possible to add to the substitution group of element " + owner.getName() +
-                        " in namespace '" + owner.getTargetNamespace() +
-                        "', because the schema for that namespace has already been used for validating instance documents," +
-                        " or for compiling queries or stylesheets";
-                SchemaException err = new SchemaException(msg);
-                err.setLocator(member);
-                throw err;
-            }
             substitutionGroupMembers.add(member);
             if (substitutionGroupMembers.size() > 10) {
                 substitutionGroupMembers = new HashSet<>(substitutionGroupMembers);

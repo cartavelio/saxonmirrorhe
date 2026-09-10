@@ -232,14 +232,14 @@ public class XSDAttributeGroup extends SchemaElement {
             if (externalSchema == null || redefinedSchema == null) {
                 return;     // error already reported
             }
-            EnterpriseConfiguration config = getSchema().getConfiguration();
-            if (config.isSealedNamespace(redefinedSchema.getTargetNamespace())) {
-                error("It is not possible to redefine schema components in namespace " +
-                        redefinedSchema.getTargetNamespace() +
-                        " because components in this namespace have already been used " +
-                        " for validating instance documents, or for compiling queries or stylesheets");
-                return;
-            }
+//            EnterpriseConfiguration config = getSchema().getConfiguration();
+//            if (config.isSealedNamespace(redefinedSchema.getTargetNamespace())) {
+//                error("It is not possible to redefine schema components in namespace " +
+//                        redefinedSchema.getTargetNamespace() +
+//                        " because components in this namespace have already been used " +
+//                        " for validating instance documents, or for compiling queries or stylesheets");
+//                return;
+//            }
             if (isRef) {
                 error("An attribute group redefinition must not be a reference");
             }

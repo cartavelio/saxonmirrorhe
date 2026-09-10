@@ -782,35 +782,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     }
 
     /**
-     * Mark a schema namespace as being sealed. This is done when components from this namespace
-     * are first used for validating a source document or compiling a source document or query. Once
-     * a namespace has been sealed, it is not permitted to change the schema components in that namespace
-     * by redefining them, deriving new types by extension, or adding to their substitution groups.
-     *
-     * @param namespace the namespace URI of the components to be sealed
-     */
-
-    @Override
-    public void sealNamespace(NamespaceUri namespace) {
-        if (!namespace.equals(NamespaceUri.ANONYMOUS)) {
-            setNamespaceStatus(namespace, PreparedSchema.NAMESPACE_SEALED);
-        }
-    }
-
-    /**
-     * Test whether a schema namespace is sealed. Once
-     * a namespace has been sealed, it is not permitted to change the schema components in that namespace
-     * by redefining them, deriving new types by extension, or adding to their substitution groups.
-     *
-     * @param namespace the namespace URI of the components to be tested. Supply "" for the no-namespace.
-     * @return true if this namespace has been sealed, otherwise false
-     */
-
-    public boolean isSealedNamespace(NamespaceUri namespace) {
-        return getNamespaceStatus(namespace) == PreparedSchema.NAMESPACE_SEALED;
-    }
-
-    /**
      * Get the set of saxon:param schema parameters declared in the schema held by this Configuration.
      *
      * @return the set of parameters. May return null if none have been declared.

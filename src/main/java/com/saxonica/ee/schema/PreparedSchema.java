@@ -51,7 +51,6 @@ public class PreparedSchema implements Schema, NotationSet {
     public static final int NAMESPACE_UNKNOWN = 1;
     public static final int NAMESPACE_UNDER_CONSTRUCTION = 2;
     public static final int NAMESPACE_KNOWN = 3;
-    public static final int NAMESPACE_SEALED = 4;
 
     /**
      * The system configuration

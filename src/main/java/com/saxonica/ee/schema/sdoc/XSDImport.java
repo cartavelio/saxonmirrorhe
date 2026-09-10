@@ -141,8 +141,6 @@ public class XSDImport extends AnnotationParent {
                 }
                 return;
             }
-        } else if (status == PreparedSchema.NAMESPACE_SEALED) {
-            return;
         } else if (status == PreparedSchema.NAMESPACE_KNOWN &&
                 !config.getBooleanProperty(Feature.MULTIPLE_SCHEMA_IMPORTS)) {
             if (schemaLocation != null) {

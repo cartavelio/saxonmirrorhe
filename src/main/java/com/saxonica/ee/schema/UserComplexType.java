@@ -1082,14 +1082,6 @@ public class UserComplexType extends UserDefinedType
         // or for compiling schemas or stylesheets
 
         final EnterpriseConfiguration config = getConfiguration();
-        if (config.isSealedNamespace(base.getTargetNamespace())) {
-            String err = "It is not possible to extend type " + base.getDescription() +
-                    " because that type has already been used for validating instance documents" +
-                    " or for compiling queries or stylesheets";
-            compiler.error(err, this);
-            setValidationStatus(INVALID);
-            return false;
-        }
 
         // See Schema Part 1 section 3.4.6,
         // Schema Component Constraint: Derivation Valid (Extension)
