@@ -22,7 +22,7 @@ namespace Saxon.Api {
     /// <para>A sequence consisting of a single item <i>may</i> be represented
     /// as an instance of <see cref="XdmItem"/>, which is a subtype of <c>XdmValue</c>. However,
     /// there is no guarantee that all single-item sequences will be instances of
-    /// <c>XdmItem</c>: if you want to ensure this, use the <see cref="Simplify"/> property.</para>
+    /// <c>XdmItem</c>: if you want to ensure this, use the <see cref="Simplify()"/> property.</para>
     /// <para>There are various ways of creating an <c>XdmValue</c>. To create an atomic
     /// value, use one of the constructors on <see cref="XdmAtomicValue"/> (which is a subtype of <c>XdmValue</c>).
     /// To construct an <see cref="XdmNode"/> (another subtype) by parsing an XML document, or by wrapping a DOM document,
@@ -33,7 +33,7 @@ namespace Saxon.Api {
     /// <para>The subtype <see cref="XdmEmptySequence"/> represents an empty sequence: an
     /// <c>XdmValue</c> of length zero. Again, there is no guarantee that every empty sequence
     /// will be represented as an instance of <c>XdmEmptySequence</c>, unless you use
-    /// the <c>Simplify</c> property.</para>
+    /// the <c>Simplify()</c> method.</para>
     /// </remarks>
     [Serializable]
     public class XdmValue : IEnumerable<XdmItem> {
@@ -504,7 +504,7 @@ namespace Saxon.Api {
         /// </returns>
 
         public bool Empty => value.getLength() == 0;
-        
+
         /// <summary>
         /// Simplify an XDM value: that is, reduce it to the simplest possible form.
         /// </summary>
@@ -521,12 +521,13 @@ namespace Saxon.Api {
         /// </remarks>
         /// <returns>The XDM value reduced to the simplest possible form.</returns>
 
-        public XdmValue Simplify =>
-            value.getLength() switch {
+        public XdmValue Simplify() {
+            return value.getLength() switch {
                 0 => this is XdmEmptySequence ? this : XdmEmptySequence.Instance,
                 1 => this is XdmItem ? this : Wrap(value),
                 _ => this
             };
+        }
     }
 }
 

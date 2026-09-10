@@ -9,8 +9,6 @@ namespace Saxon.Api {
     /// <para>An empty sequence <i>may</i> also be represented by an <c>XdmValue</c> whose length
     /// happens to be zero. Applications should therefore not test to see whether an object
     /// is an instance of this class in order to decide whether it is empty.</para>
-    /// <para>In interfaces that expect an <c>XdmItem</c>, an empty sequence is represented
-    /// by a CLI <c>null</c> value.</para> 
     /// </remarks>
 
     [Serializable]
