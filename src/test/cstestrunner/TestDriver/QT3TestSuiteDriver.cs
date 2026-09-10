@@ -98,7 +98,7 @@ namespace TestDriver {
                     this, xpc, env, globalEnvironments, defaultEnv);
             }
 
-            buildDependencyDictionary(driverProc, environment);
+            buildDependencyDictionary(driverProc, environment, catalog);
         }
 
         /**
@@ -975,22 +975,23 @@ namespace TestDriver {
          * @param env the environment for which dependency information is to be gathered
          * @
          */
-        private void buildDependencyDictionary(Processor processor, Environment env) {
+        private void buildDependencyDictionary(Processor processor, Environment env, XdmNode catalog) {
             XQueryCompiler xqCompiler = processor.NewXQueryCompiler();
             xqCompiler.XQueryLanguageVersion = "3.1";
             xqCompiler.BaseUri = new Uri("file://" + System.IO.Path.GetFullPath(testSuiteDir) + "/", UriKind.RelativeOrAbsolute);
-            XdmValue result = xqCompiler.Compile(
+            XQueryExecutable exec = xqCompiler.Compile(
                 "        declare namespace fots = \"http://www.w3.org/2010/09/qt-fots-catalog\";\n" +
-                "        let $testsets := doc('" + testSuiteDir +
-                "/catalog.xml')//fots:test-set/@file/doc(resolve-uri(., exactly-one(base-uri(.))))\n" +
+                "        let $testsets := //fots:test-set/@file/doc(resolve-uri(., exactly-one(base-uri(.))))\n" +
                 "        for $dependencyTS in $testsets//fots:dependency\n" +
                 "        let $name := $dependencyTS/@type\n" +
                 "        let $value := $dependencyTS/@value\n" +
                 "        group by $name, $value\n" +
                 "        order by $name, $value\n" +
-                "        return <dependency type='{$name}' value='{$value}' />").Load().Evaluate();
-
-
+                "        return <dependency type='{$name}' value='{$value}' />");
+            XQueryEvaluator selector = exec.Load();
+            selector.ContextItem = catalog;
+            XdmValue result = selector.Evaluate();
+            
             foreach (XdmItem item in result) {
                 XdmNode node = (XdmNode) item;
                 string type = node.GetAttributeValue(new QName("type"));
