@@ -89,8 +89,6 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
         register("analyze-uri", 1, AnalyzeUri.class, analyzeUriResult, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
 
-        register("array-member", 1, ArrayMember.class, config.getJavaExternalObjectType(Evaluate.PreparedExpression.class), ONE, 0)
-                .arg(0, AnyItemType.getInstance(), STAR, null);
 
         register("characters", 1, CharactersFn.class, BuiltInAtomicType.STRING, STAR, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);

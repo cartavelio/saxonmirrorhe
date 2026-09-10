@@ -1,6 +1,7 @@
 package com.saxonica.expr;
 
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.ForMemberExpression;
 import net.sf.saxon.expr.LocalBinding;
 import net.sf.saxon.expr.LocalVariableReference;
 import net.sf.saxon.expr.instruct.ForEach;

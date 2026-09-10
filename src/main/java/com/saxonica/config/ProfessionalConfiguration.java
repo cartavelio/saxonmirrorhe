@@ -864,10 +864,10 @@ public class ProfessionalConfiguration extends Configuration {
      */
 
     @Override
-    public synchronized JavaExternalObjectType getJavaExternalObjectType(Class theClass) {
+    public synchronized JavaExternalObjectType getJavaExternalObjectType(Class<?> theClass) {
         JavaExternalObjectType jeot = externalObjectTypeCache.get(theClass);
         if (jeot == null) {
-            jeot = new JavaExternalObjectType(this, theClass);
+            jeot = new JavaExternalObjectType(theClass);
             externalObjectTypeCache.put(theClass, jeot);
         }
         return jeot;
