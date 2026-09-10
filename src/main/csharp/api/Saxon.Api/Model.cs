@@ -2916,7 +2916,7 @@ namespace Saxon.Api
             string uri = qualifiedName.Namespace;
             string local = qualifiedName.Name;
             string prefix = String.Empty;
-            sqName = new JQName(prefix, uri, prefix);
+            sqName = new JQName(prefix, uri, local);
         }
 
         //  internal constructor from a QNameValue
