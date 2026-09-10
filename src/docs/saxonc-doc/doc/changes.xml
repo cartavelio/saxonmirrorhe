@@ -49,8 +49,8 @@
          </ul>
       </li>
       <li>ICU support added in SaxonC-PE and SaxonC-EE.</li>
-      <li>Improved memory management</li>
-      <li>Added the support of XdmFunctionItem,XdmArray and XdmMap in the Xdm data model for SaxonC. This applies to C++, Python and PHP APIs.</li>
+      <li>Improved memory management for the handlng of Xdm objects</li>
+      <li>Added the support of <code>XdmFunctionItem</code>, <code>XdmArray</code> and <code>XdmMap</code> in the Xdm data model for SaxonC. This applies to C++, Python and PHP APIs.</li>
       
    </ul>
 
