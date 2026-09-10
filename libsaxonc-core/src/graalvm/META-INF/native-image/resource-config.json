@@ -8,6 +8,9 @@
         "pattern": "com/ibm/icu/.*/*.*res$"
       },
       {
+        "pattern": "com/ibm/icu/.*"
+      },
+      {
         "pattern": "com/ibm/icu/.*/*.*icu$"
       },
       {

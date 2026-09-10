@@ -39,6 +39,22 @@
     "name":"com.ibm.icu.text.CollatorServiceShim",
     "methods":[{"name":"<init>","parameterTypes":[] }]
   },
+  {
+    "name": "com.ibm.icu.text.BreakIteratorFactory",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "com.ibm.icu.text.RuleBasedBreakIterator",
+    "allDeclaredConstructors": true
+  },
+  {
+    "name": "javax.xml.parsers.DocumentBuilderFactory",
+    "allPublicMethods": true
+  },
+  {
+    "name": "javax.xml.parsers.SAXParserFactory",
+    "allPublicMethods": true
+  },
 {
   "name":"net.sf.saxon.Configuration",
   "methods":[{"name":"<init>","parameterTypes":[] }]

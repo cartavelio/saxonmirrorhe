@@ -62,6 +62,11 @@ public class SaxonCExceptionHandler {
                 exception = (SaxonApiException) throwable;
                 lineNumber = exception.getLineNumber();
 
+            } if(throwable instanceof NullPointerException) {
+
+                createStandardErrorResult(errorStruct, "NullPointerException found");
+                return;
+
             } else {
                 exception = new SaxonApiException(throwable);
             }
