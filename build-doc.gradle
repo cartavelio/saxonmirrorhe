@@ -269,6 +269,59 @@ task product_jeljavadoc(
   }
 }
 
+task product_xmljavadoc(
+  dependsOn: ["filter_sources_for_javadoc"],
+  description: "Generate Javadoc XML files"
+) {
+  // If you can't do something the easy way, do it the hard way.
+  // The Gradle JavaDoc plugin should be able to do this, but it doesn't
+  // do the right thing with package descriptions and it's completely
+  // unclear why.
+  inputs.files fileTree(dir: "${buildDir}/javadoc_src")
+  inputs.file "${projectDir}/lib/jeldoc.jar"
+  outputs.files fileTree(dir: "${buildDir}/jeljavadoc")
+
+  def cp = ""
+  configurations.documentation.resolve().each { path ->
+    cp = cp + System.getProperty("path.separator") + path
+  }
+
+  def command = []
+
+  doFirst {
+    mkdir "${buildDir}/xmljavadoc"
+
+    // If there are back slashes in the filesep, make sure they're escaped!
+    def filesep = fileSeparator
+    def fsre = filesep.replaceAll("\\\\", "\\\\\\\\")
+    def packages = [:]
+
+    // Any directory that contains a java file is assumed to be a
+    // package...because that's the way packages work in Java.
+    fileTree(dir: "${buildDir}/javadoc_src").each { pkg ->
+      def fn = pkg.toString()
+      fn = fn.substring("{$buildDir}/javadoc_src".length()-1)
+      def pos = fn.lastIndexOf(filesep)
+      fn = fn.substring(0, pos).replaceAll(fsre, ".")
+      packages[fn] = 1
+    }
+
+    command = ["javadoc",
+               "-sourcepath", "${buildDir}/javadoc_src",
+               "-d", "${buildDir}/xmljavadoc",
+               "-classpath", cp,
+               "-doclet", "com.saxonica.xmldoclet.XmlDoclet",
+               "-docletpath", cp,
+               "-source", "1.8"] + packages.keySet()
+  }
+
+  doLast {
+    exec {
+      commandLine command
+    }
+  }
+}
+
 task product_xsljavadoc(
   type: JavaExec,
   dependsOn: ["product_jeljavadoc"],
