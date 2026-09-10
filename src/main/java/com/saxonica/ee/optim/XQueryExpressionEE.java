@@ -19,6 +19,7 @@ import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.Optimizer;
+import net.sf.saxon.expr.parser.OptimizerOptions;
 import net.sf.saxon.expr.parser.PathMap;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.Logger;
@@ -56,8 +57,6 @@ public class XQueryExpressionEE extends XQueryExpression {
     private final boolean isUpdating;
     private PathMap pathMap;
     private Inversion inversion;
-
-    private static boolean useElaboration = true;
 
     public XQueryExpressionEE(Expression exp, QueryModule mainModule, boolean streaming)
             throws XPathException {
@@ -157,7 +156,7 @@ public class XQueryExpressionEE extends XQueryExpression {
 
     @Override
     protected SequenceIterator getExpressionIterator(XPathContext context) throws XPathException {
-        if (useElaboration) {
+        if (getConfiguration().getOptimizerOptions().isSet(OptimizerOptions.ELABORATION)) {
             if (puller == null) {
                 puller = Elaborator.makeElaborator(expression).elaborateForPull();
             }
@@ -170,7 +169,7 @@ public class XQueryExpressionEE extends XQueryExpression {
     
     @Override
     protected void processQuery(Outputter dest, XPathContext context) throws XPathException {
-        if (useElaboration) {
+        if (getConfiguration().getOptimizerOptions().isSet(OptimizerOptions.ELABORATION)) {
             if (pusher == null) {
                 pusher = Elaborator.makeElaborator(expression).elaborateForPush();
             }
