@@ -1,7 +1,7 @@
 namespace Saxon.Api.Sapling
 {
     /// <summary>
-    /// his class represents a sapling node.
+    /// This class represents a sapling node.
     /// <para>Sapling nodes represent transient
     /// nodes used in the course of tree construction; they are intended to have a
     /// very lightweight implementation, making construction as simple as possible,
@@ -11,12 +11,8 @@ namespace Saxon.Api.Sapling
     /// further processing, or it can be sent to a destination such as a
     /// <see cref="Serializer"/> or <see cref="SchemaValidator"/>.</para>
     ///
-    /// <para>The <see cref="SaplingDocument"/> node at the root of a constructed tree
-    /// implements the JAXP <see cref="Source"/> interface which is widely accepted
-    /// by a variety of interfaces in Saxon: this means that it can readily be used
-    /// as input to a query, a transformation, a document builder, or a schema
-    /// validator.</p> <p>Sapling nodes are immutable objects; operations such as
-    /// <see cref="SaplingElement#withChild"/> create a new object and leave the
+    /// <para>Sapling nodes are immutable objects; operations such as
+    /// <see cref="SaplingElement#WithChild"/> create a new object and leave the
     /// original unchanged. This eliminates the need (found in other models such as
     /// the DOM) to make copies of nodes when attaching them to a tree.</para>
     ///
@@ -34,7 +30,7 @@ namespace Saxon.Api.Sapling
     ///     eliminated when the sapling tree is converted to a regular node tree)</description></item>
     /// </list>
     ///
-    /// <paraAttributes are not represented as nodes in their own right, but rather
+    /// <para>Attributes are not represented as nodes in their own right, but rather
     /// as properties of element nodes.</para>
     ///
     /// <para>The internal representation of document and element nodes include a list

@@ -77,7 +77,7 @@ namespace Saxon.Api.Sapling
         /// <summary>
         /// Add a text node to this element, returning a new sapling element node.
         /// <para>This is a convenience method. It is equivalent to
-        /// <code>WithChild(Saplings.Text(text))</code>.
+        /// <code>WithChild(Saplings.Text(text))</code>.</para>
         /// </summary>
         /// <param name="text">The value of the text node.</param>
         /// <returns>A new element node with a new text node as an additional child.</returns>
@@ -89,7 +89,7 @@ namespace Saxon.Api.Sapling
         /// <summary>
         /// Add a comment to this element, returning a new sapling element node.
         /// <para>This is a convenience method. It is equivalent to
-        /// <code>WithChild(Saplings.Comment(comment))</code>.
+        /// <code>WithChild(Saplings.Comment(comment))</code>.</para>
         /// </summary>
         /// <param name="comment">The value of the comment.</param>
         /// <returns>A new element node with a new comment node as an additional child.</returns>
@@ -101,10 +101,10 @@ namespace Saxon.Api.Sapling
         /// <summary>
         /// Add a processing instruction to this element, returning a new sapling element node.
         /// <para>This is a convenience method. It is equivalent to
-        /// <code>WithChild(Saplings.ProcessingInstruction(target, content))</code>.
+        /// <code>WithChild(Saplings.ProcessingInstruction(target, content))</code>.</para>
         /// </summary>
         /// <param name="target">The PI target.</param>
-        /// <param name="content">The PI content.</para>
+        /// <param name="content">The PI content.</param>
         /// <returns>A new element node with a new processing instruction node as an additional child.</returns>
         public SaplingElement WithProcessingInstruction(string target, string content)
         {

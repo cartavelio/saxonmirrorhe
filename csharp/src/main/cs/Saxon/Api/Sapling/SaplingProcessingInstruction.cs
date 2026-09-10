@@ -10,25 +10,13 @@ namespace Saxon.Api.Sapling
         /// <summary>
         /// The processing instruction target.
         /// </summary>
-        public string Target
-        {
-            get
-            {
-                return ((Saxon.Hej.sapling.SaplingProcessingInstruction)javaDelegate).getName();
-            }
-        }
+        public string Target => ((Saxon.Hej.sapling.SaplingProcessingInstruction)javaDelegate).getName();
 
         /// <summary>
         /// The processing instruction content.
         /// </summary>
-        public string Content
-        {
-            get
-            {
-                return ((Saxon.Hej.sapling.SaplingProcessingInstruction)javaDelegate).getStringValue();
-            }
-        }
-        
+        public string Content => ((Saxon.Hej.sapling.SaplingProcessingInstruction)javaDelegate).getStringValue();
+
         /// <summary>
         /// Constructs a new processing instruction sapling node with the specified values.
         /// </summary>

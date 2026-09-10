@@ -10,14 +10,8 @@ namespace Saxon.Api.Sapling
         /// <summary>
         /// The string value of the comment.
         /// </summary>
-        public string StringValue
-        {
-            get
-            {
-                return ((Saxon.Hej.sapling.SaplingComment)javaDelegate).getStringValue();
-            }
-        }
-        
+        public string StringValue => ((Saxon.Hej.sapling.SaplingComment)javaDelegate).getStringValue();
+
         /// <summary>
         /// Construct a comment with the given string value.
         /// </summary>

@@ -8,14 +8,8 @@ namespace Saxon.Api.Sapling
         /// <summary>
         /// The string value of the node.
         /// </summary>
-        public string StringValue
-        {
-            get
-            {
-                return ((Saxon.Hej.sapling.SaplingText)javaDelegate).getStringValue();
-            }
-        }
-        
+        public string StringValue => ((Saxon.Hej.sapling.SaplingText)javaDelegate).getStringValue();
+
         /// <summary>
         /// Constructs a new sapling text node.
         /// </summary>
