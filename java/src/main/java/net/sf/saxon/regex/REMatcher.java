@@ -124,7 +124,7 @@ public class REMatcher {
     }
 
     /**
-     * Returns the start index of a given paren level.
+     * Returns the start index of a given paren level (zero-based).
      *
      * @param which Nesting level of subexpression
      * @return String index

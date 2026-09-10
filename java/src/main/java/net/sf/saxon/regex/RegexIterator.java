@@ -11,6 +11,7 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.StringValue;
+import net.sf.saxon.z.IntHashMap;
 
 
 /**
@@ -20,12 +21,23 @@ import net.sf.saxon.value.StringValue;
  */
 public interface RegexIterator extends SequenceIterator {
 
+    public record Group (int index, int startPosition, UnicodeString content) {
+
+    }
+
     /**
      * Get the next item in the sequence. This method changes the state of the
      * iterator.
      */
     @Override
     StringValue next();
+
+    /**
+     * Get the position within the input string of the item that has just been returned by a call on {@link #next()}
+     * @return the 1-based position within the input string
+     */
+
+    int currentItemPosition();
 
     /**
      * Determine whether the current item in the sequence is a matching item or a non-matching item
@@ -51,6 +63,12 @@ public interface RegexIterator extends SequenceIterator {
 
     /*@Nullable*/
     UnicodeString getRegexGroup(int number);
+
+    /**
+     * Get all the groups associated with the current match
+     */
+
+    IntHashMap<Group> getCurrentRegexGroups();
 
     /**
      * Process a matching substring, performing specified actions at the start and end of each matching

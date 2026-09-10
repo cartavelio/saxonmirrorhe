@@ -150,6 +150,16 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
         }
     }
 
+    /**
+     * Get the position within the input string of the item that has just been returned by a call on {@link #next()}
+     * @return the 1-based position within the input string
+     */
+
+    @Override
+    public int currentItemPosition() {
+        return _matcher.getParenStart(0) + 1;
+    }
+
     private StringValue currentStringValue() {
         return new StringValue(current);
     }
@@ -195,6 +205,25 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
     @Override
     public int getNumberOfGroups() {
         return _matcher.getParenCount();
+    }
+
+    /**
+     * Get all the groups associated with the current match
+     */
+
+    @Override
+    public IntHashMap<Group> getCurrentRegexGroups() {
+        int c = _matcher.getParenCount() - 1;
+        IntHashMap<Group> groups = new IntHashMap<>(c);
+        for (int i = 1; i <= c; i++) {
+            final int position = _matcher.getParenStart(i);
+            if (position >= 0) {
+                final UnicodeString value = _matcher.search.substring(position, _matcher.getParenEnd(i));
+                groups.put(i, new Group(i, position, value));
+            }
+        }
+        return groups;
+
     }
 
     private static class GroupAction {

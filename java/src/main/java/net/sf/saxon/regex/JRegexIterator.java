@@ -118,6 +118,11 @@ public class JRegexIterator implements RegexIterator, LastPositionFinder {
         return StringValue.makeStringValue(current);
     }
 
+    @Override
+    public int currentItemPosition() {
+        return prevEnd;
+    }
+
     /**
      * Determine whether the current item is a matching item or a non-matching item
      *
@@ -162,6 +167,11 @@ public class JRegexIterator implements RegexIterator, LastPositionFinder {
         return matcher.groupCount();
     }
 
+    @Override
+    public IntHashMap<Group> getCurrentRegexGroups() {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
     /**
      * Process a matching substring, performing specified actions at the start and end of each captured
      * subgroup. This method will always be called when operating in "push" mode; it writes its
@@ -195,7 +205,7 @@ public class JRegexIterator implements RegexIterator, LastPositionFinder {
                         // Add the end action before all other actions on the list for the same position
                         List<Integer> e = actions.get(end);
                         if (e == null) {
-                            e = new ArrayList<Integer>(4);
+                            e = new ArrayList<>(4);
                             actions.put(end, e);
                         }
                         e.add(0, -i);
@@ -212,7 +222,7 @@ public class JRegexIterator implements RegexIterator, LastPositionFinder {
                         // if present; otherwise after all existing events for this position
                         List<Integer> s = actions.get(start);
                         if (s == null) {
-                            s = new ArrayList<Integer>(4);
+                            s = new ArrayList<>(4);
                             actions.put(start, s);
                             s.add(i);
                             s.add(-i);
@@ -236,7 +246,7 @@ public class JRegexIterator implements RegexIterator, LastPositionFinder {
             for (int i = 0; i < current.length() + 1; i++) {
                 List<Integer> events = actions.get(i);
                 if (events != null) {
-                    if (tb.length() > 0) {
+                    if (!tb.isEmpty()) {
                         action.characters(tb.toUnicodeString());
                         tb = TwineBuilder.make(256);
                     }
@@ -252,7 +262,7 @@ public class JRegexIterator implements RegexIterator, LastPositionFinder {
                     tb = tb.append(current.charAt(i));
                 }
             }
-            if (tb.length() > 0) {
+            if (!tb.isEmpty()) {
                 action.characters(tb.toUnicodeString());
             }
         }
