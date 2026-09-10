@@ -8,11 +8,11 @@
 package net.sf.saxon.expr;
 
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.elab.BooleanEvaluator;
-import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PullElaborator;
-import net.sf.saxon.Configuration;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.instruct.Choose;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.LocalName_1;
@@ -225,15 +225,22 @@ public final class FilterExpression extends BinaryExpression implements ContextS
         }
 
         // check whether the filter is a constant true() or false()
-        if (getFilter() instanceof Literal && !(((Literal) getFilter()).getGroundedValue() instanceof NumericValue)) {
-            try {
-                if (getFilter().effectiveBooleanValue(new EarlyEvaluationContext(getConfiguration()))) {
-                    return getBase();
-                } else {
-                    return Literal.makeEmptySequence();
+        if (getFilter() instanceof Literal) {
+            GroundedValue val = ((Literal)getFilter()).getGroundedValue();
+            Item first = val.head();
+            if (first == null) {
+                return Literal.makeEmptySequence();
+            }
+            if (!(first instanceof NumericValue)) {
+                try {
+                    if (val.effectiveBooleanValue()) {
+                        return getBase();
+                    } else {
+                        return Literal.makeEmptySequence();
+                    }
+                } catch (XPathException e) {
+                    throw e.maybeWithLocation(getLocation());
                 }
-            } catch (XPathException e) {
-                throw e.maybeWithLocation(getLocation());
             }
         }
 
@@ -616,11 +623,12 @@ public final class FilterExpression extends BinaryExpression implements ContextS
     private Expression tryToRewritePositionalFilter(ExpressionVisitor visitor, boolean tracing) throws XPathException {
         Configuration config = visitor.getConfiguration();
         TypeHierarchy th = config.getTypeHierarchy();
+        boolean isXPath40 = visitor.getStaticContext().getXPathVersion() >= 40;
         if (getFilter() instanceof Literal) {
             GroundedValue val = ((Literal) getFilter()).getGroundedValue();
             if (val instanceof NumericValue) {
                 Expression result;
-                int lvalue = ((NumericValue)val).asSubscript();
+                int lvalue = ((NumericValue) val).asSubscript();
                 if (lvalue != -1) {
                     if (lvalue == 1) {
                         result = FirstItemExpression.makeFirstItemExpression(getBase());
@@ -634,6 +642,16 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                     Optimizer.trace(config, "Rewriting numeric filter expression with constant subscript", result);
                 }
                 return result;
+            } else if (val instanceof IntegerRange && isXPath40) {
+                // 4.0 allows $input[2 to 5]
+                IntegerRange range = (IntegerRange) val;
+                return SystemFunction.makeCall(
+                        "subsequence", getRetainedStaticContext(), getBase(),
+                        new Literal(new Int64Value(range.getStart())),
+                        new Literal(new Int64Value(range.getLength())));
+
+            } else if (isXPath40 && SequenceType.NUMERIC_SEQUENCE.matches(val, th)) {
+                return new MultiSubscriptExpression(getBase(), getFilter());
             } else {
                 Expression result = ExpressionTool.effectiveBooleanValue(val.iterate()) ? getBase() : Literal.makeEmptySequence();
                 if (tracing) {
@@ -651,8 +669,31 @@ public final class FilterExpression extends BinaryExpression implements ContextS
             }
             return result;
         }
+        if (getFilter() instanceof RangeExpression && isXPath40) {
+            Expression min = ((RangeExpression) getFilter()).getStartExpression();
+            Expression max = ((RangeExpression) getFilter()).getEndExpression();
+
+            if (ExpressionTool.dependsOnFocus(min)) {
+                return null;
+            }
+            if (ExpressionTool.dependsOnFocus(max)) {
+                if (max.isCallOn(PositionAndLast.Last.class)) {
+                    Expression result = SystemFunction.makeCall("subsequence", getRetainedStaticContext(), getBase(), min);
+                    if (tracing) {
+                        Optimizer.trace(config, "Rewriting numeric range filter expression using subsequence()", result);
+                    }
+                    return result;
+                } else {
+                    return null;
+                }
+            }
+            Expression slice = SystemFunction.makeCall("slice", getRetainedStaticContext(), getBase(), min, max, new Literal(Int64Value.PLUS_ONE));
+            if (tracing) {
+                Optimizer.trace(config, "Rewriting numeric range filter expression using slice()", slice);
+            }
+            return slice;
+        }
         if (getFilter() instanceof ComparisonExpression) {
-            //VendorFunctionLibrary lib = getConfiguration().getVendorFunctionLibrary();
             Expression lhs = ((ComparisonExpression) getFilter()).getLhsExpression();
             Expression rhs = ((ComparisonExpression) getFilter()).getRhsExpression();
             int operator = ((ComparisonExpression) getFilter()).getSingletonOperator();
@@ -732,6 +773,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
             Expression minMinusOne = new ArithmeticExpression(
                     min2, Token.MINUS, Literal.makeLiteral(Int64Value.makeIntegerValue(1), this));
             Expression length = new ArithmeticExpression(max, Token.MINUS, minMinusOne);
+            // TODO: use fn:slice to avoid the arithmetic
             Expression subs = SystemFunction.makeCall("subsequence", getRetainedStaticContext(), getBase(), min, length);
             let.setAction(subs);
             if (tracing) {
@@ -1282,12 +1324,22 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                 };
             } else {
                 final PullEvaluator conditionEval = expr.getFilter().makeElaborator().elaborateForPull();
-                return context -> {
-                    SequenceIterator base = baseEval.iterate(context);
-                    XPathContext c2 = context.newMinorContext();
-                    c2.setCurrentIterator(c2.getController().makeFocusTracker(base, false));
-                    return new PositionalFilteredIterator(c2, conditionEval);
-                };
+                if (expr.getRetainedStaticContext().getPackageData().getHostLanguageVersion() < 40) {
+                    return context -> {
+                        SequenceIterator base = baseEval.iterate(context);
+                        XPathContext c2 = context.newMinorContext();
+                        c2.setCurrentIterator(c2.getController().makeFocusTracker(base, false));
+                        return new PositionalFilteredIterator(c2, conditionEval);
+                    };
+                } else {
+                    return context -> {
+                        SequenceIterator base = baseEval.iterate(context);
+                        XPathContext c2 = context.newMinorContext();
+                        c2.setCurrentIterator(c2.getController().makeFocusTracker(base, false));
+                        return new PositionalFilteredIterator40(c2, conditionEval);
+                    };
+
+                }
             }
 
         }
@@ -1308,7 +1360,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
              *
              * @param outerContext the underlying iterator that returns all the nodes on
              *             a required axis.
-             * @param condition a test that is applied to each node returned by the
+             * @param condition a test that is applied to each item returned by the
              *             underlying SequenceIterator; only those items that pass the NodeTest are
              *             returned by the filter
              */
@@ -1338,6 +1390,48 @@ public final class FilterExpression extends BinaryExpression implements ContextS
             }
 
         }
+
+        public static class PositionalFilteredIterator40 implements SequenceIterator {
+            private final XPathContext outerContext;
+            private final FocusIterator base;
+            private final PullEvaluator condition;
+
+            /**
+             * Construct a AxisFilter
+             *
+             * @param outerContext the underlying iterator that returns all the nodes on
+             *                     a required axis.
+             * @param condition    a test that is applied to each item returned by the
+             *                     underlying SequenceIterator; only those items that pass the NodeTest are
+             *                     returned by the filter
+             */
+
+            public PositionalFilteredIterator40(XPathContext outerContext, PullEvaluator condition) {
+                this.outerContext = outerContext;
+                this.base = outerContext.getCurrentIterator();
+                this.condition = condition;
+            }
+
+            /*@Nullable*/
+            @Override
+            public Item next() {
+                try {
+                    while (true) {
+                        Item next = base.next();
+                        if (next == null) {
+                            return null;
+                        }
+                        if (FilterIterator.testPredicateValue40(condition.iterate(outerContext), base.position(), null)) {
+                            return next;
+                        }
+                    }
+                } catch (XPathException e) {
+                    throw new UncheckedXPathException(e);
+                }
+            }
+
+        }
+
 
         /**
          * An iterator for a filter expression where it is known that the filter value will not be numeric,

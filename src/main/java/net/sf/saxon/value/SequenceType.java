@@ -327,6 +327,9 @@ public final class SequenceType {
     public static final SequenceType SINGLE_NUMERIC =
             makeSequenceType(NumericType.getInstance(), StaticProperty.EXACTLY_ONE);
 
+    public static final SequenceType NUMERIC_SEQUENCE =
+            makeSequenceType(NumericType.getInstance(), StaticProperty.ALLOWS_ZERO_OR_MORE);
+
     /**
      * A type that allows zero or one nodes
      */

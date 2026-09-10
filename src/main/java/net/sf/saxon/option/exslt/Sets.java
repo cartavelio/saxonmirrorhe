@@ -8,12 +8,11 @@
 package net.sf.saxon.option.exslt;
 
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.sort.GlobalOrderComparer;
+import net.sf.saxon.functions.hof.FilterFn;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.ZeroOrOne;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -113,12 +112,10 @@ public abstract class Sets {
 
         // Filter ns1 to select nodes that come before this one
 
-        Expression filter = new IdentityComparison(
-                new ContextItemExpression(),
-                Token.PRECEDES,
-                Literal.makeLiteral(new ZeroOrOne<>(first)));
-
-        return new FilterIterator(ns1, filter, context);
+        final NodeInfo finalFirst = first;
+        return new FilterFn.PositionalFilterIterator(
+                ns1,
+                (it, pos) -> ((NodeInfo)it).compareOrder(finalFirst) < 0);
 
     }
 

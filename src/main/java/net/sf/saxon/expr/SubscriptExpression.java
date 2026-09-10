@@ -24,7 +24,7 @@ import net.sf.saxon.value.NumericValue;
 
 /**
  * A SubscriptExpression represents a FilterExpression of the form EXPR[n]
- * where n is known to be singleton numeric and to be independent of the focus; it does not need to be constant
+ * where n is known to be of type xs:numeric? and to be independent of the focus; it does not need to be constant
  */
 public class SubscriptExpression extends SingleItemFilter {
 
@@ -39,7 +39,7 @@ public class SubscriptExpression extends SingleItemFilter {
 
     public SubscriptExpression(Expression base, Expression subscript) {
         super(base);
-        subscriptOp = new Operand(this, subscript, OperandRole.SINGLE_ATOMIC);
+        subscriptOp = new Operand(this, subscript, OperandRole.SINGLE_ATOMIC);   // TODO: should be OPTIONAL_NUMERIC?
     }
 
 

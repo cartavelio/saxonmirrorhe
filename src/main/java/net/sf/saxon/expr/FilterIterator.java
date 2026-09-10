@@ -22,9 +22,11 @@ import net.sf.saxon.value.*;
 
 public class FilterIterator implements SequenceIterator {
 
-    protected FocusIterator base;
-    protected Expression filter;
-    protected XPathContext filterContext;
+    private FocusIterator base;
+    private Expression filter;
+    private XPathContext filterContext;
+
+    private boolean isXPath40;
 
     /**
      * Constructor
@@ -39,6 +41,8 @@ public class FilterIterator implements SequenceIterator {
         this.filter = filter;
         filterContext = context.newMinorContext();
         this.base = filterContext.trackFocus(base);
+        this.isXPath40 = filter != null &&
+                filter.getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40;
     }
 
     /**
@@ -100,7 +104,9 @@ public class FilterIterator implements SequenceIterator {
         // except for the handling of a numeric result
 
         SequenceIterator iterator = filter.iterate(filterContext);
-        return testPredicateValue(iterator, base.position(), filter);
+        return isXPath40
+                ? testPredicateValue40(iterator, base.position(), filter)
+                : testPredicateValue(iterator, base.position(), filter);
     }
 
     public static boolean testPredicateValue(SequenceIterator iterator, long position, Expression filter) throws XPathException {
@@ -142,6 +148,54 @@ public class FilterIterator implements SequenceIterator {
                 ExpressionTool.ebvError("a sequence starting with " + Err.describeGenre(first.getGenre()) + " (" + first.toShortString() + ")", filter);
                 return false;
             }
+        }
+    }
+
+    public static boolean testPredicateValue40(SequenceIterator iterator, long position, Expression filter) throws XPathException {
+        Item first = iterator.next();
+        if (first == null) {
+            return false;
+        }
+        if (first instanceof NodeInfo) {
+            return true;
+
+        } else if (first instanceof NumericValue) {
+            NumericValue val = (NumericValue) first;
+            while (true) {
+                if (val.compareTo(position) == 0) {
+                    return true;
+                }
+                Item next = iterator.next();
+                if (next == null) {
+                    return false;
+                }
+                if (!(next instanceof NumericValue)) {
+                    throw new XPathException("If the first item in the predicate is numeric, "
+                                                     + "all following values must be numeric", "XPTY0004");
+                }
+                val = (NumericValue) next;
+            }
+
+        } else if (first instanceof BooleanValue) {
+            if (iterator.next() != null) {
+                ExpressionTool.ebvError("a sequence of two or more items starting with a boolean", filter);
+            }
+            return ((BooleanValue) first).getBooleanValue();
+        } else if (first instanceof StringValue) {
+            if (iterator.next() != null) {
+                ExpressionTool.ebvError("a sequence of two or more items starting with a string", filter);
+            }
+            return !((StringValue) first).isEmpty();
+
+        } else if (first instanceof AtomicValue) {
+            ExpressionTool.ebvError("a sequence starting with an atomic value of type "
+                                            + ((AtomicValue) first).getPrimitiveType().getDisplayName()
+                                            + " (" + first.toShortString() + ")",
+                                    filter);
+            return false;
+        } else {
+            ExpressionTool.ebvError("a sequence starting with " + Err.describeGenre(first.getGenre()) + " (" + first.toShortString() + ")", filter);
+            return false;
         }
     }
 
