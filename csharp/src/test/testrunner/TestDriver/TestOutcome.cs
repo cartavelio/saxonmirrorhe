@@ -835,7 +835,7 @@ namespace TestDriver {
                 JGroundedValue val1 = SequenceTool.toGroundedValue(iter1);
                 bool success = JDeepEqual.deepEqual(
                     val0.iterate(), val1.iterate(),
-                    (a,b) => new JGenericAtomicComparer(JCodepointCollator.getInstance(), null).comparesEqual(a,b),
+                    (a,b) => new JGenericAtomicComparer(JCodepointCollator.getInstance(), 40, null).comparesEqual(a,b),
                     assertXpc.Processor.Implementation.getConversionContext(), flag);
                 // if necessary try again ignoring whitespace nodes
                 if (!success) {
@@ -847,7 +847,7 @@ namespace TestDriver {
                     iter1 = new JItemMappingIterator(iter1, new RemoveWhitespace());
                     success = JDeepEqual.deepEqual(
                         iter0, iter1,
-                        (a,b) => new JGenericAtomicComparer(JCodepointCollator.getInstance(), null).comparesEqual(a,b),
+                        (a,b) => new JGenericAtomicComparer(JCodepointCollator.getInstance(), 40, null).comparesEqual(a,b),
                         assertXpc.Processor.Implementation.getConversionContext(),
                         flag | JDeepEqual.EXCLUDE_WHITESPACE_TEXT_NODES);
                     if (success) {
