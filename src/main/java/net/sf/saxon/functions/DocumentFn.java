@@ -618,6 +618,11 @@ public class DocumentFn extends SystemFunction implements Callable {
                 source = request.resolve(context.getResourceResolver(),
                                                 config.getResourceResolver(),
                                                 new DirectResourceResolver(config));
+                if (source == null) {
+                    XPathException xerr = new XPathException("Failed to resolve streamed document URI " + request.uri, "FODC0005");
+                    xerr.setLocator(locator);
+                    throw xerr;
+                }
                 if (sourceIsTree(source)) {
                     NodeInfo startNode = controller.prepareInputTree(source);
                     source = startNode.getRoot().asActiveSource();

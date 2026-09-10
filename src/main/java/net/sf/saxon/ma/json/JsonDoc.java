@@ -79,7 +79,7 @@ public class JsonDoc extends SystemFunction  {
         } catch (java.io.IOException ioErr) {
 //            System.err.println("ProxyHost: " + System.getProperty("http.proxyHost"));
 //            System.err.println("ProxyPort: " + System.getProperty("http.proxyPort"));
-            throw UnparsedTextFunction.handleIOError(absoluteURI, ioErr, context);
+            throw UnparsedTextFunction.handleIOError(absoluteURI, ioErr);
         }
 
         Map<String, Sequence> checkedOptions;

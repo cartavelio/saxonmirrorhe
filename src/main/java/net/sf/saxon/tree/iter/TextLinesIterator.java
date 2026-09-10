@@ -92,7 +92,7 @@ public abstract class TextLinesIterator implements SequenceIterator {
             return current;
         } catch (IOException err) {
             close();
-            XPathException e = UnparsedTextFunction.handleIOError(uri, err, null);
+            XPathException e = handleIOError(uri, err);
             if (location != null) {
                 e.setLocator(location);
             }
@@ -100,6 +100,10 @@ public abstract class TextLinesIterator implements SequenceIterator {
         } catch (XPathException err) {
             throw new UncheckedXPathException(err);
         }
+    }
+
+    protected XPathException handleIOError(URI uri, IOException err) {
+        return UnparsedTextFunction.handleIOError(uri, err);
     }
 
     @Override
