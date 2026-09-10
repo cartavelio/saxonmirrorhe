@@ -322,7 +322,7 @@ DynamicFunctionCall extends Expression {
             SequenceType[] suppliedTypes = new SequenceType[expr.getArity()];
             for (int i=0; i<argEvaluators.length; i++) {
                 Expression arg = expr.suppliedArguments.getOperand(i).getChildExpression();
-                argEvaluators[i] = new LearningEvaluator(arg, arg.makeElaborator().lazily(true, false));
+                argEvaluators[i] = LearningEvaluator.makeLearningEvaluator(arg, arg.makeElaborator().lazily(true, false));
                 suppliedTypes[i] = SequenceType.makeSequenceType(arg.getItemType(), arg.getCardinality());
             }
             Expression target = expr.targetFunction.getChildExpression();

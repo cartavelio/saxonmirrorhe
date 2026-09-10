@@ -402,7 +402,7 @@ public class LetExpression extends Assignation {
         } else if (needsLazyEvaluation) {
             setEvaluator(getSequence().makeElaborator().lazily(getNominalReferenceCount() > 1, needsLazyEvaluation));
         } else if (evaluator == null) {
-            setEvaluator(new LearningEvaluator(
+            setEvaluator(LearningEvaluator.makeLearningEvaluator(
                     getSequence(),
                     getSequence().makeElaborator().lazily(getNominalReferenceCount() > 1, false)));
         }
@@ -544,7 +544,7 @@ public class LetExpression extends Assignation {
             if (needsEagerEvaluation) {
                 setEvaluator(getSequence().makeElaborator().eagerly());
             } else {
-                setEvaluator(new LearningEvaluator(
+                setEvaluator(LearningEvaluator.makeLearningEvaluator(
                         getSequence(), getSequence().makeElaborator().lazily(getNominalReferenceCount() > 1, false)));
             }
         }

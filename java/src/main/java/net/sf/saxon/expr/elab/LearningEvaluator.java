@@ -8,6 +8,7 @@
 package net.sf.saxon.expr.elab;
 
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
@@ -50,6 +51,13 @@ public class LearningEvaluator implements SequenceEvaluator {
         this.evaluator = lazy;
         this.completed = new AtomicInteger(0);
         this.count = new AtomicInteger(0);
+    }
+
+    public static SequenceEvaluator makeLearningEvaluator(Expression expr, SequenceEvaluator lazy) {
+        if (expr instanceof Literal) {
+            return lazy;
+        }
+        return new LearningEvaluator(expr, lazy);
     }
 
     /**

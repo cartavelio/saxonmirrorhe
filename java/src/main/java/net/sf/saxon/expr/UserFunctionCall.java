@@ -246,7 +246,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                 // appending to the sequence.
                 argumentEvaluators[i] = new SharedAppendEvaluator((Block) arg);
             } else {
-                argumentEvaluators[i] = new LearningEvaluator(
+                argumentEvaluators[i] = LearningEvaluator.makeLearningEvaluator(
                         arg, arg.makeElaborator().lazily(true, false));
             }
             i++;

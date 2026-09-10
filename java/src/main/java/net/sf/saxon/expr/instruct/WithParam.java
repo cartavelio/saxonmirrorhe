@@ -216,7 +216,7 @@ public class WithParam  {
 
     private void makeEvaluator() {
         Expression select = selectOp.getChildExpression();
-        evaluator = new LearningEvaluator(
+        evaluator = LearningEvaluator.makeLearningEvaluator(
                 select, select.makeElaborator().lazily(true, false));
     }
 

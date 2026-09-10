@@ -655,7 +655,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
                 selectEvaluator = new IndexedVariableEvaluator(pullEval);
             } else {
                 Expression select = expr.getSelectExpression();
-                selectEvaluator = new LearningEvaluator(
+                selectEvaluator = LearningEvaluator.makeLearningEvaluator(
                         select, select.makeElaborator().lazily(true, false));
                 //selectEvaluator = select.makeElaborator().lazily(true);
             }

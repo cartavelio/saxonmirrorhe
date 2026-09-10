@@ -10,6 +10,7 @@ package net.sf.saxon.expr.elab;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.Literal;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
@@ -109,6 +110,8 @@ public abstract class Elaborator {
         if (lazyEvaluationRequired) {
             return new MemoClosureEvaluator(expr, elaborateForPull());
         } else if (!expr.supportsLazyEvaluation()) {
+            return eagerly();
+        } else if (expr instanceof Literal) {
             return eagerly();
         } else if (repeatable) {
             return new LearningEvaluator(

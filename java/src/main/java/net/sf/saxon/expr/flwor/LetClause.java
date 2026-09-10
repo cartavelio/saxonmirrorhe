@@ -38,7 +38,7 @@ public class LetClause extends Clause {
 
     public SequenceEvaluator getEvaluator() {
         if (variableEvaluator == null) {
-            variableEvaluator = new LearningEvaluator(
+            variableEvaluator = LearningEvaluator.makeLearningEvaluator(
                     getSequence(), getSequence().makeElaborator().lazily(true, false));
         }
         return variableEvaluator;
