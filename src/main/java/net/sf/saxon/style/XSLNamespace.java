@@ -81,7 +81,7 @@ public class XSLNamespace extends XSLLeafNodeConstructor {
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         NamespaceConstructor inst = new NamespaceConstructor(name);
         compileContent(exec, decl, inst, new StringLiteral(StringValue.SINGLE_SPACE));
-        return inst;
+        return inst.withLocation(saveLocation());
     }
 
 }

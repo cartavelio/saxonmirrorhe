@@ -161,6 +161,7 @@ public class XSLMerge extends StyleElement {
             throws XPathException {
 
         MergeInstr merge = new MergeInstr();
+        merge.setLocation(saveLocation());
         int entries = numberOfMergeSources;
         MergeSource[] sources = new MergeSource[entries];
         Expression action = Literal.makeEmptySequence();

@@ -164,6 +164,7 @@ public class XSLIf extends StyleElement {
 
         Choose choose = new Choose(conditions, actions);
         choose.setInstruction(true);
+        choose.setLocation(saveLocation());
         return choose;
     }
 

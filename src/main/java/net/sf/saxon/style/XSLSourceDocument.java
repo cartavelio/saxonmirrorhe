@@ -68,8 +68,7 @@ public class XSLSourceDocument extends StyleElement {
     @Override
     protected void prepareAttributes() {
 
-        parseOptions = getConfiguration().getParseOptions()
-                .withSchema(getContainingPackage().getImportedSchema());
+        parseOptions = getConfiguration().getParseOptions();
 
         String hrefAtt = null;
         String validationAtt = null;
@@ -201,7 +200,7 @@ public class XSLSourceDocument extends StyleElement {
             action = action.typeCheck(visitor, config.makeContextItemStaticInfo(NodeKindTest.DOCUMENT, false));
 
             return config.makeStreamInstruction(
-                        href, action, streaming, parseOptions, null, allocateLocation(),
+                        href, action, streaming, parseOptions, null, saveLocation(),
                         makeRetainedStaticContext());
 
         } catch (XPathException err) {

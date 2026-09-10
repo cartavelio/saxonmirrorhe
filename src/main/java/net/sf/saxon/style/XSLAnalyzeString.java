@@ -203,11 +203,12 @@ public class XSLAnalyzeString extends StyleElement {
 
         try {
             return new AnalyzeString(select,
-                    regex,
-                    flags,
-                    matchingBlock == null ? null : matchingBlock.simplify(),
-                    nonMatchingBlock == null ? null : nonMatchingBlock.simplify(),
-                    pattern);
+                                     regex,
+                                     flags,
+                                     matchingBlock == null ? null : matchingBlock.simplify(),
+                                     nonMatchingBlock == null ? null : nonMatchingBlock.simplify(),
+                                     pattern)
+                    .withLocation(saveLocation());
         } catch (XPathException e) {
             compileError(e);
             return null;

@@ -322,6 +322,7 @@ public class XSLResultDocument extends StyleElement {
         }
         inst.setContentExpression(content);
         inst.setAsynchronous(async);
+        inst.setLocation(saveLocation());
         return inst;
     }
 

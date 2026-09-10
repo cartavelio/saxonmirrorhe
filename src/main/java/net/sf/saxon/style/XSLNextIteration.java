@@ -100,6 +100,7 @@ public class XSLNextIteration extends XSLBreakOrContinue {
         call.setRetainedStaticContext(makeRetainedStaticContext());
         WithParam[] actualParams = getWithParamInstructions(call, exec, decl, false);
         call.setParameters(actualParams);
+        call.setLocation(saveLocation());
 
         // For all declared parameters of the xsl:iterate instruction that are not present in the
         // actual parameters of the xsl:next-iteration, add an implicit <xsl:with-param name="p" select="$p"/>

@@ -106,7 +106,7 @@ public final class XSLValueOf extends XSLLeafNodeConstructor {
         ValueOf inst = new ValueOf(select, disable, false);
         inst.setRetainedStaticContext(makeRetainedStaticContext());
         compileContent(exec, decl, inst, separator);
-        return inst;
+        return inst.withLocation(saveLocation());
     }
 
 }

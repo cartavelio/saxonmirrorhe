@@ -314,6 +314,7 @@ public final class XSLForEachGroup extends StyleElement {
                 makeSortKeys(compilation, decl));
             instr.setIsInFork(getParent().getFingerprint() == StandardNames.XSL_FORK);
             instr.setComposite(composite);
+            instr.setLocation(saveLocation());
             return instr;
         } catch (XPathException e) {
             compileError(e);

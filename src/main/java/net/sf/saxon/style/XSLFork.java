@@ -81,7 +81,8 @@ public class XSLFork extends StyleElement {
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         Expression content = compileSequenceConstructor(exec, decl, true);
         if (content instanceof Block) {
-            return new Fork(((Block) content).getOperanda());
+            return new Fork(((Block) content).getOperanda())
+                    .withLocation(saveLocation());
         } else {
             return content;
         }

@@ -138,6 +138,7 @@ public final class XSLMessage extends StyleElement {
             }
         }
         MessageInstr m = new MessageInstr(select, terminate, errorCode);
+        m.setLocation(saveLocation());
         m.setRetainedStaticContext(makeRetainedStaticContext());
         return m;
     }
