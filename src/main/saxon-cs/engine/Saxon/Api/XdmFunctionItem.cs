@@ -1,6 +1,10 @@
 using System;
+using Saxon.Ejava.util.function;
+using Saxon.Hej;
 using Saxon.Hej.expr;
+using Saxon.Hej.expr.parser;
 using Saxon.Hej.om;
+using Saxon.Hej.type;
 
 namespace Saxon.Api {
     /// <summary inherits="XdmItem">
@@ -62,28 +66,44 @@ namespace Saxon.Api {
         /// <returns>The result of calling the function</returns>
         /// 
         public XdmValue Invoke(XdmValue[] arguments, Processor processor) {
-            Sequence[] args = new Sequence[arguments.Length];
-            for (int i = 0; i < arguments.Length; i++) {
-                args[i] = arguments[i].value;
+            try {
+                TypeHierarchy th = processor.Implementation.getTypeHierarchy();
+                FunctionItem fi = (FunctionItem)value;
+                FunctionItemType type = fi.getFunctionItemType();
+                Sequence[] args = new Sequence[arguments.Length];
+                for (int i = 0; i < arguments.Length; i++) {
+                    //args[i] = arguments[i].value;
+                    Hej.value.SequenceType required = type.getArgumentTypes()[i];
+                    GroundedValue val = arguments[i].value;
+                    if (!required.matches(val, th)) {
+                        int pos = i;
+                        Supplier<RoleDiagnostic> role =
+                            () => new RoleDiagnostic(RoleDiagnostic.FUNCTION, "", pos);
+                        val = th.applyFunctionConversionRules(val, required, role, Loc.NONE);
+                    }
+                    args[i] = val;
+                }
+
+                Configuration config = processor.Implementation;
+                Controller controller = new Controller(config);
+                XPathContext context = controller.newXPathContext();
+                context = fi.makeNewContext(context, controller);
+
+                Sequence result = fi.call(context, args);
+                GroundedValue groundedResult = result.materialize();
+                if (!fi.isTrustedResultType()) {
+                    Hej.value.SequenceType required = type.getResultType();
+                    if (!required.matches(groundedResult, th)) {
+                        Supplier<RoleDiagnostic> role =
+                            () => new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, "", 0);
+                        groundedResult = th.applyFunctionConversionRules(groundedResult, required, role, Loc.NONE);
+                    }
+                }
+                return Wrap(groundedResult);
             }
-
-            FunctionItem function = (FunctionItem) value;
-            Saxon.Hej.Configuration config = processor.Implementation;
-            Saxon.Hej.Controller controller = new Saxon.Hej.Controller(config);
-            XPathContext context = controller.newXPathContext();
-            context = function.makeNewContext(context, controller);
-
-            Sequence result = function.call(context, args);
-            GroundedValue groundedResult = result.materialize();
-            // TODO: check the result type
-            // if (!function.isTrustedResultType()) {
-            //     Saxon.Hej.value.SequenceType required = type.getResultType();
-            //     if (!required.matches(groundedResult, th)) {
-            //         RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, "", 0);
-            //         groundedResult = th.applyFunctionConversionRules(groundedResult, required, role, Loc.NONE);
-            //     }
-            // }
-            return Wrap(groundedResult);
+            catch (Saxon.Hej.trans.XPathException e) {
+                throw new Saxon.Api.SaxonApiException(e);
+            }
         }
     }
 }
