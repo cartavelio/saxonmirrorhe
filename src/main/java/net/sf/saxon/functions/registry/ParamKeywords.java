@@ -47,7 +47,7 @@ public class ParamKeywords {
         arrayParamNames.put("index-of", "array|target|collation");
         arrayParamNames.put("index-where", "array|predicate");
         arrayParamNames.put("insert-before", "array|position|member");
-        arrayParamNames.put("join", "arrays");
+        arrayParamNames.put("join", "arrays|separator");
         arrayParamNames.put("members", "array");
         arrayParamNames.put("of-members", "input");
         arrayParamNames.put("partition", "input|break-when");

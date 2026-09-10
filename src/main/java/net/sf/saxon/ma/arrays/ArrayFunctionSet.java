@@ -68,7 +68,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
 
         register("build", 2, e -> e.populate(ArrayBuild::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR | NAV, null)
-                .arg(1, buildFunctionType, ONE | INS, null));
+                .arg(1, buildFunctionType, OPT | INS, null));
         //#endif
 
         SpecificFunctionType filterFunctionType31 = new SpecificFunctionType(
@@ -227,6 +227,10 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             register("index-where", 2, e -> e.populate(ArrayIndexWhere::new, BuiltInAtomicType.INTEGER, STAR, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                     .arg(1, filterFunctionType, ONE | INS, null));
+
+            register("join", 1, 2, e -> e.populate(ArrayJoin::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, STAR | INS, null)
+                    .arg(1, ArrayItemType.ANY_ARRAY_TYPE, OPT | INS, null));
 
             register("slice", 1, 4, e -> e.populate(ArraySlice::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null)
@@ -666,10 +670,20 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
 
         @Override
         public ArrayItem call(XPathContext context, Sequence[] arguments) throws XPathException {
+            ArrayItem separator = null;
+            if (arguments.length == 2) {
+                separator = ((ArrayItem)arguments[1].materialize());
+            }
             SequenceIterator iterator = arguments[0].iterate();
             ArrayItem array = SimpleArrayItem.EMPTY_ARRAY;
             ArrayItem nextArray;
+            boolean atStart = true;
             while ((nextArray = (ArrayItem) iterator.next()) != null) {
+                if (atStart) {
+                    atStart = false;
+                } else {
+                    array = array.concat(separator);
+                }
                 array = array.concat(nextArray);
             }
             return array;
@@ -902,7 +916,11 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         public ArrayItem call(XPathContext context, Sequence[] arguments) throws XPathException {
             List<GroundedValue> members = new ArrayList<>(expectedSize());
             SequenceIterator iter = arguments[0].iterate();
-            if (arguments.length == 1) {
+            FunctionItem fn = null;
+            if (arguments.length == 2) {
+                fn = (FunctionItem) arguments[1].head();
+            }
+            if (fn == null) {
                 try {
                     for (Item it; (it = iter.next()) != null; ) {
                         members.add(it);
@@ -912,7 +930,6 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                     throw e.getXPathException();
                 }
             } else {
-                FunctionItem fn = (FunctionItem) arguments[1].head();
                 switch (fn.getArity()) {
                     case 0: {
                         try {
@@ -951,7 +968,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                         }
                         return makeArray(members);
                     default:
-                        throw new XPathException("Wrong arity for array:filter callback function");
+                        throw new XPathException("Wrong arity for array:build callback function");
                 }
             }
             return makeArray(members);
