@@ -37,7 +37,7 @@ cppClass,
   cppXP = createXPathProcessorWithProcessor(SaxonProcessor::sxn_environ->thread,
                                             (void *)p->procRef);
 
-  if (cppXP == -1) {
+  if (cppXP == SXN_UNSET) {
 
     std::cerr << "Error: Failed to create the XPathProcessor internal object"
               << std::endl;
@@ -96,7 +96,7 @@ XPathProcessor::~XPathProcessor() {
   if (cppXP > 0) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)cppXP);
   }
-  cppXP = -1;
+  cppXP = SXN_UNSET;
   // exceptionClear();
 }
 
@@ -112,16 +112,16 @@ XdmValue *XPathProcessor::evaluate(const char *xpathStr) {
   int64_t results =
       j_evaluate(SaxonProcessor::sxn_environ->thread, (void *)cppXP,
                  (char *)cwdXP.c_str(), (char *)xpathStr,
-                 (void *)(processorDataRef == -1 ? (void *)NULL
+                 (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                                  : (void *)processorDataRef));
   if (processorDataRef > 0) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)processorDataRef);
-    processorDataRef = -1;
+    processorDataRef = SXN_UNSET;
   }
   if (results > 0) {
     return SaxonProcessor::makeXdmValueFromRef(results);
-  } else if (results == -2) {
+  } else if (results == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
 
@@ -141,41 +141,41 @@ XdmItem *XPathProcessor::evaluateSingle(const char *xpathStr) {
   int64_t result = j_evaluateSingle(
       SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)cwdXP.c_str(),
       (char *)xpathStr,
-      (void *)(processorDataRef == -1 ? (void *)NULL
+      (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                       : (void *)processorDataRef));
   if (processorDataRef > 0) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)processorDataRef);
-    processorDataRef = -1;
+    processorDataRef = SXN_UNSET;
   }
   if (result > 0) {
     int typeRef =
         j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)result);
     XdmItem *xdmItem = nullptr;
 
-    if (typeRef == 1) {
+    if (typeRef == XDM_ATOMIC_VALUE) {
       xdmItem = new XdmAtomicValue(result);
       return xdmItem;
 
-    } else if (typeRef == 2) {
+    } else if (typeRef == XDM_NODE) {
       xdmItem = new XdmNode(result);
       return xdmItem;
 
-    } else if (typeRef == 4) {
+    } else if (typeRef == XDM_MAP) {
       xdmItem = new XdmMap(result);
       return xdmItem;
 
-    } else if (typeRef == 3) {
+    } else if (typeRef == XDM_ARRAY) {
       xdmItem = new XdmArray(result);
       return xdmItem;
 
-    } else if (typeRef == 5) {
+    } else if (typeRef == XDM_FUNCTION_ITEM) {
       xdmItem = new XdmFunctionItem(result);
       return xdmItem;
     }
     xdmItem = new XdmItem(result);
     return xdmItem;
-  } else if (result == -2) {
+  } else if (result == SXN_EXCEPTION) {
 
     throw SaxonApiException();
   }
@@ -307,14 +307,14 @@ bool XPathProcessor::effectiveBooleanValue(const char *xpathStr) {
   int resultsi = j_effectiveBooleanValue(
       SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)cwdXP.c_str(),
       (char *)xpathStr,
-      (void *)(processorDataRef == -1 ? (void *)NULL
+      (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                       : (void *)processorDataRef));
   if (processorDataRef > 0) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)processorDataRef);
-    processorDataRef = -1;
+    processorDataRef = SXN_UNSET;
   }
-  if (resultsi == -2) {
+  if (resultsi == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
 

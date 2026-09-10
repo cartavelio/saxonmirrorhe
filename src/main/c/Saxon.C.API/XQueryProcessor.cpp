@@ -19,7 +19,7 @@ XQueryProcessor::XQueryProcessor() {
 XQueryProcessor::~XQueryProcessor() {
   clearProperties();
   clearParameters();
-  cppXQ = -1;
+  cppXQ = SXN_UNSET;
   cwdXQ.erase();
   exceptionClear();
 }
@@ -29,7 +29,7 @@ XQueryProcessor::XQueryProcessor(SaxonProcessor *p, std::string curr) {
   exception = nullptr;
   cppXQ = j_createXQueryEngineWithProcessor(SaxonProcessor::sxn_environ->thread,
                                             (void *)p->procRef);
-  if (cppXQ == -1) {
+  if (cppXQ == SXN_UNSET) {
 
     throw SaxonApiException(
         "Error: Failed to create the XPathProcessor internal object");
@@ -237,16 +237,16 @@ void XQueryProcessor::executeQueryToFile(const char *infilename,
   int64_t status = j_executeQueryToFile(
       SaxonProcessor::sxn_environ->thread, (void *)proc->procRef,
       (char *)cwdXQ.c_str(), (char *)ofilename,
-      (void *)(processorDataRef == -1 ? (void *)NULL
+      (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                       : (void *)processorDataRef));
 
-  if (status == -2) {
+  if (status == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
   if (processorDataRef > 0) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)processorDataRef);
-    processorDataRef = -1;
+    processorDataRef = SXN_UNSET;
   }
 }
 
@@ -265,16 +265,16 @@ XdmValue *XQueryProcessor::executeQueryToValue(const char *infilename,
   int64_t result = j_executeQueryToValue(
       SaxonProcessor::sxn_environ->thread, (void *)proc->procRef,
       (char *)cwdXQ.c_str(),
-      (void *)(processorDataRef == -1 ? (void *)NULL
+      (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                       : (void *)processorDataRef));
   if (processorDataRef > 0) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)processorDataRef);
-    processorDataRef = -1;
+    processorDataRef = SXN_UNSET;
   }
   if (result > 0) {
     return SaxonProcessor::makeXdmValueFromRef(result);
-  } else if (result == -2) {
+  } else if (result == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
 
@@ -297,7 +297,7 @@ const char *XQueryProcessor::executeQueryToString(const char *infilename,
   char *result = j_executeQueryToString(
       SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)proc->procRef,
       (char *)cwdXQ.c_str(),
-      (void *)(processorDataRef == -1 ? (void *)NULL
+      (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                       : (void *)processorDataRef));
 
   if (result == nullptr) {
@@ -306,7 +306,7 @@ const char *XQueryProcessor::executeQueryToString(const char *infilename,
   if (processorDataRef > 0) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)processorDataRef);
-    processorDataRef = -1;
+    processorDataRef = SXN_UNSET;
   }
   return (const char *)result;
 }

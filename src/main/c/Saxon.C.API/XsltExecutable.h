@@ -551,6 +551,7 @@ private:
   // jclass messageListenerClass, resultDocumentClass;
   int64_t procRef, executableRef, selectionRef, saxonMessageListenerRef,
       saxonResultDocRef;
+  bool selectionStringFlag;  /*!< Flag to indicate that the selection was retrieved as a string file value instead of XdmValue */
   std::string cwdXE;         /*!< current working directory */
   std::string resources_dir; /*!< current Saxon resources directory */
   bool tunnel, jitCompilation, rawResultsFlag, exceptionFound;

@@ -97,7 +97,7 @@ XdmNode *SchemaValidator::getValidationReport() {
   if (result > 0) {
     XdmNode *node = new XdmNode(result);
     return node;
-  } else if (result == -2) {
+  } else if (result == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
   return nullptr;
@@ -117,15 +117,15 @@ void SchemaValidator::registerSchemaFromNode(XdmNode *node) {
   int64_t status = j_registerSchemaNode(
       SaxonProcessor::sxn_environ->thread, (void *)proc->procRef,
       (void *)node->getUnderlyingValue(),
-      (void *)(processorDataRef == -1 ? (void *)NULL
+      (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                       : (void *)processorDataRef));
-  if (status == -2) {
+  if (status == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
   if (processorDataRef > 0) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)processorDataRef);
-    processorDataRef = -1;
+    processorDataRef = SXN_UNSET;
   }
 }
 
@@ -142,15 +142,15 @@ void SchemaValidator::registerSchemaFromFile(const char *sourceFile) {
   int64_t status = j_registerSchema(
       SaxonProcessor::sxn_environ->thread, (void *)proc->procRef,
       (char *)cwdV.c_str(), (char *)sourceFile,
-      (void *)(processorDataRef == -1 ? (void *)NULL
+      (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                       : (void *)processorDataRef));
-  if (status == -2) {
+  if (status == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
   if (processorDataRef > 0) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)processorDataRef);
-    processorDataRef = -1;
+    processorDataRef = SXN_UNSET;
   }
 }
 
@@ -164,7 +164,7 @@ void SchemaValidator::exportSchema(const char *fileName) {
   int64_t status =
       j_exportSchema(SaxonProcessor::sxn_environ->thread, (void *)proc->procRef,
                      (char *)cwdV.c_str(), (char *)fileName);
-  if (status == -2) {
+  if (status == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
 }
@@ -185,9 +185,9 @@ void SchemaValidator::registerSchemaFromString(const char *sourceStr,
       SaxonProcessor::sxn_environ->thread, (void *)proc->procRef,
       (char *)(systemID == nullptr ? cwdV.c_str() : systemID),
       (char *)sourceStr,
-      (void *)(processorDataRef == -1 ? (void *)NULL
+      (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                       : (void *)processorDataRef));
-  if (status == -2) {
+  if (status == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
 }
@@ -204,15 +204,15 @@ void SchemaValidator::validate(const char *sourceFile) {
   int64_t status = j_validate(
       SaxonProcessor::sxn_environ->thread, (void *)proc->procRef, (void *)cppV,
       (char *)cwdV.c_str(), (char *)sourceFile, (char *)nullptr,
-      (void *)(processorDataRef == -1 ? (void *)NULL
+      (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                       : (void *)processorDataRef));
-  if (status == -2) {
+  if (status == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
   if (processorDataRef > 0) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)processorDataRef);
-    processorDataRef = -1;
+    processorDataRef = SXN_UNSET;
   }
 }
 
@@ -228,17 +228,17 @@ XdmNode *SchemaValidator::validateToNode(const char *sourceFile) {
   int64_t result = j_validateToNode(
       SaxonProcessor::sxn_environ->thread, (void *)proc->procRef, (void *)cppV,
       (char *)cwdV.c_str(), (char *)sourceFile,
-      (void *)(processorDataRef == -1 ? (void *)NULL
+      (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                       : (void *)processorDataRef));
   if (processorDataRef > 0) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)processorDataRef);
-    processorDataRef = -1;
+    processorDataRef = SXN_UNSET;
   }
   if (result > 0) {
     XdmNode *node = new XdmNode(result);
     return node;
-  } else if (result == -2) {
+  } else if (result == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
 

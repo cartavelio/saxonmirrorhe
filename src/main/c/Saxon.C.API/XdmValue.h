@@ -24,16 +24,6 @@ class XdmItem;
 class XdmAtomicValue;
 class XdmNode;
 
-typedef enum eXdmType {
-  XDM_VALUE = 1,
-  XDM_ITEM = 2,
-  XDM_NODE = 3,
-  XDM_ATOMIC_VALUE = 4,
-  XDM_FUNCTION_ITEM = 5,
-  XDM_MAP = 6,
-  XDM_ARRAY = 7
-} XDM_TYPE;
-
 typedef enum saxonTypeEnum {
   enumNode,
   enumString,
@@ -196,11 +186,17 @@ protected:
     valueType = nullptr;
     xdmSize = 0;
     toStringValue = nullptr;
+    values_cap = 1;
+    values = new XdmItem*[values_cap];
+    relinquished_values = new char[values_cap];
+    memset(relinquished_values, 0, sizeof((char *) + relinquished_values));
   }
 
   char *valueType; /*!< Cached. The type of the XdmValue */
 
-  std::vector<XdmItem *> values; /*!< Cached. XdmItems in the XdmValue */
+  XdmItem ** values; /*!< Cached. XdmItems in the XdmValue */
+  char * relinquished_values;
+  int values_cap;
   int xdmSize;  /*!< Cached. The count of items in the XdmValue */
   int refCount; /*!< The reference count of this XdmValue. If >1 this object
                    should not be deleted */

@@ -182,7 +182,7 @@ XdmNode *XdmNode::getParent() {
   if (parent == nullptr) {
     int64_t nodeRef =
         getParentForXdmNode(SaxonProcessor::sxn_environ->thread, (void *)value);
-    if (nodeRef > -1) {
+    if (nodeRef > SXN_UNSET) {
       parent = new XdmNode(nullptr, nodeRef, UNKNOWN);
       // parent->incrementRefCount();
       return parent;
@@ -333,7 +333,7 @@ XdmNode *XdmNode::getChild(int i, bool cached) {
     int64_t childRef =
         j_getChild(SaxonProcessor::sxn_environ->thread, (void *)value, i);
 
-    if(childRef == -1) {
+    if(childRef == SXN_UNSET) {
         return nullptr;
     }
 

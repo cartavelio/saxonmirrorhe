@@ -35,6 +35,7 @@
 #include <string>
 #include <vector>
 
+
 #include "DocumentBuilder.h"
 #include "SaxonApiException.h"
 #include "SaxonCGlue.h"
@@ -66,6 +67,7 @@ void operator delete(void *ptr) noexcept;
 void operator delete(void *, std::size_t) noexcept;
 
 #endif
+
 
 class Xslt30Processor;
 
@@ -130,6 +132,18 @@ enum class UnprefixedElementMatchingPolicy {
    */
   DEFAULT_NAMESPACE_OR_NONE
 };
+
+
+typedef enum eXdmType {
+  XDM_VALUE = 0,
+  XDM_ATOMIC_VALUE = 1,
+  XDM_NODE = 2,
+  XDM_FUNCTION_ITEM = 3,
+  XDM_MAP = 4,
+  XDM_ARRAY = 5,
+  XDM_EMPTY = 6,
+  XDM_ITEM = 7,
+} XDM_TYPE;
 
 //==========================================
 

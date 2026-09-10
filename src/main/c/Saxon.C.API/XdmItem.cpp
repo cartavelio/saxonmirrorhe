@@ -3,12 +3,16 @@
 #include "XdmItem.h"
 
 XdmItem::XdmItem() : XdmValue() {
-  value = -1;
+  value = SXN_UNSET;
   stringValue = nullptr;
   itemToString = nullptr;
 }
 
 XdmItem::XdmItem(const XdmItem &other) : XdmValue(other) {
+if (getenv("SAXONC_DEBUG_FLAG")) {
+    std::cerr << "XdmItem copy constructor called:"
+              << std::endl;
+  }
   value = other.value;
   xdmSize = 1;
   refCount = other.refCount;

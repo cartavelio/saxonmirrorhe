@@ -39,7 +39,7 @@ public class XdmUtils {
     }
 
     private enum XdmType {
-        XDM_VALUE(0), XDM_ATOMIC_VALUE(1), XDM_NODE(2),  XDM_ARRAY_VALUE(3), XDM_MAP_VALUE(4), XDM_FUNCTION_ITEM(5), XDM_EMPTY_SEQUENCE(6);
+        XDM_VALUE(0), XDM_ATOMIC_VALUE(1), XDM_NODE(2),  XDM_ARRAY_VALUE(3), XDM_MAP_VALUE(4), XDM_FUNCTION_ITEM(5), XDM_EMPTY_SEQUENCE(6), XDM_ITEM(7);
 
         private final int value;
 

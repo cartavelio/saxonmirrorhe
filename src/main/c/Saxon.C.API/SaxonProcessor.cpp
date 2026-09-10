@@ -239,7 +239,7 @@ void SaxonProcessor::initialize(bool l) {
   cwd = "";
   licensei = l;
   exception = nullptr;
-  procRef = -1;
+  procRef = SXN_UNSET;
   if (SaxonProcessor::jvmCreatedCPP == 0) {
     SaxonProcessor::jvmCreatedCPP = 1;
     SaxonProcessor::sxn_environ =
@@ -261,7 +261,7 @@ void SaxonProcessor::initialize(bool l) {
   procRef =
       createSaxonProcessor2((SaxonProcessor::sxn_environ->thread), (int)l);
 
-  if (procRef == -2) {
+  if (procRef == SXN_EXCEPTION) {
     throw SaxonApiException("Failed to create Processor object");
   }
 
@@ -300,7 +300,7 @@ SaxonProcessor::SaxonProcessor(const char *configFile) {
 
   licensei = true;
   exception = nullptr;
-  procRef = -1;
+  procRef = SXN_UNSET;
   if (SaxonProcessor::jvmCreatedCPP == 0) {
     SaxonProcessor::jvmCreatedCPP = 1;
     SaxonProcessor::sxn_environ =
@@ -320,7 +320,7 @@ SaxonProcessor::SaxonProcessor(const char *configFile) {
   }
   procRef = createSaxonProcessorWithConfigurationFile(
       (SaxonProcessor::sxn_environ->thread), (char *)configFile);
-  if (procRef == -2) {
+  if (procRef == SXN_EXCEPTION) {
     throw SaxonApiException(
         "Failed to create SaxonProcessor object - with configuration file");
   }
@@ -337,14 +337,14 @@ SaxonProcessor::~SaxonProcessor() {
     std::cerr << "~SaxonProcessor destructor:"
               << " proc ref=" << ((long)procRef) << std::endl;
   }
-  if (procRef != -1) {
+  if (procRef != SXN_UNSET) {
     if (getenv("SAXONC_DEBUG_FLAG")) {
       std::cerr << "~SaxonProcessor destructor called with destroy:"
                 << " ob ref=" << (this) << std::endl;
     }
     // SaxonProcessor::sxn_environ->env->DeleteGlobalRef(proc);
     j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)procRef);
-    procRef = -1;
+    procRef = SXN_UNSET;
   }
   if (!versionStr.empty()) {
 
@@ -397,40 +397,35 @@ XdmValue *SaxonProcessor::makeXdmValueFromRef(int64_t results) {
     XdmValue *value = nullptr;
     int typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,
                                      (void *)results);
-    XdmItem *xdmItem = nullptr;
-    if (typeRef == -2) {
+    if (typeRef == SXN_EXCEPTION) {
 
       throw SaxonApiException();
     }
-    if (typeRef == 1) {
+    XDM_TYPE xdm_type = static_cast<XDM_TYPE>(typeRef);
+    if (xdm_type == XDM_ATOMIC_VALUE) {
       value = new XdmValue();
-      xdmItem = new XdmAtomicValue(results);
-      value->addXdmItem(xdmItem);
+      value->addXdmItem(new XdmAtomicValue(results));
 
-    } else if (typeRef == 2) {
+    } else if (xdm_type == XDM_NODE) {
       value = new XdmValue();
-      xdmItem = new XdmNode(results);
-      value->addXdmItem(xdmItem);
+      value->addXdmItem(new XdmNode(results));
 
-    } else if (typeRef == 4) {
+    } else if (xdm_type == XDM_MAP) {
       value = new XdmValue();
-      xdmItem = new XdmMap(results);
-      value->addXdmItem(xdmItem);
+      value->addXdmItem(new XdmMap(results));
 
-    } else if (typeRef == 3) {
+    } else if (xdm_type == XDM_ARRAY) {
       value = new XdmValue();
-      xdmItem = new XdmArray(results);
-      value->addXdmItem(xdmItem);
+      value->addXdmItem(new XdmArray(results));
 
-    } else if (typeRef == 5) {
+    } else if (xdm_type == XDM_FUNCTION_ITEM) {
       value = new XdmValue();
-      xdmItem = new XdmFunctionItem(results);
-      value->addXdmItem(xdmItem);
-    } else if (typeRef == 6) {
+      value->addXdmItem(new XdmFunctionItem(results));
+    } else if (typeRef == XDM_EMPTY) {
       // Empty Sequence detected.
       // TODO Maybe we should create an EmptySequence object
       j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)results);
-      results = -1;
+      results = SXN_UNSET;
       return nullptr;
 
     } else {
@@ -438,7 +433,7 @@ XdmValue *SaxonProcessor::makeXdmValueFromRef(int64_t results) {
     }
 
     return value;
-  } else if (results == -2) {
+  } else if (results == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
 
@@ -449,30 +444,32 @@ XdmItem *SaxonProcessor::makeXdmItemFromRef(int64_t results) {
   if (results > 0) {
     int typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,
                                      (void *)results);
+
+    XDM_TYPE xdm_type = static_cast<XDM_TYPE>(typeRef);
     XdmItem *xdmItem = nullptr;
-    if (typeRef == -2) {
+    if (typeRef == SXN_EXCEPTION) {
 
       throw SaxonApiException();
     }
-    if (typeRef == 1) {
+    if (xdm_type == XDM_ATOMIC_VALUE) {
       xdmItem = new XdmAtomicValue(results);
 
-    } else if (typeRef == 2) {
+    } else if (xdm_type == XDM_NODE) {
       xdmItem = new XdmNode(results);
 
-    } else if (typeRef == 4) {
+    } else if (xdm_type == XDM_MAP) {
       xdmItem = new XdmMap(results);
 
-    } else if (typeRef == 3) {
+    } else if (xdm_type == XDM_ARRAY) {
       xdmItem = new XdmArray(results);
 
-    } else if (typeRef == 5) {
+    } else if (xdm_type == XDM_FUNCTION_ITEM) {
       xdmItem = new XdmFunctionItem(results);
-    } else if (typeRef == 6) {
+    } else if (xdm_type == XDM_EMPTY) {
       // Empty Sequence detected.
       // TODO Maybe we should create an EmptySequence object
       j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)results);
-      results = -1;
+      results = SXN_UNSET;
       return nullptr;
 
     } else {
@@ -481,7 +478,7 @@ XdmItem *SaxonProcessor::makeXdmItemFromRef(int64_t results) {
     }
 
     return xdmItem;
-  } else if (results == -2) {
+  } else if (results == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
 
@@ -503,7 +500,7 @@ int64_t SaxonProcessor::createJArray(XdmValue **values, int length) {
     return processorDataRef;
 
   } else {
-    return -1;
+    return SXN_UNSET;
   }
 }
 
@@ -544,7 +541,7 @@ int64_t SaxonProcessor::createParameterJArray(
 
                       std::cerr<<"Type of value:"<<((long)xx)<<std::endl;
                   }
-                  if((iter->second)->getUnderlyingValue() == -1) {
+                  if((iter->second)->getUnderlyingValue() == SXN_UNSET) {
                       std::cerr<<"(iter->second)->getUnderlyingValue() is
       nullptr"<<std::endl;
                   }}
@@ -566,7 +563,7 @@ int64_t SaxonProcessor::createParameterJArray(
     return processorDataRef;
 
   } else {
-    return -1;
+    return SXN_UNSET;
   }
 }
 
@@ -621,7 +618,7 @@ int64_t SaxonProcessor::createParameterJArray2(
     return processorDataRef;
 
   } else {
-    return -1;
+    return SXN_UNSET;
   }
 }
 
@@ -726,7 +723,7 @@ void SaxonProcessor::setCatalog(const char *catalogFile) {
     return;
   }
 
-  if (procRef == -1) {
+  if (procRef == SXN_UNSET) {
     throw SaxonApiException(
         "Processor is null in SaxonProcessor.setCatalogFiles");
     return;
@@ -734,7 +731,7 @@ void SaxonProcessor::setCatalog(const char *catalogFile) {
 
   long result = j_setCatalogFile(sxn_environ->thread, (void *)procRef,
                                  (char *)catalogFile);
-  if (result == -1) {
+  if (result == SXN_UNSET) {
     throw SaxonApiException("setCatalogFile failed");
   }
 }
@@ -752,7 +749,7 @@ XdmValue * SaxonProcessor::parseJsonFromString(const char *source, const char * 
     XdmValue *value = new XdmValue(xdmValueRef);
 
     return value;
-  } else if (xdmValueRef == -2) {
+  } else if (xdmValueRef == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
   return nullptr;
@@ -772,7 +769,7 @@ XdmValue * SaxonProcessor::parseJsonFromFile(const char *source){
     XdmValue *value = new XdmValue(xdmValueRef);
 
     return value;
-  } else if (xdmValueRef == -2) {
+  } else if (xdmValueRef == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
   return nullptr;
@@ -792,7 +789,7 @@ XdmNode *SaxonProcessor::parseXmlFromString(const char *source, const char * enc
     XdmNode *value = new XdmNode(xdmNodeRef);
 
     return value;
-  } else if (xdmNodeRef == -2) {
+  } else if (xdmNodeRef == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
   return nullptr;
@@ -818,7 +815,7 @@ XdmNode *SaxonProcessor::parseXmlFromFile(const char *filename,
     value = new XdmNode(xdmNodeRef);
 
     return value;
-  } else if (xdmNodeRef == -2) {
+  } else if (xdmNodeRef == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
   return nullptr;
@@ -837,7 +834,7 @@ XdmNode *SaxonProcessor::parseXmlFromUri(const char *uri,
     value = new XdmNode(xdmNodeRef);
 
     return value;
-  } else if (xdmNodeRef == -2) {
+  } else if (xdmNodeRef == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
   return nullptr;
@@ -1012,7 +1009,7 @@ XdmArray *SaxonProcessor::makeArray(short *input, int length) {
 
 XdmArray *SaxonProcessor::makeArray(XdmValue **input, int length) {
   SaxonProcessor::attachCurrentThread();
-  int64_t processorDataRef = -1;
+  int64_t processorDataRef = SXN_UNSET;
 
   if (length == 0) {
     processorDataRef = createProcessorData(sxn_environ->thread);
@@ -1024,7 +1021,7 @@ XdmArray *SaxonProcessor::makeArray(XdmValue **input, int length) {
   }
 
   for (int i = 0; i < length; i++) {
-    if (input[i] == nullptr || input[i]->getUnderlyingValue() <= -1) {
+    if (input[i] == nullptr || input[i]->getUnderlyingValue() <= SXN_UNSET) {
       std::cerr << "Error found when converting array of XdmValue to XdmArray"
                 << std::endl;
       return nullptr;
@@ -1119,15 +1116,15 @@ XdmArray *SaxonProcessor::makeArray(const char **input, int length) {
 XdmMap *
 SaxonProcessor::makeMap(std::map<XdmAtomicValue *, XdmValue *> dataMap) {
   SaxonProcessor::attachCurrentThread();
-  int64_t mapDataRef = -1;
+  int64_t mapDataRef = SXN_UNSET;
 
   mapDataRef =
       j_create_mapDataWithCapacity(sxn_environ->thread, dataMap.size());
 
   for (std::map<XdmAtomicValue *, XdmValue *>::iterator iter = dataMap.begin();
        iter != dataMap.end(); ++iter) {
-    if ((iter->first)->getUnderlyingValue() <= -1 ||
-        (iter->second)->getUnderlyingValue() <= -1) {
+    if ((iter->first)->getUnderlyingValue() <= SXN_UNSET ||
+        (iter->second)->getUnderlyingValue() <= SXN_UNSET) {
       std::cerr << "Error found when converting array of XdmValue to XdmArray"
                 << std::endl;
       return nullptr;
@@ -1153,14 +1150,14 @@ SaxonProcessor::makeMap(std::map<XdmAtomicValue *, XdmValue *> dataMap) {
 
 XdmMap *SaxonProcessor::makeMap2(std::map<std::string, XdmValue *> dataMap) {
   SaxonProcessor::attachCurrentThread();
-  int64_t mapDataRef = -1;
+  int64_t mapDataRef = SXN_UNSET;
 
   mapDataRef =
       j_create_mapDataWithCapacity(sxn_environ->thread, dataMap.size());
 
   for (std::map<std::string, XdmValue *>::iterator iter = dataMap.begin();
        iter != dataMap.end(); ++iter) {
-    if ((iter->first).empty() || (iter->second)->getUnderlyingValue() <= -1) {
+    if ((iter->first).empty() || (iter->second)->getUnderlyingValue() <= SXN_UNSET) {
       std::cerr << "Error found when converting array of XdmValue to XdmArray"
                 << std::endl;
       return nullptr;
@@ -1191,13 +1188,13 @@ XdmMap *SaxonProcessor::makeMap2(std::map<std::string, XdmValue *> dataMap) {
 
 XdmMap *SaxonProcessor::makeMap3(XdmAtomicValue **keys, XdmValue **values,
                                  int size) {
-  int64_t mapDataRef = -1;
+  int64_t mapDataRef = SXN_UNSET;
 
   mapDataRef = j_create_mapDataWithCapacity(sxn_environ->thread, size);
 
   for (int i = 0; i < size; i++) {
-    if (keys[i]->getUnderlyingValue() <= -1 ||
-        values[i]->getUnderlyingValue() <= -1) {
+    if (keys[i]->getUnderlyingValue() <= SXN_UNSET ||
+        values[i]->getUnderlyingValue() <= SXN_UNSET) {
       std::cerr << "Error found when converting array of XdmValue to XdmArray"
                 << std::endl;
       return nullptr;
