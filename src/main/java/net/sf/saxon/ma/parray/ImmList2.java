@@ -120,7 +120,15 @@ public class ImmList2<E> extends ImmList<E> {
         return new ConcatenatingIterator<>(left.iterator(), () -> right.iterator());
     }
 
-    private static final int THRESHOLD = 10;
+    private static final int THRESHOLD = 3;
+
+    private static String showBalance(ImmList list, int depth) {
+        if (depth == 0 || !(list instanceof ImmList2)) {
+            return "" + list.size();
+        } else {
+            return "(" + showBalance(((ImmList2)list).left, depth-1) + "," + showBalance(((ImmList2) list).right, depth-1)  + ")";
+        }
+    }
 
     @Override
     protected ImmList<E> rebalance() {
@@ -130,9 +138,10 @@ public class ImmList2<E> extends ImmList<E> {
         if (right.isEmpty()) {
             return left;
         }
-        ImmList<E> l2 = left;//.rebalance();
-        ImmList<E> r2 = right;//.rebalance();
-        //System.err.println("Balance l=" + left.size() + " r=" + right.size());
+        ImmList<E> l2 = left;
+        ImmList<E> r2 = right;
+        //System.err.println("Rebalance l=" + left.size() + " r=" + right.size());
+        System.err.println("Rebalance " + size() + " - " + showBalance(this, 3));
         if (size() > THRESHOLD) {
             if (l2 instanceof ImmList2 && l2.size() > THRESHOLD * r2.size()) {
                 return new ImmList2<>(((ImmList2<E>) l2).left, new ImmList2<>(((ImmList2<E>) l2).right, r2));
@@ -141,11 +150,9 @@ public class ImmList2<E> extends ImmList<E> {
             } else {
                 return this;
             }
-        } else if (left == l2 && right == r2) {
-            return this;
         } else {
-            return new ImmList2<>(l2, r2);
-        }
+            return this;
+        } 
     }
 }
 

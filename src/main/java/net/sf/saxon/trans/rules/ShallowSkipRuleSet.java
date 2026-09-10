@@ -17,6 +17,7 @@ import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.type.Type;
 
 /**
@@ -69,7 +70,7 @@ public class ShallowSkipRuleSet implements BuiltInRuleSet {
                     while (tc != null) {
                         tc = tc.processLeavingTail();
                     }
-                    //C#//goto case net.sf.saxon.type.Type.DOCUMENT;
+                    CSharp.emitCode("goto case net.sf.saxon.type.Type.DOCUMENT;");
                 }   // fall through!
                 case Type.DOCUMENT: {
                     XPathContextMajor c2 = context.newContext();

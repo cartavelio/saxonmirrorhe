@@ -21,6 +21,7 @@ import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.tree.util.Navigator;
@@ -787,7 +788,7 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
 //                                }
                                 break;
                             }
-                            //C#//goto default;
+                            CSharp.emitCode("goto default;");
                             // otherwise fall through to default case
                         default:
                             previousText = thisText;
@@ -834,7 +835,7 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
 //                                }
                                 break;
                             }
-                            //C#//goto default;
+                            CSharp.emitCode("goto default;");
                             // otherwise fall through to default case
                         default:
                             previousText = thisText;

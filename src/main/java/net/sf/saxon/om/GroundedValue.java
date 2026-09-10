@@ -9,13 +9,11 @@ package net.sf.saxon.om;
 
 import net.sf.saxon.expr.SingletonIntersectExpression;
 import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
-import java.util.Collections;
 
 /**
  * A value that exists in memory and that can be directly addressed
@@ -182,10 +180,12 @@ public interface GroundedValue extends Sequence {
      */
 
     default GroundedValue concatenate(GroundedValue... others) {
-        ArrayList<GroundedValue> c = new ArrayList<>();
-        c.add(this);
-        Collections.addAll(c, others);
-        return new Chain(c);
+        ZenoSequence chain = new ZenoSequence();
+        chain.appendSequence(this);
+        for (GroundedValue seq : others) {
+            chain.appendSequence(seq);
+        }
+        return chain;
     }
 }
 

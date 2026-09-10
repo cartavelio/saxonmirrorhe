@@ -7,6 +7,8 @@
 
 package net.sf.saxon.s9api;
 
+import net.sf.saxon.transpile.CSharp;
+
 /**
  * An unchecked exception thrown by the Saxon API. Unchecked exceptions are used only when errors occur in a method
  * for which the interface specification defines no checked exception, for example {@link java.util.Iterator#next()}.
@@ -25,9 +27,7 @@ public class SaxonApiUncheckedException extends RuntimeException {
         //#if CSHARP==false
         super(err);
         //#endif
-        //#if CSHARP==true
-        throw new AssertionError(err);
-        //#endif
+        CSharp.emitCode("throw new AssertionError(err);");
     }
 
 

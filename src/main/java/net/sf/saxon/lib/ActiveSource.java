@@ -12,7 +12,9 @@ import javax.xml.transform.Source;
 public interface ActiveSource extends Source {
 
     /**
-     * Deliver the content of the source to a supplied Receiver
+     * Deliver the content of the source to a supplied Receiver.
+     * <p>For many (but not all) implementations of {@code Source}, this method consumes
+     * the source and can therefore only be called once.</p>
      * @param receiver the receiver to which events representing the parsed XML document will be sent
      * @param options options for parsing the source
      * @throws XPathException if parsing fails for any reason. The detailed diagnostics will
