@@ -37,7 +37,6 @@
         cppXQ = SaxonProcessor::sxn_environ->env->NewGlobalRef(tempcppXQ);
     } else {
         createException("Error: Failed to create the Xslt30Processor internal object");
-        std::cerr<<"Error in XQueryProcessor XXXXXXX"<<std::endl;
     }
     
 #ifdef DEBUG

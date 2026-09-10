@@ -346,6 +346,7 @@ void testXQueryLineNumberError(XQueryProcessor * queryProc, sResultCount *sresul
  cout<<endl<<"Test testXQueryLineNumberError:"<<endl;
 	queryProc->clearProperties();
 	queryProc->clearParameters();
+    queryProc->setcwd(".");
    queryProc->setProperty("s", "../data/cat.xml");
 
     queryProc->setProperty("qs", "saxon:line-number((//person)[1])");
@@ -388,7 +389,7 @@ void testXQueryLineNumber(SaxonProcessor * processor, sResultCount *sresult){
     queryProc->setProperty("s", "../data/cat.xml");
    queryProc->declareNamespace("saxon","http://saxon.sf.net/");
 
-    queryProc->setProperty("qs", "saxon:line-number(doc('cat.xml')/out/person[1])"); ///out/person[1]
+    queryProc->setProperty("qs", "saxon:line-number(doc('../data/cat.xml')/out/person[1])"); ///out/person[1]
 
     const char * result = queryProc->runQueryToString();
     if(result != nullptr){
