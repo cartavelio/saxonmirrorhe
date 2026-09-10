@@ -606,7 +606,7 @@ public class XPathParser {
         if (exp == null) {
 
             qNameParser = new QNameParser(env.getNamespaceResolver())
-                .withAcceptEQName(allowXPath30Syntax, languageVersion)
+                .withAcceptEQName(allowXPath30Syntax)
                 .withErrorOnBadSyntax(language == ParsedLanguage.XSLT_PATTERN ? "XTSE0340" : "XPST0003")
                 .withErrorOnUnresolvedPrefix("XPST0081");
 
@@ -689,7 +689,7 @@ public class XPathParser {
         if (qNameParser == null) {
             qNameParser = new QNameParser(env.getNamespaceResolver());
             if (languageVersion >= 30) {
-                qNameParser = qNameParser.withAcceptEQName(true, languageVersion);
+                qNameParser = qNameParser.withAcceptEQName(true);
             }
         }
         language = ParsedLanguage.SEQUENCE_TYPE;
@@ -3417,7 +3417,7 @@ public class XPathParser {
 
         } else if (token == Token.HASH && isAllowXPath40Syntax()) {
             StructuredQName qn = parseEQName();
-            return Literal.makeLiteral(new QNameValue(qn, BuiltInAtomicType.QNAME));
+            return Literal.makeLiteral(new QNameValue(qn,BuiltInAtomicType.QNAME));
 
         } else if (token instanceof Token.StringTemplate) {
             checkLanguageVersion40("a string template");
@@ -4338,6 +4338,7 @@ public class XPathParser {
     /*@NotNull*/
     protected Expression parseMapConstructor() throws XPathException {
         checkMapExtensions();
+        int version = env.getXPathVersion();
 
         // have read the "map {" or bare "{"
         int offset = t.currentTokenStartOffset;
@@ -4363,7 +4364,7 @@ public class XPathParser {
                     nextToken();
                     Expression value = parseExprSingle();
                     operands.add(
-                            MapFunctionSet.getInstance(languageVersion).makeFunction("entry", 2).makeFunctionCall(key, value));
+                            MapFunctionSet.getInstance(version).makeFunction("entry", 2).makeFunctionCall(key, value));
                     if (!(value instanceof Literal)) {
                         allLiteralValues = false;
                     }
@@ -4390,7 +4391,7 @@ public class XPathParser {
         Expression result;
         switch (operands.size()) {
             case 0:
-                result = Literal.makeLiteral(EmptyMap.getInstance(languageVersion));
+                result = Literal.makeLiteral(EmptyMap.getInstance());
                 break;
             case 1:
                 if (allLiteralKeys && allLiteralValues) {
@@ -4399,15 +4400,14 @@ public class XPathParser {
                     Literal value = (Literal) operand.getArguments()[1];
                     SingleEntryMap sem = new SingleEntryMap(
                             (AtomicValue)(key.getGroundedValue()),
-                            value.getGroundedValue(),
-                            languageVersion);
+                            value.getGroundedValue());
                     result = Literal.makeLiteral(sem);
                 } else {
-                    GeneralMapBuilder optionsBuilder = AbstractFixedMap.getBuilder(languageVersion);
+                    GeneralMapBuilder optionsBuilder = AbstractFixedMap.getBuilder();
                     optionsBuilder.put(new StringValue("duplicates"), mapConstructorDuplicatesAction);
                     optionsBuilder.put(new QNameValue("", NamespaceUri.SAXON, "allow-streaming"), BooleanValue.FALSE);
                     MapItem optionsMap = optionsBuilder.getCompletedMap();
-                    result = MapFunctionSet.getInstance(languageVersion).makeFunction("merge", 2)
+                    result = MapFunctionSet.getInstance(version).makeFunction("merge", 2)
                             .makeFunctionCall(operands.get(0), Literal.makeLiteral(optionsMap));
                     result.setRetainedStaticContext(env.makeRetainedStaticContext());
                 }
@@ -4423,7 +4423,7 @@ public class XPathParser {
                             final AtomicValue keyValue =
                                     (AtomicValue) ((Literal) ((FunctionCall) operand).getArg(0)).getGroundedValue();
 
-                            AtomicMatchKey key = keyValue.asMapKey(languageVersion);
+                            AtomicMatchKey key = keyValue.asMapKey();
                             boolean ok = matchKeys.add(key);
                             if (!ok) {
                                 grumble("Duplicate key + " + Err.depict(keyValue) + " in map constructor", "XQDY0137");
@@ -4446,7 +4446,7 @@ public class XPathParser {
                         }
                         result = Literal.makeLiteral(mapBuilder.getCompletedMap());
                     } else {
-                        GeneralMapBuilder builder = FixedMap.getBuilder(languageVersion);
+                        GeneralMapBuilder builder = FixedMap.getBuilder();
                         for (Expression expression : operands) {
                             FunctionCall operand = (FunctionCall) expression;
                             Literal keyExp = (Literal) operand.getArguments()[0];
@@ -4465,14 +4465,14 @@ public class XPathParser {
                     Block block = new Block(entriesArray);
                     MapItem optionsMap;
                     if (allLiteralKeys) {
-                        optionsMap = EmptyMap.getInstance(languageVersion);
+                        optionsMap = EmptyMap.getInstance();
                     } else {
-                        GeneralMapBuilder optionsBuilder = AbstractFixedMap.getBuilder(languageVersion);
+                        GeneralMapBuilder optionsBuilder = AbstractFixedMap.getBuilder();
                         optionsBuilder.put(new StringValue("duplicates"), mapConstructorDuplicatesAction);
                         optionsBuilder.put(new QNameValue("", NamespaceUri.SAXON, "allow-streaming"), BooleanValue.TRUE);
                         optionsMap = optionsBuilder.getCompletedMap();
                     }
-                    result = MapFunctionSet.getInstance(languageVersion).makeFunction("merge", 2)
+                    result = MapFunctionSet.getInstance(31).makeFunction("merge", 2)
                         .makeFunctionCall(block, Literal.makeLiteral(optionsMap));
                     result.setRetainedStaticContext(env.makeRetainedStaticContext());
                 }
@@ -4581,6 +4581,10 @@ public class XPathParser {
             position++;
         }
 
+//        StructuredQName noNamespaceFunctionName = null;
+//        if (allowXPath40Syntax && NameChecker.isValidNCName(fname)) {
+//            noNamespaceFunctionName = new StructuredQName("", NamespaceUri.NULL, fname);
+//        }
         StructuredQName functionName = resolveFunctionName(fname);
         if (env.getConfiguration().isDisabledFunction(functionName)) {
             grumble("Function " + functionName.getEQName() + " has been disabled in this Saxon Configuration", "XPST0017", offset);
@@ -4664,18 +4668,38 @@ public class XPathParser {
             return makeCurriedFunction(this, offset, functionName, arguments, placeMarkerArgs);
         }
 
-        Expression fcall;
-        SymbolicName.F sn = new SymbolicName.F(functionName, args.size());
-        List<String> reasons = new ArrayList<>();
-        try {
-            fcall = env.getFunctionLibrary().bind(sn, arguments, keywordArgs, env, reasons);
-        } catch (UncheckedXPathException e) {
-            fcall = null;
-            reasons.add(e.getMessage());
-        }
-        if (fcall == null) {
-            return reportMissingFunction(offset, functionName, arguments, reasons);
-        }
+        Expression fcall = null;
+
+        SymbolicName.F sn;
+
+        //if (fcall == null) {
+            sn = new SymbolicName.F(functionName, args.size());
+            List<String> reasons = new ArrayList<>();
+            try {
+                fcall = env.getFunctionLibrary().bind(sn, arguments, keywordArgs, env, reasons);
+            } catch (UncheckedXPathException e) {
+                reasons.add(e.getMessage());
+            }
+
+//            // Temporarily, look for a no-namespace function only if there is no matching function in the default function namespace
+//
+//            if (fcall == null) {
+//                if (noNamespaceFunctionName != null) {
+//                    // In 4.0, try first for a no-namespace function
+//                    sn = new SymbolicName.F(noNamespaceFunctionName, args.size());
+//                    List<String> reasons0 = new ArrayList<>();
+//                    try {
+//                        fcall = env.getFunctionLibrary().bind(sn, arguments, keywordArgs, env, reasons0);
+//                    } catch (UncheckedXPathException e) {
+//                        // Try again with the default function namespace
+//                    }
+//                }
+//            }
+
+            if (fcall == null) {
+                return reportMissingFunction(offset, functionName, arguments, reasons);
+            }
+        //}
         //  A QName or NOTATION constructor function must be given the namespace context now
 //        if (fcall instanceof CastExpression &&
 //                ((AtomicType) fcall.getItemType()).isNamespaceSensitive()) {
