@@ -52,6 +52,7 @@ public abstract class XsdCompiler {
      * @return the {@link Processor}
      */
 
+    @CSharpModifiers(code = {"internal", "abstract"})
     public abstract Processor getProcessor();
 
     /**
@@ -162,6 +163,7 @@ public abstract class XsdCompiler {
      * @return a minimal XSD schema
      */
 
+    @CSharpModifiers(code = {"internal", "abstract"})
     public abstract XsdSchema minimalSchema();
 
     /**
