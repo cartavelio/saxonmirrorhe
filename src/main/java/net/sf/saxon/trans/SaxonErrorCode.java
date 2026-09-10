@@ -347,7 +347,7 @@ public class SaxonErrorCode {
 
 
     /**
-     * SXUP0081: attempt to update a non-updateable node
+     * SXUP0081: attempt to update a non-updatable node
      */
 
     public static final String SXUP0081 = "SXUP0081";
