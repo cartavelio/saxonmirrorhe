@@ -1,0 +1,24 @@
+version: '3.3'
+
+services:
+    sendriasmtp:
+      image: ghcr.io/saxonica/sendriasmtp:latest
+      container_name: sendriasmtp
+      ports:
+        - 1025:1025
+        - 1080:1080
+      stdin_open: true
+      tty: true
+      environment:
+        - MAIL_DRIVER=smtp
+        - MAIL_HOST=127.0.0.1
+        - MAIL_PORT=1025
+        - MAIL_USERNAME=username
+        - MAIL_PASSWORD=password
+        - MAIL_ENCRYPTION=tcp
+        - MAIL_FROM_ADDRESS=qt3extra@saxonica.com
+      networks:
+        - saxonica_net
+
+networks:
+  saxonica_net: {}
