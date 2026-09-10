@@ -1832,20 +1832,21 @@ public class XPathParser {
                 case "tuple": // Retained as synonym for the time being
                     primaryType = parseRecordTest(this);
                     break;
-                case "atomic":
-                    // Allowed only in patterns, not in item types??
-                    nextToken();
-                    expect(Token.NAME);
-                    StructuredQName typeName = getQNameParser().parse(
-                            t.currentTokenValue, NamespaceUri.SCHEMA);
-                    primaryType = getPlainType(typeName);
-                    if (!(primaryType instanceof AtomicType)) {
-                        grumble("Type " + t.currentTokenValue + " exists, but is not atomic");
-                    }
-                    nextToken();
-                    expect(Token.RPAR);
-                    nextToken();
-                    break;
+//                case "atomic":
+//                    // Allowed only in patterns, not in item types??
+//                    // TODO: not in spec, drop this
+//                    nextToken();
+//                    expect(Token.NAME);
+//                    StructuredQName typeName = getQNameParser().parse(
+//                            t.currentTokenValue, NamespaceUri.SCHEMA);
+//                    primaryType = getPlainType(typeName);
+//                    if (!(primaryType instanceof AtomicType)) {
+//                        grumble("Type " + t.currentTokenValue + " exists, but is not atomic");
+//                    }
+//                    nextToken();
+//                    expect(Token.RPAR);
+//                    nextToken();
+//                    break;
                 case "union":
                     primaryType = parseUnionType();
                     break;
@@ -1860,17 +1861,25 @@ public class XPathParser {
                     break;
                 case "type":
                     checkLanguageVersion40();
-                    nextToken();
-                    expect(Token.NAME);
-                    StructuredQName typeAlias = getQNameParser().parse(t.currentTokenValue, NamespaceUri.NULL);
-                    ItemType realType = getStaticContext().resolveTypeAlias(typeAlias);
-                    if (realType == null) {
-                        grumble("Named type (" + typeAlias.getDisplayName() + ") has not been defined");
+                    if (language != ParsedLanguage.XSLT_PATTERN) {
+                        grumble("The type() construct is allowed only in XSLT patterns");
                     }
                     nextToken();
+                    if (t.currentToken == Token.NAME) {
+                        StructuredQName qName = getQNameParser().parse(t.currentTokenValue, NamespaceUri.NULL);
+                        ItemType realType = getStaticContext().resolveTypeAlias(qName);
+                        if (realType != null) {
+                            nextToken();
+                            expect(Token.RPAR);
+                            nextToken();
+                            return realType;
+                        }
+                    }
+                    ItemType it = parseItemType();
                     expect(Token.RPAR);
                     nextToken();
-                    return realType;
+                    return it;
+
                 default:
                     primaryType = parseKindTest();
                     break;
@@ -4186,8 +4195,8 @@ public class XPathParser {
 
         if (functionName.hasURI(NamespaceUri.FN) && fcf instanceof SystemFunction) {
             final BuiltInFunctionSet.Entry details = ((SystemFunction) fcf).getDetails();
-            if (details != null &&
-                    (details.properties & (BuiltInFunctionSet.FOCUS | BuiltInFunctionSet.DEPENDS_ON_STATIC_CONTEXT)) != 0) {
+            if (fcf instanceof ContextAccessorFunction || (details != null &&
+                    (details.properties & (BuiltInFunctionSet.FOCUS | BuiltInFunctionSet.DEPENDS_ON_STATIC_CONTEXT)) != 0)) {
                 // For a context-dependent function, return a call on function-lookup(), which saves the context
                 SystemFunction lookup = XPath31FunctionSet.getInstance().makeFunction("function-lookup", 2);
                 lookup.setRetainedStaticContext(env.makeRetainedStaticContext());
