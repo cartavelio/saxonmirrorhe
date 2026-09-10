@@ -104,5 +104,23 @@ public class TestXPathCompiler40 {
         }
     }
 
+    @Test
+    public void testLineNumberOfWarning() {
+        String expression =
+                "//pm/\n*/dmRef/\ndmRefIdent/\ndmCode/[@infoCode= \"00T\"]";
+        Processor proc = new net.sf.saxon.s9api.Processor(true);
+        XPathCompiler compiler = proc.newXPathCompiler();
+        compiler.setWarningHandler(error -> {
+            Location loc = error.getLocation();
+            assertEquals(4, loc.getLineNumber());
+            assertEquals(8, loc.getColumnNumber());
+        });
+        try {
+            compiler.compile(expression);
+        } catch (SaxonApiException e) {
+            fail();
+        }
+    }
+
 
 }

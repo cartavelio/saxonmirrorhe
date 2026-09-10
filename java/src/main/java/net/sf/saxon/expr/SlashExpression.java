@@ -221,7 +221,7 @@ public class SlashExpression extends BinaryExpression
             SquareArrayConstructor sq = (SquareArrayConstructor)getRhsExpression();
             if (sq.getOperanda().getNumberOfOperands() == 1) {
                 visitor.getStaticContext().issueWarning("An array constructor appears immediately after '/' or '//'. Perhaps " +
-                                "'/*[predicate]' was intended? If not, consider using '!' rather than '/' to remove this warning.", SaxonErrorCode.SXWN9028, getLocation());
+                                "'/*[predicate]' was intended? If not, consider using '!' rather than '/' to remove this warning.", SaxonErrorCode.SXWN9028, sq.getLocation());
             }
         }
 

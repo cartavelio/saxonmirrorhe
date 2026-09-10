@@ -4133,6 +4133,7 @@ public class XPathParser {
         if (t.currentToken == Token.RSQB) {
             nextToken();
             SquareArrayConstructor arrayBlock = new SquareArrayConstructor(members);
+            arrayBlock.setLocation(makeLocation(offset));
             setLocation(arrayBlock, offset);
             return arrayBlock;
         }
@@ -4153,7 +4154,7 @@ public class XPathParser {
             return new ErrorExpression();
         }
         SquareArrayConstructor block = new SquareArrayConstructor(members);
-        setLocation(block, offset);
+        block.setLocation(makeLocation(offset));
         return block;
     }
 
