@@ -1244,7 +1244,7 @@
 													<source ref="xpath-40-matching-item"/>
 												</sources>
 												<sub-types>
-													<datatype id="schema-attribute" first-introduced="XDM 4.0">
+													<datatype id="schema-attribute">
 														<name>schema-attribute()</name>
 														<description>A schema attribute.</description>
 														<category>

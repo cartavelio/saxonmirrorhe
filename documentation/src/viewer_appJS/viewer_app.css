@@ -1120,3 +1120,9 @@ div.warning p{
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* used in table listing built-in datatypes */
+.notes .sources {
+	font-size: smaller;
+	margin-top: 4px;
+}

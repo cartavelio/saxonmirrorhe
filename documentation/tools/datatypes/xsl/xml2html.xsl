@@ -33,17 +33,17 @@
 				</sources>
 			</xsl:document>
 		</xsl:variable>		
-		<div>
+		<div id="datatypes-table">
 			<table>
 				<thead>
 					<tr>
-						<td>Name</td>
-						<td>Description</td>
-						<td>Category</td>
-						<td>Parent type</td>
-						<td>Sub-types</td>
-						<td>Comparison family</td>
-						<td>Notes</td>
+						<th>Name</th>
+						<th>Description</th>
+						<th>Category</th>
+						<th>Parent type</th>
+						<th>Sub-types</th>
+						<th>Comparison family</th>
+						<th>Notes</th>
 					</tr>
 				</thead>
 				<tbody>
