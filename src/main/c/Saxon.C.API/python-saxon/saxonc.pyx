@@ -3963,21 +3963,21 @@ cdef class PyXdmNode(PyXdmItem):
         cdef str kind
         cdef int nk = self.derivednptr.getNodeKind()
         if nk == DOCUMENT:
-            return repr('document')
+            return 'document'
         elif nk == ELEMENT:
-            return repr('element')
+            return 'element'
         elif nk == ATTRIBUTE:
-            return repr('attribute')
+            return 'attribute'
         elif nk == TEXT:
-            return repr('text')
+            return 'text'
         elif nk == COMMENT:
-            return repr('comment')
+            return 'comment'
         elif nk == PROCESSING_INSTRUCTION:
-            return repr('processing-instruction')
+            return 'processing-instruction'
         elif nk == NAMESPACE:
-            return repr('namespace')
+            return 'namespace'
         elif nk == UNKNOWN:
-            return repr('unknown')
+            return 'unknown'
         else:
             raise ValueError('Unknown node kind: %d' % nk)
 
