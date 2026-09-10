@@ -1178,6 +1178,9 @@ any version number.</p>
                   as a result this mechanism fails on some application servers.
                </p>
             </li>
+            <li class="conly">
+               <p>For SaxonC only, the directory where the main SaxonC library has been installed.</p>
+            </li>
             <li class="javaonly">
                <p>For SaxonJ  only, the directories identified by the environment variable
                         <code><dfn>SAXON_HOME</dfn></code> and <code>SAXON_HOME/bin</code>.</p>
@@ -1193,6 +1196,10 @@ any version number.</p>
             <li class="csonly">
                <p>For SaxonCS only, the directory identified by the environment variable
                   <code><dfn>SAXON_LICENSE_DIR</dfn></code>.</p>
+            </li>
+            <li class="conly">
+               <p>For SaxonC only, the directory identified by the environment variable
+                  <code><dfn>SAXONC_HOME</dfn></code>.</p>
             </li>
          </ol>
 
