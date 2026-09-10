@@ -42,7 +42,13 @@ namespace Saxon.Api {
         /// namespace and when matching no-namespace elements
         /// </remarks>
         
-        DefaultNamespaceOrNone
+        DefaultNamespaceOrNone,
+
+        /// <summary>
+        /// Default value when no policy has been defined
+        /// </summary>
+
+        Unspecified
     }
 }
 
