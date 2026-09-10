@@ -1567,6 +1567,23 @@ zval makePHPValue(XdmValue * value){
 
 
 } else if (xdm_type == XDM_FUNCTION_ITEM) {
+	XdmFunctionItem * funcxdmItem = (XdmFunctionItem *)(value->getHead());
+
+          struct xdmFunctionItem_object* aavobj;
+          zend_object* zend_avobj;
+		  funcxdmItem->incrementRefCount();
+          if (object_init_ex(&retval, xdmFunctionItem_ce) != SUCCESS) {
+            //error
+
+            zend_throw_exception(zend_ce_exception, "Error found in creating XdmFunctionItem", 0);
+          }
+
+          zend_avobj = Z_OBJ_P(&retval);
+          aavobj = (xdmFunctionItem_object *)((char *)zend_avobj - XtOffsetOf(xdmFunctionItem_object, std));
+          assert (aavobj != NULL);
+
+          aavobj->xdmFunctionItem = funcxdmItem;
+
 
 } else if (xdm_type == XDM_EMPTY) {
   //delete value;
@@ -1924,7 +1941,7 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
             return nullptr;
           }
 
-
+		  axdmItem->incrementRefCount();
           zend_object *zavobj = Z_OBJ_P(&params[i]);
           xdmAtomicValue_object *avobj =
               (xdmAtomicValue_object *)((char *)zavobj -
@@ -1942,7 +1959,7 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
           if (object_init_ex(&params[i], xdmNode_ce) != SUCCESS) {
             return nullptr;
           }
-
+		  nodeItem->incrementRefCount();
           zend_object *znvobj = Z_OBJ_P(&params[i]);
           xdmNode_object *nvobj =
               (xdmNode_object *)((char *)znvobj -
@@ -1957,7 +1974,7 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
 
           struct xdmMap_object* aavobj;
           zend_object* zend_avobj;
-
+		  mapxdmItem->incrementRefCount();
           if (object_init_ex(&params[i], xdmArray_ce) != SUCCESS) {
             //error
 
@@ -1977,7 +1994,7 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
 
           struct xdmArray_object* aavobj;
           zend_object* zend_avobj;
-
+		  arrxdmItem->incrementRefCount();
           if (object_init_ex(&params[i], xdmArray_ce) != SUCCESS) {
             //error
 
@@ -1996,7 +2013,7 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
 
           struct xdmFunctionItem_object* aavobj;
           zend_object* zend_avobj;
-
+		  funcxdmItem->incrementRefCount();
           if (object_init_ex(&params[i], xdmFunctionItem_ce) != SUCCESS) {
             //error
 
@@ -2053,22 +2070,7 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
     }
 
     void * resultValue = makeXdmValueFromPHPZVal(nprocessor, &retval);
-    //resultValue->incrementRefCount();
 
-   /* if(useNativeTypes) {
-      std::cerr<<"PHP internal: call_user_function deleting arguments for useNativeTypes"<< std::endl;
-    	for(int i= 0; i < numOfArguments; i++) {
-            std::cerr<<"PHP internal: call_user_function deleting arguments for ref="<<((long)arguments[i]->getUnderlyingValue())<< std::endl;
-            //arguments[i]->resetRelinquishedItems();
-            //zend_object_std_dtor(Z_OBJ_P(&params[i]));
-            /\*if(arguments[i]->getRefCount() < 1) {
-        		delete arguments[i];
-            }*\/
-            j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)(arguments[i]->getUnderlyingValue()));
-            arguments[i]->resetValue(SXN_UNSET);
-
-        }
-    }*/
 
     if(resultValue == nullptr){
       return nullptr;
