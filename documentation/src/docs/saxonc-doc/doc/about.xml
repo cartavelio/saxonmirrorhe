@@ -11,7 +11,7 @@
          href="https://github.com/rimmartin/saxon-node" target="_blank">saxon-node</a> uses SaxonC
       to create an interface with Node.js.) </p>
 
-   <p>SaxonC 13 is built from the SaxonJ 13 Java product using GraalVM Native Image (GraalVM for JDK 21 Community 21.0.2).
+   <p>SaxonC 13 is built from the SaxonJ 13 Java product using GraalVM Native Image (Community Edition 25.0.1).
       The APIs support the current W3C Recommendations: XSLT 3.0, XQuery 3.1, XPath
       3.1 and Schema Validation 1.0/1.1. SaxonC-EE and SaxonC-PE also include support for many features in
       the XPath, XQuery, and XSLT 4.0 specifications currently in development in the <a
