@@ -1131,6 +1131,18 @@
                     <xsl:apply-templates select="comment/returns/body" mode="jdc"/>
                 </div>
             </xsl:if>
+            <xsl:if test="exceptions">
+                <p class="methodLabel">Throws:</p>
+                <xsl:for-each select="exceptions/exception">
+                    <div class="params">
+                        <xsl:sequence select="f:showType(., false(), true())"/>
+                        <xsl:if test="exists(body|sentence)">
+                            <xsl:text> - </xsl:text>
+                            <xsl:apply-templates select="(body, sentence)[1]" mode="jdc"/>
+                        </xsl:if>
+                    </div>
+                </xsl:for-each>
+            </xsl:if>
             <xsl:for-each select="comment/attribute[@name='@since']">
                 <p class="methodLabel">Since:</p>
                 <div class="params">
