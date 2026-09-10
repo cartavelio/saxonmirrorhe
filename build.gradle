@@ -1755,6 +1755,8 @@ publishing {
       artifact mavenHeSourceJar
       artifact mavenHeXqjJar
       artifact mavenHeXqjSourcesJar
+      artifact mavenHeTestJar
+      artifact mavenHeTestSourcesJar
     }
 
     if (project.findProperty("mavenLocalPublish") != null) {
@@ -1781,6 +1783,8 @@ publishing {
         version = saxonVersion
         artifact mavenPeSaxonJar
         artifact mavenPeJavadocJar
+        artifact mavenPeTestJar
+        artifact mavenPeTestSourcesJar
       }
 
       mavenEE(MavenPublication) {
@@ -1806,6 +1810,8 @@ publishing {
         version = saxonVersion
         artifact mavenEeSaxonJar
         artifact mavenEeJavadocJar
+        artifact mavenPeTestJar
+        artifact mavenPeTestSourcesJar
       }
     }
   }
