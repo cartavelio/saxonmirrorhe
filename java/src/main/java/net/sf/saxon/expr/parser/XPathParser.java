@@ -4336,7 +4336,9 @@ public class XPathParser {
         boolean allLiteralValues = true;
         nextToken();
         if (t.currentToken != Token.RCURLY) {
+            int seq = 0;
             while (true) {
+                seq++;
                 Expression key = parseExprSingle();
                 if (!(key instanceof Literal && ((Literal)key).getGroundedValue() instanceof AtomicValue)) {
                     allLiteralKeys = false;
@@ -4360,6 +4362,9 @@ public class XPathParser {
                     allLiteralKeys = false;
                     allLiteralValues = false;
                     allStringKeys = false;
+                    int finalSeq  = seq;
+                    Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.MAP_CONSTRUCTOR, "", finalSeq);
+                    key = new ItemChecker(key, MapType.ANY_MAP_TYPE, role);
                     operands.add(key);
                 }
                 if (t.currentToken == Token.RCURLY) {

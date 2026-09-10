@@ -51,13 +51,11 @@ public class RoleDiagnostic {
     public static final int CHARACTER_MAP_EXPANSION = 16;
     public static final int FOR_MEMBER = 17;
     public static final int SUBEXPRESSION = 18;
-
-    //public static final int DOCUMENT_ORDER = 17;  // 9.8 and earlier
-    //public static final int MAP_CONSTRUCTOR = 18;  // 9.8 and earlier
     public static final int MATCH_PATTERN = 19;
     public static final int MISC = 20;
     public static final int DYNAMIC_FUNCTION = 21;
     public static final int PARTIAL_APPLY = 22;
+    public static final int MAP_CONSTRUCTOR = 23;
 
 
     /**
@@ -215,6 +213,9 @@ public class RoleDiagnostic {
                     return ordinal(operand + 1) + " argument of the partial application of " +
                             (name.isEmpty() ? "the anonymous function" : name + "()");
                 }
+            case MAP_CONSTRUCTOR:
+                return ordinal(operand) + " entry in the map constructor";
+
             default:
                 return "";
         }
