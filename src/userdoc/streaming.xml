@@ -1,0 +1,795 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<article id="streaming" title="Streaming">
+   <h1>Streaming XML Documents</h1>
+   
+   
+   
+   <p>Sometimes source documents are too large to hold in memory. Saxon-EE provides a range of
+      facilities for processing such documents in <i>streaming mode</i>: that is, processing data as
+      it is read by the XML parser, without building a complete tree representation of the document
+      in memory.</p>
+   
+   <aside>Streaming is available only in Saxon-EE (in all of SaxonJ, SaxonCS, and SaxonC).</aside>
+   
+   <p>These facilities are closely aligned with the XSLT 3.0 Recommendation. Some facilities
+      are specific to Saxon, and a few facilities are also available in XQuery.</p>
+   
+   <p>Inevitably there are things that cannot be done in streaming mode - sorting is an obvious
+      example. Sometimes, achieving a streaming transformation means rethinking the design of how it
+      works - for example, splitting it into multiple phases. So streaming is rarely a case of
+      simply taking your existing code and setting a simple switch to request streamed
+      implementation.</p>
+ 
+   <p>See the topics below for further information:</p>
+   
+   <nav>
+      <ul/>
+   </nav>
+
+
+    <section id="xslt-streaming" title="Streaming using XSLT 3.0">
+      <h1>Streaming using XSLT 3.0</h1>
+
+      <aside>Requires Saxon-EE (either Java or C#).</aside>
+
+      <p>Saxon-EE (from Saxon 9.8) is fully conformant to the final XSLT 3.0 recommendation in terms of the
+        streaming facilities it supports. A few gaps in coverage that were found after release were fixed for Saxon 9.9. 
+        There are also some extensions.</p>
+
+      <p>There are two main ways to initiate a streaming transformation:</p>
+
+      <ol>
+        <li><p>Using the <a class="bodylink code" href="/xsl-elements/source-document">xsl:source-document</a>
+          instruction, with the attribute <code>streamable="yes"</code>. 
+          Here the source document is identified within the stylesheet itself.
+          Typically such a stylesheet will have a named template as its entry point, and will not
+          have any principal source document supplied externally.</p></li>
+        <li><p>By supplying a source document as input to a stylesheet whose initial mode is declared
+          with <code>streamable="yes"</code> in an <a href="/xsl-elements/mode"
+            class="bodylink code">xsl:mode</a> declaration. In this case the source document must be
+          supplied as a stream, and not as an in-memory
+          tree. The details depend on which API is being used:</p>
+          <ul>
+            <li class="javaonly"><p>With the Java s9api API, compile the stylesheet to create an <code>XsltExecutable</code>,
+            and then use the <code>load30</code> method to create an <code>Xslt30Transformer</code>.
+            Invoke the streamed transformation using the <code>applyTemplates</code> method of
+            the <code>Xslt30Transformer</code>, supplying the input as a <code>StreamSource</code>
+            or <code>SAXSource</code>.</p></li> 
+            <li class="csonly"><p>Similarly with the Saxon.Api interface on .NET, use the method
+            <code>Xslt30Transformer.ApplyTemplates()</code>, supplying a <code>Stream</code> 
+            as input.</p></li>
+            <li class="javaonly"><p>With the JAXP API, start by instantiating a <code>com.saxonica.config.StreamingTransformerFactory</code>.
+            Invoke the transformation in the usual way by creating a <code>Transformer</code> (optionally via a
+            <code>Templates</code> object). When the <code>transform()</code> method is called with a
+            <code>StreamSource</code> or <code>SAXSource</code> as input, and when the initial mode
+            is a streamable mode, the input will be streamed. In consequence, this approach breaks the
+            normal JAXP convention whereby the document supplied as the <code>Source</code> argument to
+            the <code>transform()</code> method also becomes the global context item (the value of "." when
+            accessed within the initializer of a global variable). Instead such a reference fails with 
+            an XPDY0002 dynamic error.</p>
+            <p>The <code>StreamingTransformerFactory</code> can also be used to create an <code>XMLFilter</code>
+            which takes streamed input and produces streamed output, and a pipeline can be built from a
+            sequence of such filters connected end-to-end in the usual JAXP way.</p></li>
+          </ul>
+        </li>
+      </ol>
+
+      <p>The <a class="bodylink code" href="/functions/saxon/stream">saxon:stream</a> extension
+        function used in previous releases is still supported for the time being. In Saxon 9.8 and later a
+        call on <code>saxon:stream</code> is translated at compile time into a call on the XSLT 3.0
+          <code>&lt;xsl:source-document&gt;</code> instruction. The original Saxon mechanism for streaming,
+        namely the <code>saxon:read-once</code> attribute on <code>xsl:copy-of</code>, was dropped
+        in Saxon 9.6.</p>
+
+      <p>The rules for whether a construct is streamable or not are largely the same in Saxon as in
+        the XSLT 3.0 specification. Saxon applies these rules after doing any optimization
+        re-writes, so some constructs end up being streamable in Saxon even though they are not
+        guaranteed streamable in the W3C spec, because the Saxon optimizer rewrites the expression
+        into a streamable form. An example of this effect is where variables or functions are
+        inlined before doing the streamability analysis. In contrast, when streaming is requested,
+        the optimizer takes care to avoid rewriting streamable constructs into a non-streamable
+        form.</p>
+
+      <p>This documentation does not attempt to provide a tutorial introduction to the streaming
+        capabilities of XSLT 3.0. The specification itself is not easy to read, especially the
+        detailed rules on which constructs are deemed streamable. However, for the most part it is
+        not necessary to be familiar with the detailed rules. The main things to remember are:</p>
+
+      <ul>
+        <li>A construct is "consuming" if it reads a subtree of the source document, that is, if it
+          makes a downwards selection from the context item. In general, constructs are not allowed
+          to have two operands that are both consuming. Some exceptions to this are: the <a
+            class="bodylink code" href="/xsl-elements/fork">xsl:fork</a> instruction; conditional
+          expressions such as <a class="bodylink code" href="/xsl-elements/choose">xsl:choose</a> if
+          each branch only contains one consuming expression; the map expression
+            <code>map{...}</code> in XPath and the <a class="bodylink code" href="/xsl-elements/map"
+            >xsl:map</a> instruction in XSLT.</li>
+        <li>During a streaming pass, the XSLT processor remembers the ancestors of the context item
+          and all the attributes of ancestors. Path expressions that access the ancestors and their
+          attributes are therefore allowed. However, such expressions should generally return atomic
+          values (for example the values of attributes) rather than returning nodes in the streamed
+          document, because if nodes are returned, the system often can't be sure that there is no
+          disallowed navigation from those nodes (for example, you can't get all the descendants of
+          an ancestor node).</li>
+        <li>It's not permitted to bind a streamed node to a variable or parameter, or to pass it to
+          a function, except in the special case of functions that are declared streamable.</li>
+        <li>An expression such as <code>//section</code> is referred to as a crawling expression.
+          Crawling expressions potentially contain nodes which overlap each other, which creates
+          problems if you want to make further downward selections from such nodes. The XSLT 3.0
+          specification allows this in some circumstances, for example you can pass such an
+          expression to a function that atomizes the result, but other cases (for example, using
+          such an expression in <a class="bodylink code" href="/xsl-elements/for-each"
+            >xsl:for-each</a> or <a class="bodylink code" href="/xsl-elements/apply-templates"
+            >xsl:apply-templates</a>) are forbidden. If you know that the expression will never
+          select overlapping nodes (for example, if you know that <code>//title</code> will never
+          select one title appearing within another title), then you can rewrite the expression as
+            <code>outermost(//title)</code> to avoid the restrictions. Saxon also allows overlapping
+          nodes in some contexts where the W3C specification does not, provided streamability
+          extensions are enabled.</li>
+        <li>When you hit these restrictions, you can often work around them by making a copy of a
+          subtree of the streamed document, for example by using the new <a class="bodylink code"
+            href="/functions/fn/copy-of">copy-of()</a> or <a class="bodylink code"
+            href="/functions/fn/snapshot">snapshot()</a> functions. These are consuming expressions,
+          but the result is "grounded" (that is, an ordinary in-memory tree) so it can be used
+          without any restrictions. Clearly this only works if the subtrees that you copy are small
+          enough to fit in memory.</li>
+      </ul>
+
+      <p>The XSLT 3.0 constructs most relevant to streaming are:</p>
+
+      <ul>
+        <li><strong>Streamable template rules</strong>. XSLT 3.0 has a new <a class="bodylink code"
+            href="/xsl-elements/mode">xsl:mode</a> declaration, and this allows all the template
+          rules in a particular mode to be declared streamable (<code>&lt;xsl:mode
+            streamable="yes"/&gt;</code>). If a mode is declared streamable, then Saxon checks
+          whether all the template rules in that mode are actually streamable, and reports a
+          compile-time error if not.</li>
+        <li>The <a class="bodylink code"
+          href="/xsl-elements/source-document">xsl:source-document</a> instruction.
+          This has an <code>href</code> attribute which defines the URI of a streamed input
+          document, and the instructions within <code>xsl:source-document</code> are evaluated with this
+          document as the context node. When streamed processing is requested using the attribute
+          <code>streamable="yes"</code>, the body of the <code>xsl:source-document</code> instruction must
+          satisfy the streamability rules; again, any violation is detected at compile time.</li>
+        <li>The <a class="bodylink code" href="/xsl-elements/iterate">xsl:iterate</a> instruction.
+          This is like an <a class="bodylink code" href="/xsl-elements/for-each">xsl:for-each</a>
+          instruction except that it guarantees to process the selected nodes in order, and the
+          results of processing one node can be passed as a parameter to the next iteration, so the
+          action applied to one node can influence the way in which subsequent nodes are processed.
+          This often provides a solution to the problem that when streaming, you can never "look
+          backwards" at preceding nodes. Instead of looking backwards, the information that will be
+          needed when processing subsequent nodes can be retained in parameters and "passed
+          forwards". Note that streamed nodes themselves cannot be contained in parameters, but data
+          derived from those nodes (or copies made using the <code>copy-of()</code> function) can.</li>
+        <li>The <a class="bodylink code" href="/xsl-elements/merge">xsl:merge</a> instruction allows
+          several input sequences to be merged, based on the value of a sort key. Any or all of the
+          input sequences can be streamed documents, provided that they are already correctly sorted
+          on the sort key value.</li>
+        <li><strong>Accumulators</strong> allow values to be computed "in the background" while a
+          streamed document is being read; the final value of the <a class="bodylink code"
+            href="/xsl-elements/accumulator">accumulator</a> is available by calling the <a
+            class="bodylink code" href="/functions/fn/accumulator-after">accumulator-after()</a>
+          function at the end of processing, and intermediate values are also available.
+          Accumulators are useful if you want to compute several values during a single processing
+          pass of a streamed document (for example, a minimum and maximum of some value). When the
+          information to be maintained in the accumulator is complex, it can be useful to hold it in
+          a map, which is a new data structure introduced in XSLT 3.0.</li>
+        <li>Saxon (from 9.9) supports an additional capability: <em>capturing accumulators</em>.
+         By adding the attribute <code>saxon:capture="yes"</code> to an accumulator rule with
+          <code>phase="end"</code>, you can tell Saxon to make a snapshot copy of the matched
+          element (as if by calling the <code>fn:snapshot</code> function) and the code for computing
+          the next value of the accumulator then has full access to this snapshot, which means it is
+          no longer constrained to be motionless. You can even keep the snapshot copy directly
+          as the value of the accumulator (just write <code>select="."</code>), or you can retain
+          all the matched elements (write <code>select="($value, .)"</code>). One way of writing a
+          streamed transformation is now to capture all the data you need in accumulators, and
+          to process it only when you hit the end of the document.
+        </li>
+        <li>The <a class="bodylink code" href="/xsl-elements/fork">xsl:fork</a> instruction
+          effectively computes several instructions in parallel. In the Saxon implementation, they
+          are not actually evaluated in different threads, but they are all executed during a single
+          scan of the streamed input document. The outputs produced by each "prong" of the
+            <code>xsl:fork</code> instruction are buffered in memory until all prongs have
+          completed, and are then assembled in the correct order to form the final result.</li>
+        <li><strong>Streamed grouping</strong> is possible using the <a class="bodylink code"
+            href="/xsl-elements/for-each-group">xsl:for-each-group</a> instruction, provided that
+          one of the options <code>group-adjacent</code>, <code>group-starting-with</code>, or
+            <code>group-ending-with</code> is used. There are restrictions on the use of the <a
+            class="bodylink code" href="/functions/fn/current-group">current-group()</a> function
+          within such an instruction: essentially, it can only be used once, because it is a
+          consuming construct.</li>
+      </ul>
+
+
+      <p>All these facilities are available in Saxon-EE only.</p>
+
+    </section>
+
+    <section id="streamed-query" title="Streaming in XQuery">
+      <h1>Streaming in XQuery</h1>
+
+      <aside>Requires Saxon-EE.</aside>
+
+      <p>The XQuery specification says nothing on the subject of streamed evaluation; it is left
+        entirely to implementations. Saxon-EE supports streaming of XQuery for simple queries, using
+        rules similar to those that apply to XSLT.</p>
+
+      <p>Simple queries can be streamed by specifying <code>-stream:on</code> on the Saxon-EE
+        command line. There is no need to specify anything in the query itself; however, the <a
+          class="bodylink code" href="/functions/fn/copy-of">copy-of()</a> and <a
+          class="bodylink code" href="/functions/fn/snapshot">snapshot()</a> functions (defined in
+        the XSLT 3.0 specification) may be used if streaming is not otherwise possible.</p>
+
+      <p>When running a query using the s9api interface, streaming must be requested both when
+        compiling the query (<a class="javalink" href="net.sf.saxon.s9api.XQueryCompiler"
+          >XQueryCompiler.setStreaming(true)</a>), and when executing it (<a class="javalink"
+          href="net.sf.saxon.s9api.XQueryEvaluator">XQueryEvaluator.runStreamed(Source,
+          Destination)</a>).</p>
+
+      <p>The query should access the streamed input document via the context item, not via the <a
+          class="bodylink code" href="/functions/fn/doc">doc()</a> or <a class="bodylink code"
+          href="/functions/fn/collection">collection()</a> function, nor using external variables.
+        The source document should be supplied in the form of a <code>SAXSource</code> or
+          <code>StreamSource</code> object.</p>
+
+      <p>If the query is not streamable, this will be reported as a compile-time error.</p>
+
+      <p>The conditions for streamability are essentially the same as the rules for the body of the
+        <a class="bodylink code" href="/xsl-elements/source-document">xsl:source-document</a>
+        instruction when streamed processing is requested using the attribute
+        <code>streamable="yes"</code>, as in the XSLT 3.0 specification. For example:</p>
+
+      <ol>
+        <li>
+          <p>Path expressions must use downward selection only.</p>
+        </li>
+        <li>
+          <p>Predicates must be motionless, which means they can reference attributes but not child
+            elements of the node being filtered.</p>
+        </li>
+        <li>
+          <p>No construct may make two downward selections. For example, the expression <code>price
+              - discount</code> fails because both operands use the child axis to select downwards.
+            If necessary, use <a class="bodylink code" href="/functions/fn/copy-of">copy-of()</a> to
+            copy a subtree, after which arbitrary selections within the copied subtree become
+            possible.</p>
+        </li>
+        <li>
+          <p>A streamed node may not be bound to a variable. This rules out many uses of FLWOR
+            expressions.</p>
+        </li>
+        <li>
+          <p>A streamed node must not be passed as an argument to a function call, other than
+            built-in function calls.</p>
+        </li>
+        <li>
+          <p>Global variables in the query must not reference the context item.</p>
+        </li>
+      </ol>
+
+      <p>As with XSLT, these restrictions can often be overcome by using the <a
+          class="bodylink code" href="/functions/fn/copy-of">copy-of()</a> or <a
+          class="bodylink code" href="/functions/fn/snapshot">snapshot()</a> functions, which Saxon
+        makes available in XQuery as well as XSLT.</p>
+
+    </section>
+
+    <section id="configuration-streaming" title="Configuration options for streaming">
+      <h1>Configuration options for streaming</h1>
+
+      <aside>Requires Saxon-EE.</aside>
+
+      <p>Saxon attempts streamed evaluation only if it is explicitly requested. Streaming may be
+        requested in a number of ways:</p>
+
+      <ul>
+        <li>
+          <p>By use of XSLT 3.0 language constructs that request streaming, for example the <a
+            class="bodylink code" href="/xsl-elements/source-document">xsl:source-document</a>
+            instruction with attribute <code>streamable="yes"</code>, or by
+            specifying <code>streamable="yes"</code> on <a class="bodylink code"
+              href="/xsl-elements/mode"> xsl:mode</a> or <a class="bodylink code"
+              href="/xsl-elements/accumulator">xsl:accumulator</a>.</p>
+        </li>
+        <li>
+          <p>By use of a Saxon extension that requests streaming, for example <a
+              class="bodylink code" href="/functions/saxon/stream">saxon:stream</a>.</p>
+        </li>
+        <li>
+          <p>By setting the option <code>-stream:on</code> in the XQuery command line, or the
+            equivalent API option (for example, in s9api, <a class="javalink"
+              href="net.sf.saxon.s9api.XQueryCompiler">XQueryCompiler.setStreaming(true)</a>).</p>
+        </li>
+      </ul>
+
+      <p>There are three configuration options that control how these requests for streaming
+        are interpreted:</p>
+      
+      <ul>
+        <li>The configuration property <a class="feature" href="STREAMABILITY"/>
+          may be set to one of the values "off" or "standard".
+          (Releases prior to 9.8 supported a third option, "extended".) With a licensed Saxon-EE
+        configuration, the default is "standard", which means that streaming will happen if it
+        is requested and if it is feasible. Setting the value to "off" causes Saxon to behave
+        as if there is no Saxon-EE license: that is, requests for streaming are effectively
+        ignored, and the stylesheet is executed in a non-streaming manner (which means that processing
+        of a large document may fail if there is insufficient memory).</li>
+        
+        <li>The configuration property <a class="feature" href="STREAMING_FALLBACK"/> determines what
+          Saxon does when streaming is requested, and a construct is found that is deemed
+          non-streamable. This is a boolean option. If it is set to <code>true</code>, Saxon attempts a
+          non-streaming implementation of the relevant construct. If sufficient memory is available
+          for a non-streaming evaluation, this should always give the same result as a streamed
+          evaluation. When the option is set to <code>false</code> (the default), the presence of a 
+          construct that is deemed non-streamable causes a static (compile-time) error.</li>
+        
+        <li>The configuration property <a class="feature" href="STRICT_STREAMABILITY"/>
+         determines how closely Saxon's streamability analysis follows the rules in the
+        W3C specification. This is a boolean value (with the default <code>false</code>): the value <code>true</code> requests
+        strict adherence to the W3C rules. In reality this option does not affect the rules
+        that Saxon applies, rather it affects when they are applied. By default Saxon first performs
+        all its usual compile-time optimizations to the expression tree, and then checks the final result
+        for streamability. During the optimization process Saxon takes care to avoid replacing streamable
+        constructs with non-streamable equivalents, but it may do the reverse. As a result, constructs
+        that are not streamable according to the W3C rules may become streamable after optimization.
+        (An example is the non-streamable expression <code>AUTHOR or EDITOR</code>, which Saxon rewrites
+          in the streamable form <code>exists(AUTHOR | EDITOR)</code>.)
+        For interoperability, the W3C specification requires processors to provide a mode of operation in
+        which the W3C streamability rules are enforced rigidly, and this is achieved by setting
+        <code>STRICT_STREAMABILITY</code> to <code>true</code>. With this setting, Saxon checks the
+        expression tree for streamability <em>before</em> doing any optimizations that change
+        the tree.</li>
+      </ul>
+        
+ 
+
+      <p>When running from the command line these options can be set for example as
+          <code>--streamability:off</code> or <code>--streamingFallback:on</code>.</p>
+    </section>
+
+ 
+
+    <section id="burst-mode-streaming" title="Burst-mode streaming">
+      <h1>Burst-mode streaming</h1>
+
+      <aside>Requires Saxon-EE.</aside>
+
+
+      <p>Burst-mode streaming takes a streamed document as input, and generates a sequence of small
+        subtrees containing the parts of the document that need to be processed. This can be
+        achieved using XSLT 3.0 syntax like this:</p>
+
+      <samp><![CDATA[<xsl:source-document streamable="yes" href="employees.xml">
+  <xsl:apply-templates select="*/employee/copy-of(.)"/>  
+</xsl:source-document>
+]]></samp>
+
+      <p>The code that processes an individual <code>employee</code> element does not need to be
+        streamable; it can use any XSLT constructs. The only constraint is that it cannot navigate
+        outside the <code>employee</code> element: because the <code>employee</code> element is a
+        copy of a subtree from the orginal document, it has no parent or siblings.</p>
+
+      <p>Burst-mode streaming can also be applied to the principal input of the transformation. This
+        works if the transformation is run from the command line, and also if it is executed from a
+        Java or .NET API provided that the document is supplied as a streamed source object, not as
+        a pre-built tree (under Java, this means a <code>StreamSource</code> or
+          <code>SAXSource</code>). For example:</p>
+
+      <samp><![CDATA[<xsl:mode streamable="yes"/>
+<xsl:template match="/">
+  <xsl:apply-templates select="*/employee/copy-of(.)"/>  
+</xsl:template>
+]]></samp>
+
+      <p>The same effect can be achieved in XQuery if the document is supplied as the initial
+        context item, again in the form of a streamed input source. Although the functions
+          <code>copy-of()</code> and <code>snapshot()</code> are defined in the XSLT 3.0
+        specification, Saxon also makes them available in XQuery, allowing for example:</p>
+
+      <samp><![CDATA[*/employee ! copy-of(.)/(name, address)
+]]></samp>
+
+      <p>In XQuery there is no need for the query itself to indicate that streamed execution is
+        required; rather this can be requested from the command line using the option
+          <code>-stream:on</code>. </p>
+
+      <p>The same effect can be achieved on external streamed documents using the <a
+          class="bodylink code" href="/functions/saxon/stream">saxon:stream</a> extension
+        function.</p>
+
+
+
+      <h2 class="subtitle">Example: selective copying</h2>
+
+      <p>A very simple way of using burst mode streaming is when making a selective copy of parts of
+        a document. For example, the following code creates an output document containing all the
+          <code>footnote</code> elements from the source document that have the attribute
+          <code>@type='endnote'</code>:</p>
+
+      <p>
+        <strong>XSLT example (named document)</strong>
+      </p>
+      <samp><![CDATA[<xsl:template name="main">
+  <footnotes>
+    <xsl:source-document streamable="yes" href="thesis.xml">
+      <xsl:copy-of select=".//footnote[@type='endnote'])"/>
+    </xsl:source-document>  
+  </footnotes>
+</xsl:template>
+]]></samp>
+
+      <p>
+        <strong>XQuery example (named document)</strong>
+      </p>
+      <samp><![CDATA[  <footnotes>{
+     saxon:stream(doc('thesis.xml')//footnote[@type='endnote']) 
+  }</footnotes>
+]]></samp>
+
+      <p>
+        <strong>XSLT example (principal input document)</strong>
+      </p>
+      <samp><![CDATA[<xsl:mode streamable="yes"/>
+<xsl:template match="/">
+  <footnotes>
+    <xsl:copy-of select=".//footnote[@type='endnote'])"/>
+  </footnotes>
+</xsl:template>
+]]></samp>
+
+      <p>
+        <strong>XQuery example (principal input document)</strong>
+      </p>
+      <samp><![CDATA[  <footnotes>{.//footnote[@type='endnote']}</footnotes>
+]]></samp>
+
+
+      <p>These examples work because the predicate (the expression in square brackets) is
+          <i>motionless</i> - evaluating the predicate does not require the source document to be
+        repositioned. If the predicate needs access to child elements rather than attributes, it's
+        necessary to make a copy of each footnote and then test the copy. The last example then
+        becomes:</p>
+
+      <samp><![CDATA[  <footnotes>{.//footnote/copy-of(.)[type='endnote']}</footnotes>
+]]></samp>
+    </section>
+
+
+
+    <section id="partial-reading" title="Reading source documents partially">
+      <h1>Reading source documents partially</h1>
+
+      <aside>Requires Saxon-EE.</aside>
+
+
+      <p>As well as allowing a source document to be processed in a single sequential pass, the
+        streaming facility in many cases allows the source document to be read only partially. For
+        example, the following query will return true as soon as it finds a transaction with a
+        negative value, and will then immediately stop processing the input file:</p>
+      <samp><![CDATA[some $t in saxon:stream(doc('big-transaction-file.xml')//transaction)
+satisfies number($t/@value) lt 0
+]]></samp>
+
+      <p>This facility is particularly useful for extracting data that appears near the start of a
+        large file. It does mean, however, that well-formedness or validity errors appearing later
+        in the file will not necessarily be detected.</p>
+
+      <p>To exit early from reading a streamed document using pure XSLT 3.0 constructs, use <a
+          href="/xsl-elements/iterate" class="bodylink code">xsl:iterate</a> like this:</p>
+
+      <samp><![CDATA[<xsl:variable name="contains-debit" as="xs:boolean">
+  <xsl:source-document streamable="yes" href="big-transaction-file.xml">
+    <xsl:iterate select=".//transaction">
+      <xsl:if test="@value lt 0">
+        <xsl:break select="true()"/>
+      </xsl:if>
+      <xsl:on-completion select="false()"/>
+    </xsl:iterate>
+  </xsl:source-document>
+</xsl:variable>
+]]></samp>
+
+    </section>
+
+
+
+    <section id="stream-with-iterate" title="Streaming with xsl:iterate">
+      <h1>Streaming with xsl:iterate</h1>
+
+      <aside>Requires Saxon-EE.</aside>
+
+      <p>In the examples given above, streaming is used to select a sequence of element nodes from
+        the source document, and each of these nodes is then processed independently. In cases where
+        the processing of one node depends in some way on previous nodes, it is possible to use <a
+          class="bodylink" href="../burst-mode-streaming">burst-mode streaming</a> in conjunction
+        with the new <a href="/xsl-elements/iterate" class="bodylink code">xsl:iterate</a>
+        instruction in XSLT 3.0.</p>
+
+      <p>The following example takes a sequence of <code>&lt;transaction&gt;</code> elements in an
+        input document, each one containing the value of a debit or credit from an account. As
+        output it copies the transaction elements, adding a current balance.</p>
+      <samp><![CDATA[    <xsl:source-document streamable="yes" href="transactions.xml">          
+      <xsl:iterate select="account/transaction">
+        <xsl:param name="balance" as="xs:decimal" select="0.00"/>
+        <xsl:variable name="new-balance" as="xs:decimal" select="$balance + xs:decimal(@value)"/>
+        <transaction balance="{$new-balance}">
+           <xsl:copy-of select="@*"/>
+        </transaction>
+        <xsl:next-iteration>
+          <xsl:with-param name="balance" select="$new-balance"/>
+        </xsl:next-iteration>
+      </xsl:iterate>
+    </xsl:source-document>  
+]]></samp>
+
+      <p>The following example is similar: this time it copies the account number (contained in a
+        separate element at the start of the file) into each transaction element:</p>
+      <samp><![CDATA[    <xsl:source-document streamable="yes" href="transactions.xml">           
+      <xsl:iterate select="account/(account-number|transaction)">
+        <xsl:param name="accountNr"/>
+        <xsl:choose>
+           <xsl:when test="self::account-number">
+             <xsl:next-iteration>
+                <xsl:with-param name="accountNr" select="string(.)"/>
+             </xsl:next-iteration>
+           </xsl:when>
+           <xsl:otherwise>
+             <transaction account-number="{$accountNr}">
+               <xsl:copy-of select="@*"/>
+             </transaction>
+           </xsl:otherwise>
+        </xsl:choose>
+      </xsl:iterate>
+    </xsl:source-document>  
+]]></samp>
+
+      <p>Here is a more complex example, one that groups adjacent transaction elements having the
+        same date attribute. The two loop parameters are the current grouping key and the current
+        date. The contents of a group are accumulated in a variable until the date changes.</p>
+      <samp><![CDATA[    <xsl:source-document streamable="yes" href="transactions.xml">           
+      <xsl:iterate select="account/transaction">
+        <xsl:param name="group" as="element(transaction)*" select="()"/>
+        <xsl:param name="currentDate" as="xs:date?" select="()"/>
+        <xsl:choose>
+          <xsl:when test="xs:date(@date) eq $currentDate or empty($group)">
+            <xsl:next-iteration>
+              <xsl:with-param name="currentDate" select="@date"/>
+              <xsl:with-param name="group" select="($group, .)"/>
+            </xsl:next-iteration>
+          </xsl:when>
+          <xsl:otherwise>
+            <daily-transactions date="{$currentDate}">
+              <xsl:copy-of select="$group"/>
+            </daily-transactions>
+            <xsl:next-iteration>
+              <xsl:with-param name="group" select="."/>
+              <xsl:with-param name="currentDate" select="@date"/>
+            </xsl:next-iteration>            
+          </xsl:otherwise>
+        </xsl:choose>
+        <xsl:on-completion>
+          <final-daily-transactions date="{$currentDate}">
+            <xsl:copy-of select="$group"/>
+          </final-daily-transactions>
+        </xsl:on-completion>        
+      </xsl:iterate>
+    </xsl:source-document>  
+]]></samp>
+
+      <p>Note that when an <a class="bodylink code" href="/xsl-elements/iterate">xsl:iterate</a>
+        loop is terminated using <a class="bodylink code" href="/xsl-elements/break">xsl:break</a>,
+        parsing of the source document will be abandoned. This provides a convenient way to read
+        data near the start of a large file without incurring the cost of reading the entire
+        file.</p>
+    </section>
+
+    <section id="stream-with-merge" title="Streaming with xsl:merge">
+      <h1>Streaming with xsl:merge</h1>
+
+      <aside>Requires Saxon-EE.</aside>
+
+      <p>Saxon (since 9.6) allows several streamed inputs to be merged using the new XSLT 3.0 <a
+          href="/xsl-elements/merge" class="bodylink code">xsl:merge</a> instruction. For this to
+        work, there are a number of rules to follow:</p>
+
+      <ol>
+        <li>
+          <p>Streaming must be requested by specifying <code>streamable="yes"</code> on the <a
+              class="bodylink code" href="/xsl-elements/merge-source">xsl:merge-source</a>
+            element.</p>
+        </li>
+        <li>
+          <p>When streaming is requested, the <code>for-each-source</code> attribute of
+              <code>xsl:merge-source</code> must be present, and must be a single string.</p>
+        </li>
+        <li>
+          <p>The <code>select</code> attribute on the <code>xsl:merge-source</code> element must
+            take the form of a motionless pattern.</p>
+        </li>
+      </ol>
+
+      <p>For each node selected by the <code>select</code> expression, Saxon takes an implicit
+        snapshot (in the sense of the XSLT 3.0 <a class="bodylink code"
+          href="/functions/fn/snapshot">fn:snapshot()</a> function). The merge keys are evaluated in
+        relation to this snapshot, and it is this snapshot that is presented within the
+          <code>xsl:merge-action</code> construct as the result of the <a class="bodylink code"
+          href="/functions/fn/current-merge-group">fn:current-merge-group()</a> function.</p>
+
+      <p>Here is an example of streamed merging of two log files:</p>
+
+      <samp><![CDATA[<xsl:merge>
+  <xsl:merge-source streamable="yes"
+       for-each-source="'log-file-1.xml'" select="events/event">
+    <xsl:merge-key select="xs:dateTime(@timestamp)"/>
+  </xsl:merge-source>
+  <xsl:merge-source streamable="yes"
+       for-each-source="'log-file-2.xml'" select="log/day/record">
+    <xsl:merge-key select="dateTime(../@date, time)"/>
+  </xsl:merge-source>
+  <xsl:merge-action>
+    <group>
+      <xsl:copy-of select="current-merge-group()" />
+    </group>
+  </xsl:merge-action>
+</xsl:merge>]]></samp>
+    </section>
+
+
+    <section id="streaming-templates" title="Streaming Templates">
+      <h1>Streaming Templates</h1>
+
+      <aside>Requires Saxon-EE.</aside>
+
+      <p>Streaming templates allow a document to be processed hierarchically in the classical XSLT
+        style, applying template rules to each element (or other nodes) in a top-down manner, while
+        scanning the source document in a pure streaming fashion, without building the source tree
+        in memory. Saxon-EE allows streamed processing of a document using template rules, provided
+        the templates conform to a set of strict guidelines.</p>
+
+      <p>Streaming in this way is a property of a <strong>mode</strong>; a mode can be declared to
+        be streamable, and if it is so declared, then all template rules using that mode must obey
+        the rules for streamability. A mode is declared to be streamable using the top-level
+        stylesheet declaration:</p>
+
+      <samp><![CDATA[<xsl:mode name="s" streamable="yes"/>]]></samp>
+
+      <p>The <code>name</code> attribute is optional; if omitted, the declaration applies to the
+        default (unnamed) mode.</p>
+
+      <p>Streamed processing of a source document can be applied either to the principal source
+        document of the transformation, or to a secondary source document read using the <a
+          class="bodylink code" href="/xsl-elements/source-document">xsl:source-document</a>
+        instruction.</p>
+
+      <p>To use streaming on the principal source document, the input to the transformation must be
+        supplied in the form of a <code>StreamSource</code> or <code>SAXSource</code>, and the
+        initial mode selected on entry to the transformation must be a streamable mode. In this case
+        there must be no references to the context item in the initializer of any global
+        variable.</p>
+
+      <p>Streamed processing of a secondary document is initiated using the instruction:</p>
+
+      <samp><![CDATA[<xsl:source-document streamable="yes" href="abc.xml">
+  <xsl:apply-templates mode="s"/>
+</xsl:source-document>]]></samp>
+
+      <p>Saxon will also recognize an instruction of the form:</p>
+
+      <samp><![CDATA[<xsl:apply-templates select="doc('abc.xml')" mode="s"/>]]></samp>
+
+      <p>Here the <code>select</code> attribute must contain a simple call on the <a
+          class="bodylink code" href="/functions/fn/doc">doc()</a> or <a class="bodylink code"
+          href="/functions/fn/document">document()</a> function, and the mode (explicit or implicit)
+        must be declared as streamable. The call on <code>doc()</code> or <code>document()</code>
+        can be extended with a streamable selection path, for example
+          <code>select="doc('employee.xml')/*/employee"</code>.</p>
+
+      <p>If a mode is declared as streamable, then it must ONLY be used in streaming mode; it is not
+        possible to apply templates using a streaming mode if the selected nodes are ordinary
+        non-streamed nodes. </p>
+
+      <p>Every template rule within a streamable mode must follow strict rules to ensure it can be
+        processed in a streaming manner. The essence of these rules is:</p>
+      <ol>
+        <li>
+          <p>The match pattern for the template rule must be a simple pattern that can be evaluated
+            when positioned at the start tag of an element, without repositioning the stream (but
+            information about the ancestors of the element and their attributes is available,
+            together with some limited information about their position relative to their siblings).
+            Examples of acceptable patterns are <code>*</code>, <code>para</code>,
+              <code>para[1]</code>, or <code>para/*</code>.</p>
+          <p>If the match pattern includes a boolean predicate, then the predicate must be
+            "motionless", which means that it can be evaluated while the input stream is positioned
+            at the start tag. This means it can reference properties such as <code>name()</code> and
+              <code>base-uri()</code>, and can reference attributes of the element, but cannot
+            reference its children or content.</p>
+          <p>If the match pattern includes a numeric predicate, then it must be possible to evaluate
+            this by counting either the total number of preceding-sibling elements, or the number of
+            preceding siblings with a given name. Examples of permitted patterns include
+              <code>*[1]</code>, <code>p[3]</code>, and <code>*:p[2][@class='bold']</code>;
+            disallowed patterns include <code>(descendant::fig)[1]</code>,
+              <code>p[@class='bold'][2]</code>, and <code>p[last()]</code>.</p>
+        </li>
+        <li>
+          <p> The body of the template rule must contain at most one expression or instruction that
+            reads the contents below the matched element (that is, children or descendants), and it
+            must process the contents in document order. This expression or instruction will often
+            be one of the following:</p>
+          <ul>
+            <li>
+              <p>
+                <code>&lt;xsl:apply-templates/&gt;</code>
+              </p>
+            </li>
+            <li>
+              <p>
+                <code>&lt;xsl:value-of select="."/&gt;</code>
+              </p>
+            </li>
+            <li>
+              <p>
+                <code>&lt;xsl:copy-of select="."/&gt;</code>
+              </p>
+            </li>
+            <li>
+              <p>
+                <code>string(.)</code>
+              </p>
+            </li>
+            <li>
+              <p><code>data(.)</code> (explicitly or implicitly)</p>
+            </li>
+          </ul>
+          <p>but this list is not exhaustive. It is possible to process the contents selectively by
+            using a streamable path expression, for example:</p>
+          <ul>
+            <li>
+              <p>
+                <code>&lt;xsl:apply-templates select="foo"/&gt;</code>
+              </p>
+            </li>
+            <li>
+              <p>
+                <code>&lt;xsl:value-of select="a/b/c"/&gt;</code>
+              </p>
+            </li>
+            <li>
+              <p>
+                <code>&lt;xsl:copy-of select="x/y"/&gt;</code>
+              </p>
+            </li>
+          </ul>
+          <p>but this effectively means that the content not selected by this path is skipped
+            entirely; the transformation ignores it.</p>
+          <p>The template can access attributes of the context item without restriction, as well as
+            properties such as its <code>name()</code>, <code>local-name()</code>, and
+              <code>base-uri()</code>. It can also access the ancestors of the context item, the
+            attributes of the ancestors, and properties such as the name of an ancestor; but having
+            navigated to an ancestor, it cannot then navigate downwards or sideways, since the
+            siblings and the other descendants of the ancestor are not available while
+            streaming.</p>
+          <p>The restriction that only one downwards access is allowed makes it an error to use an
+            expression such as <code>price - discount</code> in a streamable template. This problem
+            can often be circumvented by making a copy of the context item. This can be done using
+            the <code>copy-of()</code> function: for example <code>&lt;xsl:value-of
+              select="copy-of(.)/(price - discount)"/&gt;</code>. Taking a copy of the context node
+            requires memory, of course, and should be avoided unless the contents of the node are
+            small.</p>
+
+          <p>Certain constructs using positional filters can be evaluated in streaming mode. For
+            example, it is possible to use <code>&lt;xsl:apply-templates select="*[1]"/&gt;</code>.
+            The filter must be on a node test that uses the child axis and selects element nodes.
+            The forms accepted are expressions that can be expressed as <code>x[position() op
+              N]</code> where <code>N</code> is an expression that is independent of the focus and
+            is statically known to evaluate to a number, <code>x</code> is a node test using the
+            child axis, and <code>op</code> is one of the operators <code>eq</code>,
+            <code>le</code>, <code>lt</code>, <code>gt</code>, or <code>ge</code>. Alternative forms
+            of this construct such as <code>x[N]</code>, <code>remove(x, 1)</code>,
+              <code>head(x)</code>, <code>tail(x)</code>, and <code>subsequence(x, 1, N)</code> are
+            also accepted.</p>
+        </li>
+      </ol>
+
+    </section>
+
+</article>
