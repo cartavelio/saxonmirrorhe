@@ -1244,7 +1244,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
         }
     }
 
-    @CSharpReplaceBody(code="System.IO.File.Copy(sourceFile.getPath(), destFile.getPath(), true);")
+    @CSharpReplaceBody(code="Saxon.Ejava.io.File.copyFile(sourceFile, destFile);")
     private static void copyFile(File sourceFile, File destFile) throws XPathException {
         try {
             Query.createFileIfNecessary(destFile);
