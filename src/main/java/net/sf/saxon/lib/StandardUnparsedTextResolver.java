@@ -87,6 +87,10 @@ public class StandardUnparsedTextResolver
             throw new XPathException("unparsed-text(): failed to resolve URI " + absoluteURI);
         }
 
+        if (resolved instanceof SAXSource) {
+            return getReaderFromSAXSource((SAXSource) resolved, encoding, config, debug);
+        }
+
         if (resolved instanceof AugmentedSource
             && ((AugmentedSource) resolved).getContainedSource() instanceof SAXSource) {
             return getReaderFromSAXSource((SAXSource) ((AugmentedSource) resolved).getContainedSource(), encoding, config, debug);
@@ -109,6 +113,11 @@ public class StandardUnparsedTextResolver
         }
 
         if (inputStream == null) {
+            Reader reader = source.getInputSource().getCharacterStream();
+            if (reader != null) {
+                return reader;
+            }
+
             String systemId = source.getSystemId();
             if (systemId != null) {
                 try {
