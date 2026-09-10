@@ -128,9 +128,7 @@
             <desc>
                 <p>Default value 80. With the XML output method, attributes are output on a new line
                     if they would otherwise extend beyond this column position. With the HTML output
-                    method, text lines are split at this line length when possible. In releases 9.2
-                    and earlier, the HTML output method attempted to split lines that exceeded 120
-                    characters in length.</p>
+                    method, text lines are split at this line length when possible.</p>
             </desc>
             <data-type name="integer"/>
         </attribute>
@@ -182,14 +180,14 @@
         <attribute name="saxon:property-order" required="no">
             <desc>
                 <p>Available with the JSON output method, to control the order in
-                    which properties appear within the serialization of a map/object (in the absence of the
-                    property the order of properties is unpredictable). 
+                    which properties appear within the serialization of a map/object (in the absence of <code>saxon:property-order</code>
+                    the order of properties is unpredictable). 
                     The value of the parameter is a list of tokens, in which the token "*" is treated specially. Properties whose names are
                     listed before the "*" token appear first, in the order they are listed; other
                     unlisted properties follow, sorted alphabetically, and finally any properties
                     whose names are listed after the "*" appear at the end.
                     For example <code>saxon:property-order="@ a b c * $"</code> will cause properties to be output in the order
-                    <code>@</code>, then <code>a</code>, then <code>b</code>, then <code>c</code>, then everything else (sorted by URI and local name), 
+                    <code>@</code>, then <code>a</code>, then <code>b</code>, then <code>c</code>, then everything else, 
                     then <code>$</code>. Although JSON property names can include spaces, there is no provision for such names to be included in the list.
                     
                 </p>
