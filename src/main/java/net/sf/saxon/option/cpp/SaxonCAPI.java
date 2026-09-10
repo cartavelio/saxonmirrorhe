@@ -125,6 +125,14 @@ public class SaxonCAPI {
         return handle.rawValue();
     }
 
+    @CEntryPoint(name = "j_isSchemaAware")
+    public static byte j_isSchemaAware(IsolateThread thread, ObjectHandle procRef) {
+        Processor proc = objectHandles.get(procRef);
+        boolean result = proc.isSchemaAware();
+
+        return CTypeConversion.toCBoolean(result);
+    }
+
     @CEntryPoint(name = "j_run_transform")
     public static long run_transform(IsolateThread thread, ObjectHandle processorDataRef) {
 

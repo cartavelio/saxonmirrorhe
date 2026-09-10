@@ -272,10 +272,13 @@ void SaxonProcessor::initialize(bool l) {
 #endif
 
     }
+
     procRef = createSaxonProcessor2((SaxonProcessor::sxn_environ->thread), (int)l);
-if(procRef<0) {
-    exception = new SaxonApiException("Processor is in unclean state");
-}
+
+    if(procRef== -2) {
+        exception = new SaxonApiException("Failed to create Processor object");
+        throw exception;
+    }
 
 #ifdef DEBUG
     setDebugMode(SaxonProcessor::sxn_environ->thread, 1);
@@ -320,10 +323,9 @@ SaxonProcessor::SaxonProcessor(const char *configFile) {
 
     }
     procRef = createSaxonProcessorWithConfigurationFile((SaxonProcessor::sxn_environ->thread), (char *)configFile);
-    if(procRef<0) {
-        exception = new SaxonApiException();
-        //std::cerr<<"SaxonProcessor error procRef= "<<((long)procRef)<<std::endl;
-        std::cerr<<"SaxonProcessor error procRef= "<<exception->getMessage()<<std::endl;
+    if(procRef== -2) {
+        exception = new SaxonApiException("Failed to create SaxonProcessor object - with configuration file");
+        throw exception;
     }
 
 #ifdef DEBUG
@@ -350,15 +352,11 @@ bool SaxonProcessor::isSchemaAwareProcessor() {
     if (!licensei) {
         return false;
     } else {
-        //TODO add isSchemaAwareProcessor
-        /*static jmethodID MID_schema = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(procClass,
-                                                                                                "isSchemaAware", "()Z");
-        if (!MID_schema) {
-            std::cerr << "\nError: Saxonc.SaxonProcessor.isSchemaAware()" << " not found" << std::endl;
+
+        if(procRef <0) {
             return false;
         }
-
-        licensei = (jboolean) (SaxonProcessor::sxn_environ->env->CallBooleanMethod(proc, MID_schema));*/
+        licensei = j_isSchemaAware(SaxonProcessor::sxn_environ->thread, (void *)procRef);
         return licensei;
 
     }
