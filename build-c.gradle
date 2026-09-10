@@ -33,6 +33,38 @@ task test_jetHome(
   }
 }
 
+// ============================================================
+// Tasks to rejar Xerces
+
+task unjar_XercesImpl(
+  type: Copy,
+  description: "Unjar XercesImple for .NET build"
+) {
+  inputs.file("lib/xercesImpl.jar")
+  outputs.files(fileTree("${buildDir}/xerces/org/apache/xerces"))
+  from zipTree(file("lib/xercesImpl.jar"))
+  into "${buildDir}/xerces"
+}
+
+task rejar_Xerces(
+  type: Jar,
+  dependsOn: ["unjar_XercesImpl"],
+  description: "Unjar Xerces and Resolver for .NET build"
+) {
+  inputs.files fileTree("${buildDir}/xerces/org")
+  outputs.file "${buildDir}/xerces/xerces.jar"
+  archiveBaseName = "xerces"
+  destinationDirectory = file("${buildDir}/xerces")
+  from ("${buildDir}/xerces") {
+    include "**/*.class"
+    include "**/*.properties"
+    exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
+    exclude "META-INF/MANIFEST.MF"
+  }
+}
+
+// ============================================================
+
 ["h", "p", "e"].each { initial ->
   def release = initial + "e"
   def Release = initial.toUpperCase() + "e"
