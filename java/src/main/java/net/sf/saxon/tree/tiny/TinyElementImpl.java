@@ -364,10 +364,10 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                     int nameCode = tree.nameCode[next];
                     int fp = nameCode & NamePool.FP_MASK;
                     String prefix = tree.getPrefix(next);
-//                    if (location.getLineNumber() < tree.getLineNumber(next)) {
-//                        String systemId = location.getSystemId() == null ? getSystemId() : location.getSystemId();
-//                        location = new Loc(systemId, tree.getLineNumber(next), getColumnNumber());
-//                    }
+                    if (location.getLineNumber() < tree.getLineNumber(next)) {
+                        String systemId = location.getSystemId() == null ? getSystemId() : location.getSystemId();
+                        location = new Loc(systemId, tree.getLineNumber(next), tree.getColumnNumber(next));
+                    }
 
                     // decide on namespaces
                     NamespaceMap namespaces = NamespaceMap.emptyMap();
