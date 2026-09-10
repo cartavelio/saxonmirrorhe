@@ -1161,11 +1161,13 @@ public class SaxonCAPI {
     public static Source resolveFileToSource(Processor processor, String cwd, String filename, String nature) throws SaxonApiException {
 
         Source source = null;
-        String ccwd = null;
+        //String ccwd = null;
+        URI cwdURI = null;
         String ffilename = filename;
 
         if(cwd != null) {
-            ccwd = new File(cwd).toURI().toString();
+            cwdURI =  new File(cwd).toURI();
+           // ccwd = new File(cwd).toURI().toString();
         } /*else {
 
             ccwd = "";
@@ -1181,15 +1183,14 @@ public class SaxonCAPI {
         }
 
         if(debug) {
-            System.err.println("ccwd = " + ccwd);
+            System.err.println("ccwd = " + cwdURI.toString());
             System.err.println("filename = " + filename);
+            System.err.println("request.uri = " + ffilename);
         }
 
-        Configuration configuration = processor.getUnderlyingConfiguration();
-        ResourceResolver resolver = configuration.getResourceResolver();
         ResourceRequest request = new ResourceRequest();
-        request.baseUri = ccwd;
-        request.uri = ffilename;
+        request.baseUri = (cwdURI != null ? cwdURI.toString() : null);
+        request.uri = (cwdURI != null ? cwdURI.resolve(ffilename).toString() : ffilename);
         request.nature = nature;
 
         try {
@@ -1198,13 +1199,11 @@ public class SaxonCAPI {
             source = request.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
             if (source == null) {
                 if(debug) {
-                    System.err.println("USING resolver fallback");
+                    System.err.println("DEBUG: Using resolver fallback");
                 }
                 source = resolveFileToSource_fallback(cwd, filename);
 
-            } /*else if(debug){
-                System.err.println("USING XML resolver - ZZZZZZYYYY");
-            } */
+            }
 
             return source;
         } catch (XPathException exception) {
@@ -1347,6 +1346,14 @@ public class SaxonCAPI {
         return serializer;
     }
 
+   /* public static void testj() throws SaxonApiException {
+        SaxonCAPI.debug  = true;
+        Processor processor = new Processor(false);
+        //processor.setConfigurationProperty("http://saxon.sf.net/feature/allowedProtocols", "http,https");
+        processor.setConfigurationProperty(Feature.ALLOWED_PROTOCOLS, "http,https");
+        Source source = SaxonCAPI.resolveFileToSource(processor, "file:///home/ond1/work/repository/temp", "identity1.xsl", ResourceRequest.XSLT_NATURE);
+    }   */
+
      /*public static void testj() throws SaxonApiException, URISyntaxException {
 
         String xml = "<out><person att1='value1' att2='value2'>text1</person>\n" +
@@ -1398,7 +1405,7 @@ public class SaxonCAPI {
         }
         Iterator<XdmNode> iter = node1.axisIterator(Axis.CHILD);
         XdmNode node2 = iter.next();
-        
+
         System.err.println("test method");
         System.err.println("node1="+node1.toString());
         XdmSequenceIterator<XdmNode> iteryy = node1.axisIterator(Axis.CHILD);
@@ -1418,6 +1425,6 @@ public class SaxonCAPI {
     /*public static void main(String [] args) throws SaxonApiException, URISyntaxException {
           SaxonCAPI.testj();
 
-    }    */
+    }   */
 
 }
