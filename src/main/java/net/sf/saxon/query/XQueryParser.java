@@ -3445,8 +3445,8 @@ public class XQueryParser extends XPathParser {
                 nextToken();
                 return tag;
             case Token.KEYWORD_CURLY:
-                String nodeKind = t.currentTokenValue;
-                switch (nodeKind) {
+                String keyword = t.currentTokenValue;
+                switch (keyword) {
                     case "validate":
                         grumble("A validate expression is not allowed within a path expression");
 
@@ -3491,7 +3491,7 @@ public class XQueryParser extends XPathParser {
                         return parseNamespaceConstructor(offset);
 
                     default:
-                        grumble("Unrecognized node constructor " + t.currentTokenValue + "{}");
+                        grumble("Unrecognized keyword '" + t.currentTokenValue + "' before {...} ");
                         break;
                 }
                 break;

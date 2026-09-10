@@ -2623,7 +2623,9 @@ public class XPathParser {
         if (token == Token.NAME || token == Token.FUNCTION) {
             return parseFunctionCall(lhs);
         } else if (token == Token.DOLLAR) {
-            Expression var = parseVariableReference();
+            int offset = t.currentTokenStartOffset;
+            StructuredQName varName = parseVariableName();
+            Expression var = resolveVariableReference(offset, varName);
             expect(Token.LPAR);
             return parseDynamicFunctionCall(var, lhs);
         } else if (token == Token.LPAR) {
@@ -2660,7 +2662,9 @@ public class XPathParser {
         if (token == Token.NAME || token == Token.FUNCTION) {
             rhs = parseFunctionCall(varRef);
         } else if (token == Token.DOLLAR) {
-            Expression var = parseVariableReference();
+            int offset = t.currentTokenStartOffset;
+            StructuredQName variableName = parseVariableName();
+            Expression var = resolveVariableReference(offset, variableName);
             expect(Token.LPAR);
             rhs = parseDynamicFunctionCall(var, varRef);
         } else if (token == Token.LPAR) {
@@ -2705,9 +2709,48 @@ public class XPathParser {
     protected Expression parseBasicStep(boolean firstInPattern) throws XPathException {
         switch (t.currentToken) {
             case Token.DOLLAR:
-                return parseVariableReference();
+                int offset = t.currentTokenStartOffset;
+                StructuredQName variableName = parseVariableName();
+                if (allowXPath40Syntax && t.currentToken == Token.THIN_ARROW) {
+                    // This is a single-argument lambda expression, $x -> {EXPR}
+                    List<UserFunctionParameter> params = new ArrayList<>(1);
+                    UserFunctionParameter arg = new UserFunctionParameter();
+                    arg.setRequiredType(SequenceType.ANY_SEQUENCE);
+                    arg.setVariableQName(variableName);
+                    arg.setSlotNumber(0);
+                    params.add(arg);
+                    nextToken();
+                    return parseInlineFunctionBody(AnnotationList.EMPTY, params, SequenceType.ANY_SEQUENCE);
+                } else {
+                    // This is a variable reference
+                    return resolveVariableReference(offset, variableName);
+                }
 
             case Token.LPAR:
+                if (allowXPath40Syntax
+                        && t.thereMightBeAnArrowAhead()
+                        && (t.peekAhead() == Token.DOLLAR || t.peekAhead() == Token.RPAR)) {
+                    // Possible lambda expression.
+                    Tokenizer checkpoint = new Tokenizer();
+                    t.copyTo(checkpoint);
+                    List<StructuredQName> lambdaParams = parseLambdaParams();
+                    if (lambdaParams == null) {
+                        // backtrack and resume a normal parse
+                        checkpoint.copyTo(t);
+                    } else {
+                        //nextToken();
+                        List<UserFunctionParameter> params = new ArrayList<>(lambdaParams.size());
+                        int slotNumber = 0;
+                        for (StructuredQName paramName : lambdaParams) {
+                            UserFunctionParameter arg = new UserFunctionParameter();
+                            arg.setRequiredType(SequenceType.ANY_SEQUENCE);
+                            arg.setVariableQName(paramName);
+                            arg.setSlotNumber(slotNumber++);
+                            params.add(arg);
+                        }
+                        return parseInlineFunctionBody(AnnotationList.EMPTY, params, SequenceType.ANY_SEQUENCE);
+                    }
+                }
                 return parseParenthesizedExpression();
 
             case Token.LSQB:
@@ -2769,7 +2812,11 @@ public class XPathParser {
                     grumble("Expected 'function' to follow the annotation assertion");
                 }
                 annotations.check(env.getConfiguration(), "IF");
-                return parseInlineFunction(annotations);
+                if (t.currentToken == Token.KEYWORD_CURLY) {
+                    return parseFocusFunction(annotations);
+                } else {
+                    return parseInlineFunction(annotations);
+                }
             }
             case Token.THIN_ARROW: {
                 checkLanguageVersion40();
@@ -2874,6 +2921,8 @@ public class XPathParser {
                         return parseMapExpression();
                     case "array":
                         return parseArrayCurlyConstructor();
+                    case "function":
+                        return parseFocusFunction(null);
                 }
                 CSharp.emitCode("goto case Saxon.Hej.expr.parser.Token.ELEMENT_QNAME;");
                 // else fall through
@@ -2904,6 +2953,52 @@ public class XPathParser {
         expect(Token.RPAR);
         nextToken();
         return seq;
+    }
+
+    /**
+     * Attempt to parse the parameter list of a lambda expression. No errors are thrown, except for
+     * unresolvable QNames. If the grammar isn't matched, return null, so the caller can backtrack.
+     * @return either a list of parameter names, or null.
+     * @throws XPathException only for low-level errors like failure to tokenize, or failure to
+     * resolve a QName.
+     */
+    public List<StructuredQName> parseLambdaParams() throws XPathException {
+        List<StructuredQName> result = new ArrayList<>(4);
+        nextToken();
+        if (t.currentToken == Token.RPAR) {
+            nextToken();
+            if (t.currentToken == Token.THIN_ARROW) {
+                nextToken();
+                return result;
+            } else {
+                return null;
+            }
+        }
+        while (true) {
+            if (t.currentToken != Token.DOLLAR) {
+                return null;
+            }
+            nextToken();
+            if (t.currentToken == Token.NAME) {
+                result.add(makeStructuredQName(t.currentTokenValue, NamespaceUri.NULL));
+            } else {
+                return null;
+            }
+            nextToken();
+            if (t.currentToken == Token.COMMA) {
+                nextToken();
+            } else if (t.currentToken == Token.RPAR) {
+                nextToken();
+                if (t.currentToken == Token.THIN_ARROW) {
+                    nextToken();
+                    return result;
+                } else {
+                    return null;
+                }
+            } else {
+                return null;
+            }
+        }
     }
 
     protected void testPermittedAxis(int axis, String errorCode) throws XPathException {
@@ -3072,24 +3167,25 @@ public class XPathParser {
         return fn;
     }
 
-    /*@NotNull*/
-    public Expression parseVariableReference() throws XPathException {
-        int offset = t.currentTokenStartOffset;
+    public StructuredQName parseVariableName() throws XPathException {
         nextToken();
         expect(Token.NAME);
         String var = t.currentTokenValue;
         nextToken();
-
         if (scanOnly) {
-            return new ContextItemExpression();
-            // don't do any semantic checks during a prescan
+            return new StructuredQName("", NamespaceUri.SAXON_GENERATED_VARIABLE, "dummy");
         }
-
-        //int vtest = makeNameCode(var, false) & 0xfffff;
         StructuredQName vtest = makeStructuredQName(var, NamespaceUri.NULL);
         assert vtest != null;
+        return vtest;
+    }
 
+    /*@NotNull*/
+    public Expression resolveVariableReference(int offset, StructuredQName vtest) throws XPathException {
         // See if it's a range variable or a variable in the context
+        if (scanOnly) {
+            return Literal.makeEmptySequence();
+        }
         LocalBinding b = findRangeVariable(vtest);
         Expression ref;
         if (b != null) {
@@ -3275,8 +3371,9 @@ public class XPathParser {
             nextToken();
         } else if (token == Token.DOLLAR) {
             checkLanguageVersion40();
-
-            result = new LookupExpression(lhs, parseVariableReference());
+            offset = t.currentTokenStartOffset;
+            StructuredQName varName = parseVariableName();
+            result = new LookupExpression(lhs, resolveVariableReference(offset, varName));
         } else {
             grumble("Unexpected " + Token.tokens[token] + " after '?'");
             return null;
@@ -4355,9 +4452,57 @@ public class XPathParser {
         return null;
     }
 
-
     protected Expression parseInlineFunction(AnnotationList annotations) throws XPathException {
-        // the next token should be the < QNAME "("> pair
+        nextToken();
+        List<UserFunctionParameter> params = new ArrayList<>(8);
+        SequenceType resultType = SequenceType.ANY_SEQUENCE;
+        int paramSlot = 0;
+        while (t.currentToken != Token.RPAR) {
+            //     ParamList   ::=     Param ("," Param)*
+            //     Param       ::=     "$" VarName  TypeDeclaration?
+            expect(Token.DOLLAR);
+            nextToken();
+            expect(Token.NAME);
+            String argName = t.currentTokenValue;
+            StructuredQName argQName = makeStructuredQName(argName, NamespaceUri.NULL);
+            SequenceType paramType = SequenceType.ANY_SEQUENCE;
+            nextToken();
+            if (t.currentToken == Token.AS) {
+                nextToken();
+                paramType = parseSequenceType();
+            }
+
+            UserFunctionParameter arg = new UserFunctionParameter();
+            arg.setRequiredType(paramType);
+            arg.setVariableQName(argQName);
+            arg.setSlotNumber(paramSlot++);
+            params.add(arg);
+
+            if (t.currentToken == Token.RPAR) {
+                break;
+            } else if (t.currentToken == Token.COMMA) {
+                nextToken();
+            } else {
+                grumble("Expected ',' or ')' after function argument, found '" +
+                                Token.tokens[t.currentToken] + '\'');
+            }
+        }
+        t.setState(Tokenizer.BARE_NAME_STATE);
+        nextToken();
+        if (t.currentToken == Token.AS) {
+            t.setState(Tokenizer.SEQUENCE_TYPE_STATE);
+            nextToken();
+            resultType = parseSequenceType();
+        }
+        return parseInlineFunctionBody(annotations, params, resultType);
+
+    }
+
+    protected Expression parseInlineFunctionBody(
+            AnnotationList annotations,
+            List<UserFunctionParameter> params,
+            SequenceType resultType) throws XPathException {
+        // the next token should be the "{" at the start of the function body
 
         int offset = t.currentTokenStartOffset;
 
@@ -4371,52 +4516,17 @@ public class XPathParser {
         inlineFunctionStack.push(details);
         //noinspection Convert2Diamond
         setRangeVariables(new IndexedStack<LocalBinding>());
-        nextToken();
-        HashSet<StructuredQName> paramNames = new HashSet<>(8);
-        List<UserFunctionParameter> params = new ArrayList<>(8);
-        SequenceType resultType = SequenceType.ANY_SEQUENCE;
-        int paramSlot = 0;
-        while (t.currentToken != Token.RPAR) {
-            //     ParamList   ::=     Param ("," Param)*
-            //     Param       ::=     "$" VarName  TypeDeclaration?
-            expect(Token.DOLLAR);
-            nextToken();
-            expect(Token.NAME);
-            String argName = t.currentTokenValue;
-            StructuredQName argQName = makeStructuredQName(argName, NamespaceUri.NULL);
-            if (paramNames.contains(argQName)) {
-                grumble("Duplicate parameter name " + Err.wrap(t.currentTokenValue, Err.VARIABLE), "XQST0039");
-            }
-            paramNames.add(argQName);
-            SequenceType paramType = SequenceType.ANY_SEQUENCE;
-            nextToken();
-            if (t.currentToken == Token.AS) {
-                nextToken();
-                paramType = parseSequenceType();
-            }
 
-            UserFunctionParameter arg = new UserFunctionParameter();
-            arg.setRequiredType(paramType);
-            arg.setVariableQName(argQName);
-            arg.setSlotNumber(paramSlot++);
-            params.add(arg);
-            declareRangeVariable(arg);
-            if (t.currentToken == Token.RPAR) {
-                break;
-            } else if (t.currentToken == Token.COMMA) {
-                nextToken();
-            } else {
-                grumble("Expected ',' or ')' after function argument, found '" +
-                                  Token.tokens[t.currentToken] + '\'');
+        HashSet<StructuredQName> paramNameSet = new HashSet<>(8);
+        for (UserFunctionParameter arg : params) {
+            if (!scanOnly) {
+                if (!paramNameSet.add(arg.getVariableQName())) {
+                    grumble("Duplicate parameter name " + Err.wrap(arg.getVariableQName().getEQName(), Err.VARIABLE), "XQST0039");
+                }
             }
+            declareRangeVariable(arg);
         }
-        t.setState(Tokenizer.BARE_NAME_STATE);
-        nextToken();
-        if (t.currentToken == Token.AS) {
-            t.setState(Tokenizer.SEQUENCE_TYPE_STATE);
-            nextToken();
-            resultType = parseSequenceType();
-        }
+
         expect(Token.LCURLY);
         t.setState(Tokenizer.DEFAULT_STATE);
         nextToken();
@@ -4432,15 +4542,13 @@ public class XPathParser {
             nextToken();
         }
         ExpressionTool.setDeepRetainedStaticContext(body, getStaticContext().makeRetainedStaticContext());
-
-        int arity = paramNames.size();
-        for (int i = 0; i < arity; i++) {
-            undeclareRangeVariable();
-        }
-
         Expression result = makeInlineFunctionValue(this, annotations, details, params, resultType, body);
 
         setLocation(result, offset);
+
+        for (UserFunctionParameter arg : params) {
+            undeclareRangeVariable();
+        }
         // restore the previous stack of range variables
         setRangeVariables(details.outerVariables);
         inlineFunctionStack.pop();

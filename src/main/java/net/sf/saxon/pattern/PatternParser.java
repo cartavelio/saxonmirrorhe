@@ -402,7 +402,9 @@ public class PatternParser extends XPathParser {
         } else {
             switch (t.currentToken) {
                 case Token.DOLLAR:
-                    return parseVariableReference();
+                    int offset = t.currentTokenStartOffset;
+                    StructuredQName variableName = parseVariableName();
+                    return resolveVariableReference(offset, variableName);
 
                 case Token.STRING_LITERAL:
                     return parseStringLiteral(true);
