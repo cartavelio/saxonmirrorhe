@@ -277,7 +277,9 @@
       fo-test-fn-chain-014
       fo-test-fn-chain-015
       fo-test-fn-chain-016
-      fo-test-fn-chain-017" 
+      fo-test-fn-chain-017
+      fo-test-fn-chain-018
+      fo-test-fn-chain-019" 
       run="false" report="n/a">
       <created by="Michael Kay" on="2023-11-16"/>
       <reason>Functionality not yet implemented</reason>
@@ -323,7 +325,8 @@
    
    <exception test-set="app-spec-examples" 
       test-case="fo-test-fn-invisible-xml-001
-      fo-test-fn-invisible-xml-002" 
+      fo-test-fn-invisible-xml-002
+      fo-test-fn-invisible-xml-003" 
       run="false" report="n/a">
       <created by="Michael Kay" on="2023-11-16"/>
       <reason>Functionality not yet implemented</reason>
@@ -333,6 +336,7 @@
       test-case="fo-test-fn-parse-csv-001
       fo-test-fn-parse-csv-002
       fo-test-fn-parse-csv-003
+      fo-test-fn-parse-csv-004
       fo-test-fn-parse-csv-005
       fo-test-fn-parse-csv-006
       fo-test-fn-parse-csv-007
