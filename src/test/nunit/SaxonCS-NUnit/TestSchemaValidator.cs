@@ -258,7 +258,26 @@ namespace SaxonCS_NUnit {
                 Assert.Fail(e.Message);
             }
         }
+        
+        [Test]
+        public void TestSchemaForXslt30viaSchemaCompiler() {
+            // This should use the resolver mechanism to load the schema locally
+            try {
+                Processor proc = new Processor(true);
+                SchemaManager schemaManager = proc.SchemaManager;
+                schemaManager.Compile(new Uri("https://www.w3.org/TR/xslt-30/schema-for-xslt30.xsd"));
+                SchemaValidator validator = schemaManager.NewSchemaValidator();
+                validator.Validate(new Uri(ConfigTest.DataDirUri + "books.xsl"));
+            }
+            catch (Exception e) {
+                Assert.Fail(e.Message);
+            }
+        }
     }
+    
+    
+    
+    
 
 
 }
