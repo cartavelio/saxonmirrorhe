@@ -67,7 +67,7 @@
                <xsl:if test="exists($implemented-methods) and parent::interface">
                   <xsl:sequence select="map{'method': $this-method-name, 'hidden':true()}"/>
                </xsl:if>
-               <xsl:if test="exists($implemented-methods[@returns != current()/@returns])">
+               <xsl:if test="exists($implemented-methods[@returns != current()/@returns and not(@returns = ../typeParameter/@name)])">
                   <xsl:choose>
                      <xsl:when test="count(distinct-values($implemented-methods!@returns)) eq 1">
                         <xsl:sequence select="map{'method': $this-method-name, 
@@ -130,7 +130,7 @@
          </xsl:if>
          <xsl:if test="$covariant-methods($full-name)">
             <xsl:attribute name="csReturns" select="$covariant-methods($full-name)"/>
-         </xsl:if>
+         </xsl:if> 
          <!--<xsl:variable name="supermethods" select="f:all-supermethods(.)"/>
          <xsl:variable name="covariant-supermethods" select="$supermethods[@returns != current()/@returns]"/>
          <xsl:if test="exists($covariant-supermethods)">

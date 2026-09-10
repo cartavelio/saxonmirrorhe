@@ -211,8 +211,8 @@ dependencies {
     [group: 'jline', name: 'jline', version: jlineVersion ],
     [group: 'org.xmlresolver', name: 'xmlresolver', version: xmlresolverVersion],
     [group: 'org.xmlresolver', name: 'xmlresolver', version: xmlresolverVersion, classifier: 'data'],
-    [group: 'com.github.javaparser', name: 'javaparser-symbol-solver-core', version: '3.17.0'],
-    [group: 'com.github.javaparser', name: 'javaparser-core', version: '3.17.0'],
+    [group: 'com.github.javaparser', name: 'javaparser-symbol-solver-core', version: '3.25.9'],
+    [group: 'com.github.javaparser', name: 'javaparser-core', version: '3.25.9'],
     // PE and EE
     [group: 'javax.mail', name: 'javax.mail-api', version: mailVersion ],
     [group: 'com.sun.mail', name: 'javax.mail', version: mailVersion ],
