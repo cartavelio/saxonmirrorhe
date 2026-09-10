@@ -47,7 +47,6 @@
     }
   }
 
-  // TODO reinstate to include CS samples when releasing for .NET
   task "${release}_samples_cs"(
     type: Copy
   ) {
