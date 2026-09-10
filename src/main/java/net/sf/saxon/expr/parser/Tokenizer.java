@@ -394,8 +394,7 @@ public final class Tokenizer {
 
     private void handleLCURLY() throws XPathException
     {
-        if (!(state == SEQUENCE_TYPE_STATE))
-        {
+        if (state != SEQUENCE_TYPE_STATE) {
             currentToken = Token.KEYWORD_CURLY;
             lookAhead();        // swallow the "{"
         }
