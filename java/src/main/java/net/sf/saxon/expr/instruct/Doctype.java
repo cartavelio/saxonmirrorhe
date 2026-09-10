@@ -65,7 +65,7 @@ public class Doctype extends Instruction {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        throw new UnsupportedOperationException("Doctype.copy()");
+        return new Doctype(getContent().copy(rebindings));
     }
 
 
