@@ -1228,11 +1228,15 @@ public final class Tokenizer {
         switch (s) {
             case "if":
                 return Token.IF;
-            case "map":
             case "namespace-node":
-            case "array":
             case "function":
                 return languageLevel == 20 ? Token.FUNCTION : Token.NODEKIND;
+            case "fn":
+                return languageLevel >= 40 ? Token.NODEKIND : Token.FUNCTION;
+            case "array":
+            case "map":
+                 // first reserved in 3.1, unreserved again in 4.0
+                return languageLevel == 31 ? Token.NODEKIND : Token.FUNCTION;
             case "node":
             case "schema-attribute":
             case "schema-element":
@@ -1246,7 +1250,7 @@ public final class Tokenizer {
             case "attribute":
                 return Token.NODEKIND;
             case "atomic":
-            case "tuple": // Retained as synonym of "record" for the time benig
+            case "tuple": // Retained as synonym of "record" for the time being
             case "record":
             case "type":
             case "union":
