@@ -326,6 +326,16 @@ val packagePytestsTask = tasks.register<Copy>("package_pytests") {
     from(layout.projectDirectory.dir("../saxonc/test"))
     from(layout.projectDirectory.dir("test"))
 }
+val packagePytestIniTask = tasks.register<PythonExec>("package_pytest_ini") {
+    val script = layout.projectDirectory.file("../saxonc/generate_samples_pytest_ini.py")
+    val pytest_ini = packagedSamplesDir.map { it.file("pytest.ini") }
+    inputs.file(script)
+    inputs.file(layout.projectDirectory.file("../saxonc/pyproject.toml"))
+    outputs.file(pytest_ini)
+    python = venv.map { it.pythonExe.get() }
+    workingDir = layout.projectDirectory.dir("../saxonc")
+    args(script, pytest_ini)
+}
 val packageTestdriverTask = tasks.register<Copy>("package_testdriver") {
     into(packagedSamplesDir.map { it.dir("testsuite_driver") })
     from(layout.projectDirectory.dir("../testsuite_driver")) {
@@ -333,7 +343,7 @@ val packageTestdriverTask = tasks.register<Copy>("package_testdriver") {
     }
 }
 val packageSamples = tasks.register<Copy>("package_samples_for_release") {
-    dependsOn(packageSamplesTask, packagePytestsTask , packageTestdriverTask)
+    dependsOn(packageSamplesTask, packagePytestsTask , packageTestdriverTask,  packagePytestIniTask)
     into(packagedSamplesDir)
     from(layout.projectDirectory.dir("../")) {
         include("README-samples.md")

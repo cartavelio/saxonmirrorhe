@@ -14,18 +14,16 @@ You can run the samples from inside their directory:
 Also provided are the `pytest`-run tests we run ourselves. Because these are
 run against every edition (HE, PE, EE) of SaxonC, they're a little more involved 
 to run. You need to tell the runner which edition you're using by setting the 
-`SAXONC_EDITION` environment variable:
+`SAXONC_EDITION` environment variable, and the provided `pytest.ini` is needed:
 
     $ pip install pytest
-    $ SAXONC_EDITION=@edition@ pytest --import-mode=importlib \
-        --data-dir=../samples/data \
-        test 
+    $ SAXONC_EDITION=@edition@ pytest --data-dir=../samples/data
 
 Or, with PowerShell on Windows:
 
     PS > pip install pytest
     PS > $env:SAXONC_EDITION = "@edition@"
-    PS > pytest --import-mode=importlib --data-dir=../samples/data test 
+    PS > pytest --data-dir=../samples/data
 
 Full documentation for SaxonC 13 Python is available. The [SaxonC 13 Python API
 documentation][1] contains information specific to SaxonC Python, and the
