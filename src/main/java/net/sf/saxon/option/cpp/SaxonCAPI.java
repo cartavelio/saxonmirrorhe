@@ -166,10 +166,8 @@ public class SaxonCAPI {
         }
       CLongPointer a =  alloc.call(refs.length*8);
       for (int i = 0; i < refs.length; i++) {
-          System.err.println("DEBUG: Java - refs ["+i+"]: "+refs[i]);
           a.write(i, refs[i]);
       }
-      //a.write(refs.length, (long) 0);
       return a;
     }
 
