@@ -55,7 +55,7 @@ public class ReplaceWith extends RegexFunction  {
                 }
             };
 
-        RegularExpression re = getRegularExpression(arguments, 1, 2);
+        RegularExpression re = getRegularExpression(arguments, 1, 3);
         return new StringValue(re.replaceWith(input.getUnicodeStringValue(), fn));
     }
 
