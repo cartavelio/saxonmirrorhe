@@ -621,6 +621,21 @@
          </tr>
          <tr>
             <td>
+               <p>-stublib:filename</p>
+            </td>
+            <td>
+               <p>Import a set of stub functions (names and signatures) from the specifed JSON file.
+                  These functions will be added to the static context of the stylesheet, but any
+                  attempt to call the functions will fail with a dynamic error. The main purpose is
+                  to allow SaxonJS stylesheets to be compiled that at run-time will invoke external
+                  JavaScript functions available on the target platform; this option will therefore
+                  normally be used when compiling with <code>-target:JS3</code> and
+                  <code>-nogo</code>. The format of the JSON file is described at <a class="javalink"
+                     href="com.saxonica.ee.extfn.js.StubFunctionLibrary">StubFunctionLibrary</a>.</p>
+            </td>
+         </tr>
+         <tr>
+            <td>
                <p>-t</p>
             </td>
             <td>
@@ -656,8 +671,7 @@
                   "JSx" <bold>must</bold> be specified, because this adds information to the
                   SEF file that is required by SaxonJS, and it also outputs the SEF file in JSON format. 
                   Specifying "JS" or "JS2" means the SEF is for use with SaxonJS 2.x. 
-                  The option "JS3" targets SaxonJS 3.x (not yet
-                  available at the time of writing). To generate SEF files for Saxon-JS 1.x, 
+                  The option "JS3" targets SaxonJS 3.x. To generate SEF files for Saxon-JS 1.x, 
                   you need to revert to Saxon-EE 9.9.</p> 
                <p>In principle, specifying "HE" or "PE" will
                   inhibit optimizations that generate code which Saxon-HE/Saxon-PE cannot execute;
