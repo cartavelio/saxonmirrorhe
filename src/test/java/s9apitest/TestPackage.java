@@ -216,6 +216,34 @@ public class TestPackage {
     }
 
     @Test
+    public void testExportedPackage02() {
+        // This version of the test uses a SEF file exported on 2024-08-30 using Saxon-EE 12.0
+        try {
+            Processor processor = new Processor(true);
+            XsltCompiler compiler = processor.newXsltCompiler();
+            File file = new File(configTest.getDataDir() + "override-m-021-base-v12.0.sef");
+            XsltPackage pack = compiler.loadLibraryPackage(file.toURI());
+            System.err.println("Package loaded from " + file.getAbsolutePath());
+            compiler.importPackage(pack);
+            XsltExecutable exec = compiler.compile(new StreamSource(new File(configTest.getDataDir() + "override-m-021.xsl")));
+            DocumentBuilder db = processor.newDocumentBuilder();
+            XdmNode root = db.build(new File(configTest.getDataDir() + "override-m-021.xml"));
+            Xslt30Transformer trans = exec.load30();
+            StringWriter out = new StringWriter();
+            Serializer ser = processor.newSerializer(out);
+            trans.applyTemplates(root, ser);
+            //System.err.println(out.toString());
+            assertTrue(out.toString().contains("<root><list><item><bar>foo 1</bar><list><item><bar>foo 2</bar></item></list></item></list></root>"), "result");
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail();
+        } catch (LicenseException le) {
+            le.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
     public void testConfig01() {
         // using package declared first in configuration file
         runConfigFileTest("packages/config-100.xml", "http://package-one/", true);

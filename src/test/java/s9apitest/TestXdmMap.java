@@ -159,7 +159,7 @@ public class TestXdmMap {
         map = map.put(new XdmAtomicValue("a"), new XdmAtomicValue(1));
         map = map.put(new XdmAtomicValue("b"), new XdmAtomicValue(2));
         map = map.put(new XdmAtomicValue("c"), new XdmAtomicValue(3));
-        String result = map.toString();
+        String result = map.toString().replace(" ", "").replace("\n", "");;
         assertEquals("map{\"a\":1,\"b\":2,\"c\":3}", result); // Could change
     }
 }

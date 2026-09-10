@@ -373,7 +373,7 @@ public class TestReflexion {
 
     @Test
     public void testStaticInvalidRequiredExternalObjectType() {
-        // Error should be detected at compile time
+        // Error should be detected at compile time - Cannot convert result of extension function to required type
         Processor p = new Processor(true);
         XsltCompiler c = p.newXsltCompiler();
         String s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +

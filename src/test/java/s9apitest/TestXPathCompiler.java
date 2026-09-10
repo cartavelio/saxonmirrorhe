@@ -960,6 +960,7 @@ public class TestXPathCompiler {
             XdmItem result = exp.evaluateSingle();
             assertEquals(((XdmAtomicValue)result).getDoubleValue(), 25e0);
         } catch (SaxonApiException e) {
+            e.printStackTrace();
             fail();
         }
     }

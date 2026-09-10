@@ -179,7 +179,7 @@ public class SignatureTest {
         } catch (XPathException e) {
             e.printStackTrace();
             System.err.println("Unknown type " + typeDesignation);
-            //fail("Unknown type " + typeDesignation);
+            fail("Unknown type " + typeDesignation);
             return SequenceType.ANY_SEQUENCE;
         }
     }

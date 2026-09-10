@@ -927,21 +927,21 @@ public class TestXslt30Transformer {
         XsltExecutable xsltExecutable = xsltCompiler.compile(new StreamSource(new ByteArrayInputStream(source.getBytes(StandardCharsets.UTF_8))));
         Map<QName, XsltExecutable.ParameterDetails> params = xsltExecutable.getGlobalParameters();
         ItemType t1 = params.get(new QName("surname")).getDeclaredItemType();
-        assertTrue(t1.toString().equals("Q{" + NamespaceConstant.SCHEMA + "}string"), "t1");
+        assertEquals("Q{" + NamespaceConstant.SCHEMA + "}string", t1.toString(), "t1");
         OccurrenceIndicator c1 = params.get(new QName("surname")).getDeclaredCardinality();
-        assertTrue(c1.toString().equals(""), "c1");
+        assertEquals("", c1.toString(), "c1");
         ItemType t2 = params.get(new QName("age")).getDeclaredItemType();
-        assertTrue(t2.toString().equals("Q{" + NamespaceConstant.SCHEMA + "}integer"), "t2");
+        assertEquals("Q{" + NamespaceConstant.SCHEMA + "}integer", t2.toString(), "t2");
         OccurrenceIndicator c2 = params.get(new QName("age")).getDeclaredCardinality();
-        assertTrue(c2.toString().equals("?"), "c2");
+        assertEquals("?", c2.toString(), "c2");
         ItemType t3 = params.get(new QName("doc")).getDeclaredItemType();
-        assertTrue(t3.toString().equals("document-node()"), "t3");
+        assertEquals("document-node()", t3.toString(), "t3");
         OccurrenceIndicator c3 = params.get(new QName("doc")).getDeclaredCardinality();
-        assertTrue(c3.toString().equals(""), "c3");
+        assertEquals("", c3.toString(), "c3");
         ItemType t4 = params.get(new QName("ele")).getDeclaredItemType();
         assertEquals("element(Q{http://pre/}a, Q{" + NamespaceConstant.SCHEMA + "}date)", t4.toString(), "t4");
         OccurrenceIndicator c4 = params.get(new QName("ele")).getDeclaredCardinality();
-        assertTrue(c4.toString().equals("+"), "c4");
+        assertEquals("+", c4.toString(), "c4");
     }
 
     /**
@@ -2221,8 +2221,10 @@ public class TestXslt30Transformer {
             XdmValue val = exec.load30().callTemplate(new QName("main"));
             fail();
         } catch (SaxonApiException e) {
-            assertTrue(e.getMessage().contains("Found while atomizing the first argument of f:do()"));
-            System.err.println(e);
+            assertTrue(e.getMessage().contains("atomiz"));
+            assertTrue(e.getMessage().contains("first argument of f:do()"));
+            assertEquals("XPTY0004", e.getErrorCode().getLocalName());
+            System.err.println(e.getMessage());
         }
     }
 
