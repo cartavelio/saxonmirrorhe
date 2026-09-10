@@ -739,6 +739,22 @@ public abstract class TestDriver {
                 }
             });
         }
+
+        // Avoid concurent modification exception...
+        Set<String> envToRemove = new HashSet<>();
+        for (String key : localEnvironments.keySet()) {
+            Environment env = localEnvironments.get(key);
+            if (env.cleanup()) {
+                // If we did any cleanup, remove the key so that it'll get setup
+                // again if it's reused. (I don't think they're reused, but ...)
+                envToRemove.add(key);
+            }
+        }
+
+        for (String key : envToRemove) {
+            localEnvironments.remove(key);
+        }
+
         writeTestSetEndElement();
     }
 

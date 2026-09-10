@@ -279,15 +279,21 @@ saxon:evaluate($expression)
       might be evaluated in an unexpected order.</aside>
       <p>Functions in the EXPath file module use file paths that are specified as being relative to the
         "current working directory". If the Java system property <code>expath.base.directory</code>
-        is present, this is taken as the current working directory. In other cases, Saxon interprets
-        the file name using the rules of the Java method <code>File.getCanonicalFile()</code>.</p>
-      <aside>Note that the UNIX concept of "current working directory" does not translate directly to Microsoft Windows.
+        is present, this is taken as the current working directory, but this property is deprecated.
+        In the absence of this property, the standard Java system property <code>user.dir</code>
+        is taken as the current working directory. In other cases, Saxon interprets
+        the file name using the rules of the Java method <code>File.getCanonicalFile()</code>.
+      </p>
+      <aside>Note that the UNIX concept of "current working directory"
+      does not translate directly to Microsoft Windows.
         On Windows, systems, there is in effect a current drive and an active directory in each drive.
         A simple relative file name like <code>a.xml</code> is interpreted relative to the active directory
         of the current drive. A file name of the form <code>E:a.xml</code> is interpreted relative to
         the active directory of the named drive (<code>E:</code>). A file name in the form <code>\p\q\a.xml</code>
         is interpreted relative to the root directory of the current drive. More specifically, file names
-        are interpreted using the rules of the Java method <code>File.getCanonicalFile()</code>.</aside>
+        are interpreted using the rules of the Java method <code>File.getCanonicalFile()</code>.
+      Where a current working directory is required, the <code>System.Environment.CurrentDirectory</code>
+      is used.</aside>
       <p>On Windows, a file name starting "//" or "\\" is interpreted as a UNC file name. In particular, 
         the function <code>file:path-to-uri(name)</code> converts <code>//server/p/q/a.xml</code> to
         <code>file://server/p/q/a.xml</code> - that is, the server part of the UNC name becomes the authority

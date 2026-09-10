@@ -77,6 +77,8 @@ namespace TestDriver {
         public bool outputSerialize = false;
         public string streamedInputValidation = "skip";
         internal bool failedToBuild = false;
+        internal string initialWorkingDirectory = null;
+        internal string sandpit = null;
 
         private static byte[] ToByteArray(Stream stream)
         {
@@ -212,6 +214,10 @@ namespace TestDriver {
 
             DeclareNamespaces(xpc, env, environment);
 
+            // set up the sandpit
+
+            CreateSandpit(name, xpc, env, environment);
+            
             // load the requested schema documents
 
             bool validateSources = LoadSchemaDocuments(driver, xpc, env, environment);
@@ -294,6 +300,63 @@ namespace TestDriver {
         }
 
 
+        private static void CreateSandpit(string name, XPathCompiler xpc, XdmItem env, Environment environment)
+        {
+            foreach (XdmItem param in xpc.Evaluate("sandpit", env))
+            {
+                var path = ((XdmNode)param).GetAttributeValue(new QName("path"));
+                var tempdir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+                Directory.CreateDirectory(tempdir);
+                environment.sandpit = tempdir;
+
+                var sandpit = Path.Combine(tempdir, path);
+                Directory.CreateDirectory(sandpit);
+
+                var source = new Uri(((XdmNode)param).BaseUri, path).AbsolutePath;
+                DirectoryCopy(source, sandpit);
+
+                Console.WriteLine("Sandpit: " + sandpit);
+                
+                environment.initialWorkingDirectory = Directory.GetCurrentDirectory();
+                Directory.SetCurrentDirectory(tempdir);
+            }
+        }
+
+        // https://learn.microsoft.com/en-us/dotnet/standard/io/how-to-copy-directories
+        private static void DirectoryCopy(string sourceDirName, string destDirName)
+        {
+            // Get the subdirectories for the specified directory.
+            DirectoryInfo dir = new DirectoryInfo(sourceDirName);
+
+            if (!dir.Exists)
+            {
+                throw new DirectoryNotFoundException(
+                    "Source directory does not exist or could not be found: "
+                    + sourceDirName);
+            }
+
+            DirectoryInfo[] dirs = dir.GetDirectories();
+            // If the destination directory doesn't exist, create it.
+            if (!Directory.Exists(destDirName))
+            {
+                Directory.CreateDirectory(destDirName);
+            }
+
+            // Get the files in the directory and copy them to the new location.
+            FileInfo[] files = dir.GetFiles();
+            foreach (FileInfo file in files)
+            {
+                string temppath = Path.Combine(destDirName, file.Name);
+                file.CopyTo(temppath, false);
+            }
+
+            foreach (DirectoryInfo subdir in dirs)
+            {
+                string temppath = Path.Combine(destDirName, subdir.Name);
+                DirectoryCopy(subdir.FullName, temppath);
+            }
+        }
+
         private static void SetBaseUri(Driver driver, XPathCompiler xpc, XdmItem env, Environment environment) {
             foreach (XdmItem basei in xpc.Evaluate("static-base-uri", env)) {
                 string uri = ((XdmNode) basei).GetAttributeValue(new QName("uri"));
@@ -349,20 +412,6 @@ namespace TestDriver {
                 string uri = ((XdmNode) nsElement).GetAttributeValue(new QName("uri"));
                 environment.xpathCompiler.DeclareNamespace(prefix, uri);
                 environment.xqueryCompiler.DeclareNamespace(prefix, uri);
-                if (uri.Equals("http://expath.org/ns/file")) {
-                    // For EXPath file tests, set the EXPath base directory to the catalog directory
-                    string basei = ((XdmNode) nsElement).BaseUri.ToString();
-                    if (basei.StartsWith("file:///")) {
-                        basei = basei.Substring(7);
-                    }
-                    else if (basei.StartsWith("file:/")) {
-                        basei = basei.Substring(5);
-                    }
-
-                    FileStream file = new FileStream(basei, FileMode.Open, FileAccess.Read); //new File(base);
-
-                    //System.SetProperty("expath.base.directory", file.ToString());
-                }
             }
         }
 
@@ -1146,5 +1195,23 @@ namespace TestDriver {
                 return false;
             };
         }
+        
+        public bool Cleanup()
+        {
+            if (initialWorkingDirectory != null)
+            {
+                Directory.SetCurrentDirectory(initialWorkingDirectory);
+            }
+
+            if (sandpit != null)
+            {
+                Console.WriteLine("Cleanup sandpit: " + sandpit);
+                Directory.Delete(sandpit, true);
+                return true;
+            }
+
+            return false;
+        }
+
     }
 }

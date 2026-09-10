@@ -40,6 +40,8 @@ import java.io.*;
 import java.net.*;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 
 import static net.sf.saxon.s9api.streams.Predicates.attributeEq;
@@ -90,7 +92,9 @@ public class Environment implements ResourceResolver {
     public Map<String, List<String>> jsCollections;
     public boolean schemaAware = false;
     public boolean validateSources = false;
-
+    public String initialWorkingDirectory = null;
+    public String initialExpathBaseDirectory = null;
+    public File sandpit = null;
 
     /**
      * Construct a local default environment for a test set
@@ -174,7 +178,6 @@ public class Environment implements ResourceResolver {
         driver.prepareForSQL(environment.processor);
         //AutoActivate.activate(environment.processor);
 
-
         // TODO temporary
         environment.processor.setConfigurationProperty(Feature.EXPATH_FILE_DELETE_TEMPORARY_FILES, true);
         environment.processor.setConfigurationProperty(Feature.LINE_NUMBERING, true);
@@ -256,7 +259,10 @@ public class Environment implements ResourceResolver {
             XsdCompiler xsdCompiler = environment.processor.newXsdCompiler();
             environment.xsdSchema = loadSchemaDocuments(driver, xpc, env, environment, xsdCompiler);
         }
-        
+
+        // set up the sandpit, if there is one
+        createSandpit(name, env, environment);
+
         // load the requested source documents
 
         loadSourceDocuments(driver, xpc, env, environment, builder, environment.xsdSchema);
@@ -341,8 +347,55 @@ public class Environment implements ResourceResolver {
             }
         }
 
-
         return environment;
+    }
+
+    private static void createSandpit(String name, XdmNode env, Environment environment) {
+        // handle sandpit
+        for (XdmNode param : env.children("sandpit")) {
+            String path = param.attribute("path");
+            try {
+                File tempdir = File.createTempFile(name + ".", ".sandpit");
+                boolean ok = tempdir.delete();
+                ok = ok && tempdir.mkdir();
+                File sandpit = new File(tempdir, "sandpit");
+                ok = ok && sandpit.mkdir();
+
+                if (ok) {
+                    environment.initialWorkingDirectory = System.getProperty("user.dir");
+                    environment.initialExpathBaseDirectory = System.getProperty("expath.base.directory");
+
+                    Path source = Paths.get(env.getBaseURI().resolve(path).getPath());
+                    Path dest = Paths.get(sandpit.getAbsolutePath());
+                    copyFolder(source, dest);
+                    environment.sandpit = sandpit;
+                    System.err.println("Sandpit: " + tempdir.getAbsolutePath());
+
+                    System.setProperty("user.dir", tempdir.getAbsolutePath());
+                    System.setProperty("expath.base.directory", tempdir.getAbsolutePath());
+                } else {
+                    System.err.println("Failed to make temporary directories for sandpit");
+                }
+            } catch (IOException e) {
+                System.err.println("Failed to create sandpit: " + e.getMessage());
+            }
+        }
+    }
+
+    private static void copyFolder(Path source, Path target,  CopyOption... options) throws IOException {
+        Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                Files.createDirectories(target.resolve(source.relativize(dir).toString()));
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.copy(file, target.resolve(source.relativize(file).toString()), options);
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 
     private static void declareOutputControls(TestDriver driver, XPathCompiler xpc, XdmItem env, Environment environment) throws SaxonApiException {
@@ -401,18 +454,6 @@ public class Environment implements ResourceResolver {
             String uri = nsElement.attribute("uri");
             environment.xpathCompiler.declareNamespace(prefix, uri);
             environment.xqueryCompiler.declareNamespace(prefix, uri);
-            if (uri.equals("http://expath.org/ns/file")) {
-                // For EXPath file tests, set the EXPath base directory to the catalog directory
-                String base = nsElement.getBaseURI().toString();
-                if (base.startsWith("file:///")) {
-                    base = base.substring(7);
-                } else if (base.startsWith("file:/")) {
-                    base = base.substring(5);
-                }
-                File file = new File(base);
-                file = file.getParentFile();
-                System.setProperty("expath.base.directory", file.getAbsolutePath());
-            }
         }
     }
 
@@ -1112,6 +1153,41 @@ public class Environment implements ResourceResolver {
         public abstract void reset(Environment env);
     }
 
+    public boolean cleanup() {
+        if (initialWorkingDirectory != null) {
+            System.setProperty("user.dir", initialWorkingDirectory);
+        }
 
+        if (initialExpathBaseDirectory != null) {
+            System.setProperty("expath.base.directory", initialExpathBaseDirectory);
+        }
+
+        if (sandpit != null) {
+            try {
+                deleteFolder(sandpit.toPath());
+            } catch (IOException e) {
+                System.err.println("Failed to cleanup sandpit: " + sandpit + ": " + e.getMessage());
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    private void deleteFolder(Path folder) throws IOException {
+        Files.walkFileTree(folder, new SimpleFileVisitor<>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.delete(file);
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                Files.delete(dir);
+                return FileVisitResult.CONTINUE;
+            }
+        });
+    }
 }
 

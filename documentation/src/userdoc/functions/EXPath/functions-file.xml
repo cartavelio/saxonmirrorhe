@@ -79,7 +79,9 @@
         relative file names in <code>file:resolve-path()</code> and in other functions (such as <code>file:exists()</code>),
         but it is not reflected in the result of <code>file:current-dir()</code>.</p>
       <p>For convenience in testing, Saxon recognizes the Java system property <code>expath.base.directory</code> and uses
-        this as the current directory if the property exists. Applications should not rely on this feature.</p>
+        this as the current directory if the property exists. Applications should not rely on this feature.
+      If the Java system property <code>expath.base.directory</code> is not set, the standard
+      system property <code>user.dir</code> is used.</p>
     </status>
   </function>
 
