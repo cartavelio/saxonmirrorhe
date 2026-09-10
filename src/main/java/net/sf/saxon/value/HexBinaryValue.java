@@ -7,25 +7,17 @@
 
 package net.sf.saxon.value;
 
-import net.sf.saxon.expr.sort.AtomicMatchKey;
-import net.sf.saxon.expr.sort.XPathComparable;
-import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 
-import java.util.Arrays;
-
 /**
  * A value of type xs:hexBinary
  */
 
-public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, XPathComparable, ContextFreeAtomicValue {
-
-    private final byte[] binaryValue;
-
+public class HexBinaryValue extends BinaryValue {
 
     /**
      * Constructor: create a hexBinary value from a supplied string, in which
@@ -36,17 +28,21 @@ public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, XPath
      */
 
     public HexBinaryValue(UnicodeString in) throws XPathException {
-        super(BuiltInAtomicType.HEX_BINARY);
+        super(BuiltInAtomicType.HEX_BINARY, fromString(in));
+    }
+
+    private static byte[] fromString(UnicodeString in) throws XPathException {
         UnicodeString s = Whitespace.trim(in);
         int len32 = s.length32();
         if ((len32 & 1) != 0) {
             throw new XPathException("A hexBinary value must contain an even number of characters", "FORG0001");
         }
-        binaryValue = new byte[len32 / 2];
+        byte[] binaryValue = new byte[len32 / 2];
         for (int i = 0; i < binaryValue.length; i++) {
             binaryValue[i] = (byte) ((fromHex(s.codePointAt(2 * i)) << 4) +
-                    fromHex(s.codePointAt(2 * i + 1)));
+                                             fromHex(s.codePointAt(2 * i + 1)));
         }
+        return binaryValue;
     }
 
     /**
@@ -56,8 +52,7 @@ public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, XPath
      */
 
     public HexBinaryValue(byte[] value) {
-        super(BuiltInAtomicType.HEX_BINARY);
-        binaryValue = value;
+        super(BuiltInAtomicType.HEX_BINARY, value);
     }
 
     /**
@@ -68,8 +63,7 @@ public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, XPath
      */
 
     public HexBinaryValue(byte[] value, AtomicType typeLabel) {
-        super(typeLabel);
-        binaryValue = value;
+        super(typeLabel, value);
     }
 
     /**
@@ -98,16 +92,6 @@ public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, XPath
     }
 
     /**
-     * Get the binary value
-     *
-     * @return the binary value, as a byte array
-     */
-
-    public byte[] getBinaryValue() {
-        return binaryValue;
-    }
-
-    /**
      * Decode a single hex digit
      *
      * @param c the hex digit
@@ -115,7 +99,7 @@ public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, XPath
      * @throws XPathException if it isn't a hex digit
      */
 
-    private int fromHex(int c) throws XPathException {
+    private static int fromHex(int c) throws XPathException {
         int d = c < 255 ? "0123456789ABCDEFabcdef".indexOf((char)c) : -1;
         if (d > 15) {
             d = d - 6;
@@ -145,77 +129,5 @@ public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, XPath
     }
 
 
-    /**
-     * Get the number of octets in the value
-     *
-     * @return the number of octets (bytes) in the value
-     */
-
-    public int getLengthInOctets() {
-        return binaryValue.length;
-    }
-
-    /*@Nullable*/
-    @Override
-    public AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone) {
-        return this;
-    }
-
-    /**
-     * Get an object value that implements the XPath equality and ordering comparison semantics for this value.
-     * If the ordered parameter is set to true, the result will be a Comparable and will support a compareTo()
-     * method with the semantics of the XPath lt/gt operator, provided that the other operand is also obtained
-     * using the getXPathComparable() method. In all cases the result will support equals() and hashCode() methods
-     * that support the semantics of the XPath eq operator, again provided that the other operand is also obtained
-     * using the getXPathComparable() method. A context argument is supplied for use in cases where the comparison
-     * semantics are context-sensitive, for example where they depend on the implicit timezone or the default
-     * collation.
-     *
-     * @param collator collation to be used for comparing strings
-     * @param implicitTimezone to be used for comparing dates/times with no timezone
-     * @return a key used for performing the comparison
-     */
-
-    @Override
-    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) {
-        return this;
-    }
-
-    @Override
-    public XPathComparable getXPathComparable() {
-        return this;
-    }
-
-    /**
-     * Test if the two hexBinary or Base64Binaryvalues are equal.
-     */
-
-    public boolean equals(/*@NotNull*/ Object other) {
-        return other instanceof HexBinaryValue && Arrays.equals(binaryValue, ((HexBinaryValue) other).binaryValue);
-    }
-
-    public int hashCode() {
-        return Base64BinaryValue.byteArrayHashCode(binaryValue);
-    }
-
-    @Override
-    public int compareTo(XPathComparable o) {
-        if (o instanceof HexBinaryValue) {
-            byte[] other = ((HexBinaryValue)o).binaryValue;
-            int len0 = binaryValue.length;
-            int len1 = other.length;
-            int shorter = java.lang.Math.min(len0, len1);
-            for (int i = 0; i < shorter; i++) {
-                int a = (int) binaryValue[i] & 0xff;
-                int b = (int) other[i] & 0xff;
-                if (a != b) {
-                    return a < b ? -1 : +1;
-                }
-            }
-            return Integer.signum(len0 - len1);
-        } else {
-            throw new ClassCastException("Cannot compare xs:hexBinary to " + o.toString());
-        }
-    }
 }
 

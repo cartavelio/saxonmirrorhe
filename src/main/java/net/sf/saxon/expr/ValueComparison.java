@@ -171,6 +171,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
         getRhs().typeCheck(visitor, contextInfo);
 
         Configuration config = visitor.getConfiguration();
+        boolean allow40 = visitor.getStaticContext().getPackageData().getHostLanguageVersion() >= 40;
 
         if (Literal.isEmptySequence(getLhsExpression())) {
             return resultWhenEmpty == null ? getLhsExpression() : Literal.makeLiteral(resultWhenEmpty, this);
@@ -213,7 +214,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
         needsRuntimeCheck =
                 p0.equals(BuiltInAtomicType.ANY_ATOMIC) || p1.equals(BuiltInAtomicType.ANY_ATOMIC);
 
-        if (!needsRuntimeCheck && !Type.isPossiblyComparable(p0, p1, Token.isOrderedOperator(operator))) {
+        if (!needsRuntimeCheck && !Type.isPossiblyComparable(p0, p1, Token.isOrderedOperator(operator), allow40)) {
             boolean opt0 = Cardinality.allowsZero(getLhsExpression().getCardinality());
             boolean opt1 = Cardinality.allowsZero(getRhsExpression().getCardinality());
             if (opt0 || opt1) {
@@ -515,6 +516,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
             final ItemEvaluator p0 = expr.getLhsExpression().makeElaborator().elaborateForItem();
             final ItemEvaluator p1 = expr.getRhsExpression().makeElaborator().elaborateForItem();
             final BooleanValue resultWhenEmpty = expr.getResultWhenEmpty();
+            final boolean allow40 = expr.getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40;
 
             StringCollator defaultCollation;
             try {
@@ -532,10 +534,10 @@ public final class ValueComparison extends BinaryExpression implements Compariso
 
             GenericAtomicComparer.AtomicComparisonFunction comparer =
                     GenericAtomicComparer.makeAtomicComparisonFunction(
-                        operandType(expr.getLhsExpression()),
-                        operandType(expr.getRhsExpression()),
-                        defaultCollation,
-                        operator, true);
+                            operandType(expr.getLhsExpression()),
+                            operandType(expr.getRhsExpression()),
+                            defaultCollation,
+                            operator, true, allow40);
 
 
             final boolean nullable0 = Cardinality.allowsZero(card0);
@@ -599,7 +601,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
                 t1 = BuiltInAtomicType.ANY_ATOMIC;
             }
             final GenericAtomicComparer.AtomicComparisonFunction comparer = GenericAtomicComparer.makeAtomicComparisonFunction(
-                    (BuiltInAtomicType) t0, (BuiltInAtomicType) t1, defaultCollation, operator, true);
+                    (BuiltInAtomicType) t0, (BuiltInAtomicType) t1, defaultCollation, operator, true, false);
 
             final boolean nullable0 = Cardinality.allowsZero(card0);
             final boolean nullable1 = Cardinality.allowsZero(card1);

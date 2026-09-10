@@ -165,17 +165,21 @@ public class GenericAtomicComparer implements AtomicComparer {
      * Return the integer fingerprint of a type, after promoting the type fpr comparison
      * purposes. Numeric types are promoted to xs:double, while xs:anyURI and xs:untypedAtomic
      * are promoted to xs:string
-     * @param type the input type
+     *
+     * @param type    the input type
+     * @param allow40 true if 4.0 promotions are to be allowed
      * @return the fingerprint of the type after promotion
      */
 
-    private static int applyPromotion(BuiltInAtomicType type) {
+    private static int applyPromotion(BuiltInAtomicType type, boolean allow40) {
         if (type.isPrimitiveNumeric()) {
             return StandardNames.XS_DOUBLE;
         }
         int fp = type.getFingerprint();
         if (fp == StandardNames.XS_UNTYPED_ATOMIC || fp == StandardNames.XS_ANY_URI) {
             return StandardNames.XS_STRING;
+        } else if (allow40 && fp == StandardNames.XS_HEX_BINARY) {
+            return StandardNames.XS_BASE64_BINARY;
         } else {
             return fp;
         }
@@ -184,23 +188,24 @@ public class GenericAtomicComparer implements AtomicComparer {
     /**
      * Factory method to make a ComparisonFunction for values of known types
      *
-     * @param type0    primitive type of the first operand
-     * @param type1    primitive type of the second operand
-     * @param collator the collation to be used, if any. This is supplied as a SimpleCollation object
-     *                 which encapsulated both the collation URI and the collation itself.
-     * @param operator  the comparison operator, fpr example {@link Token#FEQ}
+     * @param type0          primitive type of the first operand
+     * @param type1          primitive type of the second operand
+     * @param collator       the collation to be used, if any. This is supplied as a SimpleCollation object
+     *                       which encapsulated both the collation URI and the collation itself.
+     * @param operator       the comparison operator, fpr example {@link Token#FEQ}
      * @param allowRecursion flag to stop infinite recursion (the function recurses if the static types
      *                       are not known; it then relies on testing the run-time types)
+     * @param allow40
      * @return a comparison function for two atomic values (neither of which may be null)
      */
 
     public static AtomicComparisonFunction makeAtomicComparisonFunction(
             BuiltInAtomicType type0, BuiltInAtomicType type1,
             StringCollator collator, int operator,
-            boolean allowRecursion) {
+            boolean allowRecursion, boolean allow40) {
 
-        int fp0 = applyPromotion(type0);
-        int fp1 = applyPromotion(type1);
+        int fp0 = applyPromotion(type0, allow40);
+        int fp1 = applyPromotion(type1, allow40);
 
         if (fp0 == fp1) {
             switch (fp0) {
@@ -283,7 +288,7 @@ public class GenericAtomicComparer implements AtomicComparer {
                 synchronized(firstTimeFunction) {
                     if (firstTimeFunction[0] == null) {
                         AtomicComparisonFunction comparisonFunction =
-                                makeAtomicComparisonFunction(at, bt, collator, operator, false);
+                                makeAtomicComparisonFunction(at, bt, collator, operator, false, allow40);
                         firstTimeFunction[0] = comparisonFunction;
                         firstTimeTypes[0] = at;
                         firstTimeTypes[1] = bt;
@@ -293,7 +298,7 @@ public class GenericAtomicComparer implements AtomicComparer {
                             return firstTimeFunction[0].compare(a, b, context);
                         } else {
                             AtomicComparisonFunction comparisonFunction =
-                                    makeAtomicComparisonFunction(at, bt, collator, operator, false);
+                                    makeAtomicComparisonFunction(at, bt, collator, operator, false, false);
                             return comparisonFunction.compare(a, b, context);
                         }
                     }

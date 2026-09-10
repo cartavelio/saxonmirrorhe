@@ -570,7 +570,7 @@ public abstract class Type {
      *         and others are not). False if they are definitely not comparable.
      */
 
-    public static boolean isPossiblyComparable(/*@NotNull*/ BuiltInAtomicType t1, /*@NotNull*/ BuiltInAtomicType t2, boolean ordered) {
+    public static boolean isPossiblyComparable(/*@NotNull*/ BuiltInAtomicType t1, /*@NotNull*/ BuiltInAtomicType t2, boolean ordered, boolean allow40) {
         if (t1 == t2) {
             return true; // short cut
         }
@@ -597,6 +597,14 @@ public abstract class Type {
         }
         if (t2.equals(BuiltInAtomicType.YEAR_MONTH_DURATION)) {
             t2 = BuiltInAtomicType.DURATION;
+        }
+        if (allow40) {
+            if (t1.equals(BuiltInAtomicType.BASE64_BINARY)) {
+                t1 = BuiltInAtomicType.HEX_BINARY;
+            }
+            if (t2.equals(BuiltInAtomicType.BASE64_BINARY)) {
+                t2 = BuiltInAtomicType.HEX_BINARY;
+            }
         }
         return t1 == t2;
     }
