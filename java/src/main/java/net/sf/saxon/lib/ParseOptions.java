@@ -1239,8 +1239,7 @@ public class ParseOptions {
 
     public static void close(/*@NotNull*/ Source source) {
         try {
-            if (source instanceof StreamSource) {
-                StreamSource ss = (StreamSource) source;
+            if (source instanceof StreamSource ss) {
                 if (ss.getInputStream() != null) {
                     ss.getInputStream().close();
                 }
@@ -1259,9 +1258,9 @@ public class ParseOptions {
                     }
                 }
             //#endif
-            } else if (source instanceof AugmentedSource) {
-                ((AugmentedSource)source).close();
-            }
+            } else if (source instanceof AugmentedSource aug) {
+                aug.close();
+            } 
         } catch (IOException err) {
             // no action
         }

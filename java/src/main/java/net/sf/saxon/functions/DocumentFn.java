@@ -31,11 +31,11 @@ import net.sf.saxon.value.StringValue;
 //#if CSHARP == false
 import org.xmlresolver.utils.URIUtils;
 //#endif
-
 import javax.xml.transform.Source;
 import javax.xml.transform.SourceLocator;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamSource;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -347,6 +347,10 @@ public class DocumentFn extends SystemFunction implements Callable {
 
             if (source instanceof EmptySource) {
                 return null;
+            }
+
+            if (source instanceof StreamSource ss && (ss.getInputStream() != null || ss.getReader() != null)) {
+                options = options.withPleaseCloseAfterUse(true);
             }
 
             //System.err.println("URI resolver returned " + source.getClass() + " " + source.getSystemId());
