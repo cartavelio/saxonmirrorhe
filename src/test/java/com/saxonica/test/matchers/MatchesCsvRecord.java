@@ -1,17 +1,12 @@
 package com.saxonica.test.matchers;
 
-import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.value.StringValue;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
-import org.hamcrest.collection.IsIterableContainingInOrder;
 
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -41,7 +36,8 @@ public class MatchesCsvRecord extends TypeSafeDiagnosingMatcher<MapItem> {
         String[] expectedKeys = Stream.of("columns", "column-index", "rows", "get").toArray(String[]::new);
 //        boolean ok = containsInAnyOrder(expectedKeys).matches(sequenceIteratorToList(item.keys()));
 
-        boolean ok = containsInAnyOrder(expectedKeys).matches(sequenceIteratorToList(actualCsvRecord.keys()).stream().map(k -> k.toString()).collect(Collectors.toList()));
+        boolean ok = containsInAnyOrder(expectedKeys).matches(sequenceIteratorToList(
+                actualCsvRecord.keys()).stream().map(k -> k.toString()).collect(Collectors.toList()));
         if (ok) {
             mismatchDescription.appendText("a csv-record: \n");
         } else {
