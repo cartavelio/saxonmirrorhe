@@ -16,6 +16,7 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.NumericType;
 import net.sf.saxon.value.DoubleValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.NumericValue;
@@ -70,7 +71,7 @@ public class MathFunctionSet extends BuiltInFunctionSet {
 
         register("pow", 2, e -> e.populate(PowFn::new, BuiltInAtomicType.DOUBLE, OPT, CARD0)
                 .arg(0, BuiltInAtomicType.DOUBLE, OPT, EMPTY)
-                .arg(1, BuiltInAtomicType.DOUBLE, ONE, null));
+                .arg(1, NumericType.getInstance(), ONE, null));
 
         register("atan2", 2, e -> e.populate(Atan2Fn::new, BuiltInAtomicType.DOUBLE, ONE, 0)
                 .arg(0, BuiltInAtomicType.DOUBLE, ONE, null)

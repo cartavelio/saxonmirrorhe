@@ -4430,8 +4430,12 @@ public class XPathParser {
         if (hasKeywordPlaceMarkers) {
             // Map the declared parameter names to their 0-based numeric positions
             // It must be a function item that knows the original parameter names
-            if (functionExp instanceof IFunctionWithRetainedParameterNames) {
-                StructuredQName[] paramNames = ((IFunctionWithRetainedParameterNames)functionExp).getParameterNames();
+            StructuredQName[] paramNames = null;
+            if (functionExp instanceof FunctionLiteral && ((FunctionLiteral)functionExp).getGroundedValue() instanceof IFunctionWithRetainedParameterNames) {
+                IFunctionWithRetainedParameterNames fn = (IFunctionWithRetainedParameterNames) ((FunctionLiteral) functionExp).getGroundedValue();
+                paramNames = fn.getParameterNames();
+            }
+            if (paramNames != null) {
                 Map<StructuredQName, Integer> paramNameMap = new HashMap<>();
                 for (int i = 0; i< paramNames.length; i++) {
                     paramNameMap.put(paramNames[i], i);

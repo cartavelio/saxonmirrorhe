@@ -48,7 +48,7 @@ public class ParamKeywords {
         arrayParamNames.put("index-where", "array|predicate");
         arrayParamNames.put("insert-before", "array|position|member");
         arrayParamNames.put("join", "arrays");
-        arrayParamNames.put("members", "input");
+        arrayParamNames.put("members", "array");
         arrayParamNames.put("of", "input");
         arrayParamNames.put("partition", "input|break-when");
         arrayParamNames.put("put", "array|position|member");
@@ -56,7 +56,7 @@ public class ParamKeywords {
         arrayParamNames.put("replace", "array|position|action");
         arrayParamNames.put("reverse", "array");
         arrayParamNames.put("size", "array");
-        arrayParamNames.put("slice", "input|start|end|step");
+        arrayParamNames.put("slice", "array|start|end|step");
         arrayParamNames.put("split", "array");
         arrayParamNames.put("sort", "array|collations|keys|orders");
         arrayParamNames.put("subarray", "array|start|length");
@@ -88,7 +88,7 @@ public class ParamKeywords {
         fnParamNames.put("collation-key", "value|collation");
         fnParamNames.put("collection", "uri");
         fnParamNames.put("compare", "value1|value2|collation");
-        fnParamNames.put("concat", "value1|value2|...");
+        fnParamNames.put("concat", "values");
         fnParamNames.put("contains", "value|substring|collation");
         fnParamNames.put("contains-subsequence", "input|subsequence|compare");
         fnParamNames.put("contains-token", "value|token|collation");

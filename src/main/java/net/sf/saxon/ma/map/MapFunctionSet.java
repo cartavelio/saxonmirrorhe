@@ -64,6 +64,11 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             field("key", SequenceType.SINGLE_ATOMIC, false),
             field("value", SequenceType.ANY_SEQUENCE, false));
 
+    public static final RecordTest KVP_TYPE_EXTENSIBLE = RecordTest.extensible(
+            field("key", SequenceType.SINGLE_ATOMIC, false),
+            field("value", SequenceType.ANY_SEQUENCE, false));
+
+
     private void init(int version) {
 
         register("merge", 1, e -> e.populate( MapMerge::new, MapType.ANY_MAP_TYPE, ONE, 0)
@@ -77,9 +82,6 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         SequenceType oneOnDuplicatesFunction = SequenceType.makeSequenceType(
                 ON_DUPLICATES_CALLBACK_TYPE, StaticProperty.EXACTLY_ONE);
 
-        RecordTest KVP_TYPE_EXTENSIBLE = RecordTest.extensible(
-                field("key", SequenceType.SINGLE_ATOMIC, false),
-                field("value", SequenceType.ANY_SEQUENCE, false));
 
 
 
@@ -187,7 +189,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                     .arg(1, filterFunctionType, ONE, null));
 
-            register("pair", 2, e -> e.populate(MapPair::new, MapType.ANY_MAP_TYPE, ONE, 0)
+            register("pair", 2, e -> e.populate(MapPair::new, KVP_TYPE_INEXTENSIBLE, ONE, 0)
                     .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE | INS, null)
                     .arg(1, AnyItemType.getInstance(), STAR | INS, null));
 
