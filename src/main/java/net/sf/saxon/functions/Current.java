@@ -18,7 +18,7 @@ import net.sf.saxon.trans.XPathException;
  * Implement the XSLT current() function
  */
 
-public class Current extends ContextAccessorFunction {
+public class Current extends SystemFunction {
 
     /**
      * The name of the Current function
@@ -27,7 +27,7 @@ public class Current extends ContextAccessorFunction {
     /*@NotNull*/ public static final StructuredQName FN_CURRENT =
         new StructuredQName("", NamespaceUri.FN, "current");
 
-    @Override
+    //@Override
     public FunctionItem bindContext(XPathContext context) {
 //        Int64Value value;
 //        try {
