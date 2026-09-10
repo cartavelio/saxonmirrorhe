@@ -420,18 +420,21 @@ public class Processor implements Configuration.ApiProvider {
     }
 
     /**
-     * Set a configuration property
+     * Set a configuration property. This method is useful when it is necessary to identify
+     * configuration properties by name; however, the method {@link #setConfigurationProperty(Feature, Object)}
+     * is preferred because it is more efficient and offers better type safety.
      *
      * @param name  the name of the option to be set. The names of the options available are listed
      *              as constants in class {@link net.sf.saxon.lib.FeatureKeys}.
      * @param value the value of the option to be set.
      * @throws IllegalArgumentException if the property name is not recognized or if the supplied value
      *                                  is not a valid value for the named property.
-     * @deprecated since 9.9 - use {@link #setConfigurationProperty(Feature, Object)}
      */
 
     @Deprecated
-    public void setConfigurationProperty(/*@NotNull*/ String name, /*@NotNull*/ Object value) {
+    public void setConfigurationProperty(String name, Object value) {
+        Objects.requireNonNull(name, "feature name");
+        Objects.requireNonNull(value, "feature value");
         if (name.equals(FeatureKeys.CONFIGURATION)) {
             config = (Configuration) value;
         } else {
