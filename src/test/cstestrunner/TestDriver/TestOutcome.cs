@@ -575,9 +575,9 @@ namespace TestDriver {
             }
             else {
                 return result.value.Count == 1 &&
-                       ((XdmAtomicValue) result.value.Simplify).IsAtomic() &&
-                       ((XdmAtomicValue) result.value.Simplify).PrimitiveTypeName.Equals(QName.XS_BOOLEAN) &&
-                       !((XdmAtomicValue) result.value.Simplify).AsBoolean();
+                       ((XdmAtomicValue) result.value.Simplify()).IsAtomic() &&
+                       ((XdmAtomicValue) result.value.Simplify()).PrimitiveTypeName.Equals(QName.XS_BOOLEAN) &&
+                       !((XdmAtomicValue) result.value.Simplify()).AsBoolean();
             }
         }
 
@@ -587,9 +587,9 @@ namespace TestDriver {
             }
             else {
                 return result.value.Count == 1 &&
-                       ((XdmAtomicValue) result.value.Simplify).IsAtomic() &&
-                       ((XdmAtomicValue) result.value.Simplify).PrimitiveTypeName.Equals(QName.XS_BOOLEAN) &&
-                       ((XdmAtomicValue) result.value.Simplify).AsBoolean();
+                       ((XdmAtomicValue) result.value.Simplify()).IsAtomic() &&
+                       ((XdmAtomicValue) result.value.Simplify()).PrimitiveTypeName.Equals(QName.XS_BOOLEAN) &&
+                       ((XdmAtomicValue) result.value.Simplify()).AsBoolean();
             }
         }
 
@@ -695,7 +695,7 @@ namespace TestDriver {
 
                 if (resultString == null) {
                     if (result.value is XdmItem) {
-                        resultString = ((XdmItem) result.value).Simplify.ToString();
+                        resultString = ((XdmItem) result.value).Simplify().ToString();
                     }
                     else {
                         if (debug) {
@@ -946,7 +946,7 @@ namespace TestDriver {
                         return false;
                     }
 
-                    if (value.Count == 1 && value.Simplify is XdmNode node &&
+                    if (value.Count == 1 && value.Simplify() is XdmNode node &&
                         node.NodeKind == XdmNodeKind.Document) {
                         iter0 = node.Implementation.iterateAxis(JAxisInfo.CHILD);
                     }
@@ -1022,37 +1022,33 @@ namespace TestDriver {
                 return false;
             }
             else {
-                return true;
+                
                 try {
                     int expectedItems = 0;
                     SysCollGen.HashSet<string> expected = new SysCollGen.HashSet<string>();
+                    SysCollGen.HashSet<string> actual = new SysCollGen.HashSet<string>();
                     XPathSelector s = assertXpc.Compile("(" + assertion.StringValue + ")").Load();
                     s.SetVariable(new QName("result"), result.value); // not used, but we declared it
-                    JCodepointCollator collator = JCodepointCollator.getInstance();
-                    //JXPathContext context =  new JXPathContextMajor(stringValue.EMPTY_string, assertXpc.getUnderlyingStaticContext().getConfiguration());
-                    foreach (XdmItem item in s) {
-                        expectedItems++;
-                        XdmValue value = (XdmValue) item.Simplify;
-                        // value.Simplify.
-                        /*  Object comparable = value.isNaN() ?
-                                  AtomicSortComparer.COLLATION_KEY_NaN :
-                                  value.getXPathComparable(false, collator, context);
-                          expected.Add(comparable);*/
-                    }
 
-                    int actualItems = 0;
-                    foreach (XdmItem item in GetPrincipalResult()) {
-                        actualItems++;
-                        XdmValue value = (XdmValue) item.Simplify;
-                        /*Object comparable = value.isNaN() ?
-                                AtomicSortComparer.COLLATION_KEY_NaN :
-                                value.getXPathComparable(false, collator, context); */
-                        //   if (!expected.Contains(comparable)) {
+                    XdmValue expectedResult = s.Evaluate();
+                    XdmValue actualResult = GetPrincipalResult();
+
+                    if (expectedResult.Count != actualResult.Count) {
                         return false;
-                        // }
+                    }
+                    
+                    // Approximation: compare the string values of the items in the result
+
+                    foreach (XdmItem i in expectedResult) {
+                        expected.Add(i.StringValue);
                     }
 
-                    return actualItems == expectedItems;
+                    foreach (XdmItem i in actualResult) {
+                        actual.Add(i.StringValue);
+                    }
+
+                    return expected.SetEquals(actual);
+                   
                 }
                 catch (SaxonApiException) {
                     return false;
