@@ -76,22 +76,18 @@ abstract class JavaRunner @Inject constructor(private val ex: ExecOperations): D
   @OutputDirectory
   val reportDir = reportingRootDir.map { it.dir("${suite.get()}/${dateStamp}") }
 
-/*
-  @get:Internal
-  val testOpts = mutableMapOf<String, String>()
+  @get:Input
+  @get:Option(option = "s", description = "request specific test set")
+  abstract val testSet: Property<String>
 
-  @Option(option = "s", description = "request specific test set")
-  fun setTestSet(arg: String): JavaRunner {
-    testOpts["s"] = arg
-    return this;
-  }
+  @get:Input
+  @get:Option(option = "t", description = "set test matching pattern")
+  abstract val testPattern: Property<String>
 
-  @Option(option = "t", description = "set test matching pattern")
-  fun setTestPattern(arg: String): JavaRunner {
-    testOpts["t"] = arg
-    return this;
+  init {
+    testSet.convention("")
+    testPattern.convention("")
   }
-*/
 
   @TaskAction
   fun execute() {
@@ -120,11 +116,13 @@ abstract class JavaRunner @Inject constructor(private val ex: ExecOperations): D
 
     javaArgs.addAll(testargs.get())
 
-/*
-    testOpts.forEach { (opt, arg) ->
-      javaArgs.add("-${opt}:${arg}")
+    if (testSet.get() != "") {
+      javaArgs.add("-s:${testSet.get()}")
     }
-*/
+
+    if (testPattern.get() != "") {
+      javaArgs.add("-t:${testPattern.get()}")
+    }
 
     println("JARG: ${javaArgs}")
 
