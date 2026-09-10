@@ -2,6 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
+      <DefineConstants>EE</DefineConstants>
   </PropertyGroup>
   <Import Project="build\arm64\SaxonCS\core.csproj"/>
    <ItemGroup>
