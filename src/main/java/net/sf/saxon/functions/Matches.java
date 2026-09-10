@@ -42,7 +42,8 @@ public class Matches extends RegexFunction {
         }
 
         try {
-            String lang = "XP30";
+            int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
+            String lang = version >= 40 ? "XP40" : "XP31";
             if (context.getConfiguration().getXsdVersion() == Configuration.XSD11) {
                 lang += "/XSD11";
             }

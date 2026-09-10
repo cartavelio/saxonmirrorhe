@@ -107,6 +107,7 @@ public class RECompiler {
 
     boolean isXPath = true;
     boolean isXPath30 = true;
+    boolean isXPath40 = false;
     boolean isXSD11 = false;
     IntHashSet captures = new IntHashSet();
     boolean hasBackReferences = false;
@@ -134,6 +135,7 @@ public class RECompiler {
         this.reFlags = flags;
         isXPath = flags.isAllowsXPath20Extensions();
         isXPath30 = flags.isAllowsXPath30Extensions();
+        isXPath40 = flags.isAllowsXPath40Extensions();
         isXSD11 = flags.isAllowsXSD11Syntax();
     }
 
@@ -345,6 +347,13 @@ public class RECompiler {
                     return new SingletonCharacterClass(escapeChar);
                 } else {
                     syntaxError("In XSD, '$' must not be escaped");
+                }
+                break;
+            case '#':
+                if (isXPath40) {
+                    return new SingletonCharacterClass(escapeChar);
+                } else {
+                    syntaxError("'#' must not be escaped unless XPath 4.0 is enabled");
                 }
                 break;
                 
@@ -760,7 +769,7 @@ public class RECompiler {
     /**
      * Absorb an atomic character string.  This method is a little tricky because
      * it can un-include the last character of string if a quantifier operator follows.
-     * This is correct because *+? have higher precedence than concatentation (thus
+     * This is correct because *+? have higher precedence than concatenation (thus
      * ABC* means AB(C*) and NOT (ABC)*).
      *
      * @return Index of new atom node
@@ -1278,14 +1287,45 @@ public class RECompiler {
                         sb.append(ch);
                     } else if (ch == '[' && !escaped) {
                         nesting++;
-                        escaped = false;
                         sb.append(ch);
                     } else if (ch == ']' && !escaped) {
                         nesting--;
-                        escaped = false;
                         sb.append(ch);
                     } else if (nesting == 0 && Whitespace.isWhite(ch)) {
                         // no action
+                    } else {
+                        escaped = false;
+                        sb.append(ch);
+                    }
+                }
+                this.pattern = sb.toUnicodeString();
+                this.len = this.pattern.length32();
+            }
+
+            if (reFlags.isAllowComments()) {
+                // 'c' flag is set (XPath 4.0). Preprocess the expression to strip comments
+                UnicodeBuilder sb = new UnicodeBuilder();
+                int nesting = 0;
+                boolean escaped = false;
+                IntIterator iter = pattern.codePoints();
+                while (iter.hasNext()) {
+                    int ch = iter.next();
+                    if (ch == '\\' && !escaped) {
+                        escaped = true;
+                        sb.append(ch);
+                    } else if (ch == '[' && !escaped) {
+                        nesting++;
+                        sb.append(ch);
+                    } else if (ch == ']' && !escaped) {
+                        nesting--;
+                        sb.append(ch);
+                    } else if (ch == '#' && nesting == 0 && !escaped) {
+                        while (iter.hasNext()) {
+                            ch = iter.next();
+                            if (ch == '#') {
+                                break;
+                            }
+                        }
                     } else {
                         escaped = false;
                         sb.append(ch);

@@ -135,17 +135,18 @@ public abstract class RegexFunction extends SystemFunction implements StatefulSy
         }
         UnicodeString regexArg = regexItem.getUnicodeStringValue();
 
+        int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
         String flags = "";
         if (flagsPos < args.length) {
             Item flagsItem = args[flagsPos].head();   // May generally be empty in XPath 4.0
-            if (flagsItem == null && getRetainedStaticContext().getPackageData().getHostLanguageVersion() < 40) {
+            if (flagsItem == null && version < 40) {
                 XPathException err = new XPathException("Flags argument must not be an empty sequence (unless 4.0 is enabled)", "XPTY0004");
                 err.setIsTypeError(true);
                 throw err;
             }
             flags = flagsItem == null ? "" : flagsItem.getStringValue();
         }
-        String hostLang = "XP30";
+        String hostLang = version >= 40 ? "XP40" : "XP31";
         if (config.getXsdVersion() == Configuration.XSD11) {
             hostLang += "/XSD11";
         }

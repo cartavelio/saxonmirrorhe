@@ -20,8 +20,10 @@ public class REFlags {
     private boolean singleLine;
     private boolean allowWhitespace;
     private boolean literal;
+    private boolean allowComments;
     private boolean xpath20;
     private boolean xpath30;
+    private boolean xpath40;
     private boolean xsd11;
     private boolean debug; // flags = ";g"
     private boolean allowUnknownBlockNames = false; //flags = ";k"
@@ -46,6 +48,10 @@ public class REFlags {
         } else if (language.contains("XP30") || language.contains("XP31")) {
             xpath20 = true;
             xpath30 = true;
+        } else if (language.contains("XP40")) {
+            xpath20 = true;
+            xpath30 = true;
+            xpath40 = true;
         }
 
         int semi = flags.indexOf(';');
@@ -70,6 +76,12 @@ public class REFlags {
                     break;
                 case 'x':
                     allowWhitespace = true;
+                    break;
+                case 'c':
+                    if (!xpath40) {
+                        throw new RESyntaxException("'c' flag requires XPath 4.0 to be enabled");
+                    }
+                    allowComments = true;
                     break;
                 default:
                     throw new RESyntaxException("Unrecognized flag '" + c + "'");
@@ -106,6 +118,9 @@ public class REFlags {
     public boolean isAllowWhitespace() {
         return allowWhitespace;
     }
+    public boolean isAllowComments() {
+        return allowComments;
+    }
 
     public boolean isLiteral() {
         return literal;
@@ -117,6 +132,10 @@ public class REFlags {
 
     public boolean isAllowsXPath30Extensions() {
         return xpath30;
+    }
+
+    public boolean isAllowsXPath40Extensions() {
+        return xpath40;
     }
 
     public boolean isAllowsXSD11Syntax() {
