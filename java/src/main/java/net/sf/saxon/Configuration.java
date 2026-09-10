@@ -3067,15 +3067,15 @@ public class Configuration implements SourceResolver {
     }
 
 
-    /**
-     * Add a built-in schema for a given namespace. This is a no-op if the configuration is not schema-aware
-     *
-     * @param namespace the namespace. Currently built-in schemas are available for the XML and FN namespaces
-     */
-
-    public Schema getSchemaForBuiltInNamespace(NamespaceUri namespace) {
-        return null;
-    }
+//    /**
+//     * Add a built-in schema for a given namespace. This is a no-op if the configuration is not schema-aware
+//     *
+//     * @param namespace the namespace. Currently built-in schemas are available for the XML and FN namespaces
+//     */
+//
+//    public Schema getSchemaForBuiltInNamespace(NamespaceUri namespace) {
+//        return null;
+//    }
 
     /**
      * Determine whether the Configuration contains a cached schema for a given target namespace

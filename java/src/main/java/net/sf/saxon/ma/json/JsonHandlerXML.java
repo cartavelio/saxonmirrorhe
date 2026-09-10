@@ -7,6 +7,7 @@
 
 package net.sf.saxon.ma.json;
 
+import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.event.ComplexContentOutputter;
@@ -97,7 +98,6 @@ public class JsonHandlerXML extends JsonHandler {
      * @throws XPathException if initialization fails, for example because of problems loading the schema
      */
     public JsonHandlerXML(XPathContext context, RetainedStaticContext rsc, int flags) throws XPathException {
-        schema = rsc.getImportedSchema();
         init(context, flags);
         builder = context.getController().makeBuilder();
         builder.setSystemId(rsc.getStaticBaseUriString());
@@ -140,22 +140,29 @@ public class JsonHandlerXML extends JsonHandler {
         escapedQN = qname("escaped");
         escapedKeyQN = qname("escaped-key");
 
+
         if (validate) {
+            Configuration config = context.getConfiguration();
+
             // Note, we do not actually perform schema validation, because we assume the XML we are generating
             // is valid. Instead, we just set type annotations "on trust", as if we were validating.
             // Currently this means we aren't detecting duplicate keys, which would cause validation to fail.
             // The spec needs clarification in this area.
 
-
-            Configuration config = context.getConfiguration();
-            if (schema == null || schema.getElementDecl(mapQN.getFingerprint()) == null) {
-                schema = config.getSchemaForBuiltInNamespace(NamespaceUri.FN);
-            }
-            String[] typeNames = {"mapType", "arrayType", "stringType", "numberType", "booleanType", "nullType",
-                "mapWithinMapType", "arrayWithinMapType", "stringWithinMapType",
-                "numberWithinMapType", "booleanWithinMapType", "nullWithinMapType"};
-            for (String t : typeNames) {
-                setType(t, schema.getSchemaType(new StructuredQName(PREFIX, JSON_NS, t)));
+            if (config.isLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION)) {
+                //#if EE==true
+                if (schema == null || schema.getElementDecl(mapQN.getFingerprint()) == null) {
+                    schema = ((EnterpriseConfiguration)config).getSchemaForFnNamespace();
+                }
+                String[] typeNames = {"mapType", "arrayType", "stringType", "numberType", "booleanType", "nullType",
+                        "mapWithinMapType", "arrayWithinMapType", "stringWithinMapType",
+                        "numberWithinMapType", "booleanWithinMapType", "nullWithinMapType"};
+                for (String t : typeNames) {
+                    setType(t, schema.getSchemaType(new StructuredQName(PREFIX, JSON_NS, t)));
+                }
+                //#endif
+            } else {
+                throw new XPathException("Schema validation not supported in this configuration", "FOJS0004");
             }
 
         }

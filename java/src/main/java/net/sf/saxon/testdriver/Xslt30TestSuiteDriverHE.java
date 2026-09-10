@@ -1049,6 +1049,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
     }
 
     protected XsltExecutable reloadExportedStylesheet(XsltCompiler compiler, File exportFile) throws SaxonApiException {
+        compiler.clearRegisteredSchemas();
         return compiler.loadExecutablePackage(exportFile.toURI());
     }
 

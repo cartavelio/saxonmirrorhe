@@ -18,6 +18,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpReplaceBody;
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.iter.GroundedIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.value.EmptySequence;
@@ -296,6 +297,7 @@ public class ZenoSequence implements GroundedValue {
         }
 
         @Override
+        @CSharpSuppressWarnings("UnsafeIteratorConversion")
         public Item next() {
             position++;
             return chainIterator.hasNext() ? chainIterator.next() : null;
@@ -334,6 +336,7 @@ public class ZenoSequence implements GroundedValue {
 
         @Override
         @CSharpReplaceBody(code="throw new InvalidOperationException();")
+        @CSharpSuppressWarnings("UnsafeIteratorConversion")
         public boolean hasNext() {
             return chainIterator.hasNext();
         }

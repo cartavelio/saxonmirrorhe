@@ -16,6 +16,7 @@ import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.nodetest.NodeVectorMatchMaker;
 import net.sf.saxon.pattern.qname.*;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.*;
 
@@ -283,7 +284,6 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
                                 && tree.getFingerprint(nodeNr) == requiredFingerprint;
             }
         }
-        final TypeHierarchy th = tree.getConfiguration().getTypeHierarchy();
         return nodeNr -> (tree.getNodeKind(nodeNr) & 0x0f) == kind
                                       && matches(tree.getNode(nodeNr));
     }
@@ -299,8 +299,13 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
             return true;
         }
 
-        if (annotation.equals(schemaType)) {
-            return true;
+        if (annotation.getFingerprint() == schemaType.getFingerprint()) {
+            if (annotation.equals(schemaType)) {
+                return true;
+            }
+            throw new UncheckedXPathException("There are two different types with the same name " + annotation.getEQName() +
+                                  "; this probably means the schema has been loaded twice, once to validate a source document, " +
+                                  "and once as a static schema import.", "XTSE0220");
         }
 
         // see if the type annotation is a subtype of the required type

@@ -7,6 +7,7 @@
 
 package net.sf.saxon.functions;
 
+import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.event.ComplexContentOutputter;
@@ -108,7 +109,7 @@ public class AnalyzeStringFn extends RegexFunction {
             if (schemaAware) {
                 schema = getRetainedStaticContext().getImportedSchema();
                 if ((schema.getSchemaType(new StructuredQName("", NamespaceUri.FN, "analyze-string-result-type"))) == null) {
-                    schema = config.getSchemaForBuiltInNamespace(NamespaceUri.FN);
+                    schema = ((EnterpriseConfiguration)config).getSchemaForFnNamespace();
                 }
             }
             init(context.getConfiguration(), schema);

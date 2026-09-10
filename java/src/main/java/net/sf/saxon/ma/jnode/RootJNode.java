@@ -206,6 +206,7 @@ public class RootJNode extends JNode {
          * Get the next item in the sequence.
          */
         @Override
+        @CSharpSuppressWarnings("UnsafeIteratorConversion")
         public GNode next() {
             if (arrayEntryIterator.hasNext()) {
                 GroundedValue nextItem = arrayEntryIterator.next();

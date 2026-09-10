@@ -868,11 +868,11 @@ public class QueryModule implements StaticContext {
     /**
      * Get global variables declared in this module
      *
-     * @return an Iterator whose items are GlobalVariable objects
+     * @return an Iterable whose items are GlobalVariable objects
      */
 
-    public Iterator<GlobalVariable> getModuleVariables() {
-        return variables.values().iterator();
+    public Iterable<GlobalVariable> getModuleVariables() {
+        return variables.values();
     }
 
     /**

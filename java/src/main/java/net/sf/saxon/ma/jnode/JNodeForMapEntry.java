@@ -193,6 +193,7 @@ public class JNodeForMapEntry extends ChildJNode implements SiblingCountingNode 
                 ^ getPosition();
     }
 
+    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     protected void allocateSerialNr() {
         if (parent.getContent() instanceof AbstractFixedMap) {
             this.serialNr = ((AbstractFixedMap)parent.getContent()).getPosition(getSelector());

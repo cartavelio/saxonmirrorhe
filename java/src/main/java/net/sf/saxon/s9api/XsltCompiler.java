@@ -151,6 +151,15 @@ public class XsltCompiler {
         useSchema("", schema);
     }
 
+    /**
+     * Clear all used schemas (for subsequent stylesheet compilations)
+     */
+
+    public void clearRegisteredSchemas() {
+        usedSchemata = null;
+        usedXsdSchemata = null;
+    }
+
 
     /**
      * Get the schema that is to be used for a schema-aware transformation.

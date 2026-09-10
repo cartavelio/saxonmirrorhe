@@ -66,6 +66,22 @@ public abstract class Subsumption {
             return SAME_TYPE;
         }
 
+        if (t1 instanceof EnumerationUnionType && !(t2 instanceof EnumerationUnionType)) {
+            if (t2 == BuiltInAtomicType.STRING) {
+                return SUBSUMED_BY;
+            } else {
+                return computeRelationship(BuiltInAtomicType.STRING, t2);
+            }
+        }
+
+        if (t2 instanceof EnumerationUnionType && !(t1 instanceof EnumerationUnionType)) {
+            if (t1 == BuiltInAtomicType.STRING) {
+                return SUBSUMES;
+            } else {
+                return computeRelationship(BuiltInAtomicType.STRING, t2);
+            }
+        }
+
         if (t1 instanceof ChoiceItemType || t2 instanceof ChoiceItemType) {
             ChoiceItemType c1 = t1.normalizeItemType().asChoiceItemType().expand();
             ChoiceItemType c2 = t2.normalizeItemType().asChoiceItemType().expand();
@@ -568,6 +584,7 @@ public abstract class Subsumption {
         // * If every pair of item types is disjoint, then DISJOINT
         // * Else OVERLAPS
         //System.err.println("choiceRelationship /// c1=" + c1.getFullAlphaCode() + " /// c2=" + c2.getFullAlphaCode());
+
         Affinity[][] affinities = makeAffinityTable(c1.memberTypes.size(), c2.memberTypes.size());
         boolean allDIS = true;
         for (int i = 0; i < c1.memberTypes.size(); i++) {

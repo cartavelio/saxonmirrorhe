@@ -164,6 +164,7 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
      * returns null.
      */
 
+    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public Iterator<KeyValuePair> followingKeyValuePairs(AtomicValue key) {
         // TODO: provide a more efficient implementation for AbstractFixedMap and ExtensibleMap
         int specVersion = getSpecVersion();
@@ -189,6 +190,7 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
      * returns null.
      */
 
+    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public Iterator<KeyValuePair> precedingKeyValuePairs(AtomicValue key) {
         // TODO: provide a more efficient implementation for AbstractFixedMap and ExtensibleMap
         int specVersion = getSpecVersion();
@@ -632,6 +634,7 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
     }
 
     @Override
+    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual.DeepEqualOptions options) throws XPathException {
         if (other instanceof MapItem &&
                 ((MapItem) other).size() == size()) {
