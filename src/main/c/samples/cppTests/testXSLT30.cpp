@@ -2280,6 +2280,7 @@ void testPipeline(SaxonProcessor *proc, sResultCount *sresult) {
       }
     cout<<sw<<endl;
     cout << "testPipeline = " << sw << endl;
+    cerr<<"testPipeline cp0-0"<<endl;
     sresult->success++;
     delete stage1;
     stage1 = nullptr;
@@ -2765,9 +2766,17 @@ int main(int argc, char* argv[]) {
 
     cout<<endl<<"============================================================="<<endl<<endl;
 
-
+    cout<<"cp 2 -xx"<<endl;
+    try {
     DocumentBuilder * builder = processor->newDocumentBuilder();
+
+    cout<<"cp 3 -xx"<<endl;
     testSaxSourceNoSystemId(processor, builder, sresult);
+    cout<<"cp 4 -xx"<<endl;
+    } catch(SaxonApiException &e) {
+        cerr<<e.what()<<endl;
+
+    }
 
     cout<<endl<<"============================================================="<<endl<<endl;
 
