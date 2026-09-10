@@ -50,6 +50,9 @@
         <code>doc.select(Steps.child("test-set").then(Steps.child("dependencies"))).first()</code> reduces to
         <code>doc.select("test-set").select("dependencies").first()</code>.</p>
         
+        <p>The interface <code>net.sf.saxon.s9api.StaticError</code>, which was no longer used, has now been
+        dropped from the product.</p>
+        
   
     </category>
     

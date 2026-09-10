@@ -7,11 +7,13 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.DefaultedArgumentExpression;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.StringLiteral;
+import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicMatcher;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
 import net.sf.saxon.lib.ErrorReporter;
-import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.SameNameTest;
 import net.sf.saxon.str.StringTool;
@@ -110,10 +112,10 @@ public class DeepEqual extends CollatingFunctionFixed {
 
     @Override
     public Expression makeFunctionCall(Expression... arguments) {
-        if (arguments.length == 4) {
-            return super.makeFunctionCall(arguments);
-        }
-        Expression[] newArgs = new Expression[4];
+//        if (arguments.length == 4) {
+//            return super.makeFunctionCall(arguments);
+//        }
+        Expression[] newArgs = new Expression[3];
         newArgs[0] = arguments[0];
         newArgs[1] = arguments[1];
         if (arguments.length < 3 || arguments[2] instanceof DefaultedArgumentExpression) {
@@ -121,11 +123,11 @@ public class DeepEqual extends CollatingFunctionFixed {
         } else {
             newArgs[2] = arguments[2];
         }
-        if (arguments.length < 4 || arguments[3] instanceof DefaultedArgumentExpression) {
-            newArgs[3] = Literal.makeLiteral(new DictionaryMap());
-        } else {
-            newArgs[2] = arguments[2];
-        }
+//        if (arguments.length < 4 || arguments[3] instanceof DefaultedArgumentExpression) {
+//            newArgs[3] = Literal.makeLiteral(new DictionaryMap());
+//        } else {
+//            newArgs[2] = arguments[2];
+//        }
         return super.makeFunctionCall(newArgs);
     }
 
