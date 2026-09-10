@@ -64,14 +64,10 @@ public abstract class Verifier {
         if (!config.getConfigurationProperty(Feature.SUPPRESS_EVALUATION_EXPIRY_WARNING)) {
             int left = primaryLicense.daysLeft();
             if (left == 1) {
-                config.getLogger().info("****** Saxon evaluation license expires tomorrow! ******");
-            } else if (left > 0 && left < 15) {
-                config.getLogger().info("Saxon evaluation license expires in " + left + " days");
+                config.getLogger().info("****** Saxon license expires tomorrow! ******");
+            } else if (left > 0 && left < 30) {
+                config.getLogger().info("Saxon license expires in " + left + " days");
             }
-        }
-        if (!"yes".equals(primaryLicense.getFeature("Evaluation")) && !"never".equals(primaryLicense.getFeature("Expiration"))) {
-            int left = primaryLicense.daysLeft();
-
         }
     }
 
@@ -264,8 +260,8 @@ public abstract class Verifier {
                     throw new LicenseException("The " + licenseDesc + " has expired",
                                                LicenseException.EXPIRED);
                 } else {
-                    System.err.println("Saxon " + licenseDesc + " has expired. You are using the software without legal authority. "
-                                               + "You must obtain a new license immediately; meanwhile a delay of " + Math.abs(daysLeft)*2 + " seconds will be imposed.");
+                    System.err.println("Saxon " + licenseDesc + " has expired. \n*** You are using the software without legal authority. ***"
+                                               + "\nYou must obtain a new license immediately; meanwhile a delay of " + Math.abs(daysLeft)*2 + " seconds will be imposed.");
                     try {
                         Thread.sleep(Math.abs(daysLeft)*2000);
                     } catch (InterruptedException e) {
@@ -390,6 +386,10 @@ public abstract class Verifier {
          */
 
         int daysLeft() {
+            String company = features.getProperty("Company");
+            if (company != null && company.startsWith("OEM")) {
+                return 0;
+            }
             String expiration = features.getProperty("Expiration");
             if (expiration == null) {
                 return -1;
