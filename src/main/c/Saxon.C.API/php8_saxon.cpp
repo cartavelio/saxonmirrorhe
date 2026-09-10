@@ -1371,7 +1371,7 @@ XtOffsetOf(saxonProcessor_object, std));
         enumArrXdmValue
 };*/
 
-zval makePHPValue(XdmItem * item){
+zval makePHPValue(XdmValue * value){
 
   zval retval;
 
@@ -1418,13 +1418,15 @@ zval makePHPValue(XdmItem * item){
 
     typeMap["[xdmvalue"] = enumArrXdmValue;
 
-  int typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)item->getUnderlyingValue());
+  int typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)value->getUnderlyingValue());
 
 
 
   XDM_TYPE xdm_type = static_cast<XDM_TYPE>(typeRef);
 
-  std::cerr<<"Xdm typeRef = "<< typeRef<<std::endl;
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+    std::cerr<<"Xdm typeRef = "<< typeRef<<std::endl;
+  }
 
   if (typeRef == SXN_EXCEPTION) {
 
@@ -1434,10 +1436,13 @@ zval makePHPValue(XdmItem * item){
   }
 
   if (xdm_type == XDM_ATOMIC_VALUE) {
-    XdmAtomicValue * aitem = (XdmAtomicValue *) item;
+
+    XdmAtomicValue * aitem = (XdmAtomicValue *) (value->getHead());
     const char * primType = aitem->getPrimitiveTypeName();
 
-    std::cerr<<"Primitive type = "<< primType<<std::endl;
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+      std::cerr<<"Primitive type = "<< primType<<std::endl;
+    }
 
     saxonTypeEnum typeValue = typeMap[primType];
     bool bvalue;
@@ -1447,17 +1452,15 @@ zval makePHPValue(XdmItem * item){
 
     switch (typeValue) {
       case saxonTypeEnum::enumBool:
-        std::cerr<<"PHP internal: Integer type found"<< std::endl;
       bvalue = aitem->getBooleanValue();
       ZVAL_BOOL(&retval, bvalue);
       break;
       case saxonTypeEnum::enumInteger:
-        std::cerr<<"PHP internal: Integer type found"<< std::endl;
       lnumber = aitem->getLongValue();
       ZVAL_LONG(&retval, lnumber);
       break;
       case saxonTypeEnum::enumString:
-        astri = item->getStringValue();
+        astri = aitem->getStringValue();
       ZVAL_STRING(&retval, astri);
       break;
       case saxonTypeEnum::enumDouble:
@@ -1467,16 +1470,134 @@ zval makePHPValue(XdmItem * item){
       break;
 
       default:
-        std::cerr<<"PHP internal: type not found"<< std::endl;
-      astri = aitem->getStringValue();
-      ZVAL_STRING(&retval, astri);
-      break;
-
+        if (getenv("SAXONC_DEBUG_FLAG")) {
+          std::cerr<<"PHP internal: type not found"<< std::endl;
+        }
+        astri = aitem->getStringValue();
+        ZVAL_STRING(&retval, astri);
+        break;
 
     }
 
   return retval;
+} else if (xdm_type == XDM_NODE) {
+  XdmNode * nxdmItem = (XdmNode *)(value->getHead());
+  if (object_init_ex(&retval, xdmNode_ce) != SUCCESS) {
+    //error
+
+    php_error(E_WARNING,"error phpNative xdmNode creation failed");
+  }
+
+  struct xdmNode_object* vobj;
+  zend_object* zend_vobj;
+
+  //MAKE_STD_ZVAL(php_argv[i]._val);
+  zend_vobj = Z_OBJ_P(&retval);
+  vobj = (xdmNode_object *)((char *)zend_vobj - XtOffsetOf(xdmNode_object, std));
+  assert (vobj != NULL);
+
+  vobj->xdmNode = nxdmItem;
+
+  return retval;
+
+
+}  else if (xdm_type == XDM_MAP) {
+  XdmMap * mitem = (XdmMap *) (value->getHead());
+
+  int count = mitem->mapSize();
+
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+    std::cerr<<"PHPValue: XDMMap size="<<count<<std::endl;
+  }
+
+  ///// creating PHP array
+  zend_array *ret = zend_new_array(count);
+  zend_ulong idx = 0;
+  XdmAtomicValue ** aKeys = mitem->keys();
+
+  for (int j = 0; j < count; j++) {
+    XdmValue * avaluej =mitem->get(aKeys[j]);
+
+
+    const char * ss = aKeys[j]->getStringValue();
+
+    zend_string * keyzvalj = zend_string_init(ss, strlen(ss), 0);
+
+
+    zval retvalj = makePHPValue(avaluej);
+
+    zend_hash_add(ret, keyzvalj, &retvalj);
+
+  }
+  ZVAL_ARR(&retval, ret);
+
+  return retval;
+
+} else if (xdm_type == XDM_ARRAY) {
+
+
+
+  XdmArray * aitem = (XdmArray *) (value->getHead());
+
+  int count = aitem->arrayLength();
+
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+    std::cerr<<"PHPValue: XDMarray size="<<count<<std::endl;
+  }
+
+  ///// creating PHP array
+  zend_array *ret = zend_new_array(count);
+  zend_ulong idx = 0;
+
+  for (int j = 0; j < count; j++) {
+    XdmValue * avaluej =aitem->get(j);
+    //itemi->incrementRefCount();
+
+    zval retvali = makePHPValue(avaluej);
+
+    zend_hash_index_add(ret, idx, &retvali);
+
+    idx++;
+  }
+  ZVAL_ARR(&retval, ret);
+
+  return retval;
+
+
+} else if (xdm_type == XDM_FUNCTION_ITEM) {
+
+} else if (xdm_type == XDM_EMPTY) {
+
+}else if (xdm_type == XDM_VALUE) {
+
+  int count = value->size();
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+    std::cerr<<"PHPValue: XDMValue size="<<count<<std::endl;
+  }
+
+  ///// creating PHP array
+  zend_array *ret = zend_new_array(count);
+  zend_ulong idx = 0;
+
+  for (int j = 0; j < count; j++) {
+    XdmItem *itemi = value->itemAt(j);
+    //itemi->incrementRefCount();
+
+    zval retvali = makePHPValue(itemi);
+
+    zend_hash_index_add(ret, idx, &retvali);
+
+    idx++;
+  }
+  ZVAL_ARR(&retval, ret);
+
+  return retval;
+
 }
+  zend_throw_exception(zend_ce_exception, "Internal Error: Cannot convert XdmValue to PHP value", 0);
+
+
+
 }
 
 
@@ -1484,13 +1605,12 @@ zval makePHPValue(XdmItem * item){
 void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int numOfArguments,  XdmValue ** arguments)
 {
 
-    std::cerr<<"inside phpNativeCall"<<std::endl;
-
-
     //JNIEnv *senv = SaxonProcessor::sxn_environ->env;
     //char *nativeString = functionName;
     if(functionName == NULL) {
-        std::cerr<<"Error: phpNativeCall - functionName is null"<<std::endl;
+        if (getenv("SAXONC_DEBUG_FLAG")) {
+          std::cerr<<"Error: phpNativeCall - functionName is null"<<std::endl;
+        }
         return NULL;
     }
     std::string nativeString2 = std::string(functionName);
@@ -1523,147 +1643,17 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
 
 
     if(useNativeTypes) {
-            std::cerr<<"Error: phpNativeCall - useNativeTypes"<<std::endl;
+        if (getenv("SAXONC_DEBUG_FLAG")) {
+          std::cerr<<"DEBUG: phpNativeCall - useNativeTypes"<<std::endl;
+        }
         for(int i=0; i<argLength;i++){
-            int typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,
-                                     (void *)(arguments[i])->getUnderlyingValue());
-
-            XDM_TYPE xdm_type = static_cast<XDM_TYPE>(typeRef);
-
-           if (typeRef == SXN_EXCEPTION) {
-
-              //throw SaxonApiException();
-
-              zend_throw_exception(zend_ce_exception, "Error found in converting arguments", 0);
-            }
-            if (xdm_type == XDM_ATOMIC_VALUE) {
-              params[i] = makePHPValue((arguments[i])->getHead());
-
-            } else if (xdm_type == XDM_NODE) {
-              XdmNode * nxdmItem = (XdmNode *)((arguments[i])->getHead());
-              if (object_init_ex(&params[i], xdmNode_ce) != SUCCESS) {
-                //error
-
-                php_error(E_WARNING,"error phpNative xdmNode creation failed");
-              }
-
-              struct xdmNode_object* vobj;
-              zend_object* zend_vobj;
-
-              //MAKE_STD_ZVAL(php_argv[i]._val);
-              zend_vobj = Z_OBJ_P(&params[i]);
-              vobj = (xdmNode_object *)((char *)zend_vobj - XtOffsetOf(xdmNode_object, std));
-              assert (vobj != NULL);
-
-              vobj->xdmNode = nxdmItem;
-
-            } else if (xdm_type == XDM_MAP) {
-              std::cerr<<"XDMMap found"<<std::endl;
-
-            } else if (xdm_type == XDM_ARRAY) {
-              std::cerr<<"XDMArray found"<<std::endl;
-
-              XdmArray * arrxdmItem = (XdmArray *)((arguments[i])->getHead());
-
-              int count = arrxdmItem->arrayLength();
-
-              std::cerr<<"XDMArray size="<<count<<std::endl;
-
-              ///// creating PHP array
-              zend_array *ret = zend_new_array(count);
-              zend_ulong idx = 0;
-
-              struct xdmArray_object* aavobj;
-              zend_object* zend_avobj;
-
-              bool arrayContainsNonSingletons = false;
-
-              for (int j = 0; j < count; j++) {
-                XdmValue *valuei = arrxdmItem->get(j);
-                //itemi->incrementRefCount();
-                zval retvali;
-
-                if(valuei->size() == 1) {
-                  retvali = makePHPValue(valuei->getHead());
-
-                  zend_hash_index_add(ret, idx, &retvali);
-
-                  idx++;
-
-                } else {
-                  if (object_init_ex(&params[i], xdmArray_ce) != SUCCESS) {
-                    //error
-
-                    php_error(E_WARNING,"error phpNative xdmArray creation failed");
-                  }
-
-
-                  //MAKE_STD_ZVAL(php_argv[i]._val);
-                  zend_avobj = Z_OBJ_P(&params[i]);
-                  aavobj = (xdmArray_object *)((char *)zend_avobj - XtOffsetOf(xdmArray_object, std));
-                  assert (vobj != NULL);
-
-                  aavobj->xdmArray = arrxdmItem;
-                  arrayContainsNonSingletons = true;
-                  break;
-
-                }
-
-
-              }
-
-              if(!arrayContainsNonSingletons) {
-                ZVAL_ARR(&params[i], ret);
-              }
-
-            } else if (xdm_type == XDM_FUNCTION_ITEM) {
-
-              std::cerr<<"XDMFunctionItem found"<<std::endl;
-
-            } else if (xdm_type == XDM_EMPTY) {
-              // Empty Sequence detected.
-
-
-              return nullptr;
-
-            } else if (xdm_type == XDM_VALUE) {
-              std::cerr<<"XDMValue foundx"<<std::endl;
-
-              int count = arguments[i]->size();
-
-              std::cerr<<"XDMValue size="<<count<<std::endl;
-
-              ///// creating PHP array
-              zend_array *ret = zend_new_array(count);
-              zend_ulong idx = 0;
-
-              for (int j = 0; j < count; j++) {
-                XdmItem *itemi = arguments[i]->itemAt(j);
-                //itemi->incrementRefCount();
-
-                zval retvali = makePHPValue(itemi);
-
-                zend_hash_index_add(ret, idx, &retvali);
-
-                idx++;
-              }
-              ZVAL_ARR(&params[i], ret);
-
-
-
-            } else {
-              zend_throw_exception(zend_ce_exception, "Internal Error: Cannot create XdmItem from reference", 0);
-            }
+          params[i] = makePHPValue(arguments[i]);
         }
 
-
-
-
-
-
-
     } else {
-      std::cerr<<"Error: phpNativeCall - using Xdmtypes"<<std::endl;
+      if (getenv("SAXONC_DEBUG_FLAG")) {
+        std::cerr<<"DEBUG: phpNativeCall - using Xdmtypes"<<std::endl;
+      }
 
       zval * oth = nullptr;
       for(int i=0; i<argLength;i++){
@@ -1679,7 +1669,6 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
           zend_throw_exception(zend_ce_exception, "Error found in converting arguments", 0);
         }
 
-        std::cerr<<"Error: phpNativeCall - checking for param type"<<std::endl;
         if (xdm_type == XDM_ATOMIC_VALUE) {
           XdmAtomicValue * axdmItem = (XdmAtomicValue *)((arguments[i])->getHead());
 
@@ -1687,7 +1676,6 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
             return nullptr;
           }
 
-          std::cerr<<"Error: phpNativeCall - atomicValue param found"<<std::endl;
 
           zend_object *zavobj = Z_OBJ_P(&params[i]);
           xdmAtomicValue_object *avobj =
@@ -1717,11 +1705,63 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
 
         } else if (xdm_type == XDM_MAP) {
 
+          XdmMap * mapxdmItem = (XdmMap *)((arguments[i])->getHead());
+
+          struct xdmMap_object* aavobj;
+          zend_object* zend_avobj;
+
+          if (object_init_ex(&params[i], xdmArray_ce) != SUCCESS) {
+            //error
+
+            zend_throw_exception(zend_ce_exception, "Error found in converting user function argument to XdmMap", 0);
+          }
+
+          zend_avobj = Z_OBJ_P(&params[i]);
+          aavobj = (xdmMap_object *)((char *)zend_avobj - XtOffsetOf(xdmMap_object, std));
+          assert (vobj != NULL);
+
+          aavobj->xdmMap = mapxdmItem;
+
 
         } else if (xdm_type == XDM_ARRAY) {
 
+          XdmArray * arrxdmItem = (XdmArray *)((arguments[i])->getHead());
+
+          struct xdmArray_object* aavobj;
+          zend_object* zend_avobj;
+
+          if (object_init_ex(&params[i], xdmArray_ce) != SUCCESS) {
+            //error
+
+            zend_throw_exception(zend_ce_exception, "Error found in converting user function argument to XdmArray", 0);
+          }
+
+
+          //MAKE_STD_ZVAL(php_argv[i]._val);
+          zend_avobj = Z_OBJ_P(&params[i]);
+          aavobj = (xdmArray_object *)((char *)zend_avobj - XtOffsetOf(xdmArray_object, std));
+          assert (vobj != NULL);
+
+          aavobj->xdmArray = arrxdmItem;
+
 
         } else if (xdm_type == XDM_FUNCTION_ITEM) {
+          XdmFunctionItem * funcxdmItem = (XdmFunctionItem *)((arguments[i])->getHead());
+
+          struct xdmFunctionItem_object* aavobj;
+          zend_object* zend_avobj;
+
+          if (object_init_ex(&params[i], xdmFunctionItem_ce) != SUCCESS) {
+            //error
+
+            zend_throw_exception(zend_ce_exception, "Error found in converting user function argument to XdmFunctionItem", 0);
+          }
+
+          zend_avobj = Z_OBJ_P(&params[i]);
+          aavobj = (xdmFunctionItem_object *)((char *)zend_avobj - XtOffsetOf(xdmFunctionItem_object, std));
+          assert (vobj != NULL);
+
+          aavobj->xdmFunctionItem = funcxdmItem;
 
         } else if (xdm_type == XDM_EMPTY) {
           // Empty Sequence detected.
@@ -1742,8 +1782,9 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
         zval* callOnObj = NULL;
 
         ZVAL_STRING(&function_name, nativeString2.c_str());
-
-        std::cerr<<"PHP internal: call_user_function on = "<<nativeString2<< std::endl;
+        if (getenv("SAXONC_DEBUG_FLAG")) {
+          std::cerr<<"PHP internal: call_user_function on = "<<nativeString2<< std::endl;
+        }
 
         //std::cerr<<"PHP internal: function_table = "<<function_table<< std::endl;
 
@@ -1753,19 +1794,18 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
             zend_error(E_ERROR, "Function call failed");
         }
 
-  std::cerr<<"Error: phpNativeCall - after function called"<<std::endl;
 
         if(Z_TYPE(retval) ==0){
             //zend_error(E_ERROR, "Function returned null");
             zend_throw_exception(zend_ce_exception, "Function returned null", 0);
         }
-  std::cerr<<"Error: phpNativeCall - after function called cp0"<<std::endl;
+
         XdmValue * resultValue = nullptr;
 
         char * sVal = NULL;
         int len = 0;
 
-  std::cerr<<"Error: phpNativeCall - after function called cp1"<<std::endl;
+
 
         switch (Z_TYPE_P(&retval)) {
             case IS_FALSE:

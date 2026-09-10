@@ -87,36 +87,34 @@ extern "C" void * c_nativeCall(char * functionName, void * proc, void * func, in
         arguments1[i] = SaxonProcessor::makeXdmValueFromRef((int64_t)arguments[i]);
         //new XdmValue((int64_t)arguments[i]);
     }
-    /*if(func == nullptr) {
-        return nullptr;
-    } */
+
 
 #if defined PYTHON_SAXONC_API
+  if (getenv("SAXONC_DEBUG_FLAG")) {
     fprintf(stdout, "We are in a c function preprocessor directive for Python\n");
     fflush(stdout);
-    fflush(stdout);
-    return python_nativeFunctionCall(functionName, proc, func, useNativeTypes, numOfArguments, arguments1);
+  }
+  return python_nativeFunctionCall(functionName, proc, func, useNativeTypes, numOfArguments, arguments1);
 
 #elif defined PHP_SAXONC_API
 
-    fprintf(stdout, "We are in a c function preprocessor directive for PHP\n");
-    fflush(stdout);
-    fflush(stdout);
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+      fprintf(stdout, "We are in a c function preprocessor directive for PHP\n");
+      fflush(stdout);
+    }
     return phpNativeCall(functionName, proc, useNativeTypes, numOfArguments, arguments1);
 
 
 #else
 
 
-
+  if (getenv("SAXONC_DEBUG_FLAG")) {
     fprintf(stdout, "We are in a c function name= %s\n", functionName);
 
     fprintf(stdout, "We are in a c function pointer= %p\n", func);
-    sxnExtensionFunction func1 = sxnExtensionFunction(func);
-
     fflush(stdout);
-
-
+  }
+  sxnExtensionFunction func1 = sxnExtensionFunction(func);
 
     XdmValue * result = func1(numOfArguments, arguments1);   // call of the user function
     return (void *)result->getUnderlyingValue();
@@ -409,13 +407,6 @@ SaxonProcessor::~SaxonProcessor() {
 void SaxonProcessor::registerUserFunctionWithProcessor(void * python_procPtr, const char * ns1, const char * functionName, void * func, const char * signature, bool useNativeTypes)
 {
 
-    /* if(func != nullptr) {
-        fprintf(stderr, "We are in a C++ registerUserFunction pointer= %p\n", func);
-        fprintf(stderr, "We are in a C++ registerUserFunction pointer= %p\n", (void *)func);
-        fflush(stdout);
-    } */
-
-
 
     //userFunctionRegister[functionName] =userFunctionDescriptor1;
     XdmValue * signatureValue = parseJsonFromString(signature);
@@ -441,11 +432,8 @@ void SaxonProcessor::registerUserFunctionWithProcessor(void * python_procPtr, co
 
 
     if (status == SXN_EXCEPTION) {
-              std::cerr<<"We are in a C++ registerUserFunction F"<<std::endl;
       throw SaxonApiException();
     }
-
-    std::cerr<<"We are in a C++ registerUserFunction cp1"<<std::endl;
 
     XdmValue * argValue = nullptr;
     XdmValue * returnValue = nullptr;
@@ -456,7 +444,6 @@ void SaxonProcessor::registerUserFunctionWithProcessor(void * python_procPtr, co
         XdmValue *signatureMap = xdmMap->get(functionName);
 
         if(signatureMap == nullptr) {
-              std::cerr<<"We are in a C++ registerUserFunction K"<<std::endl;
               throw SaxonApiException("Signature Map is NULL");
         }
 
@@ -470,8 +457,6 @@ void SaxonProcessor::registerUserFunctionWithProcessor(void * python_procPtr, co
 
         /*int64_t returnIntValue = j_getReturnTypeFromSignature(SaxonProcessor::sxn_environ->thread,
                                                               (void *) signatureMap->getUnderlyingValue()); */
-
-    std::cerr<<"We are in a C++ registerUserFunction cp3"<<std::endl;
 
         /*if (returnIntValue == SXN_EXCEPTION) {
 

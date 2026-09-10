@@ -30,11 +30,19 @@ function sumASequence($arr){
 
 }
 
+function implode_all($arr) {
+    for ($i=0; $i<count($arr); $i++) {
+        if (@is_array($arr[$i]))
+            $arr[$i] = implode_all ($arr[$i]);
+    }
+    return implode(' ', $arr);
+}
+
 function twoSequenceParam($arr1, $arr2){
   echo("twoSequenceParam called\n");
   if(is_array($arr1) and is_array($arr2)){
-    $out1 = implode(" ", $arr1);
-    $out2 = implode(" ", $arr2);
+    $out1 = implode_all($arr1);
+    $out2 = implode_all($arr2);
     echo $out1."\n";
     echo $out2."\n";
     return True;
@@ -47,8 +55,8 @@ function twoSequenceParam($arr1, $arr2){
 function sequenceOfArraysParam($arr1, $arr2){
   echo("sequenceOfArraysParam called\n");
   if(is_array($arr1) and is_array($arr2)){
-    $out1 = implode(" ", $arr1);
-    $out2 = implode(" ", $arr2);
+    $out1 = implode_all($arr1);
+    $out2 = implode_all($arr2);
     echo $out1."\n";
     echo $out2."\n";
     return True;
@@ -57,6 +65,52 @@ function sequenceOfArraysParam($arr1, $arr2){
   }
     return False;
 
+}
+
+function sequenceOfArraysParamB($arr1){
+  echo("sequenceOfArraysParamB called\n");
+  if(is_array($arr1)){
+    $out1 = implode_all($arr1);
+    echo $out1."\n";
+    return True;
+  } else {
+    throw new Exception('$arr argument is not an array type');
+  }
+    return False;
+
+}
+
+function sequenceOfMapParam($map1, $map2){
+  echo("sequenceOfMapParam called\n");
+  if(is_array($map1)){
+    $out1 = implode_all($map1);
+    echo $out1."\n";
+    return True;
+  } else {
+    throw new Exception('$map argument is not an array type');
+  }
+    return False;
+}
+
+function attributeParam($input){
+  echo("attributeParam called\n");
+  return $input != NULL && ($input instanceof Saxon\XdmNode) && $input->getNodeKind() == 2;
+}
+
+
+function documentParam($input){
+  echo("documentParam called\n");
+  return $input != NULL && ($input instanceof Saxon\XdmNode) && $input->getNodeKind() == 9;
+}
+
+function elementParam($input){
+  echo("elementParam called\n");
+  return $input != NULL && ($input instanceof Saxon\XdmNode) && $input->getNodeKind() == 1;
+}
+
+function nodeParam($input){
+  echo("nodeParam called\n");
+  return $input != NULL && ($input instanceof Saxon\XdmNode) && $input->getNodeKind() >= 1 && $input->getNodeKind() <= 13;
 }
 
 
@@ -152,6 +206,24 @@ function commonSamplesForSequences($saxonProc) {
                                                         "    }".
                                                         "}", True);
 
+         $saxonProc->registerUserFunction("http://www.example.com", "sequenceOfArraysParamB", "{ \"sequenceOfArraysParamB\": {".
+                                                        "      \"as\": \"xs:boolean\"," .
+                                                        "      \"param\": [" .
+                                                        "        \"array(*)*\"" .
+                                                        "      ],".
+                                                        "      \"arity\": [1]" .
+                                                        "    }".
+                                                        "}", True);
+
+         $saxonProc->registerUserFunction("http://www.example.com", "sequenceOfMapParam", "{ \"sequenceOfMapParam\": {".
+                                                        "      \"as\": \"xs:boolean\"," .
+                                                        "      \"param\": [" .
+                                                        "        \"map(*)\", \"map(*)\"" .
+                                                        "      ],".
+                                                        "      \"arity\": [1]" .
+                                                        "    }".
+                                                        "}", True);
+
          $xpath = $saxonProc->newXPathProcessor();
 
 
@@ -160,7 +232,19 @@ function commonSamplesForSequences($saxonProc) {
          try {
              $result = $xpath->evaluateSingle("ms:sequenceOfArraysParam(array{1,2,3}, array{'a',2,3})");
              if($result != null) {
-                $value = $result->getAtomicValue()->getLongValue();
+                $value = $result->getAtomicValue()->getBooleanValue();
+                echo 'Correct Result='.$value;
+             }
+
+             $result1 = $xpath->evaluateSingle("ms:sequenceOfArraysParamB((array{1,2,3}, array{'a',2,3}))");
+             if($result1 != null) {
+                $value = $result1->getAtomicValue()->getBooleanValue();
+                echo 'Correct Result='.$value;
+             }
+
+             $result2 = $xpath->evaluateSingle("ms:sequenceOfMapParam(map{'a':1,'b':2},map{'c':3,'d':'four'})");
+             if($result1 != null) {
+                $value = $result1->getAtomicValue()->getBooleanValue();
                 echo 'Correct Result='.$value;
              }
          } catch (Exception $e) {
@@ -168,6 +252,79 @@ function commonSamplesForSequences($saxonProc) {
          }
 
 }
+
+function handlingXdmNodes($saxonProc) {
+         $saxonProc->registerUserFunction("http://www.example.com", "elementParam", "{ \"elementParam\": {".
+                                                        "      \"as\": \"xs:boolean\"," .
+                                                        "      \"param\": [" .
+                                                        "        \"element(*)\"" .
+                                                        "      ],".
+                                                        "      \"arity\": [1]" .
+                                                        "    }".
+                                                        "}", True);
+
+         $saxonProc->registerUserFunction("http://www.example.com", "documentParam", "{ \"documentParam\": {".
+                                                        "      \"as\": \"xs:boolean\"," .
+                                                        "      \"param\": [" .
+                                                        "        \"document-node()\"" .
+                                                        "      ],".
+                                                        "      \"arity\": [1]" .
+                                                        "    }".
+                                                        "}", False);
+
+         $saxonProc->registerUserFunction("http://www.example.com", "nodeParam", "{ \"nodeParam\": {".
+                                                        "      \"as\": \"xs:boolean\"," .
+                                                        "      \"param\": [" .
+                                                        "        \"node()\"" .
+                                                        "      ],".
+                                                        "      \"arity\": [1]" .
+                                                        "    }".
+                                                        "}", False);
+
+         $saxonProc->registerUserFunction("http://www.example.com", "attributeParam", "{ \"attributeParam\": {".
+                                                        "      \"as\": \"xs:boolean\"," .
+                                                        "      \"param\": [" .
+                                                        "        \"attribute()\"" .
+                                                        "      ],".
+                                                        "      \"arity\": [1]" .
+                                                        "    }".
+                                                        "}", True);
+
+         $xpath = $saxonProc->newXPathProcessor();
+
+
+         $xpath->declareNamespace("ms", "http://www.example.com");
+
+         try {
+             $result = $xpath->evaluateSingle("ms:elementParam(parse-xml('<doc/>')/*)");
+             if($result != null) {
+                $value = $result->getAtomicValue()->getBooleanValue();
+                echo 'Correct Result='.$value;
+             }
+
+             $result1 = $xpath->evaluateSingle("ms:documentParam(parse-xml('<doc/>'))");
+             if($result1 != null) {
+                $value = $result1->getAtomicValue()->getBooleanValue();
+                echo 'Correct Result='.$value;
+             }
+
+             $result2 = $xpath->evaluateSingle("ms:nodeParam(parse-xml('<doc/>')/node())");
+             if($result2 != null) {
+                $value = $result2->getAtomicValue()->getBooleanValue();
+                echo 'Correct Result='.$value;
+             }
+
+             $result3 = $xpath->evaluateSingle("ms:attributeParam(parse-xml('<doc a=\"1\"/>')/*/@a)");
+             if($result3 != null) {
+                $value = $result3->getAtomicValue()->getBooleanValue();
+                echo 'Correct Result='.$value;
+             }
+         } catch (Exception $e) {
+             echo 'Caught exception: ', $e->getMessage(), "\n";
+         }
+
+}
+
 
 
 $saxonProc1 = new Saxon\SaxonProcessor(true);
@@ -190,6 +347,8 @@ testSequence($saxonProc1);
 testTwoSequence($saxonProc1);
 
 commonSamplesForSequences($saxonProc1);
+
+handlingXdmNodes($saxonProc1);
 
 
 ?>
