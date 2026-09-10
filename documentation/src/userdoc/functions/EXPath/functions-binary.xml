@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <section id="expath-binary" spec="expath-binary" title="Namespace expath-binary"
-  catalog="${GitHub}/specs/binary/src/function-catalog.xml"
+  catalog="catalog-binary.xml"
   namespace="http://expath.org/ns/binary" xmlns:doc="http://www.saxonica.com/ns/doc">
   <defaults doc:doc="Default values across the set.">
     <arg-descriptions

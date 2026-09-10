@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <section id="expath-file" spec="expath-file" title="Namespace expath-file"
-  catalog="${GitHub}/specs/file/src/function-catalog.xml"
+  catalog="catalog-file.xml"
   namespace="http://expath.org/ns/file" xmlns:doc="http://www.saxonica.com/ns/doc">
   <defaults doc:doc="Default values across the set.">
     <arg-descriptions

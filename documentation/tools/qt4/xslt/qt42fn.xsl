@@ -10,12 +10,12 @@
 <xsl:output method="xml" encoding="utf-8" indent="no"/>
 <xsl:preserve-space elements="*"/>
 
+<xsl:param name="qt4-specs" as="xs:string" required="yes"/>
+
 <xsl:variable name="qt4cg-fn-uri"
-  select="resolve-uri('../../../../qt4cg/qtspecs/specifications/xpath-functions-40/src/function-catalog.xml',
-                      static-base-uri())"/>
+              select="$qt4-specs || '/xpath-functions-40/src/function-catalog.xml'"/>
 <xsl:variable name="qt4cg-xslt-uri"
-  select="resolve-uri('../../../../qt4cg/qtspecs/specifications/xslt-40/src/function-catalog.xml',
-                      static-base-uri())"/>
+              select="$qt4-specs || '/xslt-40/src/function-catalog.xml'"/>
 
 <xsl:variable name="qt4cg-functions">
   <xsl:document>
@@ -149,8 +149,10 @@
       <xsl:sequence select="."/>
       <xsl:text>&#10;</xsl:text>
     </xsl:for-each>
+<!-- only needed on the first conversion ... 
     <in-spec xmlns="http://www.saxonica.com/ns/doc/functions">xpath40</in-spec>
     <xsl:text>&#10;</xsl:text>
+-->
     <xsl:if test="count(../fos:proto) gt 1">
       <xsl:apply-templates select="$protos[$num]/sfn:description"/>
     </xsl:if>

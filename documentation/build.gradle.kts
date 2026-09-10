@@ -444,8 +444,6 @@ listOf<String>("binary", "archive", "file").forEach { target ->
     group = "Internal"
     description = "Expand EXPath documentation for ${target}"
 
-    val expath_root = layout.projectDirectory.file("../submodules/expath")
-
     inputs.file(layout.projectDirectory.file("src/userdoc/functions/EXPath/functions-${target}.xml"))
     inputs.files(layout.projectDirectory.dir("tools/userdoc"))
     outputs.file(layout.buildDirectory.file("src/userdoc/functions/EXPath/functions-${target}.xml"))
@@ -454,9 +452,7 @@ listOf<String>("binary", "archive", "file").forEach { target ->
     args("-xi:on",
          "-s:${layout.projectDirectory.file("src/userdoc/functions/EXPath/functions-${target}.xml")}",
          "-xsl:${layout.projectDirectory.file("tools/userdoc/genFunctionDoc.xsl")}",
-         "-o:${layout.buildDirectory.file("src/userdoc/functions/EXPath/functions-${target}.xml").get().asFile}",
-         // FIXME: What is this?
-         "GitHub=${expath_root}/")
+         "-o:${layout.buildDirectory.file("src/userdoc/functions/EXPath/functions-${target}.xml").get().asFile}")
   }
   expath_doc { dependsOn(t) }
 }

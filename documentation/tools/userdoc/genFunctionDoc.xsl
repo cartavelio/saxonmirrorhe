@@ -7,14 +7,12 @@
   xmlns:map="http://www.w3.org/2005/xpath-functions/map"
   exclude-result-prefixes="xs math sDoc fos map" version="3.0">
 
-  <xsl:param name="GitHub" as="xs:string"/>
-
   <xsl:output method="xml" indent="no"/>
 
   <xsl:mode on-no-match="shallow-copy"/>
 
   <xsl:variable name="catalog"
-    select="doc(resolve-uri(replace(section/@catalog,'\$\{GitHub\}',$GitHub),base-uri(.)))"
+    select="doc(resolve-uri(section/@catalog,base-uri(.)))"
     doc:doc="The function catalog that contains the signatures for the functions in this section"/>
   <xsl:variable name="namespace" select="section/@namespace"
     doc:doc="The namespace for these functions"/>

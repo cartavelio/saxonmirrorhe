@@ -1,0 +1,7 @@
+The function catalogs used to be read directly from a copy of the EXPath
+repository, but QT4 has incorporated the file and binary modules directly into
+XPath. Mirroring the QT4 repository seems would be fiddly, so this directory
+just has copies of the relevant function catalogs.
+
+To simplify things, the archive catalog is also copied here, although
+technically it could still be read from the EXPath repository.

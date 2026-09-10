@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <section id="expath-archive" spec="expath-archive" title="Namespace expath-archive"
-  catalog="${GitHub}/specs/archive/src/function-catalog.xml"
+  catalog="catalog-archive.xml"
   namespace="http://expath.org/ns/archive" xmlns:doc="http://www.saxonica.com/ns/doc">
   <defaults doc:doc="Default values across the set.">
     <arg-descriptions
