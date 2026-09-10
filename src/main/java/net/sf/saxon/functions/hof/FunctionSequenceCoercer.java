@@ -41,6 +41,7 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
     private final SpecificFunctionType requiredItemType;
     private final Supplier<RoleDiagnostic> roleSupplier;
     private final boolean allow40;
+    private final boolean acceptReducedArity;
 
     /**
      * Constructor
@@ -50,11 +51,12 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
      */
 
     public FunctionSequenceCoercer(Expression sequence, SpecificFunctionType requiredItemType,
-                                   Supplier<RoleDiagnostic> role, boolean allow40) {
+                                   Supplier<RoleDiagnostic> role, boolean allow40, boolean acceptReducedArity) {
         super(sequence);
         this.requiredItemType = requiredItemType;
         this.roleSupplier = role;
         this.allow40 = allow40;
+        this.acceptReducedArity = acceptReducedArity;
         ExpressionTool.copyLocationInfo(sequence, this);
     }
 
@@ -123,7 +125,7 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
     @Override
     public Expression copy(RebindingMap rebindings) {
         FunctionSequenceCoercer fsc2 = new FunctionSequenceCoercer(
-                getBaseExpression().copy(rebindings), requiredItemType, roleSupplier, allow40);
+                getBaseExpression().copy(rebindings), requiredItemType, roleSupplier, allow40, acceptReducedArity);
         ExpressionTool.copyLocationInfo(this, fsc2);
         return fsc2;
     }
@@ -222,7 +224,8 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
         SequenceType st = SequenceType.makeSequenceType(requiredItemType, StaticProperty.EXACTLY_ONE);
         destination.emitAttribute("to", st.toAlphaCode());
         destination.emitAttribute("diag", roleSupplier.get().save());
-        if (allow40) {
+        String flags = "" + (allow40 ? "4" : "") + (acceptReducedArity ? "r" : "");
+        if (!flags.isEmpty()) {
             destination.emitAttribute("flags", "4");
         }
         getBaseExpression().export(destination);
@@ -255,12 +258,15 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
         private final Configuration config;
         private final Location locator;
         private final boolean allow40;
+        private final boolean acceptReducedArity;
 
-        public Coercer(SpecificFunctionType requiredItemType, Configuration config, Location locator, boolean allow40) {
+        public Coercer(SpecificFunctionType requiredItemType, Configuration config,
+                       Location locator, boolean allow40, boolean acceptReducedArity) {
             this.requiredItemType = requiredItemType;
             this.config = config;
             this.locator = locator;
             this.allow40 = allow40;
+            this.acceptReducedArity = acceptReducedArity;
         }
 
         public FunctionItem mapItem(Item item) throws XPathException {
@@ -270,7 +276,7 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
             }
             try {
                 checkAnnotations((FunctionItem)item, requiredItemType, config);
-                return new CoercedFunction((FunctionItem)item, requiredItemType, allow40);
+                return new CoercedFunction((FunctionItem)item, requiredItemType, allow40, acceptReducedArity);
             } catch (XPathException err) {
                 throw err.maybeWithLocation(locator);
             }
@@ -286,7 +292,7 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
             FunctionSequenceCoercer expr = (FunctionSequenceCoercer) getExpression();
             PullEvaluator base = expr.getBaseExpression().makeElaborator().elaborateForPull();
             Coercer coercer = new Coercer(
-                    expr.requiredItemType, expr.getConfiguration(), expr.getLocation(), expr.allow40);
+                    expr.requiredItemType, expr.getConfiguration(), expr.getLocation(), expr.allow40, expr.acceptReducedArity);
             return context -> new ItemMappingIterator(base.iterate(context), coercer, true);
         }
 
@@ -295,7 +301,7 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
             FunctionSequenceCoercer expr = (FunctionSequenceCoercer) getExpression();
             ItemEvaluator base = expr.getBaseExpression().makeElaborator().elaborateForItem();
             Coercer coercer = new Coercer(
-                    expr.requiredItemType, expr.getConfiguration(), expr.getLocation(), expr.allow40);
+                    expr.requiredItemType, expr.getConfiguration(), expr.getLocation(), expr.allow40, expr.acceptReducedArity);
             return context -> {
                 Item item = base.eval(context);
                 if (item == null) {

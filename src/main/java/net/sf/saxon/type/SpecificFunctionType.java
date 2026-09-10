@@ -38,6 +38,7 @@ public class SpecificFunctionType extends AnyFunctionType {
     private final SequenceType[] argTypes;
     private final SequenceType resultType;
     private final AnnotationList annotations;
+    private boolean acceptReducedArity;
 
 
     public final static FunctionItemType COMPONENT_FUNCTION_TYPE =
@@ -65,6 +66,44 @@ public class SpecificFunctionType extends AnyFunctionType {
     public int getArity() {
         return argTypes.length;
     }
+
+    /**
+     * Indicate that this function type describes a callback function, and that the caller of this
+     * callback is prepared to accept a reduced-arity version of the function directly, without
+     * needing it to be wrapped in a `CoercedFunction` that accepts and swallows the superfluous
+     * arguments. This is useful where it means that the caller does not need to compute additional
+     * argument values just for them to be ignored.
+     * @return this, after setting the `acceptReducedArity` flag.
+     */
+
+    public SpecificFunctionType withAcceptReducedArity() {
+        acceptReducedArity = true;
+        return this;
+    }
+
+    public boolean isAcceptReducedArity() {
+        return acceptReducedArity;
+    }
+
+    public boolean acceptsReducedArityFunction(ItemType supplied) {
+        if (supplied instanceof SpecificFunctionType) {
+            SpecificFunctionType actual = (SpecificFunctionType) supplied;
+            if (!actual.getResultType().equals(getResultType())) {
+                return false;
+            }
+            if (actual.getArity() > getArity()) {
+                return false;
+            }
+            for (int i=0; i < actual.getArity(); i++) {
+                if (!actual.getArgumentTypes()[i].equals(getArgumentTypes()[i])) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
 
     /**
      * Get the argument types
@@ -460,7 +499,7 @@ public class SpecificFunctionType extends AnyFunctionType {
 
     @Override
     public Expression makeFunctionSequenceCoercer(Expression exp, Supplier<RoleDiagnostic> role, boolean allow40) {
-        return new FunctionSequenceCoercer(exp, this, role, allow40);
+        return new FunctionSequenceCoercer(exp, this, role, allow40, acceptReducedArity);
     }
 
 }

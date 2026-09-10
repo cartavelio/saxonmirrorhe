@@ -265,7 +265,7 @@ public class TypeHierarchy {
             } else {
 
                 FunctionSequenceCoercer.Coercer coercer = new FunctionSequenceCoercer.Coercer(
-                        (SpecificFunctionType) requiredItemType, config, locator, false);
+                        (SpecificFunctionType) requiredItemType, config, locator, false, false);
                 return new ItemMappingIterator(iterator, coercer, true);
             }
 

@@ -336,8 +336,14 @@ public class TypeChecker {
                     exp = new ItemChecker(exp, th.getGenericFunctionItemType(), roleSupplier);
                     suppliedItemType = th.getGenericFunctionItemType();
                 }
-                exp = makeFunctionSequenceCoercer(exp, (FunctionItemType) reqItemType, roleSupplier, allow40);
-                itemTypeOK = true;
+                // Try to avoid unnecessary coercion for a reduced-arity call
+                if (reqItemType instanceof SpecificFunctionType
+                        && ((SpecificFunctionType) reqItemType).acceptsReducedArityFunction(suppliedItemType)) {
+                    itemTypeOK = true;
+                } else {
+                    exp = makeFunctionSequenceCoercer(exp, (FunctionItemType) reqItemType, roleSupplier, allow40);
+                    itemTypeOK = true;
+                }
             }
 
         // External object conversion
