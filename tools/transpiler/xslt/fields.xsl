@@ -136,12 +136,13 @@
       </xsl:choose>
    </xsl:template>
    
-   <!-- Identify static field accessors such asd BigInteger.ZERO -->
+   <!-- Identify static field accessors such as BigInteger.ZERO -->
    
    <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'java.math.BigInteger']" priority="19">
       <xsl:choose>
          <xsl:when test="name/@identifier='ZERO'">System.Numerics.BigInteger.Zero</xsl:when>
          <xsl:when test="name/@identifier='ONE'">System.Numerics.BigInteger.One</xsl:when>
+         <xsl:when test="name/@identifier='TWO'">Saxon.Impl.Helpers.BigIntegerUtils.TWO</xsl:when>
          <xsl:otherwise>
             <xsl:next-match/>
          </xsl:otherwise>

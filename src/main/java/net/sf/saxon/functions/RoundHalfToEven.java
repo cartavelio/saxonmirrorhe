@@ -64,7 +64,7 @@ public final class RoundHalfToEven extends SystemFunction {
                 }
             }
         }
-        return val0.round(scale, null);
+        return val0.round(scale, Round.RoundingRule.HALF_TO_EVEN);
     }
 
     /**
@@ -93,10 +93,10 @@ public final class RoundHalfToEven extends SystemFunction {
                         if (result == null) {
                             return null;
                         }
-                        return result.round(0, null);
+                        return result.round(0, Round.RoundingRule.HALF_TO_EVEN);
                     };
                 } else {
-                    return context -> ((NumericValue) arg0eval.eval(context)).round(0, null);
+                    return context -> ((NumericValue) arg0eval.eval(context)).round(0, Round.RoundingRule.HALF_TO_EVEN);
                 }
             } else if (fnc.getArg(1) instanceof Literal && ((Literal)fnc.getArg(1)).getGroundedValue() instanceof NumericValue) {
                 final NumericValue scaleVal = (NumericValue) ((Literal) fnc.getArg(1)).getGroundedValue();
@@ -137,7 +137,7 @@ public final class RoundHalfToEven extends SystemFunction {
                             scale = (int) scaleVal.longValue();
                         }
                     }
-                    return result.round(scale, null);
+                    return result.round(scale, Round.RoundingRule.HALF_TO_EVEN);
                 };
             }
 

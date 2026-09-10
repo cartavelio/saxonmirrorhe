@@ -15,6 +15,7 @@ import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.value.*;
 
 /**
@@ -58,7 +59,7 @@ public final class Round extends SystemFunction {
             StringValue rounding = (StringValue) arguments[2].head();
             roundingRule = rounding == null
                     ? RoundingRule.HALF_TO_CEILING
-                    : roundingRule(rounding.getStringValue());
+                    : getRoundingRule(rounding.getStringValue());
         }
         if (roundingRule == RoundingRule.HALF_TO_CEILING) {
             return val0.round(scaleRnd);
@@ -127,7 +128,7 @@ public final class Round extends SystemFunction {
                     StringValue midpointModeVal = ((StringValue) modeArg.eval(context));
                     RoundingRule mode = midpointModeVal == null
                             ? RoundingRule.HALF_TO_CEILING
-                            : roundingRule(midpointModeVal.getStringValue());
+                            : getRoundingRule(midpointModeVal.getStringValue());
                     if (mode == RoundingRule.HALF_TO_CEILING) {
                         return result.round(scale);
                     } else {
@@ -141,7 +142,7 @@ public final class Round extends SystemFunction {
 
     }
 
-    public static RoundingRule roundingRule(String s) {
+    public static RoundingRule getRoundingRule(String s) {
         switch (s) {
             case "toward-zero":
                 return RoundingRule.TOWARD_ZERO;
@@ -168,6 +169,7 @@ public final class Round extends SystemFunction {
         }
     }
 
+    @CSharpSimpleEnum
     public enum RoundingRule {
         FLOOR, CEILING, TOWARD_ZERO, AWAY_FROM_ZERO,
         HALF_TO_FLOOR, HALF_TO_CEILING, HALF_TOWARD_ZERO, HALF_AWAY_FROM_ZERO, HALF_TO_EVEN

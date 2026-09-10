@@ -25,10 +25,6 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.regex.Pattern;
 
-import static net.sf.saxon.functions.Round.RoundingRule.HALF_AWAY_FROM_ZERO;
-import static net.sf.saxon.functions.Round.RoundingRule.HALF_TOWARD_ZERO;
-import static net.sf.saxon.functions.Round.RoundingRule.HALF_TO_EVEN;
-
 /**
  * An implementation class for decimal values other than integers
  * @since 9.8. This class was previously named "DecimalValue". In 9.8 a new DecimalValue
@@ -568,7 +564,7 @@ public final class BigDecimalValue extends DecimalValue {
      */
 
     @Override
-    @CSharpReplaceBody(code = "return new BigDecimalValue(Singulink.Numerics.BigDecimal.Round(value, scale, Singulink.Numerics.RoundingMode.MidpointToEven));")
+    @CSharpReplaceBody(code = "return new BigDecimalValue(Saxon.Impl.Helpers.BigDecimalUtils.Round(value, scale, roundingRule));")
     public NumericValue round(int scale, Round.RoundingRule roundingRule) {
         if (scale >= value.scale()) {
             return this;

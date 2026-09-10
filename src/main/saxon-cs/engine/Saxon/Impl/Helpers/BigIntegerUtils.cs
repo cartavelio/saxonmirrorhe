@@ -8,6 +8,7 @@ namespace Saxon.Impl.Helpers {
     public class BigIntegerUtils {
 
         public static readonly BigInt ZERO = ValueOf(0);
+        public static readonly BigInt TWO = ValueOf(2);
         public static BigInt ValueOf(long val) {
             return val;
         }
