@@ -3412,7 +3412,10 @@ public class XQueryParser extends XPathParser {
 
         Expression exp = parseExpression();
         if (exp instanceof ParentNodeConstructor) {
-            ((ParentNodeConstructor) exp).setValidationAction(mode, mode == Validation.BY_TYPE ? requiredType : null);
+            ((ParentNodeConstructor) exp).setValidationAction(
+                    env.getPackageData().getImportedSchema(),
+                    mode,
+                    mode == Validation.BY_TYPE ? requiredType : null);
         } else {
             // the expression must return a single element or document node. The type-
             // checking machinery can't handle a union type, so we just check that it's
@@ -3515,7 +3518,8 @@ public class XQueryParser extends XPathParser {
         }
         if (validateType) {
             if (expr instanceof ParentNodeConstructor) {
-                ((ParentNodeConstructor) expr).setValidationAction(Validation.BY_TYPE, requiredType);
+                ((ParentNodeConstructor) expr).setValidationAction(
+                        env.getPackageData().getImportedSchema(), Validation.BY_TYPE, requiredType);
                 return expr;
             } else if (expr instanceof AttributeCreator) {
                 if (!(requiredType instanceof SimpleType)) {
@@ -3649,7 +3653,8 @@ public class XQueryParser extends XPathParser {
         if (!((QueryModule) env).isPreserveNamespaces()) {
             content = new CopyOf(content, false, Validation.PRESERVE, null, true);
         }
-        doc.setValidationAction(((QueryModule) env).getConstructionMode(), null);
+        doc.setValidationAction(env.getPackageData().getImportedSchema(),
+                                ((QueryModule) env).getConstructionMode(), null);
         doc.setContentExpression(content);
         setLocation(doc, offset);
         return doc;
@@ -3682,7 +3687,9 @@ public class XQueryParser extends XPathParser {
             // if the child expression creates another element,
             // suppress validation, as the parent already takes care of it
             if (content instanceof ElementCreator && ((ElementCreator) content).getSchemaType() == null) {
-                ((ElementCreator) content).setValidationAction(Validation.PRESERVE, null);
+                ((ElementCreator) content).setValidationAction(
+                        env.getPackageData().getImportedSchema(),
+                        Validation.PRESERVE, null);
             }
             expect(Token.RCURLY);
         }
@@ -3722,10 +3729,11 @@ public class XQueryParser extends XPathParser {
                 grumble("Element name must be either a string or a QName", "XPTY0004", offset);
                 return new ErrorExpression();
             }
+            Schema schema = env.getPackageData().getImportedSchema();
             inst = new FixedElement(elemName,
                                     ((QueryModule) env).getActiveNamespaceBindings(),
                                     ((QueryModule) env).isInheritNamespaces(),
-                                    true, null,
+                                    true, schema, null,
                                     ((QueryModule) env).getConstructionMode());
             if (content == null) {
                 content = Literal.makeEmptySequence();
@@ -3742,7 +3750,8 @@ public class XQueryParser extends XPathParser {
             NamespaceResolver ns = new NamespaceResolverWithDefault(
                     env.getNamespaceResolver(),
                     env.getDefaultElementNamespace());
-            inst = new ComputedElement(name, null, null,
+            Schema schema = env.getPackageData().getImportedSchema();
+            inst = new ComputedElement(name, null, schema, null,
                                        ((QueryModule) env).getConstructionMode(),
                                        ((QueryModule) env).isInheritNamespaces(),
                                        true);
@@ -3779,10 +3788,11 @@ public class XQueryParser extends XPathParser {
         }
         lookAhead();  // after an RCURLY
         nextToken();
+        Schema schema = env.getPackageData().getImportedSchema();
         FixedElement el2 = new FixedElement(nodeName,
                                             ((QueryModule) env).getActiveNamespaceBindings(),
                                             ((QueryModule) env).isInheritNamespaces(),
-                                            true, null,
+                                            true, schema, null,
                                             ((QueryModule) env).getConstructionMode());
         setLocation(el2, offset);
         if (content == null) {
@@ -4501,11 +4511,12 @@ public class XQueryParser extends XPathParser {
         int validationMode = ((QueryModule) env).getConstructionMode();
         FingerprintedQName fqn = new FingerprintedQName(
                 qName.getPrefix(), qName.getNamespaceUri(), qName.getLocalPart(), pool.allocateFingerprint(qName.getNamespaceUri(), qName.getLocalPart()));
+        Schema schema = env.getPackageData().getImportedSchema();
         FixedElement elInst = new FixedElement(fqn,
                                                ((QueryModule) env).getActiveNamespaceBindings(),
                                                ((QueryModule) env).isInheritNamespaces(),
                                                !isNested,
-                                               null,
+                                               schema, null,
                                                validationMode);
 
         setLocation(elInst, offset);

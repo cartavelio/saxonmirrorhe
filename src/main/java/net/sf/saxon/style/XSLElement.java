@@ -16,6 +16,7 @@ import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.Whitespace;
 
@@ -185,22 +186,23 @@ public class XSLElement extends StyleElement {
                 // Local name and namespace are both known statically: generate a FixedElement instruction
                 FingerprintedQName qn = new FingerprintedQName(parts[0], nsuri, parts[1]);
                 qn.obtainFingerprint(getNamePool());
+                Schema schema = getContainingPackage().getImportedSchema();
                 FixedElement FixedElementInst = new FixedElement(qn,
-                        NamespaceMap.emptyMap(),
-                        inheritNamespaces,
-                        true, schemaType,
-                        validation);
+                                                                 NamespaceMap.emptyMap(),
+                                                                 inheritNamespaces,
+                                                                 true, schema, schemaType,
+                                                                 validation);
                 FixedElementInst.setLocation(allocateLocation());
                 return compileContentExpression(exec, decl, FixedElementInst);
             }
         }
-
+        Schema schema = getContainingPackage().getImportedSchema();
         ComputedElement inst = new ComputedElement(elementName,
-                namespace,
-                schemaType,
-                validation,
-                inheritNamespaces,
-                false);
+                                                   namespace,
+                                                   schema, schemaType,
+                                                   validation,
+                                                   inheritNamespaces,
+                                                   false);
 
         inst.setLocation(allocateLocation());
         return compileContentExpression(exec, decl, inst);

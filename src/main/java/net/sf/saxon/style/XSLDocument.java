@@ -96,7 +96,7 @@ public class XSLDocument extends StyleElement {
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
 
         DocumentInstr inst = new DocumentInstr(false, null);
-        inst.setValidationAction(validationAction, schemaType);
+        inst.setValidationAction(getContainingPackage().getImportedSchema(), validationAction, schemaType);
         Expression b = compileSequenceConstructor(exec, decl, true);
         if (b == null) {
             b = Literal.makeEmptySequence();

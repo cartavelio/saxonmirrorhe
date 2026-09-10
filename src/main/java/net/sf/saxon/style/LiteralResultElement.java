@@ -10,17 +10,21 @@ package net.sf.saxon.style;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
-import net.sf.saxon.expr.instruct.*;
+import net.sf.saxon.expr.instruct.Block;
+import net.sf.saxon.expr.instruct.FixedAttribute;
+import net.sf.saxon.expr.instruct.FixedElement;
+import net.sf.saxon.expr.instruct.UseAttributeSet;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.linked.DocumentImpl;
 import net.sf.saxon.tree.linked.LinkedTreeBuilder;
 import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Untyped;
 import net.sf.saxon.z.IntHashSet;
@@ -336,12 +340,12 @@ public class LiteralResultElement extends StyleElement {
         if (toplevel) {
             return null;
         }
-
+        Schema schema = getContainingPackage().getImportedSchema();
         FixedElement inst = new FixedElement(
                 resultNodeName,
                 retainedNamespaces,
                 inheritNamespaces,
-                true, schemaType,
+                true, schema, schemaType,
                 validation);
 
         inst.setLocation(allocateLocation());

@@ -1922,7 +1922,8 @@ public class PackageLoaderHE implements IPackageLoader {
                 validation = Validation.BY_TYPE;
             }
             String flags = element.getAttributeValue(NamespaceUri.NULL,"flags");
-            ComputedElement inst = new ComputedElement(name, namespace, schemaType, validation, true, false);
+            ComputedElement inst = new ComputedElement(
+                    name, namespace, loader.getSchema(), schemaType, validation, true, false);
             if (flags != null) {
                 inst.setInheritanceFlags(flags);
             }
@@ -1988,7 +1989,7 @@ public class PackageLoaderHE implements IPackageLoader {
             }
             String sType = element.getAttributeValue(NamespaceUri.NULL,"sit");
 
-            Copy inst = new Copy(false, false, schemaType, validation);
+            Copy inst = new Copy(false, false, loader.getSchema(), schemaType, validation);
             inst.setContentExpression(loader.getFirstChildExpression(element));
             String flags = element.getAttributeValue(NamespaceUri.NULL,"flags");
             inst.setCopyNamespaces(flags.contains("c"));
@@ -2100,7 +2101,7 @@ public class PackageLoaderHE implements IPackageLoader {
             Expression body = loader.getFirstChildExpression(element);
             DocumentInstr inst = new DocumentInstr(textOnly, constantText == null ? null : StringView.tidy(constantText));
             inst.setContentExpression(body);
-            inst.setValidationAction(validation, schemaType);
+            inst.setValidationAction(loader.getSchema(), validation, schemaType);
             return inst;
         });
 
@@ -2175,7 +2176,8 @@ public class PackageLoaderHE implements IPackageLoader {
             }
 
             Expression content = loader.getFirstChildExpression(element);
-            FixedElement elem = new FixedElement(elemName, bindings, true, true, schemaType, validation);
+            FixedElement elem = new FixedElement(
+                    elemName, bindings, true, true, loader.getSchema(), schemaType, validation);
             String flags = element.getAttributeValue(NamespaceUri.NULL,"flags");
             if (flags != null) {
                 elem.setInheritanceFlags(flags);
