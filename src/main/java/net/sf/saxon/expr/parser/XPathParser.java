@@ -7,7 +7,7 @@
 
 package net.sf.saxon.expr.parser;
 
-import com.saxonica.expr.DeepUpdate2;
+
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
 import net.sf.saxon.expr.*;
@@ -56,7 +56,6 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.function.Predicate;
 
-import static net.sf.saxon.expr.parser.OperatorSymbol.operatorPrecedence;
 
 /**
  * Parser for XPath expressions and XSLT patterns.
@@ -883,7 +882,7 @@ public class XPathParser {
                 break;
             }
             int offset = t.currentTokenStartOffset;
-            int prec = operatorPrecedence(operator);
+            int prec = OperatorInfo.operatorPrecedence(operator);
             if (prec < minPrecedence) {
                 break;
             }
@@ -972,7 +971,7 @@ public class XPathParser {
                         if (op2 == OperatorSymbol.NOT_AN_OPERATOR) {
                             break;
                         }
-                        int prec2 = operatorPrecedence(op2);
+                        int prec2 = OperatorInfo.operatorPrecedence(op2);
                         if (prec2 <= prec) {
                             break;
                         }
@@ -996,7 +995,7 @@ public class XPathParser {
     }
 
     private int getCurrentOperatorPrecedence() {
-        return operatorPrecedence(getCurrentOperatorSymbol());
+        return OperatorInfo.operatorPrecedence(getCurrentOperatorSymbol());
     }
 
     private OperatorSymbol getCurrentOperatorSymbol() {
@@ -1311,33 +1310,8 @@ public class XPathParser {
 
     /*@NotNull*/
     protected Expression parseDeepUpdateExpression() throws XPathException {
-//        grumble("update map/array expressions are not allowed in XPath");
-//        return new ErrorExpression();
-        // TODO: supported here in XPath temporarily for use in Gizmo demo, June 2024.
-        XPathParser parser = this;
-        Tokenizer t = parser.getTokenizer();
-        if (!parser.isAllowXPath40Syntax()) {
-            parser.grumble("update map/array syntax requires 4.0 to be enabled");
-        }
-
-        DeepUpdate2.UpdateTarget target;
-        nextToken();
-        if (isKeyword("map")) {
-            target = DeepUpdate2.UpdateTarget.MAP;
-        } else if (isKeyword("array")) {
-            target = DeepUpdate2.UpdateTarget.ARRAY;
-        } else {
-            grumble("Expected 'map' or 'array' after 'update'");
-            return null;
-        }
-
-        nextToken();
-        Expression rootExpr = parser.parseExprSingle();
-        readKeyword("replace");
-        Expression selectExpr = parser.parseExprSingle();
-        readKeyword("with");
-        Expression actionExpr = parser.parseExprSingle();
-        return new DeepUpdate2(target, rootExpr, selectExpr, actionExpr);
+        grumble("update map/array expressions are not allowed in XPath");
+        return new ErrorExpression();
     }
 
     /**
@@ -3102,11 +3076,12 @@ public class XPathParser {
                         if (next.equals("map") || next.equals("array")) {
                             return parseDeepUpdateExpression();
                         }
+                        break;
                 }
             }
-            AxisExpression ae2 = new AxisExpression(AxisInfo.CHILD, parseNodeTest(Type.ELEMENT));
-            setLocation(ae2);
-            return ae2;
+            AxisExpression resultExpr = new AxisExpression(AxisInfo.CHILD, parseNodeTest(Type.ELEMENT));
+            setLocation(resultExpr);
+            return resultExpr;
 
         } else if (token instanceof Token.Wildcard) {
             NodeTest test = getNodeTestForWildcard((Token.Wildcard) token, Type.ELEMENT);

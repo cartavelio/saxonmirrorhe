@@ -280,7 +280,7 @@ public class Token {
         protected String tokenType;
 
         public ComplexToken(Tokenizer tokenizer, String input, int startOffset) {
-            super(input.substring(startOffset, Integer.min(input.length(), startOffset + 30)));
+            super(input.substring(startOffset, Math.min(input.length(), startOffset + 30)));
             this.tokenizer = tokenizer;
         }
 

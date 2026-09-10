@@ -8,6 +8,7 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.expr.parser.OperatorInfo;
 import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.expr.parser.RebindingMap;
 
@@ -52,7 +53,7 @@ public class GeneralComparison20 extends GeneralComparison {
 
     @Override
     protected GeneralComparison getInverseComparison() {
-        GeneralComparison20 gc = new GeneralComparison20(getRhsExpression(), OperatorSymbol.inverse(operator), getLhsExpression());
+        GeneralComparison20 gc = new GeneralComparison20(getRhsExpression(), OperatorInfo.inverse(operator), getLhsExpression());
         gc.setRetainedStaticContext(getRetainedStaticContext());
         return gc;
     }

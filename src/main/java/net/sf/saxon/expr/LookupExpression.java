@@ -7,8 +7,8 @@
 
 package net.sf.saxon.expr;
 
-import com.saxonica.ee.pin.pin.LabeledArrayItem;
-import com.saxonica.ee.pin.pin.LabeledItem;
+//import com.saxonica.ee.pin.pin.LabeledArrayItem;
+//import com.saxonica.ee.pin.pin.LabeledItem;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.ItemEvaluator;
@@ -447,9 +447,9 @@ public class LookupExpression extends BinaryExpression {
                             int subscript = subscriptValue.asSubscript() - 1;
                             return MappingIterator.map(lhs.iterate(context), baseItem -> {
                                 ArrayItem array = (ArrayItem) baseItem;
-                                if (!(array instanceof LabeledArrayItem)) {
-                                    array = LabeledArrayItem.makePinnedArrayItem(array);
-                                }
+//                                if (!(array instanceof LabeledArrayItem)) {
+//                                    array = LabeledArrayItem.makePinnedArrayItem(array);
+//                                }
                                 return array.getIfPresent(subscript).iterate();
                             });
                         };
@@ -468,9 +468,9 @@ public class LookupExpression extends BinaryExpression {
                             return MappingIterator.map(baseIterator, baseItem ->
                                     MappingIterator.map(rhsValue.iterate(), index -> {
                                         ArrayItem array = (ArrayItem) baseItem;
-                                        if (!(array instanceof LabeledArrayItem)) {
-                                            array = LabeledArrayItem.makePinnedArrayItem(array);
-                                        }
+//                                        if (!(array instanceof LabeledArrayItem)) {
+//                                            array = LabeledArrayItem.makePinnedArrayItem(array);
+//                                        }
                                         return array.get(((IntegerValue) index).asSubscript() - 1).iterate();
                                     })
                             );
