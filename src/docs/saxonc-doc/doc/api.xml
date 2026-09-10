@@ -2912,6 +2912,17 @@
                      the attribute node selected does not exist then return null.</div>
                </td>
             </tr>
+            <tr>
+               <td>
+                  <code>boolean</code>
+               </td>
+               <td>
+                  <span class="signature">equals(XdmNode $other)</span>
+                  <div class="fcomment">Returns true if and only if the other object is an
+                     <code>XdmNode</code> instance representing the same node. That is, it
+                     corresponds to the "is" operator in XPath.</div>
+               </td>
+            </tr>
          </table>
       </section>
       

@@ -4621,7 +4621,7 @@ cdef class PyXdmNode(PyXdmItem):
         The equals() relation between two XdmNode objects is true if they both represent the same
         node. That is, it corresponds to the "is" operator in XPath.
         Args:
-            other (PyXdmNode): other the object to be compared
+            other (PyXdmNode): The object to be compared
         Returns:
             bool: true if and only if the other object is an XdmNode instance representing the same node
         """
