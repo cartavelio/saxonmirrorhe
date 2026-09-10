@@ -34,8 +34,6 @@ set_target_properties(${saxonc} PROPERTIES
 )
 target_link_libraries(${saxonc} PRIVATE Threads::Threads)
 
-include(GenerateExportHeader)
-generate_export_header(${saxonc} BASE_NAME saxonc)
 target_sources(${saxonc}
     PUBLIC
         FILE_SET common_headers
@@ -72,15 +70,6 @@ target_sources(${saxonc}
             ${SAXONC_EDITION_SRC_DIR}/include
         FILES
             ${SAXONC_EDITION_SRC_DIR}/include/saxonc/saxonc-core.h
-)
-target_sources(${saxonc}
-    PUBLIC
-        FILE_SET export_header
-        TYPE HEADERS
-        BASE_DIRS
-            ${CMAKE_CURRENT_BINARY_DIR}
-        FILES
-            ${CMAKE_CURRENT_BINARY_DIR}/saxonc_export.h
 )
 
 list(APPEND CMAKE_PREFIX_PATH ${SAXONC_CORE_PACKAGE_DIR})
