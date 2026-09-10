@@ -564,11 +564,13 @@ TODO: rethink redefines and override
             <code>union(xs:int, xs:long)</code> now becomes <code>(xs:int | xs:long)</code>,
             and unions of other types are allowed (for example <code>(map(*) | array(*))</code>.</p></li>
             <li>The <code>fn:pin()</code> and <code>fn:label()</code> functions are dropped
-            (replaced by JNodes). For the time being, though, the saxon:deep-update extension function
+            (replaced by JNodes). For the time being, though, the <code>saxon:deep-update</code> extension function
             continues to use pinned and labelled items; this is likely to change in due course.</li>
             <li>The functions <code>fn:parcel</code> and <code>fn:unparcel</code> are dropped.
             In Saxon 12, <code>fn:parcel($x)</code> simply did <code>{'value': $x}</code>, and
             <code>fn:unparcel($p)</code> simply did <code>$p?value</code>.</li>
+            <li>The <code>saxon:as</code> extension attribute is deprecated; the standard <code>as</code>
+            attribute can now be used in its place.</li>
         </ul>
         
         <p>Some Saxon extension functions that were essentially prototypes of 

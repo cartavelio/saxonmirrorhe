@@ -371,7 +371,8 @@ saxon:evaluate($expression)
     <section id="as" title="saxon:as">
       <h1>saxon:as</h1>
       
-      <aside>Requires Saxon-PE or Saxon-EE. Available since Saxon 9.9. Added to xsl:mode in Saxon 10.</aside>
+      <aside>Requires Saxon-PE or Saxon-EE. Available since Saxon 9.9. Added to <code>xsl:mode</code> in Saxon 10.
+      Deprecated in Saxon 13.</aside>
       
       <p>This attribute may be set on most XSLT elements that have an <code>as</code> attribute 
         (<a class="bodylink code" href="/xsl-elements/variable">xsl:variable</a>, <a class="bodylink
