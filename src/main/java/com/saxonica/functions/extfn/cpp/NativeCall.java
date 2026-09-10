@@ -20,7 +20,9 @@ import org.graalvm.nativeimage.c.type.CLongPointer;
 import org.graalvm.nativeimage.c.type.CTypeConversion;
 import org.graalvm.word.WordFactory;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -111,7 +113,7 @@ public class NativeCall implements ExtensionFunction {
 
             long[] argumentRefs = null;
             CLongPointer addr = WordFactory.nullPointer();
-            if(arguments.length > 0) {
+            if (arguments.length > 0) {
                 argumentRefs = Arrays.stream(arguments).mapToLong((i -> {
                     ObjectHandle objectHandle = SaxonCAPI.createHandle(i);
                     return objectHandle.rawValue();
@@ -120,7 +122,7 @@ public class NativeCall implements ExtensionFunction {
                 addr = SaxonCAPI.longArrayToNative(alloc, argumentRefs);
             }
 
-            if(SaxonCAPI.debug) {
+            if (SaxonCAPI.debug) {
                 System.err.println("Java SaxonC Debug NativeCall.call= " + arguments.length);
 
                 if (useNativeTypes) {
@@ -131,23 +133,24 @@ public class NativeCall implements ExtensionFunction {
                 }
             }
 
-            ObjectHandle valueRef = c_nativeCall(holder.get(), pythonProc, func, (useNativeTypes? 1 : 0), arguments.length, addr); // pass arguments as an array
+            ObjectHandle valueRef = c_nativeCall(holder.get(), pythonProc, func, (useNativeTypes ? 1 : 0), arguments.length, addr); // pass arguments as an array
 
-             // get info on the return type
+            XdmValue xdmValue = null;
+            // get info on the return type
             if (valueRef != WordFactory.nullPointer()) {
                 Object obj = SaxonCAPI.objectHandles.get(valueRef);
 
-                XdmValue xdmValue = SaxonCAPI.convertObjectToXdmValue(obj);
+                xdmValue = SaxonCAPI.convertObjectToXdmValue(obj);
 
-                if (xdmValue != null) {
-                    return xdmValue;
+                SaxonCAPI.j_internal_destroy(valueRef);
 
-                }
-
+            } else {
+                xdmValue = XdmEmptySequence.getInstance();
             }
-        }
 
-        return XdmEmptySequence.getInstance();
+            return xdmValue;
+
+        }
     }
 }
 
