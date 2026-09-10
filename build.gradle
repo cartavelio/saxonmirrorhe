@@ -429,6 +429,43 @@ def signNuget(String nupkgfile) {
   }
 }
 
+def patchReleaseInfo(String src) {
+  def stdout = new ByteArrayOutputStream()
+  exec {
+    commandLine 'git', 'rev-parse', '--short', 'HEAD'
+    standardOutput = stdout
+  }
+  def hash = stdout.toString().trim().substring(0, 6) // Keep it in the range of an int.
+  def minorDate = new Date().format("yyyy-MM-dd")
+  def lines = []
+
+  BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(src)))
+  String line = reader.readLine()
+  while (line != null) {
+    line = line.replaceAll('[\\n\\r]$', "")
+    line = line.replaceAll('\\d+; // @@MAJOR_VERSION@@.*$', saxonMajorVersion + ";")
+    line = line.replaceAll('\\d+; // @@MINOR_VERSION@@.*$', saxonMinorVersion + ";")
+    line = line.replaceAll('\\d+; // @@PATCH_VERSION@@.*$', saxonPatchVersion + ";")
+    line = line.replaceAll('\\d+; // @@BUILD@@.*$', "0x" + hash + ";")
+    line = line.replaceAll('\".*\"; // @@MAJOR_DATE@@.*$', '"' + saxonMajorReleaseDate + '";')
+    line = line.replaceAll('\".*\"; // @@MINOR_DATE@@.*$', '"' + minorDate + '";')
+
+    if (line.contains("@@")) {
+      throw new GradleException("Replacing @@ failed in ${src}")
+    }
+
+    lines += line
+    line = reader.readLine()
+  }
+  reader.close()
+
+  PrintStream stream = new PrintStream(new FileOutputStream(src))
+  lines.each { pl ->
+    stream.println(pl)
+  }
+  stream.close()
+}
+
 // ============================================================
 // Find jar files that need to be part of the build or release
 //
@@ -678,6 +715,9 @@ task "hej_preprocess"(
         "/p:OPT=false", "/p:SAXONC=false", "/p:BYTECODE=false", "/p:CSHARP=false"
     }
   }
+  doLast {
+    patchReleaseInfo("${buildDir}/src/hej/net/sf/saxon/Version.java")
+  }
 }
 
 task "pej_preprocess"(
@@ -760,6 +800,9 @@ task "pej_preprocess"(
         "/p:OPT=false", "/p:SAXONC=false", "/p:BYTECODE=false", "/p:CSHARP=false"
     }
   }
+  doLast {
+    patchReleaseInfo("${buildDir}/src/pej/net/sf/saxon/Version.java")
+  }
 }
 
 task "eej_preprocess"(
@@ -826,6 +869,9 @@ task "eej_preprocess"(
         "/p:OPT=false", "/p:SAXONC=false", "/p:BYTECODE=true",
         "/p:STREAM=true", "/p:PACKAGES=true", "/p:SCHEMA=true", "/p:CSHARP=false"
     }
+  }
+  doLast {
+    patchReleaseInfo("${buildDir}/src/eej/net/sf/saxon/Version.java")
   }
 }
 

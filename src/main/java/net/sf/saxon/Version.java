@@ -16,12 +16,13 @@ import net.sf.saxon.transpile.CSharpReplaceBody;
  */
 
 public final class Version {
-
-    private static final int MAJOR_VERSION = 13;
-    private static final int MINOR_VERSION = 0;
-    private static final int BUILD = 11208; //mmddhh  BEWARE: a leading 0 means octal.
-    private static final String MAJOR_RELEASE_DATE = "2023-01-12";
-    private static final String MINOR_RELEASE_DATE = "2023-01-12";
+    // For a release, these values are set automatically by the build script
+    private static final int MAJOR_VERSION = 13; // @@MAJOR_VERSION@@ (marker for build system)
+    private static final int MINOR_VERSION = 0; // @@MINOR_VERSION@@
+    private static final int PATCH_VERSION = 0; // @@PATCH_VERSION@@
+    private static final int BUILD = 120112; // @@BUILD@@; was mmddhh is now git hash. BEWARE: a leading 0 means octal.
+    private static final String MAJOR_RELEASE_DATE = "2023-01-12"; // @@MAJOR_DATE@@
+    private static final String MINOR_RELEASE_DATE = "2023-12-01"; // @@MINOR_DATE@@
 
     private Version() {
         // class is never instantiated
