@@ -129,8 +129,8 @@
       <signatures>
         <proto return-type="xs:boolean">
           <arg name="values" type="xs:anyAtomicType*" desc="The input sequence"/>
-          <arg name="collation" type="xs:string?" default="fn:default-collation()" 
-            desc="The collation used for comparing strings"/>
+          <arg name="collation" type="xs:string?" default="fn:default-collation()" desc="The
+            collation used for comparing strings"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
@@ -148,8 +148,8 @@
       <signatures>
         <proto return-type="xs:boolean">
           <arg name="values" type="xs:anyAtomicType*" desc="The input sequence"/>
-          <arg name="collation" type="xs:string?" default="fn:default-collation()" 
-            desc="The collation used for comparing strings"/>
+          <arg name="collation" type="xs:string?" default="fn:default-collation()" desc="The
+            collation used for comparing strings"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
@@ -215,8 +215,8 @@
       <signatures>
         <proto return-type="item()*">
           <arg name="select" type="item()*" desc="Selected items for which to apply templates"/>
-          <arg name="options" type="map(*)?" default="{}" 
-            desc="Options map used to supply non-tunnel parameters, tunnel parameters, and the mode to be used"/>
+          <arg name="options" type="map(*)?" default="{}" desc="Options map used to supply
+            non-tunnel parameters, tunnel parameters, and the mode to be used"/>
           <in-spec>xslt40</in-spec>
         </proto>
       </signatures>
@@ -419,15 +419,16 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">char</name>
       <signatures>
         <proto return-type="xs:string">
-          <arg name="value" type="(xs:string | xs:positiveInteger)" 
-            desc="A value identifying a particular character: either a Unicode codepoint, an HTML5
-            character reference name, or one of the backslash-escape sequences \n, \r or \t"/>
+          <arg name="value" type="(xs:string | xs:positiveInteger)" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Returns a string containing a particular character or glyph.</p>
       </description>
     </function>
@@ -467,14 +468,17 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">civil-timezone</name>
       <signatures>
         <proto return-type="xs:dayTimeDuration">
-          <arg name="value" type="xs:dateTime" desc="The input date/time"/>
-          <arg name="place" type="xs:string" default="()" desc="An IANA timezone name"/>
+          <arg name="value" type="xs:dateTime" desc="FIXME:"/>
+          <arg name="place" type="xs:string" default="()" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Returns the timezone offset from UTC that is in conventional use at a given place and
           time.</p>
       </description>
@@ -524,14 +528,16 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">collation</name>
       <signatures>
         <proto return-type="xs:string">
-          <arg name="options" type="map(*)" 
-            desc="A map defining the properties required of the collation"/>
+          <arg name="options" type="map(*)" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Constructs a collation URI with requested properties.</p>
       </description>
     </function>
@@ -540,16 +546,16 @@
       <signatures>
         <proto return-type="xs:boolean">
           <arg name="collation" type="xs:string" desc="A collation URI"/>
-          <arg name="usage" type="enum('compare', 'key', 'substring')*" default="()" 
-            desc="A sequence indicating the intended usage of the collation URI"/>
+          <arg name="usage" type="enum('compare', 'key', 'substring')*" default="()" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
       <status>
-        <p>TODO FIXME: check implementation conforms to latest spec.</p>
+        <p>FIXME:</p>
       </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Asks whether a collation URI is recognized by the implementation, and whether it has
           required properties.</p>
       </description>
@@ -759,14 +765,17 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">csv-doc</name>
       <signatures>
         <proto return-type="fn:parsed-csv-structure-record?">
-          <arg name="source" type="xs:string?" desc="The URI of the CSV file to be read"/>
-          <arg name="options" type="map(*)?" default="{}" desc="Parsing options"/>
+          <arg name="source" type="xs:string?" desc="FIXME:"/>
+          <arg name="options" type="map(*)?" default="{}" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Reads an external resource containing CSV, and returns the results as a record containing
           information about the names in the header, as well as the data itself.</p>
       </description>
@@ -775,14 +784,17 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">csv-to-arrays</name>
       <signatures>
         <proto return-type="array(xs:string)*">
-          <arg name="value" type="xs:string?" desc="The input CSV data"/>
-          <arg name="options" type="map(*)?" default="{}" desc="Parsing options"/>
+          <arg name="value" type="xs:string?" desc="FIXME:"/>
+          <arg name="options" type="map(*)?" default="{}" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Parses CSV data supplied as a string, returning the results in the form of a sequence of
           arrays of strings.</p>
       </description>
@@ -791,15 +803,19 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">csv-to-xml</name>
       <signatures>
         <proto return-type="document-node(fn:csv)?">
-          <arg name="value" type="xs:string?" desc="The input CSV data"/>
-          <arg name="options" type="map(*)?" default="{}" desc="Parsing options"/>
+          <arg name="value" type="xs:string?" desc="FIXME:"/>
+          <arg name="options" type="map(*)?" default="{}" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
-        <p>Parses CSV data supplied as a string, returning the results as an XML document.</p>
+        <p>FIXME:</p>
+        <p>Parses CSV data supplied as a string, returning the results as an XML document, as
+          described by SPECREF:csv-represent-as-xml:.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -938,14 +954,17 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">current-merge-key-array</name>
       <signatures>
         <proto return-type="array(xs:anyAtomicType*)">
-          <in-spec>xslt40</in-spec>
+          <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
-        <p>Returns the merge key of the merge group currently being processed using the
-          <code>xsl:merge</code> instruction.</p>
+        <p>FIXME:</p>
+        <p>Returns the merge key of the merge group currently being processed using the <code
+            xmlns="">xsl:merge</code> instruction.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -1079,13 +1098,16 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">decode-from-uri</name>
       <signatures>
         <proto return-type="xs:string">
-          <arg name="value" type="xs:string?" desc="The input URI string"/>
+          <arg name="value" type="xs:string?" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Decodes URI-escaped characters in a string.</p>
       </description>
     </function>
@@ -1158,13 +1180,16 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">distinct-ordered-nodes</name>
       <signatures>
         <proto return-type="gnode()*">
-          <arg name="nodes" type="gnode()*" desc="The input sequence of GNodes"/>
+          <arg name="nodes" type="gnode()*" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Removes duplicate GNodes and sorts the input into document order.</p>
       </description>
     </function>
@@ -1194,19 +1219,18 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">divide-decimals</name>
       <signatures>
         <proto return-type="record(quotient as xs:decimal, remainder as xs:decimal)">
-          <arg name="value" type="xs:decimal" desc="The decimal number to be divided"/>
-          <arg name="divisor" type="xs:decimal" desc="The number to divide by"/>
-          <arg name="precision" type="xs:integer?" default="0" desc="The required precision"/>
+          <arg name="value" type="xs:decimal" desc="FIXME:"/>
+          <arg name="divisor" type="xs:decimal" desc="FIXME:"/>
+          <arg name="precision" type="xs:integer?" default="0" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
       <status>
-        <p>The 4.0 specification states that the limits on precision are implementation-defined.
-          Saxon requires the precision to be in the range -100 to +100; a requested precision
-          outside this range is adjusted to -100 or +100 as appropriate.</p>
+        <p>FIXME:</p>
       </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Divides one <code>xs:decimal</code> by another to a defined precision, returning both the
           quotient and the remainder.</p>
       </description>
@@ -1215,17 +1239,18 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">do-until</name>
       <signatures>
         <proto return-type="item()*">
-          <arg name="input" type="item()*" desc="The input value"/>
-          <arg name="action" type="fn(item()*, xs:integer) as item()*" 
-            desc="The function to be applied to the value iteratively"/>
-          <arg name="predicate" type="fn(item()*, xs:integer) as xs:boolean?" 
-            desc="The predicate function"/>
+          <arg name="input" type="item()*" desc="FIXME:"/>
+          <arg name="action" type="fn(item()*, xs:integer) as item()*" desc="FIXME:"/>
+          <arg name="predicate" type="fn(item()*, xs:integer) as xs:boolean?" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Processes a supplied value repeatedly, continuing when some condition is false, and
           returning the value that satisfies the condition.</p>
       </description>
@@ -1400,14 +1425,17 @@
       <signatures>
         <proto return-type="xs:anyAtomicType*">
           <arg name="values" type="xs:anyAtomicType*" desc="The input sequence"/>
-          <arg name="collation" type="xs:string?" default="fn:default-collation()" 
-            desc="The collation used for comparing strings"/>
+          <arg name="collation" type="xs:string?" default="fn:default-collation()" desc="The
+            collation used for comparing strings"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Returns the values that appear in a sequence more than once.</p>
       </description>
     </function>
@@ -1449,14 +1477,17 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">element-to-map</name>
       <signatures>
         <proto return-type="map(xs:string, item()?)?">
-          <arg name="element" type="element()?" desc="An input element node"/>
-          <arg name="options" type="map(*)?" default="{}" desc="Options map"/>
+          <arg name="element" type="element()?" desc="FIXME:"/>
+          <arg name="options" type="map(*)?" default="{}" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Converts an element node into a map that is suitable for JSON serialization.</p>
       </description>
     </function>
@@ -1464,16 +1495,18 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">element-to-map-plan</name>
       <signatures>
         <proto return-type="map(xs:string, record(*))">
-          <arg name="input" type="(document-node() | element(*))*" 
-            desc="An input sequence of element and document nodes"/>
+          <arg name="input" type="(document-node() | element(*))*" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
-        <p>Analyzes sample data to generate a conversion plan suitable for use by the
-          <code>element-to-map()</code> function.</p>
+        <p>FIXME:</p>
+        <p>Analyzes sample data to generate a conversion plan suitable for use by the <em xmlns=""
+            namespace="http://www.saxonica.com/ns/doc/functions">element-to-map</em> function.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -2091,13 +2124,16 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">function-annotations</name>
       <signatures>
         <proto return-type="map(xs:QName, xs:anyAtomicType*)*">
-          <arg name="function" type="fn(*)" desc="The input function item"/>
+          <arg name="function" type="fn(*)" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Returns the annotations of the function item.</p>
       </description>
     </function>
@@ -2149,13 +2185,16 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">function-identity</name>
       <signatures>
         <proto return-type="xs:string">
-          <arg name="function" type="fn(*)" desc="The input function item"/>
+          <arg name="function" type="fn(*)" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Returns a string representing the identity of a function item.</p>
       </description>
     </function>
@@ -2226,13 +2265,16 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">graphemes</name>
       <signatures>
         <proto return-type="xs:string*">
-          <arg name="value" type="xs:string?" desc="The input string"/>
+          <arg name="value" type="xs:string?" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Splits the supplied string into a sequence of single-grapheme strings.</p>
       </description>
     </function>
@@ -2262,17 +2304,18 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">hash</name>
       <signatures>
         <proto return-type="xs:hexBinary?">
-          <arg name="value" type="(xs:string | xs:hexBinary | xs:base64Binary)?" 
-            desc="The input value"/>
-          <arg name="algorithm" type="xs:string?" default="&#34;MD5&#34;" 
-            desc="The algorithm to use, specified by a recognised code string"/>
-          <arg name="options" type="map(*)?" default="{}" desc="Options map"/>
+          <arg name="value" type="(xs:string | xs:hexBinary | xs:base64Binary)?" desc="FIXME:"/>
+          <arg name="algorithm" type="xs:string?" default="&#34;MD5&#34;" desc="FIXME:"/>
+          <arg name="options" type="map(*)?" default="{}" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Returns the results of a specified hash, checksum, or cyclic redundancy check function
           applied to the input.</p>
       </description>
@@ -2377,14 +2420,17 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">html-doc</name>
       <signatures>
         <proto return-type="document-node(*:html)?">
-          <arg name="source" type="xs:string?" desc="The URI of the HTML file to be read"/>
-          <arg name="options" type="map(*)?" default="{}" desc="Parsing options"/>
+          <arg name="source" type="xs:string?" desc="FIXME:"/>
+          <arg name="options" type="map(*)?" default="{}" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Reads an external resource containing HTML, and returns the result of parsing the
           resource as HTML.</p>
       </description>
@@ -2533,8 +2579,7 @@
       <signatures>
         <proto return-type="xs:integer*">
           <arg name="input" type="item()*" desc="The input sequence"/>
-          <arg name="predicate" type="fn(item(), xs:integer) as xs:boolean?" 
-            desc="The predicate function"/>
+          <arg name="predicate" type="fn(item(), xs:integer) as xs:boolean?" desc="The predicate function"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
@@ -2608,17 +2653,17 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">invisible-xml</name>
       <signatures>
         <proto return-type="fn(xs:string) as item()">
-          <arg name="grammar" type="(xs:string | element(ixml))?" default="()" 
-            desc="The input grammar"/>
-          <arg name="options" type="map(*)?" default="{}" desc="Options map"/>
+          <arg name="grammar" type="(xs:string | element(ixml))?" default="()" desc="FIXME:"/>
+          <arg name="options" type="map(*)?" default="{}" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
       <status>
-        <p>Not available in SaxonCS.</p>
+        <p>FIXME:</p>
       </status>
-      <saxon-edition platform="J C">PE/EE 13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Creates an Invisible XML parser for a grammar.</p>
       </description>
     </function>
@@ -2682,42 +2727,51 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">jnode-content</name>
       <signatures>
         <proto return-type="item()*">
-          <arg name="input" type="jnode()?" default="." desc="The input JNode"/>
+          <arg name="input" type="jnode()?" default="." desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
-        <p>Returns the content property of a JNode.</p>
+        <p>FIXME:</p>
+        <p>Returns the ·content· property of a JNode.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions" class="qt4">
       <name namespace="http://www.w3.org/2005/xpath-functions">jnode-position</name>
       <signatures>
         <proto return-type="xs:anyAtomicType?">
-          <arg name="input" type="jnode()?" default="." desc="The input JNode"/>
+          <arg name="input" type="jnode()?" default="." desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
-        <p>Returns the position property of a JNode.</p>
+        <p>FIXME:</p>
+        <p>Returns the ·position· property of a JNode.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions" class="qt4">
       <name namespace="http://www.w3.org/2005/xpath-functions">jnode-selector</name>
       <signatures>
         <proto return-type="xs:anyAtomicType?">
-          <arg name="input" type="jnode()?" default="." desc="The input JNode"/>
+          <arg name="input" type="jnode()?" default="." desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
-        <p>Returns the selector property of a JNode.</p>
+        <p>FIXME:</p>
+        <p>Returns the ·selector· property of a JNode.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -2799,15 +2853,18 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">jtree</name>
       <signatures>
         <proto return-type="jnode((map(*)|array(*)))">
-          <arg name="input" type="(map(*)|array(*))" desc="The input map or array"/>
+          <arg name="input" type="(map(*)|array(*))" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
-        <p>Delivers a root JNode wrapping a map or array, enabling the use of lookup expression to
-          navigate a JTree rooted at that map or array.</p>
+        <p>FIXME:</p>
+        <p>Delivers a root XTERMREF:DM40.dt-JNode: wrapping a map or array, enabling the use of
+          lookup expression to navigate a XTERMREF:DM40.dt-JTree: rooted at that map or array.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -2943,8 +3000,8 @@
       <signatures>
         <proto return-type="item()*">
           <arg name="input" type="item()*" desc="The input sequence"/>
-          <arg name="collation" type="xs:string?" default="fn:default-collation()" 
-            desc="The collation used for comparing strings"/>
+          <arg name="collation" type="xs:string?" default="fn:default-collation()" desc="The
+            collation used for comparing strings"/>
           <arg name="key" type="(fn(item()) as xs:anyAtomicType*)?" default="fn:data#1"
             desc="A function used for computing sort keys"/>
           <in-spec>xpath40</in-spec>
@@ -2965,8 +3022,7 @@
       <signatures>
         <proto return-type="map(xs:anyAtomicType, node()*)">
           <arg name="key-name" type="(xs:string | xs:QName)" desc="The name of the key"/>
-          <arg name="top" type="(document-node() | element())" default="/" 
-            desc="Used to specify a subtree"/>
+          <arg name="top" type="(document-node() | element())" default="/" desc="Used to specify a subtree"/>
           <in-spec>xslt40</in-spec>
         </proto>
       </signatures>
@@ -3131,15 +3187,17 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">message</name>
       <signatures>
         <proto return-type="empty-sequence()">
-          <arg name="input" type="item()*" desc="The value to be traced"/>
-          <arg name="label" type="xs:string?" default="()" 
-            desc="Label to be included in the trace output"/>
+          <arg name="input" type="item()*" desc="FIXME:"/>
+          <arg name="label" type="xs:string?" default="()" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Outputs trace information and discards the result.</p>
       </description>
     </function>
@@ -3392,14 +3450,16 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">node-type-annotation</name>
       <signatures>
         <proto>
-          <arg name="node" type="(element() | attribute())" 
-            desc="The input element or attribute node"/>
+          <arg name="node" type="(element() | attribute())" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Returns a record containing information about the type annotation of an element or
           attribute node.</p>
       </description>
@@ -3449,7 +3509,7 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">not</name>
       <signatures>
         <proto return-type="xs:boolean">
-          <arg name="input" type="item()*" desc="The input value"/>
+          <arg name="input" type="item()*" desc="FIXME:"/>
           <in-spec>xpath20</in-spec>
           <in-spec>xpath30</in-spec>
           <in-spec>xpath31</in-spec>
@@ -3466,7 +3526,7 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">number</name>
       <signatures>
         <proto return-type="xs:double">
-          <arg name="value" type="xs:anyAtomicType?" default="." desc="The input value"/>
+          <arg name="value" type="xs:anyAtomicType?" default="." desc="FIXME:"/>
           <in-spec>xpath20</in-spec>
           <in-spec>xpath30</in-spec>
           <in-spec>xpath31</in-spec>
@@ -3539,14 +3599,17 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">parse-csv</name>
       <signatures>
         <proto>
-          <arg name="value" type="xs:string?" desc="The input CSV data"/>
-          <arg name="options" type="map(*)?" default="{}" desc="Parsing options"/>
+          <arg name="value" type="xs:string?" desc="FIXME:"/>
+          <arg name="options" type="map(*)?" default="{}" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Parses CSV data, returning the results in the form of a record containing information
           about the names in the header, as well as the data itself.</p>
       </description>
@@ -3562,8 +3625,8 @@
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 13 in XPath 4.0. An earlier one-argument version of the function
-          was available since Saxon 12.0 provided that syntax extensions are enabled.</p>
+        <p>Available since Saxon 13 in XPath 4.0. An earlier version of the function was available
+          since Saxon 12.0 provided that syntax extensions are enabled.</p>
         <p>In SaxonJ this is implemented using <code>validator.nu</code>; in SaxonCS the
           implementation uses <code>AngleSharp</code>.</p>
       </status>
@@ -3595,14 +3658,17 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">parse-integer</name>
       <signatures>
         <proto return-type="xs:integer?">
-          <arg name="value" type="xs:string?" desc="The input string"/>
-          <arg name="radix" type="xs:integer?" default="10" desc="The required radix"/>
+          <arg name="value" type="xs:string?" desc="FIXME:"/>
+          <arg name="radix" type="xs:integer?" default="10" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Converts a string to an integer, recognizing any radix in the range 2 to 36.</p>
       </description>
     </function>
@@ -3744,15 +3810,17 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">partial-apply</name>
       <signatures>
         <proto return-type="fn(*)">
-          <arg name="function" type="fn(*)" desc="The input function item"/>
-          <arg name="arguments" type="map(xs:positiveInteger, item()*)" 
-            desc="A map providing argument values"/>
+          <arg name="function" type="fn(*)" desc="FIXME:"/>
+          <arg name="arguments" type="map(xs:positiveInteger, item()*)" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Performs partial application of a function item by binding values to selected
           arguments.</p>
       </description>
@@ -3761,15 +3829,17 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">partition</name>
       <signatures>
         <proto return-type="array(item()*)*">
-          <arg name="input" type="item()*" desc="The input sequence"/>
-          <arg name="split-when" type="fn(item()*, item(), xs:integer) as xs:boolean?" 
-            desc="Function determining the condition for starting a new partition"/>
+          <arg name="input" type="item()*" desc="FIXME:"/>
+          <arg name="split-when" type="fn(item()*, item(), xs:integer) as xs:boolean?" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Partitions a sequence of items into a sequence of non-empty arrays containing the same
           items, starting a new partition when a supplied condition is true.</p>
       </description>
@@ -3896,17 +3966,17 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">regex-groups</name>
       <signatures>
         <proto return-type="map(xs:integer, record(value as xs:string, position as xs:integer))">
-          <in-spec>xslt40</in-spec>
+          <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
       <status>
-        <p>New in XSLT 4.0. Not yet implemented in Saxon.</p>
+        <p>FIXME:</p>
       </status>
-      <saxon-edition platform="NONE">NOT_IMPLEMENTED</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Returns the set of captured groups associated with a matching segment during evaluation
-          of the <a class="bodylink code" href="/xsl-elements/analyze-string">xsl:analyze-string</a>
-          instruction.</p>
+          of the <code xmlns="">xsl:analyze-string</code> instruction.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -4074,7 +4144,7 @@
           <arg name="precision" type="xs:integer?" default="0"
             desc="The number of decimal places required"/>
           <arg name="mode"
-            type="enum('floor',&#xA; 'ceiling',&#xA; 'toward-zero',&#xA; 'away-from-zero',&#xA; 'half-to-floor',&#xA; 'half-to-ceiling',&#xA; 'half-toward-zero',&#xA; 'half-away-from-zero',&#xA; 'half-to-even')?"
+            type="enum('floor',&#xA; 'ceiling',&#xA;                 'toward-zero',&#xA; 'away-from-zero',&#xA; 'half-to-floor',&#xA;                 'half-to-ceiling',&#xA; 'half-toward-zero',&#xA; 'half-away-from-zero',&#xA; 'half-to-even')?"
             default="'half-to-ceiling'"/>
           <in-spec>xpath20</in-spec>
           <in-spec>xpath30</in-spec>
@@ -4124,53 +4194,58 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">scan-left</name>
       <signatures>
         <proto return-type="array(*)*">
-          <arg name="input" type="item()*" desc="The input sequence"/>
-          <arg name="init" type="item()*" desc="The initial value"/>
-          <arg name="action" type="fn(item()*, item()) as item()*" 
-            desc="The function to be applied to each item in the sequence"/>
+          <arg name="input" type="item()*" desc="FIXME:"/>
+          <arg name="init" type="item()*" desc="FIXME:"/>
+          <arg name="action" type="fn(item()*, item()) as item()*" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
       <status>
-        <p>New in XPath 4.0. Not yet implemented in Saxon.</p>
+        <p>FIXME:</p>
       </status>
-      <saxon-edition platform="NONE">NOT_IMPLEMENTED</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
-        <p>Produces the sequence of successive partial results from the evaluation of
-          <code>fn:fold-left()</code> with the same arguments.</p>
+        <p>FIXME:</p>
+        <p>Produces the sequence of successive partial results from the evaluation of <em xmlns=""
+            namespace="http://www.saxonica.com/ns/doc/functions">fn:fold-left</em> with the same
+          arguments.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions" class="qt4">
       <name namespace="http://www.w3.org/2005/xpath-functions">scan-right</name>
       <signatures>
         <proto return-type="array(*)*">
-          <arg name="input" type="item()*" desc="The input sequence"/>
-          <arg name="init" type="item()*" desc="The initial value"/>
-          <arg name="action" type="fn(item(), item()*) as item()*" 
-            desc="The function to be applied to each item in the sequence"/>
+          <arg name="input" type="item()*" desc="FIXME:"/>
+          <arg name="init" type="item()*" desc="FIXME:"/>
+          <arg name="action" type="fn(item(), item()*) as item()*" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
       <status>
-        <p>New in XPath 4.0. Not yet implemented in Saxon.</p>
+        <p>FIXME:</p>
       </status>
-      <saxon-edition platform="NONE">NOT_IMPLEMENTED</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
-        <p>Produces the sequence of successive partial results from the evaluation of
-          <code>fn:fold-right()</code> with the same arguments.</p>
+        <p>FIXME:</p>
+        <p>Produces the sequence of successive partial results from the evaluation of <em xmlns=""
+            namespace="http://www.saxonica.com/ns/doc/functions">fn:fold-right</em> with the same
+          arguments.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions" class="qt4">
       <name namespace="http://www.w3.org/2005/xpath-functions">schema-type</name>
       <signatures>
         <proto>
-          <arg name="name" type="xs:QName" desc="A named schema type"/>
+          <arg name="name" type="xs:QName" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Returns a record containing information about a named schema type in the static
           context.</p>
       </description>
@@ -4179,13 +4254,16 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">seconds</name>
       <signatures>
         <proto return-type="xs:dayTimeDuration?">
-          <arg name="value" type="xs:decimal?" desc="The input number"/>
+          <arg name="value" type="xs:decimal?" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Returns an <code>xs:dayTimeDuration</code> whose length is a given number of seconds.</p>
       </description>
     </function>
@@ -4278,13 +4356,16 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">siblings</name>
       <signatures>
         <proto return-type="gnode()*">
-          <arg name="node" type="gnode()?" default="." desc="The input GNode"/>
+          <arg name="node" type="gnode()?" default="." desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Returns the supplied GNode together with its siblings, in document order.</p>
       </description>
     </function>
@@ -4293,12 +4374,12 @@
       <signatures>
         <proto return-type="item()*">
           <arg name="input" type="item()*" desc="The input sequence"/>
-          <arg name="start" type="xs:integer?" default="()" 
-            desc="The position of the first item from the input sequence to be included in the result"/>
-          <arg name="end" type="xs:integer?" default="()" 
-            desc="The position of the last item from the input sequence to be included in the result"/>
-          <arg name="step" type="xs:integer?" default="()" 
-            desc="Step between positions to include in the result"/>
+          <arg name="start" type="xs:integer?" default="()" desc="The position of the first item
+            from the input sequence to be included in the result"/>
+          <arg name="end" type="xs:integer?" default="()" desc="The position of the last item from
+            the input sequence to be included in the result"/>
+          <arg name="step" type="xs:integer?" default="()" desc="Step between positions to include
+            in the result"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
@@ -4391,16 +4472,19 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">sort-by</name>
       <signatures>
         <proto return-type="item()*">
-          <arg name="input" type="item()*" desc="The input sequence"/>
+          <arg name="input" type="item()*" desc="FIXME:"/>
           <arg name="keys"
             type="record(key? as (fn(item()) as xs:anyAtomicType*)?, collation? as xs:string?, order? as enum('ascending', 'descending')?)*"
-            desc="The sort key definitions"/>
+            desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Sorts a supplied sequence, based on the value of a number of sort keys supplied as
           functions.</p>
       </description>
@@ -4409,15 +4493,17 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">sort-with</name>
       <signatures>
         <proto return-type="item()*">
-          <arg name="input" type="item()*" desc="The input sequence"/>
-          <arg name="comparators" type="(fn(item(), item()) as xs:integer)+" 
-            desc="The comparator functions"/>
+          <arg name="input" type="item()*" desc="FIXME:"/>
+          <arg name="comparators" type="(fn(item(), item()) as xs:integer)+" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Sorts a supplied sequence, according to the order induced by the supplied comparator
           functions.</p>
       </description>
@@ -4601,17 +4687,20 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">subsequence-where</name>
       <signatures>
         <proto return-type="item()*">
-          <arg name="input" type="item()*" desc="The input sequence"/>
+          <arg name="input" type="item()*" desc="FIXME:"/>
           <arg name="from" type="(fn(item(), xs:integer) as xs:boolean?)?" default="true#0"
-            desc="Predicate function to determine the first item in the subsequence"/>
+            desc="FIXME:"/>
           <arg name="to" type="(fn(item(), xs:integer) as xs:boolean?)?" default="false#0"
-            desc="Predicate function to determine the last item in the subsequence"/>
+            desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Returns a contiguous sequence of items from <code>$input</code>, with the start and end
           points located by applying predicates.</p>
       </description>
@@ -4778,15 +4867,17 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">take-while</name>
       <signatures>
         <proto return-type="item()*">
-          <arg name="input" type="item()*" desc="The input sequence"/>
-          <arg name="predicate" type="fn(item(), xs:integer) as xs:boolean?" 
-            desc="The predicate function"/>
+          <arg name="input" type="item()*" desc="FIXME:"/>
+          <arg name="predicate" type="fn(item(), xs:integer) as xs:boolean?" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Returns items from the input sequence prior to the first one that fails to satisfy a
           supplied predicate.</p>
       </description>
@@ -4996,15 +5087,17 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">transitive-closure</name>
       <signatures>
         <proto return-type="gnode()*">
-          <arg name="node" type="gnode()?" desc="The input GNode"/>
-          <arg name="step" type="fn(gnode()) as gnode()*" 
-            desc="The step function used to navigate to other GNodes"/>
+          <arg name="node" type="gnode()?" desc="FIXME:"/>
+          <arg name="step" type="fn(gnode()) as gnode()*" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Returns all the GNodes reachable from a given start GNode by applying a supplied function
           repeatedly.</p>
       </description>
@@ -5094,13 +5187,16 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">type-of</name>
       <signatures>
         <proto return-type="xs:string">
-          <arg name="value" type="item()*" desc="The input sequence"/>
+          <arg name="value" type="item()*" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Returns information about the type of a value, as a string.</p>
       </description>
     </function>
@@ -5108,13 +5204,16 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">unix-dateTime</name>
       <signatures>
         <proto return-type="xs:dateTimeStamp">
-          <arg name="value" type="xs:nonNegativeInteger?" default="0" desc="The input Unix time"/>
+          <arg name="value" type="xs:nonNegativeInteger?" default="0" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Returns a dateTime value for a Unix time.</p>
       </description>
     </function>
@@ -5144,14 +5243,18 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">unparsed-binary</name>
       <signatures>
         <proto return-type="xs:base64Binary?">
-          <arg name="source" type="xs:string?" desc="The URI of the resource to be read"/>
+          <arg name="source" type="xs:string?" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
-        <p>Reads an external resource (for example, a file) and returns its contents in binary.</p>
+        <p>FIXME:</p>
+        <p>The <code>fn:unparsed-binary</code> function reads an external resource (for example, a
+          file) and returns its contents in binary.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -5339,17 +5442,18 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">while-do</name>
       <signatures>
         <proto return-type="item()*">
-          <arg name="input" type="item()*" desc="The input value"/>
-          <arg name="predicate" type="fn(item()*, xs:integer) as xs:boolean?" 
-            desc="The predicate function"/>
-          <arg name="action" type="fn(item()*, xs:integer) as item()*" 
-            desc="The function to be applied to the value iteratively"/>
+          <arg name="input" type="item()*" desc="FIXME:"/>
+          <arg name="predicate" type="fn(item()*, xs:integer) as xs:boolean?" desc="FIXME:"/>
+          <arg name="action" type="fn(item()*, xs:integer) as item()*" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Processes a supplied value repeatedly, continuing while some condition remains true, and
           returning the first value that does not satisfy the condition.</p>
       </description>
@@ -5382,14 +5486,16 @@
       <signatures>
         <proto
           return-type="function((document-node(*) | element(*) | attribute(*))?) as record(is-valid as xs:boolean, typed-node? as node(), error-details? as record(*)*)">
-          <arg name="options" type="map(*)?" default="{}" 
-            desc="Options map providing details of an XSD schema"/>
+          <arg name="options" type="map(*)?" default="{}" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Given an XSD schema, delivers a function item that can be invoked to validate a document
           or element node against this schema.</p>
       </description>
@@ -5567,7 +5673,7 @@
       <name namespace="http://www.w3.org/2005/xpath-functions/math">cos</name>
       <signatures>
         <proto return-type="xs:double?">
-          <arg name="radians" type="xs:double?" desc="The supplied angle in radians"/>
+          <arg name="radians" type="xs:double?" desc="The supplied angle, in radians"/>
           <in-spec>xpath30</in-spec>
           <in-spec>xpath31</in-spec>
           <in-spec>xpath40</in-spec>
@@ -5588,13 +5694,16 @@
       <name namespace="http://www.w3.org/2005/xpath-functions/math">cosh</name>
       <signatures>
         <proto return-type="xs:double?">
-          <arg name="value" type="xs:double?" desc="The input number"/>
+          <arg name="value" type="xs:double?" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Returns the hyperbolic cosine of the argument.</p>
       </description>
     </function>
@@ -5605,10 +5714,13 @@
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
-        <p>Returns an approximation to the mathematical constant <code>e</code>.</p>
+        <p>FIXME:</p>
+        <p>Returns an approximation to the mathematical constant <code xmlns="">e</code>.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -5732,7 +5844,7 @@
       <name namespace="http://www.w3.org/2005/xpath-functions/math">sin</name>
       <signatures>
         <proto return-type="xs:double?">
-          <arg name="radians" type="xs:double?" desc="The supplied angle in radians"/>
+          <arg name="radians" type="xs:double?" desc="FIXME:"/>
           <in-spec>xpath30</in-spec>
           <in-spec>xpath31</in-spec>
           <in-spec>xpath40</in-spec>
@@ -5753,13 +5865,16 @@
       <name namespace="http://www.w3.org/2005/xpath-functions/math">sinh</name>
       <signatures>
         <proto return-type="xs:double?">
-          <arg name="value" type="xs:double?" desc="The input number"/>
+          <arg name="value" type="xs:double?" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Returns the hyperbolic sine of the argument.</p>
       </description>
     </function>
@@ -5767,7 +5882,7 @@
       <name namespace="http://www.w3.org/2005/xpath-functions/math">sqrt</name>
       <signatures>
         <proto return-type="xs:double?">
-          <arg name="value" type="xs:double?" desc="The input number"/>
+          <arg name="value" type="xs:double?" desc="FIXME:"/>
           <in-spec>xpath30</in-spec>
           <in-spec>xpath31</in-spec>
           <in-spec>xpath40</in-spec>
@@ -5788,7 +5903,7 @@
       <name namespace="http://www.w3.org/2005/xpath-functions/math">tan</name>
       <signatures>
         <proto return-type="xs:double?">
-          <arg name="radians" type="xs:double?" desc="The supplied angle in radians"/>
+          <arg name="radians" type="xs:double?" desc="The input angle in radians"/>
           <in-spec>xpath30</in-spec>
           <in-spec>xpath31</in-spec>
           <in-spec>xpath40</in-spec>
@@ -5809,13 +5924,16 @@
       <name namespace="http://www.w3.org/2005/xpath-functions/math">tanh</name>
       <signatures>
         <proto return-type="xs:double?">
-          <arg name="value" type="xs:double?" desc="The input number"/>
+          <arg name="value" type="xs:double?" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Returns the hyperbolic tangent of the argument.</p>
       </description>
     </function>
@@ -5827,7 +5945,7 @@
       <name namespace="http://www.w3.org/2005/xpath-functions/map">build</name>
       <signatures>
         <proto return-type="map(*)">
-          <arg name="input" type="item()*" desc="The input sequence"/>
+          <arg name="input" type="item()*" desc="The input map"/>
           <arg name="key"
             type="(fn($item as item(), $position as xs:integer) as xs:anyAtomicType*)?"
             default="fn:identity#1" desc="Function to compute map keys"/>
@@ -5873,13 +5991,16 @@
       <name namespace="http://www.w3.org/2005/xpath-functions/map">empty</name>
       <signatures>
         <proto return-type="xs:boolean">
-          <arg name="map" type="map(*)" desc="The input map"/>
+          <arg name="map" type="map(*)" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Returns <code>true</code> if the supplied map contains no entries.</p>
       </description>
     </function>
@@ -6016,13 +6137,16 @@
       <name namespace="http://www.w3.org/2005/xpath-functions/map">items</name>
       <signatures>
         <proto return-type="item()*">
-          <arg name="map" type="map(*)" desc="The input map"/>
+          <arg name="map" type="map(*)" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Returns a sequence containing all the values present in a map, in order.</p>
       </description>
     </function>
@@ -6052,12 +6176,12 @@
         <proto return-type="xs:anyAtomicType*">
           <arg name="map" type="map(*)" desc="The input map"/>
           <arg name="predicate"
-            type="fn($key as xs:anyAtomicType, $value as item()*) as xs:boolean?" 
-            desc="The predicate function"/>
+            type="fn($key as xs:anyAtomicType, $value as item()*) as xs:boolean?" desc="The
+            predicate function"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status/>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>Returns a sequence containing selected keys present in a map.</p>
@@ -6235,15 +6359,18 @@
       <name namespace="http://www.w3.org/2005/xpath-functions/array">build</name>
       <signatures>
         <proto return-type="array(*)">
-          <arg name="input" type="item()*" desc="The input sequence"/>
+          <arg name="input" type="item()*" desc="FIXME:"/>
           <arg name="action" type="(fn(item(), xs:integer) as item()*)?" default="fn:identity#1"
-            desc="The function to be applied to each member of the input sequence"/>
+            desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Returns an array obtained by evaluating the supplied function once for each item in the
           input sequence.</p>
       </description>
@@ -6452,16 +6579,19 @@
       <name namespace="http://www.w3.org/2005/xpath-functions/array">index-of</name>
       <signatures>
         <proto return-type="xs:integer*">
-          <arg name="array" type="array(*)" desc="The input array"/>
-          <arg name="target" type="item()*" desc="The target value"/>
-          <arg name="collation" type="xs:string?" default="fn:default-collation()" 
-            desc="The collation used for comparing strings"/>
+          <arg name="array" type="array(*)" desc="FIXME:"/>
+          <arg name="target" type="item()*" desc="FIXME:"/>
+          <arg name="collation" type="xs:string?" default="fn:default-collation()" desc="The
+            collation used for comparing strings"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Returns a sequence of positive integers giving the positions within the array
             <code>$array</code> of members that are equal to <code>$target</code>.</p>
       </description>
@@ -6471,8 +6601,8 @@
       <signatures>
         <proto return-type="xs:integer*">
           <arg name="array" type="array(*)" desc="The input array"/>
-          <arg name="predicate" type="fn(item()*, xs:integer) as xs:boolean?" 
-            desc="The predicate function"/>
+          <arg name="predicate" type="fn(item()*, xs:integer) as xs:boolean?" desc="The predicate
+            function"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
@@ -6509,13 +6639,16 @@
       <name namespace="http://www.w3.org/2005/xpath-functions/array">items</name>
       <signatures>
         <proto return-type="item()*">
-          <arg name="array" type="array(*)" desc="The input array"/>
+          <arg name="array" type="array(*)" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Returns the sequence concatenation of the members of an array.</p>
       </description>
     </function>
@@ -6656,12 +6789,12 @@
       <signatures>
         <proto return-type="array(*)">
           <arg name="array" type="array(*)" desc="The input array"/>
-          <arg name="start" type="xs:integer?" default="()" 
-            desc="The position of the first item from the input array to be included in the result"/>
-          <arg name="end" type="xs:integer?" default="()" 
-            desc="The position of the last item from the input array to be included in the result"/>
-          <arg name="step" type="xs:integer?" default="()" 
-            desc="Step between positions to include in the result"/>
+          <arg name="start" type="xs:integer?" default="()" desc="The position of the first item
+            from the input array to be included in the result"/>
+          <arg name="end" type="xs:integer?" default="()" desc="The position of the last item from
+            the input array to be included in the result"/>
+          <arg name="step" type="xs:integer?" default="()" desc="Step between positions to include
+            in the result"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
@@ -6702,16 +6835,19 @@
       <name namespace="http://www.w3.org/2005/xpath-functions/array">sort-by</name>
       <signatures>
         <proto return-type="array(*)">
-          <arg name="array" type="array(*)" desc="The input array"/>
+          <arg name="array" type="array(*)" desc="FIXME:"/>
           <arg name="keys"
             type="record(key? as (fn(item()*) as xs:anyAtomicType*)?, collation? as xs:string?, order? as enum('ascending', 'descending')?)*"
-            desc="The sort key definitions"/>
+            desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Sorts a supplied array, based on the value of a number of sort keys supplied as
           functions.</p>
       </description>
@@ -6720,15 +6856,17 @@
       <name namespace="http://www.w3.org/2005/xpath-functions/array">sort-with</name>
       <signatures>
         <proto return-type="array(*)">
-          <arg name="array" type="array(*)" desc="The input array"/>
-          <arg name="comparators" type="(fn(item()*, item()*) as xs:integer)+" 
-            desc="The comparator functions"/>
+          <arg name="array" type="array(*)" desc="FIXME:"/>
+          <arg name="comparators" type="(fn(item()*, item()*) as xs:integer)+" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Sorts a supplied array, according to the order induced by the supplied comparator
           functions.</p>
       </description>
@@ -6737,13 +6875,16 @@
       <name namespace="http://www.w3.org/2005/xpath-functions/array">split</name>
       <signatures>
         <proto return-type="array(*)*">
-          <arg name="array" type="array(*)" desc="The input array"/>
+          <arg name="array" type="array(*)" desc="FIXME:"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>FIXME:</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
+        <p>FIXME:</p>
         <p>Delivers the contents of an array as a sequence of single-member arrays.</p>
       </description>
     </function>
@@ -12793,7 +12934,7 @@ xs:duration('PT0.001S')}ms &lt;/xsl:message&gt;</code></pre>
       <name namespace="http://exslt.org/math">cos</name>
       <signatures>
         <proto return-type="xs:double">
-          <arg name="θ" type="xs:double" desc="The supplied angle in radians"/>
+          <arg name="θ" type="xs:double" desc="The supplied angle, in radians"/>
           <in-spec>exslt-math</in-spec>
         </proto>
       </signatures>
@@ -13000,7 +13141,7 @@ xs:duration('PT0.001S')}ms &lt;/xsl:message&gt;</code></pre>
       <name namespace="http://exslt.org/math">tan</name>
       <signatures>
         <proto return-type="xs:double">
-          <arg name="θ" type="xs:double" desc="The supplied angle in radians"/>
+          <arg name="θ" type="xs:double" desc="The input angle in radians"/>
           <in-spec>exslt-math</in-spec>
         </proto>
       </signatures>

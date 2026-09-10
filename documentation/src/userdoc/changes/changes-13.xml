@@ -713,8 +713,7 @@ TODO: rethink redefines and override
             <li><p><code>saxon:highest</code> and <code>saxon:lowest</code> are dropped, superseded by 
                 <code>fn:highest</code> and <code>fn:lowest</code> from the 4.0 specification.</p></li>
             <li><p><code>saxon:is-NaN</code> is dropped, superseded by <code>fn:is-NaN</code>.</p></li>
-            <li><p><code>saxon:parse-html</code> is superseded by <code>fn:parse-html</code>, but
-                note that the specification for <code>fn:parse-html</code> has changed.</p></li>
+            <li><p><code>saxon:parse-html</code> is superseded by <code>fn:parse-html</code>.</p></li>
             <li><p><code>saxon:array-member</code> is dropped. A call on <code>saxon:array-member(x)</code>
             can be replaced with the expression <code>{'value': x}</code>.</p></li>
         </ul>
@@ -725,11 +724,8 @@ TODO: rethink redefines and override
             <code>xsl:array</code> has changed to drop the <code>composite</code> attribute, and add
             the <code>for-each</code> attribute.</p>
         
-        <p>The <code>xsl:map/@saxon:on-duplicates</code> extension attribute is no longer supported, it is 
-        replaced by the regular XSLT 4.0 attribute <code>xsl:map/@duplicates.</code></p>
-        
-        <p>The <code>xsl:accumulator-rule/@saxon:capture</code> extension attribute is deprecated;
-            it is replaced by the regular XSLT 4.0 attribute <code>xsl:accumulator-rule/@capture.</code></p>
+        <p>The <code>xsl:map/saxon:on-duplicates</code> extension attribute is no longer supported, it is 
+        replaced by the regular XSLT 4.0 attribute <code>xsl:map/duplicates.</code></p>
         
         <p>A new vendor option has been added to the <code>fn:transform</code> function. Setting
         the option <code>saxon:write-result-documents</code> to <code>true()</code> changes the
@@ -790,19 +786,15 @@ TODO: rethink redefines and override
             <li><p>PR957 - scan-left and scan-right functions</p></li>
             <li><p>PR1875 - params passed implicitly through <code>xsl:next-match</code> and <code>xsl:apply-imports</code></p></li>
             <li><p>PR1773 - intersect and except in patterns (especially across different kinds of pattern, e.g. (node() | jnode())</p></li>
-            <li><p>PR1676 - collation-available (TODO a version is implemented, but check conformance to latest spec)</p></li>
+            <li><p>PR1676 - collation-available</p></li>
             <li><p>PR1674 - composite sort keys in xsl:sort</p></li>
             <li><p>PR1622 - XSLT <code>fn:map-for-key</code> function</p></li>
-            <li><p>XSLT <code>fn:regex-groups</code> function</p></li>
             <li><p>JNode patterns in XSLT (syntax <code>jnode(key, type)</code>) -- syntax now recognized, not well tested</p></li>
             <li><p>PR2051 - merge-when attribute for xsl:for-each-group</p></li>
             <li><p>PR2259 - canonical JSON output is implemented, but does not always produce the correct canonical output for numeric values</p></li>
             <li><p>PR2213 - <code>trusted</code> attribute for <code>xsl:evaluate</code></p></li>
             <li><p>PR2259 - Canonical XHTML serialization (<code>method="xhtml"</code> wih <code>canonical="yes"</code>code>)</p></li>
-            <li><p>PR791 - The <code>fn:invisible-xml</code> function is not implemented in SaxonCS</p></li>
-            <li><p>PR2372 - Serializing processing instructions with the HTML serialization method.</p></li>
-            <li><p>PR2337 - New values for <code>xsl:mode/@typed</code>.</p></li>
-            <li><p>PR2387 - Handling of NaN and Infinity by the JSON serialization method.</p></li>
+            <li><p>PR791 - The fn:invisible-xml function is not implemented in SaxonCS</p></li>
         </ul>
         
         <p>XInclude processing (e.g. using the xinclude option of fn:doc) is not supported in SaxonCS.</p>
