@@ -1,13 +1,9 @@
 package com.saxonica.expr;
 
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.ForMemberExpression;
 import net.sf.saxon.expr.parser.ParserExtension;
-import net.sf.saxon.expr.parser.Token;
-import net.sf.saxon.expr.parser.Tokenizer;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.om.FunctionItem;
-import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.pattern.ItemTypePattern;
 import net.sf.saxon.query.QueryModule;
 import net.sf.saxon.query.XQueryFunction;
@@ -79,66 +75,6 @@ public class SaxonSyntaxExtension extends ParserExtension {
         }
     }
 
-    /**
-     * Parse a for-member expression (Saxon extension):
-     * for member $x in expr return expr
-     *
-     * @return the resulting subexpression
-     * @throws XPathException if any error is encountered
-     */
-    
-    @Override
-    protected Expression parseForMemberExpression(XPathParser p) throws XPathException {
-        Tokenizer t = p.getTokenizer();
-        p.checkSyntaxExtensions("'for member'");
-        int clauses = 0;
-        int operator = t.currentToken;
-        ForMemberExpression first = null;
-        ForMemberExpression previous = null;
-        do {
-            int offset = t.currentTokenStartOffset;
-            p.nextToken();
-            p.expect(Token.DOLLAR);
-            p.nextToken();
-            p.expect(Token.NAME);
-            String var = t.currentTokenValue;
-            clauses++;
-
-            // declare the range variable
-            ForMemberExpression v = new ForMemberExpression();
-            p.setLocation(v, offset);
-
-            v.setVariableQName(p.makeStructuredQName(var, NamespaceUri.NULL));
-            p.nextToken();
-
-            // process the "in" clause
-            p.expect(Token.IN);
-            p.nextToken();
-            v.setSequence(p.parseExprSingle());
-            p.declareRangeVariable(v);
-            if (previous != null) {
-                previous.setAction(v);
-            } else {
-                first = v;
-            }
-            previous = v;
-
-        } while (t.currentToken == Token.COMMA);
-
-        // process the "return" expression (called the "action")
-        p.expect(Token.RETURN);
-        p.nextToken();
-        previous.setAction(p.parseExprSingle());
-
-
-        // undeclare all the range variables
-
-        for (int i = 0; i < clauses; i++) {
-            p.undeclareRangeVariable();
-        }
-        return p.makeTracer(first, first.getVariableQName());
-
-    }
 
 }
 

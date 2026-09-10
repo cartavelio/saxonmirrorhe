@@ -108,26 +108,7 @@ public class PackageLoaderPE extends PackageLoaderHE {
             Expression arg = loader.getFirstChildExpression(element);
             return new DoInstr(arg);
         });
-
-
-        eMap.put("forMember", (loader, element) -> {
-            Expression select = loader.getFirstChildExpression(element);
-
-            int slot = loader.getIntegerAttribute(element, "slot");
-            StructuredQName name = loader.getQNameAttribute(element, "var");
-            ForMemberExpression forEx = new ForMemberExpression();
-            forEx.setSequence(select);
-            forEx.setSlotNumber(slot);
-            forEx.setVariableQName(name);
-
-            loader.localBindings.push(forEx);
-            Expression action = loader.getSecondChildExpression(element);
-            loader.localBindings.pop();
-            forEx.setAction(action);
-
-            return forEx;
-        });
-
+        
         //#if CSHARP==false
         eMap.put("javaCall", (loader, element) -> {
             StructuredQName name = loader.getQNameAttribute(element, "name");
