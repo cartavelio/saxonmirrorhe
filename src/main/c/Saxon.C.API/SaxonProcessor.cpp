@@ -13,6 +13,7 @@
 #include "XdmMap.h"
 #include "XdmNode.h"
 #include "XdmValue.h"
+#include "UserFunctionHandler.h"
 
 //#define DEBUG
 

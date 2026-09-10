@@ -27,17 +27,13 @@ from libc.string cimport memcpy
 
 from cython import Py_ssize_t
 
-from cpython.ref cimport PyObject
-
 ctypedef fused xdm_hierarchy:
     saxoncClasses.XdmValue
     saxoncClasses.XdmItem
     saxoncClasses.XdmAtomicValue
 
-class PySaxonApiError(RuntimeError):
-  pass
-
-cdef public PyObject* pysaxonapierror = <PyObject*>PySaxonApiError
+saxoncClasses.create_saxonc_api_py_exception()
+PySaxonApiError = <object> saxoncClasses.SaxonApiErrorWrapper
 
 
 class XdmType(IntEnum):
