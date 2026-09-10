@@ -2682,11 +2682,11 @@ PHP_METHOD(XdmMap,  get)  {
     if (ZEND_NUM_ARGS()!=1) {
         WRONG_PARAM_COUNT;
     }
-
+   if (zend_parse_parameters(ZEND_NUM_ARGS() , "s", &skey, &len1) == FAILURE) {
     if (zend_parse_parameters(ZEND_NUM_ARGS() , "z", &key_zval) == FAILURE) {
 
         if (zend_parse_parameters(ZEND_NUM_ARGS() , "l", &lkey) == FAILURE) {
-            if (zend_parse_parameters(ZEND_NUM_ARGS() , "s", &skey, &len1) == FAILURE) {
+
                 RETURN_NULL();
             }
 
@@ -2694,22 +2694,24 @@ PHP_METHOD(XdmMap,  get)  {
 
     }
 
-
-
     zend_object *oobj = Z_OBJ_P(getThis());
     xdmMap_object* obj = (xdmMap_object *)((char *)oobj - XtOffsetOf(xdmMap_object, std));
     xdmMap = obj->xdmMap;
     if (xdmMap != nullptr) {
-
         if(key_zval != nullptr){
+
             const char * objName =ZSTR_VAL(Z_OBJCE_P(key_zval)->name);
+
             if(strcmp(objName, "Saxon\\XdmAtomicValue")==0) {
 	            zend_object * nobj = Z_OBJ_P(key_zval);
 
 	            xdmAtomicValue_object* ooth = (xdmAtomicValue_object *)((char *)nobj - XtOffsetOf(xdmAtomicValue_object, std));
                 if(ooth != nullptr) {
+
                     XdmAtomicValue * value = ooth->xdmAtomicValue;
+
                     if(value != nullptr) {
+
         	            result = xdmMap->get(value); // call back to C++ API
         	            if(result != nullptr) {
                             result->incrementRefCount();
@@ -2733,7 +2735,7 @@ PHP_METHOD(XdmMap,  get)  {
                 RETURN_NULL();
             }
 
-    } else if(lkey != -1){
+        } else if(lkey != -1){
         	            result = xdmMap->get(lkey);
         	            if(result != nullptr) {
                             result->incrementRefCount();

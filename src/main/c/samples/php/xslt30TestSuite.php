@@ -634,7 +634,7 @@ function collapseWhitespace(string $in) {
 
     global $proc;
     global $xpathProcForCompareNodes;
-    echo "testAssertion cp0";
+
 
     $xpathProcForAssertions = $proc->newXPathProcessor();
     if($xpathProcForAssertions == NULL) {
@@ -677,16 +677,15 @@ function collapseWhitespace(string $in) {
             if ($aErrorCode == $errorCode) {
                 return true;
             } else {
-                error_log("Test failed but not with the correct error code, assert=".$aErrorCode . "Actual error code=".$errorCode);
+                error_log("Test failed but not with the correct error code, assert=".$aErrorCode . " Actual error code=".$errorCode);
                  return true;
             }
 
-        } elseif($result == null) {
-        return true; //TODO fixup
+        
 
     }
 
-    if($result == NULL) {
+    if($result == null) {
         error_log("Result is NULL");
         return false;
     }
@@ -856,8 +855,8 @@ function collapseWhitespace(string $in) {
 
         $uri =  $baseUri.$assert->getAttributeValue("uri");
         if(!file_exists($uri)) {
-            error_log("**** Invalid output uri ". $uri );
-            return false;
+            error_log("**** Invalid output uri ". $uri + "Now checking ResultMap" );
+            //return false;
         }
         $resultDoc = $resultDocMap->get($uri); //$proc->parseXmlFromFile($uri);
         if($resultDoc == null) {
@@ -1126,7 +1125,7 @@ function run_test_case($testcase, $env, $path)
             //error_log("TEST CASE checkpoint 2 - LLLLLl ");
             $test = null;
 
-            $asserts = getNodeFromXPath($testcase, "./*:result/*:child::*");
+            $asserts = getNodeFromXPath($testcase, "./*:result/child::*");
 
             $assertsSerial = effectiveBooleanValue($asserts, "exists(//descendant-or-self::*[assert-serialization or assert-serialization-error or serialization-matches])");
 
@@ -1134,7 +1133,7 @@ function run_test_case($testcase, $env, $path)
 
 
             if($t_env_ref!= null && array_key_exists($t_env_ref , $env)) {
-                error_log("envvvalue:". print_r($env[$t_env_ref . ""], TRUE));
+                //error_log("envvvalue:". print_r($env[$t_env_ref . ""], TRUE));
                 if(array_key_exists("stylesheet", $env[$t_env_ref . ""])) {
                     error_log("Entered stylesheet!");
                     $test =  $path. $env[$t_env_ref . ""]["stylesheet"];
@@ -1162,7 +1161,7 @@ function run_test_case($testcase, $env, $path)
             if ($foundStylesheet) {
                 $resultSerialized = $serializationDeclared or $assertsSerial;
                 
-                echo "Test case=" . $test;
+                //echo "Test case=" . $test;
                 if ($test != null && file_exists($test)) {
                     try {
 
@@ -1198,12 +1197,12 @@ function run_test_case($testcase, $env, $path)
                                     
                                 }
 
-                                error_log("before apply stylesheet:".$test);
+                               // error_log("before apply stylesheet:".$test);
                   
                                 $executable = $xsltproc->compileFromFile($test);
-                        echo "Test case cp1-1";
+                                $executable->setCaptureResultDocuments(true);
                                 if($executable == null) {
-                                    echo "Test case cp1";
+
                                     $fail++;
                                     if($xsltproc->getErrorMessage() == NULL) {
                                         return "FAIL - executable is NULL";
@@ -1212,17 +1211,17 @@ function run_test_case($testcase, $env, $path)
 
                                     }
                                 }
-                        echo "Test case cp2";
+
                                 if($resultSerialized == True) {
                                     $executable->setSaveResultDocument(True);
                                 } 
 
-                        echo "Test case cp3";
-                       error_log("envvvalue2:". print_r($env, TRUE));
+
+                       //error_log("envvvalue2:". print_r($env, TRUE));
                        // error_log("t_env_ref = ".$t_env_ref);
                         $input = null;
                         if($t_env_ref != null && array_key_exists($t_env_ref , $env)) {
-                            error_log("env[t_env_ref] value:" . print_r($env[$t_env_ref . ""], TRUE));
+                           // error_log("env[t_env_ref] value:" . print_r($env[$t_env_ref . ""], TRUE));
                             if(array_key_exists("sources", $env[$t_env_ref . ""])) {
                                 if(array_key_exists(".file", $env[$t_env_ref . ""]["sources"])) {
 
@@ -1315,22 +1314,23 @@ function run_test_case($testcase, $env, $path)
                                     TODO check for output@ file
                                      * 
                                      */
-
-
-                                    if ($init_template != null ) {
-
-                                        if($t_env_ref != null) {
-                                            if(array_key_exists("sources", $env[$t_env_ref . ""])) {
-                                                if(array_key_exists(".file", $env[$t_env_ref . ""]["sources"])) {
-                                                    $input = $path . $env[$t_env_ref . ""]["sources"][".file"];    //TODO this needs a array access check
-                                                    error_log("file:" . $input);
-                                                    if ($input != null) {
-                                                        error_log("input file: " . $input);
-                                                        $executable->setGlobalContextFromFile($input);
-                                                    }
+                                    if($t_env_ref != null) {
+                                        if(array_key_exists("sources", $env[$t_env_ref . ""])) {
+                                            if(array_key_exists(".file", $env[$t_env_ref . ""]["sources"])) {
+                                                $input = $path . $env[$t_env_ref . ""]["sources"][".file"];    //TODO this needs a array access check
+                                                error_log("file:" . $input);
+                                                if ($input != null) {
+                                                    error_log("input file: " . $input);
+                                                    $executable->setGlobalContextFromFile($input);
+                                                    $executable->setInitialMatchSelectionAsFile($input);
                                                 }
                                             }
                                         }
+                                    }
+
+                                    if ($init_template != null ) {
+
+
                                         $init_node = $init_template->getNodeValue();
 
                                         error_log("init_node: ".$init_node->getAttributeValue("name"));
@@ -1347,12 +1347,18 @@ function run_test_case($testcase, $env, $path)
                                         $initialModeName = $init_mode->getNodeValue()->getAttributeValue("name");
                                         $modeSelect = $init_mode->getNodeValue()->getAttributeValue("select");
                                         $executable->setInitialMode($initialModeName);
+
                                         if ($modeSelect != null) {
                                             $initialMatchSelection = getNodeFromXPath(null, $modeSelect."");
                                             $result = $executable->setInitialMatchSelection($initialMatchSelection);
                                         }
 
-                                        $result = $executable->transformToValue();
+                                        $result = $executable->applyTemplatesReturningValue();  //$executable->transformToValue()
+
+                                        if($result == null) {
+
+                                            echo "Error:".$executable->getErrorMessage();
+                                        }
                                         $resultDocMap = $executable->getResultDocuments();
 
                                     }else {
@@ -1394,7 +1400,7 @@ function run_test_case($testcase, $env, $path)
                                     exit('import-0502b');
                                 }*/
                                 if ($asserts == NULL) {
-                                    error_log("NULL FOUND IN ASSERT1 = ". $testElem);
+                                    error_log("NULL FOUND IN ASSERT1 = ". $testcase);
                                     if ($proc->exceptionOccurred()) {
                                         error_log(" assert exception: " . $proc->getErrorMessage());
 
@@ -1514,7 +1520,7 @@ function run_test_case($testcase, $env, $path)
 
 
                         $outcome = testAssertion($path, $asserts->itemAt(0)->getNodeValue(), $result, $resultDocMap, $errorCode);
-                        if (!$outcome or $result == null) {
+                        if (!$outcome) {
                             $fail++;
                             unset($asserts);
                             unset($outcome);
