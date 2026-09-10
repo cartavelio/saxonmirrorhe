@@ -82,9 +82,9 @@ public class DocAvailable extends SystemFunction  {
             PackageData packageData = getRetainedStaticContext().getPackageData();
 
             int schemaValidationMode = parseOptions.getSchemaValidationMode();
-            if (!packageData.isSchemaAware() && (schemaValidationMode > 0  && schemaValidationMode < 4)) {
+            if (!packageData.isSchemaAware() && (schemaValidationMode == 1  || schemaValidationMode == 2)) {
                 // Regardless of whether it exists, the document will be unavailable because
-                // schema validation is required but not supported
+                // schema validation (STRICT or LAX) is required but not supported
                 return false;
             }
 
