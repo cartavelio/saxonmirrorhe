@@ -339,6 +339,13 @@ TODO: rethink redefines and override
         at least one special character, specifically a less-than or ampersand character. 
         TODO: perhaps drop this, it didn't make it into 4.0</p>
         
+        <p>The serialization parameter <code>saxon:stylesheet-version</code> (which in previous releases was largely
+            for internal use) is now renamed <code>saxon:spec-version</code>, and can be used to control which version
+            of the serialization specification is to be used. The differences are minor, but with version 4.0, for example,
+            JSON output adopts a fallback representation of Infinity and NaN rather than rejecting these values with an
+            error. When the serializer is invoked directly from XQuery or XSLT then the...
+            TODO: FIXME!!! </p>
+        
         <p>When generating HTML5 output including a <code>meta</code> element, the <code>meta</code>
         element now uses the form mandated by the HTML5 living standard (with a <code>charset</code>
         attribute). Technically this is a non-conformance with the XSLT 3.0 / XQuery 3.1 specifications,
@@ -361,6 +368,12 @@ TODO: rethink redefines and override
     
     <category name="xslt40">
         
+        <aside>See also the <xref section="changes" page="extensions"
+            subpage="12-13">Saxon extensions to the W3C XSLT/XQuery specifications</xref>
+            Change history category, for information about proposed 4.0 extensions
+            implemented in earlier versions of Saxon, including details about extensions 
+            which have been dropped in the current 4.0 specifications.</aside>
+        
         <h2>New features from the 4.0 specifications</h2>
         
         <p>Many new features from the draft 4.0 specifications are implemented in Saxon 13, and they
@@ -371,9 +384,10 @@ TODO: rethink redefines and override
                 <a href="https://qt4cg.org/">qt4cg.org</a>. In most cases these link to the GitHub
                 issues and pull requests (PRs) that record the progress of each change. For example,
                 section 5.5 of the XSLT 4.0 specification starts with the change entry:</p>
-                <quote>The strings used in the formatted number to represent a decimal separator, grouping separator, 
+                <blockquote>The strings used in the formatted number to represent a decimal separator, grouping separator, 
                     exponent separator, percent sign, per mille sign, or minus sign, are no longer 
-                    constrained to be single characters.   [Issue 1048 PR 1250 3 June 2024]</quote>
+                    constrained to be single characters.   [Issue 1048 PR 1250 3 June
+                    2024]</blockquote>
             </li>
             <li><p>Click on the PR number in the spec to find the relevant PR on GitHub.
                 For this example (at the time of writing) the PR carries the labels "Completed", "Tests Added",
@@ -382,8 +396,8 @@ TODO: rethink redefines and override
                 and implementation are both subject to change.</p></li>
         </ol>
         
-        <p><emph>References of the form </emph>PR nnnn <emph>refer to pull requests against the
-            specifications in <a href="https://github.com/qt4cg/qtspecs/pulls">GitHub</a>.</emph></p>
+        <p><em>References of the form </em>PR nnnn <em>refer to pull requests against the
+            specifications in <a href="https://github.com/qt4cg/qtspecs/pulls">GitHub</a>.</em></p>
         
         <h2>XSLT 4.0 changes</h2>
         
@@ -438,6 +452,12 @@ TODO: rethink redefines and override
     
     <category name="xquery40">
         
+        <aside>See also the <xref section="changes" page="extensions"
+            subpage="12-13">Saxon extensions to the W3C XSLT/XQuery specifications</xref>
+            Change history category, for information about proposed 4.0 extensions
+            implemented in earlier versions of Saxon, including details about extensions 
+            which have been dropped in the current 4.0 specifications.</aside>
+        
         <p>See also the changes for XPath 4.0, which apply equally to XQuery.</p>
         
         <p>In XQuery, the syntax of item type declarations is now <code>declare type</code> rather than
@@ -468,6 +488,12 @@ TODO: rethink redefines and override
     </category>
     
     <category name="xpath40">
+        
+        <aside>See also the <xref section="changes" page="extensions"
+            subpage="12-13">Saxon extensions to the W3C XSLT/XQuery specifications</xref>
+            Change history category, for information about proposed 4.0 extensions
+            implemented in earlier versions of Saxon, including details about extensions 
+            which have been dropped in the current 4.0 specifications.</aside>
         
         <h3>Data model changes</h3>
         
@@ -597,6 +623,13 @@ TODO: rethink redefines and override
     </category>
     
     <category name="functions40">
+        
+        <aside>See also the <xref section="changes" page="extensions"
+            subpage="12-13">Saxon extensions to the W3C XSLT/XQuery specifications</xref>
+            Change history category, for information about proposed 4.0 extensions
+            implemented in earlier versions of Saxon, including details about extensions 
+            which have been dropped in the current 4.0 specifications.</aside>
+        
         <p>A second <code>$position</code> argument is available on many function callbacks, for example those on
             <code>every</code>, <code>filter</code>, <code>for-each</code>, <code>index-where</code>, <code>some</code>.</p>
         
@@ -604,8 +637,6 @@ TODO: rethink redefines and override
             flag is set. A '#' character can be escaped as <code>\#</code> or <code>[#]</code>. (PR 1022)</p>
         
         <p>PR2492 - The <code>fn:collation-available</code> function IS implemented, and the $usage parameter has been dropped.</p>
-        
-        <p>PR2492 - Renamed <code>jnode-selector</code> and <code>jnode-content</code> as <code>jkey</code> and <code>jvalue</code>.</p>
         
         
         <p>The following functions are new in 4.0 (some of these were already implemented in Saxon 12):</p>
@@ -643,6 +674,7 @@ TODO: rethink redefines and override
             <li><code>fn:every</code></li> 
             <li><code>fn:expanded-QName</code></li> 
             <li><code>fn:foot</code></li> 
+            <li><code>fn:function-identity</code></li> 
             <li><code>fn:graphemes</code></li> 
             <li><code>fn:hash</code></li> 
             <li><code>fn:highest</code></li> 
@@ -654,9 +686,10 @@ TODO: rethink redefines and override
             <li><code>fn:invisible-xml</code></li> 
             <li><code>fn:is-NaN</code></li> 
             <li><code>fn:items-at</code></li> 
-            <li><code>fn:jnode-position</code></li> 
-            <li><code>fn:jnode-selector</code></li> 
+            <li><code>fn:jkey</code></li> 
+            <li><code>fn:jposition</code></li> 
             <li><code>fn:jtree</code></li> 
+            <li><code>fn:jvalue</code></li> 
             <li><code>fn:lowest</code></li> 
             <li><code>fn:message</code></li> 
             <li><code>fn:node-type-annotation</code></li> 
@@ -807,7 +840,6 @@ TODO: rethink redefines and override
                 is due to limitations in the ICU4N library.</p></li>
         </ul>
         
-        <p>Following PR2572, the proposed <code>map:keys-where</code> function has been dropped.</p>
  
     </category>
     
@@ -828,35 +860,33 @@ TODO: rethink redefines and override
         <ul>
             <li><p>The ternary conditional expression <code>test ?? A !! B</code>.</p></li>
             <li><p>Record tests using the keyword "tuple" rather than "record".</p></li>
-            <li><p>Item types of the form "atomic(X)"</p></li>
+            <li><p>Item types of the form <code>"atomic(X)"</code>.</p></li>
             <li><p>The syntax <code>type(T)</code> is dropped. A type alias <code>T</code> is now referenced simply
                     as <code>T</code>, not <code>type(T)</code>. In XSLT patterns, a match for items
                     of type <code>T</code> is written <code>match="~T"</code> rather than
                 <code>match="type(T)"</code>.</p></li>
-            <li><p>Lambda expressions of the form <code>($a, $b) -> {$a + $b}</code></p></li>
+            <li><p>Local union types have been generalized to choice types; the syntax
+                <code>union(xs:int, xs:long)</code> is dropped, replaced by <code>(xs:int | xs:long)</code>,
+                and unions of other types are allowed (for example <code>(map(*) | array(*))</code>.</p></li>
+            <li><p>Lambda expressions of the form <code>($a, $b) -> {$a + $b}</code>.</p></li>
             <li><p>The "thin arrow" notation for inline functions (<code>->{.+1}</code> or
             <code>->($x){$x+1}</code>). These are now written <code>fn{.+1}</code> or
-            <code>fn($x){$x+1}</code> respectively.</p></li>
+                <code>fn($x){$x+1}</code> respectively.</p></li>
+            <li><p>Saxon's experimental operators <code>andAlso</code> and <code>orElse</code>
+                are dropped. The 4.0 specification defines <code>and</code> and <code>or</code>
+                to have short-cut semantics, so these operators are unnecessary.</p></li>
             <li><p><code>fn:all</code> is renamed <code>fn:every</code>.</p></li>
             <li><p><code>fn:contains-sequence</code>, <code>fn:ends-with-sequence</code> and
                 <code>fn:starts-with-sequence</code> are renamed
                 <code>fn:contains-subsequence</code>, <code>fn:ends-with-subsequence</code> and
                 <code>fn:starts-with-subsequence</code> respectively.</p></li>
             <li><p><code>fn:intersperse</code> is renamed <code>fn:insert-separator</code>.</p></li>
-            <li><p>Saxon's experimental operators <code>andAlso</code> and <code>orElse</code>
-            are dropped. The 4.0 specification defines <code>and</code> and <code>or</code>
-            to have short-cut semantics, so these operators are unnecessary.</p></li>
-            <li><p>Local union types have been generalized to choice types; the syntax
-            <code>union(xs:int, xs:long)</code> is dropped, replaced by <code>(xs:int | xs:long)</code>,
-            and unions of other types are allowed (for example <code>(map(*) | array(*))</code>.</p></li>
-            <li>The <code>fn:pin()</code> and <code>fn:label()</code> functions are dropped
+            <li>The <code>fn:pin</code> and <code>fn:label</code> functions are dropped
             (replaced by JNodes). For the time being, though, the <code>saxon:deep-update</code> extension function
             continues to use pinned and labelled items; this is likely to change in due course.</li>
             <li>The functions <code>fn:parcel</code> and <code>fn:unparcel</code> are dropped.
             In Saxon 12, <code>fn:parcel($x)</code> simply did <code>{'value': $x}</code>, and
             <code>fn:unparcel($p)</code> simply did <code>$p?value</code>.</li>
-            <li>The <code>saxon:as</code> extension attribute is deprecated; the standard <code>as</code>
-                attribute can now be used in its place.</li>
             <li><p>The functions <code>fn:items-after</code>, <code>fn:items-before</code>,
                 <code>fn:items-ending-where</code>, <code>fn:items-starting-where</code> are
                 dropped. (The alternative original Saxon namespace functions remain available: 
@@ -870,6 +900,7 @@ TODO: rethink redefines and override
             <li><p>The function <code>array:exists</code> is dropped.</p></li>
             <li><p>The second argument for <code>map:keys</code> is dropped, replaced by the new
                 function <code>map:keys-where</code>.</p></li>
+            <li><p>Following PR2572, the proposed <code>map:keys-where</code> function is dropped.</p></li>
             <li><p>The function <code>map:pairs</code> is dropped.</p></li>
         </ul>
         
@@ -878,26 +909,40 @@ TODO: rethink redefines and override
         
         <ul>
             <li><p><code>saxon:analyze-uri</code> is dropped, superseded by <code>fn:parse-uri</code>
-                    from the 4.0 specification.</p></li>
-            <li><p><code>saxon:index</code> is superseded by <code>map:build</code>.</p></li>
-            <li><p><code>saxon:index-where</code> is superseded by <code>fn:index-where</code>.</p></li>
+                from the 4.0 specification.</p></li>
+            <li><p><code>saxon:array-member</code> is dropped. A call on <code>saxon:array-member(x)</code>
+                can be replaced with the expression <code>{'value': x}</code>.</p></li>
             <li><p><code>saxon:highest</code> and <code>saxon:lowest</code> are dropped, superseded by 
                 <code>fn:highest</code> and <code>fn:lowest</code> from the 4.0 specification.</p></li>
+            <li><p><code>saxon:index</code> is superseded by <code>map:build</code>.</p></li>
+            <li><p><code>saxon:index-where</code> is superseded by <code>fn:index-where</code>.</p></li>
             <li><p><code>saxon:is-NaN</code> is dropped, superseded by <code>fn:is-NaN</code>.</p></li>
             <li><p><code>saxon:parse-html</code> is superseded by <code>fn:parse-html</code>, but
                 note that the specification for <code>fn:parse-html</code> has changed.</p></li>
-            <li><p><code>saxon:array-member</code> is dropped. A call on <code>saxon:array-member(x)</code>
-            can be replaced with the expression <code>{'value': x}</code>.</p></li>
             <li><p><code>saxon:pedigree</code> and <code>saxon:with-pedigree</code> are dropped.
             Applications using these functions should be rewritten to use JNodes, which build on the
             same idea but provide much more flexibility.</p></li>
         </ul>
+        
+        <p>The extension functions <code>saxon:line-number</code> and <code>saxon:column-number</code>
+            now return an empty sequence if the argument value is an empty sequence.</p>
+        
+        <p>A new vendor option has been added to the <code>fn:transform</code> function. Setting
+            the option <code>saxon:write-result-documents</code> to <code>true()</code> changes the
+            way the output of <code>xsl:result-document</code> instructions is handled. Instead of
+            being returned in the result map returned by <code>fn:transform</code>, they are handled
+            by the result document handler registered with the primary transformation, or the default
+            result document handler otherwise: this has the effect of writing the secondary results
+            directly to filestore.</p>
         
         <p>The <code>saxon:array</code> and <code>saxon:array-member</code> instructions are dropped
         in favour of their XSLT 4.0 counterparts, <code>xsl:array</code> and
             <code>xsl:array-member</code>. Note that the XSLT 4.0 specification for
             <code>xsl:array</code> has changed to drop the <code>composite</code> attribute, and add
             the <code>for-each</code> attribute.</p>
+        
+        <p>The <code>saxon:as</code> extension attribute is deprecated; the standard <code>as</code>
+            attribute can now be used in its place.</p>
         
         <p>The <code>xsl:map/@saxon:on-duplicates</code> extension attribute is no longer supported, it is 
         replaced by the regular XSLT 4.0 attribute <code>xsl:map/@duplicates.</code>
@@ -907,45 +952,26 @@ TODO: rethink redefines and override
         <p>The <code>xsl:accumulator-rule/@saxon:capture</code> extension attribute is deprecated;
             it is replaced by the regular XSLT 4.0 attribute <code>xsl:accumulator-rule/@capture.</code></p>
         
-        <p>A new vendor option has been added to the <code>fn:transform</code> function. Setting
-        the option <code>saxon:write-result-documents</code> to <code>true()</code> changes the
-        way the output of <code>xsl:result-document</code> instructions is handled. Instead of
-        being returned in the result map returned by <code>fn:transform</code>, they are handled
-        by the result document handler registered with the primary transformation, or the default
-        result document handler otherwise: this has the effect of writing the secondary results
-        directly to filestore.</p>
-        
-        <p>The extension functions <code>saxon:line-number</code> and <code>saxon:column-number</code>
-        now return an empty sequence if the argument value is an empty sequence.</p>
-        
         <p>The extension instruction <code>saxon:tabulate-maps</code> is dropped, as it depends
         on features like pins and labels that were proposed for XPath 4.0 but subsequently replaced
         by JNodes. Practical use cases for <code>saxon:tabulate-maps</code> can readily be rewritten
-        to use JNode-based path expressions: the example in the documentation:</p>
+        to use JNode-based path expressions: the example previously in the documentation:</p>
         
-        <p><code>&lt;saxon:tabulate-maps root="parse-json($input)" select="?*?cities?*"/></code></p>
+        <pre><code class="language-xml"><![CDATA[<saxon:tabulate-maps root="parse-json($input)" select="?*?cities?*"/>]]></code></pre>
         
         <p>might become:</p>
         
-        <p><![CDATA[
-<xsl:variable name="root" select="parse-json($input) -> jtree()"/>
+        <pre><code class="language-xml"><![CDATA[<xsl:variable name="root" select="parse-json($input) -> jtree()"/>
 <xsl:select>
    array {
      for $e in $root/*/cities/*
      return 
        map:merge(($e,
-                  {'_keys': array { ancestor-or-self::* ! json-selector() } },
+                  {'_keys': array { ancestor-or-self::* ! jkey() } },
                   ancestor::map(*)/child::type(xs:anyAtomicType)
                  ))
    }
-</xsl:select>]]></p>
-
-        
-        <p>The serialization parameter <code>saxon:stylesheet-version</code> (which in previous releases was largely
-        for internal use) is now renamed <code>saxon:spec-version</code>, and can be used to control which version
-        of the serialization specification is to be used. The differences are minor, but with version 4.0, for example,
-        JSON output adopts a fallback representation of Infinity and NaN rather than rejecting these values with an
-        error. When the serializer is invoked directly from XQuery or XSLT then the </p>
+</xsl:select>]]></code></pre>
     
     </category>
     

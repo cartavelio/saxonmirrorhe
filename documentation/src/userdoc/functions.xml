@@ -694,7 +694,7 @@
         <p>Available since Saxon 13 in XPath 4.0. Available since Saxon 12.0 under the previous name
           <code>fn:contains-sequence</code> provided that syntax extensions are enabled.</p>
       </status>
-      <saxon-edition>PE/EE 13 12_EXPERIMENTAL</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>Determines whether one sequence contains another as a contiguous subsequence, using a
           supplied callback function to compare items.</p>
@@ -1574,7 +1574,7 @@
         <p>Available since Saxon 13 in XPath 4.0. Available since Saxon 12.0 under the previous name
           <code>fn:ends-with-sequence</code> provided that syntax extensions are enabled.</p>
       </status>
-      <saxon-edition>PE/EE 13 12_EXPERIMENTAL</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>Determines whether one sequence ends with another, using a supplied callback function to
           compare items.</p>
@@ -1664,7 +1664,7 @@
         <p>Available since Saxon 13 in XPath 4.0. Available since Saxon 12.4 provided that syntax
           extensions are enabled, and since Saxon 11 under the previous name <code>fn:all</code>.</p>
       </status>
-      <saxon-edition>PE/EE 13 11_EXPERIMENTAL</saxon-edition>
+      <saxon-edition>PE/EE 12</saxon-edition>
       <description>
         <p>Returns <code>true</code> if every item in the input sequence satisfies a supplied
           predicate.</p>
@@ -2634,7 +2634,7 @@
         <p>Available since Saxon 13 in XPath 4.0. Available since Saxon 12.0 under the previous name
           <code>fn:intersperse</code> provided that syntax extensions are enabled.</p>
       </status>
-      <saxon-edition>PE/EE 13 12_EXPERIMENTAL</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>Inserts a separator between adjacent items in a sequence.</p>
       </description>
@@ -2714,21 +2714,7 @@
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions" class="qt4">
-      <name namespace="http://www.w3.org/2005/xpath-functions">jnode-content</name>
-      <signatures>
-        <proto return-type="item()*">
-          <arg name="input" type="jnode()?" default="." desc="The input JNode"/>
-          <in-spec>xpath40</in-spec>
-        </proto>
-      </signatures>
-      <status-ok/>
-      <saxon-edition>PE/EE 13</saxon-edition>
-      <description>
-        <p>Returns the content property of a JNode.</p>
-      </description>
-    </function>
-    <function xmlns="http://www.saxonica.com/ns/doc/functions" class="qt4">
-      <name namespace="http://www.w3.org/2005/xpath-functions">jnode-position</name>
+      <name namespace="http://www.w3.org/2005/xpath-functions">jkey</name>
       <signatures>
         <proto return-type="xs:anyAtomicType?">
           <arg name="input" type="jnode()?" default="." desc="The input JNode"/>
@@ -2738,13 +2724,13 @@
       <status-ok/>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
-        <p>Returns the position property of a JNode.</p>
+        <p>Returns the <em>jkey</em> property of a JNode.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions" class="qt4">
-      <name namespace="http://www.w3.org/2005/xpath-functions">jnode-selector</name>
+      <name namespace="http://www.w3.org/2005/xpath-functions">jposition</name>
       <signatures>
-        <proto return-type="xs:anyAtomicType?">
+        <proto return-type="xs:integer?">
           <arg name="input" type="jnode()?" default="." desc="The input JNode"/>
           <in-spec>xpath40</in-spec>
         </proto>
@@ -2752,7 +2738,7 @@
       <status-ok/>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
-        <p>Returns the selector property of a JNode.</p>
+        <p>Returns the <em>jposition</em> property of a JNode.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -2844,6 +2830,20 @@
       <description>
         <p>Delivers a root JNode wrapping a map or array, enabling the use of lookup expression to
           navigate a JTree rooted at that map or array.</p>
+      </description>
+    </function>
+    <function xmlns="http://www.saxonica.com/ns/doc/functions" class="qt4">
+      <name namespace="http://www.w3.org/2005/xpath-functions">jvalue</name>
+      <signatures>
+        <proto return-type="item()*">
+          <arg name="input" type="jnode()?" default="." desc="The input JNode"/>
+          <in-spec>xpath40</in-spec>
+        </proto>
+      </signatures>
+      <status-ok/>
+      <saxon-edition>PE/EE 13</saxon-edition>
+      <description>
+        <p>Returns the <em>jvalue</em> property of a JNode.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -4519,7 +4519,7 @@
         <p>Available since Saxon 13 in XPath 4.0. Available since Saxon 12.0 under the previous name
           <code>fn:starts-with-sequence</code> provided that syntax extensions are enabled.</p>
       </status>
-      <saxon-edition>PE/EE 13 12_EXPERIMENTAL</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>Determines whether one sequence starts with another, using a supplied callback function
           to compare items.</p>
@@ -6596,7 +6596,7 @@
         <p>Available since Saxon 13 in XPath 4.0. Available since Saxon 12.2 under the previous name
           <code>array:of</code> provided that syntax extensions are enabled .</p>
       </status>
-      <saxon-edition>PE/EE 13 12_EXPERIMENTAL</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>Constructs an array from the contents of a sequence of value records. The inverse of the
           <a class="bodylink code" href="/functions/array/members">array:members</a>
