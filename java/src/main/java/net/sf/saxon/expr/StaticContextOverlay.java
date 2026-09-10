@@ -32,10 +32,18 @@ public class StaticContextOverlay implements StaticContext, NamespaceResolver {
     private final StaticContext delegee;
     private UnprefixedElementMatchingPolicy localPolicy = UnprefixedElementMatchingPolicy.UNSPECIFIED;
     private NamespaceUri defaultElementNamespace;
-    private Map<String, NamespaceUri> prologNamespaces = new HashMap<>(4);
+    private final Map<String, NamespaceUri> prologNamespaces = new HashMap<>(4);
 
+    /**
+     * Construct a StaticContext object that delegates to an underlying ummutable StaticContext
+     * @param delegee the StaticContext to which requests are delegated
+     */
     public StaticContextOverlay(StaticContext delegee) {
         this.delegee = delegee;
+    }
+
+    public StaticContext getDelegee() {
+        return delegee;
     }
 
     @Override
@@ -60,8 +68,11 @@ public class StaticContextOverlay implements StaticContext, NamespaceResolver {
 
     @Override
     public RetainedStaticContext makeRetainedStaticContext() {
-        // TODO: add extra namespaces??
-        return delegee.makeRetainedStaticContext();
+        // This is inefficient because it retains the entire static context in run-time memory,
+        // but we can assume for now that declaring namespaces in XPath expressions is uncommon.
+        RetainedStaticContext rsc = delegee.makeRetainedStaticContext();
+        rsc.setNamespaces(this);
+        return rsc;
     }
 
     @Override

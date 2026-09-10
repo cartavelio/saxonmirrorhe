@@ -89,8 +89,8 @@ public abstract class AttributeValueTemplate {
                 if (last > avt.length()) {
                     throw new XPathException("Missing closing '}' after expression in value template `" + avt + "`", "XTSE0350");
                 }
-                if (env instanceof ExpressionContext && ((ExpressionContext)env).getStyleElement() instanceof XSLAnalyzeString
-                        && isIntegerOrIntegerPair(exp)) {
+                StyleElement elem = ExpressionContext.getXsltElement(env);
+                if (elem instanceof XSLAnalyzeString && isIntegerOrIntegerPair(exp)) {
                     env.issueWarning("Found {" + showIntegers(exp) + "} in regex attribute: perhaps {{" +
                         showIntegers(exp) + "}} was intended? (The attribute is an AVT, so curly braces should be doubled)", SaxonErrorCode.SXWN9036, exp.getLocation());
                 }

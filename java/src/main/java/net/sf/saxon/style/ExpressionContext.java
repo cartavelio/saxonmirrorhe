@@ -34,7 +34,8 @@ import net.sf.saxon.value.SequenceType;
 
 /**
  * An ExpressionContext represents the context for an XPath expression written
- * in the stylesheet.
+ * in an XSLT stylesheet. Note that in 4.0, an ExpressionContext may be accessed
+ * indirectly via a {@link StaticContextOverlay}.
  */
 
 public class ExpressionContext implements StaticContext {
@@ -56,6 +57,34 @@ public class ExpressionContext implements StaticContext {
     public ExpressionContext(StyleElement styleElement, StructuredQName attributeName) {
         element = styleElement;
         this.attributeName = attributeName;
+    }
+
+    /**
+     * Static method to get the XSLT instruction underlying a supplied StaticContext
+     * object if there is one; otherwise return null.
+     */
+
+    public static ExpressionContext getXsltExpressionContext(StaticContext env) {
+        if (env instanceof ExpressionContext ex) {
+            return ex;
+        }
+        if (env instanceof StaticContextOverlay overlay) {
+            return getXsltExpressionContext(overlay.getDelegee());
+        }
+        return null;
+    }
+
+    /**
+     * Static method to get the XSLT instruction underlying a supplied StaticContext
+     * object if there is one; otherwise return null.
+     */
+
+    public static StyleElement getXsltElement(StaticContext env) {
+        ExpressionContext expressionContext = getXsltExpressionContext(env);
+        if (expressionContext != null) {
+            return expressionContext.getStyleElement();
+        }
+        return null;
     }
 
     /**

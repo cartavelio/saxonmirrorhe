@@ -5365,8 +5365,9 @@ public class XPathParser {
             b2 = findXPathParameter(qName, inlineFunctionStack, env);
         }
         // It's not an in-scope range variable. If we're in XSLT, it might be an XSLT-defined local variable
-        if (env instanceof ExpressionContext && !inlineFunctionStack.isEmpty()) {
-            b2 = findOuterXSLTVariable(qName, inlineFunctionStack, env);
+        ExpressionContext xsltContext = ExpressionContext.getXsltExpressionContext(env);
+        if (xsltContext != null && !inlineFunctionStack.isEmpty()) {
+            b2 = findOuterXSLTVariable(qName, inlineFunctionStack, xsltContext);
         }
         return b2;  // if null, it's not an in-scope range variable
     }
@@ -5468,9 +5469,9 @@ public class XPathParser {
      */
 
     private static LocalBinding findOuterXSLTVariable(
-            StructuredQName qName, IndexedStack<InlineFunctionDetails> inlineFunctionStack, StaticContext env) {
-        StructuredQName attName = ((ExpressionContext) env).getAttributeName();
-        SourceBinding decl = ((ExpressionContext) env).getStyleElement().bindLocalVariable(qName, attName);
+            StructuredQName qName, IndexedStack<InlineFunctionDetails> inlineFunctionStack, ExpressionContext env) {
+        StructuredQName attName = env.getAttributeName();
+        SourceBinding decl = env.getStyleElement().bindLocalVariable(qName, attName);
         if (decl != null) {
             InlineFunctionDetails details = inlineFunctionStack.get(0);
             LocalBinding innermostBinding;

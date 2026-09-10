@@ -62,12 +62,11 @@ public class XSLOriginalLibrary implements FunctionLibrary {
 
     @Override
     public FunctionItem getFunctionItem(SymbolicName.F functionName, StaticContext env) throws XPathException {
+        StyleElement containingElement = ExpressionContext.getXsltElement(env);
         if (functionName.getComponentKind() == StandardNames.XSL_FUNCTION &&
                 functionName.getComponentName().hasURI(NamespaceUri.XSLT) &&
                 functionName.getComponentName().getLocalPart().equals("original") &&
-                env instanceof ExpressionContext) {
-            ExpressionContext expressionContext = (ExpressionContext) env;
-            StyleElement containingElement = expressionContext.getStyleElement();
+                containingElement != null) {
             XSLFunction overridingFunction = (XSLFunction)containingElement.findAncestorElement(StandardNames.XSL_FUNCTION);
             if (overridingFunction == null) {
                 throw new XPathException("Function name xsl:original can only be used within xsl:function", "XTSE3058");

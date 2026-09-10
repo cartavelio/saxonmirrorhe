@@ -12,7 +12,6 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.UserFunctionCall;
 import net.sf.saxon.expr.instruct.UserFunction;
-import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.functions.ContextDependentUserFunction;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.om.FunctionItem;
@@ -116,10 +115,10 @@ public class StylesheetFunctionLibrary implements FunctionLibrary {
             fc.setArguments(expandedArgs);
         }
 
-        if (env instanceof ExpressionContext) {
+        StyleElement elem = ExpressionContext.getXsltElement(env);
+        if (elem != null) {
             // compile-time binding of a static function call in XSLT
-            final PrincipalStylesheetModule psm = ((ExpressionContext) env).getStyleElement().getCompilation().getPrincipalStylesheetModule();
-            final ExpressionVisitor visitor = ExpressionVisitor.make(env);
+            final PrincipalStylesheetModule psm = elem.getCompilation().getPrincipalStylesheetModule();
             psm.addFixupAction(() -> {
                 if (fc.getFunction() == null) {
                     Component target = psm.getComponent(fc.getSymbolicName());
