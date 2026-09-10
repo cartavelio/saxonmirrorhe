@@ -745,6 +745,10 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         }
 
         public static GroundedValue members(ArrayItem input) {
+            if (input == null) {
+                return EmptySequence.getInstance();
+            }
+
             List<Parcel> parcels = new ArrayList<>(input.arrayLength());
             for (GroundedValue member : input.members()) {
                 parcels.add(new Parcel(member));
