@@ -80,7 +80,7 @@ public class ParseHtml extends Parse {
                 nsStack.push(nsStack.peek());
             }
             nsMap = nsMap.put("", nsStack.peek());
-            NodeName nn = new FingerprintedQName("", nsStack.peek(), elemName.getLocalPart().toLowerCase());
+            NodeName nn = new FingerprintedQName("", nsStack.peek(), elemName.getLocalPart());
             if (attributes.size() != 0) {
                 AttributeMap atts2 = EmptyAttributeMap.getInstance();
                 for (AttributeInfo info : attributes) {
@@ -98,7 +98,7 @@ public class ParseHtml extends Parse {
         private String lowerCaseAttributeName(String in) {
             return in;
 //            // nu.validator doesn't convert SVG attribute names to lower-case, which it should. But we can't simply
-//            // call toLowerCase(), because the name may contains Uxxxxxx escapes that should remain upper-case.
+//            // call toLowerCase(), because the name may contain Uxxxxxx escapes that should remain upper-case.
 //            if (in.equals(in.toLowerCase())) {
 //                return in;
 //            } else {
