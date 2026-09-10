@@ -15,6 +15,7 @@ using Saxon.Ejava.io;
 using Saxon.Ejava.util;
 using Singulink.Numerics;
 using FeatureKeys = Saxon.Api.FeatureKeys;
+using File = Saxon.Ejava.io.File;
 using TreeModel = Saxon.Api.TreeModel;
 using Version = System.Version;
 using SysIO = System.IO;

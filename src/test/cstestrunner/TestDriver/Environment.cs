@@ -26,7 +26,9 @@ using JStructuredQName = Saxon.Hej.om.StructuredQName;
 using Saxon.Hej;
 using Saxon.Hej.lib;
 using Saxon.Callbacks;
+#if EE
 using Saxon.Eej.ee.stream;
+#endif
 using Saxon.Impl.Helpers;
 using DocumentBuilder = Saxon.Api.DocumentBuilder;
 using Processor = Saxon.Api.Processor;
@@ -868,6 +870,9 @@ namespace TestDriver {
                 if (!validateSources && validation.Equals("skip")) {
                     builder.SchemaValidationMode = SchemaValidationMode.None;
                     builder.SchemaValidator = null;
+                } else if (manager == null)
+                {
+                    environment.usable = false;
                 }
                 else {
                     SchemaValidator validator = manager.NewSchemaValidator();
@@ -951,10 +956,12 @@ namespace TestDriver {
                                         dom.Load(ss);
                                         doc = builder.Wrap(dom);
                                         break;
+#if EE                                    
                                     case "linq":
                                         XDocument linq = XDocument.Load(ss, LoadOptions.PreserveWhitespace);
                                         doc = builder.Wrap(linq);
                                         break;
+#endif
                                     default:
                                         builder.TreeModel = TreeModel.TinyTree;
                                         doc = builder.Build(ss);

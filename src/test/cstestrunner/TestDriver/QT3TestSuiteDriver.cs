@@ -13,7 +13,9 @@ using JVersion = Saxon.Hej.Version;
 using System.Linq;
 using System.Net;
 using System.Text;
+#if EE
 using Saxon.Eej.functions.registry;
+#endif
 using Saxon.Hej.trans;
 
 
@@ -336,14 +338,19 @@ namespace TestDriver {
         }
 
         protected bool makeSchemaAware(Environment env, bool inverse) {
-            // if (!env.processor.SchemaAware) {
-            //     return false; // cannot use the selected tree model for schema-aware tests
-            // }
-
+#if !EE
+             //if (!env.processor.SchemaManager == null) {
+                 return false; // cannot use the selected tree model for schema-aware tests
+             //}
+#endif
             if (inverse) {
                 // force use of a non-schema-aware processor by creating a ProfessionalConfiguration
                 Processor savedProcessor = env.processor;
+#if EE                
                 Saxon.Eej.config.ProfessionalConfiguration pConfig = new Saxon.Eej.config.ProfessionalConfiguration();
+#else
+                Saxon.Hej.Configuration pConfig = new Saxon.Hej.Configuration();
+#endif                
                 pConfig.setNamePool(env.processor.Implementation.getNamePool());
                 env.processor = new Processor(pConfig);
                 env.processor.SetProperty(Feature.STABLE_UNPARSED_TEXT, true);
@@ -833,7 +840,11 @@ namespace TestDriver {
                 }
 
                 XPathCompiler assertXpc = env.processor.NewXPathCompiler();
+#if EE
                 assertXpc.XPathLanguageVersion = "4.0";
+#else
+                assertXpc.XPathLanguageVersion = "3.1";
+#endif                
                 assertXpc.SchemaAware = testIsSchemaAware;
                 assertXpc.DeclareNamespace("fn", "http://www.w3.org/2005/xpath-functions");
                 assertXpc.DeclareNamespace("xs", "http://www.w3.org/2001/XMLSchema");
