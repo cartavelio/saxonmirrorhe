@@ -8,6 +8,11 @@ namespace Saxon.Impl.Helpers {
         public static int unsignedRightShift(int i, int shift) {
             return (int) ((uint) i >> shift);
         }
+        
+        public static int RotateRight(int i, int distance) {
+            return unsignedRightShift(i, distance) | (i << -distance);
+        }
+        
         public static long unsignedRightShift(long i, int shift) {
             return (long) ((ulong) i >> shift);
         }
