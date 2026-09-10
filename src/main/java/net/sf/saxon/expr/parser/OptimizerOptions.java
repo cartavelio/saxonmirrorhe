@@ -19,7 +19,7 @@ public class OptimizerOptions {
     public static final int INLINE_FUNCTIONS = 8;
     public static final int INDEX_VARIABLES = 16;
     public static final int CREATE_KEYS = 32;
-    public static final int BYTE_CODE = 64;
+    public static final int BYTE_CODE_NOT_USED = 64;
     public static final int COMMON_SUBEXPRESSIONS = 128;
     public static final int MISCELLANEOUS = 256;
     public static final int SWITCH = 512;
@@ -60,7 +60,7 @@ public class OptimizerOptions {
     private int decodeFlag(char flag) {
         switch (flag) {
             case 'c':
-                return BYTE_CODE;
+                return BYTE_CODE_NOT_USED;
             case 'd':
                 return VOID_EXPRESSIONS;
             case 'e':
@@ -112,9 +112,6 @@ public class OptimizerOptions {
 
     public String toString() {
         String result = "";
-        if (isSet(BYTE_CODE)) {
-            result += "c";
-        }
         if (isSet(VOID_EXPRESSIONS)) {
             result += "d";
         }
