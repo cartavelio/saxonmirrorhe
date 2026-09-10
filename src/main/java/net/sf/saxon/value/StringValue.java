@@ -383,7 +383,12 @@ public class StringValue extends AtomicValue {
             } else if (o instanceof StringXPathComparable) {
                 return collator.compareStrings(value, ((StringXPathComparable)o).value);
             } else {
-                throw new ClassCastException("Cannot compare xs:string to " + o.toString());
+                String other = o.toString();
+                if (o instanceof AtomicValue) {
+                    other = ((AtomicValue) o).getItemType() + " value " + other;
+                }
+                throw new ClassCastException("Cannot compare xs:string value '"
+                                                     + value + "' to " + other);
             }
         }
     }
