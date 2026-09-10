@@ -246,10 +246,10 @@
           select="."/>"); </xsl:for-each> } </xsl:result-document>
 
     <xsl:result-document href="{$output-root}-numbering.xml" expand-text="yes">
-      <section id="ICU-numbers-and-dates" title="Numbers and Dates from ICU">
+      <section id="ICU-numbers-and-dates" title="Numbers and dates from ICU">
         <xsl:comment>AUTO-GENERATED: do not edit</xsl:comment>
         <xsl:comment>{$audit}</xsl:comment>
-        <h1>Numbers and Dates from ICU</h1>
+        <h1>Numbers and dates from ICU</h1>
         <p xsl:use-when="$add.diagnostics">The time now, in Welsh, is
           {format-time(current-time(),'[HWw] [mw]','cy',(),())}</p>
         <p><a href="http://site.icu-project.org/">ICU - International Components for Unicode</a>
@@ -324,7 +324,7 @@
           <a class="bodylink code" href="/functions/fn/format-integer">format-integer()</a> and 
           <a class="bodylink code" href="/xsl-elements/number">xsl:number</a> language arguments.</p>
         <p>A full list of the scheme codes and their support in a given language is given in <a
-            class="bodylink" href="ICU-numbering">Supported ICU Numbering Schemes</a>.</p>
+            class="bodylink" href="ICU-numbering">Supported ICU numbering schemes</a>.</p>
         <p>In the absence of such a private tag, the following strategies are adopted:</p>
         <dl>
           <dt>Cardinal spellout</dt>
@@ -397,8 +397,8 @@
         <p>As is required from the specification, when the language locale requested is not
           implemented, the result of <code>format-date()</code> or <code>format-dateTime()</code> is
           prefixed with "[Language: <em>default language code</em>]". </p>
-        <h2 class="subtitle">Title Case</h2>
-        <p>Protocols for Title Case of sequences of words can differ markedly between languages,
+        <h2 class="subtitle">Title case</h2>
+        <p>Protocols for title case of sequences of words can differ markedly between languages,
           with many keeping strictly to lower-case throughout, and a very few (such as Dutch with
           'iJ') having very specialist rules. In Saxon, when title case is requested (e.g.
             <code>Ww</code> in <code>format-integer()</code> or <code>[MNn]</code> in
@@ -421,7 +421,7 @@
           using, please let us know.</p>
 
         <div xsl:use-when="false()">
-          <h2>Maps of features.</h2>
+          <h2>Maps of features</h2>
           <p>Saxon can provide a series of maps that describe the supported locales, numbering
             schemes and appropriate codes, which can be consulted programmatically to determine
             whether various forms of language and numbering are supported in the implementation.
@@ -455,8 +455,8 @@
             </tbody>
           </table>
         </div>
-        <section id="ICU-numbering" title="Supported ICU Numbering Schemes">
-          <h1>Supported ICU Numbering Schemes</h1>
+        <section id="ICU-numbering" title="Supported ICU numbering schemes">
+          <h1>Supported ICU numbering schemes</h1>
           <aside>Since Saxon 9.8, the ICU library is updated from version 57.1 to 59.1; which brings
             Unicode 9.0 support.</aside>
           <p>The names of the numbering schemes and the codes to be used for them (ICU
