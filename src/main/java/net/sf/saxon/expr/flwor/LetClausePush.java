@@ -9,7 +9,6 @@ package net.sf.saxon.expr.flwor;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -31,8 +30,7 @@ public class LetClausePush extends TuplePush {
      */
     @Override
     public void processTuple(XPathContext context) throws XPathException {
-        Sequence val = letClause.getEvaluator().evaluate(letClause.getSequence(), context);
-        context.setLocalVariable(letClause.getRangeVariable().getLocalSlotNumber(), val);
+        letClause.evaluateRangeVariable(context);
         destination.processTuple(context);
     }
 

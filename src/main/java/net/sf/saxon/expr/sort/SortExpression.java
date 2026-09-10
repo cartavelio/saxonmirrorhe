@@ -379,6 +379,10 @@ public class SortExpression extends Expression
         if (iter instanceof EmptyIterator) {
             return iter;
         }
+        return iterateSorted(iter, context);
+    }
+
+    public SequenceIterator iterateSorted(SequenceIterator iter, XPathContext context) throws XPathException {
 
         AtomicComparer[] comps = comparators;
         if (comparators == null) {

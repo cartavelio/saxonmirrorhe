@@ -10,9 +10,9 @@ package net.sf.saxon.expr.flwor;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-
 import net.sf.saxon.type.ItemType;
 
 import java.util.List;
@@ -27,6 +27,7 @@ public class LetClause extends Clause {
     private LocalVariableBinding rangeVariable;
     private Operand sequenceOp;
     private Evaluator evaluator;
+    private Evaluator.ElaboratedEvaluator variableEvaluator;
 
     @Override
     public ClauseName getClauseKey() {
@@ -69,6 +70,15 @@ public class LetClause extends Clause {
 
     public LocalVariableBinding getRangeVariable() {
         return rangeVariable;
+    }
+
+    public void evaluateRangeVariable(XPathContext context) throws XPathException {
+        if (variableEvaluator == null) {
+            Evaluator evaluator = getEvaluator();
+            variableEvaluator = evaluator.elaborate(getSequence());
+        }
+        Sequence val = variableEvaluator.eval(context);
+        context.setLocalVariable(getRangeVariable().getLocalSlotNumber(), val);
     }
 
     /**

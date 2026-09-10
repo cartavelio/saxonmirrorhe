@@ -157,26 +157,38 @@ public class SubscriptExpression extends SingleItemFilter {
         }
         int intindex = index.asSubscript();
         if (intindex != -1) {
-            Item item;
             SequenceIterator iter = getBaseExpression().iterate(context);
-            if (intindex == 1) {
-                item = iter.next();
-            } else if (iter instanceof MemoSequence.ProgressiveIterator) {
-                MemoSequence mem = ((MemoSequence.ProgressiveIterator)iter).getMemoSequence();
-                item = mem.itemAt(intindex - 1);
-            } else if (iter instanceof GroundedIterator && ((GroundedIterator)iter).isActuallyGrounded()) {
-                GroundedValue value = SequenceTool.toGroundedValue(iter);
-                item = value.itemAt(intindex - 1);
-            } else {
-                SequenceIterator tail = TailIterator.make(iter, intindex);
-                item = tail.next();
-                tail.close();
-            }
-            return item;
+            return getItemAt(iter, intindex);
         } else {
             // there is no item at the required position
             return null;
         }
+    }
+
+    /**
+     * Get the item at a specified position within a SequenceIterator
+     * @param iter the SequenceIterator (which may be consumed by this operation)
+     * @param index the position (1-based) - must be positive
+     * @return the item at that position, or null if out of range
+     * @throws XPathException if a failure occurs evaluating the iterator
+     */
+
+    public static Item getItemAt(SequenceIterator iter, int index) throws XPathException {
+        Item item;
+        if (index == 1) {
+            item = iter.next();
+        } else if (iter instanceof MemoSequence.ProgressiveIterator) {
+            MemoSequence mem = ((MemoSequence.ProgressiveIterator) iter).getMemoSequence();
+            item = mem.itemAt(index - 1);
+        } else if (iter instanceof GroundedIterator && ((GroundedIterator) iter).isActuallyGrounded()) {
+            GroundedValue value = SequenceTool.toGroundedValue(iter);
+            item = value.itemAt(index - 1);
+        } else {
+            SequenceIterator tail = TailIterator.make(iter, index);
+            item = tail.next();
+            tail.close();
+        }
+        return item;
     }
 
     /**
