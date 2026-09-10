@@ -52,7 +52,6 @@ import java.util.List;
  * This class implements the saxon:compile-XPath() extension function,
  * which is specially-recognized by the system because it needs access
  * to parts of the static context.
- * <p>
  * <p>The compile-XPath() extension function compiles an XPath expression to a SEF
  * representation. It was originally defined for Saxon-JS to allow free-standing compilation
  * and execution of dynamic XPath expressions in the browser; this is a back-port to
