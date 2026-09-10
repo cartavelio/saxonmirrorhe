@@ -57,7 +57,7 @@ task xml_digest(
   args "-it",
     "-xsl:${projectDir}/tools/transpiler/xslt/xml-to-digest.xsl",
     "-o:${buildDir}/digest.xml",
-    "xmlDir=${buildDir}/xmlout"
+    "xmlDir=../../../build/xmlout"
 }
 
 task refine_digest(
