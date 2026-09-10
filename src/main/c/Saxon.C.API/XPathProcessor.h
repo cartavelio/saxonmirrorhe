@@ -179,7 +179,7 @@ public:
    */
   bool removeParameter(const char *name);
 
-  //! Set a property specific to the processor in use.
+  //! Set a property specific to the XPath processor in use.
   /**
    * XPathProcessor: set serialization properties (names start with '!' i.e.
    * name "!method" -> "xml") 'o':outfile name, 's': context item supplied as
@@ -189,8 +189,14 @@ public:
    */
   void setProperty(const char *name, const char *value);
 
-  //! Declare a namespace binding as part of the static context for XPath
-  //! expressions compiled using this XPathCompiler
+ //! Get a property specified on the XPath processor in use. Memory deallocation internally handled.
+ /**
+  * @param name of the property.
+  * @returns const char * - value of the property or nullptr is property not found. Memory deallocation internally handled.
+  */
+ const char * getProperty(const char *name);
+
+  //! Declare a namespace binding as part of the static context for XPath expressions compiled using this XPathCompiler
   /**
    *
    * @param prefix The namespace prefix. If the value is a zero-length string,
@@ -204,8 +210,7 @@ public:
    */
   void declareNamespace(const char *prefix, const char *uri);
 
-  //! Declare a variable as part of the static context for XPath expressions
-  //! compiled using this <code>XPathCompiler</code>.
+  //! Declare a variable as part of the static context for XPath expressions compiled using this <code>XPathCompiler</code>.
   /**
    *  It is an error for the XPath expression to refer to a variable unless it
    * has been declared. This method declares the existence of the variable, but

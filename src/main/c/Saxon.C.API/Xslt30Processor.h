@@ -427,6 +427,12 @@ private:
    */
   void setProperty(const char *name, const char *value);
 
+ //! Get properties specified on the Xslt30 processor.
+ /**
+  * @returns map (string, string) pair
+  */
+ std::map<std::string, std::string> &getProperties();
+
   //! Clear property values set
   void clearProperties();
 
