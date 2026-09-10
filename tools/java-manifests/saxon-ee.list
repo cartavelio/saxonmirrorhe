@@ -102,7 +102,6 @@ com/saxonica/ee/parallel/MultithreadedFocusTrackingIterator.class
 com/saxonica/ee/parallel/MultithreadedForEach.class
 com/saxonica/ee/parallel/MultithreadedItemMappingIterator.class
 com/saxonica/ee/parallel/PushToPull.class
-com/saxonica/ee/parallel/Pusher.class
 com/saxonica/ee/parallel/ThreadManagerEE.class
 com/saxonica/ee/s9api/
 com/saxonica/ee/s9api/SchemaManagerImpl.class
@@ -563,7 +562,6 @@ com/saxonica/functions/extfn/ReplaceWith.class
 com/saxonica/functions/extfn/SaxonDeepEqual.class
 com/saxonica/functions/extfn/SendMail.class
 com/saxonica/functions/extfn/Serialize.class
-com/saxonica/functions/extfn/Slice.class
 com/saxonica/functions/extfn/TimestampFn.class
 com/saxonica/functions/extfn/TransformFn.class
 com/saxonica/functions/extfn/UnescapeNCName.class
@@ -756,7 +754,6 @@ net/sf/saxon/event/ReceiverOption.class
 net/sf/saxon/event/ReceiverWithOutputProperties.class
 net/sf/saxon/event/ReceivingContentHandler.class
 net/sf/saxon/event/RegularSequenceChecker.class
-net/sf/saxon/event/RepairingContentHandler.class
 net/sf/saxon/event/Sender.class
 net/sf/saxon/event/SequenceCollector.class
 net/sf/saxon/event/SequenceCopier.class
@@ -818,8 +815,6 @@ net/sf/saxon/expr/DescendingRangeIterator.class
 net/sf/saxon/expr/EagerLetExpression.class
 net/sf/saxon/expr/EarlyEvaluationContext.class
 net/sf/saxon/expr/EmptyTextNodeRemover.class
-net/sf/saxon/expr/EquivalenceComparer.class
-net/sf/saxon/expr/EquivalenceComparison.class
 net/sf/saxon/expr/ErrorExpression.class
 net/sf/saxon/expr/ErrorIterator.class
 net/sf/saxon/expr/ExportAgent.class
@@ -846,7 +841,6 @@ net/sf/saxon/expr/ItemMappingFunction.class
 net/sf/saxon/expr/ItemMappingIterator.class
 net/sf/saxon/expr/ItemTypeCheckingFunction.class
 net/sf/saxon/expr/JPConverter.class
-net/sf/saxon/expr/LambdaCallable.class
 net/sf/saxon/expr/LastItemExpression.class
 net/sf/saxon/expr/LastPositionFinder.class
 net/sf/saxon/expr/LetExpression.class
@@ -954,7 +948,6 @@ net/sf/saxon/expr/flwor/SingularityPull.class
 net/sf/saxon/expr/flwor/TraceClause.class
 net/sf/saxon/expr/flwor/TraceClausePull.class
 net/sf/saxon/expr/flwor/TraceClausePush.class
-net/sf/saxon/expr/flwor/Tuple.class
 net/sf/saxon/expr/flwor/TupleExpression.class
 net/sf/saxon/expr/flwor/TuplePull.class
 net/sf/saxon/expr/flwor/TuplePush.class
@@ -1309,7 +1302,6 @@ net/sf/saxon/functions/hof/LoadXqueryModule.class
 net/sf/saxon/functions/hof/PartialApply.class
 net/sf/saxon/functions/hof/RandomNumberGenerator.class
 net/sf/saxon/functions/hof/Sort_3.class
-net/sf/saxon/functions/hof/SystemFunctionWithBoundContextItem.class
 net/sf/saxon/functions/hof/UnresolvedXQueryFunctionItem.class
 net/sf/saxon/functions/hof/UserFunctionReference.class
 net/sf/saxon/functions/registry/
@@ -1318,7 +1310,6 @@ net/sf/saxon/functions/registry/ConstructorFunctionLibrary.class
 net/sf/saxon/functions/registry/ExsltCommonFunctionSet.class
 net/sf/saxon/functions/registry/ExtensionFunctionFactory.class
 net/sf/saxon/functions/registry/OnDemandFunctionSet.class
-net/sf/saxon/functions/registry/SefFunction.class
 net/sf/saxon/functions/registry/UseWhen30FunctionSet.class
 net/sf/saxon/functions/registry/VendorFunctionSetHE.class
 net/sf/saxon/functions/registry/XPath20FunctionSet.class
@@ -1387,7 +1378,6 @@ net/sf/saxon/lib/OutputURIResolver.class
 net/sf/saxon/lib/OutputURIResolverWrapper.class
 net/sf/saxon/lib/ParseOptions.class
 net/sf/saxon/lib/ProtocolRestrictor.class
-net/sf/saxon/lib/RawResult.class
 net/sf/saxon/lib/RelativeURIResolver.class
 net/sf/saxon/lib/Resource.class
 net/sf/saxon/lib/ResourceCollection.class
@@ -1460,7 +1450,6 @@ net/sf/saxon/ma/map/MapUntypedContains.class
 net/sf/saxon/ma/map/RangeKey.class
 net/sf/saxon/ma/map/RecordTest.class
 net/sf/saxon/ma/map/SingleEntryMap.class
-net/sf/saxon/ma/map/TupleType.class
 net/sf/saxon/ma/trie/
 net/sf/saxon/ma/trie/ImmutableHashTrieMap.class
 net/sf/saxon/ma/trie/ImmutableList.class
