@@ -8,16 +8,17 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.*;
-import net.sf.saxon.functions.hof.FunctionLiteral;
-import net.sf.saxon.functions.hof.PartialApply;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
+import net.sf.saxon.type.FunctionItemType;
+import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.DoubleValue;
-import net.sf.saxon.value.QNameValue;
+import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
 /**
@@ -44,13 +45,12 @@ public class ContextItemAccessorFunction extends ContextAccessorFunction {
         final Item ci = context.getContextItem();
         if (ci == null) {
             if (getRetainedStaticContext().getPackageData().getHostLanguageVersion() < 40) {
-                SystemFunction f = SystemFunction.makeFunction("error", getRetainedStaticContext(), 2);
-                PartialApply e = new PartialApply(new FunctionLiteral(f), new Expression[] {
-                        Literal.makeLiteral(new QNameValue("err", NamespaceUri.ERR, "XPTY004")),
-                        new StringLiteral("Function " +
-                                                  getFunctionName().getDisplayName() +
-                                                  " returned by function-lookup has no context item")});
-                return e.evaluateItem(context);
+                FunctionItemType fit = new SpecificFunctionType(new SequenceType[]{}, SequenceType.ANY_SEQUENCE);
+                CallableDelegate.Lambda callable = (cxt, args) -> {
+                    throw new XPathException("Context item for " +
+                                                     getFunctionName().getDisplayName() + " is absent", "XPDY0002");
+                };
+                return new CallableFunction(new SymbolicName.F(getFunctionName(), 0), callable, fit);
 
             } else {
                 throw new XPathException("Context item for " +
