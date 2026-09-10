@@ -27,6 +27,7 @@ import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.DoubleValue;
 import net.sf.saxon.value.QualifiedNameValue;
 
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.stream.StreamResult;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -46,6 +47,9 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
     private boolean started = false;
     private boolean mustClose = true;
     private int hostLanguageVersion = 31;
+    private boolean indenting = false;
+    private int indentLevel = 0;
+    private static String indentString = "\n                                                               ";
 
     public AdaptiveEmitter(PipelineConfiguration pipe, UnicodeWriter writer)  {
         super(pipe);
@@ -59,6 +63,7 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
         if (sep != null && !"#absent".equals(sep)) {
             itemSeparator = sep;
         }
+        indenting = "yes".equals(props.getProperty(OutputKeys.INDENT));
     }
 
     /**
@@ -282,7 +287,17 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
         return sb.toString();
     }
 
+    private void indent(int level) throws XPathException {
+        if (indenting) {
+            if (level*2 < indentString.length()) {
+                indentString += "                ";
+            }
+            emit(indentString.substring(0, level*2));
+        }
+    }
+
     private void serializeArray(ArrayItem array) throws XPathException {
+        indent(indentLevel++);
         emit("[");
         boolean first = true;
         for (Sequence seq: array.members()) {
@@ -290,13 +305,16 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
                 first = false;
             } else {
                 emit(",");
+                indent(indentLevel);
             }
             outputInternalSequence(seq);
         }
+        indent(indentLevel--);
         emit("]");
     }
 
     private void serializeMap(MapItem map) throws XPathException {
+        indent(indentLevel++);
         emit(hostLanguageVersion >= 40 ? "{" : "map{");
         boolean first = true;
         for (KeyValuePair pair : map.keyValuePairs()) {
@@ -304,12 +322,14 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
                 first = false;
             } else {
                 emit(",");
+                indent(indentLevel);
             }
             serializeItem(pair.key);
             emit(":");
             Sequence value = pair.value;
             outputInternalSequence(value);
         }
+        indent(indentLevel--);
         emit("}");
     }
 

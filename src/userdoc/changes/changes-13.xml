@@ -122,6 +122,9 @@
 
     <category name="serialization">
         
+        <p>The adaptive output method now does (fairly crude) indentation of maps and arrays
+        if the <code>indent</code> serialization option is set. Previously maps and arrays
+        were output without indentation.</p>
   
     </category>
     
