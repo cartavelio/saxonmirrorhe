@@ -645,9 +645,16 @@ public class JavaExtensionLibrary implements FunctionLibrary {
             firstParam = 1;
         }
         for (int i = firstArg; i < noOfArgs; i++) {
-            preferences[i] = getConversionPreference(argTypes[i], params[i + firstParam - firstArg]);
-            if (preferences[i] == -1) {
-                return null;
+            Class<?> param = params[i + firstParam - firstArg];
+            preferences[i] = getConversionPreference(argTypes[i], param);
+            if (preferences[i] == -1) {  // Bug #6621
+                if (method instanceof Method && ((Method) method).isVarArgs() && i == noOfArgs - 1) {
+                    // Parameter is declared as "X...": allow an actual argument of type "X"
+                    preferences[i] = getConversionPreference(argTypes[i], param.getComponentType());
+                }
+                if (preferences[i] == -1) {
+                    return null;
+                }
             }
         }
 
@@ -673,7 +680,9 @@ public class JavaExtensionLibrary implements FunctionLibrary {
     private int getConversionPreference(SequenceType argType, Class<?> required) {
         ItemType itemType = argType.getPrimaryType();
         int cardinality = argType.getCardinality();
-        if (required == Object.class) {
+        if (required == null) {
+            return -1;
+        } else if (required == Object.class) {
             return 100;
         } else if (required.isAssignableFrom(SequenceIterator.class)) {
             return 26;
