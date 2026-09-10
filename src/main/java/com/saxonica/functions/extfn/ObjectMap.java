@@ -89,7 +89,7 @@ public class ObjectMap extends SystemFunction {
             FunctionItem method = methodMap.get(key);
             Sequence[] boundArgs = new Sequence[method.getArity()];
             boundArgs[0] = value;
-            CurriedFunction fn = new CurriedFunction(method, boundArgs);
+            CurriedFunction fn = new CurriedFunction(method, boundArgs, null); // TODO: FIXME
             mapView.initialPut(key, fn);
         }
         CallableDelegate returnThis = new CallableDelegate((context, args) -> value);

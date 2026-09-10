@@ -3,6 +3,7 @@ package com.saxonica.expr;
 import com.saxonica.functions.extfn.ObjectMap;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
@@ -136,11 +137,11 @@ public class ObjectLookupExpression extends LookupExpression {
     public SequenceIterator iterate(final XPathContext context) throws XPathException {
         return makeElaborator().elaborateForPull().iterate(context);
     }
-//
-//    @Override
-//    public Elaborator getElaborator() {
-//        return new ObjectLookupElaborator();
-//    }
+
+    @Override
+    public Elaborator getElaborator() {
+        return new ObjectLookupElaborator();
+    }
 
     public static class ObjectLookupElaborator extends PullElaborator {
 
@@ -155,7 +156,7 @@ public class ObjectLookupExpression extends LookupExpression {
                     return ItemMappingIterator.map(baseIterator, item -> {
                         Sequence[] boundArgs = new Sequence[arity];
                         boundArgs[0] = item;
-                        return new CurriedFunction(reflexiveFunction, boundArgs);
+                        return new CurriedFunction(reflexiveFunction, boundArgs, null); // TODO: FIXME
                     });
                 };
             } else {
