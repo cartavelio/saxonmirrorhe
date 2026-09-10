@@ -11,6 +11,7 @@ class JarSignPluginExtension {
   ArrayList exeSigner = ["signtool"]
   boolean signJars = false
   boolean signExes = false
+  OperatingSystem systemOs = OperatingSystem.current()
 
   public boolean getCanSignJars() {
     if (jarSigner[0] == "echo") {
@@ -56,16 +57,22 @@ class JarSignPluginExtension {
 
   public ArrayList signExeCommand(String exefile) {
     ArrayList command = exeSigner
-    command += ["sign", "/fd", "sha1",
-                "/f", keystore,
-                "/t", "http://timestamp.digicert.com",
-                "/p", password,
-                exefile]
+    if (systemOs.isWindows()) {
+      command += ["sign", "/fd", "sha1",
+                  "/f", keystore,
+                  "/t", "http://timestamp.digicert.com",
+                  "/p", password,
+                  exefile]
+    } else {
+      command += ["-s", "SAXONICA LIMITED", exefile]
+    }
     return command
   }
 }
 
 public class JarSignPlugin implements Plugin<Project> {
+  OperatingSystem systemOs = OperatingSystem.current()
+
   void apply(Project project) {
     def extension = project.extensions.create("jarsigner", JarSignPluginExtension)
 
@@ -103,11 +110,19 @@ public class JarSignPlugin implements Plugin<Project> {
 
     extension.signExes = (prop == "true")
 
-    prop = project.findProperty("windowsSignTool") ?: System.getenv("WINDOWS_SIGN_TOOL")
+    if (systemOs.isWindows()) {
+      prop = project.findProperty("windowsSignTool") ?: System.getenv("WINDOWS_SIGN_TOOL")
+    } else if (systemOs.isMacOsX()) {
+      prop = project.findProperty("macSignTool") ?: System.getenv("MAC_SIGN_TOOL")
+    } else if (systemOs.isLinux()) {
+      prop = null
+    } else {
+      // Unknown OS?
+      prop = null
+    }
 
     if (prop != null) {
       extension.exeSigner = [prop]
     }
-
   }
 }
