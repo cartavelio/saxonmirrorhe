@@ -577,6 +577,8 @@ public abstract class GDateValue extends CalendarValue {
             case HOURS:
             case MINUTES:
             case SECONDS:
+            case WHOLE_SECONDS: // Internal use only
+            case NANOSECONDS: // Internal use only
                 return null;
             default:
                 throw new IllegalArgumentException("Unknown component for date: " + component);
