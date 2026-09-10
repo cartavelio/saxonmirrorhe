@@ -313,7 +313,15 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
             }
         }
 
-        NamespaceMap ns = CopyOptions.includes(copyOptions, CopyOptions.ALL_NAMESPACES) ? getAllNamespaces() : NamespaceMap.emptyMap();
+        NamespaceMap nsMap;
+        boolean gatherAttributeNamespaces = false;
+        if (CopyOptions.includes(copyOptions, CopyOptions.ALL_NAMESPACES)) {
+            nsMap = getAllNamespaces();
+        } else {
+            nsMap = NamespaceMap.of(getPrefix(), getNamespaceUri());
+            gatherAttributeNamespaces = true;
+        }
+
         boolean disallowNamespaceSensitiveContent =
                 ((copyOptions & CopyOptions.TYPE_ANNOTATIONS) != 0) &&
                         ((copyOptions & CopyOptions.ALL_NAMESPACES) == 0);
@@ -341,6 +349,9 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
                 }
             }
             atts.add(new AttributeInfo(att.getNodeName(), attributeType, att.getValue(), att.getLocation(), 0));
+            if (gatherAttributeNamespaces && !att.getNodeName().getPrefix().isEmpty()) {
+                nsMap = nsMap.put(att.getNodeName().getPrefix(), att.getNodeName().getNamespaceUri());
+            }
         }
 
         int receiverOptions = ReceiverOption.BEQUEATH_INHERITED_NAMESPACES_ONLY | ReceiverOption.NAMESPACE_OK;
@@ -348,7 +359,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
             receiverOptions |= ReceiverOption.MUTABLE_TREE;
         }
         out.startElement(NameOfNode.makeName(this), typeCode, SequenceTool.attributeMapFromList(atts),
-                         ns, location, receiverOptions);
+                         nsMap, location, receiverOptions);
 
         // output the children
 
