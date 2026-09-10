@@ -44,7 +44,7 @@ public class ElaboratorFactory {
         //map.put("xsl:attribute", new ComputedAttributeCompiler());
         //map.put("xsl:element", new ComputedElementCompiler());
         map.put("conditionalSort", () -> new ConditionalSorterElaborator());
-        map.put("convertUntyped", () -> new AtomicSequenceConverterElaborator());
+        map.put("convertUntyped", () -> new UntypedSequenceConverterElaborator());
         map.put("dot", () -> new ContextItemElaborator());
         //map.put("xsl:copy", new CopyCompiler());
         map.put("xsl:document", useFallback);

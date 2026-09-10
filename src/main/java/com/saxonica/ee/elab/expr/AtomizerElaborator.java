@@ -4,10 +4,10 @@ import com.saxonica.ee.elab.eval.ItemEvaluator;
 import com.saxonica.ee.elab.eval.PullEvaluator;
 import com.saxonica.ee.elab.gen.PullElaborator;
 import net.sf.saxon.expr.Atomizer;
-import net.sf.saxon.expr.ContextMappingIterator;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.value.Cardinality;
 
 /**
  * Elaborator for an Atomizer
@@ -29,13 +29,13 @@ public class AtomizerElaborator extends PullElaborator {
     public ItemEvaluator elaborateForItem() {
         final Atomizer expr = (Atomizer) getExpression();
         final ItemEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForItem();
+        final boolean nullable = Cardinality.allowsZero(expr.getBaseExpression().getCardinality());
         return context -> {
             Item it = baseEval.eval(context);
-            if (it == null) {
+            if (nullable && it == null) {
                 return null;
-            } else {
-                return it.atomize().head();
             }
+            return it.atomize().head();
         };
     }
 }

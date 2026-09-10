@@ -1,9 +1,12 @@
 package com.saxonica.ee.elab.expr;
 
+import com.saxonica.ee.elab.eval.BooleanEvaluator;
 import com.saxonica.ee.elab.eval.ItemEvaluator;
 import com.saxonica.ee.elab.gen.ItemElaborator;
 import net.sf.saxon.expr.ValueComparison;
+import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.sort.AtomicComparer;
+import net.sf.saxon.expr.sort.ContextFreeAtomicComparer;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.Cardinality;
@@ -37,6 +40,50 @@ public class ValueComparisonElaborator extends ItemElaborator {
             }
             return BooleanValue.get(
                     ValueComparison.compare(v0, operator, v1, comparer.provideContext(context), needsRuntimeCheck));
+        };
+
+    }
+
+    public BooleanEvaluator elaborateForBoolean() {
+        final ValueComparison exp = (ValueComparison) getExpression();
+        final ItemEvaluator p0 = makeElaborator(exp.getLhsExpression()).elaborateForItem();
+        final ItemEvaluator p1 = makeElaborator(exp.getRhsExpression()).elaborateForItem();
+        final AtomicComparer comparer = exp.getAtomicComparer();
+        final boolean resultWhenEmpty = exp.getResultWhenEmpty() != null && exp.getResultWhenEmpty().getBooleanValue();
+        final int operator = exp.getOperator();
+        final boolean needsRuntimeCheck = exp.needsRuntimeComparabilityCheck();
+        final boolean nullable0 = Cardinality.allowsZero(exp.getLhsExpression().getCardinality());
+        final boolean nullable1 = Cardinality.allowsZero(exp.getRhsExpression().getCardinality());
+
+        return context -> {
+            AtomicValue v0 = (AtomicValue) p0.eval(context);
+            if (nullable0 && v0 == null) {
+                return resultWhenEmpty;  // normally false
+            }
+            AtomicValue v1 = (AtomicValue) p1.eval(context);
+            if (nullable1 && v1 == null) {
+                return resultWhenEmpty;  // normally false
+            }
+            if (comparer == ContextFreeAtomicComparer.getInstance()) {
+                switch (operator) {
+                    case Token.FEQ:
+                        return comparer.comparesEqual(v0, v1);
+                    case Token.FNE:
+                        return !comparer.comparesEqual(v0, v1);
+                    case Token.FGT:
+                        return comparer.compareAtomicValues(v0, v1) > 0;
+                    case Token.FLT:
+                        return comparer.compareAtomicValues(v0, v1) < 0;
+                    case Token.FGE:
+                        return comparer.compareAtomicValues(v0, v1) >= 0;
+                    case Token.FLE:
+                        return comparer.compareAtomicValues(v0, v1) <= 0;
+                    default:
+                        throw new UnsupportedOperationException("Unknown operator " + operator);
+                }
+            } else {
+                return ValueComparison.compare(v0, operator, v1, comparer.provideContext(context), needsRuntimeCheck);
+            }
         };
 
     }

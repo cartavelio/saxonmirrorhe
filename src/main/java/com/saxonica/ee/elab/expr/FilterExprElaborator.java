@@ -3,7 +3,6 @@ package com.saxonica.ee.elab.expr;
 import com.saxonica.ee.elab.eval.BooleanEvaluator;
 import com.saxonica.ee.elab.eval.PullEvaluator;
 import com.saxonica.ee.elab.gen.PullElaborator;
-import net.sf.saxon.expr.ContextMappingIterator;
 import net.sf.saxon.expr.FilterExpression;
 import net.sf.saxon.expr.FilterIterator;
 import net.sf.saxon.expr.XPathContext;
