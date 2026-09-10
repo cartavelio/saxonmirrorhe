@@ -6,7 +6,7 @@
       and Schema Validation 1.0/1.1 specifications. SaxonC can be used in C/C++, PHP and Python,
       and links to the APIs in each of these languages are provided below.</p>
 
-   <p>The SaxonC API provides six main classes:</p>
+   <p>For C++, PHP and Python, the SaxonC API provides six main classes:</p>
 
    <table>
       <thead>
@@ -147,6 +147,13 @@
          </tr>
       </tbody>
    </table>
+   
+   <p>For C, the SaxonC API is provided in the three header files: <a class="bodylink"
+      href="https://www.saxonica.com/saxon-c/doc12/html/SaxonCGlue_8h.html">SaxonCGlue.h</a>, 
+      <a class="bodylink"
+         href="https://www.saxonica.com/saxon-c/doc12/html/SaxonCProcessor_8h.html">SaxonCProcessor.h</a>, 
+      <a class="bodylink"
+         href="https://www.saxonica.com/saxon-c/doc12/html/SaxonCXPath_8h.html">SaxonCXPath.h</a>.</p>
 
 
    <section id="saxon_c_cpp_api" title="SaxonC C++ API">
@@ -158,7 +165,7 @@
       
       <p>The <a class="bodylink"
          href="https://www.saxonica.com/saxon-c/doc12/html/index.html"
-         >SaxonC C++ API documentation</a> contains full details of the API. 
+         >SaxonC C/C++ API documentation</a> contains full details of the API. 
          See below for direct links to the main classes.</p>
       
       <p>The following SaxonC API classes are available in C++ to process XSLT, XQuery, XPath and Schema validation:</p>
@@ -3117,6 +3124,39 @@
       </ul>
 
 
+   </section>
+   
+   <section id="saxonc_c_api" title="SaxonC C API">
+      <h1>SaxonC C API</h1>
+      
+      <p>SaxonC 12 is built from the SaxonJ 12 Java product by compiling using GraalVM Native Image.
+         This generates platform specific machine code, which is
+         interfaced with C/C++ using the Native Image C API.</p>
+      
+      <p>The <a class="bodylink"
+         href="https://www.saxonica.com/saxon-c/doc12/html/index.html"
+         >SaxonC C/C++ API documentation</a> contains full details of the API to process XSLT, XQuery, and XPath.</p>
+      
+      <p>The SaxonC C API is provided in the following header files:</p>
+      
+      <ul>
+         <li>
+            <a class="bodylink code"
+               href="https://www.saxonica.com/saxon-c/doc12/html/SaxonCGlue_8h.html"
+               >SaxonCGlue.h</a>
+         </li>
+         <li>
+            <a class="bodylink code"
+               href="https://www.saxonica.com/saxon-c/doc12/html/SaxonCProcessor_8h.html"
+               >SaxonCProcessor.h</a>
+         </li>
+         <li>
+            <a class="bodylink code"
+               href="https://www.saxonica.com/saxon-c/doc12/html/SaxonCXPath_8h.html"
+               >SaxonCXPath.h</a>
+         </li>
+      </ul>
+      
    </section>
 
 
