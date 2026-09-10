@@ -202,7 +202,12 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
 
             case StandardNames.XS_QNAME:
             case StandardNames.XS_NOTATION:
-                return StringView.of(((QualifiedNameValue)value).getStructuredQName().getEQName());
+                StructuredQName sq = ((QualifiedNameValue) value).getStructuredQName();
+                if (hostLanguageVersion >= 40) {
+                    return StringView.of("#" + (sq.hasURI(NamespaceUri.NULL) ? sq.getLocalPart() : sq.getEQName()));
+                } else {
+                    return StringView.of(sq.getEQName());
+                }
             default:
                 return new Twine8("***");
         }
