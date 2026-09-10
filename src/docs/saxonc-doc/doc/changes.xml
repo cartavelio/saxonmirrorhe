@@ -10,6 +10,47 @@
    
    <h2 class="subtitle">Changes between releases 1.2 and 11</h2>
    
+   <h3 class="subtitle">Main new features</h3>
+   
+   <ul>
+      <li>Compiling the C++ API now requires at least C++14. This also affects the building of the Python and
+         PHP APIs.</li>
+      <li>ICU localization support added in SaxonC-PE and SaxonC-EE, to provide support for formatting numbers
+         and dates, as well as sorting and comparison of strings, in a wide variety of languages.</li>
+      <li>Improved memory management for the handling of XDM objects.</li>
+      <li>Multi threading feature added to the <code>Xslt30Processor</code> and <code>XQueryProcessor</code>
+         (see: bug issue <a href="https://saxonica.plan.io/issues/4428" target="_blank">#4428</a>).</li>
+   </ul>
+   
+   <h3 class="subtitle">API changes</h3>
+   <ul>
+      <li>Replaced the <code>getXslMessages()</code> method from the <code>XsltProcessor</code> and
+         <code>Xslt30Processor</code> with the method <code>setupXslMessages(boolean show, const char
+            filename=NULL)</code>. This new method gives users the option to direct <code>xsl:message</code>
+         output to the standard error listener (by default). Alternatively the <code>xsl:message</code> output
+         can be sent to the given file name.</li>
+      <li>For XSLT transformations, the compilation and execution of a stylesheet is now separated as follows:
+         <ul>
+            <li>The <code>Xslt30Processor</code> is used to compile an XSLT stylesheet, returning an
+               <code>XsltExecutable</code> representing the compiled form of the stylesheet. Methods on the
+               <code>XsltExecutable</code> can then be used to invoke the transform. The new
+               <code>XsltExecutable</code> class is added in the C++, Python, and PHP APIs.</li>
+            <li>The one shot methods <code>transformFileToString()</code>, <code>transformFiletoValue()</code> and
+               <code>transformFileToFile()</code> are retained on <code>Xslt30Processor</code> for backwards
+               compatibility, but the use of the corresponding methods on the <code>XsltExecutable</code>
+               class is recommended.</li>
+            <li>It is possible to clone the <code>XsltExecutable</code> object to run different executables.</li>
+         </ul>
+      </li>
+      <li><code>XdmArray</code> and <code>XdmMap</code> have been implemented as new XDM data types, making it
+         easier to pass maps and arrays as parameters to queries or stylesheets. (These classes have
+         been available in SaxonJ since version 9.8, and are belatedly added to the SaxonC API.) The
+         superclass <code>XdmFunctionItem</code> is also implemented, and provides the methods
+         <code>call()</code> and <code>getSystemFunction()</code> for working with XDM functions.</li>
+      
+   </ul>
+   
+   
    <h3 class="subtitle">Naming and numbering</h3>
    
    <ul>
@@ -34,25 +75,6 @@
          was previously known as Saxon/C. The different editions of the SaxonC product are now
          called SaxonC-HE, SaxonC-PE, and SaxonC-EE (rather than Saxon-HE/C, Saxon-PE/C, and
          Saxon-EE/C, as previously).</li>
-      <li>C++14 supported as minimum for compiling the C++ API. This also affects the building of the Python and PHP APIs</li>
-      <li>Replaced the method getXslMessages() method from the XsltProcessor and Xslt30Processor with the method
-         setupXslMessages(boolean show, const char filename=NULL). This new methods gives users the option to show xsl:message output
-         print to the standard error listener (by default). Alternatively the xsl:message output can be sent to the given file name.</li>
-      <li>Multi threading feature added to the processors Xslt30Processor and XQueryProcessor
-         (see: bug issue <a href="https://saxonica.plan.io/issues/4428" target="_blank">#4428</a>)</li>
-      <li>
-         XSLT30 Transformation: We have seperated the compilation and execution of a stylesheet as follows:
-         <ul>
-            <li>The Xslt30Transformer now is used to compile the stylsheet, which returns an XsltExecutable representing 
-               the compiled form of the stylesheet. We have retained the one shot methods transformFileToString, transformFiletoValue and transformFileToFile for backward compatibility. But we recommend the use of the XsltExecutable class</li>
-            <li>Added the new <code>XsltExecutable</code> for the C++ API (Similarly the Python and PHP APIs). It is possible to <code>clone</code> the XsltExecutable object to run different executables.</li>
-         </ul>
-      </li>
-      <li>ICU support added in SaxonC-PE and SaxonC-EE.</li>
-      <li>Improved memory management for the handlng of Xdm objects</li>
-      <li>XdmArray and XdmMap APIs has been implemented as new data types. This was already in the core Saxon product but now we have available the APIs inb SaxonC. 
-         We also have the super-class <code>XdmFunctionItem</code> implemented which has the methods <code>call()</code> and <code>getSystemFunction()</code> for working with functions.</li>
-      
    </ul>
 
 
@@ -122,10 +144,10 @@
          Validation.</li>
       <li>Support for user defined functions. Users can now write their functions in C++/PHP and
          invoke them in XSLT, XQuery and XPath.</li>
-      <li>Support for PHP7 distribution</li>
-      <li>Windows SaxonC builds</li>
-      <li>Updated to Excelsior JET 11.3 (MP1) cross compiler tool</li>
-      <li>Revised API for XSLT and XQuery in C, C++ and PHP</li>
+      <li>Support for PHP7 distribution.</li>
+      <li>Windows SaxonC builds.</li>
+      <li>Updated to Excelsior JET 11.3 (MP1) cross compiler tool.</li>
+      <li>Revised API for XSLT and XQuery in C, C++ and PHP.</li>
    </ul>
 
 
