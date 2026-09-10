@@ -39,89 +39,82 @@ testDriverClasses.outgoing.artifacts(tasks.named<JavaCompile>("compileJava").map
                                      { it.outputs.files.filter { 
                                          it.name != "previous-compilation-data.bin" }}) { builtBy("compileJava") }
 
-fun registerJarTasksAndArtifacts(prefix: String, outputDir: Provider<Directory>, jarNames: Map<String, String>) {
-    val parts = saxonBuild.version.get().split('.')
-    val usefulParts = if (parts.last() == "0") parts.dropLast(1) else parts
-    val archiveVersion = usefulParts.joinToString(".")
-
-  val heJar = tasks.register<Jar>("${prefix}-he-jar") {
-    archiveFileName = "${jarNames["he"]}-${archiveVersion}-test.jar"
+fun registerJarTaskAndArtifactForEdition(edition: String, version: String, prefix: String, outputDir: Provider<Directory>, jarName: (String, String) -> String, jarCopySpec: CopySpec.() -> Unit) {
+  val jar = tasks.register<Jar>("${prefix}-${edition}-jar") {
+    group = LifecycleBasePlugin.BUILD_GROUP
+    archiveFileName = jarName(edition, version)
     destinationDirectory = outputDir.get().asFile
-    dependsOn("compileJava")
-    from(sourceSets["main"].output) {
-      exclude("com/**")
-      exclude("previous-compilation-data.bin")
-    }
+    from(sourceSets["main"].output, jarCopySpec)
   }
 
-  val peJar = tasks.register<Jar>("${prefix}-pe-jar") {
-    archiveFileName = "${jarNames["pe"]}-${archiveVersion}-test.jar"
-    destinationDirectory = outputDir.get().asFile
-    from(sourceSets["main"].output) {
-      exclude("com/saxonica/testdriver/QT3TestDriverEE*")
-      exclude("com/saxonica/testdriver/Xslt30TestSuiteDriverEE*")
-      exclude("com/saxonica/testdriver/Xslt30TestSuiteDriverJS*")
-      exclude("com/saxonica/testdriver/XMarkBenchmark*")
-      exclude("com/saxonica/testdriver/ee/SchemaTestSuiteDriver*")
-      exclude("com/saxonica/testdriver/ee/XQTSCollectionFinder*")
-      exclude("previous-compilation-data.bin")
-    }
-  }
-
-  val eeJar = tasks.register<Jar>("${prefix}-ee-jar") {
-    archiveFileName = "${jarNames["ee"]}-${archiveVersion}-test.jar"
-    destinationDirectory = outputDir.get().asFile
-    from(sourceSets["main"].output) {
-      exclude("previous-compilation-data.bin")
-    }
-  }
-
-  val peSourcesJar = tasks.register<Jar>("${prefix}-pe-sources-jar") {
-    archiveFileName = "${jarNames["pe"]}-${archiveVersion}-test-sources.jar"
-    destinationDirectory = outputDir.get().asFile
-    from(sourceSets["main"].java) {
-      exclude("com/saxonica/testdriver/QT3TestDriverEE*")
-      exclude("com/saxonica/testdriver/Xslt30TestSuiteDriverEE*")
-      exclude("com/saxonica/testdriver/Xslt30TestSuiteDriverJS*")
-      exclude("com/saxonica/testdriver/XMarkBenchmark*")
-      exclude("com/saxonica/testdriver/ee/SchemaTestSuiteDriver*")
-      exclude("com/saxonica/testdriver/ee/XQTSCollectionFinder*")
-    }
-  }
-
-  val heSourcesJar = tasks.register<Jar>("${prefix}-he-sources-jar") {
-    archiveFileName = "${jarNames["he"]}-${archiveVersion}-test-sources.jar"
-    destinationDirectory = outputDir.get().asFile
-    from(sourceSets["main"].java) {
-      include("net/sf/saxon/testdriver/**")
-    }
-  }
-
-  val eeSourcesJar = tasks.register<Jar>("${prefix}-ee-sources-jar") {
-    archiveFileName = "${jarNames["ee"]}-${archiveVersion}-test-sources.jar"
-    destinationDirectory = outputDir.get().asFile
-    from(java.sourceSets["main"].java)
-  }
-
-  val heJarArtifact by configurations.consumable("${prefix}HEJar")
-  heJarArtifact.outgoing.artifact(heJar.map { it.archiveFile }) { builtBy(heJar) }
-
-  val peJarArtifact by configurations.consumable("${prefix}PEJar")
-  peJarArtifact.outgoing.artifact(peJar.map { it.archiveFile }) { builtBy(peJar) }
-
-  val eeJarArtifact by configurations.consumable("${prefix}EEJar")
-  eeJarArtifact.outgoing.artifact(eeJar.map { it.archiveFile }) { builtBy(eeJar) }
-
-  val heSourceJarArtifact by configurations.consumable("${prefix}HESourcesJar")
-  heSourceJarArtifact.outgoing.artifact(heSourcesJar.map { it.archiveFile }) { builtBy(heSourcesJar) }
-
-  val peSourceJarArtifact by configurations.consumable("${prefix}PESourcesJar")
-  peSourceJarArtifact.outgoing.artifact(peSourcesJar.map { it.archiveFile }) { builtBy(peSourcesJar) }
-
-  // cheating
-  val eeSourceJarArtifact by configurations.consumable("${prefix}EESourcesJar")
-  eeSourceJarArtifact.outgoing.artifact(eeSourcesJar.map { it.archiveFile }) { builtBy(eeSourcesJar) }
+  val artifact by configurations.consumable("${prefix}${edition.uppercase()}Jar")
+  artifact.outgoing.artifact(jar.map { it.archiveFile }) { builtBy(jar) }
 }
 
-registerJarTasksAndArtifacts("maven", layout.buildDirectory.dir("mavenJars"), mavenJarNames)
-registerJarTasksAndArtifacts("download", layout.buildDirectory.dir("downloadJars"), downloadJarNames)
+fun registerMavenSourceJarTaskAndArtifactForEdition(edition: String, version: String, outputDir: Provider<Directory>, jarName: (String, String) -> String, jarCopySpec: CopySpec.() -> Unit) {
+  val jar = tasks.register<Jar>("maven-${edition}-sources-jar") {
+    group = LifecycleBasePlugin.BUILD_GROUP
+    archiveFileName = jarName(edition, version)
+    destinationDirectory = outputDir.get().asFile
+    from(sourceSets["main"].java, jarCopySpec)
+  }
+
+  val artifact by configurations.consumable("maven${edition.uppercase()}SourcesJar")
+  artifact.outgoing.artifact(jar.map { it.archiveFile }) { builtBy(jar) }
+}
+
+fun registerJarTasksAndArtifacts(archiveVersion: String, prefix: String, outputDir: Provider<Directory>, jarName: (String, String) -> String) {
+  registerJarTaskAndArtifactForEdition("he", archiveVersion, prefix, outputDir, jarName) {
+    exclude("com/**")
+    exclude("previous-compilation-data.bin")
+  }
+
+  registerJarTaskAndArtifactForEdition("pe", archiveVersion, prefix, outputDir, jarName) {
+    exclude("com/saxonica/testdriver/QT3TestDriverEE*")
+    exclude("com/saxonica/testdriver/Xslt30TestSuiteDriverEE*")
+    exclude("com/saxonica/testdriver/Xslt30TestSuiteDriverJS*")
+    exclude("com/saxonica/testdriver/XMarkBenchmark*")
+    exclude("com/saxonica/testdriver/ee/SchemaTestSuiteDriver*")
+    exclude("com/saxonica/testdriver/ee/XQTSCollectionFinder*")
+    exclude("previous-compilation-data.bin")
+  }
+
+  registerJarTaskAndArtifactForEdition("ee", archiveVersion, prefix, outputDir, jarName) {
+    exclude("previous-compilation-data.bin")
+  }
+}
+
+fun registerMavenSourceJarTasksAndArtifacts(archiveVersion: String, outputDir: Provider<Directory>, jarName: (String, String) -> String) {
+  registerMavenSourceJarTaskAndArtifactForEdition("he", archiveVersion, outputDir, jarName) {
+    include("net/sf/saxon/testdriver/**")
+  }
+
+  registerMavenSourceJarTaskAndArtifactForEdition("pe", archiveVersion, outputDir, jarName) {
+    exclude("com/saxonica/testdriver/QT3TestDriverEE*")
+    exclude("com/saxonica/testdriver/Xslt30TestSuiteDriverEE*")
+    exclude("com/saxonica/testdriver/Xslt30TestSuiteDriverJS*")
+    exclude("com/saxonica/testdriver/XMarkBenchmark*")
+    exclude("com/saxonica/testdriver/ee/SchemaTestSuiteDriver*")
+    exclude("com/saxonica/testdriver/ee/XQTSCollectionFinder*")
+  }
+
+  registerMavenSourceJarTaskAndArtifactForEdition("ee", archiveVersion, outputDir, jarName) {
+    // this copyspec left intentionally blank
+  }
+}
+
+val parts = saxonBuild.version.get().split('.')
+val usefulParts = if (parts.last() == "0") parts.dropLast(1) else parts
+val archiveVersion = usefulParts.joinToString(".")
+
+registerJarTasksAndArtifacts(archiveVersion, "download", layout.buildDirectory.dir("downloadJars")) { edition, version ->
+  "saxon-${edition}-test-${version}.jar"
+}
+
+registerJarTasksAndArtifacts(archiveVersion, "maven", layout.buildDirectory.dir("mavenJars")) { edition, version ->
+  "Saxon-${edition.uppercase()}-${version}-test.jar"
+}
+
+registerMavenSourceJarTasksAndArtifacts(archiveVersion, layout.buildDirectory.dir("mavenJars")) { edition, version ->
+  "Saxon-${edition.uppercase()}-${version}-test-sources.jar"
+}
