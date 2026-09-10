@@ -355,7 +355,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
         if (parent == null) {
             return Navigator.filteredSingleton(this, predicate);
         } else {
-            return new StrippingIterator(node.iterateFollowingSiblingAxis(predicate), (SpaceStrippedDocument) docWrapper, parent);
+            return new StrippingIterator(node.iterateFollowingSiblingOrSelfAxis(predicate), (SpaceStrippedDocument) docWrapper, parent);
         }
     }
 
@@ -424,7 +424,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
         if (parent == null) {
             return Navigator.filteredSingleton(this, predicate);
         } else {
-            return new StrippingIterator(node.iterateFollowingSiblingOrSelfAxis(predicate), (SpaceStrippedDocument) docWrapper, parent);
+            return new StrippingIterator(node.iteratePrecedingSiblingOrSelfAxis(predicate), (SpaceStrippedDocument) docWrapper, parent);
         }
     }
 
