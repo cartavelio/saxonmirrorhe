@@ -66,8 +66,7 @@
 
       <p>A command is available to run a query contained in a file.</p> 
       <div class="javaonly">
-      <p>The form of command on the Java
-         platform is:</p>
+      <p>The form of command on the Java platform is:</p>
       <kbd>java  net.sf.saxon.Query   [options]  [ <i>params...</i>] </kbd>
       </div>
       
@@ -83,12 +82,13 @@
       </div>
 
       <div class="conly">
-       <p>The form of command on the SaxonC platform is:</p>
-       <kbd>./query [options] [ <i>params...</i>] </kbd>
-         <p class="conly">We must first compile the <code>Query.c</code> C
-                    program which builds the command line program by running the batch script <code>./build-saxonc-commands.sh</code>
-                     on linux or MacOS and <code>build-saxonc-commands.bat</code> for Windows:</p>
-                 <p>A command is available to run a query contained in a file.</p>
+         <p>For SaxonC, the <code>query</code> executable file must first be built. To do this, compile
+            the <code>Query.c</code> C command line program by running the batch script
+            <code>./build64-linux.sh</code> on Linux,
+            <code>./build64-mac.sh</code> on MacOS, or
+            <code>build-windows.bat</code> on Windows.</p>
+         <p>Then the command takes the form:</p>
+         <kbd>./query   [options]  [ <i>params...</i>] </kbd>
        </div>
 
       <p>The options will generally include either <code>-q:queryFile</code> which takes the query from a file,
@@ -172,10 +172,8 @@
                   a representation of the final expression tree after optimization.
                   If no file name is specified the output is sent to the standard error stream. The
                   output is in XML format.</p>
-
                <p>Equivalent to setting the configuration option <a class="feature" href="TRACE_OPTIMIZER_DECISIONS"/>
                and then calling the <code>explain()</code> method of the <code>XQueryExecutable</code>.</p>
-
             </td>
          </tr>
          <tr class="javaonly">
@@ -390,6 +388,18 @@
          </tr>
          <tr>
             <td>
+               <p>-qversion:(3.1|4.0)</p>
+            </td>
+            <td>
+               <p>Defines the XQuery specification version to be used, in the absence of a version
+                  declaration in the query itself. The default is <code>3.1</code>, and this is the
+                  only permitted value for Saxon-HE. The value <code>4.0</code> enables features
+                  defined in the draft XQuery 4.0 family of specifications, which should be regarded
+                  as experimental and subject to change.</p>
+            </td>
+         </tr>
+         <tr class="javaonly">
+            <td>
                <p>-r:classname</p>
             </td>
             <td>
@@ -496,7 +506,6 @@
                   <a class="bodylink" href="../performanceanalysis">Performance analysis</a>.</p>
             </td>
          </tr>
-
          <tr class="javaonly">
             <td>
                <p>-TC:filename</p>
@@ -509,7 +518,6 @@
                   inhibits coverage analysis.</p>
             </td>
          </tr>
-        
          <tr class="javaonly">
             <td>
                <p>-TJ</p>
@@ -971,7 +979,7 @@
    </section>
    
    <section id="saxon-api-query" title="From a C# application" class="csonly">
-      <h1>Using XQuery from C#</h1>
+      <h1>XQuery from a C# application</h1>
       
       <aside>The same classes and methods can be used from .NET languages other than C#, but
       all the examples here are written in C# terms.</aside>
@@ -1060,7 +1068,7 @@
          supplied, it will be ignored.</p>
       
    </section>
-
+   
    <section id="saxonc-query" title="From a C/C++, Python or PHP application" class="conly">
       <h1>XQuery from a C/C++, Python or PHP application</h1>
       
@@ -1319,7 +1327,7 @@
       
       
    </section>
-
+   
    <section id="update" title="Using XQuery Update">
       <h1>Using XQuery Update</h1>
 
