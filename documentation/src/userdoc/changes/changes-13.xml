@@ -694,7 +694,6 @@ TODO: rethink redefines and override
             <li><code>map:entries</code></li> 
             <li><code>map:filter</code></li> 
             <li><code>map:items</code></li> 
-            <li><code>map:keys-where</code></li> 
             <li><code>math:cosh</code></li> 
             <li><code>math:e</code></li> 
             <li><code>math:sinh</code></li> 
@@ -788,8 +787,7 @@ TODO: rethink redefines and override
             <li><code>map:filter</code></li> 
             <li><code>map:find</code></li> 
             <li><code>map:for-each</code></li> 
-            <li><code>map:get</code></li> 
-            <li><code>map:keys-where</code></li> 
+            <li><code>map:get</code></li>  
             <li><code>map:merge</code></li> 
             <li><code>map:put</code></li> 
             <li><code>map:remove</code></li> 
@@ -803,14 +801,13 @@ TODO: rethink redefines and override
             Pull Requests are labeled "In Saxon13" when they have been implemented.</p>
         
         <ul>
-            <!--<li><p>PR1856: lookahead/behind in regular expressions. While the basic
-            capability is implemented, captured groups within lookahead expressions
-            aren't fully working. TODO: is this still true?</p></li>-->
             <li><p>PR957 - scan-left and scan-right functions</p></li>
             <li><p>PR791 - The <code>fn:invisible-xml</code> function is not implemented in SaxonCS</p></li>
             <li><p>PR1068 - The SaxonCS implementation of <code>fn:graphemes</code> does not handle all strings correctly. This
                 is due to limitations in the ICU4N library.</p></li>
         </ul>
+        
+        <p>Following PR2572, the proposed <code>map:keys-where</code> function has been dropped.</p>
  
     </category>
     

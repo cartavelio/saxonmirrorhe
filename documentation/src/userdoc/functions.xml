@@ -6120,23 +6120,7 @@
       </status>
       <saxon-edition>ALL_SINCE_9.7</saxon-edition>
     </function>
-    <function xmlns="http://www.saxonica.com/ns/doc/functions" class="qt4">
-      <name namespace="http://www.w3.org/2005/xpath-functions/map">keys-where</name>
-      <signatures>
-        <proto return-type="xs:anyAtomicType*">
-          <arg name="map" type="map(*)" desc="The input map"/>
-          <arg name="predicate"
-            type="fn($key as xs:anyAtomicType, $value as item()*) as xs:boolean?" 
-            desc="The predicate function"/>
-          <in-spec>xpath40</in-spec>
-        </proto>
-      </signatures>
-      <status-ok/>
-      <saxon-edition>PE/EE 13</saxon-edition>
-      <description>
-        <p>Returns a sequence containing selected keys present in a map.</p>
-      </description>
-    </function>
+    
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions/map">merge</name>
       <description>
