@@ -170,20 +170,6 @@ public class TypeStrippedNode extends AbstractVirtualNode implements WrappingFun
     }
 
     /**
-     * Return an iteration over the nodes reached by the given axis from this node
-     *
-     * @param axisNumber the axis to be used
-     * @return a SequenceIterator that scans the nodes reached by the axis in turn.
-     */
-
-    /*@Nullable*/
-    @Override
-    public SequenceIterator iterateAxis(int axisNumber) {
-        //return new WrappingIterator(node.iterateAxis(axisNumber), this, null);
-        return null;
-    }
-
-    /**
      * Get an iterator over the ancestor axis, starting at this node; the nodes will
      * be in reverse document order.
      *

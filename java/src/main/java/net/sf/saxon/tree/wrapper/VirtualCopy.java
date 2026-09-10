@@ -428,69 +428,6 @@ public class VirtualCopy implements NodeInfo {
     }
 
     /**
-     * Return an iteration over all the nodes reached by the given axis from this node
-     * that match a given NodeTest
-     *
-     * @param axisNumber an integer identifying the axis; one of the constants
-     *                   defined in class net.sf.saxon.om.Axis
-     * @param nodeTest   A pattern to be matched by the returned nodes; nodes
-     *                   that do not match this pattern are not included in the result
-     * @return an AxisIterator that scans the nodes reached by the axis in
-     * turn.
-     * @throws UnsupportedOperationException if the namespace axis is
-     *                                       requested and this axis is not supported for this implementation.
-     * @see net.sf.saxon.om.AxisInfo
-     */
-
-    @Override
-    public SequenceIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
-//        VirtualCopy newParent = null;
-//        switch (axisNumber) {
-//            case AxisInfo.CHILD:
-//            case AxisInfo.ATTRIBUTE:
-//                newParent = this;
-//                break;
-//            case AxisInfo.SELF:
-//            case AxisInfo.PRECEDING_SIBLING:
-//            case AxisInfo.FOLLOWING_SIBLING:
-//                newParent = parent;
-//                break;
-//            // Ensure that the ancestor, ancestor-or-self, following, and preceding axes use an implementation
-//            // that relies on getParent() to escape from the subtree
-//            case AxisInfo.ANCESTOR:
-//                return Navigator.filter(
-//                        new Navigator.AncestorIterator(this, false), nodeTest);
-//            case AxisInfo.ANCESTOR_OR_SELF:
-//                return Navigator.filter(
-//                        new Navigator.AncestorIterator(this, true), nodeTest);
-//            case AxisInfo.NAMESPACE:
-//                if (getNodeKind() != Type.ELEMENT) {
-//                    return EmptyIterator.getInstance();
-//                }
-//                return NamespaceNode.makeIterator(this, nodeTest);
-//            case AxisInfo.PARENT:
-//                return Navigator.filteredSingleton(getParent(), nodeTest);
-//            case AxisInfo.PRECEDING:
-//                return Navigator.filter(
-//                        new Navigator.PrecedingIterator(this, false), nodeTest);
-//            case AxisInfo.FOLLOWING:
-//                return Navigator.filter(
-//                        new Navigator.FollowingIterator(this), nodeTest);
-//            case AxisInfo.PRECEDING_OR_ANCESTOR:
-//                return Navigator.filter(
-//                        new Navigator.PrecedingIterator(this, true), nodeTest);
-//            case AxisInfo.FOLLOWING_OR_SELF:
-//            case AxisInfo.FOLLOWING_SIBLING_OR_SELF:
-//            case AxisInfo.PRECEDING_OR_SELF:
-//            case AxisInfo.PRECEDING_SIBLING_OR_SELF:
-//                return Navigator.orSelfIterator(this, axisNumber, nodeTest);
-//
-//        }
-//        return makeCopier(original.iterateAxis(axisNumber, nodeTest), newParent, !AxisInfo.isSubtreeAxis[axisNumber]);
-        return null;
-    }
-
-    /**
      * Get an iterator over the attribute axis, starting at this node; the nodes will
      * be in document order.
      *
@@ -539,6 +476,18 @@ public class VirtualCopy implements NodeInfo {
     }
 
     /**
+     * Get an iterator over the following axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateFollowingAxis(NodePredicate predicate) {
+        return makeCopier(original.iterateFollowingAxis(predicate), null, false);
+    }
+
+    /**
      * Get an iterator over the following-sibling axis, starting at this node; the nodes will
      * be in document order.
      *
@@ -548,6 +497,18 @@ public class VirtualCopy implements NodeInfo {
     @Override
     public SequenceIterator iterateFollowingSiblingAxis(NodePredicate predicate) {
         return makeCopier(original.iterateFollowingSiblingAxis(predicate), parent, true);
+    }
+
+    /**
+     * Get an iterator over the preceding axis, starting at this node; the nodes will
+     * be in reverse document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iteratePrecedingAxis(NodePredicate predicate) {
+        return makeCopier(original.iteratePrecedingAxis(predicate), null, true);
     }
 
     /**

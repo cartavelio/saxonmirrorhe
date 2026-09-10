@@ -253,49 +253,6 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
         return parent;
     }
 
-    @Override
-    public SequenceIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
-//        if (nodeTest instanceof NodeTest &&
-//                ((NodeTest)nodeTest).getUType().intersection(UType.TEXT) == UType.VOID ||
-//                axisNumber == AxisInfo.ATTRIBUTE || axisNumber == AxisInfo.NAMESPACE) {
-//            // iteration does not include text nodes, so no stripping needed
-//            return new WrappingIterator(node.iterateAxis(axisNumber, nodeTest), this, getParentForAxis(axisNumber));
-//        } else {
-//            return new StrippingIterator(node.iterateAxis(axisNumber, nodeTest), (SpaceStrippedDocument) docWrapper, getParentForAxis(axisNumber));
-//        }
-        return null;
-    }
-
-    /**
-     * Return an iteration over the nodes reached by the given axis from this node
-     *
-     * @param axisNumber the axis to be used
-     * @return a SequenceIterator that scans the nodes reached by the axis in turn.
-     */
-
-    /*@Nullable*/
-    @Override
-    public SequenceIterator iterateAxis(int axisNumber) {
-//        switch (axisNumber) {
-//            case AxisInfo.ATTRIBUTE:
-//            case AxisInfo.NAMESPACE:
-//                return new WrappingIterator(node.iterateAxis(axisNumber), this, this);
-//            case AxisInfo.CHILD:
-//                return new StrippingIterator(node.iterateAxis(axisNumber), (SpaceStrippedDocument) docWrapper, this);
-//            case AxisInfo.FOLLOWING_SIBLING:
-//            case AxisInfo.PRECEDING_SIBLING:
-//                SpaceStrippedNode parent = (SpaceStrippedNode) getParent();
-//                if (parent == null) {
-//                    return EmptyIterator.getInstance();
-//                } else {
-//                    return new StrippingIterator(node.iterateAxis(axisNumber), (SpaceStrippedDocument) docWrapper, parent);
-//                }
-//            default:
-//                return new StrippingIterator(node.iterateAxis(axisNumber), (SpaceStrippedDocument) docWrapper, null);
-//        }
-        return null;
-    }
-
     /**
      * Get an iterator over the ancestor axis, starting at this node; the nodes will
      * be in reverse document order.

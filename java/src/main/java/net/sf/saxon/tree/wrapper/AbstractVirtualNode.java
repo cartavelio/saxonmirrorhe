@@ -8,12 +8,10 @@
 package net.sf.saxon.tree.wrapper;
 
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 
-import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SchemaType;
 
 
@@ -302,20 +300,6 @@ public abstract class AbstractVirtualNode implements VirtualNode {
     @Override
     public String getDisplayName() {
         return node.getDisplayName();
-    }
-
-    /**
-     * Return an iteration over the nodes reached by the given axis from this node
-     *
-     * @param axisNumber the axis to be used
-     * @param nodeTest   A pattern to be matched by the returned nodes
-     * @return a SequenceIterator that scans the nodes reached by the axis in turn.
-     */
-
-    /*@NotNull*/
-    @Override
-    public SequenceIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
-        return Navigator.filter(iterateAxis(axisNumber), nodeTest);
     }
 
     /**

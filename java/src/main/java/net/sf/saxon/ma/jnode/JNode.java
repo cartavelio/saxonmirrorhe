@@ -4,15 +4,9 @@ import net.sf.saxon.expr.Atomizer;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodePredicate;
-import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.iter.IncrementalIterator;
-import net.sf.saxon.tree.iter.SingletonIterator;
-import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 
@@ -86,57 +80,6 @@ public abstract class JNode implements GNode {
     @Override
     public AtomicSequence atomize() throws XPathException {
         return Atomizer.atomize(getValue());
-    }
-
-    public SequenceIterator iterateAxis(int axis) {
-        switch (axis) {
-            case AxisInfo.SELF:
-                return SingletonIterator.makeIterator(this);
-            case AxisInfo.CHILD:
-                return getChildren();
-            case AxisInfo.PARENT:
-                if (getParent() == null) {
-                    return EmptyIterator.getInstance();
-                } else {
-                    return SingletonIterator.makeIterator(getParent());
-                }
-            case AxisInfo.ANCESTOR:
-                if (getParent() == null) {
-                    return EmptyIterator.getInstance();
-                } else {
-                    return new IncrementalIterator(getParent(), GNode::getParent);
-                }
-            case AxisInfo.ANCESTOR_OR_SELF:
-                return new IncrementalIterator(getParent(), GNode::getParent);
-            case AxisInfo.DESCENDANT:
-                return new Navigator.DescendantIterator(this, false, true);
-            case AxisInfo.DESCENDANT_OR_SELF:
-                return new Navigator.DescendantIterator(this, true, true);
-            default:
-                throw new IllegalArgumentException("Unrecognized JNode axis number " + axis);
-        }
-    }
-
-    /**
-     * Return an iteration over all the nodes reached by the given axis from this node
-     * that match a given NodeTest
-     *
-     * @param axisNumber an integer identifying the axis; one of the constants
-     *                   defined in class {@link AxisInfo}
-     * @param predicate  A condition to be satisfied by the returned nodes; nodes
-     *                   that do not satisfy this condition are not included in the result
-     * @return an AxisIterator that delivers the nodes reached by the axis in
-     * turn.  The nodes are returned in axis order (document order for a forwards
-     * axis, reverse document order for a reverse axis).
-     * @throws UnsupportedOperationException if the namespace axis is
-     *                                       requested and this axis is not supported for this implementation.
-     * @see AxisInfo
-     * @since 8.4. Changed in 10.0 to accept any {@code Predicate<NodeInfo>} as the second argument. It is still
-     * possible to supply a {@link NodeTest}, because {@code NodeTest} implements {@code Predicate<NodeInfo>}.
-     */
-    @Override
-    public SequenceIterator iterateAxis(int axisNumber, NodePredicate predicate) {
-        return iterateAxis(axisNumber); //TEMPORARY
     }
 
     /**

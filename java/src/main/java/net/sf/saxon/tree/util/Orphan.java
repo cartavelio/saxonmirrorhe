@@ -809,9 +809,5 @@ public final class Orphan implements MutableNodeInfo {
     }
 
 
-    @Override
-    public SequenceIterator iterateAxis(int axisNumber, NodePredicate predicate) {
-        return null;
-    }
 }
 

@@ -506,53 +506,6 @@ public class TinyTextualElement extends TinyElementImpl {
         }
 
 
-
-        /**
-         * Return an enumeration over the nodes reached by the given axis from this node
-         *
-         * @param axisNumber the axis to be iterated over
-         * @return a AxisIterator that scans the nodes reached by the axis in turn.
-         */
-
-
-
-        /*@NotNull*/
-        @Override
-        public SequenceIterator iterateAxis(int axisNumber) {
-//            switch (axisNumber) {
-//                case AxisInfo.ANCESTOR:
-//                    return element.iterateAxis(AxisInfo.ANCESTOR_OR_SELF);
-//
-//                case AxisInfo.ANCESTOR_OR_SELF:
-//                    return new PrependIterator(this, getParent().iterateAxis(AxisInfo.ANCESTOR_OR_SELF));
-//
-//                case AxisInfo.FOLLOWING:
-//                    return new Navigator.FollowingIterator(this);
-//
-//                case AxisInfo.PRECEDING:
-//                    return new Navigator.PrecedingIterator(this, false);
-//
-//                case AxisInfo.PARENT:
-//                    return SingletonIterator.makeIterator(getParent());
-//
-//                case AxisInfo.ATTRIBUTE:
-//                case AxisInfo.CHILD:
-//                case AxisInfo.DESCENDANT:
-//                case AxisInfo.FOLLOWING_SIBLING:
-//                case AxisInfo.NAMESPACE:
-//                case AxisInfo.PRECEDING_SIBLING:
-//                    return EmptyIterator.getInstance();
-//
-//                case AxisInfo.SELF:
-//                case AxisInfo.DESCENDANT_OR_SELF:
-//                    return SingletonIterator.makeIterator(this);
-//
-//                default:
-//                    throw new IllegalArgumentException("Unknown axis number " + axisNumber);
-//            }
-            return null;
-        }
-
         @Override
         public SequenceIterator iterateAncestorAxis(NodePredicate predicate) {
             return element.iterateAncestorAxis(predicate);
@@ -606,72 +559,6 @@ public class TinyTextualElement extends TinyElementImpl {
             return EmptyIterator.getInstance();
         }
 
-
-        /**
-         * Return an enumeration over the nodes reached by the given axis from this node
-         *
-         * @param axisNumber the axis to be iterated over
-         * @param predicate  A pattern to be matched by the returned nodes
-         * @return a AxisIterator that scans the nodes reached by the axis in turn.
-         */
-
-        
-
-
-        /*@NotNull*/
-        @Override
-        public SequenceIterator iterateAxis(int axisNumber, NodePredicate predicate) {
-//            NodeTest nodeTest = Navigator.nodeTestFromPredicate(predicate);
-//            switch (axisNumber) {
-//                case AxisInfo.ANCESTOR:
-//                    return getParent().iterateAxis(AxisInfo.ANCESTOR_OR_SELF, nodeTest);
-//
-//                case AxisInfo.PRECEDING_OR_ANCESTOR:
-//                    return Navigator.filter(
-//                            new Navigator.PrecedingIterator(this, true),
-//                            nodeTest);
-//
-//                case AxisInfo.ANCESTOR_OR_SELF:
-//                    return Navigator.filter(
-//                            new PrependIterator(this, getParent().iterateAncestorOrSelfAxis(null)),
-//                            nodeTest);
-//
-//                case AxisInfo.FOLLOWING:
-//                    return Navigator.filter(
-//                            new Navigator.FollowingIterator(this),
-//                            nodeTest);
-//
-//                case AxisInfo.PRECEDING:
-//                    return Navigator.filter(
-//                            new Navigator.PrecedingIterator(this, false),
-//                            nodeTest);
-//
-//                case AxisInfo.PARENT:
-//                    return Navigator.filteredSingleton(getParent(), nodeTest);
-//
-//                case AxisInfo.ATTRIBUTE:
-//                case AxisInfo.CHILD:
-//                case AxisInfo.DESCENDANT:
-//                case AxisInfo.FOLLOWING_SIBLING:
-//                case AxisInfo.NAMESPACE:
-//                case AxisInfo.PRECEDING_SIBLING:
-//                    return EmptyIterator.getInstance();
-//
-//                case AxisInfo.SELF:
-//                case AxisInfo.DESCENDANT_OR_SELF:
-//                    return Navigator.filteredSingleton(this, nodeTest);
-//
-//                case AxisInfo.FOLLOWING_OR_SELF:
-//                case AxisInfo.FOLLOWING_SIBLING_OR_SELF:
-//                case AxisInfo.PRECEDING_OR_SELF:
-//                case AxisInfo.PRECEDING_SIBLING_OR_SELF:
-//                    return Navigator.orSelfIterator(this, axisNumber, nodeTest);
-//
-//                default:
-//                    throw new IllegalArgumentException("Unknown axis number " + axisNumber);
-//            }
-            return null;
-        }
 
         /**
          * Find the parent node of this node.
