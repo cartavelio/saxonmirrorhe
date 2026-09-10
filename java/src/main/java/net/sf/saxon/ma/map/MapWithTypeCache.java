@@ -36,10 +36,10 @@ public abstract class MapWithTypeCache extends MapItem {
 
         if (knownKeyType != null) {
             Affinity affinityKeyRelationship = Subsumption.computeRelationship(keyType, knownKeyType);
-            boolean ok = affinityKeyRelationship == Affinity.SAME_TYPE || affinityKeyRelationship == Affinity.SUBSUMED_BY;
+            boolean ok = affinityKeyRelationship == Affinity.SAME_TYPE || affinityKeyRelationship == Affinity.SUBSUMES;
             if (ok) {
                 Affinity valueTypeRelationship = Subsumption.sequenceTypeRelationship(valueType, knownValueType);
-                ok = valueTypeRelationship == Affinity.SAME_TYPE || valueTypeRelationship == Affinity.SUBSUMED_BY;
+                ok = valueTypeRelationship == Affinity.SAME_TYPE || valueTypeRelationship == Affinity.SUBSUMES;
             }
 
             if (ok) {
