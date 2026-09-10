@@ -279,24 +279,6 @@ public class FleetingDocumentNode extends FleetingParentNode implements TreeInfo
         return systemId;
     }
 
-//    /**
-//     * Get a mapping from accumulators to the AccumulatorWatch that implements the accumulator.
-//     * @return a mapping from accumulators to the corresponding AccumulatorWatch
-//     */
-//
-//    public Map<Accumulator, AccumulatorWatch> getAccumulatorWatchMap() {
-//        return accumulatorWatchMap;
-//    }
-//
-//    /**
-//     * Set a mapping from accumulators to the AccumulatorWatch that implements the accumulator.
-//     * @param accumulatorWatchMap a mapping from accumulators to the corresponding AccumulatorWatch
-//     */
-//
-//    public void setAccumulatorWatchMap(Map<Accumulator, AccumulatorWatch> accumulatorWatchMap) {
-//        this.accumulatorWatchMap = accumulatorWatchMap;
-//    }
-
     public void setMultiAccumulatorWatch(MultiAccumulatorWatch multiWatch) {
         this.multiAccumulatorWatch = multiWatch;
     }
