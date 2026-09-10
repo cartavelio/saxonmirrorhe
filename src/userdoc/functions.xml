@@ -6381,6 +6381,9 @@
             from the calling environment. The default namespace for elements and types is taken from
             the value of the <code>xpath-default-namespace</code> attribute in the stylesheet, if
             present.</p>
+          
+          <p>If stylesheet functions are to be called from the expression, they should be declared
+          with <code>visibility="public"</code>.</p>
 
           <p>The expression may contain references to variables <code>$p1</code>, <code>$p2</code>,
             etc., and the values of these variables may be supplied in the second, third, and
@@ -6452,6 +6455,9 @@
             stylesheet. But it does not allow access to stylesheet variables, or functions defined
             in the XSLT specification such as <code>key()</code> or
             <code>format-number()</code>.</p>
+          
+          <p>If stylesheet functions are to be called from the expression, they should be declared
+            with <code>visibility="public"</code>.</p>
 
           <p>
             <i>Use of the <code>current()</code> function is allowed, provided <a
