@@ -576,7 +576,7 @@ public class QT3TestDriverHE extends TestDriver {
                             testXpc.declareNamespace("map", NamespaceConstant.MAP_FUNCTIONS);
                             testXpc.declareNamespace("array", NamespaceConstant.ARRAY_FUNCTIONS);
 
-                            testXpc.setBaseURI(testCase.getBaseURI());
+                            //testXpc.setBaseURI(testCase.getBaseURI());
                             copySchemaNamespaces(env, testXpc);  // ensure environment has schema namespaces
 
 
