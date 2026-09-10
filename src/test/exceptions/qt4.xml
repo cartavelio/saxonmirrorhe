@@ -3,10 +3,25 @@
 <exceptions>
 
    <exception test-set="fn-deep-equal" 
+      test-case="deep-equal-40-functions-001
+      deep-equal-40-functions-002
+      deep-equal-40-functions-003
+      deep-equal-40-functions-004
+      deep-equal-40-functions-005
+      deep-equal-40-functions-006
+      deep-equal-40-functions-007" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-11-24"/>
+      <reason>change for comparing function items not yet implemented</reason>
+   </exception>
+   
+   <exception test-set="fn-deep-equal" 
       test-case="fn-deep-equal-mix-args-017a fn-deep-equal-mix-args-018a" run="false" report="n/a">
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>4.0 change in numeric comparison semantics not yet implemented</reason>
    </exception>
+   
+   
+   
    
    <exception test-set="op-same-key" 
       test-case="same-key-006a" run="false" report="n/a">
