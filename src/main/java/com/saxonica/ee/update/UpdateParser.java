@@ -92,7 +92,7 @@ public class UpdateParser {
     /**
      * Parse a CopyClause.
      * <p>
-     * [44] CopyClause ::= <"copy" "$"> VarName ":=" ExprSingle
+     * [44] CopyClause ::= &lt;"copy" "$"&gt; VarName ":=" ExprSingle
      * ("," "$" VarName ":=" ExprSingle)*
      * </p>
      *

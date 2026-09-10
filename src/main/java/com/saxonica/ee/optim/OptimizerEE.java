@@ -308,7 +308,7 @@ public class OptimizerEE extends Optimizer {
 
     /**
      * Optimize comparisons of count(X) to a literal value. The objective here is to count items in the sequence only
-     * until the result of the comparison is deducible; for example to evaluate (count(X)>2) we can stop at the third
+     * until the result of the comparison is deducible; for example to evaluate (count(X)&gt;2) we can stop at the third
      * item in the sequence.
      *
      * @param inverted true if the call to count(X) is the right-hand operand
