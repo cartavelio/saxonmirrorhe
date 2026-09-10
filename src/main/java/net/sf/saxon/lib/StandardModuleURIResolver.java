@@ -35,7 +35,7 @@ import java.net.URLConnection;
  */
 
 public class StandardModuleURIResolver implements ModuleURIResolver {
-    public static final String XQUERY_PURPOSE = "https://www.iana.org/assignments/media-types/application/xquery";
+    public static final String XQUERY_NATURE = "https://www.iana.org/assignments/media-types/application/xquery";
 
     Configuration config = null;
 
@@ -91,9 +91,7 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
         if (locations.length == 0) {
             StreamSource source = resolvedNamespaceURI(moduleURI, baseURI);
             if (source != null) {
-                StreamSource[] sources = new StreamSource[1];
-                sources[0] = source;
-                return sources;
+                return new StreamSource[]{source};
             }
             XPathException err = new XPathException("Cannot locate module for namespace " + moduleURI);
             err.setErrorCode("XQST0059");
@@ -139,10 +137,10 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
         try {
             Source source = null;
             if (config != null) {
-                source = config.getCommonResourceResolver().resolveNamespace(moduleURI, XQUERY_PURPOSE, null);
+                source = config.getCommonResourceResolver().resolveNamespace(moduleURI, XQUERY_NATURE, null);
                 if (source == null && baseURI != null) {
                     String resuri = new URI(baseURI).resolve(moduleURI).toString();
-                    source = config.getCommonResourceResolver().resolveNamespace(resuri, XQUERY_PURPOSE, null);
+                    source = config.getCommonResourceResolver().resolveNamespace(resuri, XQUERY_NATURE, null);
                 }
             }
             if (source != null) {

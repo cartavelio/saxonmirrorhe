@@ -57,6 +57,11 @@ import javax.xml.transform.URIResolver;
  *
  * The chain methods returns "this" so that calls to the chain methods can be strung together in a fluent style.
  *
+ * The resolver methods in this class are expected to return <code>null</code> if the requested resource
+ * could not be found. It's common for the caller to then simply attempt to resolve the resource by
+ * dereferencing the URI, but the resolver APIs don't do this. (If they did, it would be impossible for
+ * the caller to determine if the resolver was able to locate the resource or not, sometimes useful information.)
+ *
  * @since 11
  */
 

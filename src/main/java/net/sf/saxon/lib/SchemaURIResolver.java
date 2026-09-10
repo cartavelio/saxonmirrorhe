@@ -40,7 +40,7 @@ public interface SchemaURIResolver {
      * @param baseURI         The base URI of the module containing the "import schema" declaration;
      *                        null if no base URI is known
      * @param locations       The set of URIs identified as schema location hints. In most cases (xs:include, xs:import,
-     *                        xsi:schemaLocation, xsl:import-schema) there is only one URI in this list. With an XQuery "import module"
+     *                        xsi:schemaLocation, xsl:import-schema) there is only one URI in this list. With an XQuery "import schema"
      *                        declaration, however, a list of URIs may be specified.
      * @return an array of Source objects each identifying a schema document to be loaded.
      *         These need not necessarily correspond one-to-one with the location hints provided.
