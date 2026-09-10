@@ -318,7 +318,7 @@ public class XMarkBenchmark {
                         //sink = new CountingFilter(sink);
                         long queryStart = bean.getCurrentThreadCpuTime(); //System.nanoTime();
                         for (int t = 0; t < MAX_RUNS; t++) {
-                            System.err.println("Running q" + q);
+                            //System.err.println("Running q" + q);
                             XQueryEvaluator eval = exp.load();
                             eval.setContextItem(doc);
                             eval.setDestination(sink);
@@ -335,10 +335,10 @@ public class XMarkBenchmark {
                             if (time > max) max = time;
                             measures.add(time);
                             totalTime += time;
-                            if (runs == 1) {
-                                Instrumentation.report();
-                                Instrumentation.reset();
-                            }
+//                            if (runs == 1) {
+//                                Instrumentation.report();
+//                                Instrumentation.reset();
+//                            }
                             if (totalTime > MAX_TIME && t >= 2) break;
                         }
                         long queryEnd = bean.getCurrentThreadCpuTime(); //System.nanoTime();
@@ -366,6 +366,9 @@ public class XMarkBenchmark {
             }
         }
         println("</xmark-results>");
+        if (Instrumentation.ACTIVE) {
+            Instrumentation.report();
+        }
     }
 
     private long median(List<Long> measures) {
