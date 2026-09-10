@@ -491,7 +491,7 @@ private:
       @param proc - Supplied pointer to the SaxonProcessor object
       cwd - The current working directory
     */
-    XsltExecutable(jobject exObject, std::string cwd, std::string resources);
+    XsltExecutable(int64_t exObject, std::string cwd, std::string resources);
 
 	/**
 	 * Xslt30Processor copy constructor.
@@ -500,9 +500,9 @@ private:
     XsltExecutable(const XsltExecutable &other);
 
 
-    jclass  cppClass;
-    jclass messageListenerClass, resultDocumentClass;
-	jobject executableObject, selection, saxonMessageListenerObj, saxonResultDocObj;
+    //jclass  cppClass;
+    //jclass messageListenerClass, resultDocumentClass;
+	int64_t executableRef, selectionRef, saxonMessageListenerRef, saxonResultDocRef;
 	XdmValue * selectionV;
     std::string cwdXE; /*!< current working directory */
     std::string resources_dir; /*!< current Saxon resources directory */
