@@ -14,6 +14,8 @@ import net.sf.saxon.s9api.*;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.BuiltInType;
 import net.sf.saxon.type.Converter;
+import net.sf.saxon.type.ValidationException;
+import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.StringValue;
@@ -79,6 +81,56 @@ public class XdmValueForCpp {
     public XdmValueForCpp(XdmNode node) {
         value = XdmValue.wrap(node.getUnderlyingValue());
         type = null;
+    }
+
+    @CEntryPoint(name = "j_makeAtomicValue", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long j_makeAtomicValue(IsolateThread thread, CCharPointer c_typeStr, CCharPointer c_valueStr) throws ValidationException, SaxonApiException {
+
+        String typeStr = null;
+        if (c_typeStr != WordFactory.nullPointer()) {
+            typeStr = SaxonCAPI.toJavaString(c_typeStr, WordFactory.nullPointer());
+        }
+
+        String valueStr = null;
+        if (c_valueStr != WordFactory.nullPointer()) {
+            valueStr = SaxonCAPI.toJavaString(c_valueStr, WordFactory.nullPointer());
+        }
+
+        if (SaxonCAPI.debug) {
+            if (valueStr != null) {
+                System.err.println("DEBUG: j_makeAtomicValue value=" + valueStr);
+            } else if(typeStr != null) {
+                System.err.println("DEBUG:  j_makeAtomicValue type=" + typeStr);
+            }
+        }
+
+        int fp = StandardNames.getFingerprint(NamespaceUri.SCHEMA, typeStr);
+
+        BuiltInAtomicType type = (BuiltInAtomicType) BuiltInType.getSchemaType(fp);
+
+        if(type == null) {
+            if (SaxonCAPI.debug) {
+                System.err.println("DEBUG:  j_makeAtomicValue type is null");
+            }
+            return -1;
+        }
+
+        ConversionRules rules = new ConversionRules();
+        Converter converter = rules.getConverter(BuiltInAtomicType.STRING, type);
+
+        if(converter == null) {
+            return -1;
+        }
+
+        AtomicValue aValue = converter.convert(new StringValue(valueStr)).asAtomic();
+
+        if(aValue.getLength() == 1 ) {
+            XdmAtomicValue value = new XdmAtomicValue(aValue);
+
+            ObjectHandle objectHandle = SaxonCAPI.createHandle(value);
+            return objectHandle.rawValue();
+        }
+        return -1;
     }
 
     /**

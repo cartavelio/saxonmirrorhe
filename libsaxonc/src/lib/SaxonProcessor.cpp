@@ -1152,13 +1152,18 @@ XdmAtomicValue *SaxonProcessor::makeQNameValue(const char *str) {
 
 XdmAtomicValue *SaxonProcessor::makeAtomicValue(const char *typei,
                                                 const char *strValue) {
-  return nullptr;
-  // TODO fix this method
-  /*SaxonProcessor::attachCurrentThread();
-  jobject obj = xdmValueAsObj(SaxonProcessor::sxn_environ, typei, strValue);
+  SaxonProcessor::attachCurrentThread();
+  if(typei == nullptr || strValue == nullptr) {
+    return nullptr;
+  }
+  int64_t obj = j_makeAtomicValue(sxn_environ->thread, (char *)typei, (char *)strValue);
+  if(obj == -1) {
+    return nullptr;
+  } else if(obj == SXN_EXCEPTION) {
+    throw SaxonApiException();
+  }
   XdmAtomicValue *value = new XdmAtomicValue(obj, typei);
-  SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
-  return value;*/
+  return value;
 }
 
 const char *SaxonProcessor::clarkNameToEQName(const char *name) {

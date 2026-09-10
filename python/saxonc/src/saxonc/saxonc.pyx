@@ -761,9 +761,13 @@ cdef class PySaxonProcessor:
         """
         if encoding is None:
             encoding = sys.getdefaultencoding()
+        if value is None:
+            return None
+        py_value_string = value.encode(encoding) if value is not None else None
+        cdef char * c_str_ = py_value_string if value is not None else ""
         py_valueType_string = value_type.encode(encoding) if value_type is not None else None
         cdef char * c_valueType_string = py_valueType_string if value_type is not None else ""
-        cdef saxoncClasses.XdmAtomicValue * atomic_value_ptr = self.thisptr.makeAtomicValue(c_valueType_string, value)
+        cdef saxoncClasses.XdmAtomicValue * atomic_value_ptr = self.thisptr.makeAtomicValue(c_valueType_string, c_str_)
         if atomic_value_ptr == NULL:
             del atomic_value_ptr
             return None

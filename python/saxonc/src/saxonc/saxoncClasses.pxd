@@ -101,7 +101,7 @@ cdef extern from "saxonc/SaxonProcessor.h":
 
         XdmAtomicValue * makeQNameValue(const char* str)
 
-        XdmAtomicValue * makeAtomicValue(const char* type, const char* value)
+        XdmAtomicValue * makeAtomicValue(const char* type, const char* value)  except +handle_saxonc_api_exceptions
 
 
         XdmArray *makeArray(const char **input, int length)
