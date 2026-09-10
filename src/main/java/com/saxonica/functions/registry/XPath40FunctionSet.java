@@ -366,7 +366,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("highest", 1, 3, e -> e.populate(HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
-                .arg(2, ft, ONE, null));
+                .arg(2, ft, OPT, null));
 
         register("hours-from-dateTime", 1, e -> e.populate(() -> new AccessorFn.HoursFromDateTime(),
                                                            BuiltInAtomicType.INTEGER, OPT, CARD0)
@@ -448,7 +448,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("lowest", 1, 3, e -> e.populate(HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
-                .arg(2, ft, ONE, null));
+                .arg(2, ft, OPT, null));
 
         register("matches", 3, e -> e.populate(Matches::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)

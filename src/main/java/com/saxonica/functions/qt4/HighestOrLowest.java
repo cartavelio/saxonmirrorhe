@@ -81,10 +81,11 @@ public class HighestOrLowest extends SystemFunction {
             comparer = new DescendingComparer(comparer);
         }
 
-        FunctionItem keyFn;
+        FunctionItem keyFn = null;
         if (arguments.length >= 3) {
             keyFn = (FunctionItem) arguments[2].head();
-        } else {
+        }
+        if (keyFn == null) {
             keyFn = SystemFunction.makeFunction("data", getRetainedStaticContext(), 1);
         }
 
