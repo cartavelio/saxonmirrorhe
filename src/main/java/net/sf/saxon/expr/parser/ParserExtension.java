@@ -11,7 +11,6 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.LocalBinding;
 import net.sf.saxon.expr.VariableReference;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.QueryModule;
@@ -173,10 +172,7 @@ public class ParserExtension {
         return null;
     }
 
-    public void processSchemaImports(NamespaceUri targetNamespace,
-                                     List<String> locationHints,
-                                     String baseUri,
-                                     QueryModule module) throws XPathException {
+    public void processSchemaImports(QueryModule module, List<XQueryParser.Import> schemaImports) throws XPathException {
         throw new XPathException("Import schema requires Saxon-EE");
     }
 

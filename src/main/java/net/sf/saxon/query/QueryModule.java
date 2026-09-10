@@ -145,7 +145,7 @@ public class QueryModule implements StaticContext {
 
         Schema preloadedSchema = sqc.getPreLoadedSchema();
         if (preloadedSchema != null) {
-            // TODO: HE build...
+            // TODO : HE build...
             for (Map.Entry<NamespaceUri, List<String>> entry : ((PreparedSchema)preloadedSchema).getTargetNamespaceMap().entrySet()) {
                 addImportedSchema(entry.getKey(), null, entry.getValue());
             }
@@ -1229,7 +1229,8 @@ public class QueryModule implements StaticContext {
 
     @Override
     public boolean isImportedSchema(NamespaceUri namespace) {
-        return importedSchemata != null && importedSchemata.contains(namespace);
+        //return importedSchemata != null && importedSchemata.contains(namespace);
+        return isSchemaAware() && getPackageData().getImportedSchema().includesTargetNamespace(namespace);
     }
 
     /**
@@ -1761,13 +1762,6 @@ public class QueryModule implements StaticContext {
         return getPackageData().obtainTypeAliasManager().getItemType(typeName);
     }
 
-    /**
-     * Inner class containing information about an active namespace entry
-     */
 
-    private static class ActiveNamespace {
-        /*@Nullable*/ public String prefix;
-        /*@Nullable*/ public String uri;
-    }
 }
 

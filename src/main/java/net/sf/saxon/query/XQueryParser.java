@@ -989,15 +989,9 @@ public class XQueryParser extends XPathParser {
             }
             ((QueryModule) env).setDefaultCollationName(collationName);
         }
-        for (Import imp : schemaImports) {
-            try {
-                applySchemaImport(imp);
-            } catch (XPathException err) {
-                if (!err.hasBeenReported()) {
-                    throw err.maybeWithLocation(makeLocation(imp.offset));
-                }
-            }
-        }
+
+        applySchemaImports(schemaImports);
+
         for (Import imp : moduleImports) {
             try {
                 applyModuleImport(imp);
@@ -1266,23 +1260,28 @@ public class XQueryParser extends XPathParser {
         getStaticContext().getPackageData().setSchemaAware(true);
     }
 
-    private void applySchemaImport(/*@NotNull*/ Import sImport) throws XPathException {
+//    private void applySchemaImport(/*@NotNull*/ Import sImport) throws XPathException {
+//
+//        // Do the importing
+//
+//        Configuration config = env.getConfiguration();
+//        //noinspection SynchronizationOnLocalVariableOrMethodParameter
+//        synchronized(config) {
+//            PackageData pack = env.getPackageData();
+//            if (pack.getImportedSchema().includesTargetNamespace(sImport.namespaceURI)) {
+//                // Schema was preloaded
+//                ((QueryModule) env).addImportedSchema(sImport.namespaceURI, env.getStaticBaseURI(), sImport.locationURIs);
+//                return;
+//            }
+//            parserExtension.processSchemaImports(sImport.namespaceURI, sImport.locationURIs, env.getStaticBaseURI(), (QueryModule)env);
+//
+//            ((QueryModule) env).addImportedSchema(sImport.namespaceURI, env.getStaticBaseURI(), sImport.locationURIs);
+//        }
+//    }
 
-        // Do the importing
 
-        Configuration config = env.getConfiguration();
-        //noinspection SynchronizationOnLocalVariableOrMethodParameter
-        synchronized(config) {
-            PackageData pack = env.getPackageData();
-            if (pack.getImportedSchema().includesTargetNamespace(sImport.namespaceURI)) {
-                // Schema was preloaded
-                ((QueryModule) env).addImportedSchema(sImport.namespaceURI, env.getStaticBaseURI(), sImport.locationURIs);
-                return;
-            }
-            parserExtension.processSchemaImports(sImport.namespaceURI, sImport.locationURIs, env.getStaticBaseURI(), (QueryModule)env);
-
-            ((QueryModule) env).addImportedSchema(sImport.namespaceURI, env.getStaticBaseURI(), sImport.locationURIs);
-        }
+    public void applySchemaImports(List<Import> schemaImports) throws XPathException {
+        parserExtension.processSchemaImports((QueryModule)env, schemaImports);
     }
 
     /**
@@ -5418,10 +5417,10 @@ public class XQueryParser extends XPathParser {
         int startOffset;
     }
 
-    private static class Import {
-        NamespaceUri namespaceURI;
-        List<String> locationURIs;
-        int offset;
+    public static class Import {
+        public NamespaceUri namespaceURI;
+        public List<String> locationURIs;
+        public int offset;
     }
 }
 
