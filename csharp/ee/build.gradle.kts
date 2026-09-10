@@ -76,7 +76,7 @@ tasks.filteredSources {
     exclude("net/sf/saxon/resource/ActiveStreamSource.java")
     exclude("net/sf/saxon/resource/JarCollection.java")
     exclude("net/sf/saxon/resource/ResourceLoader.java")
-    exclude("net/sf/saxon/sapling/*.java")
+    exclude("net/sf/saxon/sapling/**")
     exclude("net/sf/saxon/s9api/BuildingContentHandler.java")
     exclude("net/sf/saxon/s9api/BuildingStreamWriter.java")
     exclude("net/sf/saxon/s9api/BuildingStreamWriterImpl.java")

@@ -44,6 +44,8 @@ public class FeatureIndex {
         return byCode.get(code);
     }
 
+//#if CSHARP==false
     public static Stream<FeatureData> stream() { return FeatureData.featureList.stream(); }
+//#endif
 }
 
