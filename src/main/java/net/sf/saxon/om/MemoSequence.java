@@ -11,8 +11,12 @@ import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
-import net.sf.saxon.tree.iter.*;
+import net.sf.saxon.tree.iter.ArrayIterator;
+import net.sf.saxon.tree.iter.EmptyIterator;
+import net.sf.saxon.tree.iter.GroundedIterator;
+import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.value.EmptySequence;
+import net.sf.saxon.value.MemoClosure;
 import net.sf.saxon.value.SequenceExtent;
 
 import java.util.Arrays;
@@ -30,6 +34,8 @@ public class MemoSequence implements Sequence {
 
     private Item[] reservoir = null;
     private int used;
+
+    private MemoClosure.MemoClosureStatisticsGatherer callingExpression;
 
     @CSharpSimpleEnum
     private enum State {
@@ -52,6 +58,12 @@ public class MemoSequence implements Sequence {
         this.inputIterator = iterator;
     }
 
+
+    public void setCallingExpression(MemoClosure.MemoClosureStatisticsGatherer caller) {
+        this.callingExpression = caller;
+    }
+
+
     @Override
     public Item head() throws XPathException {
         return iterate().next();
@@ -60,7 +72,6 @@ public class MemoSequence implements Sequence {
 
     @Override
     public synchronized SequenceIterator iterate() {
-
         switch (state) {
             case UNREAD:
                 state = State.BUSY;
@@ -188,9 +199,9 @@ public class MemoSequence implements Sequence {
     public final static class ProgressiveIterator
             implements SequenceIterator, LastPositionFinder, GroundedIterator {
 
-        private MemoSequence container;
+        private final MemoSequence container;
         private int position = -1;  // zero-based position in the reservoir of the
-        // item most recently read
+                                    // item most recently read
 
         /**
          * Create a ProgressiveIterator
@@ -232,6 +243,7 @@ public class MemoSequence implements Sequence {
                         container.state = State.ALL_READ;
                         container.condense();
                         position = -2;
+                        reportCompletion(true);
                         return null;
                     }
                     position = container.used;
@@ -261,6 +273,7 @@ public class MemoSequence implements Sequence {
                 // save the current position
                 int savePos = position;
                 // fill the reservoir
+                //noinspection StatementWithEmptyBody
                 while (next() != null) {}
                 // reset the current position
                 position = savePos;
@@ -307,7 +320,7 @@ public class MemoSequence implements Sequence {
                 } else if (container.used == 1) {
                     return container.reservoir[0];
                 } else {
-                    return new SequenceExtent.Of<Item>(container.reservoir);
+                    return new SequenceExtent.Of<>(container.reservoir);
                 }
             } else {
                 return SequenceExtent.makeSequenceExtent(
@@ -326,6 +339,7 @@ public class MemoSequence implements Sequence {
                 // save the current position
                 int savePos = position;
                 // fill the reservoir
+                //noinspection StatementWithEmptyBody
                 while (next() != null) {
                 }
                 // reset the current position
@@ -333,6 +347,41 @@ public class MemoSequence implements Sequence {
                 // return all the items
                 return SequenceExtent.makeSequenceExtent(
                         Arrays.asList(container.reservoir).subList(position + 1, container.used));
+            }
+        }
+
+        /**
+         * Close the iterator. This indicates to the supplier of the data that the client
+         * does not require any more items to be delivered by the iterator. This may enable the
+         * supplier to release resources. After calling close(), no further calls on the
+         * iterator should be made; if further calls are made, the effect of such calls is undefined.
+         * <p>For example, the iterator returned by the unparsed-text-lines() function has a close() method
+         * that causes the underlying input stream to be closed, whether or not the file has been read
+         * to completion.</p>
+         * <p>Closing an iterator is important when the data is being "pushed" in
+         * another thread. Closing the iterator terminates that thread and means that it needs to do
+         * no additional work. Indeed, failing to close the iterator may cause the push thread to hang
+         * waiting for the buffer to be emptied.</p>
+         * <p>Closing an iterator is not necessary if the iterator is read to completion: if a call
+         * on {@link #next()} returns null, the iterator will be closed automatically. An explicit
+         * call on {@link #close()} is needed only when iteration is abandoned prematurely.</p>
+         *
+         * @since 9.1. Default implementation added in 9.9.
+         */
+        @Override
+        public void close() {
+            reportCompletion(container.state == State.ALL_READ);
+        }
+
+        private void reportCompletion(boolean allRead) {
+            // When we've finished with the iterator, provide feedback to the binding instruction
+            // as to whether all the data was read, or whether there was an early exit. This can
+            // be used to switch the evaluation strategy from lazy evaluation to eager evaluation
+            if (container.callingExpression != null) {
+                MemoClosure.MemoClosureStatistics stats = new MemoClosure.MemoClosureStatistics();
+                stats.allRead = allRead;
+                stats.size = container.used;
+                container.callingExpression.supplyFeedback(stats);
             }
         }
 

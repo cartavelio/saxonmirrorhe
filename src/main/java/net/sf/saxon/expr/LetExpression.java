@@ -19,6 +19,7 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.value.IntegerValue;
+import net.sf.saxon.value.MemoClosure;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
@@ -31,7 +32,8 @@ import java.util.function.Supplier;
  * also for XSLT local variables.
  */
 
-public class LetExpression extends Assignation implements TailCallReturner {
+public class LetExpression extends Assignation
+        implements TailCallReturner, MemoClosure.MemoClosureStatisticsGatherer {
 
     //private int evaluationMode = ExpressionTool.UNDECIDED;
     private Evaluator evaluator = null;
@@ -108,6 +110,23 @@ public class LetExpression extends Assignation implements TailCallReturner {
 
     public boolean isNeedsLazyEvaluation() {
         return needsLazyEvaluation;
+    }
+
+    private int completed = 0;
+    private int abandoned = 0;
+
+    public void supplyFeedback(MemoClosure.MemoClosureStatistics statistics) {
+        // Note, does thread-unsafe updates to the statistics
+        if (evaluator.getCode() == Evaluators.MAKE_MEMO_CLOSURE) {
+            if (statistics.allRead) {
+                completed++;
+            } else {
+                abandoned++;
+            }
+            if (completed > 20 && abandoned == 0) {
+                setEvaluator(Evaluator.EagerSequence.INSTANCE);
+            }
+        }
     }
 
     /**
@@ -554,6 +573,9 @@ public class LetExpression extends Assignation implements TailCallReturner {
             int savedOutputState = context.getTemporaryOutputState();
             context.setTemporaryOutputState(StandardNames.XSL_VARIABLE);
             Sequence result = evaluator.evaluate(getSequence(), context);
+            if (result instanceof MemoClosure) {
+                ((MemoClosure)result).setBindingExpression(this);
+            }
             context.setTemporaryOutputState(savedOutputState);
             return result;
         } catch (ClassCastException e) {

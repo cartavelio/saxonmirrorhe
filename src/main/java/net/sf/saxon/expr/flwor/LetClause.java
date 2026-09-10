@@ -14,6 +14,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
+import net.sf.saxon.value.MemoClosure;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -23,7 +24,7 @@ import static net.sf.saxon.expr.flwor.Clause.ClauseName.LET;
 /**
  * A "let" clause in a FLWOR expression
  */
-public class LetClause extends Clause {
+public class LetClause extends Clause implements MemoClosure.MemoClosureStatisticsGatherer {
 
     private LocalVariableBinding rangeVariable;
     private Operand sequenceOp;
@@ -40,6 +41,25 @@ public class LetClause extends Clause {
             evaluator = ExpressionTool.lazyEvaluator(getSequence(), true);
         }
         return evaluator;
+    }
+
+    private int completed = 0;
+    private int abandoned = 0;
+
+    public void supplyFeedback(MemoClosure.MemoClosureStatistics statistics) {
+        // Note, does thread-unsafe updates to the statistics
+        if (evaluator.getCode() == Evaluators.MAKE_MEMO_CLOSURE) {
+            if (statistics.allRead) {
+                completed++;
+            } else {
+                abandoned++;
+            }
+            if (completed > 10 && abandoned == 0) {
+                System.err.println("LetClause set to eager");
+                evaluator = Evaluator.EagerSequence.INSTANCE;
+                variableEvaluator = evaluator.elaborate(getSequence());
+            }
+        }
     }
 
     @Override
@@ -79,6 +99,9 @@ public class LetClause extends Clause {
             variableEvaluator = evaluator.elaborate(getSequence());
         }
         Sequence val = variableEvaluator.eval(context);
+        if (val instanceof MemoClosure) {
+            ((MemoClosure)val).setBindingExpression(this);
+        }
         context.setLocalVariable(getRangeVariable().getLocalSlotNumber(), val);
     }
 
