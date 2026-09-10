@@ -420,7 +420,7 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
 
         Map<QName, XdmValue> parameters = new HashMap<>();
         Properties props = new Properties();
-        Map<String, Object> optionsMap = setupConfigurationAndBuildMap(processorDataRef, props, parameters, null, null, null, false);
+        Map<String, Object> optionsMap = setupConfigurationAndBuildMap(processorDataRef, props, parameters, null, null, null, null, false);
 
 
         SchemaValidator validator = null;
@@ -507,7 +507,7 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
 
         Map<QName, XdmValue> parameters = new HashMap<>();
         Properties props = new Properties();
-        Map<String, Object> optionsMap = setupConfigurationAndBuildMap(processorDataRef, props, parameters, null, null, null, false);
+        Map<String, Object> optionsMap = setupConfigurationAndBuildMap(processorDataRef, props, parameters, null, null, null, null, false);
 
         applySchemaProperties(cwd, processor, schemaValidatorForCpp, validator, optionsMap, parameters, props);
 

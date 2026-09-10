@@ -1259,17 +1259,18 @@ public class SaxonCAPI {
      * Method to convert arrays received from C++ to Java map object
      * this method also extracts serialization properties and parameters
      *
-     * @param processorDataAccumulatorRef  - Data held as a map structure when passing from C++ to Java
-     * @param props                       - Serialisation properties to be setup
-     * @param parameters                  - Passed Processor parameters as map. Updated within method
-     * @param staticParameters            - For XSLT use
-     * @param globals                     - Map to retrieve global variables to be used in XSLT transformer
-     * @param initialTemplateParameters   - Initial template parameter for use with XSLT
-     * @param forXslt                     - Indicate XSLT use
+     * @param processorDataAccumulatorRef     - Data held as a map structure when passing from C++ to Java
+     * @param props                           - Serialisation properties to be setup
+     * @param parameters                      - Passed Processor parameters as map. Updated within method
+     * @param staticParameters                - For XSLT use
+     * @param globals                         - Map to retrieve global variables to be used in XSLT transformer
+     * @param initialTemplateParameters       - Initial template parameter for use with XSLT
+     * @param initialTemplateTunnelParameters
+     * @param forXslt                         - Indicate XSLT use
      * @return Map of String, Object pairs
-     * @throws SaxonApiException    failure in the setup of configuration parameters
+     * @throws SaxonApiException failure in the setup of configuration parameters
      */
-    public static Map<String, Object> setupConfigurationAndBuildMap(ObjectHandle processorDataAccumulatorRef, Properties props, Map<QName, XdmValue> parameters, Map<QName, XdmValue> staticParameters, Map<QName, XdmValue> globals, Map<QName, XdmValue> initialTemplateParameters, boolean forXslt) throws SaxonApiException {
+    public static Map<String, Object> setupConfigurationAndBuildMap(ObjectHandle processorDataAccumulatorRef, Properties props, Map<QName, XdmValue> parameters, Map<QName, XdmValue> staticParameters, Map<QName, XdmValue> globals, Map<QName, XdmValue> initialTemplateParameters, Map<QName, XdmValue> initialTemplateTunnelParameters, boolean forXslt) throws SaxonApiException {
 
         Map<String, Object> map = new HashMap();
         ProcessorDataAccumulator processorDataAccumulator = null;
@@ -1336,6 +1337,18 @@ public class SaxonCAPI {
                 initialTemplateParameters.put(qname, valueForCpp);
                 if (debug) {
                     System.err.println("DEBUG: SaxonCAPI itparam: " + paramName);
+                }
+
+            } else if (initialTemplateTunnelParameters != null && params[i].startsWith("tnparam:")) {
+                //initial template parameters
+                String paramName = params[i].substring(8);
+                Object value = values[i];
+                XdmValue valueForCpp = null;
+                QName qname = QName.fromClarkName(paramName);
+                valueForCpp = convertObjectToXdmValue(values[i]);
+                initialTemplateTunnelParameters.put(qname, valueForCpp);
+                if (debug) {
+                    System.err.println("DEBUG: SaxonCAPI tnparam: " + paramName);
                 }
 
             } else if (staticParameters != null && params[i].startsWith("sparam:")) {

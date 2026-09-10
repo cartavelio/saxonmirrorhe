@@ -257,10 +257,6 @@ public:
   //! Clear configuration property values set
   void clearProperties();
 
-  /**
-   * Utility method for working with SaxonC on Python - internal use only
-   */
-  XdmValue **createXdmValueArray(int len) { return (new XdmValue *[len]); }
 
   /**
    * Utility method for working with SaxonC on Python - internal use only
@@ -590,7 +586,7 @@ private:
                                 XdmValue */
   std::string cwdXE;         /*!< Current working directory */
   std::string resources_dir; /*!< Saxon resources directory */
-  bool tunnel, jitCompilation, rawResultsFlag, exceptionFound;
+  bool jitCompilation, rawResultsFlag, exceptionFound;
   std::map<std::string, XdmValue *>
       parameters; /*!< Map of parameters used for the transformation as (string,
                      value) pairs */

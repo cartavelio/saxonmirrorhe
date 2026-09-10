@@ -25,7 +25,6 @@ XsltExecutable::XsltExecutable(SaxonProcessor *proci, int64_t exRef,
 
 #endif
   proc = proci;
-  tunnel = false;
   rawResultsFlag = false;
   selectionRef = SXN_UNSET;
   saxonMessageListenerRef = SXN_UNSET;
@@ -71,7 +70,6 @@ XsltExecutable::XsltExecutable(const XsltExecutable &other) {
   cwdXE = other.cwdXE;
   resources_dir = other.resources_dir;
   selectionRef = other.selectionRef;
-  tunnel = other.tunnel;
   rawResultsFlag = other.rawResultsFlag;
   exceptionFound = other.exceptionFound;
   saxonMessageListenerRef = other.saxonMessageListenerRef;
@@ -205,12 +203,8 @@ void XsltExecutable::setInitialTemplateParameters(
        itr != _itparameters.end(); itr++) {
 
     //parameters["itparam:" + std::string(itr->first)] = itr->second;
-    std::string paramStr = "itparam:" + std::string(itr->first);
+    std::string paramStr = (_tunnel ?"tnparam:":"itparam:") + std::string(itr->first);
     setParameter(paramStr.c_str(), itr->second, false);
-  }
-  tunnel = _tunnel;
-  if (tunnel) {
-    setProperty("tunnel", "true");
   }
 }
 

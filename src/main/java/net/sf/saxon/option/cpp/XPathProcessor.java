@@ -22,8 +22,6 @@ import org.graalvm.word.WordFactory;
 import javax.xml.transform.Source;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -340,7 +338,7 @@ public class XPathProcessor extends SaxonCAPI {
             }
         }
         Map<QName, XdmValue> parameters = new HashMap<>();
-        Map<String, Object> optionsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, null, parameters, null, null, null, false);
+        Map<String, Object> optionsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, null, parameters, null, null, null, null , false);
         setupXPathCompiler(compiler, optionsMap);
 
         URI baseURI = PathHelper.pathToURI(xPathProcessor.getProcessor().getUnderlyingConfiguration(), cwd);
@@ -473,7 +471,7 @@ public class XPathProcessor extends SaxonCAPI {
             }
         }
         Map<QName, XdmValue> parameters = new HashMap<>();
-        Map<String, Object> optionsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, null, parameters, null, null, null, false);
+        Map<String, Object> optionsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, null, parameters, null, null, null, null, false);
         setupXPathCompiler(compiler, optionsMap);
         URI baseURI = PathHelper.pathToURI(xPathProcessor.getProcessor().getUnderlyingConfiguration(), cwd);
         compiler.setBaseURI(baseURI);
@@ -505,7 +503,7 @@ public class XPathProcessor extends SaxonCAPI {
     public static int effectiveBooleanValue(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer c_cwd, CCharPointer c_xpathStr, CCharPointer c_encoding, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
         Map<QName, XdmValue> parameters = new HashMap<>();
-        Map<String, Object> optionsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, null, parameters, null, null, null, false);
+        Map<String, Object> optionsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, null, parameters, null, null, null, null, false);
         XPathProcessor xPathProcessor = objectHandles.get(xpathProcessorRef);
 
         XPathCompiler compiler = xPathProcessor.getCompiler();

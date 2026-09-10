@@ -117,14 +117,6 @@ public:
   std::list<XdmValue *> asList();
 
   /**
-   * Utility method for working with SaxonC on Python
-   * Create an array of XdmValue objects
-   * @param len - the length of the array to create
-   * @return An empty XdmArray of length len. The caller is responsible for memory deallocation.
-   */
-  XdmValue **createXdmValueArray(int len) { return (new XdmValue *[len]); }
-
-  /**
    * Get the members of the XDM array in the form of a C++ array.
    * @return An array of the members of this XdmArray. The caller is responsible for memory deallocation.
    */

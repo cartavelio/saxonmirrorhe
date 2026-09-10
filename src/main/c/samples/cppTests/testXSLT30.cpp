@@ -2986,6 +2986,84 @@ void testAssociatedError(SaxonProcessor *proc, Xslt30Processor *trans,
   }
 }
 
+void testTunnelNonTunnelStylesheet(SaxonProcessor *proc, Xslt30Processor *trans, sResultCount *sresult) {
+
+      cerr << endl << "testTunnelNonTunnelStylesheet test" << endl;
+  const char *source =
+"<?xml version='1.0' encoding='UTF-8'?>"
+"<xsl:transform xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'>"
+	"<xsl:template name='start'>"
+		"<xsl:param name='par1' select=\"'xyz1'\" tunnel='yes'/>"
+		"<xsl:param name='par2' select=\"'xyz2'\" tunnel='yes'/>"
+		"<xsl:param name='par3' select=\"'xyz3'\" tunnel='no'/>"
+		"<xsl:param name='par4' select=\"'xyz4'\" tunnel='no'/>"
+		"<out>"
+		"	<xsl:value-of select='$par1'/>, <xsl:value-of select='$par2'/>, <xsl:value-of select='$par3'/>, <xsl:value-of select='$par4'/>"
+		"</out>"
+	"</xsl:template>"
+"</xsl:transform>";
+  cout << endl << "Test:testUTF8StringTemplate" << endl;
+  try{
+  	XsltExecutable *executable = trans->compileFromString(source);
+       /* XdmNode * node = proc->parseXmlFromString("<initial-template name='start'>"
+            "<param name='par1' tunnel='no' select=\"'foo1'\"/>"
+            "<param name='par2' tunnel='yes' select=\"'foo2'\"/>"
+            "<param name='par3' tunnel='no' select=\"'foo3'\"/>"
+            "<param name='par4' tunnel='yes' select=\"'foo4'\"/>"
+         "</initial-template>"); */
+
+  std::map<std::string, XdmValue *> tunnel_parameterValues;
+  std::map<std::string, XdmValue *> parameterValues;
+
+  XdmAtomicValue *a1 = proc->makeStringValue("foo1");
+  XdmAtomicValue *a2 = proc->makeStringValue("foo2");
+  XdmAtomicValue *a3 = proc->makeStringValue("foo3");
+  XdmAtomicValue *a4 = proc->makeStringValue("foo4");
+
+  parameterValues["par1"] = a1;
+  tunnel_parameterValues["par2"] = a2;
+  parameterValues["par3"] = a3;
+  tunnel_parameterValues["par4"] = a4;
+  executable->setInitialTemplateParameters(parameterValues, false);
+  executable->setInitialTemplateParameters(tunnel_parameterValues, true);
+  XdmValue * resultValue = executable->callTemplateReturningValue("start");
+
+  const char * resultStr = resultValue->toString();
+  if(resultStr != nullptr){
+  cout<< " Result String: " << resultStr << endl;
+  string sresulti = string(resultStr);
+  if (sresulti.compare("<out>xyz1, foo2, foo3, xyz4</out>") == 0) {
+  sresult->success++;
+  delete [] resultStr;
+  delete resultValue;
+  } else {
+    sresult->failure++;
+    sresult->failureList.push_back("testTunnelNonTunnelStylesheet1");
+  }
+  } else {
+    sresult->failure++;
+    sresult->failureList.push_back("testTunnelNonTunnelStylesheet2");
+  }
+
+        delete executable;
+
+	} catch (SaxonApiException &e) {
+    const char *emessage = e.getMessage();
+    if (emessage != nullptr) {
+      cerr << "exception=" << emessage << endl;
+    } else {
+      cerr << "exception is nullptr" << endl;
+      sresult->failure++;
+      sresult->failureList.push_back("testTunnelNonTunnelStylesheet3");
+      return;
+
+	}
+
+
+
+}
+}
+
 void testUTF8StringTemplate(SaxonProcessor *proc, Xslt30Processor *trans,
                             sResultCount *sresult) {
 
@@ -3451,6 +3529,13 @@ int main(int argc, char *argv[]) {
        << endl;
 
   testContext2NotRootNamedTemplate(processor, trans, sresult);
+
+  cout << endl
+       << "============================================================="
+       << endl
+       << endl;
+
+  testTunnelNonTunnelStylesheet(processor, trans, sresult);
 
   cout << endl
      << "============================================================="
