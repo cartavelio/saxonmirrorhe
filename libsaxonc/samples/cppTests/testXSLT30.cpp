@@ -2745,6 +2745,67 @@ void testCatalogError(const char *cwd, SaxonProcessor *proc,
   }
 }
 
+void testXInclude(const char* cwd, SaxonProcessor* proc,
+                  const std::string *const dataDir,
+                  sResultCount* sresult) {
+
+#ifdef MEM_DEBUG
+  SaxonProcessor::getInfo();
+#endif
+  cout << endl << "Test: testXInclude" << endl;
+  bool trace = false;
+  proc->setcwd(cwd);
+  proc->setConfigurationProperty("http://saxon.sf.net/feature/xinclude-aware", "on");
+  XsltExecutable* executable = nullptr;
+  Xslt30Processor* trans = nullptr;
+  try {
+
+    trans = proc->newXslt30Processor();
+
+    executable = trans->compileFromFile(CppTestUtils::concat(2, dataDir->c_str(), "/identity.xsl").c_str());
+
+    executable->setInitialMatchSelectionAsFile(CppTestUtils::concat(2, dataDir->c_str(), "/sample1.xml").c_str());
+
+    const char* result = executable->applyTemplatesReturningString();
+
+    if (result != NULL) {
+      std::cerr << "testXInclude result= " << result << std::endl;
+      operator delete((char*)result);
+      sresult->success++; // TODO - check the results more carefully
+    }
+    else {
+      sresult->failure++;
+      sresult->failureList.push_back("testXInclude");
+    }
+    if (executable != nullptr) {
+      delete executable;
+    }
+    executable = nullptr;
+    if (trans != nullptr) {
+      delete trans;
+    }
+    trans = nullptr;
+
+  }
+  catch (SaxonApiException& e) {
+    const char* message = e.getMessage();
+    if (message != nullptr) {
+      cerr << "exception-proc=" << message << endl;
+    }
+    sresult->failure++;
+    sresult->failureList.push_back("testXInclude");
+    if (executable != nullptr) {
+      delete executable;
+      executable = nullptr;
+    }
+
+    if (trans != nullptr) {
+      delete trans;
+    }
+  }
+}
+
+
 void testSaxSourceNoSystemId(SaxonProcessor *proc, DocumentBuilder *builder,
                              sResultCount *sresult) {
 
@@ -3220,6 +3281,13 @@ int main(int argc, char *argv[]) {
        << endl
        << endl;
 
+  testXInclude(cwd, processor, &dataDir, sresult);
+
+  cout << endl
+     << "============================================================="
+     << endl
+     << endl;
+
   testTransformToString2b(processor, trans, sresult);
 
   cout << endl
@@ -3435,7 +3503,7 @@ int main(int argc, char *argv[]) {
        << endl
        << endl;
 
-  // testThreads (processor, trans2, sresult);
+   testThreads (processor, trans2, &dataDir, sresult);
 
   delete trans;
   delete trans2;

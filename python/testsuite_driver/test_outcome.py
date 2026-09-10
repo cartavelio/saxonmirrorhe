@@ -28,7 +28,14 @@ class PyTestOutcome:
                        catalog_xpc: saxonc.PyXPathProcessor, assert_set: set):
         self.processor = proc
         tag = assertion.name
-        success = self.test_assertion2(assertion, result, result_as_error, assert_xpc, catalog_xpc, assert_set)
+
+        success = False
+        try:
+            success = self.test_assertion2(assertion, result, result_as_error, assert_xpc, catalog_xpc, assert_set)
+        except saxonc.PySaxonApiError as ex:
+            print('Message =', ex)
+            raise ex
+            '''success = False'''
 
         if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None and "any-of" != tag and "all-of" != tag and "not" != tag:
             if not success:
@@ -483,6 +490,11 @@ class PyTestOutcome:
 
         result_str = "<z>" + str(result).strip().replace("\r\n", "\n").replace("\n", "") + "</z>"
 
+        if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+            print("assert-xml:")
+            print("Comparand xml = " + comparand)
+            print("result xml = " + result_str)
+
         try:
             comparand_node = self.processor.parse_xml(xml_text=comparand)
 
@@ -514,7 +526,7 @@ class PyTestOutcome:
                 print("Failed using Saxon deep-equal function")
                 print("Comparand xml = " + str(no_wsp_comparand_node))
                 print("resultx = " + str(no_wsp_result_node))
-        except PySaxonApiError as ex:
+        except saxonc.PySaxonApiError as ex:
             if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
                 print("Faild to parse Comparand xml or run effective_boolean_value = " + comparand)
                 print(ex)
@@ -548,6 +560,6 @@ class PyTestOutcome:
             print(item)'''
             return item is not None and item.get_atomic_value().boolean_value
 
-        except PySaxonApiError as ex:
+        except saxonc.PySaxonApiError as ex:
             '''print("assert-eq failed - " + str(ex))'''
             return False

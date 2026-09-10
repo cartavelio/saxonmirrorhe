@@ -89,6 +89,12 @@ SAXONC_EXPORT void initSaxonc(sxnc_environment **environi, sxnc_processor **proc
 SAXONC_EXPORT void freeSaxonc(sxnc_environment **environi, sxnc_processor **proc,
                 sxnc_parameter **param, sxnc_property **prop);
 
+SAXONC_EXPORT void setConfigurationProperty(sxnc_environment *environi, sxnc_processor *proc,
+                                            char *name, char *value);
+
+SAXONC_EXPORT void setCatalog(sxnc_environment *environi, sxnc_processor *proc,
+                                            char *cwd, char *catalogFileName);
+
 /**
  * Transform an XSLT stylesheet with the result saved to file.
  * The compile and execution is done in the same call of this method.

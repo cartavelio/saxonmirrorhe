@@ -14,7 +14,6 @@ import random
 '''pytest --data-dir=[path/data]  test_saxonc.py'''
 
 
-
 @pytest.fixture
 def saxonproc():
     return PySaxonProcessor()
@@ -409,7 +408,7 @@ def testUTF8(saxonproc):
     result = executable.apply_templates_returning_string()
     assert result is not None
     assert "UTF8-تيست: تيست" in result
-
+    
 '''PyXslt30Processor test cases '''
 def testContextNotRoot(saxonproc):
     node = saxonproc.parse_xml(xml_text="<doc><e>text</e></doc>")
@@ -1015,13 +1014,14 @@ def testParseJsonWithEncoding(saxonproc):
 def testParseJsonFunction(saxonproc):
     json1 = """{ "test" : "This is a test. Price is higher than 25 €. " }"""
 
-    parse_json_fn = PyXdmFunctionItem.get_system_function(saxonproc, '{http://www.w3.org/2005/xpath-functions}parse-json', 1)
+
+    parse_json_fn = saxonc.PyXdmFunctionItem.get_system_function(saxonproc, '{http://www.w3.org/2005/xpath-functions}parse-json', 1)
 
     try:
         parsed_json1 = parse_json_fn.call([saxonproc.make_string_value(json1, encoding="UTF-8")])
         print(parsed_json1)
         assert True
-    except PySaxonApiError as e:
+    except saxonc.PySaxonApiError as e:
         print(e.message)
         assert False
 
@@ -1043,7 +1043,7 @@ def testResultDocumentWitJson(saxonproc):
     assert  keysList[0].endswith('result-1.json')
     assert isinstance(rdocs_map[keysList[0]].head, PyXdmMap)
 
-
+    
 def testApplyTemplatesToFile(saxonproc):
     xsl = "<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>  <xsl:template match='a'> <c>d</c>  </xsl:template></xsl:stylesheet>"
     trans = saxonproc.new_xslt30_processor()
@@ -1709,7 +1709,6 @@ def testMapOperations2(saxonproc):
         assert map is not None
         print(map.values())
         assert map.map_size == 3
-
 
 def testMapOperationsWithStrings(saxonproc):
 
