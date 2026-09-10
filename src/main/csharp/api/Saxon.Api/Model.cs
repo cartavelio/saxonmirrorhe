@@ -2447,17 +2447,18 @@ namespace Saxon.Api
             return localNameStep.Invoke(this);
 		}
 
-		/// <summary>
-		/// Get the element children having a specified namespace URI and local name
-		/// </summary>
-		/// <param name="uri">the namespace URI of the child elements to be selected: 
-		/// supply a zero-length string to indicate the null namespace</param>
-		/// <param name="localName">the local name of the child elements to be selected</param>
-		/// <returns> an <c>Iterable</c> containing the element children of this node that have the required local name and namespace URI.</returns>
+        /// <summary>
+        /// Get the element children having a specified namespace URI and local name
+        /// </summary>
+        /// <param name="uri">the namespace URI of the child elements to be selected: 
+        /// supply a zero-length string to indicate the null namespace</param>
+        /// <param name="localName">the local name of the child elements to be selected</param>
+        /// <returns> an <c>Iterable</c> containing the element children of this node that have the required local name and namespace URI.</returns>
 
         public IEnumerable<XdmNode> Children(String uri, String localName)
         {
-            return Children().SelectMany(Steps.Child(uri, localName).Func);
+            Step<XdmNode, XdmNode> nameUriStep = Steps.Child(uri, localName);
+            return nameUriStep.Invoke(this);
         }
 
         /// <summary>
