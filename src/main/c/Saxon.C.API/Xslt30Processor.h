@@ -345,7 +345,7 @@ private:
      //! Clear property values set
     void clearProperties();
 
-	SaxonProcessor* proc;/*! */
+	SaxonProcessor* proc;/*! Pointer to SaxonProcessor object*/
 	int64_t cppXT;
     std::string cwdXT; /*!< current working directory */
 	bool jitCompilation;

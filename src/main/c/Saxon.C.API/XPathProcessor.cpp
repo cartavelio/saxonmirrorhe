@@ -105,7 +105,7 @@ XdmValue * XPathProcessor::evaluate(const char * xpathStr) {
 	exception = new SaxonApiException("Error:: XPath string cannot be empty or nullptr");
 	return nullptr;
     }
-
+    SaxonProcessor::attachCurrentThread();
 
 	setProperty("resources", proc->getResourcesDirectory());
     int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties,0);
@@ -132,7 +132,7 @@ XdmItem * XPathProcessor::evaluateSingle(const char * xpathStr) {
         exception = new SaxonApiException("Error:: XPath string cannot be empty or nullptr");
         return nullptr;
     }
-
+    SaxonProcessor::attachCurrentThread();
 
     setProperty("resources", proc->getResourcesDirectory());
     int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
@@ -205,7 +205,7 @@ void XPathProcessor::setContextFile(const char * filename) {
 
 
 void XPathProcessor::declareNamespace(const char *prefix, const char * uri){
-    //SaxonProcessor::attachCurrentThread();
+    SaxonProcessor::attachCurrentThread();
     if (prefix == nullptr) {
         exception = new SaxonApiException("Null prefix supplied to declareNamespace()");
         return;
@@ -265,7 +265,7 @@ void XPathProcessor::setBaseURI(const char * uriStr) {
 }
 
 bool XPathProcessor::effectiveBooleanValue(const char * xpathStr) {
-
+    SaxonProcessor::attachCurrentThread();
     setProperty("resources", proc->getResourcesDirectory());
     int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
     int resultsi = j_effectiveBooleanValue(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)cwdXP.c_str(), (char *)xpathStr, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));

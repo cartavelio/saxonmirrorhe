@@ -217,6 +217,7 @@ void Xslt30Processor::createException(const char * message) {
 
 
 void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* filename) {
+    proc->attachCurrentThread();
     long status = j_compileFromXdmNodeAndSave(SaxonProcessor::sxn_environ->thread, (void *)cppXT,  (void *)node->getUnderlyingValue(),  (char *)cwdXT.c_str(), (char *)filename);
     if(status == -2) {
         createException();
@@ -225,6 +226,7 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* file
 }
 
     void Xslt30Processor::compileFromStringAndSave(const char* stylesheetStr, const char* filename){
+        proc->attachCurrentThread();
         long status = j_compileFromStringAndSave(SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(), (char *)stylesheetStr, (char *)filename);
         if(status == -2) {
             createException();
@@ -234,6 +236,7 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* file
 
 
     void Xslt30Processor::compileFromFileAndSave(const char* xslFilename, const char* filename){
+        proc->attachCurrentThread();
         if(xslFilename == nullptr) {
             createException("XSL filename is null");
             return;
@@ -249,7 +252,7 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* file
 }
 
 XsltExecutable * Xslt30Processor::compileFromString(const char* stylesheetStr) {
-    //proc->attachCurrentThread();
+    proc->attachCurrentThread();
     if(stylesheetStr == nullptr) {
         createException("XSL string is null");
         return nullptr;
@@ -261,7 +264,7 @@ XsltExecutable * Xslt30Processor::compileFromString(const char* stylesheetStr) {
             createException();
             return nullptr;
         }
-	    XsltExecutable * executable = new XsltExecutable(proc->procRef, objRef, cwdXT, proc->getResourcesDirectory());
+	    XsltExecutable * executable = new XsltExecutable(proc, objRef, cwdXT, proc->getResourcesDirectory());
         if(processorDataRef > 0) {
             j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
             processorDataRef = -1;
@@ -272,7 +275,7 @@ XsltExecutable * Xslt30Processor::compileFromString(const char* stylesheetStr) {
 }
 
 XsltExecutable * Xslt30Processor::compileFromXdmNode(XdmNode * node) {
-    //proc->attachCurrentThread();
+    proc->attachCurrentThread();
     if(node == nullptr) {
         createException("XSL node is null");
         return nullptr;
@@ -283,7 +286,7 @@ XsltExecutable * Xslt30Processor::compileFromXdmNode(XdmNode * node) {
         createException();
         return nullptr;
     }
-    XsltExecutable * executable = new XsltExecutable(proc->procRef, objRef, cwdXT, proc->getResourcesDirectory());
+    XsltExecutable * executable = new XsltExecutable(proc, objRef, cwdXT, proc->getResourcesDirectory());
     if(processorDataRef > 0) {
         j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
         processorDataRef = -1;
@@ -294,6 +297,7 @@ XsltExecutable * Xslt30Processor::compileFromXdmNode(XdmNode * node) {
 }
 
 XsltExecutable * Xslt30Processor::compileFromAssociatedFile(const char* source) {
+    proc->attachCurrentThread();
     if(source == nullptr) {
         createException("XSL filename is null");
         return nullptr;
@@ -304,13 +308,13 @@ XsltExecutable * Xslt30Processor::compileFromAssociatedFile(const char* source) 
         createException();
         return nullptr;
     }
-    XsltExecutable * executable = new XsltExecutable(proc->procRef, objRef, cwdXT, proc->getResourcesDirectory());
+    XsltExecutable * executable = new XsltExecutable(proc, objRef, cwdXT, proc->getResourcesDirectory());
     return executable;
 }
 
 
 XsltExecutable * Xslt30Processor::compileFromFile(const char* stylesheet) {
-
+    proc->attachCurrentThread();
     if(stylesheet == nullptr) {
         createException("XSL filename is null");
         return nullptr;
@@ -321,7 +325,7 @@ XsltExecutable * Xslt30Processor::compileFromFile(const char* stylesheet) {
         createException();
         return nullptr;
     }
-    XsltExecutable * executable = new XsltExecutable(proc->procRef,objRef, cwdXT, proc->getResourcesDirectory());
+    XsltExecutable * executable = new XsltExecutable(proc,objRef, cwdXT, proc->getResourcesDirectory());
     if(processorDataRef > 0) {
         j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
         processorDataRef = -1;
@@ -332,7 +336,7 @@ XsltExecutable * Xslt30Processor::compileFromFile(const char* stylesheet) {
 
 XdmValue * Xslt30Processor::transformFileToValue(const char* sourcefile,const char* stylesheetfile) {
 
-
+    proc->attachCurrentThread();
 
 	if(sourcefile == nullptr && stylesheetfile == nullptr){
         createException("Found null file name");
@@ -366,6 +370,7 @@ void Xslt30Processor::transformFileToFile(const char* source,
 		//Require clearing exception.
 		return;	
 	}
+    proc->attachCurrentThread();
 	if(stylesheet==nullptr){
 		std::cerr<< "Error: stylesheet has not been set."<<std::endl;
 		return;
@@ -390,6 +395,7 @@ const char * Xslt30Processor::transformFileToString(const char* source,
         std::cerr<<"Error: Xslt30Processor not in a clean state. - Exception found"<<std::endl;
 		return nullptr;
 	}
+    proc->attachCurrentThread();
 	if(source == nullptr && stylesheet == nullptr){
 		std::cerr<< "Error: nullptr file name found in transformFiletoString."<<std::endl;
 		return nullptr;

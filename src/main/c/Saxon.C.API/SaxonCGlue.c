@@ -55,32 +55,54 @@ int create_graalvm_isolate(sxnc_environment * env)
         fprintf(stderr, "graal_create_isolate error\n");
         return 1;
     }
-    fprintf(stdout, "Current thread pointer %p\n", (void *)((env)->thread));
-    fflush(stdout);
+    (env)->mainthread = (env)->thread;
+    /*fprintf(stdout, "main thread pointer %p\n", (void *)(((env)->thread)));
+    fflush(stdout);*/
     return 0;
 }
 
 
 int attach_graalvm_thread(sxnc_environment * env)
 {
-    fprintf(stdout, "graal_attach_thread before\n");
-    fflush(stdout);
-    graal_isolatethread_t *newthread = NULL;
-    //graal_create_isolate(NULL, &isolate1, &newthread);
-    graal_isolatethread_t *curthread = graal_get_current_thread(((env)->isolate));
-    fprintf(stdout, "Cur thread pointer %p\n", (void *)curthread);
-    fflush(stdout);
+    graal_isolatethread_t *newthread = graal_get_current_thread(((env)->isolate));
+    if(newthread) {
+        /*fprintf(stdout, "Cur attach thread pointer same %p\n", (void *)newthread);
+        fflush(stdout);*/
+        (env)->thread = newthread;
+        return 1;
+    }
 
     if (graal_attach_thread(((env)->isolate), &newthread) != 0) {
-        fprintf(stdout, "graal_attach_thread error\n");
+        /*fprintf(stdout, "graal_attach_thread error\n");
+        fflush(stdout);*/
+        return 1;
+    }
+    /*fprintf(stdout, "graal_attach_thread pointer %p\n", (void *)newthread);
+    fflush(stdout);*/
+    (env)->thread = newthread;
+    return 0;
+}
+
+
+int detach_graalvm_thread(sxnc_environment * env)
+{
+    /*graal_isolatethread_t *curthread = graal_get_current_thread(((env)->isolate));
+    if(!curthread) {
+        fprintf(stdout, "Cur detach thread pointer not in isolate \n");
         fflush(stdout);
         return 1;
     }
-    fprintf(stderr, "graal_attach_thread ok\n");
+    fprintf(stdout, "detach: Cur thread pointer %p\n", (void *)curthread);
     fflush(stdout);
-    fprintf(stdout, "Cur thread pointer %p\n", (void *)newthread);
-    fflush(stdout);
-    (env)->thread = newthread;
+    if (graal_detach_thread(curthread) != 0) {
+        fprintf(stdout, "graal_detach_thread error\n");
+        fflush(stdout);
+        return 1;
+    }
+    (env)->thread = (env)->mainthread;
+    fprintf(stdout, "graal_dettach_thread pointer %p\n", (void *)((env)->thread));
+     fflush(stdout);*/
+
     return 0;
 }
 

@@ -268,9 +268,6 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
 
     XdmValue * XQueryProcessor::executeQueryToValue(const char * infilename, const char * query){
         SaxonProcessor::attachCurrentThread();
-        SaxonProcessor::attachCurrentThread();
-
-
         setProperty("resources", proc->getResourcesDirectory());
         if(infilename != nullptr) {
             setProperty("s", infilename);
@@ -297,7 +294,7 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
 }
 
     const char * XQueryProcessor::executeQueryToString(const char * infilename, const char * query){
-
+        SaxonProcessor::attachCurrentThread();
         setProperty("resources", proc->getResourcesDirectory());
         if(infilename != nullptr) {
             setProperty("s", infilename);
