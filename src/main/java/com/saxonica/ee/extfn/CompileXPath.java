@@ -40,6 +40,7 @@ import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.*;
 
@@ -296,7 +297,7 @@ public class CompileXPath extends SystemFunction {
         }
 
         @Override
-        public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
+        public boolean isAvailable(SymbolicName.F functionName, Schema schema, int languageLevel) {
             return lib.containsKey(functionName);
         }
 
