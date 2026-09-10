@@ -872,3 +872,50 @@ task copy_prod_desc_pdf(
   into("${buildDir}/website/products/PD${saxonMajorVersion}")
   from("${buildDir}/proddesc/PD/pdf")
 }
+
+// ============================================================
+
+task saxonc_documentation(
+        dependsOn: ["copy_saxonc_doc", "copy_saxonc_css", "saxonc_doc_sef"],
+        description: "Build the SaxonC documentation for website"
+) {
+  // Just a place to hang dependencies
+}
+
+task copy_saxonc_doc(
+  type: Copy,
+  description: "Copy the SaxonC documentation source"
+) {
+  into "${buildDir}/website/saxon-c/documentation11"
+  from ("${projectDir}/src/docs/saxonc-doc") {
+    exclude "xsl/*.xsl"
+    exclude "*.css"
+  }
+}
+
+task copy_saxonc_css(
+        type: Copy,
+        description: "Copy SaxonC documentation CSS"
+) {
+  into "${buildDir}/website/saxon-c/documentation11"
+  from "${projectDir}/src/docs/saxonc-doc/jstree.css"
+  filter { line ->
+    line.contains("url('saxon-base.css')")
+            ? line.replace("saxon-base.css", "../../saxon-base.css")
+            : line
+  }
+}
+
+task saxonc_doc_sef(
+  type: JavaExec,
+  description: "Compile the viewer_app stylesheet for the SaxonC documentation"
+) {
+  inputs.files fileTree(dir: "${projectDir}/src/docs/saxonc-doc/xsl")
+  outputs.file "${buildDir}/website/saxon-c/documentation11/xsl/jstree.sef.json"
+  classpath = configurations.documentation
+  main = "com.saxonica.Transform"
+  args "-xsl:${projectDir}/src/docs/saxonc-doc/xsl/jstree.xsl",
+          "-export:${buildDir}/website/saxon-c/documentation11/xsl/jstree.sef.json",
+          "-target:JS", "-nogo", "-relocate:on", "-ns:##html5",
+          "--generateByteCode:off"
+}
