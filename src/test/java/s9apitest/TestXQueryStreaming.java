@@ -195,19 +195,19 @@ public class TestXQueryStreaming {
 
     @Test
     public void testConversionFallbackOn() {
-        String uri = "file://" + ConfigTest.DATA_DIR + "books.xml";
+        String uri = "file:///" + ConfigTest.DATA_DIR + "books.xml";
         assertTrue(runFallback(true, "saxon:stream(doc('" + uri + "')/BOOKLIST/BOOKS/ITEM[last()]/AUTHOR)"));
     }
 
     @Test
     public void testConversionFallbackOff() {
-        String uri = "file://" + ConfigTest.DATA_DIR + "books.xml";
+        String uri = "file:///" + ConfigTest.DATA_DIR + "books.xml";
         assertFalse(runFallback(false, "saxon:stream(doc('" + uri + "')/BOOKLIST/BOOKS/ITEM[last()]/AUTHOR)"));
     }
 
     @Test
     public void testStreamabilityFallbackOn() {
-        String uri = "file://" + ConfigTest.DATA_DIR + "books.xml";
+        String uri = "file:///" + ConfigTest.DATA_DIR + "books.xml";
         String query = "declare function local:f($element)\n" +
                 "{\n" +
                 "  element x\n" +
@@ -223,7 +223,7 @@ public class TestXQueryStreaming {
 
     @Test
     public void testStreamabilityFallbackOff() {
-        String uri = "file://" + ConfigTest.DATA_DIR + "books.xml";
+        String uri = "file:///" + ConfigTest.DATA_DIR + "books.xml";
 
         String query = "declare function local:f($element)\n" +
                 "{\n" +
@@ -244,7 +244,7 @@ public class TestXQueryStreaming {
     @Test
     public void testMotionlessQuery() {
         try {
-            String uri = "file://" + ConfigTest.DATA_DIR + "othello.xml";
+            String uri = "file:///" + ConfigTest.DATA_DIR + "othello.xml";
             String query = "declare variable $n external; count(saxon:stream(doc('" + uri +
                     "')/((1 to $n)!element e {.})))";
             Processor proc = new Processor(true);
@@ -263,7 +263,7 @@ public class TestXQueryStreaming {
     @Test
     public void testEarlyExit() {
         try {
-            String uri = "file://" + ConfigTest.DATA_DIR + "othello.xml";
+            String uri = "file:///" + ConfigTest.DATA_DIR + "othello.xml";
             String query = "declare variable $name as xs:string external;\n" +
                     "    exists(//PERSONA/text()[starts-with(., $name)])";
             Processor processor = new Processor(true);

@@ -77,7 +77,7 @@ public class SAXTest {
     @Test
     public void testBackMapping() {
         String xml = "<a/>";
-        String textUri = "file://" + ConfigTest.DATA_DIR + "sample.json";
+        String textUri = "file:///" + ConfigTest.DATA_DIR + "sample.json";
         String xsl = "<xsl:transform version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>\n" +
                 "<xsl:template match='/'>\n" +
                 "<out>\n" +
