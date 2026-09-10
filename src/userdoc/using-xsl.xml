@@ -2099,7 +2099,8 @@
          <p>XSLT defines the <a class="bodylink code" href="/xsl-elements/message">xsl:message</a> instruction to produce output, but leaves
          nearly all details of its behaviour implementation-defined. Although the content of a message
          is often a simple text string, the specification defines it as an XML document fragment.
-         By default Saxon serializes this document and writes it to the standard error stream.</p>
+         By default Saxon serializes this document and writes it to the standard error stream. The serialization
+         is done with <code>method="xml" indent="yes" omit-xml-declaration="yes"</code>.</p>
          
          <div class="javaonly">
          <p>A Java application can customize the handling of <code>xsl:message</code>
