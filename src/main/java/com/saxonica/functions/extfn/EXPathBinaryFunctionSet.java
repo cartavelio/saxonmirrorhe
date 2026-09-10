@@ -577,20 +577,39 @@ EXPathBinaryFunctionSet extends BuiltInFunctionSet {
         }
     }
 
+
     public static class BinaryPackInteger extends SystemFunction {
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-            IntegerValue value = (IntegerValue)arguments[0].head();
-            int length = (int)((IntegerValue)arguments[1].head()).longValue();
-            if (length < 0) {
+            IntegerValue value = (IntegerValue) arguments[0].head();
+            int requestedLength = (int) ((IntegerValue) arguments[1].head()).longValue();
+            if (requestedLength < 0) {
                 error("Requested length of integer packing is negative", ERROR_NEGATIVE_SIZE);
             }
             BigInteger big = value.asBigInteger();
-            return packBytes(big.toByteArray(),
-                             length, endianness(arguments, 2), big.signum() == -1);
+            byte[] in = big.toByteArray();
+            byte[] result = new byte[requestedLength];
+            if (big.signum() == -1) {
+                // Negative number: unused bytes set to 0xFF
+                Arrays.fill(result, (byte) 255);
+            }
+            int suppliedLength = in.length;
+            if (endianness(arguments, 2)) {
+                // big-endian (most significant byte first)
+                int bytesToCopy = Math.min(suppliedLength, requestedLength);
+                System.arraycopy(in, suppliedLength - bytesToCopy,
+                                 result, requestedLength - bytesToCopy,
+                                 bytesToCopy);
+            } else {
+                // little-endian (least significant byte first)
+                int i = 0;
+                while (i < requestedLength && suppliedLength > 0) {
+                    result[i++] = in[--suppliedLength];
+                }
+            }
+            return one(result);
         }
     }
-
     public static class BinaryPadLeft extends SystemFunction {
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
@@ -1069,36 +1088,6 @@ EXPathBinaryFunctionSet extends BuiltInFunctionSet {
                 result[i++] = (byte) (in & 0xff);
                 in >>= 8;
             }
-        }
-        return one(result);
-    }
-
-    private static Base64BinaryValue packBytes(byte[] in, int length,
-                                                    boolean big) {
-        return packBytes(in, length, big, false);
-    }
-
-    private static Base64BinaryValue packBytes(byte[] in, int length,
-                                                    boolean big, boolean negative) {
-        byte[] result = new byte[length];
-        int len = in.length;
-        int i;
-        if (big) {
-            i = len;
-            while (length > 0 && i > 0) {
-                result[--length] = in[--i];
-            }
-            if (negative)
-                while (length > 0)
-                    result[--length] = (byte) (255);
-        } else {
-            i = 0;
-            while (length-- > 0 && len > 0) {
-                result[i++] = in[--len];
-            }
-            if (negative)
-                while (length > 0)
-                    result[i++] = (byte) (255);
         }
         return one(result);
     }
