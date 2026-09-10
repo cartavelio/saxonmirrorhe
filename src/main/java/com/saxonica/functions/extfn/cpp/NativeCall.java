@@ -8,6 +8,7 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.option.cpp.SaxonCAPI;
+import net.sf.saxon.option.cpp.SaxonCExceptionLongHandler;
 import net.sf.saxon.option.cpp.XdmValueForCpp;
 import net.sf.saxon.s9api.XdmItem;
 import net.sf.saxon.s9api.XdmNode;
@@ -16,6 +17,10 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.*;
+import org.graalvm.nativeimage.IsolateThread;
+import org.graalvm.nativeimage.c.function.CEntryPoint;
+import org.graalvm.nativeimage.c.function.CLibrary;
+import org.graalvm.nativeimage.c.function.CFunction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,8 +51,8 @@ public class NativeCall extends SystemFunction {
         return extension;
     }
 
-    public static void loadLibrary(String libraryName) {
-        String libName = libraryName + "." + getLibraryExtension();
+    public static void loadLibrary(String libName) {
+
         try {
             //System.out.println("Library Name=. " + libName);
             //System.err.println("Err.println Library Name=. " + libName);
@@ -59,6 +64,7 @@ public class NativeCall extends SystemFunction {
 
 
     }
+
 
 
     @Override
@@ -122,7 +128,7 @@ public class NativeCall extends SystemFunction {
         if (SaxonCAPI.debug) {
             System.err.println("Phpcall.call: Before call to _phpCall ");
         }
-        Object obj = _nativeCall(phpFuncName, funcArgs, funcArgTypes);
+        Object obj = null;//_nativeCall(/*phpFuncName, funcArgs, funcArgTypes*/);
         if (SaxonCAPI.debug) {
             System.err.println("Phpcall.call: After call to _phpCall ");
         }
@@ -164,9 +170,19 @@ public class NativeCall extends SystemFunction {
 
     }
 
+    @CEntryPoint(name = "j_testNativeC")
+    public static void testNativeC(IsolateThread thread){
+        System.err.println("In the testNativeC method");
+        //NativeCall call = new NativeCall();
+        int value = nativeCall(thread);
+        System.err.println("cp1 testNativeC method value=" + value);
+        System.err.println("exit testNativeC method");
+    }
+
 
     // Declare a native method _native()
-    public native Object _nativeCall(String name, Object[] args, String[] types);
+    @CFunction("c_nativeCall")
+    public static native int nativeCall(IsolateThread thread/*String name, Object[] args, String[] types*/);
 
 
 }
