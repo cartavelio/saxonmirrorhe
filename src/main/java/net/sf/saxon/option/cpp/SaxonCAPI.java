@@ -296,7 +296,7 @@ public class SaxonCAPI {
     @CEntryPoint(name = "createSaxonProcessorWithConfigurationFile", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long createSaxonProcessorWithConfigurationFile(IsolateThread thread, CCharPointer cconfigFile) throws SaxonApiException {
         Configuration config = null;
-        if (cconfigFile != WordFactory.nullPointer()) {
+        if (cconfigFile == WordFactory.nullPointer()) {
             throw new SaxonApiException("Configuration file is null");
         }
         String configFile = CTypeConversion.toJavaString(cconfigFile);
