@@ -385,7 +385,7 @@ public class Transform {
                 jit = false;
                 compiler.setJustInTimeCompilation(jit);
                 if (!"".equals(value)) {
-                    explainOutputFileName = value;
+                    explainOutputFileName = CommandLineOptions.coerceImplicitOutputURI(value);
                 }
             }
             value = options.getOptionValue("export");
@@ -394,7 +394,7 @@ public class Transform {
                 jit = false;
                 compiler.setJustInTimeCompilation(jit);
                 if (!"".equals(value)) {
-                    exportOutputFileName = value;
+                    exportOutputFileName = CommandLineOptions.coerceImplicitOutputURI(value);
                 }
             }
 
@@ -454,7 +454,7 @@ public class Transform {
 
             value = options.getOptionValue("o");
             if (value != null) {
-                outputFileName = value;
+                outputFileName = CommandLineOptions.coerceImplicitOutputURI(value);
             }
 
             value = options.getOptionValue("nogo");

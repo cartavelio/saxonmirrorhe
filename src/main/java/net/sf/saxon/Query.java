@@ -556,10 +556,10 @@ public class Query {
         allowExit = !"off".equals(options.getOptionValue("quit"));
 
         backup = "on".equals(options.getOptionValue("backup"));
-        explainOutputFileName = options.getOptionValue("explain");
+        explainOutputFileName = CommandLineOptions.coerceImplicitOutputURI(options.getOptionValue("explain"));
         explaining = explainOutputFileName != null;
         moduleURIResolverClass = options.getOptionValue("mr");
-        outputFileName = options.getOptionValue("o");
+        outputFileName = CommandLineOptions.coerceImplicitOutputURI(options.getOptionValue("o"));
         streaming = "on".equals(options.getOptionValue("stream"));
 
         String value = options.getOptionValue("p");

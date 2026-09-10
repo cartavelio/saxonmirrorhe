@@ -819,6 +819,30 @@ public class CommandLineOptions {
             name.startsWith("jar:");
     }
 
+    /*
+     * Coerce an output filename that's been specified with a file: URI into a filename.
+     *
+     * file:path => path
+     * file://///path => /path
+     * file:///c:/path => c:/path (on Windows)
+     *
+     */
+    public static String coerceImplicitOutputURI(String outputName) {
+        if (outputName == null) {
+            return null;
+        }
+        if (outputName.startsWith("file:")) {
+            outputName = outputName.substring(5);
+            if (outputName.startsWith("/")) {
+                outputName = outputName.replaceFirst("^/+", "/");
+            }
+            if (System.getProperty("os.name").startsWith("Windows") && outputName.matches("^/[A-Za-z]:.*$")) {
+                outputName = outputName.substring(1);
+            }
+        }
+        return outputName;
+    }
+
     public static void loadAdditionalSchemas(/*@NotNull*/ Configuration config, String additionalSchemas)
             throws SchemaException {
         StringTokenizer st = new StringTokenizer(additionalSchemas, File.pathSeparator);
