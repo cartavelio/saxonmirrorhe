@@ -1058,6 +1058,7 @@
             </li>
          </ul>
 
+		 <!-- It's expected that this will be changed for Saxon 13, so that setting 4.0 in the stylesheet WILL be enough. -->
          <p>Note: in XSLT, setting <code>version="4.0"</code> in the stylesheet is not enough. This
             gives you an XSLT 3.0 processor running in forwards compatibility mode, rather than an
             XSLT 4.0 processor.</p>
