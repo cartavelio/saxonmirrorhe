@@ -82,7 +82,6 @@ class TestSuite {
     }
     if (!(options['suite'] in this.directoryMap)) {
       String testTaskName = options["name"]
-      println("Configure task to fail later: ${testTaskName}")
       Task incomplete = project.task("${testTaskName}_test_suite") {
         doLast {
           throw new GradleException("Incomplete configuration for test suite ${options['suite']}")
