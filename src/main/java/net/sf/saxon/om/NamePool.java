@@ -163,7 +163,7 @@ public final class NamePool {
      * for the same name with a prefix equal to "".
      */
     
-    public synchronized int allocateFingerprint(NamespaceUri uri, String local) {
+    public int allocateFingerprint(NamespaceUri uri, String local) {
         if (NamespaceUri.isReserved(uri) || NamespaceUri.SAXON.equals(uri)) {
             int fp = StandardNames.getFingerprint(uri, local);
             if (fp != -1) {
@@ -171,21 +171,23 @@ public final class NamePool {
             }
         }
         StructuredQName qName = new StructuredQName("", uri, local);
-        int existing = qNameToInteger.getOrDefault(qName, -1);
-        if (existing >= 0) {
-            return existing;
-        }
-        long nextUnique = unique.getAndIncrement();
-        if (nextUnique > MAX_FINGERPRINT) {
-            throw new NamePoolLimitException("Too many distinct names in NamePool");
-        }
-        int next = (int)nextUnique;
-        Integer existing2 = qNameToInteger.putIfAbsent(qName, next);
-        if (keyWasAbsent(existing2)) {
-            integerToQName.put(next, qName);
-            return next;
-        } else {
-            return existing;
+        synchronized (this) {
+            int existing = qNameToInteger.getOrDefault(qName, -1);
+            if (existing >= 0) {
+                return existing;
+            }
+            long nextUnique = unique.getAndIncrement();
+            if (nextUnique > MAX_FINGERPRINT) {
+                throw new NamePoolLimitException("Too many distinct names in NamePool");
+            }
+            int next = (int) nextUnique;
+            Integer existing2 = qNameToInteger.putIfAbsent(qName, next);
+            if (keyWasAbsent(existing2)) {
+                integerToQName.put(next, qName);
+                return next;
+            } else {
+                return existing;
+            }
         }
     }
 
@@ -275,7 +277,7 @@ public final class NamePool {
                 throw new IllegalArgumentException("No closing '}' in Clark name");
             }
             namespace = NamespaceUri.of(expandedName.substring(1, closeBrace));
-            if (closeBrace == expandedName.length()) {
+            if (closeBrace == expandedName.length() - 1) {
                 throw new IllegalArgumentException("Missing local part in Clark name");
             }
             localName = expandedName.substring(closeBrace + 1);

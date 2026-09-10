@@ -19,10 +19,21 @@ namespace System.Impl.Helpers {
         private bool isEmptyElement = false;
         private Saxon.Hej.pull.PullEvent? currentEvent = Saxon.Hej.pull.PullEvent.START_OF_INPUT;
         private bool expandDefaults = true;
-        
+
         private readonly SysCollGen.Stack<Saxon.Hej.om.NamespaceMap> namespaceStack = new();
+
+        /**
+         * A local cache is used to avoid allocating fingerprints for the same name more than once.
+         * This reduces contention on the NamePool. This is a two-level hashmap: the first level
+         * has the namespace URI as its key, and returns a HashMap which maps lexical QNames to integer
+         * fingerprints.
+         */
+        private readonly SysCollGen.Dictionary<NamespaceUri, SysCollGen.Dictionary<string, NodeName>> nameCache = new();
+
+        private SysCollGen.Dictionary<string, NodeName> noNamespaceNameCache = new();
+
         public bool AcceptFragment { get; set; }
-        public bool IgnoreIgnorableWhitespace { get; set; } 
+        public bool IgnoreIgnorableWhitespace { get; set; }
 
         public DotNetPullProvider(XmlReader parser) {
             this.parser = parser;
@@ -58,8 +69,9 @@ namespace System.Impl.Helpers {
                     }
                     else {
                         if ((expandDefaults || !(parser.IsDefault))) {
-                            Saxon.Hej.om.NodeName nc =
-                                new Saxon.Hej.om.FingerprintedQName(prefix, namespaceURI, localName);
+                            NodeName nc = namespaceURI.isEmpty()
+                                ? getNoNamespaceNodeName(localName)
+                                : getNamespacedNodeName(prefix, namespaceURI, localName);
                             atts = atts.put(new Saxon.Hej.om.AttributeInfo(nc,
                                 Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC, parser.Value,
                                 location, Saxon.Hej.@event.ReceiverOption.NONE));
@@ -75,9 +87,59 @@ namespace System.Impl.Helpers {
             }
         }
 
-        public Saxon.Hej.om.NodeName getNodeName() {
-            return new Saxon.Hej.om.FingerprintedQName(parser.Prefix, NamespaceUri.of(parser.NamespaceURI), parser.LocalName);
+        public NodeName getNodeName() {
+            string local = parser.LocalName;
+            NamespaceUri uri = NamespaceUri.of(parser.NamespaceURI);
+            if (uri == NamespaceUri.NULL) {
+                return getNoNamespaceNodeName(local);
+            }
+            else {
+                return getNamespacedNodeName(parser.Prefix, uri, local);
+            }
         }
+
+
+        private NodeName getNamespacedNodeName(string prefix, NamespaceUri uri, string localname) {
+            // Following code maintains a local cache to remember all the element/attribute names that have been
+            // allocated, which reduces contention on the NamePool. It also avoids parsing the lexical QName
+            // when the same name is used repeatedly. We also get a tiny improvement by avoiding the first hash
+            // table lookup for names in the null namespace.
+
+            bool found = nameCache.TryGetValue(uri, out Dictionary<string, NodeName>? map2);
+            if (!found) {
+                map2 = new(50);
+                nameCache.Add(uri, map2);
+            }
+
+            string rawname = prefix == "" ? localname : prefix + ":" + localname;
+            found = map2.TryGetValue(rawname, out NodeName? n);
+            // we use the rawname (qname) rather than the local name because we want to retain the prefix
+            // Note that the NodeName objects generated do not contain a namecode or fingerprint; it will be generated
+            // later if we are building a TinyTree, but not necessarily on other paths (e.g. an identity transformation).
+            // The NodeName object is shared by all elements with the same name, so when the namecode is allocated to one
+            // of them, it is there for all of them.
+            if (!found) {
+                FingerprintedQName qn = new (prefix, uri, localname);
+                map2.Add(rawname, qn);
+                return qn;
+            }
+            else {
+                return n;
+            }
+        }
+
+        private NodeName getNoNamespaceNodeName(string localname) {
+            bool found = noNamespaceNameCache.TryGetValue(localname, out NodeName? n);
+            if (!found) {
+                NoNamespaceName qn = new(localname);
+                noNamespaceNameCache.Add(localname, qn);
+                return qn;
+            }
+            else {
+                return n;
+            }
+        }
+
 
         public Saxon.Hej.om.NamespaceBinding[] getNamespaceDeclarations() {
             if (parser.HasAttributes) {
@@ -95,7 +157,8 @@ namespace System.Impl.Helpers {
                     }
                     else {
                         if (((prefix.Length == 0) && "xmlns".Equals(localName))) {
-                            Saxon.Hej.om.NamespaceBinding nscode = new Saxon.Hej.om.NamespaceBinding("", NamespaceUri.of(parser.Value));
+                            Saxon.Hej.om.NamespaceBinding nscode =
+                                new Saxon.Hej.om.NamespaceBinding("", NamespaceUri.of(parser.Value));
                             nsBindings[used++] = nscode;
                         }
                         else {
@@ -163,7 +226,7 @@ namespace System.Impl.Helpers {
                 catch (XmlException e) {
                     Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException(
                         "Error reported by XML parser"
-                         + (baseURI == null ? ": " : " processing " + baseURI), e);
+                        + (baseURI == null ? ": " : " processing " + baseURI), e);
                     Saxon.Hej.expr.parser.Loc loc =
                         new Saxon.Hej.expr.parser.Loc(getSystemId(), e.LineNumber, e.LinePosition);
                     de.setLocator(loc);
@@ -181,7 +244,7 @@ namespace System.Impl.Helpers {
                 catch (System.Exception e) {
                     Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException(
                         "Error reported by XML parser"
-                         + (baseURI == null ? ": " : " processing " + baseURI), e);
+                        + (baseURI == null ? ": " : " processing " + baseURI), e);
                     Saxon.Hej.expr.parser.Loc loc = new Saxon.Hej.expr.parser.Loc(getSystemId(), -1, -1);
                     de.setLocator(loc);
                     throw de;
@@ -297,8 +360,8 @@ namespace System.Impl.Helpers {
         }
 
         public int getColumnNumber() {
-            if (((parser is IXmlLineInfo) && ((IXmlLineInfo) parser).HasLineInfo())) {
-                return ((IXmlLineInfo) parser).LinePosition;
+            if (((parser is IXmlLineInfo) && ((IXmlLineInfo)parser).HasLineInfo())) {
+                return ((IXmlLineInfo)parser).LinePosition;
             }
             else {
                 return -1;
@@ -306,8 +369,8 @@ namespace System.Impl.Helpers {
         }
 
         public int getLineNumber() {
-            if (((parser is IXmlLineInfo) && ((IXmlLineInfo) parser).HasLineInfo())) {
-                return ((IXmlLineInfo) parser).LineNumber;
+            if (((parser is IXmlLineInfo) && ((IXmlLineInfo)parser).HasLineInfo())) {
+                return ((IXmlLineInfo)parser).LineNumber;
             }
             else {
                 return -1;
@@ -332,7 +395,7 @@ namespace System.Impl.Helpers {
         public Saxon.Hej.s9api.Location saveLocation() {
             return new Saxon.Hej.expr.parser.Loc(this);
         }
-        
+
         public SysCollGen.IList<Saxon.Hej.pull.UnparsedEntity> getUnparsedEntities() {
             return null;
         }

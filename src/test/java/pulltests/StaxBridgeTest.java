@@ -1,23 +1,38 @@
 package pulltests;
 
+import com.saxonica.xqj.pull.PullToStax;
+import com.saxonica.xqj.pull.TreeWalker;
 import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.NamespaceReducer;
 import net.sf.saxon.event.PipelineConfiguration;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pull.PullEvent;
+import net.sf.saxon.pull.PullProvider;
 import net.sf.saxon.pull.PullPushCopier;
 import net.sf.saxon.pull.StaxBridge;
+import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.serialize.UTF8Writer;
 import net.sf.saxon.serialize.XMLEmitter;
 import net.sf.saxon.str.UnicodeWriterToWriter;
 import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.Test;
+import org.xml.sax.InputSource;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Test input from a Stax (JSR173) parser
@@ -53,26 +68,27 @@ public class StaxBridgeTest {
 
     @Test
     public void testPullToStax() {
-//        try {
-//            Configuration config = new Configuration();
-//            PipelineConfiguration pipe = config.makePipelineConfiguration();
-//            StringReader sr = new StringReader("<a>text</a>");
-//            NodeInfo doc = config.buildDocumentTree(new StreamSource(sr)).getRootNode();
-//            TinyTreeWalker ttw = new TinyTreeWalker((TinyDocumentImpl) doc);
-//            ttw.setPipelineConfiguration(pipe);
-//            PullToStax xmlReader = new PullToStax(ttw);
-//
-//            assertNotNull("null XMLStreamReader", xmlReader);
-//            assertEquals("unexpected first event returned by XMLStreamReader", XMLStreamReader.START_DOCUMENT, xmlReader.getEventType());
-//            assertEquals("unexpected second event returned by XMLStreamReader", XMLStreamReader.START_ELEMENT, xmlReader.next());
-//            assertEquals("unexpected third event returned by XMLStreamReader", XMLStreamReader.CHARACTERS, xmlReader.next());
-//            assertEquals("unexpected fourth event returned by XMLStreamReader", XMLStreamReader.END_ELEMENT, xmlReader.next());
-//            assertEquals("unexpected fifth event returned by XMLStreamReader", XMLStreamReader.END_DOCUMENT, xmlReader.next());
-//        } catch (XMLStreamException e) {
-//            fail("A-XQIA-9.1: XMLStreamReader.next() failed with message: " + e.getMessage());
-//        } catch (XPathException err) {
-//            fail("buildDocument");
-//        }
+        try {
+            Configuration config = new Configuration();
+            PipelineConfiguration pipe = config.makePipelineConfiguration();
+            StringReader sr = new StringReader("<a>text</a>");
+            NodeInfo doc = config.buildDocumentTree(new StreamSource(sr)).getRootNode();
+
+            PullProvider ttw = TreeWalker.makeTreeWalker(doc);
+            ttw.setPipelineConfiguration(pipe);
+            PullToStax xmlReader = new PullToStax(ttw);
+
+            assertNotNull("null XMLStreamReader", xmlReader);
+            assertEquals(XMLStreamReader.START_DOCUMENT, xmlReader.getEventType(), "unexpected first event returned by XMLStreamReader");
+            assertEquals(XMLStreamReader.START_ELEMENT, xmlReader.next(), "unexpected second event returned by XMLStreamReader");
+            assertEquals(XMLStreamReader.CHARACTERS, xmlReader.next(), "unexpected third event returned by XMLStreamReader");
+            assertEquals(XMLStreamReader.END_ELEMENT, xmlReader.next(), "unexpected fourth event returned by XMLStreamReader");
+            assertEquals(XMLStreamReader.END_DOCUMENT, xmlReader.next(), "unexpected fifth event returned by XMLStreamReader");
+        } catch (XMLStreamException e) {
+            fail("A-XQIA-9.1: XMLStreamReader.next() failed with message: " + e.getMessage());
+        } catch (XPathException err) {
+            fail("buildDocument");
+        }
 
     }
 
@@ -151,47 +167,47 @@ public class StaxBridgeTest {
         }
     }
 
-
+    @Test
     public void testDOMToStax() {
-//        try {
-//            String xml = "<a><b> <c>x</c></b></a>";
-//
-//            DOMSource domSource = new DOMSource(
-//                    DocumentBuilderFactory.newInstance().newDocumentBuilder().
-//                            parse(new InputSource(new StringReader(xml))));
-//
-//            Configuration configuration = new Configuration();
-//            Processor processor = new Processor(configuration);
-//            NodeInfo node = processor.newDocumentBuilder().wrap(domSource.getNode()).getUnderlyingNode();
-//            PullProvider treeWalker = TreeWalker.makeTreeWalker(node);
-//            treeWalker.setPipelineConfiguration(new PipelineConfiguration(configuration));
-//
-//            for (PullToStax xmlStreamReader = new PullToStax(treeWalker); xmlStreamReader.hasNext(); ) {
-//                int xmlParsingEvent = xmlStreamReader.next();
-//                switch (xmlParsingEvent) {
-//                    case XMLStreamConstants.START_DOCUMENT:
-//                        System.out.println("START_DOCUMENT");
-//                        break;
-//                    case XMLStreamConstants.END_DOCUMENT:
-//                        System.out.println("END_DOCUMENT");
-//                        break;
-//                    case XMLStreamConstants.START_ELEMENT:
-//                        System.out.println("START_ELEMENT " + xmlStreamReader.getLocalName());
-//                        break;
-//                    case XMLStreamConstants.END_ELEMENT:
-//                        System.out.println("END_ELEMENT " + xmlStreamReader.getLocalName());
-//                        break;
-//                    case XMLStreamConstants.CHARACTERS:
-//                        System.out.println("CHARACTERS");
-//                        break;
-//                    default:
-//                        System.out.println("event code " + xmlParsingEvent);
-//                }
-//            }
-//        } catch (Exception err) {
-//            err.printStackTrace();
-//            fail();
-//        }
+        try {
+            String xml = "<a><b> <c>x</c></b></a>";
+
+            DOMSource domSource = new DOMSource(
+                    DocumentBuilderFactory.newInstance().newDocumentBuilder().
+                            parse(new InputSource(new StringReader(xml))));
+
+            Configuration configuration = new Configuration();
+            Processor processor = new Processor(configuration);
+            NodeInfo node = processor.newDocumentBuilder().wrap(domSource.getNode()).getUnderlyingNode();
+            PullProvider treeWalker = TreeWalker.makeTreeWalker(node);
+            treeWalker.setPipelineConfiguration(new PipelineConfiguration(configuration));
+
+            for (PullToStax xmlStreamReader = new PullToStax(treeWalker); xmlStreamReader.hasNext(); ) {
+                int xmlParsingEvent = xmlStreamReader.next();
+                switch (xmlParsingEvent) {
+                    case XMLStreamConstants.START_DOCUMENT:
+                        System.out.println("START_DOCUMENT");
+                        break;
+                    case XMLStreamConstants.END_DOCUMENT:
+                        System.out.println("END_DOCUMENT");
+                        break;
+                    case XMLStreamConstants.START_ELEMENT:
+                        System.out.println("START_ELEMENT " + xmlStreamReader.getLocalName());
+                        break;
+                    case XMLStreamConstants.END_ELEMENT:
+                        System.out.println("END_ELEMENT " + xmlStreamReader.getLocalName());
+                        break;
+                    case XMLStreamConstants.CHARACTERS:
+                        System.out.println("CHARACTERS");
+                        break;
+                    default:
+                        System.out.println("event code " + xmlParsingEvent);
+                }
+            }
+        } catch (Exception err) {
+            err.printStackTrace();
+            fail();
+        }
     }
 }
 

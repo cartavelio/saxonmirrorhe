@@ -92,7 +92,7 @@ public class ReceivingContentHandler
     private boolean afterStartTag = true;
 
     /**
-     * A local cache is used to avoid allocating namecodes for the same name more than once.
+     * A local cache is used to avoid allocating fingerprints for the same name more than once.
      * This reduces contention on the NamePool. This is a two-level hashmap: the first level
      * has the namespace URI as its key, and returns a HashMap which maps lexical QNames to integer
      * namecodes.
@@ -555,7 +555,7 @@ public class ReceivingContentHandler
             throw new SAXException("Parser configuration problem: namespace reporting is not enabled");
         }
 
-        // Following code maintains a local cache to remember all the elemen/attribute names that have been
+        // Following code maintains a local cache to remember all the element/attribute names that have been
         // allocated, which reduces contention on the NamePool. It also avoids parsing the lexical QName
         // when the same name is used repeatedly. We also get a tiny improvement by avoiding the first hash
         // table lookup for names in the null namespace.

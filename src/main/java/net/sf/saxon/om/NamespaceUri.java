@@ -19,11 +19,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * all occurrences of a given namespace name are represented by the same object.
  */
 
+@SuppressWarnings("JavadocLinkAsPlainText")
 public class NamespaceUri {
 
     // A map from strings to NamespaceUris
 
-    private final static ConcurrentHashMap<String, NamespaceUri> stringToNamespaceUri = new ConcurrentHashMap<>(20);
+    private final static ConcurrentHashMap<String, NamespaceUri> stringToNamespaceUri = new ConcurrentHashMap<>(50);
 
     /**
      * Return the {@code NamespaceUri} object corresponding to a given namespace name supplied as a string
@@ -397,8 +398,8 @@ public class NamespaceUri {
      * @return true if this namespace URI is a reserved namespace in XSLT
      */
 
-    public static boolean isReserved(/*@Nullable*/ NamespaceUri uri) {
-        return uri != null &&
+    public static boolean isReserved(NamespaceUri uri) {
+        return !uri.equals(NamespaceUri.NULL) &&
                 (uri.equals(XSLT) ||
                          uri.equals(FN) ||
                          uri.equals(MATH) ||
