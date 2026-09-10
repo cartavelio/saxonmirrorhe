@@ -124,7 +124,8 @@ public class QT3TestDriverHE extends TestDriver {
     }
 
     public static boolean isSlow(String test) {
-        return test.equals("divide-decimals-018");
+        return false;
+        //return test.equals("divide-decimals-018");
     }
 
 
