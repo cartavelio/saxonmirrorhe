@@ -1119,6 +1119,18 @@
                     <xsl:apply-templates select="(comment/body, comment/sentence)[1]" mode="jdc"/>
                 </div>
             </xsl:if>
+            <xsl:if test="exists(comment/value)">
+                <p class="methodLabel">Value:</p>
+                <div class="params">
+                    <xsl:apply-templates select="comment/value/body" mode="jdc"/>
+                </div>
+            </xsl:if>
+            <xsl:if test="exists(comment/returns)">
+                <p class="methodLabel">Returns:</p>
+                <div class="params">
+                    <xsl:apply-templates select="comment/returns/body" mode="jdc"/>
+                </div>
+            </xsl:if>
             <xsl:for-each select="comment/attribute[@name='@since']">
                 <p class="methodLabel">Since:</p>
                 <div class="params">

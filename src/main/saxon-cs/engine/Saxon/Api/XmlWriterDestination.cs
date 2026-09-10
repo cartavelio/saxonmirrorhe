@@ -109,8 +109,8 @@ namespace Saxon.Api {
         /// (and the objects it provides access to) is included in the Saxon JavaDoc documentation.
         /// </para>
         /// </remarks>
-        /// <value>returns the underlying Destination object</value>
-        public Destination UnderlyingDestination {
+        /// <value>The underlying Destination object</value>
+        public Saxon.Hej.s9api.Destination UnderlyingDestination {
             get { return this; }
         }
     }

@@ -753,7 +753,7 @@
       <p class="methodLabel">Parameters:</p>
       <xsl:apply-templates select="param" mode="comments"/>
     </xsl:if>
-    <xsl:apply-templates select="returns" mode="comments"/>
+    <xsl:apply-templates select="returns, value" mode="comments"/>
     <xsl:if test="exception">
       <p class="methodLabel">Throws:</p>
       <xsl:apply-templates select="exception" mode="comments"/>
@@ -848,8 +848,8 @@
     </div>
   </xsl:template>
   
-  <xsl:template match="returns" mode="comments">
-    <p class="methodLabel">Returns:</p>
+  <xsl:template match="returns|value" mode="comments">
+    <p class="methodLabel"><xsl:value-of select="if (self::returns) then 'Returns:' else 'Value:'"/></p>
     <div class="params"><xsl:apply-templates mode="comments"/></div>
   </xsl:template>
 
