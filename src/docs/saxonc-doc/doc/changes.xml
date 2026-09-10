@@ -57,13 +57,6 @@
                href="https://www.saxonica.com/documentation12/index.html">Saxon 12 documentation</a> has
                been updated to provide more details relevant for the C/C++, PHP and Python platforms where
                this differs to Saxon on the Java and C# platforms.</p></li>
-            <li><p>The <code>setcatalog()</code> o nthe SaxonProcessor class has been enhanced in the C++, Python and PHP APIs to accept multiple catalog files.</p></li>
-            <li><p>Now support the parsing of JSON documents from file and string. This feature has been added to the SaxonProcessor as
-               <code>parseJsonFromFile</code> and <code>parseJsonFromString</code> in the C++, Python and PHP APIs.</p></li>
-            <li>The method <code>setUnprefixedElementMatchingPolicy()</code> has been added to the XPathProcessor class in the C++, Python and PHP APIs.</li>
-            <li>The importing of an XSLT package via the <code>Xslt30Processor</code> class has been added to the C++, Python and PHP APIs.</li>
-            <li><p>Added the option to change the charset for parsing XML documents from strings and also the compiling of stylesheets from string. If the encoding is not set then
-            the platform default is used.</p></li>
          </ul>
       </category>
 
@@ -136,6 +129,17 @@
                <code>n[i]</code> returns the i'th item in the sequence.</li>
             <li>Added ICU localization support for SaxonC-EE and SaxonC-PE.</li>
             <li>The C API is now documented: see <a href="/api/saxonc_c_api">SaxonC C API</a>.</li>
+            <li>The <code>setcatalog()</code> method on the <code>SaxonProcessor</code> class has
+               been enhanced in the C++, Python and PHP APIs to accept multiple catalog files.</li>
+            <li>Added support for parsing JSON documents from file and string. This feature has been
+               added to the <code>SaxonProcessor</code> as <code>parseJsonFromFile()</code> and
+               <code>parseJsonFromString()</code> in the C++, Python and PHP APIs.</li>
+            <li>The method <code>setUnprefixedElementMatchingPolicy()</code> has been added to the
+               <code>XPathProcessor</code> class in the C++, Python and PHP APIs.</li>
+            <li>Added the option to specify the encoding for parsing XML documents from strings 
+               (including when compiling a stylesheet from a string using the
+               <code>Xslt30Processor.compileFromString()</code> method). If the encoding is not set then
+               the platform default is used.</li>
          </ul>
       </category>
       
