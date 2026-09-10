@@ -12,26 +12,39 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
 
 import java.util.Iterator;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
+/**
+ * Defines a SequenceIterator that delivers the items returned by an underlying
+ * {@link java.util.Iterator}, modified by applying a mapping function
+ * @param <J> the type of items returned by the Java iterator
+ */
 public class SequenceIteratorOverJavaIterator<J> implements SequenceIterator {
 
     // See also class IteratorWrapper, which does the same thing without mapping,
     // and WrappingJavaIterator, which does the converse.
 
     private final Iterator<J> javaIterator;
-    private final Function<J, Item> mapper;
+    private final BiFunction<J, Integer, Item> mapper;
+    private int position;
 
-    public SequenceIteratorOverJavaIterator(Iterator<J> javaIterator, Function<J, Item> mapper) {
+    /**
+     * Create a mapping iterator
+     * @param javaIterator the underlying Java iterator
+     * @param mapper a function to process each item. It takes two arguments, the item returned
+     *               by the Java iterator, and a zero-based position incremented for each item.
+     */
+    public SequenceIteratorOverJavaIterator(Iterator<J> javaIterator, BiFunction<J, Integer, Item> mapper) {
         this.javaIterator = javaIterator;
         this.mapper = mapper;
+        this.position = 0;
     }
 
     @Override
     @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public Item next() {
         if (javaIterator.hasNext()) {
-            return mapper.apply(javaIterator.next());
+            return mapper.apply(javaIterator.next(), position++);
         } else {
             return null;
         }

@@ -16,6 +16,7 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.SimpleLazyFunction;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
+import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.ma.map.RecordTest;
@@ -28,6 +29,7 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.coercion.SequenceCoercer;
 import net.sf.saxon.value.*;
 
 import java.util.ArrayList;
@@ -159,7 +161,16 @@ public class LookupExpression extends BinaryExpression {
             if (th.relationship(containerType, MapType.ANY_MAP_TYPE) == Affinity.DISJOINT &&
                     th.relationship(containerType, ArrayItemType.getInstance()) == Affinity.DISJOINT &&
                     th.relationship(containerType, AnyExternalObjectType.THE_INSTANCE) == Affinity.DISJOINT) {
-                if (Cardinality.allowsZero(getLhsExpression().getCardinality())) {
+                if (visitor.getStaticContext().getXPathVersion() >= 40 &&
+                        th.relationship(containerType, AnyJNodeType.getInstance()) != Affinity.DISJOINT) {
+                    Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "?", 0);
+                    setLhsExpression(SequenceCoercer.makeSequenceCoercer(
+                            getLhsExpression(),
+                            SequenceType.zeroOrMore(
+                                    ChoiceItemType.of(MapType.ANY_MAP_TYPE, ArrayItemType.getInstance())),
+                            role,
+                            true));
+                } else if (Cardinality.allowsZero(getLhsExpression().getCardinality())) {
                     visitor.issueWarning("The left-hand operand of '?' must be a map or an array; the expression can succeed only if the operand is an empty sequence " +
                                                  containerType, SaxonErrorCode.SXWN9026, getLocation());
                 } else {

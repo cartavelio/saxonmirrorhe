@@ -128,7 +128,7 @@ public abstract class ArrayItem extends MapOrArray implements FunctionItem {
     public SequenceIterator parcels() {
         return new SequenceIteratorOverJavaIterator<GroundedValue>(
                 members().iterator(),
-                member -> new Parcel(member));
+                (member, position) -> new Parcel(member));
     }
 
     /**

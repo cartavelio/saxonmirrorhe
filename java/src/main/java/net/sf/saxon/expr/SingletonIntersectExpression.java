@@ -12,6 +12,7 @@ import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.ItemElaborator;
 import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
@@ -129,9 +130,9 @@ public class SingletonIntersectExpression extends VennExpression {
      * @throws XPathException if evaluating the iterator fails
      */
 
-    public static boolean containsNode(SequenceIterator iter, NodeInfo m) throws XPathException {
-        NodeInfo n;
-        while ((n = (NodeInfo) iter.next()) != null) {
+    public static boolean containsNode(SequenceIterator iter, GNode m) throws XPathException {
+        GNode n;
+        while ((n = (GNode) iter.next()) != null) {
             if (n.equals(m)) {
                 iter.close();
                 return true;
@@ -191,7 +192,7 @@ public class SingletonIntersectExpression extends VennExpression {
             final PullEvaluator rhs = exp.getRhsExpression().makeElaborator().elaborateForPull();
 
             return context -> {
-                NodeInfo node = (NodeInfo) lhs.eval(context);
+                GNode node = (GNode) lhs.eval(context);
                 if (node == null) {
                     return null;
                 }

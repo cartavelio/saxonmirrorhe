@@ -3084,6 +3084,17 @@ public class XPathParser {
                         setLocation(ae);
                         return ae;
                     }
+                    case "record": {
+                        checkLanguageVersion40("nodeTest record(...)");
+                        ItemType type = parseRecordTest(this);
+                        AxisExpression ae = new AxisExpression(
+                                AxisInfo.CHILD,
+                                new NodeTypeTest(
+                                        new SpecificJNodeType(SequenceType.one(type),
+                                                              env.getConfiguration().getTypeHierarchy())));
+                        setLocation(ae);
+                        return ae;
+                    }
                     case "function":
                     case "fn":
                         return parseInlineFunction(AnnotationList.EMPTY);
@@ -3939,6 +3950,16 @@ public class XPathParser {
         NamePool pool = config.getNamePool();
 
         boolean empty = false;
+
+        if (isKeyword("record")) {
+            // TODO: this is horrible, merge it into the switch
+            checkLanguageVersion40("nodeTest record(...)");
+            //nextToken();
+            ItemType type = parseRecordTest(this);
+            return new SpecificJNodeType(SequenceType.one(type),
+                                         env.getConfiguration().getTypeHierarchy());
+        }
+
         String kind = expectName();
         nextToken();
         readToken(Token.LPAREN);
@@ -4144,10 +4165,16 @@ public class XPathParser {
                 readToken(Token.LPAREN);
                 SequenceType type = parseSequenceType();
                 readToken(Token.RPAREN);
-                new NodeTypeTest(
-                        new SpecificJNodeType(type,
-                                              env.getConfiguration().getTypeHierarchy()));
+                return new SpecificJNodeType(type,
+                                              env.getConfiguration().getTypeHierarchy());
 
+            }
+            case "record": {
+                checkLanguageVersion40("nodeTest record(...)");
+                nextToken();
+                ItemType type = parseRecordTest(this);
+                return new SpecificJNodeType(SequenceType.one(type),
+                                             env.getConfiguration().getTypeHierarchy());
             }
             default:
                 // can't happen!

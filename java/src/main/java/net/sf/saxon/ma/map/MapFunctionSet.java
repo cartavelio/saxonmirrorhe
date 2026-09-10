@@ -593,9 +593,9 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             MapItem map = (MapItem) arguments[0].head();
             Iterable<KeyValuePair> pairIterable = map.keyValuePairs();
-            java.util.function.Function<KeyValuePair, Item> mapper = KVP -> KVP.asKeyValueRecord();
             SequenceIterator iter = new SequenceIteratorOverJavaIterator<KeyValuePair>(
-                    pairIterable.iterator(), mapper);
+                    pairIterable.iterator(),
+                    (KVP, position) -> KVP.asKeyValueRecord());
             return new LazySequence(iter);
         }
     }

@@ -1,5 +1,6 @@
 package net.sf.saxon.ma.jnode;
 
+import net.sf.saxon.functions.Reverse;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
@@ -13,6 +14,7 @@ import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Int64Value;
+import net.sf.saxon.value.IntegerValue;
 
 import java.util.Iterator;
 
@@ -96,12 +98,27 @@ public class ChildJNode extends JNode implements SiblingCountingNode {
     public SequenceIterator iterateFollowingSiblingAxis(NodePredicate predicate) {
         if (parent.getContent() instanceof MapItem) {
             Iterator<KeyValuePair> iter = ((MapItem)parent.getContent()).followingKeyValuePairs(getSelector());
-            return new SequenceIteratorOverJavaIterator<>(
+            final int startPos = serialNr + 1;
+            SequenceIterator all = new SequenceIteratorOverJavaIterator<>(
                     iter,
-                    kvp -> new ChildJNode(parent, getPosition(), kvp.key, kvp.value, -1));
+                    (kvp, position) -> new ChildJNode(parent, getPosition(),
+                                                      kvp.key,
+                                                      kvp.value,
+                                                      position + startPos));
+            return Navigator.filter(all, predicate);
         }
         if (parent.getContent() instanceof ArrayItem) {
-            throw new UnsupportedOperationException();
+            ArrayItem wholeArray = (ArrayItem) parent.getContent();
+            ArrayItem subarray = wholeArray.subArray(((IntegerValue)getSelector()).asSubscript(), wholeArray.arrayLength());
+            Iterator<GroundedValue> iter = subarray.members().iterator();
+            final int startPos = serialNr + 1;
+            SequenceIterator all = new SequenceIteratorOverJavaIterator<>(
+                    iter,
+                    (mem, position) -> new ChildJNode(parent, getPosition(),
+                                                      new Int64Value(position + startPos + 1),
+                                                      mem,
+                                                      position + startPos));
+            return Navigator.filter(all, predicate);
         }
         throw new UnsupportedOperationException();
     }
@@ -117,12 +134,27 @@ public class ChildJNode extends JNode implements SiblingCountingNode {
     public SequenceIterator iteratePrecedingSiblingAxis(NodePredicate predicate) {
         if (parent.getContent() instanceof MapItem) {
             Iterator<KeyValuePair> iter = ((MapItem) parent.getContent()).precedingKeyValuePairs(getSelector());
-            return new SequenceIteratorOverJavaIterator<>(
+            final int endPos = serialNr - 1;
+            SequenceIterator all = new SequenceIteratorOverJavaIterator<>(
                     iter,
-                    kvp -> new ChildJNode(parent, getPosition(), kvp.key, kvp.value, -1));
+                    (kvp, position) -> new ChildJNode(parent, getPosition(), kvp.key, kvp.value, endPos - position));
+            return Navigator.filter(all, predicate);
         }
         if (parent.getContent() instanceof ArrayItem) {
-            throw new UnsupportedOperationException();
+            ArrayItem wholeArray = (ArrayItem) parent.getContent();
+            int thisSubscript = ((IntegerValue) getSelector()).asSubscript();
+            ArrayItem subarray = wholeArray.subArray(0, thisSubscript - 1);
+            Iterator<GroundedValue> iter = subarray.members().iterator();
+            final int startPos = thisSubscript - 1;
+            SequenceIterator forwards = new SequenceIteratorOverJavaIterator<>(
+                    iter,
+                    (mem, position) -> new ChildJNode(parent,
+                                                      getPosition(),
+                                                      new Int64Value(position + 1),
+                                                      mem,
+                                                      startPos - position));
+            SequenceIterator all = Reverse.getReverseIterator(forwards);
+            return Navigator.filter(all, predicate);
         }
         throw new UnsupportedOperationException();
     }

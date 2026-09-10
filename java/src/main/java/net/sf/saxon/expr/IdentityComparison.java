@@ -350,8 +350,8 @@ public final class IdentityComparison extends BinaryExpression {
                     }
                 case PRECEDES:
                     return context -> {
-                        NodeInfo v0 = (NodeInfo) p0.eval(context);
-                        NodeInfo v1 = (NodeInfo) p1.eval(context);
+                        GNode v0 = (GNode) p0.eval(context);
+                        GNode v1 = (GNode) p1.eval(context);
                         if (v0 == null || v1 == null) {
                             return false;
                         }
@@ -359,8 +359,8 @@ public final class IdentityComparison extends BinaryExpression {
                     };
                 case FOLLOWS:
                     return context -> {
-                        NodeInfo v0 = (NodeInfo) p0.eval(context);
-                        NodeInfo v1 = (NodeInfo) p1.eval(context);
+                        GNode v0 = (GNode) p0.eval(context);
+                        GNode v1 = (GNode) p1.eval(context);
                         if (v0 == null || v1 == null) {
                             return false;
                         }
@@ -385,8 +385,8 @@ public final class IdentityComparison extends BinaryExpression {
                     if (nullable0 || nullable1) {
                         if (generateIdEmulation) {
                             return context -> {
-                                NodeInfo v0 = (NodeInfo) p0.eval(context);
-                                NodeInfo v1 = (NodeInfo) p1.eval(context);
+                                GNode v0 = (GNode) p0.eval(context);
+                                GNode v1 = (GNode) p1.eval(context);
                                 if (v0 == null) {
                                     if (v1 == null) {
                                         // generate-id(()) = generate-id(()) is true: bug 6279
@@ -402,11 +402,11 @@ public final class IdentityComparison extends BinaryExpression {
                             };
                         } else {
                             return context -> {
-                                NodeInfo v0 = (NodeInfo) p0.eval(context);
+                                GNode v0 = (GNode) p0.eval(context);
                                 if (v0 == null) {
                                     return null;
                                 }
-                                NodeInfo v1 = (NodeInfo) p1.eval(context);
+                                GNode v1 = (GNode) p1.eval(context);
                                 if (v1 == null) {
                                     return null;
                                 }
@@ -419,11 +419,11 @@ public final class IdentityComparison extends BinaryExpression {
                 case IS_NOT:
                     if (nullable0 || nullable1) {
                         return context -> {
-                            NodeInfo v0 = (NodeInfo) p0.eval(context);
+                            GNode v0 = (GNode) p0.eval(context);
                             if (v0 == null) {
                                 return null;
                             }
-                            NodeInfo v1 = (NodeInfo) p1.eval(context);
+                            GNode v1 = (GNode) p1.eval(context);
                             if (v1 == null) {
                                 return null;
                             }
@@ -434,11 +434,11 @@ public final class IdentityComparison extends BinaryExpression {
                     }
                 case PRECEDES:
                     return context -> {
-                        NodeInfo v0 = (NodeInfo) p0.eval(context);
+                        GNode v0 = (GNode) p0.eval(context);
                         if (v0 == null) {
                             return null;
                         }
-                        NodeInfo v1 = (NodeInfo) p1.eval(context);
+                        GNode v1 = (GNode) p1.eval(context);
                         if (v1 == null) {
                             return null;
                         }
@@ -446,11 +446,11 @@ public final class IdentityComparison extends BinaryExpression {
                     };
                 case FOLLOWS:
                     return context -> {
-                        NodeInfo v0 = (NodeInfo) p0.eval(context);
+                        GNode v0 = (GNode) p0.eval(context);
                         if (v0 == null) {
                             return null;
                         }
-                        NodeInfo v1 = (NodeInfo) p1.eval(context);
+                        GNode v1 = (GNode) p1.eval(context);
                         if (v1 == null) {
                             return null;
                         }

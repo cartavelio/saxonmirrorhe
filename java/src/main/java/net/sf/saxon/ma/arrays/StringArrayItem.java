@@ -148,7 +148,7 @@ public class StringArrayItem extends AbstractArrayItem {
     public SequenceIterator parcels() {
         return new SequenceIteratorOverJavaIterator<GroundedValue>(
                 getMembers().iterator(),
-                member -> new Parcel(member));
+                (member, position) -> new Parcel(member));
     }
 
     /**

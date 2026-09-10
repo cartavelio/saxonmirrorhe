@@ -210,7 +210,7 @@ public class SimpleArrayItem extends AbstractArrayItem {
     public SequenceIterator parcels() {
         return new SequenceIteratorOverJavaIterator<GroundedValue>(
                 _members.iterator(),
-                member -> new Parcel(member));
+                (member, position) -> new Parcel(member));
     }
 
     /**

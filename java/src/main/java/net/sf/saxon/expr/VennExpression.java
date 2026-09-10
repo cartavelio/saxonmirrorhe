@@ -282,12 +282,12 @@ public class VennExpression extends BinaryExpression {
 
         if (!(getLhsExpression() instanceof Pattern)) {
             Supplier<RoleDiagnostic> role0 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, operator.toString(), 0);
-            setLhsExpression(tc.staticTypeCheck(getLhsExpression(), SequenceType.NODE_SEQUENCE, role0, visitor));
+            setLhsExpression(tc.staticTypeCheck(getLhsExpression(), SequenceType.GNODE_SEQUENCE, role0, visitor));
         }
 
         if (!(getRhsExpression() instanceof Pattern)) {
             Supplier<RoleDiagnostic> role1 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, operator.toString(), 1);
-            setRhsExpression(tc.staticTypeCheck(getRhsExpression(), SequenceType.NODE_SEQUENCE, role1, visitor));
+            setRhsExpression(tc.staticTypeCheck(getRhsExpression(), SequenceType.GNODE_SEQUENCE, role1, visitor));
         }
 
         // For the intersect and except operators, if the types are disjoint then we can simplify

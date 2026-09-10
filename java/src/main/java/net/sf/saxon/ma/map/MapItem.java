@@ -162,7 +162,7 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
      * order of the map.
      *
      * @param key the starting point of the iteration.
-     * @return an iterator over all the entries in the map that follow the entry for the supplied
+     * @return an iterator over all the entries in the map that precede the entry for the supplied
      * key. This key is NOT included in the result. If the key is not present in the map, the method
      * returns null.
      */
@@ -195,7 +195,7 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
     public SequenceIterator entries() {
         return new SequenceIteratorOverJavaIterator<KeyValuePair>(
                 keyValuePairs().iterator(),
-                entry -> new SingleEntryMap(entry.key, entry.value));
+                (entry, position) -> new SingleEntryMap(entry.key, entry.value));
     }
 
 

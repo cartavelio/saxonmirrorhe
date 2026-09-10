@@ -166,7 +166,8 @@ public class SelectorTest extends NodeTest {
                 } else {
                     mapKey = ((SpecificQNameTest)key).getStructuredQName().getLocalPart();
                 }
-                return (((JNode)gnode).getSelector().getStringValue().equals(mapKey));
+                AtomicValue selector = ((JNode) gnode).getSelector();
+                return selector != null && selector.getStringValue().equals(mapKey);
             } else {
                 AtomicValue actual = ((JNode) gnode).getSelector();
                 return actual instanceof QNameValue && key.matches(((QNameValue)actual).getStructuredQName());
