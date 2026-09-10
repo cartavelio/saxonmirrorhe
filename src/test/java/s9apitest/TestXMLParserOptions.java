@@ -143,11 +143,19 @@ public class TestXMLParserOptions {
 
     @Test
     public void testSettingOfProperty() {
+        // Make sure the local schema location is a reasonable URI even on Windows
+        // where the data directory location might begin "C:\...". Note that
+        // getDataDir() should always return an absolute location, so I think a
+        // Windows drive letter is the only way it can fail to begin with a "/".
+        String localSchemaLocation = configTest.getDataDir().startsWith("/")
+                ? "file://" + configTest.getDataDir() + "catalog-schema.xsd"
+                : "file:///" + configTest.getDataDir() + "catalog-schema.xsd";
+
         Processor processor = new Processor(true);
         processor.setConfigurationProperty(FeatureKeys.XML_PARSER_FEATURE + "http://xml.org/sax/features/validation", true);
         processor.setConfigurationProperty(FeatureKeys.XML_PARSER_FEATURE + "http://apache.org/xml/features/validation/schema", true);
         processor.setConfigurationProperty(FeatureKeys.XML_PARSER_PROPERTY + "http://apache.org/xml/properties/schema/external-schemaLocation",
-                "http://www.w3.org/2010/09/qt-fots-catalog " + configTest.getDataDir() + "catalog-schema.xsd");
+                "http://www.w3.org/2010/09/qt-fots-catalog " + localSchemaLocation);
         StringReader sr = new StringReader("<catalog xmlns=\"http://www.w3.org/2010/09/qt-fots-catalog\" \n" +
                 "    test-suite=\"FOTS\" version=\"0.6\">\n" +
                 "    <environment name=\"empty\">\n" +
