@@ -340,7 +340,7 @@
         <p>Changes to existing Saxon extensions and new extensions in Saxon 11 are outlined below. This includes
             extension functions and instructions in the <code>saxon</code> namespace, as well as
             experimental implementations for version 4.0 extensions to XPath, XSLT, and XQuery. A W3C
-            Community Group is working on these proposals; for more information see the <a class="bodylink"
+            Community Group is working on these proposals; for more information see the <a
                 href="https://qt4cg.org/">QT4CG Specifications</a>, and documentation about the Saxon
             implementations at <a class="bodylink" href="/v4extensions">Experimental 4.0 extensions</a>.</p>
         
@@ -472,8 +472,7 @@
         <h2>XSLT extensions</h2>
         
         <aside>These extensions are all experimental, and may change as a result of community standardisation efforts.
-            They are based on proposals for an <a class="bodylink"
-                href="https://qt4cg.org/specifications/xslt-40/Overview.html">XSLT 4.0 Specification</a>, but they do
+            They are based on proposals for an <a href="https://qt4cg.org/specifications/xslt-40/Overview.html">XSLT 4.0 Specification</a>, but they do
             not necessarily correspond precisely with the current draft of that proposal. For more information
             see <a class="bodylink" href="/v4extensions">Experimental 4.0 extensions</a>.</aside>
         
@@ -508,7 +507,7 @@
                         declaration</a>.</p>
             </li>
             <li>
-                <p><a class="bodylink code" href="/xsl-elements/match">xsl:match</a></p>
+                <p><code>xsl:match</code></p>
                 <p>Used to match selected items against an XSLT pattern; see <a class="bodylink"
                     href="/v4extensions/xslt-syntax-extensions/xsl-match">The <code>xsl:match</code>
                     instruction</a>.)</p>
