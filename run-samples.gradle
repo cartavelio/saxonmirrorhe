@@ -262,7 +262,6 @@ task hej_setup_samples(
   from ("${projectDir}/src/samples/java/he") {
     include "ApplyXPathJAXP.java"
     include "ExampleContentHandler.java"
-    include "QueryAPIExamples.java"
     include "S9APIExamples.java"
     include "S9APIExamplesOM.java"
     include "SaxonServlet.java"
@@ -304,7 +303,6 @@ def heSampleConfigurations = ["JAXPExamples",
                               "ExampleContentHandler",
                               "ApplyXPathJAXP_saxon",
                               "ApplyXPathJAXP_dom",
-                              "QueryAPIExamples",
                               "S9APIExamples_he",
                               "S9APIExamples_pe",
                               "S9APIExamples_ee",
@@ -329,7 +327,6 @@ def heSampleArgs = ["JAXPExamples": ["all"],
                                              "/BOOKLIST/BOOKS/ITEM[@CAT='MMP']/TITLE", "saxon"],
                     "ApplyXPathJAXP_dom": ["data/books.xml",
                                            "/BOOKLIST/BOOKS/ITEM[@CAT='MMP']/TITLE", "dom"],
-                    "QueryAPIExamples": ["all"],
                     "S9APIExamples_he": ["nonschema"],
                     "S9APIExamples_pe": ["nonschema"],
                     "S9APIExamples_ee": ["all"],
