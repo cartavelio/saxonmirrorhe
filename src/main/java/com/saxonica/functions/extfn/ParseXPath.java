@@ -44,7 +44,7 @@ public class ParseXPath extends SystemFunction {
         Controller controller = context.getController();
         Configuration configuration = controller.getConfiguration();
         AtomicValue content = (AtomicValue) arguments[0].head();
-        throw new XPathException("saxon:parse-XPath() is only supported in Saxon-JS", SaxonErrorCode.SXJS0001);
+        throw new XPathException("saxon:parse-XPath() is only supported in SaxonJS", SaxonErrorCode.SXJS0001);
         // Just null in Java at present
         //return ZeroOrOne.empty();
 

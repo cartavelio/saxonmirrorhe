@@ -32,7 +32,7 @@ import java.util.List;
 
 /**
  * The IXSLFunctionSet represents additions to the set of Saxon vendor-supplied
- * extension functions that are available on Saxon-JS.
+ * extension functions that are available on SaxonJS.
  */
 
 public class IXSLFunctionSet extends BuiltInFunctionSet {
@@ -146,12 +146,12 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
 
 
     /**
-     * Most of the functions in this library will only run in Saxon-JS, some of them only in the browser
+     * Most of the functions in this library will only run in SaxonJS, some of them only in the browser
      */
     public static class Stub extends SystemFunction {
         @Override
         public Sequence call(XPathContext context, Sequence[] args) throws XPathException {
-            throw new XPathException("ixsl:" + getDetails().name.getLocalPart() + " is available only in Saxon-JS");
+            throw new XPathException("ixsl:" + getDetails().name.getLocalPart() + " is available only in SaxonJS");
         }
     }
 

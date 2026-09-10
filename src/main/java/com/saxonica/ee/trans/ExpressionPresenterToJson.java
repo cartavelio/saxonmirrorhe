@@ -12,7 +12,7 @@ import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.StringValue;
 
 /**
- * This class handles export of packages for Saxon-JS 2.0 by converting the XML representation
+ * This class handles export of packages for SaxonJS 2 by converting the XML representation
  * of SEF files to a JSON representation, at the level of emitting events.
  */
 
