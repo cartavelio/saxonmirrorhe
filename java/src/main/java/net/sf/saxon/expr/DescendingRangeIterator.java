@@ -26,10 +26,10 @@ public class DescendingRangeIterator extends RangeIterator implements AtomicIter
         LastPositionFinder,
         LookaheadIterator {
 
-    long start;
-    long step;
-    long currentValue;
-    long limit;
+    private final long start;
+    private final long step;
+    private long currentValue;
+    private final long limit;
 
     /**
      * Create an iterator over a range of integers in monotonic descending order
@@ -42,16 +42,11 @@ public class DescendingRangeIterator extends RangeIterator implements AtomicIter
     public DescendingRangeIterator(long start, long step, long end) {
         assert step > 0;
         assert start - end <= Integer.MAX_VALUE;
-//        if (start - end > Integer.MAX_VALUE) {
-//            throw new UncheckedXPathException("Saxon limit on sequence length exceeded (2^31)", "XPDY0130");
-//        }
+
         this.start = start;
         this.step = step;
         currentValue = start + step;
-        limit = end;
-        if (step != 1L) {
-            limit = start + ((end - start) / step) * step;
-        }
+        limit = step == 1L ? end : start + ((end - start) / step) * step;
     }
 
     public boolean isActuallyGrounded() {

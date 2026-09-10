@@ -24,10 +24,10 @@ public class AscendingRangeIterator extends RangeIterator implements AtomicItera
         LookaheadIterator,
         GroundedIterator {
 
-    long start;
-    long step;
-    long currentValue;
-    long limit;
+    private final long start;
+    private final long step;
+    private long currentValue;
+    private final long limit;
 
     // TODO: the step is currently always +1.
 
@@ -74,10 +74,7 @@ public class AscendingRangeIterator extends RangeIterator implements AtomicItera
         this.start = start;
         this.step = step;
         currentValue = start - step;
-        limit = end;
-        if (step != 1L) {
-            limit = start + ((end - start)/step) * step;
-        }
+        limit = step == 1L ? end : start + ((end - start)/step) * step;
     }
 
     @Override
