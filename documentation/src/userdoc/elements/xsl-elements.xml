@@ -6677,6 +6677,8 @@
             <p>Like other node tests, a JNode test can be qualified with an ancestor path (for example
             <code>jnode(products, array(*)//jnode(price, xs:decimal)</code> and/or with
             predicates (for example <code>jnode(price, xs:decimal)[empty(../discount)]</code>).</p>
+            
+            
 
         </section>
     </section>
