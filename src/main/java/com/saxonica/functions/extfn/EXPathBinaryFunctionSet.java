@@ -300,7 +300,7 @@ public class EXPathBinaryFunctionSet extends BuiltInFunctionSet {
                 len = (int) ((NumericValue) arguments[3].head()).longValue();
             }
             checkIndexInclusive(value, offset, len);
-            if (encoding.equalsIgnoreCase("utf-16") && len > 1) {
+            if (encoding.equalsIgnoreCase("utf-16") && len > 1 && offset != 0) {
                 if (value.getBinaryValue()[0] == (byte)0xfe && value.getBinaryValue()[1] == (byte)0xff) {
                     encoding = "utf-16be";
                 } else if (value.getBinaryValue()[0] == (byte) 0xff && value.getBinaryValue()[1] == (byte) 0xfe) {
@@ -335,6 +335,10 @@ public class EXPathBinaryFunctionSet extends BuiltInFunctionSet {
                 encoding = "UTF-8";
             } else {
                 encoding = arguments[1].head().getStringValue();
+            }
+            if (encoding.equalsIgnoreCase("UTF-16")) {
+                // we want UTF-16BE with no BOM
+                encoding = "UTF-16BE";
             }
             //checkEncoding(encoding);
             byte[] data;
