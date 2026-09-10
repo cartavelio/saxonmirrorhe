@@ -1,12 +1,14 @@
 cmake_minimum_required(VERSION 3.27)
 project(SaxonC@EDITION@ VERSION @version@)
 
+set(SaxonC_VERSION ${SaxonC@EDITION@_VERSION})
+set(SaxonC_VERSION_MAJOR ${SaxonC@EDITION@_VERSION_MAJOR})
 set(SaxonC_EDITION "@edition@" CACHE STRING "Saxon edition")
 set(SAXON_EDITION "@EDITION@")
 set(SAXONC_SRC_DIR .)
 set(SAXONC_VERSION_SRC_DIR lib)
 set(SAXONC_EDITION_SRC_DIR .)
-set(SAXONC_CORE_PACKAGE_DIR SaxonCCore@EDITION@)
+set(BUNDLED_SAXONC_CORE_DIR ../@platform@-@architecture@/SaxonCCore@EDITION@)
 
 include("cmake/libsaxonc.cmake")
 include("cmake/export-header.cmake")

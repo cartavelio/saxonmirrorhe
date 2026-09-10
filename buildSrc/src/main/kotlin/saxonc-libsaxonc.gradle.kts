@@ -291,6 +291,10 @@ fun replaceTokens(): Map<String, String> {
 val readmeDir = layout.buildDirectory.dir("release-readme")
 
 val editionReadmeTemplateDir = layout.projectDirectory.dir("README.in")
+val binDirName = saxonBuild.targetHost.map {
+    val (os, arch) = it
+    "${os}-${arch}"
+}
 val readmeTask = tasks.register<TemplatedDocTask>("readme") {
     templateRoot = layout.projectDirectory.dir("../README.in")
     if (editionReadmeTemplateDir.asFile.exists()) {
@@ -302,7 +306,8 @@ val readmeTask = tasks.register<TemplatedDocTask>("readme") {
         productVersion = saxonBuild.version.get(),
         edition = extension.edition.get(),
         host = saxonBuild.targetHost.get(),
-        binaries = extension.binaries.get().toTypedArray()
+        binaries = extension.binaries.get().toTypedArray(),
+        binDirName = binDirName.get()
     )
 }
 
@@ -314,7 +319,7 @@ val releaseFolderTask = tasks.register<Copy>("build_release_zip_contents_folder"
     into(dest)
 
     // Saxon C Source
-    into(extension.edition.map { "SaxonC${it.uppercase()}" }) {
+    into(extension.edition.map { "src" }) {
         from(layout.projectDirectory.dir("../source-cmake-distro")) {
             include("CMakeLists.txt.in")
             rename { "CMakeLists.txt" }
@@ -361,10 +366,6 @@ val releaseFolderTask = tasks.register<Copy>("build_release_zip_contents_folder"
 
     // Binary artifacts
     val saxonCCoreCMakePackageDir = saxonCCoreReleaseCMakePackageDir.elements.map { it.first() }
-    val binDirName = saxonBuild.targetHost.map {
-        val (os, arch) = it
-        "${os}-${arch}"
-    }
     val saxonCCoreDestDirName = binDirName.map { "${it}/SaxonCCore${extension.edition.get().uppercase()}" }
     val saxonCDestDirName = binDirName.map { "${it}/${extension.package_name.get()}" }
 
