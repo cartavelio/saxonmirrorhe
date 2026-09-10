@@ -61,7 +61,7 @@ public class TransformWithValidation {
             transformerFactory.setAttribute(FeatureKeys.OPTIMIZATION_LEVEL, "-jc");
             transformerFactory.setErrorListener(errorListener);
             transformerFactory.getConfiguration().setConfigurationProperty(FeatureKeys.SCHEMA_VALIDATION_MODE,
-                                                                           Validation.toString(Validation.STRICT));
+                                                                           Validation.describe(Validation.STRICT));
             Transformer transformer = transformerFactory.newTransformer(source);
             transformer.setErrorListener(errorListener);
 

@@ -110,7 +110,7 @@ public class TestReflexionHelper {
         List<NodeInfo> list = new ArrayList<>();
         list.add(config.buildDocumentTree(new StreamSource(new StringReader("<doc1/>"))).getRootNode());
         list.add(config.buildDocumentTree(new StreamSource(new StringReader("<doc2/>"))).getRootNode());
-        return new ListIterator<>(list);
+        return new ListIterator(list);
     }
 
     public static SequenceIterator makeDocsBad() throws XPathException {
@@ -118,7 +118,7 @@ public class TestReflexionHelper {
         List<NodeInfo> list = new ArrayList<>();
         list.add(config.buildDocumentTree(new StreamSource(new StringReader("<doc1/>"))).getRootNode());
         list.add(config.buildDocumentTree(new StreamSource(new StringReader("<doc2/>"))).getRootNode());
-        return new ListIterator<>(list);
+        return new ListIterator(list);
     }
 
     public static One addDecimals(OneOrMore<DecimalValue> values) throws XPathException {

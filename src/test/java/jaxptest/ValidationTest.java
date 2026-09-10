@@ -152,7 +152,7 @@ public class ValidationTest {
 
             transformerFactory.getConfiguration().setConfigurationProperty(
                     FeatureKeys.SCHEMA_VALIDATION_MODE,
-                    Validation.toString(Validation.STRICT));
+                    Validation.describe(Validation.STRICT));
 
             transformerFactory.setAttribute(net.sf.saxon.lib.FeatureKeys.XSLT_SCHEMA_AWARE, true);
 
