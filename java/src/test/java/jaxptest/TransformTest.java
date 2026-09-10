@@ -15,10 +15,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.ext.Attributes2Impl;
 
-import javax.xml.transform.Templates;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.*;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TransformerHandler;
@@ -487,6 +484,65 @@ public class TransformTest  {
             e.printStackTrace();
             fail();
         }
+    }
+
+
+    @Test
+    public void testErrorListenerException() {
+        // See Saxon bug 6857. Error listener tries to make a warning fatal
+        try {
+
+            String xsl =
+                    "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" version=\"1.0\">\n"
+                            + "  <xsl:output method=\"xml\" />\n"
+                            + "  <xsl:strip-space elements=\"*\" />\n"
+                            + "  <xsl:template match=\"text()\">\n"
+                            + "    <xsl:value-of select=\"normalize-space()\" />\n"
+                            + "  </xsl:template>\n"
+                            + "  <xsl:template match=\"@*|node()\">\n"
+                            + "    <xsl:copy>\n"
+                            + "      <xsl:apply-templates select=\"@*|node()\" />\n"
+                            + "    </xsl:copy>\n"
+                            + "  </xsl:template>\n"
+                            + "</xsl:stylesheet>";
+            String xmlA = "<doc>A</doc>";
+
+            TransformerFactoryImpl factory = new EnterpriseTransformerFactory();
+            StreamSource xslS = new StreamSource(new StringReader(xsl));
+            Templates templates = factory.newTemplates(xslS);
+            Transformer transformer = templates.newTransformer();
+            transformer.setErrorListener(new ErrorListener() {
+
+                @Override
+                public void warning(TransformerException exception) throws TransformerException {
+                    if (exception.getMessage().contains("Ambiguous rule match")) {
+                        throw new TransformerException("FATAL: " + exception.getMessage());
+                    }
+                }
+
+                @Override
+                public void error(TransformerException exception) throws TransformerException {
+                    System.err.println(exception);
+                }
+
+                @Override
+                public void fatalError(TransformerException exception) throws TransformerException {
+                    System.err.println(exception);
+                }
+            });
+            transformer.setOutputProperty("omit-xml-declaration", "yes");
+            InputSource inputSource = new InputSource(new StringReader(xmlA));
+            SAXSource xmlSource = new SAXSource(inputSource);
+            StringWriter writer = new StringWriter();
+            transformer.transform(xmlSource, new StreamResult(writer));
+            fail("Unexpected success");
+
+
+        } catch (TransformerException e) {
+            assertTrue(e.getMessage().contains("Ambiguous rule match"));
+        }
+
+
     }
 
 
