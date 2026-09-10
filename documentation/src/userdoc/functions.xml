@@ -1227,6 +1227,9 @@
       </signatures>
       <status>
         <p>FIXME:</p>
+        <p>Implemented in Saxon 13. The 4.0 specification states that the limits on precision
+        are implementation-defined. Saxon requires the precision to be in the range -100 to +100;
+        a requested precision outside this range is adjusted to -100 or +100 as appropriate.</p>
       </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
