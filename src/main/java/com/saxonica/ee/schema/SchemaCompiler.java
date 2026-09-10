@@ -16,6 +16,7 @@ import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.type.MissingComponentException;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.AnyURIValue;
@@ -311,7 +312,7 @@ public class SchemaCompiler {
      * @return the actual target namespace of the schema
      */
 
-    public NamespaceUri readSchema(PipelineConfiguration pipe, String baseURI, String schemaLocation, NamespaceUri expected)
+    public PreparedSchema readSchema(PipelineConfiguration pipe, String baseURI, String schemaLocation, NamespaceUri expected)
             throws SchemaException {
         Source source = SchemaReader.getSource(baseURI, schemaLocation, this, expected);
         if (source == null) {
@@ -322,7 +323,7 @@ public class SchemaCompiler {
         if (schemadoc.isCompiledSchemaDocument()) {
             try {
                 getConfiguration().importComponents(schemadoc.getDocument().getRootNode().asActiveSource());
-                return expected;
+                return null;  // TODO
             } catch (XPathException e) {
                 throw new SchemaException(e);
             }
@@ -341,11 +342,11 @@ public class SchemaCompiler {
      * is invalid, or inconsistent with already loaded schema components.
      */
 
-    private NamespaceUri processSchemaDocument(SchemaDocument schemadoc, String schemaLocation, NamespaceUri expected)
+    private PreparedSchema processSchemaDocument(SchemaDocument schemadoc, String schemaLocation, NamespaceUri expected)
             throws SchemaException {
         if (schemadoc.isCompiledSchemaDocument()) {
             // the schema will already have been added to the Configuration
-            return expected;
+            return null;
         }
         NamespaceUri targetNamespace = schemadoc.getTargetNamespace();
         if (expected != null && !expected.equals(targetNamespace)) {
@@ -371,7 +372,7 @@ public class SchemaCompiler {
             ps.addGlobalParam(param);
         }
 
-        return targetNamespace;
+        return ps;
     }
 
     private void retainSchemaComponents(PreparedSchema ps) throws SchemaException {
@@ -474,7 +475,7 @@ public class SchemaCompiler {
      * @throws SchemaException if the inline schema is in error
      */
 
-    public NamespaceUri readInlineSchema(NodeInfo root, NamespaceUri expected, ErrorReporter errorReporter)
+    public Schema readInlineSchema(NodeInfo root, NamespaceUri expected, ErrorReporter errorReporter)
             throws SchemaException {
         ErrorReporter listener = errorReporter == null ? getErrorReporter() : errorReporter;
         setErrorReporter(listener);

@@ -419,7 +419,7 @@ public class ValidatingReader implements XMLReader {
                 .withTopLevelType(config.getParseOptions().getTopLevelType())
                 .withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
 
-        Receiver receiver = config.getSchema().getDocumentValidator(output, systemId, options, null);
+        Receiver receiver = schema.getDocumentValidator(output, systemId, options, null);
 
         ReceivingContentHandler rch = new ReceivingContentHandler();
         rch.setPipelineConfiguration(output.getPipelineConfiguration());

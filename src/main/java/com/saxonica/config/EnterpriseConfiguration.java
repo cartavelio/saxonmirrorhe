@@ -566,23 +566,21 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      */
 
     @Override
-    public NamespaceUri readSchema(PipelineConfiguration pipe, String baseURI, String schemaLocation, NamespaceUri expected)
+    public Schema readSchema(PipelineConfiguration pipe, String baseURI, String schemaLocation, NamespaceUri expected)
             throws SchemaException {
-        //noinspection SynchronizeOnNonFinalField
-        synchronized(unnamedSchema) {
-            int status = getNamespaceStatus(expected);
-            if (status == PreparedSchema.NAMESPACE_UNKNOWN || (status == PreparedSchema.NAMESPACE_KNOWN && getConfigurationProperty(Feature.MULTIPLE_SCHEMA_IMPORTS))) {
-                SchemaCompiler schemaCompiler = newSchemaCompiler();
-                if (pipe.getErrorReporter() != null) {
-                    schemaCompiler.setErrorReporter(pipe.getErrorReporter());
-                }
-                NamespaceUri ns = schemaCompiler.readSchema(pipe, baseURI, schemaLocation, expected);
-                schemaCompiler.makeAllAutomata();
-                schemaCompiler.checkAllAutomata();
-                return ns;
-            } else {
-                return expected;
+        int status = getNamespaceStatus(expected);
+        if (status == PreparedSchema.NAMESPACE_UNKNOWN || (status == PreparedSchema.NAMESPACE_KNOWN && getConfigurationProperty(Feature.MULTIPLE_SCHEMA_IMPORTS))) {
+            SchemaCompiler schemaCompiler = newSchemaCompiler();
+            if (pipe.getErrorReporter() != null) {
+                schemaCompiler.setErrorReporter(pipe.getErrorReporter());
             }
+            PreparedSchema schema = schemaCompiler.readSchema(pipe, baseURI, schemaLocation, expected);
+            schemaCompiler.setPreparedSchema(schema);
+            schemaCompiler.makeAllAutomata();
+            schemaCompiler.checkAllAutomata();
+            return schema;
+        } else {
+            return null;
         }
     }
 
@@ -614,7 +612,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     @Override
     public NamespaceUri readInlineSchema(NodeInfo root, NamespaceUri expected, ErrorReporter errorReporter)
             throws SchemaException {
-        return newSchemaCompiler().readInlineSchema(root, expected, errorReporter);
+        Schema schema = newSchemaCompiler().readInlineSchema(root, expected, errorReporter);
+        return NamespaceUri.NULL; // TODO
     }
 
     /**

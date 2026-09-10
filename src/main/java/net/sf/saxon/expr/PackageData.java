@@ -54,7 +54,7 @@ public class PackageData {
         this.config = config;
         targetEdition = config.getEditionCode();
         globalSlotManager = config.makeSlotManager();
-        importedSchema = config.getSchema();
+        importedSchema = config.emptySchema();
     }
 
     /**

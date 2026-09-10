@@ -407,6 +407,7 @@ public class Environment implements ResourceResolver {
 
     private static boolean loadSchemaDocuments(TestDriver driver, XPathCompiler xpc, XdmNode env, Environment environment, SchemaManager manager) throws SaxonApiException {
         boolean validateSources = false;
+        List<Source> sourceList = new ArrayList<>();
         for (XdmNode schema : env.children("schema")) {
             String role = schema.attribute("role");
             String xsdVersion = schema.attribute("xsd-version");
@@ -434,7 +435,8 @@ public class Environment implements ResourceResolver {
                 if (href == null) {
                     try {
                         Source[] sources = manager.getSchemaURIResolver().resolve(ns, null, new String[0]);
-                        manager.load(sources[0]);
+                        sourceList.add(sources[0]);
+                        //manager.load(sources[0]);
                     } catch (Exception e) {
                         driver.println("*** Failed to load schema by URI: " + ns + " - " + e.getMessage());
                         e.printStackTrace();
@@ -442,9 +444,10 @@ public class Environment implements ResourceResolver {
                 } else {
                     File file = new File(env.getBaseURI().resolve(href));
                     try {
-                        manager.load(file);
-                    } catch (SaxonApiException err) {
-                        driver.println("*** Failed to load schema: " + href + " - " + err.getMessage());
+                        sourceList.add(new StreamSource(file));
+                        //manager.load(file);
+//                    } catch (SaxonApiException err) {
+//                        driver.println("*** Failed to load schema: " + href + " - " + err.getMessage());
                     } catch (NullPointerException err) {
                         err.printStackTrace();
                         driver.println("*** NPE: Failed to load schema: " + href + " - " + err.getMessage());
@@ -458,6 +461,11 @@ public class Environment implements ResourceResolver {
                 if ("stylesheet-import".equals(role)) {
                     environment.xsltCompiler.setSchemaAware(true);
                 }
+            }
+            try {
+                manager.load(sourceList.toArray(new Source[0]));
+            } catch (SaxonApiException err) {
+                driver.println("*** Failed to load schema: " + err.getMessage());
             }
         }
         return validateSources;

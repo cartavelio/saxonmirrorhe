@@ -365,14 +365,6 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
             setDocumentNumber(getConfiguration().getDocumentNumberAllocator().allocateDocumentNumber());
         }
 
-//        if (depth == 0 && kind != Type.STOPPER) {
-//            if (rootIndexUsed == rootIndex.length) {
-//                int[] r2 = new int[rootIndexUsed * 2];
-//                System.arraycopy(rootIndex, 0, r2, 0, rootIndexUsed);
-//                rootIndex = r2;
-//            }
-//            rootIndex[rootIndexUsed++] = numberOfNodes;
-//        }
         return numberOfNodes++;
     }
 
@@ -384,21 +376,6 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
 
     void appendChars(UnicodeString chars) {
         textBuffer.appendUnicodeString(chars);
-//        chars.supplyContent(textBuffer, 0, chars.length());
-//        ensureTextCapacity(1);
-//        textChunks[textChunksUsed++] = chars;
-    }
-
-    /**
-     * Create a new text node that is a copy of an existing text node
-     *
-     * @param depth          the depth of the new node
-     * @param existingNodeNr the node to be copied
-     * @return the node number of the new node
-     */
-
-    public int addTextNodeCopy(int depth, int existingNodeNr) {
-        return addNode(Type.TEXT, depth, alpha[existingNodeNr], beta[existingNodeNr], -1);
     }
 
     /**
@@ -466,15 +443,6 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
         prefixPool.condense();
 
         statistics.updateStatistics(numberOfNodes, numberOfAttributes, numberOfNamespaces, textBuffer);
-//        System.err.println("STATS: " + averageNodes + ", " + averageAttributes + ", "
-//                + averageNamespaces + ", " + averageCharacters);
-
-//        if (charBufferLength * 3 < charBuffer.length ||
-//                charBuffer.length - charBufferLength > 10000) {
-//            char[] c2 = new char[charBufferLength];
-//            System.arraycopy(charBuffer,  0, c2, 0, charBufferLength);
-//            charBuffer = c2;
-//        }
     }
 
     /**

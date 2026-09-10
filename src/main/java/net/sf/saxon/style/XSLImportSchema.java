@@ -9,7 +9,6 @@ package net.sf.saxon.style;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.LicenseException;
@@ -142,16 +141,17 @@ public class XSLImportSchema extends StyleElement {
                     SaxonErrorCode.SXWN9006);
                 return;
             }
-            if (namespaceKnown && !config.getBooleanProperty(Feature.MULTIPLE_SCHEMA_IMPORTS)) {
-                if (schemaLoc != null) {
-                    issueWarning("The schema document at " + schemaLoc +
-                        " is ignored because a schema for this namespace is already loaded", SaxonErrorCode.SXWN9006);
-                }
-            }
+//            if (namespaceKnown && !config.getBooleanProperty(Feature.MULTIPLE_SCHEMA_IMPORTS)) {
+//                if (schemaLoc != null) {
+//                    issueWarning("The schema document at " + schemaLoc +
+//                        " is ignored because a schema for this namespace is already loaded", SaxonErrorCode.SXWN9006);
+//                }
+//            }
             if (!namespaceKnown) {
                 PipelineConfiguration pipe = config.makePipelineConfiguration();
                 pipe.setErrorReporter(getCompilation().getCompilerInfo().getErrorReporter());
-                targetNamespace = config.readSchema(pipe, getBaseURI(), schemaLoc, targetNamespace);
+                schema = config.readSchema(pipe, getBaseURI(), schemaLoc, targetNamespace);
+                getPrincipalStylesheetModule().getStylesheetPackage().setImportedSchema(schema);
             }
             getPrincipalStylesheetModule().addImportedSchema(targetNamespace);
         } catch (SchemaException err) {

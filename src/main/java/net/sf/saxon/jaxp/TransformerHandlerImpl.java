@@ -19,6 +19,7 @@ import net.sf.saxon.om.Durability;
 import net.sf.saxon.om.NoElementsSpaceStrippingRule;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.tree.tiny.TinyBuilder;
+import net.sf.saxon.type.Schema;
 import org.xml.sax.SAXException;
 
 import javax.xml.transform.Result;
@@ -79,7 +80,8 @@ public class TransformerHandlerImpl extends ReceivingContentHandler implements T
         if (validation != Validation.PRESERVE) {
             options = options.withSchemaValidationMode(validation);
             options = options.withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
-            receiver = config.getSchema().getDocumentValidator(receiver, getSystemId(), options, null);
+            Schema schema = transformer.getUnderlyingXsltExecutable().getUnderlyingCompiledStylesheet().getTopLevelPackage().getImportedSchema();
+            receiver = schema.getDocumentValidator(receiver, getSystemId(), options, null);
         }
         pipe.setParseOptions(options);
         setReceiver(receiver);

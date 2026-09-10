@@ -3073,7 +3073,7 @@ public class Configuration implements SourceResolver {
      */
 
     /*@Nullable*/
-    public NamespaceUri readSchema(PipelineConfiguration pipe, String baseURI, String schemaLocation, /*@Nullable*/ NamespaceUri expected)
+    public Schema readSchema(PipelineConfiguration pipe, String baseURI, String schemaLocation, /*@Nullable*/ NamespaceUri expected)
             throws SchemaException {
         needEnterpriseEdition();
         return null;
