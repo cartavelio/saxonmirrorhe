@@ -230,6 +230,7 @@ public abstract class Converter {
                 return input.copyAsSubType(newType);
             } else {
                 // validation failed
+                f.setErrorCode("XPTY0004");
                 return f;
             }
         }
