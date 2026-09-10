@@ -35,6 +35,7 @@ import org.graalvm.nativeimage.c.function.InvokeCFunctionPointer;
 import org.graalvm.nativeimage.c.type.CCharPointer;
 import org.graalvm.nativeimage.c.type.CLongPointer;
 import org.graalvm.nativeimage.c.type.CTypeConversion;
+import org.graalvm.nativeimage.c.type.VoidPointer;
 import org.graalvm.word.UnsignedWord;
 import org.graalvm.word.WordFactory;
 import org.xml.sax.InputSource;
@@ -174,7 +175,7 @@ public class SaxonCAPI {
     }
 
     @CEntryPoint(name = "j_setIndirectFunctionForNativeCall", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long j_setIndirectFunctionForNativeCall(IsolateThread thread, NativeCall.NativeFunctionPointer nativeFunctionPointer) throws SaxonApiException {
+    public static long j_setIndirectFunctionForNativeCall(IsolateThread thread, NativeFunctionPointer nativeFunctionPointer) throws SaxonApiException {
 //#if EE==true || PE==true
         NativeCall.setIndirectFunctionForNativeCall(nativeFunctionPointer);
 //#endif
@@ -658,6 +659,16 @@ public class SaxonCAPI {
         } catch (IOException ioe) {
             System.out.println("IO went wrong: " + ioe.getMessage());
         }
+    }
+
+    public interface NativeFunctionPointer extends CFunctionPointer {
+
+        /*
+         * Invocation of the function pointer. A call to the function is replaced with an indirect
+         * call of the function pointer.
+         */
+        @InvokeCFunctionPointer
+        VoidPointer invoke(IsolateThread thread, CCharPointer functionName, CFunctionPointer proc, CFunctionPointer func, int phpFlag, int useNativeTypes, int numArgs, CLongPointer args);
     }
 
 
