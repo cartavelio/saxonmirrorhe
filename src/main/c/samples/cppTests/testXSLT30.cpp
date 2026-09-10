@@ -2170,7 +2170,7 @@ void testCallSystemFunction(SaxonProcessor *proc, sResultCount *sresult) {
   XdmValue *result = fi->call(proc, xdmValue, 1);
 
   std::cerr << "Result = " << result->toString() << endl;
-  if (result->size() == 3) {
+  if (result->size() == 1) {
 
     cout << "testCallSystemFunction = " << result->getHead()->getStringValue()
          << endl;
@@ -3247,6 +3247,13 @@ int main(int argc, char *argv[]) {
        << endl;
 
   testContext2NotRootNamedTemplate(processor, trans, sresult);
+
+    cout << endl
+         << "============================================================="
+         << endl
+         << endl;
+
+  testCallSystemFunction(processor, sresult);
 
   fflush(stdout);
 

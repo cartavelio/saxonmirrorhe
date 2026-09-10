@@ -1,6 +1,6 @@
 """@package saxonc@@edition@@
 This documentation details the Python API for SaxonC, which has been written in cython for Python3.
-SaxonC is is produced by compiling the Java source code of Saxon to a native executable using GraalVM,
+SaxonC is produced by compiling the Java source code of Saxon to a native executable using GraalVM,
 and adding APIs for C/C++, Python, and PHP.
 SaxonC provides processing in XSLT 3.0, XQuery 3.1 and XPath 3.1, and Schema validation 1.0/1.1.
 Main classes in SaxonC Python API: PySaxonProcessor, PyXslt30Processor, PyXsltExecutable, PyXQueryProcessor,
@@ -3172,7 +3172,9 @@ cdef class PyXQueryProcessor:
         Args:
             **kwds: Possible keyword arguments: input_file_name (str) or input_xdm_item (PyXdmItem) can be used to
                 supply the input; query_file (str) or query_text (str) can be used to supply the query;
-                lang (str) can be used to specify which version of XQuery should be used, options: '3.1' or '4.0'
+                lang (str) can be used to specify which version of XQuery should be used, options: '3.1' or '4.0'.
+                Also accept the keyword 'encoding' (str) to specify the encoding of the query_text string
+                is specified. If not specified then the platform default encoding is used.
         Returns:
             PyXdmValue: Output result as a PyXdmValue
         Raises:
@@ -3187,7 +3189,18 @@ cdef class PyXQueryProcessor:
         cdef PyXdmMap mval = None
         cdef PyXdmArray aaval = None
         cdef PyXdmValue val = None
+        cdef char * c_encoding_string = NULL
+        cdef const char * c_content = NULL
         if not len(kwds) == 0:
+
+            encoding = None
+            py_encoding_string = None
+            if "encoding" in kwds:
+                encoding = kwds["encoding"]
+                py_encoding_string = encoding.encode('UTF-8')
+                c_encoding_string = py_encoding_string
+            else:
+                encoding = sys.getdefaultencoding()
 
             if "lang" in kwds:
                 py_lang_string = kwds["lang"]
@@ -3202,9 +3215,13 @@ cdef class PyXQueryProcessor:
             if "query_file" in kwds:
                 self.set_query_file(kwds["query_file"])
             elif "query_text" in kwds:
-                self.set_query_content(kwds["query_text"])
+                content = kwds["query_text"]
+                if content is not None:
+                    '''make_c_str(content)'''
+                    py_s_string = content.encode(encoding) if content is not None else None
+                    c_content = py_s_string if content is not None else ""
 
-        cdef saxoncClasses.XdmValue * xdmValue = self.thisxqptr.runQueryToValue()
+        cdef saxoncClasses.XdmValue * xdmValue = self.thisxqptr.executeQueryToValue(NULL, c_content, c_encoding_string)
         if xdmValue is NULL:
             return None
         cdef type_ = xdmValue.getType()
@@ -3243,7 +3260,9 @@ cdef class PyXQueryProcessor:
         Args:
             **kwds: Possible keyword arguments: input_file_name (str) or input_xdm_item (PyXdmItem) can be used to
                 supply the input; query_file (str) or query_text (str) can be used to supply the query;
-                lang (str) can be used to specify which version of XQuery should be used, options: '3.1' or '4.0'
+                lang (str) can be used to specify which version of XQuery should be used, options: '3.1' or '4.0'.
+                Also accept the keyword 'encoding' (str) to specify the encoding of the query_text string
+                is specified. If not specified then the platform default encoding is used.
         Returns:
             str: Output result as a string
         Raises:
@@ -3251,11 +3270,23 @@ cdef class PyXQueryProcessor:
             Exception: Error if invalid use of keywords
         """
         cdef const char * c_string
+        cdef char * c_encoding_string = NULL
+        cdef const char * c_content = NULL
+        content = None
         if len(kwds) == 0:
             c_string = self.thisxqptr.runQueryToString()
             py_string_i = make_py_str(c_string)
             saxoncClasses.SaxonProcessor.deleteString(c_string)
             return py_string_i
+
+        encoding = None
+        py_encoding_string = None
+        if "encoding" in kwds:
+            encoding = kwds["encoding"]
+            py_encoding_string = encoding.encode('UTF-8')
+            c_encoding_string = py_encoding_string
+        else:
+            encoding = sys.getdefaultencoding()
 
         if "lang" in kwds:
           py_lang_string = kwds["lang"]
@@ -3270,9 +3301,12 @@ cdef class PyXQueryProcessor:
         if "query_file" in kwds:
           self.set_query_file(kwds["query_file"])
         elif "query_text" in kwds:
-          self.set_query_content(kwds["query_text"])
+          content = kwds["query_text"]
+          if content is not None:
+              py_s_string = content.encode(encoding) if content is not None else None
+              c_content = py_s_string if content is not None else ""
 
-        c_string = self.thisxqptr.runQueryToString()
+        c_string = self.thisxqptr.executeQueryToString(NULL, c_content, c_encoding_string)
         py_string_i = make_py_str(c_string)
         saxoncClasses.SaxonProcessor.deleteString(c_string)
         return py_string_i
@@ -3287,13 +3321,26 @@ cdef class PyXQueryProcessor:
                 input_file_name (str) or input_xdm_item (PyXdmItem) can be used to supply
                 the input; query_file (str) or query_text (str) can be used to supply the query;
                 lang (str) can be used to specify which version of XQuery should be used,
-                options: '3.1' or '4.0'
+                options: '3.1' or '4.0'.
+                Also accept the keyword 'encoding' (str) to specify the encoding of the query_text string
+                is specified. If not specified then the platform default encoding is used.
         Raises:
             PySaxonApiError: Error if failure to run query
             Exception: Error if invalid use of keywords
         """
+        cdef char * c_encoding_string = NULL
+        cdef const char * c_content = NULL
         if len(kwds) == 0:
           self.thisxqptr.runQueryToFile()
+
+        encoding = None
+        py_encoding_string = None
+        if "encoding" in kwds:
+            encoding = kwds["encoding"]
+            py_encoding_string = encoding.encode('UTF-8')
+            c_encoding_string = py_encoding_string
+        else:
+            encoding = sys.getdefaultencoding()
 
         if "lang" in kwds:
           py_lang_string = kwds["lang"]
@@ -3310,8 +3357,13 @@ cdef class PyXQueryProcessor:
         if "query_file" in kwds:
           self.set_query_file(kwds["query_file"])
         elif "query_text" in kwds:
-          self.set_query_content(kwds["query_text"])
-        self.thisxqptr.runQueryToFile()
+            content = kwds["query_text"]
+            if content is not None:
+                '''make_c_str(content)'''
+                py_s_string = content.encode(encoding) if content is not None else None
+                c_content = py_s_string if content is not None else ""
+
+        self.thisxqptr.executeQueryToFile(NULL, NULL, c_content, c_encoding_string)
      def declare_namespace(self, prefix, uri):
         """
         declare_namespace(self, prefix, uri)
@@ -3447,23 +3499,30 @@ cdef class PyXPathProcessor:
         """
         if self.thisxpptr != NULL:
            del self.thisxpptr
-     def evaluate(self, xpath_str):
+     def evaluate(self, xpath_str, encoding = None):
         """
         evaluate(self, xpath_str)
         Evaluate an XPath expression supplied as a string
         Args:
             xpath_str (str): The XPath expression supplied as a string
+            encoding (str): The encoding of the XPath string. Argument can be omitted or None.
+                If not specified then the platform default encoding is used.
         Returns:
             PyXdmValue: the result of evaluating the XPath expression
         Raises:
             PySaxonApiError: Error if failure to evaluate XPath expression
         """
-        '''c_xpath = make_c_str(xpath_str)'''
-        py_value_string = xpath_str.encode('utf-8') if xpath_str is not None else None
+        cdef char * c_encoding_string = NULL
+        if encoding is None:
+            encoding = sys.getdefaultencoding()
+        else :
+            py_encoding_string = encoding.encode('UTF-8')
+            c_encoding_string = py_encoding_string if py_encoding_string is not None else ""
+        py_value_string = xpath_str.encode(encoding) if xpath_str is not None else None
         c_xpath = py_value_string if xpath_str is not None else ""
         cdef PyXdmValue val = None
         cdef type_ = 0
-        cdef saxoncClasses.XdmValue * xdmValue = self.thisxpptr.evaluate(c_xpath)
+        cdef saxoncClasses.XdmValue * xdmValue = self.thisxpptr.evaluate(c_xpath, c_encoding_string)
         if xdmValue == NULL:
             return None
         else:
@@ -3471,12 +3530,14 @@ cdef class PyXPathProcessor:
             val.thisvptr = xdmValue
             return val
 
-     def evaluate_single(self, xpath_str):
+     def evaluate_single(self, xpath_str, encoding = None):
         """
         evaluate_single(self, xpath_str)
         Evaluate an XPath expression supplied as a string, returning a single item
         Args:
             xpath_str (str): The XPath expression supplied as a string
+            encoding (str): The encoding of the XPath string. Argument can be omitted or None.
+                If not specified then the platform default encoding is used.
         Returns:
             PyXdmItem: A single XDM item is returned. Returns None if the expression returns an empty sequence.
             If the expression returns a sequence of more than one item, any items after the first are ignored.
@@ -3489,11 +3550,17 @@ cdef class PyXPathProcessor:
         cdef PyXdmArray aaval = None
         cdef PyXdmFunctionItem fval = None
         cdef const char * c_xpath = NULL
-        '''make_c_str(xpath_str)'''
-        py_s_string = xpath_str.encode('UTF-8') if xpath_str is not None else None
+        cdef char * c_encoding_string = NULL
+        if encoding is None:
+            encoding = sys.getdefaultencoding()
+        else :
+            py_encoding_string = encoding.encode('UTF-8')
+            c_encoding_string = py_encoding_string if py_encoding_string is not None else ""
+        py_s_string = xpath_str.encode(encoding) if xpath_str is not None else None
         c_xpath = py_s_string if xpath_str is not None else ""
 
-        cdef saxoncClasses.XdmItem * xdmItem = self.thisxpptr.evaluateSingle(c_xpath)
+        cdef saxoncClasses.XdmItem * xdmItem = self.thisxpptr.evaluateSingle(c_xpath, c_encoding_string)
+
         if xdmItem == NULL:
             return None
         cdef type_ = xdmItem.getType()
@@ -3583,20 +3650,29 @@ cdef class PyXPathProcessor:
         py_cwd_string = cwd.encode('UTF-8') if cwd is not None else None
         cdef char * c_cwd = py_cwd_string if cwd is not None else ""
         self.thisxpptr.setcwd(c_cwd)
-     def effective_boolean_value(self, xpath_str):
+     def effective_boolean_value(self, xpath_str, encoding = None):
         """
         effective_boolean_value(self, xpath_str)
         Evaluate the XPath expression, returning the effective boolean value of the result.
         Args:
             xpath_str (str): XPath expression supplied as a string
+            encoding (str): The encoding of the XPath string. Argument can be omitted or None.
+                If not specified then the platform default encoding is used.
         Returns:
             boolean: The result is a boolean value.
         Raises:
             PySaxonApiError: Error if failure to evaluate XPath expression
         """
-        py_value_string = xpath_str.encode('UTF-8') if xpath_str is not None else None
+        cdef char * c_encoding_string = NULL
+        if encoding is None:
+            encoding = sys.getdefaultencoding()
+        else :
+            py_encoding_string = encoding.encode('UTF-8')
+            c_encoding_string = py_encoding_string if py_encoding_string is not None else ""
+
+        py_value_string = xpath_str.encode(encoding) if xpath_str is not None else None
         c_xpath = py_value_string if xpath_str is not None else ""
-        return self.thisxpptr.effectiveBooleanValue(c_xpath)
+        return self.thisxpptr.effectiveBooleanValue(c_xpath, c_encoding_string)
      def set_parameter(self, name, value):
         """
         set_parameter(self, name, value)

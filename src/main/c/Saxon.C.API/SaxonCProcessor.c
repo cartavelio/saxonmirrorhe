@@ -128,8 +128,8 @@ void executeQueryToFile(sxnc_environment *environi, sxnc_processor *proc,
     }
   }
 
-  long result = j_executeQueryToFile(environi->thread, (void *)proc->value, cwd,
-                                     outputfile, (void *)processorDataRef);
+  long result = j_executeQueryToFile(environi->thread, (void *)proc->value, cwd, null,
+                                     outputfile, null, (void *)processorDataRef);
 
   if (result == -2) {
   }

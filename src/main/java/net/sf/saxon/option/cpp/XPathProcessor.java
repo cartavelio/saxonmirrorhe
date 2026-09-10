@@ -309,13 +309,14 @@ public class XPathProcessor extends SaxonCAPI {
      * @param xpathProcessorRef - reference to XPathProcessor object held in the ObjectHandle's pool
      * @param ccwd      - Current working directory
      * @param c_xpathStr - A string containing the source text of the XPath expression represented as a C pointer to a char array
+     * @param c_encoding - C char array for the encoding name
      * @param processorDataAccumulatorRef   - Parameters and properties names required by the XPath expression along with their values in a ProcessorDataAccumulator.
      *                                      This could contain the context node , source as string or file name, etc
      *                                      The values for the parameters and properties required by the XPath expression
      * @return long value reference to the XdmItem in the ObjectHandle's pool
      **/
     @CEntryPoint(name = "j_evaluate", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long evaluate(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer ccwd, CCharPointer c_xpathStr, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    public static long evaluate(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer ccwd, CCharPointer c_xpathStr, CCharPointer c_encoding, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         if(xpathProcessorRef == WordFactory.nullPointer()) {
             throw new SaxonApiException("XPathProcessor is null");
         }
@@ -324,7 +325,12 @@ public class XPathProcessor extends SaxonCAPI {
         if(ccwd != WordFactory.nullPointer()) {
             cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
-        String xpathStr = SaxonCAPI.toJavaString(c_xpathStr, WordFactory.nullPointer());
+        String xpathStr;
+        if(c_xpathStr != WordFactory.nullPointer()) {
+            xpathStr = SaxonCAPI.toJavaString(c_xpathStr, c_encoding);
+        } else {
+            throw new SaxonApiException("XPath string is null");
+        }
         XPathCompiler compiler = xPathProcessor.getCompiler();
         if (SaxonCAPI.debug) {
             if (xpathStr != null) {
@@ -433,19 +439,26 @@ public class XPathProcessor extends SaxonCAPI {
      * @param xpathProcessorRef - reference to XPathProcessor object held in the ObjectHandle's pool
      * @param ccwd      - Current working directory
      * @param c_xpathStr - A string containing the source text of the XPath expression represented as a C pointer to a char array
+     * @param c_encoding - C char array for the encoding name.
      * @param processorDataAccumulatorRef   - Parameters and properties names required by the XPath expression along with their values in a ProcessorDataAccumulator.
      *                                      This could contain the context node , source as string or file name, etc
      *                                      The values for the parameters and properties required by the XPath expression
      * @return long value reference to the XdmItem in the ObjectHandle's pool
      **/
     @CEntryPoint(name = "j_evaluateSingle", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long evaluateSingle(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer ccwd, CCharPointer c_xpathStr, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    public static long evaluateSingle(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer ccwd, CCharPointer c_xpathStr, CCharPointer c_encoding, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
         String cwd = null;
         if(ccwd != WordFactory.nullPointer()) {
             cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
-        String xpathStr = SaxonCAPI.toJavaString(c_xpathStr, WordFactory.nullPointer());
+        String xpathStr;
+        if(c_xpathStr != WordFactory.nullPointer()) {
+            xpathStr = SaxonCAPI.toJavaString(c_xpathStr, c_encoding);
+        } else {
+            throw new SaxonApiException("XPath string is null");
+        }
+        SaxonCAPI.toJavaString(c_xpathStr, WordFactory.nullPointer());
         XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);
         XPathCompiler compiler = xPathProcessor.getCompiler();
         if (debug) {
@@ -480,7 +493,7 @@ public class XPathProcessor extends SaxonCAPI {
      *         the expression, as defined by the rules for the fn:boolean() function.
      **/
     @CEntryPoint(name = "j_effectiveBooleanValue", exceptionHandler = SaxonCExceptionIntHandler.class)
-    public static int effectiveBooleanValue(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer c_cwd, CCharPointer c_xpathStr, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    public static int effectiveBooleanValue(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer c_cwd, CCharPointer c_xpathStr, CCharPointer c_encoding, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
         Map<QName, XdmValue> parameters = new HashMap<>();
         Map<String, Object> optionsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, null, parameters, null, null, null, false);
@@ -492,7 +505,12 @@ public class XPathProcessor extends SaxonCAPI {
         if(c_cwd != WordFactory.nullPointer()) {
             cwd = SaxonCAPI.toJavaString(c_cwd, WordFactory.nullPointer());
         }
-        String xpathStr = SaxonCAPI.toJavaString(c_xpathStr, WordFactory.nullPointer());
+        String xpathStr;
+        if(c_xpathStr != WordFactory.nullPointer()) {
+            xpathStr = SaxonCAPI.toJavaString(c_xpathStr, c_encoding);
+        } else {
+            throw new SaxonApiException("XPath string is null");
+        }
         setupXPathCompiler(compiler, optionsMap);
         XPathSelector selector = compiler.compile(xpathStr).load();
 

@@ -107,22 +107,24 @@ public:
   //! Compile and evaluate an XPath expression
   /**
    *  @param xpathStr - supplied as a character string
+   * @param encoding -  the encoding of the string. If not specified then the platform default encoding is used.
    *  @return XdmValue - representing the results of the expression.
    * @throws SaxonApiException
    */
-  XdmValue *evaluate(const char *xpathStr);
+  XdmValue *evaluate(const char *xpathStr, const char* encoding = nullptr);
 
   //! Compile and evaluate an XPath expression. The result is expected to be a
   //! single XdmItem or nullptr
   /**
     * @param xpathStr - supplied as a character string
-       @return XdmItem - XdmItem object or nullptr if the expression returns an
+    * @param encoding -  the encoding of the string. If not specified then the platform default encoding is used.
+    * @return XdmItem - XdmItem object or nullptr if the expression returns an
    empty sequence.
    * If the expression returns a sequence of more than one item, any items after
    the first are ignored.
    * @throws SaxonApiException
   */
-  XdmItem *evaluateSingle(const char *xpathStr);
+  XdmItem *evaluateSingle(const char *xpathStr, const char* encoding = nullptr);
 
   /** Set the context item
    */
@@ -140,10 +142,11 @@ public:
   //! Evaluate the XPath expression, returning the effective boolean value of
   //! the result.
   /** @param xpathStr - supplied as a character string
+   * @param encoding -  the encoding of the string. If not specified then the platform default encoding is used.
    *  @return bool
    * @throws SaxonApiException
    */
-  bool effectiveBooleanValue(const char *xpathStr);
+  bool effectiveBooleanValue(const char *xpathStr, const char* encoding = nullptr);
 
   /**
    * Set a parameter value used in the query

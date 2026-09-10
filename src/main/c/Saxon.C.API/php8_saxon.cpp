@@ -2308,11 +2308,14 @@ PHP_METHOD(XdmNode, getParent) {
   RETURN_NULL();
 }
 
-PHP_METHOD(XdmNode, getAttributeNode) {
+PHP_METHOD(XdmNode, getAttributeNodes) {
   long indexi;
-  if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &indexi) == FAILURE) {
+    zval *arr_val;
+    zval *arr_item;
+    zval * retval;
+  /*if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &indexi) == FAILURE) {
     RETURN_NULL();
-  }
+  }*/
 
   XdmNode *xdmNode;
   zend_object *zobj = Z_OBJ_P(getThis());
@@ -2328,8 +2331,46 @@ PHP_METHOD(XdmNode, getAttributeNode) {
         return;
       } else {
 
+       ///// creating PHP array
+        XdmNode **attNodes = xdmNode->getAttributeNodes();
+        if(attNodes != nullptr) {
+       array_init_size(return_value, count);
+       //std::cerr<<"getAttriuteNodes cp0"<<std::endl;
+        for(int i=0; i< count; i++) {
+            XdmNode *attNode = attNodes[i];
+            attNode->incrementRefCount();
+           //object_init_ex(arr_item, xdmNode_ce);
+           object_init_ex(retval, xdmNode_ce);
+            zend_object *zobj = Z_OBJ_P(retval);//Z_OBJ_P(arr_item);
+            xdmNode_object *vobj =
+                (xdmNode_object *)((char *)zobj -
+                                   XtOffsetOf(xdmNode_object, std));
+            assert(vobj != nullptr);
+            vobj->xdmNode = attNode;
+            add_next_index_zval(return_value, retval);
+        }
+        zend_array * arr_obj = Z_ARR_P(return_value);
+          delete [] attNodes;
+          RETVAL_ARR(arr_obj);
+          return;
+
+       }
+       /// end of creating PHP array
+
+
+        /*
         if (indexi < count) {
-          XdmNode *attNode = xdmNode->getAttributeNodes()[indexi];
+        XdmNode **attNodes = xdmNode->getAttributeNodes();
+        if(attNodes != nullptr) {
+          XdmNode *attNode = attNodes[indexi];
+
+          for(int i=0; i< count; i++) {
+            if(indexi !=i) {
+                delete attNodes[i];
+            }
+          }
+          delete [] attNodes;
+
           if (attNode != nullptr) {
             attNode->incrementRefCount();
             // struct xdmNode_object* vobj = (struct xdmNode_object
@@ -2344,9 +2385,11 @@ PHP_METHOD(XdmNode, getAttributeNode) {
             return;
           }
         }
+       }*/
       }
     }
   }
+    std::cerr<<"getAttriuteNodes NULL"<<std::endl;
   RETURN_NULL();
 }
 
@@ -2356,7 +2399,7 @@ PHP_METHOD(XdmNode, getAttributeValue) {
   if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &len1) == FAILURE) {
     RETURN_NULL();
   }
-  XdmNode *xdmNode;
+  XdmNode *xdmNode;    // c++ object
   zend_object *zobj = Z_OBJ_P(getThis());
   xdmNode_object *obj =
       (xdmNode_object *)((char *)zobj - XtOffsetOf(xdmNode_object, std));
@@ -3586,7 +3629,7 @@ zend_function_entry xdmNode_methods[] = {
                             PHP_ME(XdmNode, getParent,
                                    arginfo_saxonc_xdmnode_getParent,
                                    ZEND_ACC_PUBLIC)
-                                PHP_ME(XdmNode, getAttributeNode,
+                                PHP_ME(XdmNode, getAttributeNodes,
                                        arginfo_saxonc_xdmnode_getAttributeNode,
                                        ZEND_ACC_PUBLIC)
                                     PHP_ME(

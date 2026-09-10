@@ -550,10 +550,12 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xpath_effectiveBooleanValue, 0, 0, 1)
 ZEND_ARG_INFO(0, xpath)
+ZEND_ARG_INFO(0, encoding_Str)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xpath_evaluate, 0, 0, 1)
 ZEND_ARG_INFO(0, xpath)
+ZEND_ARG_INFO(0, encoding_Str)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xpath_setUnprefixedElementMatchingPolicy, 0, 0, 1)
@@ -562,6 +564,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xpath_evaluateSingle, 0, 0, 1)
 ZEND_ARG_INFO(0, xpath)
+ZEND_ARG_INFO(0, encoding_Str)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xpath_setParameter, 0, 0, 2)

@@ -196,7 +196,7 @@ public class XQueryEngine extends SaxonCAPI {
         }
 
 
-    public static XQueryEvaluator xqueryEvaluator(Processor processor, String cwd, String[] params, Object[] values, Serializer serializer) throws SaxonApiException {
+    public static XQueryEvaluator xqueryEvaluator(Processor processor, String cwd, String query, String[] params, Object[] values, Serializer serializer) throws SaxonApiException {
         File queryFile = null;
         XQueryCompiler compiler = processor.newXQueryCompiler();
         Map<QName, XdmValue> parameters = new HashMap<>();
@@ -204,12 +204,17 @@ public class XQueryEngine extends SaxonCAPI {
 
         Map<String, Object> optionsMap = convertArraysToMap(processor, compiler, params, values, parameters, props);
         //compiler.setErrorListener(errorListener);
-        String query = null;
+
         if (params != null && params.length != values.length) {
             SaxonApiException ex = new SaxonApiException("Length of params array not equal to the length of values array");
             throw ex;
         }
+
         XQueryExecutable executable = null;
+
+        if(query != null) {
+            executable = compiler.compile(query);
+        }
 
         if (params != null && params.length != 0) {
                 if(optionsMap.containsKey("updating")) {
@@ -283,7 +288,7 @@ public class XQueryEngine extends SaxonCAPI {
 
 
     @CEntryPoint(name = "j_executeQueryToString", exceptionHandler = SaxonCExceptionCCharHandler.class)
-    public static CCharPointer executeQueryToString(IsolateThread thread, AllocatorCCharFn alloc, ObjectHandle processorRef, CCharPointer ccwd, ObjectHandle processorDataRef) throws SaxonApiException {
+    public static CCharPointer executeQueryToString(IsolateThread thread, AllocatorCCharFn alloc, ObjectHandle processorRef, CCharPointer ccwd,  CCharPointer c_queryStr, CCharPointer c_encoding, ObjectHandle processorDataRef) throws SaxonApiException {
         ProcessorDataAccumulator processorDataAccumulator = null;
         String[] params = null;
         Object[] values = null;
@@ -296,13 +301,19 @@ public class XQueryEngine extends SaxonCAPI {
             throw new SaxonApiException("Processor pointer is null");
         }
         Processor processor = SaxonCAPI.objectHandles.get(processorRef);
+
+        String queryStr = null;
+        if(c_queryStr != WordFactory.nullPointer()) {
+            queryStr = SaxonCAPI.toJavaString(c_queryStr, c_encoding);
+        }
+
         String cwd = null;
         if(ccwd != WordFactory.nullPointer()) {
             cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
         ByteArrayOutputStream bStream = new ByteArrayOutputStream();
         Serializer serializer = processor.newSerializer(bStream);
-        XQueryEvaluator eval = xqueryEvaluator(processor, cwd, params, values, serializer);
+        XQueryEvaluator eval = xqueryEvaluator(processor, cwd, queryStr, params, values, serializer);
         eval.run(serializer);
         return SaxonCAPI.stringToNative(alloc, bStream);
 
@@ -337,7 +348,7 @@ public class XQueryEngine extends SaxonCAPI {
                     }
                 }
             }
-            XQueryEvaluator eval = xqueryEvaluator(processor, cwd, params, values, serializer);
+            XQueryEvaluator eval = xqueryEvaluator(processor, cwd, null, params, values, serializer);
             eval.run(serializer);
             final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(bStream.toString());
             return holder.get();
@@ -345,7 +356,7 @@ public class XQueryEngine extends SaxonCAPI {
         }
 
     @CEntryPoint(name = "j_executeQueryToValue", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long executeQueryToValue(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, ObjectHandle processorDataRef) throws SaxonApiException {
+    public static long executeQueryToValue(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer c_queryStr, CCharPointer c_encoding, ObjectHandle processorDataRef) throws SaxonApiException {
         ProcessorDataAccumulator processorDataAccumulator = null;
         String[] params = null;
         Object[] values = null;
@@ -359,14 +370,18 @@ public class XQueryEngine extends SaxonCAPI {
         if(ccwd != WordFactory.nullPointer()) {
             cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
-        XQueryEvaluator eval = xqueryEvaluator(processor, cwd, params, values, null);
+        String queryStr = null;
+        if(c_queryStr != WordFactory.nullPointer()) {
+            queryStr = SaxonCAPI.toJavaString(c_queryStr, c_encoding);
+        }
+        XQueryEvaluator eval = xqueryEvaluator(processor, cwd, queryStr, params, values, null);
         XdmValue value = eval.evaluate();
         ObjectHandle handle = SaxonCAPI.createHandle(value);
         return handle.rawValue();
     }
 
     @CEntryPoint(name = "j_executeQueryToFile", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long executeQueryToFile(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer c_outFilename, ObjectHandle processorDataRef) throws SaxonApiException {
+    public static long executeQueryToFile(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer c_queryStr, CCharPointer c_outFilename, CCharPointer c_encoding, ObjectHandle processorDataRef) throws SaxonApiException {
         ProcessorDataAccumulator processorDataAccumulator = null;
         String[] params = null;
         Object[] values = null;
@@ -387,11 +402,16 @@ public class XQueryEngine extends SaxonCAPI {
             outFilename = SaxonCAPI.toJavaString(c_outFilename, WordFactory.nullPointer());
         }
 
+        String queryStr = null;
+        if(c_queryStr != WordFactory.nullPointer()) {
+            queryStr = SaxonCAPI.toJavaString(c_queryStr, c_encoding);
+        }
+
         Serializer serializer = null;
             if(outFilename != null) {
                 serializer = resolveOutputFile(processor, cwd, outFilename, ResourceRequest.XML_NATURE);
             }
-            XQueryEvaluator eval = xqueryEvaluator(processor, cwd, params, values,  serializer);
+            XQueryEvaluator eval = xqueryEvaluator(processor, cwd, queryStr, params, values,  serializer);
             if (serializer != null) {
 
                 eval.run(serializer);

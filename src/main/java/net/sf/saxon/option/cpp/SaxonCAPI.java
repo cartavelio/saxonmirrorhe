@@ -285,7 +285,7 @@ public class SaxonCAPI {
      *  Convert C string to Java string object. Encoding name given as a char pointer.
      *  If the encoding is null use the platform default encoding
       * @param str  - C char array
-     * @param c_encoding - C char array for the encoding name
+     * @param c_encoding - C char array for the encoding name. Also, can be a C NULL pointer
      * @return  Java String represented by the given encoding
      * @throws SaxonApiException  - if the str is null
      */

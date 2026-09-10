@@ -783,7 +783,7 @@ def testParseJsonFunction(saxonproc):
     parse_json_fn = PyXdmFunctionItem().get_system_function(saxonproc, '{http://www.w3.org/2005/xpath-functions}parse-json', 1)
 
     try:
-        parsed_json1 = parse_json_fn.call(saxon proc, [saxonproc.make_string_value(json1, encoding="UTF-8")])
+        parsed_json1 = parse_json_fn.call(saxonproc, [saxonproc.make_string_value(json1, encoding="UTF-8")])
         print(parsed_json1)
         assert True
     except PySaxonApiError as e:
@@ -968,6 +968,22 @@ def testxQuery2(saxonproc, data_dir):
     assert xp.effective_boolean_value("/out/text()=3")
     if os.path.exists('catOutput2.xml'):
         os.remove("catOutput2.xml")
+
+def testxQuery_encoding1(saxonproc, data_dir):
+    xml = """\
+    <out>
+        <person att1='value1' att2='value2'>text1</person>
+        <salary>3000 €</salary>
+        <person>text2</person>
+        <person>text3</person>
+    </out>
+    """
+    query_proc = saxonproc.new_xquery_processor()
+    query_proc.set_cwd(os.getcwd()+'/')
+    node = saxonproc.parse_xml(xml_text=xml, encoding="UTF-8")
+    result = query_proc.run_query_to_value(input_xdm_item=node, query_text="/out/salary/text() = '3000 €'", encoding="UTF-8")
+    assert result.head.get_atomic_value().boolean_value
+    print(result)
 
 def test_default_namespace(saxonproc):
     query_proc = saxonproc.new_xquery_processor()
@@ -1157,9 +1173,28 @@ def test_node():
     assert 'value2' in attrs[1].string_value
 
 def test_evaluate():
+        xml = """\
+        <out>
+            <person att1='value1' att2='value2'>text1</person>
+            <person>text2</person>
+            <person>text3</person>
+        </out>
+        """
+        sp = PySaxonProcessor()
+        xp = sp.new_xpath_processor()
+
+        node = sp.parse_xml(xml_text=xml)
+        assert isinstance(node, PyXdmNode)
+        xp.set_context(xdm_item=node)
+        value = xp.evaluate('//person')
+        assert isinstance(value, PyXdmValue)
+        assert value.size == 3
+
+def test_evaluate_encoding():
     xml = """\
     <out>
         <person att1='value1' att2='value2'>text1</person>
+        <salary>3000 €</salary>
         <person>text2</person>
         <person>text3</person>
     </out>
@@ -1170,9 +1205,9 @@ def test_evaluate():
     node = sp.parse_xml(xml_text=xml)
     assert isinstance(node, PyXdmNode)
     xp.set_context(xdm_item=node)
-    value = xp.evaluate('//person')
+    value = xp.evaluate('//salary', encoding="UTF-8")
     assert isinstance(value, PyXdmValue)
-    assert value.size == 3
+    assert value.head.get_string_value(encoding="UTF-8") == "3000 €"
 
 def test_xdm_value_iter():
     xml = """\

@@ -157,28 +157,31 @@ public:
    * @param infilename - The file name of the source document
    * @param ofilename - The file name of where result will be stored
    * @param query - The query as string representation.
+   * @param encoding -  the encoding of the query string. If not specified then the platform default encoding is used.
    * @throws SaxonApiException
    */
   void executeQueryToFile(const char *infilename, const char *ofilename,
-                          const char *query);
+                          const char *query, const char* encoding = nullptr);
 
   //! Perform the Query to a XdmValue representation.
   /**
    * @param infilename - The file name of the source document
    * @param query - The query as string representation
+   * @param encoding -  the encoding of the query string. If not specified then the platform default encoding is used.
    * @return XdmValue - result of the the query as a XdmValue
    * @throws SaxonApiException
    */
-  XdmValue *executeQueryToValue(const char *infilename, const char *query);
+  XdmValue *executeQueryToValue(const char *infilename, const char *query, const char* encoding = nullptr);
 
   //! Perform the Query to a string representation.
   /**
    * @param infilename - The file name of the source document
    * @param query - The query as string representation
+   * @param encoding -  the encoding of the query string. If not specified then the platform default encoding is used.
    * @return char array - result of as a string
    * @throws SaxonApiException
    */
-  const char *executeQueryToString(const char *infilename, const char *query);
+  const char *executeQueryToString(const char *infilename, const char *query, const char* encoding = nullptr);
 
   //! Execute the Query cached.
   /**
