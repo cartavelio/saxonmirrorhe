@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<package xmlns='http://ns.saxonica.com/xslt/export' xmlns:fn='http://www.w3.org/2005/xpath-functions' xmlns:java-type='http://saxon.sf.net/java-type' xmlns:vv='http://saxon.sf.net/generated-variable' xmlns:xs='http://www.w3.org/2001/XMLSchema' when='2021-12-21T01:49:29.159Z' id='0' version='30' packageVersion='1' saxonProduct='SAXON-EE' saxonVersion='11.0' buildDateTime='2021-12-21T01:49:29.159Z' target='EE' targetVersion='1' relocatable='false' implicit='true'>
+<package xmlns='http://ns.saxonica.com/xslt/export' xmlns:fn='http://www.w3.org/2005/xpath-functions' xmlns:java-type='http://saxon.sf.net/java-type' xmlns:vv='http://saxon.sf.net/generated-variable' xmlns:xs='http://www.w3.org/2001/XMLSchema' when='2022-01-11T15:04:23.929Z' id='0' version='30' packageVersion='1' saxonProduct='SAXON-EE' saxonVersion='11.0' buildDateTime='2022-01-11T15:04:23.929Z' target='EE' targetVersion='1' relocatable='false' implicit='true'>
  <co id='0' binds='1'>
-  <globalVariable name='Q{http://saxon.sf.net/generated-variable}gg589629040' as='?AS' line='13' module='file:///home/ond1/work/repository/saxondev-11/src/main/c/samples/cppTests/test.xsl' visibility='PRIVATE'>
+  <globalVariable name='Q{http://saxon.sf.net/generated-variable}gg-52109072' as='?AS' line='13' module='file:///home/ond1/work/repository/saxondev-11/src/main/c/samples/cppTests/test.xsl' visibility='PRIVATE'>
    <convert baseUri='file:///home/ond1/work/repository/saxondev-11/src/main/c/samples/cppTests/test.xsl' ns='xsl=~ xml=~' line='13' from='A' to='AS'>
     <arith op='*' calc='a*a'>
      <cvUntyped to='AO'>
@@ -35,7 +35,7 @@
        </forEach>
        <elem line='13' name='out' nsuri='' flags='l'>
         <valueOf flags='l'>
-         <gVarRef name='Q{http://saxon.sf.net/generated-variable}gg589629040' bSlot='0'/>
+         <gVarRef name='Q{http://saxon.sf.net/generated-variable}gg-52109072' bSlot='0'/>
         </valueOf>
        </elem>
       </sequence>
