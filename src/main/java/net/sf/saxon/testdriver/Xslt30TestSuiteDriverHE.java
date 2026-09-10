@@ -1371,12 +1371,14 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 return false;
             case "year_component_values":
                 if ("support year zero".equals(value)) {
-                    if (env != null) {
-                        env.processor.setConfigurationProperty(Feature.XSD_VERSION, inverse ? "1.0" : "1.1");
-                        return true;
-                    } else {
-                        return false;
-                    }
+                    String oldValue = env.processor.getConfigurationProperty(Feature.XSD_VERSION);
+                    env.processor.setConfigurationProperty(Feature.XSD_VERSION, inverse ? "1.0" : "1.1");
+                    env.resetActions.add(new Environment.ResetAction() {
+                        @Override
+                        public void reset(Environment env) {
+                            env.processor.setConfigurationProperty(Feature.XSD_VERSION, oldValue);
+                        }
+                    });
                 }
                 return !inverse;
             case "additional_normalization_form":
