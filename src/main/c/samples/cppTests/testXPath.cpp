@@ -111,7 +111,7 @@ void testUserExtensionFunction(SaxonProcessor *processor, XPathProcessor *xpath,
   XdmNode *input =
       processor->parseXmlFromString("<out />");
 
-  processor->registerUserFunction("http://www.example.com", "myFunc", &myFunc, "{ \"myFunc\": {"
+  processor->registerUserFunction("http://www.example.com", &myFunc, "{ \"myFunc\": {"
                                                   "      \"as\": \"xs:integer?\","
                                                   "      \"param\": ["
                                                   "        \"xs:integer\""

@@ -19,6 +19,7 @@ zend_object_handlers xdmAtomicValue_object_handlers;
 zend_object_handlers xdmFunctionItem_object_handlers;
 zend_object_handlers xdmMap_object_handlers;
 zend_object_handlers xdmArray_object_handlers;
+zend_object_handlers sequenceIterator_object_handlers;
 
 zend_class_entry *saxonProcessor_ce;
 
@@ -29,6 +30,7 @@ zend_class_entry *xdmAtomicValue_ce;
 zend_class_entry *xdmFunctionItem_ce;
 zend_class_entry *xdmMap_ce;
 zend_class_entry *xdmArray_ce;
+zend_class_entry *sequenceIterator_ce;
 
 zend_class_entry *xsltExecutable_ce;
 
@@ -937,14 +939,14 @@ PHP_METHOD(SaxonProcessor, parseXmlFromUri) {
 
 PHP_METHOD(SaxonProcessor, createAtomicValue) {
   XdmAtomicValue *xdmValue = nullptr;
-  SaxonProcessor *proc;
-  char *source;
-  int len1;
+  SaxonProcessor *proc = nullptr;
+  char *source = nullptr;
+  int len1 = 0;
   zval *zvalue;
-  bool bVal;
-  char *sVal;
-  int len;
-  long iVal;
+  bool bVal = false;
+  char *sVal = nullptr;
+  int len = 0;
+  long iVal = 0;
   double dVal;
   if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zvalue) == FAILURE) {
     RETURN_NULL();
@@ -1321,15 +1323,13 @@ PHP_METHOD(SaxonProcessor, clearConfigurationProperties) {
 PHP_METHOD(SaxonProcessor, registerUserFunction)
 {
 
-    //char * functionName, void * proc, void * func,  int useNativeTypes, int numOfArguments, void ** arguments
     SaxonProcessor *saxonProcessor;
     char * namespacei = nullptr;
-    char * functionName = nullptr;
     char * signature = nullptr;
     bool useNativeTypes = true;
-    size_t len1, len2, len3;
+    size_t len1, len2;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() , "sssb", &namespacei, &len1, &functionName, &len2, &signature, &len3, &useNativeTypes) ==
+    if (zend_parse_parameters(ZEND_NUM_ARGS() , "ssb", &namespacei, &len1, &signature, &len2, &useNativeTypes) ==
 FAILURE) { RETURN_NULL();
     }
 
@@ -1344,23 +1344,13 @@ XtOffsetOf(saxonProcessor_object, std));
     saxonProcessor = obj->saxonProcessor;
                  try {
 
-                    saxonProcessor->registerUserFunctionWithProcessor((void *)saxonProcessor, namespacei, functionName, (void *)nullptr, (const char *)signature, useNativeTypes);
+                    saxonProcessor->registerUserFunctionWithProcessor((void *)saxonProcessor, namespacei, (void *)nullptr, (const char *)signature, useNativeTypes);
                 } catch (SaxonApiException &e) {
                     zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
                  }
 
 }
 
-/*enum saxonTypeEnum
-{
-        enumNode,
-        enumString,
-        enumInteger,
-        enumDouble,
-        enumFloat,
-        enumBool,
-        enumArrXdmValue
-};*/
 
 zval makePHPValue(XdmValue * value){
 
@@ -1566,6 +1556,8 @@ zval makePHPValue(XdmValue * value){
     std::cerr<<"PHPValue: XDMValue size="<<count<<std::endl;
   }
 
+
+
   ///// creating PHP array
   zend_array *ret = zend_new_array(count);
   zend_ulong idx = 0;
@@ -1580,7 +1572,21 @@ zval makePHPValue(XdmValue * value){
 
     idx++;
   }
-  ZVAL_ARR(&retval, ret);
+
+  std::cerr<<"PHP internal: makePHPValue created an array cp0 - now ArrayIterator"<< std::endl;
+
+  zval arrval;
+  ZVAL_ARR(&arrval, ret);
+    ///// create PHP ArrayIterator
+  if (object_init_ex(&retval,spl_ce_ArrayIterator) != SUCCESS) {
+
+ } else {
+std::cerr<<"PHP internal: makePHPValue created an array cp1 - before ArrayIterator"<< std::endl;
+   zend_call_method_with_1_params(Z_OBJ(retval), spl_ce_ArrayIterator, &spl_ce_ArrayIterator->constructor, "__construct", NULL, &arrval);
+
+std::cerr<<"PHP internal: makePHPValue created an array cp2 - done ArrayIterator"<< std::endl;
+        }
+
 
   return retval;
 
@@ -1593,7 +1599,7 @@ zval makePHPValue(XdmValue * value){
 
 
 
-void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int numOfArguments,  XdmValue ** arguments)
+void * phpNativeCall(char * functionName, void * proc, XdmValue * returnValueType, int occuranceValue, int useNativeTypes, int numOfArguments,  XdmValue ** arguments)
 {
 
     //JNIEnv *senv = SaxonProcessor::sxn_environ->env;
@@ -1727,8 +1733,6 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
             zend_throw_exception(zend_ce_exception, "Error found in converting user function argument to XdmArray", 0);
           }
 
-
-          //MAKE_STD_ZVAL(php_argv[i]._val);
           zend_avobj = Z_OBJ_P(&params[i]);
           aavobj = (xdmArray_object *)((char *)zend_avobj - XtOffsetOf(xdmArray_object, std));
           assert (aavobj != NULL);
@@ -1795,12 +1799,10 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
           std::cerr<<"PHP internal: call_user_function on = "<<nativeString2<< std::endl;
         }
 
-        //std::cerr<<"PHP internal: function_table = "<<function_table<< std::endl;
-
         if(call_user_function(CG(function_table), (zval*)callOnObj,
                                  &function_name, &retval, argLength, params) != SUCCESS)
         {
-            zend_error(E_ERROR, "Function call failed");
+            zend_throw_exception(zend_ce_exception, "Function call failed", 0);
         }
 
 
@@ -1825,7 +1827,27 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
 
         if (getenv("SAXONC_DEBUG_FLAG")) {
           std::cerr<<"PHP internal: call_user_function returnType value = "<<((int)(Z_TYPE_P(&retval)))<< std::endl;
+
+          if(Z_TYPE_P(&retval) == IS_OBJECT && Z_OBJCE(retval) != nullptr &&
+instanceof_function(Z_OBJCE_P(&retval), spl_ce_ArrayIterator)) {
+
+            std::cerr<<"PHP internal: call_user_function returnType value is an ArrayIterator"<< std::endl;
+           } else {
+
+             std::cerr<<"PHP internal: call_user_function returnType value not an object"<< std::endl;
+           }
+
+
         }
+
+         /*  if (Z_TYPE_P(&retval) == 0 && Z_OBJCE_P(&retval) != NULL && Z_OBJCE_P(&retval)->name != NULL) {
+        const char *objName = ZSTR_VAL(Z_OBJCE_P(&retval)->name);
+        if(objName != NULL) {
+         std::cerr<<"PHP internal: call_user_function returnType value name = "<<objName<< std::endl;
+         } else {
+           std::cerr<<"PHP internal: call_user_function returnType value name is null "<< std::endl;
+           }
+        } */
 
         switch (Z_TYPE_P(&retval)) {
             case IS_FALSE:
@@ -1855,8 +1877,91 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
               if (getenv("SAXONC_DEBUG_FLAG")) {
                 std::cerr<<"PHP internal: call_user_function return is an array"<< std::endl;
               }
+              /**
+                  ZEND_HASH_FOREACH_KEY_VAL(arr_hash, num_key, key, val) {
+      if (Z_TYPE_P(val) != NULL) {
+        const char *objName = ZSTR_VAL(Z_OBJCE_P(val)->name);
+
+        if (strcmp(objName, "Saxon\\XdmNode") == 0) {
+          zend_object *ooth = Z_OBJ_P(val);
+          xdmNode_object *nobj =
+              (xdmNode_object *)((char *)ooth -
+                                 XtOffsetOf(xdmNode_object, std));
+          if (nobj != nullptr) {
+            XdmValue *value = (XdmValue *)nobj->xdmNode;
+            arguments[num_key] = value;
+          }
+        } else if (strcmp(objName, "Saxon\\XdmAtomicValue") == 0) {
+          zend_object *ooth = Z_OBJ_P(val);
+          xdmAtomicValue_object *nobj =
+              (xdmAtomicValue_object *)((char *)ooth -
+                                        XtOffsetOf(xdmAtomicValue_object, std));
+          if (nobj != nullptr) {
+            XdmValue *value = (XdmValue *)nobj->xdmAtomicValue;
+            arguments[num_key] = value;
+          }
+        } else if (strcmp(objName, "Saxon\\XdmValue") == 0) {
+          zend_object *ooth = Z_OBJ_P(val);
+          xdmValue_object *nobj =
+              (xdmValue_object *)((char *)ooth -
+                                  XtOffsetOf(xdmValue_object, std));
+          if (nobj != nullptr) {
+            XdmValue *value = nobj->xdmValue;
+            arguments[num_key] = value;
+          }
+        } else if (strcmp(objName, "Saxon\\XdmFunctionItem") == 0) {
+          zend_object *ooth = Z_OBJ_P(val);
+          xdmFunctionItem_object *nobj =
+              (xdmFunctionItem_object *)((char *)ooth -
+                                         XtOffsetOf(xdmFunctionItem_object,
+                                                    std));
+          if (nobj != nullptr) {
+            XdmValue *value = (XdmValue *)nobj->xdmFunctionItem;
+            arguments[num_key] = value;
+          }
+
+        } else if (strcmp(objName, "Saxon\\XdmMap") == 0) {
+          zend_object *ooth = Z_OBJ_P(val);
+          xdmMap_object *nobj =
+              (xdmMap_object *)((char *)ooth - XtOffsetOf(xdmMap_object, std));
+          if (nobj != nullptr) {
+            XdmValue *value = (XdmValue *)nobj->xdmMap;
+            arguments[num_key] = value;
+          }
+
+        } else if (strcmp(objName, "Saxon\\XdmArray") == 0) {
+          zend_object *ooth = Z_OBJ_P(val);
+          xdmArray_object *nobj =
+              (xdmArray_object *)((char *)ooth -
+                                  XtOffsetOf(xdmArray_object, std));
+          if (nobj != nullptr) {
+            XdmValue *value = (XdmValue *)nobj->xdmArray;
+            arguments[num_key] = value;
+          }
+
+        } else { // TODO error warning}
+        }
+      } else {
+        // TODO error warning
+      }
+    }
+    ZEND_HASH_FOREACH_END();
+
+            */
+
               break;
             case IS_OBJECT:
+
+               if(Z_OBJCE(retval) != nullptr && instanceof_function(Z_OBJCE_P(&retval), spl_ce_ArrayIterator)) {
+                 	zend_vobj2 =  Z_OBJ_P(&retval);
+                  	vooth = (xdmValue_object *)((char *)zend_vobj2 -
+                                            XtOffsetOf(xdmValue_object, std));
+
+                  	if(vooth != NULL) {
+                          //get items from ArrayIterator
+                    	resultValue = vooth->xdmValue;
+                  	}
+                 } else {
 
                 objName =ZSTR_VAL(Z_OBJCE_P(&retval)->name);
 
@@ -1922,6 +2027,7 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
                   if(vooth != NULL) {
                     resultValue = vooth->xdmValue;
                   }
+                }
                 }
                 break;
             default:
@@ -3546,6 +3652,96 @@ PHP_METHOD(XdmFunctionItem, call) {
   RETURN_NULL();
 }
 
+
+
+/*     ============== PHP Interface of   SequenceIterator =============== */
+
+void sequenceIterator_free_storage(zend_object *object) {
+  zend_object_std_dtor(object);
+}
+
+void sequenceIterator_destroy_storage(zend_object *object) {
+  zend_objects_destroy_object(object);
+}
+
+zend_object *sequenceIterator_create_handler(zend_class_entry *type) {
+
+  sequenceIterator_object *obj = (sequenceIterator_object *)ecalloc(
+      1, sizeof(sequenceIterator_object) + zend_object_properties_size(type));
+
+  zend_object_std_init(&obj->std,
+                       type); /* take care of the zend_object also ! */
+  object_properties_init(&obj->std, type);
+
+  obj->std.handlers = &sequenceIterator_object_handlers;
+
+  return &obj->std;
+}
+
+PHP_METHOD(SequenceIterator, __construct) {
+
+  long seqLen = 0;
+
+  zval *seq;
+
+
+ if (ZEND_NUM_ARGS() > 1 || ZEND_NUM_ARGS() < 1) {
+    WRONG_PARAM_COUNT;
+  }
+
+  char *cwdi = nullptr;
+  int sequenceLength = 0;
+  if (ZEND_NUM_ARGS() == 1 &&
+     zend_parse_parameters(ZEND_NUM_ARGS(),  "a", &seq) == FAILURE) {
+    RETURN_NULL();
+  }
+  zval *object = getThis();
+
+  zend_object *zobj = Z_OBJ_P(object);
+  sequenceIterator_object *obj =
+      (sequenceIterator_object *)((char *)zobj -
+                                XtOffsetOf(sequenceIterator_object, std));
+}
+
+PHP_METHOD(SequenceIterator, __destruct) {
+  // std::cerr<<"php_atomicValue  destruct"<<std::endl;
+  zval *object = getThis();
+  zend_object *zobj = Z_OBJ_P(object);
+
+  sequenceIterator_object *obj =
+      (sequenceIterator_object *)((char *)zobj - XtOffsetOf(sequenceIterator_object, std));
+
+
+  if (obj->item != nullptr) {
+  	zval_ptr_dtor(obj->item);
+  }
+}
+
+
+PHP_METHOD(SequenceIterator, next) {
+	zval retval;
+  if (zend_parse_parameters_none() == FAILURE) {
+    RETURN_THROWS();
+  }
+
+  zend_object *oobj = Z_OBJ_P(getThis());
+  sequenceIterator_object *obj =
+      (sequenceIterator_object *)((char *)oobj - XtOffsetOf(sequenceIterator_object, std));
+  zval * zitem = obj->item;
+  int index = obj->index;
+  if (zitem != nullptr && Z_TYPE_P(zitem) == IS_ARRAY && index < obj->length ) {
+    zend_array *arr_hash =  Z_ARRVAL_P(zitem);
+   	zval * ret = zend_hash_index_find(arr_hash, index);
+    //ZVAL_ARR(&retval, ret);
+   	//RETVAL_ARR(retval);
+          RETURN_NULL();
+      //return;
+  }
+  RETURN_NULL();
+  return;
+}
+
+
 /*     ============== PHP Interface of   XdmMap =============== */
 
 void xdmMap_free_storage(zend_object *object) { zend_object_std_dtor(object); }
@@ -4186,83 +4382,54 @@ PHP_METHOD(XdmArray, arrayLength) {
 // =============================================================
 
 zend_function_entry SaxonProcessor_methods[] = {
-    PHP_ME(SaxonProcessor, __construct, arginfo_saxonproc_construct,
-           ZEND_ACC_PUBLIC | ZEND_ACC_CTOR) PHP_ME(SaxonProcessor, __destruct,
-                                                   arginfo_saxonc_destruct,
-                                                   ZEND_ACC_PUBLIC)
-        PHP_ME(SaxonProcessor, createAtomicValue,
-               arginfo_saxonc_createAtomicValue,
-               ZEND_ACC_PUBLIC) PHP_ME(SaxonProcessor, parseXmlFromString,
-                                       arginfo_saxonc_parseXmlFromString,
-                                       ZEND_ACC_PUBLIC)
-            PHP_ME(SaxonProcessor, parseXmlFromFile,arginfo_saxonc_parseXmlFromFile,ZEND_ACC_PUBLIC)
-            PHP_ME(SaxonProcessor, parseXmlFromUri,arginfo_saxonc_parseXmlFromUri,ZEND_ACC_PUBLIC)
-            PHP_ME(SaxonProcessor, parseJsonFromFile,arginfo_saxonc_parseJsonFromFile,ZEND_ACC_PUBLIC)
-            PHP_ME(SaxonProcessor, parseJsonFromString,arginfo_saxonc_parseJsonFromString,ZEND_ACC_PUBLIC)
-                PHP_ME(SaxonProcessor, setcwd, arginfo_saxonc_setcwd,
-                       ZEND_ACC_PUBLIC) PHP_ME(SaxonProcessor,
-                                               newXPathProcessor,
-                                               arginfo_saxonc_newXPathProcessor,
-                                               ZEND_ACC_PUBLIC)
-                    PHP_ME(
-                        SaxonProcessor, newDocumentBuilder,
-                        arginfo_saxonc_newDocumentBuilder,
-                        ZEND_ACC_PUBLIC) PHP_ME(SaxonProcessor,
-                                                newXslt30Processor,
-                                                arginfo_saxonc_newXslt30Processor,
-                                                ZEND_ACC_PUBLIC)
-                        PHP_ME(SaxonProcessor, newXQueryProcessor,
-                               arginfo_saxonc_newXQueryProcessor,
-                               ZEND_ACC_PUBLIC)
-                            PHP_ME(
-                                SaxonProcessor, newSchemaValidator,
-                                arginfo_saxonc_newSchemaValidator,
-                                ZEND_ACC_PUBLIC) PHP_ME(SaxonProcessor,
-                                                        setCatalog,
-                                                        arginfo_saxonc_setCatalog,
-                                                        ZEND_ACC_PUBLIC)
-                                PHP_ME(SaxonProcessor, setCatalogFiles,
-                                       arginfo_saxonc_setCatalogFiles,
-                                       ZEND_ACC_PUBLIC)
-                                    PHP_ME(
-                                        SaxonProcessor,
-                                        setConfigurationProperty,
-                                        arginfo_saxonc_setConfigurationProperty,
-                                        ZEND_ACC_PUBLIC)
+    PHP_ME(SaxonProcessor, __construct, arginfo_saxonproc_construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
+    PHP_ME(SaxonProcessor, __destruct,arginfo_saxonc_destruct,ZEND_ACC_PUBLIC)
+    PHP_ME(SaxonProcessor, createAtomicValue, arginfo_saxonc_createAtomicValue, ZEND_ACC_PUBLIC)
+    PHP_ME(SaxonProcessor, parseXmlFromString,arginfo_saxonc_parseXmlFromString,ZEND_ACC_PUBLIC)
+    PHP_ME(SaxonProcessor, parseXmlFromFile,arginfo_saxonc_parseXmlFromFile,ZEND_ACC_PUBLIC)
+    PHP_ME(SaxonProcessor, parseXmlFromUri,arginfo_saxonc_parseXmlFromUri,ZEND_ACC_PUBLIC)
+    PHP_ME(SaxonProcessor, parseJsonFromFile,arginfo_saxonc_parseJsonFromFile,ZEND_ACC_PUBLIC)
+    PHP_ME(SaxonProcessor, parseJsonFromString,arginfo_saxonc_parseJsonFromString,ZEND_ACC_PUBLIC)
+	PHP_ME(SaxonProcessor, setcwd, arginfo_saxonc_setcwd,ZEND_ACC_PUBLIC)
+	PHP_ME(SaxonProcessor, newXPathProcessor, arginfo_saxonc_newXPathProcessor, ZEND_ACC_PUBLIC)
+	PHP_ME(SaxonProcessor, newDocumentBuilder,arginfo_saxonc_newDocumentBuilder,ZEND_ACC_PUBLIC)
+	PHP_ME(SaxonProcessor,newXslt30Processor,arginfo_saxonc_newXslt30Processor,ZEND_ACC_PUBLIC)
+	PHP_ME(SaxonProcessor, newXQueryProcessor,arginfo_saxonc_newXQueryProcessor,ZEND_ACC_PUBLIC)
+	PHP_ME(SaxonProcessor, newSchemaValidator,arginfo_saxonc_newSchemaValidator,ZEND_ACC_PUBLIC)
+	PHP_ME(SaxonProcessor,setCatalog,arginfo_saxonc_setCatalog,ZEND_ACC_PUBLIC)
+	PHP_ME(SaxonProcessor, setCatalogFiles,arginfo_saxonc_setCatalogFiles,ZEND_ACC_PUBLIC)
+	PHP_ME(SaxonProcessor,setConfigurationProperty,arginfo_saxonc_setConfigurationProperty,ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  registerUserFunction,   arginfo_saxonc_registerUserFunction, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor, version, arginfo_saxonc_version, ZEND_ACC_PUBLIC)
-        PHP_ME(SaxonProcessor, isSchemaAware, arginfo_saxonc_isSchemaAware,
-               ZEND_ACC_PUBLIC) PHP_ME(SaxonProcessor, EQNameToClarkName,
-                                       arginfo_saxonc_EQNameToClarkName,
-                                       ZEND_ACC_PUBLIC)
-            PHP_ME(SaxonProcessor, clarkNameToEQName,
-                   arginfo_saxonc_clarkNameToEQName, ZEND_ACC_PUBLIC)
-                PHP_ME(SaxonProcessor, exceptionOccurred,
-                       arginfo_saxonc_isSchemaAware, ZEND_ACC_PUBLIC)
-                    PHP_ME(SaxonProcessor, getErrorMessage,
-                           arginfo_saxonc_exceptionOccurred, ZEND_ACC_PUBLIC)
-                        PHP_ME(SaxonProcessor, exceptionClear,
-                               arginfo_saxonc_exceptionClear, ZEND_ACC_PUBLIC)
-                            PHP_ME(SaxonProcessor, release,
-                                   arginfo_saxonc_release,
-                                   ZEND_ACC_PUBLIC){nullptr, nullptr, nullptr}};
+    PHP_ME(SaxonProcessor, isSchemaAware, arginfo_saxonc_isSchemaAware,ZEND_ACC_PUBLIC)
+	PHP_ME(SaxonProcessor, EQNameToClarkName,arginfo_saxonc_EQNameToClarkName,ZEND_ACC_PUBLIC)
+	PHP_ME(SaxonProcessor, clarkNameToEQName,arginfo_saxonc_clarkNameToEQName, ZEND_ACC_PUBLIC)
+	PHP_ME(SaxonProcessor, exceptionOccurred,arginfo_saxonc_isSchemaAware, ZEND_ACC_PUBLIC)
+	PHP_ME(SaxonProcessor, getErrorMessage,arginfo_saxonc_exceptionOccurred, ZEND_ACC_PUBLIC)
+	PHP_ME(SaxonProcessor, exceptionClear,arginfo_saxonc_exceptionClear, ZEND_ACC_PUBLIC)
+	PHP_ME(SaxonProcessor, release,arginfo_saxonc_release,ZEND_ACC_PUBLIC)
+	{nullptr, nullptr, nullptr}};
+
+zend_function_entry sequenceIterator_methods[] = {
+    PHP_ME(SequenceIterator, __construct, arginfo_saxonc_seqIter_construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
+    PHP_ME(SequenceIterator, __destruct, arginfo_saxonc_seqIter_destruct,ZEND_ACC_PUBLIC)
+	/*PHP_ME(SequenceIterator, __toString, arginfo_saxonc_seqIter_toString,ZEND_ACC_PUBLIC) */
+	PHP_ME(SequenceIterator, next, arginfo_saxonc_seqIter_next,ZEND_ACC_PUBLIC)
+	/*PHP_ME(SequenceIterator, hasNext, arginfo_saxonc_seqIter_hasNext,ZEND_ACC_PUBLIC)
+	PHP_ME(XdmValue, count, arginfo_saxonc_xdmval_size,ZEND_ACC_PUBLIC) */
+	PHP_ME(XdmValue, addXdmItem,arginfo_saxonc_xdmval_addXdmItem,ZEND_ACC_PUBLIC)
+	{nullptr, nullptr, nullptr}};
 
 zend_function_entry xdmValue_methods[] = {
     PHP_ME(XdmValue, __construct, arginfo_saxonc_xdmval_construct,
            ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
-        PHP_ME(XdmValue, __destruct, arginfo_saxonc_xdmval_destruct,
-               ZEND_ACC_PUBLIC)
-            PHP_ME(XdmValue, __toString, arginfo_saxonc_xdmval_toString,
-                   ZEND_ACC_PUBLIC)
-                PHP_ME(XdmValue, getHead, arginfo_saxonc_xdmval_getHead,
-                       ZEND_ACC_PUBLIC)
-                    PHP_ME(XdmValue, itemAt, arginfo_saxonc_xdmval_itemAt,
-                           ZEND_ACC_PUBLIC)
-                        PHP_ME(XdmValue, size, arginfo_saxonc_xdmval_size,
-                               ZEND_ACC_PUBLIC)
-                            PHP_ME(XdmValue, addXdmItem,
-                                   arginfo_saxonc_xdmval_addXdmItem,
-                                   ZEND_ACC_PUBLIC){nullptr, nullptr, nullptr}};
+    PHP_ME(XdmValue, __destruct, arginfo_saxonc_xdmval_destruct,ZEND_ACC_PUBLIC)
+	PHP_ME(XdmValue, __toString, arginfo_saxonc_xdmval_toString,ZEND_ACC_PUBLIC)
+	PHP_ME(XdmValue, getHead, arginfo_saxonc_xdmval_getHead,ZEND_ACC_PUBLIC)
+	PHP_ME(XdmValue, itemAt, arginfo_saxonc_xdmval_itemAt,ZEND_ACC_PUBLIC)
+	PHP_ME(XdmValue, size, arginfo_saxonc_xdmval_size,ZEND_ACC_PUBLIC)
+	PHP_ME(XdmValue, addXdmItem,arginfo_saxonc_xdmval_addXdmItem,ZEND_ACC_PUBLIC)
+	{nullptr, nullptr, nullptr}};
 
 zend_function_entry xdmItem_methods[] = {
     PHP_ME(XdmItem, __construct, arginfo_saxonc_xdmitem_construct,
@@ -4590,6 +4757,15 @@ PHP_MINIT_FUNCTION(saxon) {
   xdmArray_object_handlers.offset = XtOffsetOf(xdmArray_object, std);
   xdmArray_object_handlers.free_obj = xdmArray_free_storage;
   xdmArray_object_handlers.dtor_obj = XdmArray_destroy_storage;
+
+  INIT_CLASS_ENTRY(ce, "Saxon\\SequenceIterator", sequenceIterator_methods);
+  sequenceIterator_ce = zend_register_internal_class(&ce);
+  sequenceIterator_ce->create_object = sequenceIterator_create_handler;
+  memcpy(&sequenceIterator_object_handlers, zend_get_std_object_handlers(),
+         sizeof(sequenceIterator_object_handlers));
+  sequenceIterator_object_handlers.offset = XtOffsetOf(sequenceIterator_object, std);
+  sequenceIterator_object_handlers.free_obj = sequenceIterator_free_storage;
+  sequenceIterator_object_handlers.dtor_obj = sequenceIterator_destroy_storage;
 
   // REGISTER_INI_ENTRIES();
   return SUCCESS;

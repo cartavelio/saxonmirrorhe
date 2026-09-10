@@ -19,6 +19,8 @@ extern "C" { // remove comment
 #include "php_ini.h"
 #include "Zend/zend_exceptions.h"
 #include "ext/standard/info.h"
+#include "ext/spl/spl_iterators.h"
+#include "ext/spl/spl_array.h"
 
 #include "SAPI.h"
 #include "zend_closures.h"
@@ -173,6 +175,14 @@ struct xslt30Processor_object {
 struct xsltExecutable_object {
 
   XsltExecutable *xsltExecutable;
+  zend_object std;
+};
+
+struct sequenceIterator_object {
+
+  zval * item;
+  int index;
+  int length;
   zend_object std;
 };
 

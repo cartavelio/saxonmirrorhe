@@ -167,26 +167,18 @@ public class SaxonCAPI {
     }
 
     @CEntryPoint(name = "j_registerFunctionDefinition", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long j_registerFunctionDefinition(IsolateThread thread, ObjectHandle procRef, CCharPointer c_namespace, CCharPointer c_funcName, ObjectHandle signatureRef, CFunctionPointer pythonProc, CFunctionPointer func, AllocatorFn alloc,  int c_useNativeTypes) throws SaxonApiException {
+    public static long j_registerFunctionDefinition(IsolateThread thread, ObjectHandle procRef, CCharPointer c_namespace, ObjectHandle signatureRef, CFunctionPointer pythonProc, CFunctionPointer func, AllocatorFn alloc, int c_useNativeTypes) throws SaxonApiException {
         if (SaxonCAPI.debug) {
-            System.err.println("Java DEBUG en entered setLibrary!!");
+            System.err.println("Java DEBUG entered setLibrary!!");
         }
 //#if EE==true || PE==true
         boolean isNativeType = CTypeConversion.toBoolean(c_useNativeTypes);
 
-        if(isNativeType) {
-            System.err.println("Java DEBUG  isNativeType is TRue");
-        }
-        if (procRef == WordFactory.nullPointer() || c_funcName == WordFactory.nullPointer()) {
+        if (procRef == WordFactory.nullPointer()) {
             return net.sf.saxon.option.cpp.SaxonCAPI.STATUS_FAIL;
         }
 
         Processor processor = objectHandles.get(procRef);
-
-        String funcName = null;
-        if (c_funcName != WordFactory.nullPointer()) {
-            funcName = SaxonCAPI.toJavaString(c_funcName, WordFactory.nullPointer());
-        }
 
         String namespaceStr = null;
         if (c_namespace != WordFactory.nullPointer()) {
@@ -199,41 +191,44 @@ public class SaxonCAPI {
 
         }
 
-        return registerFunctionDefinition(processor, namespaceStr, funcName, signatureValue, pythonProc, func, alloc, isNativeType);
+        return registerFunctionDefinition(processor, namespaceStr, signatureValue, pythonProc, func, alloc, isNativeType);
 
     }
 
-    public static long registerFunctionDefinition(Processor processor, String namespaceStr, String funcName, XdmValue signatureValue, CFunctionPointer pythonProc, CFunctionPointer func, AllocatorFn alloc, boolean useNativeTypes) throws SaxonApiException{
+    public static long registerFunctionDefinition(Processor processor, String namespaceStr, XdmValue signatureValue, CFunctionPointer pythonProc, CFunctionPointer func, AllocatorFn alloc, boolean useNativeTypes) throws SaxonApiException{
 
-        QName funcQname = new QName(namespaceStr, funcName);
+        QName funcQname = null;
 
         SequenceType [] sequenceTypes = null;
         SequenceType returnSequenceType = null;
+        XdmValue returnValue = null;
 
-        //ItemTypeFactory itemTypeFactory = new ItemTypeFactory(processor);
         if (signatureValue != null) {
-            if(signatureValue != null && signatureValue instanceof XdmMap) {
-                XdmMap signatureMap  = (XdmMap) ((XdmMap)signatureValue).get(funcName);
+            if(signatureValue instanceof XdmMap) {
+                XdmMap functionMap = (XdmMap) signatureValue;
+                XdmAtomicValue functionKey = functionMap.keySet().iterator().next();
+                XdmMap signatureMap  = (XdmMap) ((XdmMap)signatureValue).get(functionKey);
+
+                funcQname = new QName(namespaceStr, functionKey.getStringValue());
+
                 if(signatureMap != null) {
                     if(SaxonCAPI.debug) {
-                          System.out.println("Signature = " + (signatureValue).toString());
+                        System.out.println("Java DEBUG: Function name = " + funcQname);
+                          System.out.println("Java DEBUG: Signature = " + (signatureValue).toString());
                       }
                     XdmValue paramValue = signatureMap.get("param");
-                    if (paramValue != null && paramValue instanceof XdmArray) {
+                    if (paramValue instanceof XdmArray) {
                          if(SaxonCAPI.debug) {
-                             System.out.println("param = " + ((XdmArray) paramValue).toString());
-                             System.out.println("param length= " + ((XdmArray) paramValue).arrayLength());
+                             System.out.println("Java DEBUG: param = " + ((XdmArray) paramValue).toString());
+                             System.out.println("Java DEBUG: param length= " + ((XdmArray) paramValue).arrayLength());
                          }
                         XdmArray paramArray = (XdmArray) paramValue;
                         sequenceTypes = new SequenceType[paramArray.arrayLength()];
 
                         for (int i =0; i< paramArray.arrayLength(); i++) {
-                            if(SaxonCAPI.debug) {
-                                System.out.println("param-loop i=" + i);
-                            }
                             XdmValue val = paramArray.get(i);
                             if(SaxonCAPI.debug) {
-                                System.out.println("param item= " + val.toString());
+                                System.out.println("param (i="+i+") item= " + val.toString());
                             }
                             sequenceTypes[i] = SaxonCAPI.parseSequenceType(processor, val.toString());
 
@@ -243,19 +238,22 @@ public class SaxonCAPI {
                         }
 
                     }
-                    XdmValue returnValue = signatureMap.get("as");
+                    returnValue = signatureMap.get("as");
                     if (returnValue != null && returnValue instanceof XdmAtomicValue) {
                         if(SaxonCAPI.debug) {
-                            System.out.println("return type (as)= " + ((XdmAtomicValue) returnValue).getStringValue());
+                            System.out.println("Java DEBUG: return type (as)= " + ((XdmAtomicValue) returnValue).getStringValue());
                         }
                         returnSequenceType = SaxonCAPI.parseSequenceType(processor, ((XdmAtomicValue) returnValue).getStringValue());
+                        returnSequenceType.getOccurrenceIndicator();
                     }
 
                 }
             }
+        } else {
+            throw new SaxonApiException("Invalid signature value");
         }
 
-        processor.registerExtensionFunction(new NativeCall(funcQname, sequenceTypes, returnSequenceType, pythonProc, func, alloc, useNativeTypes));
+        processor.registerExtensionFunction(new NativeCall(funcQname, sequenceTypes, returnSequenceType, pythonProc, func, alloc, returnValue, useNativeTypes));
 
 //#endif
         return  SaxonCAPI.STATUS_OK;
@@ -1973,7 +1971,7 @@ public class SaxonCAPI {
 
 
         //#if EE==true || PE==true
-        SaxonCAPI.registerFunctionDefinition(processor, "http://www.example.com", "myFunc", signatureValue, null, null, null, false);
+        SaxonCAPI.registerFunctionDefinition(processor, "http://www.example.com", signatureValue, null, null, null, false);
         //#endif
         XPathCompiler xpath = processor.newXPathCompiler();
 

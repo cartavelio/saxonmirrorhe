@@ -50,13 +50,20 @@ function implode_all($arr) {
     return implode(' ', $arr);
 }
 
-function twoSequenceParam($arr1, $arr2){
+function twoSequenceParam($arrIter1, $arrIter2){
   echo("twoSequenceParam called\n");
-  if(is_array($arr1) and is_array($arr2)){
-    $out1 = implode_all($arr1);
-    $out2 = implode_all($arr2);
-    echo $out1."\n";
-    echo $out2."\n";
+  if($arrIter1 != NULL and $arrIter2 != NULL){
+
+    while( $arrIter1->valid() ){
+      echo $arrIter1->key() . "=" . $arrIter1->current() . "\n";
+      $arrIter1->next();
+    }
+
+    while( $arrIter2->valid() ){
+      echo $arrIter2->key() . "=" . $arrIter2->current() . "\n";
+      $arrIter2->next();
+    }
+
     return True;
   } else {
     throw new Exception('$arr argument is not an array type');
@@ -79,12 +86,19 @@ function sequenceOfArraysParam($arr1, $arr2){
 
 }
 
-function sequenceOfArraysParamB($arr1){
+function sequenceOfArraysParamB($arrIter){
   echo("sequenceOfArraysParamB called\n");
-  if(is_array($arr1)){
-    $out1 = implode_all($arr1);
-    echo $out1."\n";
-    return True;
+  if($arrIter != NULL){
+
+    while( $arrIter->valid() ){
+        $arri = $arrIter->current();
+        if(is_array($arri)){
+            $out1 = implode_all($arris);
+            echo $out1."\n";
+        }
+        $arrIter->next();
+    }
+   return True;
   } else {
     throw new Exception('$arr argument is not an array type');
   }
@@ -97,7 +111,7 @@ function sequenceOfArraysParamC($arr1){
   if(is_array($arr1)){
     $out1 = implode_all($arr1);
     echo $out1."\n";
-    return $arr1;
+    return new ArrayIterator($arr1);
   } else {
     throw new Exception('$arr argument is not an array type');
   }
@@ -153,16 +167,16 @@ function nodeParam2($input){
 
 
 function testSequence($saxonProc) {
-         $saxonProc->registerUserFunction("http://www.example.com", "sumASequence", "{ \"sumASequence\": {".
+         $saxonProc->registerUserFunction("http://www.example.com", "{ \"sumASequence\": {".
                                                         "      \"as\": \"xs:integer?\"," .
                                                         "      \"param\": [" .
-                                                        "        \"xs:integer*\"" .
+                                                        "        \"array(xs:integer*)\"" .
                                                         "      ],".
                                                         "      \"arity\": [1]" .
                                                         "    }".
                                                         "}", True);
 
-         $saxonProc->registerUserFunction("http://www.example.com", "simpleUserFunction2", "{ \"simpleUserFunction2\": {".
+         $saxonProc->registerUserFunction("http://www.example.com", "{ \"simpleUserFunction2\": {".
                                                         "      \"as\": \"xs:integer?\"," .
                                                         "      \"param\": [" .
                                                         "        \"xs:integer\"" .
@@ -177,7 +191,7 @@ function testSequence($saxonProc) {
          $xpath->declareNamespace("dy", "http://www.example.com");
 
          try {
-             $result = $xpath->evaluateSingle("dy:sumASequence((1,2,3,4,5))");
+             $result = $xpath->evaluateSingle("dy:sumASequence([1,2,3,4,5])");
              if($result != null) {
                 $value = $result->getAtomicValue()->getLongValue();
                 echo 'Correct Result='.$value;
@@ -195,7 +209,7 @@ function testSequence($saxonProc) {
 }
 
 function testSimpleUserFunction($saxonProc1){
-      $saxonProc1->registerUserFunction("http://www.example.com", "userFunction", "{ \"userFunction\": {".
+      $saxonProc1->registerUserFunction("http://www.example.com", "{ \"userFunction\": {".
                                                             "      \"as\": \"xs:integer?\"," .
                                                             "      \"param\": [" .
                                                             "        \"xs:integer\"" .
@@ -223,7 +237,7 @@ function testSimpleUserFunction($saxonProc1){
 
 
 function testTwoSequence($saxonProc) {
-         $saxonProc->registerUserFunction("http://www.example.com", "twoSequenceParam", "{ \"twoSequenceParam\": {".
+         $saxonProc->registerUserFunction("http://www.example.com", "{ \"twoSequenceParam\": {".
                                                         "      \"as\": \"xs:boolean\"," .
                                                         "      \"param\": [" .
                                                         "        \"xs:string*\", \"xs:integer*\"" .
@@ -232,7 +246,7 @@ function testTwoSequence($saxonProc) {
                                                         "    }".
                                                         "}", True);
 
-         $saxonProc->registerUserFunction("http://www.example.com", "twoSequenceParam2", "{ \"twoSequenceParam2\": {".
+         $saxonProc->registerUserFunction("http://www.example.com", "{ \"twoSequenceParam2\": {".
                                                         "      \"as\": \"xs:integer*\"," .
                                                         "      \"param\": [" .
                                                         "        \"xs:string*\", \"xs:integer*\"" .
@@ -266,7 +280,7 @@ function testTwoSequence($saxonProc) {
 }
 
 function commonSamplesForSequences($saxonProc) {
-         $saxonProc->registerUserFunction("http://www.example.com", "sequenceOfArraysParam", "{ \"sequenceOfArraysParam\": {".
+         $saxonProc->registerUserFunction("http://www.example.com", "{ \"sequenceOfArraysParam\": {".
                                                         "      \"as\": \"xs:boolean\"," .
                                                         "      \"param\": [" .
                                                         "        \"array(*)\", \"array(*)\"" .
@@ -275,7 +289,7 @@ function commonSamplesForSequences($saxonProc) {
                                                         "    }".
                                                         "}", True);
 
-         $saxonProc->registerUserFunction("http://www.example.com", "sequenceOfArraysParamB", "{ \"sequenceOfArraysParamB\": {".
+         $saxonProc->registerUserFunction("http://www.example.com", "{ \"sequenceOfArraysParamB\": {".
                                                         "      \"as\": \"xs:boolean\"," .
                                                         "      \"param\": [" .
                                                         "        \"array(*)*\"" .
@@ -284,16 +298,16 @@ function commonSamplesForSequences($saxonProc) {
                                                         "    }".
                                                         "}", True);
 
-         $saxonProc->registerUserFunction("http://www.example.com", "sequenceOfArraysParamC", "{ \"sequenceOfArraysParamC\": {".
-                                                        "      \"as\": \"array(*)*\"," .
+         $saxonProc->registerUserFunction("http://www.example.com", "{ \"sequenceOfArraysParamC\": {".
+                                                        "      \"as\": \"xs:integer*\"," .
                                                         "      \"param\": [" .
-                                                        "        \"array(*)*\"" .
+                                                        "        \"array(*)\"" .
                                                         "      ],".
                                                         "      \"arity\": [1]" .
                                                         "    }".
                                                         "}", True);
 
-         $saxonProc->registerUserFunction("http://www.example.com", "sequenceOfMapParam", "{ \"sequenceOfMapParam\": {".
+         $saxonProc->registerUserFunction("http://www.example.com", "{ \"sequenceOfMapParam\": {".
                                                         "      \"as\": \"xs:boolean\"," .
                                                         "      \"param\": [" .
                                                         "        \"map(*)\", \"map(*)\"" .
@@ -320,7 +334,7 @@ function commonSamplesForSequences($saxonProc) {
                 echo 'Correct Result='.$value;
              }
 
-             $result1a = $xpath->evaluateSingle("ms:sequenceOfArraysParamC((array{1,2,3}, array{'a',2,3}))");
+             $result1a = $xpath->evaluate("ms:sequenceOfArraysParamC(array{1,2,3})");
              if($result1a != null) {
                 if($result1a instanceof Saxon\XdmValue) {
                     echo 'Test sequenceOfArraysParamC: XdmValue found';
@@ -347,7 +361,7 @@ function commonSamplesForSequences($saxonProc) {
 }
 
 function handlingXdmNodes($saxonProc) {
-         $saxonProc->registerUserFunction("http://www.example.com", "elementParam", "{ \"elementParam\": {".
+         $saxonProc->registerUserFunction("http://www.example.com", "{ \"elementParam\": {".
                                                         "      \"as\": \"xs:boolean\"," .
                                                         "      \"param\": [" .
                                                         "        \"element(*)\"" .
@@ -356,7 +370,7 @@ function handlingXdmNodes($saxonProc) {
                                                         "    }".
                                                         "}", True);
 
-         $saxonProc->registerUserFunction("http://www.example.com", "documentParam", "{ \"documentParam\": {".
+         $saxonProc->registerUserFunction("http://www.example.com",  "{ \"documentParam\": {".
                                                         "      \"as\": \"xs:boolean\"," .
                                                         "      \"param\": [" .
                                                         "        \"document-node()\"" .
@@ -365,7 +379,7 @@ function handlingXdmNodes($saxonProc) {
                                                         "    }".
                                                         "}", False);
 
-         $saxonProc->registerUserFunction("http://www.example.com", "nodeParam", "{ \"nodeParam\": {".
+         $saxonProc->registerUserFunction("http://www.example.com", "{ \"nodeParam\": {".
                                                         "      \"as\": \"xs:boolean\"," .
                                                         "      \"param\": [" .
                                                         "        \"node()\"" .
@@ -374,7 +388,7 @@ function handlingXdmNodes($saxonProc) {
                                                         "    }".
                                                         "}", False);
 
-         $saxonProc->registerUserFunction("http://www.example.com", "attributeParam", "{ \"attributeParam\": {".
+         $saxonProc->registerUserFunction("http://www.example.com", "{ \"attributeParam\": {".
                                                         "      \"as\": \"xs:boolean\"," .
                                                         "      \"param\": [" .
                                                         "        \"attribute()\"" .
@@ -383,7 +397,7 @@ function handlingXdmNodes($saxonProc) {
                                                         "    }".
                                                         "}", True);
 
-         $saxonProc->registerUserFunction("http://www.example.com", "nodeParam2", "{ \"nodeParam2\": {".
+         $saxonProc->registerUserFunction("http://www.example.com", "{ \"nodeParam2\": {".
                                                         "      \"as\": \"node()\"," .
                                                         "      \"param\": [" .
                                                         "        \"node()\"" .

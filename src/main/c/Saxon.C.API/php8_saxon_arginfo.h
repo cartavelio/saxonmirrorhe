@@ -23,11 +23,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_parseXmlFromString, 0, 0, 1)
 ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_registerUserFunction, 0, 0, 4)
-// the first argument to this is if this is a reference
-// the second argument to this is the name
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_registerUserFunction, 0, 0, 3)
 ZEND_ARG_TYPE_INFO(0, namespacei, IS_STRING, 0)
-ZEND_ARG_TYPE_INFO(0, functionName, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, signature, IS_STRING, 0)
 ZEND_ARG_INFO(0, useNativeType)
 ZEND_END_ARG_INFO()
@@ -859,3 +856,17 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmarray_arrayLength, 0, 0, 0)
 ZEND_END_ARG_INFO()
+
+
+//======================= SequenceIterator
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_seqIter_construct, 0, 0, 1)
+ZEND_ARG_INFO(0, arrayi)
+ZEND_END_ARG_INFO()
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_seqIter_destruct, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_seqIter_next, 0, 0, 0)
+ZEND_END_ARG_INFO()
+

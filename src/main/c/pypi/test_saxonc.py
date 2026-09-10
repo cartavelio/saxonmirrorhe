@@ -1741,7 +1741,7 @@ Create a function to do type conversion between PyXdm and Python types
 def testUserFunction():
     with PySaxonProcessor(license=True) as proc:
         try:
-            proc.register_user_function("http://www.example.com", "myFunc", user_function, "{ \"myFunc\": {"
+            proc.register_user_function("http://www.example.com", user_function, "{ \"myFunc\": {"
                                                           "      \"as\": \"xs:integer?\","
                                                           "      \"param\": ["
                                                           "        \"xs:integer\""
