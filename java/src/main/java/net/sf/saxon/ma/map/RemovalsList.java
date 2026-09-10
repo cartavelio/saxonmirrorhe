@@ -29,7 +29,6 @@ public class RemovalsList {
         return new RemovalsList(removals.put(value, value), numberOfItems + 1);
     }
 
-    @CSharpReplaceBody(code="return removals.ContainsKey(value);")
     public boolean contains(Integer value) {
         return removals.get(value) != null;
     }
