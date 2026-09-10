@@ -131,8 +131,10 @@ public class ToXml {
                 icu4jJar = arg.substring(7);
             } else if (arg.startsWith("-vavr:")) {
                 vavrJar = arg.substring(6);
+                System.err.println("vavrJar = " + vavrJar);
             } else if (arg.startsWith("-vavrMatch:")) {
                 vavrMatchJar = arg.substring(11);
+                System.err.println("vavrMatchJar = " + vavrMatchJar);
             } else if (arg.equals("-debug")) {
                 DEBUG = true;
                 compiler.setCompileWithTracing(true);

@@ -82,6 +82,8 @@
       'com.saxonica.ee.parallel.PushToPull.Pusher': 'Saxon.Impl.Parallel.PushToPull.Pusher',
       'com.saxonica.functions.qt4.ParseHtml': 'Saxon.Impl.Helpers.ParseHtml',
       'com.saxonica.functions.qt4.ma.OrderedMap': 'Saxon.Impl.DataModel.ImmOrderedMap',
+      'io.vavr.collection.List': 'System.Collections.Immutable.ImmutableList',
+      'io.vavr.collection.HashMap': 'System.Collections.Immutable.ImmutableDictionary',
       'io.vavr.collection.LinkedHashMap': 'System.Collections.Immutable.ImmutableDictionary', 
       'io.vavr.collection.TreeMap': 'System.Collections.Immutable.ImmutableSortedDictionary', 
       'java.io.BufferedInputStream': 'System.IO.BufferedStream',

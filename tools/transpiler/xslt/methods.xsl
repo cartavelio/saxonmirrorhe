@@ -825,7 +825,7 @@
    </xsl:template>
    
    <!-- ImmutableHashTrieMap -->
-   <xsl:template match="*[f:targetType(.) = ('net.sf.saxon.ma.trie.ImmutableHashTrieMap', 'net.sf.saxon.ma.trie.ImmutableMap')]" 
+   <xsl:template match="*[f:targetType(.) = ('io.vavr.collection.HashMap', 'io.vavr.collection.LinkedHashMap')]" 
       priority="20" mode="methods">
       <xsl:choose>
          <xsl:when test="name/@identifier='entrySet' and count(arguments/argument)=0 and self::iterable">
