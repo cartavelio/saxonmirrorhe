@@ -439,9 +439,7 @@ public final class Atomizer extends UnaryExpression {
                 throw e;
             } else {
                 String message = expandMessage(e.getMessage());
-                throw new XPathException(message)
-                        .withErrorCode(e.getErrorCodeQName())
-                        .withLocation(e.getLocator())
+                throw e.withMessage(message)
                         .withXPathContext(context)
                         .maybeWithLocation(getLocation());
             }
@@ -690,9 +688,7 @@ public final class Atomizer extends UnaryExpression {
                         throw e;
                     } else {
                         String message = expr.expandMessage(e.getMessage());
-                        throw new XPathException(message)
-                                .withErrorCode(e.getErrorCodeQName())
-                                .withLocation(e.getLocator())
+                        throw e.withMessage(message)
                                 .withXPathContext(context)
                                 .maybeWithLocation(expr.getLocation());
                     }

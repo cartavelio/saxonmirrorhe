@@ -387,9 +387,7 @@ public final class SingletonAtomizer extends UnaryExpression {
                         } else {
                             RoleDiagnostic role = expr.roleSupplier.get();
                             String message = e.getMessage() + ". Failed while atomizing the " + role.getMessage();
-                            throw new XPathException(message)
-                                    .withErrorCode(e.getErrorCodeQName())
-                                    .withLocation(e.getLocator())
+                            throw e.withMessage(message)
                                     .withXPathContext(context);
                         }
                     }

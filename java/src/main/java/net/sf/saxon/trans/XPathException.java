@@ -205,6 +205,7 @@ public class XPathException extends TransformerException {
         e2.setIsTypeError(isTypeError());
         e2.setHostLanguage(getHostLanguage());
         e2.setXPathContext(getXPathContext());
+        e2.setErrorObject(getErrorObject());
         return e2;
     }
 
@@ -561,6 +562,11 @@ public class XPathException extends TransformerException {
 
     public void setErrorObject(Sequence value) {
         errorObject = value;
+    }
+
+    public XPathException withErrorObject(Sequence value) {
+        setErrorObject(value);
+        return this;
     }
 
     /**

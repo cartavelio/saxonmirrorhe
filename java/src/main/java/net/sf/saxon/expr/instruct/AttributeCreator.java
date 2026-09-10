@@ -290,6 +290,7 @@ public abstract class AttributeCreator extends SimpleNodeConstructor implements 
                         .withErrorCode(e.getErrorCodeQName())
                         .withXPathContext(context)
                         .withLocation(getLocation())
+                        .withErrorObject(e.getErrorObject())
                         .asTypeError();
             }
         }

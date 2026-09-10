@@ -597,7 +597,8 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                     XPathException e = new XPathException(err.getMessage())
                             .withLocation(getLocation())
                             .withXPathContext(context)
-                            .withErrorCode(err.getErrorCodeQName());
+                            .withErrorCode(err.getErrorCodeQName())
+                            .withErrorObject(err.getErrorObject());
                     throw dynamicError(getLocation(), e, context);
                 }
                 break;
