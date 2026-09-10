@@ -477,17 +477,37 @@ def get_named_parameters(proc: saxonc.PySaxonProcessor, xpath_proc: saxonc.PyXPa
     static_test = ""
     if get_static:
         static_test = "[@static]"
-
+    xpath_proc.set_context(xdm_item=node)
     param_elements = xpath_proc.evaluate("param" + static_test)
+    '''if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+        print("DEBUG get_named_parameters:", param_elements)'''
     if param_elements is not None:
         for i in range(param_elements.size):
 
             param_i = param_elements.item_at(i).get_node_value()
-
+            print(param_i)
             name = param_i.get_attribute_value("name")
             select = param_i.get_attribute_value("select")
             tunnelled = param_i.get_attribute_value("tunnel")
             as_i = param_i.get_attribute_value("as")
+
+            prefix = None
+            ns = None
+            if ":" in name:
+                prefix = name.split(":")[0]
+                local_name = name.split(":")[1]
+                if local_name is not None:
+                    xpath_proc.set_context(xdm_item=param_i)
+                    ns_value = xpath_proc.evaluate_single("namespace-uri-for-prefix('"+prefix+"', .)")
+
+                    if ns_value is not None:
+                        name = "{"+str(ns_value)+"}"+local_name
+                        if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+                            print("localname in param found = " + local_name)
+                            print("param clark_name = ", ns_value)
+                            print("param name = ", name)
+
+
 
             required = tunnel == (tunnelled is not None and tunnelled == "yes")
             value = None
@@ -498,7 +518,7 @@ def get_named_parameters(proc: saxonc.PySaxonProcessor, xpath_proc: saxonc.PyXPa
                 value = xpath_proc.evaluate(select)
                 i += 1
                 if value is None:
-                    if os.getenv("SAXONC_DEBUG_FLAG") is not None:
+                    if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
                         print("Error in get_named_parameters - value is None")
                     continue
             except saxonc.PySaxonApiError as ex:
@@ -509,7 +529,8 @@ def get_named_parameters(proc: saxonc.PySaxonProcessor, xpath_proc: saxonc.PyXPa
                 if required:
                     params[name] = valuei
             elif required:'''
-            params[name] = value
+            if required:
+                params[name] = value
 
     return params
 
@@ -671,6 +692,7 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
         for key in global_params:
             environment.sheet.set_parameter(key, global_params[key])
 
+
         environment.sheet.set_capture_result_documents(True)
         environment.sheet.set_save_xsl_message(True, None)
 
@@ -678,16 +700,20 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
             '''print(environment.context_item)'''
             environment.sheet.set_global_context_item(xdm_item=environment.context_item)
 
-        if initial_template is not None or initial_mode_name is not None:
-            '''TODO check for params - set to tunnel'''
-            print("")
+        '''if initial_template is not None or initial_mode_name is not None:'''
         if initial_mode_name is not None:
             environment.sheet.set_initial_mode(initial_mode_name)
         if initial_template is not None:
-            init_params = get_named_parameters(environment.proc, xpath_proc, test_input_node.get_node_value(),
+            init_params = get_named_parameters(environment.proc, xpath_proc, initial_template,
                                                False, False)
-            tunnel_params = get_named_parameters(environment.proc, xpath_proc, test_input_node.get_node_value(),
+            tunnel_params = get_named_parameters(environment.proc, xpath_proc, initial_template,
                                                  False, True)
+
+            if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+                print("DEBUG init_params:")
+                print(*init_params, sep=", ")
+                print("DEBUG tunnel_params:")
+                print(*tunnel_params, sep=", ")
             environment.sheet.set_initial_template_parameters(False, init_params)
             environment.sheet.set_initial_template_parameters(True, tunnel_params)
             if serialize_check is not None and str(serialize_check) == "yes":
