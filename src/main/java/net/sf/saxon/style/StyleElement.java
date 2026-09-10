@@ -2419,11 +2419,16 @@ public abstract class StyleElement extends ElementImpl {
     /**
      * Report an error unless XSLT 4.0 syntax is enabled. This currently requires the XSLT version to be set to "4.0"
      * in the XSLT compiler, AND the effective version in the stylesheet to be 4.0 or greater.
+     * @param attributeName the name of the attribute if relevant, or null if no specific attribute is concerned
      */
     protected void requireXslt40(String attributeName) {
         if (compilation.getCompilerInfo().getLanguageVersion() != 40 || getEffectiveVersion() < 40) {
-            compileErrorInAttribute("Attribute " + getDisplayName() + "/@" + attributeName + " is allowed only if XSLT 4.0 is enabled",
-                                    "XTSE0020", attributeName);
+            if (attributeName == null) {
+                compileError("Element " + getDisplayName() + " is allowed only if XSLT 4.0 is enabled", "XTSE0010");
+            } else {
+                compileErrorInAttribute("Attribute " + getDisplayName() + "/@" + attributeName + " is allowed only if XSLT 4.0 is enabled",
+                                        "XTSE0020", attributeName);
+            }
         }
     }
 

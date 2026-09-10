@@ -23,21 +23,16 @@ public final class XSLComment extends XSLLeafNodeConstructor {
 
     @Override
     public void prepareAttributes() {
-
-        String selectAtt = null;
-
         for (AttributeInfo att : attributes()){
             NodeName attName = att.getNodeName();
             String f = attName.getDisplayName();
             String value = att.getValue();
             if (f.equals("select")) {
-                selectAtt = value;
-                select = makeExpression(selectAtt, att);
+                select = makeExpression(value, att);
             } else {
                 checkUnknownAttribute(attName);
             }
         }
-
     }
 
     @Override

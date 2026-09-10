@@ -51,8 +51,8 @@ public class XSLWhen extends StyleElement {
 
     @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
-        if (!(getParent() instanceof XSLChoose)) {
-            compileError("xsl:when must be immediately within xsl:choose", "XTSE0010");
+        if (!(getParent() instanceof XSLChooseOrSwitch)) {
+            compileError("xsl:when must be immediately within xsl:choose or xsl:switch", "XTSE0010");
         }
         test = typeCheck("test", test);
         if (select != null && hasChildNodes()) {

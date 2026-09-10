@@ -439,6 +439,8 @@ public class StyleNodeFactory implements NodeFactory {
                 return new XSLPreserveSpace();
             case StandardNames.XSL_STYLESHEET:
                 return topLevelModule ? new XSLPackage() : new XSLStylesheet();
+            case StandardNames.XSL_SWITCH:
+                return new XSLSwitch();
             case StandardNames.XSL_TEMPLATE:
                 return new XSLTemplate();
             case StandardNames.XSL_TEXT:

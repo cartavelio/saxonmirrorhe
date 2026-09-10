@@ -105,16 +105,17 @@ public abstract class StandardNames {
     public static final int XSL_SOURCE_DOCUMENT = XSL + 68;
     public static final int XSL_STRIP_SPACE = XSL + 70;
     public static final int XSL_STYLESHEET = XSL + 71;
-    public static final int XSL_TEMPLATE = XSL + 72;
-    public static final int XSL_TEXT = XSL + 73;
-    public static final int XSL_TRANSFORM = XSL + 74;
-    public static final int XSL_TRY = XSL + 75;
-    public static final int XSL_USE_PACKAGE = XSL + 76;
-    public static final int XSL_VALUE_OF = XSL + 77;
-    public static final int XSL_VARIABLE = XSL + 78;
-    public static final int XSL_WHEN = XSL + 79;
-    public static final int XSL_WHERE_POPULATED = XSL + 80;
-    public static final int XSL_WITH_PARAM = XSL + 81;
+    public static final int XSL_SWITCH = XSL + 72;
+    public static final int XSL_TEMPLATE = XSL + 73;
+    public static final int XSL_TEXT = XSL + 74;
+    public static final int XSL_TRANSFORM = XSL + 75;
+    public static final int XSL_TRY = XSL + 76;
+    public static final int XSL_USE_PACKAGE = XSL + 77;
+    public static final int XSL_VALUE_OF = XSL + 78;
+    public static final int XSL_VARIABLE = XSL + 79;
+    public static final int XSL_WHEN = XSL + 80;
+    public static final int XSL_WHERE_POPULATED = XSL + 81;
+    public static final int XSL_WITH_PARAM = XSL + 82;
 
 
 
@@ -399,6 +400,7 @@ public abstract class StandardNames {
         bindXSLTName(XSL_SOURCE_DOCUMENT, "source-document");
         bindXSLTName(XSL_STRIP_SPACE, "strip-space");
         bindXSLTName(XSL_STYLESHEET, "stylesheet");
+        bindXSLTName(XSL_SWITCH, "switch");
         bindXSLTName(XSL_TEMPLATE, "template");
         bindXSLTName(XSL_TEXT, "text");
         bindXSLTName(XSL_TRANSFORM, "transform");
