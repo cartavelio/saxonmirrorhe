@@ -400,7 +400,7 @@ History
     
     <xsl:template match="d:interfaces//d:interface">
         <interface fulltype="{@fullname}" type="{@name}">
-            <xsl:apply-templates select="d:type/d:param"/>
+            <xsl:apply-templates select="d:param"/>
             <xsl:if test="d:inherited/d:method">
                 <methods>
                     <xsl:apply-templates select="d:inherited/d:method">
@@ -513,10 +513,6 @@ History
                 <xsl:apply-templates select="d:superclass"/>
             </interface>
         </extends>
-    </xsl:template>
-    
-    <xsl:template match="d:superclass/d:interface">
-        <interface fulltype="{@fullname}" type="{@name}" />
     </xsl:template>
     
     <xsl:template match="d:inherited/d:method">
@@ -652,7 +648,22 @@ History
     </xsl:template>
     
     <xsl:template match="d:param">
-        <type fulltype="{if (@kind eq 'typevar') then @name else @fullname}" type="{@name}"/>
+        <xsl:choose>
+            <xsl:when test="@kind eq 'typevar'">
+                <xsl:variable name="enum" select="if (@name eq 'E') then ancestor::d:enum else ()" as="element()?"/>
+                <xsl:choose>
+                    <xsl:when test="exists($enum)">
+                        <type fulltype="{$enum/@fullname}" type="{$enum/@name}"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <type fulltype="{@name}" type="{@name}"/>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:when>
+            <xsl:otherwise>
+                <type fulltype="{@fullname}" type="{@name}"/>
+            </xsl:otherwise>
+        </xsl:choose>
     </xsl:template>
     
     <xsl:template match="d:wildcard">
