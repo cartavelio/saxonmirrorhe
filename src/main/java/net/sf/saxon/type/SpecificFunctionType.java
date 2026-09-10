@@ -10,6 +10,7 @@ package net.sf.saxon.type;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
+import net.sf.saxon.functions.hof.CoercedFunction;
 import net.sf.saxon.functions.hof.FunctionSequenceCoercer;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
@@ -70,10 +71,10 @@ public class SpecificFunctionType extends AnyFunctionType {
     /**
      * Indicate that this function type describes a callback function, and that the caller of this
      * callback is prepared to accept a reduced-arity version of the function directly, without
-     * needing it to be wrapped in a `CoercedFunction` that accepts and swallows the superfluous
+     * needing it to be wrapped in a {@code CoercedFunction} that accepts and swallows the superfluous
      * arguments. This is useful where it means that the caller does not need to compute additional
      * argument values just for them to be ignored.
-     * @return this, after setting the `acceptReducedArity` flag.
+     * @return this, after setting the {@code acceptReducedArity} flag.
      */
 
     public SpecificFunctionType withAcceptReducedArity() {
@@ -85,6 +86,12 @@ public class SpecificFunctionType extends AnyFunctionType {
         return acceptReducedArity;
     }
 
+    /**
+     * Ask whether a function of a supplied type is acceptable, despite not being an exact
+     * match, without needing to be wrapped in a {@link CoercedFunction}
+     * @param supplied the item type of a supplied function
+     * @return true if the caller is able to call the supplied function without further wrapping
+     */
     public boolean acceptsReducedArityFunction(ItemType supplied) {
         if (supplied instanceof SpecificFunctionType) {
             SpecificFunctionType actual = (SpecificFunctionType) supplied;
@@ -92,6 +99,9 @@ public class SpecificFunctionType extends AnyFunctionType {
                 return false;
             }
             if (actual.getArity() > getArity()) {
+                return false;
+            }
+            if (!acceptReducedArity && actual.getArity() < getArity() )  {
                 return false;
             }
             for (int i=0; i < actual.getArity(); i++) {
