@@ -6,21 +6,13 @@
 
 
     DocumentBuilder::DocumentBuilder(){
-       /* SaxonProcessor::attachCurrentThread();
-	    SaxonProcessor *p = new SaxonProcessor(false);
-	    procClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/Processor");
-        static jmethodID xdocBuilderID = nullptr;
-        if (xdocBuilderID == nullptr) {
-         			xdocBuilderID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(procClass,
-         					"newDocumentBuilder",
-         					"()Lnet/sf/saxon/s9api/DocumentBuilder;");
+        exception = nullptr;
+        schemaValidator = nullptr;
+        proc = new SaxonProcessor(false);
+        docBuilderObject = createDocumentBuilder(SaxonProcessor::sxn_environ->thread, (void *)proc->procRef);
+        lineNumbering = -1;
+        dtdVal = -1;
 
-        jobject docBuilderObject = (jobject)(
-             				SaxonProcessor::sxn_environ->env->CallObjectMethod(p->proc, xdocBuilderID));
-        DocumentBuilder(p, docBuilderObject, "");
-        SaxonProcessor::sxn_environ->env->DeleteLocalRef(docBuilderObject);
-    }
-*/
     }
 
 
@@ -88,19 +80,7 @@
 
 
     void DocumentBuilder::setSchemaValidator(SchemaValidator * validator){
-        SaxonProcessor::attachCurrentThread();
-        /*static jmethodID db_schemaID = nullptr;
-	    if (!db_schemaID || validator == nullptr) {
-
-	        return;
-	    }
 	    schemaValidator = validator;
-		db_schemaID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(docBuilderClass,
-					"setSchemaValidator",
-					"(Lnet/sf/saxon/s9api/SchemaValidator;)");
-        SaxonProcessor::sxn_environ->env->CallVoidMethod(docBuilderObject, db_schemaID, validator->getUnderlyingValidator());*/
-
-
     }
 
 
@@ -136,17 +116,7 @@
 
 
     void DocumentBuilder::setBaseUri(const char* uri) {
-        SaxonProcessor::attachCurrentThread();
-        /*static jmethodID db_dtdID = nullptr;
-	    if (!db_dtdID ) {
-
-	        return;
-	    }
-		db_dtdID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(docBuilderClass,
-					"setBaseURI",
-					"(Z)");
         baseURI= std::string(uri);
-        SaxonProcessor::sxn_environ->env->CallVoidMethod(docBuilderObject, db_dtdID, dtdVal);*/
 
     }
 
