@@ -2028,8 +2028,8 @@ public class XPathParser {
         if (t.currentToken == Token.LPAREN) {
             primaryType = parseParenthesizedItemType();
             //nextToken();
-        } else if (t.currentToken == Token.NAME) {
-            primaryType = getPlainType(t.currentTokenValue);
+        } else if (t.currentToken instanceof Token.NameToken) {
+            primaryType = getPlainType(((Token.NameToken) t.currentToken).getValue());
             nextToken();
         } else if (t.currentToken == Token.KEYWORD_LBRA || t.currentToken == Token.FUNCTION) {
             // Which includes things such as "map" and "array"
@@ -3951,8 +3951,9 @@ public class XPathParser {
                     nextToken();
                     NodeTest result;
 
-                    if t.currentToken instanceof Token.NameToken) {
-                        StructuredQName contentType = makeStructuredQName(t.currentTokenValue, env.getDefaultElementNamespace());
+                    if (t.currentToken instanceof Token.NameToken) {
+                        StructuredQName contentType = makeStructuredQName(
+                                ((Token.NameToken) t.currentToken).getValue(), env.getDefaultElementNamespace());
                         SchemaType schemaType = env.getPackageData().getImportedSchema().getSchemaType(contentType);
 
                         if (schemaType == null) {
