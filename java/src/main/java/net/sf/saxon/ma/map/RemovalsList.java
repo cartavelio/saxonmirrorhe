@@ -44,10 +44,11 @@ public class RemovalsList {
      * @return the removals list, with the supplied value reinstated
      */
     public RemovalsList remove(Integer value) {
-        if (removals.get(value) == null) {
+        if (contains(value)) {
+            return new RemovalsList(removals.remove(value), numberOfItems - 1);
+        } else {
             return this;
         }
-        return new RemovalsList(removals.remove(value), numberOfItems - 1);
     }
 
 
