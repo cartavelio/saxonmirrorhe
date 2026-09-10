@@ -770,6 +770,9 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             NodeInfo node = (NodeInfo) arguments[0].head();
+            if (node == null) {
+                return EmptySequence.getInstance();
+            }
             return Int64Value.makeIntegerValue(node.getLineNumber());
         }
     }
