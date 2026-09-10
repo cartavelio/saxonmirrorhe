@@ -858,7 +858,7 @@ public class OptimizerEE extends Optimizer {
     }
 
     /**
-     * // Optimize a test of the form ($X = (1, 7, 9, 10, 16, ....)) where the RHS is a constant list
+     * Optimize a test of the form ($X = (1, 7, 9, 10, 16, ....)) where the RHS is a constant list
      *
      * @param visitor     the expression visitor
      * @param exp         the "$X" expression

@@ -72,13 +72,6 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                 .arg(0, MapType.ANY_MAP_TYPE, STAR, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE, null));
 
-//        RecordTest mapRepresentation = RecordTest.nonExtensible(
-//                field("key", SequenceType.SINGLE_ATOMIC, false),
-//                field("value", SequenceType.ANY_SEQUENCE, false));
-//
-//        register("map-as-sequence-of-maps", 1, e -> e.populate(MapAsSequenceOfMaps::new, mapRepresentation, STAR, 0)
-//                .arg(0, MapType.ANY_MAP_TYPE, ONE, null));
-
         register("yes-no-boolean", 1, e -> e.populate(YesNoBoolean::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
