@@ -10,6 +10,7 @@ package net.sf.saxon.event;
 import net.sf.saxon.lib.DigestMaker;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.s9api.QName;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
@@ -122,9 +123,13 @@ public class CheckSumFilter extends ProxyReceiver {
         if (rootElement) {
             rootElement = false;
 
+            boolean scm_schema = elemName.getNamespaceUri() == NamespaceUri.of("http://ns.saxonica.com/schema-component-model")
+                    && "schema".equals(elemName.getLocalPart());
+
             // A digest is required for version 12.5+
             String version = attributes.getValue("saxonVersion");
-            requireDigest = version == null; // No sneaky deleting the version to avoid the check
+            // No sneaky deleting the version to avoid the check. Except SCM files don't have a version...
+            requireDigest = version == null && !scm_schema;
             if (version != null) {
                 String minorVersion = "x"; // cause number format exception
                 int dpos = version.indexOf('.');
