@@ -215,7 +215,7 @@ dependencies {
     [group: 'org.apache.ws.commons.axiom', name: 'axiom-dom', version: '1.4.0'],
     [group: 'org.apache.ws.commons.axiom', name: 'axiom-impl', version: '1.4.0'],
     [group: 'com.ibm.icu', name: 'icu4j', version: icu4jVersion ],
-    //[group: 'io.vavr', name: 'vavr', version: vavrVersion],
+    [group: 'io.vavr', name: 'vavr', version: vavrVersion],
     [group: 'ch.randelshofer', name: 'vavr-champ', version: '0.10.5'],
     [group: 'jline', name: 'jline', version: jlineVersion ],
     [group: 'org.xmlresolver', name: 'xmlresolver', version: xmlresolverVersion],
