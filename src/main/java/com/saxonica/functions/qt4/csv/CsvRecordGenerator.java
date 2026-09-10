@@ -9,6 +9,7 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.str.Twine8;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.PrependSequenceIterator;
@@ -122,10 +123,10 @@ public class CsvRecordGenerator extends CsvRepresentationGenerator {
      */
 
     private MapItem makeColumnIndex(List<StringValue> names) {
-        Map<String, GroundedValue> index = new HashMap<>(names.size());
+        Map<UnicodeString, GroundedValue> index = new HashMap<>(names.size());
         int pos = 1;
         for (StringValue name : names) {
-            String s = name.getStringValue();
+            UnicodeString s = name.getUnicodeStringValue();
             if (!s.isEmpty() && index.get(s) == null) {
                 index.put(s, Int64Value.makeIntegerValue(pos));
             }
@@ -143,10 +144,10 @@ public class CsvRecordGenerator extends CsvRepresentationGenerator {
      */
 
     private MapItem makeColumnIndex(GroundedValue names) {
-        Map<String, GroundedValue> index = new HashMap<>(names.getLength());
+        Map<UnicodeString, GroundedValue> index = new HashMap<>(names.getLength());
         int pos = 1;
         for (Item item : names.asIterable()) {
-            String name = item.getStringValue();
+            UnicodeString name = item.getUnicodeStringValue();
             if (!name.isEmpty() && index.get(name) == null) {
                 index.put(name, Int64Value.makeIntegerValue(pos));
             }

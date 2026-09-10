@@ -481,19 +481,19 @@ public class ElementsToMaps extends SystemFunction {
 
         if (!(hasChildElements || hasWhitespaceTextNodes || hasNonWhitespaceTextNodes)) {
             // Rule 6a
-            if (!hasAttributes && !cc.disabledLayouts.contains("empty")) {
+            if (!hasAttributes && !cc.disabledLayouts.contains(JsonLayout.EMPTY)) {
                 return new ElementPlan(JsonLayout.EMPTY);
             }
-            if (!cc.disabledLayouts.contains("empty-plus")) {
+            if (!cc.disabledLayouts.contains(JsonLayout.EMPTY_PLUS)) {
                 return new ElementPlan(JsonLayout.EMPTY_PLUS);
             }
         }
         if (!hasChildElements) {
             // Rule 6b
-            if (!hasAttributes && !cc.disabledLayouts.contains("simple")) {
+            if (!hasAttributes && !cc.disabledLayouts.contains(JsonLayout.SIMPLE)) {
                 return new ElementPlan(JsonLayout.SIMPLE);
             }
-            if (!cc.disabledLayouts.contains("simple-plus")) {
+            if (!cc.disabledLayouts.contains(JsonLayout.SIMPLE_PLUS)) {
                 return new ElementPlan(JsonLayout.SIMPLE_PLUS);
             }
         }

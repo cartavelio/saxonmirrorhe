@@ -10,6 +10,8 @@ import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyFunctionType;
@@ -51,19 +53,19 @@ public class SQLFunctionSet extends BuiltInFunctionSet {
         int icol = rs.getMetaData().getColumnCount();
         while (rs.next()) {                            // next row
             //System.out.print("<- SQL : "+ rowStart);
-            Map<String, GroundedValue> map = new HashMap<>(icol);
+            Map<UnicodeString, GroundedValue> map = new HashMap<>(icol);
             for (int col = 1; col <= icol; col++) {     // next column
                 // Read result from RS only once, because
                 // of JDBC-Specifications
                 String result = rs.getString(col);
                 //System.err.println("Column " + col + " getColumnName()=" + metaData.getColumnName(col) + " getColumnLabel()=" + metaData.getColumnLabel(col));
-                String sqlName = metaData.getColumnName(col);
+                UnicodeString sqlName = StringView.of(metaData.getColumnName(col));
                 if (map.get(sqlName) != null) {
                     int suffix = 1;
-                    String baseName = sqlName;
-                    sqlName = baseName + suffix;
+                    UnicodeString baseName = sqlName;
+                    sqlName = baseName.concat(StringView.of(""+suffix));
                     while (map.get(sqlName) != null) {
-                        sqlName = baseName + (++suffix);
+                        sqlName = baseName.concat(StringView.of("" + ++suffix));
                     }
                 }
                 map.put(sqlName, result == null ? EmptySequence.getInstance() : new StringValue(result));

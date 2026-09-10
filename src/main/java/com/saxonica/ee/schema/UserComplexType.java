@@ -2793,7 +2793,7 @@ public class UserComplexType extends UserDefinedType
                     return new ElementsToMaps.ElementPlan(JsonLayout.LIST_PLUS, fp);
                 }
             }
-            if (noWildcards && uniqueChildren && !disabledLayouts.contains("record")) {
+            if (noWildcards && uniqueChildren && !disabledLayouts.contains(JsonLayout.RECORD)) {
                 return new ElementsToMaps.ElementPlan(JsonLayout.RECORD);
             }
             return new ElementsToMaps.ElementPlan(JsonLayout.SEQUENCE);

@@ -163,7 +163,7 @@ public class PreparedSchema implements Schema, NotationSet {
      * List of components awaiting fixup and validation
      */
 
-    private transient List<UserSchemaComponent> components;
+    private transient ArrayList<UserSchemaComponent> components;
 
     /**
      * Index of complex types in this schema that extend built-in types, including types that

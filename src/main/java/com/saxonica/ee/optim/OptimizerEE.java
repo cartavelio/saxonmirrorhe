@@ -27,6 +27,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.pattern.qname.SpecificQNameTest;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.style.XSLFunction;
 import net.sf.saxon.style.XSLTemplate;
@@ -879,9 +880,9 @@ public class OptimizerEE extends Optimizer {
                 }
             }
             if (allStrings) {
-                Map<String, GroundedValue> dict = new HashMap<>();
+                Map<UnicodeString, GroundedValue> dict = new HashMap<>();
                 for (Item item : literal.getGroundedValue().asIterable()) {
-                    dict.put(item.getStringValue(), BooleanValue.TRUE);
+                    dict.put(item.getUnicodeStringValue(), BooleanValue.TRUE);
                 }
                 map = new DictionaryMap(dict);
             } else {
