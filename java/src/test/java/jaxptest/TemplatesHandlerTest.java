@@ -107,6 +107,9 @@ public class TemplatesHandlerTest {
             tFactory.setAttribute(FeatureKeys.STRIP_WHITESPACE, "ignorable");
             tFactory.setAttribute(FeatureKeys.VERSION_WARNING, Boolean.FALSE);
 
+            // disable JIT compilation
+            tFactory.setAttribute(FeatureKeys.OPTIMIZATION_LEVEL, "-j");
+
             Transformer transformer = tFactory.newTransformer(new StreamSource(xsltUrl));
 
 
