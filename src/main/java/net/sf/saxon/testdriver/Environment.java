@@ -331,26 +331,6 @@ public class Environment implements ResourceResolver {
         return environment;
     }
 
-    private static void configureByteCode(TestDriver driver, Environment environment, int generate) {
-        if (environment.processor.getSaxonEdition().equals("EE")) {
-            if (generate == 0) {
-                environment.processor.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, true);
-                environment.processor.setConfigurationProperty(Feature.THRESHOLD_FOR_HOTSPOT_BYTE_CODE, 1);
-                environment.processor.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, false);
-                environment.processor.setConfigurationProperty(Feature.MAX_COMPILED_CLASSES, 1000000);
-            } else  if (generate > 0) {
-                environment.processor.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, true);
-                environment.processor.setConfigurationProperty(Feature.THRESHOLD_FOR_HOTSPOT_BYTE_CODE, generate);
-                environment.processor.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, false);
-                environment.processor.setConfigurationProperty(Feature.MAX_COMPILED_CLASSES, 1000000);
-            } else {
-                environment.processor.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, false);
-                environment.processor.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, false);
-                //environment.processor.setConfigurationProperty(Feature.ALLOW_MULTITHREADING, "false"); // TODO should have a separate option for this
-            }
-        }
-    }
-
     private static void declareOutputControls(TestDriver driver, XPathCompiler xpc, XdmItem env, Environment environment) throws SaxonApiException {
         String needsSerialization = xpc.evaluate("string((output/@serialize,'no')[1])", env).toString();
         environment.outputSerialize = "yes".equals(needsSerialization);
