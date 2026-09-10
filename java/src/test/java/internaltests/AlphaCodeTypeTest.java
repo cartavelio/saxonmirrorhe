@@ -120,12 +120,11 @@ public class AlphaCodeTypeTest {
             parser.setParserExtension(new SaxonSyntaxExtension());
             String[] testCases = new String[]{
                     "record(x, y)",
-                    "record(x, y, *)",
-                    "record('date of birth'?, 'date of death'?, 'married?'?, *)",
+                    "record('date of birth'?, 'date of death'?, 'married?'?)",
                     "record(x as xs:int, y as xs:string)*",
-                    "record(x, y as xs:string*, *)",
+                    "record(x, y as xs:string*)",
                     "record(xxx?, yyy?)+",
-                    "record(xxx? as xs:boolean?, yyy? as xs:QName?, *)"
+                    "record(xxx? as xs:boolean?, yyy? as xs:QName?)"
             };
             for (String s : testCases) {
                 SequenceType t = parser.parseSequenceType(s, ic);
@@ -133,9 +132,10 @@ public class AlphaCodeTypeTest {
                 SequenceType t2 = AlphaCode.toSequenceType(alpha, config.emptySchema());
                 assertEquals(t, t2);
                 String alpha2 = AlphaCode.fromSequenceType(t2);
-                assertEquals(alpha, alpha2); // ?? component order may differ?
+                assertEquals(alpha, alpha2);
             }
         } catch (XPathException e) {
+            e.printStackTrace();
             fail();
         }
 

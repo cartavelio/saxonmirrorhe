@@ -282,8 +282,6 @@ public class AlphaCode {
                         tree.content = value;
                 case "z" -> // nillable flag
                         tree.nillable = true;
-                case "x" -> // extensible tuple type flag
-                        tree.extensibleTupleType = true;
                 default ->
                         throw new IllegalArgumentException("Bad alphacode component " + key);
             }
@@ -478,10 +476,6 @@ public class AlphaCode {
                         }
                         break;
                     case 'f':  // tuple field types
-                    case 'F':  // tuple field types, extensible
-                        if (c == 'F') {
-                            callBack.setStringProperty(container, "x", "1");
-                        }
                         position++;
                         expect('[');
                         List<String> fieldNames = new ArrayList<>();
@@ -608,7 +602,6 @@ public class AlphaCode {
         AlphaCodeTree[] vennOperands;
         List<String> fieldNames;
         Set<String> optionalFieldNames;
-        boolean extensibleTupleType;
         AlphaCodeTree selfReference;
     }
 
@@ -886,7 +879,7 @@ public class AlphaCode {
                     for (AlphaCodeTree t : tree.argTypes) {
                         fieldTypes.add(sequenceTypeFromTree(t, schema));
                     }
-                    recordTest.setDetails(tree.fieldNames, fieldTypes, tree.optionalFieldNames, tree.extensibleTupleType);
+                    recordTest.setDetails(tree.fieldNames, fieldTypes, tree.optionalFieldNames, false);
                     itemType = recordTest;
                 }
             } else {
@@ -1004,7 +997,6 @@ public class AlphaCode {
                     result.valueType = makeTree(memberType);
                 }
             } else if (primary instanceof RecordType) {
-                result.extensibleTupleType = ((RecordType) primary).isExtensible();
                 result.optionalFieldNames = new HashSet<>();
                 result.fieldNames = new ArrayList<>();
                 result.argTypes = new ArrayList<>();
@@ -1133,7 +1125,7 @@ public class AlphaCode {
             sb.append("]");
         }
         if (tree.fieldNames != null) {
-            sb.append(tree.extensibleTupleType ? " F[" : " f[");
+            sb.append(" f[");
             boolean first = true;
             for (String s : tree.fieldNames) {
                 if (!first) {
