@@ -14,6 +14,10 @@ namespace Saxon.Ejava.net {
         public URL(string str) {
             uri = new SysUri(str);
         }
+
+        public URL(SysUri uri) {
+            this.uri = uri;
+        }
         
         public URL(URL baseURL, string href) {
             uri = new SysUri(baseURL.uri, href);

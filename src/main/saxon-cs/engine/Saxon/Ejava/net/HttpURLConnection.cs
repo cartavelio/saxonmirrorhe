@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 
 namespace Saxon.Ejava.net {
     public class HttpURLConnection : URLConnection {
@@ -21,6 +23,16 @@ namespace Saxon.Ejava.net {
 
         public override string getContentType() {
             return httpResponse.Content.Headers.ContentType?.MediaType;
+        }
+
+        public override string getContentEncoding() {
+            IEnumerator<string> enum1 = httpResponse.Content.Headers.ContentEncoding.GetEnumerator();
+            if (enum1.MoveNext()) {
+                return enum1.Current;
+            }
+            else {
+                return "utf8";
+            }
         }
 
         public override long getLastModified() {
