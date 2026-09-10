@@ -286,7 +286,7 @@ public class ForEachGroupAdjunct extends ForEachAdjunct  {
                 ManualIterator popIter = new ManualIterator(currentGroup.get(0), groupCounter);
                 c2.setCurrentIterator(popIter);
                 ManualGroupIterator gi = new ManualGroupIterator(currentGroup.get(0), 1);
-                gi.setCurrentGroup(currentGroup);
+                gi.setCurrentGroup(SequenceExtent.makeSequenceExtent(currentGroup));
                 gi.setCurrentGroupingKey(currentGroupingKey);
                 c2.setCurrentGroupIterator(gi);
                 //c2.setReceiver(getOutputter());
