@@ -15,11 +15,13 @@ import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.qname.AnyQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.coercion.CoercionPlan;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.Optional;
+import java.util.Stack;
 
 /**
  * Abstract superclass for all gnode types. In 4.0, node predicates (as used in axis steps)
@@ -277,5 +279,9 @@ public abstract class GNodeType implements ItemTypeWithSequenceTypeCache, ItemTy
         return _zeroOrMore;
     }
 
+    @Override
+    public ItemType resolveAliases(Stack<Object> path) throws XPathException {
+        return this;
+    }
 }
 

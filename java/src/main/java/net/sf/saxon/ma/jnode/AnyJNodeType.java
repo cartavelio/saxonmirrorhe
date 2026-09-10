@@ -103,5 +103,6 @@ public class AnyJNodeType extends JNodeType {
     public boolean isNillable() {
         return true;
     }
+
 }
 

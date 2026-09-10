@@ -19,6 +19,7 @@ import net.sf.saxon.type.coercion.ItemCheckingPlan;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.Optional;
+import java.util.Stack;
 import java.util.function.Supplier;
 
 /**
@@ -267,6 +268,11 @@ public class AnyFunctionType implements FunctionItemType {
     @Override
     public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
         return Optional.empty();
+    }
+
+    @Override
+    public ItemType resolveAliases(Stack<Object> path) throws XPathException {
+        return this;
     }
 }
 

@@ -22,6 +22,7 @@ import net.sf.saxon.value.Whitespace;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Stack;
 
 /**
  * Represents the type enum("X") - an enumeration type with a single permitted xs:string value.
@@ -736,6 +737,11 @@ public class SingletonEnumType implements AtomicType {
     @Override
     public int hashCode()  {
         return value.hashCode();
+    }
+
+    @Override
+    public ItemType resolveAliases(Stack<Object> path) throws XPathException {
+        return this;
     }
 
     //#if SCHEMA==true

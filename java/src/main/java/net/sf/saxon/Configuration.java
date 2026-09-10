@@ -4184,16 +4184,11 @@ public class Configuration implements SourceResolver {
                     String suppliedValue = (String) value;
                     String protocols;
                     if (suppliedValue != null) {
-                        switch (suppliedValue) {
-                            case "#none":
-                                protocols = "";
-                                break;
-                            case "":
-                                protocols = "all";
-                                break;
-                            default:
-                                protocols = suppliedValue;
-                        }
+                        protocols = switch (suppliedValue) {
+                            case "#none" -> "";
+                            case "" -> "all";
+                            default -> suppliedValue;
+                        };
                     } else {
                         protocols = "";
                     }

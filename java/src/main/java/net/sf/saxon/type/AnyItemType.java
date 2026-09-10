@@ -10,11 +10,13 @@ package net.sf.saxon.type;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.coercion.CoercionPlan;
 import net.sf.saxon.type.coercion.ItemCheckingPlan;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.Optional;
+import java.util.Stack;
 
 
 /**
@@ -263,6 +265,10 @@ public enum AnyItemType implements ItemTypeWithSequenceTypeCache {
         return Optional.empty();
     }
 
+    @Override
+    public ItemType resolveAliases(Stack<Object> path) throws XPathException {
+        return this;
+    }
 
 
 }

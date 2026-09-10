@@ -105,6 +105,5 @@ public final class AnyXNodeType extends XNodeType {
         return "node()";
     }
 
-
 }
 

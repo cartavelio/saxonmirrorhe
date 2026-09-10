@@ -19,10 +19,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.coercion.*;
 import net.sf.saxon.value.*;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
 
@@ -1522,5 +1519,10 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
     }
     //#endif
 
+
+    @Override
+    public ItemType resolveAliases(Stack<Object> path) throws XPathException {
+        return this;
+    }
 }
 

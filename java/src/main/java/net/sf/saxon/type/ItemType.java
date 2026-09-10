@@ -230,9 +230,11 @@ public interface ItemType {
      * @return the item type after resolving any item type name references
      */
 
-    default ItemType resolveAliases(Stack<Object> path) throws XPathException {
-        return this;
-    }
+//    default ItemType resolveAliases(Stack<Object> path) throws XPathException {
+//        return this;
+//    }
+
+    ItemType resolveAliases(Stack<Object> path) throws XPathException;
 
 }
 

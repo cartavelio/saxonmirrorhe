@@ -20,7 +20,7 @@ import java.util.List;
 
 /**
  * Interface representing a union type. This may be either a built-in union type (of which there are
- * currently two, namely ErrorType and NumericType), or a user-defined union type.
+ * currently two, namely ErrorType and NumericType), or a user-defined union type defined in a schema.
  */
 
 public interface UnionType extends ItemType, CastingTarget, ChoiceType {
