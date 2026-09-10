@@ -301,7 +301,7 @@ public class XdmValue implements Iterable<XdmItem> {
     }
 
     /**
-     * Create a string representation of the value. The is the result of serializing
+     * Create a string representation of the value. This is the result of serializing
      * the value using the adaptive serialization method, with the options
      * <code>indent="yes"</code> and <code>omit-xml-declaration="yes"</code>.
      * The <code>item-separator</code> if there are multiple items is a newline.

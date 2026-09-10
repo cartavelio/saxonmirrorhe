@@ -129,7 +129,7 @@ public final class UntypedSequenceConverter extends AtomicSequenceConverter {
             public ConversionResult convert(/*@NotNull*/ AtomicValue input) {
                 ValidationFailure vf = new ValidationFailure(
                         "Implicit conversion of untypedAtomic value to " + requiredItemType.toString() + " is not allowed");
-                vf.setErrorCode("XPTY0117");
+                vf.setErrorCode(requiredItemType.isNamespaceSensitive() ? "XPTY0117" : "XPTY0004");
                 vf.setLocator(operand.getLocation());
                 return vf;
             }

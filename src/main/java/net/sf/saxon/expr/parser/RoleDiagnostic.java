@@ -149,7 +149,7 @@ public class RoleDiagnostic {
                 if (name.equals("saxon:context-item")) {
                     return "context item";
                 } else {
-                    return "value of variable $" + name;
+                    return "supplied value for variable $" + name;
                 }
             case INSTRUCTION: {
                 int slash = name.indexOf('/');

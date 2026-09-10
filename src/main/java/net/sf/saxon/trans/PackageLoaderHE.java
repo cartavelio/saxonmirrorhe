@@ -2495,6 +2495,7 @@ public class PackageLoaderHE implements IPackageLoader {
                 if (name.getLocalPart().equals("apply")) {
                     // legacy saxon:apply function for dynamic function calls: generate fn:apply
                     exp = XPath30FunctionSet.getInstance().makeFunction("apply", 2).makeFunctionCall(args);
+                    exp.setRetainedStaticContext(loader.makeRetainedStaticContext(element));
                 } else {
                     loader.needsPELicense("Saxon extension functions");
                     exp = null;

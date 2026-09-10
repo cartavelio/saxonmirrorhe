@@ -88,6 +88,7 @@ public class IndependentContext extends AbstractStaticContext
 
     public IndependentContext(IndependentContext ic) {
         this(ic.getConfiguration());
+        setXPathLanguageLevel(ic.getXPathVersion());
         setPackageData(ic.getPackageData());
         setBaseURI(ic.getStaticBaseURI());
         setContainingLocation(ic.getContainingLocation());
@@ -105,7 +106,6 @@ public class IndependentContext extends AbstractStaticContext
         externalResolver = ic.externalResolver;
         autoDeclare = ic.autoDeclare;
         setUnprefixedElementMatchingPolicy(ic.getUnprefixedElementMatchingPolicy());
-        setXPathLanguageLevel(ic.getXPathVersion());
         requiredContextItemType = ic.requiredContextItemType;
         setExecutable(ic.getExecutable());
         setOptimizerOptions(ic.getOptimizerOptions());

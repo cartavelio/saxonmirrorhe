@@ -138,6 +138,8 @@ public class CheckSumFilter extends ProxyReceiver {
             // A digest is required for version 12.5+
             String version = attributes.getValue("saxonVersion");
             // No sneaky deleting the version to avoid the check. Except SCM files don't have a version...
+            // NOTE: this will also cause very old SEF files (generated prior to 9.8?) to fail, as they don't have
+            // a saxonVersion attribute either. 
             requireDigest = version == null && !scm_schema;
             if (version != null) {
                 String minorVersion = "x"; // cause number format exception

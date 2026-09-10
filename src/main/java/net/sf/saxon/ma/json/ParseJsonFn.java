@@ -79,7 +79,10 @@ public class ParseJsonFn extends JsonToXMLFn {
         int flags = 0;
         if (options != null) {
             flags = JsonParser.getFlags(options, false, false);
-            nullRepresentation = options.get("null");
+            GroundedValue nullOption = options.get("null");
+            if (nullOption != null) {
+                nullRepresentation = nullOption;
+            }
         }
         JsonHandlerMap handler = new JsonHandlerMap(context, flags);
         if ((flags & JsonParser.DUPLICATES_RETAINED) != 0) {

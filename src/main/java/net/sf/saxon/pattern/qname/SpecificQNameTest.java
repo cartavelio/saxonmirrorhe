@@ -4,7 +4,6 @@ import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeTest;
-import net.sf.saxon.pattern.PortableNameTest;
 import net.sf.saxon.pattern.UnionQNameTest;
 import net.sf.saxon.type.Affinity;
 
@@ -80,8 +79,8 @@ public class SpecificQNameTest implements QNameTest {
 
     @Override
     public String toString() {
-        //return qName.getEQName();
-        return qName.getLocalPart();
+        return qName.getEQName();
+        //return qName.getLocalPart();
     }
 
     @Override

@@ -267,6 +267,7 @@ public class ParamKeywords {
         fnParamNames.put("translate", "value|replace|with");
         fnParamNames.put("true", "");
         fnParamNames.put("trunk", "input");
+        fnParamNames.put("void", "input");
         fnParamNames.put("unordered", "input");
         fnParamNames.put("unparsed-text", "href|options");
         fnParamNames.put("unparsed-text-available", "href|options");

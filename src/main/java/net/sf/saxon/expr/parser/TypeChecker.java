@@ -121,6 +121,21 @@ public class TypeChecker {
 
         // Produce a static error if coercion cannot succeed or (in 4.0) is implausible
 
+        if (reqItemType instanceof JavaExternalObjectType) {
+
+            if (Sequence.class.isAssignableFrom(((JavaExternalObjectType) reqItemType).getJavaClass())) {
+                // special case: allow an extension function to call an instance method on the implementation class of an XDM value.
+                // We leave the conversion to be sorted out at run-time
+                return supplied;
+            } else if (supplied instanceof FunctionCall) {
+                // adjust the required type of the Java extension function call
+                // this does nothing unless supplied is an instanceof JavaExtensionFunctionCall
+                if (((FunctionCall) supplied).adjustRequiredType((JavaExternalObjectType) reqItemType)) {
+                    return supplied;
+                }
+            }
+        }
+
         final int version = visitor.getStaticContext().getPackageData().getHostLanguageVersion();
         if (reqCardinality != StaticProperty.ALLOWS_ZERO && supplied.getCardinality() != StaticProperty.ALLOWS_ZERO
                 && !isCoercible(supplied.getItemType(), reqItemType)) {

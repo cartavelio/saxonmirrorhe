@@ -70,6 +70,17 @@ public class ContentTypeTest extends NodeTest {
         return nameTest;
     }
 
+    @Override
+    public StructuredQName getMatchingNodeName() {
+        if (nameTest instanceof SpecificQNameTest) {
+            return ((SpecificQNameTest)nameTest).getStructuredQName();
+        }
+        if (nameTest instanceof PortableQNameTest) {
+            return ((PortableQNameTest) nameTest).getStructuredQName();
+        }
+        return null;
+    }
+
     /**
      * The test is nillable if a question mark was specified as the occurrence indicator
      *
@@ -254,7 +265,7 @@ public class ContentTypeTest extends NodeTest {
 
     public String toString() {
         return (kind == Type.ELEMENT ? "element(" : "attribute(") +
-                nameTest.toString() + ',' +
+                nameTest.toString() + ", " +
                 schemaType.getEQName() + ')';
     }
 
