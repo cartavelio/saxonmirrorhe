@@ -106,7 +106,13 @@
 
     <category name="JAXP" class="javaonly">
         
-      
+      <p>From 12.2, in response to bug #5953, we have changed the Saxon implementation of the JAXP <code>ValidationHandler</code>
+          interface, so that a call on <code>XMLReader.parse()</code> using this <code>ValidationHandler</code> does not
+          throw an exception if the document is found to be invalid. Although the JAXP specification is unspecific on what
+          should happen, this is the way Xerces behaves, and since the main rationale for providing this API is for interoperability
+          with Xerces, we decided to bring it into line. To determine whether validation was successful you should now
+          monitor calls on the supplied <code>ErrorHandler</code>; if you use the <code>StandardErrorHandler</code> (or
+          a subclass) then you can call <code>getErrorCount()</code> at the end of the validation run.</p>
         
     </category>
     
