@@ -26,17 +26,15 @@ from cython import Py_ssize_t
 def create_xdm_dict(proc, mmap):
     """
     create_xdm_dict(proc, mmap)
-    Function to create dictionary of XdmAtomicValue, XdmValue pairs from primitive types
+    Function to create a dictionary of pairs of type (PyXdmAtomicValue, PyXdmValue) from primitive types
     Args:
-        proc (PySaxonProcessor): PySaxonProcessor object required to create the XdmAtomicValue from primitive types
-        mmap(dict): The dict of key value paris to convert
-        Example:
-              with saxonc.PySaxonProcessor(license=False) as proc:
-                         mymap = {"a":saxonproc.make_integer_value(1), "b":saxonproc.make_integer_value(2),
+        proc (PySaxonProcessor): PySaxonProcessor object required to create PyXdmValue objects from primitive types
+        mmap (dict): The dict of key-value pairs to convert
+    Example: with saxonc.PySaxonProcessor(license=False) as proc:
+        mymap = {"a":saxonproc.make_integer_value(1), "b":saxonproc.make_integer_value(2),
                  "c":saxonproc.make_integer_value(3)}
-
         xdmdict = create_xdm_dict(saxonproc, mymap)
-        map =saxonproc.make_map(xdmdict)
+        map = saxonproc.make_map(xdmdict)
     """
     xdmMap = {}
     xdmValue_ = None
@@ -115,7 +113,7 @@ cdef str make_py_str(const char * c_value, encoding='utf-8'):
     return ustring
 
 cdef class PySaxonProcessor:
-    """An SaxonProcessor acts as a factory for generating XQuery, XPath, Schema and XSLT compilers.
+    """A PySaxonProcessor acts as a factory for generating XQuery, XPath, Schema and XSLT compilers.
     This class is itself the context that needs to be managed (i.e. allocation & release)
     Example:
           with saxonc.PySaxonProcessor(license=False) as proc:
@@ -132,12 +130,11 @@ cdef class PySaxonProcessor:
     # @contextlib.contextmanager
     def __cinit__(self, config_file= None, license=False,  releasei=False):
         """
-        __cinit__(self, license=False, config_file=None)
+        __cinit__(self, config_file=None, license=False, releasei=False)
         The constructor.
         Args:
-            config_file (str): Construct a Saxon processor based upon an configuration file
+            config_file (str): Construct a Saxon processor based on a configuration file
             license(bool): Flag that a license is to be used. The Default is false.
-
         """
         cdef const char * c_str = NULL
         cdef bool l = license
@@ -182,7 +179,7 @@ cdef class PySaxonProcessor:
     property version:
         """
         Get the Saxon Version.
-        Getter:
+        Returns:
             str: The Saxon version
         """
         def __get__(self):
@@ -201,21 +198,30 @@ cdef class PySaxonProcessor:
     @property
     def cwd(self):
         """
-        cwd Property represents the current working directory
-        :str: Get or set the current working directory"""
+        cwd(self)
+        Property represents the current working directory
+        """
         cdef const char* c_string = self.thisptr.getcwd()
         ustring = make_py_str(c_string)
         return ustring
     def set_cwd(self, cwd):
-         cdef char * c_str_ = NULL
-         '''make_c_str(cwd)'''
-         py_cwd_string = cwd.encode('UTF-8') if cwd is not None else None
-         c_str_ = py_cwd_string if cwd is not None else ""
-         self.thisptr.setcwd(c_str_)
+        """
+        set_cwd(self, cwd)
+        Set the current working directory
+        Args:
+            cwd (str): current working directory
+        """
+        cdef char * c_str_ = NULL
+        '''make_c_str(cwd)'''
+        py_cwd_string = cwd.encode('UTF-8') if cwd is not None else None
+        c_str_ = py_cwd_string if cwd is not None else ""
+        self.thisptr.setcwd(c_str_)
     def set_resources_directory(self, dir_):
         """
-        Property to set or get resources directory
-        :str: A string of the resources directory which Saxon will use
+        set_resources_directory(self, dir_)
+        Set the resources directory
+        Args:
+            dir_ (str): A string of the resources directory which Saxon will use
         """
         cdef char * c_str_ = NULL
         '''make_c_str(dir_)'''
@@ -224,6 +230,10 @@ cdef class PySaxonProcessor:
         self.thisptr.setResourcesDirectory(c_str_)
     @property
     def resources_directory(self):
+        """
+        resources_directory(self)
+        Property represents the resources directory
+        """
         cdef const char* c_string = self.thisptr.getResourcesDirectory()
         ustring = make_py_str(c_string)
         return ustring
@@ -252,7 +262,7 @@ cdef class PySaxonProcessor:
     def clear_configuration_properties(self):
         """
         clear_configuration_properties(self)
-        Clear the configurations properties in use by the processor
+        Clear the configuration properties in use by the processor
         """
         self.thisptr.clearConfigurationProperties()
         
@@ -260,18 +270,19 @@ cdef class PySaxonProcessor:
     def is_schema_aware(self):
         """
         is_schema_aware(self)
-        Property to check if the processor is Schema aware. A licensed Saxon-EE/C product is schema aware
-        :bool: Indicate if the processor is schema aware, True or False otherwise
+        Property to check if the processor is schema aware. A licensed SaxonC-EE product is schema aware
+        Returns:
+            bool: True if the processor is schema aware, or False otherwise
         """
         return self.thisptr.isSchemaAwareProcessor()
 
     def new_document_builder(self):
         """
         new_document_builder(self)
-        Create an PyDocumentBuilder. A PyDocumentBuilder holds properties controlling how a Saxon document tree should be built, and
-        provides methods to invoke the tree construction.
+        Create a PyDocumentBuilder. A PyDocumentBuilder holds properties controlling how a Saxon document tree should
+        be built, and provides methods to invoke the tree construction.
         Returns:
-            PyDocumentBuilder: a newly created PyDocumentProcessor
+            PyDocumentBuilder: a newly created PyDocumentBuilder
         """
         cdef PyDocumentBuilder val = PyDocumentBuilder()
         val.thisdbptr = self.thisptr.newDocumentBuilder()
@@ -280,7 +291,7 @@ cdef class PySaxonProcessor:
     def new_xslt30_processor(self):
         """
         new_xslt30_processor(self)
-        Create an PyXslt30Processor. A PyXslt30Processor is used to compile and execute XSLT 3.0 stylesheets.
+        Create a PyXslt30Processor. A PyXslt30Processor is used to compile and execute XSLT 3.0 stylesheets.
         Returns:
             PyXslt30Processor: a newly created PyXslt30Processor
         """
@@ -290,7 +301,7 @@ cdef class PySaxonProcessor:
     def new_xquery_processor(self):
         """
         new_xquery_processor(self)
-        Create an PyXqueryProcessor. A PyXQueryProcessor is used to compile and execute XQuery queries.
+        Create a PyXqueryProcessor. A PyXQueryProcessor is used to compile and execute XQuery queries.
         Returns:
             PyXQueryProcessor: a newly created PyXQueryProcessor
         """
@@ -300,7 +311,7 @@ cdef class PySaxonProcessor:
     def new_xpath_processor(self):
         """
         new_xpath_processor(self)
-        Create an PyXPathProcessor. A PyXPathProcessor is used to compile and execute XPath expressions.
+        Create a PyXPathProcessor. A PyXPathProcessor is used to compile and execute XPath expressions.
         Returns:
             PyXPathProcessor: a newly created XPathProcessor
         """
@@ -310,7 +321,8 @@ cdef class PySaxonProcessor:
     def new_schema_validator(self):
         """
         new_schema_validator(self)
-        Create a PySchemaValidator which can be used to validate instance documents against the schema held by this
+        Create a PySchemaValidator which can be used to validate instance documents against the schema held by
+        this processor.
         Returns:
             PySchemaValidator: a newly created PySchemaValidator
         """
@@ -321,14 +333,13 @@ cdef class PySaxonProcessor:
         return val
     def make_string_value(self, value):
         """
-        make_string_value(self, str_)
+        make_string_value(self, value)
         Factory method. Unlike the constructor, this avoids creating a new StringValue in the case
         of a zero-length string (and potentially other strings, in future)
-
         Args:
-            str_ (str): the String value. NULL is taken as equivalent to "".
+            value (str): the String value. NULL is taken as equivalent to "".
         Returns:
-            PyXdmAtomicValue: The corresponding Xdm StringValue
+            PyXdmAtomicValue: The corresponding XDM string value
         """
         cdef char * c_str_
         py_value_string = value.encode('utf-8') if value is not None else None
@@ -340,11 +351,10 @@ cdef class PySaxonProcessor:
         """
         make_integer_value(self, value)
         Factory method: makes either an Int64Value or a BigIntegerValue depending on the value supplied
-
         Args:
             value (int): The supplied primitive integer value
         Returns:
-            PyXdmAtomicValue: The corresponding Xdm value which is a BigIntegerValue or Int64Value as appropriate
+            PyXdmAtomicValue: The corresponding XDM value which is a BigIntegerValue or Int64Value as appropriate
         """
         cdef PyXdmAtomicValue val = PyXdmAtomicValue()
         val.derivedaptr = val.derivedptr = val.thisvptr = self.thisptr.makeIntegerValue(value)
@@ -356,7 +366,7 @@ cdef class PySaxonProcessor:
         Args:
             value (double): The supplied primitive double value
         Returns:
-            PyXdmAtomicValue: The corresponding Xdm Value
+            PyXdmAtomicValue: The corresponding XDM value
         """
         cdef PyXdmAtomicValue val = PyXdmAtomicValue()
         val.derivedaptr = val.derivedptr = val.thisvptr = self.thisptr.makeDoubleValue(value)
@@ -368,7 +378,7 @@ cdef class PySaxonProcessor:
         Args:
             value (float): The supplied primitive float value
         Returns:
-            PyXdmAtomicValue: The corresponding Xdm Value
+            PyXdmAtomicValue: The corresponding XDM value
         """
         cdef PyXdmAtomicValue val = PyXdmAtomicValue()
         val.derivedaptr = val.derivedptr = val.thisvptr = self.thisptr.makeFloatValue(value)
@@ -380,7 +390,7 @@ cdef class PySaxonProcessor:
         Args:
             value (long): The supplied primitive long value
         Returns:
-            PyXdmAtomicValue: The corresponding Xdm Value
+            PyXdmAtomicValue: The corresponding XDM value
         """
         cdef PyXdmAtomicValue val = PyXdmAtomicValue()
         val.derivedaptr = val.derivedptr = val.thisvptr = self.thisptr.makeLongValue(value)
@@ -388,11 +398,11 @@ cdef class PySaxonProcessor:
     def make_boolean_value(self, value):
         """
         make_boolean_value(self, value)
-        Factory method: makes a XdmAtomicValue representing a boolean Value
+        Factory method: makes a PyXdmAtomicValue representing a boolean value
         Args:
-            value (boolean): True or False, to determine which boolean value is required
+            value (bool): True or False, to determine which boolean value is required
         Returns:
-            PyAtomicValue: The corresonding XdmValue
+            PyXdmAtomicValue: The corresponding XDM value
         """
         cdef bool c_b = value
         cdef PyXdmAtomicValue val = PyXdmAtomicValue()
@@ -401,11 +411,11 @@ cdef class PySaxonProcessor:
     def make_qname_value(self, str_):
         """
         make_qname_value(self, str_)
-        Create an QName Xdm value from string representation in clark notation
+        Create a QName XDM value from string representation in clark notation
         Args:
-            str_ (str): The value given in a string form in clark notation. {uri}local
+            str_ (str): The value given in a string form in clark notation {uri}local
         Returns:
-            PyAtomicValue: The corresonding value
+            PyXdmAtomicValue: The corresponding value
         """
         py_value_string = str_.encode('UTF-8') if str_ is not None else None
         cdef char * c_str_ = py_value_string if str_ is not None else ""
@@ -415,11 +425,11 @@ cdef class PySaxonProcessor:
     def make_atomic_value(self, value_type, value):
         """
         make_atomic_value(self, value_type, value)
-        Create an QName Xdm value from string representation in clark notation
+        Create an QName XDM value from string representation in clark notation
         Args:
-            str_ (str): The value given in a string form in clark notation. {uri}local
+            str_ (str): The value given in a string form in clark notation {uri}local
         Returns:
-            PyAtomicValue: The corresponding value
+            PyXdmAtomicValue: The corresponding value
         """
         py_valueType_string = value_type.encode('UTF-8') if value_type is not None else None
         cdef char * c_valueType_string = py_valueType_string if value_type is not None else ""
@@ -433,12 +443,12 @@ cdef class PySaxonProcessor:
 
     def make_array(self, list values):
         """
-        make_array(self, list_values)
-        Make an XdmArray whose members are from a list of XdmValues
+        make_array(self, list values)
+        Make a PyXdmArray whose members are from a list of PyXdmValues
         Args:
-            list_values (list): List of XdmValues
+            values (list): List of PyXdmValues
         Returns:
-            PyAXdmArray: The corresponding value
+            PyXdmArray: The corresponding value
         """
         cdef int len_ = len(values)
         cdef saxoncClasses.XdmValue ** argumentV = self.thisptr.createXdmValueArray(len_)
@@ -485,13 +495,13 @@ cdef class PySaxonProcessor:
     def make_map(self, dict dataMap):
         """
         make_map(self, dict dataMap)
-        Make an XdmMap whose members are from a dict type. Members are key, value pair (XdmAtomicValue, XdmValue).
-        The factory method create_xdm_dict(proc, mmap) can be used to create pairs of type (XdmAtomicValue, XdmValue) from primitive types, which
-        then can be used as input to this function make_map.
+        Make a PyXdmMap from a dict type whose entries are key-value pairs of type (PyXdmAtomicValue, PyXdmValue).
+        The factory method create_xdm_dict(proc, mmap) can be used to create pairs of type (PyXdmAtomicValue, PyXdmValue)
+        from primitive types, which can then be used as input to this function make_map.
         Args:
-            dataMap (dict): Dictionary of  (XdmAtomicValue, XdmValue) pairs
+            dataMap (dict): Dictionary of (PyXdmAtomicValue, PyXdmValue) pairs
         Returns:
-            PyAXdmAMap: The corresponding value
+            PyXdmMap: The corresponding value
         """
         cdef int len_ = len(dataMap)
         cdef saxoncClasses.XdmValue ** c_values = self.thisptr.createXdmValueArray(len_)
@@ -538,14 +548,14 @@ cdef class PySaxonProcessor:
 
     def make_map2(self, dict dataMap):
         """
-        make_map2(self, dict_dataMap)
-        Make an XdmMap whose members are from a dict type. Members are key, value pair (str, XdmValue).
-        The factory method create_xdm_dict(proc, mmap) can be used to create pairs of type (str, XdmValue) from primitive types, which
-        then can be used as input to this function make_map.
+        make_map2(self, dict dataMap)
+        Make a PyXdmMap from a dict type whose entries are key-value pairs of type (str, PyXdmValue).
+        The factory method create_xdm_dict(proc, mmap) can be used to create pairs of type (str, PyXdmValue)
+        from primitive types, which can then be used as input to this function make_map2.
         Args:
-            dataMap (dict): Dictionary of  (str, XdmValue) pairs
+            dataMap (dict): Dictionary of (str, PyXdmValue) pairs
         Returns:
-            PyAXdmMap: The corresponding value
+            PyXdmMap: The corresponding value
         """
         cdef map[string , saxoncClasses.XdmValue * ] c_dataMap
         cdef PyXdmValue value_
@@ -598,9 +608,8 @@ cdef class PySaxonProcessor:
 
     def set_catalog(self, str file_name):
         """
-        set_ctalog(self, name, value)
+        set_catalog(self, str file_name)
         Set the XML catalog to be used in Saxon
-
         Args:
             file_name (str): The file name for the XML catalog
         """
@@ -615,26 +624,26 @@ cdef class PySaxonProcessor:
     def get_string_value(self, PyXdmItem item):
         """
         get_string_value(self, PyXdmItem item)
-        Create an QName Xdm value from string representation in clark notation
+        Create an QName XDM value from string representation in clark notation
         Args:
-            str_ (str): The value given in a string form in clark notation. {uri}local
+            str_ (str): The value given in a string form in clark notation {uri}local
         Returns:
-            PyAtomicValue: The corresonding value
+            PyXdmAtomicValue: The corresponding value
         """
         return make_py_str(self.thisptr.getStringValue(item.derivedptr))
 
     def parse_xml(self, **kwds):
         """
         parse_xml(self, **kwds)
-        Parse a lexical representation, source file or uri of the source document and return it as an Xdm Node
+        Parse a source document supplied as a lexical representation, source file or uri, and return it as an XDM node
         Args:
-            **kwds : The possible keyword arguments must be one of the follow (xml_file_name|xml_text|xml_uri)
+            **kwds: Possible keyword arguments: must be one of the following (xml_file_name|xml_text|xml_uri)
         Returns:
-            PyXdmNode: The Xdm Node representation of the XML document
+            PyXdmNode: The XDM node representation of the XML document
         Raises:
             Exception: Error if the keyword argument is not one of xml_file_name|xml_text|xml_uri.
         """
-        py_error_message = "Error: parseXml should only contain one of the following keyword arguments: (xml_file_name|xml_text|xml_uri)"
+        py_error_message = "Error: parse_xml should only contain one of the following keyword arguments: (xml_file_name|xml_text|xml_uri)"
         if len(kwds) != 1:
           raise Exception(py_error_message)
         cdef PyXdmNode val = None
@@ -686,7 +695,7 @@ cdef class PySaxonProcessor:
         exception_occurred(self)
         Property to check if an exception has occurred internally within SaxonC
         Returns:
-            boolean: True or False if an exception has been reported internally in SaxonC
+            boolean: True if an exception has been reported; otherwise False
         """
         return self.thisptr.exceptionOccurred()
 
@@ -701,10 +710,10 @@ cdef class PySaxonProcessor:
     def error_message(self):
        """
        error_message(self)
-       The PySaxonProcessor may have a number of errors reported against it. Get the error message if there are any errors
-
+       The PySaxonProcessor may have a number of errors reported against it. Get the error message
+       if there are any errors.
        Returns:
-           str: The message of the exception. Return None if the exception does not exist.
+           str: The message of the exception. Returns None if the exception does not exist.
        """
        cdef const char* c_string = self.thisptr.getErrorMessage()
        ustring = make_py_str(c_string)
@@ -714,9 +723,9 @@ cdef class PySaxonProcessor:
 cdef class PyDocumentBuilder:
     """
     A PyDocumentBuilder holds properties controlling how a Saxon document tree should be built, and
-     * provides methods to invoke the tree construction.
-     * <p>This class has no public constructor.  To construct a DocumentBuilder,
-     * use the factory method SaxonProcessor.newDocumentBuilder().
+    provides methods to invoke the tree construction.
+    This class has no public constructor. To construct a PyDocumentBuilder, use the factory method
+    PySaxonProcessor.new_document_builder().
     """
     cdef saxoncClasses.DocumentBuilder *thisdbptr      # hold a C++ instance which we're wrapping
     def __cinit__(self):
@@ -754,7 +763,7 @@ cdef class PyDocumentBuilder:
     def set_schema_validator(self, PySchemaValidator val):
        """Set the source document for the transformation.
        Args:
-           **kwds: Keyword argument can only be one of the following: file_name|xdm_node
+           **kwds: Possible keyword arguments: must be one of the following (file_name|xdm_node)
        Raises:
            Exception: Exception is raised if keyword argument is not one of file_name or node.
         """
@@ -778,12 +787,12 @@ cdef class PyDocumentBuilder:
     def base_uri(self):
        """
        base_uri(self)
-       Base uri Property. Get the Base URI for the node, that is, the URI used for resolving a relative URI contained in the node.
-       This will be the same as the System ID unless xml:base has been used. Where the node does not have a base URI of its own,
-       the base URI of its parent node is returned.
+       Base URI property. Get the Base URI for the node, that is, the URI used for resolving a relative URI
+       contained in the node. This will be the same as the System ID unless xml:base has been used. Where the
+       node does not have a base URI of its own, the base URI of its parent node is returned.
        Returns:
-           str: String value of the base uri for this node. This may be NULL if the base URI is unknown, including the case
-                where the node has no parent.
+           str: String value of the base uri for this node. This may be NULL if the base URI is unknown, including
+           the case where the node has no parent.
        """
        return make_py_str(self.thisdbptr.getBaseUri())
 
@@ -801,15 +810,15 @@ cdef class PyDocumentBuilder:
     def parse_xml(self, **kwds):
         """
         parse_xml(self, **kwds)
-        Parse a lexical representation, source file or uri of the source document and return it as an Xdm Node
+        Parse a source document supplied as a lexical representation, source file or uri, and return it as XDM node
         Args:
-            **kwds : The possible keyword arguments must be one of the follow (xml_file_name|xml_text|xml_uri)
+            **kwds: Possible keyword arguments: must be one of the following (xml_file_name|xml_text|xml_uri)
         Returns:
-            PyXdmNode: The Xdm Node representation of the XML document
+            PyXdmNode: The XDM node representation of the XML document
         Raises:
             Exception: Error if the keyword argument is not one of xml_file_name|xml_text|xml_uri.
         """
-        py_error_message = "Error: parseXml should only contain one of the following keyword arguments: (xml_file_name|xml_text|xml_uri)"
+        py_error_message = "Error: parse_xml should only contain one of the following keyword arguments: (xml_file_name|xml_text|xml_uri)"
         if len(kwds) != 1:
           raise Exception(py_error_message)
         cdef PyXdmNode val = None
@@ -847,8 +856,8 @@ parametersDict = None
 
 
 cdef class PyXslt30Processor:
-     """An PyXslt30Processor represents factory to compile, load and execute a stylesheet.
-     It is possible to cache the context and the stylesheet in the PyXslt30Processor """
+     """A PyXslt30Processor represents a factory to compile, load and execute a stylesheet.
+     It is possible to cache the context and the stylesheet in the PyXslt30Processor. """
      cdef saxoncClasses.Xslt30Processor *thisxptr      # hold a C++ instance which we're wrapping
 
      def __cinit__(self):
@@ -872,7 +881,7 @@ cdef class PyXslt30Processor:
 
      def set_jit_compilation(self, bool jit):
         """
-        set_jit_compilation(self, jit)
+        set_jit_compilation(self, bool jit)
         Say whether just-in-time compilation of template rules should be used.
         Args:
             jit (bool): True if just-in-time compilation is to be enabled. With this option enabled,
@@ -895,10 +904,11 @@ cdef class PyXslt30Processor:
 
      def set_parameter(self, name, PyXdmValue value):
         """
-        set_parameter(self, PyXdmValue value)
+        set_parameter(self, name, PyXdmValue value)
         Set the value of a stylesheet parameter
         Args:
-            name (str): the name of the stylesheet parameter, as a string. For namespaced parameter use the JAXP solution i.e. "{uri}name
+            name (str): the name of the stylesheet parameter, as a string. For a namespaced parameter use
+                clark notation {uri}local
             value (PyXdmValue): the value of the stylesheet parameter, or NULL to clear a previously set value
         """
         cdef const char * c_str = NULL
@@ -916,7 +926,7 @@ cdef class PyXslt30Processor:
         Args:
             name (str): The name of the stylesheet parameter
         Returns:
-            PyXdmValue: The Xdm value of the parameter
+            PyXdmValue: The XDM value of the parameter
         """
         py_name_string = name.encode('UTF-8') if name is not None else None
         cdef char * c_name = py_name_string if name is not None else ""
@@ -926,7 +936,8 @@ cdef class PyXslt30Processor:
      def remove_parameter(self, name):
         """
         remove_parameter(self, name)
-        Remove the parameter given by name from the PyXslt30Processor. The parameter will not have any affect on the stylesheet if it has not yet been executed
+        Remove the parameter given by name from the PyXslt30Processor. The parameter will not have any effect on the
+        stylesheet if it has not yet been executed.
         Args:
             name (str): The name of the stylesheet parameter
         Returns:
@@ -947,25 +958,25 @@ cdef class PyXslt30Processor:
      def compile_stylesheet(self, **kwds):
         """
         compile_stylesheet(self, **kwds)
-        Compile a stylesheet  received as text, uri or as a node object. The term "compile" here indicates
+        Compile a stylesheet received as text, uri or as a node object. The term "compile" here indicates
         that the stylesheet is converted into an executable
-         form. The compilation uses a snapshot of the properties of the <code>Xslt30Processor</code> at the
-         time this method is invoked. It is also possible to save the compiled
+        form. The compilation uses a snapshot of the properties of the PyXslt30Processor at the
+        time this method is invoked. It is also possible to save the compiled
         stylesheet (SEF file) given the option 'save' and 'output_file'.
         Get the stylesheet associated via the xml-stylesheet processing instruction (see
-        http://www.w3.org/TR/xml-stylesheet/) with the document
+        http://www.w3.org/TR/xml-stylesheet/) with the
         document specified in the source parameter, and that match
         the given criteria.  If there are several suitable xml-stylesheet
         processing instructions, then the returned Source will identify
         a synthesized stylesheet module that imports all the referenced
-        stylesheet module.
+        stylesheet modules.
         Args:
-            **kwds: Possible keyword arguments stylesheet_text (str), stylesheet_file (str),
-            associated_file (str) or stylesheet_node (PyXdmNode). Also possible to add the options
-            save (boolean) and output_file, which creates an exported stylesheet to file (SEF).
+            **kwds: Possible keyword arguments: one of stylesheet_text (str), stylesheet_file (str),
+                associated_file (str) or stylesheet_node (PyXdmNode). It is also possible to add the options
+                save (bool) and output_file (str), which creates an exported stylesheet to file (SEF).
         Returns:
-            PyXsltExecutable - which represents the compiled stylesheet. The XsltExecutable
-             is immutable and thread-safe; it may be used to run multiple transformations, in series or concurrently.
+            PyXsltExecutable: which represents the compiled stylesheet. The PyXsltExecutable is immutable
+            and thread-safe; it may be used to run multiple transformations, in series or concurrently.
         Example:
             1. executable = xsltproc.compile_stylesheet(stylesheet_text="<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'>
                                              <xsl:param name='values' select='(2,3,4)' /><xsl:output method='xml' indent='yes' />
@@ -976,7 +987,7 @@ cdef class PyXslt30Processor:
             2. executable = xsltproc.compile_stylesheet(stylesheet_file="test1.xsl", save=True, output_file="test1.sef")
             3. executable = xsltproc.compile(associated_file="foo.xml")
         """
-        py_error_message = "CompileStylesheet should only be one of the keyword option: (associated_file|stylesheet_text|stylesheet_file|stylesheet_node), also in allowed in addition the optional keyword 'save' boolean with the keyword 'outputfile' keyword"
+        py_error_message = "Error: compile_stylesheet should only contain one of the following keyword arguments: (associated_file|stylesheet_text|stylesheet_file|stylesheet_node) (with optional additional arguments: save, output_file)"
         if len(kwds) >3:
           raise Exception(py_error_message)
         cdef char * c_outputfile
@@ -997,7 +1008,7 @@ cdef class PyXslt30Processor:
         if ("save" in kwds) and kwds["save"]==True:
           del kwds["save"]
           if "output_file" not in kwds:
-            raise Exception("Output file option not in keyword arugment for compile_stylesheet")
+            raise Exception("output_file keyword argument is required for compile_stylesheet when save=True")
           py_output_string = kwds["output_file"]
           '''c_outputfile = make_c_str(py_output_string)'''
           py_output_sstring = py_output_string.encode('UTF-8') if py_output_string is not None else None
@@ -1019,7 +1030,7 @@ cdef class PyXslt30Processor:
           elif "stylesheet_node" in kwds:
             py_xdmNode = kwds["stylesheet_node"]
             #if not isinstance(py_value, PyXdmNode):
-              #raise Exception("StylesheetNode keyword arugment is not of type XdmNode")
+              #raise Exception("stylesheet_node keyword argument is not of type PyXdmNode")
             #value = PyXdmNode(py_value)
             self.thisxptr.compileFromXdmNodeAndSave(py_xdmNode.derivednptr, c_outputfile)
           else:
@@ -1072,7 +1083,7 @@ cdef class PyXslt30Processor:
           elif "stylesheet_node" in kwds:
             py_xdmNode = kwds["stylesheet_node"]
             #if not isinstance(py_value, PyXdmNode):
-              #raise Exception("StylesheetNode keyword arugment is not of type XdmNode")
+              #raise Exception("stylesheet_node keyword argument is not of type PyXdmNode")
             #value = PyXdmNode(py_value)
             executable = PyXsltExecutable()
             cexecutable =  self.thisxptr.compileFromXdmNode(py_xdmNode.derivednptr)
@@ -1086,11 +1097,11 @@ cdef class PyXslt30Processor:
      def transform_to_string(self, **kwds):
         """
         transform_to_string(self, **kwds)
-        Execute transformation to string.
+        Execute a transformation and return the result as a string.
         Args:
-            **kwds: Possible arguments: source_file (str) or xdm_node (PyXdmNode). Other allowed argument: stylesheet_file (str)
-                                        and base_output_uri (str) which is used for for resolving relative URIs in the href
-                                        attribute of the xsl:result-document instruction.
+            **kwds: Possible keyword arguments: source_file (str), xdm_node (PyXdmNode), stylesheet_file (str),
+                and base_output_uri (str) which is used for resolving relative URIs in the href
+                attribute of the xsl:result-document instruction.
         Example:
             1) result = xsltproc.transform_to_string(source_file="cat.xml", stylesheet_file="test1.xsl")
             2) xsltproc.set_source("cat.xml")\r
@@ -1134,15 +1145,16 @@ cdef class PyXslt30Processor:
      def transform_to_file(self, **kwds):
         """
         transform_to_file(self, **kwds)
-        Execute transformation to a file. It is possible to specify the as an argument or using the set_output_file method.
+        Execute a transformation with the result saved to file. It is possible to specify the output file as an
+        argument or using the set_output_file method.
         Args:
-            **kwds: Possible optional arguments: source_file (str), stylesheet_file (str), output_file (str)
-                                                 and base_output_uri (str) which is used for for resolving relative URIs in the href attribute of the
-                                                 xsl:result-document instruction.
+            **kwds: Possible keyword arguments: source_file (str), stylesheet_file (str), output_file (str),
+                and base_output_uri (str) which is used for resolving relative URIs in the href attribute of
+                the xsl:result-document instruction.
         Example:
             1) xsltproc.transform_to_file(source_file="cat.xml", stylesheet_file="test1.xsl", output_file="result.xml")
             2) xsltproc.set_source("cat.xml")\r
-               xsltproc.setoutput_file("result.xml")\r
+               xsltproc.set_output_file("result.xml")\r
                xsltproc.transform_to_file(stylesheet_file="test1.xsl")
             3) node = saxon_proc.parse_xml(xml_text="<in/>")\r
                xsltproc.transform_to_file(output_file="result.xml", stylesheet_file="test1.xsl", xdm_node= node)
@@ -1175,13 +1187,13 @@ cdef class PyXslt30Processor:
      def transform_to_value(self, **kwds):
         """
         transform_to_value(self, **kwds)
-        Execute transformation to an PyXdmNode object
+        Execute a transformation and return the result as a PyXdmValue object.
         Args:
-            **kwds: Possible optional arguments: source_file (str), stylesheet_file (str)
-                                                 and base_output_uri (str) which is used for for resolving relative URIs in the href attribute
-                                                 of the xsl:result-document instruction.
+            **kwds: Possible keyword arguments: source_file (str), stylesheet_file (str),
+                and base_output_uri (str) which is used for resolving relative URIs in the href attribute
+                of the xsl:result-document instruction.
         Returns:
-            PyXdmNode: Result of the transformation as an PyXdmNode object
+            PyXdmValue: Result of the transformation as a PyXdmValue object
         Example:
             1) node = xsltproc.transform_to_value(source_file="cat.xml", stylesheet_file="test1.xsl")
             2) xsltproc.set_source("cat.xml")\r
@@ -1246,7 +1258,7 @@ cdef class PyXslt30Processor:
         exception_occurred(self)
         Property to check for pending exceptions without creating a local reference to the exception object
         Returns:
-            boolean: True when there is an exception thrown; otherwise return False
+            boolean: True when there is an exception thrown; otherwise False
         """
         return self.thisxptr.exceptionOccurred()
 
@@ -1261,10 +1273,10 @@ cdef class PyXslt30Processor:
      def error_message(self):
         """
         error_message(self)
-        A transformation may have a number of errors reported against it. This property returns an error message if there are any errors
-
+        A transformation may have a number of errors reported against it. This property returns an error message
+        if there are any errors.
         Returns:
-            str: The message of the exception. Return None if the exception does not exist.
+            str: The message of the exception. Returns None if the exception does not exist.
         """
         cdef const char* c_string = self.thisxptr.getErrorMessage()
         ustring = make_py_str(c_string)
@@ -1274,10 +1286,10 @@ cdef class PyXslt30Processor:
      def error_code(self):
         """
         error_code(self)
-        A transformation may have a number of errors reported against it. This property returns the error code if there are any errors
-
+        A transformation may have a number of errors reported against it. This property returns the error code if
+        there are any errors.
         Returns:
-            str: The error code associated with the exception. Return None if the exception does not exist.
+            str: The error code associated with the exception. Returns None if the exception does not exist.
         """
         cdef const char* c_string = self.thisxptr.getErrorCode()
         ustring = make_py_str(c_string)
@@ -1288,9 +1300,8 @@ cdef class PyXslt30Processor:
 
 
 cdef class PyXsltExecutable:
-     """An PyXsltExecutable represents the compiled form of a stylesheet.
-      An XsltExecutable is created by using one of the compile methods on the
-       PyXsltProcessor """
+     """A PyXsltExecutable represents the compiled form of a stylesheet.
+     A PyXsltExecutable is created by using one of the compile methods on the PyXsltProcessor. """
      cdef saxoncClasses.XsltExecutable *thisxptr      # hold a C++ instance which we're wrapping
      def __cinit__(self):
         """Default constructor """
@@ -1316,7 +1327,7 @@ cdef class PyXsltExecutable:
          clone(self)
          Create a clone object of this PyXsltExecutable object
          Returns:
-               PYXsltExecutable: copy of this object
+             PyXsltExecutable: copy of this object
          """
          cdef PyXsltExecutable executable = PyXsltExecutable()
          executable.thisxptr = self.thisxptr.clone()
@@ -1324,15 +1335,15 @@ cdef class PyXsltExecutable:
 
      def set_initial_mode(self, name):
         """
-        set_initial_mode(self, base_uri)
+        set_initial_mode(self, name)
         Set the initial mode for the transformation
         Args:
-            name (str): he EQName of the initial mode. Two special values are recognized, in the
-                 reserved XSLT namespace:
-                 xsl:unnamed to indicate the mode with no name, and xsl:default to indicate the
-                 mode defined in the stylesheet header as the default mode.
-                 The value null also indicates the default mode (which defaults to the unnamed
-                 mode, but can be set differently in an XSLT 3.0 stylesheet).
+            name (str): the EQName of the initial mode. Two special values are recognized, in the
+                reserved XSLT namespace:
+                xsl:unnamed to indicate the mode with no name, and xsl:default to indicate the
+                mode defined in the stylesheet header as the default mode.
+                The value null also indicates the default mode (which defaults to the unnamed
+                mode, but can be set differently in an XSLT 3.0 stylesheet).
         """
         cdef char * c_name = NULL
         '''make_c_str(name)'''
@@ -1344,8 +1355,8 @@ cdef class PyXsltExecutable:
         """
         set_base_output_uri(self, base_uri)
         Set the base output URI. The default is the base URI of the principal output
-        of the transformation. If a base output URI is supplied using this function then it takes precedence
-        over any base URI defined in the principal output, and
+        of the transformation. If a base output URI is supplied using this function then
+        it takes precedence over any base URI defined in the principal output, and
         it may cause the base URI of the principal output to be modified in situ.
         The base output URI is used for resolving relative URIs in the 'href' attribute
         of the xsl:result-document instruction; it is accessible to XSLT stylesheet
@@ -1360,11 +1371,14 @@ cdef class PyXsltExecutable:
         self.thisxptr.setBaseOutputURI(c_uri)
 
      def set_global_context_item(self, **kwds):
-        """Set the global context item for the transformation.
+        """
+        set_global_context_item(self, **kwds)
+        Set the global context item for the transformation.
         Args:
-            **kwds: Keyword argument can only be one of the following: file_name|xdm_item
+            **kwds: Possible keyword arguments: must be one of the following (file_name|xdm_item)
         Raises:
-            Exception: Exception is raised if keyword argument is not one of file_name or an Xdm item.
+            Exception: Exception is raised if keyword argument is not one of file_name or xdm_item
+                (providing a PyXdmItem).
         """
         py_error_message = "Error: set_global_context_item should only contain one of the following keyword arguments: (file_name|xdm_item)"
         if len(kwds) != 1:
@@ -1390,11 +1404,13 @@ cdef class PyXsltExecutable:
      def set_initial_match_selection(self, **kwds):
         """
         set_initial_match_selection(self, **kwds)
-        The initial filename to which templates are to be applied (equivalent to the select attribute of xsl:apply-templates).
+        The initial filename to which templates are to be applied (equivalent to the select attribute of
+        xsl:apply-templates).
         Args:
-            **kwds: Keyword argument can only be one of the following: file_name|xdm_value
+            **kwds: Possible keyword arguments: must be one of the following (file_name|xdm_value)
         Raises:
-            Exception: Exception is raised if keyword argument is not one of file_name or XdmValue.
+            Exception: Exception is raised if keyword argument is not one of file_name or xdm_value
+                (providing a PyXdmValue).
         """
         py_error_message = "Error: set_initial_match_selection should only contain one of the following keyword arguments: (file_name|xdm_value)"
         if len(kwds) != 1:
@@ -1441,7 +1457,7 @@ cdef class PyXsltExecutable:
         set_output_file(self, output_file)
         Set the output file where the output of the transformation will be sent
         Args:
-            output_file (str): The output file supplied as a str
+            output_file (str): The output file supplied as a string
         """
         cdef char * c_outputfile =  NULL
         '''make_c_str(output_file)'''
@@ -1451,10 +1467,11 @@ cdef class PyXsltExecutable:
 
      def set_result_as_raw_value(self, bool is_raw):
         """
-        set_result_as_raw_value(self, is_raw)
-        Set true if the return type of callTemplate, applyTemplates and transform methods is to return XdmValue, otherwise return XdmNode object with root Document node
+        set_result_as_raw_value(self, bool is_raw)
+        Set true if the return type of callTemplate, applyTemplates and transform methods is to return PyXdmValue,
+        otherwise return PyXdmNode object with root Document node
         Args:
-            is_raw (bool): True if returning raw result, i.e. XdmValue, otherwise return XdmNode
+            is_raw (bool): True if returning raw result, i.e. PyXdmValue, otherwise return PyXdmNode
         """
         cdef bool c_raw
         c_raw = is_raw
@@ -1464,19 +1481,19 @@ cdef class PyXsltExecutable:
 
      def set_capture_result_documents(self, bool value, bool raw_result=False):
         """
-        set_capture_result_documents(self, value, raw_result)
-        Enable the capture of the result-document output into a dict. This overrides the default mechanism.
+        set_capture_result_documents(self, bool value, bool raw_result)
+        Enable the capture of the result document output into a dict. This overrides the default mechanism.
         If this option is enabled, then any document created using xsl:result-document is saved (as a PyXdmNode)
         in a dict object where it is accessible using the URI as a key. After the execution of the transformation
-        a call on the get_result_documents method is required to get access to the result-documents in the map.
-        It is also possible to capture the result-document as a raw result directly as an PyXdmValue, without
+        a call on the get_result_documents method is required to get access to the result documents in the map.
+        It is also possible to capture the result document as a raw result directly as a PyXdmValue, without
         constructing an XML tree, and without serialization. It corresponds to the serialization.
         Args:
             value (bool): true causes secondary result documents from the transformation to be saved in a map;
-            false disables this option.
-            raw_result (bool): true enables the handling of raw destination for resultsDocuments. If not
-            supplied this can also be set on the setResultAsRawValue method. The setResultAsRawValue method
-            has higher priority to this flag
+                false disables this option.
+            raw_result (bool): true enables the handling of raw destination for result documents. If not supplied
+                this can also be set on the set_result_as_raw_value method. The set_result_as_raw_value method
+                has higher priority to this flag.
         """
         cdef bool c_value
         c_value = value
@@ -1487,12 +1504,11 @@ cdef class PyXsltExecutable:
      def get_result_documents(self):
          """
          get_result_documents(self)
-         Return the result-documents resulting from the execution of the stylesheet. Null is
-         returned if the user has not enabled this feature via the method set_capture_result_documents
-
+         Return the secondary result documents resulting from the execution of the stylesheet. Null is
+         returned if the user has not enabled this feature via the method set_capture_result_documents.
          Returns:
-             dict [str, PyXdmValue]: Dict of the key, value pair. Indexed by the absolute URI of each result
-             document, and the corresponding value is an PyXdmValue object containing the result document (as
+             dict [str, PyXdmValue]: Dict of the key-value pairs. Indexed by the absolute URI of each result
+             document, and the corresponding value is a PyXdmValue object containing the result document (as
              an in-memory tree, without serialization).
          """
          cdef map[string , saxoncClasses.XdmValue * ] c_dataMap
@@ -1517,10 +1533,11 @@ cdef class PyXsltExecutable:
 
      def set_parameter(self, name, value):
         """
-        set_parameter(self, PyXdmValue value)
+        set_parameter(self, name, value)
         Set the value of a stylesheet parameter
         Args:
-            name (str): the name of the stylesheet parameter, as a string. For namespaced parameter use the JAXP solution i.e. "{uri}name
+            name (str): the name of the stylesheet parameter, as a string. For a namespaced parameter use
+                clark notation {uri}local
             value (PyXdmValue): the value of the stylesheet parameter, or NULL to clear a previously set value
         """
         cdef const char * c_str = NULL
@@ -1555,7 +1572,7 @@ cdef class PyXsltExecutable:
         Args:
             name (str): The name of the stylesheet parameter
         Returns:
-            PyXdmValue: The Xdm value of the parameter
+            PyXdmValue: The XDM value of the parameter
         """
         cdef char * c_name = NULL
         '''make_c_str(name)'''
@@ -1567,7 +1584,8 @@ cdef class PyXsltExecutable:
      def remove_parameter(self, name):
         """
         remove_parameter(self, name)
-        Remove the parameter given by name from the PyXslt30Processor. The parameter will not have any affect on the stylesheet if it has not yet been executed
+        Remove the parameter given by name from the PyXslt30Processor. The parameter will not have any effect on the
+        stylesheet if it has not yet been executed.
         Args:
             name (str): The name of the stylesheet parameter
         Returns:
@@ -1586,14 +1604,14 @@ cdef class PyXsltExecutable:
             name (str): The name of the property
             value (str): The value of the property
         Example:
-            XsltProcessor: set serialization properties (names start with '!' i.e. name "!method" -> "xml")\r
-            'o':outfile name,\r
+            XsltProcessor: set serialization properties (names start with '!' e.g. name "!method" -> "xml")\r
+            'o': output file name,\r
             'it': initial template,\r
             'im': initial mode,\r
             's': source as file name\r
             'm': switch on message listener for xsl:message instructions,\r
-            'item'| 'node' : source supplied as an XdmNode object,\r
-            'extc':Set the native library to use with Saxon for extension functions written in C/C++/PHP\r
+            'item'| 'node': source supplied as a PyXdmNode object,\r
+            'extc': Set the native library to use with Saxon for extension functions written in C/C++/PHP\r
         """
         cdef char * c_name = make_c_str(name)
         py_string_string = name.encode('utf-8') if name is not None else None
@@ -1619,23 +1637,23 @@ cdef class PyXsltExecutable:
         self.thisxptr.clearProperties()
      def set_initial_template_parameters(self, bool tunnel, dict kwds):
         """
-        set_initial_template_parameters(self, bool tunnel, **kwds)
+        set_initial_template_parameters(self, bool tunnel, dict kwds)
         Set parameters to be passed to the initial template. These are used
         whether the transformation is invoked by applying templates to an initial source item,
         or by invoking a named template. The parameters in question are the xsl:param elements
         appearing as children of the xsl:template element.
-        TODO: To fix issue where we pass XdmValue object created directly in the function argument. This causes seg error
+        TODO: To fix issue where we pass PyXdmValue object created directly in the function argument. This causes seg error
         e.g. set_initial_template_parameter(False, {a:saxonproc.make_integer_value(12)})
         Do the following instead:
         paramArr = {a:saxonproc.make_integer_value(12)}
         set_initial_template_parameter(False, paramArr)
         Args:
         	tunnel (bool): True if these values are to be used for setting tunnel parameters;
-        	**kwds: the parameters to be used for the initial template supplied as an key-value pair.
-        	False if they are to be used for non-tunnel parameters. The default is false.
+        	    False if they are to be used for non-tunnel parameters. The default is false.
+            kwds (dict): the parameters to be used for the initial template supplied as key-value pairs.
         Example:
-        	1)paramArr = {'a':saxonproc.make_integer_value(12), 'b':saxonproc.make_integer_value(5)}
-                  xsltproc.set_initial_template_parameters(False, paramArr)
+        	1) paramArr = {'a':saxonproc.make_integer_value(12), 'b':saxonproc.make_integer_value(5)}
+               xsltproc.set_initial_template_parameters(False, paramArr)
         """
         cdef map[string, saxoncClasses.XdmValue * ] parameters
         cdef bool c_tunnel
@@ -1658,9 +1676,12 @@ cdef class PyXsltExecutable:
 
      def set_save_xsl_Message(self, show, str file_name = None):
         """
-        setup_xsl_message(self, **kwds)
-        gives users the option to switch on or off the <code>xsl:message</code> feature. It is also possible
-        to send the <code>xsl:message</code> outputs to file given by file name.
+        set_save_xsl_Message(self, show, str file_name)
+        Gives users the option to switch the xsl:message feature on or off. It is also possible
+        to send the xsl:message outputs to file given by file name.
+        Args:
+            show (bool): Boolean to indicate if xsl:message should be outputted. Default (True) is on.
+            file_name (str): The name of the file to send output
         """
         cdef char * c_file_name = NULL
         '''make_c_str(file_name)'''
@@ -1670,9 +1691,11 @@ cdef class PyXsltExecutable:
 
      def export_stylesheet(self, str file_name):
         """
-        export_stylesheet(self, file_name)
+        export_stylesheet(self, str file_name)
         Produce a representation of the compiled stylesheet, in XML form, suitable for
         distribution and reloading.
+        Args:
+            file_name (str): The name of the file where the compiled stylesheet is to be saved
         """
         cdef char * c_file_name = NULL
         '''make_c_str(file_name)'''
@@ -1684,10 +1707,11 @@ cdef class PyXsltExecutable:
      def transform_to_string(self, **kwds):
         """
         transform_to_string(self, **kwds)
-        Execute transformation to string.
+        Execute a transformation and return the result as a string.
         Args:
-            **kwds: Possible arguments: source_file (str) or xdm_node (PyXdmNode). Other allowed argument: base_output_uri (str)
-            which is used for for resolving relative URIs in the href attribute of the xsl:result-document instruction.
+            **kwds: Possible keyword arguments: source_file (str) or xdm_node (PyXdmNode);
+                and base_output_uri (str) which is used for resolving relative URIs
+                in the href attribute of the xsl:result-document instruction.
         Example:
             1) result = executable.transform_to_string(source_file="cat.xml")
             2) executable.set_initial_match_selection(file_name="cat.xml")\r
@@ -1702,7 +1726,7 @@ cdef class PyXsltExecutable:
         cdef PyXdmNode xdm_node = None
         cdef saxoncClasses.XdmNode * derivednptr = NULL
         if len(kwds) > 1:
-          raise Warning("Warning: transform_to_string should only contain the following keyword arguments: (source_file|xdm_node, stylesheet_file)")
+          raise Warning("Warning: transform_to_string should only contain the following keyword arguments: (source_file|xdm_node, base_output_uri)")
         for key, value in kwds.items():
           if isinstance(value, str):
             if key == "source_file":
@@ -1717,7 +1741,7 @@ cdef class PyXsltExecutable:
               c_base_output_uri = py_string_string if value is not None else ""
               self.thisxptr.setBaseOutputURI(c_base_output_uri)
             else:
-              raise Warning("Warning: transform_to_string should only contain the following keyword arguments: (source_file|xdm_node, stylesheet_file)")
+              raise Warning("Warning: transform_to_string should only contain the following keyword arguments: (source_file|xdm_node, base_output_uri)")
           elif key == "xdm_node":
 
             if isinstance(value, PyXdmNode):
@@ -1734,11 +1758,12 @@ cdef class PyXsltExecutable:
      def transform_to_file(self, **kwds):
         """
         transform_to_file(self, **kwds)
-        Execute transformation to a file. It is possible to specify the as an argument or using the set_output_file method.
+        Execute a transformation with the result saved to file. It is possible to specify the output file as an
+        argument or using the set_output_file method.
         Args:
-            **kwds: Possible optional arguments: source_file (str) or xdm_node (PyXdmNode). Other allowed argument: output_file (str)
-                                                 and base_output_uri (str) which is used for for resolving relative URIs in the href attribute of the
-                                                 xsl:result-document instruction.
+            **kwds: Possible keyword arguments: source_file (str) or xdm_node (PyXdmNode); output_file (str),
+                and base_output_uri (str) which is used for resolving relative URIs in the href attribute of the
+                xsl:result-document instruction.
         Example:
             1) executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
                executable.transform_to_file(source_file="cat.xml", output_file="result.xml")
@@ -1788,13 +1813,13 @@ cdef class PyXsltExecutable:
      def transform_to_value(self, **kwds):
         """
         transform_to_value(self, **kwds)
-        Execute transformation to an Xdm Node
+        Execute a transformation and return the result as a PyXdmValue object.
         Args:
-            **kwds: Possible optional arguments: source_file (str), xdm_node (PyXdmNode) and base_output_uri (str) which
-                                                 is used for resolving relative URIs in the href attribute
-                                                 of the xsl:result-document instruction.
+            **kwds: Possible keyword arguments: source_file (str) or xdm_node (PyXdmNode);
+                and base_output_uri (str) which is used for resolving relative URIs in the href attribute
+                of the xsl:result-document instruction.
         Returns:
-            PyXdmNode: Result of the transformation as an PyXdmNode object
+            PyXdmValue: Result of the transformation as a PyXdmValue object
         Example:
               xslt30_proc = saxon_proc.new_xsl30_processor()
               executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
@@ -1875,13 +1900,13 @@ cdef class PyXsltExecutable:
      def apply_templates_returning_value(self, **kwds):
         """
         apply_templates_returning_value(self, **kwds)
-        Invoke the stylesheet by applying templates to a supplied input sequence, Saving the results as an XdmValue.
+        Invoke the stylesheet by applying templates to a supplied input sequence, saving the results as a PyXdmValue.
         Args:
-            **kwds: Possible optional arguments: source_file (str) or xdm_value (PyXdmValue). Other allowed argument:
-                                                 base_output_uri (str) which is used for resolving relative URIs in the href attribute of
-                                                 the xsl:result-document instruction.
+            **kwds: Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue);
+                and base_output_uri (str) which is used for resolving relative URIs in the href attribute of
+                the xsl:result-document instruction.
         Returns:
-            PyXdmValue: Result of the transformation as an PyXdmValue object
+            PyXdmValue: Result of the transformation as a PyXdmValue object
         Example:
               xslt30_proc = saxon_proc.new_xsl30_processor()
               executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")            
@@ -1976,13 +2001,13 @@ cdef class PyXsltExecutable:
      def apply_templates_returning_string(self, **kwds):
         """
         apply_templates_returning_string(self, **kwds)
-        Invoke the stylesheet by applying templates to a supplied input sequence, Saving the results as a str.
+        Invoke the stylesheet by applying templates to a supplied input sequence, saving the results as a string.
         Args:
-            **kwds: Possible optional arguments: source_file (str) or xdm_value (PyXdmValue). Other allowed argument:
-                                                 base_output_uri (str) which is used for resolving relative URIs in the href attribute of
-                                                 the xsl:result-document instruction
+            **kwds: Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue);
+                and base_output_uri (str) which is used for resolving relative URIs in the href attribute of
+                the xsl:result-document instruction.
         Returns:
-            str: Result of the transformation as str
+            str: Result of the transformation as a str value
         Example:
                xslt30_proc = saxon_proc.new_xsl30_processor()
                executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
@@ -2043,13 +2068,12 @@ cdef class PyXsltExecutable:
      def apply_templates_returning_file(self, **kwds):
         """
         apply_templates_returning_file(self, **kwds)
-        Invoke the stylesheet by applying templates to a supplied input sequence, Saving the
-        results to file.
+        Invoke the stylesheet by applying templates to a supplied input sequence, saving the results to file.
         Args:
-            **kwds: Possible optional arguments: source_file (str) or xdm_value (PyXdmValue).
-            Other allowed argument: The required argument output_file (str) and
-            base_output_uri (str) which is used for resolving relative URIs in the href attribute of
-            the xsl:result-document instruction.
+            **kwds: Required argument: output_file (str).
+                Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue); and
+                base_output_uri (str) which is used for resolving relative URIs in the href attribute of
+                the xsl:result-document instruction.
 
         Example:
             1) executable = trans.compile_stylesheet(stylesheet_file="test1.xsl")
@@ -2112,13 +2136,14 @@ cdef class PyXsltExecutable:
      def call_template_returning_value(self, str template_name=None, **kwds):
         """
         call_template_returning_value(self, str template_name, **kwds)
-        Invoke a transformation by calling a named template and return result as an PyXdmValue.
+        Invoke a transformation by calling a named template and return the result as a PyXdmValue.
         Args:
-			template_name(str): The name of the template to invoke. If None is supplied then call the initial-template
-            **kwds: Possible optional arguments: source_file (str) or xdm_value (PyXdmValue). Other allowed argument:
-                    base_output_uri (str) which is used for for resolving relative URIs in the href attribute of the xsl:result-document instruction
+			template_name (str): The name of the template to invoke. If None is supplied then call the initial-template.
+            **kwds: Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue); and
+                base_output_uri (str) which is used for resolving relative URIs in the href attribute
+                of the xsl:result-document instruction.
         Returns:
-            PyXdmValue: Result of the transformation as an PyXdmValue object
+            PyXdmValue: Result of the transformation as a PyXdmValue object
         Example:
                xslt30_proc = saxon_proc.new_xsl30_processor()
                executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
@@ -2215,14 +2240,15 @@ cdef class PyXsltExecutable:
      def call_template_returning_string(self, str template_name=None, **kwds):
         """
         call_template_returning_string(self, str template_name, **kwds)
-        Invoke a transformation by calling a named template and return result as a string.
-        If no source file or xdm value has been supplied, then the clark name 'xsl:initial-template' is used.
+        Invoke a transformation by calling a named template and return the result as a string.
+        If no source file or xdm value has been supplied, then the clark name for 'xsl:initial-template' is used.
         Args:
-			template_name(str): The name of the template to invoke. If None is supplied then call the initial-template
-            **kwds: Possible optional arguments: source_file (str) or  xdm_Value (PyXdmValue). Other allowed argument: 
-            base_output_uri (str) which is used for for resolving relative URIs in the href attribute of the xsl:result-document instruction
+			template_name (str): The name of the template to invoke. If None is supplied then call the initial-template
+            **kwds: Possible keyword arguments: source_file (str) or xdm_Value (PyXdmValue); and
+                base_output_uri (str) which is used for resolving relative URIs in the href attribute
+                of the xsl:result-document instruction.
         Returns:
-            PyXdmValue: Result of the transformation as an PyXdmValue object
+            PyXdmValue: Result of the transformation as a PyXdmValue object
         Example:
             1) executable = trans.compile_stylesheet(stylesheet_file="test1.xsl")
                result = executable.call_template_returning_string("main")
@@ -2290,12 +2316,12 @@ cdef class PyXsltExecutable:
      def call_template_returning_file(self, str template_name=None, **kwds):
         """
         call_template_returning_file(self, str template_name, **kwds)
-        Invoke a transformation by calling a named template and save result in a specified file.
+        Invoke a transformation by calling a named template and save the result to a specified file.
         Args:
-			template_name(str): The name of the template to invoke. If None is supplied then call the initial-template
-            **kwds: Possible optional arguments: source_file (str) or xdm_node (PyXdmNode). Other allowed argument: stylesheet_file (str)
-                    base_output_uri (str) which is used for for resolving relative URIs in the href attribute of the xsl:result-document instruction
-
+			template_name (str): The name of the template to invoke. If None is supplied then call the initial-template
+            **kwds: Possible keyword arguments: source_file (str) or xdm_node (PyXdmNode); output_file (str), and
+                base_output_uri (str) which is used for resolving relative URIs in the href attribute
+                of the xsl:result-document instruction.
         Example:
               executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
             1) executable.call_template_returning_file("main", output_file="result.xml")
@@ -2362,13 +2388,14 @@ cdef class PyXsltExecutable:
      def call_function_returning_value(self, str function_name, list args, **kwds):
         """
         call_function_returning_value(self, str function_name, list args, **kwds)
-        Invoke a transformation by calling a named template and return result as an PyXdmValue.
+        Invoke a transformation by calling a named function and return the result as a PyXdmValue.
         Args:
-			function_name(str): The name of the template to invoke. If None is supplied then call the initial-template
-			list args: Pointer array of XdmValue object - he values of the arguments to be supplied to the function.
-            **kwds: Possible optional arguments: source_file (str) or xdm_value (PyXdmValue).
+			function_name (str): The name of the function to invoke, in clark notation {uri}local
+			args (list): Pointer array of PyXdmValue objects - the values of the arguments to be supplied
+			    to the function.
+            **kwds: Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue).
         Returns:
-            PyXdmValue: Result of the transformation as an PyXdmValue object
+            PyXdmValue: Result of the transformation as a PyXdmValue object
         Example:
               executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
             1) node = executable.call_function_returning_value("{http://localhost/example}func")
@@ -2429,7 +2456,7 @@ cdef class PyXsltExecutable:
             value_ = args[x];
             argumentV[x] = value_.thisvptr
           else:
-            raise Exception("Argument value at position " , x , " is not an PyXdmValue. The following object found: ", type(args[x]))
+            raise Exception("Argument value at position " , x , " is not a PyXdmValue. The following object found: ", type(args[x]))
         '''c_functionName = make_c_str(function_name)'''
         py_function_string = function_name.encode('UTF-8') if function_name is not None else None
         c_functionName = py_function_string if function_name is not None else ""
@@ -2474,11 +2501,12 @@ cdef class PyXsltExecutable:
      def call_function_returning_string(self, str function_name, list args, **kwds):
         """
         call_function_returning_string(self, str function_name, list args, **kwds)
-        Invoke a transformation by calling a named template and return result as a serialized string.
+        Invoke a transformation by calling a named function and return the result as a serialized string.
         Args:
-			function_name(str): The name of the template to invoke. If None is supplied then call the initial-template
-			list args: Pointer array of XdmValue object - he values of the arguments to be supplied to the function.
-            **kwds: Possible optional arguments: source_file (str) or xdm_value (PyXdmValue). Other allowed argument: stylesheet_file (str)
+			function_name (str): The name of the function to invoke, in clark notation {uri}local
+			args (list): Pointer array of PyXdmValue objects - the values of the arguments to be supplied
+			    to the function.
+            **kwds: Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue); and stylesheet_file (str).
         Returns:
             str: Result of the transformation as a str value
         Example:
@@ -2550,7 +2578,7 @@ cdef class PyXsltExecutable:
             value_ = args[x]
             argumentV[x] = value_.thisvptr
           else:
-            raise Exception("Argument value at position ",x," is not an PyXdmValue")
+            raise Exception("Argument value at position ",x," is not a PyXdmValue")
         '''c_functionName = make_c_str(function_name)'''
         py_s_string = function_name.encode('UTF-8') if function_name is not None else None
         c_functionName = py_s_string if function_name is not None else ""
@@ -2563,13 +2591,13 @@ cdef class PyXsltExecutable:
      def call_function_returning_file(self, str function_name, list args, **kwds):
         """
         call_function_returning_file(self, str function_name, list args, **kwds)
-        Invoke a transformation by calling a named template and return result in the supplied file.
+        Invoke a transformation by calling a named function and save the result to a specified file.
         Args:
-			function_name(str): The name of the template to invoke. If None is supplied
-                        then call the initial-template
-			list args: Pointer array of XdmValue object - he values of the arguments to be supplied to the function.
-            **kwds: Possible optional arguments: source_file (str) or xdm_value (PyXdmValue). Other allowed argument: stylesheet_file (str)
-
+			function_name(str): The name of the function to invoke, in clark notation {uri}local
+			args (list): Pointer array of PyXdmValue objects - the values of the arguments to be supplied
+			    to the function.
+            **kwds: Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue); stylesheet_file (str),
+                and output_file (str)
         Example:
                executable = xslt30_proc.compile_stylesheet(stylesheet_file="test2.xsl")
             1) executable.set_output_file("result.xml")
@@ -2645,7 +2673,7 @@ cdef class PyXsltExecutable:
             value_ = args[x]
             argumentV[x] = value_.thisvptr
           else:
-            raise Exception("Argument value at position ",x," is not an PyXdmValue")
+            raise Exception("Argument value at position ",x," is not a PyXdmValue")
         '''c_functionName = make_c_str(function_name)'''
         py_s_string = function_name.encode('UTF-8') if function_name is not None else None
         c_functionName = py_s_string if function_name is not None else ""
@@ -2662,7 +2690,7 @@ cdef class PyXsltExecutable:
         exception_occurred(self)
         Property to check for pending exceptions without creating a local reference to the exception object
         Returns:
-            boolean: True when there is a pending exception; otherwise return False
+            boolean: True when there is a pending exception; otherwise False
         """
         return self.thisxptr.exceptionOccurred()
 
@@ -2678,9 +2706,8 @@ cdef class PyXsltExecutable:
         """
         error_message(self)
         A transformation may have a number of errors reported against it. Get the error message if there are any errors
-
         Returns:
-            str: The message of the exception. Return None if the exception does not exist.
+            str: The message of the exception. Returns None if the exception does not exist.
         """
         cdef const char* c_string = self.thisxptr.getErrorMessage()
         ustring = make_py_str(c_string)
@@ -2693,14 +2720,14 @@ cdef class PyXsltExecutable:
         Args:
             index (int): The i'th exception
         Returns:
-            str: The error code associated with the i'th exception. Return None if the i'th exception does not exist.
+            str: The error code associated with the i'th exception. Returns None if the i'th exception does not exist.
         """
         """cdef const char* c_string = self.thisxptr.getErrorCode()
         ustring = c_string.decode('UTF-8') if c_string is not NULL else None
         return ustring"""
 
 cdef class PyXQueryProcessor:
-     """An PyXQueryProcessor object represents factory to compile, load and execute queries. """
+     """A PyXQueryProcessor object represents a factory to compile, load and execute a query. """
      cdef saxoncClasses.XQueryProcessor *thisxqptr      # hold a C++ instance which we're wrapping
      def __cinit__(self):
         """
@@ -2710,7 +2737,7 @@ cdef class PyXQueryProcessor:
         self.thisxqptr = NULL
      def __dealloc__(self):
         """
-        dealloc(self)
+        __dealloc__(self)
         """
         if self.thisxqptr != NULL:
            del self.thisxqptr
@@ -2718,9 +2745,8 @@ cdef class PyXQueryProcessor:
         """
         set_context(self, **kwds)
         Set the initial context for the query
-
         Args:
-            **kwds : Possible keyword argument file_name (str) or xdm_item (PyXdmItem)
+            **kwds: Possible keyword arguments: file_name (str) or xdm_item (PyXdmItem)
         """
         py_error_message = "Error: set_context should only contain one of the following keyword arguments: (file_name|xdm_item)"
         if len(kwds) != 1:
@@ -2766,8 +2792,9 @@ cdef class PyXQueryProcessor:
         set_parameter(self, name, PyXdmValue value)
         Set the value of a query parameter
         Args:
-            name (str): the name of the stylesheet parameter, as a string. For namespaced parameter use the JAXP solution i.e. "{uri}name
-            value (PyXdmValue): the value of the query parameter, or None to clear a previously set value
+            name (str): the name of the stylesheet parameter, as a string. For a namespaced parameter use
+                clark notation {uri}local
+            value (PyXdmValue): the value of the query parameter, or NULL to clear a previously set value
         """
         cdef const char * c_str = NULL
         '''make_c_str(name)'''
@@ -2779,7 +2806,8 @@ cdef class PyXQueryProcessor:
      def remove_parameter(self, name):
         """
         remove_parameter(self, name)
-        Remove the parameter given by name from the PyXQueryProcessor. The parameter will not have any affect on the query if it has not yet been executed
+        Remove the parameter given by name from the PyXQueryProcessor. The parameter will not have any effect on the
+        query if it has not yet been executed.
         Args:
             name (str): The name of the query parameter
         Returns:
@@ -2790,15 +2818,14 @@ cdef class PyXQueryProcessor:
         self.thisxqptr.removeParameter(c_name)
      def set_property(self, name, str value):
         """
-        set_property(self, name, value)
+        set_property(self, name, str value)
         Set a property specific to the processor in use.
-
         Args:
             name (str): The name of the property
             value (str): The value of the property
         Example:
             PyXQueryProcessor: set serialization properties (names start with '!' i.e. name "!method" -> "xml")\r
-            'o':outfile name,\r
+            'o': output file name,\r
             'dtd': Possible values 'on' or 'off' to set DTD validation,\r
             'resources': directory to find Saxon data files,\r
             's': source as file name,\r
@@ -2810,35 +2837,36 @@ cdef class PyXQueryProcessor:
         self.thisxqptr.setProperty(c_name, c_value)
      def clear_parameters(self):
         """
-        clear_parameter(self)
+        clear_parameters(self)
         Clear all parameters set on the processor
         """
         self.thisxqptr.clearParameters()
      def clear_properties(self):
         """
-        clear_parameter(self)
+        clear_properties(self)
         Clear all properties set on the processor
         """
         self.thisxqptr.clearProperties()
      def set_updating(self, updating):
         """
         set_updating(self, updating)
-        Say whether the query is allowed to be updating. XQuery update syntax will be rejected during query compilation unless this
-        flag is set. XQuery Update is supported only under Saxon-EE/C.
+        Say whether the query is allowed to be updating. XQuery update syntax will be rejected during query compilation
+        unless this flag is set. XQuery Update is supported only under SaxonC-EE.
         Args:
-            updating (bool): true if the query is allowed to use the XQuery Update facility (requires Saxon-EE/C). If set to false,
-                             the query must not be an updating query. If set to true, it may be either an updating or a non-updating query.
+            updating (bool): true if the query is allowed to use the XQuery Update facility (requires SaxonC-EE).
+                If set to false, the query must not be an updating query. If set to true, it may be either an
+                updating or a non-updating query.
         """
         self.thisxqptr.setUpdating(updating)
      def run_query_to_value(self, ** kwds):
         """
         run_query_to_value(self, **kwds)
-        Execute query and output result as an PyXdmValue object
+        Execute a query and return the result as a PyXdmValue object.
         Args:
-            **kwds: Keyword arguments with the possible options input_file_name (str) or input_xdm_item (PyXdmItem). Possible to supply
-                    query with the arguments 'query_file' or 'query_text', which are of type str.
+            **kwds: Possible keyword arguments: input_file_name (str) or input_xdm_item (PyXdmItem) can be used to
+                supply the input; query_file (str) or query_text (str) can be used to supply the query.
         Returns:
-            PyXdmValue: Output result as an PyXdmValue
+            PyXdmValue: Output result as a PyXdmValue
         """
         cdef PyXdmAtomicValue aval = None
         cdef PyXdmAtomicValue avalue_
@@ -2894,10 +2922,10 @@ cdef class PyXQueryProcessor:
      def run_query_to_string(self, ** kwds):
         """
         run_query_to_string(self, **kwds)
-        Execute query and output result as a string
+        Execute a query and return the result as a string.
         Args:
-            **kwds: Keyword arguments with the possible options input_file_name (str) or input_xdm_item (PyXdmItem). Possible to supply
-                    query with the arguments 'query_file' or 'query_text', which are of type str.
+            **kwds: Possible keyword arguments: input_file_name (str) or input_xdm_item (PyXdmItem) can be used to
+                supply the input; query_file (str) or query_text (str) can be used to supply the query.
         Returns:
             str: Output result as a string
         """
@@ -2920,11 +2948,11 @@ cdef class PyXQueryProcessor:
      def run_query_to_file(self, ** kwds):
         """
         run_query_to_file(self, **kwds)
-        Execute query with the result saved to file
+        Execute a query with the result saved to file.
         Args:
-            **kwds: Keyword arguments with the possible options input_file_name (str) or input_xdm_item (PyXdmItem). The Query can be
-                    supplied with the arguments 'query_file' or 'query_text', which are of type str. The name of the output file is
-                    specified as the argument output_file_name.
+            **kwds: Required argument: output_file_name (str) to specify the output file.
+                Possible keyword arguments: input_file_name (str) or input_xdm_item (PyXdmItem) can be used to
+                supply the input; query_file (str) or query_text (str) can be used to supply the query.
         """
         if len(kwds) == 0:
           self.thisxqptr.runQueryToFile()
@@ -2944,14 +2972,16 @@ cdef class PyXQueryProcessor:
      def declare_namespace(self, prefix, uri):
         """
         declare_namespace(self, prefix, uri)
-        Declare a namespace binding part of the static context for queries compiled using this.
+        Declare a namespace binding as part of the static context for queries compiled using this processor.
         This binding may be overridden by a binding that appears in the query prolog.
-        The namespace binding will form part of the static context of the query, but it will
-        not be copied into result trees unless the prefix is actually used in an element or attribute name.
+        The namespace binding will form part of the static context of the query, but it will not be copied
+        into result trees unless the prefix is actually used in an element or attribute name.
         Args:
-            prefix (str): The namespace prefix. If the value is a zero-length string, this method sets the default namespace for elements and types.
-            uri (uri) : The namespace URI. It is possible to specify a zero-length string to "undeclare" a namespace; in this case the prefix will not be available for use,
-            except in the case where the prefix is also a zero length string, in which case the absence of a prefix implies that the name is in no namespace.
+            prefix (str): The namespace prefix. If the value is a zero-length string, this method sets the default
+                namespace for elements and types.
+            uri (uri) : The namespace URI. It is possible to specify a zero-length string to "undeclare" a namespace;
+                in this case the prefix will not be available for use, except in the case where the prefix is also a
+                zero length string, in which case the absence of a prefix implies that the name is in no namespace.
         """
         cdef const char * c_prefix = NULL
         '''make_c_str(prefix)'''
@@ -2967,7 +2997,7 @@ cdef class PyXQueryProcessor:
      def set_query_file(self, file_name):
         """
         set_query_file(self, file_name)
-        Set the query to be executed as a file
+        Supply the query as a file
         Args:
             file_name (str): The file name for the query
         """
@@ -2979,10 +3009,10 @@ cdef class PyXQueryProcessor:
 
      def set_query_content(self, str content):
         """
-        set_query_content(self)
-        Set the query to be executed as a string
+        set_query_content(self, str content)
+        Supply the query as a string
         Args:
-            content (str): The query content suplied as a string
+            content (str): The query content supplied as a string
         """
         cdef const char * c_content = NULL
         if content is not None:
@@ -2993,7 +3023,7 @@ cdef class PyXQueryProcessor:
      def set_query_base_uri(self, base_uri):
         """
         set_query_base_uri(self, base_uri)
-        Set the static base query for the query
+        Set the static base URI for the query
         Args:
             base_uri (str): The static base URI; or None to indicate that no base URI is available
         """
@@ -3015,9 +3045,8 @@ cdef class PyXQueryProcessor:
         """
         check_exception(self)
         Check for exception thrown and get message of the exception.
-
         Returns:
-            str: Returns the exception message if thrown otherwise return None
+            str: Returns the exception message if thrown otherwise returns None
         """
         return self.thisxqptr.checkException()
 
@@ -3027,7 +3056,7 @@ cdef class PyXQueryProcessor:
         exception_occurred(self)
         Property to check for pending exceptions without creating a local reference to the exception object
         Returns:
-            boolean: True when there is a pending exception; otherwise return False
+            boolean: True when there is a pending exception; otherwise False
         """
         return self.thisxqptr.exceptionOccurred()
 
@@ -3042,10 +3071,10 @@ cdef class PyXQueryProcessor:
      def error_message(self):
         """
         error_message(self)
-        A transformation may have a number of errors reported against it. This property returns error message if there are any errors
-
+        A query may have a number of errors reported against it. This property returns an error message
+        if there are any errors.
         Returns:
-            str: The message of the exception. Return None if the exception does not exist.
+            str: The message of the exception. Returns None if the exception does not exist.
         """
         return make_py_str(self.thisxqptr.getErrorMessage())
 
@@ -3053,35 +3082,36 @@ cdef class PyXQueryProcessor:
      def error_code(self):
         """
         error_code(self)
-        A transformation may have a number of errors reported against it. This property returns error code if there are any errors
-
+        A query may have a number of errors reported against it. This property returns the error code
+        if there are any errors.
         Returns:
-            str: The error code associated with the exception. Return None if the exception does not exist.
+            str: The error code associated with the exception. Returns None if the exception does not exist.
         """
         return make_py_str(self.thisxqptr.getErrorCode())
 
 cdef class PyXPathProcessor:
-     """An XPathProcessor represents factory to compile, load and execute the XPath query. """
+     """A PyXPathProcessor represents a factory to compile, load and execute an XPath expression. """
      cdef saxoncClasses.XPathProcessor *thisxpptr      # hold a C++ instance which we're wrapping
      def __cinit__(self):
         """
-        cinit(self)
+        __cinit__(self)
         Constructor for PyXPathProcessor
         """
         self.thisxpptr = NULL
      def __dealloc__(self):
         """
-        dealloc(self)
+        __dealloc__(self)
         """
         if self.thisxpptr != NULL:
            del self.thisxpptr
      def evaluate(self, xpath_str):
         """
         evaluate(self, xpath_str)
+        Evaluate an XPath expression supplied as a string
         Args:
-            xpath_str (str): The XPath query suplied as a string
+            xpath_str (str): The XPath expression supplied as a string
         Returns:
-            PyXdmValue:
+            PyXdmValue: the result of evaluating the XPath expression
         """
         '''c_xpath = make_c_str(xpath_str)'''
         py_value_string = xpath_str.encode('utf-8') if xpath_str is not None else None
@@ -3099,10 +3129,11 @@ cdef class PyXPathProcessor:
      def evaluate_single(self, xpath_str):
         """
         evaluate_single(self, xpath_str)
+        Evaluate an XPath expression supplied as a string, returning a single item
         Args:
-            xpath_str (str): The XPath query supplied as a string
+            xpath_str (str): The XPath expression supplied as a string
         Returns:
-            PyXdmItem: A single Xdm Item is returned. return None if the expression returns an empty sequence.
+            PyXdmItem: A single XDM item is returned. Returns None if the expression returns an empty sequence.
             If the expression returns a sequence of more than one item, any items after the first are ignored.
         """
         cdef PyXdmNode val = None
@@ -3153,10 +3184,9 @@ cdef class PyXPathProcessor:
      def set_context(self, **kwds):
         """
         set_context(self, **kwds)
-        Set the context for the XPath query
-
+        Set the initial context for the XPath expression
         Args:
-            **kwds : Possible keyword argument file_name (str) or xdm_item (PyXdmItem)
+            **kwds: Possible keyword arguments: file_name (str) or xdm_item (PyXdmItem)
         """
         py_error_message = "Error: set_context should only contain one of the following keyword arguments: (file_name|xdm_item)"
         if len(kwds) != 1:
@@ -3186,7 +3216,7 @@ cdef class PyXPathProcessor:
      def set_cwd(self, cwd):
         """
         set_cwd(self, cwd)
-        Set the current working directory.
+        Set the current working directory
         Args:
             cwd (str): current working directory
         """
@@ -3197,9 +3227,8 @@ cdef class PyXPathProcessor:
         """
         effective_boolean_value(self, xpath_str)
         Evaluate the XPath expression, returning the effective boolean value of the result.
-
         Args:
-            xpath_str (str): Supplied as a string
+            xpath_str (str): XPath expression supplied as a string
         Returns:
             boolean: The result is a boolean value.
         """
@@ -3208,11 +3237,12 @@ cdef class PyXPathProcessor:
         return self.thisxpptr.effectiveBooleanValue(c_xpath)
      def set_parameter(self, name, value):
         """
-        set_parameter(self, name, PyXdmValue value)
-        Set the value of a XPath parameter
+        set_parameter(self, name, value)
+        Set the value of an XPath parameter
         Args:
-            name (str): the name of the XPath parameter, as a string. For namespaced parameter use the JAXP solution i.e. "{uri}name
-            value (PyXdmValue): the value of the query parameter, or None to clear a previously set value
+            name (str): the name of the XPath parameter, as a string. For a namespaced parameter use
+                clark notation {uri}local
+            value (PyXdmValue): the value of the query parameter, or NULL to clear a previously set value
         """
         cdef char * c_str = NULL
         cdef PyXdmAtomicValue avalue_
@@ -3244,7 +3274,8 @@ cdef class PyXPathProcessor:
      def remove_parameter(self, name):
         """
         remove_parameter(self, name)
-        Remove the parameter given by name from the PyXPathProcessor. The parameter will not have any affect on the XPath if it has not yet been executed
+        Remove the parameter given by name from the PyXPathProcessor. The parameter will not have any effect on the
+        XPath if it has not yet been executed.
         Args:
             name (str): The name of the XPath parameter
         Returns:
@@ -3255,7 +3286,6 @@ cdef class PyXPathProcessor:
         """
         set_property(self, name, value)
         Set a property specific to the processor in use.
-
         Args:
             name (str): The name of the property
             value (str): The value of the property
@@ -3263,7 +3293,7 @@ cdef class PyXPathProcessor:
             PyXPathProcessor: set serialization properties (names start with '!' i.e. name "!method" -> "xml")\r
             'resources': directory to find Saxon data files,\r
             's': source as file name,\r
-            'extc': REgister native library to be used with extension functions
+            'extc': Register native library to be used with extension functions
         """
         py_name_string = name.encode('UTF-8') if name is not None else None
         c_name = py_name_string if name is not None else ""
@@ -3273,13 +3303,13 @@ cdef class PyXPathProcessor:
      def declare_namespace(self, prefix, uri):
         """
         declare_namespace(self, prefix, uri)
-        Declare a namespace binding as part of the static context for XPath expressions compiled using this compiler
+        Declare a namespace binding as part of the static context for XPath expressions compiled using this processor
         Args:
-            prefix (str): The namespace prefix. If the value is a zero-length string, this method sets the default namespace
-                          for elements and types.
-            uri (uri) : The namespace URI. It is possible to specify a zero-length string to "undeclare" a namespace;
-                        in this case the prefix will not be available for use, except in the case where the prefix is also a
-                        zero length string, in which case the absence of a prefix implies that the name is in no namespace.
+            prefix (str): The namespace prefix. If the value is a zero-length string, this method sets the default
+                namespace for elements and types.
+            uri (uri): The namespace URI. It is possible to specify a zero-length string to "undeclare" a namespace;
+                in this case the prefix will not be available for use, except in the case where the prefix is also a
+                zero length string, in which case the absence of a prefix implies that the name is in no namespace.
         """
         py_prefix_string = prefix.encode('UTF-8') if prefix is not None else None
         c_prefix = py_prefix_string if prefix is not None else ""
@@ -3291,11 +3321,14 @@ cdef class PyXPathProcessor:
 
      def declare_variable(self, str name):
         """
-        declare_variable(self, name)
-        Declare variable name
+        declare_variable(self, str name)
+        Declare a variable as part of the static context for XPath expressions compiled using this processor.
+        It is an error for the XPath expression to refer to a variable unless it has been declared. This method
+        declares the existence of the variable, but it does not bind any value to the variable; that is done later,
+        when the XPath expression is evaluated. The variable is allowed to have any type (that is, the required
+        type is item()*).
         Args:
-        prefix (str): The variable name to declare
-
+        name (str): The name of the variable, as a string in clark notation
         """
         py_name_string = name.encode('UTF-8') if name is not None else None
         c_name = py_name_string if name is not None else ""
@@ -3318,13 +3351,11 @@ cdef class PyXPathProcessor:
          Say whether the compiler should maintain a cache of compiled expressions.
          Args:
          is_caching (bool): if set to true, caching of compiled expressions is enabled.
-                            If set to false, any existing cache is cleared, and future compiled expressions
-                            will not be cached until caching is re-enabled. The cache is also cleared
-                            (but without disabling future caching)
-                            if any method is called that changes the static context for compiling
-                            expressions, for example declareVariable(QName) or
-                            declareNamespace(String, String).
-
+            If set to false, any existing cache is cleared, and future compiled expressions
+            will not be cached until caching is re-enabled. The cache is also cleared
+            (but without disabling future caching) if any method is called that changes the
+            static context for compiling expressions, for example declare_variable() or
+            declare_namespace().
          """
          cdef bool c_is_caching
          c_is_caching = is_caching
@@ -3334,8 +3365,8 @@ cdef class PyXPathProcessor:
          import_schema_namespace(self, uri)
          Import a schema namespace
          Args:
-         uri (str): The schema namespace to be imported. To import declarations in a no-namespace schema, supply a zero-length string.
-
+         uri (str): The schema namespace to be imported. To import declarations in a no-namespace schema,
+            supply a zero-length string.
          """
          py_uri_string = uri.encode('UTF-8') if uri is not None else None
          c_name = py_uri_string if uri is not None else ""
@@ -3359,7 +3390,7 @@ cdef class PyXPathProcessor:
         exception_occurred(self)
         Check if an exception has occurred internally within SaxonC
         Returns:
-            boolean: True or False if an exception has been reported internally in SaxonC
+            boolean: True if an exception has been reported; otherwise False
         """
         return self.thisxpptr.exceptionOccurred()
 
@@ -3374,10 +3405,10 @@ cdef class PyXPathProcessor:
      def error_message(self):
         """
         error_message(self)
-        A transformation may have a number of errors reported against it. This property returns the error message if there are any errors
-
+        An expression may have a number of errors reported against it. This property returns the error message
+        if there are any errors.
         Returns:
-            str: The message of the exception. Return None if the exception does not exist.
+            str: The message of the exception. Returns None if the exception does not exist.
         """
         return make_py_str(self.thisxpptr.getErrorMessage())
 
@@ -3385,15 +3416,15 @@ cdef class PyXPathProcessor:
      def error_code(self):
         """
         error_code(self)
-        A transformation may have a number of errors reported against it. This property returns the error code if there are any errors
-
+        An expression may have a number of errors reported against it. This property returns the error code
+        if there are any errors.
         Returns:
-            str: The error code associated with the exception. Return None if the exception does not exist.
+            str: The error code associated with the exception. Returns None if the exception does not exist.
         """
         return make_py_str(self.thisxpptr.getErrorCode())
 
 cdef class PySchemaValidator:
-     """An PySchemaValidator represents factory for validating instance documents against a schema."""
+     """A PySchemaValidator represents a factory for validating instance documents against a schema."""
 
      cdef saxoncClasses.SchemaValidator *thissvptr      # hold a C++ instance which we're wrapping
      def __cinit__(self):
@@ -3404,7 +3435,7 @@ cdef class PySchemaValidator:
      def set_cwd(self, cwd):
         """
         set_cwd(self, cwd)
-        Set the current working directory.
+        Set the current working directory
         Args:
             cwd (str): current working directory
         """
@@ -3413,9 +3444,10 @@ cdef class PySchemaValidator:
         self.thissvptr.setcwd(c_cwd)
      def register_schema(self, **kwds):
         """
-        Register schema given as file name or schema text. (xsd_text|xsd_file)
+        register_schema(self, **kwds)
+        Register a schema supplied as file name or schema text
         Args:
-            **kwds: Keyword argument options only one of 'xsd_text' or 'xsd_file'
+            **kwds: Possible keyword arguments: must be one of the following (xsd_text|xsd_file)
         """
         py_error_message = "Error: register_schema should only contain one of the following keyword arguments: (xsd_text|xsd_file)"
         if len(kwds) != 1:
@@ -3439,9 +3471,10 @@ cdef class PySchemaValidator:
      def export_schema(self, file_name):
         """
         export_schema(self, file_name)
-        Export a precompiled Schema Component Model containing all the components (except built-in components) that have been loaded
+        Export a precompiled Schema Component Model containing all the components (except built-in components)
+        that have been loaded
         Args:
-            file_name (str):The file name that will be used for thje saved SCM
+            file_name (str): The file name that will be used for the saved SCM
         """
         py_value_string = file_name.encode('UTF-8') if file_name is not None else None
         c_source = py_value_string
@@ -3455,8 +3488,7 @@ cdef class PySchemaValidator:
         set_output_file(self, output_file)
         Set the name of the output file that will be used by the validator.
         Args:
-            output_file (str):The output file name for use by the validator
-
+            output_file (str): The output file name for use by the validator
         """
         py_value_string = output_file.encode('UTF-8') if output_file is not None else None
         c_source = py_value_string
@@ -3468,10 +3500,10 @@ cdef class PySchemaValidator:
         """
         validate(self, **kwds)
         Validate an instance document by a registered schema.
-
         Args:
-            **kwds: The possible keyword arguments must be one of the follow (file_name|xml_text|xdm_node).
-                    The source file to be validated. Allow None when source document is supplied using the set_source method
+            **kwds: Possible keyword arguments: must be one of the following (file_name|xml_text|xdm_node).
+                Specifies the source file to be validated. Allow None when source document is
+                supplied using the set_source method
         """
         py_error_message = "Error: validate should only contain one of the following keyword arguments: (file_name|xdm_node|xml_text)"
         if len(kwds) > 1:
@@ -3495,15 +3527,15 @@ cdef class PySchemaValidator:
      def validate_to_node(self, **kwds):
         """
         validate_to_node(self, **kwds)
-        Validate an instance document by a registered schema.
-
+        Validate an instance document by a registered schema, returning the validated document.
         Args:
-            **kwds: The possible keyword arguments must be one of the follow (file_name|xml_text|xdm_node).
-                    The source file to be validated. Allow None when source document is supplied using the set_source method
+            **kwds: Possible keyword arguments: must be one of the following (file_name|xml_text|xdm_node).
+                Specifies the source file to be validated. Allow None when source document is supplied
+                using the set_source method.
         Returns:
-            PyXdmNode: The validated document returned to the calling program as an PyXdmNode
+            PyXdmNode: The validated document returned to the calling program as a PyXdmNode
         """
-        py_error_message = "Error: validate should only contain one of the following keyword arguments: (file_name|xdm_node|xml_text)"
+        py_error_message = "Error: validate_to_node should only contain one of the following keyword arguments: (file_name|xdm_node|xml_text)"
         if len(kwds) > 1:
           raise Exception(py_error_message)
         cdef py_value = None
@@ -3535,18 +3567,19 @@ cdef class PySchemaValidator:
             return val
      def set_source_node(self, PyXdmNode source):
         """
-        set_source_node(self, source)
-        Set the source as an PyXdmNode object that will be validated
+        set_source_node(self, PyXdmNode source)
+        Set the source node for validation
         Args:
-            source (PyXdmNode) :
+            source (PyXdmNode): the source node to be validated
         """
         self.thissvptr.setSourceNode(source.derivednptr)
      @property
      def validation_report(self):
         """
-        validation_report
-        The validation report Property
-        :PyXdmNode: The Validation report result from the Schema validator
+        validation_report(self)
+        Get the validation report
+        Returns:
+            PyXdmNode: The Validation report result from the Schema validator
         """
         cdef PyXdmNode val = None
         cdef saxoncClasses.XdmNode * xdmNode = NULL
@@ -3560,10 +3593,11 @@ cdef class PySchemaValidator:
      def set_parameter(self, name, PyXdmValue value):
         """
         set_parameter(self, name, PyXdmValue value)
-        Set the value of the parameter for the Schema validator
+        Set the value of a parameter for the Schema validator
         Args:
-            name (str): the name of the schema parameter, as a string. For namespaced parameter use the JAXP solution i.e. "{uri}name
-            value (PyXdmValue): the value of the parameter, or None to clear a previously set value
+            name (str): the name of the schema parameter, as a string. For a namespaced parameter use
+                clark notation {uri}local
+            value (PyXdmValue): the value of the parameter, or NULL to clear a previously set value
         """
         cdef const char * c_str = NULL
         '''make_c_str(name)'''
@@ -3575,7 +3609,8 @@ cdef class PySchemaValidator:
      def remove_parameter(self, name):
         """
         remove_parameter(self, name)
-        Remove the parameter given by name from the PySchemaValidator. The parameter will not have any affect on the SchemaValidator if it has not yet been executed
+        Remove the parameter given by name from the PySchemaValidator. The parameter will not have any effect on the
+        validation if it has not yet been executed.
         Args:
             name (str): The name of the schema parameter
         Returns:
@@ -3591,24 +3626,23 @@ cdef class PySchemaValidator:
         """
         set_property(self, name, value)
         Set a property specific to the processor in use.
-
         Args:
             name (str): The name of the property
             value (str): The value of the property
         Example:
             PySchemaValidator: set serialization properties (names start with '!' i.e. name "!method" -> "xml")\r
-            'o':outfile name,\r
+            'o': output file name,\r
             'dtd': Possible values 'on' or 'off' to set DTD validation,\r
             'resources': directory to find Saxon data files,\r
             's': source as file name,\r
             'string': Set the source as xml string for validation. Parsing will take place in the validate method\r
-            'report-node': Boolean flag for validation reporting feature. Error validation failures are represented in an XML
-                           document and returned as an PyXdmNode object\r
-            'report-file': Specifcy value as a file name string. This will switch on the validation reporting feature, which will be
-                           saved to the file in an XML format\r
+            'report-node': Boolean flag for validation reporting feature. Error validation failures are represented
+                in an XML document and returned as a PyXdmNode object\r
+            'report-file': Specify value as a file name string. This will switch on the validation reporting feature,
+                which will be saved to the file in an XML format\r
             'verbose': boolean value which sets the verbose mode to the output in the terminal. Default is 'on'
-            'element-type': Set the name of the required type of the top-lelvel element of the doucment to be validated.
-                            The string should be in the Clark notation {uri}local\r
+            'element-type': Set the name of the required type of the top-level element of the document to be validated.
+                The string should be in clark notation {uri}local\r
             'lax': Boolean to set the validation mode to strict (False) or lax ('True')
         """
         cdef const char * c_name = NULL
@@ -3631,7 +3665,7 @@ cdef class PySchemaValidator:
         self.thissvptr.clearParameters()
      def clear_properties(self):
         """
-        clear_parameter(self)
+        clear_properties(self)
         Clear all properties set on the processor
         """
         self.thissvptr.clearProperties()
@@ -3642,7 +3676,7 @@ cdef class PySchemaValidator:
         exception_occurred(self)
         Property to check if an exception has occurred internally within SaxonC
         Returns:
-            boolean: True or False if an exception has been reported internally in SaxonC
+            boolean: True if an exception has been reported; otherwise False
         """
         return self.thissvptr.exceptionOccurred()
 
@@ -3655,47 +3689,43 @@ cdef class PySchemaValidator:
 
      def get_error_message(self, index):
         """
-        error_message(self)
-        A transformation may have a number of errors reported against it. Get the ith error message if there are any errors
-
+        get_error_message(self, index)
+        A validation may have a number of errors reported against it. Get the ith error message if there
+        are any errors.
         Args:
             index (int): The i'th exception
-
         Returns:
-            str: The message of the exception. Return None if the exception does not exist.
+            str: The message of the exception. Returns None if the exception does not exist.
         """
         return make_py_str(self.thissvptr.getErrorMessage(index))
      def get_error_code(self, index):
         """
-        get_error_code(self)
-        A transformation may have a number of errors reported against it. Get the error code if there was an error.
-
-
+        get_error_code(self, index)
+        A validation may have a number of errors reported against it. Get the error code if there was an error.
         Args:
             index (int): The i'th exception
-
         Returns:
-            str: The error code associated with the exception thrown. Return None if the exception does not exist.
+            str: The error code associated with the exception thrown. Returns None if the exception does not exist.
         """
         return make_py_str(self.thissvptr.getErrorCode(index))
      def set_lax(self, lax):
         """
         set_lax(self, lax)
-        The validation mode may be either strict or lax. \r
-        The default is strict; this method may be called to indicate that lax validation is required. With strict validation,
-        validation fails if no element declaration can be located for the outermost element. With lax validation,
-        the absence of an element declaration results in the content being considered valid.
-
+        The validation mode may be either strict or lax. The default is strict; this method may be called to
+        indicate that lax validation is required. With strict validation, validation fails if no element
+        declaration can be located for the outermost element. With lax validation, the absence of an element
+        declaration results in the content being considered valid.
         Args:
-            lax (boolean): lax True if validation is to be lax, False if it is to be strict
+            lax (bool): True if validation is to be lax, False if it is to be strict
         """
         self.thissvptr.setLax(lax)
 cdef class PyXdmValue:
-     """Value in the XDM data model. A value is a sequence of zero or more items, each item being either an atomic value or a node. """
+     """Value in the XDM data model. A value is a sequence of zero or more items, each item being an atomic value,
+      a node, or a function item. """
      cdef saxoncClasses.XdmValue *thisvptr      # hold a C++ instance which we're wrapping
      def __cinit__(self):
         """
-        cinit(self)
+        __cinit__(self)
         Constructor for PyXdmValue
         """
         if type(self) is PyXdmValue:
@@ -3709,10 +3739,10 @@ cdef class PyXdmValue:
                 self.thisvptr.decrementRefCount()
      def add_xdm_item(self, PyXdmItem value):
         """
-        add_xdm_tem(self, PyXdmItem value)
-        Add PyXdmItem to the Xdm sequence
+        add_xdm_item(self, PyXdmItem value)
+        Add an item to the XDM sequence
         Args:
-            value (PyXdmItem): The PyXdmItem object
+            value (PyXdmItem): The PyXdmItem object to add to the sequence
         """
         if value is not None:
             self.thisvptr.addXdmItem(value.derivedptr)
@@ -3723,7 +3753,7 @@ cdef class PyXdmValue:
         head(self)
         Property to get the first item in the sequence
         Returns:
-            PyXdmItem: The PyXdmItem or None if the sequence is empty
+            PyXdmItem: The first item or None if the sequence is empty
         """
 
         cdef saxoncClasses.XdmItem * xdmItem = NULL
@@ -3768,12 +3798,13 @@ cdef class PyXdmValue:
      def item_at(self, index):
         """
         item_at(self, index)
-        Get the n'th item in the value, counting from zero.
-
+        Get the n'th item in the sequence, counting from zero.
         Args:
-            index (int): the index of the item required. Counting from zero
+            index (int): the index of the item required, counting from zero
         Returns:
-            PyXdmItem: Get the item indicated at the index. This could be PyXdmNode or PyXdmAtomicValue object. If the item does not exist return None.
+            PyXdmItem: The item at the specified index. This could be a PyXdmItem or any of its subclasses:
+            PyXdmAtomicValue, PyXdmNode, PyXdmFunctionItem, PyXdmMap or PyXdmArray.
+            If the item does not exist returns None.
 
         """
         cdef PyXdmValue val = None
@@ -3819,8 +3850,7 @@ cdef class PyXdmValue:
      def size(self):
         """
         size(self)
-        Property - Get the number of items in the sequence
-
+        Get the number of items in the sequence
         Returns:
             int: The count of items in the sequence
         """
@@ -3845,10 +3875,13 @@ cdef class PyXdmValue:
         ustring = make_py_str(c_string)
         return ustring
      def __iter__(self):
-        ''' Returns the Iterator object of PyXdmValue'''
+        """
+        __iter__(self)
+        Returns the Iterator object of PyXdmValue
+        """
         return PyXdmValueIterator(self)
 cdef class PyXdmValueIterator:
-     """ Iterator class for the PyXdmValue """
+     """ Iterator class for PyXdmValue """
      cdef PyXdmValue _value
      cdef _index
      def __init__(self, value):
@@ -3872,8 +3905,8 @@ cdef class PyXdmValueIterator:
 
 
 cdef class PyXdmItem(PyXdmValue):
-     """The class XdmItem represents an item in a sequence, as defined by the XDM data model.
-     An item is either an atomic value or a node."""
+     """The class PyXdmItem represents an item in a sequence, as defined by the XDM data model.
+     An item is either an atomic value, a node, or a function item."""
      cdef saxoncClasses.XdmItem *derivedptr      # hold a C++ instance which we're wrapping
      def __cinit__(self):
         """
@@ -3895,7 +3928,7 @@ cdef class PyXdmItem(PyXdmValue):
      def string_value(self):
         """
         string_value(self)
-        Property to get the the string value of the XdmItem
+        Property to get the string value of the PyXdmItem
         """
         cdef const char* c_string = self.derivedptr.getStringValue()
         ustring = make_py_str(c_string)
@@ -3911,31 +3944,28 @@ cdef class PyXdmItem(PyXdmValue):
         """
         is_atomic(self)
         Property to check if the current PyXdmItem is an atomic value
-
         Returns:
-            bool: Check of is atomic value
+            bool: True if the current item is an atomic value
         """
         return self.derivedptr.isAtomic()
 
      @property
      def is_node(self):
         """
-        is_atomic(self)
-        Property to check if the current PyXdmItem is a node value
-
+        is_node(self)
+        Property to check if the current PyXdmItem is a node
         Returns:
-            bool: Check for node value
+            bool: True if the current item is a node
         """
         return self.derivedptr.isNode()
 
      @property
      def is_function(self):
         """
-        is_atomic(self)
-        Property to check if the current PyXdmItem is a function value
-
+        is_function(self)
+        Property to check if the current PyXdmItem is a function item
         Returns:
-            bool: Check of is atomic value
+            bool: True if the current item is a function item
         """
         return self.derivedptr.isFunction()
 
@@ -3943,10 +3973,9 @@ cdef class PyXdmItem(PyXdmValue):
      def is_map(self):
         """
         is_map(self)
-        Property to check if the current PyXdmItem is a map value
-
+        Property to check if the current PyXdmItem is a map item
         Returns:
-            bool: Check for map value
+            bool: True if the current item is a map item
         """
         return self.derivedptr.isMap()
 
@@ -3954,24 +3983,22 @@ cdef class PyXdmItem(PyXdmValue):
      def is_array(self):
         """
         is_array(self)
-        Property to check if the current PyXdmItem is an XdmArray value
-
+        Property to check if the current PyXdmItem is an array item
         Returns:
-            bool: Check for array value
+            bool: True if the current item is an array item
         """
         return self.derivedptr.isArray()
 
      def get_node_value(self):
         """
         get_node_value(self)
-        Get the subclass PyXdmNode for this PyXdmItem object current object if it is a node value
-
+        Get the subclass PyXdmNode for this current PyXdmItem object if it is a node
         Returns:
             PyXdmNode: Subclass this object to PyXdmNode or error
         """
         cdef PyXdmNode val = None
         if self.is_atomic:
-          raise Exception("The PyXdmItem is an PyXdmAtomicValue therefore cannot be sub-classed to an PyXdmNode")
+          raise Exception("The PyXdmItem is a PyXdmAtomicValue therefore cannot be sub-classed to a PyXdmNode")
         val = PyXdmNode()
         val.derivednptr = val.derivedptr = <saxoncClasses.XdmNode*> self.derivedptr
         '''val.derivednptr.incrementRefCount()'''
@@ -3979,15 +4006,14 @@ cdef class PyXdmItem(PyXdmValue):
 
      def get_map_value(self):
         """
-        get_node_value(self)
-        Get the subclass PyXdmNode for this PyXdmItem object current object if it is a node value
-
+        get_map_value(self)
+        Get the subclass PyXdmMap for this current PyXdmItem object if it is a map item
         Returns:
-            PyXdmNode: Subclass this object to PyXdmNode or error
+            PyXdmNode: Subclass this object to PyXdmMap or error
         """
         cdef PyXdmMap val = None
         if self.is_atomic:
-          raise Exception("The PyXdmItem is an PyXdmAtomicValue therefore cannot be sub-classed to an PyXdmNode")
+          raise Exception("The PyXdmItem is a PyXdmAtomicValue therefore cannot be sub-classed to a PyXdmMap")
         val = PyXdmMap()
         val.derivedmmptr = val.derivedptr = <saxoncClasses.XdmMap*> self.derivedptr
         '''val.derivednptr.incrementRefCount()'''
@@ -3996,7 +4022,8 @@ cdef class PyXdmItem(PyXdmValue):
      def head(self):
         """
         head(self)
-        Property to get the first item in the sequence. This would be the PyXdmItem itself as there is only one item in the sequence
+        Property to get the first item in the sequence represented by this PyXdmItem. Since a PyXdmItem is a sequence
+        of length one, this returns the PyXdmItem itself.
         Returns:
             PyXdmItem: The PyXdmItem or None if the sequence is empty
         """
@@ -4004,25 +4031,26 @@ cdef class PyXdmItem(PyXdmValue):
      def get_atomic_value(self):
         """
         get_atomic_value(self)
-        Get the subclass PyXdmAtomicValue for this PyXdmItem object current object if it is an atomic value
-
+        Get the subclass PyXdmAtomicValue for this current PyXdmItem object if it is an atomic value
         Returns:
             PyXdmAtomicValue: Subclass this object to PyXdmAtomicValue or error
         """
         if self.is_atomic == False:
-          raise Exception("The PyXdmItem is not an PyXdmAtomicValue")
+          raise Exception("The PyXdmItem is not a PyXdmAtomicValue")
         val = PyXdmAtomicValue()
         val.derivedaptr = val.derivedptr = <saxoncClasses.XdmAtomicValue*>self.derivedptr
         val.derivedaptr.incrementRefCount()
         return val
 cdef class PyXdmNode(PyXdmItem):
-     """This class represents a node in the XDM data model. A Node is an <code>XdmItem</code>, and is therefore an
-     <code>XdmValue</code> in its own right, and may also participate as one item within a sequence value.
-     <p>The XdmNode interface exposes basic properties of the node, such as its name, its string value, and     """
+     """This class represents a node in the XDM data model. A PyXdmNode is a PyXdmItem, and is therefore a
+     PyXdmValue in its own right, and may also participate as one item within a sequence value.
+     The PyXdmNode interface exposes basic properties of the node, such as its name, its string value, and
+     its typed value.
+     """
      cdef saxoncClasses.XdmNode *derivednptr      # hold a C++ instance which we're wrapping
      def __cinit__(self):
         """
-         cinit(self)
+         __cinit__(self)
          Constructor for PyXdmNode
         """
         self.derivednptr = self.derivedptr = self.thisvptr = NULL
@@ -4038,9 +4066,10 @@ cdef class PyXdmNode(PyXdmItem):
      def head(self):
         """
         head(self)
-        Property to get the first item in the sequence. This would be the PyXdmNode itself as there is only one item in the sequence
+        Property to get the first item in the sequence represented by this PyXdmNode. Since a PyXdmItem is a sequence
+        of length one, this returns the PyXdmNode itself.
         Returns:
-            PyXdmItem: The PyXdmItem or None if the sequence is empty
+            PyXdmNode: The PyXdmNode or None if the sequence is empty
         """
         return self
 
@@ -4048,8 +4077,10 @@ cdef class PyXdmNode(PyXdmItem):
      def node_kind(self):
         """
         node_kind(self)
-        Node Kind property. This will be a value such as {@link net.sf.saxon.type.Type#ELEMENT} or {@link net.sf.saxon.type.Type#ATTRIBUTE}.
-        There are seven kinds of node: documents, elements, attributes, text, comments, processing-instructions, and namespaces.
+        Node kind property. This will be a value such as net.sf.saxon.type.Type#ELEMENT or
+        net.sf.saxon.type.Type#ATTRIBUTE.
+        There are seven kinds of node: documents, elements, attributes, text, comments, processing-instructions,
+        and namespaces.
         Returns:
             int: an integer identifying the kind of node. These integer values are the same as those used in the DOM
         """
@@ -4058,11 +4089,11 @@ cdef class PyXdmNode(PyXdmItem):
      @property
      def node_kind_str(self):
         """
-        node_kind(self)
-        Node Kind property string. This will be a value such as {@link net.sf.saxon.type.Type#ELEMENT} or {@link net.sf.saxon.type.Type#ATTRIBUTE}.
-        There are seven kinds of node: documents, elements, attributes, text, comments, processing-instructions, and namespaces.
+        node_kind_str(self)
+        Node kind property string. Returns one of the following: 'document', 'element', 'attribute', 'text', 'comment',
+        'processing-instruction', 'namespace', 'unknown'.
         Returns:
-            int: an integer identifying the kind of node. These integer values are the same as those used in the DOM
+            str: a string identifying the kind of node.
         """
         cdef str kind
         cdef int nk = self.derivednptr.getNodeKind()
@@ -4089,9 +4120,9 @@ cdef class PyXdmNode(PyXdmItem):
      def name(self):
         """
         name(self)
-        Get the name of the node, as a string in the form of a EQName
+        Get the name of the node, as a string in the form of an EQName
         Returns:
-            str: the name of the node. In the case of unnamed nodes (for example, text and comment nodes) return None
+            str: the name of the node. In the case of unnamed nodes (e.g. text and comment nodes) returns None
         """
         cdef const char* c_string = self.derivednptr.getNodeName()
         if c_string == NULL:
@@ -4103,9 +4134,10 @@ cdef class PyXdmNode(PyXdmItem):
      def typed_value(self):
         """
         typed_value(self)
-        Property - get the typed value of this node, as defined in XDM
+        Get the typed value of this node, as defined in the XPath data model
         Returns:
-            PyXdmValue:the typed value. If the typed value is a single atomic value, this will be returne as an instance of {@link XdmAtomicValue}
+            PyXdmValue: the typed value. If the typed value is a single atomic value, this will be returned
+            as an instance of PyXdmAtomicValue
         """
         cdef PyXdmValue val = None
         cdef saxoncClasses.XdmValue * xdmValue = self.derivednptr.getTypedValue()
@@ -4120,12 +4152,12 @@ cdef class PyXdmNode(PyXdmItem):
      def base_uri(self):
         """
         base_uri(self)
-        Base uri Property. Get the Base URI for the node, that is, the URI used for resolving a relative URI contained in the node.
-        This will be the same as the System ID unless xml:base has been used. Where the node does not have a base URI of its own,
-        the base URI of its parent node is returned.
+        Base URI property. Get the Base URI for the node, that is, the URI used for resolving a relative URI
+        contained in the node. This will be the same as the System ID unless xml:base has been used. Where the
+        node does not have a base URI of its own, the base URI of its parent node is returned.
         Returns:
-            str: String value of the base uri for this node. This may be NULL if the base URI is unknown, including the case
-                 where the node has no parent.
+            str: String value of the base uri for this node. This may be NULL if the base URI is unknown,
+                including the case where the node has no parent.
         """
         return make_py_str(self.derivednptr.getBaseUri())
 
@@ -4133,7 +4165,7 @@ cdef class PyXdmNode(PyXdmItem):
      def string_value(self):
         """
         string_value(self)
-        Property to get the string value of the node as defined in the XPath data model.
+        Property to get the string value of the node as defined in the XPath data model
         Returns:
             str: The string value of this node
         """
@@ -4143,7 +4175,7 @@ cdef class PyXdmNode(PyXdmItem):
      def __str__(self):
         """
         __str__(self)
-        The string value of the node as defined in the XPath data model
+        The string value of the node as returned by the toString method
         Returns:
             str: String value of this node
         """
@@ -4152,7 +4184,7 @@ cdef class PyXdmNode(PyXdmItem):
         return ustring
      def __repr__(self):
         """
-        ___repr__
+        ___repr__(self)
         """
         cdef const char* c_string = self.derivednptr.toString()
         ustring = make_py_str(c_string)
@@ -4162,18 +4194,17 @@ cdef class PyXdmNode(PyXdmItem):
         get_parent(self)
         Get the current node's parent
         Returns:
-            PyXdmNode: The parent node as PyXdmNode object
+            PyXdmNode: The parent node as a PyXdmNode object
         """
         cdef PyXdmNode val = PyXdmNode()
         val.derivednptr = val.derivedptr = val.thisvptr = self.derivednptr.getParent()
         return val
      def get_attribute_value(self, name):
         """
-        getAttribute_value(self, name)
-        The name of the required attribute
-
+        get_attribute_value(self, name)
+        Get the value of a named attribute
         Args:
-            name(str): the eqname of the required attribute
+            name (str): the EQName of the required attribute
         """
         py_value_string = name.encode('UTF-8') if name is not None else None
         cdef char * c_name = py_value_string if name is not None else ""
@@ -4186,16 +4217,16 @@ cdef class PyXdmNode(PyXdmItem):
      def attribute_count(self):
         """
         attribute_count(self)
-        Property to get the count of attribute nodes on this XdmNode object. If this current node is not an element node then return 0
+        Get the number of attribute nodes on this node. If the node is not an element node then returns 0.
         Returns:
-            int: Count of attribute nodes
+            int: The number of attribute nodes
         """
         return self.derivednptr.getAttributeCount()
      @property
      def attributes(self):
         """
         attribute_nodes(self)
-        Property to get the attribute nodes as a list of PyXdmNode objects
+        Get the attribute nodes of this node as a list of PyXdmNode objects
         Returns:
             list[PyXdmNode]: List of PyXdmNode objects
         """
@@ -4216,7 +4247,7 @@ cdef class PyXdmNode(PyXdmItem):
      def children(self):
         """
         children(self)
-        Property to get children of this current node. List of child nodes
+        Get the children of this node as a list of PyXdmNode objects
         Returns:
             list[PyXdmNode]: List of PyXdmNode objects
         """
@@ -4237,8 +4268,9 @@ cdef class PyXdmNode(PyXdmItem):
 
 cdef class PyXdmAtomicValue(PyXdmItem):
      """
-     The class PyXdmAtomicValue represents an item in an Xath sequence that is an atomic value. The value may belong to any of the
-     19 primitive types defined in XML Schema, or to a type derived from these primitive types, or the XPath type xs:untypedAtomic.
+     The class PyXdmAtomicValue represents an item in an XPath sequence that is an atomic value. The value may
+     belong to any of the 19 primitive types defined in XML Schema, or to a type derived from these primitive
+     types, or the XPath type xs:untypedAtomic.
      """
      cdef saxoncClasses.XdmAtomicValue *derivedaptr      # hold a C++ instance which we're wrapping
      def __cinit__(self):
@@ -4255,8 +4287,8 @@ cdef class PyXdmAtomicValue(PyXdmItem):
      @property
      def primitive_type_name(self):
         """
-        get_primitive_type_name()
-        Property - Get the primitive type name of the PyXdmAtomicValue
+        primitive_type_name()
+        Get the primitive type name of the PyXdmAtomicValue
         Returns:
             str: String of the primitive type name
         """
@@ -4265,17 +4297,17 @@ cdef class PyXdmAtomicValue(PyXdmItem):
      @property
      def boolean_value(self):
         """
-        Property which returns the boolean value of the PyXdmAtomicValue
+        Get the boolean value of the PyXdmAtomicValue, converted using the XPath casting rules
         Returns:
-            bool: boolean value.
+            bool: the result of converting to a boolean
         """
         return self.derivedaptr.getBooleanValue()
      @property
      def double_value(self):
         """
-        Property which is returns the double value of the PyXdmAtomicValue if it can be converted.
+        Get the double value of the PyXdmAtomicValue, converted using the XPath casting rules
         Returns:
-            double: Double value of the Xdm object
+            double: the result of converting to a double
         """
 
         return self.derivedaptr.getDoubleValue()
@@ -4283,27 +4315,30 @@ cdef class PyXdmAtomicValue(PyXdmItem):
      def head(self):
         """
         head(self)
-        Property to get the first item in the sequence. This would be the PyXdmAtomicValue itself as there is only one item in the sequence
+        Property to get the first item in the sequence represented by this PyXdmAtomicValue. Since a PyXdmItem
+        is a sequence of length one, this returns the PyXdmAtomicValue itself.
         Returns:
-            PyXdmAtomicValue: The PyXdmAtomic or None if the sequence is empty
+            PyXdmAtomicValue: The PyXdmAtomicValue or None if the sequence is empty
         """
         return self
 
      @property
      def integer_value(self):
         """
-        Property which is returns the int value of the PyXdmAtomicValue if it can be converted.
+        integer_value(self)
+        Get the integer value of the PyXdmAtomicValue, converted using the XPath casting rules
         Returns:
-            int: Int value of the Xdm object
+            int: the result of converting to an integer
         """
 
         return self.derivedaptr.getLongValue()
      @property
      def string_value(self):
         """
-        Property which returns the string value of the PyXdmAtomicValue
+        string_value(self)
+        Get the string value of the PyXdmAtomicValue, converted using the XPath casting rules
         Returns:
-            str: String value of the Xdm object
+            str: the result of converting to a string
         """
         ustring = make_py_str(self.derivedaptr.getStringValue())
         return ustring
@@ -4318,7 +4353,7 @@ cdef class PyXdmAtomicValue(PyXdmItem):
      def __str__(self):
         """
         __str__(self)
-        The string value of the node as defined in the XPath data model
+        The string value of the node as returned by the toString method
         Returns:
             str: String value of this node
         """
@@ -4326,7 +4361,7 @@ cdef class PyXdmAtomicValue(PyXdmItem):
         return ustring
      def __repr__(self):
         """
-        ___repr__
+        ___repr__(self)
         """
         ustring = make_py_str(self.derivedaptr.toString())
         return ustring
@@ -4370,6 +4405,8 @@ cdef class PyXdmFunctionItem(PyXdmItem):
          """
          name(self)
          Get the name of the function
+         Returns:
+             str: The name of the function as an EQName
          """
          ustring = make_py_str(self.derivedfptr.getName())
          return ustring
@@ -4378,9 +4415,8 @@ cdef class PyXdmFunctionItem(PyXdmItem):
      def arity(self):
          """
          arity(self)
-         Property - Get the arity of the function
-
-         :returns:
+         Get the arity of the function
+         Returns:
              int: The arity of the function, that is, the number of arguments in the function's signature
          """
          return self.derivedfptr.getArity()
@@ -4393,19 +4429,26 @@ cdef class PyXdmFunctionItem(PyXdmItem):
      @property
      def string_value(self):
         """
-        Property which returns the string value of the PyXdmFunctionItem
+        string_value(self)
+        Property to get the string value of the PyXdmFunctionItem
         Returns:
-            str: String value of the Xdm object
+            str: String value of the function item
         """
         ustring = make_py_str(self.derivedfptr.getStringValue())
         return ustring
 
      def get_system_function(self, PySaxonProcessor proc, str name, arity):
          """
+         get_system_function(self, PySaxonProcessor proc, str name, arity)
          Get a system function. This can be any function defined in XPath 3.1 functions and operators,
          including functions in the math, map, and array namespaces. It can also be a Saxon extension
          function, provided a licensed Processor is used.
-         :return:
+         Args:
+             proc (PySaxonProcessor): the Saxon processor
+             name (str): the name of the requested function
+             arity (int): the arity of the requested function
+         Returns:
+             PyXdmFunctionItem: the requested function
          """
          cdef char * c_str = NULL
          cdef PyXdmFunctionItem func = None
@@ -4422,11 +4465,15 @@ cdef class PyXdmFunctionItem(PyXdmItem):
 
      def call(self, PySaxonProcessor proc, list args):
          """
-         call(self, list args)
+         call(self, PySaxonProcessor proc, list args)
          Call the function
-         :param args: arguments the values to be supplied as arguments to the function. The "function
-                      conversion rules" will be applied to con
-         :return: PyXdmValue - the result of calling the function
+         Args:
+             proc (PySaxonProcessor): the Saxon processor
+             args (list): the values to be supplied as arguments to the function. The "function
+                conversion rules" will be applied to convert the arguments to the required
+                type when necessary.
+         Returns:
+             PyXdmValue: the result of calling the function
          """
          cdef int _len = len(args)
          cdef saxoncClasses.XdmValue ** argumentV = self.derivedfptr.createXdmValueArray(_len)
@@ -4436,7 +4483,7 @@ cdef class PyXdmFunctionItem(PyXdmItem):
              ivalue_ = args[x]
              argumentV[x] = ivalue_.thisvptr
            else:
-             raise Exception("Argument value at position ",x," is not an PyXdmValue")
+             raise Exception("Argument value at position ",x," is not a PyXdmValue")
          '''c_functionName = make_c_str(function_name)'''
          cdef saxoncClasses.XdmValue * c_xdmValue = NULL
          cdef PyXdmAtomicValue avalue_
@@ -4483,14 +4530,14 @@ cdef class PyXdmFunctionItem(PyXdmItem):
 
 cdef class PyXdmMap(PyXdmFunctionItem):
      """
-     The class PyXdmMap represents a map in the XDM data model. A map is a list of zero or more entries, each of which
-     is a pair comprising a key (which is an atomic value) and a value (which is an arbitrary value).
-     The map itself is an XDM item. <p>An XdmMap is immutable.</p>
+     The class PyXdmMap represents a map item in the XDM data model. A map is a list of zero or more entries, each of
+     which is a pair comprising a key (which is an atomic value) and a value (which is an arbitrary value).
+     The map itself is an XDM item. A PyXdmMap is immutable.
      """
      cdef saxoncClasses.XdmMap *derivedmmptr      # hold a C++ instance which we're wrapping
      def __cinit__(self):
         """
-         cinit(self)
+         __cinit__(self)
          Constructor for PyXdmMap
         """
         if type(self) is PyXdmMap:
@@ -4514,7 +4561,8 @@ cdef class PyXdmMap(PyXdmFunctionItem):
          map_size(self)
          Get the number of entries in the map
          Returns:
-             the number of entries in the map. (Note that the <code>size()</code> method returns 1 (one), because an XDM map is an item.)
+             int: the number of entries in the map. (Note that the size() method returns 1 (one), because an XDM
+             map is an item.)
          """
          return self.derivedmmptr.mapSize()
 
@@ -4523,9 +4571,11 @@ cdef class PyXdmMap(PyXdmFunctionItem):
          get(self, key)
          Returns the value to which the specified key is mapped, or NULL if this map contains no mapping for the key.
          Args:
-               key  -   the key whose associated value is to be returned. The key supports the following types XdmAtomicValue, str, int and float
+             key: the key whose associated value is to be returned. The key supports the following types:
+                PyXdmAtomicValue, str, int and float
          Returns:
-             PyXdmValue  - the value to which the specified key is mapped, or NULL if this map contains no mapping for the key
+             PyXdmValue: the value to which the specified key is mapped, or NULL if this map contains no
+             mapping for the key
          """
          cdef saxoncClasses.XdmValue * c_xdmValue = NULL
          cdef PyXdmAtomicValue avalue_
@@ -4601,18 +4651,23 @@ cdef class PyXdmMap(PyXdmFunctionItem):
                  return None
 
      def __iter__(self):
-        ''' Returns the Iterator object of PyXdmMap'''
+        """
+        __iter__(self)
+        Returns the Iterator object of PyXdmMap
+        """
         return iter(self.keys())
 
 
-     def put(self, PyXdmAtomicValue key, PyXdmValue  value):
+     def put(self, PyXdmAtomicValue key, PyXdmValue value):
          """
-         put(self, PYXdmAtomicValue key, PyXdmValue value)
-         Create a new map containing an additional (key, value) pair. If there is an existing entry with the same key, it is removed
+         put(self, PyXdmAtomicValue key, PyXdmValue value)
+         Create a new map containing an additional (key, value) pair. If there is an existing entry with
+         the same key, it is replaced.
          Args:
-               key  -   The key to be removed given as an XdmAtomicValue
+             key (PyXdmAtomicValue): The key for the new map entry
+             value (PyXdmValue): The value for the new map entry
          Returns:
-             PyXdmMap  - a new map containing the additional entry. The original map is unchanged.
+             PyXdmMap: a new map containing the new entry. The original map is unchanged.
          """
          cdef PyXdmMap newmap_
          cdef saxoncClasses.XdmMap * c_xdmMap = NULL
@@ -4631,12 +4686,12 @@ cdef class PyXdmMap(PyXdmFunctionItem):
 
      def remove(self, PyXdmAtomicValue key):
          """
-         remove(self, PYXdmAtomicValue key)
+         remove(self, PyXdmAtomicValue key)
          Create a new map in which the entry for a given key has been removed.
          Args:
-               key  -   The key to be removed given as an XdmAtomicValue
+             key (PyXdmAtomicValue): The key to be removed given as an PyXdmAtomicValue
          Returns:
-             PyXdmMap  - a map without the specified entry. The original map is unchanged.
+             PyXdmMap: a map without the specified entry. The original map is unchanged.
          """
          cdef PyXdmMap newmap_
          cdef saxoncClasses.XdmMap * c_xdmMap = NULL
@@ -4654,8 +4709,9 @@ cdef class PyXdmMap(PyXdmFunctionItem):
      def keys(self):
          """
          keys(self)
-         Keys in the XdmMap
-         :return: list of PyXdmAtomicValues
+         Get the keys in the PyXdmMap
+         Returns:
+             list[PyXdmAtomicValue]: List of PyXdmAtomicValue objects
          """
          """TODO: memory management for the array returned from C++"""
          cdef list p_values = []
@@ -4677,22 +4733,21 @@ cdef class PyXdmMap(PyXdmFunctionItem):
      @property
      def isEmpty(self):
          """
-         isEmpty(self, PYXdmAtomicValue key)
+         isEmpty(self)
          Returns true if this map contains no key-value mappings.
-
          Returns:
-             true if this map contains no key-value mappings
+             bool: true if this map contains no key-value mappings
          """
          self.derivedmmptr.isEmpty()
 
      def contains_key(self, PyXdmAtomicValue key):
          """
-         contains_key(self, PYXdmAtomicValue key)
+         contains_key(self, PyXdmAtomicValue key)
          Returns true if this map contains a mapping for the specified key.
          Args:
-               key (PyXdmAtomicValue) - key key whose presence in this map is to be tested
+             key (PyXdmAtomicValue): key whose presence in this map is to be tested
          Returns:
-             true if this map contains a mapping for the specified key
+             bool: true if this map contains a mapping for the specified key
          """
          if key is None:
              return None
@@ -4702,9 +4757,10 @@ cdef class PyXdmMap(PyXdmFunctionItem):
      @property
      def string_value(self):
         """
-        Property which returns the string value of the PyXdmMap
+        string_value(self)
+        Property to get the string value of the PyXdmMap
         Returns:
-            str: String value of the Xdm object
+            str: String value of the map item
         """
         ustring = make_py_str(self.derivedmmptr.getStringValue())
         return ustring
@@ -4712,7 +4768,9 @@ cdef class PyXdmMap(PyXdmFunctionItem):
      def values(self):
          """
          values(self)
-         :return:
+         Get the values found in this map, that is, the value parts of the key-value pairs.
+         Returns:
+             list: List of the values found in this map.
          """
          """TODO: memory management for the array returned from C++"""
          cdef list p_values = []
@@ -4771,8 +4829,8 @@ cdef class PyXdmMap(PyXdmFunctionItem):
 
 cdef class PyXdmArray(PyXdmFunctionItem):
      """
-     The class PyXdmArray represents an array in the XDM data model. An array is a list of zero or more members, each of which
-       is an arbitrary XDM value. The array itself is an XDM item.
+     The class PyXdmArray represents an array in the XDM data model. An array is a list of zero or more members,
+     each of which is an arbitrary XDM value. The array itself is an XDM item.
      """
      cdef saxoncClasses.XdmArray *derivedaaptr      # hold a C++ instance which we're wrapping
      def __cinit__(self):
@@ -4792,25 +4850,30 @@ cdef class PyXdmArray(PyXdmFunctionItem):
         return make_py_str(self.derivedaaptr.toString())
 
      def __iter__(self):
-        ''' Returns the Iterator object of PyXdmArray'''
+        """
+        __iter__(self)
+        Returns the Iterator object of PyXdmArray
+        """
         return iter(self.as_list())
 
      @property
      def array_length(self):
          """
+         array_length(self)
          Get the number of members in the array
          Returns:
              int: the number of members in the array. (Note that the size() method returns 1 (one),
-              because an XDM array is an item.)
+             because an XDM array is an item.)
          """
          return self.derivedaaptr.arrayLength()
 
      @property
      def string_value(self):
         """
-        Property which returns the string value of the PyXdmArray
+        string_value(self)
+        Property to get the string value of the PyXdmArray
         Returns:
-            str: String value of the Xdm object
+            str: String value of the array item
         """
         ustring = make_py_str(self.derivedaaptr.getStringValue())
         return ustring
@@ -4820,7 +4883,7 @@ cdef class PyXdmArray(PyXdmFunctionItem):
          get(self, int n)
          Get the n'th member in the array, counting from zero
          Args:
-               n (int): the member that is required, counting the first member in the array as member zero
+             n (int): the member that is required, counting the first member in the array as member zero
          Returns:
              PyXdmValue: the n'th member in the sequence making up the array, counting from zero
          """
@@ -4841,8 +4904,9 @@ cdef class PyXdmArray(PyXdmFunctionItem):
          put(self, int n, PyXdmValue value)
          Create a new array in which one member is replaced with a new value.
          Args:
-               n (int): n the position of the member that is to be replaced, counting the first member in the array as member zero
-               value (PyXdmValue): the new value for this member
+             n (int): n the position of the member that is to be replaced, counting the first member
+                in the array as member zero
+             value (PyXdmValue): the new value for this member
          Returns:
              PyXdmArray: a new array, the same length as the original, with one member replaced by a new value
          """
@@ -4882,9 +4946,9 @@ cdef class PyXdmArray(PyXdmFunctionItem):
      def add_member(self, value):
          """
          add_member(self, value)
-         Create a new array in which one member is replaced with a new value.
+         Append a new member to an array.
          Args:
-               value (PyXdmValue): the new member as PYXdmValue or any of its subclasses
+             value (PyXdmValue): the new member
          Returns:
              PyXdmArray: a new array, one item longer than the original
          """
@@ -4920,7 +4984,7 @@ cdef class PyXdmArray(PyXdmFunctionItem):
          concat(self, PyXdmArray value)
          Concatenate another array to this array
          Args:
-               value (PyXdmArray): the other array
+             value (PyXdmArray): the other array
          Returns:
              PyXdmArray: a new array, containing the members of this array followed by the members of the other array
          """
@@ -4941,7 +5005,7 @@ cdef class PyXdmArray(PyXdmFunctionItem):
          as_list(self)
          Get the members of the array in the form of a list.
          Returns:
-               list: list of the members of this array.
+             list: list of the members of this array
          """
          """
          TODO: handle memory management"""
