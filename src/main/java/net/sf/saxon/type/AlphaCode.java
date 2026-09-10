@@ -55,7 +55,7 @@ import java.util.Set;
  * <li>ASN: xs:normalizedString</li>
  * <li>ASNT: xs:token</li>
  * <li>ASNTL: xs:language</li>
- * <li>ASNTM: xs:NMTOKEN </li>
+ * <li>ASNTK: xs:NMTOKEN </li>
  * <li>ASNTN: xs:Name</li>
  * <li>ASNTNC: xs:NCName</li>
  * <li>ASNTNCI: xs:ID</li>
