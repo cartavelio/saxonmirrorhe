@@ -13,7 +13,6 @@ import org.graalvm.nativeimage.ObjectHandle;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
 import org.graalvm.nativeimage.c.type.CCharPointer;
 import org.graalvm.nativeimage.c.type.CLongPointer;
-import org.graalvm.nativeimage.c.type.CTypeConversion;
 import org.graalvm.word.WordFactory;
 
 import javax.xml.transform.Source;
@@ -80,9 +79,9 @@ public class SaxonCMessageListener implements MessageListener2 {
 
         String cwd = null;
         if(ccwd != WordFactory.nullPointer()) {
-            cwd =   CTypeConversion.toJavaString(ccwd);
+            cwd =   SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
-        String mode = CTypeConversion.toJavaString(c_mode);
+        String mode = SaxonCAPI.toJavaString(c_mode, WordFactory.nullPointer());
 
         SaxonCMessageListener listener = new SaxonCMessageListener(processor, cwd, mode);
 

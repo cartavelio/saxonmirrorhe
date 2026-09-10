@@ -182,11 +182,11 @@ public class XdmUtils {
          * @return C Pointer to the string value in the C memory space. Exceptions are handled and returned to the C program as null pointer
          */
         @CEntryPoint(name = "j_EQNameToClarkName", exceptionHandler = SaxonCExceptionCCharHandler.class)
-        public static CCharPointer j_EQNameToClarkName(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, CCharPointer c_eqname) {
+        public static CCharPointer j_EQNameToClarkName(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, CCharPointer c_eqname) throws SaxonApiException {
             if(c_eqname == WordFactory.nullPointer()) {
                 return WordFactory.nullPointer();
             }
-            String eqname = CTypeConversion.toJavaString(c_eqname);
+            String eqname = SaxonCAPI.toJavaString(c_eqname, WordFactory.nullPointer());
             QName qname = QName.fromEQName(eqname);
             String clarkname_result = qname.getClarkName();
             CCharPointer a = SaxonCAPI.stringToNative2(alloc, clarkname_result);
@@ -201,11 +201,11 @@ public class XdmUtils {
          * @return C Pointer to the string value in the C memory space. Exceptions are handled and returned to the C program as null pointer
          */
         @CEntryPoint(name = "j_clarkNameToEQName", exceptionHandler = SaxonCExceptionCCharHandler.class)
-        public static CCharPointer j_clarkNameToEQName(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, CCharPointer c_clarkname) {
+        public static CCharPointer j_clarkNameToEQName(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, CCharPointer c_clarkname) throws SaxonApiException {
             if(c_clarkname == WordFactory.nullPointer()) {
                 return WordFactory.nullPointer();
             }
-            String clarkname = CTypeConversion.toJavaString(c_clarkname);
+            String clarkname = SaxonCAPI.toJavaString(c_clarkname, WordFactory.nullPointer());
             QName qname = QName.fromClarkName(clarkname);
             String eqname_result = qname.getEQName();
             CCharPointer a = SaxonCAPI.stringToNative2(alloc, eqname_result);
@@ -378,7 +378,7 @@ public class XdmUtils {
             throw new SaxonApiException("SystemFunction name is null");
         }
         Processor proc = SaxonCAPI.objectHandles.get(procRef);
-        String eqname = CTypeConversion.toJavaString(c_eqname);
+        String eqname = SaxonCAPI.toJavaString(c_eqname, WordFactory.nullPointer());
         QName qname = null;
         if(eqname.startsWith("Q")){
             qname =  QName.fromEQName(eqname);
@@ -703,7 +703,7 @@ public class XdmUtils {
      * @throws IllegalArgumentException
      */
     @CEntryPoint(name = "j_makeXdmArrayFromStrings", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long makeXdmArrayFromStrings(IsolateThread thread, CCharPointer ccharPointer, int length) {
+    public static long makeXdmArrayFromStrings(IsolateThread thread, CCharPointer ccharPointer, int length) throws SaxonApiException {
 
         XdmArray array = null;
         String [] values = new String[length];
@@ -713,7 +713,7 @@ public class XdmUtils {
          }  else {
 
              for(int i =0; i< length; i++) {
-                 values[i] = CTypeConversion.toJavaString(ccharPointer.addressOf(i));
+                 values[i] = SaxonCAPI.toJavaString(ccharPointer.addressOf(i), WordFactory.nullPointer());
 
              }
              array = XdmArray.makeArray(values);
@@ -725,7 +725,7 @@ public class XdmUtils {
     /**
      * make an XdmArray from a pointer array of int values
      * @param thread  - Graalvm runtime data structure for the thread
-     * @param shortPointer - the C int pointer array of items
+     * @param intPointer - the C int pointer array of items
      * @param length - the number of items in the pointer array
      * @return long value as reference to the created XdmArray object held in the ObjectHandle's pool
      * Exceptions are handled and returned to the C program as null pointer
@@ -755,7 +755,7 @@ public class XdmUtils {
     /**
      * make an XdmArray from a pointer array of long values
      * @param thread  - Graalvm runtime data structure for the thread
-     * @param shortPointer - the C long pointer array of items
+     * @param longPointer - the C long pointer array of items
      * @param length - the number of items in the pointer array
      * @return long value as reference to the created XdmArray object held in the ObjectHandle's pool
      * Exceptions are handled and returned to the C program as null pointer
@@ -995,7 +995,7 @@ public class XdmUtils {
             throw new SaxonApiException("Atomic key object is null");
         }
         XdmMap xdmMap = SaxonCAPI.objectHandles.get(mapRef);
-        String atomicKey = CTypeConversion.toJavaString(atomicKeyStr);
+        String atomicKey = SaxonCAPI.toJavaString(atomicKeyStr, WordFactory.nullPointer());
         XdmValue result = xdmMap.get(atomicKey);
         if(result == null) {
             return SaxonCAPI.STATUS_FAIL;
@@ -1263,10 +1263,10 @@ public class XdmUtils {
      * attribute with the specified name. Otherwise return the string value of the
      * selected attribute node.
      */
-    @CEntryPoint(name = "j_getAttributeValue")
-    public static CCharPointer getAttributeValue(IsolateThread thread, ObjectHandle nodeRef, CCharPointer c_eqname, SaxonCAPI.AllocatorCCharFn alloc) {
+    @CEntryPoint(name = "j_getAttributeValue" , exceptionHandler = SaxonCExceptionCCharHandler.class)
+    public static CCharPointer getAttributeValue(IsolateThread thread, ObjectHandle nodeRef, CCharPointer c_eqname, SaxonCAPI.AllocatorCCharFn alloc) throws SaxonApiException {
         XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
-        String eqname = CTypeConversion.toJavaString(c_eqname);
+        String eqname = SaxonCAPI.toJavaString(c_eqname, WordFactory.nullPointer());
         QName name = QName.fromEQName(eqname);
         if (SaxonCAPI.debug) {
             System.err.println("EQName= " + eqname);
@@ -1484,11 +1484,12 @@ public class XdmUtils {
      * Make XdmAtomicValue from string
      * @param thread  - Graalvm runtime data structure for the thread
      * @param str - string value as a C char pointer array
+     * @param c_encoding - The charset to be used. If not specified then use the platform default
      * @return  the long value reference to the XdmAtomicValue object in the ObjectHandle's pool
      */
-    @CEntryPoint(name = "j_makeStringValue")
-    public static long makeStringValue(IsolateThread thread,CCharPointer str){
-        String valueStr = CTypeConversion.toJavaString(str);
+    @CEntryPoint(name = "j_makeStringValue", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long makeStringValue(IsolateThread thread, CCharPointer str, CCharPointer c_encoding) throws SaxonApiException{
+        String valueStr = SaxonCAPI.toJavaString(str, c_encoding);
 
         XdmAtomicValue value = new XdmAtomicValue(valueStr);
         ObjectHandle handle = SaxonCAPI.createHandle(value);
@@ -1583,7 +1584,7 @@ public class XdmUtils {
      @CEntryPoint(name = "j_makeQNameValue")
      public static long makeQNameValue(IsolateThread thread, CCharPointer str) throws SaxonApiException {
 
-         XdmValue value = SaxonCAPI.createXdmAtomicItem("QName", CTypeConversion.toJavaString(str));
+         XdmValue value = SaxonCAPI.createXdmAtomicItem("QName", SaxonCAPI.toJavaString(str, WordFactory.nullPointer()));
          ObjectHandle handle = SaxonCAPI.createHandle(value);
          return handle.rawValue();
      }

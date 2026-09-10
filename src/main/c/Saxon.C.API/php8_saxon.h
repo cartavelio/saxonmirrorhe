@@ -202,6 +202,8 @@ PHP_METHOD(SaxonProcessor, createQNameValue);
 PHP_METHOD(SaxonProcessor, parseXmlFromString);
 PHP_METHOD(SaxonProcessor, parseXmlFromFile);
 PHP_METHOD(SaxonProcessor, parseXmlFromUri);
+PHP_METHOD(SaxonProcessor, parseJsonFromString);
+PHP_METHOD(SaxonProcessor, parseJsonFromFile);
 PHP_METHOD(SaxonProcessor, setcwd);
 PHP_METHOD(SaxonProcessor, attachCurrentThread);
 PHP_METHOD(SaxonProcessor, detachCurrentThread);

@@ -285,15 +285,18 @@ def testNodeAxis(saxonproc, data_dir):
         uri_str = ns.string_value
         ns_prefix = ns.name
 
-        print("xmlns:" + ns_prefix + "='" + uri_str + "'")
+        if ns_prefix is not None:
+            print("xmlns:" + ns_prefix + "='" + uri_str + "'")
+        else:
+            print("xmlns uri=" + uri_str + "'")
 
 
 
 def testCollection(saxonproc, data_dir):
     xq = saxonproc.new_xquery_processor()
-    print(getcwd())
-    xq.set_query_base_uri(data_dir)
-    xq.set_query_content("collection('?select=*.xml")
+    print(os.getcwd())
+    xq.set_query_base_uri(os.getcwd()+data_dir)
+    xq.set_query_content("collection('?select=*.xml')")
     r = xq.run_query_to_value()
     assert r is not None
 
@@ -304,7 +307,7 @@ def testXquery_40_functions():
     proc.set_configuration_property('http://saxon.sf.net/feature/allowSyntaxExtensions', 'on')
     xquery_processor = proc.new_xquery_processor()
     result = xquery_processor.run_query_to_value(query_text = 'xquery version "4.0"; parse-html("<p>This is paragraph 1.<p>This is paragraph 2.")', lang= '4.0')
-    assert "paragraph" in result
+    assert "paragraph" in str(result)
 
 def testXquery_40_functions_error():
     try:
@@ -400,7 +403,7 @@ def testCaseVariantFileLoads(saxonproc, files_dir, data_dir):
 
 def testNamedTemplateToFileDefault(saxonproc):
     trans = saxonproc.new_xslt30_processor()
-    trans.set_cwd(os.getcwd())
+    trans.set_cwd(os.getcwd()+'/')
     input_ = saxonproc.parse_xml(xml_text="<doc><e>text</e></doc>")
     executable = trans.compile_stylesheet(stylesheet_text = '''
      <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -842,8 +845,7 @@ def test_return_document_node(saxonproc):
 
 def testxQuery1(saxonproc, data_dir):
     query_proc = saxonproc.new_xquery_processor()
-    query_proc.set_cwd(os.getcwd())
-    saxonproc.set_cwd(os.getcwd())
+    query_proc.set_cwd(os.getcwd()+'/')
     query_proc.clear_properties()
     query_proc.clear_parameters()
     xmlFile = data_dir+"cat.xml"
@@ -1048,10 +1050,10 @@ def test_node_list():
     personData = str(children)
     assert ('<person att1' in personData)
 
-def test_parse_xml_file1():
+def test_parse_xml_file1(data_dir):
     sp = PySaxonProcessor()
 
-    node = sp.parse_xml(xml_file_name='cat.xml')
+    node = sp.parse_xml(xml_file_name=data_dir+'/cat.xml')
     outNode = node.children[0]
     assert outNode.name == 'out'
 

@@ -113,12 +113,13 @@ public class XPathProcessor extends SaxonCAPI {
      *               is in no namespace.
      * @throws NullPointerException if either the prefix or uri is null.
      */
-    @CEntryPoint(name = "j_xp_declareNamespace")
-    public static void declareNamespace(IsolateThread thread, ObjectHandle xpathProcessorRef,  CCharPointer c_prefix, CCharPointer c_uri) {
-        String prefix = CTypeConversion.toJavaString(c_prefix);
-        String uri = CTypeConversion.toJavaString(c_uri);
+    @CEntryPoint(name = "j_xp_declareNamespace", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long declareNamespace(IsolateThread thread, ObjectHandle xpathProcessorRef,  CCharPointer c_prefix, CCharPointer c_uri) throws SaxonApiException {
+        String prefix = SaxonCAPI.toJavaString(c_prefix, WordFactory.nullPointer());
+        String uri = SaxonCAPI.toJavaString(c_uri, WordFactory.nullPointer());
         XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);
         xPathProcessor.getCompiler().declareNamespace(prefix, uri);
+        return SaxonCAPI.STATUS_OK;
     }
 
     /**
@@ -133,14 +134,15 @@ public class XPathProcessor extends SaxonCAPI {
      * @param xpathProcessorRef - reference to XPathProcessor object held in the ObjectHandle's pool
      * @param c_qname The name of the variable, expressions as a clark name string
      */
-    @CEntryPoint(name = "j_xp_declareVariable")
-    public static void declareVariable(IsolateThread thread, ObjectHandle xpathProcessorRef,  CCharPointer c_qname) {
-        String qname = CTypeConversion.toJavaString(c_qname);
+    @CEntryPoint(name = "j_xp_declareVariable", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long declareVariable(IsolateThread thread, ObjectHandle xpathProcessorRef,  CCharPointer c_qname) throws SaxonApiException {
+        String qname = SaxonCAPI.toJavaString(c_qname, WordFactory.nullPointer());
         XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);
         XPathCompiler compiler = xPathProcessor.getCompiler();
         if(compiler != null) {
             compiler.declareVariable(QName.fromClarkName(qname));
         }
+        return SaxonCAPI.STATUS_OK;
     }
 
 
@@ -159,14 +161,15 @@ public class XPathProcessor extends SaxonCAPI {
      * @param c_uri The schema namespace to be imported. To import declarations in a no-namespace schema,
      *            supply a zero-length string.
      */
-    @CEntryPoint(name = "j_xp_importSchemaNamespace")
-    public static void importSchemaNamespace(IsolateThread thread, ObjectHandle xpathProcessorRef,  CCharPointer c_uri) {
-        String uri = CTypeConversion.toJavaString(c_uri);
+    @CEntryPoint(name = "j_xp_importSchemaNamespace", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long importSchemaNamespace(IsolateThread thread, ObjectHandle xpathProcessorRef,  CCharPointer c_uri) throws SaxonApiException{
+        String uri = SaxonCAPI.toJavaString(c_uri, WordFactory.nullPointer());
         XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);
         XPathCompiler compiler = xPathProcessor.getCompiler();
         if(compiler != null) {
             compiler.importSchemaNamespace(uri);
         }
+        return SaxonCAPI.STATUS_OK;
     }
 
     /**
@@ -225,7 +228,7 @@ public class XPathProcessor extends SaxonCAPI {
         if(c_uriStr == WordFactory.nullPointer()) {
             throw new SaxonApiException("URI string is null");
         }
-        String uriStr = CTypeConversion.toJavaString(c_uriStr);
+        String uriStr = SaxonCAPI.toJavaString(c_uriStr, WordFactory.nullPointer());
         XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);
         XPathCompiler compiler = xPathProcessor.getCompiler();
         URI uri = null;
@@ -294,9 +297,9 @@ public class XPathProcessor extends SaxonCAPI {
         XPathProcessor xPathProcessor = objectHandles.get(xpathProcessorRef);
         String cwd = null;
         if(ccwd != WordFactory.nullPointer()) {
-            cwd = CTypeConversion.toJavaString(ccwd);
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
-        String xpathStr = CTypeConversion.toJavaString(c_xpathStr);
+        String xpathStr = SaxonCAPI.toJavaString(c_xpathStr, WordFactory.nullPointer());
         XPathCompiler compiler = xPathProcessor.getCompiler();
         if (SaxonCAPI.debug) {
             if (xpathStr != null) {
@@ -404,9 +407,9 @@ public class XPathProcessor extends SaxonCAPI {
 
         String cwd = null;
         if(ccwd != WordFactory.nullPointer()) {
-            cwd = CTypeConversion.toJavaString(ccwd);
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
-        String xpathStr = CTypeConversion.toJavaString(c_xpathStr);
+        String xpathStr = SaxonCAPI.toJavaString(c_xpathStr, WordFactory.nullPointer());
         XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);
         XPathCompiler compiler = xPathProcessor.getCompiler();
         if (debug) {
@@ -451,9 +454,9 @@ public class XPathProcessor extends SaxonCAPI {
         String cwd = null;
 
         if(c_cwd != WordFactory.nullPointer()) {
-            CTypeConversion.toJavaString(c_cwd);
+            SaxonCAPI.toJavaString(c_cwd, WordFactory.nullPointer());
         }
-        String xpathStr = CTypeConversion.toJavaString(c_xpathStr);
+        String xpathStr = SaxonCAPI.toJavaString(c_xpathStr, WordFactory.nullPointer());
         setupXPathCompiler(compiler, optionsMap);
         XPathSelector selector = compiler.compile(xpathStr).load();
 

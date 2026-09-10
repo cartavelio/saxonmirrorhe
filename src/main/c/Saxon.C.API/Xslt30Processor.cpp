@@ -239,8 +239,11 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode *node,
 }
 
 void Xslt30Processor::compileFromStringAndSave(const char *stylesheetStr,
-                                               const char *filename) {
+                                               const char *filename, const char * encoding) {
   proc->attachCurrentThread();
+  if(encoding != nullptr) {
+    setProperty("!input-encoding", encoding);
+  }
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties);
   long status = j_compileFromStringAndSave(
@@ -291,12 +294,14 @@ void Xslt30Processor::compileFromFileAndSave(const char *xslFilename,
   }
 }
 
-XsltExecutable *Xslt30Processor::compileFromString(const char *stylesheetStr) {
+XsltExecutable *Xslt30Processor::compileFromString(const char *stylesheetStr, const char * encoding) {
   proc->attachCurrentThread();
   if (stylesheetStr == nullptr) {
     throw SaxonApiException("XSL string is null");
   }
-  
+    if(encoding != nullptr) {
+      setProperty("!input-encoding", encoding);
+    }
   int addition = 0;  
   if(importPackageValue > -1) {
         addition += 1;

@@ -171,7 +171,7 @@ task buildCWrappers (
 
   task "${edition}c_graalImage"(
     dependsOn: ["${edition}c_graalJar", "graal_${graalEdition}_home"],
-    description: "Builds the GraalVM native image, add '-g' and \"-H:Log=registerResource:3\" option for debugging add :${icu4jJar} for icu,  Next options for heap size: -R:MaxHeapSize=1000000, -H:+AllowVMInspection"
+    description: "Builds the GraalVM native image, add '-g' and \"-H:Log=registerResource:3\" option for debugging, \"-J-Dfile.encoding=UTF-8\",  Next options for heap size: -R:MaxHeapSize=1000000, -H:+AllowVMInspection"
   ) {
     inputs.file "${buildDir}/libs/libsaxon-${edition}c-${saxonVersion}.jar"
     outputs.file "libsaxon-${edition}c-${saxonVersion}.o"

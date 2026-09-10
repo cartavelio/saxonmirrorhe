@@ -265,7 +265,7 @@ public:
    * @param str the String value. NULL is taken as equivalent to "".
    * @return the corresponding StringValue
    */
-  XdmAtomicValue *makeStringValue(std::string str);
+  XdmAtomicValue *makeStringValue(std::string str, const char* encoding = nullptr);
 
   //! Factory method. Unlike the constructor, this avoids creating a new
   //! StringValue in the case
@@ -276,7 +276,7 @@ public:
    * @param str the char pointer array. nullptr is taken as equivalent to "".
    * @return the corresponding StringValue
    */
-  XdmAtomicValue *makeStringValue(const char *str);
+  XdmAtomicValue *makeStringValue(const char *str, const char* encoding = nullptr);
 
   /*!
    * Factory method: makes either an Int64Value or a BigIntegerValue depending
@@ -470,12 +470,13 @@ public:
   /**
    *
    * @param source the source document as a lexical string
+   * @param encoding of the source string argument. If not specified then platform default encoding is used
    * @param validator SchemaValidator object if it exists. Default is null
    * @return an XdmNode
    * @throws SaxonApiException if there is a failure in the parsing of the XML
    * document
    */
-  XdmNode *parseXmlFromString(const char *source,
+  XdmNode *parseXmlFromString(const char *source, const char * encoding = nullptr,
                               SchemaValidator *validator = nullptr);
 
   //! Parse a source document file and return it as an XdmNode.
@@ -508,10 +509,11 @@ public:
   /**
    *
    * @param source the JSON as a lexical string
+   * @param encoding the encoding of the source argument. Argument can be omitted and NULL accepted to use the default platform encoding
    * @return an XdmValue
    * @throws SaxonApiException if there is a failure in the parsing of the JSON
    */
-  XdmValue *parseJsonFromString(const char *source);
+  XdmValue *parseJsonFromString(const char *source, const char * encoding=NULL);
 
   //! Parse a source JSON file and return it as an XdmValue.
   /**

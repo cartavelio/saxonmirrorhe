@@ -15,6 +15,7 @@ from libcpp.string cimport string
 from libcpp.map cimport map
 from cython.operator import dereference, postincrement
 from os.path import isfile
+import sys
 
 from libc.stdlib cimport free, malloc, realloc
 from libc.string cimport memcpy
@@ -90,12 +91,28 @@ def create_xdm_dict(proc, mmap):
     return xdmMap
 
 cdef char * make_c_str(str str_value, encoding='utf-8'):
+            if str_value is None:
+                return NULL
+            else:
+                py_string_string = str_value.encode(encoding) if str_value is not None else None
+                c_string = py_string_string if str_value is not None else ""
+                return c_string
+
+cdef char * from_make_c_str(str str_value, encoding='utf-8'):
     if str_value is None:
         return NULL
     else:
-        py_string_string = str_value.encode(encoding) if str_value is not None else None
+        py_string_string = str_value.encode(encoding).decode('UTF-8') if str_value is not None else None
         c_string = py_string_string if str_value is not None else ""
         return c_string
+
+cdef char * out_make_c_str(str str_value, encoding='utf-8'):
+     if str_value is None:
+         return NULL
+     else:
+         py_string_string = str_value.encode('UTf-8').decode(encoding) if str_value is not None else None
+         c_string = py_string_string if str_value is not None else ""
+         return c_string
 
 
 cdef char * make_c_str2(str_value, encoding='utf-8'):
@@ -257,7 +274,7 @@ cdef class PySaxonProcessor:
         py_string_i = make_py_str(c_string)
         return py_string_i
 
-    def set_configuration_property(self, name, value):
+    def set_configuration_property(self, name, value, encoding=None):
         """
         set_configuration_property(self, name, value)
         Set configuration property specific to the processor in use.
@@ -270,11 +287,14 @@ cdef class PySaxonProcessor:
         """
         cdef char * c_str_ = NULL
         '''make_c_str(name)'''
-        py_name_string = name.encode('UTF-8') if name is not None else None
+        if encoding is None:
+            encoding = sys.getdefaultencoding()
+            
+        py_name_string = name.encode(encoding) if name is not None else None
         c_str_ = py_name_string if name is not None else ""
         cdef char * c_value_str_ = NULL
         '''make_c_str(value)'''
-        py_value_string = value.encode('UTF-8') if value is not None else None
+        py_value_string = value.encode(encoding) if value is not None else None
         c_value_str_ = py_value_string if value is not None else ""
         self.thisptr.setConfigurationProperty(c_str_, c_value_str_)
 
@@ -353,7 +373,7 @@ cdef class PySaxonProcessor:
 
 
 
-    def eqname_to_clark_name(self, name):
+    def eqname_to_clark_name(self, name, encoding=None):
         """
         eqname_to_clark_name(self, name)
         Convert EQName string to clark name notation.
@@ -365,14 +385,16 @@ cdef class PySaxonProcessor:
             str: the URI inb clark notation
         """
         cdef char * c_str_
-        py_name_string = name.encode('utf-8') if name is not None else None
+        if encoding is None:
+            encoding = sys.getdefaultencoding()
+        py_name_string = name.encode(encoding) if name is not None else None
         c_str_ = py_name_string if name is not None else ""
         cdef const char* c_string = self.thisptr.EQNameToClarkName(c_str_)
         py_string_i = make_py_str(c_string)
         saxoncClasses.SaxonProcessor.deleteString(c_string)
         return py_string_i
 
-    def clark_name_to_eqname(self, name):
+    def clark_name_to_eqname(self, name, encoding=None):
         """
         clark_name_to_eqname(self, name)
         Convert clark name string to EQName notation; i.e. the expanded name, as a string using the notation defined
@@ -385,7 +407,9 @@ cdef class PySaxonProcessor:
             str: the expanded name, as a string using the notation defined by the EQName production in XPath 3.0.
         """
         cdef char * c_str_
-        py_name_string = name.encode('utf-8') if name is not None else None
+        if encoding is None:
+            encoding = sys.getdefaultencoding()
+        py_name_string = name.encode(encoding) if name is not None else None
         c_str_ = py_name_string if name is not None else ""
         cdef const char* c_string = self.thisptr.clarkNameToEQName(c_str_)
         py_string_i = make_py_str(c_string)
@@ -393,7 +417,7 @@ cdef class PySaxonProcessor:
         return py_string_i
 
 
-    def make_string_value(self, value):
+    def make_string_value(self, value, encoding = None):
         """
         make_string_value(self, value)
         Factory method. Unlike the constructor, this avoids creating a new StringValue in the case
@@ -404,11 +428,21 @@ cdef class PySaxonProcessor:
             PyXdmAtomicValue: The corresponding XDM string value
         """
         cdef char * c_str_
-        py_value_string = value.encode('utf-8') if value is not None else None
+        cdef char * c_encoding_str_ = NULL
+        py_encoding_string = None
+
+        py_value_string = value.encode(encoding if encoding is not None else sys.getdefaultencoding()) if value is not None else None
         c_str_ = py_value_string if value is not None else ""
+
+        if encoding is not None:
+            py_encoding_string = encoding.encode('UTF-8') if encoding is not None else None
+            c_encoding_str_ = py_encoding_string if value is not None else ""
+
         cdef PyXdmAtomicValue val = PyXdmAtomicValue()
-        val.derivedaptr = val.derivedptr = val.thisvptr = self.thisptr.makeStringValue(c_str_)
+        val.derivedaptr = val.derivedptr = val.thisvptr = self.thisptr.makeStringValue(c_str_, c_encoding_str_)
+
         return val
+    
     def make_integer_value(self, value):
         """
         make_integer_value(self, value)
@@ -470,7 +504,7 @@ cdef class PySaxonProcessor:
         cdef PyXdmAtomicValue val = PyXdmAtomicValue()
         val.derivedaptr = val.derivedptr = val.thisvptr = self.thisptr.makeBooleanValue(c_b)
         return val
-    def make_qname_value(self, str_):
+    def make_qname_value(self, str_, encoding=None):
         """
         make_qname_value(self, str_)
         Create a QName XDM value from string representation in clark notation
@@ -479,12 +513,14 @@ cdef class PySaxonProcessor:
         Returns:
             PyXdmAtomicValue: The corresponding XDM value
         """
-        py_value_string = str_.encode('UTF-8') if str_ is not None else None
+        if encoding is None:
+            encoding = sys.getdefaultencoding()
+        py_value_string = str_.encode(encoding) if str_ is not None else None
         cdef char * c_str_ = py_value_string if str_ is not None else ""
         cdef PyXdmAtomicValue val = PyXdmAtomicValue()
         val.derivedaptr = val.derivedptr = val.thisvptr = self.thisptr.makeQNameValue(c_str_)
         return val
-    def make_atomic_value(self, value_type, value):
+    def make_atomic_value(self, value_type, value, encoding=None):
         """
         make_atomic_value(self, value_type, value)
         Create an XDM atomic value from string representation
@@ -492,10 +528,13 @@ cdef class PySaxonProcessor:
             value_type (str): Local name of a type in the XML Schema namespace
             value (str): The value given in a string form. In the case of a QName the value supplied must be
                 in clark notation {uri}local.
+            encoding (str): The encoding of the value_type. None or omit argument to use the default
         Returns:
             PyXdmAtomicValue: The corresponding XDM value
         """
-        py_valueType_string = value_type.encode('UTF-8') if value_type is not None else None
+        if encoding is None:
+            encoding = sys.getdefaultencoding()
+        py_valueType_string = value_type.encode(encoding) if value_type is not None else None
         cdef char * c_valueType_string = py_valueType_string if value_type is not None else ""
         cdef PyXdmAtomicValue val = PyXdmAtomicValue()
         val.derivedaptr = val.derivedptr = val.thisvptr = self.thisptr.makeAtomicValue(c_valueType_string, value)
@@ -615,7 +654,7 @@ cdef class PySaxonProcessor:
         return newMap_
 
 
-    def make_map2(self, dict dataMap):
+    def make_map2(self, dict dataMap, encoding = None):
         """
         make_map2(self, dict dataMap)
         Make a PyXdmMap from a dict type whose entries are key-value pairs of type (str, PyXdmValue).
@@ -631,14 +670,16 @@ cdef class PySaxonProcessor:
         cdef const char * c_key = NULL
         cdef char * c_key_str = NULL
         cdef PyXdmMap newMap_ = None
+        if encoding is None:
+            encoding = sys.getdefaultencoding()
         '''global parametersDict
         if kwds is not None:
                 parametersDict = kwds '''
         for (key, value) in dataMap.items():
 
             if isinstance(key, str):
-                 key_str = key.encode('UTF-8')
-                 py_key_str = key.encode('UTF-8') if key is not None else None
+                 key_str = key.encode(encoding)
+                 py_key_str = key.encode(encoding) if key is not None else None
                  c_key_str = py_key_str if key_str is not None else ""
                  c_key = c_key_str
 
@@ -705,7 +746,7 @@ cdef class PySaxonProcessor:
     def parse_xml(self, **kwds):
         """
         parse_xml(self, **kwds)
-        Parse a source document supplied as a lexical representation, source file or uri, and return it as an XDM node
+        Parse a source XML document supplied as a lexical representation, source file or uri, and return it as an XDM node
         Args:
             **kwds: Possible keyword arguments: must be one of the following (xml_file_name|xml_text|xml_uri)
         Returns:
@@ -714,26 +755,36 @@ cdef class PySaxonProcessor:
             Exception: Error if the keyword argument is not one of xml_file_name|xml_text|xml_uri.
         """
         py_error_message = "Error: parse_xml should only contain one of the following keyword arguments: (xml_file_name|xml_text|xml_uri)"
-        if len(kwds) != 1:
+        if len(kwds) > 2:
           raise Exception(py_error_message)
         cdef PyXdmNode val = None
         cdef str py_value = None
         cdef char * c_xml_string = NULL
+        cdef char * c_encoding_string = NULL
+        encoding = None
+
+        if "encoding" in kwds:
+            encoding = kwds["encoding"]
+            py_encoding_string = encoding.encode('UTF-8')
+            c_encoding_string = py_encoding_string if py_encoding_string is not None else ""
 
         if "xml_text" in kwds:
           py_value = kwds["xml_text"]
           if py_value is None:
               raise Exception("XML text is None")
           '''c_xml_string = make_c_str(py_value)'''
-          py_text_string = py_value.encode('UTF-8') if py_value is not None else None
+          py_text_string = py_value.encode(encoding if encoding is not None else sys.getdefaultencoding()) if py_value is not None else None
           c_xml_string = py_text_string if py_value is not None else ""
           if c_xml_string == NULL:
               raise Exception("Error converting XML text")
           val = PyXdmNode()
-          val.derivednptr =  val.derivedptr = val.thisvptr =self.thisptr.parseXmlFromString(c_xml_string, NULL)
-          val.derivednptr.incrementRefCount()
+
+          val.derivednptr =  val.derivedptr = val.thisvptr =self.thisptr.parseXmlFromString(c_xml_string, c_encoding_string, NULL)
+
           if val.derivednptr == NULL:
               return None
+          val.derivednptr.incrementRefCount()
+
           return val
         elif "xml_file_name" in kwds:
           py_value  = kwds["xml_file_name"]
@@ -755,9 +806,63 @@ cdef class PySaxonProcessor:
           c_xml_string = py_uri_string if py_value is not None else ""
           val = PyXdmNode()
           val.derivednptr = val.derivedptr = val.thisvptr = self.thisptr.parseXmlFromUri(c_xml_string, NULL)
-          val.derivednptr.incrementRefCount()
           if val.derivednptr is NULL:
               return None
+          val.derivednptr.incrementRefCount()
+
+          return val
+        else:
+           raise Exception(py_error_message)
+
+    def parse_json(self, **kwds):
+        """
+        parse_xml(self, **kwds)
+        Parse a source JSON document supplied as a lexical representation, source file or uri, and return it as an XDM value
+        Args:
+            **kwds: Possible keyword arguments: must be one of the following (json_file_name|json_text)
+        Returns:
+            PyXdmValue: The XDM value representation of the JSON document
+        Raises:
+            Exception: Error if the keyword argument is not one of json_file_name|xml_text|xml_uri.
+        """
+        py_error_message = "Error: parse_json should only contain one of the following keyword arguments: (json_file_name|json_text)"
+        if len(kwds) != 1:
+          raise Exception(py_error_message)
+        cdef PyXdmNode val = None
+        cdef str py_value = None
+        cdef char * c_json_string = NULL
+        cdef char * c_encoding_string = NULL
+        encoding = None
+
+        if "encoding" in kwds:
+            encoding = kwds["encoding"]
+        py_encoding_string = encoding.encode(encoding)
+        c_encoding_string = py_encoding_string
+
+        if "json_text" in kwds:
+          py_value = kwds["json_text"]
+          if py_value is None:
+              raise Exception("JSON text is None")
+          py_text_string = py_value.encode(encoding if encoding is not None else sys.getdefaultencoding()) if py_value is not None else None
+          c_json_string = py_text_string if py_value is not None else ""
+          if c_json_string == NULL:
+              raise Exception("Error converting JSON text")
+          val = PyXdmValue()
+          val.thisvptr = self.thisptr.parseJsonFromString(c_json_string, c_encoding_string if encoding is not None else NULL)
+          if val.thisvptr is NULL:
+              return None
+          val.thisvptr.incrementRefCount()
+          return val
+        elif "json_file_name" in kwds:
+          py_value  = kwds["json_file_name"]
+          py_value_string = py_value.encode('UTF-8') if py_value is not None else None
+          c_json_string = py_value_string if py_value is not None else ""
+          val = PyXdmValue()
+          val.thisvptr = self.thisptr.parseJsonFromFile(c_json_string)
+          if val.thisvptr is NULL:
+              return None
+          val.thisvptr.incrementRefCount()
+
           return val
         else:
            raise Exception(py_error_message)
@@ -912,12 +1017,20 @@ cdef class PyDocumentBuilder:
         cdef PyXdmNode val = None
         cdef py_value = None
         cdef char * c_xml_string = NULL
+        cdef char * c_encoding_string = NULL
+        encoding = None
+
+        if "encoding" in kwds:
+            encoding = kwds["encoding"]
+            py_encoding_string = encoding.encode('UTF-8')
+            c_encoding_string = py_encoding_string
+
         if "xml_text" in kwds:
           py_value = kwds["xml_text"]
-          py_xml_text_string = py_value.encode('UTF-8') if py_value is not None else None
+          py_xml_text_string = py_value.encode(encoding if encoding is not None else sys.getdefaultencoding()) if py_value is not None else None
           c_xml_string = py_xml_text_string if py_value is not None else ""
           val = PyXdmNode()
-          val.derivednptr = val.derivedptr = val.thisvptr = self.thisdbptr.parseXmlFromString(c_xml_string)
+          val.derivednptr = val.derivedptr = val.thisvptr = self.thisdbptr.parseXmlFromString(c_xml_string, c_encoding_string)
           val.derivednptr.incrementRefCount()
           return val
         elif "xml_file_name" in kwds:
@@ -993,7 +1106,7 @@ cdef class PyXslt30Processor:
         #else:
         #raise Warning("setJustInTimeCompilation: argument must be a boolean type. JIT not set")
 
-     def set_parameter(self, name, PyXdmValue value):
+     def set_parameter(self, name, PyXdmValue value, encoding = None):
         """
         set_parameter(self, name, PyXdmValue value)
         Set the value of a stylesheet parameter
@@ -1004,7 +1117,9 @@ cdef class PyXslt30Processor:
         """
         cdef const char * c_str = NULL
         '''make_c_str(name)'''
-        py_name_string = name.encode('UTF-8') if name is not None else None
+        if encoding is None:
+            encoding = sys.getdefaultencoding()
+        py_name_string = name.encode(encoding) if name is not None else None
         c_str = py_name_string if name is not None else ""
         if value is None:
             return
@@ -1012,7 +1127,7 @@ cdef class PyXslt30Processor:
             value.thisvptr.incrementRefCount()
             self.thisxptr.setParameter(c_str, value.thisvptr)
 
-     def get_parameter(self, name):
+     def get_parameter(self, name, encoding=None):
         """
         get_parameter(self, name)
         Get a parameter value by a given name
@@ -1021,22 +1136,27 @@ cdef class PyXslt30Processor:
         Returns:
             PyXdmValue: The XDM value of the parameter
         """
-        py_name_string = name.encode('UTF-8') if name is not None else None
+        if encoding is None:
+            encoding = sys.getdefaultencoding()
+        py_name_string = name.encode(encoding) if name is not None else None
         cdef char * c_name = py_name_string if name is not None else ""
         cdef PyXdmValue val = PyXdmValue()
         val.thisvptr = self.thisxptr.getParameter(c_name)
         return val
-     def remove_parameter(self, name):
+     def remove_parameter(self, name, encoding=None):
         """
         remove_parameter(self, name)
         Remove the parameter given by name from the PyXslt30Processor. The parameter will not have any effect on the
         stylesheet if it has not yet been executed.
         Args:
             name (str): The name of the stylesheet parameter
+            encoding (str): The encoding of the name argument. Can be omitted or None
         Returns:
             bool: True if the removal of the parameter has been successful, False otherwise.
         """
-        py_name_string = name.encode('UTF-8') if name is not None else None
+        if encoding is None:
+            encoding = sys.getdefaultencoding()
+        py_name_string = name.encode(encoding) if name is not None else None
         cdef char * c_name = py_name_string if name is not None else ""
         return self.thisxptr.removeParameter(c_name)
 
@@ -1106,6 +1226,7 @@ cdef class PyXslt30Processor:
         py_error_message = "Error: compile_stylesheet should only contain one of the following keyword arguments: (associated_file|stylesheet_text|stylesheet_file|stylesheet_node) (with optional additional arguments: save, output_file, target)"
         cdef char * c_outputfile
         cdef char * c_stylesheet
+        cdef char * c_encoding_string = NULL
         py_output_string = None
         py_stylesheet_string = None
         cdef PyXsltExecutable executable
@@ -1114,6 +1235,8 @@ cdef class PyXslt30Processor:
         cdef int option = 0
         cdef bool c_relocate
         cdef PyXdmNode py_xdmNode = None
+        encoding = None
+
         if kwds.keys() >= {"stylesheet_text", "stylesheet_file"}:
           raise Exception(py_error_message)
         if kwds.keys() >= {"stylesheet_text", "stylesheet _node"}:
@@ -1125,6 +1248,12 @@ cdef class PyXslt30Processor:
           py_ta_string = py_lang_string.encode('UTF-8') if py_lang_string is not None else None
           c_lang = py_ta_string if py_lang_string is not None else ""
           self.thisxptr.setXsltLanguageVersion(c_lang)
+
+        py_encoding_string = None
+        if "encoding" in kwds:
+            encoding = kwds["encoding"]
+            py_encoding_string = encoding.encode('UTF-8')
+            c_encoding_string = py_encoding_string
 
         if "fast_compile" in kwds:
           py_fast_string = kwds["fast_compile"]
@@ -1153,10 +1282,11 @@ cdef class PyXslt30Processor:
           c_outputfile = py_output_sstring if py_output_string is not None else ""
           if "stylesheet_text" in kwds:
             py_stylesheet_string = kwds["stylesheet_text"]
+
             '''c_stylesheet = make_c_str(py_stylesheet_string)'''
-            py_s_string = py_stylesheet_string.encode('UTF-8') if py_stylesheet_string is not None else None
+            py_s_string = py_stylesheet_string.encode(encoding if encoding is not None else sys.getdefaultencoding()) if py_stylesheet_string is not None else None
             c_stylesheet = py_s_string if py_stylesheet_string is not None else ""
-            self.thisxptr.compileFromStringAndSave(c_stylesheet, c_outputfile)
+            self.thisxptr.compileFromStringAndSave(c_stylesheet, c_outputfile, c_encoding_string)
           elif "stylesheet_file" in kwds:
             py_stylesheet_string = kwds["stylesheet_file"]
             '''if py_stylesheet_string  is None or isfile(py_stylesheet_string) == False:
@@ -1177,11 +1307,11 @@ cdef class PyXslt30Processor:
           if "stylesheet_text" in kwds:
             py_stylesheet_string = kwds["stylesheet_text"]
             '''c_stylesheet = make_c_str(py_stylesheet_string)'''
-            py__string = py_stylesheet_string.encode('UTF-8') if py_stylesheet_string is not None else None
+            py__string = py_stylesheet_string.encode(encoding if encoding is not None else sys.getdefaultencoding()) if py_stylesheet_string is not None else None
             c_stylesheet = py__string if py_stylesheet_string is not None else ""
 
             executable = PyXsltExecutable()
-            cexecutable =  self.thisxptr.compileFromString(c_stylesheet)
+            cexecutable =  self.thisxptr.compileFromString(c_stylesheet, c_encoding_string)
             if cexecutable is NULL:
                 return None
             executable.thisxptr = cexecutable
@@ -1257,15 +1387,14 @@ cdef class PyXslt30Processor:
         if "source_file" in kwds:
             py_value2 = kwds["source_file"]
             '''c_sourcefile = make_c_str(py_value2)'''
-
-            py_string_string = py_value2.encode('utf-8') if py_value2 is not None else None
-            c_sourcefile = py_string_string if py_value2 is not None else ""
+            py_string_string2 = py_value2.encode('utf-8') if py_value2 is not None else None
+            c_sourcefile = py_string_string2 if py_value2 is not None else ""
 
         if "base_output_uri" in kwds:
             py_value = kwds["base_output_uri"]
             '''c_base_output_uri = make_c_str(py_value)'''
-            py_string_string = py_value.encode('utf-8') if py_value is not None else None
-            c_base_output_uri = py_string_string if py_value is not None else ""
+            py_bstring_string = py_value.encode('utf-8') if py_value is not None else None
+            c_base_output_uri = py_bstring_string if py_value is not None else ""
             self.thisxptr.setBaseOutputURI(c_base_output_uri)
 
         if "stylesheet_file" in kwds:
@@ -1274,10 +1403,12 @@ cdef class PyXslt30Processor:
             c_stylesheet = py_string_string if py_value1 is not None else ""
             '''make_c_str(py_value)'''
 
-
+        encoding = sys.getdefaultencoding()
+        if "encoding" in kwds:
+            encoding = kwds["encoding"]
         cdef const char* c_string
         c_string = self.thisxptr.transformFileToString(c_sourcefile, c_stylesheet)
-        py_string_i = make_py_str(c_string)
+        py_string_i = make_py_str(c_string, encoding)
         saxoncClasses.SaxonProcessor.deleteString(c_string)
         return py_string_i
 
@@ -1949,14 +2080,17 @@ cdef class PyXsltExecutable:
                 xdm_node = value
           else:
             raise Warning("Warning: transform_to_string should only contain the following keyword arguments: (source_file|xdm_node, base_output_uri)")
+        encoding = sys.getdefaultencoding()
+        if "encoding" in kwds:
+            encoding = kwds["encoding"]
         if xdm_node is not None:
           c_string = self.thisxptr.transformToString(xdm_node.derivednptr)
-          py_string_i = make_py_str(c_string)
+          py_string_i = make_py_str(c_string, encoding)
           saxoncClasses.SaxonProcessor.deleteString(c_string)
           return py_string_i
         else:
           c_string = self.thisxptr.transformFileToString(c_sourcefile)
-          py_string_i = make_py_str(c_string)
+          py_string_i = make_py_str(c_string, encoding)
           saxoncClasses.SaxonProcessor.deleteString(c_string)
           return py_string_i
 
@@ -2249,7 +2383,11 @@ cdef class PyXsltExecutable:
         cdef PyXdmFunctionItem valuef_ = None
         cdef PyXdmMap valuem_ = None
         cdef PyXdmArray valuear_ = None
+        encoding = "UTF-8"
+
         for key, value in kwds.items():
+
+
           if isinstance(value, str):
             if key == "source_file":
               '''c_sourcefile = make_c_str(value)'''
@@ -2261,6 +2399,9 @@ cdef class PyXsltExecutable:
               py_string_string = value.encode('utf-8') if value is not None else None
               c_base_output_uri = py_string_string if value is not None else ""
               self.thisxptr.setBaseOutputURI(c_base_output_uri)
+            if "encoding" in kwds:
+              encoding = kwds["encoding"]
+                
           elif key == "xdm_value" or key == "xdm_node":
               if isinstance(value, PyXdmValue):
                 value_ = value
@@ -2284,7 +2425,7 @@ cdef class PyXsltExecutable:
                       valuear_ = value
                       self.thisxptr.setInitialMatchSelection(valuear_.derivedaaptr)
         cdef const char* c_string  = self.thisxptr.applyTemplatesReturningString()
-        py_string_i = make_py_str(c_string)
+        py_string_i = make_py_str(c_string, encoding)
         saxoncClasses.SaxonProcessor.deleteString(c_string)
         return py_string_i
 
@@ -2435,7 +2576,7 @@ cdef class PyXsltExecutable:
         Args:
 			template_name (str): The name of the template to invoke. If None is supplied then call the initial-template.
             **kwds: Possible keyword arguments: base_output_uri (str) which is used for resolving relative URIs in
-                the href attribute of the xsl:result-document instruction.
+                the href attribute of the xsl:result-document instruction. encoding (str) set the encoding of the output string.
         Returns:
             PyXdmValue: Result of the transformation as a PyXdmValue object
         Raises:
@@ -2460,12 +2601,16 @@ cdef class PyXsltExecutable:
               c_base_output_uri = py_string_string if value is not None else ""
               self.thisxptr.setBaseOutputURI(c_base_output_uri)
 
-        py_template_name_string = template_name.encode('UTF-8') if template_name is not None else None
+        encoding = sys.getdefaultencoding()
+        if "encoding" in kwds:
+            encoding = kwds["encoding"]
+        py_template_name_string = template_name.encode(encoding) if template_name is not None else None
         if template_name is not None:
             c_templateName = py_template_name_string
 
         c_string  = self.thisxptr.callTemplateReturningString(c_templateName)
-        py_string_i = make_py_str(c_string)
+
+        py_string_i = make_py_str(c_string, encoding)
         saxoncClasses.SaxonProcessor.deleteString(c_string)
         return py_string_i
 
@@ -2601,7 +2746,7 @@ cdef class PyXsltExecutable:
 			function_name (str): The name of the function to invoke, in clark notation {uri}local
 			args (list[PyXdmValue]): Pointer array of PyXdmValue objects - the values of the arguments to be supplied
 			    to the function.
-            **kwds: Possible keyword arguments: base_output_uri (str)
+            **kwds: Possible keyword arguments: base_output_uri (str), encoding (str)
         Returns:
             str: Result of the transformation as a str value
         Raises:
@@ -2640,7 +2785,10 @@ cdef class PyXsltExecutable:
         cdef PyXdmNode nval = None
         cdef saxoncClasses.XdmValue * xdmValue = NULL
         cdef const char* c_string = self.thisxptr.callFunctionReturningString(c_functionName, argumentV, len(args))
-        py_string_i = make_py_str(c_string)
+        encoding = sys.getdefaultencoding()
+        if "encoding" in kwds:
+            encoding = kwds["encoding"]
+        py_string_i = make_py_str(c_string, encoding)
         saxoncClasses.SaxonProcessor.deleteString(c_string)
         return py_string_i
 
@@ -3761,13 +3909,15 @@ cdef class PySchemaValidator:
         c_str = py_name_string if name is not None else ""
         if c_str is not NULL:
             self.thissvptr.removeParameter(c_str)
-     def set_property(self, name, value):
+
+     def set_property(self, name, value, encoding = None):
         """
         set_property(self, name, value)
         Set a property specific to the processor in use.
         Args:
             name (str): The name of the property
             value (str): The value of the property
+            encoding (str): The encoding of the name argument. Argument can be omitted or None
         Example:
             PySchemaValidator: set serialization properties (names start with '!' i.e. name "!method" -> "xml")\r
             'o': output file name,\r
@@ -3786,12 +3936,16 @@ cdef class PySchemaValidator:
         """
         cdef const char * c_name = NULL
         '''make_c_str(name)'''
-        py_name_string = name.encode('UTF-8') if name is not None else None
+
+        if encoding is None:
+            encoding = sys.getdefaultencoding()
+
+        py_name_string = name.encode(encoding) if name is not None else None
         c_name = py_name_string if name is not None else ""
 
         cdef const char * c_value = NULL
         '''make_c_str(value)'''
-        py_value_string = value.encode('UTF-8') if value is not None else None
+        py_value_string = value.encode(encoding) if value is not None else None
         c_value = py_value_string if value is not None else ""
         if c_name is not NULL:
             if c_value is not NULL:
@@ -4100,6 +4254,22 @@ cdef class PyXdmItem(PyXdmValue):
         py_item_string_value = make_py_str(c_string)
         return py_item_string_value
 
+     def get_string_value(self, encoding=None):
+        """
+        get_string_value(self, encoding=None)
+        Property to get the string value of the item as defined in the XPath data model
+        Args:
+            encoding (str): the encoding to be used to get the string value. Can be omitted or set as None to use the system default
+        Returns:
+            str: The string value of this node
+        """
+        cdef const char* c_string = NULL
+        if encoding is None:
+            encoding = sys.getdefaultencoding()
+        c_string = self.derivedptr.getStringValue()
+        py_item_string_value = make_py_str(c_string, encoding)
+        return py_item_string_value
+
      def __repr__(self):
         c_string =  self.derivedptr.toString()
         py_item_to_string = make_py_str(c_string)
@@ -4396,6 +4566,22 @@ cdef class PyXdmNode(PyXdmItem):
         py_node_string_value = make_py_str(c_string)
         return py_node_string_value
 
+     def get_string_value(self, encoding=None):
+        """
+        get_string_value(self, encoding=None)
+        Property to get the string value of the node as defined in the XPath data model
+        Args:
+            encoding (str): the encoding to be used to get the string value. Can be omitted or set as None to use the system default         
+        Returns:
+            str: The string value of this node
+        """
+        cdef const char* c_string = NULL
+        if encoding is None:
+            encoding = sys.getdefaultencoding()
+        c_string = self.derivednptr.getStringValue()
+        py_node_string_value = make_py_str(c_string, encoding)
+        return py_node_string_value
+
      def __str__(self):
         """
         __str__(self)
@@ -4406,6 +4592,20 @@ cdef class PyXdmNode(PyXdmItem):
         cdef const char* c_string = NULL
         c_string = self.derivednptr.toString()
         py_node_to_string = make_py_str(c_string)
+        return py_node_to_string
+
+     def to_string(self, encoding=None):
+        """
+        __str__(self)
+        The string value of the node as returned by the toString method
+        Returns:
+            str: String value of this node
+        """
+        cdef const char* c_string = NULL
+        c_string = self.derivednptr.toString()
+        if encoding is None:
+            encoding = sys.getdefaultencoding()
+        py_node_to_string = make_py_str(c_string, encoding)
         return py_node_to_string
 
      def __getitem__(self, index):
@@ -4466,20 +4666,24 @@ cdef class PyXdmNode(PyXdmItem):
             node.incrementRefCount()
             return val
 
-     def get_attribute_value(self, name):
+     def get_attribute_value(self, name, encoding=None):
         """
         get_attribute_value(self, name)
         Get the value of a named attribute
         Args:
             name (str): the EQName of the required attribute
+            encoding (str): The encoding of the name argument. Argument can be omitted or None
+            in which case the platform default encoding is used
         """
-        py_value_string = name.encode('UTF-8') if name is not None else None
+        if encoding is None:
+            encoding = sys.getdefaultencoding()
+        py_value_string = name.encode(encoding) if name is not None else None
         cdef char * c_name = py_value_string if name is not None else ""
 
         cdef const char* c_string = self.derivednptr.getAttributeValue(c_name)
         if c_string == NULL:
             return None
-        py_string_i = make_py_str(c_string)
+        py_string_i = make_py_str(c_string, encoding)
         saxoncClasses.SaxonProcessor.deleteString(c_string)
         return py_string_i
 
@@ -4646,6 +4850,22 @@ cdef class PyXdmAtomicValue(PyXdmItem):
         ustring = make_py_str(self.derivedaptr.getStringValue())
         return ustring
 
+     def get_string_value(self, encoding=None):
+        """
+        get_string_value(self, encoding=None)
+        Property to get the string value of the atomic value as defined in the XPath data model
+        Args:
+            encoding (str): the encoding to be used to get the string value. Can be omitted or set as None to use the system default
+        Returns:
+            str: The string value of this node
+        """
+        cdef const char* c_string = NULL
+        if encoding is None:
+            encoding = sys.getdefaultencoding()
+        c_string = self.derivedaptr.getStringValue()
+        py_item_string_value = make_py_str(c_string, encoding)
+        return py_item_string_value
+
 
      def __int__(self):
 
@@ -4756,7 +4976,7 @@ cdef class PyXdmFunctionItem(PyXdmItem):
         return py_string_i
 
 
-     def get_system_function(self, PySaxonProcessor proc, str name, arity):
+     def get_system_function(self, PySaxonProcessor proc, str name, arity, encoding=None):
          """
          get_system_function(self, PySaxonProcessor proc, str name, arity)
          Get a system function. This can be any function defined in XPath 3.1 functions and operators,
@@ -4766,6 +4986,7 @@ cdef class PyXdmFunctionItem(PyXdmItem):
              proc (PySaxonProcessor): the Saxon processor
              name (str): the name of the requested function as an EQName or clark name
              arity (int): the arity of the requested function
+             encoding (str): the encoding of the name argument. If argument is omitted or None then the platform default encoding is used
          Returns:
              PyXdmFunctionItem: the requested function
          """
@@ -4774,7 +4995,9 @@ cdef class PyXdmFunctionItem(PyXdmItem):
          cdef saxoncClasses.XdmFunctionItem * c_func = NULL
          if proc is None:
              return None
-         py_name_string = name.encode('UTF-8') if name is not None else None
+         if encoding is None:
+            encoding = sys.getdefaultencoding()
+         py_name_string = name.encode(encoding) if name is not None else None
          c_name = py_name_string if name is not None else ""
          c_func = self.derivedfptr.getSystemFunction(proc.thisptr, c_name, arity)
          if c_func is NULL:
@@ -4899,7 +5122,7 @@ cdef class PyXdmMap(PyXdmFunctionItem):
          """
          return self.derivedmmptr.mapSize()
 
-     def get(self, key):
+     def get(self, key, encoding=None):
          """
          get(self, key)
          Returns the value to which the specified key is mapped, or NULL if this map contains no mapping for the key.
@@ -4932,7 +5155,9 @@ cdef class PyXdmMap(PyXdmFunctionItem):
 
          elif  isinstance(key, str):
              keyStr = key
-             py_value_string = keyStr.encode('UTF-8') if keyStr is not None else None
+             if encoding is None:
+                 encoding = sys.getdefaultencoding()
+             py_value_string = keyStr.encode(encoding) if keyStr is not None else None
              c_key_str = py_value_string if keyStr is not None else ""
              c_xdmValue = self.derivedmmptr.get(c_key_str)
 

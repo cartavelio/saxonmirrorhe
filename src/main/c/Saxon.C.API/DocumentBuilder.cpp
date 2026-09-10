@@ -95,7 +95,7 @@ void DocumentBuilder::setBaseUri(const char *uri) {
 
 const char *DocumentBuilder::getBaseUri() { return baseURI.c_str(); }
 
-XdmNode *DocumentBuilder::parseXmlFromString(const char *source) {
+XdmNode *DocumentBuilder::parseXmlFromString(const char *source, const char *encoding) {
   int64_t result = j_main_parseXmlString(
       SaxonProcessor::sxn_environ->thread,
       (baseURI.empty() ? (char *)nullptr : (char *)baseURI.c_str()),
@@ -103,7 +103,7 @@ XdmNode *DocumentBuilder::parseXmlFromString(const char *source) {
       (schemaValidator != nullptr
            ? (void *)schemaValidator->getUnderlyingValidator()
            : (void *)nullptr),
-      (char *)source);
+      (char *)source, (char *)encoding);
   if (result > 0) {
     XdmNode *node = new XdmNode(result);
     return node;

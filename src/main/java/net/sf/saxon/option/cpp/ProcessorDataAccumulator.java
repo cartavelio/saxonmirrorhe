@@ -7,12 +7,13 @@
 
 package net.sf.saxon.option.cpp;
 
+import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.XdmValue;
 import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.ObjectHandle;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
 import org.graalvm.nativeimage.c.type.CCharPointer;
-import org.graalvm.nativeimage.c.type.CTypeConversion;
+import org.graalvm.word.WordFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -80,7 +81,15 @@ public class ProcessorDataAccumulator {
     public static void addProcessorDataPair(IsolateThread thread, ObjectHandle processorDataRef, CCharPointer cparamName, ObjectHandle objectRef){
 
         ProcessorDataAccumulator processorData = SaxonCAPI.objectHandles.get(processorDataRef);
-        String paramNamei = CTypeConversion.toJavaString(cparamName);
+        String paramNamei = null;
+        try {
+            paramNamei = SaxonCAPI.toJavaString(cparamName, WordFactory.nullPointer());
+        } catch(SaxonApiException ex) {
+            if(SaxonCAPI.debug) {
+                System.err.println(ex.getMessage());
+            }
+            return;
+        }
         Object object = SaxonCAPI.objectHandles.get(objectRef);
 
         if(SaxonCAPI.debug) {
@@ -99,8 +108,18 @@ public class ProcessorDataAccumulator {
     public static void addProcessorPropertyPair(IsolateThread thread, ObjectHandle processorDataRef, CCharPointer cpropName, CCharPointer cpropvalue){
 
         ProcessorDataAccumulator processorData = SaxonCAPI.objectHandles.get(processorDataRef);
-        String paramNamei = CTypeConversion.toJavaString(cpropName);
-        String object = CTypeConversion.toJavaString(cpropvalue);
+        String paramNamei = null;
+        String object = null;
+
+        try {
+            paramNamei = SaxonCAPI.toJavaString(cpropName, WordFactory.nullPointer());
+            object = SaxonCAPI.toJavaString(cpropvalue, WordFactory.nullPointer());
+        } catch(SaxonApiException ex) {
+            if(SaxonCAPI.debug) {
+                System.err.println(ex.getMessage());
+            }
+            return;
+        }
 
         if(SaxonCAPI.debug) {
             System.err.println("ProcessorDataAccumulator - pair - addProcessor paramName= " + paramNamei);
@@ -142,7 +161,15 @@ public class ProcessorDataAccumulator {
     public static void addProcessorProperty(IsolateThread thread, ObjectHandle processorDataRef, CCharPointer cparamName){
 
         ProcessorDataAccumulator processorData = SaxonCAPI.objectHandles.get(processorDataRef);
-        String paramNamei = CTypeConversion.toJavaString(cparamName);
+        String paramNamei = null;
+        try {
+            paramNamei = SaxonCAPI.toJavaString(cparamName, WordFactory.nullPointer());
+        } catch(SaxonApiException ex) {
+            if(SaxonCAPI.debug) {
+                System.err.println(ex.getMessage());
+            }
+            return;
+        }
 
         if(SaxonCAPI.debug) {
             System.err.println("ProcessorDataAccumulator - addProcessorValue paramNamei= " + paramNamei);

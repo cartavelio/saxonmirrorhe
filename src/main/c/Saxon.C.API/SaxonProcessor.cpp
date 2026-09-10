@@ -739,7 +739,7 @@ void SaxonProcessor::setCatalog(const char *catalogFile) {
   }
 }
 
-XdmValue * SaxonProcessor::parseJsonFromString(const char *source){
+XdmValue * SaxonProcessor::parseJsonFromString(const char *source, const char * encoding){
 
   if(source == nullptr) {
     throw SaxonApiException("JSON source string is null");
@@ -747,7 +747,7 @@ XdmValue * SaxonProcessor::parseJsonFromString(const char *source){
 
   applyConfigurationProperties();
   int64_t xdmValueRef = parseJsonString(
-      sxn_environ->thread, (void *)procRef, (char *)source);
+      sxn_environ->thread, (void *)procRef, (char *)source, (char *)encoding);
   if (xdmValueRef >= 0) {
     XdmValue *value = new XdmValue(xdmValueRef);
 
@@ -767,7 +767,7 @@ XdmValue * SaxonProcessor::parseJsonFromFile(const char *source){
 
   applyConfigurationProperties();
   int64_t xdmValueRef = parseJsonFile(
-      sxn_environ->thread, (void *)procRef, (char *)source);
+      sxn_environ->thread, (void *)procRef, (char *)cwd.c_str(), (char *)source);
   if (xdmValueRef >= 0) {
     XdmValue *value = new XdmValue(xdmValueRef);
 
@@ -778,15 +778,15 @@ XdmValue * SaxonProcessor::parseJsonFromFile(const char *source){
   return nullptr;
 }
 
-XdmNode *SaxonProcessor::parseXmlFromString(const char *source,
+XdmNode *SaxonProcessor::parseXmlFromString(const char *source, const char * encoding,
                                             SchemaValidator *validator) {
   // SaxonProcessor::attachCurrentThread();
 
   applyConfigurationProperties();
   int64_t xdmNodeRef = parseXmlStringWithValidator(
-      sxn_environ->thread, (void *)procRef,
+      sxn_environ->thread, (void *)procRef, (char *)encoding,
       (validator != nullptr ? (void *)validator->getUnderlyingValidator()
-                            : (void *)nullptr),
+                            : (void *)NULL),
       (char *)source);
   if (xdmNodeRef >= 0) {
     XdmNode *value = new XdmNode(xdmNodeRef);
@@ -886,18 +886,18 @@ void SaxonProcessor::release() {
 
 /* ========= Factory method for Xdm ======== */
 
-XdmAtomicValue *SaxonProcessor::makeStringValue(const char *str) {
+XdmAtomicValue *SaxonProcessor::makeStringValue(const char *str, const char* encoding) {
   SaxonProcessor::attachCurrentThread();
-  int64_t stringValueRef = j_makeStringValue(sxn_environ->thread, (char *)str);
+  int64_t stringValueRef = j_makeStringValue(sxn_environ->thread, (char *)str, (char *)encoding);
   XdmAtomicValue *value = new XdmAtomicValue(stringValueRef, "xs:string");
   return value;
 }
 
-XdmAtomicValue *SaxonProcessor::makeStringValue(std::string str) {
+XdmAtomicValue *SaxonProcessor::makeStringValue(std::string str, const char* encoding) {
   SaxonProcessor::attachCurrentThread();
 
   int64_t stringValueRef =
-      j_makeStringValue(sxn_environ->thread, (char *)str.c_str());
+      j_makeStringValue(sxn_environ->thread, (char *)str.c_str(), (char *)encoding);
   XdmAtomicValue *value = new XdmAtomicValue(stringValueRef, "xs:string");
   return value;
 }
@@ -1166,7 +1166,7 @@ XdmMap *SaxonProcessor::makeMap2(std::map<std::string, XdmValue *> dataMap) {
       return nullptr;
     }
     int64_t stringValueRef =
-        j_makeStringValue(sxn_environ->thread, (char *)(iter->first).c_str());
+        j_makeStringValue(sxn_environ->thread, (char *)(iter->first).c_str(), (char *)nullptr);
     XdmAtomicValue *stringValue =
         new XdmAtomicValue(stringValueRef, "xs:string");
     j_addMapPair(sxn_environ->thread, (void *)mapDataRef,
