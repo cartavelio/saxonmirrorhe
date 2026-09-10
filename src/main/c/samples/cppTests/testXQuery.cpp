@@ -74,6 +74,43 @@ void testxQuery1(SaxonProcessor * processor, XQueryProcessor * queryProc, sResul
 
 }
 
+
+
+
+void testxQuery_ICU(SaxonProcessor * processor, XQueryProcessor * queryProc, sResultCount *sresult){
+    cout<<endl<<"Test testXQuery_ICU:"<<endl;
+    queryProc->clearParameters();
+    queryProc->clearProperties();
+
+    queryProc->setProperty("qs", "format-integer(33,'Ww','cs')");
+
+    const char * result = queryProc->runQueryToString();
+    if(result != nullptr){
+        cout<<"Result :"<<result<<endl;
+        sresult->success++;
+        delete result;
+    } else {
+        sresult->failure++;
+        sresult->failureList.push_back("testXQuery_ICU");
+        if(queryProc->exceptionOccurred()) {
+            SaxonApiException *exception = queryProc->getException();
+            if(exception != nullptr) {
+                cerr << "Error: " << exception->getMessage() << endl;
+                delete exception;
+                exception = nullptr;
+            }
+            queryProc->exceptionClear();
+        }
+
+
+    }
+
+
+    queryProc->clearParameters();
+    queryProc->clearProperties();
+
+}
+
 void testxQueryError(XQueryProcessor * queryProc, sResultCount *sresult){
  cout<<endl<<"Test testXQueryError-Test:"<<endl;
     queryProc->clearParameters();
@@ -425,6 +462,9 @@ int main(int argc, char* argv[])
     testXQueryLineNumberError(query,sresult);
     cout<<endl<<"============================================================="<<endl<<endl;
     testXQueryLineNumber(processor, sresult);
+
+    cout<<endl<<"============================================================="<<endl<<endl;
+    testxQuery_ICU(processor, query, sresult);
 
     delete query;
 

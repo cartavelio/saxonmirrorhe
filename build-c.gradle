@@ -33,6 +33,20 @@ task test_jetHome(
   }
 }
 
+
+// ============================================================
+// Tasks to rejar ICU
+
+task unjar_ICU4jJar(
+  type: Copy,
+  description: "Unjar ICU"
+) {
+  inputs.file(icu4jJar)
+  outputs.files(fileTree("${buildDir}/icu"))
+  from zipTree(file(icu4jJar))
+  into "${buildDir}/icu"
+}
+
 // ============================================================
 // Tasks to rejar Xerces and XML Resolver
 
@@ -690,7 +704,7 @@ task pec_jar(
 
 task eec_jar(
   type: Jar,
-  dependsOn: ["eecCompile", "eej_MetaInf", "rejar_Xerces"],
+  dependsOn: ["eecCompile", "eej_MetaInf", "rejar_Xerces", "unjar_ICU4jJar"],
   description: "Build the EE jar file for SaxonC"
 ) {
   archiveBaseName = "saxon9ee"
@@ -716,6 +730,12 @@ task eec_jar(
       include "**/*.class"
       include "**/*.properties"
       exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
+      exclude "META-INF/MANIFEST.MF"
+    }
+  from ("${buildDir}/icu") {
+      include "**/*.class"
+      include "**/*.*"
+      include "**/*.properties"
       exclude "META-INF/MANIFEST.MF"
     }
   doFirst {
