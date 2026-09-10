@@ -2029,94 +2029,12 @@ public class XPathParser {
             primaryType = parseParenthesizedItemType();
             //nextToken();
         } else if (t.currentToken instanceof Token.NameToken) {
-            primaryType = getPlainType(((Token.NameToken) t.currentToken).getValue());
-            nextToken();
-        } else if (t.currentToken == Token.KEYWORD_LBRA || t.currentToken == Token.FUNCTION) {
-            // Which includes things such as "map" and "array"
-            switch (t.currentTokenValue) {
-                case "item":
-                    nextToken();
-                    expect(Token.RPAR);
-                    nextToken();
-                    primaryType = AnyItemType.getInstance();
-                    break;
-                case "function": {
-                    checkLanguageVersion30();
-                    AnnotationList annotations = AnnotationList.EMPTY;
-                    primaryType = parseFunctionItemType(annotations);
-                    break;
-                }
-                case "fn": {
-                    checkLanguageVersion40();
-                    AnnotationList annotations = AnnotationList.EMPTY;
-                    primaryType = parseFunctionItemType(annotations);
-                    break;
-                }
-                case "map":
-                    primaryType = parseMapItemType();
-                    break;
-                case "array":
-                    primaryType = parseArrayItemType();
-                    break;
-                case "record":
-                    primaryType = parseRecordTest(this);
-                    break;
-                case "atomic":
-                    // Allowed only in patterns, not in item types??
-                    // TODO: not in spec, drop this
-                    checkLanguageVersion40();
-                    warning("The pattern syntax atomic(typename) is likely to be dropped from the 4.0 specification. Use type(typename) instead.", SaxonErrorCode.SXWN9000);
-                    nextToken();
-                    expect(Token.NAME);
-                    StructuredQName typeName = getQNameParser().parse(
-                            t.currentTokenValue, NamespaceUri.SCHEMA);
-                    primaryType = getPlainType(typeName);
-                    if (!(primaryType instanceof AtomicType)) {
-                        grumble("Type " + t.currentTokenValue + " exists, but is not atomic");
-                    }
-                    nextToken();
-                    expect(Token.RPAR);
-                    nextToken();
-                    break;
-                case "union":
-                    primaryType = parseUnionType();
-                    break;
-                case "enum":
-                    primaryType = parseEnumType();
-                    break;
-                case "empty-sequence":
-                    nextToken();
-                    expect(Token.RPAR);
-                    nextToken();
-                    primaryType = ErrorType.getInstance();
-                    break;
-                case "type":
-                    checkLanguageVersion40();
-                    if (language != ParsedLanguage.XSLT_PATTERN) {
-                        grumble("The syntax type(N) is allowed only in XSLT patterns, not in XPath expressions");
-                    }
-                    nextToken();
-                    if (t.currentToken == Token.NAME) {
-                        StructuredQName qName = getQNameParser().parse(t.currentTokenValue, NamespaceUri.NULL);
-                        ItemType realType = getStaticContext().resolveTypeAlias(qName);
-                        if (realType != null) {
-                            nextToken();
-                            expect(Token.RPAR);
-                            nextToken();
-                            return realType;
-                        }
-                    }
-                    if (language != ParsedLanguage.XSLT_PATTERN) {
-                        grumble("In an XPath expression (as distinct from an XSLT pattern), type(N) must refer to a named item type");
-                    }
-                    ItemType it = parseItemType();
-                    expect(Token.RPAR);
-                    nextToken();
-                    return it;
-
-                default:
-                    primaryType = parseKindTest();
-                    break;
+            String typeName = t.currentName();
+            if (t.peekAhead() == Token.LPAREN) {
+                return parseKeywordItemType();
+            } else {
+                primaryType = getPlainType(typeName);
+                nextToken();
             }
         } else if (t.currentToken == Token.PERCENT) {
             AnnotationList annotations = parseAnnotationsList();
@@ -2126,32 +2044,6 @@ public class XPathParser {
                 grumble("Expected 'function(...)' to follow annotation assertions, found " + t.currentToken);
                 return null;
             }
-//        } else if (language == ParsedLanguage.EXTENDED_ITEM_TYPE && t.currentToken == Token.PREFIX) {
-//            String tokv = t.currentTokenValue;
-//            nextToken();
-//            return makeNamespaceTest(Type.ELEMENT, tokv);
-//        } else if (language == ParsedLanguage.EXTENDED_ITEM_TYPE && t.currentToken == Token.SUFFIX) {
-//            nextToken();
-//            expectName();
-//            String tokv = t.currentTokenValue;
-//            nextToken();
-//            return makeLocalNameTest(Type.ELEMENT, tokv);
-//        } else if (language == ParsedLanguage.EXTENDED_ITEM_TYPE && t.currentToken == Token.AT) {
-//            nextToken();
-//            if (t.currentToken == Token.PREFIX) {
-//                String tokv = t.currentTokenValue;
-//                nextToken();
-//                return makeNamespaceTest(Type.ATTRIBUTE, tokv);
-//            } else if (t.currentToken == Token.SUFFIX) {
-//                nextToken();
-//                expectName();
-//                String tokv = t.currentTokenValue;
-//                nextToken();
-//                return makeLocalNameTest(Type.ATTRIBUTE, tokv);
-//            } else {
-//                grumble("Expected NodeTest after '@'");
-//                return BuiltInAtomicType.ANY_ATOMIC;
-//            }
         } else {
             grumble("Expected type name in SequenceType, found " + t.currentToken);
             return BuiltInAtomicType.ANY_ATOMIC;
@@ -3892,11 +3784,9 @@ public class XPathParser {
                     String name = readName();
                     fp = makeFingerprint(name, false);
                     nextToken();
-                    expect(Token.RPAR);
+                    expect(Token.RPAREN);
                     nextToken();
                     SchemaDeclaration decl = env.getPackageData().getImportedSchema().getAttributeDecl(fp);
-
-
                     if (decl == null) {
                         grumble("There is no declaration for attribute @" + name + " in an imported schema", "XPST0008");
                         return null;
@@ -3912,7 +3802,7 @@ public class XPathParser {
                     String name = readName();
                     fp = makeFingerprint(name, true);
                     nextToken();
-                    expect(Token.RPAR);
+                    expect(Token.RPAREN);
                     nextToken();
                     SchemaDeclaration decl = env.getPackageData().getImportedSchema().getElementDecl(fp);
 
