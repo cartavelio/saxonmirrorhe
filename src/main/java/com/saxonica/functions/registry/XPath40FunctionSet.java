@@ -547,8 +547,8 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .setOptionDetails(ParseJsonFn.makeOptionsParameter(40)));
 
         //#if EE==true || PE==true
-        register("parse-uri", 1, 2, e -> e.populate(ParseURI::new, MapType.ANY_MAP_TYPE, ONE, 0)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null)
+        register("parse-uri", 1, 2, e -> e.populate(ParseURI::new, MapType.ANY_MAP_TYPE, OPT, 0)
+                .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, MapType.ANY_MAP_TYPE, OPT, null));
         //#endif
 

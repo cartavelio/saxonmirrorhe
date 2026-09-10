@@ -4,6 +4,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.ma.map.HashTrieMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
@@ -18,8 +19,12 @@ import java.util.regex.Pattern;
  */
 public class ParseURI extends URIFunctions {
     @Override
-    public MapItem call(XPathContext context, Sequence[] arguments) throws XPathException {
-        String uristr = arguments[0].head().getStringValue();
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+        Item arg0 = arguments[0].head();
+        if (arg0 == null) {
+            return EmptySequence.getInstance();
+        }
+        String uristr = arg0.getStringValue();
         MapItem map = new HashTrieMap();
 
         map = map.addEntry(URI, new StringValue(uristr));
@@ -67,7 +72,7 @@ public class ParseURI extends URIFunctions {
             uristr = matcher.group(2);
         }
 
-        boolean absolute = scheme != null && fragid == null;
+        boolean absolute = scheme != null && (fragid == null || fragid.trim().isEmpty());
 
         if (scheme == null || "file".equals(scheme)) {
             pattern = Pattern.compile("^/*([A-Za-z])[:|](.*)$");
