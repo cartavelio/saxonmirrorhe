@@ -34,8 +34,8 @@
             <td>
                <p>
                   <a href="https://www.saxonica.com/saxon-c/doc11/html/classSaxonProcessor.html"
-                     >C++</a>
-                  <a href="/api/saxon_c_php_api/saxon_c_php_saxonprocessor">PHP</a>
+                     >C++</a><br/>
+                  <a href="/api/saxon_c_php_api/saxon_c_php_saxonprocessor">PHP</a><br/>
                   <a href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PySaxonProcessor"
                      >Python</a>
                </p>
@@ -56,8 +56,8 @@
             <td>
                <p>
                   <a href="https://www.saxonica.com/saxon-c/doc11/html/classXslt30Processor.html"
-                     >C++</a>
-                  <a href="/api/saxon_c_php_api/saxon_c_php_xslt30processor">PHP</a>
+                     >C++</a><br/>
+                  <a href="/api/saxon_c_php_api/saxon_c_php_xslt30processor">PHP</a><br/>
                   <a href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXslt30Processor"
                      >Python</a>
                </p>
@@ -76,8 +76,8 @@
             <td>
                <p>
                   <a href="https://www.saxonica.com/saxon-c/doc11/html/classXsltExecutable.html"
-                     >C++</a>
-                  <a href="/api/saxon_c_php_api/saxon_c_php_xsltexecutable">PHP</a>
+                     >C++</a><br/>
+                  <a href="/api/saxon_c_php_api/saxon_c_php_xsltexecutable">PHP</a><br/>
                   <a href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXsltExecutable"
                      >Python</a>
                </p>
@@ -96,8 +96,8 @@
             <td>
                <p>
                   <a href="https://www.saxonica.com/saxon-c/doc11/html/classXQueryProcessor.html"
-                     >C++</a>
-                  <a href="/api/saxon_c_php_api/saxon_c_php_xqueryprocessor">PHP</a>
+                     >C++</a><br/>
+                  <a href="/api/saxon_c_php_api/saxon_c_php_xqueryprocessor">PHP</a><br/>
                   <a href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXQueryProcessor"
                      >Python</a>
                </p>
@@ -116,8 +116,8 @@
             <td>
                <p>
                   <a href="https://www.saxonica.com/saxon-c/doc11/html/classXPathProcessor.html"
-                     >C++</a>
-                  <a href="/api/saxon_c_php_api/saxon_c_php_xpathprocessor">PHP</a>
+                     >C++</a><br/>
+                  <a href="/api/saxon_c_php_api/saxon_c_php_xpathprocessor">PHP</a><br/>
                   <a href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXPathProcessor"
                      >Python</a>
                </p>
@@ -136,8 +136,8 @@
             <td>
                <p>
                   <a href="https://www.saxonica.com/saxon-c/doc11/html/classschemavalidator.html"
-                     >C++</a>
-                  <a href="/api/saxon_c_php_api/saxon_c_php_schemavalidator">PHP</a>
+                     >C++</a><br/>
+                  <a href="/api/saxon_c_php_api/saxon_c_php_schemavalidator">PHP</a><br/>
                   <a href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PySchemaValidator"
                      >Python</a>
                </p>
@@ -234,13 +234,13 @@
       </nav>
 
       <section id="saxon_c_php_saxonprocessor" title="Saxon\SaxonProcessor">
-         <h1>Saxon\SaxonProcessor Class</h1>
+         <h1>Saxon\SaxonProcessor</h1>
 
          <table>
             <thead>
                <tr>
                   <td>Return</td>
-                  <td>Function name and Description</td>
+                  <td>Function name and description</td>
                </tr>
             </thead>
 
@@ -400,7 +400,7 @@
                   <div class="fcomment">Set a configuration property specific to the processor in
                      use. Properties specified here are common across all the processors. See <a
                         href="http://www.saxonica.com/documentation11/index.html#!configuration/config-features"
-                        >Configuration Features</a> for more details.</div>
+                        >Configuration features</a> for more details.</div>
                </td>
             </tr>
             <tr>
@@ -481,14 +481,14 @@
       </section>
 
       <!--<section id="saxon_c_php_xsltprocessor" title="Saxon\XsltProcessor">
-         <h1>Saxon\XsltProcessor Class</h1>
+         <h1>Saxon\XsltProcessor</h1>
 
 
          <table>
             <thead>
                <tr>
                   <td>Return</td>
-                  <td>Function name and Description</td>
+                  <td>Function name and description</td>
                </tr>
             </thead>
             <tr>
@@ -697,13 +697,13 @@
 
 
       <section id="saxon_c_php_xslt30processor" title="Saxon\Xslt30Processor">
-         <h1>Saxon\Xslt30Processor Class</h1>
+         <h1>Saxon\Xslt30Processor</h1>
 
          <table>
             <thead>
                <tr>
                   <td>Return</td>
-                  <td>Function name and Description</td>
+                  <td>Function name and description</td>
                </tr>
             </thead>
 
@@ -935,13 +935,13 @@
       
       
             <section id="saxon_c_php_xsltexecutable" title="Saxon\XsltExecutable">
-         <h1>Saxon\XsltExecutable Class</h1>
+         <h1>Saxon\XsltExecutable</h1>
 
          <table>
             <thead>
                <tr>
                   <td>Return</td>
-                  <td>Function name and Description</td>
+                  <td>Function name and description</td>
                </tr>
             </thead>
 
@@ -1431,13 +1431,13 @@
       
 
       <section id="saxon_c_php_xqueryprocessor" title="Saxon\XQueryProcessor">
-         <h1>Saxon\XQueryProcessor Class</h1>
+         <h1>Saxon\XQueryProcessor</h1>
 
          <table>
             <thead>
                <tr>
                   <td>Return</td>
-                  <td>Function name and Description</td>
+                  <td>Function name and description</td>
                </tr>
             </thead>
 
@@ -1616,13 +1616,13 @@
 
 
       <section id="saxon_c_php_xpathprocessor" title="Saxon\XPathProcessor">
-         <h1>Saxon\XPathProcessor Class</h1>
+         <h1>Saxon\XPathProcessor</h1>
 
          <table>
             <thead>
                <tr>
                   <td>Return</td>
-                  <td>Function name and Description</td>
+                  <td>Function name and description</td>
                </tr>
             </thead>
 
@@ -1846,13 +1846,13 @@
       </section>
 
       <section id="saxon_c_php_schemavalidator" title="Saxon\SchemaValidator">
-         <h1>Saxon\SchemaValidator Class</h1>
+         <h1>Saxon\SchemaValidator</h1>
 
          <table>
             <thead>
                <tr>
                   <td>Return</td>
-                  <td>Function name and Description</td>
+                  <td>Function name and description</td>
                </tr>
             </thead>
 
@@ -2059,13 +2059,13 @@
       </section>
 
       <section id="saxon_c_php_xdmvalue" title="Saxon\XdmValue">
-         <h1>Saxon\XdmValue Class</h1>
+         <h1>Saxon\XdmValue</h1>
 
          <table>
             <thead>
                <tr>
                   <td>Return</td>
-                  <td>Function name and Description</td>
+                  <td>Function name and description</td>
                </tr>
             </thead>
 
@@ -2111,14 +2111,14 @@
       </section>
 
       <section id="saxon_c_php_xdmitem" title="Saxon\XdmItem">
-         <h1>Saxon\XdmItem Class</h1>
+         <h1>Saxon\XdmItem</h1>
          <p>extends <a href="../saxon_c_php_xdmvalue">Saxon\XdmValue</a></p>
 
          <table>
             <thead>
                <tr>
                   <td>Return</td>
-                  <td>Function name and Description</td>
+                  <td>Function name and description</td>
                </tr>
             </thead>
 
@@ -2180,14 +2180,14 @@
       </section>
 
       <section id="saxon_c_php_xdmatomicvalue" title="Saxon\XdmAtomicValue">
-         <h1>Saxon\XdmAtomicValue Class</h1>
+         <h1>Saxon\XdmAtomicValue</h1>
          <p>extends <a href="../saxon_c_php_xdmitem">Saxon\XdmItem</a></p>
 
          <table>
             <thead>
                <tr>
                   <td>Return</td>
-                  <td>Function name and Description</td>
+                  <td>Function name and description</td>
                </tr>
             </thead>
 
@@ -2247,14 +2247,14 @@
       </section>
       
       <section id="saxon_c_php_xdmnode" title="Saxon\XdmNode">
-         <h1>Saxon\XdmNode Class</h1>
+         <h1>Saxon\XdmNode</h1>
          <p>extends <a href="../saxon_c_php_xdmitem">Saxon\XdmItem</a></p>
          
          <table>
             <thead>
                <tr>
                   <td>Return</td>
-                  <td>Function name and Description</td>
+                  <td>Function name and description</td>
                </tr>
             </thead>
             
@@ -2357,7 +2357,7 @@
       </section>
       
       <section id="saxon_c_php_xdmfunctionitem" title="Saxon\XdmFunctionItem">
-         <h1>Saxon\XdmFunctionItem Class</h1>
+         <h1>Saxon\XdmFunctionItem</h1>
          <p>extends <a href="../saxon_c_php_xdmitem">Saxon\XdmItem</a></p>
          
        
@@ -2366,7 +2366,7 @@
             <thead>
                <tr>
                   <td>Return</td>
-                  <td>Function name and Description</td>
+                  <td>Function name and description</td>
                </tr>
             </thead>
             
@@ -2429,14 +2429,14 @@
       
       
       <section id="saxon_c_php_xdmarray" title="Saxon\XdmArray">
-         <h1>Saxon\XdmArray Class</h1>
+         <h1>Saxon\XdmArray</h1>
          <p>extends <a href="../saxon_c_php_xdmfunctionitem">Saxon\XdmFunctionItem</a></p>
          
          <table>
             <thead>
                <tr>
                   <td>Return</td>
-                  <td>Function name and Description</td>
+                  <td>Function name and description</td>
                </tr>
             </thead>
             <tr>
@@ -2503,14 +2503,14 @@
     PHP_METHOD(XdmMap,  keys); -->
       
       <section id="saxon_c_php_xdmmap" title="Saxon\XdmMap">
-         <h1>Saxon\XdmMap Class</h1>
+         <h1>Saxon\XdmMap</h1>
          <p>extends <a href="../saxon_c_php_xdmfunctionitem">Saxon\XdmFunctionItem</a></p>
          
          <table>
             <thead>
                <tr>
                   <td>Return</td>
-                  <td>Function name and Description</td>
+                  <td>Function name and description</td>
                </tr>
             </thead>
             

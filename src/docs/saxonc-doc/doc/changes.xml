@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<article id="changes" title="Change History">
-   <h1>Change History</h1>
+<article id="changes" title="Change history">
+   <h1>Change history</h1>
 
    <p>In this section we highlight headline changes between the major releases. For full details of
       changes between maintenance releases, see the SaxonC <a
-         href="https://www.saxonica.com/saxon-c/release-notes.xml">Release Notes</a>, and for
+         href="https://www.saxonica.com/saxon-c/release-notes.xml">Release notes</a>, and for
       details of bug fixes see the <a href="https://saxonica.plan.io/projects/saxon-c">SaxonC
          project</a> at the Saxonica community site.</p>
    
