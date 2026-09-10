@@ -62,6 +62,51 @@ public class ResolverConfigurationTest {
         }
     }
 
+<<<<<<< Updated upstream
+=======
+    @Test
+    public void wrappedUriResolver2() {
+        try {
+            Configuration config = new Configuration();
+            Processor proc = new Processor(config);
+            config.setResourceResolver(
+                    new ResourceResolverWrappingURIResolver(
+                            new StandardURIResolver(config) {
+                                @Override
+                                public Source resolve(String href, String base)
+                                        throws XPathException {
+                                    if ((href != null) && (base != null) && base.startsWith("classpath:")) {
+                                        try {
+                                            URI uri = new URI(href);
+
+                                            if (!uri.isAbsolute()) {
+                                                href = "classpath:" +
+                                                        new URI(base.substring("classpath:".length())).
+                                                                resolve(uri).
+                                                                toString();
+                                            }
+                                        } catch (URISyntaxException e) {
+                                            fail();
+                                        }
+                                    }
+
+                                    return super.resolve(href, base);
+                                }
+                            }));
+
+            //config.setResourceResolver(new ResourceResolverWrappingURIResolver(new StandardURIResolver(config)));
+            TreeInfo info = config.buildDocumentTree(new StreamSource(new File(ConfigTest.DATA_DIR + "books.xml")));
+            XQueryCompiler xqc = proc.newXQueryCompiler();
+            xqc.setBaseURI(new File(ConfigTest.DATA_DIR).toURI());
+            XQueryExecutable exec = xqc.compile("doc('books.xml')");
+            exec.load().run(new NullDestination());
+            assertTrue(info.getRootNode().getBaseURI().endsWith("books.xml"));
+        } catch (XPathException | SaxonApiException e) {
+            fail();
+        }
+    }
+
+>>>>>>> Stashed changes
     private class MyResolver extends CatalogResourceResolver {
         private final CatalogResourceResolver resolver;
 
