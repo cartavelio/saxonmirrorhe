@@ -3417,14 +3417,37 @@ public class XQueryParser extends XPathParser {
         } else {
             String name = null;
             StructuredQName qName = null;
-            if (t.currentToken == Token.HASH_BEFORE_NAME && allowXPath40Syntax) {
-                qName = parseEQName();
-            } else {
-                name = expectName();
-                if (allowXPath40Syntax) {
-                    checkUnreserved(name);
-                }
+            switch (nodeKind) {
+                case "element":
+                case "attribute":
+                    if (t.currentToken == Token.HASH_BEFORE_NAME
+                            && allowXPath40Syntax) {
+                        qName = parseEQName();
+                    } else {
+                        name = expectName();
+                        if (allowXPath40Syntax) {
+                            checkUnreserved(name);
+                        }
+                    }
+                    break;
+                case "namespace":
+                case "processing-instruction":
+                    if (t.currentToken == Token.HASH_BEFORE_NAME
+                            && allowXPath40Syntax) {
+                        nextToken();
+                        name = expectName();
+                    } else {
+                        name = expectName();
+                        if (allowXPath40Syntax) {
+                            checkUnreserved(name);
+                        }
+                    }
+                    break;
+                default:
+                    grumble("Unknown constructor for named node: " + nodeKind);
+                    return null;
             }
+
             switch (nodeKind) {
                 case "element":
                     return parseNamedElementConstructor(name, qName, offset);
