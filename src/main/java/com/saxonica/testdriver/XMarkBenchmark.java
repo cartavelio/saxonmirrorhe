@@ -15,23 +15,15 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.Version;
 import net.sf.saxon.dom.DOMObjectModel;
-import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.Sink;
-import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.FeatureKeys;
-import net.sf.saxon.lib.ParseOptions;
-import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.option.axiom.AxiomObjectModel;
 import net.sf.saxon.option.dom4j.DOM4JObjectModel;
 import net.sf.saxon.option.jdom2.JDOM2ObjectModel;
 import net.sf.saxon.option.xom.XOMObjectModel;
-import net.sf.saxon.query.DynamicQueryContext;
-import net.sf.saxon.query.StaticQueryContext;
-import net.sf.saxon.query.XQueryExpression;
+import net.sf.saxon.s9api.*;
 import net.sf.saxon.trace.Instrumentation;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.DateTimeValue;
 
 import javax.xml.transform.Result;
@@ -64,24 +56,22 @@ public class XMarkBenchmark {
     public XMarkBenchmark() {
     }
 
-    static boolean pull = false;
-    static boolean lazy = false;
-    static boolean saproduct = false;
-    static boolean satests = false;
+    static String edition = "HE";
+    static boolean schemaAware = false;
+    static String opt = null;
     static boolean xslt = false;
     static boolean elab = true;
     static String generateByteCode = null;
     static int byteCodeThreshold = 100;
     static boolean checkResults = false;
-    static boolean val = false;
     static int test = -1;
-    static String programPath = "//home//ond1//work//development//xmark//";
     static String dataPath = "";
-    private Object guiForm;
     private boolean threadStop = false;
     private TreeModel treeModel = null;
+    private boolean useJson = false;
 
-    static String[] tests = {"xmark1.xml", "xmark4.xml", "xmark10.xml"};
+    private static String[] xmlDataSets = {"xmark1.xml", "xmark4.xml", "xmark10.xml"};
+
     static TreeModel[] models = {TreeModel.TINY_TREE, TreeModel.TINY_TREE_CONDENSED, TreeModel.LINKED_TREE,
             new DOMObjectModel(), new JDOM2ObjectModel(),
             new DOM4JObjectModel(), new XOMObjectModel(), new AxiomObjectModel(), new DominoTreeModel()};
@@ -90,31 +80,14 @@ public class XMarkBenchmark {
     public static final int MAX_RUNS =  /*10000;*/  1000;
     public static final long MAX_TIME = /*3_000_000_000_000L;*/   30_000_000_000L;
 
-    public void setProgramPath(String path) {
-        programPath = path;
-    }
-
-    public String getProgramPath() {
-        return programPath;
-    }
-
-    public void setDataPath(String path) {
-        dataPath = path;
-    }
-
-    public String getDataPath() {
-        return dataPath;
-    }
-
     /**
      * Method main
      *
      * @param argv command line arguments. The following arguments are recognised:
      *             <dl>
-     *             <dt>-dir:directory</dt><dd>The directory containing the tests</dd>
-     *             <dt>-pull</dt><dd>Run in pull mode</dd>
-     *             <dt>-lazy</dt><dd>Enable lazy construction mode</dd>
-     *             <dt>-sa</dt><dd>Run standard tests in schema-aware mode</dd>
+     *             <dt>-dir:directory</dt><dd>The directory containing the tests. Defaults to "."</dd>
+     *             <dt>-edition:HE|EE</dt><dd>Saxon edition to use</dd>
+     *             <dt>-opt:flags</dt><dd>Optimizer options</dd>
      *             <dt>-satests</dt><dd>Run schema-aware versions of the tests in schema-aware mode</dd>
      *             <dt>-xslt</dt><dd>Run XSLT versions of the tests</dd>
      *             <dt>-runcomp</dt><dd>set bytecode on or off, or integer threshold</dd>
@@ -127,26 +100,13 @@ public class XMarkBenchmark {
         xmark.go(argv);
 
     }
-
-//    public void setTestDriverForm(TestDriverForm gui) {
-//        guiForm = gui;
-//    }
-
+    
     public void println(String data) {
-        if (guiForm != null) {
-            //guiForm.setResultTextArea(data);
-        } else {
-            System.err.println(data);
-        }
+        System.err.println(data);
     }
 
     public void printError(String error, Exception e) {
-        if (guiForm != null) {
-            //guiForm.errorPopup(error);
-            e.printStackTrace();
-        } else {
-            e.printStackTrace();
-        }
+        e.printStackTrace();
     }
 
     /**
@@ -171,24 +131,19 @@ public class XMarkBenchmark {
             if (anArgv.startsWith("-dir:")) {
                 dir = anArgv.substring(5);
             }
-            if (anArgv.equals("-pull")) {
-                pull = true;
+            if (anArgv.equals("-sa") /* for compatibility */ || anArgv.equals("-edition:EE")) {
+                edition = "EE";
             }
-            if (anArgv.equals("-lazy")) {
-                lazy = true;
-            }
-            if (anArgv.equals("-sa")) {
-                saproduct = true;
-            }
-            // means use Saxon-EE optimizer (not the schema-aware version of the tests)
-            if (anArgv.equals("-satests")) {
-                satests = true;
+            // -satests means use schema-aware version of the tests: implies edition:EE
+            if (anArgv.equals("-satests") || anArgv.equals("-val")) {
+                edition = "EE";
+                schemaAware = true;
             }
             if (anArgv.equals("-xslt")) {
                 xslt = true;
             }
-            if (anArgv.equals("-elab:off")) {
-                elab = false;
+            if (anArgv.startsWith("-opt:")) {
+                opt = anArgv.substring(5);
             }
             if (anArgv.startsWith("-runcomp")) {
                 if (anArgv.equals("-runcomp")) {
@@ -200,14 +155,11 @@ public class XMarkBenchmark {
             if (anArgv.equals("-check")) {
                 checkResults = true;
             }
-            if (anArgv.equals("-val")) {
-                val = true;
-            }
             if (anArgv.startsWith("-q")) {
                 test = Integer.parseInt(anArgv.substring(2));
             }
             if (anArgv.startsWith("-size:")) {
-                tests = new String[]{"xmark" + anArgv.substring(6) + ".xml"};
+                xmlDataSets = new String[]{"xmark" + anArgv.substring(6) + ".xml"};
             }
             if (anArgv.startsWith("-tree")) {
                 String modelName = anArgv.substring(6);
@@ -235,16 +187,19 @@ public class XMarkBenchmark {
 
             }
             if (anArgv.equals("-?")) {
-                System.err.println("Options: -pull -lazy -sa -xslt -runcomp -tree");
+                System.err.println("Options: -dir:DIR -edition:HE|EE -xslt -runcomp -tree:MODEL");
             }
         }
 
         if (dir == null) {
-            dir = satests ? programPath + "//sa//" : programPath + "//";
+            dir = System.getProperty("user.dir");
         }
-
+        if (!dir.endsWith("/")) {
+            dir = dir + "/";
+        }
+        useJson = dir.contains("xmark-j");
         if (xslt) {
-            transform(lazy, saproduct, dir);
+            transform(edition.equalsIgnoreCase("EE"), dir);
         } else {
             query(dir);
         }
@@ -261,64 +216,75 @@ public class XMarkBenchmark {
         long per_millisecs = 1000000;
         String options = "";
         String when = DateTimeValue.getCurrentDateTime(null).getStringValue();
-        if (saproduct) options += "-sa ";
-        if (satests) options += "-satests ";
-        if (pull) options += "-pull ";
-        if (lazy) options += "-lazy ";
-        if (val) options += "-val ";
+        options += "-edition:" + edition + " ";
+        if (schemaAware) options += "-satests ";
         if (generateByteCode != null) {
-            options += "-runcomp:" + generateByteCode;
+            options += "-runcomp:" + generateByteCode + " ";
+        }
+        if (useJson) {
+            options += "json ";
         }
         options += ("-elab:" + (elab ? "on " : "off "));
         println("<xmark-results product='Saxon' lang='query' version='" + Version.getProductVersion() +
                         "' options='" + options + "' when='" + when + "'>");
 
+        Processor processor = new Processor(edition.equalsIgnoreCase("EE"));
+        DocumentBuilder builder = processor.newDocumentBuilder();
+        JsonBuilder jsonBuilder = processor.newJsonBuilder();
+        XQueryCompiler compiler = processor.newXQueryCompiler();
+        if (schemaAware) {
+            SchemaManager schemaManager = processor.getSchemaManager();
+            schemaManager.load(new StreamSource(new File(dir + "schema.xsd")));
+            builder.setSchemaValidator(schemaManager.newSchemaValidator());
+            compiler.setSchemaAware(true);
+        }
+
         for (TreeModel model : models) {
             if (treeModel != null && !treeModel.getName().equals(model.getName())) {
                 continue;
             }
-            ParseOptions parseOptions = new ParseOptions();
-            parseOptions.setModel(model);
-            for (String test1 : tests) {
+
+            builder.setTreeModel(model);
+
+            for (String test1 : xmlDataSets) {
+                if (useJson) {
+                    test1 = test1.replace(".xml", ".json");
+                }
                 File file = new File(dir + test1);
-                Configuration config = new Configuration();
-//#if EE==true
-                if (saproduct) {
-                    config = new com.saxonica.config.EnterpriseConfiguration();
-                }
-//#endif
 
-                config.setBooleanProperty(FeatureKeys.TRACE_OPTIMIZER_DECISIONS, false);
-                if (saproduct) {
-                    if (satests) {
-                        //AutoActivate.activate(config);
-                        config.setSchemaValidationMode(Validation.STRICT);
-                        config.addSchemaSource(new StreamSource(new File(dir + "schema.xsd")),
-                                               config.makeErrorReporter());
-                        config.setBooleanProperty(FeatureKeys.USE_TYPED_VALUE_CACHE, false);
-                    }
-                    if (val) {
-                        config.loadSchema(new File(dir + "sa//schema.xsd").toURI().toString());
-                        config.setSchemaValidationMode(Validation.STRICT);
-                    }
-                    if (!elab) {
-                        config.setConfigurationProperty(Feature.OPTIMIZATION_LEVEL, "-bc");
-                    }
-                    if (generateByteCode != null) {
-                        config.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, generateByteCode);
-                        config.setBooleanProperty(FeatureKeys.DEBUG_BYTE_CODE, false);
-                        //config.setTiming(true);
-                    }
-
-                }
+//                if (edition.equalsIgnoreCase("EE")) {
+//                    if (schemaAware) {
+//                        //AutoActivate.activate(config);
+//                        dir = dir + "schema-aware/";
+//                        config.setSchemaValidationMode(Validation.STRICT);
+//                        config.addSchemaSource(new StreamSource(new File(dir + "schema.xsd")),
+//                                               config.makeErrorReporter());
+//                        config.setBooleanProperty(FeatureKeys.USE_TYPED_VALUE_CACHE, false);
+//                        config.setSchemaValidationMode(Validation.STRICT);
+//                    }
+//                    if (!elab) {
+//                        config.setConfigurationProperty(Feature.OPTIMIZATION_LEVEL, "-bc");
+//                    }
+//                    if (generateByteCode != null) {
+//                        config.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, generateByteCode);
+//                        config.setBooleanProperty(FeatureKeys.DEBUG_BYTE_CODE, false);
+//                        //config.setTiming(true);
+//                    }
+//
+//                }
 
 
-                Source streamSource = new StreamSource(file);
+
 
                 long pstart = System.currentTimeMillis();
-                TreeInfo doc = null;
+                XdmItem doc = null;
                 try {
-                    doc = config.buildDocumentTree(streamSource, parseOptions);
+                    if (useJson) {
+                        doc = (XdmItem)jsonBuilder.parseJson(new FileReader(file));
+                    } else {
+                        Source streamSource = new StreamSource(file);
+                        doc = builder.build(streamSource);
+                    }
                 } catch (Exception e) {
                     printError("Error loading the file: " + file.toString(), e);
                 }
@@ -341,28 +307,25 @@ public class XMarkBenchmark {
                     try {
                         List<Long> measures = new ArrayList<>();
                         File query = new File(dir + 'q' + q + ".xq");
-                        StaticQueryContext qenv = config.newStaticQueryContext();
-                        qenv.setBaseURI(query.toURI().toString());
-                        if (val) {
-                            qenv.setSchemaAware(true);
-                        }
-                        XQueryExpression exp = qenv.compileQuery(new FileReader(query));
+                        compiler.setBaseURI(query.toURI());
+                        XQueryExecutable exp = compiler.compile(new FileReader(query));
                         //exp.explain(new ExpressionPresenter(config, new StreamResult(System.out)));
                         int runs = 0;
                         long totalTime = 0;
                         long min = Integer.MAX_VALUE;
                         long max = 0;
-                        Receiver sink = new Sink(config.makePipelineConfiguration());
+                        Destination sink = new NullDestination();
                         //sink = new CountingFilter(sink);
                         long queryStart = bean.getCurrentThreadCpuTime(); //System.nanoTime();
                         for (int t = 0; t < MAX_RUNS; t++) {
-                            final DynamicQueryContext context = new DynamicQueryContext(config);
-                            context.setContextItem(doc.getRootNode());
-                            Result result = sink;
+                            System.err.println("Running q" + q);
+                            XQueryEvaluator eval = exp.load();
+                            eval.setContextItem(doc);
+                            eval.setDestination(sink);
                             long start, end;
 
                             start = bean.getCurrentThreadCpuTime(); //System.nanoTime();
-                            exp.run(context, result, props);
+                            eval.run();
                             end = bean.getCurrentThreadCpuTime(); //System.nanoTime();
                             runs++;
 
@@ -391,9 +354,9 @@ public class XMarkBenchmark {
                         if (threadStop) {
                             break;
                         }
-                    } catch (XPathException err) {
+                    } catch (SaxonApiException err) {
                         println("Error in test " + q);
-                        System.err.println(err.getMessageAndLocation());
+                        System.err.println(err.getMessage());
                     }
                 }
                 println("  </file>");
@@ -414,18 +377,17 @@ public class XMarkBenchmark {
     /**
      * Run an XSLT transformation
      *
-     * @param lazy true if lazy construction mode is to be set
      * @param sa   true if schema-aware
      * @param dir  the directory containing the tests
      * @throws Exception
      */
 
-    public void transform(boolean lazy, boolean sa, String dir) throws Exception {
+    public void transform(boolean sa, String dir) throws Exception {
 
         System.out.println("<xmark-results product='Saxon' lang='xslt' version='" + Version.getProductVersion() + "'>");
 
-        for (int f = 0; f < tests.length; f++) {
-            File file = new File(dir + tests[f]);
+        for (int f = 0; f < xmlDataSets.length; f++) {
+            File file = new File(dir + xmlDataSets[f]);
 
 //            String factoryName = (sa ? "com.saxonica.config.EnterpriseTransformerFactory" : "net.sf.saxon.TransformerFactoryImpl");
 //            System.setProperty("java.xml.transform.TransformerFactory", factoryName);
@@ -442,7 +404,7 @@ public class XMarkBenchmark {
             TreeInfo doc = config.buildDocumentTree(streamSource);
             long pend = System.currentTimeMillis();
 
-            System.out.println("  <file name='" + tests[f] +
+            System.out.println("  <file name='" + xmlDataSets[f] +
                                        "' size='" + file.length() +
                                        "' schema-aware='" + config.isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XSLT) +
                                        "' build-time='" + (pend - pstart) + "'>");
