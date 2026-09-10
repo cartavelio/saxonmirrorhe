@@ -43,7 +43,6 @@ public class InvisibleXmlFn extends SystemFunction {
     public static OptionsParameter getOptionDetails() {
         OptionsParameter details = new OptionsParameter(40);
         details.addAllowedOption("fail-on-error", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        details.addAllowedOption(sx("format"), SequenceType.SINGLE_STRING, StringValue.bmp("xml"));
         details.addAllowedOption(sx("choose-alternative"), SequenceType.SINGLE_FUNCTION, null);
         return details;
     }
@@ -88,21 +87,11 @@ public class InvisibleXmlFn extends SystemFunction {
     private Sequence functionFromParser(XPathContext context,
                                         InvisibleXmlParser parser,
                                         Map<String, GroundedValue> options) throws XPathException {
-        String format = options.get(sx("format")).getStringValue().trim();
-
-        if (!"xml".equals(format) && !"json".equals(format)) {
-            throw new XPathException("Invalid format: " + format, "XPTY0004");
-        }
-
         if (parser.constructed()) {
             SequenceType[] argTypes = new SequenceType[]{SequenceType.SINGLE_STRING};
 
             final FunctionItemType ftype;
-            if ("xml".equals(format)) {
-                ftype = new SpecificFunctionType(argTypes, SequenceType.SINGLE_NODE);
-            } else {
-                ftype = new SpecificFunctionType(argTypes, SequenceType.SINGLE_ITEM);
-            }
+            ftype = new SpecificFunctionType(argTypes, NodeKindTest.DOCUMENT.one());
 
             AbstractFunction chooseAlternative = null;
             if (options.containsKey(sx("choose-alternative"))) {
@@ -172,7 +161,6 @@ public class InvisibleXmlFn extends SystemFunction {
         @Override
         public Sequence call(XPathContext context, Sequence[] sequences) throws XPathException {
             String input = sequences[0].head().getStringValue();
-            String format = options.get(sx("format")).getStringValue().trim();
 
             try {
                 Processor processor = (Processor) context.getConfiguration().getProcessor();
@@ -210,46 +198,15 @@ public class InvisibleXmlFn extends SystemFunction {
 
                 Arborist arborist = document.getResult().getArborist(axe);
 
-                if ("xml".equals(format)) {
-                    DocumentBuilder docBuilder = processor.newDocumentBuilder();
-                    BuildingContentHandler handler = docBuilder.newBuildingContentHandler();
-                    arborist.getTree(document.getAdapter(handler));
-                    return handler.getDocumentNode().getUnderlyingNode();
-                }
-
-                String json;
-                ParserOptions newOptions = new ParserOptions();
-                newOptions.setAssertValidXmlNames(false);
-                if ("json-tree".equals(format) || "json-text".equals(format)) {
-                    SimpleTreeBuilder simpleBuilder = new SimpleTreeBuilder(newOptions);
-                    arborist.getTree(document.getAdapter(simpleBuilder));
-                    SimpleTree tree = simpleBuilder.getTree();
-                    json = tree.asJSON();
-                } else {
-                    DataTreeBuilder dataBuilder = new DataTreeBuilder(newOptions);
-                    arborist.getTree(document.getAdapter(dataBuilder));
-                    DataTree tree = dataBuilder.getTree();
-                    json = tree.asJSON();
-                }
-
-                return jsonToXDM(processor, json);
+                DocumentBuilder docBuilder = processor.newDocumentBuilder();
+                BuildingContentHandler handler = docBuilder.newBuildingContentHandler();
+                arborist.getTree(document.getAdapter(handler));
+                return handler.getDocumentNode().getUnderlyingNode();
             } catch (XPathException ex) {
                 throw ex;
             } catch (Exception ex) {
                 throw new XPathException(ex);
             }
-        }
-
-        protected Item jsonToXDM(Processor processor, String json) throws SaxonApiException {
-            // This also really isn't very nice
-            XPathCompiler compiler = processor.newXPathCompiler();
-            compiler.declareVariable(_json);
-            XPathExecutable exec = compiler.compile("parse-json($json)");
-            XPathSelector selector = exec.load();
-            selector.setVariable(_json, new XdmAtomicValue(json));
-            XdmSequenceIterator<XdmItem> iter = selector.iterator();
-            XdmItem item = iter.next();
-            return item.getUnderlyingValue();
         }
     }
 }
