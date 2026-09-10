@@ -223,6 +223,10 @@ void * makeXdmValueFromPythonObject(PyObject * result){
             return xdmsetRef;
         } else if(PyIter_Check(result)){
             // PyIter are treated as XdmValues
+            if (getenv("SAXONC_DEBUG_FLAG")) {
+                 fprintf(stderr, "OVerflow error for the size of the set\n");
+                 fflush(stdout);
+            }
             void * resultVoidValue  = (void *)createProcessorData(thread1);
 
             PyObject *item;
@@ -259,7 +263,22 @@ void * makeXdmValueFromPythonObject(PyObject * result){
             return resultVoidValue;
 
         } else if(PyTuple_Check(result)) {
-            //TODO handle PyTuple
+            Py_ssize_t size = PyTuple_Size(result);
+
+            void * resultVoidValue  = (void *)createProcessorData(thread1);
+
+            for (Py_ssize_t i = 0; i < size; i++) {
+                PyObject *item = PyTuple_GetItem(result, i);
+                 void * valueii = makeXdmValueFromPythonObject(item);
+                // Use item
+                if(valueii != nullptr) {
+                    addProcessorValue(thread1, resultVoidValue,valueii);
+                    j_handles_destroy(thread1, valueii);
+                } else {
+                    // The item is not in a form we can handle, therefore ignore. Or maybe we should report error?
+                }
+            }
+            return resultVoidValue;
         }
 
 
