@@ -4,19 +4,18 @@ using SysCollGen = System.Collections.Generic;
 using System.Text;
 using System.Xml;
 using System.IO;
-using System.Text.RegularExpressions;
-using System.Globalization;
 using Saxon.Api;
-using JFeatureKeys = net.sf.saxon.lib.FeatureKeys;
-using JConfiguration = net.sf.saxon.Configuration;
-using JVersion = net.sf.saxon.Version;
-using JResult = javax.xml.transform.Result;
+using JFeatureKeys = Saxon.Hej.lib.FeatureKeys;
+using JConfiguration = Saxon.Hej.Configuration;
+using JVersion = Saxon.Hej.Version;
+using JResult = Saxon.Ejavax.xml.transform.Result;
 using System.Diagnostics;
-using TestRunner;
 using System.Linq;
-using java.util;
+using Saxon.Ejavax.xml.transform.stream;
+using Saxon.Hej.lib;
 using static Saxon.Api.Steps;
 using static Saxon.Api.Predicates;
+using NamespaceConstant = Saxon.Api.NamespaceConstant;
 
 namespace TestDriver {
     //C:/work/repositories/hg/xslt30-test C:/work/repositories/hg/xslt30-test/results/saxon/ -lang:XT30 -xt30:on
@@ -350,7 +349,7 @@ namespace TestDriver {
             if (testName.Contains("load-xquery-module")) {
                 ModuleResolver mr = new ModuleResolver(null, this);
                 mr.setTestCase(testCase);
-                env.processor.QueryResolver = mr;
+                env.processor.Implementation.setModuleURIResolver(mr);
             }
 
             XdmNode testInput = testCase.Select(Child("test")).FirstOrDefault();
@@ -367,9 +366,9 @@ namespace TestDriver {
                 Child("result").Then(Steps.Descendant("error"))
                     .Where(AttributeEq("code", "XTSE3430"))).Any();
             if (strictStreamability) {
-                env.processor.SetProperty(Feature<bool>.STRICT_STREAMABILITY, true);
+                env.processor.SetProperty(Saxon.Api.Feature<bool>.STRICT_STREAMABILITY, true);
                 env.resetActions.Add(env =>
-                    env.processor.SetProperty(Feature<bool>.STRICT_STREAMABILITY, false));
+                    env.processor.SetProperty(Saxon.Api.Feature<bool>.STRICT_STREAMABILITY, false));
             }
 
             // If a static error is expected, suppress JIT compilation so we catch it eagerly
@@ -587,9 +586,9 @@ namespace TestDriver {
 
 
                         Xslt30Transformer transformer = sheet.Load30();
-                        transformer.InputXmlResolver = env;
+                        transformer.XmlResolver = env;
                         if (env.unparsedTextResolver != null) {
-                            transformer.GetUnderlyingController.setUnparsedTextURIResolver(env.unparsedTextResolver);
+                            transformer.TextResolver = env.unparsedTextResolver;
                         }
 
                         SysCollGen.Dictionary<QName, XdmValue> caseGlobalParams =
@@ -669,7 +668,7 @@ namespace TestDriver {
                                 }
                             }
                             catch (Exception e) {
-                                if (e.InnerException is net.sf.saxon.trans.XPathException) {
+                                if (e.InnerException is Saxon.Hej.trans.XPathException) {
                                     Console.WriteLine(e.Message);
                                     outcome.SetException(e);
                                     //throw new SaxonApiException(e.getCause());
@@ -780,8 +779,8 @@ namespace TestDriver {
                             foreach (SysCollGen.KeyValuePair<Uri, TestOutcome.SingleResultDoc> entry in
                                 xslResultDocuments) {
                                 Uri key = entry.Key;
-                                String path = key.AbsolutePath;
-                                String serialization = outcome.Serialize(env.processor, entry.Value);
+                                string path = key.AbsolutePath;
+                                string serialization = outcome.Serialize(env.processor, entry.Value);
 
                                 saveResultsToFile(serialization, path);
                             }
@@ -796,9 +795,9 @@ namespace TestDriver {
                         XsltTransformer transformer = sheet.Load();
 
                         //transformer.SetURIResolver(env); //TODO
-                        if (env.unparsedTextResolver != null) {
-                            transformer.Implementation.setUnparsedTextURIResolver(env.unparsedTextResolver);
-                        }
+                        // if (env.unparsedTextResolver != null) {
+                        //     transformer.TextResolver = env.unparsedTextResolver;
+                        // }
 
                         if (initialTemplate != null) {
                             transformer.InitialTemplate = initialTemplateName;
@@ -1029,7 +1028,7 @@ namespace TestDriver {
             return pack;
         }
 
-        public class EnvironmentVariableResolver : net.sf.saxon.lib.EnvironmentVariableResolver {
+        public class EnvironmentVariableResolver : Saxon.Hej.lib.EnvironmentVariableResolver {
             public EnvironmentVariableResolver() {
             }
 
@@ -1214,11 +1213,11 @@ namespace TestDriver {
                             return (edition.Equals("PE") || edition.Equals("EE")) ^ inverse;
                         case "streaming-fallback":
                             bool requiredi = !inverse;
-                            bool old = (bool) env.processor.GetProperty(Feature<bool>.STREAMING_FALLBACK);
+                            bool old = (bool) env.processor.GetProperty(Saxon.Api.Feature<bool>.STREAMING_FALLBACK);
                             if (old != requiredi) {
-                                env.processor.SetProperty(Feature<bool>.STREAMING_FALLBACK, requiredi);
+                                env.processor.SetProperty(Saxon.Api.Feature<bool>.STREAMING_FALLBACK, requiredi);
                                 env.resetActions.Add(envi => {
-                                    env.processor.SetProperty(Feature<bool>.STREAMING_FALLBACK, old);
+                                    env.processor.SetProperty(Saxon.Api.Feature<bool>.STREAMING_FALLBACK, old);
                                 });
                             }
 
@@ -1236,11 +1235,11 @@ namespace TestDriver {
                     string[] platforms = value.Split(' ');
                     return Array.IndexOf(platforms, "CS") >= 0;
                 case "default_language_for_numbering": {
-                    string old = env.processor.GetProperty(Feature<string>.DEFAULT_LANGUAGE);
+                    string old = env.processor.GetProperty(Saxon.Api.Feature<string>.DEFAULT_LANGUAGE);
                     if (!value.Equals(old)) {
-                        env.processor.SetProperty(Feature<string>.DEFAULT_LANGUAGE, value);
+                        env.processor.SetProperty(Saxon.Api.Feature<string>.DEFAULT_LANGUAGE, value);
                         env.resetActions.Add(envi => {
-                                env.processor.SetProperty(Feature<string>.DEFAULT_LANGUAGE, old);
+                                env.processor.SetProperty(Saxon.Api.Feature<string>.DEFAULT_LANGUAGE, old);
                             }
                         );
                     }
@@ -1272,7 +1271,7 @@ namespace TestDriver {
                 case "year_component_values":
                     if ("support year zero".Equals(value)) {
                         if (env != null) {
-                            env.processor.SetProperty(Feature<string>.XSD_VERSION, inverse ? "1.0" : "1.1");
+                            env.processor.SetProperty(Saxon.Api.Feature<string>.XSD_VERSION, inverse ? "1.0" : "1.1");
                             return true;
                         }
                         else {
@@ -1556,60 +1555,12 @@ namespace TestDriver {
             return (qname == null ? null : (QName) qname.Value);
         }
 
-        internal class OutputResolver : net.sf.saxon.lib.OutputURIResolver {
-            private Processor proc;
-            private TestOutcome outcome;
-            private XdmDestination destination;
-            private StringWriter stringWriter;
-            readonly bool serialized;
-            Uri uri;
-
-            public OutputResolver(Processor proc, TestOutcome outcome, bool serialized) {
-                this.proc = proc;
-                this.outcome = outcome;
-                this.serialized = serialized;
-            }
-
-            public net.sf.saxon.lib.OutputURIResolver newInstance() {
-                return new OutputResolver(proc, outcome, serialized);
-            }
-
-            XmlUrlResolver res = new XmlUrlResolver();
-
-            public JResult resolve(string href, string base1) {
-                try {
-                    uri = res.ResolveUri(new Uri(base1), href);
-                    if (serialized) {
-                        stringWriter = new StringWriter();
-                        javax.xml.transform.stream.StreamResult result =
-                            new javax.xml.transform.stream.StreamResult(stringWriter);
-                        result.setSystemId(uri.ToString());
-                        return result;
-                    }
-                    else {
-                        destination = new XdmDestination();
-                        destination.BaseUri = uri;
-                        return null; //  destination..GetReceiver(proc.Implementation.makePipelineConfiguration());
-                    }
-                }
-                catch (Exception e) {
-                    throw;
-                }
-            }
-
-            public void close(JResult result) {
-                if (serialized) {
-                    outcome.SetSecondaryResult(uri, null, stringWriter.ToString(), proc);
-                }
-                else {
-                    XdmDestination xdm = (XdmDestination) destination;
-                    outcome.SetSecondaryResult(xdm.BaseUri, xdm.XdmNode, null, proc);
-                }
-            }
-        }
     }
 
-    public class ModuleResolver : IQueryResolver {
+    public class ModuleResolver : ModuleURIResolver {
+        // To support XSLT stylesheets that use load-query-module(), we're setting a query module resolver
+        // in the Configuration. This isn't supported directly in the Saxon-CS API, we have to dive down into
+        // internals to achieve the required effect
         XQueryCompiler catXQC;
         XdmNode testCase;
         Driver driver = null;
@@ -1623,42 +1574,12 @@ namespace TestDriver {
             this.testCase = testCase;
         }
 
-
-        public Object GetEntity(Uri absoluteUri) {
-            FileStream stream = null;
-            try {
-                stream = new FileStream(driver.queryModules[absoluteUri], FileMode.Open, FileAccess.Read);
-            }
-            catch (Exception ex) {
-                return null;
-            }
-
-            return stream;
+        public Saxon.Ejavax.xml.transform.stream.StreamSource[] resolve(string moduleURI, string baseURI, string[] locations) {
+            Uri absoluteUri = (new XmlUrlResolver()).ResolveUri(testCase.BaseUri, moduleURI);
+            FileStream stream = new (driver.queryModules[absoluteUri], FileMode.Open, FileAccess.Read);
+            StreamSource ss = new (stream, absoluteUri.ToString());
+            return new[] {ss};
         }
 
-        internal Uri resolve(Uri basei, String child) {
-            return (new XmlUrlResolver()).ResolveUri(testCase.BaseUri, child);
-        }
-
-
-        public Uri[] GetModules(String moduleUri, Uri baseUri, String[] locationHints) {
-            //  XdmValue files = catXPC.Evaluate("./module[@uri='" + moduleUri + "']/@file/string()", testCase);
-            /*if (files.Count == 0)
-            {
-                throw new Exception("Failed to find module entry for " + moduleUri);
-            }*/
-            XmlUrlResolver res = new XmlUrlResolver();
-
-            Uri[] fullPaths = new Uri[1];
-
-            try {
-                fullPaths[0] = res.ResolveUri(baseUri, moduleUri);
-            }
-            catch (Exception e) {
-                return null;
-            }
-
-            return fullPaths;
-        }
     }
 }

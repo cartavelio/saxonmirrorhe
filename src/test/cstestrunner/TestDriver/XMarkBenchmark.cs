@@ -1,19 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using java.io;
-using java.math;
-using java.util;
-using javax.xml.transform.stream;
-using net.sf.saxon;
-using net.sf.saxon.@event;
-using net.sf.saxon.lib;
-using net.sf.saxon.om;
-using net.sf.saxon.query;
-using net.sf.saxon.trace;
-using net.sf.saxon.trans;
-using net.sf.saxon.value;
+
+using Saxon.Hej;
+using Saxon.Hej.@event;
+using Saxon.Hej.lib;
+using Saxon.Hej.om;
+using Saxon.Hej.query;
+using Saxon.Hej.trace;
+using Saxon.Hej.trans;
+using Saxon.Hej.value;
 using Saxon.Api;
+using Saxon.Ejava.io;
+using Saxon.Ejava.util;
 using Singulink.Numerics;
 using FeatureKeys = Saxon.Api.FeatureKeys;
 using TreeModel = Saxon.Api.TreeModel;
@@ -224,7 +223,7 @@ namespace TestRunner {
             if (lazy) options += "-lazy ";
             if (val) options += "-val ";
 
-            println("<xmark-results product='Saxon' lang='query' version='" + net.sf.saxon.Version.getProductVersion() +
+            println("<xmark-results product='Saxon' lang='query' version='" + Saxon.Hej.Version.getProductVersion() +
                     "' options='" + options + "' when='" + when + "'>");
             Stopwatch stopWatch = new Stopwatch();
 
@@ -348,7 +347,7 @@ namespace TestRunner {
         }
 
         protected internal static long now() {
-            return java.lang.System.nanoTime();
+            return Saxon.Ejava.lang.System.nanoTime();
         }
 
         private long median(SysCollGen.List<long> measures) {
@@ -369,7 +368,7 @@ namespace TestRunner {
         public void transform(bool lazy, bool sa, string dir) {
 
             Console.WriteLine("<xmark-results product='Saxon' lang='xslt' version='" +
-                              net.sf.saxon.Version.getProductVersion() + "'>");
+                              Saxon.Hej.Version.getProductVersion() + "'>");
 
             for (int f = 0; f < tests.Length; f++) {
                 Processor proc = new Processor(true);
@@ -385,7 +384,7 @@ namespace TestRunner {
 
                 for (int q = 1; q <= 20; q++) {
                     //if (q==9) continue;
-                    java.io.File sheet = new java.io.File(dir + 'q' + q + ".xsl");
+                    Saxon.Ejava.io.File sheet = new (dir + 'q' + q + ".xsl");
                     if (!sheet.exists()) {
                         continue;
                     }
