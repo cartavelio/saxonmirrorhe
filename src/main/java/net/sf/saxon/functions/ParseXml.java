@@ -177,8 +177,12 @@ public class ParseXml extends SystemFunction implements Callable {
             if (controller == null) {
                 throw new XPathException("parse-xml() function is not available in this environment");
             }
-            
-            StringReader sr = new StringReader(inputArg.getStringValue());
+
+            String inputXml = inputArg.getStringValue();
+            if (!inputXml.isEmpty() && inputXml.charAt(0) == 0xFEFF) {  // Strip a leading BOM
+                inputXml = inputXml.substring(1);
+            }
+            StringReader sr = new StringReader(inputXml);
 //            InputSource is = new InputSource(sr);
 //            is.setSystemId(baseUri);
             Source source = new StreamSource(sr);
@@ -273,7 +277,11 @@ public class ParseXml extends SystemFunction implements Callable {
             }
             Configuration config = context.getConfiguration();
 
-            StringReader sr = new StringReader(inputArg.getStringValue());
+            String inputXml = inputArg.getStringValue();
+            if (!inputXml.isEmpty() && inputXml.charAt(0) == 0xFEFF) { // Strip a leading BOM
+                inputXml = inputXml.substring(1);
+            }
+            StringReader sr = new StringReader(inputXml);
             StreamSource ss = new StreamSource(sr, baseUri);
             Source pullSource = Version.platform.resolveSource(ss, options, config);
 

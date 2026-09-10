@@ -95,6 +95,11 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
         NodeInfo node = null;
         ParseXml.RetentiveErrorHandler errorHandler = new ParseXml.RetentiveErrorHandler();
 
+        String inputXml = inputArg.getStringValue();
+        if (!inputXml.isEmpty() && inputXml.charAt(0) == 0xFEFF) {  // Strip a leading BOM
+            inputXml = inputXml.substring(1);
+        }
+
         int attempt = 0;
         while (attempt++ < 3) {
             try {
@@ -103,7 +108,7 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
                     throw new XPathException("parse-xml-fragment() function is not available in this environment");
                 }
                 Configuration configuration = controller.getConfiguration();
-                final StringReader fragmentReader = new StringReader(inputArg.getStringValue());
+                final StringReader fragmentReader = new StringReader(inputXml);
 
                 String skeleton = "<!DOCTYPE z [<!ENTITY e SYSTEM \"http://www.saxonica.com/parse-xml-fragment/actual.xml\">]>\n<z>&e;</z>";
                 StringReader skeletonReader = new StringReader(skeleton);
