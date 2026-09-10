@@ -239,8 +239,9 @@ return this;}
 
     int XdmNode::getChildCount(){
 	if(childCount == -1) {
+        std::cerr<<"getChildCount value="<<((int)value)<<std::endl;
 		childCount = j_getChildCount(SaxonProcessor::sxn_environ->thread, (void *)value);
-
+        std::cerr<<"getChildCount count="<<childCount<<std::endl;
 
 	}
 	return childCount;
@@ -251,14 +252,21 @@ return this;}
         if (cached && children != nullptr) {
             return children;
         }   else {
-            getChildCount();
+            std::cerr<<"getChildren value="<<((int)value)<<std::endl;
+            if(childCount < 0) {
+                getChildCount();
+            }
+
+            if(childCount == 0) {
+                return nullptr;
+            }
             allocFn fn = operator new;
             long long * childNodes = j_getChildren(SaxonProcessor::sxn_environ->thread, (void*) fn, (void *)value);
 
 
         XdmNode ** childreni =   new XdmNode*[childCount];
 		for (int p=0; p < childCount; ++p){
-
+            std::cerr<<"create childNode with value="<<((int)childNodes[p])<<std::endl;
             childreni[p] = new XdmNode(this, (int64_t)childNodes[p], UNKNOWN);
 
 

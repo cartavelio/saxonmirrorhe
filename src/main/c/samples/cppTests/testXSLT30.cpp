@@ -1501,9 +1501,7 @@ void testInitialTemplate(SaxonProcessor *proc, Xslt30Processor *trans, sResultCo
         }
         return;
     }
-    cout << "testInitialTemplate cp0" << endl;
     XdmNode * node = proc->parseXmlFromString("<e/>");
-    cout << "testInitialTemplate cp1" << endl;
     executable->setResultAsRawValue(false);
     std::map<std::string, XdmValue *> parameterValues;
 
@@ -1513,22 +1511,20 @@ void testInitialTemplate(SaxonProcessor *proc, Xslt30Processor *trans, sResultCo
     parameterValues["b"] = a2;
     executable->setInitialTemplateParameters(parameterValues, false);
     executable->setInitialMatchSelection(node);
-    cout << "testInitialTemplate cp2" << endl;
     XdmValue *result = executable->applyTemplatesReturningValue();
-    cout << "testInitialTemplate cp3" << endl;
-    if (result != NULL) {
+    if (result != nullptr) {
         sresult->success++;
         cout << "Result=" << result->getHead()->getStringValue() << endl;
         delete result;
     } else {
         sresult->failure++;
     }
-
     delete executable;
     delete a1;
     delete a2;
     delete node;
     parameterValues.clear();
+
 }
 
 
@@ -1635,7 +1631,6 @@ void testContextNotRoot(SaxonProcessor *proc, Xslt30Processor *trans, sResultCou
     XsltExecutable *executable = trans->compileFromString(
             "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:variable name='x' select='.'/><xsl:template match='/'>errorA</xsl:template><xsl:template match='e'>[<xsl:value-of select='name($x)'/>]</xsl:template></xsl:stylesheet>");
 
-
     if (executable == nullptr) {
         sresult->failure++;
         sresult->failureList.push_back("testContextNotRoot");
@@ -1646,8 +1641,9 @@ void testContextNotRoot(SaxonProcessor *proc, Xslt30Processor *trans, sResultCou
     }
 
     executable->setGlobalContextItem(node);
-    if (node->getChildCount() > 0) {
+    if (node != nullptr && node->getChildCount() > 0) {
         XdmNode **eNodeL1 = node->getChildren();
+        std::cerr<<"testContextNotRoot cp 0"<<std::endl;
         if (eNodeL1 != nullptr) {
             XdmNode ** eNodeChildren = eNodeL1[0]->getChildren();
             if (eNodeChildren != nullptr) {

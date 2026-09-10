@@ -528,10 +528,11 @@ XdmValue *XsltExecutable::applyTemplatesReturningValue() {
     }
 
     int64_t result = j_applyTemplatesReturningValue(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)executableRef, (void *)selectionRef, (void *)processorDataRef);
-
+    std::cerr << "testInitialTemplate cp = "<<(int)result << std::endl;
     if (result > -1) {
-        int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)result);
 
+        int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)result);
+        std::cerr << "testInitialTemplate cp = "<<(int)typeRef<< std::endl;
         XdmValue * value = new XdmValue();
         XdmItem * xdmItem = nullptr;
 
