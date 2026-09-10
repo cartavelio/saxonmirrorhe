@@ -422,7 +422,6 @@ namespace TestDriver {
         private static bool LoadSchemaDocuments(Driver driver, XPathCompiler xpc, XdmNode env,
                 Environment environment) {
             bool validateSources = false;
-            Configuration config = environment.processor.Implementation;
             XmlUrlResolver res = new TracingXmlResolver(env.BaseUri);
             XsdCompiler compiler = null;
             SysCollGen.List<XsdCompiler.SchemaSource> sources = new SysCollGen.List<XsdCompiler.SchemaSource>();
@@ -938,7 +937,7 @@ namespace TestDriver {
                     XmlReader parser = XmlReader.Create(stream, new XmlReaderSettings(), hrefStr);
                     DocumentBuilder builder = processor.NewDocumentBuilder();
                     if (val != "skip") {
-                        builder.SchemaValidator = processor.SchemaManager.NewSchemaValidator();
+                        builder.SchemaValidator = schema.NewValidator();
                     }
                     
                     return new XmlReaderResource(builder, parser);
