@@ -158,7 +158,7 @@ public class AxiomDocumentNodeWrapper extends AxiomParentNodeWrapper  {
      */
     @Override
     public String getSystemId() {
-        return getTreeInfo().getRootNode().getSystemId();
+        return ((GenericTreeInfo)getTreeInfo()).getSystemId();
     }
 
     /**
