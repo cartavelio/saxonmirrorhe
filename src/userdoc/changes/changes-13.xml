@@ -43,7 +43,12 @@
     
     <category name="s9api" class="javaonly">
         
-  
+    <p>Some new convenience methods have been introduced for the <code>XdmValue</code> and <code>XdmStream</code>
+    classes. In both cases, you can now write <code>select("name")</code> or <code>select("uri", "local")</code>
+    as a shorthand for <code>select(Steps.child("name"))</code> or <code>select(Steps.child("uri", "local")</code>
+        respectively. For example, the expression 
+        <code>doc.select(Steps.child("test-set").then(Steps.child("dependencies"))).first()</code> reduces to
+        <code>doc.select("test-set").select("dependencies").first()</code>.</p>
         
   
     </category>

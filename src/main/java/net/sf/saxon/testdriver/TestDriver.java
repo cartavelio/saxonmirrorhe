@@ -29,7 +29,6 @@ import java.util.regex.Pattern;
 
 import static net.sf.saxon.s9api.streams.Predicates.attributeEq;
 import static net.sf.saxon.s9api.streams.Predicates.hasAttribute;
-import static net.sf.saxon.s9api.streams.Steps.child;
 import static net.sf.saxon.s9api.streams.Steps.descendant;
 import static net.sf.saxon.s9api.streams.Steps.path;
 import static net.sf.saxon.s9api.streams.XdmCollectors.asString;
@@ -513,7 +512,7 @@ public abstract class TestDriver {
 
     protected Environment getEnvironment(XdmNode testCase, XPathCompiler xpc) throws SaxonApiException {
         String testCaseName = testCase.attribute("name");
-        Optional<XdmNode> environmentNode = testCase.select(child("environment")).asOptionalNode();
+        Optional<XdmNode> environmentNode = testCase.select("environment").asOptionalNode();
         Environment env;
         if (!environmentNode.isPresent()) {
             env = localEnvironments.get("default");
@@ -525,8 +524,10 @@ public abstract class TestDriver {
                 try {
                     env = Environment.processEnvironment(
                             this, xpc, environmentNode.get(), null, localEnvironments.get("default"));
-                    baseUriCheck =  environmentNode.get().select(
-                            child("static-base-uri").where(attributeEq("uri", "#UNDEFINED"))).exists();
+                    baseUriCheck =  environmentNode.get()
+                            .select("static-base-uri")
+                            .filter(attributeEq("uri", "#UNDEFINED"))
+                            .exists();
                 } catch (NullPointerException ex) {
                     ex.printStackTrace();
                     System.err.println("Failure loading environment");
@@ -652,8 +653,8 @@ public abstract class TestDriver {
         createLocalEnvironments(testSetDocNode);
         boolean run = true;
         // pick up any test-set level dependencies in the QT3 catalog
-        if (testSetDocNode.select(child("test-set").then(child("dependency"))).exists()) {
-            for (XdmNode dependency : testSetDocNode.select(child("test-set").then(child("dependency"))).asList()) {
+        if (testSetDocNode.select("test-set").select("dependency").exists()) {
+            for (XdmNode dependency : testSetDocNode.select("test-set").select("dependency").asList()) {
                 if (!ensureDependencySatisfied(dependency, localEnvironments.get("default"))) {
                     for (XdmNode testCase : testSetDocNode.select(descendant("test-case")).asList()) {
                         String testCaseName = testCase.attribute("name");
@@ -666,7 +667,7 @@ public abstract class TestDriver {
             }
         }
         // pick up any test-set level dependencies in the XSLT 3.0 catalog
-        if (testSetDocNode.select(child("test-set").then(child("dependencies"))).exists()) {
+        if (testSetDocNode.select("test-set").select("dependencies").exists()) {
             for (XdmNode dependency : testSetDocNode.select(path("test-set", "dependencies", "*")).asListOfNodes()) {
                 if (!ensureDependencySatisfied(dependency, localEnvironments.get("default"))) {
                     for (XdmNode testCase : testSetDocNode.select(descendant("test-case")).asList()) {
@@ -769,7 +770,6 @@ public abstract class TestDriver {
         for (NamespaceUri s : config.getImportedNamespaces()) {
             testXpc.importSchemaNamespace(s.toString());
         }
-
     }
 
 }

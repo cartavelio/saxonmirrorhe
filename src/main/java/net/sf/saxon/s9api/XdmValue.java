@@ -509,6 +509,36 @@ public class XdmValue implements Iterable<XdmItem> {
     }
 
     /**
+     * Select children of the nodes in this value. This is a shortcut for
+     * <code>select(Steps.child(nodeName))</code>; it returns an <code>XdmStream</code>
+     * containing all the child elements of nodes in this <code>XdmValue</code> that have
+     * local name <code>nodeName</code>; or if <code>nodeName</code> is <code>"*"</code>,
+     * then all child elements regardless of their name.
+     * @param nodeName the local name of the required child elements, or <code>"*"</code>
+     *                 to select all element children
+     * @since 13
+     */
+
+    public XdmStream<XdmNode> select(String nodeName) {
+        return select(Steps.child(nodeName));
+    }
+
+    /**
+     * Select children of the nodes in this value. This is a shortcut for
+     * <code>select(Steps.child(uri, localName))</code>; it returns an <code>XdmStream</code>
+     * containing all the child elements of nodes in this <code>XdmValue</code> that have
+     * local name <code>localName</code> and namespace URI <code>uri</code>.
+     * @param uri the namespace URI of the child elements to be selected by the {@code Step}:
+     *            supply a zero-length string to indicate the null namespace
+     * @param localName the local name of the child elements to be selected
+     * @since 13
+     */
+
+    public XdmStream<XdmNode> select(String uri, String localName) {
+        return select(Steps.child(uri, localName));
+    }
+
+    /**
      * Filter the value on a supplied predicate
      * @param predicate the predicate to be applied. Note that an {@link ItemType} is a
      *                  predicate, so this method can be used to select those items

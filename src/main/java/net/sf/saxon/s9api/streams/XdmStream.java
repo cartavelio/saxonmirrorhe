@@ -205,11 +205,66 @@ public class XdmStream<T extends XdmItem> implements Stream<T> {
      * @param mapper the mapping function
      * @param <U> the type of items returned by the mapping function
      * @return a new stream of items
+     * @since 9.9
      */
 
     public <U extends XdmItem> XdmStream<U> flatMapToXdm(Step<U> mapper) {
         return new XdmStream<>(base.flatMap(mapper));
     }
+
+    /**
+     * Create a new {@link XdmStream} by applying a mapping function (specifically, a {@link Step})
+     * to each item in the stream. The {@link Step} returns a sequence of items, which are inserted
+     * into the result sequence in place of the original item.
+     * <p>This method is similar to {@link #flatMap}, but differs in that it returns an {@link XdmStream},
+     * making additional methods available.</p>
+     * <p>Note: {@link XdmValue#select} is implemented using this method, and in practice it is
+     * usually clearer to use that method directly. For example {@code node.select(child("*")).flatMapToXdm(child(*))}
+     * can be written as {@code node.select(child("*").then(child("*"))}. Both expressions return a stream containing
+     * all the grandchildren elements of {@code node}. The same result can be achieved more concisely by writing
+     * {@code node.select(path("*", "*"))}</p>
+     * @param mapper the mapping function
+     * @param <U> the type of items returned by the mapping function
+     * @return a new stream of items
+     * @since 13. The method is introduced as a synonym of {@link #flatMapToXdm(Step)}
+     */
+
+    public <U extends XdmItem> XdmStream<U> select(Step<U> mapper) {
+        return new XdmStream<>(base.flatMap(mapper));
+    }
+
+    /**
+     * Select children of the nodes in this stream. This is a shortcut for
+     * <code>select(Steps.child(nodeName))</code>; it returns an <code>XdmStream</code>
+     * containing all the child elements of nodes in this <code>XdmStream</code> that have
+     * local name <code>nodeName</code>; or if <code>nodeName</code> is <code>"*"</code>,
+     * then all child elements regardless of their name.
+     *
+     * @param nodeName the local name of the required child elements, or <code>"*"</code>
+     *                 to select all element children
+     * @since 13
+     */
+
+    public XdmStream<XdmNode> select(String nodeName) {
+        return select(Steps.child(nodeName));
+    }
+
+    /**
+     * Select children of the nodes in this stream. This is a shortcut for
+     * <code>select(Steps.child(uri, localName))</code>; it returns an <code>XdmStream</code>
+     * containing all the child elements of nodes in this <code>XdmValue</code> that have
+     * local name <code>localName</code> and namespace URI <code>uri</code>.
+     *
+     * @param uri       the namespace URI of the child elements to be selected by the {@code Step}:
+     *                  supply a zero-length string to indicate the null namespace
+     * @param localName the local name of the child elements to be selected
+     * @since 13
+     */
+
+    public XdmStream<XdmNode> select(String uri, String localName) {
+        return select(Steps.child(uri, localName));
+    }
+
 
     /**
      * Returns an {@code IntStream} consisting of the results of replacing each
