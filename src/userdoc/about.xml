@@ -185,7 +185,7 @@
                <p>As a first-time user, you may find it useful to install the sample applications.
                   These are packaged together with a copy of this documentation in the file
                   <code>saxon-resources-12.zip</code>. This can be downloaded from
-                  either the GitHub Saxon-HE repository or Saxonica sites (it is the same file in both cases).
+                  either the GitHub Saxon-HE repository or Saxonica download site (it is the same file in both cases).
                   Unzip the contents of this file into the same directory as the Saxon software.
                   When you run a program that uses Saxon, this program as well as Saxon itself will
                   need to be on the classpath. For more details of the classpath, see <a
