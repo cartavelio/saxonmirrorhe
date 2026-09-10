@@ -3,6 +3,7 @@ package com.saxonica.functions.qt4.csv;
 import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -10,8 +11,11 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.IntegerValue;
+import net.sf.saxon.value.StringValue;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 
 /**
@@ -40,7 +44,11 @@ class CsvOptionsParameterValidator {
     }
 
     public boolean validate() throws XPathException {
-        return ensureMutuallyExclusiveOptionsOk() && ensureFilterColumnsValid() && ensureNumberOfColumnsValid() && ensureColumnNamesValid();
+        return ensureMutuallyExclusiveOptionsOk()
+                && ensureDelimitersValid()
+                && ensureFilterColumnsValid()
+                && ensureNumberOfColumnsValid()
+                && ensureColumnNamesValid();
     }
 
     private boolean nonEmpty(String key) {
@@ -50,6 +58,26 @@ class CsvOptionsParameterValidator {
     private boolean ensureMutuallyExclusiveOptionsOk() throws XPathException {
         if (nonEmpty("filter-columns") && nonEmpty("number-of-columns")) {
             throw new XPathException("Cannot specify both number-of-columns and filter-columns as options for fn:csv-to-xdm", "FOCV0006");
+        }
+        return true;
+    }
+
+    private boolean ensureDelimitersValid() throws XPathException {
+        if (((StringValue)options.get("field-delimiter")).getUnicodeStringValue().length() != 1) {
+            throw new XPathException("CSV field delimiter must be a single character", "FOCV0002");
+        }
+        if (((StringValue) options.get("quote-character")).getUnicodeStringValue().length() != 1) {
+            throw new XPathException("CSV quote character must be a single character", "FOCV0002");
+        }
+        Set<UnicodeString> delimiters = new HashSet<>();
+        delimiters.add(((StringValue) options.get("field-delimiter")).getUnicodeStringValue());
+        boolean allAdded = delimiters.add(((StringValue) options.get("quote-character")).getUnicodeStringValue());
+        GroundedValue rowDelimiters = options.get("row-delimiter");
+        for (Item item : rowDelimiters.asIterable()) {
+            allAdded = allAdded && delimiters.add(item.getUnicodeStringValue());
+        }
+        if (!allAdded) {
+            throw new XPathException("The same delimiter is used in multiple roles", "FOCV0003");
         }
         return true;
     }

@@ -2,20 +2,22 @@ package com.saxonica.functions.qt4.csv;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.OptionsParameter;
-import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.EmptyAtomicSequence;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.StringValue;
 
+import java.util.Map;
+
 /**
- * Implements XPath 4 fn:parse-csv() to parse CSV data from an xs:string into an array of sequences, with header row
- * information optionally returned
+ * Implements XPath 4 fn:csv-to-arrays() to parse CSV data from an xs:string into a sequence or arrays, with
+ * no interpretation of headers
  */
-public class ParseCsv extends CsvFunction {
+public class CsvToArrays extends CsvFunction {
     public static OptionsParameter OPTION_DETAILS = coreOptions();
     private static Sequence EMPTY_CSV = EmptyAtomicSequence.getInstance();
 
@@ -40,7 +42,10 @@ public class ParseCsv extends CsvFunction {
             options = (MapItem) arguments[1].head();
         }
 
-        return CsvParser.parse(input, getDetails().optionDetails.processSuppliedOptions(options, context));
+        final Map<String, GroundedValue> csvOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
+        CsvOptionsParameterValidator.validate(csvOptions);
+
+        return CsvParser.parse(input, csvOptions);
     }
 
 }

@@ -1,6 +1,5 @@
 package com.saxonica.functions.qt4.csv;
 
-import net.sf.saxon.functions.Count;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
@@ -20,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 class CsvContentHandlerTest {
     CsvContentHandler subject;
-    Map<String, GroundedValue> options = defaultOptionParameters(ParseCsv.OPTION_DETAILS);
+    Map<String, GroundedValue> options = defaultOptionParameters(CsvToArrays.OPTION_DETAILS);
     Sequence result;
 
     CsvContentHandlerTest() throws XPathException {
@@ -73,7 +72,7 @@ class CsvContentHandlerTest {
     void trimmingWhitespace() throws XPathException {
         Map<String, GroundedValue> opts = new HashMap<>();
         opts.put("trim-whitespace", BooleanValue.TRUE);
-        options = parsedOptionParameters(ParseCsv.OPTION_DETAILS, opts);
+        options = parsedOptionParameters(CsvToArrays.OPTION_DETAILS, opts);
         subject = new CsvContentHandler(options);
 
         subject.appendField("   abc");

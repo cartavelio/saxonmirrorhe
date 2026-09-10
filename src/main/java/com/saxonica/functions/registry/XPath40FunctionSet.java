@@ -4,7 +4,7 @@ import com.saxonica.functions.qt4.*;
 import com.saxonica.functions.qt4.csv.CsvToXml;
 import com.saxonica.functions.qt4.csv.CsvFetchFieldByColumn;
 import com.saxonica.functions.qt4.csv.CsvToXdm;
-import com.saxonica.functions.qt4.csv.ParseCsv;
+import com.saxonica.functions.qt4.csv.CsvToArrays;
 import net.sf.saxon.functions.Error;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.hof.FilterFn;
@@ -364,14 +364,14 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR, null));
 
         //#if EE==true || PE==true
-        register("parse-csv", 1, e -> e.populate(ParseCsv::new, MapType.ANY_MAP_TYPE, ONE, LATE | NEW)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .setOptionDetails(ParseCsv.OPTION_DETAILS));
+        register("csv-to-arrays", 1, e -> e.populate(CsvToArrays::new, new ArrayItemType(SequenceType.SINGLE_STRING), STAR, LATE | NEW)
+                .arg(0, BuiltInAtomicType.STRING, OPT, null)
+                .setOptionDetails(CsvToArrays.OPTION_DETAILS));
 
-        register("parse-csv", 2, e -> e.populate(ParseCsv::new, MapType.ANY_MAP_TYPE, ONE, LATE | NEW)
+        register("csv-to-arrays", 2, e -> e.populate(CsvToArrays::new, MapType.ANY_MAP_TYPE, ONE, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
-                .setOptionDetails(ParseCsv.OPTION_DETAILS));
+                .setOptionDetails(CsvToArrays.OPTION_DETAILS));
         //#endif
 
         //#if EE==true || PE==true

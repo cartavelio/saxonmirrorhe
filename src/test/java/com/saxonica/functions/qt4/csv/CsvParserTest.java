@@ -26,7 +26,7 @@ public class CsvParserTest {
 
     @BeforeEach
     void defaultOptions() throws XPathException {
-        options = defaultOptionParameters(ParseCsv.OPTION_DETAILS);
+        options = defaultOptionParameters(CsvToArrays.OPTION_DETAILS);
         handler = new CsvContentHandler(options);
     }
 
@@ -136,7 +136,7 @@ public class CsvParserTest {
         @Test
         @DisplayName("non-default quote characters are handled")
         void nonDefaultQuoteChar() throws XPathException {
-            options = parsedOptionParameters(ParseCsv.OPTION_DETAILS, opts -> opts.put("quote-character", "|"));
+            options = parsedOptionParameters(CsvToArrays.OPTION_DETAILS, opts -> opts.put("quote-character", "|"));
             handler = new CsvContentHandler(options);
             subject = new CsvParser(TestXdmHelpers.stringValue("|abc ||quote|| def|,|ghi|\r\n"), options, handler);
 
@@ -155,7 +155,7 @@ public class CsvParserTest {
         void rowDelimiterSingleString() throws XPathException {
             Map<String, GroundedValue> opts = new HashMap<>();
             opts.put("row-delimiter", TestXdmHelpers.stringValue("$"));
-            options = parsedOptionParameters(ParseCsv.OPTION_DETAILS, opts);
+            options = parsedOptionParameters(CsvToArrays.OPTION_DETAILS, opts);
 
             subject = new CsvParser(TestXdmHelpers.stringValue("abc,def$123,456"), options, handler);
 
@@ -173,7 +173,7 @@ public class CsvParserTest {
         void rowDelimiterSequence() throws XPathException {
             Map<String, GroundedValue> opts = new HashMap<>();
             opts.put("row-delimiter", TestXdmHelpers.simpleValueSequence("$", "£"));
-            options = parsedOptionParameters(ParseCsv.OPTION_DETAILS, opts);
+            options = parsedOptionParameters(CsvToArrays.OPTION_DETAILS, opts);
 
             subject = new CsvParser(TestXdmHelpers.stringValue("abc,def$123,456£ghi,789"), options, handler);
 
@@ -190,7 +190,7 @@ public class CsvParserTest {
         void rowDelimiterDaftSequence() throws XPathException {
             Map<String, GroundedValue> opts = new HashMap<>();
             opts.put("row-delimiter", TestXdmHelpers.simpleValueSequence("$$", "$"));
-            options = parsedOptionParameters(ParseCsv.OPTION_DETAILS, opts);
+            options = parsedOptionParameters(CsvToArrays.OPTION_DETAILS, opts);
 
             subject = new CsvParser(TestXdmHelpers.stringValue("abc,def$123,456$$ghi,789"), options, handler);
 
@@ -207,7 +207,7 @@ public class CsvParserTest {
         @Test
         @DisplayName("Setting field delimiter")
         void fieldDelimiter() throws XPathException {
-            options = parsedOptionParameters(ParseCsv.OPTION_DETAILS, opts -> opts.put("field-delimiter", ";"));
+            options = parsedOptionParameters(CsvToArrays.OPTION_DETAILS, opts -> opts.put("field-delimiter", ";"));
 
             subject = new CsvParser(TestXdmHelpers.stringValue("abc;def\n123;456\nghi;789"), options, handler);
 
