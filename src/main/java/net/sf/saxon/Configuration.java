@@ -4748,21 +4748,21 @@ public class Configuration implements SourceResolver, NotationSet {
                 //#endif
 
                 case FeatureCode.XQUERY_VERSION: {
-                    int vn;
+                    int qvn;
                     switch (value.toString()) {
                         case "3.1":
-                            vn = 31;
+                            qvn = 31;
                             break;
                         case "4.0":
-                            vn = 40;
+                            qvn = 40;
                             break;
                         default:
                             makeErrorReporter().report(
                                     new XmlProcessingIncident("XQuery version ignored: only \"3.1\" is recognized").asWarning());
-                            vn = 40;
+                            qvn = 40;
                             break;
                     }
-                    getDefaultStaticQueryContext().setLanguageVersion(vn);
+                    getDefaultStaticQueryContext().setLanguageVersion(qvn);
                     break;
                 }
 
@@ -4776,17 +4776,17 @@ public class Configuration implements SourceResolver, NotationSet {
                     setXMLVersion(xv.equals("1.0") ? XML10 : XML11);
                     break;
 
-                case FeatureCode.XSD_VERSION:
-                    String vn = requireString(name, value);
-                    if (!(vn.equals("1.0") || vn.equals("1.1"))) {
+                case FeatureCode.XSD_VERSION: {
+                    String xsdVn = requireString(name, value);
+                    if (!(xsdVn.equals("1.0") || xsdVn.equals("1.1"))) {
                         throw new IllegalArgumentException(
                                 "XSD_VERSION value must be \"1.0\" or \"1.1\" as a String");
 
                     }
-                    xsdVersion = value.equals("1.0") ? XSD10 : XSD11;
+                    xsdVersion = xsdVn.equals("1.0") ? XSD10 : XSD11;
                     theConversionRules = null;
                     break;
-
+                }
                 case FeatureCode.XSLT_ENABLE_ASSERTIONS:
                     getDefaultXsltCompilerInfo().setAssertionsEnabled(requireBoolean(name, value));
                     break;
@@ -4818,20 +4818,21 @@ public class Configuration implements SourceResolver, NotationSet {
                 //#endif
 
                 case FeatureCode.XSLT_VERSION: {
-                    int v;
+                    int xsltVersion;
                     switch (value.toString()) {
                         case "3.0":
-                            v = 30;
+                            xsltVersion = 30;
                             break;
                         case "4.0":
-                            v = 40;
+                            xsltVersion = 40;
                             break;
                         default:
                             makeErrorReporter().report(
                                     new XmlProcessingIncident("XSLT version ignored: only \"3.0\" and \"4.0\" are recognized").asWarning());
-                            v = 30;
+                            xsltVersion = 30;
+                            break;
                     }
-                    getDefaultXsltCompilerInfo().setXsltVersion(v);
+                    getDefaultXsltCompilerInfo().setXsltVersion(xsltVersion);
                     break;
                 }
 
