@@ -19,7 +19,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-public class CatalogResolver {
+public class CatalogResolverTest {
     @Test
     public void noResolverFail() {
         Configuration config = new Configuration();
