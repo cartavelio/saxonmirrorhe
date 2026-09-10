@@ -24,6 +24,8 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,6 +43,7 @@ public class ConfigTest {
     private String BUGS_DIR = null;
     private String XMARK_DIR = null;
     private String QT4_TESTS_DIR = null;
+    private String QT4_SPECS_DIR = null;
 
     public ConfigTest() {
         // The directories above used to be static final, but that had the nasty consequence
@@ -85,9 +88,11 @@ public class ConfigTest {
         return QT4_TESTS_DIR;
     }
 
-    public String getQt4SpecsDir() {
-        String testDir = getQt4TestsDir();
-        return testDir.replace("qt4tests", "qtspecs");
+     public String getQt4SpecsDir() {
+         if (QT4_SPECS_DIR == null) {
+             QT4_SPECS_DIR = qt4SpecsDirectory();
+         }
+         return QT4_SPECS_DIR;
     }
 
     private static String junitDataDirectory() {
@@ -207,6 +212,34 @@ public class ConfigTest {
             // Assume the current directory is the root of the project
             throw new RuntimeException("Environment variable W3C_QT4_TEST_SUITE_DIR is not set");
         } else {
+            dir = new File(env);
+            if (!dir.exists() || !dir.isDirectory()) {
+                throw new RuntimeException("Failed to find " + dir.getAbsolutePath() + "; bad " + envar);
+            }
+        }
+        String path = dir.getAbsolutePath().replace("\\", "/");
+        if (!path.endsWith("/")) {
+            path += "/";
+        }
+        return path;
+    }
+
+    private static String qt4SpecsDirectory() {
+        File dir = null;
+        String envar = "W3C_QT4_SPECS_DIR";
+        String env = System.getenv(envar);
+        if (env == null) {
+            // Assume that the specs live as a sibling of the qt4 tests
+            Path qt4TestsPath = Paths.get(qt4TestsDirectory());
+            Path assumedQt4SpecsPath = qt4TestsPath.resolve("../qtspecs");
+
+            if (!assumedQt4SpecsPath.toFile().isDirectory()) {
+                // Assume the current directory is the root of the project
+                throw new RuntimeException("Environment variable " + envar + " is not set, and there is no 'qtspecs' dir sibling of the W3C_QT4_TEST_DIR dir");
+            }
+            dir = assumedQt4SpecsPath.toAbsolutePath().toFile();
+        }
+        else {
             dir = new File(env);
             if (!dir.exists() || !dir.isDirectory()) {
                 throw new RuntimeException("Failed to find " + dir.getAbsolutePath() + "; bad " + envar);
