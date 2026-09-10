@@ -466,7 +466,7 @@ public class JsonReceiver implements Receiver {
 
     @CSharpReplaceBody(code="return c.ToString(\"X4\");")
     public static String hex4(int c) {
-        return String.format("%04x", c);
+        return String.format("%04X", c);
     }
 
     private final static IntPredicate isControlChar = c -> c < 31 || (c >= 127 && c <= 159);
