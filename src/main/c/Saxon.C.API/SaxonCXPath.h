@@ -16,6 +16,13 @@
 
 EXTERN_SAXONC
 
+/*!    \file   SaxonCXPath.h
+    \brief  This is the C API for the <code>XPathProcessor.h</code> which contains a set of functions to compile and execute XPath expressions.
+
+*/
+
+
+
 /**
  * Create boxed Boolean value
  * @param val - boolean value

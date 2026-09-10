@@ -53,6 +53,10 @@ static const bool true = 1;
 #endif
 #endif
 
+/*!    \file  SaxonCGlue.h
+*   \brief This C header file contains a number of factory functions for running SaxonC C/C++ APIs, including GraalVM create and destroy functions.
+*/
+
 //#define DEBUG
 
 EXTERN_SAXONC

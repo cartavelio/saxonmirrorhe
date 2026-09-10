@@ -12,6 +12,16 @@
 
 #include "SaxonCGlue.h"
 
+/*!    \file   SaxonCProcessor.h
+    \brief  This is the C API for the <code>SaxonCProcessor.h</code>, <code>XQuery Processor</code> and <code>Xslt30 Processor</code>  which contains a set of functions to compile and execute the queries and XSLT stylesheet.
+
+*/
+
+/** @file SaxonCProcessor
+*   @brief This is the C API for the <code>SaxonCProcessor</code>, <code>XQueryProcessor</code> and <code>Xslt30Processor</code>.
+*   which contains a set of functions to compile and execute the queries and XSLT stylesheet.
+*/
+
 /*! <code>sxnc_xquery</code>. This struct is used to capture the Java processor
  * objects created in C for XQuery <p/>
  */
