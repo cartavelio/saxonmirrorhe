@@ -465,8 +465,10 @@ def get_named_parameters(proc: PySaxonProcessor, xpath_proc: PyXPathProcessor, n
                 print("*** Error evaluating parameter " + name + " in initial-template : " + print(ex))
                 exit()
             if as_i is not None:
-                value = proc.make_atomic_value(str(value), str(as_i))
-            if required:
+                valuei = proc.make_atomic_value(str(as_i), str(value))
+                if required:
+                    params[name] = valuei
+            elif required:
                 params[name] = value
 
         return params

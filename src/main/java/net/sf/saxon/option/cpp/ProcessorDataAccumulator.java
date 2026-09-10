@@ -144,6 +144,10 @@ public class ProcessorDataAccumulator {
         ProcessorDataAccumulator processorData = SaxonCAPI.objectHandles.get(processorDataRef);
         String paramNamei = CTypeConversion.toJavaString(cparamName);
 
+        if(SaxonCAPI.debug) {
+            System.err.println("ProcessorDataAccumulator - addProcessorValue paramNamei= " + paramNamei);
+        }
+
         processorData.paramNames.add(paramNamei);
 
     }

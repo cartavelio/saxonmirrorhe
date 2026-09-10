@@ -813,9 +813,14 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
   if(saxonResultDocRef > 0) {
       additions++;
   }*/
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+      std::cerr << "C++ DEBUG callTemplateReturningValue cp0" << std::endl;
+    }
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties, additions);
-
+      if (getenv("SAXONC_DEBUG_FLAG")) {
+        std::cerr << "C++ DEBUG callTemplateReturningValue cp1" << std::endl;
+      }
   std::string optionStr;
   // TODO change map to set values as int64_t then we can add
   // saxonMessageListenerRef directly
