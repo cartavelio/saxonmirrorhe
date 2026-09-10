@@ -33,11 +33,17 @@ namespace Saxon.Api {
             set => jDestination.setTreeModel(Saxon.Hej.om.TreeModel.getTreeModel((int) value));
         }
 
-        /// <summary>This property determines the base URI of the constructed <c>XdmNode</c>. 
+        /// <summary>This property determines the base URI of the constructed nodes. 
         /// If the <c>BaseUri</c> property of the <c>XdmDestination</c> is set before the destination is written to,
         /// then the constructed <c>XdmNode</c> will have this base URI. Setting this property after constructing the node
         /// has no effect.
         /// </summary>
+        /// <remarks>
+        /// <para>If no base URI is set, nodes written to this destination will typically take their base URI from the
+        /// location of the event that created the node. For a node written by a query or stylesheet, this will 
+        /// typically be the static base URI of the instruction that created the node. For a node written by
+        /// a schema validator, it will typically be the base URI of the node being validated in the source document.</para>
+        /// </remarks>
 
         public Uri BaseUri {
             get => jDestination.getBaseURI();
