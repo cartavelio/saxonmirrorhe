@@ -494,6 +494,9 @@
 				<ul>
 					<li>
 						<p>The items in a map are now ordered.</p>
+						<p>The main reason for this change is that serialized JSON results can easily become unreadable
+						if the order of entries is randomized. The change also supports applications where the
+						ordering carries semantic significance, for example a map whose keys are timestamps.</p>
 					</li>
 					<li>
 						<p>Various functions (<code>map:merge</code>, <code>map:build</code>) and
@@ -505,7 +508,8 @@
 							FLWOR expression) is introduced to allow iterative processing of the entries
 							in a map, in order: for example <code>string-join(for key $k value $v return `{$k}="{$v}"`)</code>
 							produces a string representation of the map contents.
-							(This example also uses the new XPath 4.0 construct of string templates).</p>
+							(This example also uses the new XPath 4.0 construct of 
+							<a class="bodylink" href="/expressions/primary/string-templates">string templates</a>).</p>
 					</li>
 					<li>
 						<p>Trees of maps and arrays (called JTrees, made up of JNodes) can be processed using
@@ -525,16 +529,18 @@
 		<section id="arrays" title="Arrays">
 			<h1>Arrays</h1>
 
-			<aside>Since Saxon 9.7, arrays are available in all Saxon editions.</aside>
-
+			
 			<p>XPath 3.1 introduced arrays as a new data type, with limited support
-				in XSLT 3.0.</p>
+				in XSLT 3.0. XPath 4.0 makes no changes to the data model for arrays,
+			   but introduces additional convenience functions.</p>
 			
 			<aside>In Saxon, arrays were first introduced in Saxon 9.7, with additional XSLT support
 				available in Saxon-PE and Saxon-EE via vendor extensions.</aside>
+			
 			<p>The main reason arrays were introduced was to allow JSON data structures to be
 				represented faithfully. However there are many other ways you can take advantage of
 				arrays.</p>
+			
 			<p>Arrays differ from sequences in a number of ways:</p>
 			<ul>
 				<li>
@@ -551,20 +557,23 @@
 						the entire array, not to each of its members in turn.</aside>
 				</li>
 				<li>
-					<p>To access the Nth member of an array, use the syntax <code>$array($N)</code>. This
-						works because an array is a function: given an integer <code>$N</code> as the
-						argument, this function returns the member in position <code>$N</code>.</p>
-				</li>
-				<li>
-					<p>If you know which member you want statically, you can also use the syntax
-							<code>$array?1</code> which is equivalent to $array(1).</p>
-				</li>
-				<li>
 					<p>As with sequences, the members of an array are addressed by integers in the range
 						1 to N, where N is the length of the array. However, unlike sequences, any attempt
 						to access a member using an out-of-range index is a dynamic error
 							(<code>FOAY0001</code>).</p>
 				</li>
+				<li>
+					<p>To access the Nth member of an array, use the syntax <code>$array($N)</code>. This
+						works because an array is a function: given an integer <code>$N</code> as the
+						argument, this function returns the member in position <code>$N</code>.</p>
+				</li>
+				<li>
+					<p>Alternatively, you can also use a so-called <emph>lookup expression</emph>:
+							<code>$array?1</code> is equivalent to $array(1). The subscript can be
+					an integer literal, or any expression in parentheses (for example <code>$array?($i+1)</code>),
+					and in XPath 4.0 it can also be a variable reference: <code>$array?$i</code>.</p>
+				</li>
+				
 				<li>
 					<p>Operators and functions designed to work on sequences, such as
 							<code>count()</code>, for expressions, filter expressions, <code>head()</code>,
@@ -581,8 +590,8 @@
 				</li>
 			</ul>
 			<p>Arrays, like all other XDM values, are immutable. When you append or replace or remove a
-				member entry in an array, you get a new array; the original is unchanged. From Saxon
-				9.9, the implementation uses a "persistent immutable" data structure under the covers,
+				member entry in an array, you get a new array; the original is unchanged. The Saxon
+				implementation uses a "persistent immutable" data structure under the covers,
 				to ensure that making a small change to an array (such as replacing a single member)
 				does not require copying the entire array.</p>
 			<p>As with sequences and maps, arrays do not have an intrinsic type of their own, but
@@ -613,11 +622,13 @@
 				</li>
 			</ul>
 			<aside>
-				<p>There are no XSLT 3.0 instructions for creating arrays, analogous to the instructions
-						<code>xsl:map</code> and <code>xsl:map-entry</code>. Saxon however fills the gap
-					with the instructions <code>saxon:array</code> and <code>saxon:array-member</code>:
+				<p>XSLT 3.0 provides no instructions for creating arrays, analogous to the instructions
+						<code>xsl:map</code> and <code>xsl:map-entry</code>. Saxon filled this gap
+					with extension instructions <code>saxon:array</code> and <code>saxon:array-member</code>:
 					see <a class="bodylink" href="/extensions/instructions">Extension
-					instructions</a>.</p>
+					instructions</a>. XSLT 4.0 introduces instructions <code>xsl:array</code> and 
+					<code>xsl:array-member</code>, and Saxon 13 drops the extension instructions 
+				   in favor of the new XSLT 4.0 versions.</p>
 			</aside>
 			<p>The summary of the full list of functions that operate on arrays is as follows; for full
 				details see the <a class="bodylink" href="/functions/array">Functions library</a>. The
@@ -808,14 +819,25 @@
 				all members.</p>
 			
 			<div class="qt4">
-				<p>TODO give more details about 4.0 changes</p>
-				<p>XPath 4.0 introduces some changes for array items:</p>
+				<p>XPath 4.0 and XSLT 4.0 introduce some changes for array items:</p>
 				<ul>
 					<li>
-						<p>constructors are added</p>
+						<p>A number of new functions are added, and existing functions have been extended,
+							as described above.</p>
 					</li>
 					<li>
-						<p>the single accessor function is now an iterator over members of the array.</p>
+						<p>A variant of the <code>for</code> expression (FLWOR expression in XQuery) is introduced,
+						allowing iteration over arrays. For example, <code><![CDATA[for member $m in [<e/>, <f/>, <g/>]
+						return local-name($m)]]></code> returns the sequence <code>("e", "f", "g")</code>.</p>
+					</li>
+					<li>
+						<p>Trees of maps and arrays (called JTrees, made up of JNodes) can be processed using
+						path expressions, in the same way as trees of XML nodes (now called XNodes when there
+						is a need to make the distinction).</p>
+					</li>
+					<li>
+						<p>In XSLT, the <code>xsl:array</code> and <code>xsl:array-member</code> instructions
+							are introduced.</p>
 					</li>
 				</ul>
 			</div>
@@ -2117,7 +2139,7 @@
 				times quantity) for all the selected <code>order-item</code> elements.</p>
 			
 			<div class="qt4">
-				<p>From XPath 4.0:</p>
+				<p>XPath 4.0 supports a larger subset of the XQuery FLWOR expression syntax:</p>
 				<ul>
 					<li>
 						<p>Multiple <code>for</code> and  <code>let</code> clauses are allowed to be
@@ -2129,8 +2151,22 @@
 							combining with <code>let</code> clauses is implemented from Saxon 13.)</p>
 					</li>
 					<li>
-						<p>Positional variables can be defined, and the type of variables can be declared in
-							a <code>for</code> expression. (Implemented from Saxon 13.)</p>
+						<p>Positional variables can be defined. For example:</p>
+						
+						<pre><code>for $str at $n in ("red", "green", "blue") return `{$n}:{$str}`</code></pre>
+						
+						<p>returns the sequence <code>("1:red", "2:green", "3:blue")</code>.
+							(Implemented from Saxon 13.)</p>
+					</li>
+					<li>
+						<p>The type of variables can be declared in
+							a <code>for</code> expression:</p> 
+						
+						<pre><code><![CDATA[for $str as xs:string in (<a>red</a>, <a>green</a>, <a>blue</a>) return $str</code>]]></pre>
+						
+						<p>returns the sequence <code>("red", "green", "blue")</code>. In both XPath 4.0 and XQuery 4.0,
+							unlike earlier XQuery versions, the supplied values are coerced to the declared type. In this example,
+							the elements are atomized to extract their content. (Implemented from Saxon 13.)</p>
 					</li>
 				</ul>
 				
@@ -2168,6 +2204,10 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
 return `{$key}={$value}`]]></code></pre>
 				
 				<p>returns <code>("x=1", "y=2", "z=3")</code>.</p>
+				
+				<p>This example also makes use of 
+					<a class="bodylink" href="/expressions/primary/string-templates">string templates</a>, 
+					another new feature in XPath 4.0.</p>
 			</div>
 
 		</section>
