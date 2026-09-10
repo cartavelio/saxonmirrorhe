@@ -7,6 +7,7 @@
 
 package net.sf.saxon.functions.registry;
 
+import net.sf.saxon.expr.ContextItemExpression;
 import net.sf.saxon.functions.Error;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.ma.map.MapType;
@@ -273,19 +274,17 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
         register("iri-to-uri", 1, e -> e.populate(IriToUri::new, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING));
 
-        register("lang", 1, e -> e.populate(Lang::new, BuiltInAtomicType.BOOLEAN, ONE, CITEM | LATE)
-                .arg(0, BuiltInAtomicType.STRING, OPT, null));
-
-        register("lang", 2, e -> e.populate(Lang::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+        register("lang", 1, 2, e -> e.populate(Lang::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
-                .arg(1, Type.XNODE_TYPE, ONE | INS, null));
+                .arg(1, Type.XNODE_TYPE, ONE | INS, null, ContextItemExpression::new));
 
         register("last", 0, e -> e.populate(() -> new PositionAndLast.Last(), BuiltInAtomicType.INTEGER, ONE, LAST | LATE));
 
         register("local-name", 0, e -> e.populate(ContextItemAccessorFunction::new, BuiltInAtomicType.STRING, ONE, CITEM | LATE));
 
         register("local-name", 1, e -> e.populate(LocalName_1::new, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, Type.XNODE_TYPE, OPT | INS, StringValue.EMPTY_STRING));
+                .arg(0, Type.XNODE_TYPE, OPT | INS, StringValue.EMPTY_STRING)
+        );
 
         register("local-name-from-QName", 1, e -> e.populate(() -> new AccessorFn.LocalNameFromQName(),
                  BuiltInAtomicType.NCNAME, OPT, 0)
