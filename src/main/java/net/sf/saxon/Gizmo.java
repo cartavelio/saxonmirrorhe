@@ -441,7 +441,7 @@ public class Gizmo {
         for (StructuredQName var : variables.keySet()) {
             env.declareVariable(var);
         }
-        XPathParser scanner = config.newExpressionParser("XP", false);
+        XPathParser scanner = config.newExpressionParser("XP", false, env);
         scanner.parse(selection.toString(), 0, terminator, env);
         int endPoint = scanner.getTokenizer().currentTokenStartOffset;
         XPathExpression expr = evaluator.createExpression(selection.substring(0, endPoint));

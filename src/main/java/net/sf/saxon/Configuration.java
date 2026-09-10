@@ -3451,25 +3451,26 @@ public class Configuration implements SourceResolver, NotationSet {
     /**
      * Make an expression Parser for a specified version of XPath or XQuery
      *
-     * @param language        set to "XP" (XPath) or "XQ" (XQuery) or "PATTERN" (XSLT Patterns)
-     * @param updating        indicates whether or not XQuery update syntax may be used. Note that XQuery Update
-     *                        is supported only in Saxon-EE
+     * @param language set to "XP" (XPath) or "XQ" (XQuery) or "PATTERN" (XSLT Patterns)
+     * @param updating indicates whether or not XQuery update syntax may be used. Note that XQuery Update
+     *                 is supported only in Saxon-EE
+     * @param env
      * @return the XPath or Query parser
      * @throws net.sf.saxon.trans.XPathException if this version of Saxon does not support the
      *                                           requested options
      */
 
-    public XPathParser newExpressionParser(String language, boolean updating) throws XPathException {
+    public XPathParser newExpressionParser(String language, boolean updating, StaticContext env) throws XPathException {
         if ("XQ".equals(language)) {
             if (updating) {
                 throw new XPathException("XQuery Update is supported only in Saxon-EE");
             } else {
-                return new XQueryParser();
+                return new XQueryParser(env);
             }
         } else if ("XP".equals(language)) {
-            return new XPathParser();
+            return new XPathParser(env);
         } else if ("PATTERN".equals(language)) {
-            return new PatternParser();
+            return new PatternParser(env);
         } else {
             throw new XPathException("Unknown expression language " + language);
         }
@@ -4800,8 +4801,8 @@ public class Configuration implements SourceResolver, NotationSet {
                     break;
 
                 case FeatureCode.XQUERY_REQUIRED_CONTEXT_ITEM_TYPE:
-                    XPathParser parser = new XPathParser();
                     IndependentContext env = new IndependentContext(this);
+                    XPathParser parser = new XPathParser(env);
                     env.setXPathLanguageLevel(31);
                     try {
                         SequenceType type = parser.parseSequenceType(value.toString(), env);

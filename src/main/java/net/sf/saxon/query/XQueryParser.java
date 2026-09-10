@@ -89,7 +89,8 @@ public class XQueryParser extends XPathParser {
      *
      */
 
-    public XQueryParser() {
+    public XQueryParser(StaticContext env) {
+        super(env);
         this.languageVersion = 31; // Until proved otherwise
         setLanguage(ParsedLanguage.XQUERY, languageVersion);
     }
@@ -101,8 +102,7 @@ public class XQueryParser extends XPathParser {
      */
 
     private XQueryParser newParser() {
-        XQueryParser qp = new XQueryParser();
-        qp.env = env;
+        XQueryParser qp = new XQueryParser(env);
         qp.setLanguage(language, languageVersion);
         qp.setParserExtension(parserExtension);
         return qp;

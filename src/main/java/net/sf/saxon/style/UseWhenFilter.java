@@ -428,7 +428,7 @@ public class UseWhenFilter extends ProxyReceiver {
         staticContext.setXPathLanguageLevel(languageLevel);
 
         if (asStr != null) {
-            XPathParser parser = compilation.getConfiguration().newExpressionParser("XP", false);
+            XPathParser parser = compilation.getConfiguration().newExpressionParser("XP", false, staticContext);
             requiredType = parser.parseSequenceType(asStr, staticContext);
         }
 

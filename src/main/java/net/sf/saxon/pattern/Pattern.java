@@ -49,7 +49,7 @@ public abstract class Pattern extends PseudoExpression {
 
     public static Pattern make(String pattern, StaticContext env, PackageData packageData) throws XPathException {
 
-        PatternParser parser = (PatternParser)env.getConfiguration().newExpressionParser("PATTERN", false);
+        PatternParser parser = (PatternParser)env.getConfiguration().newExpressionParser("PATTERN", false, env);
         Pattern pat = parser.parsePattern(pattern, env);
         pat.setRetainedStaticContext(env.makeRetainedStaticContext());
         // System.err.println("Simplified [" + pattern + "] to " + pat.getClass() + " default prio = " + pat.getDefaultPriority());

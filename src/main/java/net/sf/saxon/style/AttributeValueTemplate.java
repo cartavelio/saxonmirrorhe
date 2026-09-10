@@ -78,7 +78,7 @@ public abstract class AttributeValueTemplate {
                     addStringComponent(components, avt, last, i0);
                 }
                 Expression exp;
-                XPathParser parser = env.getConfiguration().newExpressionParser("XP", false);
+                XPathParser parser = env.getConfiguration().newExpressionParser("XP", false, env);
                 //parser.setDefaultContainer(container);
                 //parser.setLanguage(XPathParser.ParsedLanguage.XPATH, 31);
                 parser.setAllowAbsentExpression(true);

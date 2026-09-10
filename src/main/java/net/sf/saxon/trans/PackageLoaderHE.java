@@ -101,7 +101,7 @@ public class PackageLoaderHE implements IPackageLoader {
         overriding = new ExecutableFunctionLibrary(config);
         underriding = new ExecutableFunctionLibrary(config);
         try {
-            parser = config.newExpressionParser("XP", false);
+            parser = config.newExpressionParser("XP", false, new IndependentContext(config));
             QNameParser qNameParser = new QNameParser(null).withAcceptEQName(true);
             parser.setQNameParser(qNameParser);
         } catch (XPathException e) {
