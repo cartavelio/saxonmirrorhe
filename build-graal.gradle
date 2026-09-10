@@ -1,0 +1,84 @@
+// Find GraalVM to build the SaxonC releases
+def graalHome = null
+["${graalVM}",
+ "/Library/Java/JavaVirtualMachines/graalvm-ce-java11-22.1.0/Contents/Home/bin",
+ "c:/irrelevant"].each { graal ->
+  if (graalHome == null && graal != "" && pathExists(graal)) {
+    graalHome = graal
+  }
+}
+
+task test_graalHome(
+  description: "Test that graalHome is configured"
+) {
+  doLast {
+    if (graalHome == null) {
+      throw new GradleException("Cannot build SaxonC, cannot find GraalVM")
+    } else {
+      println("Running GraalVM from ${graalHome}")
+      def ni = new File("${graalHome}/native-image");
+      if (!ni.exists()) {
+        throw new GradleException("Cannot build SaxonC, cannot find native-image")
+      }
+    }
+  }
+}
+
+task setup_graalJar(
+  dependsOn: ["test_graalHome", "eejJar"],
+  description: "Setup the EE jar file for GraalVM"
+) {
+  doLast {
+    mkdir("${buildDir}/graalvm");
+  }
+  doLast {
+    copy {
+      def zipFile = file("${buildDir}/libs/saxon-ee-${saxonVersion}.jar")
+      def outputDir = "${buildDir}/graalvm"
+      from(zipTree(zipFile)) {
+        exclude "META-INF/TE*"
+      }
+      into outputDir
+    }
+  }
+  doLast {
+    copy {
+      from("${projectDir}/src/graalvm/META-INF")
+      into("${buildDir}/graalvm/META-INF")
+    }
+  }
+}
+
+task graalJar(
+  type: Jar,
+  dependsOn: ["setup_graalJar"],
+  description: "Build the EE jar file for GraalVM"
+) {
+  def prefixLen = "${buildDir}/graalvm".length()
+
+  archiveBaseName = "graalvm-ee-${saxonVersion}"
+  manifest {
+    from "${buildDir}/graalvm/META-INF/MANIFEST.MF"
+  }
+  from("${buildDir}/graalvm")
+  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+task graalImage(
+  dependsOn: ["graalJar"],
+  description: "Builds the GraalVM native image"
+) {
+  doLast {
+    exec {
+      commandLine "${graalHome}/native-image",
+        "-jar", "${buildDir}/libs/graalvm-ee-${saxonVersion}.jar",
+        "--no-fallback", "--allow-incomplete-classpath",
+        "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages",
+        "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
+        "--trace-class-initialization=javax.xml.parsers.FactoryFinder",
+        "--trace-class-initialization=net.sf.saxon.s9api.streams.Steps",
+        "--trace-class-initialization=jdk.xml.internal.SecuritySupport",
+        "--shared"
+    }
+  }
+}
