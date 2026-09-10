@@ -98,7 +98,7 @@ public class GDayValue extends GDateValue {
             return new ValidationFailure("Invalid gDay value " + day);
         }
         if (!isValidTimezone(timezoneInMinutes)) {
-            return new ValidationFailure("Invalid timezone offset " + timezoneInMinutes + " minutes");
+            return new ValidationFailure("Invalid timezone offset " + timezoneInMinutes + " minutes", "FODT003");
         }
         return new GDayValue(day, timezoneInMinutes);
     }

@@ -314,7 +314,7 @@ public class DateValue extends GDateValue implements XPathComparable {
             return new ValidationFailure("Invalid date value " + year + "-" + month + "-" + day);
         }
         if (!isValidTimezone(timezoneInMinutes)) {
-            return new ValidationFailure("Invalid timezone offset " + timezoneInMinutes + " minutes");
+            return new ValidationFailure("Invalid timezone offset " + timezoneInMinutes + " minutes", "FODT0003");
         }
         return new DateValue(year, month, day, timezoneInMinutes);
     }

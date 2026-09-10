@@ -289,15 +289,9 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
     /*@NotNull*/
     private static ValidationFailure badTime(String msg, UnicodeString value) {
         ValidationFailure err = new ValidationFailure(
-                "Invalid time " + Err.wrap(value, Err.VALUE) + " (" + msg + ")");
+                "Invalid time " + Err.wrap(value, Err.VALUE) + " (" + msg + ")"
+        );
         err.setErrorCode("FORG0001");
-        return err;
-    }
-
-    protected static ValidationFailure badTimeComponent(String msg, int value, String errorCode) {
-        ValidationFailure err = new ValidationFailure(
-                "Invalid time component: " + Err.wrap(value + "", Err.VALUE) + " (" + msg + ")");
-        err.setErrorCode(errorCode);
         return err;
     }
 

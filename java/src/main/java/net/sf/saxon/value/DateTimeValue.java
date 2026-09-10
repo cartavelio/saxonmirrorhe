@@ -693,7 +693,7 @@ public final class DateTimeValue extends CalendarValue
             return new ValidationFailure("Invalid time " + hour + ":" + minute + ":" + seconds);
         }
         if (!GDateValue.isValidTimezone(tzMinutes)) {
-            return new ValidationFailure("Invalid time zone " + tzMinutes);
+            return new ValidationFailure("Invalid time zone " + tzMinutes, "FODT0003");
         }
         return new DateTimeValue(year, month, day, hour, minute, seconds, tzMinutes);
     }
@@ -725,14 +725,16 @@ public final class DateTimeValue extends CalendarValue
 
     private static ValidationFailure badDate(String msg, UnicodeString value) {
         ValidationFailure err = new ValidationFailure(
-                "Invalid dateTime value " + Err.wrap(value, Err.VALUE) + " (" + msg + ")");
+                "Invalid dateTime value " + Err.wrap(value, Err.VALUE) + " (" + msg + ")"
+        );
         err.setErrorCode("FORG0001");
         return err;
     }
 
     private static ValidationFailure badDate(String msg, UnicodeString value, String errorCode) {
         ValidationFailure err = new ValidationFailure(
-                "Invalid dateTime value " + Err.wrap(value, Err.VALUE) + " (" + msg + ")");
+                "Invalid dateTime value " + Err.wrap(value, Err.VALUE) + " (" + msg + ")"
+        );
         err.setErrorCode(errorCode);
         return err;
     }

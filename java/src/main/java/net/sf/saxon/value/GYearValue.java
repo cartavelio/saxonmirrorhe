@@ -89,7 +89,7 @@ public class GYearValue extends GDateValue {
      */
     public static ConversionResult makeGYearValue(int year, int timezoneInMinutes) {
         if (!isValidTimezone(timezoneInMinutes)) {
-            return new ValidationFailure("Invalid timezone offset " + timezoneInMinutes + " minutes");
+            return new ValidationFailure("Invalid timezone offset " + timezoneInMinutes + " minutes", "FODT0003");
         }
         return new GYearValue(year, timezoneInMinutes);
     }
