@@ -85,7 +85,7 @@ public class SimpleComponentReference extends SchemaStructure implements Compone
     public int getTargetFingerprint() {
         if (targetFingerprint == -1) {
             targetFingerprint = getConfiguration().getNamePool().allocateFingerprint(
-                    targetComponentName.getURI(), targetComponentName.getLocalPart());
+                    targetComponentName.getNamespaceUri(), targetComponentName.getLocalPart());
         }
         return targetFingerprint;
     }

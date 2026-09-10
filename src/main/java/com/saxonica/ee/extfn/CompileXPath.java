@@ -2,7 +2,6 @@
 
 package com.saxonica.ee.extfn;
 
-import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.Builder;
@@ -178,7 +177,7 @@ public class CompileXPath extends SystemFunction {
             if (lib instanceof BuiltInFunctionSet && ((BuiltInFunctionSet) lib).getNamespace().equals(NamespaceUri.FN)) {
                 libraryList.addFunctionLibrary(XPath31FunctionSet.getInstance());
                 libraryList.addFunctionLibrary(XSLT30FunctionSet.getInstance());
-                libraryList.addFunctionLibrary(new VendorFunctionSetEE((EnterpriseConfiguration) configuration));
+                libraryList.addFunctionLibrary(configuration.getVendorFunctionSet());
             } else if (lib instanceof StylesheetFunctionLibrary || lib instanceof ExecutableFunctionLibrary) {
                 libraryList.addFunctionLibrary(new PublicStylesheetFunctionLibrary(lib));
             } else {

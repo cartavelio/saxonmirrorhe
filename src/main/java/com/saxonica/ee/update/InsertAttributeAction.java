@@ -62,7 +62,7 @@ public class InsertAttributeAction extends PendingUpdateAction {
         if (!element.getTreeInfo().isMutable()) {
             throw new XPathException("Attempting to update a non-updatable element", SaxonErrorCode.SXUP0081);
         }
-        if (element.getAttributeValue(name.getURI(), name.getLocalPart()) != null) {
+        if (element.getAttributeValue(name.getNamespaceUri(), name.getLocalPart()) != null) {
             throw new XPathException("Attempt to insert an attribute " +
                     name.getDisplayName() +
                     " that is already present on the target element", "XUDY0021");

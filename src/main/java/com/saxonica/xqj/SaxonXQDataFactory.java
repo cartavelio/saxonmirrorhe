@@ -212,7 +212,11 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
             Configuration config = getConfiguration();
             try {
                 Class<?> javaClass = config.getClass(className, false);
-                return new SaxonXQItemType(config.getJavaExternalObjectType(javaClass), config);
+                JavaExternalObjectType result;
+                synchronized(config) {
+                    result = JavaExternalObjectType.of(javaClass);
+                }
+                return new SaxonXQItemType(result, config);
             } catch (XPathException e) {
                 throw new XQException(e.getMessage());
             }

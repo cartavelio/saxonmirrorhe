@@ -75,9 +75,9 @@ public abstract class PendingUpdateAction {
     protected NodeName fixNodeName(NodeName name) {
         if (name instanceof NameOfNode) {
             if (name.hasFingerprint()) {
-                return new FingerprintedQName(name.getPrefix(), name.getURI(), name.getLocalPart(), name.getFingerprint());
+                return new FingerprintedQName(name.getPrefix(), name.getNamespaceUri(), name.getLocalPart(), name.getFingerprint());
             } else {
-                return new FingerprintedQName(name.getPrefix(), name.getURI(), name.getLocalPart());
+                return new FingerprintedQName(name.getPrefix(), name.getNamespaceUri(), name.getLocalPart());
             }
         } else {
             return name;

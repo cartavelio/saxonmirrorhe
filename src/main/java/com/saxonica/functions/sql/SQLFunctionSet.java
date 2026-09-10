@@ -164,49 +164,53 @@ public class SQLFunctionSet extends BuiltInFunctionSet {
 
     private void init() {
 
-        JavaExternalObjectType connectionType = config.getJavaExternalObjectType(Connection.class);
+        JavaExternalObjectType result;
+        synchronized(config) {
+            result = JavaExternalObjectType.of(Connection.class);
+        }
+        JavaExternalObjectType connectionType = result;
 
-        register("connect", 1, SQLConnectFn::new, connectionType, ONE, LATE)
-                .arg(0, MapType.ANY_MAP_TYPE, ONE, null);
+        register("connect", 1, e -> e.populate(SQLConnectFn::new, connectionType, ONE, LATE)
+                .arg(0, MapType.ANY_MAP_TYPE, ONE, null));
 
-        register("delete", 3, SQLDeleteFn::new, AnyItemType.getInstance(), OPT, SIDE|LATE)
+        register("delete", 3, e -> e.populate(SQLDeleteFn::new, AnyItemType.getInstance(), OPT, SIDE|LATE)
                 .arg(0, connectionType, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
-                .arg(2, BuiltInAtomicType.STRING, ONE, null);
+                .arg(2, BuiltInAtomicType.STRING, ONE, null));
 
-        register("execute", 2, SQLExecuteFn::new, AnyItemType.getInstance(), OPT, SIDE|LATE)
+        register("execute", 2, e -> e.populate(SQLExecuteFn::new, AnyItemType.getInstance(), OPT, SIDE|LATE)
                 .arg(0, connectionType, ONE, null)
-                .arg(1, BuiltInAtomicType.STRING, ONE, null);
+                .arg(1, BuiltInAtomicType.STRING, ONE, null));
 
-        register("insert", 3, SQLInsertFn::new, AnyItemType.getInstance(), OPT, SIDE|LATE)
-                .arg(0, connectionType, ONE, null)
-                .arg(1, BuiltInAtomicType.STRING, ONE, null)
-                .arg(2, MapType.ANY_MAP_TYPE, ONE, null);
-
-        register("prepared-statement", 2, SQLPreparedStatementFn::new, AnyItemType.getInstance(), OPT, LATE)
-                .arg(0, connectionType, ONE, null)
-                .arg(1, BuiltInAtomicType.STRING, ONE, null);
-
-        register("prepared-query", 2, SQLPreparedQueryFn::new, AnyFunctionType.getInstance(), ONE, LATE)
-                .arg(0, connectionType, ONE, null)
-                .arg(1, BuiltInAtomicType.STRING, ONE, null);
-
-        register("query", 3, SQLQueryFn::new, MapType.ANY_MAP_TYPE, STAR, LATE)
+        register("insert", 3, e -> e.populate(SQLInsertFn::new, AnyItemType.getInstance(), OPT, SIDE|LATE)
                 .arg(0, connectionType, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
-                .arg(2, BuiltInAtomicType.STRING, STAR, null);
+                .arg(2, MapType.ANY_MAP_TYPE, ONE, null));
 
-        register("query", 4, SQLQueryFn::new, MapType.ANY_MAP_TYPE, STAR, LATE)
+        register("prepared-statement", 2, e -> e.populate(SQLPreparedStatementFn::new, AnyItemType.getInstance(), OPT, LATE)
+                .arg(0, connectionType, ONE, null)
+                .arg(1, BuiltInAtomicType.STRING, ONE, null));
+
+        register("prepared-query", 2, e -> e.populate(SQLPreparedQueryFn::new, AnyFunctionType.getInstance(), ONE, LATE)
+                .arg(0, connectionType, ONE, null)
+                .arg(1, BuiltInAtomicType.STRING, ONE, null));
+
+        register("query", 3, e -> e.populate(SQLQueryFn::new, MapType.ANY_MAP_TYPE, STAR, LATE)
+                .arg(0, connectionType, ONE, null)
+                .arg(1, BuiltInAtomicType.STRING, ONE, null)
+                .arg(2, BuiltInAtomicType.STRING, STAR, null));
+
+        register("query", 4, e -> e.populate(SQLQueryFn::new, MapType.ANY_MAP_TYPE, STAR, LATE)
                 .arg(0, connectionType, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, STAR, null)
-                .arg(3, BuiltInAtomicType.STRING, ONE, null);
+                .arg(3, BuiltInAtomicType.STRING, ONE, null));
 
-        register("update", 4, SQLUpdateFn::new, AnyItemType.getInstance(), OPT, SIDE|LATE)
+        register("update", 4, e -> e.populate(SQLUpdateFn::new, AnyItemType.getInstance(), OPT, SIDE|LATE)
                 .arg(0, connectionType, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, ONE, null)
-                .arg(3, MapType.ANY_MAP_TYPE, ONE, null);
+                .arg(3, MapType.ANY_MAP_TYPE, ONE, null));
 
     }
 

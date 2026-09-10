@@ -127,7 +127,7 @@ public final class AttributeGroupDecl extends SchemaStructure
      */
 
     public NamespaceUri getTargetNamespace() {
-        return attributeGroupName.getURI();
+        return attributeGroupName.getNamespaceUri();
     }
 
 

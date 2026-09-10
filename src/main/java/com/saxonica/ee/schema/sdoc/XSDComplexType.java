@@ -96,7 +96,7 @@ public class XSDComplexType extends SchemaElement {
                 error(err.getMessage());
             }
 
-            int fp = getNamePool().allocateFingerprint(typeName.getURI(), typeName.getLocalPart());
+            int fp = getNamePool().allocateFingerprint(typeName.getNamespaceUri(), typeName.getLocalPart());
             complexType.setTypeName(typeName, fp);
 
             if (!isRedefinition) {

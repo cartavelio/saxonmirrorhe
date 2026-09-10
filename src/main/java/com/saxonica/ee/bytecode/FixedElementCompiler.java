@@ -41,7 +41,7 @@ public class FixedElementCompiler extends ElementCreatorCompiler {
             for (NamespaceBinding ns : bindings) {
                 compiler.generateGetOutputter();
                 ga.push(ns.getPrefix());
-                allocateStatic(compiler, ns.getURI());
+                allocateStatic(compiler, ns.getNamespaceUri());
                 ga.push(ReceiverOption.NONE);
                 ga.invokeInstanceMethod(Outputter.class, "namespace", String.class, NamespaceUri.class, Integer.TYPE);
             }

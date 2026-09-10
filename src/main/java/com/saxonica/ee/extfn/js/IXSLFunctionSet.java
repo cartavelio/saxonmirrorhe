@@ -49,74 +49,74 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
 
     private void init() {
 
-        register("page", 0, Stub::new, NodeKindTest.DOCUMENT, ONE, SIDE|LATE);
+        register("page", 0, e -> e.populate(Stub::new, NodeKindTest.DOCUMENT, ONE, SIDE|LATE));
 
-        register("source", 0, Source::new, NodeKindTest.DOCUMENT, OPT, LATE);
+        register("source", 0, e -> e.populate(Source::new, NodeKindTest.DOCUMENT, OPT, LATE));
 
-        register("window", 0, Stub::new, AnyItemType.getInstance(), ONE, LATE);
+        register("window", 0, e -> e.populate(Stub::new, AnyItemType.getInstance(), ONE, LATE));
 
-        register("query-params", 0, Stub::new, MapType.ANY_MAP_TYPE, ONE, SIDE|LATE);
+        register("query-params", 0, e -> e.populate(Stub::new, MapType.ANY_MAP_TYPE, ONE, SIDE|LATE));
 
-        register("event", 0, Stub::new, AnyItemType.getInstance(), OPT, SIDE|LATE);
+        register("event", 0, e -> e.populate(Stub::new, AnyItemType.getInstance(), OPT, SIDE|LATE));
 
-        register("location", 0, Stub::new, BuiltInAtomicType.STRING, ONE, SIDE|LATE);
+        register("location", 0, e -> e.populate(Stub::new, BuiltInAtomicType.STRING, ONE, SIDE|LATE));
 
-        register("style", 1, Stub::new, MapType.ANY_MAP_TYPE, ONE, SIDE|LATE)
-                .arg(0, AnyItemType.getInstance(), OPT, null);
+        register("style", 1, e -> e.populate(Stub::new, MapType.ANY_MAP_TYPE, ONE, SIDE|LATE)
+                .arg(0, AnyItemType.getInstance(), OPT, null));
 
-        register("get", 2, Stub::new, AnyItemType.getInstance(), STAR, SIDE|LATE)
+        register("get", 2, e -> e.populate(Stub::new, AnyItemType.getInstance(), STAR, SIDE|LATE)
                 .arg(0, AnyItemType.getInstance(), ONE, null)
-                .arg(1, BuiltInAtomicType.STRING, ONE, null);
+                .arg(1, BuiltInAtomicType.STRING, ONE, null));
 
-        register("call", 3, Call::new, AnyItemType.getInstance(), STAR, SIDE|LATE)
+        register("call", 3, e -> e.populate(Call::new, AnyItemType.getInstance(), STAR, SIDE|LATE)
                 .arg(0, AnyItemType.getInstance(), ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
-                .arg(2, ArrayItemType.getInstance(), ONE, null);
+                .arg(2, ArrayItemType.getInstance(), ONE, null));
 
-        register("contains", 2, Stub::new, BuiltInAtomicType.BOOLEAN, ONE, SIDE|LATE)
+        register("contains", 2, e -> e.populate(Stub::new, BuiltInAtomicType.BOOLEAN, ONE, SIDE|LATE)
                 .arg(0, AnyItemType.getInstance(), ONE, null)
-                .arg(1, BuiltInAtomicType.STRING, ONE, null);
+                .arg(1, BuiltInAtomicType.STRING, ONE, null));
 
-        register("eval", 1, Eval::new, AnyItemType.getInstance(), STAR, SIDE|LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
+        register("eval", 1, e -> e.populate(Eval::new, AnyItemType.getInstance(), STAR, SIDE|LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
-        register("apply", 2, Stub::new, AnyItemType.getInstance(), STAR, SIDE|LATE)
+        register("apply", 2, e -> e.populate(Stub::new, AnyItemType.getInstance(), STAR, SIDE|LATE)
                 .arg(0, AnyItemType.getInstance(), ONE, null)
-                .arg(1, ArrayItemType.getInstance(), ONE, null);
+                .arg(1, ArrayItemType.getInstance(), ONE, null));
 
-        register("schedule-action", 3, Stub::new, AnyItemType.getInstance(), STAR, SIDE|LATE)
+        register("schedule-action", 3, e -> e.populate(Stub::new, AnyItemType.getInstance(), STAR, SIDE|LATE)
                 .arg(0, BuiltInAtomicType.INTEGER, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
-                .arg(2, AnyItemType.getInstance(), STAR, null);
+                .arg(2, AnyItemType.getInstance(), STAR, null));
 
-        register("schedule-action", 4, Stub::new, AnyItemType.getInstance(), STAR, SIDE|LATE)
+        register("schedule-action", 4, e -> e.populate(Stub::new, AnyItemType.getInstance(), STAR, SIDE|LATE)
                 .arg(0, BuiltInAtomicType.INTEGER, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
                 .arg(2, AnyItemType.getInstance(), STAR, null)
-                .arg(3, MapType.ANY_MAP_TYPE, OPT, null);
+                .arg(3, MapType.ANY_MAP_TYPE, OPT, null));
 
-        register("set-attribute", 3, Stub::new, AnyItemType.getInstance(), OPT, SIDE|FOCUS|LATE)
+        register("set-attribute", 3, e -> e.populate(Stub::new, AnyItemType.getInstance(), OPT, SIDE|FOCUS|LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
-                .arg(2, AnyItemType.getInstance(), ONE, null);
+                .arg(2, AnyItemType.getInstance(), ONE, null));
 
-        register("remove-attribute", 2, Stub::new, AnyItemType.getInstance(), OPT, SIDE|FOCUS|LATE)
+        register("remove-attribute", 2, e -> e.populate(Stub::new, AnyItemType.getInstance(), OPT, SIDE|FOCUS|LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, AnyItemType.getInstance(), ONE, null);
+                .arg(1, AnyItemType.getInstance(), ONE, null));
 
-        register("set-property", 3, Stub::new, AnyItemType.getInstance(), OPT, SIDE|FOCUS|LATE)
+        register("set-property", 3, e -> e.populate(Stub::new, AnyItemType.getInstance(), OPT, SIDE|FOCUS|LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, AnyItemType.getInstance(), OPT, null)
-                .arg(2, AnyItemType.getInstance(), ONE, null);
+                .arg(2, AnyItemType.getInstance(), ONE, null));
 
-        register("remove-property", 2, Stub::new, AnyItemType.getInstance(), OPT, SIDE|FOCUS|LATE)
+        register("remove-property", 2, e -> e.populate(Stub::new, AnyItemType.getInstance(), OPT, SIDE|FOCUS|LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, AnyItemType.getInstance(), ONE, null);
+                .arg(1, AnyItemType.getInstance(), ONE, null));
 
-        register("set-style", 3, Stub::new, AnyItemType.getInstance(), OPT, SIDE|FOCUS|LATE)
+        register("set-style", 3, e -> e.populate(Stub::new, AnyItemType.getInstance(), OPT, SIDE|FOCUS|LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
-                .arg(2, AnyItemType.getInstance(), ONE, null);
+                .arg(2, AnyItemType.getInstance(), ONE, null));
 
     }
 

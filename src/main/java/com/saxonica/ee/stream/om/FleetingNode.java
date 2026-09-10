@@ -380,7 +380,7 @@ public class FleetingNode implements NodeInfo {
 
     @Override
     public final NamespaceUri getNamespaceUri() {
-        return nodeName == null ? NamespaceUri.NULL : nodeName.getURI();
+        return nodeName == null ? NamespaceUri.NULL : nodeName.getNamespaceUri();
     }
 
     /**

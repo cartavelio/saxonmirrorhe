@@ -122,7 +122,7 @@ public abstract class AttributeValidator extends ContentValidator {
                 // There is no declaration of this attribute.
                 // Certain XSI attributes are always allowed...
                 boolean implicitlyAllowed = false;
-                NamespaceUri uri = attName.getURI();
+                NamespaceUri uri = attName.getNamespaceUri();
                 if (uri.equals(NamespaceUri.SCHEMA_INSTANCE) &&
                         (fingerprint == StandardNames.XSI_TYPE ||
                                  fingerprint == StandardNames.XSI_NIL ||
@@ -243,7 +243,7 @@ public abstract class AttributeValidator extends ContentValidator {
                             // If the attribute is in a namespace, we need to ensure that the name has
                             // a prefix and that the prefix is declared
                             NamePool pool = getNamePool();
-                            NamespaceUri uri = use.getTargetComponentName().getURI();
+                            NamespaceUri uri = use.getTargetComponentName().getNamespaceUri();
                             String prefix = null;
                             if (uri.isEmpty()) {
                                 prefix = "";
@@ -351,7 +351,7 @@ public abstract class AttributeValidator extends ContentValidator {
             for (Iterator<AttributeUse> ii = declaredAttributes.valueIterator(); ii.hasNext(); ) {
                 AttributeUse au = ii.next();
                 if (au.getTargetComponentName().getLocalPart().equals(attName.getLocalPart())) {
-                    NamespaceUri ns = au.getTargetComponentName().getURI();
+                    NamespaceUri ns = au.getTargetComponentName().getNamespaceUri();
                     if (ns.isEmpty()) {
                         possibleNamespaceMessage = " (it would be allowed in no namespace)";
                     } else {

@@ -166,7 +166,7 @@ public class PackageLoaderPE extends PackageLoaderHE {
                             String className = JavaExternalObjectType.localNameToClassName(classQName.getLocalPart());
                             Configuration config = loader.getConfiguration();
                             Class<?> resultClass = config.getClass(className, false);
-                            JavaExternalObjectType jeot = new JavaExternalObjectType(resultClass);
+                            JavaExternalObjectType jeot = JavaExternalObjectType.of(resultClass);
                             ((JavaExtensionFunctionCall) exp).adjustRequiredType(jeot);
                         }
                     } catch (Exception err) {

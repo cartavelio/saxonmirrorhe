@@ -462,7 +462,7 @@ public abstract class SchemaElement extends ElementImpl {
 
     protected int getFingerprint(String name, int option) throws SchemaException {
         StructuredQName qname = getComponentName(name, option);
-        return getNamePool().allocateFingerprint(qname.getURI(), qname.getLocalPart());
+        return getNamePool().allocateFingerprint(qname.getNamespaceUri(), qname.getLocalPart());
     }
 
     /**

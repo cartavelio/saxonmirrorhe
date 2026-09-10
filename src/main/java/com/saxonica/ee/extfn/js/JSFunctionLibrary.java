@@ -23,13 +23,13 @@ public class JSFunctionLibrary implements FunctionLibrary {
 
     @Override
     public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
-        return NamespaceUri.GLOBAL_JS.equals(functionName.getComponentName().getURI());
+        return NamespaceUri.GLOBAL_JS.equals(functionName.getComponentName().getNamespaceUri());
     }
 
     @Override
     public Expression bind(SymbolicName.F functionName, Expression[] staticArgs, StaticContext env, List<String> reasons) {
         StructuredQName fName = functionName.getComponentName();
-        if (NamespaceUri.GLOBAL_JS.equals(fName.getURI())) {
+        if (NamespaceUri.GLOBAL_JS.equals(fName.getNamespaceUri())) {
             try {
                 Expression windowCall = IXSLFunctionSet.getInstance().makeFunction("window", 0).makeFunctionCall();
                 Expression callCall = IXSLFunctionSet.getInstance().makeFunction("call", 3).makeFunctionCall(

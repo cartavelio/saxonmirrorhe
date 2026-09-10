@@ -94,7 +94,7 @@ public abstract class UserDefinedType extends SchemaStructure
     /*@NotNull*/
     @Override
     public NamespaceUri getTargetNamespace() {
-        return getTypeName().getURI();
+        return getTypeName().getNamespaceUri();
     }
 
     /**

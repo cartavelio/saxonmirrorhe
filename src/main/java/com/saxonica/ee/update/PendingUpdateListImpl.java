@@ -72,7 +72,7 @@ public class PendingUpdateListImpl implements PendingUpdateList {
                 throw conflict("rename", "XUDY0015", action.getTargetNode());
             }
             NodeName newName = ((RenameAction) action).getNewName();
-            NamespaceBinding nsCode = new NamespaceBinding(newName.getPrefix(), newName.getURI());
+            NamespaceBinding nsCode = new NamespaceBinding(newName.getPrefix(), newName.getNamespaceUri());
             NodeInfo targetNode = action.getTargetNode();
             int nodeKind = targetNode.getNodeKind();
             if (nodeKind == Type.ATTRIBUTE) {
@@ -104,7 +104,7 @@ public class PendingUpdateListImpl implements PendingUpdateList {
             AttributeMap newAtts = ((ReplaceAttributeAction) action).getNewAttributes();
             for (AttributeInfo att : newAtts) {
                 if (!test.matches(att.getNodeName().getStructuredQName())) {
-                    NamespaceBinding nsBinding = new NamespaceBinding(att.getNodeName().getPrefix(), att.getNodeName().getURI());
+                    NamespaceBinding nsBinding = new NamespaceBinding(att.getNodeName().getPrefix(), att.getNodeName().getNamespaceUri());
                     checkForNamespaceConflict(element, Type.ATTRIBUTE, nsBinding, action);
                 }
             }
@@ -116,7 +116,7 @@ public class PendingUpdateListImpl implements PendingUpdateList {
             lists.get(phase).add(action);
         } else if (action instanceof InsertAttributeAction) {
             NodeName name = ((InsertAttributeAction) action).getAttributeName();
-            NamespaceBinding nsCode = new NamespaceBinding(name.getPrefix(), name.getURI());
+            NamespaceBinding nsCode = new NamespaceBinding(name.getPrefix(), name.getNamespaceUri());
             NodeInfo targetNode = action.getTargetNode();
             addAttributeAction(targetNode, action);
             checkForNamespaceConflict(targetNode, Type.ATTRIBUTE, nsCode, action);
@@ -182,11 +182,11 @@ public class PendingUpdateListImpl implements PendingUpdateList {
             throws XPathException {
         if (targetNode != null && (nodeKind == Type.ELEMENT || !nsCode.getPrefix().isEmpty())) {
             String prefix = nsCode.getPrefix();
-            NamespaceUri uri = nsCode.getURI();
+            NamespaceUri uri = nsCode.getNamespaceUri();
 
             // Check that the namespace prefix is not already declared on the element
             NamespaceMap map = targetNode.getAllNamespaces();
-            NamespaceUri existingURI = map.getURI(prefix);
+            NamespaceUri existingURI = map.getNamespaceUri(prefix);
 
             if (existingURI != null && !existingURI.isEmpty() && !existingURI.equals(uri)) {
                 XPathException err1 = new XPathException(
@@ -204,7 +204,7 @@ public class PendingUpdateListImpl implements PendingUpdateList {
                 nsmap = NamespaceMap.of(prefix, uri);
                 newNamespaceBindings.put(targetNode, nsmap);
             } else {
-                NamespaceUri existingUri = nsmap.getURI(prefix);
+                NamespaceUri existingUri = nsmap.getNamespaceUri(prefix);
                 if (existingUri == null) {
                     nsmap = nsmap.put(prefix, uri);
                     newNamespaceBindings.put(targetNode, nsmap);
@@ -426,12 +426,12 @@ public class PendingUpdateListImpl implements PendingUpdateList {
             if (action instanceof RenameAction) {
                 NodeName nc = ((RenameAction) action).getNewName();
                 NodeName newName = null;
-                if (element.getAttributeValue(nc.getURI(), nc.getLocalPart()) != null) {
+                if (element.getAttributeValue(nc.getNamespaceUri(), nc.getLocalPart()) != null) {
                     // Name already exists. Need to allocate a temporary name.
                     for (int n = 1; ; n++) {
                         String candidate = nc.getLocalPart() + n;
-                        if (element.getAttributeValue(nc.getURI(), candidate) == null) {
-                            newName = new FingerprintedQName(nc.getPrefix(), nc.getURI(), candidate);
+                        if (element.getAttributeValue(nc.getNamespaceUri(), candidate) == null) {
+                            newName = new FingerprintedQName(nc.getPrefix(), nc.getNamespaceUri(), candidate);
                             break;
                         }
                     }

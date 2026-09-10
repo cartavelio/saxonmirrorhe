@@ -220,7 +220,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
                 (values, env) -> {
                     StructuredQName name = verifyQName(values.get(1), env);
                     return new AxisExpression(AxisInfo.ATTRIBUTE,
-                                              new NameTest(Type.ATTRIBUTE, name.getURI(), name.getLocalPart(), env.getConfiguration().getNamePool()));
+                                              new NameTest(Type.ATTRIBUTE, name.getNamespaceUri(), name.getLocalPart(), env.getConfiguration().getNamePool()));
                 });
 
         // @* - select all attributes
@@ -237,7 +237,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
                     }
                     StructuredQName name = verifyElementQName(values.get(0), env);
                     return new AxisExpression(AxisInfo.CHILD,
-                                              new NameTest(Type.ELEMENT, name.getURI(), name.getLocalPart(), env.getConfiguration().getNamePool()));
+                                              new NameTest(Type.ELEMENT, name.getNamespaceUri(), name.getLocalPart(), env.getConfiguration().getNamePool()));
                 });
 
         // keyword { } - for example, empty map constructor
@@ -285,7 +285,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
                     List<String> reasons = new ArrayList<>();
                     Expression child = new AxisExpression(
                             AxisInfo.CHILD,
-                            new NameTest(Type.ELEMENT, elName.getURI(), elName.getLocalPart(), env.getConfiguration().getNamePool()));
+                            new NameTest(Type.ELEMENT, elName.getNamespaceUri(), elName.getLocalPart(), env.getConfiguration().getNamePool()));
                     child.setLocation(env.getContainingLocation());
                     return env.getFunctionLibrary().bind(
                             new SymbolicName.F(fnName, 1), new Expression[]{child}, env, reasons);
@@ -311,7 +311,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
                     StructuredQName attName = verifyQName(values.get(2), env);
                     AxisExpression arg = new AxisExpression(
                             AxisInfo.ATTRIBUTE,
-                            new NameTest(Type.ATTRIBUTE, attName.getURI(), attName.getLocalPart(), env.getConfiguration().getNamePool()));
+                            new NameTest(Type.ATTRIBUTE, attName.getNamespaceUri(), attName.getLocalPart(), env.getConfiguration().getNamePool()));
                     arg.setLocation(env.getContainingLocation());
                     StructuredQName name = verifyFunctionQName(values.get(0), env);
                     List<String> reasons = new ArrayList<>();
@@ -342,13 +342,13 @@ public class QuickXPathParser implements XPathParser.Accelerator {
                     AxisExpression start =
                             new AxisExpression(
                                     AxisInfo.CHILD,
-                                    new NameTest(Type.ELEMENT, first.getURI(), first.getLocalPart(), env.getConfiguration().getNamePool()));
+                                    new NameTest(Type.ELEMENT, first.getNamespaceUri(), first.getLocalPart(), env.getConfiguration().getNamePool()));
                     start.setLocation(env.getContainingLocation());
                     StructuredQName second = verifyElementQName(values.get(2), env);
                     AxisExpression step =
                             new AxisExpression(
                                     AxisInfo.CHILD,
-                                    new NameTest(Type.ELEMENT, second.getURI(), second.getLocalPart(), env.getConfiguration().getNamePool()));
+                                    new NameTest(Type.ELEMENT, second.getNamespaceUri(), second.getLocalPart(), env.getConfiguration().getNamePool()));
                     step.setLocation(env.getContainingLocation());
                     return new SlashExpression(start, step);
                 });
@@ -364,13 +364,13 @@ public class QuickXPathParser implements XPathParser.Accelerator {
                     AxisExpression one =
                             new AxisExpression(
                                     AxisInfo.CHILD,
-                                    new NameTest(Type.ELEMENT, first.getURI(), first.getLocalPart(), env.getConfiguration().getNamePool()));
+                                    new NameTest(Type.ELEMENT, first.getNamespaceUri(), first.getLocalPart(), env.getConfiguration().getNamePool()));
                     one.setLocation(env.getContainingLocation());
                     StructuredQName second = verifyElementQName(values.get(2), env);
                     AxisExpression two =
                             new AxisExpression(
                                     AxisInfo.CHILD,
-                                    new NameTest(Type.ELEMENT, second.getURI(), second.getLocalPart(), env.getConfiguration().getNamePool()));
+                                    new NameTest(Type.ELEMENT, second.getNamespaceUri(), second.getLocalPart(), env.getConfiguration().getNamePool()));
                     two.setLocation(env.getContainingLocation());
                     return new VennExpression(one, Token.UNION, two);
                 });
@@ -386,13 +386,13 @@ public class QuickXPathParser implements XPathParser.Accelerator {
                     AxisExpression start =
                             new AxisExpression(
                                     AxisInfo.CHILD,
-                                    new NameTest(Type.ELEMENT, first.getURI(), first.getLocalPart(), env.getConfiguration().getNamePool()));
+                                    new NameTest(Type.ELEMENT, first.getNamespaceUri(), first.getLocalPart(), env.getConfiguration().getNamePool()));
                     start.setLocation(env.getContainingLocation());
                     StructuredQName second = verifyQName(values.get(3), env);
                     AxisExpression step =
                             new AxisExpression(
                                     AxisInfo.ATTRIBUTE,
-                                    new NameTest(Type.ATTRIBUTE, second.getURI(), second.getLocalPart(), env.getConfiguration().getNamePool()));
+                                    new NameTest(Type.ATTRIBUTE, second.getNamespaceUri(), second.getLocalPart(), env.getConfiguration().getNamePool()));
                     step.setLocation(env.getContainingLocation());
                     return new SlashExpression(start, step);
                 });
@@ -408,7 +408,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
                     AxisExpression step =
                             new AxisExpression(
                                     AxisInfo.ATTRIBUTE,
-                                    new NameTest(Type.ATTRIBUTE, second.getURI(), second.getLocalPart(), env.getConfiguration().getNamePool()));
+                                    new NameTest(Type.ATTRIBUTE, second.getNamespaceUri(), second.getLocalPart(), env.getConfiguration().getNamePool()));
                     step.setLocation(env.getContainingLocation());
                     return new SlashExpression(varRef, step);
                 });
@@ -529,7 +529,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
                     StructuredQName name = verifyElementQName(values.get(1), env);
                     return new AxisExpression(
                             axis,
-                            new NameTest(Type.ELEMENT, name.getURI(), name.getLocalPart(), env.getConfiguration().getNamePool()));
+                            new NameTest(Type.ELEMENT, name.getNamespaceUri(), name.getLocalPart(), env.getConfiguration().getNamePool()));
                 });
 
     }

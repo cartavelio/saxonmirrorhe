@@ -27,7 +27,7 @@ public class InScopeNamespacesFn extends SystemFunction {
         }
         DictionaryMap dict = new DictionaryMap();
         for (NamespaceBinding binding : nsMap) {
-            dict.initialPut(binding.getPrefix(), new StringValue(binding.getURI().toUnicodeString()));
+            dict.initialPut(binding.getPrefix(), new StringValue(binding.getNamespaceUri().toUnicodeString()));
         }
         return dict;
     }

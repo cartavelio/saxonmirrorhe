@@ -106,7 +106,7 @@ public abstract class IdentityConstraint extends SchemaStructure
      */
 
     public NamespaceUri getTargetNamespace() {
-        return constraintName.getURI();
+        return constraintName.getNamespaceUri();
     }
 
     /**

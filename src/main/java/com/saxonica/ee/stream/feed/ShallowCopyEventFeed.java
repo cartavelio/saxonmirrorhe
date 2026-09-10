@@ -48,7 +48,7 @@ public class ShallowCopyEventFeed extends ItemFeed {
             SchemaType schemaType = schemaAware ? AnyType.getInstance() : Untyped.getInstance();
             receiver.startElement(NameOfNode.makeName(node), schemaType, Loc.NONE, ReceiverOption.NONE);
             for (NamespaceBinding ns : node.getAllNamespaces()) {
-                receiver.namespace(ns.getPrefix(), ns.getURI(), ReceiverOption.NONE);
+                receiver.namespace(ns.getPrefix(), ns.getNamespaceUri(), ReceiverOption.NONE);
             }
             AxisIterator attributes = node.iterateAxis(AxisInfo.ATTRIBUTE);
             if (attributes != EmptyIterator.ofNodes()) {

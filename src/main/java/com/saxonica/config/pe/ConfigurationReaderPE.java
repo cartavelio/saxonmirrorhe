@@ -26,7 +26,7 @@ public class ConfigurationReaderPE extends ConfigurationReader {
         String namespace = null;
         String className = null;
         for (AttributeInfo a : atts) {
-            NamespaceUri uri = a.getNodeName().getURI();
+            NamespaceUri uri = a.getNodeName().getNamespaceUri();
             String attName = a.getNodeName().getLocalPart();
             String value = a.getValue();
             if (uri.isEmpty()) {

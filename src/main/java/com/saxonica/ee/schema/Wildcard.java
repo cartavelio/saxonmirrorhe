@@ -217,9 +217,9 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
             }
         }
         if (allowedNamespaces != null) {
-            return allowedNamespaces.contains(name.getURI());
+            return allowedNamespaces.contains(name.getNamespaceUri());
         } else {
-            return disallowedNamespaces == null || !disallowedNamespaces.contains(name.getURI());
+            return disallowedNamespaces == null || !disallowedNamespaces.contains(name.getNamespaceUri());
         }
     }
 
@@ -259,7 +259,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
                 return "The wildcard disallows defined siblings, and the name is a permitted sibling. ";
             }
         }
-        NamespaceUri uri = nn.getURI();
+        NamespaceUri uri = nn.getNamespaceUri();
         if (allowedNamespaces != null) {
             if (allowedNamespaces.contains(uri)) {
                 return null;

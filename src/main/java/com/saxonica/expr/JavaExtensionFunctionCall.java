@@ -73,7 +73,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
         } else {
             theParameterTypes = null;
         }
-        returnVoidAsThis = functionName.getURI().toString().endsWith("?void=this");
+        returnVoidAsThis = functionName.getNamespaceUri().toString().endsWith("?void=this");
     }
 
     /**
@@ -156,7 +156,11 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
         argumentConverters = new PJConverter[getArity()];
         TypeChecker tc = config.getTypeChecker(false);
         if (firstArg != 0) {
-            SequenceType st = SequenceType.makeSequenceType(config.getJavaExternalObjectType(theClass), StaticProperty.EXACTLY_ONE);
+            JavaExternalObjectType result;
+            synchronized(config) {
+                result = JavaExternalObjectType.of(theClass);
+            }
+            SequenceType st = SequenceType.makeSequenceType(result, StaticProperty.EXACTLY_ONE);
             ItemType at = getArg(0).getItemType();
             if (at instanceof JavaExternalObjectType) {
                 Supplier<RoleDiagnostic> role =
@@ -227,14 +231,22 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
             if (theMethod instanceof Constructor) {
                 // Constructors always return wrapped external objects, even if the Java class
                 // is one known to Saxon such as java.util.Date
-                JavaExternalObjectType resultType = config.getJavaExternalObjectType(theClass);
+                JavaExternalObjectType result;
+                synchronized(config) {
+                    result = JavaExternalObjectType.of(theClass);
+                }
+                JavaExternalObjectType resultType = result;
                 resultConverter = new JPConverter.ExternalObjectWrapper(resultType);
                 //resultConverter = JPConverter.allocate(theClass, config);
             } else if (theMethod instanceof Method) {
                 Class resultClass = ((Method) theMethod).getReturnType();
                 Type genericResultType = ((Method) theMethod).getGenericReturnType();
                 if (genericResultType == Void.TYPE && isReturnVoidAsThis()) {
-                    resultConverter = new JPConverter.ExternalObjectWrapper(config.getJavaExternalObjectType(theClass));
+                    JavaExternalObjectType result;
+                    synchronized(config) {
+                        result = JavaExternalObjectType.of(theClass);
+                    }
+                    resultConverter = new JPConverter.ExternalObjectWrapper(result);
                 } else {
                     resultConverter = JPConverter.allocate(resultClass, genericResultType, config);
                 }
@@ -287,14 +299,22 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
         if (theMethod instanceof Constructor) {
             // Constructors always return wrapped external objects, even if the Java class
             // is one known to Saxon such as java.util.Date
-            JavaExternalObjectType resultType = config.getJavaExternalObjectType(theClass);
+            JavaExternalObjectType result;
+            synchronized(config) {
+                result = JavaExternalObjectType.of(theClass);
+            }
+            JavaExternalObjectType resultType = result;
             resultConverter = new JPConverter.ExternalObjectWrapper(resultType);
             //resultConverter = JPConverter.allocate(theClass, config);
         } else if (theMethod instanceof Method) {
             Class resultClass = ((Method) theMethod).getReturnType();
             Type resultType = ((Method) theMethod).getGenericReturnType();
             if (resultType == Void.TYPE && isReturnVoidAsThis()) {
-                resultConverter = new JPConverter.ExternalObjectWrapper(config.getJavaExternalObjectType(theClass));
+                JavaExternalObjectType result;
+                synchronized(config) {
+                    result = JavaExternalObjectType.of(theClass);
+                }
+                resultConverter = new JPConverter.ExternalObjectWrapper(result);
             } else {
                 resultConverter = JPConverter.allocate(resultClass, resultType, config);
             }
@@ -458,6 +478,21 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
         }
         return call(context, argValues).iterate();
     }
+
+    /**
+     * Evaluate the function returning a single item or null.
+     *
+     * @param context The context in which the function is to be evaluated
+     * @return a Value representing the result of the function.
+     * @throws net.sf.saxon.trans.XPathException if the function cannot be evaluated.
+     */
+
+    /*@NotNull*/
+    @Override
+    public Item evaluateItem(XPathContext context) throws XPathException {
+        return iterate(context).next();
+    }
+
 
     /**
      * Get the class containing the method being called
@@ -747,7 +782,9 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
             return AnyItemType.getInstance();
         } else if (resultConverter instanceof JPConverter.VoidConverter) {
             if (returnVoidAsThis) {
-                return config.getJavaExternalObjectType(theClass);
+                synchronized(config) {
+                    return JavaExternalObjectType.of(theClass);
+                }
             } else {
                 // The result will be an empty sequence; but we avoid revealing this, to avoid being optimized away
                 return AnyItemType.getInstance();

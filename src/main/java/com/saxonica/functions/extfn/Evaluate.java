@@ -33,13 +33,6 @@ public class Evaluate extends SystemFunction {
         RetainedStaticContext rsc = getRetainedStaticContext();
         Configuration config = context.getConfiguration();
         IndependentContext env = new IndependentContext(config);
-//        {
-//            @Override
-//            public void issueWarning(String s, Location locator) {
-//                String message = "In dynamic expression {" + exprText + "}: " + s;
-//                context.getController().warning(message, null, getLocation());
-//            }
-//        };
         env.setBaseURI(baseUri);
         env.setExecutable(context.getController().getExecutable());
         env.setXPathLanguageLevel(31);
@@ -75,8 +68,6 @@ public class Evaluate extends SystemFunction {
         Executable exec = context.getController().getExecutable();
         env.setExecutable(exec);
         env.setXPathLanguageLevel(30);
-        //env.setFunctionLibrary(exec.getFunctionLibrary());
-        //env.setFunctionLibrary(((StylesheetPackage) getRetainedStaticContext().getPackageData()).getFunctionLibrary());
         env.setAllowUndeclaredVariables(true);
         PreparedExpression pexpr = new PreparedExpression();
         pexpr.expStaticContext = env;

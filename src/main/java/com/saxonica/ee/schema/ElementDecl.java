@@ -665,14 +665,14 @@ public class ElementDecl extends SchemaStructure
     public void setElementName(StructuredQName elementName, int fingerprint) {
         this.elementName = elementName;
         this.fingerprint = fingerprint;
-        this.targetNamespace = elementName.getURI();
+        this.targetNamespace = elementName.getNamespaceUri();
         substitutionGroupMembers.add(this);
     }
 
     public void setElementName(StructuredQName elementName) {
         this.elementName = elementName;
-        this.fingerprint = getConfiguration().getNamePool().allocateFingerprint(elementName.getURI(), elementName.getLocalPart());
-        this.targetNamespace = elementName.getURI();
+        this.fingerprint = getConfiguration().getNamePool().allocateFingerprint(elementName.getNamespaceUri(), elementName.getLocalPart());
+        this.targetNamespace = elementName.getNamespaceUri();
         substitutionGroupMembers.add(this);
     }
 

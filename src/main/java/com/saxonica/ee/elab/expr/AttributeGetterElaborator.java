@@ -21,7 +21,7 @@ public class AttributeGetterElaborator extends ItemElaborator {
     public ItemEvaluator elaborateForItem() {
         final AttributeGetter exp = (AttributeGetter)getExpression();
         final int fingerprint = exp.getAttributeName().getFingerprint();
-        final NamespaceUri uri = exp.getAttributeName().getURI();
+        final NamespaceUri uri = exp.getAttributeName().getNamespaceUri();
         final String local = exp.getAttributeName().getLocalPart();
         return context -> {
             Item item = context.getContextItem();

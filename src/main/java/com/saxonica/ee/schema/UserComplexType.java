@@ -2827,7 +2827,7 @@ public class UserComplexType extends UserDefinedType
                 min += p.getMinOccurs();
                 max += p.getMaxOccurs();
                 if (!((ElementWildcard) base).getWildcard().matches(p.getTargetComponentName(), true, config, this)) {
-                    NamespaceUri uri = p.getTargetComponentName().getURI();
+                    NamespaceUri uri = p.getTargetComponentName().getNamespaceUri();
                     return "The base type does not allow elements in " +
                             (uri.isEmpty() ? "no namespace" : "namespace " + uri);
                 }

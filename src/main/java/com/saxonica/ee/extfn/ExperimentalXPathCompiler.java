@@ -1,6 +1,5 @@
 package com.saxonica.ee.extfn;
 
-import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.config.JavaExtensionLibrary;
 import com.saxonica.config.ProfessionalConfiguration;
 import com.saxonica.ee.schema.UserAtomicType;
@@ -100,7 +99,7 @@ public class ExperimentalXPathCompiler {
         libraryList.addFunctionLibrary(MapFunctionSet.getInstance());
         libraryList.addFunctionLibrary(ArrayFunctionSet.getInstance());
         libraryList.addFunctionLibrary(new ConstructorFunctionLibrary(context.getConfiguration()));
-        libraryList.addFunctionLibrary(new VendorFunctionSetEE((EnterpriseConfiguration) context.getConfiguration()));
+        libraryList.addFunctionLibrary(context.getConfiguration().getVendorFunctionSet());
         libraryList.addFunctionLibrary(javaLib);
         libraryList.addFunctionLibrary(compiler.setupUserFunctionLibrary(globalFunctions));
         compiler.globalFunctionLibrary = libraryList;

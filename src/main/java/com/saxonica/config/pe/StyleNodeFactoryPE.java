@@ -67,7 +67,7 @@ public class StyleNodeFactoryPE extends StyleNodeFactory implements NodeFactory 
         }
 
         StyleElement extensionElement = null;
-        NamespaceUri uri = elementName.getURI();
+        NamespaceUri uri = elementName.getNamespaceUri();
         ExtensionElementCreator eef = ((ProfessionalConfiguration) config).getExtensionElementCreator(uri);
         if (eef != null) {
             String localName = elementName.getLocalPart();

@@ -236,7 +236,7 @@ public class SaxonXQItem extends Closable implements XQResultItem, SaxonXQItemAc
             if (name.startsWith("{")) {
                 StructuredQName qName = StructuredQName.fromClarkName(name);
                 localName = qName.getLocalPart();
-                uri = qName.getURI();
+                uri = qName.getNamespaceUri();
             }
             try {
                 ResultDocument.setSerializationProperty(validatedProps, uri, localName, value, null, false, config);

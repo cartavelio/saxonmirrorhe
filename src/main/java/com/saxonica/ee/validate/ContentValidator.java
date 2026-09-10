@@ -245,7 +245,7 @@ public abstract class ContentValidator extends ValidatingFilter {
         childValidator.setNamespaceResolver(namespaces);
         AttributeMap validatedAtts = childValidator.validateAttributes(attributes, additionalNamespaces);
         for (NamespaceBinding ns : additionalNamespaces) {
-            namespaces = namespaces.put(ns.getPrefix(), ns.getURI());
+            namespaces = namespaces.put(ns.getPrefix(), ns.getNamespaceUri());
         }
         try {
             nextReceiver.startElement(elemName, type, validatedAtts, namespaces, location, properties);

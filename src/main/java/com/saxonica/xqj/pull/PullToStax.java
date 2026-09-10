@@ -88,7 +88,7 @@ public class PullToStax implements XMLStreamReader {
     @Override
     public QName getAttributeName(int i) {
         NodeName attName = getAttributeInfo(i).getNodeName();
-        return new QName(attName.getURI().toString(), attName.getLocalPart(), attName.getPrefix());
+        return new QName(attName.getNamespaceUri().toString(), attName.getLocalPart(), attName.getPrefix());
     }
 
     @Override
@@ -98,7 +98,7 @@ public class PullToStax implements XMLStreamReader {
 
     @Override
     public String getAttributeNamespace(int i) {
-        return getAttributeInfo(i).getNodeName().getURI().toString();
+        return getAttributeInfo(i).getNodeName().getNamespaceUri().toString();
     }
 
     @Override
@@ -427,7 +427,7 @@ public class PullToStax implements XMLStreamReader {
 
     @Override
     public String getNamespaceURI() {
-        return provider.getNodeName().getURI().toString();
+        return provider.getNodeName().getNamespaceUri().toString();
     }
 
     @Override
@@ -470,7 +470,7 @@ public class PullToStax implements XMLStreamReader {
 
     @Override
     public String getNamespaceURI(int i) {
-        return provider.getNamespaceDeclarations()[i].getURI().toString();
+        return provider.getNamespaceDeclarations()[i].getNamespaceUri().toString();
     }
 
     @Override
@@ -481,7 +481,7 @@ public class PullToStax implements XMLStreamReader {
     @Override
     public QName getName() {
         NodeName nn = provider.getNodeName();
-        return new QName(nn.getURI().toString(), nn.getLocalPart(), nn.getPrefix());
+        return new QName(nn.getNamespaceUri().toString(), nn.getLocalPart(), nn.getPrefix());
     }
 
     @Override

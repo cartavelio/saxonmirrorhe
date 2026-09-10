@@ -88,7 +88,7 @@ public class ModelGroupDefinition extends ModelGroup implements SerializableSche
      * @return the namespace URI of this named Group: null if the group is in no namespace
      */
     public NamespaceUri getTargetNamespace() {
-        return modelGroupName.getURI();
+        return modelGroupName.getNamespaceUri();
     }
 
     /**

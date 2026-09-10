@@ -42,7 +42,7 @@ public class NewAttribute extends SystemFunction {
         }
         String prefix = name.getPrefix();
         String local = name.getLocalPart();
-        NamespaceUri uri = name.getURI();
+        NamespaceUri uri = name.getNamespaceUri();
         if (local.equals("xmlns") && uri.isEmpty()) {
             throw new XPathException("Invalid attribute name: xmlns", "XQDY0044");
         }

@@ -134,7 +134,7 @@ public class PullNamespaceReducer extends PullFilter implements NamespaceResolve
         for (AttributeInfo att : attributeMap) {
             NodeName nc = att.getNodeName();
             AttributeInfo att2 = att;
-            if (!nc.getURI().isEmpty()) {
+            if (!nc.getNamespaceUri().isEmpty()) {
                 // Only need to do checking for an attribute that's namespaced
                 NodeName newnc = checkProposedPrefix(nc, list.size());
                 if (nc != newnc) {
@@ -225,13 +225,13 @@ public class PullNamespaceReducer extends PullFilter implements NamespaceResolve
 
     private NodeName checkProposedPrefix(NodeName nameCode, int seq) {
         String oldPrefix = nameCode.getPrefix();
-        NamespaceUri uri = nameCode.getURI();
+        NamespaceUri uri = nameCode.getNamespaceUri();
         NamespaceBinding nsBinding = new NamespaceBinding(oldPrefix, uri);
 
         for (int i = allNamespacesSize - 1; i >= 0; i--) {
             if (oldPrefix.equals(allNamespaces[i].getPrefix())) {
                 // same prefix
-                if (uri.equals(allNamespaces[i].getURI())) {
+                if (uri.equals(allNamespaces[i].getNamespaceUri())) {
                     // same URI
                     return nameCode;    // all is well
                 } else {
@@ -379,7 +379,7 @@ public class PullNamespaceReducer extends PullFilter implements NamespaceResolve
         } else {
             for (int i = allNamespacesSize - 1; i >= 0; i--) {
                 if (allNamespaces[i].getPrefix().equals(prefix)) {
-                    return allNamespaces[i].getURI();
+                    return allNamespaces[i].getNamespaceUri();
                 }
             }
             return prefix.isEmpty() ? NamespaceUri.NULL : null;

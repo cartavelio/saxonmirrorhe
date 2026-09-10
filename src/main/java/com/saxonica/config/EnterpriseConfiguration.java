@@ -431,11 +431,11 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      *
      * @return the new function library
      */
-    protected BuiltInFunctionSet makeVendorFunctionSet() {
+    public BuiltInFunctionSet getVendorFunctionSet() {
         if (isLicensedFeature(LicenseFeature.SCHEMA_VALIDATION)) {
-            return new VendorFunctionSetEE(this);
+            return VendorFunctionSetEE.getInstance();
         } else {
-            return null;
+            return super.getVendorFunctionSet();
         }
     }
 
@@ -1201,7 +1201,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             if (topLevelElementName != null) {
                 val.setTopLevelElement(new FingerprintedQName(
                         topLevelElementName.getPrefix(),
-                        topLevelElementName.getURI(),
+                        topLevelElementName.getNamespaceUri(),
                         topLevelElementName.getLocalPart()));
             }
             HostLanguage hostLanguage = pipe.getHostLanguage();

@@ -1,6 +1,5 @@
 package com.saxonica.functions.extfn;
 
-import com.saxonica.config.ProfessionalConfiguration;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.PreparedStylesheet;
@@ -60,10 +59,14 @@ import java.util.*;
 
 public class VendorFunctionSetPE extends BuiltInFunctionSet {
 
-    protected ProfessionalConfiguration config;
+    private final static VendorFunctionSetPE INSTANCE = new VendorFunctionSetPE();
 
-    public VendorFunctionSetPE(ProfessionalConfiguration config) {
-        this.config = config;
+    public static VendorFunctionSetPE getInstance() {
+        return INSTANCE;
+    }
+
+
+    public VendorFunctionSetPE() {
         init();
     }
 
@@ -115,395 +118,375 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
                 SequenceType.OPTIONAL_ATOMIC);
 
 
-        register("adjust-to-civil-time", 2, AdjustToCivilTime::new, BuiltInAtomicType.DATE_TIME, OPT, LATE)
+        register("adjust-to-civil-time", 2, e -> e.populate( AdjustToCivilTime::new, BuiltInAtomicType.DATE_TIME, OPT, LATE)
                 .arg(0, BuiltInAtomicType.DATE_TIME, OPT, null)
-                .arg(1, BuiltInAtomicType.STRING, ONE, null);
+                .arg(1, BuiltInAtomicType.STRING, ONE, null));
 
-        register("analyze-uri", 1, AnalyzeUri::new, analyzeUriResult, ONE, 0)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
+        register("analyze-uri", 1, e -> e.populate( AnalyzeUri::new, analyzeUriResult, ONE, 0)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
-        register("array-member", 1, ParcelFn::new, Parcel.TYPE, ONE, 0)
-                .arg(0, AnyItemType.getInstance(), STAR, null);
+        register("array-member", 1, e -> e.populate( ParcelFn::new, Parcel.TYPE, ONE, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, null));
 
-        register("base64Binary-to-octets", 1, Base64BinaryToOctets::new, BuiltInAtomicType.INTEGER, STAR, 0)
-                .arg(0, BuiltInAtomicType.BASE64_BINARY, ONE, null);
+        register("base64Binary-to-octets", 1, e -> e.populate( Base64BinaryToOctets::new, BuiltInAtomicType.INTEGER, STAR, 0)
+                .arg(0, BuiltInAtomicType.BASE64_BINARY, ONE, null));
 
-        register("base64Binary-to-string", 2, Base64BinaryToString::new, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, BuiltInAtomicType.BASE64_BINARY, ONE, null)
-                .arg(1, BuiltInAtomicType.STRING, ONE, null);
+        register("base64Binary-to-string", 2, e -> e.populate( Base64BinaryToString::new, BuiltInAtomicType.STRING, OPT, 0)
+                .arg(0, BuiltInAtomicType.BASE64_BINARY, OPT, EMPTY)
+                .arg(1, BuiltInAtomicType.STRING, ONE, null));
 
-        register("characters", 1, CharactersFn::new, BuiltInAtomicType.STRING, STAR, 0)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
+        register("characters", 1, e -> e.populate( CharactersFn::new, BuiltInAtomicType.STRING, STAR, 0)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
-        register("column-number", 0, ContextItemAccessorFunction::new, BuiltInAtomicType.INTEGER, ONE, CITEM | LATE);
+        register("column-number", 0, e -> e.populate(ContextItemAccessorFunction::new, BuiltInAtomicType.INTEGER, ONE, CITEM | LATE));
 
-        register("column-number", 1, ColumnNumber::new, BuiltInAtomicType.INTEGER, OPT, 0)
-                .arg(0, AnyNodeTest.getInstance(), OPT, EMPTY);
+        register("column-number", 1, e -> e.populate( ColumnNumber::new, BuiltInAtomicType.INTEGER, OPT, 0)
+                .arg(0, AnyNodeTest.getInstance(), OPT, EMPTY));
 
-        register("compile-query", 1, CompileQuery::new, config.getJavaExternalObjectType(XQueryExpression.class), ONE, 0)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
+        register("compile-query", 1, e -> e.populate( CompileQuery::new, JavaExternalObjectType.of(XQueryExpression.class), ONE, 0)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
-        register("compile-stylesheet", 1, CompileStylesheet::new, config.getJavaExternalObjectType(PreparedStylesheet.class), ONE, 0)
-                .arg(0, NodeKindTest.DOCUMENT, ONE, null);
+        register("compile-stylesheet", 1, e -> e.populate( CompileStylesheet::new, JavaExternalObjectType.of(PreparedStylesheet.class), ONE, 0)
+                .arg(0, NodeKindTest.DOCUMENT, ONE, null));
 
-        register("configuration", 0, ConfigurationFn::new, config.getJavaExternalObjectType(Configuration.class), ONE, LATE);
+        register("configuration", 0, e -> e.populate(ConfigurationFn::new, JavaExternalObjectType.of(Configuration.class), ONE, LATE));
 
-        register("context", 0, ContextFn::new, config.getJavaExternalObjectType(XPathContext.class), ONE, CITEM | LATE);
+        register("context", 0, e -> e.populate(ContextFn::new, JavaExternalObjectType.of(XPathContext.class), ONE, CITEM | LATE));
 
-        register("controller", 0, ControllerFn::new, config.getJavaExternalObjectType(Controller.class), ONE, LATE);
+        register("controller", 0, e -> e.populate(ControllerFn::new, JavaExternalObjectType.of(Controller.class), ONE, LATE));
 
-        register("current-mode-name", 0, CurrentModeName::new, BuiltInAtomicType.QNAME, OPT, CITEM | LATE);
+        register("current-mode-name", 0, e -> e.populate(CurrentModeName::new, BuiltInAtomicType.QNAME, OPT, CITEM | LATE));
 
-        register("deep-equal", 4, SaxonDeepEqual::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+        register("deep-equal", 4, e -> e.populate( SaxonDeepEqual::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, AnyItemType.getInstance(), STAR, null)
                 .arg(2, BuiltInAtomicType.STRING, OPT, null)
-                .arg(3, BuiltInAtomicType.STRING, ONE, null);
+                .arg(3, BuiltInAtomicType.STRING, ONE, null));
 
-        register("decimal-divide", 3, DecimalDivide::new, BuiltInAtomicType.DECIMAL, OPT, 0)
+        register("decimal-divide", 3, e -> e.populate( DecimalDivide::new, BuiltInAtomicType.DECIMAL, OPT, 0)
                 .arg(0, BuiltInAtomicType.DECIMAL, OPT, EMPTY)
                 .arg(1, BuiltInAtomicType.DECIMAL, OPT, EMPTY)
-                .arg(2, BuiltInAtomicType.INTEGER, ONE, null);
+                .arg(2, BuiltInAtomicType.INTEGER, ONE, null));
 
-        register("discard-document", 1, DiscardDocument::new, NodeKindTest.DOCUMENT, OPT, 0)
-                .arg(0, NodeKindTest.DOCUMENT, OPT, null);
+        register("discard-document", 1, e -> e.populate( DiscardDocument::new, NodeKindTest.DOCUMENT, OPT, 0)
+                .arg(0, NodeKindTest.DOCUMENT, OPT, null));
 
-        register("EQName", 1, EQName::new, BuiltInAtomicType.QNAME, OPT, 0)
-                .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY);
+        register("EQName", 1, e -> e.populate( EQName::new, BuiltInAtomicType.QNAME, OPT, 0)
+                .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY));
 
-        register("escape-NCName", 1, EscapeNCName::new, BuiltInAtomicType.NCNAME, ONE, 0)
-                .arg(0, BuiltInAtomicType.STRING, ONE, EMPTY);
+        register("escape-NCName", 1, e -> e.populate( EscapeNCName::new, BuiltInAtomicType.NCNAME, ONE, 0)
+                .arg(0, BuiltInAtomicType.STRING, ONE, EMPTY));
 
-        register("eval", 10, Eval::new, AnyItemType.getInstance(), STAR, CITEM)
-                .arg(0, config.getJavaExternalObjectType(Evaluate.PreparedExpression.class), ONE, null)
-                .arg(1, AnyItemType.getInstance(), STAR, null)
-                .arg(2, AnyItemType.getInstance(), STAR, null)
-                .arg(3, AnyItemType.getInstance(), STAR, null)
-                .arg(4, AnyItemType.getInstance(), STAR, null)
-                .arg(5, AnyItemType.getInstance(), STAR, null)
-                .arg(6, AnyItemType.getInstance(), STAR, null)
-                .arg(7, AnyItemType.getInstance(), STAR, null)
-                .arg(8, AnyItemType.getInstance(), STAR, null)
-                .arg(9, AnyItemType.getInstance(), STAR, null);
+//        registerVariadic("eval", 2, e -> e.populate(Eval::new, AnyItemType.getInstance(), STAR, SEQV | CITEM)
+//                .arg(0, JavaExternalObjectType.of(Evaluate.PreparedExpression.class), ONE, null)
+//                .arg(1, AnyItemType.getInstance(), STAR, null));
+//
+//        registerVariadic("evaluate", 2, e -> e.populate(Evaluate::new, AnyItemType.getInstance(), STAR, SEQV | CITEM)
+//                .arg(0, BuiltInAtomicType.STRING, ONE, null)
+//                .arg(1, AnyItemType.getInstance(), STAR, null));
+//
+//        register("expression", 1, e -> e.populate( ExpressionFn::new, JavaExternalObjectType.of(Evaluate.PreparedExpression.class), ONE, 0)
+//                .arg(0, BuiltInAtomicType.STRING, ONE, null));
+//
+//        register("expression", 2, e -> e.populate( ExpressionFn::new, JavaExternalObjectType.of(Evaluate.PreparedExpression.class), ONE, 0)
+//                .arg(0, BuiltInAtomicType.STRING, ONE, null)
+//                .arg(1, NodeKindTest.ELEMENT, ONE, null));
 
-        registerReducedArityVariants("eval#10", 1, 9);
+        register("function-annotations", 1, e -> e.populate( FunctionAnnotations::new, FunctionAnnotations.RETURN_TYPE, STAR, 0)
+                .arg(0, AnyFunctionType.getInstance(), ONE, null));
 
-        register("evaluate", 10, Evaluate::new, AnyItemType.getInstance(), STAR, CITEM)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, AnyItemType.getInstance(), STAR, null)
-                .arg(2, AnyItemType.getInstance(), STAR, null)
-                .arg(3, AnyItemType.getInstance(), STAR, null)
-                .arg(4, AnyItemType.getInstance(), STAR, null)
-                .arg(5, AnyItemType.getInstance(), STAR, null)
-                .arg(6, AnyItemType.getInstance(), STAR, null)
-                .arg(7, AnyItemType.getInstance(), STAR, null)
-                .arg(8, AnyItemType.getInstance(), STAR, null)
-                .arg(9, AnyItemType.getInstance(), STAR, null);
+        register("get-context", 0, e -> e.populate(GetContext::new, JavaExternalObjectType.of(XPathContext.class), ONE, CITEM | LATE));
 
-        registerReducedArityVariants("evaluate#10", 1, 9);
-
-        register("expression", 1, ExpressionFn::new, config.getJavaExternalObjectType(Evaluate.PreparedExpression.class), ONE, 0)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
-
-        register("expression", 2, ExpressionFn::new, config.getJavaExternalObjectType(Evaluate.PreparedExpression.class), ONE, 0)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, NodeKindTest.ELEMENT, ONE, null);
-
-        register("function-annotations", 1, FunctionAnnotations::new, FunctionAnnotations.RETURN_TYPE, STAR, 0)
-                .arg(0, AnyFunctionType.getInstance(), ONE, null);
-
-        register("get-context", 0, GetContext::new, config.getJavaExternalObjectType(XPathContext.class), ONE, CITEM | LATE);
-
-        register("get-pseudo-attribute", 1, GetPseudoAttribute::new, BuiltInAtomicType.STRING, OPT, CITEM | LATE)
-                .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY);
+        register("get-pseudo-attribute", 1, e -> e.populate( GetPseudoAttribute::new, BuiltInAtomicType.STRING, OPT, CITEM | LATE)
+                .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY));
 
 
-        register("group-starting", 2, GroupStarting::new, ArrayItemType.ANY_ARRAY_TYPE , STAR, 0)
+        register("group-starting", 2, e -> e.populate( GroupStarting::new, ArrayItemType.ANY_ARRAY_TYPE , STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
-                .arg(1, predicate, ONE, EMPTY);
+                .arg(1, predicate, ONE, EMPTY));
 
-        register("has-same-nodes", 2, HasSameNodes::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+        register("has-same-nodes", 2, e -> e.populate( HasSameNodes::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, AnyNodeTest.getInstance(), STAR, null)
-                .arg(1, AnyNodeTest.getInstance(), STAR, null);
+                .arg(1, AnyNodeTest.getInstance(), STAR, null));
 
-        register("hexBinary-to-octets", 1, HexBinaryToOctets::new, BuiltInAtomicType.INTEGER, STAR, 0)
-                .arg(0, BuiltInAtomicType.HEX_BINARY, ONE, null);
+        register("hexBinary-to-octets", 1, e -> e.populate( HexBinaryToOctets::new, BuiltInAtomicType.INTEGER, STAR, 0)
+                .arg(0, BuiltInAtomicType.HEX_BINARY, ONE, null));
 
-        register("hexBinary-to-string", 2, HexBinaryToString::new, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, BuiltInAtomicType.HEX_BINARY, ONE, null)
-                .arg(1, BuiltInAtomicType.STRING, ONE, null);
+        register("hexBinary-to-string", 2, e -> e.populate( HexBinaryToString::new, BuiltInAtomicType.STRING, OPT, 0)
+                .arg(0, BuiltInAtomicType.HEX_BINARY, OPT, EMPTY)
+                .arg(1, BuiltInAtomicType.STRING, ONE, null));
 
-        register("highest", 1, HighestOrLowest::new, AnyItemType.getInstance(), STAR, 0)
-                .arg(0, AnyItemType.getInstance(), STAR, EMPTY);
+        register("highest", 1, e -> e.populate( HighestOrLowest::new, AnyItemType.getInstance(), STAR, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, EMPTY));
 
-        register("highest", 2, HighestOrLowest::new, AnyItemType.getInstance(), STAR, 0)
+        register("highest", 2, e -> e.populate( HighestOrLowest::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
-                .arg(1, orderKey, ONE, null);
+                .arg(1, orderKey, ONE, null));
 
-        register("index", 2, Index::new, MapType.getInstance(), ONE, 0)
+        register("index", 2, e -> e.populate( Index::new, MapType.getInstance(), ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
-                .arg(1, AnyItemType.getInstance(), ONE, EMPTY);
+                .arg(1, AnyItemType.getInstance(), ONE, EMPTY));
 
-        register("index-where", 2, IndexWhere::new, BuiltInAtomicType.INTEGER, STAR, 0)
+        register("index-where", 2, e -> e.populate( IndexWhere::new, BuiltInAtomicType.INTEGER, STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
-                .arg(1, predicate, ONE, EMPTY);
+                .arg(1, predicate, ONE, EMPTY));
 
-        register("in-scope-namespaces", 1, InScopeNamespacesFn::new, MapType.getInstance(), ONE, 0)
-                .arg(0, NodeKindTest.ELEMENT, ONE | INS, null);
+        register("in-scope-namespaces", 1, e -> e.populate( InScopeNamespacesFn::new, MapType.getInstance(), ONE, 0)
+                .arg(0, NodeKindTest.ELEMENT, ONE | INS, null));
 
-        register("in-summer-time", 2, InSummerTime::new, BuiltInAtomicType.DATE_TIME, OPT, LATE)
+        register("in-summer-time", 2, e -> e.populate( InSummerTime::new, BuiltInAtomicType.DATE_TIME, OPT, LATE)
                 .arg(0, BuiltInAtomicType.DATE_TIME, ONE, null)
-                .arg(1, BuiltInAtomicType.STRING, ONE, null);
+                .arg(1, BuiltInAtomicType.STRING, ONE, null));
 
-        register("is-defaulted", 1, IsDefaulted::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
-                .arg(0, AnyNodeTest.getInstance(), ONE, null);
+        register("is-defaulted", 1, e -> e.populate( IsDefaulted::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+                .arg(0, AnyNodeTest.getInstance(), ONE, null));
 
-        register("is-NaN", 1, IsNaN::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
-                .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE, null);
+        register("is-NaN", 1, e -> e.populate( IsNaN::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+                .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE, null));
 
-        register("items-after", 2, Starting.ItemsAfter::new, AnyItemType.getInstance(), STAR, 0)
+        register("items-after", 2, e -> e.populate( Starting.ItemsAfter::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR | TRA, EMPTY)
-                .arg(1, predicate, ONE, EMPTY);
+                .arg(1, predicate, ONE, EMPTY));
 
-        register("items-from", 2, Starting.ItemsFrom::new, AnyItemType.getInstance(), STAR, 0)
+        register("items-from", 2, e -> e.populate( Starting.ItemsFrom::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR | TRA, EMPTY)
-                .arg(1, predicate, ONE, EMPTY);
+                .arg(1, predicate, ONE, EMPTY));
 
-        register("items-before", 2, Ending.ItemsBefore::new, AnyItemType.getInstance(), STAR, 0)
+        register("items-before", 2, e -> e.populate( Ending.ItemsBefore::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR | TRA, EMPTY)
-                .arg(1, predicate, ONE, EMPTY);
+                .arg(1, predicate, ONE, EMPTY));
 
-        register("items-until", 2, Ending.ItemsUntil::new, AnyItemType.getInstance(), STAR, 0)
+        register("items-until", 2, e -> e.populate( Ending.ItemsUntil::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR | TRA, EMPTY)
-                .arg(1, predicate, ONE, EMPTY);
+                .arg(1, predicate, ONE, EMPTY));
 
         //#if CSHARP==false
-        register("key-map", 4, KeyMap::new, new MapType(BuiltInAtomicType.STRING, SequenceType.NODE_SEQUENCE), ONE, 0)
+        register("key-map", 4, e -> e.populate( KeyMap::new, new MapType(BuiltInAtomicType.STRING, SequenceType.NODE_SEQUENCE), ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, AnyNodeTest.getInstance(), ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, OPT, null)
-                .arg(3, BuiltInAtomicType.STRING, OPT, null);
+                .arg(3, BuiltInAtomicType.STRING, OPT, null));
         //#endif
         //#if CSHARP==false
-        register("last-modified", 1, LastModified::new, BuiltInAtomicType.DATE_TIME, OPT, BASE)
-                .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY);
+        register("last-modified", 1, e -> e.populate( LastModified::new, BuiltInAtomicType.DATE_TIME, OPT, BASE)
+                .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY));
         //#endif
 
-        register("leading", 1, Leading::new, AnyItemType.getInstance(), STAR, 0)
-                .arg(0, AnyItemType.getInstance(), STAR, EMPTY);
+        register("leading", 1, e -> e.populate( Leading::new, AnyItemType.getInstance(), STAR, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, EMPTY));
 
-        register("leading", 2, Leading::new, AnyItemType.getInstance(), STAR, 0)
+        register("leading", 2, e -> e.populate( Leading::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
-                .arg(1, predicate, ONE, null);
+                .arg(1, predicate, ONE, null));
 
-        register("line-number", 0, ContextItemAccessorFunction::new, BuiltInAtomicType.INTEGER, ONE, CITEM | LATE);
+        register("line-number", 0, e -> e.populate(ContextItemAccessorFunction::new, BuiltInAtomicType.INTEGER, ONE, CITEM | LATE));
 
-        register("line-number", 1, LineNumber::new, BuiltInAtomicType.INTEGER, OPT, 0)
-                .arg(0, AnyNodeTest.getInstance(), OPT, EMPTY);
+        register("line-number", 1, e -> e.populate( LineNumber::new, BuiltInAtomicType.INTEGER, OPT, 0)
+                .arg(0, AnyNodeTest.getInstance(), OPT, EMPTY));
 
-        register("lowest", 1, HighestOrLowest::new, AnyItemType.getInstance(), STAR, 0)
-                .arg(0, AnyItemType.getInstance(), STAR, EMPTY);
+        register("lowest", 1, e -> e.populate( HighestOrLowest::new, AnyItemType.getInstance(), STAR, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, EMPTY));
 
-        register("lowest", 2, HighestOrLowest::new, AnyItemType.getInstance(), STAR, 0)
+        register("lowest", 2, e -> e.populate( HighestOrLowest::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
-                .arg(1, orderKey, ONE, null);
+                .arg(1, orderKey, ONE, null));
 
         FunctionItemType tester = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.ANY_SEQUENCE},
                 SequenceType.SINGLE_BOOLEAN);
 
-        register("map-search", 2, MapSearch::new, MapType.ANY_MAP_TYPE, STAR, 0)
+        register("map-search", 2, e -> e.populate( MapSearch::new, MapType.ANY_MAP_TYPE, STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR | INS, null)
-                .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null);
+                .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null));
 
-        register("map-search", 3, MapSearch::new, MapType.ANY_MAP_TYPE, STAR, 0)
+        register("map-search", 3, e -> e.populate( MapSearch::new, MapType.ANY_MAP_TYPE, STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR | INS, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null)
-                .arg(2, tester, ONE | INS, null);
+                .arg(2, tester, ONE | INS, null));
 
-        register("message-count", 1, MessageCount::new, BuiltInAtomicType.INTEGER, ONE, LATE|SIDE)
-                .arg(0, BuiltInAtomicType.QNAME, OPT, null);
+        register("message-count", 1, e -> e.populate( MessageCount::new, BuiltInAtomicType.INTEGER, ONE, LATE|SIDE)
+                .arg(0, BuiltInAtomicType.QNAME, OPT, null));
 
-        register("namespace-node", 2, NamespaceNodeFn::new, NodeKindTest.NAMESPACE, ONE, LATE | SIDE)
+        register("namespace-node", 2, e -> e.populate( NamespaceNodeFn::new, NodeKindTest.NAMESPACE, ONE, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, BuiltInAtomicType.STRING, ONE, null);
+                .arg(1, BuiltInAtomicType.STRING, ONE, null));
 
         LocalUnionType stringOrQName = new LocalUnionType(BuiltInAtomicType.STRING, BuiltInAtomicType.QNAME);
 
-        register("new-attribute", 2, NewAttribute::new, NodeKindTest.ATTRIBUTE, ONE, LATE | SIDE | NEW)
+        register("new-attribute", 2, e -> e.populate( NewAttribute::new, NodeKindTest.ATTRIBUTE, ONE, LATE | SIDE | NEW)
                 .arg(0, stringOrQName, ONE, null)
-                .arg(1, BuiltInAtomicType.STRING, OPT, null);
+                .arg(1, BuiltInAtomicType.STRING, OPT, null));
 
-        register("new-comment", 1, NewComment::new, NodeKindTest.COMMENT, ONE, LATE | SIDE | NEW)
-                .arg(0, BuiltInAtomicType.STRING, OPT, null);
+        register("new-comment", 1, e -> e.populate( NewComment::new, NodeKindTest.COMMENT, ONE, LATE | SIDE | NEW)
+                .arg(0, BuiltInAtomicType.STRING, OPT, null));
 
-        register("new-document", 1, NewDocument::new, NodeKindTest.DOCUMENT, ONE, LATE | SIDE | NEW)
-                .arg(0, AnyItemType.getInstance(), STAR, null);
+        register("new-document", 1, e -> e.populate( NewDocument::new, NodeKindTest.DOCUMENT, ONE, LATE | SIDE | NEW)
+                .arg(0, AnyItemType.getInstance(), STAR, null));
 
-        register("new-element", 2, NewElement::new, NodeKindTest.ELEMENT, ONE, LATE | SIDE | NEW)
+        register("new-element", 2, e -> e.populate( NewElement::new, NodeKindTest.ELEMENT, ONE, LATE | SIDE | NEW)
                 .arg(0, stringOrQName, ONE, null)
-                .arg(1, AnyItemType.getInstance(), STAR, null);
+                .arg(1, AnyItemType.getInstance(), STAR, null));
 
-        register("new-namespace", 2, NewNamespace::new, NodeKindTest.NAMESPACE, ONE, LATE | SIDE | NEW)
+        register("new-namespace", 2, e -> e.populate( NewNamespace::new, NodeKindTest.NAMESPACE, ONE, LATE | SIDE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, BuiltInAtomicType.STRING, ONE, null);
+                .arg(1, BuiltInAtomicType.STRING, ONE, null));
 
-        register("new-processing-instruction", 2, NewProcessingInstruction::new, NodeKindTest.PROCESSING_INSTRUCTION, ONE, LATE | SIDE | NEW)
+        register("new-processing-instruction", 2, e -> e.populate( NewProcessingInstruction::new, NodeKindTest.PROCESSING_INSTRUCTION, ONE, LATE | SIDE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, BuiltInAtomicType.STRING, STAR, null);
+                .arg(1, BuiltInAtomicType.STRING, STAR, null));
 
-        register("new-text", 1, NewText::new, NodeKindTest.TEXT, ONE, LATE | SIDE | NEW)
-                .arg(0, BuiltInAtomicType.STRING, OPT, null);
+        register("new-text", 1, e -> e.populate( NewText::new, NodeKindTest.TEXT, ONE, LATE | SIDE | NEW)
+                .arg(0, BuiltInAtomicType.STRING, OPT, null));
 
         //#if CSHARP==false
-        register("object-map", 1, ObjectMap::new, new MapType(BuiltInAtomicType.STRING, SequenceType.ANY_SEQUENCE), ONE, 0)
-                .arg(0, AnyExternalObjectType.THE_INSTANCE, ONE, null);
+        register("object-map", 1, e -> e.populate( ObjectMap::new, new MapType(BuiltInAtomicType.STRING, SequenceType.ANY_SEQUENCE), ONE, 0)
+                .arg(0, AnyExternalObjectType.THE_INSTANCE, ONE, null));
         //#endif
 
-        register("octets-to-base64Binary", 1, OctetsToBase64Binary::new, BuiltInAtomicType.BASE64_BINARY, ONE, 0)
-                .arg(0, BuiltInAtomicType.INTEGER, STAR, null);
+        register("octets-to-base64Binary", 1, e -> e.populate( OctetsToBase64Binary::new, BuiltInAtomicType.BASE64_BINARY, ONE, 0)
+                .arg(0, BuiltInAtomicType.INTEGER, STAR, null));
 
-        register("octets-to-hexBinary", 1, OctetsToHexBinary::new, BuiltInAtomicType.HEX_BINARY, ONE, 0)
-                .arg(0, BuiltInAtomicType.INTEGER, STAR, null);
+        register("octets-to-hexBinary", 1, e -> e.populate( OctetsToHexBinary::new, BuiltInAtomicType.HEX_BINARY, ONE, 0)
+                .arg(0, BuiltInAtomicType.INTEGER, STAR, null));
 
-        register("parse", 1, Parse::new, NodeKindTest.DOCUMENT, ONE, LATE | NEW)
-                .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY);
+        register("parse", 1, e -> e.populate( Parse::new, NodeKindTest.DOCUMENT, ONE, LATE | NEW)
+                .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY));
 
-        register("parse", 2, Parse::new, NodeKindTest.DOCUMENT, ONE, LATE | NEW)
+        register("parse", 2, e -> e.populate( Parse::new, NodeKindTest.DOCUMENT, ONE, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, EMPTY)
-                .setOptionDetails(Doc_2.makeOptionsParameter());
+                .setOptionDetails(Doc_2.makeOptionsParameter()));
 
         //#if CSHARP==false
-        register("parse-dateTime", 2, ParseDateTime::new, BuiltInAtomicType.ANY_ATOMIC, ONE, 0)
+        register("parse-dateTime", 2, e -> e.populate( ParseDateTime::new, BuiltInAtomicType.ANY_ATOMIC, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY)
-                .arg(1, BuiltInAtomicType.STRING, ONE, EMPTY);
+                .arg(1, BuiltInAtomicType.STRING, ONE, EMPTY));
         //#endif
-        register("parse-html", 1, ParseHtml::new, NodeKindTest.DOCUMENT, ONE, LATE | NEW)
-                .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY);
+        register("parse-html", 1, e -> e.populate( ParseHtml::new, NodeKindTest.DOCUMENT, ONE, LATE | NEW)
+                .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY));
 
-        register("parse-html", 2, ParseHtml::new, NodeKindTest.DOCUMENT, ONE, LATE | NEW)
+        register("parse-html", 2, e -> e.populate( ParseHtml::new, NodeKindTest.DOCUMENT, ONE, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, EMPTY)
-                .setOptionDetails(Doc_2.makeOptionsParameter());
+                .setOptionDetails(Doc_2.makeOptionsParameter()));
 
-        register("parse-XPath", 3, ParseXPath::new, NodeKindTest.DOCUMENT, ONE, BuiltInFunctionSet.LATE)
+        register("parse-XPath", 3, e -> e.populate( ParseXPath::new, NodeKindTest.DOCUMENT, ONE, BuiltInFunctionSet.LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, EMPTY)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
-                .arg(2, AnyItemType.getInstance(), OPT, null);
+                .arg(2, AnyItemType.getInstance(), OPT, null));
 
-        register("pedigree", 1, PedigreeFn::new, MapType.getInstance(), OPT, 0)
-                .arg(0, AnyFunctionType.getInstance(), ONE, null);
+        register("pedigree", 1, e -> e.populate( PedigreeFn::new, MapType.getInstance(), OPT, 0)
+                .arg(0, AnyFunctionType.getInstance(), ONE, null));
 
-        register("print-stack", 0, PrintStack::new, BuiltInAtomicType.STRING, ONE, CITEM | LATE);
+        register("print-stack", 0, e -> e.populate(PrintStack::new, BuiltInAtomicType.STRING, ONE, CITEM | LATE));
 
-        register("query", 1, QueryFn::new, AnyItemType.getInstance(), STAR, LATE | CITEM)
-                .arg(0, config.getJavaExternalObjectType(XQueryExpression.class), OPT, EMPTY);
+        register("query", 1, e -> e.populate( QueryFn::new, AnyItemType.getInstance(), STAR, LATE | CITEM)
+                .arg(0, JavaExternalObjectType.of(XQueryExpression.class), OPT, EMPTY));
 
-        register("query", 2, QueryFn::new, AnyItemType.getInstance(), STAR, LATE)
-                .arg(0, config.getJavaExternalObjectType(XQueryExpression.class), OPT, EMPTY)
-                .arg(1, AnyItemType.getInstance(), ONE, null);
+        register("query", 2, e -> e.populate( QueryFn::new, AnyItemType.getInstance(), STAR, LATE)
+                .arg(0, JavaExternalObjectType.of(XQueryExpression.class), OPT, EMPTY)
+                .arg(1, AnyItemType.getInstance(), ONE, null));
 
-        register("query", 3, QueryFn::new, AnyItemType.getInstance(), STAR, LATE)
-                .arg(0, config.getJavaExternalObjectType(XQueryExpression.class), OPT, EMPTY)
+        register("query", 3, e -> e.populate( QueryFn::new, AnyItemType.getInstance(), STAR, LATE)
+                .arg(0, JavaExternalObjectType.of(XQueryExpression.class), OPT, EMPTY)
                 .arg(1, AnyItemType.getInstance(), ONE, null)
-                .arg(2, AnyNodeTest.getInstance(), STAR, null);
+                .arg(2, AnyNodeTest.getInstance(), STAR, null));
         
-        register("read-binary-resource", 1, ReadBinaryResource::new, BuiltInAtomicType.BASE64_BINARY, ONE, LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
+        register("read-binary-resource", 1, e -> e.populate( ReadBinaryResource::new, BuiltInAtomicType.BASE64_BINARY, ONE, LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
         
         FunctionItemType stringReplacer = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_STRING},
                 SequenceType.SINGLE_STRING);
 
-        register("replace-with", 3, ReplaceWith::new, BuiltInAtomicType.STRING,
+        register("replace-with", 3, e -> e.populate( ReplaceWith::new, BuiltInAtomicType.STRING,
                  ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
-                .arg(2, stringReplacer, ONE, null);
+                .arg(2, stringReplacer, ONE, null));
 
-        register("replace-with", 4, ReplaceWith::new, BuiltInAtomicType.STRING,
+        register("replace-with", 4, e -> e.populate( ReplaceWith::new, BuiltInAtomicType.STRING,
                  ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, stringReplacer, ONE, null)
-                .arg(3, BuiltInAtomicType.STRING, ONE, null);
+                .arg(3, BuiltInAtomicType.STRING, ONE, null));
 
         //#if CSHARP==false
-        register("send-mail", 3, SendMail::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+        register("send-mail", 3, e -> e.populate( SendMail::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, MapType.getInstance(), ONE, EMPTY)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
-                .arg(2, AnyItemType.getInstance(), ONE, null);
+                .arg(2, AnyItemType.getInstance(), ONE, null));
 
-        register("send-mail", 4, SendMail::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+        register("send-mail", 4, e -> e.populate( SendMail::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, MapType.getInstance(), ONE, EMPTY)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, AnyItemType.getInstance(), ONE, null)
-                .arg(3, AnyItemType.getInstance(), STAR, null);
+                .arg(3, AnyItemType.getInstance(), STAR, null));
         //#endif
 
-        register("serialize", 2, Serialize::new, BuiltInAtomicType.STRING, ONE, 0)
+        register("serialize", 2, e -> e.populate( Serialize::new, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, AnyNodeTest.getInstance(), ONE, null)
-                .arg(1, AnyItemType.getInstance(), ONE, null);
+                .arg(1, AnyItemType.getInstance(), ONE, null));
 
-        register("slice", 2, Slice::new, AnyItemType.getInstance(), STAR, 0)
+        register("slice", 2, e -> e.populate( Slice::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, BuiltInAtomicType.INTEGER, STAR, null);
+                .arg(1, BuiltInAtomicType.INTEGER, STAR, null));
 
-        register("string-to-hexBinary", 2, StringToHexBinaryFn::new, BuiltInAtomicType.HEX_BINARY, OPT, 0)
+        register("string-to-hexBinary", 2, e -> e.populate( StringToHexBinaryFn::new, BuiltInAtomicType.HEX_BINARY, OPT, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
-                .arg(1, BuiltInAtomicType.STRING, ONE, null);
+                .arg(1, BuiltInAtomicType.STRING, ONE, null));
 
-        register("string-to-base64Binary", 2, StringToBase64BinaryFn::new, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
+        register("string-to-base64Binary", 2, e -> e.populate( StringToBase64BinaryFn::new, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
-                .arg(1, BuiltInAtomicType.STRING, ONE, null);
+                .arg(1, BuiltInAtomicType.STRING, ONE, null));
 
-        register("string-to-utf8", 1, StringToUTF8::new, BuiltInAtomicType.INTEGER, STAR, 0)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
+        register("string-to-utf8", 1, e -> e.populate( StringToUTF8::new, BuiltInAtomicType.INTEGER, STAR, 0)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
-        register("system-id", 0, SystemId::new, BuiltInAtomicType.STRING, OPT, CITEM | LATE);
+        register("system-id", 0, e -> e.populate(SystemId::new, BuiltInAtomicType.STRING, OPT, CITEM | LATE));
 
-        register("system-id", 1, SystemId::new, BuiltInAtomicType.STRING, OPT, 0)
-                .arg(0, AnyNodeTest.getInstance(), OPT, EMPTY);
+        register("system-id", 1, e -> e.populate( SystemId::new, BuiltInAtomicType.STRING, OPT, 0)
+                .arg(0, AnyNodeTest.getInstance(), OPT, EMPTY));
 
 
-        register("timestamp", 0, TimestampFn::new, BuiltInAtomicType.DATE_TIME_STAMP, ONE, SIDE|LATE);
+        register("timestamp", 0, e -> e.populate(TimestampFn::new, BuiltInAtomicType.DATE_TIME_STAMP, ONE, SIDE|LATE));
 
-        register("transform", 2, TransformFn::new, NodeKindTest.DOCUMENT, OPT, 0)
-                .arg(0, config.getJavaExternalObjectType(PreparedStylesheet.class), ONE, null)
-                .arg(1, AnyNodeTest.getInstance(), ONE, null);
+        register("transform", 2, e -> e.populate( TransformFn::new, NodeKindTest.DOCUMENT, OPT, 0)
+                .arg(0, JavaExternalObjectType.of(PreparedStylesheet.class), ONE, null)
+                .arg(1, AnyNodeTest.getInstance(), ONE, null));
 
-        register("transform", 3, TransformFn::new, NodeKindTest.DOCUMENT, OPT, 0)
-                .arg(0, config.getJavaExternalObjectType(PreparedStylesheet.class), ONE, null)
+        register("transform", 3, e -> e.populate( TransformFn::new, NodeKindTest.DOCUMENT, OPT, 0)
+                .arg(0, JavaExternalObjectType.of(PreparedStylesheet.class), ONE, null)
                 .arg(1, AnyNodeTest.getInstance(), ONE, null)
-                .arg(2, AnyItemType.getInstance(), STAR, null);
+                .arg(2, AnyItemType.getInstance(), STAR, null));
 
         MapType parameterMapType = new MapType(BuiltInAtomicType.QNAME, SequenceType.ANY_SEQUENCE);
 
-        register("tunnel-params", 0, TunnelParamsFn::new, parameterMapType, ONE, LATE);
+        register("tunnel-params", 0, e -> e.populate(TunnelParamsFn::new, parameterMapType, ONE, LATE));
 
-        register("type-annotation", 1, TypeAnnotationFn::new, BuiltInAtomicType.QNAME, OPT, 0)
-                .arg(0, AnyItemType.getInstance(), OPT, null);
+        register("type-annotation", 1, e -> e.populate( TypeAnnotationFn::new, BuiltInAtomicType.QNAME, OPT, 0)
+                .arg(0, AnyItemType.getInstance(), OPT, null));
 
-        register("unescape-NCName", 1, UnescapeNCName::new, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, BuiltInAtomicType.NCNAME, ONE, EMPTY);
+        register("unescape-NCName", 1, e -> e.populate( UnescapeNCName::new, BuiltInAtomicType.STRING, ONE, 0)
+                .arg(0, BuiltInAtomicType.NCNAME, ONE, EMPTY));
 
-        register("unindexed", 1, Unindexed::new, AnyItemType.getInstance(), STAR, CTRL)
-                .arg(0, AnyItemType.getInstance(), STAR, EmptySequence.getInstance());
+        register("unindexed", 1, e -> e.populate( Unindexed::new, AnyItemType.getInstance(), STAR, CTRL)
+                .arg(0, AnyItemType.getInstance(), STAR, EmptySequence.getInstance()));
 
         //#if CSHARP==false
-        register("unparsed-entities", 1, UnparsedEntities::new, BuiltInAtomicType.STRING, STAR, CTRL)
-                .arg(0, NodeKindTest.DOCUMENT, ONE, null);
+        register("unparsed-entities", 1, e -> e.populate( UnparsedEntities::new, BuiltInAtomicType.STRING, STAR, CTRL)
+                .arg(0, NodeKindTest.DOCUMENT, ONE, null));
         //#endif
 
-        register("valid-character", 1, ValidCharacter::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
-                .arg(0, BuiltInAtomicType.INTEGER, ONE, null);
+        register("valid-character", 1, e -> e.populate( ValidCharacter::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+                .arg(0, BuiltInAtomicType.INTEGER, ONE, null));
 
-        register("with-pedigree", 1, WithPedigree::new, AnyFunctionType.getInstance(), ONE, 0)
-                .arg(0, AnyFunctionType.getInstance(), ONE, null);
+        register("with-pedigree", 1, e -> e.populate( WithPedigree::new, AnyFunctionType.getInstance(), ONE, 0)
+                .arg(0, AnyFunctionType.getInstance(), ONE, null));
 
-        register("xquery", 1, XQueryFn::new, XQueryFn.functionType, ONE, 0)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
+        register("xquery", 1, e -> e.populate( XQueryFn::new, XQueryFn.functionType, ONE, 0)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
     }
 
@@ -557,6 +540,9 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             try {
                 Base64BinaryValue in = (Base64BinaryValue) arguments[0].head();
+                if (in == null) {
+                    return EmptySequence.getInstance();
+                }
                 byte[] bytes = in.getBinaryValue();
                 String encoding = arguments[1].head().getStringValue();
                 return decodeString(context, bytes, normalizeEncodingName(encoding));
@@ -705,6 +691,9 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             try {
                 HexBinaryValue in = (HexBinaryValue) arguments[0].head();
+                if (in == null) {
+                    return EmptySequence.getInstance();
+                }
                 byte[] bytes = in.getBinaryValue();
                 String encoding = arguments[1].head().getStringValue();
                 return decodeString(context, bytes, normalizeEncodingName(encoding));

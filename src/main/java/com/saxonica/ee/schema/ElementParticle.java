@@ -83,7 +83,7 @@ public class ElementParticle extends Particle {
 
     /*@NotNull*/
     public NamespaceUri getNamespaceURI() {
-        return getTargetComponentName().getURI();
+        return getTargetComponentName().getNamespaceUri();
     }
 
     /**

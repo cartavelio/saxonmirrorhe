@@ -77,7 +77,7 @@ public class AttributeGetterCompiler extends ToItemCompiler {
 
         methodInfo.placeLabel(isElement);
         // item
-        allocateStatic(compiler, attributeName.getURI());
+        allocateStatic(compiler, attributeName.getNamespaceUri());
         ga.push(attributeName.getLocalPart());
         ga.invokeInstanceMethod(NodeInfo.class, "getAttributeValue", NamespaceUri.class, String.class);
         // string or null
@@ -172,7 +172,7 @@ public class AttributeGetterCompiler extends ToItemCompiler {
 
         methodInfo.placeLabel(isElement);
         // item
-        allocateStatic(compiler, attributeName.getURI());
+        allocateStatic(compiler, attributeName.getNamespaceUri());
         ga.push(attributeName.getLocalPart());
         ga.invokeInstanceMethod(NodeInfo.class, "getAttributeValue", NamespaceUri.class, String.class);
         // string

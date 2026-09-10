@@ -27,9 +27,9 @@ public class XQUpdate10FunctionSet extends BuiltInFunctionSet {
 
         importFunctionSet(XPath31FunctionSet.getInstance());
 
-        register("put", 2, Put::new, AnyItemType.getInstance(), OPT, LATE)
+        register("put", 2, e -> e.populate(Put::new, AnyItemType.getInstance(), OPT, LATE)
                 .arg(0, Type.NODE_TYPE, ONE, null)
-                .arg(1, BuiltInAtomicType.STRING, ONE, null);
+                .arg(1, BuiltInAtomicType.STRING, ONE, null));
     }
 
 

@@ -292,7 +292,7 @@ public class VersionControlFilter extends ProxyReceiver {
      */
 
     private boolean isAutomaticallyKnownTypeName(StructuredQName name) {
-        int fp = StandardNames.getFingerprint(name.getURI(), name.getLocalPart());
+        int fp = StandardNames.getFingerprint(name.getNamespaceUri(), name.getLocalPart());
         return fp != -1 && BuiltInType.getSchemaType(fp) != null &&
                 (isXSD11 || fp != StandardNames.XS_ERROR);
     }

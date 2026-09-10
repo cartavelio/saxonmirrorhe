@@ -54,12 +54,20 @@ public class SingletonAtomizerCompiler extends ToItemCompiler {
             boolean maybeNode = th.relationship(baseType, AnyNodeTest.getInstance()) != Affinity.DISJOINT;
             boolean maybeAtomic = th.relationship(baseType, BuiltInAtomicType.ANY_ATOMIC) != Affinity.DISJOINT;
             boolean maybeFunction = th.relationship(baseType, AnyFunctionType.getInstance()) != Affinity.DISJOINT;
-            boolean maybeExternal = th.relationship(baseType, config.getJavaExternalObjectType(Object.class)) != Affinity.DISJOINT;
+            JavaExternalObjectType result1;
+            synchronized(config) {
+                result1 = JavaExternalObjectType.of(Object.class);
+            }
+            boolean maybeExternal = th.relationship(baseType, result1) != Affinity.DISJOINT;
 
             boolean alwaysNode = th.isSubType(baseType, AnyNodeTest.getInstance());
             boolean alwaysAtomic = th.isSubType(baseType, BuiltInAtomicType.ANY_ATOMIC);
             boolean alwaysFunction = th.isSubType(baseType, AnyFunctionType.getInstance());
-            boolean alwaysExternal = th.isSubType(baseType, config.getJavaExternalObjectType(Object.class));
+            JavaExternalObjectType result;
+            synchronized(config) {
+                result = JavaExternalObjectType.of(Object.class);
+            }
+            boolean alwaysExternal = th.isSubType(baseType, result);
 
             int iterVar;
             IteratorDetails argIter = compiler.compileToIterator(arg);

@@ -66,7 +66,7 @@ public class ReplaceAttributeAction extends PendingUpdateAction {
             SimpleType typeCode = att.getType();
             String value = att.getValue();
             int properties = att.getProperties();
-            if (element.getAttributeValue(name.getURI(), name.getLocalPart()) != null) {
+            if (element.getAttributeValue(name.getNamespaceUri(), name.getLocalPart()) != null) {
                 throw new XPathException("Attempting to add an attribute that already exists");
             }
             ((MutableNodeInfo) element).addAttribute(name, typeCode, value, properties, inherit);

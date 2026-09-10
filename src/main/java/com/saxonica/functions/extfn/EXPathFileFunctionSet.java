@@ -61,146 +61,146 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
 
     private void init() {
 
-        register("append", 2, FileAppend::new, AnyItemType.getInstance(), STAR, LATE|SIDE)
+        register("append", 2, e -> e.populate(FileAppend::new, AnyItemType.getInstance(), STAR, LATE|SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, AnyItemType.getInstance(), STAR, null);
-        register("append", 3, FileAppend::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
+                .arg(1, AnyItemType.getInstance(), STAR, null));
+        register("append", 3, e -> e.populate(FileAppend::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, AnyItemType.getInstance(), STAR, null)
-                .arg(2, NodeKindTest.ELEMENT, ONE, null);
-        register("append-binary", 2, FileAppendBinary::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
+                .arg(2, NodeKindTest.ELEMENT, ONE, null));
+        register("append-binary", 2, e -> e.populate(FileAppendBinary::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, BuiltInAtomicType.BASE64_BINARY, ONE, null);
-        register("append-text", 2, FileAppendText::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
+                .arg(1, BuiltInAtomicType.BASE64_BINARY, ONE, null));
+        register("append-text", 2, e -> e.populate(FileAppendText::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, BuiltInAtomicType.STRING, ONE, null);
-        register("append-text", 3, FileAppendText::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
+                .arg(1, BuiltInAtomicType.STRING, ONE, null));
+        register("append-text", 3, e -> e.populate(FileAppendText::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
-                .arg(2, BuiltInAtomicType.STRING, ONE, null);
-        register("append-text-lines", 2, FileAppendTextLines::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
+                .arg(2, BuiltInAtomicType.STRING, ONE, null));
+        register("append-text-lines", 2, e -> e.populate(FileAppendTextLines::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, BuiltInAtomicType.STRING, STAR, null);
-        register("append-text-lines", 3, FileAppendTextLines::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
+                .arg(1, BuiltInAtomicType.STRING, STAR, null));
+        register("append-text-lines", 3, e -> e.populate(FileAppendTextLines::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, STAR, null)
-                .arg(2, BuiltInAtomicType.STRING, ONE, null);
-        register("base-dir", 0, FileBaseDir::new, AnyItemType.getInstance(), OPT, 0);
-        register("children", 1, FileChildren::new, BuiltInAtomicType.STRING, STAR, LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("copy", 2, FileCopy::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
+                .arg(2, BuiltInAtomicType.STRING, ONE, null));
+        register("base-dir", 0, e -> e.populate(FileBaseDir::new, AnyItemType.getInstance(), OPT, 0));
+        register("children", 1, e -> e.populate(FileChildren::new, BuiltInAtomicType.STRING, STAR, LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
+        register("copy", 2, e -> e.populate(FileCopy::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, BuiltInAtomicType.STRING, ONE, null);
-        register("create-dir", 1, FileCreateDir::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("create-temp-dir", 2, FileCreateTempDir::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
+                .arg(1, BuiltInAtomicType.STRING, ONE, null));
+        register("create-dir", 1, e -> e.populate(FileCreateDir::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
+        register("create-temp-dir", 2, e -> e.populate(FileCreateTempDir::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, BuiltInAtomicType.STRING, ONE, null);
-        register("create-temp-dir", 3, FileCreateTempDir::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, BuiltInAtomicType.STRING, ONE, null)
-                .arg(2, BuiltInAtomicType.STRING, ONE, null);
-        register("create-temp-file", 2, FileCreateTempFile::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, BuiltInAtomicType.STRING, ONE, null);
-        register("create-temp-file", 3, FileCreateTempFile::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
+                .arg(1, BuiltInAtomicType.STRING, ONE, null));
+        register("create-temp-dir", 3, e -> e.populate(FileCreateTempDir::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
-                .arg(2, BuiltInAtomicType.STRING, ONE, null);
-        register("current-dir", 0, FileCurrentDir::new, BuiltInAtomicType.STRING, ONE, 0);
-        register("delete", 1, FileDelete::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("delete", 2, FileDelete::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
+                .arg(2, BuiltInAtomicType.STRING, ONE, null));
+        register("create-temp-file", 2, e -> e.populate(FileCreateTempFile::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, BuiltInAtomicType.BOOLEAN, ONE, null);
-        register("dir-separator", 0, FileDirSeparator::new, BuiltInAtomicType.STRING, ONE, 0);
-        register("exists", 1, FileExists::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("is-dir", 1, FileIsDir::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("is-file", 1, FileIsFile::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("last-modified", 1, FileLastModified::new, BuiltInAtomicType.DATE_TIME_STAMP, ONE, LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("line-separator", 0, FileLineSeparator::new, BuiltInAtomicType.STRING, ONE, 0);
-        register("list", 1, FileList::new, BuiltInAtomicType.STRING, STAR, LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("list", 2, FileList::new, BuiltInAtomicType.STRING, STAR, LATE)
+                .arg(1, BuiltInAtomicType.STRING, ONE, null));
+        register("create-temp-file", 3, e -> e.populate(FileCreateTempFile::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, BuiltInAtomicType.BOOLEAN, ONE, null);
-        register("list", 3, FileList::new, BuiltInAtomicType.STRING, STAR, LATE)
+                .arg(1, BuiltInAtomicType.STRING, ONE, null)
+                .arg(2, BuiltInAtomicType.STRING, ONE, null));
+        register("current-dir", 0, e -> e.populate(FileCurrentDir::new, BuiltInAtomicType.STRING, ONE, 0));
+        register("delete", 1, e -> e.populate(FileDelete::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
+        register("delete", 2, e -> e.populate(FileDelete::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null)
+                .arg(1, BuiltInAtomicType.BOOLEAN, ONE, null));
+        register("dir-separator", 0, e -> e.populate(FileDirSeparator::new, BuiltInAtomicType.STRING, ONE, 0));
+        register("exists", 1, e -> e.populate(FileExists::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
+        register("is-dir", 1, e -> e.populate(FileIsDir::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
+        register("is-file", 1, e -> e.populate(FileIsFile::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
+        register("last-modified", 1, e -> e.populate(FileLastModified::new, BuiltInAtomicType.DATE_TIME_STAMP, ONE, LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
+        register("line-separator", 0, e -> e.populate(FileLineSeparator::new, BuiltInAtomicType.STRING, ONE, 0));
+        register("list", 1, e -> e.populate(FileList::new, BuiltInAtomicType.STRING, STAR, LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
+        register("list", 2, e -> e.populate(FileList::new, BuiltInAtomicType.STRING, STAR, LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null)
+                .arg(1, BuiltInAtomicType.BOOLEAN, ONE, null));
+        register("list", 3, e -> e.populate(FileList::new, BuiltInAtomicType.STRING, STAR, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.BOOLEAN, ONE, null)
-                .arg(2, BuiltInAtomicType.STRING, ONE, null);
-        register("move", 2, FileMove::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
+                .arg(2, BuiltInAtomicType.STRING, ONE, null));
+        register("move", 2, e -> e.populate(FileMove::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, BuiltInAtomicType.STRING, ONE, null);
-        register("name", 1, FileName::new, BuiltInAtomicType.STRING, ONE, LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("parent", 1, FileParent::new, BuiltInAtomicType.STRING, OPT, LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("path-separator", 0, FilePathSeparator::new, BuiltInAtomicType.STRING, ONE, 0);
-        register("path-to-native", 1, FilePathToNative::new, BuiltInAtomicType.STRING, ONE, LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("path-to-uri", 1, FilePathToUri::new, BuiltInAtomicType.ANY_URI, ONE, LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("read-binary", 1, FileReadBinary::new, BuiltInAtomicType.BASE64_BINARY, ONE, LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("read-binary", 2, FileReadBinary::new, BuiltInAtomicType.BASE64_BINARY, ONE, LATE)
+                .arg(1, BuiltInAtomicType.STRING, ONE, null));
+        register("name", 1, e -> e.populate(FileName::new, BuiltInAtomicType.STRING, ONE, LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
+        register("parent", 1, e -> e.populate(FileParent::new, BuiltInAtomicType.STRING, OPT, LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
+        register("path-separator", 0, e -> e.populate(FilePathSeparator::new, BuiltInAtomicType.STRING, ONE, 0));
+        register("path-to-native", 1, e -> e.populate(FilePathToNative::new, BuiltInAtomicType.STRING, ONE, LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
+        register("path-to-uri", 1, e -> e.populate(FilePathToUri::new, BuiltInAtomicType.ANY_URI, ONE, LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
+        register("read-binary", 1, e -> e.populate(FileReadBinary::new, BuiltInAtomicType.BASE64_BINARY, ONE, LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
+        register("read-binary", 2, e -> e.populate(FileReadBinary::new, BuiltInAtomicType.BASE64_BINARY, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, BuiltInAtomicType.INTEGER, ONE, null);
-        register("read-binary", 3, FileReadBinary::new, BuiltInAtomicType.BASE64_BINARY, ONE, LATE)
+                .arg(1, BuiltInAtomicType.INTEGER, ONE, null));
+        register("read-binary", 3, e -> e.populate(FileReadBinary::new, BuiltInAtomicType.BASE64_BINARY, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null)
-                .arg(2, BuiltInAtomicType.INTEGER, ONE, null);
-        register("read-text", 1, FileReadText::new, BuiltInAtomicType.STRING, ONE, LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("read-text", 2, FileReadText::new, BuiltInAtomicType.STRING, ONE, LATE)
+                .arg(2, BuiltInAtomicType.INTEGER, ONE, null));
+        register("read-text", 1, e -> e.populate(FileReadText::new, BuiltInAtomicType.STRING, ONE, LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
+        register("read-text", 2, e -> e.populate(FileReadText::new, BuiltInAtomicType.STRING, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, BuiltInAtomicType.STRING, ONE, null);
-        register("read-text-lines", 1, FileReadTextLines::new, BuiltInAtomicType.STRING, STAR, LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("read-text-lines", 2, FileReadTextLines::new, BuiltInAtomicType.STRING, STAR, LATE)
+                .arg(1, BuiltInAtomicType.STRING, ONE, null));
+        register("read-text-lines", 1, e -> e.populate(FileReadTextLines::new, BuiltInAtomicType.STRING, STAR, LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
+        register("read-text-lines", 2, e -> e.populate(FileReadTextLines::new, BuiltInAtomicType.STRING, STAR, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, BuiltInAtomicType.STRING, ONE, null);
-        register("resolve-path", 1, FileResolvePath::new, BuiltInAtomicType.STRING, ONE, LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("size", 1, FileSize::new, BuiltInAtomicType.INTEGER, ONE, LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("temp-dir", 0, FileTempDir::new, BuiltInAtomicType.STRING, ONE, LATE);
-        register("write", 2, FileWrite::new, AnyItemType.getInstance(), STAR, LATE)
+                .arg(1, BuiltInAtomicType.STRING, ONE, null));
+        register("resolve-path", 1, e -> e.populate(FileResolvePath::new, BuiltInAtomicType.STRING, ONE, LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
+        register("size", 1, e -> e.populate(FileSize::new, BuiltInAtomicType.INTEGER, ONE, LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
+        register("temp-dir", 0, e -> e.populate(FileTempDir::new, BuiltInAtomicType.STRING, ONE, LATE));
+        register("write", 2, e -> e.populate(FileWrite::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, AnyItemType.getInstance(), STAR, null);
-        register("write", 3, FileWrite::new, AnyItemType.getInstance(), STAR, LATE)
+                .arg(1, AnyItemType.getInstance(), STAR, null));
+        register("write", 3, e -> e.populate(FileWrite::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, AnyItemType.getInstance(), STAR, null)
-                .arg(2, NodeKindTest.ELEMENT, ONE, null);
-        register("write-binary", 2, FileWriteBinary::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
+                .arg(2, NodeKindTest.ELEMENT, ONE, null));
+        register("write-binary", 2, e -> e.populate(FileWriteBinary::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, BuiltInAtomicType.BASE64_BINARY, ONE, null);
-        register("write-binary", 3, FileWriteBinary::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
+                .arg(1, BuiltInAtomicType.BASE64_BINARY, ONE, null));
+        register("write-binary", 3, e -> e.populate(FileWriteBinary::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.BASE64_BINARY, ONE, null)
-                .arg(2, BuiltInAtomicType.INTEGER, ONE, null);
-        register("write-text", 2, FileWriteText::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
+                .arg(2, BuiltInAtomicType.INTEGER, ONE, null));
+        register("write-text", 2, e -> e.populate(FileWriteText::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, BuiltInAtomicType.STRING, ONE, null);
-        register("write-text", 3, FileWriteText::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
+                .arg(1, BuiltInAtomicType.STRING, ONE, null));
+        register("write-text", 3, e -> e.populate(FileWriteText::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
-                .arg(2, BuiltInAtomicType.STRING, ONE, null);
-        register("write-text-lines", 2, FileWriteTextLines::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
+                .arg(2, BuiltInAtomicType.STRING, ONE, null));
+        register("write-text-lines", 2, e -> e.populate(FileWriteTextLines::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, BuiltInAtomicType.STRING, STAR, null);
-        register("write-text-lines", 3, FileWriteTextLines::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
+                .arg(1, BuiltInAtomicType.STRING, STAR, null));
+        register("write-text-lines", 3, e -> e.populate(FileWriteTextLines::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, STAR, null)
-                .arg(2, BuiltInAtomicType.STRING, ONE, null);
-        ;
+                .arg(2, BuiltInAtomicType.STRING, ONE, null));
+
     }
 
     public static final BigDecimalValue VERSION = new BigDecimalValue(new BigDecimal("1.0"));
-    public static final NamespaceUri NAMESPACE = NamespaceUri.of("http://expath.org/ns/file");
+    public static final NamespaceUri NAMESPACE = NamespaceUri.EXPATH_FILE;
     public static final String PREFIX = "file";
     public static final NamespaceUri ERROR_NAMESPACE = NAMESPACE;
     public static final String ERROR_PREFIX = PREFIX;
@@ -219,7 +219,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
 
     @Override
     public NamespaceUri getNamespace() {
-        return NAMESPACE;
+        return NamespaceUri.EXPATH_FILE;
     }
 
     @Override

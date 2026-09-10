@@ -271,7 +271,7 @@ public class ValidationStack extends ValidatingFilter {
                 List<NamespaceBinding> additionalNamespaces = new ArrayList<>();
                 AttributeMap validatedAttributes = initial.validateAttributes(attributes, additionalNamespaces);
                 for (NamespaceBinding ns : additionalNamespaces) {
-                    namespaces = namespaces.put(ns.getPrefix(), ns.getURI());
+                    namespaces = namespaces.put(ns.getPrefix(), ns.getNamespaceUri());
                 }
 
                 if (initial instanceof SimpleContentValidator && initialSchemaType.isIdType()) {
@@ -329,7 +329,7 @@ public class ValidationStack extends ValidatingFilter {
                     List<NamespaceBinding> additionalNamespaces = new ArrayList<>();
                     AttributeMap validatedAtts = v1.validateAttributes(attributes, additionalNamespaces);
                     for (NamespaceBinding ns : additionalNamespaces) {
-                        namespaces = namespaces.put(ns.getPrefix(), ns.getURI());
+                        namespaces = namespaces.put(ns.getPrefix(), ns.getNamespaceUri());
                     }
                     prepareForAssertions(elemName, type, validatedAtts, namespaces, location, properties, pipe);
                 }

@@ -17,7 +17,7 @@ import com.saxonica.trans.ModePE;
 import com.saxonica.trans.PackageLoaderPE;
 import com.saxonica.xsltextn.ExtensionElementCreator;
 import com.saxonica.xsltextn.ExtensionElementFactory;
-import com.saxonica.xsltextn.style.*;
+import com.saxonica.xsltextn.style.SaxonElementFactory;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
 import net.sf.saxon.event.PipelineConfiguration;
@@ -43,12 +43,13 @@ import net.sf.saxon.pull.PullSource;
 import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.query.XQueryParser;
 import net.sf.saxon.serialize.SerializationProperties;
-import net.sf.saxon.style.*;
+import net.sf.saxon.style.Compilation;
+import net.sf.saxon.style.StyleNodeFactory;
+import net.sf.saxon.style.XSLResultDocument;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.type.JavaExternalObjectType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.ObjectValue;
 
@@ -112,9 +113,6 @@ public class ProfessionalConfiguration extends Configuration {
 
     private transient Verifier verifier;
     private transient HashMap<NamespaceUri, ExtensionElementCreator> xsltExtensionElementNamespaceMap;
-    protected BuiltInFunctionSet vendorFunctionSet;
-    // Static cache of JavaExternalObjectType objects representing Java classes
-    private final HashMap<Class, JavaExternalObjectType> externalObjectTypeCache = new HashMap<>();
 
 
     /**
@@ -756,9 +754,8 @@ public class ProfessionalConfiguration extends Configuration {
     }
 
     private synchronized FunctionLibraryList makeBuiltInExtensionLibraryList() {
-        vendorFunctionSet = makeVendorFunctionSet();
         FunctionLibraryList result = new FunctionLibraryList();
-        result.addFunctionLibrary(vendorFunctionSet);
+        result.addFunctionLibrary(getVendorFunctionSet());
         result.addFunctionLibrary(MathFunctionSet.getInstance());
         result.addFunctionLibrary(MapFunctionSet.getInstance());
         result.addFunctionLibrary(ArrayFunctionSet.getInstance());
@@ -782,23 +779,12 @@ public class ProfessionalConfiguration extends Configuration {
      */
 
 
-    protected BuiltInFunctionSet makeVendorFunctionSet() {
-        if (isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
-            return new VendorFunctionSetPE(this);
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Get the function library for Saxon-defined extension functions available in this Saxon Edition
-     *
-     * @return the new function library
-     */
-
-
     public BuiltInFunctionSet getVendorFunctionSet() {
-        return vendorFunctionSet;
+        if (isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
+            return VendorFunctionSetPE.getInstance();
+        } else {
+            return super.getVendorFunctionSet();
+        }
     }
 
     /**
@@ -925,25 +911,8 @@ public class ProfessionalConfiguration extends Configuration {
 
     @Override
     public boolean isExtensionElementAvailable(StructuredQName qName) {
-        ExtensionElementCreator eef = getExtensionElementCreator(qName.getURI());
+        ExtensionElementCreator eef = getExtensionElementCreator(qName.getNamespaceUri());
         return eef != null && eef.createExtensionElement(qName.getLocalPart()) != null;
-    }
-
-    /**
-     * Get the JavaExternalObjectType object representing a particular Java class
-     *
-     * @param theClass the class in question
-     * @return the corresponding JavaExternalObjectType
-     */
-
-    @Override
-    public synchronized JavaExternalObjectType getJavaExternalObjectType(Class<?> theClass) {
-        JavaExternalObjectType jeot = externalObjectTypeCache.get(theClass);
-        if (jeot == null) {
-            jeot = new JavaExternalObjectType(theClass);
-            externalObjectTypeCache.put(theClass, jeot);
-        }
-        return jeot;
     }
 
     //#if CSHARP==false

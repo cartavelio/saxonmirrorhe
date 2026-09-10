@@ -76,7 +76,7 @@ public class XSDSimpleType extends SchemaElement {
                 error(err.getMessage());
                 typeName = StandardNames.SQ_XS_INVALID_NAME;
             }
-            int fp = getNamePool().allocateFingerprint(typeName.getURI(), typeName.getLocalPart());
+            int fp = getNamePool().allocateFingerprint(typeName.getNamespaceUri(), typeName.getLocalPart());
             simpleTypeDef.setTypeName(typeName, fp);
             if (!isRedefinition) {
                 if (schema.getSchemaType(simpleTypeDef.getTypeName()) != null && fp > 1023) {

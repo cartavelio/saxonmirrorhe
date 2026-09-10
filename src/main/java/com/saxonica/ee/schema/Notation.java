@@ -128,7 +128,7 @@ public class Notation extends SchemaStructure implements UserSchemaComponent, Se
      */
 
     public NamespaceUri getTargetNamespace() {
-        return notationName.getURI();
+        return notationName.getNamespaceUri();
     }
 
     /**

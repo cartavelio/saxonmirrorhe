@@ -335,7 +335,7 @@ public class ComplexContentValidator extends AttributeValidator {
                                     if (!first) {
                                         fsb.append(", ");
                                     }
-                                    if (poss.hasURI(nodeName.getURI())) {
+                                    if (poss.hasURI(nodeName.getNamespaceUri())) {
                                         fsb.append(Err.wrap(poss.getLocalPart(), Err.ELEMENT));
                                     } else {
                                         fsb.append(Err.wrap(poss.getEQName(), Err.ELEMENT));
@@ -353,7 +353,7 @@ public class ComplexContentValidator extends AttributeValidator {
                 if (!explained) {
                     // See if there is an element with the same local name that would be OK here
                     String foundLocal = nodeName.getLocalPart();
-                    NamespaceUri foundURI = nodeName.getURI();
+                    NamespaceUri foundURI = nodeName.getNamespaceUri();
                     for (Edge e : state.getEdges()) {
                         if (e.getParticle() instanceof ElementParticle) {
                             String local = ((ElementParticle) e.getParticle()).getName();

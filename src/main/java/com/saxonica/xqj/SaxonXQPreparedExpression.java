@@ -120,7 +120,7 @@ public class SaxonXQPreparedExpression extends SaxonXQDynamicContext implements 
             QName[] qnames = new QName[params.size()];
             int q = 0;
             for (StructuredQName name : params) {
-                qnames[q++] = new QName(name.getURI().toString(), name.getLocalPart(), name.getPrefix());
+                qnames[q++] = new QName(name.getNamespaceUri().toString(), name.getLocalPart(), name.getPrefix());
             }
             return qnames;
         }

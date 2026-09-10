@@ -200,7 +200,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
     public Expression bind(SymbolicName.F symbolicName, Expression[] staticArgs, StaticContext env, List<String> reasons) {
         boolean debug = config.getBooleanProperty(Feature.TRACE_EXTERNAL_FUNCTIONS);
         StructuredQName functionName = symbolicName.getComponentName();
-        String uri = functionName.getURI().toString();
+        String uri = functionName.getNamespaceUri().toString();
         String path = uri;
         int q = uri.indexOf('?');
         if (q > 0) {
@@ -217,7 +217,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
         Logger diag = config.getLogger();
 
         if (debug) {
-            diag.info("Looking for method " + functionName.getLocalPart() + " in namespace " + functionName.getURI());
+            diag.info("Looking for method " + functionName.getLocalPart() + " in namespace " + functionName.getNamespaceUri());
             diag.info("Number of actual arguments = " + staticArgs.length);
         }
 
@@ -249,7 +249,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
         int numArgs = staticArgs.length;
         int significantArgs;
 
-        String methodName = getMethodNameFromLocalName(functionName.getURI().toString(), functionName.getLocalPart(), debug);
+        String methodName = getMethodNameFromLocalName(functionName.getNamespaceUri().toString(), functionName.getLocalPart(), debug);
 
         // if the method name is "new", look for a matching constructor
 

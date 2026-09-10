@@ -335,13 +335,13 @@ public class CopyOfFeed extends AbsorptionFeed {
                     @Override
                     public void startElement(NodeName elemName, SchemaType type, AttributeMap attributes, NamespaceMap namespaces, Location location, int properties) throws XPathException {
                         NamespaceMap map = NamespaceMap.emptyMap();
-                        if (!elemName.getURI().isEmpty()) {
-                            map = map.put(elemName.getPrefix(), elemName.getURI());
+                        if (!elemName.getNamespaceUri().isEmpty()) {
+                            map = map.put(elemName.getPrefix(), elemName.getNamespaceUri());
                         }
                         for (AttributeInfo att : attributes) {
                             NodeName name = att.getNodeName();
-                            if (!name.getURI().isEmpty()) {
-                                map = map.put(name.getPrefix(), name.getURI());
+                            if (!name.getNamespaceUri().isEmpty()) {
+                                map = map.put(name.getPrefix(), name.getNamespaceUri());
                             }
                         }
                         super.startElement(elemName, type, attributes, map, location, properties);

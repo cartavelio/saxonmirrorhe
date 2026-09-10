@@ -77,7 +77,7 @@ public class XSIAttributeHandler extends ValidatingFilter {
 
         boolean hasXsiAttributes = false;
         for (AttributeInfo att : attributes) {
-            NamespaceUri uri = att.getNodeName().getURI();
+            NamespaceUri uri = att.getNodeName().getNamespaceUri();
             if (uri.equals(NamespaceUri.SCHEMA_INSTANCE)) {
                 hasXsiAttributes = true;
                 break;
@@ -92,7 +92,7 @@ public class XSIAttributeHandler extends ValidatingFilter {
                 NodeName attName = att.getNodeName();
                 SimpleType attType = att.getType();
                 // Check for special xsi attributes and annotate them with a type code
-                NamespaceUri uri = attName.getURI();
+                NamespaceUri uri = attName.getNamespaceUri();
                 if (uri.equals(NamespaceUri.SCHEMA_INSTANCE)) {
                     String value = att.getValue();
                     int fp = attName.obtainFingerprint(getNamePool());
@@ -131,9 +131,9 @@ public class XSIAttributeHandler extends ValidatingFilter {
         }
 
         // Keep track of all namespaces encountered
-        namespacesEncountered.add(elemName.getURI());
+        namespacesEncountered.add(elemName.getNamespaceUri());
         for (AttributeInfo att : attributes) {
-            NamespaceUri uri = att.getNodeName().getURI();
+            NamespaceUri uri = att.getNodeName().getNamespaceUri();
             namespacesEncountered.add(uri);
         }
 

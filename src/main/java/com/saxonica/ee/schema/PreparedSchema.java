@@ -274,8 +274,8 @@ public class PreparedSchema /*extends SchemaStructure*/ implements NotationSet {
 
     public AttributeDecl getAttributeDecl(StructuredQName name) {
         AttributeDecl decl = attributesByName.get(name);
-        if (decl == null && isBuiltInNamespace(name.getURI())) {
-            config.addSchemaForBuiltInNamespace(name.getURI());
+        if (decl == null && isBuiltInNamespace(name.getNamespaceUri())) {
+            config.addSchemaForBuiltInNamespace(name.getNamespaceUri());
             decl = attributesByName.get(name);
         }
         return decl;
@@ -565,8 +565,8 @@ public class PreparedSchema /*extends SchemaStructure*/ implements NotationSet {
 
     public ElementDecl getElementDecl(StructuredQName name) {
         ElementDecl decl = elementsByName.get(name);
-        if (decl == null && isBuiltInNamespace(name.getURI()) ) {
-            config.addSchemaForBuiltInNamespace(name.getURI());
+        if (decl == null && isBuiltInNamespace(name.getNamespaceUri()) ) {
+            config.addSchemaForBuiltInNamespace(name.getNamespaceUri());
             decl = elementsByName.get(name);
         }
         return decl;

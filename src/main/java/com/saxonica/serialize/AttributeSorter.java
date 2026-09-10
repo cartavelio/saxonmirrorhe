@@ -57,7 +57,7 @@ public class AttributeSorter extends ProxyReceiver  {
                 pos += MIDDLE_GROUND;
             } else {
                 StructuredQName sq = StructuredQName.fromClarkName(expandedName);
-                knownAttributes.put(new FingerprintedQName("", sq.getURI(), sq.getLocalPart()), pos++);
+                knownAttributes.put(new FingerprintedQName("", sq.getNamespaceUri(), sq.getLocalPart()), pos++);
             }
         }
     }
@@ -89,7 +89,7 @@ public class AttributeSorter extends ProxyReceiver  {
                     return Integer.compare(MIDDLE_GROUND, r1);
                 } else {
                     // both null: sort on URI/local-name
-                    int x = n0.getURI().toString().compareTo(n1.getURI().toString());
+                    int x = n0.getNamespaceUri().toString().compareTo(n1.getNamespaceUri().toString());
                     if (x == 0) {
                         x = n0.getLocalPart().compareTo(n1.getLocalPart());
                     }

@@ -173,7 +173,7 @@ public final class AttributeDecl extends SchemaStructure
      */
 
     public NamespaceUri getTargetNamespace() {
-        return attributeName.getURI();
+        return attributeName.getNamespaceUri();
     }
 
     /**
@@ -208,7 +208,7 @@ public final class AttributeDecl extends SchemaStructure
     public void setAttributeName(StructuredQName attributeName) {
         this.attributeName = attributeName;
         this.fingerprint = getConfiguration().getNamePool().allocateFingerprint(
-            attributeName.getURI(), attributeName.getLocalPart());
+                attributeName.getNamespaceUri(), attributeName.getLocalPart());
     }
 
     /**
