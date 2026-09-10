@@ -92,7 +92,7 @@
           <xsl:variable name="found" select="exists(key('jd-types', $item-id, $javadoc-types))"
                as="xs:boolean"/>
           <xsl:if test="not($found)">
-               <xsl:message>Warning: javadoc ref <xsl:value-of select="$item-id"/> not found</xsl:message>
+               <xsl:message>*** Warning: javadoc ref <xsl:value-of select="$item-id"/> not found</xsl:message>
           </xsl:if>
           <xsl:variable name="link" select="translate($javaclass, '.', '/')"/>
           <xsl:variable name="file"
@@ -113,7 +113,7 @@
                as="xs:boolean"/>
           <!--<xsl:variable name="founddotnet" select="false()" as="xs:boolean"/>--><!-- Temporary pre 10 .NET release-->
           <xsl:if test="not($founddotnet)">
-               <xsl:message>Warning: dotnetdoc ref <xsl:value-of select="$item-id"/> not found</xsl:message>
+               <xsl:message>*** Warning: dotnetdoc ref <xsl:value-of select="$item-id"/> not found</xsl:message>
           </xsl:if>
           <xsl:variable name="link" select="translate($csclass, '.', '/')"/>
           <xsl:variable name="file"
@@ -261,7 +261,7 @@ terminated for ../xslt20
                          <xsl:choose>
                            <xsl:when test="empty($ref-section)">
                              <xsl:message>
-                               <xsl:text> warning: at base-path: </xsl:text>
+                               <xsl:text>*** Warning: at base-path: </xsl:text>
                                <xsl:value-of select="$base-path"/>
                                <xsl:text> href: </xsl:text>
                                <xsl:value-of select="$href"/>
