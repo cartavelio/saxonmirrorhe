@@ -7,6 +7,7 @@ using System.Net;
 using System.Xml;
 using NUnit.Framework;
 using Saxon.Api;
+using Saxon.Hej;
 
 namespace SaxonCS_NUnit {
 
@@ -33,6 +34,23 @@ namespace SaxonCS_NUnit {
                 Stream configFile = new WebClient().OpenRead(address);
                 Processor processor = new(configFile, address);
                 Assert.NotNull(processor);
+            }
+            catch (Exception ex) {
+                Console.Error.WriteLine(ex.StackTrace);
+                Assert.Fail(ex.Message);
+            }
+        }
+        
+        [Test]
+        public void TestReadConfigFileWithLinkToLicenseFile() {
+            try {
+                // Create a Processor using a configuration file that contains a link to a local license file.
+                Uri address = new Uri(ConfigTest.DataDirUri, "config-with-link-to-license-file.config");
+                Stream configFile = new WebClient().OpenRead(address);
+                Processor processor = new(configFile, address);
+                Assert.NotNull(processor);
+                Assert.That(processor.Implementation.isLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION));
+                Assert.AreEqual("V010267", processor.Implementation.getLicenseFeature("Serial"));
             }
             catch (Exception ex) {
                 Console.Error.WriteLine(ex.StackTrace);
