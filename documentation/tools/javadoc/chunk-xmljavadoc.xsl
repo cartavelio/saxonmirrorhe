@@ -640,7 +640,7 @@ History
         <xsl:variable name="override-class" select="$override-parts[1]"/>
         <!-- Refer to the superclass hierarchy to find this $override-class -->
         <xsl:variable name="override-class-name"
-            select="parent::d:method/parent::d:class//d:superclass/d:type[@fullname eq
+            select="parent::d:method/(parent::d:class|parent::d:record/parent::d:class)//d:superclass/d:type[@fullname eq
             $override-class]/@name"/>
         
         <xsl:if test="empty($override-class-name)">
