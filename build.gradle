@@ -263,7 +263,7 @@ dependencies {
     [group: "com.saxonica", name: "Saxon-EE", version: "10.3"],
     [group: "org.ccil.cowan.tagsoup", name: "tagsoup", version: "1.2.1"],
     [group: "org.apache.xmlgraphics", name: "fop", version: "2.6"],
-    [group: 'com.saxonica', name: 'xmldoclet', version: '0.0.7'],
+    [group: 'com.saxonica', name: 'xmldoclet', version: '0.1.0'],
     files("lib/jeldoc.jar"),
     files(saxonLicenseDir)
   )
