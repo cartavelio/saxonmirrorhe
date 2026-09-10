@@ -406,7 +406,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
 
         register("resolve-uri", 2, e -> e.populate(ResolveURI::new, BuiltInAtomicType.ANY_URI, OPT, CARD0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
-                .arg(1, BuiltInAtomicType.STRING, ONE, null));
+                .arg(1, BuiltInAtomicType.STRING, OPT, null));
 
         register("reverse", 1, e -> e.populate(Reverse::new, Type.ITEM_TYPE, STAR, AS_ARG0 | FILTER)
                 .arg(0, Type.ITEM_TYPE, STAR | NAV, EMPTY));
