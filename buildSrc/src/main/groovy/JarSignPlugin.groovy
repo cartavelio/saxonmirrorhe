@@ -16,33 +16,15 @@ class JarSignPluginExtension {
   OperatingSystem systemOs = OperatingSystem.current()
 
   public boolean getCanSignJars() {
-    if (jarSigner[0] == "echo") {
-      return true
-    }
-
-    return !(alias.startsWith("THIS-IS-NOT")
-             || password.startsWith("THIS-IS-NOT")
-             || keystore.startsWith("THIS-IS-NOT"))
+    return false
   }
 
   public boolean getCanSignNuget() {
-    if (nugetSigner[0] == "echo") {
-      return true
-    }
-
-    return !(alias.startsWith("THIS-IS-NOT")
-             || password.startsWith("THIS-IS-NOT")
-             || keystore.startsWith("THIS-IS-NOT"))
+    return false
   }
 
   public boolean getCanSignExes() {
-    if (exeSigner[0] == "echo") {
-      return true
-    }
-
-    return !(alias.startsWith("THIS-IS-NOT")
-             || password.startsWith("THIS-IS-NOT")
-             || keystore.startsWith("THIS-IS-NOT"))
+    return false
   }
 
   public boolean getMakeSignedJars() {
