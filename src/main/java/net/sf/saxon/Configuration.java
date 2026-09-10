@@ -33,7 +33,6 @@ import net.sf.saxon.query.XQueryExpression;
 import net.sf.saxon.query.XQueryParser;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.resource.*;
-import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.Xslt30Transformer;
 import net.sf.saxon.serialize.CharacterMap;
@@ -69,9 +68,13 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.*;
 import javax.xml.transform.stream.StreamSource;
-import java.io.*;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -134,7 +137,7 @@ public class Configuration implements SourceResolver, NotationSet {
     private CollationURIResolver collationResolver = new StandardCollationURIResolver();
     private String defaultCollationName = NamespaceConstant.CODEPOINT_COLLATION_URI;
 
-    private Map<String, ResourceCollection> registeredCollections = new HashMap<>();
+    private final Map<String, ResourceCollection> registeredCollections = new HashMap<>();
     private CollectionFinder collectionFinder;
     private EnvironmentVariableResolver environmentVariableResolver = new StandardEnvironmentVariableResolver();
     private String defaultCollection = null;
@@ -710,7 +713,7 @@ public class Configuration implements SourceResolver, NotationSet {
     }
 
     /**
-     * Set the DynamicLoader to be used. By default an instance of {@link DynamicLoader} is used
+     * Set the DynamicLoader to be used. By default, an instance of {@link DynamicLoader} is used
      * for all dynamic loading of Java classes. This method allows the actions of the standard
      * DynamicLoader to be overridden
      *
@@ -770,47 +773,6 @@ public class Configuration implements SourceResolver, NotationSet {
         return dynamicLoader.getInstance(className, isTiming() ? traceOutput : null, null);
     }
 
-//    /**
-//     * Set a Predicate that is applied to a URI to determine whether the standard resource resolvers
-//     * ({@link URIResolver}, {@link UnparsedTextURIResolver}, {@link SchemaURIResolver},
-//     * {@link CollationURIResolver}, {@link ModuleURIResolver}) should accept it.
-//     *
-//     * <p>It is possible to set a predicate by means of the configuration property
-//     * {@link Feature#ALLOWED_PROTOCOLS}. This method, however, allows an arbitrary predicate to
-//     * be supplied.</p>
-//     *
-//     * <p>The predicate is only applicable to resolvers that choose to use it. This includes
-//     * all the standard Saxon-supplied resolvers, but user-supplied resolvers can bypass this
-//     * check.</p>
-//     *
-//     * @param test a condition that a URI must satisfy if access to a resource with this URI
-//     *             is to be permitted
-//     */
-//
-//    public void setAllowedUriTest(Predicate<URI> test) {
-//        this.allowedUriTest = test;
-//    }
-
-//    /**
-//     * Get the Predicate that is applied to a URI to determine whether the standard resource resolvers
-//     * ({@link URIResolver}, {@link UnparsedTextURIResolver}, {@link SchemaURIResolver},
-//     * {@link CollationURIResolver}, {@link ModuleURIResolver}) should accept it.
-//     *
-//     * <p>It is possible to set a predicate by means of the configuration property
-//     * {@link Feature#ALLOWED_PROTOCOLS}.</p>
-//     *
-//     * <p>The predicate is only applicable to resolvers that choose to use it. This includes
-//     * all the standard Saxon-supplied resolvers, but user-supplied resolvers can bypass this
-//     * check.</p>
-//     *
-//     * @return a condition that a URI must satisfy if access to a resource with this URI
-//     *      is to be permitted
-//     */
-//
-//    public Predicate<URI> getAllowedUriTest() {
-//        return this.allowedUriTest;
-//    }
-
     /**
      * Returns the current resource resolver. If the configuration does
      * not have a resolver when this method is called, a default CatalogResourceResolver
@@ -842,7 +804,10 @@ public class Configuration implements SourceResolver, NotationSet {
      * <code>ResourceResolver</code> must be a <code>StreamSource</code>.</p>
      *
      * <p>The <code>ResourceResolver</code> may return null to indicate that the URI is to
-     * be resolved by the fallback <code>DirectResourceResolver</code>.</p>
+     * be resolved by the fallback {@link DirectResourceResolver}. It is possible
+     * to suppress the use of a {@link CatalogResourceResolver} by calling
+     * <code>setResourceResolver(request -> null)</code>, which delegates all
+     * resource requests to the {@link DirectResourceResolver}.</p>
      *
      * @param resolver The ResourceResolver to be used.
      * @since 11.1. Replaces <code>setURIResolver()</code>
@@ -2483,33 +2448,6 @@ public class Configuration implements SourceResolver, NotationSet {
     }
 
     /**
-     * Determine whether a warning is to be output when running against a stylesheet labelled
-     * as version="1.0". The XSLT specification requires such a warning unless the user disables it.
-     *
-     * @return always false.
-     * @since 8.4
-     * @deprecated since 10.0; the method has had no effect since Saxon 9.8
-     */
-    @Deprecated
-    public boolean isVersionWarning() {
-        return false;
-    }
-
-    /**
-     * Determine whether a warning is to be output when the version attribute of the stylesheet does
-     * not match the XSLT processor version. (In the case where the stylesheet version is "1.0",
-     * the XSLT specification requires such a warning unless the user disables it.)
-     *
-     * @param warn ignored.
-     * @since 8.4
-     * @deprecated since 10.0; the method has had no effect since Saxon 9.8
-     */
-    @Deprecated
-    public void setVersionWarning(boolean warn) {
-        // no action
-    }
-
-    /**
      * Determine whether the XML parser for source documents will be asked to perform
      * validation of source documents
      *
@@ -3510,7 +3448,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @param language set to "XP" (XPath) or "XQ" (XQuery) or "PATTERN" (XSLT Patterns)
      * @param updating indicates whether or not XQuery update syntax may be used. Note that XQuery Update
      *                 is supported only in Saxon-EE
-     * @param env
+     * @param env the static context for XPath expressions
      * @return the XPath or Query parser
      * @throws net.sf.saxon.trans.XPathException if this version of Saxon does not support the
      *                                           requested options
@@ -4425,19 +4363,11 @@ public class Configuration implements SourceResolver, NotationSet {
         //#if CSHARP==false
         } else if (name.startsWith(FeatureKeys.XML_PARSER_FEATURE)) {
             String uri = name.substring(FeatureKeys.XML_PARSER_FEATURE.length());
-            try {
-                uri = URLDecoder.decode(uri, "utf-8");
-            } catch (UnsupportedEncodingException e) {
-                throw new IllegalArgumentException(e);
-            }
+            uri = URLDecoder.decode(uri, StandardCharsets.UTF_8);
             defaultParseOptions = defaultParseOptions.withParserFeature(uri, requireBoolean(name, value));
         } else if (name.startsWith(FeatureKeys.XML_PARSER_PROPERTY)) {
             String uri = name.substring(FeatureKeys.XML_PARSER_PROPERTY.length());
-            try {
-                uri = URLDecoder.decode(uri, "utf-8");
-            } catch (UnsupportedEncodingException e) {
-                throw new IllegalArgumentException(e);
-            }
+            uri = URLDecoder.decode(uri, StandardCharsets.UTF_8);
             defaultParseOptions = defaultParseOptions.withParserProperty(uri, value);
         //#endif
             
@@ -5607,18 +5537,6 @@ public class Configuration implements SourceResolver, NotationSet {
     public CompilerInfo makeCompilerInfo() {
         return new CompilerInfo(this);
     }
-
-    /**
-     * Make a CompilerService object, to handle byte code generation, or null if byte code
-     * generation is not available
-     *
-     * @param hostLanguage eg Configuration.XSLT
-     * @return a CompilerService, or null
-     */
-    public ICompilerService makeCompilerService(HostLanguage hostLanguage) {
-        return null;
-    }
-
 
     /**
      * Set a label for this configuration
