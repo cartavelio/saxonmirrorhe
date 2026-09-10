@@ -238,11 +238,23 @@ public class XdmUtils {
     @CEntryPoint(name = "j_xdmArray_arrayLength", exceptionHandler = SaxonCExceptionIntHandler.class)
     public static int j_xdmArray_arrayLength(IsolateThread thread, ObjectHandle arrayRef) throws SaxonApiException {
         if(arrayRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("Processor object is null");
+            throw new SaxonApiException("XdmArray object is null");
         }
         XdmArray xdmArray = SaxonCAPI.objectHandles.get(arrayRef);
 
         return xdmArray.arrayLength();
+
+    }
+
+
+    @CEntryPoint(name = "j_xdmMap_size", exceptionHandler = SaxonCExceptionIntHandler.class)
+    public static int j_xdmMap_size(IsolateThread thread, ObjectHandle mapRef) throws SaxonApiException {
+        if(mapRef == WordFactory.nullPointer()) {
+            throw new SaxonApiException("XdmMap object is null");
+        }
+        XdmMap xdmMap = SaxonCAPI.objectHandles.get(mapRef);
+
+        return xdmMap.mapSize();
 
     }
 
@@ -562,6 +574,112 @@ public class XdmUtils {
         return arr;
 
     }
+    
+    
+    @CEntryPoint(name = "j_xdmMap_put", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long j_xdmMap_put(IsolateThread thread, ObjectHandle mapRef, ObjectHandle atomicKeyRef, ObjectHandle valueRef) throws SaxonApiException {
+        if(mapRef == WordFactory.nullPointer()) {
+            throw new SaxonApiException("XdmMap object is null");
+        }
+        XdmMap xdmMap = SaxonCAPI.objectHandles.get(mapRef);
+        XdmAtomicValue atomicKey = SaxonCAPI.objectHandles.get(atomicKeyRef);
+        XdmValue value = SaxonCAPI.objectHandles.get(valueRef);
+        XdmMap result = xdmMap.put(atomicKey,value);
+        if(result == null) {
+            return SaxonCAPI.STATUS_FAIL;
+        }
+        ObjectHandle handle = SaxonCAPI.objectHandles.create(result);
+        return handle.rawValue();
+
+    }
+
+
+    @CEntryPoint(name = "j_xdmMap_get", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long j_xdmMap_get(IsolateThread thread, ObjectHandle mapRef, ObjectHandle atomicKeyRef) throws SaxonApiException {
+        if(mapRef == WordFactory.nullPointer()) {
+            throw new SaxonApiException("XdmMap object is null");
+        }
+        XdmMap xdmMap = SaxonCAPI.objectHandles.get(mapRef);
+        XdmAtomicValue atomicKey = SaxonCAPI.objectHandles.get(atomicKeyRef);
+        XdmValue result = xdmMap.get(atomicKey);
+        if(result == null) {
+            return SaxonCAPI.STATUS_FAIL;
+        }
+        ObjectHandle handle = SaxonCAPI.objectHandles.create(result);
+        return handle.rawValue();
+
+    }
+
+
+    @CEntryPoint(name = "j_xdmMap_get_with_key_as_string", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long j_xdmMap_get_with_key_as_string(IsolateThread thread, ObjectHandle mapRef, CCharPointer atomicKeyStr) throws SaxonApiException {
+        if(mapRef == WordFactory.nullPointer()) {
+            throw new SaxonApiException("XdmMap object is null");
+        }
+        if(atomicKeyStr == WordFactory.nullPointer()) {
+            throw new SaxonApiException("Atomic key object is null");
+        }
+        XdmMap xdmMap = SaxonCAPI.objectHandles.get(mapRef);
+        String atomicKey = CTypeConversion.toJavaString(atomicKeyStr);
+        XdmValue result = xdmMap.get(atomicKey);
+        if(result == null) {
+            return SaxonCAPI.STATUS_FAIL;
+        }
+        ObjectHandle handle = SaxonCAPI.objectHandles.create(result);
+        return handle.rawValue();
+
+    }
+    
+    @CEntryPoint(name = "j_xdmMap_get_with_key_as_int", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long j_xdmMap_get_with_key_as_int(IsolateThread thread, ObjectHandle mapRef, int key) throws SaxonApiException {
+        if(mapRef == WordFactory.nullPointer()) {
+            throw new SaxonApiException("Processor object is null");
+        }
+        XdmMap xdmMap = SaxonCAPI.objectHandles.get(mapRef);
+        
+        XdmValue result = xdmMap.get(key);
+        if(result == null) {
+            return SaxonCAPI.STATUS_FAIL;
+        }
+        ObjectHandle handle = SaxonCAPI.objectHandles.create(result);
+        return handle.rawValue();
+
+    }
+    
+    
+    @CEntryPoint(name = "j_xdmMap_get_with_key_as_double", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long j_xdmMap_get_with_key_as_double(IsolateThread thread, ObjectHandle mapRef, double key) throws SaxonApiException {
+        if(mapRef == WordFactory.nullPointer()) {
+            throw new SaxonApiException("Processor object is null");
+        }
+        XdmMap xdmMap = SaxonCAPI.objectHandles.get(mapRef);
+        
+        XdmValue result = xdmMap.get(key);
+        if(result == null) {
+            return SaxonCAPI.STATUS_FAIL;
+        }
+        ObjectHandle handle = SaxonCAPI.objectHandles.create(result);
+        return handle.rawValue();
+
+    }
+    
+    
+    @CEntryPoint(name = "j_xdmMap_get_with_key_as_long", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long j_xdmMap_get_with_key_as_long(IsolateThread thread, ObjectHandle mapRef, long key) throws SaxonApiException {
+        if(mapRef == WordFactory.nullPointer()) {
+            throw new SaxonApiException("Processor object is null");
+        }
+        XdmMap xdmMap = SaxonCAPI.objectHandles.get(mapRef);
+        
+        XdmValue result = xdmMap.get(key);
+        if(result == null) {
+            return SaxonCAPI.STATUS_FAIL;
+        }
+        ObjectHandle handle = SaxonCAPI.objectHandles.create(result);
+        return handle.rawValue();
+
+    }
+    
 
 
     public static XdmAtomicValue [] getXdmMapKeys(XdmMap map) {
