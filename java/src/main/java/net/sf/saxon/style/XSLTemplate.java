@@ -602,8 +602,9 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                     for (int i=1; i<localSubPatterns.size(); i++) {
                         if (prio != localSubPatterns.get(i).getDefaultPriority()) {
                             compileWarning("The behavior of a union pattern whose branches have"
-                                                   + " different default priority may change in XSLT 4.0. "
-                                                   + " Allocate an explicit priority, or split into multiple template rules",
+                                                   + " different default priority has changed in XSLT 4.0."
+                                                   + " For compatibility, allocate an explicit priority,"
+                                                   + " or split into multiple template rules",
                                            SaxonErrorCode.SQWN9052);
                             break;
                         }

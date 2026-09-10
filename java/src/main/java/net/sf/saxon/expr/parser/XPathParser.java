@@ -2212,7 +2212,7 @@ public class XPathParser {
                 if (language != ParsedLanguage.XSLT_PATTERN) {
                     grumble("The syntax type(N) is allowed only in XSLT patterns, not in XPath expressions");
                 }
-                return parseTypePattern();
+                return parseTypeQualifier();
             default:
                 grumble("Unknown item kind " + kindName);
                 return null;
@@ -2353,7 +2353,7 @@ public class XPathParser {
      * @throws XPathException if a syntax error is found
      */
 
-    public ItemType parseTypePattern() throws XPathException {
+    public ItemType parseTypeQualifier() throws XPathException {
         checkLanguageVersion40("the syntax type(T)");
         nextToken();
         readToken(Token.LPAREN);

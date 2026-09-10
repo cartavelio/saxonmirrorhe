@@ -42,7 +42,7 @@ public class ShallowCopyRuleSet implements BuiltInRuleSet {
         return copyNamespaces ? INSTANCE_WITH_COPY_NS : INSTANCE_WITH_NO_COPY_NS;
     }
 
-    private boolean copyNamespaces;
+    private final boolean copyNamespaces;
 
     protected ShallowCopyRuleSet(boolean copyNamespaces) {
         this.copyNamespaces = copyNamespaces;
@@ -62,10 +62,9 @@ public class ShallowCopyRuleSet implements BuiltInRuleSet {
     public void process(Item item, ParameterSet parameters,
                         ParameterSet tunnelParams, Outputter out, XPathContext context,
                         Location locationId) throws XPathException {
-        if (item instanceof NodeInfo) {
-            NodeInfo node = (NodeInfo) item;
+        if (item instanceof NodeInfo node) {
             switch (node.getNodeKind()) {
-                case Type.DOCUMENT: {
+                case Type.DOCUMENT -> {
                     PipelineConfiguration pipe = out.getPipelineConfiguration();
                     if (out.getSystemId() == null) {
                         out.setSystemId(node.getBaseURI());
@@ -82,9 +81,8 @@ public class ShallowCopyRuleSet implements BuiltInRuleSet {
                     }
                     out.endDocument();
                     pipe.setXPathContext(context);
-                    return;
                 }
-                case Type.ELEMENT: {
+                case Type.ELEMENT -> {
                     boolean schemaAware = context.getController().getExecutable().isSchemaAware();
                     PipelineConfiguration pipe = out.getPipelineConfiguration();
                     if (out.getSystemId() == null) {
@@ -122,30 +120,21 @@ public class ShallowCopyRuleSet implements BuiltInRuleSet {
                     }
                     out.endElement();
                     pipe.setXPathContext(context);
-                    return;
                 }
-                case Type.TEXT:
-                    out.characters(node.getUnicodeStringValue(), locationId, ReceiverOption.NONE);
-                    return;
-
-                case Type.COMMENT:
-                    out.comment(node.getUnicodeStringValue(), locationId, ReceiverOption.NONE);
-                    return;
-
-                case Type.PROCESSING_INSTRUCTION:
-                    out.processingInstruction(node.getLocalPart(), node.getUnicodeStringValue(), locationId, ReceiverOption.NONE);
-                    return;
-
-                case Type.ATTRIBUTE:
-                    out.attribute(NameOfNode.makeName(node), (SimpleType)node.getSchemaType(), node.getStringValue(),
-                                                    locationId, ReceiverOption.NONE);
-                    return;
-                    
-                case Type.NAMESPACE:
-                    out.namespace(node.getLocalPart(), NamespaceUri.of(node.getStringValue()), ReceiverOption.NONE);
-                    return;
-
-                default:
+                case Type.TEXT ->
+                        out.characters(node.getUnicodeStringValue(), locationId, ReceiverOption.NONE);
+                case Type.COMMENT ->
+                        out.comment(node.getUnicodeStringValue(), locationId, ReceiverOption.NONE);
+                case Type.PROCESSING_INSTRUCTION ->
+                        out.processingInstruction(node.getLocalPart(), node.getUnicodeStringValue(),
+                                                  locationId, ReceiverOption.NONE);
+                case Type.ATTRIBUTE ->
+                        out.attribute(NameOfNode.makeName(node), (SimpleType) node.getSchemaType(), node.getStringValue(),
+                                                 locationId, ReceiverOption.NONE);
+                case Type.NAMESPACE ->
+                        out.namespace(node.getLocalPart(), NamespaceUri.of(node.getStringValue()), ReceiverOption.NONE);
+                default -> {
+                }
             }
         } else {
             out.append(item, locationId, ReceiverOption.NONE);

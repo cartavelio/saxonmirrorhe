@@ -424,7 +424,8 @@ public abstract class Pattern extends PseudoExpression {
 
     /**
      * Determine the default priority to use if this pattern appears as a match pattern
-     * for a template with no explicit priority attribute.
+     * for a template with no explicit priority attribute. Note that the default priority
+     * of a pattern 
      *
      * @return the default priority for the pattern
      */

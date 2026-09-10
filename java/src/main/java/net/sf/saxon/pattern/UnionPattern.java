@@ -35,14 +35,6 @@ public class UnionPattern extends VennPattern {
 
     public UnionPattern(Pattern p1, Pattern p2) {
         super(p1, p2);
-        // default in <= 3.0 is to take the priority from the component patterns.
-        // In 4.0 it is the max of the component priorities
-        boolean is40 = p1.getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40;
-        if (is40) {
-            setPriority(Math.max(p1.getDefaultPriority(), p2.getDefaultPriority()));
-        } else {
-            setPriority(Double.NaN);
-        }
     }
 
     /**
@@ -164,6 +156,7 @@ public class UnionPattern extends VennPattern {
     @Override
     public Pattern copy(RebindingMap rebindings) {
         UnionPattern n = new UnionPattern(p1.copy(rebindings), p2.copy(rebindings));
+        n.setPriority(getDefaultPriority());
         ExpressionTool.copyLocationInfo(this, n);
         n.setOriginalText(getOriginalText());
         return n;

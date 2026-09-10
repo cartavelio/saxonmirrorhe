@@ -920,7 +920,7 @@ public class Environment implements ResourceResolver {
                     environment.streamedSecondaryDocs.put(file.toURI().toString(), validation);
                     res.file = file;
                 }
-            } else if (select == null) {
+            } else /*if (select == null) */ {
                 Source ss;
                 File file = null;
                 FileInputStream fileInputStream = null;
@@ -1035,25 +1035,25 @@ public class Environment implements ResourceResolver {
                         }
                     }
                 }
-            } else {
-                XPathSelector selector = environment.xpathCompiler.compile(select).load();
-                XdmItem selectedItem = selector.evaluateSingle();
-                if (role != null) {
-                    if (".".equals(role)) {
-                        environment.contextItem = selectedItem;
-                    } else if (role.startsWith("$")) {
-                        String varName = role.substring(1);
-                        environment.params.put(new QName(varName), selectedItem);
-                        environment.xpathCompiler.declareVariable(new QName(varName));
-                        if (!isTrue("declared").test(source)) {
-                            environment.paramDeclarations.append("declare variable $" + varName + " external; ");
-                        }
-                    }
-                }
-                selector.setContextItem(selectedItem);
-
-
-            }
+            } //else {
+//                XPathSelector selector = environment.xpathCompiler.compile(select).load();
+//                XdmItem selectedItem = selector.evaluateSingle();
+//                if (role != null) {
+//                    if (".".equals(role)) {
+//                        environment.contextItem = selectedItem;
+//                    } else if (role.startsWith("$")) {
+//                        String varName = role.substring(1);
+//                        environment.params.put(new QName(varName), selectedItem);
+//                        environment.xpathCompiler.declareVariable(new QName(varName));
+//                        if (!isTrue("declared").test(source)) {
+//                            environment.paramDeclarations.append("declare variable $" + varName + " external; ");
+//                        }
+//                    }
+//                }
+//                selector.setContextItem(selectedItem);
+//
+//
+//            }
             String definesStylesheet = source.attribute("defines-stylesheet");
             if (definesStylesheet != null) {
                 definesStylesheet = definesStylesheet.trim();
