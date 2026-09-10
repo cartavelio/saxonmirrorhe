@@ -8,9 +8,8 @@ import org.apache.axiom.om.OMDocument;
 import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.om.OMXMLParserWrapper;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import javax.xml.transform.stream.StreamSource;
+import java.io.File;
 
 import static org.junit.Assert.fail;
 
@@ -19,12 +18,13 @@ public class AxiomTreeTests extends ObjectModelTests {
     @Override
     XdmNode buildExternalDocument(Processor processor, String fileName) {
         try {
-            InputStream in = new FileInputStream(ConfigTest.DATA_DIR + fileName);
-            OMXMLParserWrapper axiomBuilder = OMXMLBuilderFactory.createOMBuilder(in);
+            //InputStream in = new FileInputStream(ConfigTest.DATA_DIR + fileName);
+            StreamSource ss = new StreamSource(new File(ConfigTest.DATA_DIR + fileName));
+            OMXMLParserWrapper axiomBuilder = OMXMLBuilderFactory.createOMBuilder(ss);
             OMDocument doc = axiomBuilder.getDocument();
             DocumentBuilder builder = processor.newDocumentBuilder();
             return builder.wrap(doc);
-        } catch (IOException e) {
+        } catch (Exception e) {
             fail();
             return null;
         }

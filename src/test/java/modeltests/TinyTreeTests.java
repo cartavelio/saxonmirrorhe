@@ -22,5 +22,10 @@ public class TinyTreeTests extends ObjectModelTests {
             return null;
         }
     }
+
+    @Override
+    boolean stripsIgnorableWhitespace() {
+        return true;
+    }
 }
 
