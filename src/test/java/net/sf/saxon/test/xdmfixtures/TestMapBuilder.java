@@ -1,13 +1,15 @@
 package net.sf.saxon.test.xdmfixtures;
 
-import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.EmptyMap;
-import net.sf.saxon.ma.map.MapBuilder;
 import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.StringMapBuilder;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.trans.XPathException;
+import org.junit.Assert;
 
 public class TestMapBuilder implements BuilderDsl {
-    MapBuilder map = DictionaryMap.getBuilder();
+    StringMapBuilder map = new StringMapBuilder();
 
     public static MapItem build(DslLambda<TestMapBuilder> definition) {
         TestMapBuilder builder = new TestMapBuilder();
@@ -21,26 +23,31 @@ public class TestMapBuilder implements BuilderDsl {
 
     @Override
     public MapItem getValue() {
-        return map.getCompletedMap();
+        try {
+            return map.getCompletedMap();
+        } catch (XPathException e) {
+            Assert.fail(e.getMessage());
+            return null;
+        }
     }
 
     public TestMapBuilder put(String name, DslLambda<SequenceBuilder> definition) {
-        map.put(name, SequenceBuilder.build(definition));
+        map.put(StringView.of(name), SequenceBuilder.build(definition));
         return this;
     }
 
     public TestMapBuilder put(String name, GroundedValue value) {
-        map.put(name, value);
+        map.put(StringView.of(name), value);
         return this;
     }
 
     public TestMapBuilder put(String name, String value) {
-        map.put(name, AtomicValueBuilder.string(value));
+        map.put(StringView.of(name), AtomicValueBuilder.string(value));
         return this;
     }
 
     public TestMapBuilder put(String name, Integer value) {
-        map.put(name, AtomicValueBuilder.integer(value));
+        map.put(StringView.of(name), AtomicValueBuilder.integer(value));
         return this;
     }
 

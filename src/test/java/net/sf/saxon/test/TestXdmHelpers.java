@@ -1,7 +1,5 @@
 package net.sf.saxon.test;
 
-import net.sf.saxon.ma.map.DictionaryMap;
-import net.sf.saxon.ma.map.MapBuilder;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.test.xdmfixtures.SequenceBuilder;
@@ -20,9 +18,10 @@ public class TestXdmHelpers {
      * @return
      */
     public static MapItem buildXdmMap(Map<String, GroundedValue> options) {
-        MapBuilder resultMap = DictionaryMap.getBuilder(options.size());
-        options.forEach(resultMap::put);
-        return resultMap.getCompletedMap();
+//        MapBuilder resultMap = DictionaryMap.getBuilder(options.size());
+//        options.forEach(resultMap::put);
+//        return resultMap.getCompletedMap();
+        return null;
     }
 
     /**
@@ -32,11 +31,12 @@ public class TestXdmHelpers {
      * @return
      */
     public static MapItem buildXdmMap(Stream<Object[]> entries) {
-        MapBuilder resultMap = DictionaryMap.getBuilder();
-        entries.forEach((pair) -> {
-            resultMap.put((String) pair[0], (GroundedValue) pair[1]);
-        });
-        return resultMap.getCompletedMap();
+//        MapBuilder resultMap = DictionaryMap.getBuilder();
+//        entries.forEach((pair) -> {
+//            resultMap.put((String) pair[0], (GroundedValue) pair[1]);
+//        });
+//        return resultMap.getCompletedMap();
+        return null;
     }
 
     public static IntegerValue integerValue(Number num) {
