@@ -20,6 +20,7 @@ import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.SequenceType;
@@ -625,10 +626,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
         public PushEvaluator elaborateForPush() {
             CallTemplate expr = (CallTemplate)getExpression();
             if (expr.useTailRecursion) {
-                return (output, context) -> {
-                    //noinspection Convert2MethodRef
-                    return expr.processLeavingTail(output, context);
-                };
+                return CSharp.methodRef(expr::processLeavingTail);
 //
 //                    Component targetComponent;
 //                    if (bindingSlot >= 0) {

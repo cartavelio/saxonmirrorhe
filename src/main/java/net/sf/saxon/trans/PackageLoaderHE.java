@@ -49,6 +49,7 @@ import net.sf.saxon.trans.packages.IPackageLoader;
 import net.sf.saxon.trans.rules.BuiltInRuleSet;
 import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.trans.rules.RuleManager;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpDelegate;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.jiter.TopDownStackIterable;
@@ -727,8 +728,7 @@ public class PackageLoaderHE implements IPackageLoader {
             localBindings.pop();
         }
         if (function.getDeclaredStreamability() != FunctionStreamability.UNCLASSIFIED) {
-            //noinspection Convert2MethodRef
-            addCompletionAction(() -> function.prepareForStreaming());
+            addCompletionAction(CSharp.methodRef(function::prepareForStreaming));
         }
         return function;
     }
@@ -856,8 +856,7 @@ public class PackageLoaderHE implements IPackageLoader {
             mode.setHasRules(true);
         }
 
-        //noinspection Convert2MethodRef
-        addCompletionAction(() -> mode.prepareStreamability());
+        addCompletionAction(CSharp.methodRef(mode::prepareStreamability));
 
 
         return mode;
@@ -1217,9 +1216,7 @@ public class PackageLoaderHE implements IPackageLoader {
             pat.setLocation(makeLocation(element));
             pat.setRetainedStaticContext(makeRetainedStaticContext(element));
             if (pat instanceof GeneralNodePattern) {
-                //noinspection Convert2MethodRef
-                addCompletionAction(() -> ((GeneralNodePattern) pat).makeTopNodeEquivalent());
-                // Written this way for C# transpiler
+                addCompletionAction(CSharp.methodRef(((GeneralNodePattern) pat)::makeTopNodeEquivalent));
             }
             return pat;
         }
@@ -2701,8 +2698,7 @@ public class PackageLoaderHE implements IPackageLoader {
                 String flagsAtt = msElem.getAttributeValue(NamespaceUri.NULL,"flags");
                 ms.streamable = "s".equals(flagsAtt);
                 if (ms.streamable) {
-                    //noinspection Convert2MethodRef
-                    loader.addCompletionAction(() -> ms.prepareForStreaming());
+                    loader.addCompletionAction(CSharp.methodRef(ms::prepareForStreaming));
                 }
                 RetainedStaticContext rsc = loader.makeRetainedStaticContext(element);
                 ms.baseURI = rsc.getStaticBaseUriString();
@@ -2749,8 +2745,7 @@ public class PackageLoaderHE implements IPackageLoader {
             Expression mergeAction = loader.getExpressionWithRole(element, "action");
             MergeInstr.MergeSource[] mergeSources = list.toArray(new MergeInstr.MergeSource[0]);
             inst.init(mergeSources, mergeAction);
-            //noinspection Convert2MethodRef
-            loader.addCompletionAction(() -> inst.fixupGroupReferences());
+            loader.addCompletionAction(CSharp.methodRef(inst::fixupGroupReferences));
             return inst;
         });
 

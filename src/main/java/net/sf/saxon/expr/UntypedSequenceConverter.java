@@ -300,7 +300,7 @@ public final class UntypedSequenceConverter extends AtomicSequenceConverter {
             }
             final PullEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForPull();
             return context -> {
-                SequenceIterator base = baseEval.eval(context);
+                SequenceIterator base = baseEval.iterate(context);
                 return new ItemMappingIterator(base, mapper, true);
             };
         }

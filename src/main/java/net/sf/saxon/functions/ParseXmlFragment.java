@@ -24,6 +24,7 @@ import net.sf.saxon.resource.ActiveSAXSource;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.type.SchemaType;
@@ -130,8 +131,7 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
 
                 s.setPipelineConfiguration(b.getPipelineConfiguration());
 
-                //noinspection Convert2MethodRef
-                options.addFilter(receiver -> new OuterElementStripper(receiver));  // Done this way for Java-C# conversion
+                options.addFilter(CSharp.methodRef(OuterElementStripper::new));
 
                 try {
                     Sender.send(source, s, options);

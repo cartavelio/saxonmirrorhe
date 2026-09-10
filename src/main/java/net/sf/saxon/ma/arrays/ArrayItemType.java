@@ -191,20 +191,17 @@ public class ArrayItemType extends AnyFunctionType {
      * @return a string representation of the type, in notation resembling but not necessarily
      *         identical to XPath syntax
      */
-    @SuppressWarnings("Convert2MethodRef")
     public String toString() {
-        return makeString(st -> st.toString());
+        return makeString(SequenceType::toString);
     }
 
     private String makeString(Function<SequenceType, String> show) {
         if (this.equals(ANY_ARRAY_TYPE)) {
             return "array(*)";
         } else {
-            StringBuilder sb = new StringBuilder(100);
-            sb.append("array(");
-            sb.append(show.apply(memberType));
-            sb.append(")");
-            return sb.toString();
+            return "array("
+                    + show.apply(memberType)
+                    + ")";
         }
     }
 
@@ -217,11 +214,10 @@ public class ArrayItemType extends AnyFunctionType {
      *
      * @return the string representation as an instance of the XPath SequenceType construct
      */
-    @SuppressWarnings("Convert2MethodRef")
     @Override
     @CSharpModifiers(code={"public", "override"})
     public String toExportString() {
-        return makeString(st -> st.toExportString());
+        return makeString(SequenceType::toExportString);
     }
 
     /**

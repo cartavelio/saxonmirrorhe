@@ -1052,12 +1052,12 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
                 case MANY_TO_ONE: {
                     final PullEvaluator p0 = makeElaborator(exp.getLhsExpression()).elaborateForPull();
                     final ItemEvaluator p1 = makeElaborator(exp.getRhsExpression()).elaborateForItem();
-                    return context -> exp.evaluateManyToOne(p0.eval(context), (AtomicValue) p1.eval(context), context);
+                    return context -> exp.evaluateManyToOne(p0.iterate(context), (AtomicValue) p1.eval(context), context);
                 }
                 case MANY_TO_MANY: {
                     final PullEvaluator p0 = makeElaborator(exp.getLhsExpression()).elaborateForPull();
                     final PullEvaluator p1 = makeElaborator(exp.getRhsExpression()).elaborateForPull();
-                    return context -> exp.evaluateManyToMany(p0.eval(context), p1.eval(context), context);
+                    return context -> exp.evaluateManyToMany(p0.iterate(context), p1.iterate(context), context);
                 }
                 default:
                     throw new UnsupportedOperationException();

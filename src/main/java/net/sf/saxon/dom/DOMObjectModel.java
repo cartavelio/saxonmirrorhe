@@ -443,8 +443,7 @@ public class DOMObjectModel extends TreeModel implements ExternalObjectModel {
         List<Node> nodes = new ArrayList<>(20);
 
         SequenceIterator iter = value.iterate();
-        Item item;
-        while ((item = iter.next()) != null) {
+        for (Item item; (item = iter.next()) != null; ) {
             if (item instanceof VirtualNode) {
                 Object o = ((VirtualNode) item).getRealNode();
                 if (o instanceof Node) {

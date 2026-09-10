@@ -9,10 +9,11 @@ package net.sf.saxon.expr.flwor;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.BooleanEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-
 import net.sf.saxon.type.ItemType;
 
 import java.util.HashMap;
@@ -27,6 +28,7 @@ import static net.sf.saxon.expr.flwor.Clause.ClauseName.WHERE;
 public class WhereClause extends Clause {
 
     private final Operand predicateOp;
+    private BooleanEvaluator predicateEvaluator;
 
     public WhereClause(FLWORExpression flwor, Expression predicate) {
         this.predicateOp = new Operand(flwor, predicate, OperandRole.INSPECT);
@@ -80,7 +82,10 @@ public class WhereClause extends Clause {
      */
     @Override
     public TuplePull getPullStream(TuplePull base, XPathContext context) {
-        return new WhereClausePull(base, predicateOp.getOperandEvaluator(context));
+        if (predicateEvaluator == null) {
+            predicateEvaluator = Elaborator.makeElaborator(getPredicate()).elaborateForBoolean();
+        }
+        return new WhereClausePull(base, predicateEvaluator);
     }
 
     @Override
@@ -111,7 +116,10 @@ public class WhereClause extends Clause {
      */
     @Override
     public TuplePush getPushStream(TuplePush destination, Outputter output, XPathContext context) {
-        return new WhereClausePush(output, destination, predicateOp.getOperandEvaluator(context));
+        if (predicateEvaluator == null) {
+            predicateEvaluator = Elaborator.makeElaborator(getPredicate()).elaborateForBoolean();
+        }
+        return new WhereClausePush(output, destination, predicateEvaluator);
     }
 
     /**

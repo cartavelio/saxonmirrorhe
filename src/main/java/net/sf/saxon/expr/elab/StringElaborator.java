@@ -9,6 +9,12 @@ import net.sf.saxon.value.StringValue;
 public abstract class StringElaborator extends Elaborator {
 
     @Override
+    public EagerEvaluator eagerly() {
+        UnicodeStringEvaluator u = elaborateForUnicodeString(false);
+        return context -> new StringValue(u.eval(context));
+    }
+
+    @Override
     public PullEvaluator elaborateForPull() {
         UnicodeStringEvaluator strEval = elaborateForUnicodeString(false);
         return context -> {

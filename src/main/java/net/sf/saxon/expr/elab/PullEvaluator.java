@@ -7,6 +7,6 @@ import net.sf.saxon.trans.XPathException;
 @FunctionalInterface
 public interface PullEvaluator {
 
-    SequenceIterator eval(XPathContext context) throws XPathException;
+    SequenceIterator iterate(XPathContext context) throws XPathException;
 }
 

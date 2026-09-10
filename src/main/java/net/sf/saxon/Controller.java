@@ -28,6 +28,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.TraceEventMulticaster;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.RuleManager;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.iter.GroundedIterator;
@@ -125,8 +126,7 @@ public class Controller implements ContextOriginator {
     private StylesheetCache stylesheetCache = null;
 
     private Function<SequenceIterator, FocusTrackingIterator> focusTrackerFactory =
-            //noinspection Convert2MethodRef
-            (iter) -> new FocusTrackingIterator(iter); // Written this way for Java-C# conversion
+            CSharp.constructorRef(FocusTrackingIterator::new, 1);
 
     private Function<SequenceIterator, FocusTrackingIterator> multiThreadedFocusTrackerFactory;
 

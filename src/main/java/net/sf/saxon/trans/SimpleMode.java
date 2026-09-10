@@ -1288,7 +1288,7 @@ public class SimpleMode extends Mode {
 
         public void allocateRanks() {
             //noinspection Convert2MethodRef
-            rules.sort((x,y) -> x.compareComputedRank(y));
+            rules.sort((x, y) -> x.compareComputedRank(y));
             int rank = start;
             for (int i = 0; i < rules.size(); i++) {
                 if (i > 0 && rules.get(i - 1).compareComputedRank(rules.get(i)) != 0) {

@@ -9,8 +9,8 @@ package net.sf.saxon.event;
 
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -91,7 +91,7 @@ public final class SequenceCollector extends SequenceWriter {
      * @return the value (sequence of items) that have been written to this SequenceOutputter
      */
 
-    public Sequence getSequence() {
+    public GroundedValue getSequence() {
         switch (list.size()) {
             case 0:
                 return EmptySequence.getInstance();

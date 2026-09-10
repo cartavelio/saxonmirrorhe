@@ -111,8 +111,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
 
     public UnicodeBuilder appendAll(SequenceIterator iter) {
         // Note: used from bytecode
-        Item item;
-        while ((item = iter.next()) != null) {
+        for (Item item; (item = iter.next()) != null; ) {
             append(item.getUnicodeStringValue());
         }
         return this;

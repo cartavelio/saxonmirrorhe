@@ -7,12 +7,8 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.elab.ItemEvaluator;
-import net.sf.saxon.expr.elab.PullEvaluator;
-import net.sf.saxon.expr.elab.PushEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.event.Outputter;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.instruct.DocumentInstr;
 import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.instruct.TailCallReturner;
@@ -893,6 +889,19 @@ public class LetExpression extends Assignation
         // TODO: evaluate nested let expressions in a loop to reduce stack consumption
 
         @Override
+        public EagerEvaluator eagerly() {
+            final LetExpression expr = (LetExpression) getExpression();
+            final Evaluator.ElaboratedEvaluator selectEval = expr.getEvaluator().elaborate(expr.getSequence());
+            final EagerEvaluator actionPull = makeElaborator(expr.getAction()).eagerly();
+            final int slot = expr.getLocalSlotNumber();
+            return context -> {
+                Sequence value = selectEval.eval(context);
+                context.setLocalVariable(slot, value);
+                return actionPull.evaluate(context);
+            };
+        }
+
+        @Override
         public PullEvaluator elaborateForPull() {
             final LetExpression expr = (LetExpression) getExpression();
             final Evaluator.ElaboratedEvaluator selectEval = expr.getEvaluator().elaborate(expr.getSequence());
@@ -901,7 +910,7 @@ public class LetExpression extends Assignation
             return context -> {
                 Sequence value = selectEval.eval(context);
                 context.setLocalVariable(slot, value);
-                return actionPull.eval(context);
+                return actionPull.iterate(context);
             };
         }
 

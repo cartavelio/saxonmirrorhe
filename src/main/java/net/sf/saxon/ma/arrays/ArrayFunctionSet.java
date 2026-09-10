@@ -231,10 +231,9 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             assert array != null;
             Function fn = (Function) arguments[1].head();
             List<GroundedValue> list = new ArrayList<>(1);
-            int i;
-            for (i=0; i < array.arrayLength(); i++) {
-                if (((BooleanValue) dynamicCall(fn, context, new Sequence[]{array.get(i)}).head()).getBooleanValue()) {
-                    list.add(array.get(i));
+            for (GroundedValue gv : array.members()) {
+                if (((BooleanValue) dynamicCall(fn, context, new Sequence[]{gv}).head()).getBooleanValue()) {
+                    list.add(gv);
                 }
             }
             return new SimpleArrayItem(list);
@@ -249,7 +248,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         private void flatten(Sequence arg, List<Item> out) {
             SequenceTool.supply(arg.iterate(), (ItemConsumer<? super Item>) item -> {
                 if (item instanceof ArrayItem) {
-                    for (Sequence member : ((ArrayItem) item).members()) {
+                    for (GroundedValue member : ((ArrayItem) item).members()) {
                         flatten(member, out);
                     }
                 } else {
@@ -316,9 +315,8 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             assert array != null;
             Function fn = (Function) arguments[1].head();
             List<GroundedValue> list = new ArrayList<>(1);
-            int i;
-            for (i=0; i < array.arrayLength(); i++) {
-                list.add(dynamicCall(fn, context, new GroundedValue[]{array.get(i)}).materialize());
+            for (GroundedValue gv : array.members()) {
+                list.add(dynamicCall(fn, context, new GroundedValue[]{gv}).materialize());
             }
             return new SimpleArrayItem(list);
         }

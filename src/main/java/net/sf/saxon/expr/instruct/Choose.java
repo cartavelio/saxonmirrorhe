@@ -1117,7 +1117,7 @@ public class Choose extends Instruction implements ConditionalInstruction {
             return context -> {
                 for (int i = 0; i < count; i++) {
                     if (conditions[i].eval(context)) {
-                        return actions[i].eval(context);
+                        return actions[i].iterate(context);
                     }
                 }
                 return EmptyIterator.getInstance();

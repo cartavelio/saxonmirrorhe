@@ -224,7 +224,7 @@ public class Sum extends FoldingFunction {
                     : context -> Int64Value.ZERO;
             return context -> {
                 SumFold fold = new SumFold(context, (AtomicValue)zero.eval(context));
-                SequenceIterator iter = puller.eval(context);
+                SequenceIterator iter = puller.iterate(context);
                 Item it;
                 while ((it = iter.next()) != null) {
                     fold.processItem(it);

@@ -8,6 +8,10 @@
 package net.sf.saxon.ma.arrays;
 
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.EagerEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemElaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.oper.OperandArray;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
@@ -295,6 +299,36 @@ public class SquareArrayConstructor extends Expression {
             value.add(s);
         }
         return new SimpleArrayItem(value);
+    }
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return an appropriate {@link Elaborator}
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new SquareArrayConstructorElaborator();
+    }
+
+    private static class SquareArrayConstructorElaborator extends ItemElaborator {
+
+        @Override
+        public ItemEvaluator elaborateForItem() {
+            SquareArrayConstructor expr = (SquareArrayConstructor)getExpression();
+            List<EagerEvaluator> eagerEvaluators = new ArrayList<>(expr.getOperanda().getNumberOfOperands());
+            for (Operand o : expr.operands()) {
+                eagerEvaluators.add(Elaborator.makeElaborator(o.getChildExpression()).eagerly());
+            }
+            return context -> {
+                List<GroundedValue> members = new ArrayList<>(eagerEvaluators.size());
+                for (EagerEvaluator e : eagerEvaluators) {
+                    members.add(e.evaluate(context));
+                }
+                return new SimpleArrayItem(members);
+            };
+        }
+
     }
 
 }

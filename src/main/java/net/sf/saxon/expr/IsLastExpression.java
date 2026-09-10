@@ -235,8 +235,7 @@ public final class IsLastExpression extends Expression {
         public BooleanEvaluator elaborateForBoolean() {
             IsLastExpression expr = (IsLastExpression) getExpression();
             if (expr.getCondition()) {
-                //noinspection Convert2MethodRef
-                return context -> context.isAtLast();
+                return XPathContext::isAtLast;
             } else {
                 return context -> !context.isAtLast();
             }

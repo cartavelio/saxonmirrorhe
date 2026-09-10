@@ -417,9 +417,8 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             HashTrieMap map = new HashTrieMap();
             Function function = (Function)arguments[1];
             SequenceIterator iter = arguments[0].iterate();
-            Item item;
             Sequence[] args = new Sequence[1];
-            while ((item = iter.next()) != null) {
+            for (Item item; (item = iter.next()) != null; ) {
                 args[0] = item;
                 AtomicValue key = (AtomicValue)dynamicCall(function, context, args);
                 map.initialPut(key, item);

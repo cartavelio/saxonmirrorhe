@@ -8,10 +8,12 @@
 package net.sf.saxon.ma.arrays;
 
 import net.sf.saxon.expr.OperandRole;
+import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.SequenceIteratorOverJavaIterator;
 import net.sf.saxon.value.ObjectValue;
 import net.sf.saxon.z.IntSet;
 
@@ -168,6 +170,18 @@ public class SimpleArrayItem extends AbstractArrayItem {
     @Override
     public Iterable<GroundedValue> members() {
         return _members;
+    }
+
+    /**
+     * Get an iterator over the members of the array, each represented as a {@link Parcel}
+     *
+     * @return an {@link SequenceIterator} over the members of the array, represented as parcels
+     */
+    @Override
+    public SequenceIterator parcels() {
+        return new SequenceIteratorOverJavaIterator<GroundedValue>(
+                _members.iterator(),
+                member -> new Parcel(member));
     }
 
     /**

@@ -45,8 +45,7 @@ public abstract class SequenceExtent implements GroundedValue {
         List<Item> list = new ArrayList<>(!SequenceTool.supportsGetLength(iter)
                                                       ? 20
                                                       : ((LastPositionFinder) iter).getLength());
-        Item item;
-        while ((item = iter.next()) != null) {
+        for (Item item; (item = iter.next()) != null; ) {
             list.add(item);
         }
         return new SequenceExtent.Of<>(list);

@@ -308,8 +308,7 @@ public class XdmValue implements Iterable<XdmItem> {
         try {
             Configuration config = null;
             SequenceIterator iter = value.iterate();
-            Item item;
-            while ((item = iter.next()) != null) {
+            for (Item item; (item = iter.next()) != null; ) {
                 if (item instanceof NodeInfo) {
                     config = ((NodeInfo)item).getConfiguration();
                     break;

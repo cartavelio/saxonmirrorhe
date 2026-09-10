@@ -844,6 +844,13 @@ public class Literal extends Expression {
     public static class LiteralElaborator extends PullElaborator {
 
         @Override
+        public EagerEvaluator eagerly() {
+            GroundedValue value = ((Literal) getExpression()).getGroundedValue();
+            return context -> value;
+        }
+
+
+        @Override
         public PullEvaluator elaborateForPull() {
             GroundedValue value = ((Literal)getExpression()).getGroundedValue();
             return context -> value.iterate();

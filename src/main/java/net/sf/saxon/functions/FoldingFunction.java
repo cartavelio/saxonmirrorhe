@@ -47,9 +47,8 @@ public abstract class FoldingFunction extends SystemFunction {
         System.arraycopy(arguments, 1, additionalArgs, 0, additionalArgs.length);
         Fold fold = getFold(context, additionalArgs);
         SequenceIterator iter = arguments[0].iterate();
-        Item item;
         try {
-            while ((item = iter.next()) != null) {
+            for (Item item; (item = iter.next()) != null; ) {
                 fold.processItem(item);
                 if (fold.isFinished()) {
                     break;

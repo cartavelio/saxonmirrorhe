@@ -14,6 +14,7 @@ import net.sf.saxon.lib.ResourceFactory;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.query.InputStreamMarker;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -31,8 +32,7 @@ public class UnknownResource implements Resource {
     private final XPathContext context;
     private final AbstractResourceCollection.InputDetails details;
 
-    @SuppressWarnings("Convert2MethodRef")  // for Java-C# conversion
-    public static final ResourceFactory FACTORY = (context, details) -> new UnknownResource(context, details);
+    public static final ResourceFactory FACTORY = CSharp.constructorRef(UnknownResource::new, 2);
 
     public UnknownResource(XPathContext context, AbstractResourceCollection.InputDetails details) {
         this.context = context;

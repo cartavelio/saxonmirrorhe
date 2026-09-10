@@ -8,7 +8,10 @@
 package net.sf.saxon.expr.flwor;
 
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.FocusIterator;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Int64Value;
 
@@ -43,7 +46,7 @@ public class ForClausePull extends TuplePull {
                 if (!base.nextTuple(context)) {
                     return false;
                 }
-                currentIteration = SequenceTool.focusTracker(getIterator(context));
+                currentIteration = SequenceTool.focusTracker(forClause.getIterator(context));
             }
             Item next = currentIteration.next();
             if (next != null) {
@@ -60,17 +63,6 @@ public class ForClausePull extends TuplePull {
                 currentIteration = null;
             }
         }
-    }
-
-    /**
-     * Get an iterator over the items or members in the target collection.
-     * @param context dynamic evaluation context
-     * @return for a simple "for $x" clause, the sequence of items to which $x will be bound.
-     * For a "for member ¢x" clause, the sequence of array members, each wrapped as an object value
-     * @throws XPathException if evaluation fails
-     */
-    protected SequenceIterator getIterator(XPathContext context) throws XPathException {
-        return forClause.getSequenceOp().getOperandEvaluator(context).iterate(context);
     }
 
     /**

@@ -18,5 +18,47 @@ public class CSharp {
     public static void emitCode(String code) {
         // do nothing at run time
     }
+
+    /**
+     * CSharp.methodRef is an identity function that signals to the
+     * CSharp transpiler that the argument expression is a non-static method reference.
+     *
+     * @param methodReference must be supplied in the form of a method reference object::method
+     * @param <T>             the class of the argument
+     * @return the argument, unchanged.
+     */
+
+
+    public static <T> T methodRef(T methodReference) {
+        return methodReference;
+    }
+
+    /**
+     * CSharp.staticRef is an identity function that signals to the
+     * CSharp transpiler that the argument expression is a static method reference.
+     *
+     * @param methodReference must be supplied in the form of a method reference ClassName::method
+     * @param <T>             the class of the argument
+     * @return the argument, unchanged.
+     */
+
+    public static <T> T staticRef(T methodReference) {
+        return methodReference;
+    }
+
+    /**
+     * CSharp.constructor is an identity function that signals to the
+     * CSharp transpiler that the argument expression is a method reference to
+     * a constructor with a specified number of arguments.
+     *
+     * @param methodReference must be supplied in the form of a method reference ClassName::new
+     * @param arity the number of arguments in the constructor (must be a numeric literal)
+     * @param <T>             the class of the argument
+     * @return the argument, unchanged.
+     */
+
+    public static <T> T constructorRef(T methodReference, int arity) {
+        return methodReference;
+    }
 }
 

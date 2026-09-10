@@ -537,11 +537,11 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
                 return new ContextMappingIterator(cxt -> {
                     if (iter.isMatching()) {
                         if (matching != null) {
-                            return matching.eval(c2);
+                            return matching.iterate(c2);
                         }
                     } else {
                         if (nonMatching != null) {
-                            return nonMatching.eval(c2);
+                            return nonMatching.iterate(c2);
                         }
                     }
                     return EmptyIterator.getInstance();

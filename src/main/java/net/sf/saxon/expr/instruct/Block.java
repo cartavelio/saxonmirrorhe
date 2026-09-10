@@ -627,8 +627,7 @@ public class Block extends Instruction {
                 if (currentLiteralList == null) {
                     currentLiteralList = new ArrayList<>(10);
                 }
-                Item item;
-                while ((item = iterator.next()) != null) {
+                for (Item item; (item = iterator.next()) != null; ) {
                     currentLiteralList.add(item);
                 }
                 // no-op
@@ -861,7 +860,7 @@ public class Block extends Instruction {
 
             @Override
             public SequenceIterator getNthChildIterator(int n) throws XPathException {
-                return pullers[n].eval(context);
+                return pullers[n].iterate(context);
             }
         }
 

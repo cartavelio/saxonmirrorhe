@@ -498,7 +498,7 @@ public class AtomicSequenceConverter extends UnaryExpression {
             final AtomicSequenceConverter expr = (AtomicSequenceConverter) getExpression();
             final PullEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForPull();
             return context -> {
-                SequenceIterator base = baseEval.eval(context);
+                SequenceIterator base = baseEval.iterate(context);
                 return expr.getConvertingIterator(context, base);
             };
         }

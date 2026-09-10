@@ -280,8 +280,7 @@ public class CollectionFn extends SystemFunction implements Callable {
             DocumentPool docPool = controller.getDocumentPool();
             cachedCollection = SequenceTool.toGroundedValue(result);
             SequenceIterator iter = cachedCollection.iterate();
-            Item item;
-            while ((item = iter.next()) != null) {
+            for (Item item; (item = iter.next()) != null; ) {
                 if (item instanceof NodeInfo && ((NodeInfo) item).getNodeKind() == Type.DOCUMENT) {
                     String docUri = ((NodeInfo) item).getSystemId();
                     DocumentKey docKey;

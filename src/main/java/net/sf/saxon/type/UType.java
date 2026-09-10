@@ -366,9 +366,8 @@ public class UType {
 
     public static UType getUType(GroundedValue sequence)  {
         SequenceIterator iter = sequence.iterate();
-        Item item;
         UType u = UType.VOID;
-        while ((item = iter.next()) != null) {
+        for (Item item; (item = iter.next()) != null; ) {
             u = u.union(getUType(item));
         }
         return u;

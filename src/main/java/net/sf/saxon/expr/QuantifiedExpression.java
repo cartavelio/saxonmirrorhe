@@ -402,7 +402,7 @@ public class QuantifiedExpression extends Assignation {
             final int slot = expr.getLocalSlotNumber();
 
             return context -> {
-                SequenceIterator base = selectEval.eval(context);
+                SequenceIterator base = selectEval.iterate(context);
                 Item it;
                 while ((it = base.next()) != null) {
                     context.setLocalVariable(slot, it);

@@ -181,8 +181,7 @@ public final class CastableExpression extends CastingExpression {
         // failures and casting failures
         int count = 0;
         SequenceIterator iter = getBaseExpression().iterate(context);
-        Item item;
-        while ((item = iter.next()) != null) {
+        for (Item item; (item = iter.next()) != null; ) {
             if (item instanceof NodeInfo) {
                 AtomicSequence atomizedValue = item.atomize();
                 int length = SequenceTool.getLength(atomizedValue);

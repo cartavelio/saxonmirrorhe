@@ -388,9 +388,8 @@ public final class SingletonAtomizer extends UnaryExpression {
             return context -> {
                 int found = 0;
                 AtomicValue result = null;
-                SequenceIterator iter = baseEval.eval(context);
-                Item item;
-                while ((item = iter.next()) != null) {
+                SequenceIterator iter = baseEval.iterate(context);
+                for (Item item; (item = iter.next()) != null; ) {
                     AtomicSequence seq;
                     try {
                         seq = item.atomize();
@@ -413,7 +412,7 @@ public final class SingletonAtomizer extends UnaryExpression {
                         RoleDiagnostic role = expr.roleSupplier.get();
                         expr.typeError(
                                 "A sequence of more than one item is not allowed as the " +
-                                        role.getMessage() + CardinalityChecker.depictSequenceStart(baseEval.eval(context), 3),
+                                        role.getMessage() + CardinalityChecker.depictSequenceStart(baseEval.iterate(context), 3),
                                 role.getErrorCode(), context);
                     }
                     if (found == 1) {

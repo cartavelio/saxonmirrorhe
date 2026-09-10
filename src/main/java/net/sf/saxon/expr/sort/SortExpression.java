@@ -494,7 +494,7 @@ public class SortExpression extends Expression
             final SortExpression expr = (SortExpression) getExpression();
             final PullEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForPull();
 
-            return context -> expr.iterateSorted(baseEval.eval(context), context);
+            return context -> expr.iterateSorted(baseEval.iterate(context), context);
         }
 
     }

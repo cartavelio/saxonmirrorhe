@@ -647,8 +647,7 @@ public class TypeChecker {
         ItemType reqItemType = requiredType.getPrimaryType();
         SequenceIterator iter = val.iterate();
         int count = 0;
-        Item item;
-        while ((item = iter.next()) != null) {
+        for (Item item; (item = iter.next()) != null; ) {
             count++;
             if (!reqItemType.matches(item, context.getConfiguration().getTypeHierarchy())) {
                 XPathException err = new XPathException("Required type is " + reqItemType +

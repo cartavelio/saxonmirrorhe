@@ -252,8 +252,7 @@ public class XsltCompiler {
      */
 
     public void setErrorList(List<? super XmlProcessingError> errorList) {
-        //noinspection Convert2MethodRef
-        compilerInfo.setErrorReporter(err -> errorList.add(err));
+        compilerInfo.setErrorReporter(errorList::add);
     }
     //#endif
 

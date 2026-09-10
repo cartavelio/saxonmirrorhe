@@ -66,8 +66,7 @@ public class UnionCastableFunction extends UnionConstructorFunction {
         // This method does its own atomization so that it can distinguish between atomization
         // failures and casting failures
         int count = 0;
-        Item item;
-        while ((item = iter.next()) != null) {
+        for (Item item; (item = iter.next()) != null; ) {
             if (item instanceof NodeInfo) {
                 AtomicSequence atomizedValue = item.atomize();
                 int length = SequenceTool.getLength(atomizedValue);

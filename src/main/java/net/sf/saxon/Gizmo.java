@@ -507,8 +507,7 @@ public class Gizmo {
         Builder builder = new LinkedTreeBuilder(config.makePipelineConfiguration(), Durability.MUTABLE);
         builder.open();
         builder.startDocument(0);
-        Item item;
-        while ((item = iter.next()) != null) {
+        for (Item item; (item = iter.next()) != null; ) {
             if (item instanceof NodeInfo) {
                 ((NodeInfo) item).copy(builder, CopyOptions.ALL_NAMESPACES, Loc.NONE);
             } else {

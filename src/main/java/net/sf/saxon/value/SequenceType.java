@@ -475,8 +475,7 @@ public final class SequenceType {
     public boolean matches(GroundedValue value, TypeHierarchy th) {
         int count = 0;
         SequenceIterator iter = value.iterate();
-        Item item;
-        while ((item = iter.next()) != null) {
+        for (Item item; (item = iter.next()) != null; ) {
             count++;
             if (!primaryType.matches(item, th)) {
                 return false;
@@ -499,8 +498,7 @@ public final class SequenceType {
     public Optional<String> explainMismatch(GroundedValue value, TypeHierarchy th) {
         int count = 0;
         SequenceIterator iter = value.iterate();
-        Item item;
-        while ((item = iter.next()) != null) {
+        for (Item item; (item = iter.next()) != null; ) {
             count++;
             if (!primaryType.matches(item, th)) {
                 String s = "The " + RoleDiagnostic.ordinal(count) + " item is not an instance of the required type";

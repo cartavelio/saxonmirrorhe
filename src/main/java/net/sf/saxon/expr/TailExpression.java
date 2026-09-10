@@ -226,7 +226,7 @@ public class TailExpression extends UnaryExpression {
             final int start = expr.getStart();
 
             return context -> {
-                SequenceIterator baseIter = baseEval.eval(context);
+                SequenceIterator baseIter = baseEval.iterate(context);
                 return TailIterator.make(baseIter, start);
             };
 

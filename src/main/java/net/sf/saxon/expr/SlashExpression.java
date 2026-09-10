@@ -1129,10 +1129,10 @@ public class SlashExpression extends BinaryExpression
             SlashExpression forEach = (SlashExpression) getExpression();
             PullEvaluator select = makeElaborator(forEach.getSelectExpression()).elaborateForPull();
             PullEvaluator action = makeElaborator(forEach.getActionExpression()).elaborateForPull();
-            ContextMappingFunction mapper = context -> action.eval(context);
+            ContextMappingFunction mapper = context -> action.iterate(context);
             return context -> {
                 XPathContextMinor c2 = context.newMinorContext();
-                c2.trackFocus(select.eval(context));
+                c2.trackFocus(select.iterate(context));
                 return new ContextMappingIterator(mapper, c2);
             };
         }
@@ -1144,7 +1144,7 @@ public class SlashExpression extends BinaryExpression
             PushEvaluator action = makeElaborator(forEach.getActionExpression()).elaborateForPush();
             return (out, context) -> {
                 XPathContextMinor c2 = context.newMinorContext();
-                FocusIterator iter = c2.trackFocus(select.eval(context));
+                FocusIterator iter = c2.trackFocus(select.iterate(context));
                 TailCall tc = null;
                 while (iter.next() != null) {
                     dispatchTailCall(tc);

@@ -7,8 +7,8 @@
 
 package net.sf.saxon.expr.flwor;
 
-import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -22,7 +22,7 @@ import net.sf.saxon.trans.XPathException;
 public class ReturnClauseIterator implements SequenceIterator {
 
     private final TuplePull base;
-    private final Expression action;
+    private final PullEvaluator action;
     private final XPathContext context;
     private SequenceIterator results = null;
 
@@ -30,13 +30,13 @@ public class ReturnClauseIterator implements SequenceIterator {
      * Construct an iterator over the results of the FLWOR expression.
      *
      * @param base    the base iterator
-     * @param flwor   the FLWOR expression
+     * @param returnAction   the FLWOR expression return clause action
      * @param context the XPath dynamic context
      */
 
-    public ReturnClauseIterator(TuplePull base, FLWORExpression flwor, XPathContext context) {
+    public ReturnClauseIterator(TuplePull base, PullEvaluator returnAction, XPathContext context) {
         this.base = base;
-        this.action = flwor.getReturnClause();
+        this.action = returnAction;
         this.context = context;
     }
 

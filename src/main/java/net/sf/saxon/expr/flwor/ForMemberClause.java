@@ -9,8 +9,13 @@ package net.sf.saxon.expr.flwor;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.ma.Parcel;
+import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.Cardinality;
@@ -25,6 +30,8 @@ import static net.sf.saxon.expr.flwor.Clause.ClauseName.FOR_MEMBER;
  * A "for member" clause in a FLWOR expression  (XQuery 4.0: iterates over members of an array)
  */
 public class ForMemberClause extends ForClause {
+
+    protected ItemEvaluator arrayOperandEvaluator;
 
     public ForMemberClause() {
     }
@@ -130,6 +137,24 @@ public class ForMemberClause extends ForClause {
     public void addToPathMap(PathMap pathMap, PathMap.PathMapNodeSet pathMapNodeSet) {
         PathMap.PathMapNodeSet varPath = getSequence().addToPathMap(pathMap, pathMapNodeSet);
         pathMap.registerPathForVariable(rangeVariable, varPath);
+    }
+
+    public ArrayItem evaluateArrayExpression(XPathContext context) throws XPathException {
+        if (arrayOperandEvaluator == null) {
+            arrayOperandEvaluator = Elaborator.makeElaborator(getSequence()).elaborateForItem();
+        }
+        return (ArrayItem)arrayOperandEvaluator.eval(context);
+    }
+
+    /**
+     * Get an iterator over the members of the current array, represented as instances of {@link Parcel}
+     * @param context dynamic evaluation context
+     * @return a {@link SequenceIterator} over {@link Parcel} items
+     * @throws XPathException if a dynamic error occurs
+     */
+    @Override
+    protected SequenceIterator getIterator(XPathContext context) throws XPathException {
+        return evaluateArrayExpression(context).parcels();
     }
 
 }

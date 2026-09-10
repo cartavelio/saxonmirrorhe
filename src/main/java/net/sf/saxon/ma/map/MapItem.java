@@ -223,8 +223,7 @@ public abstract class MapItem implements Function {
         }
         try {
             SequenceIterator iter = value.iterate();
-            Item item;
-            while ((item = iter.next()) != null) {
+            for (Item item; (item = iter.next()) != null; ) {
                 if (item instanceof AtomicValue) {
                     if (itemType instanceof AtomicType) {
                         if (!Type.isSubType(((AtomicValue) item).getItemType(), (AtomicType) itemType)) {

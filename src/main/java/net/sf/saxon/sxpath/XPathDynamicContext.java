@@ -113,8 +113,7 @@ public class XPathDynamicContext {
             }
         }
         SequenceIterator iter = value.iterate();
-        Item item;
-        while ((item = iter.next()) != null) {
+        for (Item item; (item = iter.next()) != null; ) {
             if (item instanceof NodeInfo && !((NodeInfo) item).getConfiguration().isCompatible(contextObject.getConfiguration())) {
                 throw new XPathException(
                         "Supplied node must be built using the same or a compatible Configuration",

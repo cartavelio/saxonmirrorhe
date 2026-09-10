@@ -81,8 +81,7 @@ public class Concat extends SystemFunction implements PushableFunction {
                 UnicodeBuilder buffer = new UnicodeBuilder();
                 for (Operand o: operands()) {
                     SequenceIterator iter = o.getChildExpression().iterate(context);
-                    Item item;
-                    while ((item = iter.next()) != null) {
+                    for (Item item; (item = iter.next()) != null; ) {
                         buffer.accept(item.getUnicodeStringValue());
                     }
                 }
@@ -107,8 +106,7 @@ public class Concat extends SystemFunction implements PushableFunction {
                 builder.accept(((Item)arg).getUnicodeStringValue());
             } else {
                 SequenceIterator iter = arg.iterate();
-                Item item;
-                while ((item = iter.next()) != null) {
+                for (Item item; (item = iter.next()) != null; ) {
                     builder.accept(item.getUnicodeStringValue());
                 }
             }
@@ -122,8 +120,7 @@ public class Concat extends SystemFunction implements PushableFunction {
         output.open();
         for (Sequence arg : arguments) {
             SequenceIterator iter = arg.iterate();
-            Item item;
-            while ((item = iter.next()) != null) {
+            for (Item item; (item = iter.next()) != null; ) {
                 output.accept(item.getUnicodeStringValue());
             }
         }

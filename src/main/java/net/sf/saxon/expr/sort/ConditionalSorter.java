@@ -324,9 +324,9 @@ public class ConditionalSorter extends Expression {
             return context -> {
                 boolean b = condition.eval(context);
                 if (b) {
-                    return sorter.eval(context);
+                    return sorter.iterate(context);
                 } else {
-                    return nonSorter.eval(context);
+                    return nonSorter.iterate(context);
                 }
             };
         }

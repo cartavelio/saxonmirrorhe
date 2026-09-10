@@ -595,16 +595,16 @@ public class ForExpression extends Assignation {
             if (Cardinality.allowsMany(actionCardinality)) {
                 final PullEvaluator actionEval = makeElaborator(expr.getAction()).elaborateForPull();
                 return context -> {
-                    SequenceIterator base = selectEval.eval(context);
+                    SequenceIterator base = selectEval.iterate(context);
                     return new MappingIterator(base, item -> {
                         context.setLocalVariable(slot, item);
-                        return actionEval.eval(context);
+                        return actionEval.iterate(context);
                     });
                 };
             } else {
                 final ItemEvaluator actionEval = makeElaborator(expr.getAction()).elaborateForItem();
                 return context -> {
-                    SequenceIterator base = selectEval.eval(context);
+                    SequenceIterator base = selectEval.iterate(context);
                     return new ItemMappingIterator(base, item -> {
                         context.setLocalVariable(slot, item);
                         return actionEval.eval(context);
@@ -620,9 +620,8 @@ public class ForExpression extends Assignation {
             final PushEvaluator actionEval = makeElaborator(expr.getAction()).elaborateForPush();
             final int slot = expr.getLocalSlotNumber();
             return (out, context) -> {
-                SequenceIterator base = selectEval.eval(context);
-                Item item;
-                while ((item = base.next()) != null) {
+                SequenceIterator base = selectEval.iterate(context);
+                for (Item item; (item = base.next()) != null; ) {
                     context.setLocalVariable(slot, item);
                     TailCall tc = actionEval.process(out, context);
                     dispatchTailCall(tc);
