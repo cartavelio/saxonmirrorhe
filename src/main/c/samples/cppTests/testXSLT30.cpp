@@ -1857,7 +1857,7 @@ void testResultDocumentAsMap(SaxonProcessor *proc, Xslt30Processor *trans,
       for (it = mmap.begin(); it != mmap.end(); it++){
         const char * docStr = (it->second)->toString();
         cout << "Result doc: " << docStr << endl;
-        delete docStr;
+        operator delete ((char *)docStr);
         delete (it->second);
       }
       mmap.clear();

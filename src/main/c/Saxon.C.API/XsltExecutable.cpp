@@ -228,7 +228,9 @@ std::map<std::string, XdmValue *> &XsltExecutable::getResultDocuments() {
 
         value = SaxonProcessor::makeXdmValueFromRef(results[i]);
         if (value != nullptr && str != nullptr) {
-          resultDocumentMap[str] = value;
+          std::string docUriString = std::string(str);
+          resultDocumentMap[docUriString] = value;
+          operator delete (str);
         } else {
           throw SaxonApiException("getResultDocuments failed to create value");
         }
