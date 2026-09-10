@@ -153,6 +153,11 @@ def testSuiteMatrix = [
         "": [:],
         "bc": ["bytecode": "on"]
       ],
+      "XQ31": [
+        "": [:],
+        "bc": ["bytecode": "on"],
+        "unfold": ["unfolded": "on"],
+      ],
       "XQ40": [
         "": [:],
         "bc": ["bytecode": "on"]
