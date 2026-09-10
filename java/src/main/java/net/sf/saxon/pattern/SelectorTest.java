@@ -26,8 +26,6 @@ import net.sf.saxon.type.gnode.NamedXNodeType;
 import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.QNameValue;
-import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
 
 import java.util.Optional;
 import java.util.function.IntPredicate;
@@ -79,39 +77,6 @@ public class SelectorTest implements NodeTest, NodeVectorMatchMaker, NamedXNodeP
     public NodeTest asXNodeTest(Configuration config) {
         return new NamedXNodeType(nodeKind, getQNameTest(), config);
     }
-
-    /**
-     * Get an equivalent node test, knowing that it will only be used to match JNodes
-     *
-     * @return an equivalent node test for JNodes
-     */
-    public Pattern asJNodePattern() {
-        if (asNCName) {
-            String mapKey;
-            if (key instanceof LocalQNameTest lqt) {
-                mapKey = lqt.getLocalName();
-                return new JNodePattern(new StringValue(mapKey), SequenceType.ANY_SEQUENCE);
-            } else if (key instanceof SpecificQNameTest sqt) {
-                mapKey = sqt.getStructuredQName().getLocalPart();
-                return new JNodePattern(new StringValue(mapKey), SequenceType.ANY_SEQUENCE);
-            } else if (key instanceof UnionQNameTest uqt) {
-                Pattern result = null;
-                for (QNameTest test : uqt.getTests()) {
-                    SelectorTest st = new SelectorTest(test, true, nodeKind);
-                    Pattern subPattern = st.asJNodePattern();
-                    result = result == null ? subPattern : new UnionPattern(result, subPattern);
-                }
-                return result;
-            } else {
-                throw new AssertionError("Unrecognized QNameTest: " + key.getClass().getName());
-            }
-
-        } else {
-            AtomicValue actual = new QNameValue(((SpecificQNameTest) key).getStructuredQName(), BuiltInAtomicType.QNAME);
-            return new JNodePattern(actual, SequenceType.ANY_SEQUENCE);
-        }
-    }
-
 
     /**
      * Get the corresponding {@link UType}. A UType is a union of primitive item

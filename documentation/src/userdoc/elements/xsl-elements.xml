@@ -6128,12 +6128,14 @@
 
 
         <p>This section gives an informal description of the syntax of XSLT patterns. For a formal
-            specification, see the XSLT recommendation. XSLT 3.0 introduces extensions, described
-            below, to allow atomic items as well as nodes to be matched, and removes a number of
-            restrictions. Saxon (since version 9.6) implements these extensions.</p>
+            specification, see the XSLT recommendation.</p>
+        
+        <p>The documentation here describes patterns in XSLT 3.0. There are extensions in the draft
+        4.0 specifications, which are mentioned here when appropriate: be aware, however, that these
+        may change.</p>
 
         <p>Patterns define a condition that an item may or may not satisfy: an item either matches
-            the pattern, or it does not. The syntax of patterns is a subset of that for the <a
+            the pattern, or it does not. The syntax of patterns in XSLT 3.0 is a subset of that for the <a
                 class="bodylink" href="/expressions">XPath syntax</a>. In XSLT 3.0 there are two
             kinds of pattern:</p>
 
@@ -6153,6 +6155,12 @@
                     used to match atomic items and maps as well as nodes.</p>
             </li>
         </ul>
+        
+        <p>XSLT 4.0 introduces another kind of pattern, the <emph>type pattern</emph>. This simply matches
+        items by their item type, introduced with the <code>~</code> (tilde) character. For example <code>~map(*)</code>
+        matches any map, and <code>~xs:string</code> matches a string. The type can be followed by predicates, for
+        example <code>~map(*)[?age gt 21]</code> matches any map having a field with key <code>age</code> whose
+        value exceeds 21.</p>
 
         <p>Patterns are used primarily in the <code>match</code> attribute of the <a
                 class="bodylink code" href="../template">xsl:template</a> element. They are also
@@ -6163,14 +6171,13 @@
                 class="bodylink code" href="../for-each-group">xsl:for-each-group</a>.</p>
 
         <p>The next page gives some examples of match patterns and their meaning. This is followed
-            by a page that gives a summary of the XSLT 2.0 syntax, and another page that describes
-            the extensions to patterns in XSLT 3.0.</p>
+            by a page that gives a summary of the XSLT 3.0 syntax.</p>
         <nav>
             <ul/>
         </nav>
 
-        <section id="examples" title="Examples of XSLT 2.0 patterns">
-            <h1>Examples of XSLT 2.0 patterns</h1>
+        <section id="examples" title="Examples of XSLT 3.0 patterns">
+            <h1>Examples of XSLT 3.0 patterns</h1>
 
 
             <p>The table below gives some examples of patterns, and explains their meaning:</p>
@@ -6194,7 +6201,10 @@
                         </p>
                     </td>
                     <td>
-                        <p>Matches any element whose name (tag) is <code>PARA</code></p>
+                        <p>Matches any element whose name (tag) is <code>PARA</code>. Names with no namespace
+                        prefix are handled in the same way as unqualified names in XPath expressions: you need
+                        to be aware that this pattern by default will not match an element if it is in a namespace,
+                        for example it will not match <code>&lt;PARA xmlns="http://my.ns/"/&gt;</code>.</p>
                     </td>
                 </tr>
                 <tr>
@@ -6206,7 +6216,7 @@
                         </p>
                     </td>
                     <td>
-                        <p>Matches any element</p>
+                        <p>Matches any element, regardless of its name or namespace.</p>
                     </td>
                 </tr>
                 <tr>
@@ -6217,7 +6227,8 @@
                     </td>
                     <td>
                         <p>Matches any <code>PARA</code> element whose parent is an
-                                <code>APPENDIX</code></p>
+                                <code>APPENDIX</code>. Again, by default this will only match
+                        names in no namespace.</p>
                     </td>
                 </tr>
                 <tr>
@@ -6249,7 +6260,8 @@
                         </p>
                     </td>
                     <td>
-                        <p>Matches any element with a <code>NAME</code> attribute</p>
+                        <p>Matches any element with a <code>NAME</code> attribute. It won't match if the
+                        attribute is in a namespace (but most attributes aren't).</p>
                     </td>
                 </tr>
                 <tr>
@@ -6281,10 +6293,9 @@
                         </p>
                     </td>
                     <td>
-                        <p>Matches any <code>TITLE</code> element whose parent is of type
-                                <code>A</code> or <code>B</code> or <code>C</code> (Note that this
-                            cannot be written <code>(A|B|C)/TITLE</code>, although that is a valid
-                            XPath 2.0 path expression.)</p>
+                        <p>Matches any <code>TITLE</code> element whose parent element is named
+                                <code>A</code> or <code>B</code> or <code>C</code>. From XSLT 3.0 this
+                            can also be written <code>(A|B|C)/TITLE</code>.</p>
                     </td>
                 </tr>
                 <tr>
@@ -6377,7 +6388,7 @@
                 </tr>
             </table>
 
-            <p>XSLT 3.0 introduces a new option on an <code>xsl:mode</code> declaration,
+            <p>XSLT 3.0 introduced a new option on an <code>xsl:mode</code> declaration,
                     <code>typed="strict"</code> or <code>typed="lax"</code>, which enables simple
                 name patterns such as <code>match="invoice"</code> to be treated as if they were
                 written <code>match="schema-element(invoice)"</code>. This enables the processor to
@@ -6385,58 +6396,123 @@
                 the schema definitions for the <code>invoice</code> element.</p>
         </section>
 
-        <section id="syntax" title="Pattern syntax">
-            <h1>Pattern syntax for XSLT 2.0</h1>
-
-
-            <p>Saxon supports the full XSLT syntax for patterns. The rules below describe a
-                simplified form of this syntax (for example, it omits the legal but useless pattern
-                    <code>@comment()</code>):</p>
-            <samp><![CDATA[pattern          ::= path ( '|' path )*
-path             ::= anchor? remainder? (see Note)
-
-anchor           ::= '/' | '//' | id | key
-id               ::= 'id' '(' value ')'
-key              ::= 'key' '(' literal ',' value ')'
-value            ::= literal | variable-reference
-
-remainder        ::= path-part ( sep path-part )* 
-sep              ::= '/' | '//'
-path-part        ::= node-match predicate+
-node-match       ::= kind-match | type-match   
-kind-match       ::= element-match | text-match | attribute-match | pi-match | any-node-match
-element-match    ::= 'child::'? ( name | '*' ) 
-text-match       ::= 'text' '(' ')' 
-attribute-match  ::= ('attribute::' | '@') ( name | '*' ) 
-pi-match         ::= 'processing-instruction' '(' literal? ')'
-any-node-match   ::= 'node' '(' ')'
-
-type-match       ::= ('element'|'attribute') '(' ('*'|node-name) (',' type-name) ')'
-
-predicate        ::= '[' ( boolean-expression | numeric-expression ) ']'
-]]></samp>
-
-            <p>Note: not all combinations are allowed. If the anchor is <code>//</code> then the
-                remainder is mandatory.</p>
-
-            <p>The form of a literal is as defined in expressions; and a predicate is itself a
-                boolean or numeric expression. As with predicates in expressions, a numeric
-                predicate <code>[P]</code> is shorthand for the boolean predicate
-                    <code>[position()=P]</code>.</p>
-
-            <p>Informally, a pattern consists of either a single path or a sequence of paths
-                separated by vertical bars. An element matches the match-pattern if it matches any
-                one of the paths.</p>
-
-            <p>A path consists of a sequence of path-parts separated by either <code>/</code> or
-                    <code>//</code>. There is an optional separator (<code>/</code> or
-                    <code>//</code>) at the start; a <code>//</code> has no effect and can be
-                ignored. The last path-part may be an element-match, a text-match, an
-                attribute-match, a pi-match, or a node-match; in practice, a path-part other than
-                the last should be an element-match. </p>
-
-            <p>The axis syntax <code>child::</code> and <code>attribute::</code> may also be used in
-                patterns, as described in the XSLT specification.</p>
+        <section id="syntax" title="Path Patterns">
+            <h1>Syntax of path patterns</h1>
+            
+            <p>This section describes the structure of path patterns informally. It covers the most commonly used
+            forms of pattern, but is not exhaustive.</p>
+            
+            <p>Generally the most important part of a path pattern is a node test that matches
+            the relevant node; this can be qualified either by a path that qualifies where in the document
+            the node must appear, and/or by one or more predicates that are usually used to place constraints on the
+            node's content.</p>          
+            
+            <p>A simple but very common example: <code>p</code> is a node test that matches elements named <code>p</code>.
+            This might be qualified by a path such as <code>/doc/appendix//p</code> indicating that the <code>p</code>
+            element must be contained in an <code>appendix</code> which is itself part of a <code>doc</code>
+            element at the outermost level of a document; it might also be qualified by a predicate such as
+            <code>p[@class='note']</code> which indicates that the element must have a <code>class</code> attribute
+            whose value is <code>"note"</code>.</p>
+            
+            <h2>Node Tests</h2>
+            
+            <p>Technically, the node test <code>p</code> can be considered as 
+                an abbreviation for <code>child::element(p, *)</code>. This has four parts:</p>
+            
+            <ul>
+                <li><p><code>p</code> is the name of the node: here, the requirement is that the node
+                has local name <code>p</code> and that the namespace is the default namespace for elements
+                and types. The stylesheet might contain the attribute <code>xpath-default-namespace="http://xx/"</code>
+                to change the default. XSLT 4.0 also offers the option <code>xpath-default-namespace="##any"</code>
+                to indicate that the name should be matched regardless of its namespace.</p>
+                
+                <p>XSLT 3.0 generalized the syntax for matching names, so <code>*:para</code> matches a <code>para</code>
+                element in any namespace, and <code>ns:*</code> matches any element in the <code>ns</code> namespace (strictly speaking,
+                the namespace URI bound in the stylesheet to the prefix <code>ns</code>). The namespace can also be spelled
+                out explicitly, for example <code>Q{http://my.ns/}para</code> or <code>Q{http://my.ns/}*</code>.</p>
+            
+                <p>XSLT 4.0 generalizes the syntax further so that <code>element(*:a|*:b)</code> matches an element in any
+                namespace whose local name is either <code>a</code> or <code>b</code>.</p>
+                
+                </li>
+                
+                <li><p><code>*</code> in this example is the type annotation of the node: here, the pattern will match
+                        regardless of the type annotation. Supplying a type is useful with schema-aware stylesheets,
+                particularly those using schemas like FpML (Financial products Markup Language) 
+                where the schema type annotation is more useful
+                than the element name for distinguishing different elements.</p>
+                
+                <p>For example, the element <code><![CDATA[<FpML version="4-0" xmlns="http://www.fpml.org/2002/FpML-4-0"
+      xsi:type="TradeConfirmationRequest">...</FpML>]]></code> might be matched using the node test
+                <code>element(fpml:FpML, fpml:TradeConfirmationRequest)</code>.</p></li>
+                
+                <li><p>The node kind, here <code>element</code>, is useful when matching nodes other than elements.
+                When matching attributes, the syntax <code>attribute(code)</code> is usually abbreviated
+                as <code>@code</code>. To match text nodes, use <code>text()</code>; similarly <code>comment()</code>
+                or <code>processing-instruction()</code> can be used.</p>
+                
+                <p>As a special case, the pattern <code>/</code> matches a document node.</p></li>
+                
+                <li><p>The axis, here <code>child</code>, is rarely needed. The default is the child axis except
+                when the node kind is attribute or namespace, so the default is almost always right. It is
+                also possible to use the <code>descendant</code> or <code>descendant-or-self</code> axes,
+                but in practice a descendant selection is implicit when the node test is preceded by <code>//</code>.</p></li>
+            </ul>
+            
+            <h2>Qualifying Path</h2>
+            
+            <p>The node test that matches the target nodes can be preceded by a qualifying path.
+            For example, <code>li/p</code> matches a <code>p</code> element only if its parent
+            is an <code>li</code> element, while <code>table//p</code> matches a <code>p</code> element only
+            if it is contained within a <code>table</code>.</p>
+            
+            <p>More generally, in the pattern <code>P/Q</code>, the node must match <code>Q</code>
+            and it must have a parent than matches <code>P</code>, while for a pattern <code>P//Q</code>
+            the node must match <code>Q</code> and must have an ancestor than matches <code>P</code>.
+            In these examples <code>P</code> can be any pattern, so it can itself have qualifiers
+            and predicates. Thus <code>chap[@nr='1']//para</code> matches any <code>para</code>
+            element within the <code>chap</code> element having the attribute <code>nr="1"</code>.</p>
+            
+            <p>Less commonly, the qualifier for a pattern can be a call on the <code>id()</code>
+            function, or a call on <code>doc()</code> to indicate that the match must occur within a specific
+            document.</p>
+            
+            <p>A leading <code>/</code> or <code>//</code> at the start of the pattern indicates that the
+            match must occur within a tree rooted at a document node. Think carefully before using this:
+            usually it adds nothing to the meaning of the pattern, and occasionally it has unintended
+            consequences.</p>
+            
+            <h2>Predicates</h2>
+            
+            <p>A predicate is simply an additional condition that the pattern must satisfy, expressed 
+            as an XPath expression within square brackets. The predicate is evaluated with the candidate
+            node as the context node. A simple example is <code>para[@class='note']</code> which matches
+            only those <code>para</code> elements having the requested attribute value.</p>
+            
+            <p>Numeric predicates are allowed, but can cause some confusion. The pattern <code>para[1]</code>
+            matches a <code>para</code> element that is the first <code>para</code> child of its parent element;
+            by contrast, <code>*[1][self::para]</code> matches the first child of any element provided its name
+            is <code>para</code>. The pattern <code>(section//figure)[1]</code> (alternatively, <code>section/descendant::figure[1]</code>),
+            matches the first <code>figure</code> within a <code>section</code> (at any depth). Writing
+            <code>section//figure[1]</code> is probably a mistake: it matches any <code>figure</code> element
+            within a <code>section</code> provided it is the first <code>figure</code> child of its parent element.</p>
+            
+            <h2>Union, intersection, and difference</h2>
+            
+            <p>The pattern <code>P|Q</code> matches a node if the node matches either of the operand patterns
+            <code>P</code> or <code>Q</code>. The <code>|</code> operator can also be written <code>union</code>.
+            Some complications arise in XSLT template matching if a node matches both branches of the union, 
+            and this case is best avoided.</p>
+            
+            <p>In simple cases, the pattern <code>P except Q</code> matches a node if it matches <code>P</code>
+            and does not match <code>Q</code>. For example, <code>@* except (@code | @status)</code> matches all
+            attributes except <code>code</code> and <code>status</code>. In more complex cases, particularly
+            where the descendant axis is involved, the semantics of <code>except</code> can be unexpected.
+            For example <code>para except ancestor//para</code> does not have the intuitive meaning, and
+            should be avoided. XSLT 4.0 proposes making an incompatible change in this area.</p>
+            
+            <p>The form <code>P intersect Q</code> is allowed (a matching node must satisfy both patterns), 
+                but it is very rarely useful in practice.</p>
         </section>
         <section id="patterns-30" title="Patterns in XSLT 3.0">
             <h1>Patterns in XSLT 3.0</h1>
@@ -6450,10 +6526,16 @@ predicate        ::= '[' ( boolean-expression | numeric-expression ) ']'
                 because the item is of the wrong type, no error occurs, the pattern simply does not
                 match.</p>
 
-            <p>Other XSLT 3.0 extensions to patterns that are implemented since Saxon 9.6 include
+            <p>Some of the more useful extensions to pattern syntax introduced in 3.0 were
                 the following:</p>
 
             <ul>
+                <li>
+                    <p>The syntax <code>.[. instance of T]</code> allows matching items
+                    by type, for example <code>.[. instance of map(*)]</code>. 
+                        In 4.0 this is simplified so it can be written <code>~T</code>:
+                    for example <code>~map(*)</code>.</p>
+                </li>
                 <li>
                     <p>The <code>intersect</code> and <code>except</code> operators are allowed at
                         the top level: for example <code>match="* except br"</code>.</p>
@@ -6495,11 +6577,12 @@ predicate        ::= '[' ( boolean-expression | numeric-expression ) ']'
             <h2>Type patterns</h2>
 
             <p>In XSLT 4.0, the syntax of match patterns is extended to make it easier to match maps
-                and arrays. These extensions are available from Saxon 13 in XSLT 4.0.</p>
+                and arrays. These extensions are available from Saxon 13 provided that XSLT 4.0
+                is enabled.</p>
             
             <aside>Note that the syntax has changed from earlier drafts of the 4.0
-                specification, which was available in Saxon 11 and 12 provided that syntax
-                extensions are enabled.</aside>
+                specification: Saxon 11 and 12 implemented some features of earlier
+                drafts that have since been dropped.</aside>
 
             <p>In particular the syntax <code>~item-type predicate*</code> is allowed in a pattern,
                 where <code>item-type</code> is any item type, for instance:</p>
@@ -6522,11 +6605,12 @@ predicate        ::= '[' ( boolean-expression | numeric-expression ) ']'
                 </li>
             </ul>
             
-            <p>A type pattern matches an item if the item can be successfully coerced to the
-                given item type by applying the coercion rules; and the item (after such
-                coercion) satisfies each of the predicates.</p>
+            <p>A type pattern matches an item if the item is an instance of the
+                given item type, and if it satisfies each of the predicates.
+            Note that there is no coercion applied, so, for example, an untyped
+            atomic value does not match the pattern <code>~xs:string</code>.</p>
 
-            <p>For example if a named item type has been declared:</p>
+            <p>If a named item type has been declared like this:</p>
 
             <pre><code class="language-xml">&lt;xsl:item-type name="cx:complex" type="record(r as xs:double, i as xs:double)"/></code></pre>
 
@@ -6537,6 +6621,18 @@ predicate        ::= '[' ( boolean-expression | numeric-expression ) ']'
 
             <pre><code class="language-xml">&lt;xsl:template match="~cx:complex">{?r}{if (?i ge 0) then '+' else ''}{?i}i&lt;/xsl:template></code></pre>
 
+            <aside><p>The XSLT 4.0 specifications have changed since the code freeze for Saxon 13. The examples
+            given here will work, but other examples in the current 4.0 specifications may fail, or produce different
+            results. A late change to the specification is that extensible record types (for example,
+            <code>record(first, last, *)</code> have been dropped; at the same time, the rules for
+                    type patterns were changed so that coercion is attempted before matching the type. 
+                    Saxon 13 implements the first change (extensible record types are no longer allowed), 
+                    but not the second (the item must match the type strictly, without coercion). This 
+            has the unfortunate consequence that a pattern the form <code>match="~record(...)</code> must
+            list all the fields that are actually present. A replacement feature for more flexible matching
+            of records and maps is likely to be included in an early maintenance release, depending
+            on how this question is resolved in the specifications.</p></aside>
+            
             <p>Patterns for record types are particularly useful when JSON is processed using XSLT
                 template rules. For example, a JSON object such as the following: </p>
 
@@ -6549,26 +6645,38 @@ predicate        ::= '[' ( boolean-expression | numeric-expression ) ']'
 }]]></code></pre>
 
             <p>can be matched with a pattern such as <code>match="~record(firstName, lastName,
-                email)"</code>. The coercion rules cause undefined map entries to be discarded,
-                so the type pattern should include all properties that should be retained.
-                There is generally no need to give their data types, because a test like this
-                is generally sufficient to be unambiguous. The order of properties, of course,
-                is immaterial.</p>
+                email, age weight)"</code>. The order of properties is immaterial.</p>
             
-            <aside>Note that in earlier drafts of the 4.0 specification, and in earlier Saxon
-                versions, extensible record types were allowed, but this is dropped in Saxon 13.</aside>
-
+            
             <p>Predicates can be added as with any other pattern, for example
                 <code>match="~record(firstName, lastName, department)[?department='sales']"</code>.</p>
             
             <p>For information on the rules for calculating the default priority of these
                 patterns, see the specification.</p>
             
-            <h2>GNode patterns</h2>
+            <h2>Matching Nodes</h2>
             
             <p>In match patterns, union node tests work like union patterns, so <code>match="@(code,
                 ns:*)"</code> is equivalent to having two separate template rules, matching the two
                 node tests, with different default priority.</p>
+            
+            <p>In Saxon 13, patterns using the traditional path syntax will only match XNodes, not JNodes.
+            (This differs from the rules in the current 4.0 specification at the time of writing.)</p>
+            
+            <p>A path pattern in Saxon 13 will match a JNode only if an explicit <code>JNodeType</code>
+            is used. This uses the syntax <code>"jnode" "(" Selector "," SequenceType ")"</code>.
+            Here <code>Selector</code> matches the <code>key</code> property of the JNode, and
+            may be given either as <code>"*"</code> (which matches any key), or as a <code>Constant</code>
+            (which may be a string literal, a numeric literal with optional minus sign, a QName literal
+            such as <code>#xsi:type</code>, or the constants <code>true()</code> and <code>false()</code>.
+            So for example the pattern <code>jnode("name", xs:string)</code> matches a JNode whose key
+            property is the string <code>"name"</code>, and whose value property is an instance of
+            <code>xs:string</code>. The quotes may be omitted from the key value if it takes the form
+            of an NCName, so this could also be written <code>jnode(name, xs:string)</code>.</p>
+            
+            <p>Like other node tests, a JNode test can be qualified with an ancestor path (for example
+            <code>jnode(products, array(*)//jnode(price, xs:decimal)</code> and/or with
+            predicates (for example <code>jnode(price, xs:decimal)[empty(../discount)]</code>).</p>
 
         </section>
     </section>

@@ -187,68 +187,6 @@ public class PatternParser extends XPathParser {
         return result;
     }
 
-    private Pattern parseJNodePattern() throws XPathException {
-        readToken(Token.LPAREN);
-        //JNodePatternSelector	::=	"*" | NCName | Constant
-        //Constant	::=	StringLiteral | ("-"? NumericLiteral) | QNameLiteral | ("true" "(" ")") | ("false" "(" ")")
-        AtomicValue key = null;
-        if (t.currentToken == Token.STAR) {
-            nextToken();
-        } else if (isKeyword("true")) {
-            nextToken();
-            readToken(Token.LPAREN);
-            readToken(Token.RPAREN);
-            key = BooleanValue.TRUE;
-        } else if (isKeyword("false")) {
-            nextToken();
-            readToken(Token.LPAREN);
-            readToken(Token.RPAREN);
-            key = BooleanValue.FALSE;
-        } else if (t.currentToken instanceof Token.NameToken) {
-            if (NameChecker.isValidNCName(t.currentName())) {
-                key = new StringValue(t.currentName());
-            } else {
-                grumble("In a JNode pattern, the key value " + t.currentName() + " is not a valid NCName, so it must be written in quotes");
-            }
-        } else if (t.currentToken instanceof Token.StringLiteral lit) {
-            key = new StringValue(lit.getValue());
-            nextToken();
-        } else if (t.currentToken instanceof Token.NumericLiteral num) {
-            key = num.getValue();
-            nextToken();
-        } else if (t.currentToken == Token.MINUS) {
-            nextToken();
-            if (t.currentToken instanceof Token.NumericLiteral negativeNum) {
-                key = negativeNum.getValue().negate();
-                nextToken();
-            } else {
-                grumble("In a JNode pattern, expected a numeric literal after a minus sign");
-            }
-        } else if (t.currentToken == Token.HASH) {
-            //nextToken();
-            StructuredQName q = parseEQName();
-            key = new QNameValue(q, BuiltInAtomicType.QNAME);
-        }
-        readToken(Token.COMMA);
-        SequenceType contentType;
-        if (t.currentToken == Token.STAR) {
-            contentType = SequenceType.ANY_SEQUENCE;
-            nextToken();
-        } else {
-            contentType = parseSequenceType();
-        }
-        readToken(Token.RPAREN);
-        Pattern result = new JNodePattern(key, contentType);
-
-        while (t.currentToken == Token.LSQB) {
-            nextToken();
-            Expression predicate = parsePredicate();
-            readToken(Token.RSQB);
-            result = new BasePatternWithPredicate(result, predicate);
-        }
-        return result;
-    }
-
     private Pattern parsePathExprP() throws XPathException {
 
         // The grammar for an parsePathExprP is a subset of XPath expression syntax. We therefore parse the
