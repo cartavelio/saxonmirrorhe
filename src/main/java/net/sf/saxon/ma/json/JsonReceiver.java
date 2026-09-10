@@ -199,6 +199,7 @@ public class JsonReceiver implements Receiver {
                     .accept(BMPString.of(base));
         }
         String local = elemName.getLocalPart();
+        checkParent(local, parent);
         switch (local) {
             case "array":
                 if (indenting) {
@@ -220,7 +221,7 @@ public class JsonReceiver implements Receiver {
                 keyChecker.push(new HashSet<>());
                 break;
             case "null":
-                checkParent(local, parent);
+                //checkParent(local, parent);
                 output.accept(BMPString.of("null"));
                 atStart = false;
                 break;
@@ -234,12 +235,12 @@ public class JsonReceiver implements Receiver {
                                                          escaped + ") is not a valid xs:boolean", ERR_INPUT);
                     }
                 }
-                checkParent(local, parent);
+                //checkParent(local, parent);
                 atStart = false;
                 break;
             case "boolean":
             case "number":
-                checkParent(local, parent);
+                //checkParent(local, parent);
                 atStart = false;
                 break;
             default:
@@ -250,8 +251,8 @@ public class JsonReceiver implements Receiver {
 
     private void checkParent(String child, String parent) throws XPathException {
         if ("null".equals(parent) || "string".equals(parent) || "number".equals(parent) || "boolean".equals(parent)) {
-            throw new XPathException("xml-to-json: A " + Err.wrap(child, Err.ELEMENT) +
-                                             " element cannot appear as a child of " + Err.wrap(parent, Err.ELEMENT), ERR_INPUT);
+            throw new XPathException("xml-to-json: " + Err.indefiniteArticleFor(child, true) + " "
+                    + Err.wrap(child, Err.ELEMENT) + " element cannot appear as a child of " + Err.wrap(parent, Err.ELEMENT), ERR_INPUT);
         }
     }
 
