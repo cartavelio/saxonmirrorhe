@@ -2318,7 +2318,19 @@ public class XPathParser {
                 return new AnyFunctionTypeWithAssertions(annotations, getStaticContext().getConfiguration());
             }
         } else {
+            Set<StructuredQName> paramNames = null;
             while (t.currentToken != Token.RPAREN) {
+                if (t.currentToken == Token.DOLLAR && allowXPath40Syntax) {
+                    // Optional parameter names are allowed (and ignored) in 4.0
+                    StructuredQName varName = parseVariableName();
+                    if (paramNames == null) {
+                        paramNames = new HashSet<>();
+                    }
+                    if (!paramNames.add(varName)) {
+                        grumble("Duplicate parameter name " + varName.getEQName(), "XQST0039");
+                    }
+                    readKeyword("as");
+                }
                 SequenceType arg = parseSequenceType();
                 argTypes.add(arg);
                 if (t.currentToken == Token.RPAREN) {
