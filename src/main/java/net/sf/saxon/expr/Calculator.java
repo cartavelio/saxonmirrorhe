@@ -102,6 +102,12 @@ public abstract class Calculator {
             new DoubleIdivDouble()
     };
 
+    /**
+     * Marker interface for operations on doubles
+     */
+
+    public interface DoubleOpDouble {};
+
     public final static Calculator[] DOUBLE_FLOAT = DOUBLE_DOUBLE;
     public final static Calculator[] DOUBLE_DECIMAL = DOUBLE_DOUBLE;
     public final static Calculator[] DOUBLE_INTEGER = DOUBLE_DOUBLE;
@@ -546,7 +552,7 @@ public abstract class Calculator {
      * Arithmetic: double + double (including types that promote to double)
      */
 
-    public static class DoublePlusDouble extends Calculator {
+    public static class DoublePlusDouble extends Calculator implements DoubleOpDouble {
         @Override
         public AtomicValue compute(AtomicValue a, AtomicValue b, XPathContext c) throws XPathException {
             return new DoubleValue(((NumericValue) a).getDoubleValue() + ((NumericValue) b).getDoubleValue());
@@ -562,7 +568,7 @@ public abstract class Calculator {
      * Arithmetic: double - double (including types that promote to double)
      */
 
-    public static class DoubleMinusDouble extends Calculator {
+    public static class DoubleMinusDouble extends Calculator implements DoubleOpDouble{
         @Override
         public AtomicValue compute(AtomicValue a, AtomicValue b, XPathContext c) throws XPathException {
             return new DoubleValue(((NumericValue) a).getDoubleValue() - ((NumericValue) b).getDoubleValue());
@@ -578,7 +584,7 @@ public abstract class Calculator {
      * Arithmetic: double * double (including types that promote to double)
      */
 
-    public static class DoubleTimesDouble extends Calculator {
+    public static class DoubleTimesDouble extends Calculator implements DoubleOpDouble {
         @Override
         public AtomicValue compute(AtomicValue a, AtomicValue b, XPathContext c) throws XPathException {
             return new DoubleValue(((NumericValue) a).getDoubleValue() * ((NumericValue) b).getDoubleValue());
@@ -594,7 +600,7 @@ public abstract class Calculator {
      * Arithmetic: double div double (including types that promote to double)
      */
 
-    public static class DoubleDivDouble extends Calculator {
+    public static class DoubleDivDouble extends Calculator implements DoubleOpDouble {
         @Override
         public AtomicValue compute(AtomicValue a, AtomicValue b, XPathContext c) throws XPathException {
             return new DoubleValue(((NumericValue) a).getDoubleValue() / ((NumericValue) b).getDoubleValue());
@@ -610,7 +616,7 @@ public abstract class Calculator {
      * Arithmetic: double mod double (including types that promote to double)
      */
 
-    public static class DoubleModDouble extends Calculator {
+    public static class DoubleModDouble extends Calculator implements DoubleOpDouble {
         @Override
         public AtomicValue compute(AtomicValue a, AtomicValue b, XPathContext c) throws XPathException {
             return new DoubleValue(((NumericValue) a).getDoubleValue() % ((NumericValue) b).getDoubleValue());
@@ -626,7 +632,7 @@ public abstract class Calculator {
      * Arithmetic: double idiv double (including types that promote to double)
      */
 
-    private static class DoubleIdivDouble extends Calculator {
+    private static class DoubleIdivDouble extends Calculator implements DoubleOpDouble {
         @Override
         public AtomicValue compute(AtomicValue a, AtomicValue b, XPathContext c) throws XPathException {
             double A = ((NumericValue) a).getDoubleValue();
