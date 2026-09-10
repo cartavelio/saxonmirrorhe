@@ -152,14 +152,16 @@ public class AccumulatorWatch extends PatternWatch {
         }
 
         // If there is a capturing post-descent rule, then fire it off now
-        Rule capture = postDescentMode.getRule(node, context);
-        if (capture != null && ((AccumulatorRule)capture.getAction()).isCapturing()) {
-            SequenceCollector so = new SequenceCollector(getPipelineConfiguration());
-            ComplexContentOutputter cco = new ComplexContentOutputter(so);
-            ItemFeed feed = new DecomposingFeed(cco, context);
-            Watch snapshotWatch = SnapshotFeed.getWatch(feed, AnchorPattern.getInstance(), watchManager, context);
-            watchManager.addWatch(snapshotWatch, true);
-            captureStack.push(cco);
+        if (node.getNodeKind() == Type.ELEMENT) {
+            Rule capture = postDescentMode.getRule(node, context);
+            if (capture != null && ((AccumulatorRule) capture.getAction()).isCapturing()) {
+                SequenceCollector so = new SequenceCollector(getPipelineConfiguration());
+                ComplexContentOutputter cco = new ComplexContentOutputter(so);
+                ItemFeed feed = new DecomposingFeed(cco, context);
+                Watch snapshotWatch = SnapshotFeed.getWatch(feed, AnchorPattern.getInstance(), watchManager, context);
+                watchManager.addWatch(snapshotWatch, true);
+                captureStack.push(cco);
+            }
         }
         int depth = nodeStack.size();
         setAtDepth(preDescentStack, depth-1, value);
@@ -190,7 +192,7 @@ public class AccumulatorWatch extends PatternWatch {
         assert controller != null;
 
         NodeInfo targetNode = node;
-        if (target.isPostDescent() && target.isCapturing()) {
+        if (node.getNodeKind() == Type.ELEMENT && target.isPostDescent() && target.isCapturing()) {
             ComplexContentOutputter cco = captureStack.pop();
             SequenceCollector so = (SequenceCollector)cco.getReceiver();
             targetNode = (NodeInfo)so.getFirstItem();
