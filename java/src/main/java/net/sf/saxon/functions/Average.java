@@ -48,17 +48,16 @@ public class Average extends FoldingFunction {
         return new AverageFold(context);
     }
 
-    private class AverageFold implements Fold {
+    private static class AverageFold implements Fold {
         private final XPathContext context;
         private AtomicValue data;
         private boolean atStart = true;
-        private final ConversionRules rules;
         private final StringConverter toDouble;
         private int count = 0;
 
         public AverageFold(XPathContext context) {
             this.context = context;
-            this.rules = context.getConfiguration().getConversionRules();
+            ConversionRules rules = context.getConfiguration().getConversionRules();
             this.toDouble = BuiltInAtomicType.DOUBLE.getStringConverter(rules);
         }
 

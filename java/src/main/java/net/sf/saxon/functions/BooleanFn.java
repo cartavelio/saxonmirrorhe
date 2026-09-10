@@ -7,11 +7,10 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.elab.BooleanEvaluator;
-import net.sf.saxon.expr.elab.BooleanElaborator;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.BooleanElaborator;
+import net.sf.saxon.expr.elab.BooleanEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -22,7 +21,6 @@ import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.BooleanValue;
 
 /**
@@ -51,8 +49,6 @@ public class BooleanFn extends SystemFunction implements ArityOneFunction {
 
     public static Expression rewriteEffectiveBooleanValue(
             Expression exp, ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
-        Configuration config = visitor.getConfiguration();
-        TypeHierarchy th = config.getTypeHierarchy();
         boolean forStreaming = visitor.isOptimizeForStreaming();
         Expression e2 = ExpressionTool.unsortedIfHomogeneous(exp, forStreaming);
         boolean changed = e2 != exp;

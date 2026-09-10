@@ -92,6 +92,15 @@ public class CoercedFunction extends AbstractFunction {
     }
 
     /**
+     * Get the target function
+     * @return the target function that this CoercedFunction coerces
+     */
+
+    public FunctionItem getTargetFunction() {
+        return targetFunction;
+    }
+
+    /**
      * Type check the function (may modify it by adding code for converting the arguments)
      *
      * @param visitor         the expression visitor, supplies context information

@@ -809,7 +809,7 @@ public class ExpressionTool {
      * @return true if the expression depends on one of the given variables
      */
 
-    public static boolean dependsOnVariable(Expression exp, final Binding[] bindingList) {
+    public static boolean dependsOnVariable(Expression exp, Binding... bindingList) {
         return !(bindingList == null || bindingList.length == 0) &&
                 contains(exp, false, e -> {
                     if (e instanceof VariableReference) {
