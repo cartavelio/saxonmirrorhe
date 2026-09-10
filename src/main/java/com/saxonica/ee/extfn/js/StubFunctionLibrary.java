@@ -24,6 +24,7 @@ import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.NumericValue;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
+import net.sf.saxon.z.IntPredicateLambda;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.Reader;
@@ -89,7 +90,7 @@ public class StubFunctionLibrary implements FunctionLibrary {
         UnicodeString content;
         try {
             Reader reader = StandardUnparsedTextResolver.getReaderFromStreamSource(input, "utf-8", config, config.isTiming());
-            content = UnparsedTextFunction.readFile((ch) -> true, reader);
+            content = UnparsedTextFunction.readFile(IntPredicateLambda.of((ch) -> true), reader);
         } catch (java.io.IOException ioErr) {
             throw new XPathException("Failed to read function signatures", ioErr);
         }
