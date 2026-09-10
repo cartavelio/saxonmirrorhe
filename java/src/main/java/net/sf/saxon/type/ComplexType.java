@@ -272,4 +272,3 @@ public interface ComplexType extends SchemaType {
 
 
 }
-

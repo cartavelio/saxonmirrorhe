@@ -1445,6 +1445,12 @@ public class Configuration implements SourceResolver {
         return makeSystemFunction(localName, arity, 40);
     }
 
+    public SystemFunction getXsdValidatorFunction(BuiltInFunctionSet.Entry details, int arity) {
+        return null;
+    }
+
+
+
     /**
      * Register an extension function that is to be made available within any stylesheet, query,
      * or XPath expression compiled under the control of this processor. This method
