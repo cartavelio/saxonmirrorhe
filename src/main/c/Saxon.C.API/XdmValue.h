@@ -55,15 +55,6 @@ public:
   XdmValue(const XdmValue &other);
 
   /**
-   * Add an XdmItem to the sequence
-   * This method is designed for the primitive types.
-   * @param tStr - specify target type of the value
-   * @param val - Value to convert
-   */
-  XdmValue *addXdmValueWithType(const char *tStr,
-                                const char *val); // TODO check and document
-
-  /**
    * Add an XdmItem to the sequence.
    * See functions in SaxonCXPath of the C library
    * @param val - XdmItem object
