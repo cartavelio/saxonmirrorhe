@@ -95,6 +95,13 @@ val editionJava = configurations.resolvable("editionJava") {
   extendsFrom(editionJavaRuntime)
 }
 
+// Because we have Java stuff going on, there's a Java plugin task for resource copying that
+// we can't get rid of and which clashes when the assemble task is run, so let's point it somewhere
+// harmless
+val processResources by tasks.named<ProcessResources>("processResources") {
+  into(layout.buildDirectory.dir("ignore/resources"))
+}
+
 // from() is set in the edition build.gradle.kts
 val filteredSources = tasks.register<Sync>("filteredSources") {
   into(layout.buildDirectory.dir("tmp/filtered-sources"))
@@ -291,10 +298,6 @@ private fun generateDotnetTasks(buildArch: Architectures, buildConfiguration: CS
     setTaskInputSources(inputSources)
   }
 
-  tasks.named(LifecycleBasePlugin.BUILD_TASK_NAME) {
-    dependsOn(build)
-  }
-
   val publish = tasks.register<DotNetPublish>("dotnet-publish-${buildArch}-${suffix}") {
     LifecycleTasks.RELEASE_GROUP
     dotnet = extension.dotnet
@@ -394,6 +397,10 @@ fun csZipArtifactTasks(configuration: CSReleaseConfiguration, publishTask: TaskP
 // Generate Release tasks
 val releaseBuildArch = extension.architecture.get()
 val (configureTask, buildTask, publishTask, nupkgBuildTask, makeAppTask) = generateDotnetTasks(releaseBuildArch, CSReleaseConfiguration.Release, "release")
+tasks.named(LifecycleBasePlugin.ASSEMBLE_TASK_NAME) {
+  dependsOn(buildTask)
+}
+
 val releaseZipArtifactTasks = mutableListOf<TaskProvider<Zip>>()
 
 if (!saxonBuild.targetHost.get().isMacOS) {
@@ -405,6 +412,10 @@ if (!saxonBuild.targetHost.get().isMacOS) {
   }.toMap()
 
   val makeAppTasks = (dotnetTasks.values.map { it.makeApp } + makeAppTask).toTypedArray()
+
+  tasks.named(LifecycleBasePlugin.ASSEMBLE_TASK_NAME) {
+    dotnetTasks.values.forEach { dependsOn(it.build) }
+  }
 
   val buildUnsignedMacOSAppTask = tasks.register<Exec>("unsigned-macos-release-app") {
     group = LifecycleTasks.RELEASE_GROUP
