@@ -206,7 +206,7 @@ namespace TestRunner {
                 catch (Exception e) {
                     System.Console.WriteLine("*** Error evaluating parameter " + i + " in initial-function : " +
                                              e.Message);
-                    throw e;
+                    throw;
                 }
 
                 params1.Add(value);
@@ -458,7 +458,7 @@ namespace TestRunner {
 
                         Console.WriteLine("Optimization OK: " + optimizationAssertion);
                     }
-                    catch (Exception e) {
+                    catch (Exception) {
                         Console.WriteLine("Optimization assertion failed: " + optimizationAssertion);
                     }
                 }
@@ -482,7 +482,7 @@ namespace TestRunner {
                     }
                     catch (Exception e) {
                         Console.WriteLine("*** Error evaluating parameter " + name + ": " + e.Message);
-                        throw e;
+                        throw;
                     }
 
                     compiler.SetParameter(new QName(name), value);
@@ -662,7 +662,7 @@ namespace TestRunner {
                                     //throw new SaxonApiException(e.getCause());
                                 }
                                 else {
-                                    throw e;
+                                    throw;
                                 }
                             }
                         }
@@ -967,7 +967,7 @@ namespace TestRunner {
                 // compiler.GetErrorList().Add(new StaticError(e));
                 //System.err.println(e.getMessage());
                 //e.printStackTrace();  //temporary, for debugging
-                throw e;
+                throw;
             }
 
             return sheet;
@@ -996,7 +996,7 @@ namespace TestRunner {
                     catch (Exception e) {
                         Console.WriteLine(e.Message);
                         //e.printStackTrace();  //temporary, for debugging
-                        throw e;
+                        throw;
                     }
                 }
                 else {
@@ -1060,7 +1060,7 @@ namespace TestRunner {
                 try {
                     this.baseOutputUri = new Uri(baseOutputURI);
                 }
-                catch (Exception e) {
+                catch (Exception) {
                 }
 
                 this.serialized = serialized;
@@ -1110,7 +1110,7 @@ namespace TestRunner {
             }
             catch (IOException e) {
                 println("*** Failed to save results to " + filePath);
-                throw e;
+                throw;
             }
         }
 
@@ -1579,12 +1579,12 @@ namespace TestRunner {
                     }
                     else {
                         destination = new XdmDestination();
-                        ((XdmDestination) destination).BaseUri = uri;
+                        destination.BaseUri = uri;
                         return null; //  destination..GetReceiver(proc.Implementation.makePipelineConfiguration());
                     }
                 }
                 catch (Exception e) {
-                    throw e;
+                    throw;
                 }
             }
 

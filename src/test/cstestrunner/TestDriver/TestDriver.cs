@@ -639,6 +639,7 @@ namespace TestRunner {
         public abstract bool EnsureDependencySatisfied(XdmNode dependency, Environment env);
         
         public static void experiment() {
+            Console.WriteLine("LittleEndian? " + BitConverter.IsLittleEndian);
             // double d = 1e100 / 3;
             // Console.WriteLine(d);
             // BigDecimal dec = BigDecimal.FromDouble(d, false);

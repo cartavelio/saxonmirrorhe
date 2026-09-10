@@ -771,8 +771,11 @@
     </result>
   </test-case>
   <test-case name="EXPath-binary-encode-string-005">
-    <description>encode-string on a non-empty string - UTF-16 - no control over
-                BOM</description>
+    <description>
+      encode-string on a non-empty string - UTF-16 - no control over BOM
+      Note (MHK 2021-06-21): the expected results assume UTF-16BE with BOM. This
+      isn't mandated by the spec, but it seems a reasonable thing to aim for.
+    </description>
     <created by="John Lumley" on="2013-07-18"/>
     <modified by="John Lumley" on="2014-08-11" change="consistent EXPath naming"/>
     <environment ref="EXPath-binary"/>
@@ -782,8 +785,11 @@
     </result>
   </test-case>
   <test-case name="EXPath-binary-encode-string-006">
-    <description>encode-string on a non-empty string - UTF-16 - no control over
-                BOM</description>
+    <description>
+      encode-string on a non-empty string - UTF-16 - no control over BOM.
+      Note (MHK 2021-06-21): the expected results assume UTF-16BE with BOM. This
+      isn't mandated by the spec, but it seems a reasonable thing to aim for.
+    </description>
     <created by="John Lumley" on="2013-07-18"/>
     <environment ref="EXPath-binary"/>
     <modified by="John Lumley" on="2014-08-12" change="Replace non-ASCII by encodings"/>
@@ -1369,8 +1375,7 @@
     </result>
   </test-case>
   <test-case name="EXPath-binary-pack-double-011">
-    <description>pack-double with NaN - big-endian. Possibilities of other NaN
-        values?</description>
+    <description>pack-double with NaN - big-endian. Possibilities of other NaN values?</description>
     <created by="John Lumley" on="2013-07-19"/>
     <modified by="John Lumley" on="2014-08-11" change="consistent EXPath naming"/>
     <environment ref="EXPath-binary.numeric"/>
@@ -1475,14 +1480,13 @@
     </result>
   </test-case>
   <test-case name="EXPath-binary-pack-float-010">
-    <description>pack-float with NaN - big-endian. Possibilities of other NaN
-        values?</description>
+    <description>pack-float with NaN - big-endian. Possibilities of other NaN values?</description>
     <created by="John Lumley" on="2013-07-19"/>
     <modified by="John Lumley" on="2014-08-11" change="consistent EXPath naming"/>
     <environment ref="EXPath-binary.numeric"/>
     <test> bin:to-octets(bin:pack-float(xs:float(number("NaN")),'most-significant-first')) </test>
     <result>
-      <assert-deep-eq>(127,192,0,0)</assert-deep-eq>
+        <assert-deep-eq>(127,192,0,0)</assert-deep-eq>
     </result>
   </test-case>
   <test-case name="EXPath-binary-unpack-double-001">
@@ -1577,7 +1581,7 @@
     <test>
                 bin:to-octets(bin:pack-double(bin:unpack-double(bin:from-octets((127,248,0,0,0,0,0,1)),0,'most-significant-first'),'most-significant-first')) </test>
     <result>
-      <assert-deep-eq>(127,248,0,0,0,0,0,0)</assert-deep-eq>
+        <assert-deep-eq>(127,248,0,0,0,0,0,0)</assert-deep-eq>
     </result>
   </test-case>
   <test-case name="EXPath-binary-unpack-double-009">
@@ -1588,7 +1592,7 @@
     <test>
                 bin:to-octets(bin:pack-double(bin:unpack-double(bin:from-octets((127,240,0,0,0,0,0,1)),0,'most-significant-first'),'most-significant-first')) </test>
     <result>
-      <assert-deep-eq>(127,248,0,0,0,0,0,0)</assert-deep-eq>
+        <assert-deep-eq>(127,248,0,0,0,0,0,0)</assert-deep-eq>
     </result>
   </test-case>
   <test-case name="EXPath-binary-unpack-float-001">
