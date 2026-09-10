@@ -1511,6 +1511,23 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp>
             </li>
          </ul>
       </section>
+      
+      <section id="enclosing-modes" title="Enclosing modes">
+         <h1>Enclosing modes</h1>
+         
+         <p>An <code>xsl:mode</code> declaration for a named mode can contain template rules within the body of the
+            <code>xsl:mode</code> declaration. This is known as an <emph>enclosing mode</emph>. Template rules
+         within the enclosing mode cannot have a <code>mode</code> attribute (they automatically belong to the enclosing
+         mode), and any <code>xsl:apply-templates</code> instructions within these template rules default their <code>mode</code>
+         attribute to the enclosing mode. Template rules within an enclosing mode cannot be overridden by template rules
+         outside it (in fact, template rules outside the enclosing mode cannot name that mode in their <code>mode</code>
+         attribute). Specifying <code>mode="#all"</code> on a template rule has no effect on enclosing modes.</p>
+         
+         <p>The purpose of enclosing modes is to make it easier to see at a glance what all the rules for a mode are,
+         and thus to make it easier to work out which rules will match which nodes in an input document.</p>
+         
+         <p>Template rules in an enclosing mode can in principle be overridden in another stylesheet package
+         (using <code>xsl:override</code>) but this has not yet been tested.</p>
 
       <section id="miscellaneous-xslt40" title="Miscellaneous extensions">
          <h1>Miscellaneous extensions</h1>

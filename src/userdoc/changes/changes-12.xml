@@ -527,6 +527,10 @@
         <p>From 12.3 the <code>xsl:matching-substring</code> and <code>xsl:non-matching-substring</code> may take
         a <code>select</code> attribute in place of a contained sequence constructor.</p>
         
+        <p>From 12.3 enclosing modes are implemented: <code>xsl:template</code> rules can be defined as a child
+        of <code>xsl:mode</code>, and within those template rules, any <code>xsl:apply-templates</code> instruction
+        defaults to the enclosing mode.</p>
+        
         <aside>Our general policy on implementation of new features in the draft 4.0 specifications is that
         the Saxon product will modify or remove such features when the specification changes, even if this
         creates backwards incompatibility. We will try to hold incompatible changes to the next major Saxon release where possible,

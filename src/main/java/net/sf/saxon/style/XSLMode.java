@@ -12,6 +12,7 @@ import net.sf.saxon.expr.accum.Accumulator;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.RuleManager;
+import net.sf.saxon.type.Type;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.Whitespace;
 
@@ -94,7 +95,7 @@ public class XSLMode extends StyleElement {
         StructuredQName name = getObjectName();
         SymbolicName sName = new SymbolicName(StandardNames.XSL_MODE, name);
         HashMap<SymbolicName, Component> componentIndex = top.getStylesheetPackage().getComponentIndex();
-        // see if there is already a named template with this precedence
+        // see if there is already a named mode with this precedence
         if (!name.equals(Mode.UNNAMED_MODE_NAME)) {
             Component other = componentIndex.get(sName);
             if (other != null && other.getDeclaringPackage() != top.getStylesheetPackage()) {
@@ -103,8 +104,13 @@ public class XSLMode extends StyleElement {
                                      other.getDeclaringPackage().getPackageName(), "XTSE3050");
 
             }
+            if (other != null && (((Mode)other.getActor()).isEnclosingMode() || hasChildNodes())) {
+                compileError("The mode name " + name.getDisplayName() +
+                                     " identifies an enclosing mode so its name must be unique ", "XTSE4025");
+            }
         }
         mode = (SimpleMode)top.getRuleManager().obtainMode(name, true);
+        mode.setEnclosingMode(hasChildNodes());
         if (name.equals(Mode.UNNAMED_MODE_NAME)) {
             top.getRuleManager().setUnnamedModeExplicit(true);
         } else if (mode.getDeclaringComponent().getDeclaringPackage() != getContainingPackage()) {
@@ -304,7 +310,33 @@ public class XSLMode extends StyleElement {
                 mode.getActivePart().setExplicitProperty(f, allNames.toString(), decl.getPrecedence());
             }
         }
-        checkEmpty();
+        if (getCompilation().getCompilerInfo().getXsltVersion() != 40) {
+            checkEmpty();
+        } else {
+            if (hasChildNodes()) {
+                if (getAttributeValue(NamespaceUri.NULL, "name") == null) {
+                    compileError("A xsl:mode declaration with child xsl:template elements "
+                                         + "must have a name attribute", "XTSE4005");
+                }
+                String v = getAttributeValue(NamespaceUri.NULL, "default-mode");
+                if (v != null && !getObjectName().equals(makeQName(v, null, "default-mode"))) {
+                    compileError("A xsl:mode declaration with child xsl:template elements must not have "
+                                         + "a default-mode attribute that differs from the mode name", "XTSE4015");
+
+                }
+                for (NodeInfo n : children()) {
+                    if (n.getNodeKind() == Type.ELEMENT && !(n instanceof XSLTemplate)) {
+                        compileError("The only children permitted for xsl:mode are xsl;template elements");
+                    }
+                    v = n.getAttributeValue(NamespaceUri.NULL, "default-mode");
+                    if (v != null && !getObjectName().equals(makeQName(v, null, "default-mode"))) {
+                        compileError("An xsl:template declaration within an enclosing xsl:mode must not have "
+                                             + "a default-mode attribute that differs from the mode name", "XTSE4015");
+
+                    }
+                }
+            }
+        }
         checkTopLevel("XTSE0010", false);
     }
 
@@ -314,6 +346,11 @@ public class XSLMode extends StyleElement {
         Component c = pack.getComponent(mode.getSymbolicName());
         if (c == null) {
             throw new AssertionError();
+        }
+        for (NodeInfo t : children()) {
+            if (t instanceof XSLTemplate) {
+                ((XSLTemplate)t).compileDeclaration(compilation, decl);
+            }
         }
     }
 

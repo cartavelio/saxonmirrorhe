@@ -1229,7 +1229,10 @@ public abstract class StyleElement extends ElementImpl {
             processDefaultMode();
             if (defaultMode == null) {
                 NodeInfo p = getParent();
-                if (p instanceof StyleElement) {
+                if (p instanceof XSLMode) {
+                    // 4.0 enclosing modes
+                    return defaultMode = ((XSLMode)p).getObjectName();
+                } else if (p instanceof StyleElement) {
                     return defaultMode = ((StyleElement) p).getDefaultMode();
                 } else {
                     return defaultMode = Mode.UNNAMED_MODE_NAME;

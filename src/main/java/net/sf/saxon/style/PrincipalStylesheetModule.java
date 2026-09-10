@@ -1257,6 +1257,14 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
                 if (snode instanceof XSLTemplate) {
                     ((XSLTemplate) snode).register(decl);
                 }
+                if (snode instanceof XSLMode) {
+                    // XSLT 4.0 enclosing modes
+                    for (NodeInfo n : snode.children()) {
+                        if (n instanceof XSLTemplate) {
+                            ((XSLTemplate) n).register(decl);
+                        }
+                    }
+                }
             }
 
             if (Compilation.TIMING) {
