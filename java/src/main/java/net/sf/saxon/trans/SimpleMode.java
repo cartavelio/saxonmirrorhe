@@ -15,6 +15,7 @@ import net.sf.saxon.expr.accum.Accumulator;
 import net.sf.saxon.expr.accum.AccumulatorRegistry;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.instruct.TemplateRule;
+import net.sf.saxon.ma.jnode.JNode;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTestPattern;
 import net.sf.saxon.pattern.Pattern;
@@ -553,6 +554,8 @@ public class SimpleMode extends Mode {
                 bestRule = searchRuleChain(item, context, bestRule, functionItemRuleChain);
             }
             bestRule = searchRuleChain(item, context, bestRule, genericRuleChain);
+        } else if (item instanceof JNode) {
+            bestRule = searchRuleChain(item, context, bestRule, genericRuleChain);
         }
 
         return bestRule;
@@ -859,6 +862,11 @@ public class SimpleMode extends Mode {
                 ruleSearchState = makeRuleSearchState(functionItemRuleChain, context);
                 bestRule = searchRuleChain(item, context, bestRule, functionItemRuleChain, ruleSearchState, filter);
             }
+            ruleSearchState = makeRuleSearchState(genericRuleChain, context);
+            bestRule = searchRuleChain(item, context, bestRule, genericRuleChain, ruleSearchState, filter);
+            return bestRule;
+
+        } else if (item instanceof JNode) {
             ruleSearchState = makeRuleSearchState(genericRuleChain, context);
             bestRule = searchRuleChain(item, context, bestRule, genericRuleChain, ruleSearchState, filter);
             return bestRule;

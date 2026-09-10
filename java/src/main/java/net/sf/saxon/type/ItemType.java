@@ -118,6 +118,7 @@ public interface ItemType {
      */
 
     default double getNormalizedDefaultPriority() {
+        // TODO: no longer conformant to the 4.0 spec
         return (getDefaultPriority() + 1) / 2;
     }
 

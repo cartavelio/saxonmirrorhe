@@ -23,6 +23,10 @@ public class AnyJNodeType extends JNodeType {
         return SequenceType.ANY_SEQUENCE;
     }
 
+    @Override
+    public double getDefaultPriority() {
+        return -0.5;
+    }
 
     /**
      * Test whether a given item conforms to this type

@@ -157,7 +157,7 @@ public enum AnyItemType implements ItemTypeWithSequenceTypeCache {
 
     @Override
     public double getDefaultPriority() {
-        return -2;
+        return -1;
     }
 
     @Override

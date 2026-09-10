@@ -170,7 +170,7 @@ public interface AtomicType extends SimpleType, PlainType, CastingTarget, Atomic
     @Override
     default double getDefaultPriority() {
         if (getBasicAlphaCode().equals("A")) {
-            return 0;
+            return -0.5;
         }
         double factor = 1;
         SchemaType at = this;
@@ -178,7 +178,7 @@ public interface AtomicType extends SimpleType, PlainType, CastingTarget, Atomic
             factor *= 0.5;
             at = at.getBaseType();
         } while (at != BuiltInAtomicType.ANY_ATOMIC);
-        return 1 - factor;
+        return 0.5 - factor;
     }
 
     /**

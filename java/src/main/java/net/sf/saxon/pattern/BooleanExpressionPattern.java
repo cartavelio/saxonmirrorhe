@@ -44,7 +44,7 @@ public class BooleanExpressionPattern extends Pattern implements PatternWithPred
 
     public BooleanExpressionPattern(Expression expression) {
         this.expressionOp = new Operand(this, expression, OperandRole.SINGLE_ATOMIC);
-        setPriority(1);
+        setPriority(0.5);
     }
 
     @Override
