@@ -9,6 +9,7 @@ java_*.hprof
 /src/test/testdata/sandpit/
 /src/test/extra/qt3/expath/file/sandpit/temp/
 .DS_Store
+*.iml
 
 # Created by running the unit tests :-(
 /secondary-out.xml
