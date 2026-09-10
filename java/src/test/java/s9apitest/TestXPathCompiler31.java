@@ -329,5 +329,25 @@ public class TestXPathCompiler31 {
         }
     }
 
+
+    @Test
+    public void TestDefaultDecimalFormat() {
+        try {
+            Processor p = new Processor(false);
+            XPathCompiler c = p.newXPathCompiler();
+            c.setLanguageVersion("3.1");
+            c.setDecimalFormatProperty("decimal-separator", "~");
+            c.setDecimalFormatProperty("grouping-separator", "|");
+            c.setDecimalFormatProperty("exponent-separator", "E");
+            XPathExecutable e = c.compile("format-number(123.4, '0|000~0E0')");
+            XPathSelector s = e.load();
+            String result = s.evaluateSingle().getStringValue();
+            assertEquals("1|234~0E-1", result);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            fail(e);
+        }
+    }
+
 }
 
