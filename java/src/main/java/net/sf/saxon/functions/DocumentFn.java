@@ -493,23 +493,49 @@ public class DocumentFn extends SystemFunction implements Callable {
         ResourceRequest request = new ResourceRequest();
         request.relativeUri = href;
         request.uri = href;
+
         if (baseURI != null) {
+            // Allow request.baseURI to be "" (a same document reference, maybe?)
+            // Tests will fail if we unconditionally make it null in this case. So don't.
             request.baseUri = baseURI;
-            // In principle, it would be better to leave the uri relative, but historically, the
-            // DocumentKey (which is always absolute) was used, and the ResourceRequest contract
-            // says that the uri is absolute...
-            // Also: if the href is "", then this is a "same document reference" and the URI
-            // should *be* the base URI.
-            try {
-                if (href.isEmpty()) {
-                    request.uri = baseURI;
-                } else {
-                    request.uri = new URI(baseURI).resolve(href).toString();
+            if (!baseURI.isEmpty()) {
+                // In principle, it would be better to leave the uri relative, but historically, the
+                // DocumentKey (which is always absolute) was used, and the ResourceRequest contract
+                // says that the uri is absolute...
+                // Also: if the href is "", then this is a "same document reference" and the URI
+                // should *be* the base URI.
+                try {
+                    if (href.isEmpty()) {
+                        request.uri = baseURI;
+                    } else {
+                        request.uri = new URI(baseURI).resolve(href).toString();
+                    }
+                } catch (Exception ex) {
+                    // Nevermind, just leave it relative
                 }
-            } catch (Exception ex) {
-                // Nevermind, just leave it relative
             }
         }
+
+        // Finally, irrespective of all else, the request.uri *MUST* be absolute.
+        try {
+            // If the documentKey is null, then this is a collection URI and the check above
+            // for baseURI==null will already have caught it if it isn't already absolute.
+            if (documentKey != null) {
+                // If the request.uri hasn't been made absolute against some base URI,
+                // because the base URI is null or "", then use the documentKey (which *is*
+                // an absolute URI) as the base URI of last resort.
+                request.uri = new URI(documentKey).resolve(request.uri).toString();
+            }
+        } catch (IllegalArgumentException ex) {
+            // If the href is an utterly invalid URI (such as ":/", which occurs in one of the tests),
+            // just use the documentKey. This is all going to go pear shaped somewhere else anyway.
+            request.uri = documentKey;
+        } catch (URISyntaxException e) {
+            // It seems unlikely that a malformed URI could have leaked this far, but
+            // if it has, we're just going to ignore it. Yes, it'll fail later, but it
+            // was always going to.
+        }
+
         request.nature = ResourceRequest.XML_NATURE;
         request.purpose = ResourceRequest.ANY_PURPOSE;
         try {
