@@ -10,17 +10,18 @@
 #define new new(__FILE__, __LINE__)
 #endif
 
-    XdmFunctionItem::XdmFunctionItem():XdmItem(), arity(-1){}
+    XdmFunctionItem::XdmFunctionItem():XdmItem(), arity(-1), fname(nullptr){}
 
 
     XdmFunctionItem::XdmFunctionItem(const XdmFunctionItem &aVal): XdmItem(aVal){
         arity = aVal.arity;
+        fname = aVal.fname;
     }
 
    
 	
 
-    XdmFunctionItem::XdmFunctionItem(int64_t obj):XdmItem(obj), arity(-1){
+    XdmFunctionItem::XdmFunctionItem(int64_t obj):XdmItem(obj), arity(-1), fname(nullptr){
     }
 
     const char* XdmFunctionItem::getName(){

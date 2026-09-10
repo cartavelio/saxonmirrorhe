@@ -206,7 +206,11 @@ XdmValue ** XdmArray::values() {
   allocFn fn = operator new;
   long long * results = j_convertXdmArrayToArrayObject(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)value);
 
-	if(results) {
+	if(results == nullptr) {
+       delete exception;
+	   return nullptr;
+	}
+
             arr = new XdmValue*[sizex];
        		XdmValue * tempValue = nullptr;
 
@@ -216,7 +220,12 @@ XdmValue ** XdmArray::values() {
        	          XdmItem * xdmItem = nullptr;
                     if(typeRef == -2) {
                         //exception = new SaxonApiException();
-                        return arr;
+                        std::cerr<<"XdmArray.values() failed with exception"<<std::endl;
+
+                        SaxonApiException * exception =  new SaxonApiException();
+                         std::cerr<<"Exception message = "<<exception->getMessage()<<std::endl;
+                         delete exception;
+                        return nullptr;
                     }
                     if(typeRef == 1) {
                         tempValue = new XdmValue();
@@ -245,6 +254,7 @@ XdmValue ** XdmArray::values() {
                     } else if (typeRef == 6) {
                        //Empty Sequence detected.
                        //TODO Maybe we should create an EmptySequence object
+                       std::cerr<<"XdmArray.values() failed - EmtpySequence not handled"<<std::endl;
                         j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)results[p]);
                         
 
@@ -257,7 +267,6 @@ XdmValue ** XdmArray::values() {
 
        		}
        		delete results;
-	}
 	return arr;
 
 
