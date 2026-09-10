@@ -32,35 +32,35 @@ int64_t booleanValue(sxnc_environment *environi, bool);
 
 /**
  * Create a boxed Integer value
- * @param val - int value
+ * @param i - int value
  */
 
 int64_t integerValue(sxnc_environment *environi, int i);
 
 /**
  * Create a boxed Double value
- * @param val - double value
+ * @param d - double value
  */
 
 int64_t doubleValue(sxnc_environment *environi, double d);
 
 /**
  * Create a boxed Float value
- * @param val - float value
+ * @param f - float value
  */
 
 int64_t floatValue(sxnc_environment *environi, float f);
 
 /**
  * Create a boxed Long value
- * @param val - long value
+ * @param l - long value
  */
 
 int64_t longValue(sxnc_environment *environi, long l);
 
 /**
  * Create a boxed String value
- * @param val - char array value
+ * @param str - char array value
  */
 
 int64_t getJavaStringValue(sxnc_environment *environi, const char *str);
@@ -69,7 +69,7 @@ int64_t getJavaStringValue(sxnc_environment *environi, const char *str);
  * A Constructor for internal use. Create an underlying representation for the XdmValue based on the target type.
  * Conversion is applied if possible.
  * @param type - the target type of the value
- * @param val - value to convert
+ * @param str - value to convert
  */
 
 int64_t xdmValueAsObj(sxnc_environment *environi, const char *type,
@@ -79,7 +79,7 @@ int64_t xdmValueAsObj(sxnc_environment *environi, const char *type,
  * A Constructor. Create an XdmValue based on the target type. Conversion is
  * applied if possible.
  * @param type - the target type of the value
- * @param val - value to convert
+ * @param str - value to convert
  */
 
 sxnc_value *xdmValue(sxnc_environment *environi, const char *type,
@@ -158,6 +158,7 @@ bool effectiveBooleanValue(sxnc_environment *environi, sxnc_xpath *proc,
 
 /**
  * Determine whether the item is an atomic value or a node
+ * @param value - XDM value
  *
  * @return true if the item is an atomic value, false if it is a node
  */
@@ -166,28 +167,29 @@ bool isAtomicValue(sxnc_environment *environi, sxnc_value value);
 
 /**
  * Get the number of items in the sequence
+ * @param val - XDM value
  *
  * @return the number of items in the value - always one
  */
 
 int size(sxnc_environment *environi, sxnc_value val);
 
-/**
- * Get the n'th item in the value, counting from zero.
- *
- * @param n - the item that is required, counting the first item in the sequence
- * as item zero
- * @return the n'th item in the sequence making up the value, counting from zero
- */
+// /**
+// * Get the n'th item in the value, counting from zero.
+// *
+// * @param n - the item that is required, counting the first item in the sequence
+// * as item zero
+// * @return the n'th item in the sequence making up the value, counting from zero
+// */
 //sxnc_value *itemAt(sxnc_environment *environi, sxnc_value, int i);
 
-/**
- * Convert the Get the n'th item in the value, counting from zero.
- *
- * @param n the item that is required, counting the first item in the sequence
- * as item zero
- * @return the n'th item in the sequence making up the value, counting from zero
- */
+// /**
+// * Convert the Get the n'th item in the value, counting from zero.
+// *
+// * @param n the item that is required, counting the first item in the sequence
+// * as item zero
+// * @return the n'th item in the sequence making up the value, counting from zero
+// */
 //int64_t getvalue(sxnc_environment *environi, sxnc_value);
 
 /**
@@ -195,13 +197,14 @@ int size(sxnc_environment *environi, sxnc_value val);
  * of the node. For an atomic value, it has the same effect as casting the value
  * to a string. In all cases the result is the same as applying the XPath
  * string() function.
+ * @param value - Value to convert to string
  **/
 
 const char *getStringValue(sxnc_environment *environi, sxnc_value value);
 
 /**
  * Get the integer value of the item.
- * @param sxnc_value - Value to convert to integer
+ * @param value - Value to convert to integer
  * @param failure_value - If the value is not an integer then we can specify the value
  * to return. Default is zero.
  *
@@ -212,14 +215,14 @@ int getIntegerValue(sxnc_environment *environi, sxnc_value value,
 
 /**
  * Get the boolean value of the item.
- * @param sxnc_value - Value to convert to boolean
+ * @param value - Value to convert to boolean
  *
  **/
 bool getBooleanValue(sxnc_environment *environi, sxnc_value value);
 
 /**
  * Get the long value of the item.
- * @param sxnc_value - Value to convert to long
+ * @param value - Value to convert to long
  * @param failureVal - If the Value is not a long then we can specify the value
  * to return. Default is zero.
  *
@@ -229,7 +232,7 @@ long getLongValue(sxnc_environment *environi, sxnc_value value,
 
 /**
  * Get the float value of the item.
- * @param sxnc_value - Value to convert to float
+ * @param value - Value to convert to float
  * @param failureVal - If the Value is not a float then we can specify the value
  * to return. Default is zero.
  *
@@ -239,7 +242,7 @@ float getFloatValue(sxnc_environment *environi, sxnc_value value,
 
 /**
  * Get the double value of the item.
- * @param sxnc_value - Value to convert to double
+ * @param value - Value to convert to double
  * @param failureVal - If the Value is not a double then we can specify the value
  * to return. Default is zero.
  *
