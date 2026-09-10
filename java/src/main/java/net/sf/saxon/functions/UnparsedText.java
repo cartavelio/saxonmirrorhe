@@ -100,18 +100,20 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
             }
         } else {
             StringValue href = (StringValue) arguments[0].head();
-            URI absoluteURI = getAbsoluteURI(href.getStringValue(), getStaticBaseUriString(), context);
-            String encoding = getArity() == 2 ? arguments[1].head().getStringValue() : null;
-            UniStringConsumer consumer = destination.getStringReceiver(false, Loc.NONE);
-            consumer.open();
-            try {
-                readFile(absoluteURI, encoding, consumer, context);
-                consumer.close();
-            } catch (XPathException e) {
-                if (getArity() == 2 && e.hasErrorCode("FOUT1200")) {
-                    e.setErrorCode("FOUT1190");
+            if (href != null) {
+                URI absoluteURI = getAbsoluteURI(href.getStringValue(), getStaticBaseUriString(), context);
+                String encoding = getArity() == 2 ? arguments[1].head().getStringValue() : null;
+                UniStringConsumer consumer = destination.getStringReceiver(false, Loc.NONE);
+                consumer.open();
+                try {
+                    readFile(absoluteURI, encoding, consumer, context);
+                    consumer.close();
+                } catch (XPathException e) {
+                    if (getArity() == 2 && e.hasErrorCode("FOUT1200")) {
+                        e.setErrorCode("FOUT1190");
+                    }
+                    throw e;
                 }
-                throw e;
             }
         }
     }
