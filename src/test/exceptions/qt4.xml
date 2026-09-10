@@ -403,6 +403,33 @@ Keywords-fn-some-1
       <reason>Functionality not yet implemented</reason>
    </exception>
    
+   <exception test-set="app-spec-examples" 
+      test-case="fo-test-array-filter-004
+      fo-test-array-fold-left-004
+      fo-test-array-fold-right-004
+      fo-test-array-for-each-004
+      fo-test-array-for-each-pair-003
+      fo-test-array-index-where-006
+      fo-test-fn-every-008
+      fo-test-fn-every-009
+      fo-test-fn-filter-003
+      fo-test-fn-fold-left-009
+      fo-test-fn-fold-right-004
+      fo-test-fn-for-each-004
+      fo-test-fn-for-each-pair-004
+      fo-test-fn-index-where-005
+      fo-test-fn-items-after-006
+      fo-test-fn-items-before-007
+      fo-test-fn-items-ending-where-006
+      fo-test-fn-items-starting-where-006
+      fo-test-fn-iterate-while-002
+      fo-test-fn-partition-006
+      fo-test-fn-some-008" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2023-11-16"/>
+      <reason>Position argument on callback function not yet implemented.</reason>
+   </exception>
+   
  
    
  
