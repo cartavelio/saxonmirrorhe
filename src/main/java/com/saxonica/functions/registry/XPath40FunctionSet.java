@@ -99,7 +99,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         //#endif
 
         register("char", 1, e -> e.populate(CharFn::new, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, new LocalUnionType(BuiltInAtomicType.STRING, BuiltInAtomicType.INTEGER), ONE, null));
+                .arg(0, LocalUnionType.of(BuiltInAtomicType.STRING, BuiltInAtomicType.INTEGER), ONE, null));
         // TODO: use POSITIVE_INTEGER (needs enhancement to implementation of coercion rules)
 
         register("characters", 1, e -> e.populate(CharactersFn::new, BuiltInAtomicType.STRING, STAR, 0)
@@ -108,6 +108,9 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 //        // codepoints-to-string becomes variadic in 4.0:
 //        register("codepoints-to-string", 1, e -> e.populate(CodepointsToString::new, BuiltInAtomicType.STRING, ONE, SEQV)
 //                .arg(0, BuiltInAtomicType.INTEGER, STAR, null));
+
+        register("collation", 1, e -> e.populate(CollationFn::new, BuiltInAtomicType.STRING, ONE, 0)
+                .arg(0, MapType.ANY_MAP_TYPE, ONE, null));
 
         register("collation-key", 2, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.BASE64_BINARY,
                                                      ONE, DCOLL)
@@ -297,7 +300,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(3, BuiltInAtomicType.STRING, OPT, null)
                 .arg(4, BuiltInAtomicType.STRING, OPT, null));
 
-        LocalUnionType hashInput = new LocalUnionType(BuiltInAtomicType.STRING,
+        LocalUnionType<AtomicType> hashInput = LocalUnionType.of(BuiltInAtomicType.STRING,
                                                       BuiltInAtomicType.HEX_BINARY,
                                                       BuiltInAtomicType.BASE64_BINARY);
         register("hash", 1, 2, e -> e.populate(HashFn::new, BuiltInAtomicType.HEX_BINARY, OPT, 0)

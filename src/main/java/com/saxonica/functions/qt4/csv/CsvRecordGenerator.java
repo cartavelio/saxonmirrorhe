@@ -185,7 +185,7 @@ public class CsvRecordGenerator extends CsvRepresentationGenerator {
     private final static FunctionItemType GETTER_TYPE =
             new SpecificFunctionType(new SequenceType[]{
                     new SequenceType(BuiltInAtomicType.POSITIVE_INTEGER, StaticProperty.EXACTLY_ONE),
-                    new SequenceType(new LocalUnionType(BuiltInAtomicType.POSITIVE_INTEGER,
+                    new SequenceType(LocalUnionType.of(BuiltInAtomicType.POSITIVE_INTEGER,
                                                         BuiltInAtomicType.STRING),
                                      StaticProperty.EXACTLY_ONE)},
                                      SequenceType.SINGLE_STRING);
