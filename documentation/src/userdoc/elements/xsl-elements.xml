@@ -35,7 +35,7 @@
         <code>-xsltversion:4.0</code>; or on the <code>XsltCompiler</code> class, call
         <code>setXsltLanguageVersion("4.0")</code>; or set the configuration property <a
             class="feature" href="ALLOW_SYNTAX_EXTENSIONS"/>. (For more information see <a
-                class="bodylink" href="/v4extensions">QT4 extensions</a>.)</p>
+                class="bodylink" href="/v4extensions/enable-qt4">Enabling 4.0 features</a>.)</p>
 
 
     <h3 class="subtitle">XSLT patterns</h3>

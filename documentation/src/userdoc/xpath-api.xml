@@ -123,7 +123,7 @@
       Note that this doesn't prevent you using features of the XPath language defined in later versions; it merely affects
       the outcome of some functions and operators that had different behavior in 1.0.</li>
       <li>XPath 4.0 features are available in Saxon-PE and Saxon-EE when enabled (for
-         details, see <a class="bodylink" href="/v4extensions">QT4 extensions</a>). The Saxon 13
+         details, see <a class="bodylink" href="/v4extensions/enable-qt4">Enabling 4.0 features</a>). The Saxon 13
          release aims to conform to the 4.0 draft specifications dated 28 January 2026. Some of
          the 4.0 extensions were also available experimentally in earlier versions of Saxon.</li>
    </ul>

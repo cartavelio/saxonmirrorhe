@@ -14,27 +14,12 @@
 	   have a persistent URL, and the documents at that location will not change. However, the specifications
 	   themselves should not be considered to be stable: they will change as the design progresses.)</p>
 	
-	<p>Because the features in the 4.0 specs cannot be considered stable, they are not enabled by default,
-	and in most cases they are not available in Saxon-HE. To enable 4.0 functionality:</p>
+	<p>Because the features in the 4.0 specifications cannot be considered stable, they are not enabled by default,
+		and in most cases they are not available in Saxon-HE. See the following page for details on:</p>
 	
-	<ul>
-		<li>On the XQuery command line, use the option <code>-qversion:4.0</code>.</li>
-		<li>On the XSLT command line, use the option <code>-xsltversion:4.0</code>.</li>
-		<li>On the <code>XQueryCompiler</code> class, call <code>setLanguageVersion("4.0")</code>.</li>
-		<li>On the <code>XsltCompiler</code> class, call <code>setXsltLanguageVersion("4.0")</code>.</li>
-		<li>On the <code>XPathCompiler</code> class, call <code>setLanguageVersion("4.0")</code>.</li>
-	   <li>To use XPath 4.0 in XSD assertions, set the global <code>Configuration</code> property <code>Feature.XPATH_VERSION_FOR_XSD</code>,
-	   or set the attribute <code>saxon:extensions="any-xpath-version"</code> on the <code>xs:schema</code> element.</li>		
-	</ul>
-	
-	<p>In addition, if only for good documentation, any XSLT stylesheet module that uses 4.0 syntax should specify <code>version="4.0"</code>
-	on the outermost element (<code>xsl:stylesheet</code>, <code>xsl:transform</code>, or <code>xsl:package</code>),
-	and any XQuery module that uses 4.0 syntax should specify <code>xquery version 4.0;</code> in the module header.
-	The effect of using a version declaration that differs from the processor version is defined in the language
-	specifications.</p>
-	
-	<p>Saxon also recognizes the configuration property <a class="feature" href="ALLOW_SYNTAX_EXTENSIONS"/>
-	to enable both extensions defined in the 4.0 specifications, and Saxon-specific language extensions.</p>
+	<nav>
+		<ul/>
+	</nav>
 	
 	<p>Generally, Saxonica aims to avoid making incompatible changes except in major releases. But
 		since the 4.0 features are not yet entirely stable, this policy does not apply: the
@@ -57,6 +42,34 @@
 		<li><a class="bodylink" href="/functions">Function library</a> - for details on all of
 			the new 4.0 functions, and information about changes to existing functions.</li>
 	</ul>
+	
+	<section id="enable-qt4" title="Enabling 4.0 features" class="qt4">
+		
+		<h1>Enabling 4.0 features</h1>
+		
+		<p>Because the features in the draft 4.0 specifications cannot be considered stable, they are not enabled by default,
+			and in most cases they are not available in Saxon-HE. To enable 4.0 functionality:</p>
+		
+		<ul>
+			<li>On the XQuery command line, use the option <code>-qversion:4.0</code>.</li>
+			<li>On the XSLT command line, use the option <code>-xsltversion:4.0</code>.</li>
+			<li>On the <code>XQueryCompiler</code> class, call <code>setLanguageVersion("4.0")</code>.</li>
+			<li>On the <code>XsltCompiler</code> class, call <code>setXsltLanguageVersion("4.0")</code>.</li>
+			<li>On the <code>XPathCompiler</code> class, call <code>setLanguageVersion("4.0")</code>.</li>
+			<li>To use XPath 4.0 in XSD assertions, set the global <code>Configuration</code> property <code>Feature.XPATH_VERSION_FOR_XSD</code>,
+				or set the attribute <code>saxon:extensions="any-xpath-version"</code> on the <code>xs:schema</code> element.</li>		
+		</ul>
+		
+		<p>In addition, if only for good documentation, any XSLT stylesheet module that uses 4.0 syntax should specify <code>version="4.0"</code>
+			on the outermost element (<code>xsl:stylesheet</code>, <code>xsl:transform</code>, or <code>xsl:package</code>),
+			and any XQuery module that uses 4.0 syntax should specify <code>xquery version 4.0;</code> in the module header.
+			The effect of using a version declaration that differs from the processor version is defined in the language
+			specifications.</p>
+		
+		<p>Saxon also recognizes the configuration property <a class="feature" href="ALLOW_SYNTAX_EXTENSIONS"/>
+			to enable both extensions defined in the 4.0 specifications, and Saxon-specific language extensions.</p>
+		
+	</section>
 
 
 	<!-- /v4extensions/new-types moved to /expressions/types -->
