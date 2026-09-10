@@ -11,9 +11,9 @@ namespace Saxon.Hej {
         }
         private const int MAJOR_VERSION = 11;
         private const int MINOR_VERSION = 0;
-        private const int BUILD = 92809;
-        private const string MAJOR_RELEASE_DATE = "2021-09-30";
-        private const string MINOR_RELEASE_DATE = "2021-09-30";
+        private const int BUILD = 100512;
+        private const string MAJOR_RELEASE_DATE = "2021-10-05";
+        private const string MINOR_RELEASE_DATE = "2021-10-05";
         private Version()  {
         }
         public static string getProductName() {
