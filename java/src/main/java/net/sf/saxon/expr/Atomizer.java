@@ -688,7 +688,8 @@ public final class Atomizer extends UnaryExpression {
                                 .withErrorCode(e.getErrorCodeQName())
                                 .withLocation(e.getLocator())
                                 .withXPathContext(context)
-                                .maybeWithLocation(expr.getLocation());
+                                .maybeWithLocation(expr.getLocation())
+                                .withErrorObject(e.getErrorObject());
                     }
                 } catch (UncheckedXPathException uxe) {
                     XPathException e = uxe.getXPathException();
@@ -700,7 +701,8 @@ public final class Atomizer extends UnaryExpression {
                                 .withErrorCode(e.getErrorCodeQName())
                                 .withLocation(e.getLocator())
                                 .withXPathContext(context)
-                                .maybeWithLocation(expr.getLocation());
+                                .maybeWithLocation(expr.getLocation())
+                                .withErrorObject(e.getErrorObject());
                     }
                 }
             };

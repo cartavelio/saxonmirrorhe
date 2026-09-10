@@ -555,6 +555,11 @@ public class XPathException extends TransformerException {
         errorObject = value;
     }
 
+    public XPathException withErrorObject(Sequence value) {
+        setErrorObject(value);
+        return this;
+    }
+
     /**
      * Get the error object associated with this error. This is used by the standard XPath fn:error() function
      *
