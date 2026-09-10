@@ -16,7 +16,7 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.CodePoints;
-import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
@@ -111,6 +111,7 @@ public class ConditionalBlockAdjunct extends TransmissionAdjunct implements Feed
             Outputter result = getNextOutputter();
             for (int i = 0; i < consumingArg; i++) {
                 Expression child = block.getChildExpression(i);
+                //noinspection StatementWithEmptyBody
                 if (child instanceof OnEmptyExpr) {
                     // No action until close
                 } else if (child instanceof OnNonEmptyExpr) {
@@ -303,7 +304,7 @@ public class ConditionalBlockAdjunct extends TransmissionAdjunct implements Feed
                 // A whitespace separator between atomic values does not constitute significant
                 // content for assessing xsl:on-empty and xsl:on-non-empty. Treat it as if generated
                 // using xsl:on-non-empty. Test case si-on-non-empty-044
-                tentativeContent.add(new OutputterEvent.Text(UnicodeString.SINGLE_SPACE, location, properties));
+                tentativeContent.add(new OutputterEvent.Text(StringConstants.SINGLE_SPACE, location, properties));
             } else {
                 action();
                 getNextOutputter().characters(chars, location, properties);
