@@ -3,11 +3,42 @@
 //
 def csharpCompiler = null
 ["C:/Windows/Microsoft.net/Framework/${dotNetFrameworkVersion}/csc.exe",
- "/Library/Frameworks/Mono.framework/Versions/Current/Commands/csc"].each { csc ->
+ "/Library/Frameworks/Mono.framework/Commands/csc",
+ "z:/some/other/compiler/path"].each { csc ->
   // This only makes sense on Windows, so always using file:/// is ok
   if (csharpCompiler == null && pathExists(csc)) {
     csharpCompiler = csc
   }
+}
+
+if (csharpCompiler == null) {
+  println("WARNING: Failed to find csc[.exe]!")
+}
+
+// Find nuget
+def nuget = null
+// Laboriously construct a search path that includes some default locations
+// plus the users actual path.
+def spath = ["/Library/Frameworks/Mono.framework/Commands"]
+System.getenv("PATH").split(System.getProperty("path.separator")).each { dir ->
+  spath += [dir]
+}
+spath.each { dir ->
+  if (nuget == null) {
+    def fn = new File(dir + "/nuget")
+    if (fn.exists() && fn.canExecute()) {
+      nuget = fn.toString()
+    } else {
+      fn = new File(dir + "/nuget.exe")
+      if (fn.exists() && fn.canExecute()) {
+        nuget = fn.toString()
+      }
+    }
+  }
+}
+
+if (nuget == null) {
+  println("WARNING: Failed to find nuget[.exe]!")
 }
 
 task build_transpiler(
@@ -37,6 +68,7 @@ task transpile_to_xml(
   main = "ToXml"
   args "-j:${buildDir}/preprocess/hecs",
     "-xml:${buildDir}/xmlout",
+    "-h:${projectDir}/src/main/java"
     "-src:${projectDir}/src/main/java"
   doFirst {
     mkdir("${buildDir}/xmlout")
@@ -443,19 +475,46 @@ task eecs_sources(
   }
 }
 
-  task hecs_dll(
+task singulink(
+  description: "Install the Singulink libraries"
+) {
+  doLast {
+    if (nuget == null) {
+      throw new GradleException("Cannot build: failed to find nuget[.exe] on path.")
+    }
+    
+    def args = [nuget,
+                "install",
+                "Singulink.Numerics.BigDecimal"]
+    exec {
+      workingDir = buildDir
+      commandLine args
+    }
+  }
+  doFirst {
+    mkdir "${buildDir}"
+  }
+}
+
+task hecs_dll(
     dependsOn: ["generateCSharp"],
     description: "Compile Saxon-CS DLL for HE"
   ) {
     inputs.files("${buildDir}/src/hecs")
     outputs.file("${buildDir}/cs/bin/he/saxon-cs-${saxonMajorVersion}.${saxonMinorVersion}.dll")
 
+    if (csharpCompiler == null) {
+      throw new GradleException("Cannot build: failed to find csc[.exe] on path.")
+    }
+
     doLast {
       def args = [csharpCompiler,
                   "-out:${buildDir}/cs/bin/he/saxon-cs-${saxonMajorVersion}.${saxonMinorVersion}.dll",
                   "-target:library", 
                   "-doc:${buildDir}/cs/saxon-he-api-${saxonMajorVersion}.${saxonMinorVersion}.xml",
-                  "-keyfile:${ikvmDir}/saxondotnet.snk"]
+                  "-keyfile:${ikvmDir}/saxondotnet.snk",
+                  "-reference:build/Singulink.Numerics.BigDecimal.${singulinkBigDecimalVersion}/lib/netstandard2.1/Singulink.Numerics.BigDecimal.dll"]
+
       //fileTree(dir: "${buildDir}/n/bin/he",
       //         include: "*.dll").each { dll ->
       //  args += ["-reference:${dll}"]
