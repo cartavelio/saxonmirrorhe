@@ -19,7 +19,6 @@ import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.VendorFunctionSetHE;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.StandardDiagnostics;
-import net.sf.saxon.lib.StandardLogger;
 import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.HashTrieMap;
@@ -902,11 +901,7 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
     public static class PrintStack extends SystemFunction {
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream(1000);
-            StandardLogger logger = new StandardLogger();
-            logger.setPrintStream(new PrintStream(baos));
-            new StandardDiagnostics().logStackTrace(context, logger, 2);
-            return new StringValue(baos.toString().replace("\r", ""));
+            return new StringValue(StandardDiagnostics.stackTrace(context));
         }
     }
 
