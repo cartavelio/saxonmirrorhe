@@ -2954,6 +2954,7 @@ public class PackageLoaderHE implements IPackageLoader {
             StructuredQName name = loader.getQNameAttribute(element, "name");
             int slot = loader.getIntegerAttribute(element, "slot");
             LocalParam param = new LocalParam();
+            param.setLocation(element.saveLocation());
             param.setVariableQName(name);
             param.setSlotNumber(slot);
             Expression select = loader.getExpressionWithRole(element, "select");

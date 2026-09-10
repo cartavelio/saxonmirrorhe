@@ -13,6 +13,7 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ErrorType;
@@ -50,8 +51,17 @@ public final class LocalParam extends Instruction implements LocalBinding {
     private int slotNumber = -999;
     private int referenceCount = 10;
 
+    public LocalParam() {}
 
-
+    /**
+     * Set the location on an expression.
+     *
+     * @param id the location
+     */
+    @Override
+    public void setLocation(Location id) {
+        super.setLocation(id);
+    }
 
     /**
      * Set the expression to which this variable is bound
@@ -272,6 +282,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
     @Override
     public LocalParam copy(RebindingMap rebindings) {
         LocalParam p2 = new LocalParam();
+        p2.setLocation(getLocation());
         if (conversionOp != null) {
             assert getConversion() != null;
             p2.setConversion(getConversion().copy(rebindings));
