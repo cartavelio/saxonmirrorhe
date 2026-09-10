@@ -1,7 +1,5 @@
 package internaltests;
 
-import net.sf.saxon.ma.map.OrderedMap;
-import net.sf.saxon.ma.map.OrderedStringMap;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.ma.map.*;
 import net.sf.saxon.s9api.Processor;
@@ -140,18 +138,8 @@ public class OrderedMapTests {
     }
 
     @Test
-    public void testOrderedMap() {
-        MapBuilder builder = OrderedMap.getBuilder();
-        builder.put(new StringValue("a"), new DoubleValue(1));
-        builder.put(new StringValue("b"), new DoubleValue(2));
-        builder.put(new StringValue("c"), new DoubleValue(3));
-        builder.put(new StringValue("d"), new DoubleValue(4));
-        testOrderedStringMapImplementation(builder.getCompletedMap());
-    }
-
-    @Test
-    public void testOrderedStringMap() {
-        MapItem o = new OrderedStringMap();
+    public void testExtensibleMapFromEmpty() {
+        MapItem o = new ExtensibleMap();
         o = o.put(new StringValue("a"), new DoubleValue(1));
         o = o.put(new StringValue("b"), new DoubleValue(2));
         o = o.put(new StringValue("c"), new DoubleValue(3));
@@ -159,9 +147,19 @@ public class OrderedMapTests {
         testOrderedStringMapImplementation(o);
     }
 
+//    @Test
+//    public void testOrderedStringMap() {
+//        MapItem o = new OrderedStringMap();
+//        o = o.put(new StringValue("a"), new DoubleValue(1));
+//        o = o.put(new StringValue("b"), new DoubleValue(2));
+//        o = o.put(new StringValue("c"), new DoubleValue(3));
+//        o = o.put(new StringValue("d"), new DoubleValue(4));
+//        testOrderedStringMapImplementation(o);
+//    }
+
     @Test
     public void testBuildFromEmpty() {
-        MapItem o = new EmptyMap();
+        MapItem o = EmptyMap.getInstance();
         o = o.put(new StringValue("a"), new DoubleValue(1));
         o = o.put(new StringValue("b"), new DoubleValue(2));
         o = o.put(new StringValue("c"), new DoubleValue(3));
@@ -201,6 +199,29 @@ public class OrderedMapTests {
         } catch (SaxonApiException e) {
             fail();
         }
+    }
+
+    @Test
+    public void testFixedMap() {
+        GeneralMapBuilder builder = AbstractFixedMap.getBuilder();
+        builder.put(new StringValue("a"), new DoubleValue(1));
+        builder.put(new StringValue("b"), new DoubleValue(2));
+        builder.put(new StringValue("c"), new DoubleValue(3));
+        builder.put(new StringValue("d"), new DoubleValue(4));
+        testOrderedStringMapImplementation(builder.getCompletedMapConfidently());
+    }
+
+    @Test
+    public void testExtensibleMap() {
+        GeneralMapBuilder builder = AbstractFixedMap.getBuilder();
+        builder.put(new StringValue("a"), new DoubleValue(1));
+        builder.put(new StringValue("temp"), new DoubleValue(1));
+        builder.put(new StringValue("b"), new DoubleValue(2));
+        builder.put(new StringValue("c"), new DoubleValue(3));
+        MapItem initial = builder.getCompletedMapConfidently();
+        initial = initial.remove(new StringValue("temp"));
+        initial = initial.put(new StringValue("d"), new DoubleValue(4));
+        testOrderedStringMapImplementation(initial);
     }
 
 
