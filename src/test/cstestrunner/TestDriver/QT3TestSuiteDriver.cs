@@ -230,6 +230,18 @@ namespace TestDriver {
                 case "saxon:platform": {
                     return value.Split(' ').Contains("CS");
                 }
+                case "saxon:version": {
+                    int thisVersion = JVersion.getStructuredVersionNumber()[0];
+                    foreach (string p in value.Split(" ")) {
+                        if (p.Equals(thisVersion + "")) {
+                            return true;
+                        }
+                        if (p.EndsWith("+") && int.Parse(p.Replace("+", "")) <= thisVersion) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
                 case "feature": {
                     if ("namespace-axis".Equals(value)) {
                         return !inverse;
