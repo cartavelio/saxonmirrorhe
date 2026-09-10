@@ -20,6 +20,7 @@ XQueryProcessor::~XQueryProcessor() {
   if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr << "~XQueryProcessor destructor called: ob ref=" << (this)  << std::endl;
   }
+  SaxonProcessor::attachCurrentThread();
   clearProperties();
   clearParameters();
   if (cppXQ != SXN_UNSET) {
