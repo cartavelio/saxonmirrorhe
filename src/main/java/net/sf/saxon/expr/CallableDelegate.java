@@ -19,6 +19,8 @@ import net.sf.saxon.trans.XPathException;
 
 public class CallableDelegate implements Callable {
 
+    private String description;
+
     @FunctionalInterface
     public interface Lambda {
         Sequence call(XPathContext context, Sequence[] arguments) throws XPathException;
@@ -38,6 +40,14 @@ public class CallableDelegate implements Callable {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         return expression.call(context, arguments);
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String toString() {
+        return description == null ? super.toString() : description;
     }
 }
 

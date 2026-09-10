@@ -4442,8 +4442,9 @@ public class XPathParser {
                 // effect, when evaluated, is to make the call on {@code bindContext} and return
                 // the bound function item.
                 IContextAccessorFunction unboundFunction = (IContextAccessorFunction)foundFunction;
-                Callable callable = new CallableDelegate(
+                CallableDelegate callable = new CallableDelegate(
                         (context, args) -> unboundFunction.bindContext(context));
+                callable.setDescription(foundFunction.getDescription());
                 CallableFunction binder = new CallableFunction(
                         0, callable, new SpecificFunctionType(new SequenceType[]{}, SequenceType.SINGLE_FUNCTION));
                 DynamicFunctionCall dfc = new DynamicFunctionCall(
