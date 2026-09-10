@@ -45,18 +45,20 @@
       <i>For details of how to set up collation URIs for use in XQuery, see <a class="bodylink"
             href="/extensibility/collation">Collations</a>.</i>
    </p>
-   <section id="commandline" title="Running XQuery from the Command Line">
+   <section id="commandline" title="From the Command Line">
       <h1>Running XQuery from the Command Line</h1>
 
 
       <p>A command is available to run a query contained in a file.</p> 
-      <p class="javaonly">The form of command on the Java
+      <div class="javaonly">
+      <p >The form of command on the Java
          platform is:</p>
       <kbd>java  net.sf.saxon.Query   [options]  [ <i>params...</i>] </kbd>
-
-      <p class="csonly">On Saxon-CS, the command takes the form:</p>
-      <kbd>dotnet Saxon query   [options]  [ <i>params...</i>] </kbd>
-
+      </div>
+      <div class="csonly">
+      <p>On Saxon-CS, the command takes the form:</p>
+      <kbd>dotnet SaxonCS query   [options]  [ <i>params...</i>] </kbd>
+      </div>
       <p>The options will generally include either <code>-q:queryFile</code> which takes the query from a file,
       or <code>-qs:query</code> in which the query appears directly in the command line (usually in quotes).</p>
       
@@ -747,9 +749,10 @@
          supported by Saxon, see <a class="bodylink" href="/extensions/output-extras">Additional
             serialization parameters</a>.</p>
    </section>
-   <section id="api-query" title="Running Queries from a Java Application" class="javaonly">
+   <section id="api-query" title="From a Java Application">
+      
       <h1>Running Queries from a Java Application</h1>
-
+      <div  class="javaonly">
 
       <p>Saxon offers two different APIs allowing queries to be run from Java:</p>
       <ul>
@@ -766,10 +769,12 @@
                   XQuery</a>.</p>
          </li>
       </ul>
+      </div>
 
-      <section id="s9api-query" title="Using s9api for XQuery" class="javaonly">
+      <section id="s9api-query" title="Using s9api for XQuery">
+         
          <h1>Using s9api for XQuery</h1>
-
+         <div class="javaonly">
          <p>You can perform a query using the s9api interface as follows:</p>
          <ol>
             <li>
@@ -845,11 +850,12 @@
             use <code>import module</code> specifying the module URI in the normal way. It is not
             necessary to supply a module location hint (<code>at "URI"</code>), and if any is
             supplied, it will be ignored.</p>
+         </div>
       </section>
 
       <section id="xqj" title="Invoking XQuery using the XQJ API" class="javaonly">
          <h1>Invoking XQuery using the XQJ API</h1>
-
+         <div class="javaonly">
 
          <p>XQJ (XQuery API for Java, also known as JSR 225) is a vendor-neutral API for invoking
             XQuery from Java applications. The Final Release (1.0) is published at <a
@@ -900,12 +906,13 @@
             position. The result of <code>getItem()</code> is an <code>XQItem</code> object, and
             this has methods allowing you to determine the item type, and to convert the item into a
             suitable Java object or value.</p>
+         </div>
       </section>
    </section>
    
-   <section id="saxon-api-query" title="Using XQuery from C#" class="csonly">
+   <section id="saxon-api-query" title="From a C# Application">
       <h1>Using XQuery from C#</h1>
-      
+      <div class="csonly">
       <aside>The same classes and methods can be used from .NET languages other than C#, but
       all the examples here are written in C# terms.</aside>
       
@@ -960,7 +967,8 @@
             an <code>XdmValue</code> using steps and predictaes. For example, if the query returns
             a single node <code>section</code>, (<code>XdmNode</code> is a subclass of <code>XdmValue</code>), then
             you could test whether it has any descendant <code>para</code> elements with <code>@class="normal"</code>
-            by writing <code>if (section.Select(Descendant("para").Where(Eq(Attribute("class"), "normal")).Exists()) {...}</code>.</p>
+            by writing</p>
+            <samp>if (section.Select(Descendant("para").Where(Eq(Attribute("class"), "normal")).Exists()) {...}</samp>
             
             <aside>This example assumes the presence of appropriate <code>using static</code> directives for the
                types <a class="cslink" href="Saxon.Api.Steps">Saxon.Api.Steps</a> and <a class="cslink"
@@ -990,6 +998,7 @@
          use <code>import module</code> specifying the module URI in the normal way. It is not
          necessary to supply a module location hint (<code>at "URI"</code>), and if any is
          supplied, it will be ignored.</p>
+      </div>
    </section>
    
    <section id="update" title="Using XQuery Update">
@@ -1039,13 +1048,19 @@
          present possible to update the Tiny Tree, nor external object models such as DOM, JDOM2, or
          XOM.</p>
    </section>
-   <section id="callingfunctions" title="Calling XQuery Functions from Java" class="javaonly">
-      <h1>Calling XQuery Functions from Java</h1>
-
-
+   <section id="callingfunctions" title="Calling XQuery Functions from an Application">
+      
+      <h1>Calling XQuery Functions from an Application</h1>
+      
       <p>Although the usual way to invoke XQuery from a Java application is to compile and execute a
          query as described above, it is also possible to invoke individual XQuery functions
-         directly from Java if required. This is achieved as follows:</p>
+         directly from Java if required.</p>
+      
+      <div class="javaonly">
+      <h2>Calling XQuery Functions from Java</h2>
+
+
+       <p>This is achieved as follows:</p>
          
          <ol>
             <li><p>First use the s9api interface to create
@@ -1086,16 +1101,13 @@ XdmValue result = ev.callFunction(new QName("http://www.w3.org/2005/xquery-local
       <p>The value of <code>result</code> will be the atomic value 2, of type <code>xs:double</code>. The function conversion rules take care of
       the fact that a supplied sequence of integers is accepted where the required type is a sequence of <code>xs:double</code> values.</p>
          
-         
+      </div>  
  
-   </section>
-   <section id="callingfunctions-cs" title="Calling XQuery Functions from C#" class="csonly">
-      <h1>Calling XQuery Functions from C#</h1>
+      <div class="csonly">
+      <h2>Calling XQuery Functions from C#</h2>
       
       
-      <p>Although the usual way to invoke XQuery from a C# application is to compile and execute a
-         query as described above, it is also possible to invoke individual XQuery functions
-         directly from C# if required. This is achieved as follows:</p>
+      <p>This is achieved as follows:</p>
       
       <ol>
          <li><p>First use the Saxon.Api interface to create
@@ -1135,7 +1147,7 @@ XdmValue result = ev.CallFunction(new QName("http://www.w3.org/2005/xquery-local
       <p>The value of <code>result</code> will be the atomic value 2, of type <code>xs:double</code>. The function conversion rules take care of
          the fact that a supplied sequence of integers is accepted where the required type is a sequence of <code>xs:double</code> values.</p>
       
-      
+      </div>
       
    </section>
    <section id="resultformat" title="Result Format">
@@ -1145,20 +1157,29 @@ XdmValue result = ev.CallFunction(new QName("http://www.w3.org/2005/xquery-local
       <p>The result of a query is a sequence of nodes and atomic values - which means it is not, in
          general, an XML document. This raises the question as to how the results should be
          output.</p>
-
+      
       <p>The Saxon command line processor for XQuery by default produces the output by
          converting the result sequence to a document following the rules of the XQuery
-            <code>document{}</code> constructor, and then serializing this document.</p>
+         <code>document{}</code> constructor, and then serializing this document.</p>
+      
+      
+      <p>XQuery 3.1 defines the <b>adaptive</b> output method to handle non-XML output: you can select this
+      with the command line option <code>!method=adaptive</code>. (On some shells, the "!" may need to
+      be escaped as "\!".). The adaptive output method attempts to display each of the items in the result
+      in an intuitive format: XML format for nodes, string format for atomic values, JSON format for
+      maps and arrays.</p>
 
-      <p>The alternative is wrapped format, requested using the <code>-wrap</code> argument. This
+      
+      <p>Another alternative offered by Saxon is wrapped format, requested using the <code>-wrap</code> argument. This
          wraps the result sequence as an XML document, and then serializes the resulting document.
          Each item in the result sequence is wrapped in an element (such as
             <code>result:element</code> or <code>result:atomic-value</code>) according to its type.
          The sequence as a whole is wrapped in a <code>result:sequence</code> element.</p>
    </section>
-   <section id="querycompilation" title="Compiling Queries" class="javaonly">
-      <h1>Compiling Queries</h1>
+   <section id="querycompilation" title="Compiling Queries to ByteCode">
+      <h1>Compiling Queries to ByteCode</h1>
 
+      <div class="javaonly">
       <aside>Bytecode generation requires Saxon-EE on the Java platform.</aside>
 
       <p>Since Saxon 9.4, Saxon-EE automatically (and selectively) compiles queries to Java
@@ -1166,9 +1187,6 @@ XdmValue result = ev.CallFunction(new QName("http://www.w3.org/2005/xquery-local
          execution. The bytecode exists only in memory, and would not be useful otherwise because it
          contains many references to the data structures generated by the Saxon parser and
          optimizer.</p>
-
-      <p>This facility replaces the ability in previous Saxon-EE releases to generate Java source
-         code from a query.</p>
       
       <p>From Saxon 9.8, bytecode generation is by default applied only to hotspots, that is, parts of the 
          executable code that are found to be frequently executed. These will often be predicates in filter
@@ -1184,13 +1202,15 @@ XdmValue result = ev.CallFunction(new QName("http://www.w3.org/2005/xquery-local
          average cost.</p>
 
       <p>There are configuration options to suppress bytecode generation
-            (<code>Feature.GENERATE_BYTE_CODE</code>), to insert debugging logic into the
-         generated bytecode (<code>Feature.DEBUG_BYTE_CODE</code>), and to display the generated
-         bytecode (<code>Feature.DISPLAY_BYTE_CODE</code>). See <a class="bodylink"
+            (<a class="feature" href="GENERATE_BYTE_CODE"/>), to insert debugging logic into the
+         generated bytecode (<a class="feature" href="DEBUG_BYTE_CODE"/>), and to display the generated
+         bytecode (<a class="feature" href="DISPLAY_BYTE_CODE"/>). See <a class="bodylink"
             href="/configuration/config-features">Configuration Features</a> for more
          information.</p>
+      </div>
    </section>
    <section id="performanceanalysis" title="Performance Analysis">
+      <div class="javaonly">
       <h1>Performance Analysis</h1>
       <p>Saxon comes with a simple tool allowing profiling of the execution time in a
          query.</p>
@@ -1210,6 +1230,7 @@ XdmValue result = ev.CallFunction(new QName("http://www.w3.org/2005/xquery-local
          top. These will not necessarily be those with the greatest time, which tend to be
          instructions that were only executed once but remained active for the duration of the
          query.</p>
+      </div>
    </section>
    <section id="extensibility" title="Extensibility">
       <h1>Extensibility</h1>
