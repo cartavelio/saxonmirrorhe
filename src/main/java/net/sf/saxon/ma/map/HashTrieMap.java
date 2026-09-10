@@ -244,35 +244,28 @@ public class HashTrieMap extends MapItem {
      */
     @Override
     public MapType getItemType(TypeHierarchy th) {
-        AtomicType keyType = null;
-        ItemType valueType = null;
+        UType keyType = UType.VOID;
+        UType valueType = UType.VOID;
         int valueCard = 0;
         // we need to test the entries individually
         AtomicIterator keyIter = keys();
         AtomicValue key;
         while ((key = keyIter.next()) != null) {
-            Sequence val = get(key);
-            if (keyType == null) {
-                keyType = key.getItemType();
-                valueType = SequenceTool.getItemType(val, th);
-                valueCard = SequenceTool.getCardinality(val);
-            } else {
-                keyType = (AtomicType)Type.getCommonSuperType(keyType, key.getItemType(), th);
-                valueType = Type.getCommonSuperType(valueType, SequenceTool.getItemType(val, th), th);
-                valueCard = Cardinality.union(valueCard, SequenceTool.getCardinality(val));
-            }
+            GroundedValue val = get(key);
+            keyType = keyType.union(key.getUType());
+            valueType = valueType.union(SequenceTool.getUType(val));
+            valueCard = Cardinality.union(valueCard, SequenceTool.getCardinality(val));
         }
+        ItemType keyItemType = keyUType.toItemType();
+        ItemType valueItemType = valueUType.toItemType();
         if (keyType == null) {
             // implies the map is empty
-            this.keyUType = UType.VOID;
-            this.valueUType = UType.VOID;
-            this.valueCardinality = 0;
             return MapType.ANY_MAP_TYPE;
         } else {
-            this.keyUType = keyType.getUType();
-            this.valueUType = valueType.getUType();
+            this.keyUType = keyType;
+            this.valueUType = valueType;
             this.valueCardinality = valueCard;
-            return new MapType(keyType, SequenceType.makeSequenceType(valueType, valueCard));
+            return new MapType((AtomicType)keyItemType, SequenceType.makeSequenceType(valueItemType, valueCard));
         }
     }
 

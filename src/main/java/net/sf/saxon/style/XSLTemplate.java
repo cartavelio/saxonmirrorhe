@@ -1052,8 +1052,15 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
             ContextItemStaticInfo cisi = config.makeContextItemStaticInfo(contextItemType, mayOmitContextItem);
             cisi.setContextPostureStriding();
             ExpressionVisitor visitor = makeExpressionVisitor();
-            match.resetLocalStaticProperties();
-            match = match.optimize(visitor, cisi);
+
+            for (Map.Entry<StructuredQName, TemplateRule> entry : compiledTemplateRules.entrySet()) {
+                if (!entry.getKey().equals(Mode.OMNI_MODE)) {
+                    TemplateRule compiledTemplateRule = entry.getValue();
+                    compiledTemplateRule.getMatchPattern().resetLocalStaticProperties();
+                    Pattern m2 = compiledTemplateRule.getMatchPattern().optimize(visitor,cisi);
+                    compiledTemplateRule.setMatchPattern(m2);
+                }
+            }
 
             if (!isDeferredCompilation(getCompilation())) {
                 Optimizer opt = getConfiguration().obtainOptimizer();
@@ -1061,6 +1068,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                     for (Map.Entry<StructuredQName, TemplateRule> entry : compiledTemplateRules.entrySet()) {
                         if (!entry.getKey().equals(Mode.OMNI_MODE)) {
                             TemplateRule compiledTemplateRule = entry.getValue();
+
                             Expression templateRuleBody = compiledTemplateRule.getBody();
                             visitor.setOptimizeForStreaming(compiledTemplateRule.isDeclaredStreamable());
                             templateRuleBody = templateRuleBody.typeCheck(visitor, cisi);
