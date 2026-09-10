@@ -366,7 +366,7 @@ cdef class PySaxonProcessor:
         """
         cdef char * c_str_
         py_name_string = name.encode('utf-8') if name is not None else None
-        c_str_ = py_value_string if name is not None else ""
+        c_str_ = py_name_string if name is not None else ""
         cdef const char* c_string = self.thisptr.clarkNameToEQName(c_str_)
         ustring = make_py_str(c_string)
         return ustring
