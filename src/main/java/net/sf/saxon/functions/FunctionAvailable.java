@@ -66,8 +66,12 @@ public class FunctionAvailable extends SystemFunction {
             int minArity = 0;
             int maxArity = 20;
             if (getArity() == 2) {
-                minArity = (int) ((NumericValue) arguments[1].evaluateItem(env.makeEarlyEvaluationContext())).longValue();
-                maxArity = minArity;
+                NumericValue arg2 = ((NumericValue) arguments[1].evaluateItem(env.makeEarlyEvaluationContext()));
+                if (arg2 != null) {
+                    // empty sequence is allowed in 4.0
+                    minArity = (int) ((NumericValue) arguments[1].evaluateItem(env.makeEarlyEvaluationContext())).longValue();
+                    maxArity = minArity;
+                }
             }
 
             for (int i = minArity; i <= maxArity; i++) {
@@ -137,7 +141,11 @@ public class FunctionAvailable extends SystemFunction {
         String lexicalQName = arguments[0].head().getStringValue();
         int arity = -1;
         if (arguments.length == 2) {
-            arity = (int) ((NumericValue) arguments[1].head()).longValue();
+            NumericValue arg2 = ((NumericValue) arguments[1].head());
+            if (arg2 != null) {
+                // Empty sequence is allowed in 4.0
+                arity = (int) arg2.longValue();
+            }
         }
         return BooleanValue.get(
                 isFunctionAvailable(lexicalQName, getRetainedStaticContext(), arity, context));

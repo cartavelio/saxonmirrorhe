@@ -112,11 +112,13 @@ public class DocumentFn extends SystemFunction implements Callable {
         SequenceIterator hrefSequence = arguments[0].iterate();
         String baseURI = null;
         if (numArgs == 2) {
-            // we can trust the type checking: it must be a node
             NodeInfo base = (NodeInfo) arguments[1].head();
-            baseURI = base.getBaseURI();
-            if (baseURI == null) {
-                throw new XPathException("The second argument to document() is a node with no base URI", "XTDE1162");
+            if (base != null) {
+                // empty sequence is allowed in 4.0; type checking prevents it if 4.0 not enabled
+                baseURI = base.getBaseURI();
+                if (baseURI == null) {
+                    throw new XPathException("The second argument to document() is a node with no base URI", "XTDE1162");
+                }
             }
         }
 

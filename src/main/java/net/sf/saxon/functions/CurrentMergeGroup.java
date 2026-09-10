@@ -13,6 +13,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.GroupIterator;
 import net.sf.saxon.expr.sort.MergeGroupingIterator;
 import net.sf.saxon.expr.sort.MergeInstr;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
@@ -118,10 +119,14 @@ public class CurrentMergeGroup extends SystemFunction {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public Sequence call(XPathContext context, Sequence[] arguments /*@NotNull*/) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         String source = null;
         if (arguments.length > 0) {
-            source = arguments[0].head().getStringValue();
+            Item value = arguments[0].head();
+            if (value != null) {
+                // Empty sequence allowed in 4.0
+                source = value.getStringValue();
+            }
         }
         return SequenceTool.toLazySequence(currentGroup(source, context));
     }
