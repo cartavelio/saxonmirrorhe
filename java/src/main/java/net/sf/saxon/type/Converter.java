@@ -229,12 +229,6 @@ public abstract class Converter {
             setConversionRules(rules);
         }
 
-        public DownCastingConverter(AtomicType annotation, ConversionRules rules, String errorCode) {
-            this.newType = annotation;
-            setConversionRules(rules);
-            this.errorCode = errorCode;
-        }
-
         public AtomicType getTargetType() {
             return newType;
         }
