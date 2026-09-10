@@ -172,7 +172,7 @@ public class Transform {
         options.addRecognizedOption("o", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Use specified file for primary output");
         options.addRecognizedOption("opt", CommandLineOptions.TYPE_STRING | CommandLineOptions.VALUE_REQUIRED,
-                                    "Enable/disable optimization options [-]cfgjklmnrsvwx");
+                                    "Enable/disable optimization options [-]defgjklmnprstvwx");
         //#if CSHARP==false
         options.addRecognizedOption("or", CommandLineOptions.TYPE_CLASSNAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Use named OutputURIResolver class");

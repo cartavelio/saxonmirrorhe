@@ -172,7 +172,7 @@ public class Query {
         options.addRecognizedOption("o", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Use specified file for primary output");
         options.addRecognizedOption("opt", CommandLineOptions.TYPE_STRING | CommandLineOptions.VALUE_REQUIRED,
-                                    "Enable/disable optimization options [-]cfgklmnsvwx");
+                                    "Enable/disable optimization options [-]defgklmnpstvwx");
         options.addRecognizedOption("outval", CommandLineOptions.TYPE_ENUMERATION | CommandLineOptions.VALUE_REQUIRED,
                                     "Action when validation of output file fails");
         options.setPermittedValues("outval", new String[]{"recover", "fatal"}, null);
