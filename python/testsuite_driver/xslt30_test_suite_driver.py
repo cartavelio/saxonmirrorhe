@@ -863,6 +863,7 @@ def main(argv):
     global driver_proc
     global jit
 
+    report_file_name = None
     saxon_version = driver_proc.version
 
     print("W3 XSLT 3.0 Test Suite")
@@ -877,9 +878,9 @@ def main(argv):
         argvv = argv[1:]
 
         try:
-            opts, args = getopt.getopt(argvv, "ht:s:o:l:", ["testpattern", "testset", "resultdir", "jit=", "lang"])
+            opts, args = getopt.getopt(argvv, "ht:s:o:l:r:", ["testpattern=", "testset=", "resultdir=", "jit=", "lang=", "reportfilename="])
         except getopt.GetoptError:
-            print('xslt30_test_suite_driver.py -t <testpattern> -s <testset> -o <resultdir> --jit on/off -l <processor language>')
+            print('xslt30_test_suite_driver.py -t <testpattern> -s <testset> -o <resultdir> --jit on/off -l <processor language> -reportfilename <report file name>')
             sys.exit(2)
 
         for opt, arg in opts:
@@ -902,11 +903,14 @@ def main(argv):
                     jit = True
                 if "HE" in driver_proc.version:
                     jit = False
+            elif opt in ("-r", "--reportfilename"):
+                report_file_name = arg
+
             elif opt in ("-l", "--lang"):
                 spec = Spec.process_spec(arg)
-                test_report = PyTestReport("xslt30", "http://www.w3.org/2012/11/xslt30-test-results", spec.spec_and_version,driver_proc.version[:8], saxon_version)
 
-                '''PyTestReport("qt3", "http://www.w3.org/2012/08/qt-fots-results", spec.spec_and_version, driver_proc.version[7:9], saxon_version)'''
+        test_report = PyTestReport(spec.testsuite, "http://www.w3.org/2012/11/xslt30-test-results", spec.spec_and_version,driver_proc.version[:8], saxon_version, report_file_name if report_file_name is not None else None)
+
 
 
     if spec is None:

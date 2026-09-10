@@ -20,8 +20,9 @@ class PyTestReport:
     language = None
     product = None
     version = None
+    filename = None
 
-    def __init__(self, td, ns, lang, p, v):
+    def __init__(self, td, ns, lang, p, v, fname=None):
         self.result_root = None
         self.current_test_set = None
         self.test_driver_namespace = ns
@@ -29,6 +30,10 @@ class PyTestReport:
         self.test_driver = td
         self.product = p
         self.version = v
+        self.filename = fname
+
+    def file_name(self, fn):
+        self.filename = fn
 
     def write_result_file_preamble(self, proc: saxonc.PySaxonProcessor, td, config: list):
         global product
@@ -67,11 +72,14 @@ class PyTestReport:
         ET.indent(tree, space=" ", level=0)
         if not cwd.endswith('/'):
             cwd = cwd + '/'
-        filename = cwd + self.product.lower() + 'c_' + self.test_driver + '_' + self.language + '.xml'
+        if self.filename is None:
+            self.filename = cwd + self.product.lower() + 'c_' + self.test_driver + '_' + self.language + '.xml'
+        elif not self.filename.endswith('.xml'):
+                self.filename += '.xml'
         if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
             print("cwd", cwd)
-            print("Saving to = ", filename)
+            print("Saving to = ", self.filename)
 
 
-        tree.write(file_or_filename=filename)
+        tree.write(file_or_filename=self.filename)
 

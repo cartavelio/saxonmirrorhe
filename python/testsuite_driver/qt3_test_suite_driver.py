@@ -696,6 +696,8 @@ def main(argv):
     global saxon_version
     global driver_proc
 
+    report_file_name = None
+
     saxon_version = driver_proc.version
 
     print("W3 QT3 Test Suite")
@@ -710,7 +712,7 @@ def main(argv):
             diri = pathlib.Path(argv[0])
         except TypeError as ex:
             print("Error test suite directory missing")
-            print('qt3_test_suite_driver.py <testsuitedir> -l <lang> -t <testpattern> -s <testset> -o <resultdir>')
+            print('qt3_test_suite_driver.py <testsuitedir> -l <lang> -t <testpattern> -s <testset> -o <resultdir> -reportfilename <report file name>')
             sys.exit(2)
 
         print(f"Test suite directory = {diri}")
@@ -718,9 +720,9 @@ def main(argv):
         argvv = argv[1:]
 
         try:
-            opts, args = getopt.getopt(argvv, "ht:s:o:l:", ["testpattern", "testset", "resultdir", "lang"])
+            opts, args = getopt.getopt(argvv, "ht:s:o:l:r:", ["testpattern=", "testset=", "resultdir=", "lang=", "reportfilename="])
         except getopt.GetoptError:
-            print('qt3_test_suite_driver.py <testsuitedir> -t <testpattern> -s <testset> -o <resultdir> -l <processor language>')
+            print('qt3_test_suite_driver.py <testsuitedir> -t <testpattern> -s <testset> -o <resultdir> -l <processor language> -reportfilename <report file name>')
             sys.exit(2)
         print(opts)
         print(args)
@@ -736,10 +738,14 @@ def main(argv):
             elif opt in ("-o", "--resultdir"):
                 results_path = arg
 
+            elif opt in ("-r", "--reportfilename"):
+                report_file_name = arg
+
             elif opt in ("-l", "--lang"):
                 host_lang = arg
                 spec = Spec.process_spec(arg)
-                test_report = PyTestReport("qt3", "http://www.w3.org/2012/08/qt-fots-results", spec.spec_and_version, driver_proc.version[7:9], saxon_version)
+
+        test_report = PyTestReport(spec.testsuite, "http://www.w3.org/2012/08/qt-fots-results", spec.spec_and_version, driver_proc.version[7:9], saxon_version, report_file_name if report_file_name is not None else None)
 
     '''dir = os.getcwd()'''
     if spec is None:
