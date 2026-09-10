@@ -19,6 +19,22 @@ namespace Saxon.Impl.Helpers {
             return i.ToString("x");
         }
         
+        // parse an integer literal in base 10
+        public static int ParseInt(string input) {
+            if (input.StartsWith("0x")) {
+                throw new NumberFormatException("Leading 0x not allowed in number");
+            }
+
+            int number;
+            bool success = Int32.TryParse(input, out number);
+            if (success) {
+                return number;
+            }
+            else {
+                throw new NumberFormatException("Invalid integer '" + input + "'");
+            }
+        }
+        
         // parse an integer literal whose radix is not known statically
         public static int ParseInt(string input, int radix) {
             if (input.StartsWith("0x")) {
