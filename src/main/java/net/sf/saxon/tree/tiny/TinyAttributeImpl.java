@@ -80,9 +80,7 @@ final public class TinyAttributeImpl extends TinyNodeImpl {
 
     @Override
     protected long getSequenceNumber() {
-        //noinspection ConstantConditions
-        return
-                getParent().getSequenceNumber()
+        return getParent().getSequenceNumber()
                         + 0x8000 +
                         (nodeNr - tree.alpha[tree.attParent[nodeNr]]);
         // note the 0x8000 is to leave room for namespace nodes
@@ -95,7 +93,7 @@ final public class TinyAttributeImpl extends TinyNodeImpl {
      */
 
     @Override
-    public final int getNodeKind() {
+    public int getNodeKind() {
         return Type.ATTRIBUTE;
     }
 
@@ -143,7 +141,7 @@ final public class TinyAttributeImpl extends TinyNodeImpl {
     }
 
     /**
-     * Get the display name of this node. For elements and attributes this is [prefix:]localname.
+     * Get the display name of this node. For elements and attributes this is {@code [prefix:]localname}.
      * For unnamed nodes, it is an empty string.
      *
      * @return The display name of this node.
@@ -184,7 +182,7 @@ final public class TinyAttributeImpl extends TinyNodeImpl {
      */
 
     @Override
-    public final String getURI() {
+    public String getURI() {
         int code = tree.attCode[nodeNr];
         if (!NamePool.isPrefixed(code)) {
             return "";
@@ -226,7 +224,7 @@ final public class TinyAttributeImpl extends TinyNodeImpl {
     }
 
     /**
-     * Generate id. Returns key of owning element with the attribute namecode as a suffix
+     * Generate id. Returns key of owning element with the attribute nameCode as a suffix
      *
      * @param buffer Buffer to contain the generated ID value
      */
@@ -242,7 +240,7 @@ final public class TinyAttributeImpl extends TinyNodeImpl {
     }
 
     /**
-     * Copy this node to a given outputter
+     * Copy this node to a given {@code Receiver}
      */
 
     @Override
@@ -288,6 +286,17 @@ final public class TinyAttributeImpl extends TinyNodeImpl {
     @Override
     public boolean isIdref() {
         return tree.isIdrefAttribute(nodeNr);
+    }
+
+    /**
+     * Determine whether the node has the is-nilled property
+     *
+     * @return true if the node has the is-nilled property
+     */
+
+    @Override
+    public boolean isNilled() {
+        return false;
     }
 
     /**
