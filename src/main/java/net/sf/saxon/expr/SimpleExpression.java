@@ -9,10 +9,12 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.oper.OperandArray;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.ItemType;
@@ -233,7 +235,8 @@ public abstract class SimpleExpression extends Expression implements Callable {
 
     @Override
     public void export(ExpressionPresenter destination) throws XPathException {
-        throw new XPathException("In general, stylesheets using extension instructions cannot be exported");
+        throw new XPathException("In general, stylesheets using extension instructions cannot be exported",
+                                 SaxonErrorCode.SXST0072);
     }
 
     /**
@@ -247,5 +250,35 @@ public abstract class SimpleExpression extends Expression implements Callable {
         return getClass().getName();
     }
 
+    @Override
+    public Elaborator getElaborator() {
+        return new SimpleExpressionElaborator();
+    }
+
+    public static class SimpleExpressionElaborator extends PushElaborator {
+
+        @Override
+        public PushEvaluator elaborateForPush() {
+            SimpleExpression expr = (SimpleExpression)getExpression();
+            return (output, context) -> {
+                expr.process(output, context);
+                return null;
+            };
+        }
+
+        @SuppressWarnings("Convert2MethodRef")
+        @Override
+        public PullEvaluator elaborateForPull() {
+            SimpleExpression expr = (SimpleExpression) getExpression();
+            return context -> expr.iterate(context);
+        }
+
+        @SuppressWarnings("Convert2MethodRef")
+        @Override
+        public ItemEvaluator elaborateForItem() {
+            SimpleExpression expr = (SimpleExpression) getExpression();
+            return context -> expr.evaluateItem(context);
+        }
+    }
 }
 

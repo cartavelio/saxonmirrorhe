@@ -316,6 +316,12 @@ public class SaxonErrorCode {
      */
 
     public static final String SXST0071 = "SXST0071";
+
+    /**
+     * SXST0072: Exporting a stylesheet containing extensions instruction
+     */
+
+    public static final String SXST0072 = "SXST0072";
     
     /**
      * SXTA0001: unresolved type alias
