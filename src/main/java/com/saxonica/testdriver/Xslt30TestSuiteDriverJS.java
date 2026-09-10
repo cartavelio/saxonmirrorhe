@@ -18,16 +18,34 @@ public class Xslt30TestSuiteDriverJS extends Xslt30TestSuiteDriverEE {
     File exportFile;
     private final Map<String, XdmValue> globalParams = new HashMap<String, XdmValue>();
     private final List<XdmValue> initialFunctionArgs = new ArrayList<XdmValue>();
-    private final String targetVersion = "JS";
+    private String targetVersion = "JS";
 
     public static void main(String[] args) throws Exception {
         if (args.length == 0 || args[0].equals("-?")) {
             usage();
         }
-        String[] argsExtra = new String[args.length + 1];
-        System.arraycopy(args, 0, argsExtra, 0, args.length);
-        argsExtra[args.length] = "-js";
-        new Xslt30TestSuiteDriverJS().go(argsExtra);
+        new Xslt30TestSuiteDriverJS().go(args);
+    }
+
+    @Override
+    public void go(String[] args) throws Exception {
+        boolean jsOptionIncluded = false;
+        for (int i = 2; i < args.length; i++) {
+            int colon = args[i].indexOf(':');
+            String argValue = colon < 0 ? "" : args[i].substring(colon + 1);
+            if (args[i].startsWith("-js:")) {
+                targetVersion = argValue;
+                jsOptionIncluded = true;
+            }
+        }
+        if (!jsOptionIncluded) {
+            String[] argsExtra = new String[args.length + 1];
+            System.arraycopy(args, 0, argsExtra, 0, args.length);
+            argsExtra[args.length] = "-js";
+            super.go(argsExtra);
+        } else {
+            super.go(args);
+        }
     }
 
     @Override
@@ -123,11 +141,6 @@ public class Xslt30TestSuiteDriverJS extends Xslt30TestSuiteDriverEE {
     }
 
     @Override
-    protected String getNameOfExceptionsFile() {
-        return "exceptions.xml";
-    }
-
-    @Override
     protected XsltExecutable reloadExportedStylesheet(XsltCompiler compiler, File exportFile) throws SaxonApiException {
         this.exportFile = exportFile;
         globalParams.clear();
@@ -142,8 +155,9 @@ public class Xslt30TestSuiteDriverJS extends Xslt30TestSuiteDriverEE {
             String localName = sourceFile.getName();
             File exportLoc = new File(resultsDir + "/export/" + localName + ".sef.json");
             System.err.println("Exporting to " + exportLoc);
+            compiler.setTargetEdition(targetVersion);
             XsltPackage compiledPack = compiler.compilePackage(new StreamSource(filename));
-            compiledPack.save(exportLoc, targetVersion);
+            compiledPack.save(exportLoc);
             return exportLoc;
         } catch (SaxonApiException e) {
             System.err.println("*** Failed to export " + filename + " - " + e.getMessage());
@@ -156,8 +170,9 @@ public class Xslt30TestSuiteDriverJS extends Xslt30TestSuiteDriverEE {
         try {
             File exportFile = new File(resultsDir + "/export/" + testSetName + "/" + testName + ".sef.json");
             System.err.println("Exporting to " + exportFile);
+            compiler.setTargetEdition(targetVersion);
             XsltPackage compiledPack = compiler.compilePackage(styleSource);
-            compiledPack.save(exportFile, targetVersion);
+            compiledPack.save(exportFile);
             sheet = reloadExportedStylesheet(compiler, exportFile);
         } catch (SaxonApiException e) {
             System.err.println(e.getMessage());
