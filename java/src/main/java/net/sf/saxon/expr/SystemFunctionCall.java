@@ -308,7 +308,9 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
         if (target instanceof StatefulSystemFunction) {
             target = ((StatefulSystemFunction) target).copy();
         }
-        return target.makeFunctionCall(args);
+        Expression e = target.makeFunctionCall(args);
+        ExpressionTool.copyLocationInfo(this, e);
+        return e;
     }
     /**
      * For an expression that returns an integer or a sequence of integers, get
