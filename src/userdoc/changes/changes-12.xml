@@ -169,6 +169,11 @@
         <p>Added the property <code cs="Saxon.Api.XdmNode#OutermostElement">XdmNode.OutermostElement</code> to find the 
             outermost element (also known as the document element) of a tree.</p>
         
+        <p>In 12.4, added an <code>ErrorReporter</code> property to classes <code>XPathSelector</code>,
+            <code>XQueryEvaluator</code>, <code>XsltTransformer</code>, and <code>Xslt30Transformer</code>,
+            allowing dynamic errors to be intercepted and notified on some channel other than the system
+            error stream.</p>
+        
         
         
         
