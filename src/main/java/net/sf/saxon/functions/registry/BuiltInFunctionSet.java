@@ -192,7 +192,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
         if (functionName.hasURI(getNamespace()) && entry != null) {
             entry.ensurePopulated();
             if ((entry.properties & SEQV) != 0) {
-                // sequence-variadic functions in 4.0 (e.g..concat, codepoints-to-string)
+                // sequence-variadic functions in 4.0 (e.g..concat)
                 // combine the "variable" arguments into a single argument
                 if (env.getXPathVersion() < 40) {
                     // Need to special-case the fn:concat() function prior to XPath 4.0
@@ -533,9 +533,6 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
          */
         public int properties;
 
-        public boolean isVariadic() {
-            return (properties & SEQV) != 0;
-        }
         /**
          * For options parameters, details of the accepted options, their defaults, and required type
          */

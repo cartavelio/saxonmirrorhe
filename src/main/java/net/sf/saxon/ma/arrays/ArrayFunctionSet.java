@@ -245,10 +245,10 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             register("trunk", 1, e -> e.populate(ArrayTrunk::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
 
-            register("of-members", 1, e -> e.populate(ArrayOfMembers::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, SEQV)
+            register("of-members", 1, e -> e.populate(ArrayOfMembers::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                     .arg(0, Parcel.TYPE, STAR, null));
 
-            register("members", 1, e -> e.populate(ArrayMembers::new, Parcel.TYPE, STAR, SEQV)
+            register("members", 1, e -> e.populate(ArrayMembers::new, Parcel.TYPE, STAR, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null));
 
             register("values", 1, e -> e.populate(ArrayValues::new, AnyItemType.getInstance(), STAR, 0)

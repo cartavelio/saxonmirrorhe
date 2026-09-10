@@ -39,13 +39,6 @@ public interface FunctionDefinition {
     int getMinimumArity();
 
     /**
-     * Ask if the function is variadic
-     * @return true for a variadic function
-     */
-
-    boolean isVariadic();
-
-    /**
      * Get the name (keyword) of the Nth parameter
      *
      * @param i the position of the required parameter

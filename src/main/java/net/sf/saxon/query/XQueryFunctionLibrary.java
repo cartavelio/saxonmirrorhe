@@ -9,7 +9,6 @@ package net.sf.saxon.query;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
@@ -21,16 +20,16 @@ import net.sf.saxon.ma.trie.ImmutableHashTrieMap;
 import net.sf.saxon.ma.trie.ImmutableList;
 import net.sf.saxon.ma.trie.ImmutableMap;
 import net.sf.saxon.ma.trie.TrieKVP;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.FunctionItem;
+import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-
-import net.sf.saxon.type.Schema;
-
 import net.sf.saxon.transpile.CSharpReplaceBody;
-
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
 
@@ -175,7 +174,6 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
                 uf.setFunctionName(functionName.getComponentName());
                 uf.setResultType(fd.getResultType());
                 uf.setParameterDefinitions(fd.getParameterDefinitions());
-                uf.setVariadic(fd.isVariadic());
                 final UserFunctionReference ref = new UserFunctionReference(uf, functionName);
                 fd.registerReference(ref);
                 return new UnresolvedXQueryFunctionItem(fd, functionName, ref);
@@ -294,21 +292,13 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
             if (function == null) {
                 throw new XPathException("Forwards reference to XQuery function has not been resolved");
             }
-            if (function.isVariadic()) {
-                Sequence[] condensedArgs = new Sequence[function.getArity()];
-                int last = function.getArity() - 1;
-                for (int i = 0; i < last; i++) {
-                    condensedArgs[i] = arguments[i].materialize();
-                }
-                condensedArgs[last] = SequenceTool.joinSequences(Arrays.copyOfRange(arguments, last, arguments.length)).materialize();
-                return function.call(context.newCleanContext(), condensedArgs);
-            } else {
-                Sequence[] args = new Sequence[arguments.length];
-                for (int i = 0; i < arguments.length; i++) {
-                    args[i] = arguments[i].materialize(); // TODO: is the copy needed?
-                }
-                return function.call(context.newCleanContext(), args);
+
+            Sequence[] args = new Sequence[arguments.length];
+            for (int i = 0; i < arguments.length; i++) {
+                args[i] = arguments[i].materialize(); // TODO: is the copy needed?
             }
+            return function.call(context.newCleanContext(), args);
+
         }
 
         @Override
@@ -392,7 +382,7 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
         ImmutableList<XQueryFunction> homonyms = localMap.get(functionName.getLocalPart());
         if (homonyms != null) {
             for (XQueryFunction f : homonyms) {
-                if (f.getMinimumArity() <= staticArgs && (f.isVariadic() || f.getNumberOfParameters() >= staticArgs)) {
+                if (f.getMinimumArity() <= staticArgs && f.getNumberOfParameters() >= staticArgs) {
                     return f;
                 }
             }
@@ -427,14 +417,6 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
             int maxArity = fd.getNumberOfParameters();
             if (arguments.length == maxArity && (details.keywords == null || details.keywords.isEmpty())) {
                 ufc.setArguments(arguments);
-            } else if (fd.isVariadic() && arguments.length != fd.getNumberOfParameters()) {
-                Expression[] condensedArgs = new Expression[fd.getNumberOfParameters()];
-                int last = fd.getNumberOfParameters() - 1;
-                System.arraycopy(arguments, 0, condensedArgs, 0, last);
-                Expression[] spreadArgs = new Expression[arguments.length - last];
-                System.arraycopy(arguments,last,spreadArgs,0,spreadArgs.length);
-                condensedArgs[last] = new Block(spreadArgs);
-                ufc.setArguments(condensedArgs);
             } else {
                 // 4.0: handle keyword arguments and default arguments
                 Expression[] expandedArgs = Arrays.copyOf(arguments, maxArity);

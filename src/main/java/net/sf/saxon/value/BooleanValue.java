@@ -32,8 +32,9 @@ public final class BooleanValue extends AtomicValue implements XPathComparable, 
     public static final BooleanValue FALSE = new BooleanValue(false);
 
     /**
-     * Private Constructor: create a boolean value. Only two instances of this class are
-     * ever created, one to represent true and one to represent false.
+     * Private Constructor: create a boolean value. Normally, only two instances of this class are
+     * ever created, one to represent true and one to represent false. Exceptionally, however,
+     * other instances may be created if there is a user-defined subtype of xs:boolean in a schema.
      *
      * @param value the initial value, true or false
      */
@@ -77,6 +78,9 @@ public final class BooleanValue extends AtomicValue implements XPathComparable, 
 
     @Override
     public AtomicValue withMetadata(AtomicMetadata metadata) {
+        if (metadata == BuiltInAtomicType.BOOLEAN) {
+            return BooleanValue.get(getBooleanValue());
+        }
         return new BooleanValue(value, metadata);
     }
 

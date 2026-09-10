@@ -840,8 +840,7 @@ public class XQueryParser extends XPathParser {
             Annotation annotation = new Annotation(qName);
             if (uri.equals(NamespaceUri.XQUERY)) {
                 if (!qName.equals(Annotation.PRIVATE) && !qName.equals(Annotation.PUBLIC) &&
-                        !qName.equals(Annotation.UPDATING) && !qName.equals(Annotation.SIMPLE)
-                        && !qName.equals(Annotation.VARIADIC)) {
+                        !qName.equals(Annotation.UPDATING) && !qName.equals(Annotation.SIMPLE)) {
                     grumble("Unrecognized variable or function annotation " + qName.getDisplayName(), "XQST0045");
                 }
             } else if (isReservedInQuery(uri)) {
@@ -1711,8 +1710,13 @@ public class XQueryParser extends XPathParser {
 
     private void parseContextItemDeclaration() throws XPathException {
         int offset = t.currentTokenStartOffset;
+
         if (!isKeyword("item")) {
-            grumble("After 'declare context', expected 'item'");
+            if (isKeyword("value")) {
+                grumble("'declare context value' is not yet implemented"); // TODO: implement this
+            } else {
+                grumble("After 'declare context', expected 'item'");
+            }
         }
         if (foundContextItemDeclaration) {
             grumble("More than one context item declaration found", "XQST0099", offset);
@@ -1876,9 +1880,6 @@ public class XQueryParser extends XPathParser {
                 if (t.currentToken == Token.COLON_EQUALS) {
                     if (!allowXPath40Syntax) {
                         grumble("Default values for function parameters require XQuery 4.0 to be enabled");
-                    }
-                    if (func.isVariadic()) {
-                        grumble("Default values are not allowed for the parameters of a variadic function", "XQST0150");
                     }
                     foundDefault = true;
                     nextToken();

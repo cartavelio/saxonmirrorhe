@@ -45,7 +45,6 @@ public class XQueryFunction implements Declaration, Location, FunctionDefinition
     private NamespaceResolver namespaceResolver;
     private QueryModule staticContext;
     private boolean updating = false;
-    private boolean variadic = false;
     private AnnotationList annotations = AnnotationList.EMPTY;
     private int mandatoryParams = 0;
 
@@ -343,26 +342,6 @@ public class XQueryFunction implements Declaration, Location, FunctionDefinition
     }
 
     /**
-     * Set whether this is a variadic function (as defined in XQuery 4.0)
-     *
-     * @param isVariadic true if this is a variadic function
-     */
-
-    public void setVariadic(boolean isVariadic) {
-        this.variadic = isVariadic;
-    }
-
-    /**
-     * Ask whether this is a variadic function (as defined in XQuery 4.0)
-     *
-     * @return true if this is a variadic function
-     */
-
-    public boolean isVariadic() {
-        return variadic;
-    }
-
-    /**
      * Set the annotations on this function
      *
      * @param annotations the annotations, indexed by annotation name
@@ -375,9 +354,6 @@ public class XQueryFunction implements Declaration, Location, FunctionDefinition
         }
         if (annotations.includes(Annotation.UPDATING)) {
             setUpdating(true);
-        }
-        if (annotations.includes(Annotation.VARIADIC)) {
-            setVariadic(true);
         }
     }
 
@@ -477,7 +453,6 @@ public class XQueryFunction implements Declaration, Location, FunctionDefinition
                 compiledFunction.setSystemId(location.getSystemId());
                 compiledFunction.setStackFrameMap(map);
                 compiledFunction.setUpdating(updating);
-                compiledFunction.setVariadic(variadic);
                 compiledFunction.setAnnotations(annotations);
 
                 if (staticContext.getUserQueryContext().isCompileWithTracing()) {

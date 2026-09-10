@@ -30,7 +30,6 @@ import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.SequenceType;
 
 import java.util.Arrays;
 
@@ -75,7 +74,7 @@ public class UserFunctionReference extends Expression
             throw new IllegalArgumentException("Function name does not match");
         }
 
-        if (function.getMinimumArity() > functionName.getArity() || (function.getArity() < functionName.getArity() && !function.isVariadic())) {
+        if (function.getMinimumArity() > functionName.getArity() || (function.getArity() < functionName.getArity())) {
             throw new IllegalArgumentException("Function arity does not match");
         }
         this.nominalTarget = function;
@@ -292,14 +291,6 @@ public class UserFunctionReference extends Expression
      */
     @Override
     public ItemType getItemType() {
-        if (nominalTarget.isVariadic()) {
-            SequenceType[] argTypes = new SequenceType[getArity()];
-            int last = nominalTarget.getArity() - 1;
-            System.arraycopy(nominalTarget.getFunctionItemType().getArgumentTypes(), 0, argTypes, 0, last);
-            SequenceType lastArgType = nominalTarget.getFunctionItemType().getArgumentTypes()[last];
-            Arrays.fill(argTypes, last, argTypes.length, lastArgType);
-            return new SpecificFunctionType(argTypes, nominalTarget.getResultType());
-        }
         return nominalTarget.getFunctionItemType();
     }
 
@@ -514,14 +505,6 @@ public class UserFunctionReference extends Expression
             XPathContext c2 = function.makeNewContext(context, this);
             if (c2 instanceof XPathContextMajor && component != null) {
                 ((XPathContextMajor) c2).setCurrentComponent(component);
-            }
-            if (function instanceof UserFunction && ((UserFunction)function).isVariadic()) {
-                UserFunction uf = (UserFunction) function;
-                Sequence[] extendedArgs = new Sequence[uf.getArity()];
-                int last = uf.getArity() - 1;
-                System.arraycopy(args,0, extendedArgs, 0, last);
-                extendedArgs[last] = SequenceTool.joinSequences(Arrays.copyOfRange(args, last,args.length)).materialize();
-                args = extendedArgs;
             }
             if (function.getArity() > args.length) {
                 assert function instanceof FunctionDefinition && ((FunctionDefinition)function).getMinimumArity() <= args.length;

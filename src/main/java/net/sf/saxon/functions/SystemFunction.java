@@ -9,7 +9,6 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.om.*;
@@ -98,12 +97,6 @@ public abstract class SystemFunction extends AbstractFunction implements IFuncti
      */
 
     public Expression makeFunctionCall(Expression... arguments) {
-        if (arguments.length > getArity() && isSequenceVariadic()) {
-            if (getArity() != 1) {
-                throw new UnsupportedOperationException("Not implemented: sequence-variadic system function with arity>1");
-            }
-            arguments = new Expression[]{new Block(arguments)};
-        }
         Expression e = new SystemFunctionCall(this, arguments);
         e.setRetainedStaticContext(getRetainedStaticContext());
         return e;
@@ -120,6 +113,7 @@ public abstract class SystemFunction extends AbstractFunction implements IFuncti
 
     @Override
     public boolean isSequenceVariadic() {
+        // Applies now only to concat()
         return (details.properties & BuiltInFunctionSet.SEQV) != 0;
     }
 

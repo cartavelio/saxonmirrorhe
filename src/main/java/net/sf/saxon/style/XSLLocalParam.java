@@ -198,10 +198,6 @@ public class XSLLocalParam extends XSLGeneralVariable {
                 String errorCode = isFunction ? "XTSE0760" : "XTSE0010";
                 compileError("A parameter specifying required='yes' must have empty content", errorCode);
             }
-        } else if (parent instanceof XSLFunction) {
-            if (((XSLFunction)parent).isVariadic()) {
-                compileError("A parameter of a variadic function must not specify required=no", "XTSE0782");
-            }
         }
 
         super.validate(decl);
