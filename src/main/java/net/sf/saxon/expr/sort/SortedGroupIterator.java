@@ -43,6 +43,7 @@ public class SortedGroupIterator extends SortedIterator implements GroupIterator
 
     @Override
     protected void buildArray() throws XPathException {
+        SequenceIterator base = getBaseIterator();
         int allocated = SequenceTool.supportsGetLength(base) ? SequenceTool.getLength(base) : 100;
 
         values = new ObjectToBeSorted[allocated];

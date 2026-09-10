@@ -135,7 +135,7 @@ public class SequenceTool {
         try {
             return ((LastPositionFinder)iterator).getLength();
         } catch (ClassCastException e) {
-            throw new UnsupportedOperationException("getLength() not available");
+            throw new UnsupportedOperationException("getLength() not available in " + iterator.getClass());
         }
     }
 

@@ -300,9 +300,14 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
             targetMode = context.getCurrentMode();
         } else {
             if (bindingSlot >= 0) {
-                targetMode = (Component.M)context.getTargetComponent(bindingSlot);
-                if (targetMode.getVisibility() == Visibility.ABSTRACT) {
-                    throw new AssertionError("Modes cannot be abstract");
+                try {
+                    targetMode = (Component.M)context.getTargetComponent(bindingSlot);
+                    if (targetMode.getVisibility() == Visibility.ABSTRACT) {
+                        throw new AssertionError("Modes cannot be abstract");
+                    }
+                } catch (ClassCastException e) {
+                    throw new IllegalStateException("In apply-templates at " + getLocation().getSystemId() + "#" + getLocation().getLineNumber()
+                    + " target component for slot " + bindingSlot + " is " + context.getTargetComponent(bindingSlot).getActor().getSymbolicName());
                 }
             } else {
                 // fallback

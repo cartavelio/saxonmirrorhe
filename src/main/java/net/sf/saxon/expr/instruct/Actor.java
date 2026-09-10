@@ -182,10 +182,13 @@ public abstract class Actor implements ExpressionOwner, Location {
         if (invocation.getBindingSlot() >= 0) {
             throw new AssertionError("**** Component reference " + name + " is already bound");
         }
-        int slot = bindings.size();
         ComponentBinding cb = new ComponentBinding(name, target);
-        bindings.add(cb);
-        invocation.setBindingSlot(slot);
+        //noinspection SynchronizationOnLocalVariableOrMethodParameter
+        synchronized(bindings) {      // bug 6348
+            int slot = bindings.size();
+            bindings.add(cb);
+            invocation.setBindingSlot(slot);
+        }
     }
 
     public void setBody(Expression body) {

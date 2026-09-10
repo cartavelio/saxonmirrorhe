@@ -7,10 +7,12 @@
 
 package net.sf.saxon.expr.sort;
 
-import net.sf.saxon.expr.ErrorIterator;
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -27,7 +29,7 @@ import java.util.Comparator;
 public class SortedIterator implements SequenceIterator, LastPositionFinder, LookaheadIterator {
 
     // the items to be sorted
-    protected SequenceIterator base;
+    private final SequenceIterator base;
 
     // the call-back function used to evaluate sort keys
     protected SortKeyEvaluator sortKeyEvaluator;
@@ -48,12 +50,13 @@ public class SortedIterator implements SequenceIterator, LastPositionFinder, Loo
     protected int position = 0;
 
     // The context for the evaluation of sort keys
-    protected XPathContext context;
+    protected final XPathContext context;
 
     // The host language (XSLT, XQuery, XPath). Used only to decide which error code to use on dynamic errors.
     private HostLanguage hostLanguage;
 
-    protected SortedIterator() {
+    protected SequenceIterator getBaseIterator() {
+        return base;
     }
 
     /**
@@ -71,14 +74,12 @@ public class SortedIterator implements SequenceIterator, LastPositionFinder, Loo
 
         if (createNewContext) {
             this.context = context.newMinorContext();
-            this.base = this.context.trackFocus(base);
             this.context.setTemporaryOutputState(StandardNames.XSL_SORT);
-            //this.context.setCurrentOutputUri(null);   // See bug 4160
+            this.base = this.context.trackFocus(base);
         } else {
-            this.base = base;
             this.context = context;
+            this.base = base;
         }
-
         this.sortKeyEvaluator = sortKeyEvaluator;
         this.comparators = new AtomicComparer[comparators.length];
         for (int n = 0; n < comparators.length; n++) {
@@ -128,12 +129,7 @@ public class SortedIterator implements SequenceIterator, LastPositionFinder, Loo
                     doSort();
                     return count > 0;
                 } catch (XPathException err) {
-                    // can't return the exception now; but we can rely on the fact that
-                    // (a) it wouldn't have failed unless there was something to sort, and
-                    // (b) it's going to fail again when next() is called
-                    count = -1;
-                    base = SequenceTool.focusTracker(new ErrorIterator(err));
-                    return true;
+                    throw new UncheckedXPathException(err);
                 }
             }
         } else {
