@@ -71,6 +71,7 @@ saxonc_ext = Extension(
     language = 'c++',
     include_dirs = ['src/cpp/include'] + [str(loc.include) for loc in saxonc_locations],
     extra_link_args = extra_link_args,
+    extra_compile_args=["-std=c++14"],
     libraries = [saxonc_core_libname, saxonc_libname]
 )
 
