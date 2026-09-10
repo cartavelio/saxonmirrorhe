@@ -127,7 +127,8 @@
   <xsl:variable name="namespace" select="ancestor::section/@id"/>
   <xsl:variable name="default.platform"
    select="doc($implement-path)/implement/default[@id = $namespace]/@platform"/>
-  <span class="flink" data-href="{fc:name}" data-ns="{fc:namespace-ref(fc:name/@namespace)}"
+  <xsl:variable name="class" select="if (@class) then concat('flink flink-', @class) else 'flink'"/>
+  <span class="{$class}" data-href="{fc:name}" data-ns="{fc:namespace-ref(fc:name/@namespace)}"
    data-platform="{(.//fc:saxon-edition/@platform, $default.platform, 'ALL')[1]}">
    <xsl:value-of select="fc:name"/>
    <xsl:if test="(.//text() ! contains(., 'FIXME:')) = true()">***</xsl:if>
@@ -137,6 +138,16 @@
 
 
  <!--  Function pages for each function. -->
+ <xsl:template match="fc:function[@class]" mode="f-primary">
+  <div class="{@class}">
+   <xsl:apply-templates select="." mode="f"/>
+  </div>
+ </xsl:template>
+ 
+ <xsl:template match="fc:function" mode="f-primary">
+  <xsl:apply-templates select="." mode="f"/>
+ </xsl:template>
+ 
  <xsl:template match="fc:function" priority="5" mode="f">
 
   <xsl:variable name="MyFunction" select="."/>

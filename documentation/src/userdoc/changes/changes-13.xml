@@ -667,6 +667,11 @@ TODO: rethink redefines and override
             <code>->($x){$x+1}</code>). These are now written <code>fn{.+1}</code> or
             <code>fn($x){$x+1}</code> respectively.</p></li>
             <li><p><code>fn:all</code> is renamed <code>fn:every</code>.</p></li>
+            <li><p><code>fn:contains-sequence</code>, <code>fn:ends-with-sequence</code> and
+                <code>fn:starts-with-sequence</code> are renamed
+                <code>fn:contains-subsequence</code>, <code>fn:ends-with-subsequence</code> and
+                <code>fn:starts-with-subsequence</code> respectively.</p></li>
+            <li><p><code>fn:intersperse</code> is renamed <code>fn:insert-separator</code>.</p></li>
             <li><p>Saxon's experimental operators <code>andAlso</code> and <code>orElse</code>
             are dropped. The 4.0 specification defines <code>and</code> and <code>or</code>
             to have short-cut semantics, so these operators are unnecessary.</p></li>
@@ -680,7 +685,14 @@ TODO: rethink redefines and override
             In Saxon 12, <code>fn:parcel($x)</code> simply did <code>{'value': $x}</code>, and
             <code>fn:unparcel($p)</code> simply did <code>$p?value</code>.</li>
             <li>The <code>saxon:as</code> extension attribute is deprecated; the standard <code>as</code>
-            attribute can now be used in its place.</li>
+                attribute can now be used in its place.</li>
+            <li><p>The functions <code>fn:items-after</code>, <code>fn:items-before</code>,
+                <code>fn:items-ending-where</code>, <code>fn:items-starting-where</code> are dropped.</p></li>
+            <li><p>The function <code>fn:iterate-while</code> is replaced by
+                <code>fn:while-do</code> and <code>fn:do-until</code>.</p></li>
+            <li><p>The function <code>fn:parts</code> is dropped.</p></li>
+            <li><p>The function <code>fn:xdm-to-json</code> is dropped.</p></li>
+            <li><p>The function <code>array:of</code> is renamed <code>array:of-members</code>.</p></li>
         </ul>
         
         <p>Some Saxon extension functions that were essentially prototypes of 

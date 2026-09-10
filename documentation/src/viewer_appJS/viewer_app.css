@@ -382,17 +382,22 @@ div.section h2{
    border-color: #688790;
 }
 .qt4 {
-   padding: .5em;
+   padding-left: .5em;
    padding-right: 70px;
-   border: .5em;
+   border-left: .5em;
    border-left-style: solid;
-   margin: 1em auto;
    border-color: #F7E44F;
    background-image: url("https://qt4cg.org/img/QT4_shaded-64.png");
    background-repeat: no-repeat;
    background-position-x: right -70px;
    background-origin: content-box;
    min-height: 60px;
+}
+.flink-qt4 {
+   padding-right: .5em;
+   border-right: .5em;
+   border-right-style: solid;
+   border-color: #F7E44F;
 }
 .signature, .fullsignature {
     font-size:inherit;

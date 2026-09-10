@@ -50,6 +50,7 @@
     <saxon version="PARTIAL_9.7"> Partial experimental implementation in Saxon 9.7.</saxon>
     <saxon version="PARTIAL_9.6"> Partial experimental implementation in Saxon 9.6.</saxon>
     <saxon version="11_EXPERIMENTAL"> Implemented experimentally since Saxon 11.</saxon>
+    <saxon version="12_EXPERIMENTAL"> Implemented experimentally since Saxon 12.</saxon>
     
     <saxon version="EE_9.7"> Implemented in Saxon-EE since Saxon 9.7.</saxon>
     <saxon version="EE_9.6"> Implemented in Saxon-EE since Saxon 9.6.</saxon>

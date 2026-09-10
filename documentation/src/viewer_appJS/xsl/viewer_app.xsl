@@ -291,7 +291,7 @@
                             <xsl:apply-templates select="$doc" mode="primary"/>
                         </xsl:when>
                         <xsl:when test="$start eq 'functions' and $count eq 3">
-                            <xsl:apply-templates mode="f" 
+                            <xsl:apply-templates mode="f-primary" 
                                 select="$doc//fnd:function[fnd:name[. eq $hpart][fnd:namespace-ref(@namespace) = $hash-parts[2]]]"/>
                         </xsl:when>
                         <xsl:otherwise>
@@ -479,16 +479,16 @@
         
         <xsl:if test="$on-fn-list-page">
             <!-- If we're on a functions index page, then update the display of list items as necessary. -->
-            <xsl:for-each select="$maindiv//span[@class='flink']">
+            <xsl:for-each select="$maindiv//span[tokenize(@class)='flink']">
                 <ixsl:set-style name="display" 
-                    select="if ((tokenize(@data-platform)=('J','ALL') and ixsl:get($javaswitch,'checked')) or 
-                    (tokenize(@data-platform)=('CS','ALL') and ixsl:get($csswitch,'checked')) or 
-                    (tokenize(@data-platform)=('C','ALL') and ixsl:get($cswitch,'checked'))) 
+                    select="if ((tokenize(@data-platform)=('J','ALL','NONE') and ixsl:get($javaswitch,'checked')) or 
+                    (tokenize(@data-platform)=('CS','ALL','NONE') and ixsl:get($csswitch,'checked')) or 
+                    (tokenize(@data-platform)=('C','ALL','NONE') and ixsl:get($cswitch,'checked'))) 
                     then 'inline'
                     else 'none'"/>
             </xsl:for-each>
             
-            <xsl:variable name="count" select="count($maindiv//span[@class='flink'][ixsl:style(.)?display eq 'inline'])"/>
+            <xsl:variable name="count" select="count($maindiv//span[tokenize(@class)='flink'][ixsl:style(.)?display eq 'inline'])"/>
             <!--<xsl:message>functions count: <xsl:value-of select="$count"/></xsl:message>-->
             <xsl:result-document href="#platform-fn-count" method="ixsl:replace-content">
                 <xsl:value-of select="$count"/>
@@ -796,7 +796,7 @@
     </xsl:template>
     
     <xsl:template match="span[@data-href]" mode="ixsl:onmouseover">
-        <xsl:if test="@class eq 'flink'">
+        <xsl:if test="tokenize(@class) = 'flink'">
             <xsl:variable name="docName" select="concat($location, '/functions.xml')"/>
             <!-- In fact, flinks only used on the functions namespace pages, in which case we know
                 that functions.xml is already loaded.
