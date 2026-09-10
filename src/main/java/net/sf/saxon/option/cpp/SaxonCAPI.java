@@ -41,6 +41,7 @@ import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import java.net.MalformedURLException;
@@ -188,6 +189,19 @@ public class SaxonCAPI {
 
     static CCharPointer stringToNative(AllocatorCCharFn alloc, ByteArrayOutputStream bStream) {
         byte [] b = bStream.toByteArray();
+        if(b.length == 0) {
+            WordFactory.nullPointer();
+        }
+        CCharPointer a =  alloc.call(b.length + 1);
+        for (int i = 0; i < b.length; i++) {
+            a.write(i, b[i]);
+        }
+        a.write(b.length, (byte) 0);
+      return a;
+    }
+
+    static CCharPointer stringToNative2(net.sf.saxon.option.cpp.SaxonCAPI.AllocatorCCharFn alloc, String string) {
+        byte [] b = string.getBytes(StandardCharsets.UTF_8);
         CCharPointer a =  alloc.call(b.length + 1);
         for (int i = 0; i < b.length; i++) {
             a.write(i, b[i]);
@@ -654,7 +668,7 @@ public class SaxonCAPI {
      * @param xml - string representation of XML document
      * @return XdmNode
      */
-    @CEntryPoint(name = "parseXmlString")
+    @CEntryPoint(name = "parseXmlString", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long parseXmlString(IsolateThread thread, ObjectHandle processorRef, CCharPointer xml) throws SaxonApiException {
 
         Processor proc = objectHandles.get(processorRef);
@@ -665,7 +679,7 @@ public class SaxonCAPI {
     }
 
 
-    @CEntryPoint(name = "parseXmlStringWithValidator")
+    @CEntryPoint(name = "parseXmlStringWithValidator", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long parseXmlString(IsolateThread thread, ObjectHandle processorRef, ObjectHandle validatorRef, CCharPointer xml) throws SaxonApiException {
         Processor proc = objectHandles.get(processorRef);
         SchemaValidator validator = null;

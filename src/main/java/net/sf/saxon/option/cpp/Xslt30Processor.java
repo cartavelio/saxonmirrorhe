@@ -670,7 +670,6 @@ public class Xslt30Processor extends SaxonCAPI {
             }
 
             transformer.applyTemplates(valueSeq, serializer);
-            transformer.applyTemplates(valueSeq, serializer);
         } else {
             throw new SaxonApiException("Source object is not of type (String, XdmValue or XdmValue[])");
         }
@@ -840,7 +839,7 @@ public class Xslt30Processor extends SaxonCAPI {
     }
 
     @CEntryPoint(name = "j_callFunctionReturningString", exceptionHandler = SaxonCExceptionCCharHandler.class)
-    public static CCharPointer callFunctionReturningString(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef, CCharPointer ccFuncName, ObjectHandle argumentsRef, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    public static CCharPointer callFunctionReturningString(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, CCharPointer ccwd, ObjectHandle executableRef, CCharPointer ccFuncName, ObjectHandle argumentsRef, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         String cwd = null;
         if(ccwd !=WordFactory.nullPointer()) {
             cwd = CTypeConversion.toJavaString(ccwd);
@@ -873,8 +872,8 @@ public class Xslt30Processor extends SaxonCAPI {
         }
         transformer.callFunction(qname, getArguments(arguments), serializer);
 
-        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(bStream.toString());
-        return holder.get();
+        CCharPointer a = SaxonCAPI.stringToNative(alloc, bStream);
+        return a;
     }
 
 
@@ -1003,7 +1002,7 @@ public class Xslt30Processor extends SaxonCAPI {
     }
 
     @CEntryPoint(name = "j_callTemplateReturningString", exceptionHandler = SaxonCExceptionCCharHandler.class)
-    public static CCharPointer callTemplateReturningString(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef, CCharPointer cclarkName, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    public static CCharPointer callTemplateReturningString(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc,  CCharPointer ccwd, ObjectHandle executableRef, CCharPointer cclarkName, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         XsltExecutable executable;
         if(executableRef != WordFactory.nullPointer()) {
             executable = objectHandles.get(executableRef);
@@ -1040,8 +1039,8 @@ public class Xslt30Processor extends SaxonCAPI {
 
 
         transformer.callTemplate(qname, serializer);
-        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(bStream.toString());
-        return holder.get();
+        CCharPointer result = SaxonCAPI.stringToNative(alloc, bStream);
+        return result;
 
     }
 
@@ -1451,7 +1450,7 @@ public class Xslt30Processor extends SaxonCAPI {
      * @return result as a string representation in a byte array
      */
     @CEntryPoint(name = "j_transformToString", exceptionHandler = SaxonCExceptionCCharHandler.class)
-    public static CCharPointer transformToString(IsolateThread thread, CCharPointer ccwd, ObjectHandle xslt30ProcessorRef, ObjectHandle executableRef, CCharPointer csourceFile, CCharPointer cstylesheet, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    public static CCharPointer transformToString(IsolateThread thread, AllocatorCCharFn alloc, CCharPointer ccwd, ObjectHandle xslt30ProcessorRef, ObjectHandle executableRef, CCharPointer csourceFile, CCharPointer cstylesheet, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         XsltExecutable executable = null;
         if(executableRef != WordFactory.nullPointer()) {
             executable = objectHandles.get(executableRef);
@@ -1537,8 +1536,8 @@ public class Xslt30Processor extends SaxonCAPI {
             //transformer.setErrorListener(errorListener);
             transformer.transform(source, serializer);
             serializer = null;
-            final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(bStream.toString());
-            return holder.get();
+            CCharPointer a = SaxonCAPI.stringToNative(alloc, bStream);
+            return a;
         } catch (Exception e) {
             SaxonApiException ex = new SaxonApiException(e);
             throw ex;

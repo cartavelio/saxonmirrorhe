@@ -78,8 +78,11 @@ int64_t XdmItem::getUnderlyingValue(){
 
     const char * XdmItem:: getStringValue(){
         if(stringValue.empty()) {
-
-            const char * str = getStringValueForXdmItem(SaxonProcessor::sxn_environ->thread, (void *)value);
+            if(value < 0) {
+                return nullptr;
+            }
+            allocFn fn = operator new;
+            const char * str = getStringValueForXdmItem(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)value);
             if(str == nullptr) {
                 return nullptr;
             }
@@ -94,7 +97,8 @@ int64_t XdmItem::getUnderlyingValue(){
 
 
 const char * XdmItem::toString(){
-  const char * str = xdmItemToString(SaxonProcessor::sxn_environ->thread, (void *)value);
+    allocFn fn = operator new;
+  const char * str = xdmItemToString(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)value);
   if(str == nullptr) {
     return nullptr;
   }

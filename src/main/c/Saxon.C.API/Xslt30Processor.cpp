@@ -352,10 +352,12 @@ const char * Xslt30Processor::transformFileToString(const char* source,
 		std::cerr<< "Error: nullptr file name found in transformFiletoString."<<std::endl;
 		return nullptr;
 	}
-
+    allocFn fn = operator new;
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
-    char * result = j_transformToString(SaxonProcessor::sxn_environ->thread,(char *)cwdXT.c_str(), (void *)cppXT, (void *)-1, (char *)source, (char *)stylesheet, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
-
+    char * result = j_transformToString(SaxonProcessor::sxn_environ->thread,(void *)fn, (char *)cwdXT.c_str(), (void *)cppXT, (void *)-1, (char *)source, (char *)stylesheet, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
+    if(result == nullptr) {
+        //TODO create exception
+    }
     return result;
 }
 

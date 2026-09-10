@@ -18,9 +18,11 @@ import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.ObjectHandle;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
 import org.graalvm.nativeimage.c.type.*;
+import org.graalvm.word.WordFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -64,6 +66,9 @@ public class XdmUtils {
 
     @CEntryPoint(name = "getBaseURIForXdmNode")
     public static CCharPointer getBaseURIForXdmNode(IsolateThread thread, ObjectHandle value) {
+        if(value == WordFactory.nullPointer()) {
+            return WordFactory.nullPointer();
+        }
         XdmNode node = SaxonCAPI.objectHandles.get(value);
         URI uri = node.getBaseURI();
 
@@ -73,6 +78,9 @@ public class XdmUtils {
 
     @CEntryPoint(name = "getParentForXdmNode")
     public static long getParentForXdmNode(IsolateThread thread, ObjectHandle value) {
+        if(value == WordFactory.nullPointer()) {
+            return SaxonCAPI.STATUS_FAIL;
+        }
         XdmNode node = SaxonCAPI.objectHandles.get(value);
         XdmNode parent = node.getParent();
 
@@ -82,58 +90,57 @@ public class XdmUtils {
 
 
     @CEntryPoint(name = "getStringValueForXdmValue")
-    public static CCharPointer getStringValue_XdmValue(IsolateThread thread, ObjectHandle value) {
+    public static CCharPointer getStringValue_XdmValue(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value) {
+        if(value == WordFactory.nullPointer()) {
+            return WordFactory.nullPointer();
+        }
         XdmValue item = SaxonCAPI.objectHandles.get(value);
         final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(item.toString());
         return holder.get();
     }
 
     @CEntryPoint(name = "getStringValueForXdmItem")
-    public static CCharPointer getStringValue_XdmItem(IsolateThread thread, ObjectHandle value) {
+    public static CCharPointer getStringValue_XdmItem(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value) {
+        if(value == WordFactory.nullPointer()) {
+            return WordFactory.nullPointer();
+        }
         XdmItem item = SaxonCAPI.objectHandles.get(value);
-        /*
-        TODO how do we return null?
-        if(item == null) {
-            return null;
-        }   */
-        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(item.getStringValue());
-        return holder.get();
+
+        CCharPointer a = SaxonCAPI.stringToNative2(alloc, item.getStringValue());
+        return a;
     }
 
     @CEntryPoint(name = "xdmItemToString")
-    public static CCharPointer toString_XdmItem(IsolateThread thread, ObjectHandle value) {
+    public static CCharPointer toString_XdmItem(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value) {
+        if(value == WordFactory.nullPointer()) {
+            return WordFactory.nullPointer();
+        }
         XdmItem item = SaxonCAPI.objectHandles.get(value);
-        /*
-        TODO how do we return null?
-        if(item == null) {
-            return null;
-        }   */
-        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(item.toString());
-        return holder.get();
+
+        CCharPointer a = SaxonCAPI.stringToNative2(alloc, item.toString());
+        return a;
     }
     
     @CEntryPoint(name = "xdmNodeToString")
-    public static CCharPointer toString_XdmNode(IsolateThread thread, ObjectHandle value) {
+    public static CCharPointer toString_XdmNode(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value) {
+        if(value == WordFactory.nullPointer()) {
+            return WordFactory.nullPointer();
+        }
         XdmNode node = SaxonCAPI.objectHandles.get(value);
-        /*
-        TODO how do we return null?
-        if(item == null) {
-            return null;
-        }   */
-        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(node.toString());
-        return holder.get();
+
+        CCharPointer a = SaxonCAPI.stringToNative2(alloc, node.toString());
+        return a;
     }
 
     @CEntryPoint(name = "xdmMapToString")
-    public static CCharPointer toString_XdmMap(IsolateThread thread, ObjectHandle value){
+    public static CCharPointer toString_XdmMap(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value){
+        if(value == WordFactory.nullPointer()) {
+            return WordFactory.nullPointer();
+        }
         XdmMap map = SaxonCAPI.objectHandles.get(value);
-        /*
-        TODO how do we return null?
-        if(item == null) {
-            return null;
-        }   */
-        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(map.toString());
-        return holder.get();
+
+        CCharPointer a = SaxonCAPI.stringToNative2(alloc, map.toString());
+        return a;
     }
 
     /**
@@ -148,7 +155,7 @@ public class XdmUtils {
 
 
     @CEntryPoint(name = "j_getPrimitiveTypeName")
-    public static CCharPointer getPrimitiveTypeName(IsolateThread thread, ObjectHandle valueRef) {
+    public static CCharPointer getPrimitiveTypeName(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle valueRef) {
         XdmAtomicValue value = SaxonCAPI.objectHandles.get(valueRef);
 
         final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(getEQName(value.getPrimitiveTypeName()));
@@ -471,14 +478,15 @@ public class XdmUtils {
      * @return a string representation of the value
      */
     @CEntryPoint(name = "xdmValueArrayToString")
-    public static CCharPointer xdmValueArrayToString(IsolateThread thread, ObjectHandle processorDataAccumulatorRef){
+    public static CCharPointer xdmValueArrayToString(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle processorDataAccumulatorRef){
+        if(processorDataAccumulatorRef == WordFactory.nullPointer()) {
+            return WordFactory.nullPointer();
+        }
         ProcessorDataAccumulator processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataAccumulatorRef);
         XdmValue [] values = (XdmValue[]) processorDataAccumulator.getValues();
-        /*if(values == null) {
-            return null;
-        } */
-        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(buildXdmValue(values).toString());
-        return holder.get();
+
+        CCharPointer a = SaxonCAPI.stringToNative2(alloc, buildXdmValue(values).toString());
+        return a;
     }
 
 

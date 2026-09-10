@@ -37,8 +37,8 @@
 	    if(!valType.empty()) {
 		    return valType.c_str();
 	    }
-
-	    char * result = j_getPrimitiveTypeName(SaxonProcessor::sxn_environ->thread, (void *)value);
+        allocFn fn = operator new;
+	    char * result = j_getPrimitiveTypeName(SaxonProcessor::sxn_environ->thread, (void *)fn,(void *)value);
 
 	    if(result != nullptr) {
 	        valType = std::string(result);

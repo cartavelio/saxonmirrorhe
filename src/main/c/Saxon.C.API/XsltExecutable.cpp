@@ -494,8 +494,8 @@ const char *XsltExecutable::applyTemplatesReturningString() {
         optionStr = "rd";
         addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonResultDocRef);
     }
-
-    char * result = j_applyTemplatesReturningString(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)executableRef, (void *)selectionRef, (void *)processorDataRef);
+    allocFn fn = operator new;
+    char * result = j_applyTemplatesReturningString(SaxonProcessor::sxn_environ->thread, (void *)fn, (char *)cwdXE.c_str(), (void *)executableRef, (void *)selectionRef, (void *)processorDataRef);
 
     return result;
 
@@ -650,8 +650,8 @@ XsltExecutable::callFunctionReturningString(const char *functionName, XdmValue *
     for(int i= 0; i<argument_length; i++) {
         addProcessorValue(SaxonProcessor::sxn_environ->thread, (void *)argumentValuesRef,  (void *)arguments[i]->getUnderlyingValue());
     }
-
-    char * result = j_callFunctionReturningString(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)executableRef, (char *)functionName,  (void *)argumentValuesRef, (void *)processorDataRef);
+    allocFn fn = operator new;
+    char * result = j_callFunctionReturningString(SaxonProcessor::sxn_environ->thread, (void *)fn, (char *)cwdXE.c_str(), (void *)executableRef, (char *)functionName,  (void *)argumentValuesRef, (void *)processorDataRef);
 
     return result;
 
@@ -693,7 +693,7 @@ XsltExecutable::callFunctionReturningValue(const char *functionName, XdmValue **
         addProcessorValue(SaxonProcessor::sxn_environ->thread, (void *)argumentValuesRef,  (void *)arguments[i]->getUnderlyingValue());
     }
 
-    int64_t  result = j_callFunctionReturningValue(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)executableRef, (char *)functionName, (void *)argumentValuesRef,  (void *)processorDataRef);
+    int64_t  result = j_callFunctionReturningValue(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)executableRef, (char *)functionName, (void *)argumentValuesRef,  (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
 
     if (result > -1) {
         int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)result);
@@ -729,9 +729,9 @@ XsltExecutable::callFunctionReturningValue(const char *functionName, XdmValue **
         }
         value = new XdmValue(result, false);
         return value;
-    }else {
+    }else if(result== -2){
 
-        //createException();
+        //TODO create exception
 
 
     }
@@ -796,8 +796,8 @@ const char * XsltExecutable::callTemplateReturningString(const char *templateNam
         optionStr = "rd";
         addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonResultDocRef);
     }
-
-    char * result = j_callTemplateReturningString(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)executableRef, (char *)templateName, (void *)processorDataRef);
+    allocFn fn = operator new;
+    char * result = j_callTemplateReturningString(SaxonProcessor::sxn_environ->thread, (void*)fn, (char *)cwdXE.c_str(), (void *)executableRef, (char *)templateName, (void *)processorDataRef);
 
     return result;
 
@@ -1075,8 +1075,11 @@ const char *XsltExecutable::transformFileToString(const char *source) {
         addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (char *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonResultDocRef);
     }
     char * cstylesheet = nullptr;
-    char *  result = j_transformToString(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)-1, (void *)executableRef, (char *)source, cstylesheet, (void *)processorDataRef);
-
+    allocFn fn = operator new;
+    char *  result = j_transformToString(SaxonProcessor::sxn_environ->thread, (void *)fn,(char *)cwdXE.c_str(), (void *)-1, (void *)executableRef, (char *)source, cstylesheet, (void *)processorDataRef);
+    if(result == nullptr) {
+        //TODO create exception
+    }
     return result;
 }
 

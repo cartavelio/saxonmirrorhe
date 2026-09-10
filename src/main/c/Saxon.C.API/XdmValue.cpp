@@ -37,7 +37,8 @@ const char * XdmValue::toString() {
             jValues = getUnderlyingValue();
 
         }
-       char * resulti = xdmValueArrayToString(SaxonProcessor::sxn_environ->thread, (void *)jValues);
+        allocFn fn = operator new;
+       char * resulti = xdmValueArrayToString(SaxonProcessor::sxn_environ->thread, (void *)fn,(void *)jValues);
         toStringValue = resulti;
 
     }
