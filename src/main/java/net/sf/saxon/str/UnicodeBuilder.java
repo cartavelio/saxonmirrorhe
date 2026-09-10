@@ -7,8 +7,6 @@
 
 package net.sf.saxon.str;
 
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntIterator;
@@ -32,9 +30,9 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
     // to track the widest character added so far, which is subsequently used
     // to reduce the memory requirement for storing the string.
 
-    private int[] codepoints;
-    private int used;
-    private int bits;
+    private int[] activePart;
+    private int activePartUsed;
+    private int bitMask;
     private ZenoString archive = ZenoString.EMPTY;
 
     /**
@@ -49,7 +47,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      * @param allocate the initial space allocation, in codepoints (32-bit integers) 
      */
     public UnicodeBuilder(int allocate) {  
-        codepoints = new int[allocate];
+        activePart = new int[allocate];
     }
 
     /**
@@ -72,8 +70,8 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
 
     public UnicodeBuilder append(int codePoint) {
         ensureCapacity(1);
-        codepoints[used++] = codePoint;
-        bits |= codePoint;
+        activePart[activePartUsed++] = codePoint;
+        bitMask |= codePoint;
         return this;
     }
 
@@ -104,20 +102,6 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
     }
 
     /**
-     * Append the string values of all the items in a sequence, with no separator
-     * @param iter the sequence of items
-     * @return this builder, with the new items added
-     */
-
-    public UnicodeBuilder appendAll(SequenceIterator iter) {
-        // Note: used from bytecode
-        for (Item item; (item = iter.next()) != null; ) {
-            append(item.getUnicodeStringValue());
-        }
-        return this;
-    }
-
-    /**
      * Append a Java CharSequence to the content. This may contain arbitrary characters including
      * well formed surrogate pairs
      *
@@ -142,15 +126,15 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
             return this;
         }
         ensureCapacity(len);
-        str.copy32bit(codepoints, used);
-        used += len;
+        str.copy32bit(activePart, activePartUsed);
+        activePartUsed += len;
 
         int width = str.getWidth();
         if (width > 8) {
             if (width > 16) {
-                bits |= 0xffffff;
+                bitMask |= 0xffffff;
             } else {
-                bits |= 0xffff;
+                bitMask |= 0xffff;
             }
         }
         return this;
@@ -161,7 +145,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      * @return the size in codepoints
      */
     public long length() {
-        return archive.length() + used;
+        return archive.length() + activePartUsed;
     }
 
     /**
@@ -169,7 +153,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      * @return true if the size is zero
      */
     public boolean isEmpty() {
-        return archive.isEmpty() && used == 0;
+        return archive.isEmpty() && activePartUsed == 0;
     }
 
     /**
@@ -180,13 +164,15 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
 
     private void ensureCapacity(int required) {
         // For very long strings, archive what we've already accumulated as a ZenoString
-        if (used > 65535) {
+        if (activePartUsed > 65535 || required > 65535) {
             archive = archive.concat(getActivePart());
-            used = 0;
-            bits = 0xff;
-        }
-        while (used + required > codepoints.length) {
-            codepoints = Arrays.copyOf(codepoints, codepoints.length * 2);
+            activePartUsed = 0;
+            bitMask = 0xff;
+            activePart = new int[required];
+        } else {
+            while (activePartUsed + required > activePart.length) {
+                activePart = Arrays.copyOf(activePart, activePart.length * 2);
+            }
         }
     }
 
@@ -210,22 +196,22 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      */
 
     private UnicodeString getActivePart() {
-        if (used == 0) {
+        if (activePartUsed == 0) {
             return EmptyUnicodeString.getInstance();
-        } else if ((bits & 0xff0000) != 0) {
+        } else if ((bitMask & 0xff0000) != 0) {
             // use 24-bit codes
-            return new Twine24(codepoints, used);
-        } else if ((bits & 0xff00) != 0) {
+            return new Twine24(activePart, activePartUsed);
+        } else if ((bitMask & 0xff00) != 0) {
             // use 16-bit codes
-            char[] chars = new char[used];
-            for (int i = 0; i < used; i++) {
-                chars[i] = (char) (codepoints[i] & 0xffff);
+            char[] chars = new char[activePartUsed];
+            for (int i = 0; i < activePartUsed; i++) {
+                chars[i] = (char) (activePart[i] & 0xffff);
             }
             return new Twine16(chars);
         } else {
-            byte[] bytes = new byte[used];
-            for (int i = 0; i < used; i++) {
-                bytes[i] = (byte) (codepoints[i] & 0xff);
+            byte[] bytes = new byte[activePartUsed];
+            for (int i = 0; i < activePartUsed; i++) {
+                bytes[i] = (byte) (activePart[i] & 0xff);
             }
             return new Twine8(bytes);
         }
@@ -260,8 +246,8 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
 
     public void clear() {
         archive = ZenoString.EMPTY;
-        used = 0;
-        bits = 0;
+        activePartUsed = 0;
+        bitMask = 0;
     }
     
     /**

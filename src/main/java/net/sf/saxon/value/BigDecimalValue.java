@@ -211,7 +211,7 @@ public final class BigDecimalValue extends DecimalValue {
      */
 
     public static boolean castableAsDecimal(String in) {
-        String trimmed = Whitespace.trim(in).toString();
+        String trimmed = Whitespace.trim(in);
         return decimalPattern.matcher(trimmed).matches();
     }
 

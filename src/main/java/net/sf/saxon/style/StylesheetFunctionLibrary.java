@@ -170,6 +170,9 @@ public class StylesheetFunctionLibrary implements FunctionLibrary {
         }
         for (Component c : candidates) {
             UserFunction fn = (UserFunction)c.getActor();
+            if (fn.isVariadic() && fn.getMinimumArity() <= actualArgs) {
+                return c;
+            }
             if (fn.getMinimumArity() <= actualArgs && fn.getArity() >= actualArgs) {
                 return c;
             }
@@ -198,6 +201,25 @@ public class StylesheetFunctionLibrary implements FunctionLibrary {
             return null;
         }
         UserFunction uf = (UserFunction)c.getActor();
+//        if (uf.isVariadic() && functionName.getArity() > uf.getArity())  {
+//            // Generate a function f(a,b,c,d) whose body is a call to f((a,b,c,d))
+//            UserFunctionReference reference = new UserFunctionReference(uf);
+//            FunctionItem simpleCall = getFunctionItem(new SymbolicName.F(functionName.getComponentName(), uf.getArity()), staticContext);
+//            Callable callable = (context, args) -> {
+//                Sequence[] amalgamated = new Sequence[uf.getArity()];
+//                System.arraycopy(args, 0, amalgamated, 0, uf.getArity()-1);
+//                amalgamated[uf.getArity()-1] = SequenceTool.joinSequences(
+//                        Arrays.copyOfRange(args, uf.getArity() - 1, args.length)).materialize();
+//                return simpleCall.call(context, amalgamated);
+//            };
+//            SequenceType[] argTypes = new SequenceType[functionName.getArity()];
+//            int last = uf.getArity() - 1;
+//            for (int i=0; i<argTypes.length; i++) {
+//                argTypes[i] = uf.getArgumentType(Math.min(i, last));
+//            }
+//            FunctionItemType fit = new SpecificFunctionType(argTypes, uf.getResultType());
+//            return new CallableFunction(functionName.getArity(), callable, fit);
+//        }
         if (uf.getArity() > functionName.getArity() /*&& uf.hasContextDependentDefaults(functionName.getArity()) */) {
             return new ContextDependentUserFunction(uf, functionName.getArity());
         }

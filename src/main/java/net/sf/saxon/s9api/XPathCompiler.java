@@ -679,11 +679,43 @@ public class XPathCompiler {
 
     /**
      * Registers the required decimal format properties, for use in calls to the
+     * {@code fn:format-number()} function when using the default (unnamed) decimal format.
+     * The values for different properties may be supplied
+     * incrementally; they are only checked for consistency when an XPath expression is compiled.
+     *
+     * @param property The decimal symbols name to update, for example {@code "grouping-separator"}
+     * @param value    The value to update the decimal symbol property
+     * @throws SaxonApiException        if an invalid value is supplied for a decimal format property
+     * @throws IllegalArgumentException if the value of {@code property} is not one of the recognized
+     *                                  decimal format properties
+     * @since 12.6
+     */
+    public void setDecimalFormatProperty(String property, String value) throws SaxonApiException {
+        Objects.requireNonNull(property);
+        Objects.requireNonNull(value);
+        DecimalFormatManager dfm = env.getDecimalFormatManager();
+        if (dfm == null) {
+            dfm = new DecimalFormatManager(HostLanguage.XPATH, env.getXPathVersion());
+            env.setDecimalFormatManager(dfm);
+        }
+
+        DecimalSymbols symbols = dfm.getDefaultDecimalFormat();
+
+        try {
+            symbols.setProperty(property, StringView.of(value));
+        } catch (XPathException e) {
+            throw new SaxonApiException(e);
+        }
+    }
+
+
+    /**
+     * Registers the required decimal format properties, for use in calls to the
      * {@code fn:format-number()} function. The values for different properties may be supplied
      * incrementally; they are only checked for consistency when an XPath expression is compiled.
      *
      * @param format   The name of the decimal format. (Note: it is not possible to set
-     *                 properties for the default unnamed decimal format.)
+     *                 properties for the default unnamed decimal format using this method)
      * @param property The decimal symbols name to update, for example {@code "grouping-separator"}
      * @param value    The value to update the decimal symbol property
      * @throws SaxonApiException if an invalid value is supplied for a decimal format property

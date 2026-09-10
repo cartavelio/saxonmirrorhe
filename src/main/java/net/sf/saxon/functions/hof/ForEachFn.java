@@ -57,7 +57,7 @@ public class ForEachFn extends SystemFunction {
             case 0:
                 int count = Count.count(base);
                 GroundedValue val = function.call(context, new Sequence[]{}).materialize();
-                return new RepeatingIterator(val, count, context);
+                return new RepeatingIterator(val, count);
             case 1:
                 return MappingIterator.map(base, item -> dynamicCall(function, context, item).iterate());
             case 2:
@@ -150,8 +150,8 @@ public class ForEachFn extends SystemFunction {
 
         private final GroundedValue baseValue;
 
-        public RepeatingIterator(GroundedValue baseValue, int count, XPathContext context) {
-            super(count, context);
+        public RepeatingIterator(GroundedValue baseValue, int count) {
+            super(count);
             this.baseValue = baseValue;
         }
 

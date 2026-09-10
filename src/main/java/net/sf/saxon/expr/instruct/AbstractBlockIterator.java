@@ -7,7 +7,6 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -25,14 +24,12 @@ public abstract class AbstractBlockIterator implements SequenceIterator {
     protected int size;
     protected int currentOperand;
     protected SequenceIterator currentIter;
-    protected XPathContext context;
 
     // Zero-argument constructor for use from bytecode
     public AbstractBlockIterator() {}
 
-    public AbstractBlockIterator(int size, XPathContext context) {
+    public AbstractBlockIterator(int size) {
         this.size = size;
-        this.context = context;
         this.currentOperand = 0;
     }
 
@@ -40,12 +37,10 @@ public abstract class AbstractBlockIterator implements SequenceIterator {
      * Initializer for use from bytecode
      *
      * @param size    the size
-     * @param context the XPath context
      */
 
-    public void init(int size, XPathContext context) {
+    public void init(int size) {
         this.size = size;
-        this.context = context;
         this.currentOperand = 0;
     }
 

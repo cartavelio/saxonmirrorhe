@@ -77,7 +77,7 @@ public class XSLLocalParam extends XSLGeneralVariable {
             sourceBinding.setProperty(SourceBinding.BindingProperty.PARAM, true);
             if (getParent() instanceof XSLFunction) {
                 sourceBinding.setProperty(SourceBinding.BindingProperty.REQUIRED, true);
-                if (getCompilation().getCompilerInfo().getXsltVersion() != 40) {
+                if (getCompilation().getCompilerInfo().getXsltVersion() < 40) {
                     permittedAttributes.remove(SourceBinding.BindingProperty.SELECT);
                     sourceBinding.setProperty(SourceBinding.BindingProperty.DISALLOWS_CONTENT, true);
                 }
@@ -198,6 +198,10 @@ public class XSLLocalParam extends XSLGeneralVariable {
                 String errorCode = isFunction ? "XTSE0760" : "XTSE0010";
                 compileError("A parameter specifying required='yes' must have empty content", errorCode);
             }
+        } else if (parent instanceof XSLFunction) {
+            if (((XSLFunction)parent).isVariadic()) {
+                compileError("A parameter of a variadic function must not specify required=no", "XTSE0782");
+            }
         }
 
         super.validate(decl);
@@ -229,10 +233,6 @@ public class XSLLocalParam extends XSLGeneralVariable {
 
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
-//        if (!"iterate".equals(getParent().getLocalPart()) &&
-//                sourceBinding.getReferences().size() == 0 && !sourceBinding.hasProperty(SourceBinding.REQUIRED)) {
-//            return null;
-//        }
         if (getParent() instanceof XSLFunction) {
             if (getCompilation().getCompilerInfo().getXsltVersion() >= 40 && !isRequiredParam()) {
                 sourceBinding.handleSequenceConstructor(exec, decl);
@@ -244,9 +244,9 @@ public class XSLLocalParam extends XSLGeneralVariable {
                     while (underlyingExpression instanceof ItemChecker || underlyingExpression instanceof CardinalityChecker) {
                         underlyingExpression = ((UnaryExpression)underlyingExpression).getBaseExpression();
                     }
-                    if (!(underlyingExpression instanceof Literal || underlyingExpression instanceof ContextItemExpression)) {
-                        compileError("The default value for a function parameter must be either a literal, or '.' (temporary Saxon restriction)");
-                    }
+//                    if (!(underlyingExpression instanceof Literal || underlyingExpression instanceof ContextItemExpression)) {
+//                        compileError("The default value for a function parameter must be either a literal, or '.' (temporary Saxon restriction)");
+//                    }
                 }
 
                 int pos = getParameterPosition();

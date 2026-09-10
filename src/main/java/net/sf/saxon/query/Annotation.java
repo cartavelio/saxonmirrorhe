@@ -25,6 +25,7 @@ public class Annotation {
     public static final StructuredQName SIMPLE = NamespaceUri.XQUERY.qName("simple");
     public static final StructuredQName PRIVATE = NamespaceUri.XQUERY.qName("private");
     public static final StructuredQName PUBLIC = NamespaceUri.XQUERY.qName("public");
+    public static final StructuredQName VARIADIC = NamespaceUri.XQUERY.qName("variadic");
 
 
     // The name of the annotation

@@ -4552,9 +4552,9 @@ public class XPathParser {
     }
 
     /**
-     * Parse a literal function item (introduced in XQuery 1.1)
+     * Parse a named function reference
      * Syntax: QName # integer
-     * The QName and # have already been read
+     * The QName has already been read
      *
      * @return an ExternalObject representing the function item
      * @throws net.sf.saxon.trans.XPathException if a static error is encountered

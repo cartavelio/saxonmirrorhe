@@ -68,6 +68,7 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
     protected volatile SequenceEvaluator bodyEvaluator = null;
     protected PushEvaluator pushEvaluator = null;
     private boolean updating = false;
+    private boolean variadic = false;
     private boolean ixslUpdating = false;
     private int inlineable = -1; // 0:no 1:yes -1:don't know
     private int inliningCount = 0;
@@ -209,9 +210,17 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
 
     public FunctionItemType getFunctionItemType(int arity) {
         SequenceType[] argTypes = new SequenceType[arity];
-        for (int i = 0; i < arity; i++) {
-            UserFunctionParameter ufp = parameterDefinitions[i];
-            argTypes[i] = ufp.getRequiredType();
+        if (variadic && arity > parameterDefinitions.length) {
+            int last = parameterDefinitions.length - 1;
+            for (int i = 0; i < arity; i++) {
+                UserFunctionParameter ufp = parameterDefinitions[Math.min(i, last)];
+                argTypes[i] = ufp.getRequiredType();
+            }
+        } else {
+            for (int i = 0; i < arity; i++) {
+                UserFunctionParameter ufp = parameterDefinitions[i];
+                argTypes[i] = ufp.getRequiredType();
+            }
         }
         return new SpecificFunctionType(argTypes, resultType, annotations);
     }
@@ -504,6 +513,24 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
     }
 
     /**
+     * Say whether this function is variadic.
+     * @param variadic true if the function is variadic
+     */
+
+    public void setVariadic(boolean variadic) {
+        this.variadic = variadic;
+    }
+
+    /**
+     * Ask whether this function is variadic
+     * @return true if the function is variadic
+     */
+
+    public boolean isVariadic() {
+        return variadic;
+    }
+
+    /**
      * Set whether this is an ixsl:updating function, as defined for use with IXSL promises in SaxonJS,
      * allowing the function to have updating side effects
      *
@@ -619,7 +646,9 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
     /**
      * Get the arity of this function
      *
-     * @return the number of arguments
+     * @return the number of parameter definitions in the function. For a non-variadic function,
+     * this is the maximum arity. For a variadic function, the final repeatable parameter counts
+     * as one parameter definition when computing the arity.
      */
 
     @Override
@@ -1117,7 +1146,7 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
 
     public static Expression[] makeExpandedArgumentArray(
             Expression[] arguments, Map<StructuredQName, Integer> keywords, FunctionDefinition fd) throws XPathException {
-        // 4.0: handle keyword arguments and default arguments
+        // 4.0: handle keyword arguments, variadicity, and default arguments
         Expression[] expandedArgs;
         int maxArity = fd.getNumberOfParameters();
         // If there are keyword arguments, reposition them to the correct position in the argument sequence
@@ -1140,6 +1169,20 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
                 }
                 Expression supplied = arguments[argPos];
                 expandedArgs[paramPos] = supplied;
+            }
+        } else if (fd.isVariadic()) {
+            expandedArgs = new Expression[maxArity];
+            if (arguments.length == maxArity) {
+                System.arraycopy(arguments, 0, expandedArgs, 0, maxArity);
+            } else {
+                System.arraycopy(arguments, 0, expandedArgs, 0, maxArity - 1);
+                if (arguments.length < maxArity) {
+                    expandedArgs[maxArity - 1] = Literal.makeEmptySequence();
+                } else {
+                    Expression[] varArgs = new Expression[arguments.length - maxArity + 1];
+                    System.arraycopy(arguments, maxArity - 1, varArgs, 0, varArgs.length);
+                    expandedArgs[maxArity - 1] = new Block(varArgs);
+                }
             }
         } else {
             expandedArgs = Arrays.copyOf(arguments, maxArity);

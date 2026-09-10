@@ -18,9 +18,7 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.QueryResult;
 import net.sf.saxon.regex.ARegularExpression;
-import net.sf.saxon.str.BMPString;
-import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.str.UnicodeWriter;
+import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
@@ -148,29 +146,33 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
         }
     }
 
-    static ARegularExpression QUOTES = ARegularExpression.compile("\"", "");
+    private final static ARegularExpression MATCH_DOUBLE_QUOTATION_MARK = ARegularExpression.compile("\"", "");
+    private final static UnicodeString TWO_DOUBLE_QUOTATION_MARKS = new Twine8("\"\"");
+    private final static UnicodeString ONE_DOUBLE_QUOTATION_MARK = new UnicodeChar('"');
+    private final static UnicodeString TRUE_CALL = new Twine8("true()");
+    private final static UnicodeString FALSE_CALL = new Twine8("false()");
 
-    private String serializeAtomicValue(AtomicValue value) throws XPathException {
+    private UnicodeString serializeAtomicValue(AtomicValue value) throws XPathException {
         switch(value.getPrimitiveType().getFingerprint()) {
             case StandardNames.XS_STRING:
             case StandardNames.XS_ANY_URI:
             case StandardNames.XS_UNTYPED_ATOMIC: {
                 UnicodeString s = value.getUnicodeStringValue();
-                s = QUOTES.replace(s, BMPString.of("\"\""));
+                s = MATCH_DOUBLE_QUOTATION_MARK.replace(s, TWO_DOUBLE_QUOTATION_MARKS);
                 if (characterMap != null) {
                     s = characterMap.map(s, false);
                 }
-                return "\"" + s.toString() + "\"";
+                return ONE_DOUBLE_QUOTATION_MARK.concat(s).concat(ONE_DOUBLE_QUOTATION_MARK);
             }
             case StandardNames.XS_BOOLEAN:
-                return value.effectiveBooleanValue() ? "true()" : "false()";
+                return value.effectiveBooleanValue() ? TRUE_CALL : FALSE_CALL;
 
             case StandardNames.XS_DECIMAL:
             case StandardNames.XS_INTEGER:
-                return value.getStringValue();
+                return value.getUnicodeStringValue();
 
             case StandardNames.XS_DOUBLE:
-                return FormatNumber.formatExponential((DoubleValue)value).toString();
+                return FormatNumber.formatExponential((DoubleValue)value);
 
             case StandardNames.XS_FLOAT:
             case StandardNames.XS_DURATION:
@@ -184,17 +186,25 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
             case StandardNames.XS_G_DAY:
             case StandardNames.XS_HEX_BINARY:
             case StandardNames.XS_BASE64_BINARY:
-                return value.getPrimitiveType().getDisplayName() + "(\"" + value.getUnicodeStringValue() + "\")";
+                return new Twine8(value.getPrimitiveType().getDisplayName())
+                        .concat(new UnicodeChar('('))
+                        .concat(ONE_DOUBLE_QUOTATION_MARK)
+                        .concat(value.getUnicodeStringValue())
+                        .concat(ONE_DOUBLE_QUOTATION_MARK)
+                        .concat(new UnicodeChar(')'));
 
             case StandardNames.XS_DAY_TIME_DURATION:
             case StandardNames.XS_YEAR_MONTH_DURATION:
-                return "xs:duration(\"" + value.getUnicodeStringValue() + "\")";
+                return new Twine8("xs:duration(\"")
+                        .concat(value.getUnicodeStringValue())
+                        .concat(ONE_DOUBLE_QUOTATION_MARK)
+                        .concat(new UnicodeChar(')'));
 
             case StandardNames.XS_QNAME:
             case StandardNames.XS_NOTATION:
-                return ((QualifiedNameValue)value).getStructuredQName().getEQName();
+                return StringView.of(((QualifiedNameValue)value).getStructuredQName().getEQName());
             default:
-                return "***";
+                return new Twine8("***");
         }
     }
 

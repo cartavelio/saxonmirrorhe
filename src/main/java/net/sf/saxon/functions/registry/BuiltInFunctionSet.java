@@ -531,6 +531,10 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
          * the result type is the same as the type of the first argument
          */
         public int properties;
+
+        public boolean isVariadic() {
+            return (properties & SEQV) != 0;
+        }
         /**
          * For options parameters, details of the accepted options, their defaults, and required type
          */

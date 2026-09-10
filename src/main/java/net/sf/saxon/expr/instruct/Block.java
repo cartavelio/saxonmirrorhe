@@ -821,10 +821,13 @@ public class Block extends Instruction {
 
         private static class BlockIterator extends AbstractBlockIterator {
 
+            private final XPathContext context;
+
             private final PullEvaluator[] pullers;
             public BlockIterator(PullEvaluator[] pullers, XPathContext context) {
                 this.pullers = pullers;
-                init(pullers.length, context);
+                this.context = context;
+                init(pullers.length);
             }
 
             @Override

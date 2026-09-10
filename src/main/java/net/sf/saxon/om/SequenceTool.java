@@ -13,6 +13,7 @@ import net.sf.saxon.expr.AscendingRangeIterator;
 import net.sf.saxon.expr.DescendingRangeIterator;
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.StaticProperty;
+import net.sf.saxon.expr.instruct.AbstractBlockIterator;
 import net.sf.saxon.functions.Count;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeBuilder;
@@ -592,6 +593,25 @@ public class SequenceTool {
             return EmptySequence.getInstance();
         } else {
             return item;
+        }
+    }
+
+    public static Sequence joinSequences(Sequence[] sequences) {
+        return new LazySequence(new MultiSequenceIterator(sequences));
+    }
+
+    public static class MultiSequenceIterator extends AbstractBlockIterator {
+
+        private final Sequence[] sequences;
+
+        public MultiSequenceIterator(Sequence[] sequences) {
+            init(sequences.length);
+            this.sequences = sequences;
+        }
+
+        @Override
+        public SequenceIterator getNthChildIterator(int n) {
+            return sequences[n].iterate();
         }
     }
 }

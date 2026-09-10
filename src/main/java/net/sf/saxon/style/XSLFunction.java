@@ -56,6 +56,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
     private UserFunction.Determinism determinism = UserFunction.Determinism.PROACTIVE;
     private boolean explaining;
     private boolean updating = false;
+    private boolean variadic = false;
 
     /**
      * Get the corresponding Procedure object that results from the compilation of this
@@ -149,6 +150,11 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
                         break;
                     case "new-each-time":
                         newEachTimeAtt = Whitespace.trim(att.getValue());
+                        break;
+                    case "variadic":
+                        if (requireXslt40Attribute("variadic")) {
+                            variadic = processBooleanAttribute("variadic", att.getValue());
+                        };
                         break;
                     default:
                         checkUnknownAttribute(name);
@@ -377,9 +383,12 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
         return updating;
     }
 
+    public boolean isVariadic() {
+        return variadic;
+    }
+
     @Override
     public void index(ComponentDeclaration decl, PrincipalStylesheetModule top) {
-        //getSkeletonCompiledFunction();
         getCompiledFunction();
         top.indexFunction(decl);
     }
@@ -399,6 +408,11 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
 
         int maxArity = getNumberOfParameters();
         int minArity = maxArity - getNumberOfOptionalParameters();
+
+        if (variadic) {
+            minArity = getNumberOfParameters() - 1;
+            maxArity = Integer.MAX_VALUE;
+        }
         if (minArity <= 1 && maxArity >= 1) {
             SchemaType type = getConfiguration().getSchemaType(getObjectName());
             if (type instanceof PlainType) {
@@ -579,7 +593,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
      */
 
     public void setParameterDefinitions(UserFunction fn) {
-        UserFunctionParameter[] params = new UserFunctionParameter[getNumberOfParameters()];
+        UserFunctionParameter[] params = fn.getParameterDefinitions();
         int count = 0;
         int optional = 0;
         for (NodeInfo node : children()) {
@@ -601,8 +615,8 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
                 break;
             }
         }
-        fn.setParameterDefinitions(params);
-        fn.setMinimumArity(count - optional);
+//        fn.setParameterDefinitions(params);
+//        fn.setMinimumArity(count - optional);
     }
 
     /**
@@ -649,6 +663,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
             UserFunction fn = getConfiguration().newUserFunction(memoFunction, streamability);
             fn.setPackageData(getCompilation().getPackageData());
             fn.setFunctionName(getObjectName());
+            fn.setVariadic(isVariadic());
             int maxArity = getNumberOfParameters();
             int minArity = maxArity - getNumberOfOptionalParameters();
             fn.setArityRange(minArity, maxArity);

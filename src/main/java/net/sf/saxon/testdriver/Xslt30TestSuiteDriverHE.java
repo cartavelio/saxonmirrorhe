@@ -332,7 +332,6 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         Predicate<XdmItem> isStaticError = item -> item.getStringValue().startsWith("XTSE");
         boolean staticError = testCase.select(
                 path("result", "//", "error", "@code").where(isStaticError)).exists();
-        //boolean staticError = xpath.evaluate("result//error[starts-with(@code, 'XTSE')]", testCase).size() > 0;
         if (staticError && jitFlag) {
             env.xsltCompiler.setJustInTimeCompilation(false);
             env.resetActions.add(new Environment.ResetAction() {
@@ -352,8 +351,6 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             compiler.setErrorReporter(collector);
             initPatternOptimization(compiler);
             compiler.clearParameters();
-            //compiler.getUnderlyingCompilerInfo().setRuleOptimization(optimizeRules);
-            //compiler.getUnderlyingCompilerInfo().setRulePreconditions(preconditionsRules);
             prepareForSQL(compiler.getProcessor());
 
             List<XdmNode> params = testInput.select(child("param").where(isTrue("static"))).asListOfNodes();
@@ -376,7 +373,8 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 xpack = exportImportPackage(testName, testSetName, outcome, compiler, xpack, collector);
                 compiler.importPackage(xpack);
                 // Following needed for dynamic loading of packages using fn:transform()
-                env.processor.getUnderlyingConfiguration().getDefaultXsltCompilerInfo().getPackageLibrary().addPackage(xpack.getUnderlyingPreparedPackage());
+                env.processor.getUnderlyingConfiguration().getDefaultXsltCompilerInfo()
+                        .getPackageLibrary().addPackage(xpack.getUnderlyingPreparedPackage());
             }
             sheet = exportImport(testName, testSetName, outcome, compiler, sheet, collector, styleSource);
 

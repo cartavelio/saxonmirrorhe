@@ -20,6 +20,10 @@ import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyFunctionType;
 import net.sf.saxon.type.FunctionItemType;
+import net.sf.saxon.type.SpecificFunctionType;
+import net.sf.saxon.value.SequenceType;
+
+import java.util.Arrays;
 
 /**
  * A function item that wraps a Callable
@@ -67,6 +71,14 @@ public class CallableFunction extends AbstractFunction {
             UserFunction uf = ((XQueryFunctionLibrary.UnresolvedCallable) callable).getFunction();
             if (uf != null) {
                 // the previously unresolved function reference is now resolved
+                if (uf.isVariadic()) {
+                    SequenceType[] argTypes = new SequenceType[getArity()];
+                    int last = uf.getArity() - 1;
+                    System.arraycopy(uf.getFunctionItemType().getArgumentTypes(), 0, argTypes, 0, last);
+                    SequenceType lastArgType = uf.getFunctionItemType().getArgumentTypes()[last];
+                    Arrays.fill(argTypes, last, argTypes.length, lastArgType);
+                    return new SpecificFunctionType(argTypes, uf.getResultType());
+                }
                 type = uf.getFunctionItemType();
             }
         }

@@ -825,7 +825,8 @@ public class XQueryParser extends XPathParser {
             Annotation annotation = new Annotation(qName);
             if (uri.equals(NamespaceUri.XQUERY)) {
                 if (!qName.equals(Annotation.PRIVATE) && !qName.equals(Annotation.PUBLIC) &&
-                        !qName.equals(Annotation.UPDATING) && !qName.equals(Annotation.SIMPLE)) {
+                        !qName.equals(Annotation.UPDATING) && !qName.equals(Annotation.SIMPLE)
+                        && !qName.equals(Annotation.VARIADIC)) {
                     grumble("Unrecognized variable or function annotation " + qName.getDisplayName(), "XQST0045");
                 }
                 annotation.addAnnotationParameter(Int64Value.ZERO); // MHK 2024-07-15 - Why?

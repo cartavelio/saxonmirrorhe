@@ -20,9 +20,11 @@ import net.sf.saxon.trans.XPathException;
 public class BlockIterator extends AbstractBlockIterator {
 
     private final Operand[] operanda;
+    private final XPathContext context;
 
     public BlockIterator(Operand[] operanda, XPathContext context) {
-        super(operanda.length, context);
+        super(operanda.length);
+        this.context = context;
         this.operanda = operanda;
 
     }

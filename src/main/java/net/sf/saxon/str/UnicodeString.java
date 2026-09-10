@@ -401,7 +401,7 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
 
     public static int requireInt(long value) {
         if (value > Integer.MAX_VALUE) {
-            throw new UnsupportedOperationException("String offset exceeds 2^31 characters");
+            throw new UnsupportedOperationException("String offset or length exceeds 2^31 characters");
         }
         return (int) value;
     }

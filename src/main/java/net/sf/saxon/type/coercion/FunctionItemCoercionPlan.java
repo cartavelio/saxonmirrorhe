@@ -44,6 +44,7 @@ public class FunctionItemCoercionPlan extends CoercionPlan {
             FunctionSequenceCoercer.checkAnnotations((FunctionItem) item,
                                                      (FunctionItemType) requiredType,
                                                      request.config);
+            //return item;
             return new CoercedFunction((FunctionItem) item, (SpecificFunctionType) requiredType, is40, is40);
         } else {
             throw coercionError(item, requiredType, request);

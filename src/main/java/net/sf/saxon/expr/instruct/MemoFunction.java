@@ -30,6 +30,8 @@ public class MemoFunction extends UserFunction {
 
     private boolean lookForNodes = false;  // true if the function signature allows nodes within argument values
 
+    public MemoFunction() {}
+
     @Override
     public void setParameterDefinitions(UserFunctionParameter[] params) {
         super.setParameterDefinitions(params);
