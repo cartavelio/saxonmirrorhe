@@ -1,0 +1,154 @@
+task resources(
+  dependsOn: ["copy_build_scripts", "copy_notices", "resources_userdoc_xml",
+              "resources_userdoc_html", "copy_samples_usecases", "gen_readme"],
+  description: "Build the saxon-resources download"
+) {
+  // Just a place to hang dependencies
+}
+
+task releaseResources(
+        type: Zip,
+        dependsOn: ["resources"],
+        description: "Build the saxon-resources release"
+) {
+    from "${buildDir}/resources"
+    archiveFileName = "saxon-resources-${saxonMajorVersion}.zip"
+}
+
+
+// ============================================================
+task copy_build_scripts(
+        type: Copy,
+        description: "Copies the build scripts for saxon-resources"
+) {
+    into "${buildDir}/resources/build"
+    from ("${projectDir}") {
+        include "build.gradle"
+        include "build-doc.gradle"
+        include "build-n.gradle"
+        include "test-suites.gradle"
+    }
+}
+
+task copy_notices(
+        type: Copy,
+        description: "Copies the notices for saxon-resources"
+) {
+    into "${buildDir}/resources/notices"
+    from ("${projectDir}/src/docs/notices") {
+        include "ASM.txt"
+        include "ICU-J.txt"
+        include "JAMESCLARK.txt"
+        include "JLINE2.txt"
+        include "LICENSE.txt"
+        include "THAI.txt"
+        include "UNICODE.txt"
+    }
+}
+
+task resources_userdoc_html(
+        dependsOn: ["resources_html_docs", "resources_html_javadoc", "resources_html_dotnetdoc"],
+        description: "Copy HTML docs into the resources folder"
+) {
+    // Just a place to hang dependencies
+}
+
+task resources_html_docs(
+        type: Copy,
+        description: "Copy docs base files into the resources folder"
+) {
+    into "${buildDir}/resources/doc"
+    from "${projectDir}/src/docs/resources/fixed"
+}
+
+task resources_html_javadoc(
+        type: Copy,
+        dependsOn: ["userdoc_publish_html"],
+        description: "Copy HTML javadoc into the resources folder"
+) {
+    into "${buildDir}/resources/doc/javadoc"
+    from "${buildDir}/javadoc"
+    doFirst {
+        mkdir "${buildDir}/resources/doc/javadoc"
+    }
+}
+
+task resources_html_dotnetdoc(
+        type: Copy,
+        dependsOn: ["userdoc_publish_html"],
+        description: "Copy HTML dotnetdoc into the resources folder"
+) {
+    into "${buildDir}/resources/doc/dotnetdoc"
+    from "${buildDir}/dotnetdoc-html"
+    doFirst {
+        mkdir "${buildDir}/resources/doc/dotnetdoc"
+    }
+}
+
+// TODO source-userdoc previously included style/ and to-static/
+
+task source_userdoc_zip(
+        type: Zip,
+        dependsOn: ["userdoc_viewer_appJS"]
+) {
+    from ("${buildDir}/userdoc") {
+        exclude "expanded/**"
+        exclude "html/**"
+        exclude "tmp/**"
+    }
+    archiveFileName = "source-userdoc.zip"
+}
+
+task resources_userdoc_xml(
+        type: Copy,
+        dependsOn: ["source_userdoc_zip"],
+        description: "Copy zipped userdoc source into the resources folder"
+) {
+    into "${buildDir}/resources"
+    from "${buildDir}/distributions/source-userdoc.zip"
+}
+
+// TODO drivers - testdriver_classes ???
+
+// TODO maybe don't need to do samples and use-cases separately, because eej_samples already does them both???
+//  or maybe testing might mess with samples content
+
+// samples
+task samples_common(
+        type: Copy,
+        dependsOn: ["copy_usecases"],
+        description: "Assemble Cross-Platform Samples and Use-Cases"
+) {
+    // Just a place to hang dependencies
+}
+
+// use-cases
+task copy_usecases(
+        type: Copy,
+        description: "Copy use-cases into the resources folder"
+) {
+    into "${buildDir}/resources/use-cases"
+    from "${projectDir}/src/use-cases"
+}
+
+task copy_samples_usecases(
+        type: Copy,
+        dependsOn: ["eej_samples"],
+        description: "Copy samples and use-cases into the resources folder"
+) {
+    into "${buildDir}/resources"
+    from "${buildDir}/output/he/resources" // TODO output/ee/resources ???
+}
+
+task gen_readme(
+        type: JavaExec,
+        description: "Generate readme.txt for saxon-resources download"
+) {
+    inputs.file "${projectDir}/src/docs/resources/readme.xsl"
+    outputs.file "${buildDir}/resources/readme.txt"
+    classpath = configurations.documentation
+    main = "com.saxonica.Transform"
+    args "-xsl:${projectDir}/src/docs/resources/readme.xsl",
+            "-it:main",
+            "-o:${buildDir}/resources/readme.txt"
+}

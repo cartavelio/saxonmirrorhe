@@ -1,25 +1,817 @@
+task clone_expath_cg(
+  type: Exec,
+  description: "Clones the expath-cg github repository for doc builds"
+) {
+  commandLine "git",
+    "clone",
+    "https://github.com/expath/expath-cg.git",
+    "${buildDir}/expath-cg"
+}
+clone_expath_cg.onlyIf {
+  !file("${buildDir}/expath-cg").exists()
+}
+
+// ============================================================
+
+task documentation(
+  dependsOn: ["update_documentation", "gen_contents_ref", "gen_feature_matrix",
+              "copy_prod_desc_pdf"],
+  description: "Build the documentation and pages for website"
+) {
+  // Just a place to hang dependencies
+}
+
+// ============================================================
+
+task filter_sources_for_javadoc(
+  type: Copy,
+  description: "Copy the Java source files for making JavaDoc (excludes some classes)"
+) {
+  inputs.files fileTree(dir: "${projectDir}/src/main/java")
+  outputs.files fileTree(dir: "${buildDir}/javadoc_src")
+  
+  // N.B. these exclusions are also applied in the tasks below.
+  into "${buildDir}/javadoc_src"
+  from ("${projectDir}/src/main/java") {
+    include "net/**"
+    include "com/**"
+    include "javax/**"
+    exclude "**/dotnet/**"
+    exclude "net/sf/saxon/option/cpp/**"
+    exclude "net/sf/saxon/testdriver/**"
+    exclude "com/saxonica/functions/extfn/cpp/**"
+    exclude "com/saxonica/js/**"
+    exclude "com/saxonica/testdriver/**"
+    exclude "com/saxonica/config/DotNetExtensionFunctionFactory.java"
+    exclude "com/saxonica/config/DotNetExtensionLibrary.java"
+    exclude "com/saxonica/config/DotNetPlatformPE.java"
+    exclude "com/saxonica/config/JavaPlatformC.java"
+    exclude "com/saxonica/expr/DotNetExtensionFunctionCall.java"
+  }
+}
+
+task product_javadoc(
+  dependsOn: ["filter_sources_for_javadoc"],
+  description: "Generate Javadoc files"
+) {
+  // If you can't do something the easy way, do it the hard way.
+  // The Gradle JavaDoc plugin should be able to do this, but it doesn't
+  // do the right thing and it's completely unclear why. (The symptom that
+  // forced me to resort to this approach was including every file twice.)
+  inputs.files fileTree(dir: "${buildDir}/javadoc_src")
+  outputs.files fileTree(dir: "${buildDir}/javadoc")
+
+  def cp = ""
+  configurations.documentation.resolve().each { path ->
+    cp = cp + System.getProperty("path.separator") + path
+  }
+
+  def command = []
+
+  doFirst {
+    mkdir "${buildDir}/javadoc"
+
+    // If there are back slashes in the filesep, make sure they're escaped!
+    def filesep = fileSeparator
+    def fsre = filesep.replaceAll("\\\\", "\\\\\\\\")
+    def packages = [:]
+
+    // Any directory that contains a java file is assumed to be a
+    // package...because that's the way packages work in Java.
+    fileTree(dir: "${buildDir}/javadoc_src").each { pkg ->
+      def fn = pkg.toString()
+      fn = fn.substring("{$buildDir}/javadoc_src".length()-1)
+      def pos = fn.lastIndexOf(filesep)
+      fn = fn.substring(0, pos).replaceAll(fsre, ".")
+      packages[fn] = 1
+    }
+
+    command = ["javadoc",
+               "-sourcepath", "${buildDir}/javadoc_src",
+               "-Xdoclint:none",
+               "-d", "${buildDir}/javadoc",
+               "-protected",
+               "-classpath", cp,
+               "-bottom", "Copyright (c) 2004-2021 Saxonica Limited. All rights reserved.",
+               "-doctitle", "Saxon ${saxonVersion} Java API Documentation",
+               "-group", "s9api Interface", "net.sf.saxon.s9api",
+               "-group", "Other Interfaces", "com.saxonica.config:net.sf.saxon:net.sf.saxon.lib:net.sf.saxon.om:net.sf.saxon.query:net.sf.saxon.sxpath:net.sf.saxon.value:net.sf.saxon.type:net.sf.saxon.xpath:net.sf.saxon.xqj",
+               "-group", "External Interfaces", "javax.xml.xquery",
+               "-source", "1.8"] + packages.keySet()
+  }
+
+  doLast {
+    exec {
+      commandLine command
+    }
+  }
+}
+
+task he_javadoc(
+  dependsOn: ["filter_sources_for_javadoc"],
+  description: "Generate Javadoc files for HE"
+) {
+  // This task is specifically for the JavaDoc that's get published
+  // with Saxon-HE on Maven. It doesn't include any of the PE/EE docs.
+  inputs.files fileTree(dir: "${buildDir}/javadoc_src")
+  outputs.files fileTree(dir: "${buildDir}/he_javadoc")
+
+  def cp = ""
+  configurations.documentation.resolve().each { path ->
+    cp = cp + System.getProperty("path.separator") + path
+  }
+
+  def command = []
+
+  doFirst {
+    mkdir "${buildDir}/he_javadoc"
+
+    // If there are back slashes in the filesep, make sure they're escaped!
+    def filesep = fileSeparator
+    def fsre = filesep.replaceAll("\\\\", "\\\\\\\\")
+    def packages = [:]
+
+    // Any directory that contains a java file is assumed to be a
+    // package...because that's the way packages work in Java.
+    fileTree(dir: "${buildDir}/javadoc_src",
+             // Kind of a hack to exclude everything except com.saxonica.xqj
+             exclude: ["com/saxonica/*.java",
+                       "com/saxonica/config/**",
+                       "com/saxonica/ee/**",
+                       "com/saxonica/expr/**",
+                       "com/saxonica/functions/**",
+                       "com/saxonica/serialize/**",
+                       "com/saxonica/trans/**",
+                       "com/saxonica/xsltextn/**"]).each { pkg ->
+      def fn = pkg.toString()
+      fn = fn.substring("{$buildDir}/javadoc_src".length()-1)
+      def pos = fn.lastIndexOf(filesep)
+      fn = fn.substring(0, pos).replaceAll(fsre, ".")
+      packages[fn] = 1
+    }
+
+    command = ["javadoc",
+               "-sourcepath", "${buildDir}/javadoc_src",
+               "-Xdoclint:none",
+               "-d", "${buildDir}/he_javadoc",
+               "-protected",
+               "-classpath", cp,
+               "-bottom", "Copyright (c) 2004-2021 Saxonica Limited. All rights reserved.",
+               "-doctitle", "Saxon ${saxonVersion} Java API Documentation",
+               "-group", "s9api Interface", "net.sf.saxon.s9api",
+               "-group", "Other Interfaces", "net.sf.saxon:net.sf.saxon.lib:net.sf.saxon.om:net.sf.saxon.query:net.sf.saxon.sxpath:net.sf.saxon.value:net.sf.saxon.type:net.sf.saxon.xpath:net.sf.saxon.xqj",
+               "-group", "External Interfaces", "javax.xml.xquery",
+               "-source", "1.8"] + packages.keySet()
+  }
+
+  doLast {
+    exec {
+      commandLine command
+    }
+  }
+}
+
+task product_jeljavadoc(
+  dependsOn: ["filter_sources_for_javadoc"],
+  description: "Generate Javadoc XML files"
+) {
+  // If you can't do something the easy way, do it the hard way.
+  // The Gradle JavaDoc plugin should be able to do this, but it doesn't
+  // do the right thing with package descriptions and it's completely
+  // unclear why.
+  inputs.files fileTree(dir: "${buildDir}/javadoc_src")
+  inputs.file "${projectDir}/lib/jeldoc.jar"
+  outputs.files fileTree(dir: "${buildDir}/jeljavadoc")
+
+  def cp = ""
+  configurations.documentation.resolve().each { path ->
+    cp = cp + System.getProperty("path.separator") + path
+  }
+
+  def command = []
+
+  doFirst {
+    mkdir "${buildDir}/jeljavadoc"
+
+    // If there are back slashes in the filesep, make sure they're escaped!
+    def filesep = fileSeparator
+    def fsre = filesep.replaceAll("\\\\", "\\\\\\\\")
+    def packages = [:]
+
+    // Any directory that contains a java file is assumed to be a
+    // package...because that's the way packages work in Java.
+    fileTree(dir: "${buildDir}/javadoc_src").each { pkg ->
+      def fn = pkg.toString()
+      fn = fn.substring("{$buildDir}/javadoc_src".length()-1)
+      def pos = fn.lastIndexOf(filesep)
+      fn = fn.substring(0, pos).replaceAll(fsre, ".")
+      packages[fn] = 1
+    }
+
+    command = ["javadoc",
+               "-sourcepath", "${buildDir}/javadoc_src",
+               "-d", "${buildDir}/jeljavadoc",
+               "-package",
+               "-filename", "jeldoclet-out.xml",
+               "-includeNamespace",
+               "-outputEncoding", "utf-8",
+               "-classpath", cp,
+               "-doclet", "com.jeldoclet.JELDoclet",
+               "-docletpath", cp,
+               "-source", "1.8"] + packages.keySet()
+  }
+    
+  doLast {
+    exec {
+      commandLine command
+    }
+  }
+}
+
+task product_xsljavadoc(
+  type: JavaExec,
+  dependsOn: ["product_jeljavadoc"],
+  description: "Convert javadoc XML into format for documentation"
+) {
+  inputs.files fileTree(dir: "${buildDir}/jeljavadoc")
+  inputs.file "${projectDir}/tools/docs/javadoc/chunk-javadoc.xsl"
+  outputs.files fileTree(dir: "${buildDir}/javadoc-xml")
+  classpath = configurations.documentation
+  main = "com.saxonica.Transform"
+  args "-s:${buildDir}/jeljavadoc/jeldoclet-out.xml",
+    "-xsl:${projectDir}/tools/docs/javadoc/chunk-javadoc.xsl",
+    "-o:${buildDir}/javadoc-xml/out",
+    "base-output=${buildDir}/javadoc-xml/"
+}
+
+task javadoc_linkchecker(
+  type: JavaExec,
+  dependsOn: ["product_xsljavadoc"],
+  description: "Generate report of links"
+) {
+  inputs.files fileTree(dir: "${buildDir}/javadoc-xml")
+  inputs.file "${projectDir}/tools/docs/javadoc/check-tag-links.xsl"
+  outputs.file "${buildDir}/javadoc-tag-check.xml"
+  classpath = configurations.documentation
+  main = "com.saxonica.Transform"
+  args "-s:${buildDir}/javadoc-xml/javadoc-types.xml",
+    "-xsl:${projectDir}/tools/docs/javadoc/check-tag-links.xsl",
+    "-o:${buildDir}/javadoc-tag-check.xml"
+}
+
+task dotnet_doc_parsecs(
+  type: JavaExec,
+  dependsOn: ["een_csharpApi"],
+  description: "Parse dotnet cs files for docs"
+) {
+  inputs.files fileTree(dir: "${buildDir}/n/csharp/api/Saxon.Api")
+  inputs.file "${projectDir}/tools/docs/dotnet/parsecs.xsl"
+  outputs.file "${buildDir}/dotnetdoc/names.xml"
+  classpath = configurations.documentation
+  main = "com.saxonica.Transform"
+  args "-it:main",
+    "-s:${projectDir}/tools/docs/dotnet/parsecs.xsl",
+    "-xsl:${projectDir}/tools/docs/dotnet/parsecs.xsl",
+    "-o:${buildDir}/dotnetdoc/names.xml",
+    "inputdir=${buildDir}/n/csharp/api/Saxon.Api"
+}
+
+task dotnet_doc_merge(
+  type: JavaExec,
+  dependsOn: ["dotnet_doc_parsecs"],
+  description: "Merge API docs for dotnet"
+) {
+  inputs.file "${buildDir}/dotnetdoc/names.xml"
+  inputs.file "${buildDir}/n/saxon-ee-api-${saxonVersion}.xml"
+  inputs.file "${projectDir}/tools/docs/dotnet/merge.xsl"
+  outputs.file "${buildDir}/dotnetdoc/merged.xml"
+  classpath = configurations.documentation
+  main = "com.saxonica.Transform"
+  args "-it:main",
+    "-s:${buildDir}/dotnetdoc/names.xml",
+    "-xsl:${projectDir}/tools/docs/dotnet/merge.xsl",
+    "-o:${buildDir}/dotnetdoc/merged.xml",
+    "names-file=${buildDir}/dotnetdoc/names.xml",
+    "api-doc-file=${buildDir}/n/saxon-ee-api-${saxonVersion}.xml"
+}
+
+task dotnet_doc_css(
+  type: Copy,
+  description: "Copies the CSS for dotnet docs"
+) {
+  into "${buildDir}/dotnetdoc-html"
+  from "${projectDir}/tools/docs/dotnet/saxon-dotnetdoc.css"
+}
+
+task dotnet_doc_html(
+  type: JavaExec,
+  dependsOn: ["dotnet_doc_merge", "dotnet_doc_css"],
+  description: "Create HTML output for dotnet docs"
+) {
+  inputs.file "${buildDir}/dotnetdoc/merged.xml"
+  inputs.file "${projectDir}/tools/docs/dotnet/tohtml.xsl"
+  outputs.file "${buildDir}/dotnetdoc-html/index.html"
+  classpath = configurations.documentation
+  main = "com.saxonica.Transform"
+  args "-s:${buildDir}/dotnetdoc/merged.xml",
+    "-xsl:${projectDir}/tools/docs/dotnet/tohtml.xsl",
+    "-o:${buildDir}/dotnetdoc-html/index.html"
+}
+
+task dotnet_doc_jel(
+  type: JavaExec,
+  dependsOn: ["dotnet_doc_merge"],
+  description: "Create HTML output for dotnet docs"
+) {
+  inputs.file "${buildDir}/dotnetdoc/merged.xml"
+  inputs.file "${projectDir}/tools/docs/dotnet/convert-to-jel-package.xsl"
+  outputs.file "${buildDir}/dotnetdoc-xml/packages/Saxon.Api.xml"
+  classpath = configurations.documentation
+  main = "com.saxonica.Transform"
+  args "-s:${buildDir}/dotnetdoc/merged.xml",
+    "-xsl:${projectDir}/tools/docs/dotnet/convert-to-jel-package.xsl",
+    "-o:${buildDir}/dotnetdoc-xml/packages/Saxon.Api.xml"
+}
+
+task app_dotnetdoc(
+  type: Copy,
+  dependsOn: ["dotnet_doc_jel"],
+  description: "Copy the XML dotnet docs to the viewer app"
+) {
+  into "${buildDir}/userdoc/viewer_appJS/dotnetdoc-xml"
+  from "${buildDir}/dotnetdoc-xml"
+}
+
+task app_javadoc(
+  type: Copy,
+  dependsOn: ["product_xsljavadoc"],
+  description: "Copy the XML javadoc docs to the viewer app"
+) {
+  into "${buildDir}/userdoc/viewer_appJS/javadoc-xml"
+  from "${buildDir}/javadoc-xml"
+}
+
+
+// ============================================================
+
+task gen_doc(
+  dependsOn: ["gen_doc_icu_uca", "gen_xslt_element_reference",
+              "gen_xslt_element_reference", "element_doc", "expath_doc",
+              "doc_FeatureKeysDoc", "doc_ConfigFileDoc"],
+  description: "Collects up, generates and copies the documentation source into the canonical location"
+) {
+  // Just a place to hang dependencies
+}  
+
+task copy_userdoc_sources(
+  type: Copy,
+  dependsOn: ["copy_userdoc_implement"],
+  description: "Copy the 'real', unpreprocessed sources"
+) {
+  into "${buildDir}/userdoc/src"
+  from ("${projectDir}/src/userdoc") {
+    // Excluded files are transformed by other tasks into "src" for the docbuild
+    exclude "extensions/**"
+    exclude "elements/**"
+  }
+}
+
+task copy_userdoc_implement(
+  type: Copy,
+  description: "Copy the app implement file"
+) {
+  from "${projectDir}/src/viewer_appJS/doc"
+  into "${buildDir}/userdoc/src"
+}
+
 task doc_FeatureKeysDoc(
   type: JavaExec,
+  dependsOn: ["copy_userdoc_sources"],
   description: "Construct the documentation for feature keys"
 ) {
   inputs.files fileTree(dir: "${projectDir}/tools/featureKeys")
-  outputs.file "${projectDir}/userdoc/src/featureKeys/FeatureKeysDoc.xml"
+  outputs.file "${buildDir}/userdoc/src/featureKeys/FeatureKeysDoc.xml"
   classpath = configurations.preprocessor
   main = "net.sf.saxon.Transform"
   args "${projectDir}/tools/featureKeys/FeatureKeys.xml",
     "-xsl:${projectDir}/tools/featureKeys/FeatureKeysToDoc.xsl",
-    "-o:${projectDir}/userdoc/src/featureKeys/FeatureKeysDoc.xml"
+    "-o:${buildDir}/userdoc/src/featureKeys/FeatureKeysDoc.xml"
 }
 
 task doc_ConfigFileDoc(
   type: JavaExec,
+  dependsOn: ["copy_userdoc_sources", "doc_FeatureKeysDoc"],
   description: "Construct the documentation for the configuration file"
 ) {
   inputs.files fileTree(dir: "${projectDir}/tools/featureKeys")
-  outputs.files fileTree(dir: "${projectDir}/userdoc/src/featureKeys")
+  outputs.files fileTree(dir: "${buildDir}/userdoc/src/featureKeys")
   classpath = configurations.preprocessor
   main = "net.sf.saxon.Transform"
   args "${projectDir}/tools/featureKeys/AdditionalFeatures.xml",
     "-xsl:${projectDir}/tools/featureKeys/ToConfigFileDoc.xsl",
-    "-o:${projectDir}/userdoc/src/featureKeys/ConfigFileDoc.xml"
+    "-o:${buildDir}/userdoc/src/featureKeys/ConfigFileDoc.xml"
+}
+
+task gen_doc_icu_uca(
+  type: JavaExec,
+  dependsOn: ["copy_userdoc_sources"],
+  description: "Generate the ICU/UCA documentation"
+) {
+  inputs.files fileTree(dir: "${projectDir}/src/userdoc")
+  inputs.files fileTree(dir: "${projectDir}/tools/docs/userdoc")
+  outputs.files fileTree(dir: "${buildDir}/userdoc/src/extensibility")
+  classpath = configurations.documentation
+  main = "com.saxonica.Transform"
+  args "-it:go",
+    "-s:${projectDir}/src/userdoc/catalog.xml",
+    "-xsl:${projectDir}/tools/docs/userdoc/document-ICU.xsl",
+    "output=${buildDir}/userdoc/src/extensibility/"
+}
+
+task gen_xslt_element_reference_preprocess(
+  type: JavaExec,
+  dependsOn: ["copy_userdoc_sources"],
+  description: "Preprocess input for the XSLT Element reference documentation"
+) {
+  inputs.files fileTree(dir: "${projectDir}/src/userdoc/elements")
+  inputs.files fileTree(dir: "${projectDir}/tools/docs/userdoc")
+  outputs.file "${buildDir}/userdoc/tmp/xsl-elements-expanded.xml"
+  classpath = configurations.documentation
+  main = "com.saxonica.Transform"
+  args "-s:${projectDir}/src/userdoc/elements/xsl-elements.xml",
+    "-o:${buildDir}/userdoc/tmp/xsl-elements-expanded.xml",
+    "-xsl:${projectDir}/tools/docs/userdoc/genElementDoc.xsl"
+}
+
+task gen_xslt_element_reference(
+  type: JavaExec,
+  dependsOn: ["gen_xslt_element_reference_preprocess"],
+  description: "Generate the XSLT Element reference documentation"
+) {
+  inputs.file "${buildDir}/userdoc/tmp/xsl-elements-expanded.xml" 
+  inputs.files fileTree(dir: "${projectDir}/tools/docs/userdoc")
+  outputs.file "${buildDir}/userdoc/src/xsl-elements.xml"
+  classpath = configurations.documentation
+  main = "com.saxonica.Transform"
+  args "-s:${buildDir}/userdoc/tmp/xsl-elements-expanded.xml",
+    "-xsl:${projectDir}/tools/docs/userdoc/elements-body.xsl",
+    "-o:${buildDir}/userdoc/src/xsl-elements.xml"
+}
+
+task element_doc() {
+  // Just a place to hang dependencies
+}
+
+["instructions", "serialization-params"].each { target ->
+  Task t = task "gen_element_doc_${target}"(
+    type: JavaExec,
+    description: "Expand element documentation for ${target}"
+  ) {
+    inputs.file "${projectDir}/src/userdoc/extensions/${target}.xml"
+    inputs.files fileTree(dir: "${projectDir}/tools/docs/userdoc")
+    outputs.file file("${buildDir}/userdoc/src/extensions/${target}.xml")
+    classpath = configurations.documentation
+    main = "com.saxonica.Transform"
+    args "-s:${projectDir}/src/userdoc/extensions/${target}.xml",
+      "-xsl:${projectDir}/tools/docs/userdoc/elements-body.xsl",
+      "-o:${buildDir}/userdoc/src/extensions/${target}.xml"
+  }
+  element_doc.dependsOn t
+}  
+
+// Different from preceding because it doesn't go in extensions ¯\_(ツ)_/¯
+["sql-extension"].each { target ->
+  Task t = task "gen_element_doc_${target}"(
+    type: JavaExec,
+    description: "Expand element documentation for ${target}"
+  ) {
+    inputs.file "${projectDir}/src/userdoc/extensions/${target}.xml"
+    inputs.files fileTree(dir: "${projectDir}/tools/docs/userdoc")
+    outputs.file "${buildDir}/userdoc/src/${target}.xml"
+    classpath = configurations.documentation
+    main = "com.saxonica.Transform"
+    args "-s:${projectDir}/src/userdoc/extensions/${target}.xml",
+      "-xsl:${projectDir}/tools/docs/userdoc/elements-body.xsl",
+      "-o:${buildDir}/userdoc/src/${target}.xml"
+  }
+  element_doc.dependsOn t
+}  
+
+task expath_doc() {
+  // Just a place to hang dependencies
+}
+["binary", "archive", "file"].each { target ->
+  Task t = task "expath_doc_${target}"(
+    type: JavaExec,
+    dependsOn: ["clone_expath_cg"],
+    description: "Expand EXPath documentation for ${target}"
+  ) {
+    inputs.file "${projectDir}/src/userdoc/functions/EXPath/functions-${target}.xml"
+    inputs.files fileTree(dir: "${projectDir}/tools/docs/userdoc")
+    outputs.file "${buildDir}/userdoc/src/functions/EXPath/functions-${target}.xml"
+    classpath = configurations.documentation
+    main = "com.saxonica.Transform"
+    args "-xi:on",
+      "-s:${projectDir}/src/userdoc/functions/EXPath/functions-${target}.xml",
+      "-xsl:${projectDir}/tools/docs/userdoc/genFunctionDoc.xsl",
+      "-o:${buildDir}/userdoc/src/functions/EXPath/functions-${target}.xml",
+      "GitHub=${projectDir}/build"
+  }
+  expath_doc.dependsOn t
+}
+
+task expand_userdoc_sections(
+  type: JavaExec,
+  dependsOn: ["gen_doc"],
+  description: "Expand documentation sections from inclusions for app"
+) {
+  inputs.file "${buildDir}/userdoc/src/catalog.xml"
+  inputs.files fileTree(dir: "${buildDir}/userdoc/src")
+  inputs.files fileTree(dir: "${projectDir}/tools/docs/userdoc")
+  outputs.file "${buildDir}/userdoc/expanded/catalog.xml"
+  classpath = configurations.documentation
+  main = "com.saxonica.Transform"
+  args "-xi:on",
+    "-s:${buildDir}/userdoc/src/catalog.xml",
+    "-xsl:${projectDir}/tools/docs/userdoc/doc-include.xsl",
+    "-o:${buildDir}/userdoc/expanded/catalog.xml",
+    "output-uri=${buildDir}/userdoc/expanded/"
+}
+
+task userdoc_changes(
+  type: JavaExec,
+  dependsOn: ["expand_userdoc_sections"],
+  description: "Preprocess the changes.xml file to turn it into a standard article"
+) {
+  inputs.file "${buildDir}/userdoc/expanded/changes.xml"
+  inputs.files fileTree(dir: "${projectDir}/tools/docs/to-static")
+  outputs.file "${buildDir}/userdoc/expanded/changes-article.xml"
+  classpath = configurations.documentation
+  main = "com.saxonica.Transform"
+  args "-s:${buildDir}/userdoc/expanded/changes.xml",
+    "-xsl:${projectDir}/tools/docs/to-static/c-changes.xsl",
+    "-o:${buildDir}/userdoc/expanded/changes-article.xml"
+}
+
+task userdoc_functions(
+  type: JavaExec,
+  dependsOn: ["expand_userdoc_sections"],
+  description: "Preprocess the functions.xml file to turn it into a standard article"
+) {
+  inputs.file "${buildDir}/userdoc/expanded/functions.xml"
+  inputs.files fileTree(dir: "${projectDir}/tools/docs/to-static")
+  outputs.file "${buildDir}/userdoc/expanded/functions-article.xml"
+  classpath = configurations.documentation
+  main = "com.saxonica.Transform"
+  args "-s:${buildDir}/userdoc/expanded/functions.xml",
+    "-xsl:${projectDir}/tools/docs/to-static/c-functions.xsl",
+    "-o:${buildDir}/userdoc/expanded/functions-article.xml"
+}
+
+// ============================================================
+
+task viewer_app_sef(
+  type: JavaExec,
+  description: "Compile the viewer_app stylesheet"
+) {
+  inputs.files fileTree(dir: "${projectDir}/src/viewer_appJS/xsl")
+  outputs.file "${buildDir}/userdoc/viewer_appJS/xsl/viewer_app.sef.json"
+  classpath = configurations.documentation
+  main = "com.saxonica.Transform"
+  args "-xsl:${projectDir}/src/viewer_appJS/xsl/viewer_app.xsl",
+    "-export:${buildDir}/userdoc/viewer_appJS/xsl/viewer_app.sef.json",
+    "-target:JS", "-nogo", "-relocate:on", "-ns:##html5",
+    "--generateByteCode:off",
+    "SEFbuildDate=${DSTAMP}"
+}
+
+// ============================================================
+
+task userdoc_html(
+  dependsOn: ["userdoc_articles"],
+  description: "Creates the static HTML version of the user documentation"
+) {
+  // Just a place to hang dependencies
+}
+
+task userdoc_articles(
+  type: JavaExec,
+  dependsOn: ["expand_userdoc_sections", "app_javadoc", "app_dotnetdoc",
+              "userdoc_changes", "userdoc_functions"],
+  description: "Process all the articles"
+) {
+  inputs.files fileTree(dir: "${buildDir}/userdoc/expanded")
+  inputs.files fileTree(dir: "${projectDir}/tools/docs/to-static")
+  outputs.files fileTree(dir: "${buildDir}/userdoc/html")
+  classpath = configurations.documentation
+  main = "com.saxonica.Transform"
+  args "-s:${buildDir}/userdoc/expanded/catalog.xml",
+    "-xsl:${projectDir}/tools/docs/to-static/s-viewer_app.xsl",
+    "-o:${buildDir}/userdoc/html/dummy.xml",
+    "changes-article=${buildDir}/userdoc/expanded/changes-article.xml",
+    "functions-article=${buildDir}/userdoc/expanded/functions-article.xml",
+    "base-uri=${buildDir}/userdoc/html/"
+}
+
+task userdoc_publish_viewer_appJS(
+  type: Copy,
+  description: "Copy viewer_appJS to build"
+) {
+  into "${buildDir}/userdoc/viewer_appJS"
+  from ("${projectDir}/src/viewer_appJS") {
+    exclude "readme.txt"
+  }
+}
+
+task userdoc_viewer_appJS(
+  type: Copy,
+  dependsOn: ["userdoc_articles", "userdoc_publish_viewer_appJS", "viewer_app_sef"],
+  description: "Copy transformed articles to app docs"
+) {
+  into "${buildDir}/userdoc/viewer_appJS/doc"
+  from ("build/userdoc/expanded") {
+    include "*.xml"
+    exclude "functions-article.xml"
+    exclude "changes-article.xml"
+  }
+}
+
+task userdoc_publish_javadoc_html(
+  type: Copy,
+  dependsOn: ["userdoc_html", "product_javadoc"],
+  description: "Copy javadoc docs into HTML output"
+) {
+  into "${buildDir}/userdoc/html/javadoc"
+  from "build/javadoc"
+  doFirst {
+    mkdir "${buildDir}/userdoc/html/javadoc"
+  }
+}
+
+task userdoc_publish_html_images(
+  type: Copy,
+  description: "Copy viewer_appJS images to the html output directory"
+) {
+  into "${buildDir}/userdoc/html/image"
+  from "${projectDir}/src/viewer_appJS/image"
+}
+
+task userdoc_publish_html_style(
+  type: Copy,
+  description: "Copy viewer_appJS CSS to the html output directory"
+) {
+  into "${buildDir}/userdoc/html"
+  from "${projectDir}/src/viewer_appJS/viewer_app.css"
+  filter { line ->
+    line.contains("url('saxon-base.css')")
+            ? line.replace("saxon-base.css", "../../saxon-base.css")
+            : line
+  }
+}
+
+task userdoc_publish_html(
+  type: Copy,
+  dependsOn: ["userdoc_publish_javadoc_html", "dotnet_doc_html",
+              "userdoc_publish_html_style", "userdoc_publish_html_images"],
+  description: "Publish the HTML documentation"
+) {
+  into "${buildDir}/userdoc/html/dotnetdoc"
+  from "build/dotnetdoc-html"
+  doFirst {
+    mkdir "${buildDir}/userdoc/html/dotnetdoc"
+  }
+}
+
+// ============================================================
+
+task update_documentation(
+  dependsOn: ["copy_xml_documentation", "copy_html_documentation"],
+  description: "Update documentation from viewer app"
+) {
+  // Just a place to hang dependencies
+}
+
+task copy_xml_documentation(
+  type: Copy,
+  dependsOn: ["userdoc_viewer_appJS"],
+  description: "Update XML version of documentation from viewer app"
+) {
+  into "${buildDir}/website/documentation${saxonMajorVersion}"
+  from "${buildDir}/userdoc/viewer_appJS"
+}
+
+task copy_html_documentation(
+  type: Copy,
+  dependsOn: ["userdoc_publish_html"],
+  description: "Update HTML version of user documentation"
+) {
+  into "${buildDir}/website/html/documentation${saxonMajorVersion}"
+  from "${buildDir}/userdoc/html"
+}
+
+// ============================================================
+
+task gen_contents_ref(
+  type: JavaExec,
+  dependsOn: ["copy_xml_documentation"],
+  description: "Creates the contents reference file for the user documentation (used for website pages)"
+) {
+  inputs.file "${buildDir}/website/documentation${saxonMajorVersion}/doc/catalog.xml"
+  inputs.file "${projectDir}/tools/docs/userdoc/contents-builder.xsl"
+  outputs.file "${buildDir}/website/documentation${saxonMajorVersion}/contents.xml"
+  classpath = configurations.documentation
+  main = "com.saxonica.Transform"
+  args "${buildDir}/website/documentation${saxonMajorVersion}/doc/catalog.xml",
+    "-xsl:${projectDir}/tools/docs/userdoc/contents-builder.xsl",
+    "-o:${buildDir}/website/documentation${saxonMajorVersion}/contents.xml",
+    "version-number=${saxonMajorVersion}"
+}
+
+task gen_feature_matrix(
+        type: JavaExec,
+        description: "Creates the base feature matrix file for the website"
+) {
+  inputs.file "${projectDir}/tools/docs/feature-matrix/feature-matrix.xml"
+  inputs.file "${projectDir}/tools/docs/feature-matrix/feature-matrix-to-overview-chart.xsl"
+  outputs.file "${buildDir}/website/products/feature-matrix-${saxonMajorVersion}.xml"
+  classpath = configurations.documentation
+  main = "com.saxonica.Transform"
+  args "${projectDir}/tools/docs/feature-matrix/feature-matrix.xml",
+          "-xsl:${projectDir}/tools/docs/feature-matrix/feature-matrix-to-overview-chart.xsl",
+          "-o:${buildDir}/website/products/feature-matrix-${saxonMajorVersion}.xml"
+}
+
+task gen_prod_desc(
+  dependsOn: ["gen_prod_desc_fo", "gen_prod_desc_pdf"],
+  description: "Creates the HTML and PDF versions of the product descriptions"
+) {
+  // Just a place to hang dependencies
+}
+
+task gen_prod_desc_xml(
+        type: JavaExec,
+        description: "Creates the base product description file"
+) {
+  inputs.file "${projectDir}/tools/docs/feature-matrix/feature-matrix.xml"
+  inputs.file "${projectDir}/tools/docs/feature-matrix/feature-matrix-to-prod-desc.xsl"
+  outputs.file "${buildDir}/proddesc/prod-desc.xml"
+  classpath = configurations.documentation
+  main = "com.saxonica.Transform"
+  args "${projectDir}/tools/docs/feature-matrix/feature-matrix.xml",
+          "-xsl:${projectDir}/tools/docs/feature-matrix/feature-matrix-to-prod-desc.xsl",
+          "-o:${buildDir}/proddesc/prod-desc.xml"
+}
+
+task gen_prod_desc_fo(
+        type: JavaExec,
+        dependsOn: ["gen_prod_desc_xml"],
+        description: "Creates the FO and HTML versions of the product descriptions"
+) {
+  inputs.file "${buildDir}/proddesc/prod-desc.xml"
+  inputs.file "${projectDir}/tools/docs/feature-matrix/PD/prod-desc-to-fo.xsl"
+  outputs.file "${buildDir}/proddesc/PD/dummy.xml"
+  classpath = configurations.documentation
+  main = "com.saxonica.Transform"
+  args "${buildDir}/proddesc/prod-desc.xml",
+          "-xsl:${projectDir}/tools/docs/feature-matrix/PD/prod-desc-to-fo.xsl",
+          "-o:${buildDir}/proddesc/PD/dummy.xml"
+}
+
+task setup_fop(
+  type: Copy
+) {
+  into "${buildDir}/proddesc"
+  from ("${projectDir}/src/docs/doc/img") {
+    include "saxonica_logo.gif"
+  }
+}
+
+task gen_prod_desc_pdf(
+  description: "Creates the PDF versions of the product descriptions"
+) {
+  // Just a place to hang dependencies
+}
+
+["EE-Q", "EE-T", "EE-V", "EE", "PE", "HE"].each { ds ->
+  Task t = task "gen_${ds}_desc_pdf"(
+    type: JavaExec,
+    dependsOn: ["setup_fop", "gen_prod_desc_fo"],
+    description: "Creates the PDF version of the ${ds} product description"
+  ) {
+    inputs.file "${buildDir}/proddesc/PD/fo/${ds}.fo"
+    outputs.file "${buildDir}/proddesc/PD/pdf/${ds}.pdf"
+    classpath = configurations.documentation
+    main = "org.apache.fop.cli.Main"
+    args "-q", "${buildDir}/proddesc/PD/fo/${ds}.fo", "-pdf", "${buildDir}/proddesc/PD/pdf/${ds}.pdf"
+  }
+  gen_prod_desc_pdf.dependsOn t
+}
+
+task copy_prod_desc_pdf(
+  type: Copy,
+  dependsOn: ["gen_prod_desc_pdf"],
+  description: "Copy the generated product descriptions to the website"
+) {
+  into("${buildDir}/website/products/PD${saxonMajorVersion}")
+  from("${buildDir}/proddesc/PD/pdf")
 }

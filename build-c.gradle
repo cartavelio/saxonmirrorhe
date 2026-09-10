@@ -508,9 +508,11 @@ task eecCompile(
   destinationDirectory = new File("${buildDir}/classes/eec")
 }
 
+
+
 task hec_jar(
   type: Jar,
-  dependsOn: ["hecCompile", "hej_MetaInf"],
+  dependsOn: ["hecCompile", "hej_MetaInf", "rejar_Xerces"],
   description: "Build the HE jar file for Saxon/C"
 ) {
   archiveBaseName = "saxon9he"
@@ -528,6 +530,12 @@ task hec_jar(
   from ("${buildDir}/src") {
     include "net/sf/saxon/data/**"
   }
+  from ("${buildDir}/xerces") {
+      include "**/*.class"
+      include "**/*.properties"
+      exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
+      exclude "META-INF/MANIFEST.MF"
+    }
   doFirst {
     mkdir "build/c/jars/hec"
   }
@@ -535,7 +543,7 @@ task hec_jar(
 
 task pec_jar(
   type: Jar,
-  dependsOn: ["pecCompile", "pej_MetaInf"],
+  dependsOn: ["pecCompile", "pej_MetaInf", "rejar_Xerces"],
   description: "Build the PE jar file for Saxon/C"
 ) {
   archiveBaseName = "saxon9pe"
@@ -567,6 +575,12 @@ task pec_jar(
     exclude "com/saxonica/config/EnterpriseXPathFactory.class"
     include "javax/xml/xquery/*.class"
   }
+  from ("${buildDir}/xerces") {
+      include "**/*.class"
+      include "**/*.properties"
+      exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
+      exclude "META-INF/MANIFEST.MF"
+    }
   doFirst {
     mkdir "build/c/pec"
   }
@@ -574,7 +588,7 @@ task pec_jar(
 
 task eec_jar(
   type: Jar,
-  dependsOn: ["eecCompile", "eej_MetaInf"],
+  dependsOn: ["eecCompile", "eej_MetaInf", "rejar_Xerces"],
   description: "Build the EE jar file for Saxon/C"
 ) {
   archiveBaseName = "saxon9ee"
@@ -593,6 +607,12 @@ task eec_jar(
     include "com/saxonica/**/*.class"
     include "javax/xml/xquery/*.class"
   }
+  from ("${buildDir}/xerces") {
+      include "**/*.class"
+      include "**/*.properties"
+      exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
+      exclude "META-INF/MANIFEST.MF"
+    }
   doFirst {
     mkdir "build/c/eec"
   }
