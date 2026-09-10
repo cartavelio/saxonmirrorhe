@@ -741,7 +741,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
             // if the match pattern can't match anything, we produce a warning, not a hard error
             contextItemType = AnyItemType.getInstance();
         }
-        cisi = config.makeContextItemStaticInfo(contextItemType, false);
+        cisi = config.makeContextItemStaticInfo(contextItemType, mayOmitContextItem);
         body = refineTemplateBody(body, cisi);
 
         boolean first = true;
@@ -881,7 +881,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                         throw e;
                     }
                     if (match2 != match1) {
-                        ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(AnyItemType.getInstance(), false);
+                        ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(AnyItemType.getInstance(), mayOmitContextItem);
                         ExpressionTool.copyLocationInfo(match, match2);
                         match2.setOriginalText(match.toString());
                         match2 = match2.typeCheck(visitor, info);
@@ -1031,7 +1031,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         }
         if (match != null) {
             ItemType contextItemType = getContextItemTypeForTemplateRule();
-            ContextItemStaticInfo cisi = config.makeContextItemStaticInfo(contextItemType, false);
+            ContextItemStaticInfo cisi = config.makeContextItemStaticInfo(contextItemType, mayOmitContextItem);
             cisi.setContextPostureStriding();
             ExpressionVisitor visitor = makeExpressionVisitor();
             match.resetLocalStaticProperties();
@@ -1052,7 +1052,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                             allocateLocalSlots(templateRuleBody);
                             for (Rule r : compiledTemplateRule.getRules()) {
                                 Pattern match = r.getPattern();
-                                ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(match.getItemType(), false);
+                                ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(match.getItemType(), mayOmitContextItem);
                                 info.setContextPostureStriding();
                                 Pattern m2 = match.optimize(visitor, info);
                                 if (compiledTemplateRules.size() > 1) {

@@ -12,6 +12,7 @@ import net.sf.saxon.expr.elab.EagerEvaluator;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.ItemElaborator;
 import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.freq.Ping;
 import net.sf.saxon.expr.oper.OperandArray;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
@@ -27,6 +28,7 @@ import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 
 /**
@@ -34,10 +36,12 @@ import java.util.List;
  * corresponding expressions: [a,b,c,d]
  */
 
-public class SquareArrayConstructor extends Expression {
+public class SquareArrayConstructor extends Expression implements Consumer<Ping> {
 
 
     private OperandArray operanda;
+    private double numberOfCalls = 0;
+    private double numberOfConversions = 0;
 
 
     /**
@@ -277,6 +281,29 @@ public class SquareArrayConstructor extends Expression {
         return EVALUATE_METHOD;
     }
 
+    @Override
+    public void accept(Ping ping) {
+        numberOfConversions++;
+    }
+
+    /**
+     * Construct an array, given a list of members
+     *
+     * @param members the members of the array
+     * @return the constructed array
+     */
+    protected ArrayItem makeArray(List<GroundedValue> members) {
+        if (numberOfConversions > numberOfCalls * 0.5) {
+            // More than half the calls result in the array being converted...
+            return new ImmutableArrayItem(members);
+        } else {
+            numberOfCalls++;
+            SimpleArrayItem result = new SimpleArrayItem(members);
+            result.requestNotification(this);
+            return result;
+        }
+    }
+
     /**
      * Evaluate an expression as a single item. This always returns either a single Item or
      * null (denoting the empty sequence). No conversion is done. This method should not be
@@ -298,7 +325,7 @@ public class SquareArrayConstructor extends Expression {
             GroundedValue s = ExpressionTool.eagerEvaluate(o.getChildExpression(), context);
             value.add(s);
         }
-        return new SimpleArrayItem(value);
+        return makeArray(value);
     }
 
     /**
@@ -325,7 +352,7 @@ public class SquareArrayConstructor extends Expression {
                 for (EagerEvaluator e : eagerEvaluators) {
                     members.add(e.evaluate(context));
                 }
-                return new SimpleArrayItem(members);
+                return expr.makeArray(members);
             };
         }
 

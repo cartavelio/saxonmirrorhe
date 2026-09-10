@@ -26,6 +26,7 @@ import net.sf.saxon.value.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 
 /**
@@ -254,7 +255,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         return argumentEvaluators;
     }
 
-    public static class ArgumentEvaluationModeAdjuster implements MemoClosure.MemoClosureStatisticsGatherer {
+    public static class ArgumentEvaluationModeAdjuster implements Consumer<MemoClosure.MemoClosureStatistics> {
 
         private final UserFunctionCall functionCall;
         private final int argument;
@@ -267,7 +268,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         }
 
         @Override
-        public void supplyFeedback(MemoClosure.MemoClosureStatistics statistics) {
+        public void accept(MemoClosure.MemoClosureStatistics statistics) {
             if (functionCall.argumentEvaluators[argument].getCode() == Evaluators.MAKE_MEMO_CLOSURE) {
                 if (statistics.allRead) {
                     completed++;

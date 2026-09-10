@@ -7,12 +7,10 @@
 
 package net.sf.saxon.s9api;
 
-import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 
 import java.util.ArrayList;
@@ -133,18 +131,13 @@ public class XdmArray extends XdmFunctionItem {
      * Append a new member to an array
      * @param value the new member
      * @return a new array, one item longer than the original
-     * @throws SaxonApiUncheckedException if the value is lazily evaluated, and evaluation fails
      * @since 9.9. (See bug 3968: on first release of 9.9, the method was mistakenly named <code>append</code>).
      */
 
     public XdmArray addMember(XdmValue value) {
-        try {
-            GroundedValue member = value.getUnderlyingValue();
-            ArrayItem newArray = ArrayFunctionSet.ArrayAppend.append(getUnderlyingValue(), member);
-            return (XdmArray) XdmValue.wrap(newArray);
-        } catch (XPathException e) {
-            throw new SaxonApiUncheckedException(e);
-        }
+        GroundedValue member = value.getUnderlyingValue();
+        ArrayItem newArray = getUnderlyingValue().append(member);
+        return (XdmArray) XdmValue.wrap(newArray);
     }
 
     /**

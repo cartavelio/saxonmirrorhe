@@ -21,6 +21,8 @@ import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.IntegerRange;
 import net.sf.saxon.value.MemoClosure;
 
+import java.util.function.Consumer;
+
 /**
  * An Evaluator evaluates an expression to return a sequence
  */
@@ -288,11 +290,11 @@ public abstract class Evaluator {
     public final static class MemoClosureEvaluator extends Evaluator {
         public final static MemoClosureEvaluator INSTANCE = new MemoClosureEvaluator();
 
-        public MemoClosure.MemoClosureStatisticsGatherer statisticsGatherer = null;
+        public Consumer<MemoClosure.MemoClosureStatistics> statisticsGatherer = null;
         public MemoClosureEvaluator() {
         }
 
-        public MemoClosureEvaluator(MemoClosure.MemoClosureStatisticsGatherer statisticsGatherer) {
+        public MemoClosureEvaluator(Consumer<MemoClosure.MemoClosureStatistics> statisticsGatherer) {
             this.statisticsGatherer = statisticsGatherer;
         }
 
