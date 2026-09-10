@@ -152,20 +152,23 @@ public class CombinedNodeTest implements NodeTest {
         return '(' + nodetest1.toString() + ' ' + operator.toString() + ' ' + nodetest2.toString() + ')';
     }
 
-//    /**
-//     * Return a string representation of this ItemType suitable for use in stylesheet
-//     * export files. This differs from the result of toString() in that it will not contain
-//     * any references to anonymous types. Note that it may also use the Saxon extended syntax
-//     * for union types and tuple types. The default implementation returns the result of
-//     * calling {@code toString()}.
-//     *
-//     * @return the string representation as an instance of the XPath SequenceType construct
-//     */
-//    @Override
-//    public String toExportString() {
-//        return makeString(true);
-//    }
-//
+    /**
+     * Return a string representation of this ItemType suitable for use in stylesheet
+     * export files. This differs from the result of toString() in that it will not contain
+     * any references to anonymous types. Note that it may also use the Saxon extended syntax
+     * for union types and tuple types. The default implementation returns the result of
+     * calling {@code toString()}.
+     *
+     * @return the string representation as an instance of the XPath SequenceType construct
+     */
+
+    @Override
+    public String export() {
+        String s1 = nodetest1.export();
+        String s2 = nodetest2.export();
+        return "$NT-" + operator + '(' + s1.length() + '#' + s1 + ',' + s2.length() + "#" + s2 + ')';
+    }
+
 
 
 //    public String getContentTypeForAlphaCode() {

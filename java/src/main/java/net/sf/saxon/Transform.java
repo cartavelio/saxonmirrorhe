@@ -729,7 +729,7 @@ public class Transform {
 
             if (additionalSchemas != null) {
                 externalSchema = CommandLineOptions.loadAdditionalSchemas(processor, additionalSchemas);
-                compiler.useSchema(externalSchema);
+                compiler.useSchema("", externalSchema);
             }
 
             options.applyStaticParams(compiler);

@@ -123,54 +123,31 @@ public class Token {
         }
 
         private static OperatorSymbol operatorForName(String name) {
-            switch (name) {
-                case "and":
-                    return OperatorSymbol.AND;
-                case "or":
-                    return OperatorSymbol.OR;
-                case "div":
-                    return OperatorSymbol.DIV;
-                case "idiv":
-                    return OperatorSymbol.IDIV;
-                case "mod":
-                    return OperatorSymbol.MOD;
-                case "eq":
-                    return OperatorSymbol.FEQ;
-                case "ne":
-                    return OperatorSymbol.FNE;
-                case "lt":
-                    return OperatorSymbol.FLT;
-                case "le":
-                    return OperatorSymbol.FLE;
-                case "gt":
-                    return OperatorSymbol.FGT;
-                case "ge":
-                    return OperatorSymbol.FGE;
-                case "is":
-                    return OperatorSymbol.IS;
-                case "union":
-                    return OperatorSymbol.UNION;
-                case "intersect":
-                    return OperatorSymbol.INTERSECT;
-                case "except":
-                    return OperatorSymbol.EXCEPT;
-                case "otherwise":
-                    return OperatorSymbol.OTHERWISE;
-                case "to":
-                    return OperatorSymbol.TO;
-                case "follows":
-                    return OperatorSymbol.FOLLOWS;
-                case "follows-or-is":
-                    return OperatorSymbol.FOLLOWS_OR_IS;
-                case "precedes":
-                    return OperatorSymbol.PRECEDES;
-                case "precedes-or-is":
-                    return OperatorSymbol.PRECEDES_OR_IS;
-                case "is-not":
-                    return OperatorSymbol.IS_NOT;
-                default:
-                    return OperatorSymbol.NOT_AN_OPERATOR;
-            }
+            return switch (name) {
+                case "and" -> OperatorSymbol.AND;
+                case "or" -> OperatorSymbol.OR;
+                case "div" -> OperatorSymbol.DIV;
+                case "idiv" -> OperatorSymbol.IDIV;
+                case "mod" -> OperatorSymbol.MOD;
+                case "eq" -> OperatorSymbol.FEQ;
+                case "ne" -> OperatorSymbol.FNE;
+                case "lt" -> OperatorSymbol.FLT;
+                case "le" -> OperatorSymbol.FLE;
+                case "gt" -> OperatorSymbol.FGT;
+                case "ge" -> OperatorSymbol.FGE;
+                case "is" -> OperatorSymbol.IS;
+                case "union" -> OperatorSymbol.UNION;
+                case "intersect" -> OperatorSymbol.INTERSECT;
+                case "except" -> OperatorSymbol.EXCEPT;
+                case "otherwise" -> OperatorSymbol.OTHERWISE;
+                case "to" -> OperatorSymbol.TO;
+                case "follows" -> OperatorSymbol.FOLLOWS;
+                case "follows-or-is" -> OperatorSymbol.FOLLOWS_OR_IS;
+                case "precedes" -> OperatorSymbol.PRECEDES;
+                case "precedes-or-is" -> OperatorSymbol.PRECEDES_OR_IS;
+                case "is-not" -> OperatorSymbol.IS_NOT;
+                default -> OperatorSymbol.NOT_AN_OPERATOR;
+            };
         }
     }
 

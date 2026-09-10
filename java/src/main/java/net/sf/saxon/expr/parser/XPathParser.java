@@ -608,7 +608,7 @@ public class XPathParser {
 
             charChecker = env.getConfiguration().getValidCharacterChecker();
             t = new Tokenizer();
-            t.languageLevel = languageVersion = env.getXPathVersion();
+            t.languageLevel = env.getXPathVersion();
             t.setFinishCondition(finished);
                     t.allowSaxonExtensions =
                             env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS) || t.languageLevel == 40;
@@ -1108,30 +1108,11 @@ public class XPathParser {
 
 
     private boolean allowMultipleOperators(OperatorSymbol op) {
-        switch (op) {
-            case FEQ:
-            case FNE:
-            case FLE:
-            case FLT:
-            case FGE:
-            case FGT:
-            case EQUALS:
-            case NE:
-            case LE:
-            case LT:
-            case GE:
-            case GT:
-            case IS:
-            case IS_NOT:
-            case PRECEDES:
-            case FOLLOWS:
-            case PRECEDES_OR_IS:
-            case FOLLOWS_OR_IS:
-            case TO:
-                return false;
-            default:
-                return true;
-        }
+        return switch (op) {
+            case FEQ, FNE, FLE, FLT, FGE, FGT, EQUALS, NE, LE, LT, GE, GT, IS, IS_NOT, PRECEDES, FOLLOWS,
+                 PRECEDES_OR_IS, FOLLOWS_OR_IS, TO -> false;
+            default -> true;
+        };
     }
 
 
@@ -1236,15 +1217,12 @@ public class XPathParser {
         return let;
     }
 
-    private Expression makeSequenceTypeExpression(Expression lhs, OperatorSymbol operator, /*@NotNull*/ SequenceType type) {
-        switch (operator) {
-            case INSTANCE_OF:
-                return new InstanceOfExpression(lhs, type);
-            case TREAT_AS:
-                return TreatExpression.make(lhs, type);
-            default:
-                throw new IllegalArgumentException();
-        }
+    private Expression makeSequenceTypeExpression(Expression lhs, OperatorSymbol operator, SequenceType type) {
+        return switch (operator) {
+            case INSTANCE_OF -> new InstanceOfExpression(lhs, type);
+            case TREAT_AS -> TreatExpression.make(lhs, type);
+            default -> throw new IllegalArgumentException();
+        };
 
     }
 
@@ -1956,7 +1934,6 @@ public class XPathParser {
                 grumble("Unknown Java class " + local, "XPST0051");
                 return AnyItemType.INSTANCE;
             }
-            //noinspection SynchronizationOnLocalVariableOrMethodParameter
             synchronized(config) {
                 return JavaExternalObjectType.of(theClass);
             }
@@ -3085,7 +3062,7 @@ public class XPathParser {
                     case "namespace-node":
                         if (languageVersion < 30) {
                             return parseFunctionCall(name, null);
-                        };
+                        }
                         testPermittedAxis(AxisInfo.NAMESPACE, "XQST0134");
                         nextToken();
                         readToken(Token.LPAREN);
@@ -3118,7 +3095,6 @@ public class XPathParser {
                             jType = AnyJNodeType.getInstance();
                         } else {
                             SequenceType contentType = parseSequenceType();
-                            TypeHierarchy th = env.getConfiguration().getTypeHierarchy();
                             jType = new SpecificJNodeType(contentType);
                         }
                         int defaultAxis = AxisInfo.CHILD;
@@ -3134,7 +3110,6 @@ public class XPathParser {
                         readToken(Token.LPAREN);
                         readToken(Token.RPAREN);
                         int defaultAxis = AxisInfo.CHILD;
-                        TypeHierarchy th = env.getConfiguration().getTypeHierarchy();
                         SpecificJNodeType test = new SpecificJNodeType(SequenceType.one(AnyGNodeType.getInstance()));
                         AxisExpression ae = new AxisExpression(defaultAxis, test);
                         setLocation(ae);
@@ -3510,7 +3485,7 @@ public class XPathParser {
     }
 
     protected Expression parseStringConstructor() throws XPathException {
-        grumble("String constructor expressions are allowed only in XQuery");
+        grumble("String constructor expressions are allowed only in XQuery, not in XPath");
         return null;
     }
 
@@ -3536,7 +3511,7 @@ public class XPathParser {
                         currentPart.append('`');
                         t.nextChar();
                     } else {
-                        if (currentPart.length() > 0) {
+                        if (!currentPart.isEmpty()) {
                             components.add(new StringLiteral(currentPart.toString()));
                             currentPart.setLength(0);
                         }
@@ -3549,7 +3524,7 @@ public class XPathParser {
                         currentPart.append('{');
                         t.nextChar();
                     } else {
-                        if (currentPart.length() > 0) {
+                        if (!currentPart.isEmpty()) {
                             components.add(new StringLiteral(currentPart.toString()));
                             currentPart.setLength(0);
                         }
@@ -3678,11 +3653,6 @@ public class XPathParser {
     }
 
     protected Expression parseDirectPIConstructor() throws XPathException {
-        grumble("Node constructor expressions are allowed only in XQuery, not in XPath");
-        return new ErrorExpression();
-    }
-
-    protected Expression parseDirectCommentConstructor() throws XPathException {
         grumble("Node constructor expressions are allowed only in XQuery, not in XPath");
         return new ErrorExpression();
     }
@@ -3965,7 +3935,7 @@ public class XPathParser {
                     return null;
                 }
 
-            case "processing-instruction":
+            case "processing-instruction": {
                 Token piNameToken = readParenthesizedToken(true);
                 if (piNameToken == null) {
                     return NodeKindType.PROCESSING_INSTRUCTION;
@@ -3973,7 +3943,7 @@ public class XPathParser {
                 int fp = -1;
                 StructuredQName piQName = null;
                 if (piNameToken instanceof Token.StringLiteral) {
-                    String piName = Whitespace.trim(unescape(((Token.StringLiteral)piNameToken).getValue()));
+                    String piName = Whitespace.trim(unescape(((Token.StringLiteral) piNameToken).getValue()));
                     if (!NameChecker.isValidNCName(StringTool.codePoints(piName))) {
                         // Became an error as a result of XPath erratum XP.E7
                         grumble("Processing instruction name must be a valid NCName", "XPTY0004");
@@ -3983,7 +3953,7 @@ public class XPathParser {
                     }
                 } else if (piNameToken instanceof Token.NameToken) {
                     try {
-                        String[] parts = NameChecker.getQNameParts(((Token.NameToken)piNameToken).getValue());
+                        String[] parts = NameChecker.getQNameParts(((Token.NameToken) piNameToken).getValue());
                         if (parts[0].isEmpty()) {
                             piQName = new StructuredQName("", NamespaceUri.NULL, parts[1]);
                         } else {
@@ -3995,16 +3965,16 @@ public class XPathParser {
                 } else {
                     grumble("Processing instruction name must be a QName or a string literal");
                 }
-                assert(piQName != null);
+                assert (piQName != null);
                 return new NamedXNodeType(Type.PROCESSING_INSTRUCTION, piQName, config);
-
+            }
             case "schema-attribute": {
                 Token name = readParenthesizedToken(false);
                 if (!(name instanceof Token.NameToken)) {
                     grumble("Expected name after 'schema-attribute('");
                     return null;
                 }
-                fp = makeFingerprint(((Token.NameToken)name).getValue(), false);
+                int fp = makeFingerprint(((Token.NameToken)name).getValue(), false);
                 IAttributeDecl decl = env.getImportedSchema().getAttributeDecl(fp);
                 if (decl == null) {
                     grumble("There is no declaration for attribute @" + name + " in an imported schema", "XPST0008");
@@ -4019,7 +3989,7 @@ public class XPathParser {
                     grumble("Expected name after 'schema-attribute('");
                     return null;
                 }
-                fp = makeFingerprint(((Token.NameToken) name).getValue(), true);
+                int fp = makeFingerprint(((Token.NameToken) name).getValue(), true);
                 IElementDecl decl = env.getImportedSchema().getElementDecl(fp);
 
                 if (decl == null) {
@@ -5260,11 +5230,10 @@ public class XPathParser {
         uf.setResultType(resultType);
         uf.incrementReferenceCount();
 
-        if (uf.getPackageData() instanceof StylesheetPackage) {
+        if (uf.getPackageData() instanceof StylesheetPackage pack) {
             // Add the inline function as a private component to the package, so that it can have binding
             // slots allocated for any references to global variables or functions, and so that it will
             // be copied as a hidden component into any using packages
-            StylesheetPackage pack = (StylesheetPackage) uf.getPackageData();
             Component comp = Component.makeComponent(uf, Visibility.PRIVATE, VisibilityProvenance.DEFAULTED, pack, pack);
             uf.setDeclaringComponent(comp);
         }

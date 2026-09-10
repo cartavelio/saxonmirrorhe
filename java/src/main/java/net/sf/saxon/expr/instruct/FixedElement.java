@@ -596,10 +596,12 @@ public class FixedElement extends ElementCreator {
             final PushEvaluator contentPusher =
                     expr.getContentExpression().makeElaborator().elaborateForPush();
 
-            SchemaType typeCode;
-            typeCode = expr.getValidationAction() == Validation.PRESERVE ? AnyType.INSTANCE : Untyped.INSTANCE;
-
             Schema schema = expr.getRetainedStaticContext().getImportedSchema();
+            SchemaType typeCode = switch (expr.getValidationAction()) {
+                case Validation.PRESERVE -> AnyType.INSTANCE;
+                case Validation.BY_TYPE -> expr.getValidationOptions().getTopLevelType();
+                default -> Untyped.INSTANCE;
+            };
 
             int properties = ReceiverOption.NONE;
             if (!expr.bequeathNamespacesToChildren) {

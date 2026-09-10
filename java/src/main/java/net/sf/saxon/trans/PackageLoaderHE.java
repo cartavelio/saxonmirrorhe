@@ -47,6 +47,7 @@ import net.sf.saxon.query.XQueryFunctionLibrary;
 import net.sf.saxon.regex.ARegularExpression;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.s9api.XsdSchema;
 import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.CharacterMapIndex;
 import net.sf.saxon.str.StringView;
@@ -111,6 +112,7 @@ public class PackageLoaderHE implements IPackageLoader {
     private final Map<Component, String> externalReferences = new HashMap<>();
     private String relocatableBase = null;
     private NestedIntegerValue originalVersion = null;
+    private Map<String, XsdSchema> usedSchemata = null;
 
     public PackageLoaderHE(Configuration config) {
         this.config = config;
@@ -179,8 +181,8 @@ public class PackageLoaderHE implements IPackageLoader {
     }
 
     @Override
-    public StylesheetPackage loadPackage(Source source) throws XPathException {
-
+    public StylesheetPackage loadPackage(Source source, Map<String, XsdSchema> usedSchemata) throws XPathException {
+        this.usedSchemata = usedSchemata;
         ParseOptions options = new ParseOptions()
                 .withSpaceStrippingRule(AllElementsSpaceStrippingRule.INSTANCE)
                 .withSchemaValidationMode(Validation.SKIP)
@@ -346,7 +348,7 @@ public class PackageLoaderHE implements IPackageLoader {
 
         readGlobalContext(packageElement);
         readSchemaNamespaces(packageElement);
-        readSchemata(packageElement);
+        readSchemata(packageElement, usedSchemata);
         rsc.setImportedSchema(packStack.peek().getImportedSchema(""));
         readKeys(packageElement);
         readComponents(packageElement, false);
@@ -401,7 +403,7 @@ public class PackageLoaderHE implements IPackageLoader {
         // No action in Saxon-HE
     }
 
-    protected void readSchemata(NodeInfo packageElement) throws XPathException {
+    protected void readSchemata(NodeInfo packageElement, Map<String, XsdSchema> usedSchemata) throws XPathException {
         // No action in Saxon-HE
     }
 
@@ -1386,7 +1388,25 @@ public class PackageLoaderHE implements IPackageLoader {
         String attValue = element.getAttributeValue(NamespaceUri.NULL, name);
         if (attValue == null) {
             return AnyGNodeType.getInstance();
-        } else if (attValue.startsWith("$ST(")) {
+        } else {
+            return parseAlphaCodeForNodeTest(attValue, axis);
+        }
+
+    }
+
+    private IndependentContext makeStaticContext(NodeInfo element) {
+        StylesheetPackage pack = packStack.peek();
+        IndependentContext env = new IndependentContext(config);
+        final NamespaceResolver resolver = element.getAllNamespaces();
+        env.setNamespaceResolver(resolver);
+//        env.setImportedSchemaNamespaces(pack.getImportedSchemaNamespaces());
+//        env.getImportedSchemaNamespaces().add(NamespaceUri.ANONYMOUS);
+        parser.setQNameParser(parser.getQNameParser().withNamespaceResolver(resolver));
+        return env;
+    }
+
+    private NodeTest parseAlphaCodeForNodeTest(String attValue, int axis) throws XPathException {
+        if (attValue.startsWith("$ST(")) {
             // This is a SelectorTest
             int firstComma = attValue.indexOf(',');
             int secondComma = attValue.indexOf(',', firstComma + 1);
@@ -1398,7 +1418,8 @@ public class PackageLoaderHE implements IPackageLoader {
                     parseQNameTestList(names, getConfiguration().getNamePool()),
                     asNCName.equals("true"),
                     Integer.parseInt(kind));
-
+        } else if (attValue.startsWith("$NT-")) {
+            return parseCombinedNodeTest(attValue, axis);
         } else {
             try {
                 ItemType it = AlphaCode.toItemType(attValue, getSchema());
@@ -1428,7 +1449,7 @@ public class PackageLoaderHE implements IPackageLoader {
                     List<QNameTest> qNameTests = new ArrayList<>();
                     boolean failed = false;
                     int kind = -1;
-                    for (ItemType m :  memberTypes) {
+                    for (ItemType m : memberTypes) {
                         if (m instanceof NamedXNodeType namedXNodeType) {
                             if (kind == -1) {
                                 kind = namedXNodeType.getNodeKind();
@@ -1448,21 +1469,33 @@ public class PackageLoaderHE implements IPackageLoader {
                     }
                 }
             } catch (IllegalArgumentException | IllegalStateException e) {
-                throw new XPathException("Invalid alpha code " + element.getDisplayName() + "/@" + name + "='" + attValue + "': " + e.getMessage());
+                throw new XPathException("Invalid alpha code " + attValue + "': " + e.getMessage());
             }
         }
-        throw new XPathException("Bad alpha code " + attValue);
+        throw new XPathException("Bad alpha code "+attValue);
     }
 
-    private IndependentContext makeStaticContext(NodeInfo element) {
-        StylesheetPackage pack = packStack.peek();
-        IndependentContext env = new IndependentContext(config);
-        final NamespaceResolver resolver = element.getAllNamespaces();
-        env.setNamespaceResolver(resolver);
-//        env.setImportedSchemaNamespaces(pack.getImportedSchemaNamespaces());
-//        env.getImportedSchemaNamespaces().add(NamespaceUri.ANONYMOUS);
-        parser.setQNameParser(parser.getQNameParser().withNamespaceResolver(resolver));
-        return env;
+    private NodeTest parseCombinedNodeTest(String value, int axis) throws XPathException {
+       int lparen = value.indexOf('(');
+       String op = value.substring(4, lparen);
+       int hash1 = value.indexOf('#', lparen + 1);
+       int len1 = Integer.parseInt(value.substring(lparen + 1, hash1));
+       int end1 = hash1 + 1 + len1;
+       String nt1 = value.substring(hash1 + 1, end1);
+       NodeTest test1 = parseAlphaCodeForNodeTest(nt1, axis);
+       int comma = value.indexOf(',', end1);
+       int hash2 = value.indexOf('#', comma + 1);
+       int len2 = Integer.parseInt(value.substring(comma + 1, hash2));
+       int end2 = hash2 + 1 + len2;
+       String nt2 = value.substring(hash2 + 1, end2);
+       NodeTest test2 = parseAlphaCodeForNodeTest(nt2, axis);
+       OperatorSymbol symbol = switch(op) {
+           case "union" -> OperatorSymbol.UNION;
+           case "intersect" -> OperatorSymbol.INTERSECT;
+           case "except" -> OperatorSymbol.EXCEPT;
+           default -> throw new XPathException("Invalid operator symbol " + op);
+       };
+       return new CombinedNodeTest(test1, symbol, test2);
     }
 
     /**

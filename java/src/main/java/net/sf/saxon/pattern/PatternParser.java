@@ -16,16 +16,11 @@ import net.sf.saxon.functions.Root_1;
 import net.sf.saxon.functions.SuperId;
 import net.sf.saxon.functions.hof.FunctionLiteral;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.NamespaceUri;
-import net.sf.saxon.om.QNameParser;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.gnode.AnyXNodeType;
-import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.Int64Value;
-import net.sf.saxon.value.SequenceType;
+import net.sf.saxon.value.*;
 
 /**
  * Parser for XSLT patterns. This is created by overriding selected parts of the standard ExpressionParser.
@@ -147,6 +142,82 @@ public class PatternParser extends XPathParser {
             }
             expect(Token.EOF);
             return result;
+        } else if (isJNodePattern(pattern)) {
+            this.env = env;
+            if (qNameParser == null) {
+                qNameParser = new QNameParser(env.getNamespaceResolver()).withAcceptEQName(true, languageVersion);
+            }
+            language = ParsedLanguage.XSLT_PATTERN;
+            t = new Tokenizer();
+            t.languageLevel = env.getXPathVersion();
+            t.allowSaxonExtensions =
+                    env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS) || t.languageLevel >= 40;
+            try {
+                t.tokenize(pattern, 0, -1);
+            } catch (XPathException err) {
+                grumble(err.getMessage());
+            }
+            readKeyword("jnode");
+            readToken(Token.LPAREN);
+            //JNodePatternSelector	::=	"*" | NCName | Constant
+            //Constant	::=	StringLiteral | ("-"? NumericLiteral) | QNameLiteral | ("true" "(" ")") | ("false" "(" ")")
+            AtomicValue key = null;
+            if (t.currentToken == Token.STAR) {
+                nextToken();
+            } else if (isKeyword("true")) {
+                nextToken();
+                readToken(Token.LPAREN);
+                readToken(Token.RPAREN);
+                key = BooleanValue.TRUE;
+            } else if (isKeyword("false")) {
+                nextToken();
+                readToken(Token.LPAREN);
+                readToken(Token.RPAREN);
+                key = BooleanValue.FALSE;
+            } else if (t.currentToken instanceof Token.NameToken) {
+                if (NameChecker.isValidNCName(t.currentName())) {
+                    key = new StringValue(t.currentName());
+                } else {
+                    grumble("In a JNode pattern, the key value " + t.currentName() + " is not a valid NCName, so it must be written in quotes");
+                }
+            } else if (t.currentToken instanceof Token.StringLiteral lit) {
+                key = new StringValue(lit.getValue());
+                nextToken();
+            } else if (t.currentToken instanceof Token.NumericLiteral num) {
+                key = num.getValue();
+                nextToken();
+            } else if (t.currentToken == Token.MINUS) {
+                nextToken();
+                if (t.currentToken instanceof Token.NumericLiteral num) {
+                    key = num.getValue().negate();
+                    nextToken();
+                } else {
+                    grumble("In a JNode pattern, expected a numeric literal after a minus sign");
+                }
+            } else if (t.currentToken == Token.HASH) {
+                //nextToken();
+                StructuredQName q = parseEQName();
+                key = new QNameValue(q, BuiltInAtomicType.QNAME);
+            }
+            readToken(Token.COMMA);
+            SequenceType contentType;
+            if (t.currentToken == Token.STAR) {
+                contentType = SequenceType.ANY_SEQUENCE;
+                nextToken();
+            } else {
+                contentType = parseSequenceType();
+            }
+            readToken(Token.RPAREN);
+            Pattern result = new JNodePattern(key, contentType);
+
+            while (t.currentToken == Token.LSQB) {
+                nextToken();
+                Expression predicate = parsePredicate();
+                readToken(Token.RSQB);
+                result = new BasePatternWithPredicate(result, predicate);
+            }
+            expect(Token.EOF);
+            return result;
         } else {
             Expression exp = parse(pattern, 0, Tokenizer.END_OF_INPUT, env);
             exp.setRetainedStaticContext(env.makeRetainedStaticContext());
@@ -177,10 +248,9 @@ public class PatternParser extends XPathParser {
             }
 
             if (exp instanceof FilterExpression && ((FilterExpression)exp).getBase() instanceof ContextItemExpression) {
-                if (languageVersion >= 40 && (pattern.startsWith("record") || pattern.startsWith("map") || pattern.startsWith("array") || pattern.startsWith("union"))) {
-                    // no action, this is OK
-                } else {
+                if (languageVersion < 40 || (!pattern.startsWith("record") && !pattern.startsWith("map") && !pattern.startsWith("array") && !pattern.startsWith("union"))) {
                     grumble("A predicatePattern can appear only at the outermost level (parentheses not allowed)");
+                    // no action, this is OK
                 }
             }
             if (exp instanceof FilterExpression && pat instanceof NodeTestPattern) {
@@ -195,6 +265,13 @@ public class PatternParser extends XPathParser {
         return pattern.startsWith(".");
     }
 
+    private boolean isJNodePattern(String pattern) throws XPathException {
+        if (pattern.matches("^jnode\\s*\\(.+")) {
+            checkLanguageVersion40("a JNode pattern");
+            return true;
+        }
+        return false;
+    }
 
     private boolean isTypePattern(String pattern) throws XPathException {
         if (pattern.matches("^(type|record|map|array|union|atomic)\\s*\\(.+")) {

@@ -11,6 +11,7 @@ package net.sf.saxon.trans.packages;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.s9api.XsdSchema;
 import net.sf.saxon.style.*;
 import net.sf.saxon.trans.CompilerInfo;
 import net.sf.saxon.trans.XPathException;
@@ -281,7 +282,10 @@ public class PackageLibrary {
      * @since 9.8
      */
 
-    public StylesheetPackage obtainLoadedPackage(PackageDetails details, List<VersionedPackageName> disallowed) throws XPathException {
+    public StylesheetPackage obtainLoadedPackage(PackageDetails details,
+                                                 List<VersionedPackageName> disallowed,
+                                                 Map<String, XsdSchema> usedSchemata
+    ) throws XPathException {
         if (details.loadedPackage != null) {
             return details.loadedPackage;
         } else if (details.exportLocation != null) {
@@ -289,7 +293,7 @@ public class PackageLibrary {
             details.beingProcessed = Thread.currentThread();
             Source input = details.exportLocation;
             IPackageLoader loader = config.makePackageLoader();
-            StylesheetPackage pack = loader.loadPackage(input);
+            StylesheetPackage pack = loader.loadPackage(input, usedSchemata);
             checkNameAndVersion(pack, details);
             details.loadedPackage = pack;
             details.beingProcessed = null;

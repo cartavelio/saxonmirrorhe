@@ -21,11 +21,14 @@ import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.QNameValue;
 import net.sf.saxon.value.SequenceType;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * An IndependentContext provides a context for parsing an XPath expression appearing
@@ -45,7 +48,7 @@ public class IndependentContext extends AbstractStaticContext
     protected HashMap<StructuredQName, XPathVariable> variables = new HashMap<>(20);
     protected NamespaceResolver externalResolver = null;
     protected SequenceType requiredContextValueType = SequenceType.SINGLE_ITEM;
-    protected Set<NamespaceUri> importedSchemaNamespaces = new HashSet<>();
+    protected Schema importedSchema;
     protected boolean autoDeclare = false;
     protected Executable executable;
     protected RetainedStaticContext retainedStaticContext;
@@ -102,7 +105,6 @@ public class IndependentContext extends AbstractStaticContext
             setFunctionLibrary((FunctionLibraryList) libList.copy());
         }
         setDefaultCollationName(ic.getDefaultCollationName());
-        setImportedSchemaNamespaces(ic.importedSchemaNamespaces);
         externalResolver = ic.externalResolver;
         autoDeclare = ic.autoDeclare;
         setUnprefixedElementMatchingPolicy(ic.getUnprefixedElementMatchingPolicy());
@@ -467,19 +469,21 @@ public class IndependentContext extends AbstractStaticContext
         return variables.values();
     }
 
-
     /**
-     * Register the set of imported schema namespaces
-     *
-     * @param namespaces the set of namespaces for which schema components are available in the
-     *                   static context
+     * Add an imported schema to the static context
      */
 
-    public void setImportedSchemaNamespaces(Set<NamespaceUri> namespaces) {
-        importedSchemaNamespaces = namespaces;
-        if (!namespaces.isEmpty()) {
-            setSchemaAware(true);
-        }
+    public void setImportedSchema(Schema schema) {
+        this.importedSchema = schema;
+    }
+
+    /**
+     * Get the imported schema for this static context, if any
+     * @return the imported schema, or null if no schema has been imported
+     */
+
+    public Schema getImportedSchema() {
+         return importedSchema;
     }
 
     /**

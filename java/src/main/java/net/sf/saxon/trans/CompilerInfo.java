@@ -18,12 +18,14 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.QueryLibrary;
 import net.sf.saxon.s9api.UnprefixedElementMatchingPolicy;
+import net.sf.saxon.s9api.XsdSchema;
 import net.sf.saxon.trans.packages.PackageLibrary;
-import net.sf.saxon.type.Schema;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamSource;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class exists to hold information associated with a specific XSLT compilation episode.
@@ -59,7 +61,7 @@ public class CompilerInfo {
     private UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy
             = UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE;
     private int languageVersion = 30;
-    private Schema preLoadedSchema;
+    private Map<String, XsdSchema> preLoadedSchemata = new HashMap<>();
 
     private FunctionLibrary stubFunctionLibrary = null;
 
@@ -117,7 +119,7 @@ public class CompilerInfo {
         defaultNamespaceForElementsAndTypes = info.defaultNamespaceForElementsAndTypes;
         unprefixedElementMatchingPolicy = info.unprefixedElementMatchingPolicy;
         languageVersion = info.languageVersion;
-        preLoadedSchema = info.preLoadedSchema;
+        preLoadedSchemata = new HashMap<>(info.preLoadedSchemata);
         stubFunctionLibrary = info.stubFunctionLibrary;
 
 
@@ -653,12 +655,16 @@ public class CompilerInfo {
         return queryLibraries;
     }
 
-    public void preLoadSchema(Schema schema) {
-        preLoadedSchema = schema;
+    public void preLoadSchema(String role, XsdSchema schema) {
+        preLoadedSchemata.put(role, schema);
     }
 
-    public Schema getPreLoadedSchema() {
-        return preLoadedSchema;
+    public XsdSchema getPreLoadedSchema(String role) {
+        return preLoadedSchemata.get(role);
+    }
+
+    public Map<String, XsdSchema> getPreLoadedSchemata() {
+        return preLoadedSchemata;
     }
 
 

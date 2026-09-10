@@ -43,7 +43,7 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
     private final SchemaType schemaType;
     private final boolean nillable;
     private final Configuration config;
-
+    private boolean implicitSchemaType;
     /**
      * Create an NamedNodeKindType
      *
@@ -74,6 +74,7 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
         this.schemaType = AnyType.INSTANCE;
         this.config = config;
         this.nillable = true;
+        this.implicitSchemaType = true;
     }
 
     /**
@@ -89,6 +90,7 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
         this.schemaType = AnyType.INSTANCE;
         this.config = config;
         this.nillable = true;
+        this.implicitSchemaType = true;
     }
 
     public static NodeTest make(int nodeKind, NamespaceUri uri, String localName, Configuration config) {
@@ -99,6 +101,17 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
         return new NamedXNodeType(nodeKind, config.getNamePool().getStructuredQName(fingerprint), config);
     }
 
+    /**
+     * Say that the schema type is implicit. As an item type, element(E) and element(E, xs:anyType?) are equivalent,
+     * but as XSLT patterns, they have different default priority, and therefore need to be distinguished. If the
+     * schema type was omitted in the pattern we set implicitType to true, and this affects the calculation
+     * of a default priority.
+     * @param implicitSchemaType true if the node test in a pattern did not contain an explicit schema type
+     */
+
+    public void setImplicitSchemaType(boolean implicitSchemaType) {
+        this.implicitSchemaType = implicitSchemaType;
+    }
 
     /**
      * Get the corresponding {@link net.sf.saxon.type.UType}. A UType is a union of primitive item
@@ -298,7 +311,7 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
 
     @Override
     public final double getDefaultPriority() {
-        if (schemaType == null || schemaType == AnyType.INSTANCE) {
+        if (implicitSchemaType) {
             if (nameTest instanceof AnyQNameTest) {
                 return -0.5;
             } else if (nameTest instanceof SpecificQNameTest) {

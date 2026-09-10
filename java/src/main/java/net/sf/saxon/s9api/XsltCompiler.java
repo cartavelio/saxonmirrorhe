@@ -40,10 +40,7 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * An {@code XsltCompiler} object allows XSLT stylesheets to be compiled. The compiler holds information that
@@ -80,7 +77,7 @@ public class XsltCompiler {
     private final Processor processor;
     private final Configuration config;
     private final CompilerInfo compilerInfo;
-    private XsdSchema usedSchema;
+    private Map<String, XsdSchema> usedSchemata;
 
 
     /**
@@ -118,24 +115,43 @@ public class XsltCompiler {
      * episode, whether or not they have been imported into the static context by means of an
      * <code>xsl:import-schema</code> declaration.</p>
      *
+     * <p>The same also applies when a stylesheet is loaded from a SEF file. Any schema contained
+     * within the SEF file, with a matching role, is ignored in favour of the schema supplied
+     * via this API.</p>
+     *
+     * @param role   the schema role. Set this to "" (an empty string) or to null for the default
+     *               (unnamed) schema role. If a role name is specified then the supplied schema
+     *               is ignored unless the stylesheet actually contains an <code>xsl:import-schema</code>
+     *               declaration for this schema role.
      * @param schema the schema to be imported
      * @since 13.0
      */
 
-    public void useSchema(XsdSchema schema) {
+    public void useSchema(String role, XsdSchema schema) {
         compilerInfo.setSchemaAware(true);
-        compilerInfo.preLoadSchema(schema.getUnderlyingSchema());
-        usedSchema = schema;
+        compilerInfo.preLoadSchema(role, schema);
+        if (usedSchemata == null) {
+            usedSchemata = new HashMap<>();
+        }
+        usedSchemata.put(role,  schema);
     }
 
     /**
      * Get the schema that is to be used for a schema-aware transformation.
-     * @return the schema previous supplied in a call of {@link #useSchema(XsdSchema)}, or null if
+     * @param role the schema role. Set this to "" (an empty string) or to null for the default
+     *      (unnamed) schema role.
+     * @return the schema previous supplied in a call of {@link #useSchema(String, XsdSchema)}, or null if
      * that method has not been called.
      */
 
-    public XsdSchema getUsedSchema() {
-        return usedSchema;
+    public XsdSchema getUsedSchema(String role) {
+        if (role == null) {
+            role = "";
+        }
+        if (usedSchemata == null) {
+            return null;
+        }
+        return usedSchemata.get(role);
     }
 
     /**
@@ -799,7 +815,7 @@ public class XsltCompiler {
         try {
             IPackageLoader loader = processor.getUnderlyingConfiguration().makePackageLoader();
             if (loader != null) {
-                StylesheetPackage pack = loader.loadPackage(input);
+                StylesheetPackage pack = loader.loadPackage(input, usedSchemata);
                 return new XsltPackage(this, pack);
             }
             throw new SaxonApiException("Loading library package requires Saxon PE or higher");
@@ -959,7 +975,7 @@ public class XsltCompiler {
         }
         try {
             List<VersionedPackageName> packageNames = new ArrayList<>();
-            StylesheetPackage pack = getPackageLibrary().obtainLoadedPackage(details, packageNames);
+            StylesheetPackage pack = getPackageLibrary().obtainLoadedPackage(details, packageNames, usedSchemata);
             return new XsltPackage(this, pack);
         } catch (XPathException e) {
             throw new SaxonApiException(e);

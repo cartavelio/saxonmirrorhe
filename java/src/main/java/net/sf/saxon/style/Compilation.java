@@ -212,7 +212,7 @@ public class Compilation {
             try {
                 List<VersionedPackageName> disallowed = new ArrayList<>(usingPackages);
                 disallowed.add(details.nameAndVersion);
-                library.obtainLoadedPackage(details, disallowed);
+                library.obtainLoadedPackage(details, disallowed, getCompilerInfo().getPreLoadedSchemata());
             } catch (XPathException err) {
                 err.maybeSetErrorCode("XTSE3000");
                 if (!err.hasBeenReported()) {
