@@ -1,7 +1,6 @@
 package com.saxonica.build.python
 
 import org.gradle.api.DefaultTask
-import org.gradle.api.Task
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
@@ -20,6 +19,22 @@ interface ArgStringifier {
             arg
         }.toString()
     }
+}
+
+class StringArg(private var argHolder: Any? = null) : ArgStringifier {
+    fun set(arg: String) {
+        argHolder = arg
+    }
+
+    fun set(argProvider: Provider<*>) {
+        argHolder = argProvider
+    }
+
+    fun get(): String {
+        return argHolder?.let { argToString(it) }.orEmpty()
+    }
+
+    val isPresent: Boolean get() = argHolder?.let { true } ?: false
 }
 
 class ListArgs(private val args: MutableList<Any> = mutableListOf()) : ArgStringifier {
@@ -266,6 +281,36 @@ abstract class TestSuiteTask  @Inject constructor(private val ex: ExecOperations
     @get:Optional
     abstract val language: Property<String>
 
+    private val testSetArg = StringArg()
+
+    @Nullable
+    @Optional
+    @Input
+    fun getTestSet(): String? {
+        return testSetArg.get()
+    }
+
+    @Option(option = "s", description = "request specific test set")
+    fun setTestSet(arg: String): TestSuiteTask {
+        testSetArg.set(arg)
+        return this
+    }
+
+    private val testPatternArg = StringArg()
+
+    @Nullable
+    @Optional
+    @Input
+    fun getTestPattern(): String? {
+        return testPatternArg.get()
+    }
+
+    @Option(option = "t", description = "set test matching pattern")
+    fun setTestPattern(arg: String): TestSuiteTask {
+        testPatternArg.set(arg)
+        return this
+    }
+
     fun wheelInstaller(task: TaskProvider<InstallLocalWheel>): TestSuiteTask {
         this.dependsOn(task)
         return this
@@ -316,6 +361,8 @@ abstract class TestSuiteTask  @Inject constructor(private val ex: ExecOperations
             workingDir(runner.workingDir.get())
             executable(runner.python.get())
             args(runner.arguments.get())
+            if (testSetArg.isPresent) args("-s", "${testSetArg.get()}")
+            if (testPatternArg.isPresent) args("-t", "${testPatternArg.get()}")
             if (runner.hasEnvironment()) {
                 environment(runner.resolvedEnvironment())
             }

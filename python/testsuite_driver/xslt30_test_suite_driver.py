@@ -2,6 +2,7 @@ import urllib.parse
 
 import os
 import psutil
+import re
 from Environment import Environment
 from test_outcome import PyTestOutcome
 from test_report import PyTestReport
@@ -67,7 +68,7 @@ test_case_found = False
 
 run_test = None
 '''"streamable"'''
-run_test_case_name = None
+test_case_name_pattern = None
 '''result-document-0206'''
 run_assertion = None
 '''serialization-matches'''
@@ -204,13 +205,9 @@ def process_test_set(doc_builderi: saxonc.PyDocumentBuilder, proci: saxonc.PySax
                         if test_case.is_node:
                             test_casei = test_case.get_node_value()
                             test_case_name = test_casei.get_attribute_value("name")
-                            if (
-                                    run_test_case_name is None or test_case_name == run_test_case_name) and test_set_name not in exceptionList:
+                            if (test_case_name_pattern is None or test_case_name_pattern.fullmatch(test_case_name)) and test_set_name not in exceptionList:
                                 print("-s:" + test_set_name + " -t:" + test_case_name)
                                 run_test_case(test_case, xpathProcForEnv)
-                                if run_test_case_name is not None:
-                                    test_case_found = True
-                                    break
                         else:
                             print("Error test_case is not a node")
 
@@ -848,7 +845,7 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
 
 def main(argv):
     global run_test
-    global run_test_case_name
+    global test_case_name_pattern
     global path
     global results_path
     global schemaValidator
@@ -879,7 +876,7 @@ def main(argv):
                 print('HELP: xslt30_test_suite_driver.py -t <testpattern> -s <testset> -o <resultdir>')
                 sys.exit()
             elif opt in ("-t", "--testpattern"):
-                run_test_case_name = arg
+                test_case_name_pattern = re.compile(arg)
             elif opt in ("-s", "--testset"):
                 run_test = arg
                 print('Test set= ', run_test)
