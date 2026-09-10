@@ -80,7 +80,6 @@ latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Descri
       <PackageReference Include="HtmlAgilityPack" Version="1.11.46" />
       <PackageReference Include="AngleSharp" Version="0.17.1" />
       <PackageReference Include="ICU4N" Version="60.1.0-alpha.402" />
-      <PackageReference Include="ICU4N.Resources" Version="60.1.0-alpha.402" />
       <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
       <PackageReference Include="XmlResolver" Version="2.1.0" />
       <PackageReference Include="XmlResolverData" Version="1.2.3" />
