@@ -72,9 +72,9 @@ public class PullExamples {
         pipe.setConfiguration(config);
         //pipe.setSchemaURIResolver(config.getSchemaURIResolver());
         Receiver sink = new Sink(pipe);
-        ParseOptions options = new ParseOptions();
-        options.setSchemaValidationMode(Validation.STRICT);
-        options.setSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
+        ParseOptions options = new ParseOptions()
+                .withSchemaValidationMode(Validation.STRICT)
+                .withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
         Receiver validator = config.getDocumentValidator(
                 sink, in.getSourceLocator().getSystemId(), options, null);
         new PullPushCopier(in, validator).copy();
