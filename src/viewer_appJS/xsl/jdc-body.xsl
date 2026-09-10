@@ -191,7 +191,7 @@
                         </xsl:for-each>
                     </xsl:if>
                     
-                    <xsl:if test="paramtags">
+                    <xsl:if test="paramtags"><!-- for output from jeldoclet -->
                         <p class="methodLabel">Type Parameters:</p>
                         <xsl:for-each select="paramtags/tag">
                             <div class="params">
@@ -199,6 +199,19 @@
                                 <xsl:if test="@comment">
                                     <xsl:text> - </xsl:text>
                                     <xsl:value-of select="@comment"/>
+                                </xsl:if>
+                            </div>
+                        </xsl:for-each>
+                    </xsl:if>
+                    
+                    <xsl:if test="paramtypes/type/comment"><!-- for output from xmldoclet -->
+                        <p class="methodLabel">Type Parameters:</p>
+                        <xsl:for-each select="paramtypes/type">
+                            <div class="params">
+                                <code><xsl:value-of select="@name"/></code>
+                                <xsl:if test="comment">
+                                    <xsl:text> - </xsl:text>
+                                    <xsl:apply-templates select="(comment/body, comment/sentence)[1]" mode="jdc"/>
                                 </xsl:if>
                             </div>
                         </xsl:for-each>
@@ -597,6 +610,12 @@
         up the class hierarchy) -->
     <!-- TODO: Only used for method comments. Could extend for other comments (e.g parameter definitions) -->
     
+    <xsl:function name="f:in-external-java-package" as="xs:boolean">
+        <xsl:param name="full-name" as="xs:string"/>
+        <xsl:sequence select="contains($full-name, 'java.lang.') or contains($full-name, 'java.io.')
+            or contains($full-name, 'java.util.')"/>
+    </xsl:function>
+    
     <xsl:function name="f:get-package-doc" as="document-node()?">
         <xsl:param name="package-name" as="xs:string"/>
         <xsl:variable name="doc-path" select="concat($jclass-path, $package-name, '.xml')"/>
@@ -632,8 +651,8 @@
         <xsl:param name="method" as="element()"/>
         <!--<xsl:message>find-super of method: <xsl:value-of select="$method/@id"/> </xsl:message>-->
         <xsl:variable name="seq" 
-            select="($method/parent::methods/parent::class/(implements|extends)//interface[@fulltype
-            ne 'java.lang.Object']/@fulltype/f:get-super($method, f:get-class(.)))[comment][1]"/>
+            select="($method/parent::methods/parent::class/(implements|extends)//interface[not(
+            f:in-external-java-package(@fulltype))]/@fulltype/f:get-super($method, f:get-class(.)))[comment][1]"/>
         <!--<xsl:message>find-super exists($seq): <xsl:value-of select="exists($seq)"/></xsl:message>-->
         <xsl:sequence select="$seq"/>
     </xsl:function>
@@ -678,11 +697,22 @@
     
     <xsl:function name="f:eliminate-duplicates" as="element()*">
         <xsl:param name="seq" as="element(interface)*"/>
-        <xsl:sequence>
-            <xsl:for-each select="distinct-values($seq/@fulltype)">
-                <xsl:sequence select="$seq[@fulltype eq current()][1]"/>
-            </xsl:for-each>
-        </xsl:sequence>
+        <xsl:variable name="distinct-fulltypes" select="distinct-values($seq/string(@fulltype))"
+            as="xs:string*"/>
+        <xsl:choose>
+            <xsl:when test="count($seq) eq count($distinct-fulltypes)">
+                <xsl:sequence select="$seq"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <!--<xsl:message>*** Duplicates to be eliminated </xsl:message>-->
+                <xsl:sequence>
+                    <xsl:for-each select="$distinct-fulltypes">
+                        <xsl:sort select="upper-case(.)"/>
+                        <xsl:sequence select="$seq[@fulltype eq current()][1]"/>
+                    </xsl:for-each>
+                </xsl:sequence>
+            </xsl:otherwise>
+        </xsl:choose>
     </xsl:function>
 
     <xsl:template match="p[@class eq 'history']" mode="ixsl:onclick">
@@ -697,7 +727,8 @@
         
         <xsl:variable name="requiredDocs" as="xs:string*">
             <xsl:if test="exists(methods/method[not(comment)])">
-                <xsl:sequence select="(implements|extends)//interface[@fulltype ne 'java.lang.Object']/@fulltype/f:get-package-doc-name(.)"/>
+                <xsl:sequence select="(implements|extends)//interface[not(
+                    f:in-external-java-package(@fulltype))]/@fulltype/f:get-package-doc-name(.)"/>
             </xsl:if>
         </xsl:variable>
         
@@ -833,7 +864,7 @@
             </ul>
         </xsl:if>
             
-            <xsl:if test="exists(paramtags)">
+            <xsl:if test="exists(paramtags)"><!-- for output from jeldoclet -->
                 <dl>
                     <dt>Type Parameters</dt>
                     <xsl:for-each select="paramtags/tag">
@@ -847,16 +878,25 @@
                     </xsl:for-each>
                 </dl>
             </xsl:if>
+            
+            <xsl:if test="exists(paramtypes/type/comment)"><!-- for output from xmldoclet -->
+                <dl>
+                    <dt>Type Parameters</dt>
+                    <xsl:for-each select="paramtypes/type">
+                        <dd>
+                            <code><xsl:value-of select="@name"/></code>
+                            <xsl:if test="comment">
+                                <xsl:text> - </xsl:text>
+                                <xsl:apply-templates select="(comment/body, comment/sentence)[1]" mode="jdc"/>
+                            </xsl:if>
+                        </dd>
+                    </xsl:for-each>
+                </dl>
+            </xsl:if>
 
         <xsl:if test="exists(implements | extends/inherits/interface)">
-            <!--<xsl:if test="implements/interface/@fulltype =
-                extends/inherits/interface/@fulltype">
-                <xsl:message>*** Duplicates to be eliminated </xsl:message>
-            </xsl:if>-->
-            <xsl:variable name="supers" select="implements/interface | extends/inherits/interface"/>
-            <xsl:variable name="distinct-supers" select="if (implements/interface/@fulltype =
-                extends/inherits/interface/@fulltype) then f:eliminate-duplicates($supers) else
-                $supers"/>
+            <xsl:variable name="supers" select="implements//interface | extends/inherits/interface"/>
+            <xsl:variable name="distinct-supers" select="f:eliminate-duplicates($supers)"/>
             <dl>
                 <dt>All <xsl:value-of
                     select="if ($isInterface) then ' Superinterfaces' else 'Implemented Interfaces '"

@@ -134,7 +134,7 @@ History
     </xsl:template>
 
     <xsl:template match="d:class|d:interface|d:enum" mode="tree">
-        <xsl:variable name="type" select="@type"/>
+        <xsl:variable name="type" select="tokenize(@type,'\.')[last()]"/>
         <xsl:variable name="has-nonPP-implementing-classes" as="xs:boolean" 
             select="self::d:interface and exists(key('implementing-classes',
             @fullname)[exists(@access) and @access ne 'private'])" />
@@ -177,7 +177,7 @@ History
     </xsl:template>
     
     <xsl:template match="d:class|d:interface|d:enum" mode="deeptree">
-        <xsl:variable name="type" select="@type"/>
+        <xsl:variable name="type" select="tokenize(@type,'\.')[last()]"/>
         
         <xsl:variable name="has-nonPP-implementing-classes" as="xs:boolean" 
             select="self::d:interface and exists(key('implementing-classes',
@@ -385,22 +385,6 @@ History
         <xsl:attribute name="id" select="."/>
     </xsl:template>
     
-    <xsl:template match="@type[parent::element()/@nesting eq 'member']">
-        <xsl:attribute name="id" select="f:getNestedName(parent::element())"/>
-    </xsl:template>
-    
-    <xsl:function name="f:getNestedName" as="xs:string">
-        <xsl:param name="class" as="element()"/>
-        <xsl:choose>
-            <xsl:when test="$class/@nesting eq 'member'">
-                <xsl:sequence select="concat(f:getNestedName($class/parent::element()), '.', $class/@type)"/>
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:sequence select="$class/@type"/>
-            </xsl:otherwise>
-        </xsl:choose>
-    </xsl:function>
-    
     <xsl:template match="@name">
         <xsl:attribute name="id" select="."/>
     </xsl:template>
@@ -415,13 +399,32 @@ History
     
     <xsl:template match="d:interfaces">
         <implements>
-            <xsl:apply-templates select="d:interfaceref"/>
+            <xsl:apply-templates select="d:interface"/>
         </implements>
     </xsl:template>
     
-    <xsl:template match="d:interfaceref">
+    <xsl:template match="d:interfaces//d:interface">
         <interface fulltype="{@fullname}" type="{@name}">
-            <!-- TODO include inherited methods once included in xmldoclet output -->
+            <xsl:apply-templates select="d:type/d:param"/>
+            <xsl:if test="d:inherited/d:method">
+                <methods>
+                    <xsl:apply-templates select="d:inherited/d:method">
+                        <xsl:sort select="upper-case(@name)"/>
+                    </xsl:apply-templates>
+                </methods>
+            </xsl:if>
+            <xsl:if test="d:inherited/d:field">
+                <fields>
+                    <xsl:apply-templates select="d:inherited/d:field">
+                        <xsl:sort select="upper-case(@name)"/>
+                    </xsl:apply-templates>
+                </fields>
+            </xsl:if>
+            <xsl:if test="d:interface">
+                <implements>
+                    <xsl:apply-templates select="d:interface"/>
+                </implements>
+            </xsl:if>
         </interface>
     </xsl:template>
     
@@ -434,6 +437,16 @@ History
     <xsl:template match="d:typeparam">
         <type name="{@name}">
             <xsl:apply-templates select="d:type" mode="typeparam"/>
+            <xsl:if test="d:purpose|d:description">
+                <comment>
+                    <xsl:apply-templates select="d:purpose"/>
+                    <xsl:if test="d:description">
+                        <body>
+                            <xsl:call-template name="full-comment"/>
+                        </body>
+                    </xsl:if>
+                </comment>
+            </xsl:if>
         </type>
     </xsl:template>
     
@@ -472,9 +485,9 @@ History
     
     <xsl:template match="d:superclass">
         <extends>
-            <xsl:if test="d:interface">
+            <xsl:if test="d:interfaces">
                 <inherits>
-                    <xsl:apply-templates select="d:interface">
+                    <xsl:apply-templates select="d:interfaces/d:interface">
                         <xsl:sort select="@fullname"/>
                     </xsl:apply-templates>
                 </inherits>
@@ -520,7 +533,7 @@ History
     <xsl:template match="d:constructor">
         <constructor>
             <xsl:apply-templates select="@* except @fullsig"/>
-            <xsl:attribute name="id" select="parent::d:class/@type"/>
+            <xsl:attribute name="id" select="tokenize(parent::d:class/@type,'\.')[last()]"/>
             <xsl:if test="d:purpose|d:description|d:since|d:see|d:deprecated">
                 <comment>
                     <xsl:apply-templates select="d:purpose"/>
