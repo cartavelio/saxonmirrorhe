@@ -118,10 +118,11 @@ public abstract class CsvRepresentationGenerator {
      * @param firstRow the first row of the data, containing column names
      * @return a list of column names in the order that the columns appear in the output
      */
-    protected List<String> generateColumnNames(ArrayItem firstRow) {
-        List<String> result = new ArrayList<>(firstRow.arrayLength());
+    protected List<StringValue> generateColumnNames(ArrayItem firstRow) {
+        List<StringValue> result = new ArrayList<>(firstRow.arrayLength());
         for (GroundedValue value : firstRow.members()) {
-            result.add(Whitespace.trim(((StringValue) value).getStringValue()));
+            StringValue sv = (StringValue)value;
+            result.add(new StringValue(Whitespace.trim(sv.getUnicodeStringValue())));
         }
         return result;
     }

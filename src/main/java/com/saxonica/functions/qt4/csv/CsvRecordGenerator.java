@@ -13,12 +13,9 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.PrependSequenceIterator;
 import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.LocalUnionType;
-import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -87,11 +84,11 @@ public class CsvRecordGenerator extends CsvRepresentationGenerator {
         if (extractHeaderRow) {
             GroundedValue returnedRows = generateRows(rows);
             firstRow = (ArrayItem)rowAdjuster.map(firstRow);
-            List<String> columnNames = generateColumnNames(firstRow);
+            List<StringValue> columnNames = generateColumnNames(firstRow);
             MapItem columnIndex = makeColumnIndex(columnNames);
 
             return new ShapedMap(RESULT_RECORD_SHAPE,
-                                 flattenArray(firstRow),
+                                 SequenceExtent.makeSequenceExtent(columnNames),
                                  columnIndex,
                                  returnedRows,
                                  makeGetterFunction(returnedRows, columnIndex));
@@ -117,30 +114,16 @@ public class CsvRecordGenerator extends CsvRepresentationGenerator {
     }
 
     /**
-     * Turn an array of strings into a sequence of strings
-     * @param array an array whose members must be xs:string instances
-     * @return the equivalent sequence of strings
-     */
-    private static GroundedValue flattenArray(ArrayItem array) {
-        List<StringValue> names = new ArrayList<>(array.arrayLength());
-        for (GroundedValue value : array.members()) {
-            names.add((StringValue)value);
-        }
-        return SequenceExtent.makeSequenceExtent(names);
-    }
-
-
-    /**
      * Make a column index (map from strings to integers) from a list
      * of column names supplied as a Java List
      * @param names the list of column names
      * @return the corresponding column index
      */
 
-    private MapItem makeColumnIndex(List<String> names) {
+    private MapItem makeColumnIndex(List<StringValue> names) {
         MapBuilder index = DictionaryMap.getBuilder(names.size());
         int pos = 1;
-        for (String name : names) {
+        for (StringValue name : names) {
             if (!name.isEmpty() && index.get(name) == null) {
                 index.put(name, Int64Value.makeIntegerValue(pos));
             }
@@ -176,7 +159,7 @@ public class CsvRecordGenerator extends CsvRepresentationGenerator {
      * to change the order of fields, or to truncate or pad to a fixed size.
      * @param rows the rows as delivered by the CSV parser
      * @return a sequence of rows, suitably adjusted
-     * @throws XPathException
+     * @throws XPathException if things go wrong
      */
     private GroundedValue generateRows(SequenceIterator rows) throws XPathException {
         try {
@@ -187,12 +170,12 @@ public class CsvRecordGenerator extends CsvRepresentationGenerator {
     }
 
 
-    private final static FunctionItemType GETTER_TYPE =
-            new SpecificFunctionType(
-                    SequenceType.one(BuiltInAtomicType.POSITIVE_INTEGER),
-                    SequenceType.one(LocalUnionType.of(BuiltInAtomicType.POSITIVE_INTEGER,
-                                                       BuiltInAtomicType.STRING)),
-                    SequenceType.SINGLE_STRING);
+//    private final static FunctionItemType GETTER_TYPE =
+//            new SpecificFunctionType(
+//                    SequenceType.one(BuiltInAtomicType.POSITIVE_INTEGER),
+//                    SequenceType.one(LocalUnionType.of(BuiltInAtomicType.POSITIVE_INTEGER,
+//                                                       BuiltInAtomicType.STRING)),
+//                    SequenceType.SINGLE_STRING);
 
     /**
      * Make the "get" function item to be delivered in the result

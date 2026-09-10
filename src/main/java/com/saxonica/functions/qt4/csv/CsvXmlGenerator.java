@@ -9,7 +9,6 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.om.*;
-import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.PrependSequenceIterator;
@@ -17,7 +16,9 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Untyped;
 import net.sf.saxon.value.StringValue;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Handles generating a simple XML representation of a CSV from a sequence of array items
@@ -68,24 +69,24 @@ public class CsvXmlGenerator extends CsvRepresentationGenerator {
         }
         if (extractHeaderRow) {
             firstRow = (ArrayItem) rowAdjuster.map(firstRow);
-            List<String> columnNames = generateColumnNames(firstRow);
+            List<StringValue> columnNames = generateColumnNames(firstRow);
             ItemMappingIterator adjustedRows = ItemMappingIterator.map(rows, rowAdjuster);
             generateRows(adjustedRows, columnNames);
         } else {
             rows = new PrependSequenceIterator(firstRow, rows);
             ItemMappingIterator adjustedRows = ItemMappingIterator.map(rows, rowAdjuster);
-            List<String> columnNames = explicitColumnNamesAsStrings();
+            List<StringValue> columnNames = explicitColumnNamesAsStrings();
             generateRows(adjustedRows, columnNames);
         }
         generator.endDocument();
         return generator.getResult();
     }
 
-    private List<String> explicitColumnNamesAsStrings() {
-        List<String> columnNames = new ArrayList<>();
+    private List<StringValue> explicitColumnNamesAsStrings() {
+        List<StringValue> columnNames = new ArrayList<>();
         if (explicitColumnNames != null) {
             for (Item name : explicitColumnNames.asIterable()) {
-                columnNames.add(name.getStringValue());
+                columnNames.add((StringValue)name);
             }
         }
         return columnNames;
@@ -99,7 +100,7 @@ public class CsvXmlGenerator extends CsvRepresentationGenerator {
      *                    the explicitly supplied header option. May be an empty list.
      * @throws XPathException if tree building fails
      */
-    private void generateRows(SequenceIterator rows, List<String> columnNames) throws XPathException {
+    private void generateRows(SequenceIterator rows, List<StringValue> columnNames) throws XPathException {
         if (!columnNames.isEmpty()) {
             generator.columns(columnNames);
         }
@@ -200,13 +201,13 @@ public class CsvXmlGenerator extends CsvRepresentationGenerator {
             return builder.getCurrentRoot();
         }
         
-        public void columns(List<String> columnNames) throws XPathException {
+        public void columns(List<StringValue> columnNames) throws XPathException {
             out.startElement(columnsElementName, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
             out.startContent();
-            for (String name : columnNames) {
+            for (StringValue name : columnNames) {
                 out.startElement(columnElementName, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
                 out.startContent();
-                out.characters(StringView.of(name), Loc.NONE, ReceiverOption.NONE);
+                out.characters(name.getUnicodeStringValue(), Loc.NONE, ReceiverOption.NONE);
                 out.endElement();
             }
             out.endElement();
@@ -218,7 +219,7 @@ public class CsvXmlGenerator extends CsvRepresentationGenerator {
          * @param row a row of the parsed CSV, represented as an XDM array.
          * @throws XPathException if tree building fails
          */
-        public void row(ArrayItem row, List<String> columnNames) throws XPathException {
+        public void row(ArrayItem row, List<StringValue> columnNames) throws XPathException {
             out.startElement(rowElementName, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
             out.startContent();
             int pos = 0;
@@ -226,7 +227,7 @@ public class CsvXmlGenerator extends CsvRepresentationGenerator {
                 out.startElement(fieldElementName, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
                 if (pos < columnNames.size() && !columnNames.get(pos).isEmpty()) {
                     out.attribute(columnAttrName, BuiltInAtomicType.UNTYPED_ATOMIC,
-                                  columnNames.get(pos), Loc.NONE, ReceiverOption.NONE);
+                                  columnNames.get(pos).getStringValue(), Loc.NONE, ReceiverOption.NONE);
                 }
                 out.startContent();
                 out.characters(((StringValue)member).getUnicodeStringValue(), Loc.NONE, ReceiverOption.NONE);
