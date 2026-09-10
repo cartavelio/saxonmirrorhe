@@ -23,10 +23,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Properties;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 /**
@@ -55,7 +52,11 @@ public class ConfigTest {
                 throw new RuntimeException("Failed to find " + dir.getAbsolutePath() + "; bad " + envar);
             }
         }
-        return dir.getAbsolutePath() + "/";
+        String path = dir.getAbsolutePath().replace("\\", "/");
+        if (!path.endsWith("/")) {
+            path += "/";
+        }
+        return path;
     }
 
     public static String junitTempDirectory() {
@@ -90,7 +91,11 @@ public class ConfigTest {
             System.err.println(e.getMessage()); // otherwise we somehow lose the diagnostics
             throw e;
         }
-        return dir.getAbsolutePath() + "/";
+        String path = dir.getAbsolutePath().replace("\\", "/");
+        if (!path.endsWith("/")) {
+            path += "/";
+        }
+        return path;
     }
 
     public static String junitBugsDirectory() {
@@ -109,7 +114,11 @@ public class ConfigTest {
                 throw new RuntimeException("Failed to find " + dir.getAbsolutePath() + "; bad " + envar);
             }
         }
-        return dir.getAbsolutePath() + "/";
+        String path = dir.getAbsolutePath().replace("\\", "/");
+        if (!path.endsWith("/")) {
+            path += "/";
+        }
+        return path;
     }
 
     public static String junitXMarkDirectory() {
@@ -129,7 +138,11 @@ public class ConfigTest {
                 throw new RuntimeException("Failed to find " + dir.getAbsolutePath() + "; bad " + envar);
             }
         }
-        return dir.getAbsolutePath() + "/";
+        String path = dir.getAbsolutePath().replace("\\", "/");
+        if (!path.endsWith("/")) {
+            path += "/";
+        }
+        return path;
     }
 
     @Test
