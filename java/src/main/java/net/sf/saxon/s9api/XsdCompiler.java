@@ -156,17 +156,6 @@ public abstract class XsdCompiler {
     public abstract XsdSchema compile(File... file) throws SaxonApiException;
 
     /**
-     * Get a minimal schema, one that contains only the built-in schema components
-     * defined in the XSD specification. This can be used, for example, to
-     * validate elements that have an xsi:type attribute naming a built-in atomic
-     * type such as xs:ID
-     * @return a minimal XSD schema
-     */
-
-    @CSharpModifiers(code = {"internal", "abstract"})
-    public abstract XsdSchema minimalSchema();
-
-    /**
      * Combine a set of schemas into one
      * @param schemas the input schemas. These are not modified.
      * @return the combined schema
@@ -179,10 +168,13 @@ public abstract class XsdCompiler {
     public abstract XsdSchema combine(XsdSchema... schemas) throws SaxonApiException;
 
     /**
-     * Return an empty schema. This may be useful for validating instance documents when all
+     * Return an empty schema. This contains only the built-in schema components
+     * This may be useful for validating instance documents when all
      * the actual schema definitions are linked from the instance document using {@code xsi:schemaLocation}
-     * and {@code xsi:noNamespaceSchemaLocation} attributes
-     * @return an empty schema
+     * and {@code xsi:noNamespaceSchemaLocation} attributes. It can also be used directly, for example, to
+     * validate elements that have an xsi:type attribute naming a built-in atomic
+     * type such as xs:ID.
+     * @return a minimal schema containing only the built-in schema components
      */
 
     @CSharpModifiers(code = {"internal", "abstract"})
