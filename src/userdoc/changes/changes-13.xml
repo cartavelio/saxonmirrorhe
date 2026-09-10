@@ -8,6 +8,12 @@
        first forked from James Clark's xt implementation. The open-source license terms relating to these
        components have therefore been removed.</p>
         
+       <p>For some years Saxon has used an implementation of immutable hash maps based on an open
+       source library created by Michael Froh. The introduction of ordered maps in XPath 4.0
+       has promped a switch to a different open source library, VAVR: except that for the time being,
+       because of a serious performance bug in VAVR, we are using a fork of the main library
+       that uses a different data structure (CHAMP trees) internally.</p>
+        
         
         
         

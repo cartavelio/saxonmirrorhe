@@ -758,85 +758,9 @@
       </tr>
     </table>
 
-    <h2 class="subtitle">B4 Immutable hash trie</h2>
-
-    <p>Saxon implements XPath maps using an immutable hash trie map. The implementation is derived
-      from code published on GitHub by Michael Froh. The published GitHub code carries no licensing
-      conditions, but the author has given permission for Saxonica to release the code under the
-      Mozilla Public License 2.0.</p>
-
-    <table border="1">
-      <tr>
-        <td>
-          <p>Origin</p>
-        </td>
-        <td>
-          <p>Github Gist (author Michael Froh, msfroh)</p>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <p>Description</p>
-        </td>
-        <td>
-          <p>Implementation of immutable hash trie maps</p>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <p>Approximate LOC</p>
-        </td>
-        <td>
-          <p>500</p>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <p>Saxon packages / modules</p>
-        </td>
-        <td>
-          <p>Package <code>com.saxonica.functions.trie</code>, classes <code>ImmutableMap</code> and
-              <code>ImmutableHashTrieMap</code>. Used in the Java product only (SaxonCS uses
-          the class <code>ImmutableDictionary</code> from the Nuget package <code>System.Collections.Immutable</code>).</p>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <p>Modifications</p>
-        </td>
-        <td>
-          <p>Minor modifications to integrate with Saxon code, especially by removing dependencies
-            on some utility classes also published by the author.</p>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <p>Availability of source</p>
-        </td>
-        <td>
-          <p>https://gist.github.com/msfroh</p>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <p>Source version used</p>
-        </td>
-        <td>
-          <p>Version dated 2012-06-02</p>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <p>License</p>
-        </td>
-        <td>
-          <p>Mozilla Public License, version 2.0</p>
-        </td>
-      </tr>
-    </table>
     
     
-    <h2 class="subtitle">B5 Apache Jakarta Blake3 hashing</h2>
+    <h2 class="subtitle">B5 Apache Commons Blake3 hashing</h2>
 
     <p>Saxon's implementation of BLAKE3, used to support the experimental XPath 4.0 <code>fn:hash</code>
       function, is derived from the implementation in Apache Commons.</p>
@@ -967,7 +891,45 @@
       dealings in this Software without prior written authorization of the copyright holder. <br/>
     </aside>
     
-    
+    <p>
+      <strong>VAVR</strong>
+    </p>
+      
+    <p>See https://vavr.io</p>
+      
+    <p>VAVR is a library of functional (also called persistent or immutable) data structures
+    such as trees and lists. SaxonJ (from release 13) uses the VAVR library to underpin
+    its implementation of XDM maps, and for various other purposes.</p>
+      
+      <p>At the time of writing the main VAVR release (version 0.10.5) has a performance bug
+      (see https://github.com/vavr-io/vavr/issues/2727) that seriously affects Saxon.
+      Saxon is therefore using a fork of the VAVR library that resolves this problem
+      by reimplementing the affected data structure using a tree design called a
+      CHAMP-trie. The relevant code is at https://github.com/wrandelshofer/vavr.</p>
+      
+      <p>The code is available under the MIT license:</p>
+      
+      <aside>
+Copyright 2024 Vavr, https://vavr.io
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE. 
+      </aside>
       
 
     <p>
