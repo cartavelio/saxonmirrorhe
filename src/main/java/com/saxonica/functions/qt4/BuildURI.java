@@ -22,7 +22,7 @@ public class BuildURI extends URIFunctions {
         return new RecordTest.Field(name, type, optional);
     }
 
-    private static final MapType STRING_MAP_TYPE = new MapType(BuiltInAtomicType.STRING, SequenceType.OPTIONAL_STRING);
+    private static final MapType STRING_MAP_TYPE = new MapType(BuiltInAtomicType.STRING, SequenceType.STRING_SEQUENCE);
 
     public static RecordTest uriStructureRecord = RecordTest.extensible(
             f("uri", SequenceType.SINGLE_STRING, true),
@@ -112,9 +112,14 @@ public class BuildURI extends URIFunctions {
                     sep = querySeparator;
                     if (pair.key != null && !pair.key.getStringValue().isEmpty()) {
                         if (pair.value != null && pair.value.getLength() > 0) {
-                            uri.append(encodeOtherSegment(pair.key));
-                            uri.append("=");
-                            uri.append(encodeOtherSegment(pair.value));
+                            for (int idx = 0; idx < pair.value.getLength(); idx++) {
+                                if (idx > 0) {
+                                    uri.append(sep);
+                                }
+                                uri.append(encodeOtherSegment(pair.key));
+                                uri.append("=");
+                                uri.append(encodeOtherSegment(pair.value.itemAt(idx)));
+                            }
                         } else {
                             uri.append(encodeOtherSegment(pair.key));
                         }

@@ -192,14 +192,22 @@ public class ParseURI extends URIFunctions {
         if (query != null) {
             HashTrieMap querySegments = new HashTrieMap();
             for (String str : query.split(querySeparator)) {
-                MapItem seg = new HashTrieMap();
                 pos = str.indexOf("=");
+                final StringValue key;
+                final StringValue value;
                 if (pos >= 0) {
-                    String key = DecodeFromURI.decode(str.substring(0, pos));
-                    String value = DecodeFromURI.decode(str.substring(pos+1));
-                    querySegments = querySegments.addEntry(new StringValue(key), new StringValue(value));
+                    key = new StringValue(DecodeFromURI.decode(str.substring(0, pos)));
+                    value = new StringValue(DecodeFromURI.decode(str.substring(pos+1)));
                 } else {
-                    querySegments = querySegments.addEntry(new StringValue(""), new StringValue(DecodeFromURI.decode(str)));
+                    key = new StringValue("");
+                    value = new StringValue(DecodeFromURI.decode(str));
+                }
+
+                GroundedValue currentValue = querySegments.get(key);
+                if (currentValue == null) {
+                    querySegments = querySegments.addEntry(key, value);
+                } else {
+                    querySegments = querySegments.addEntry(key, currentValue.concatenate(value));
                 }
             }
             map = map.addEntry(QUERY_PARAMETERS, querySegments);
