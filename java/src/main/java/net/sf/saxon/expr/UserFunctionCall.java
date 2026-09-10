@@ -44,6 +44,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
     private StructuredQName name;
     private boolean beingInlined = false;
     private SequenceEvaluator[] argumentEvaluators = null;
+    private StreamingArgumentEvaluator streamingArgumentEvaluator = null;
 
 
 
@@ -218,7 +219,8 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                 o.setChildExpression(arg);
             }
             if (i == 0 && FunctionStreamabilityHelper.isConsuming(target.getDeclaredStreamability())) {
-                argumentEvaluators[i] = new StreamingArgumentEvaluator(arg);
+                streamingArgumentEvaluator = new StreamingArgumentEvaluator(arg);
+                argumentEvaluators[i] = arg.makeElaborator().eagerly();
             } else if (target.getParameterDefinitions()[i].isIndexedVariable()) {
                 PullEvaluator argPull = arg.makeElaborator().elaborateForPull();
                 argumentEvaluators[i] = new IndexedVariableEvaluator(argPull);
@@ -531,17 +533,35 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         return (UserFunction) getTargetComponent(context).getActor();
     }
 
+    /**
+     * Evaluate the arguments for an ordinary (non streamed) user-defined function
+     * @param c the evaluation context
+     * @return the array of actual arguments
+     * @throws XPathException if evaluation of an argument fails
+     */
 
-
-    public Sequence[] evaluateArguments(XPathContext c, boolean streamed) throws XPathException {
+    public Sequence[] evaluateArguments(XPathContext c) throws XPathException {
         int numArgs = getArity();
         Sequence[] actualArgs = SequenceTool.makeSequenceArray(numArgs);
         for (int i = 0; i < numArgs; i++) {
-            SequenceEvaluator eval = argumentEvaluators[i];
-            if (eval == null || (eval instanceof StreamingArgumentEvaluator && !streamed)) {
-                eval = getArguments()[0].makeElaborator().eagerly();
-            }
-            actualArgs[i] = eval.evaluate(c);
+            actualArgs[i] = argumentEvaluators[i].evaluate(c);
+        }
+        return actualArgs;
+    }
+
+    /**
+     * Evaluate the arguments for a streamable stylesheet function
+     * @param c the evaluation context
+     * @return the array of actual arguments
+     * @throws XPathException if evaluation of an argument fails
+     */
+
+    public Sequence[] evaluateArgumentsStreamed(XPathContext c) throws XPathException {
+        int numArgs = getArity();
+        Sequence[] actualArgs = SequenceTool.makeSequenceArray(numArgs);
+        actualArgs[0] = streamingArgumentEvaluator.evaluate(c);
+        for (int i = 1; i < numArgs; i++) {
+            actualArgs[i] = argumentEvaluators[i].evaluate(c);
         }
         return actualArgs;
     }
@@ -622,7 +642,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                                                          expr.getFunctionName().getDisplayName() +
                                                          ") with no implementation", "XTDE3052");
                     }
-                    Sequence[] actualArgs = expr.evaluateArguments(context, false);
+                    Sequence[] actualArgs = expr.evaluateArguments(context);
                     ((XPathContextMajor) context).requestTailCall(info, actualArgs);
                     return EmptyIterator.INSTANCE;
                 };
@@ -630,7 +650,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                 TailCallLoop.TailCallFunction info = new TailCallLoop.TailCallFunction();
                 info.function = expr.getFunction();
                 return context -> {
-                    Sequence[] actualArgs = expr.evaluateArguments(context, false);
+                    Sequence[] actualArgs = expr.evaluateArguments(context);
                     ((XPathContextMajor) context).requestTailCall(info, actualArgs);
                     return EmptyIterator.INSTANCE;
                 };
@@ -669,7 +689,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                     Component target = expr.getTargetComponent(context);
                     testNotAbstract(expr, target);
                     try {
-                        Sequence[] actualArgs = expr.evaluateArguments(context, false);
+                        Sequence[] actualArgs = expr.evaluateArguments(context);
                         UserFunction targetFunction = (UserFunction) target.getActor();
                         XPathContextMajor c2 = targetFunction.makeNewContext(context, expr);
                         c2.setCurrentComponent(target);
@@ -683,7 +703,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                 UserFunction targetFunction = expr.getFunction();
                 return context -> {
                     try {
-                        Sequence[] actualArgs = expr.evaluateArguments(context, false);
+                        Sequence[] actualArgs = expr.evaluateArguments(context);
                         XPathContextMajor c2 = targetFunction.makeNewContext(context, expr);
                         return targetFunction.call(c2, actualArgs).iterate();
                     } catch (StackOverflowError err) {
@@ -710,7 +730,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                     Component target = expr.getTargetComponent(context);
                     testNotAbstract(expr, target);
                     try {
-                        Sequence[] actualArgs = expr.evaluateArguments(context, false);
+                        Sequence[] actualArgs = expr.evaluateArguments(context);
                         UserFunction targetFunction = (UserFunction) target.getActor();
                         XPathContextMajor c2 = targetFunction.makeNewContext(context, expr);
                         c2.setCurrentComponent(target);
@@ -724,7 +744,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                 UserFunction targetFunction = expr.getFunction();
                 return context -> {
                     try {
-                        Sequence[] actualArgs = expr.evaluateArguments(context, false);
+                        Sequence[] actualArgs = expr.evaluateArguments(context);
                         XPathContextMajor c2 = targetFunction.makeNewContext(context, expr);
                         return targetFunction.call(c2, actualArgs).head();
                     } catch (StackOverflowError err) {
@@ -757,7 +777,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                     Component target = expr.getTargetComponent(context);
                     testNotAbstract(expr, target);
                     try {
-                        Sequence[] actualArgs = expr.evaluateArguments(context, false);
+                        Sequence[] actualArgs = expr.evaluateArguments(context);
                         UserFunction targetFunction = (UserFunction) target.getActor();
                         XPathContextMajor c2 = targetFunction.makeNewContext(context, expr);
                         c2.setCurrentComponent(target);
@@ -772,7 +792,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                 UserFunction targetFunction = expr.getFunction();
                 return (output, context) -> {
                     try {
-                        Sequence[] actualArgs = expr.evaluateArguments(context, false);
+                        Sequence[] actualArgs = expr.evaluateArguments(context);
                         XPathContextMajor c2 = targetFunction.makeNewContext(context, expr);
                         targetFunction.process(c2, actualArgs, output);
                     } catch (StackOverflowError err) {
@@ -820,7 +840,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
             //expr.allocateArgumentEvaluators();
             UserFunction targetFunction = expr.getFunction(); // This is XQuery: target function is known
             return (context, pul) -> {
-                Sequence[] actualArgs = expr.evaluateArguments(context, false);
+                Sequence[] actualArgs = expr.evaluateArguments(context);
                 XPathContextMajor c2 = context.newCleanContext();
                 c2.setOrigin(expr);
                 targetFunction.callUpdating(actualArgs, c2, pul);
