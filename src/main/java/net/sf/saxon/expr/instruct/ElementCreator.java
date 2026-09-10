@@ -7,13 +7,15 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.event.*;
+import net.sf.saxon.event.ComplexContentOutputter;
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
@@ -31,6 +33,45 @@ import net.sf.saxon.value.Cardinality;
  */
 
 public abstract class ElementCreator extends ParentNodeConstructor {
+
+    /**
+     * ElementCreationDetails is a package of information and callbacks designed
+     * to parameterize the element construction process, to allow maximum use of
+     * common code for direct interpreted evaluation, elaborated evaluation,
+     * streamed evaluation, etc; supporting the variations that exist between
+     * computed element constructors, fixed element constructors, and shallow copy.
+     */
+
+    public static abstract class ElementCreationDetails {
+
+        /**
+         * Get the name of the element node to be constructed
+         * @param context evaluation context
+         * @return the element name
+         * @throws XPathException if computation of the element name fails
+         */
+
+        public abstract NodeName getNodeName(XPathContext context) throws XPathException;
+
+        /**
+         * Get the base URI to be assigned to the new element node
+         * @param context evaluation context
+         * @return the base URI
+         * @throws XPathException if computation of the base URI fails
+         */
+
+        public abstract String getSystemId(XPathContext context) throws XPathException;
+
+        /**
+         * Callback to process the content expression, generating attributes, children and descendants
+         * (but not namespaces) of the new element node
+         * @param out the output destination
+         * @param context evaluation context
+         * @throws XPathException if processing fails
+         */
+
+        public abstract void processContent(Outputter out, XPathContext context) throws XPathException;
+    }
 
 
     /**
@@ -245,7 +286,7 @@ public abstract class ElementCreator extends ParentNodeConstructor {
      * @throws XPathException if a failure occurs
      */
 
-    public abstract NodeName getElementName(XPathContext context, /*@Nullable*/ NodeInfo copiedNode) throws XPathException;
+    //public abstract NodeName getElementName(XPathContext context, /*@Nullable*/ NodeInfo copiedNode) throws XPathException;
 
     /**
      * Get the base URI for the element being constructed
@@ -255,7 +296,7 @@ public abstract class ElementCreator extends ParentNodeConstructor {
      * @return the base URI of the constructed element
      */
 
-    public abstract String getNewBaseURI(XPathContext context, NodeInfo copiedNode);
+    //public abstract String getNewBaseURI(XPathContext context, NodeInfo copiedNode);
 
     /**
      * Callback to output namespace bindings for the new element. This method is responsible
@@ -264,12 +305,12 @@ public abstract class ElementCreator extends ParentNodeConstructor {
      *
      * @param receiver   the Outputter where the namespace bindings are to be written
      * @param nodeName   the name of the element being created
-     * @param copiedNode the node being copied (for xsl:copy) or null otherwise
+     * @param details    details supplied to the process() call
      * @throws XPathException if a dynamic error occurs
      */
 
     public abstract void outputNamespaceNodes(
-            Outputter receiver, NodeName nodeName, /*@Nullable*/ NodeInfo copiedNode)
+            Outputter receiver, NodeName nodeName, /*@Nullable*/ ElementCreationDetails details)
             throws XPathException;
 
     /**
@@ -285,36 +326,18 @@ public abstract class ElementCreator extends ParentNodeConstructor {
     /**
      * Evaluate the instruction to produce a new element node. This method is typically used when there is
      * a parent element or document in a result tree, to which the new element is added.
-     *
-     *
-     * @param output the destination for the result
-     * @param context XPath dynamic evaluation context
-     * @return null (this instruction never returns a tail call)
-     * @throws XPathException if a dynamic error occurs
-     */
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context)
-            throws XPathException {
-        return processLeavingTail(output, context, null);
-    }
-
-    /**
-     * Evaluate the instruction to produce a new element node. This method is typically used when there is
-     * a parent element or document in a result tree, to which the new element is added.
-     *
-     *
      * @param out        The destination for the result
      * @param context    XPath dynamic evaluation context
-     * @param copiedNode null except in the case of xsl:copy, when it is the node being copied; otherwise null
-     * @return null (this instruction never returns a tail call)
+     * @param details    Callbacks to supply details of the node being constructed
      * @throws XPathException if a dynamic error occurs
      */
-    public final TailCall processLeavingTail(Outputter out, XPathContext context, /*@Nullable*/ NodeInfo copiedNode)
-            throws XPathException {
+    public final void specificProcess(Outputter out,
+                                      XPathContext context,
+                                      ElementCreationDetails details) throws XPathException {
 
         try {
 
-            NodeName elemName = getElementName(context, copiedNode);
+            NodeName elemName = details.getNodeName(context);
             SchemaType typeCode;
             if (getValidationAction() == Validation.PRESERVE) {
                 typeCode = AnyType.getInstance();
@@ -336,7 +359,7 @@ public abstract class ElementCreator extends ParentNodeConstructor {
             }
 
             if (out.getSystemId() == null) {
-                out.setSystemId(getNewBaseURI(context, copiedNode));
+                out.setSystemId(details.getSystemId(context));
             }
             int properties = ReceiverOption.NONE;
             if (!bequeathNamespacesToChildren) {
@@ -351,15 +374,13 @@ public abstract class ElementCreator extends ParentNodeConstructor {
 
             // output the required namespace nodes via a callback
 
-            outputNamespaceNodes(out, elemName, copiedNode);
+            outputNamespaceNodes(out, elemName, details);
 
             // process subordinate instructions to generate attributes and content
-            getContentExpression().process(out, context);
+            details.processContent(out, context);
 
             // output the element end tag (which will fail if validation fails)
             out.endElement();
-
-            return null;
 
         } catch (XPathException e) {
             e.maybeSetLocation(getLocation());
@@ -395,6 +416,10 @@ public abstract class ElementCreator extends ParentNodeConstructor {
     public void setInheritanceFlags(String flags) {
         inheritNamespacesFromParent = !flags.contains("P");
         bequeathNamespacesToChildren = !flags.contains("C");
+    }
+
+    public ElementCreationDetails makeElementCreationDetails() {
+        throw new UnsupportedOperationException();
     }
 
     /**

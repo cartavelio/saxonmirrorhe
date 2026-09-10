@@ -64,6 +64,22 @@ public class SingletonClosure extends Closure implements Sequence {
         }
     }
 
+    /**
+     * Get the first item in the sequence.
+     *
+     * @return the first item in the sequence if there is one, or null if the sequence
+     * is empty
+     * @throws net.sf.saxon.trans.XPathException in the situation where the sequence is evaluated lazily, and
+     *                                           evaluation of the first item causes a dynamic error.
+     */
+    @Override
+    public Item head() throws XPathException {
+        try {
+            return asItem();
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
+        }
+    }
 
     /**
      * Return the value in the form of an Item

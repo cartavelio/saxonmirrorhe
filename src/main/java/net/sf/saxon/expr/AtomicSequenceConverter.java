@@ -314,6 +314,10 @@ public class AtomicSequenceConverter extends UnaryExpression {
     @Override
     public SequenceIterator iterate(final XPathContext context) throws XPathException {
         SequenceIterator base = getBaseExpression().iterate(context);
+        return getConvertingIterator(context, base);
+    }
+
+    public ItemMappingIterator getConvertingIterator(XPathContext context, SequenceIterator base) {
         Converter conv = getConverterDynamically(context);
         if (conv == Converter.ToStringConverter.INSTANCE) {
             return new ItemMappingIterator(base, TO_STRING_MAPPER, true);

@@ -15,6 +15,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.DocumentNodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.BooleanValue;
@@ -261,20 +262,24 @@ public final class InstanceOfExpression extends UnaryExpression {
      */
 
     private boolean isInstance(SequenceIterator iter, XPathContext context) throws XPathException {
-        int count = 0;
-        Item item;
-        while ((item = iter.next()) != null) {
-            count++;
-            if (!targetType.matches(item, context.getConfiguration().getTypeHierarchy())) {
-                iter.close();
-                return false;
+        try {
+            int count = 0;
+            Item item;
+            while ((item = iter.next()) != null) {
+                count++;
+                if (!targetType.matches(item, context.getConfiguration().getTypeHierarchy())) {
+                    iter.close();
+                    return false;
+                }
+                if (count == 2 && !Cardinality.allowsMany(targetCardinality)) {
+                    iter.close();
+                    return false;
+                }
             }
-            if (count == 2 && !Cardinality.allowsMany(targetCardinality)) {
-                iter.close();
-                return false;
-            }
+            return !(count == 0 && ((targetCardinality & StaticProperty.ALLOWS_ZERO) == 0));
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
         }
-        return !(count == 0 && ((targetCardinality & StaticProperty.ALLOWS_ZERO) == 0));
     }
 
     /**

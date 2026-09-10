@@ -154,4 +154,16 @@ public class GlobalVariableReference extends VariableReference implements Compon
         //pre.add(this.copy());
         return pre;
     }
+
+    /**
+     * Get a name identifying the kind of expression, in terms meaningful to a user.
+     *
+     * @return a name identifying the kind of expression, in terms meaningful to a user.
+     * The name will always be in the form of a lexical XML QName, and should match the name used
+     * in export() output displaying the expression.
+     */
+    @Override
+    public String getExpressionName() {
+        return "gVarRef";
+    }
 }

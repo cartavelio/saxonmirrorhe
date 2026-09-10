@@ -601,7 +601,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
     public void index(ComponentDeclaration decl, PrincipalStylesheetModule top) throws XPathException {
         if (getTemplateName() != null) {
             if (compiledNamedTemplate == null) {
-                compiledNamedTemplate = new NamedTemplate(getTemplateName());
+                compiledNamedTemplate = new NamedTemplate(getTemplateName(), getConfiguration());
             }
             top.indexNamedTemplate(decl);
         }

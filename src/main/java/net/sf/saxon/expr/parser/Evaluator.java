@@ -146,7 +146,7 @@ public abstract class Evaluator {
 
         @Override
         public ElaboratedEvaluator elaborate(Expression expr) {
-            return ((VariableReference) expr)::evaluateVariable;
+            return context -> ((VariableReference) expr).evaluateVariable(context);
         }
     };
 
@@ -178,7 +178,7 @@ public abstract class Evaluator {
 
         @Override
         public ElaboratedEvaluator elaborate(Expression expr) {
-            return ((SuppliedParameterReference) expr)::evaluateVariable;
+            return context -> ((SuppliedParameterReference) expr).evaluateVariable(context);
         }
 
     };

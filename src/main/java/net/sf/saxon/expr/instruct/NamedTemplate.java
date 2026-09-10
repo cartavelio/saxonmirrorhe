@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr.instruct;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
@@ -17,7 +18,6 @@ import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trace.TraceableComponent;
-import net.sf.saxon.trans.IElaborationService;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyItemType;
@@ -61,7 +61,7 @@ public class NamedTemplate extends Actor implements TraceableComponent {
      * @param templateName the name of the template (if any)
      */
 
-    public NamedTemplate(StructuredQName templateName) {
+    public NamedTemplate(StructuredQName templateName, Configuration config) {
         setTemplateName(templateName);
     }
 
@@ -264,16 +264,13 @@ public class NamedTemplate extends Actor implements TraceableComponent {
             }
         }
 
-        IElaborationService service = context.getController().getElaborationService();
-        if (service != null) {
-            service.push(context.getCurrentComponent(), output, context);
-        } else {
-            if (bodyIsTailCallReturner) {
-                return ((TailCallReturner) body).processLeavingTail(output, context);
-            } else if (body != null) {
-                body.process(output, context);
-            }
+
+        if (bodyIsTailCallReturner) {
+            return ((TailCallReturner) body).processLeavingTail(output, context);
+        } else if (body != null) {
+            process(output, context);
         }
+
         return null;
     }
 

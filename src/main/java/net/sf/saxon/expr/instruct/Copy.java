@@ -364,46 +364,47 @@ public class Copy extends ElementCreator {
         return exp;
     }
 
-    /**
-     * Callback from ElementCreator when constructing an element
-     *
-     * @param context    XPath dynamic evaluation context
-     * @param copiedNode the node being copied
-     * @return the name of the element to be constructed
-     */
+//    /**
+//     * Callback from ElementCreator when constructing an element
+//     *
+//     * @param context    XPath dynamic evaluation context
+//     * @param copiedNode the node being copied
+//     * @return the name of the element to be constructed
+//     */
+//
+//    @Override
+//    public NodeName getElementName(XPathContext context, NodeInfo copiedNode) {
+//        return NameOfNode.makeName(copiedNode);
+//    }
 
-    @Override
-    public NodeName getElementName(XPathContext context, NodeInfo copiedNode) {
-        return NameOfNode.makeName(copiedNode);
-    }
-
-    /**
-     * Get the base URI of a copied element node (the base URI is retained in the new copy)
-     *
-     * @param context    XPath dynamic evaluation context
-     * @param copiedNode the node being copied (for xsl:copy), otherwise null
-     * @return the base URI
-     */
-
-    @Override
-    public String getNewBaseURI(XPathContext context, NodeInfo copiedNode) {
-        return copiedNode.getBaseURI();
-    }
+//    /**
+//     * Get the base URI of a copied element node (the base URI is retained in the new copy)
+//     *
+//     * @param context    XPath dynamic evaluation context
+//     * @param copiedNode the node being copied (for xsl:copy), otherwise null
+//     * @return the base URI
+//     */
+//
+//    @Override
+//    public String getNewBaseURI(XPathContext context, NodeInfo copiedNode) {
+//        return copiedNode.getBaseURI();
+//    }
 
     /**
      * Callback to output namespace nodes for the new element.
      *
      * @param receiver   the Receiver where the namespace nodes are to be written
      * @param nodeName    the element name
-     * @param copiedNode  the node being copied (for xsl:copy), otherwise null
+     * @param details  the node being copied (for xsl:copy), otherwise null
      * @throws XPathException if any error occurs
      */
 
     @Override
-    public void outputNamespaceNodes(Outputter receiver, NodeName nodeName, NodeInfo copiedNode)
+    public void outputNamespaceNodes(Outputter receiver, NodeName nodeName, ElementCreationDetails details)
             throws XPathException {
         if (copyNamespaces) {
-            receiver.namespaces(copiedNode.getAllNamespaces(), ReceiverOption.NAMESPACE_OK);
+            receiver.namespaces(((CopyElementDetails)details).getCopiedNode().getAllNamespaces(),
+                                ReceiverOption.NAMESPACE_OK);
         } else {
             // Always output the namespace of the element name itself
             NamespaceBinding ns = nodeName.getNamespaceBinding();
@@ -434,7 +435,8 @@ public class Copy extends ElementCreator {
 
             case Type.ELEMENT:
                 // use the generic code for creating new elements
-                return super.processLeavingTail(out, context, (NodeInfo) item);
+                specificProcess(out, context, new CopyElementDetails((NodeInfo) item));
+                return null;
 
             case Type.ATTRIBUTE:
                 if (getSchemaType() instanceof ComplexType) {
@@ -560,6 +562,38 @@ public class Copy extends ElementCreator {
         out.setChildRole("content");
         getContentExpression().export(out);
         out.endElement();
+    }
+
+    public CopyElementDetails makeElementCreationDetails(NodeInfo copiedNode) {
+        return new CopyElementDetails(copiedNode);
+    }
+
+    private class CopyElementDetails extends ElementCreationDetails {
+
+        private NodeInfo copiedNode;
+
+        public CopyElementDetails(NodeInfo copiedNode) {
+            this.copiedNode = copiedNode;
+        }
+
+        public NodeInfo getCopiedNode() {
+            return copiedNode;
+        }
+
+        @Override
+        public NodeName getNodeName(XPathContext context) throws XPathException {
+            return NameOfNode.makeName(copiedNode);
+        }
+
+        @Override
+        public String getSystemId(XPathContext context) throws XPathException {
+            return copiedNode.getBaseURI();
+        }
+
+        @Override
+        public void processContent(Outputter out, XPathContext context) throws XPathException {
+            getContentExpression().process(out, context);
+        }
     }
 
 

@@ -753,7 +753,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
                     } else {
                         // can't happen, but we'll play safe
                         //other.setRedundantNamedTemplate();
-                        NamedTemplate compiledTemplate = new NamedTemplate(sName.getComponentName());
+                        NamedTemplate compiledTemplate = new NamedTemplate(sName.getComponentName(), getConfiguration());
                         Component declaringComponent = compiledTemplate.obtainDeclaringComponent(sourceTemplate);
                         componentIndex.put(sName, declaringComponent);
                         templateIndex.put(sName.getComponentName(), decl);

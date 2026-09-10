@@ -611,7 +611,7 @@ public class PackageLoaderHE implements IPackageLoader {
         SequenceType contextType = parseAlphaCode(templateElement, "cxt");
         ItemType contextItemType = contextType == null ? AnyItemType.getInstance() : contextType.getPrimaryType();
 
-        NamedTemplate template = new NamedTemplate(templateName);
+        NamedTemplate template = new NamedTemplate(templateName, config);
         template.setStackFrameMap(new SlotManager(slots));
         template.setPackageData(pack);
         template.setRequiredType(parseAlphaCode(templateElement, "as"));
@@ -1716,7 +1716,7 @@ public class PackageLoaderHE implements IPackageLoader {
             Component target = pack.getComponent(symbol);
             NamedTemplate t;
             if (target == null) {
-                t = new NamedTemplate(name);
+                t = new NamedTemplate(name, loader.getConfiguration());
             } else {
                 t = (NamedTemplate) target.getActor();
             }

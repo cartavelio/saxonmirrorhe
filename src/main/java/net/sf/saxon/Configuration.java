@@ -7,6 +7,7 @@
 
 package net.sf.saxon;
 
+import com.saxonica.ee.elab.eval.PushEvaluator;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.accum.AccumulatorRegistry;
@@ -1878,6 +1879,10 @@ public class Configuration implements SourceResolver, NotationSet {
     public RegularExpression compileRegularExpression(UnicodeString regex, String flags, String hostLanguage, List<String> warnings)
             throws XPathException {
         return Version.platform.compileRegularExpression(this, regex, flags, hostLanguage, warnings);
+    }
+
+    public PushEvaluator getPushEvaluator(Actor actor) {
+        return (out, context) -> actor.getBody().process(out, context);
     }
 
     /**
@@ -5443,10 +5448,6 @@ public class Configuration implements SourceResolver, NotationSet {
      * @return a CompilerService, or null
      */
     public ICompilerService makeCompilerService(HostLanguage hostLanguage) {
-        return null;
-    }
-
-    public IElaborationService makeElaborationService() {
         return null;
     }
 
