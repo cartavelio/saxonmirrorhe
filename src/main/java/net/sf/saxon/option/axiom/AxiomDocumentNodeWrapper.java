@@ -10,6 +10,7 @@ package net.sf.saxon.option.axiom;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.GenericTreeInfo;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -36,6 +37,21 @@ public class AxiomDocumentNodeWrapper extends AxiomParentNodeWrapper  {
         super(root);
         treeInfo = new AxiomDocument(root, baseURI, config);
         ((GenericTreeInfo)treeInfo).setRootNode(this);
+    }
+
+    /**
+     * Create a Saxon wrapper for an Axiom document node(internal constructor used when the TreeInfo
+     * already exists)
+     *
+     * @param root    The Axiom root node
+     * @param baseURI The base URI for all the nodes in the tree
+     * @param config  The configuration which defines the name pool used for all
+     *                names in this tree
+     * @param treeInfo object containing information about the tree as a whole
+     */
+    AxiomDocumentNodeWrapper(OMDocument root, String baseURI, Configuration config, TreeInfo treeInfo) {
+        super(root);
+        this.treeInfo = treeInfo;
     }
 
     /**
