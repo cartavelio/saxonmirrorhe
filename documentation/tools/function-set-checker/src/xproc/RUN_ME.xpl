@@ -34,7 +34,7 @@
 	<p:documentation>
 		<m:desc>When the source data was last pulled from the remote repository.</m:desc>
 		<m:note>
-			<m:p>To find out when you last pulled that repo, in a terminal, in the root of that repo, execute the command <m:code>ls -lct</m:code> and look at the date and time on the <m:code>java</m:code> directory.  This method isn't 100% reliable but should be good enough in most cases.</m:p>
+			<m:p>To find out when you last pulled that repo, in a terminal, in the root of that repo, execute the command <m:code>ls -lct</m:code> and look at the date and time on the most recently changed file or directory.  This method isn't 100% reliable but should be good enough in most cases.</m:p>
 		</m:note>
 	</p:documentation>
     <p:option name="pulled" as="xs:dateTimeStamp?" />
@@ -172,5 +172,17 @@
 		</p:choose>
 		
 	</p:viewport>
-    
+	
+	<p:xslt>
+		<p:with-input port="stylesheet" href="../xslt/aggregate_registries.xsl" />
+	</p:xslt>
+	
+	<p:store href="{$standardised-output-dir}/all_registered_functions.xml" />
+	
+	<p:xslt>
+		<p:with-input port="stylesheet" href="../xslt/all_registered_functions2markdown.xsl" />
+	</p:xslt>
+
+	<p:store href="{$standardised-output-dir}/md/All_Registered_Functions.md" />
+	
 </p:declare-step>

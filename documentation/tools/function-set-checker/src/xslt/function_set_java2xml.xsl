@@ -39,7 +39,7 @@
 		
 		<registry id="{$package}.{substring-before($filename, '.java')}" pulled="{$pulled}" name="{$metadata/@name}" catalog="{$metadata/@catalog}">
 			<xsl:for-each-group select="descendant::*:match/*:group[@nr = '2']" group-by="text()">
-				<function prefix="{$metadata/@prefix}" local-name="{current-grouping-key()}" name="{if ($metadata/@prefix/normalize-space(.) = '') then current-grouping-key() else string-join(($metadata/@prefix, current-grouping-key()), ':')}" />
+				<function name="{if ($metadata/@prefix/normalize-space(.) = '') then current-grouping-key() else string-join(($metadata/@prefix, current-grouping-key()), ':')}" />
 			</xsl:for-each-group>							
 		</registry>
 	</xsl:template>
