@@ -54,6 +54,7 @@ extern "C" { // remove comment
 #include "XdmMap.h"
 #include "XdmNode.h"
 #include "XdmValue.h"
+#include "PHPUserFunctionHandler.h"
 
 #include "php8_saxon_arginfo.h"
 

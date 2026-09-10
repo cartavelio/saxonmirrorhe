@@ -47,6 +47,8 @@
 
 #if defined PYTHON_SAXONC_API
 #include "CythonUserFunctionHandler.h"
+#elif defined PHP_SAXONC_API
+#include "PHPUserFunctionHandler.h"
 #endif
 //#include "com_saxonica_functions_extfn_PhpCall.h"
 //#include "com_saxonica_functions_extfn_PhpCall_PhpFunctionCall.h"
