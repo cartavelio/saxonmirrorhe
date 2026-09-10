@@ -2453,7 +2453,7 @@ public class XQueryParser extends XPathParser {
                 final LocalVariableBinding letBinding = new LocalVariableBinding(explicitQName, iterandType);
                 letClause.setRangeVariable(letBinding);
                 LocalVariableReference tempRef = new LocalVariableReference(clause.getRangeVariable());
-                LookupExpression lookup = new LookupExpression(tempRef, LookupExpression.Modifier.CONTENT, new StringLiteral("value"));
+                LookupExpression lookup = new LookupExpression(tempRef, new StringLiteral("value"));
                 letClause.initSequence(flwor, lookup);
                 declareRangeVariable(letBinding);
                 clauseList.add(letClause);
@@ -2463,7 +2463,7 @@ public class XQueryParser extends XPathParser {
                 final LocalVariableBinding letBinding = new LocalVariableBinding(explicitQName, iterandType);
                 letClause.setRangeVariable(letBinding);
                 LocalVariableReference tempRef = new LocalVariableReference(clause.getRangeVariable());
-                LookupExpression lookup = new LookupExpression(tempRef, LookupExpression.Modifier.CONTENT, new StringLiteral("key"));
+                LookupExpression lookup = new LookupExpression(tempRef, new StringLiteral("key"));
                 letClause.initSequence(flwor, lookup);
                 declareRangeVariable(letBinding);
                 clauseList.add(letClause);
@@ -2473,7 +2473,7 @@ public class XQueryParser extends XPathParser {
                             new LocalVariableBinding(explicitQName2, explicitType2 == null ? SequenceType.ANY_SEQUENCE : explicitType2);
                     letClause2.setRangeVariable(letBinding2);
                     LocalVariableReference tempRef2 = new LocalVariableReference(clause.getRangeVariable());
-                    LookupExpression lookup2 = new LookupExpression(tempRef2, LookupExpression.Modifier.CONTENT, new StringLiteral("value"));
+                    LookupExpression lookup2 = new LookupExpression(tempRef2, new StringLiteral("value"));
                     letClause2.initSequence(flwor, lookup2);
                     declareRangeVariable(letBinding2);
                     clauseList.add(letClause2);

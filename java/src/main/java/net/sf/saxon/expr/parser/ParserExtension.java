@@ -39,15 +39,9 @@ public class ParserExtension {
      */
 
     public Expression lookupStar(Expression lhs,
-                                 LookupExpression.Modifier modifier,
                                  SequenceType type,
-                                 boolean deep,
                                  boolean allow40) {
-        if (deep) {
-            throw new UnsupportedOperationException();
-        } else {
-            return new LookupAllExpression(lhs);
-        }
+        return new LookupAllExpression(lhs);
     }
     
 

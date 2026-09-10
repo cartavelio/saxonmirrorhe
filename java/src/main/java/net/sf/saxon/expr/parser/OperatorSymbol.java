@@ -30,7 +30,7 @@ public enum OperatorSymbol {
     CAST_AS, CASTABLE_AS, TREAT_AS, INSTANCE_OF,
     FAT_ARROW, MAPPING_ARROW, THIN_ARROW, METHOD_CALL,
     SLASH, SLASH_SLASH,
-    BANG, LOOKUP, DEEP_LOOKUP,
+    BANG, LOOKUP,
     AM_FILTER,
     NOT_AN_OPERATOR;
 
@@ -81,7 +81,6 @@ public enum OperatorSymbol {
             case SLASH_SLASH: return "//";
             case BANG: return "!";
             case LOOKUP: return "?";
-            case DEEP_LOOKUP: return "??";     // TODO: obsolete
             case AM_FILTER: return "?[]";
             default: return "<unknown op>";
         }

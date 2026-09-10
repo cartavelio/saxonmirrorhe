@@ -346,11 +346,6 @@ public final class Tokenizer {
                     nextToken = Token.AT;
                     return;
                 case '?':
-                    if (isFollowedBy('?')) {
-                        inputOffset++;
-                        nextToken = Token.QMARK_QMARK;
-                        return;
-                    }
                     if (isFollowedBy('[')) {
                         inputOffset++;
                         nextToken = Token.QMARK_LSQB;

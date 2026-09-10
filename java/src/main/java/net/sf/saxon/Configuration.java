@@ -3164,7 +3164,7 @@ public class Configuration implements SourceResolver {
         return null;
     }
 
-    public Expression makeDeepLookupExpression(Expression lhs, LookupExpression.Modifier modifier, Expression rhs) throws XPathException {
+    public Expression makeDeepLookupExpression(Expression lhs, Expression rhs) throws XPathException {
         throw new XPathException("Deep lookup expression currently requires Saxon-EE");
     }
 
@@ -3282,13 +3282,8 @@ public class Configuration implements SourceResolver {
     }
 
     public Expression makeLookupExpression(Expression lhs,
-                                           LookupExpression.Modifier modifier,
-                                           Expression rhs, boolean deep, boolean allow40) throws XPathException {
-        if (deep) {
-            return makeDeepLookupExpression(lhs, modifier, rhs);
-        } else {
-            return new LookupExpression(lhs, modifier, rhs);
-        }
+                                           Expression rhs, boolean allow40) throws XPathException {
+        return new LookupExpression(lhs, rhs);
     }
 
 

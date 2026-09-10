@@ -1502,7 +1502,6 @@ public class XPathParser {
                 temp.setVariableQName(varQName);
                 LocalVariableReference tempRef = new LocalVariableReference(result);
                 LookupExpression lookup = new LookupExpression(tempRef,
-                                                               LookupExpression.Modifier.CONTENT,
                                                                new StringLiteral("value"));
                 temp.setSequence(lookup);
                 declareRangeVariable(temp);
@@ -1516,7 +1515,6 @@ public class XPathParser {
                 temp.setVariableQName(varQName);
                 LocalVariableReference tempRef = new LocalVariableReference(result);
                 LookupExpression lookup = new LookupExpression(tempRef,
-                                                               LookupExpression.Modifier.CONTENT,
                                                                new StringLiteral("key"));
                 temp.setSequence(lookup);
                 declareRangeVariable(temp);
@@ -1530,7 +1528,6 @@ public class XPathParser {
                     temp2.setVariableQName(varQName2);
                     LocalVariableReference tempRef2 = new LocalVariableReference(result);
                     LookupExpression lookup2 = new LookupExpression(tempRef2,
-                                                                   LookupExpression.Modifier.CONTENT,
                                                                    new StringLiteral("value"));
                     temp2.setSequence(lookup2);
                     declareRangeVariable(temp2);
@@ -2634,7 +2631,6 @@ public class XPathParser {
                 || tok == Token.LPAREN
                 || tok == Token.DOLLAR
                 || tok == Token.QMARK
-                || tok == Token.QMARK_QMARK
                 || tok == Token.LSQB
                 || tok == Token.LCURLY
                 || tok instanceof Token.Pragma
@@ -2823,7 +2819,7 @@ public class XPathParser {
                 // dynamic function call (XQuery 3.0/XPath 3.0 syntax)
                 step = parseDynamicFunctionCall(step, null);
                 setLocation(step);
-            } else if (t.currentToken == Token.QMARK || t.currentToken == Token.QMARK_QMARK) {
+            } else if (t.currentToken == Token.QMARK) {
                 step = parseLookup(step);
                 setLocation(step);
             } else if (t.currentToken == Token.METHOD_CALL) {
@@ -2908,7 +2904,7 @@ public class XPathParser {
         forex.setVariableQName(new StructuredQName("vv", NamespaceUri.SAXON_GENERATED_VARIABLE, "m" + forex.hashCode()));
         forex.setRequiredType(SequenceType.SINGLE_MAP);
         VariableReference var1 = new LocalVariableReference(forex);
-        Expression function = new LookupExpression(var1, LookupExpression.Modifier.CONTENT, new StringLiteral(methodName));
+        Expression function = new LookupExpression(var1, new StringLiteral(methodName));
         Expression function1 = makeSequenceTypeExpression(function, OperatorSymbol.TREAT_AS,SequenceType.SINGLE_FUNCTION);
         VariableReference var2 = new LocalVariableReference(forex);
         args.set(0, var2);
@@ -2956,7 +2952,7 @@ public class XPathParser {
             // and UnaryLookup. Most of these will fail with a type error, which we accept, although
             // it should really be a syntax error. The only ones we actually test for are those that
             // could deliver a function item
-            if (token == Token.DOT || token == Token.QMARK || token == Token.QMARK_QMARK ||
+            if (token == Token.DOT || token == Token.QMARK ||
                     (isKeyword("ordered") || isKeyword("unordered")) && t.peekAhead() == Token.LCURLY ) {
                 grumble (token.toString() + " not allowed on RHS of " + arrow.toString());
             }
@@ -3326,7 +3322,7 @@ public class XPathParser {
         } else if (token == Token.LSQB) {
             return parseArraySquareConstructor();
 
-        } else if (token == Token.QMARK || token == Token.QMARK_QMARK) {
+        } else if (token == Token.QMARK) {
             return parseLookup(new ContextItemExpression());
 
         } else if (token == Token.AT) {
@@ -3757,21 +3753,16 @@ public class XPathParser {
     /*@NotNull*/
     protected Expression parseLookup(Expression lhs) throws XPathException {
         checkLanguageVersion31();
-        boolean deep = t.currentToken == Token.QMARK_QMARK;
-        if (deep) {
-            checkLanguageVersion40("the deep lookup operator `??`");
-        }
         int offset = t.currentTokenStartOffset;
         nextToken();
         Token token = t.currentToken;
         
         Expression result;
-        LookupExpression.Modifier modifier = LookupExpression.Modifier.CONTENT;
 
         if (token instanceof Token.NameToken) {
             String name = t.currentName();
             if (!NameChecker.isValidNCName(StringTool.codePoints(name))) {
-                grumble("The name following '" + (deep ? "??" : "?") + "' must be a valid NCName");
+                grumble("The name following '?' must be a valid NCName");
             }
             nextToken();
             if (name.equals("type") && t.currentToken == Token.LPAREN) {
@@ -3779,37 +3770,37 @@ public class XPathParser {
                 SequenceType requiredType = parseSequenceType();
                 expect(Token.RPAREN);
                 nextToken();
-                result = parserExtension.lookupStar(lhs, modifier, requiredType, deep, allowXPath40Syntax);
+                result = parserExtension.lookupStar(lhs, requiredType, allowXPath40Syntax);
             } else {
                 result = env.getConfiguration().makeLookupExpression(
-                        lhs, modifier, new StringLiteral(name), deep, allowXPath40Syntax);
+                        lhs, new StringLiteral(name), allowXPath40Syntax);
             }
         } else if (token instanceof Token.NumericLiteral) {
             NumericValue number = ((Token.NumericLiteral)token).getValue();
             if (!(number instanceof IntegerValue)) {
-                grumble("Number following '" + (deep ? "??" : "?") + "' must be an integer");
+                grumble("Number following '?' must be an integer");
             }
             if (((Token.NumericLiteral) token).getRadix() != 10) {
-                grumble("Number following '" + (deep ? "??" : "?") + "' must be a decimal integer");
+                grumble("Number following '?' must be a decimal integer");
             }
             nextToken();
-            result = makeLookupExpression(env.getConfiguration(), lhs, modifier, Literal.makeLiteral(number), deep);
+            result = makeLookupExpression(env.getConfiguration(), lhs, Literal.makeLiteral(number));
         } else if (token == Token.STAR) {
             nextToken();
-            result = parserExtension.lookupStar(lhs, modifier, SequenceType.ANY_SEQUENCE, deep, allowXPath40Syntax);
+            result = parserExtension.lookupStar(lhs, SequenceType.ANY_SEQUENCE, allowXPath40Syntax);
         } else if (token == Token.LPAREN) {
-            result = makeLookupExpression(env.getConfiguration(), lhs, modifier, parseParenthesizedExpression(), deep);
+            result = makeLookupExpression(env.getConfiguration(), lhs, parseParenthesizedExpression());
         } else if (token instanceof Token.StringLiteral) {
             checkLanguageVersion40("a string literal after `?`");
             String key = ((Token.StringLiteral)token).getValue();
             result = env.getConfiguration().makeLookupExpression(
-                    lhs, modifier, new StringLiteral(key), deep, allowXPath40Syntax);
+                    lhs, new StringLiteral(key), allowXPath40Syntax);
             nextToken();
         } else if (token == Token.DOLLAR) {
             checkLanguageVersion40("a variable reference directly after `?`");
             offset = t.currentTokenStartOffset;
             StructuredQName varName = parseEQName();
-            result = makeLookupExpression(env.getConfiguration(), lhs, modifier, resolveVariableReference(offset, varName), deep);
+            result = makeLookupExpression(env.getConfiguration(), lhs, resolveVariableReference(offset, varName));
         } else {
             grumble("Unexpected " + token + " after '?'");
             return null;
@@ -3818,113 +3809,10 @@ public class XPathParser {
         return result;
     }
 
-    /**
-     * Parse a lookup operator ("?") - new version for use with JNodes proposal
-     *
-     * @param lhs the expression that the function to be called
-     * @return the expression that results from the parsing
-     * @throws net.sf.saxon.trans.XPathException if a static error is found
-     */
-
-    /*@NotNull*/
-    protected Expression parseLookup40J(Expression lhs) throws XPathException {
-        checkLanguageVersion31();
-        boolean deep = t.currentToken == Token.QMARK_QMARK;
-        if (deep) {
-            checkLanguageVersion40("the deep lookup operator `??`");
-        }
-        int offset = t.currentTokenStartOffset;
-        nextToken();
-        Token token = t.currentToken;
-
-        int axis;
-        if (deep) {
-            axis = AxisInfo.DESCENDANT;
-        } else if (token instanceof Token.NameToken && t.peekAhead() == Token.COLON_COLON) {
-            checkLanguageVersion40("axis after `?`");
-            axis = AxisInfo.getAxisNumber(t.currentName());
-            switch (axis) {
-                case AxisInfo.CHILD:
-                case AxisInfo.PARENT:
-                case AxisInfo.ANCESTOR:
-                case AxisInfo.ANCESTOR_OR_SELF:
-                case AxisInfo.SELF:
-                case AxisInfo.DESCENDANT:
-                case AxisInfo.DESCENDANT_OR_SELF:
-                    break;
-                default:
-                    grumble("Axis " + t.currentName() + " is not allowed in a lookup expression");
-            }
-
-            nextToken();
-            readToken(Token.COLON_COLON);
-            token = t.currentToken;
-        } else {
-            axis = -1; // indicating that the axis is implicit
-        }
-
-        // Lookup expressions are divided into two classes:
-        // (a) those that test each value against a type: used for key specifiers
-        //     `*` and `~[type]`
-        // (b) those that select values by key: used for all others
-
-        Expression result;
-        if (token == Token.STAR) {
-            nextToken();
-            result = new LookupByValuePredicate(lhs, axis, null);
-        } else if (token == Token.TILDE_LSQB) {
-            checkLanguageVersion40("a type predicate after `?`");
-            nextToken();
-            SequenceType type = parseSequenceType();
-            expect(Token.RSQB);
-            nextToken();
-            final TypeHierarchy th = env.getConfiguration().getTypeHierarchy();
-            result = new LookupByValuePredicate(lhs, axis, (value -> type.matches(value, th)));
-        } else if (token instanceof Token.NameToken) {
-            String name = t.currentName();
-            if (!NameChecker.isValidNCName(StringTool.codePoints(name))) {
-                String preceding = axis >= 0 ? AxisInfo.axisName[axis] + ".." : (deep ? "??" : "?");
-                grumble("The name following '" + preceding + "' must be a valid NCName");
-            }
-            nextToken();
-            result = new LookupByKey(lhs, axis, new StringLiteral(name));
-        } else if (token instanceof Token.NumericLiteral) {
-            NumericValue number = ((Token.NumericLiteral) token).getValue();
-            if (!(number instanceof IntegerValue)) {
-                grumble("Number following '" + (deep ? "??" : "?") + "' must be an integer");
-            }
-            if (((Token.NumericLiteral) token).getRadix() != 10) {
-                grumble("Number following '" + (deep ? "??" : "?") + "' must be a decimal integer");
-            }
-            nextToken();
-            result = new LookupByKey(lhs, axis, Literal.makeLiteral(number));
-        } else if (token == Token.LPAREN) {
-            Expression selector = parseParenthesizedExpression();
-            result = new LookupByKey(lhs, axis, selector);
-        } else if (token instanceof Token.StringLiteral) {
-            checkLanguageVersion40("a string literal after `?`");
-            String key = ((Token.StringLiteral) token).getValue();
-            result = new LookupByKey(lhs, axis, new StringLiteral(key));
-            nextToken();
-        } else if (token == Token.DOLLAR) {
-            checkLanguageVersion40("a variable reference directly after `?`");
-            offset = t.currentTokenStartOffset;
-            StructuredQName varName = parseEQName();
-            Expression expr = resolveVariableReference(offset, varName);
-            result = new LookupByKey(lhs, axis, expr);
-            nextToken();
-        } else {
-            grumble("Unexpected " + token + " after '?'");
-            return null;
-        }
-
-        setLocation(result, offset);
-        return result;
-    }
 
 
-    protected Expression makeLookupExpression(Configuration config, Expression lhs, LookupExpression.Modifier modifier, Expression rhs, boolean deep) throws XPathException {
-        return config.makeLookupExpression(lhs, modifier, rhs, deep, allowXPath40Syntax);
+    protected Expression makeLookupExpression(Configuration config, Expression lhs, Expression rhs) throws XPathException {
+        return config.makeLookupExpression(lhs, rhs, allowXPath40Syntax);
     }
 
 
