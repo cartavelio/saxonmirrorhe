@@ -37,6 +37,17 @@
     <reason>Test driver limitation: schema-aware XPath using schema for fn namespace</reason>
   </exception>
   
+  <exception test-set="fn-random-number-generator" 
+    test-case="fn-random-number-generator-35
+               fn-random-number-generator-36
+               fn-random-number-generator-37" 
+    run="false" report="bug">
+    <created by="Michael Kay" on="2026-04-11"/>
+    <reason>Saxon follows the 4.0 spec, with the return type of the next() function
+            being a record type, not simply `map(xs:string, item)`, even when running
+            in 3.1 mode.</reason>
+  </exception>
+  
   <exception test-set="fn-string-join" test-case="fn-string-join-27" run="false" report="n/a">
     <created by="Michael Kay" on="2019-03-11"/>
     <reason>Pre-3.1 semantics of fn:string-join no longer supported</reason>
@@ -118,17 +129,6 @@
                                      run="false" report="n/a">
     <created by="Michael Kay" on="2025-10-22"/>
     <reason>Saxon outputs the meta tag in HTML5 format despite what the serialization 3.1 spec says</reason>
-  </exception>
-  
-  <exception test-set="fn-random-number-generator" 
-    test-case="fn-random-number-generator-35
-               fn-random-number-generator-36
-               fn-random-number-generator-37" 
-                                     run="false" report="bug">
-    <created by="Michael Kay" on="2026-04-11"/>
-    <reason>Saxon follows the 4.0 spec, with the return type of the next() function
-            being a record type, not simply `map(xs:string, item)`, even when running
-            in 3.1 mode.</reason>
   </exception>
   
   

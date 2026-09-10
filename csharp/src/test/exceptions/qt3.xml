@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- exceptions file for the QT3 Test Suite -->
 <exceptions>
-  
 
    <exception test-set="app-CatalogCheck" test-case="Catalog011" run="false" report="disputed">
       <created by="Michael Kay" on="2023-01-03"/>
@@ -35,19 +34,20 @@
     <reason>Saxon 13 implements transitive equality even in 3.1 mode</reason>
   </exception>
   
-  <exception test-set="op-same-key" 
-             test-case="same-key-006" 
-             run="false" report="n/a">
-    <created by="Michael Kay" on="2026-04-10"/>
-    <reason>Saxon 13 implements transitive equality even in 3.1 mode</reason>
-  </exception>
-  
   <exception test-set="fn-format-integer" 
              test-case="format-integer-032 format-integer-032-fr format-integer-032-it
                         format-integer-065 format-integer-066" 
              run="false" report="not supported">
     <created by="Michael Kay" on="2021-12-07"/>
     <reason>SaxonCS doesn't format "numbers as words" for languages other than English.</reason>
+  </exception>
+  
+  <exception test-set="fn-json-to-xml" 
+    test-case="json-to-xml-017
+               json-to-xml-037
+               json-to-xml-038" run="XQ" report="known restriction">
+    <created by="Michael Kay" on="2026-04-13"/>
+    <reason>Test driver limitation: schema-aware XPath using schema for fn namespace</reason>
   </exception>
   
   <exception test-set="fn-normalize-unicode" 
@@ -61,41 +61,17 @@
     test-case="fn-random-number-generator-35
                fn-random-number-generator-36
                fn-random-number-generator-37" 
-                                     run="false" report="bug">
+    run="false" report="bug">
     <created by="Michael Kay" on="2026-04-11"/>
     <reason>Saxon follows the 4.0 spec, with the return type of the next() function
             being a record type, not simply `map(xs:string, item)`, even when running
             in 3.1 mode.</reason>
-  </exception>
-  
-  <exception test-set="fn-json-to-xml" 
-    test-case="json-to-xml-017
-               json-to-xml-037
-               json-to-xml-038" run="XQ" report="known restriction">
-    <created by="Michael Kay" on="2026-04-13"/>
-    <reason>Test driver limitation: schema-aware XPath using schema for fn namespace</reason>
   </exception>
  
   <exception test-set="fn-string-join" test-case="fn-string-join-27" run="false" report="known restriction">
     <created by="Michael Kay" on="2019-03-11"/>
     <reason>Pre-3.1 semantics of fn:string-join no longer supported</reason>
   </exception>
-  
-  <exception test-set="op-to" test-case="RangeExpr-408f
-      RangeExpr-408g
-      RangeExpr-408h
-      RangeExpr-408i
-      RangeExpr-408j
-      RangeExpr-408k
-      RangeExpr-410f
-      RangeExpr-410g
-      RangeExpr-410h
-      RangeExpr-410i
-      RangeExpr-410j
-      RangeExpr-410k" run="false" report="tooBig">
-      <created by="Michael Kay" on="2022-11-23"/>
-      <reason>Exceeds Saxon limit on max length of a sequence</reason>
-   </exception>
   
   <exception test-set="prod-CastExpr" test-case="K-SeqExprCast-71a" run="false" report="known restriction">
     <created by="Michael Kay" on="2019-03-11"/>
@@ -112,14 +88,35 @@
     <reason>format-number() is allowed under XPath 2.0 though it should not be</reason>
   </exception>
   
+  <exception test-set="prod-MapConstructor" test-case="MapConstructor-025" run="false" report="n/a">
+    <created by="Michael Kay" on="2019-03-11"/>
+    <reason>Saxon implements the tokenization rules in 4.0, so this questionable edge case fails</reason>
+  </exception>
+  
   <exception test-set="misc-JsonTestSuite" test-case="n_structure_100000_opening_arrays n_structure_open_array_object" run="false" report="tooBig">
     <created by="Michael Kay" on="2021-10-04"/>
     <reason>Fails with a stack overflow (we've set a limit but it's too low)</reason>
   </exception>
   
-  <exception test-set="prod-MapConstructor" test-case="MapConstructor-025" run="false" report="n/a">
-    <created by="Michael Kay" on="2019-03-11"/>
-    <reason>Saxon implements the tokenization rules in 4.0, so this questionable edge case fails</reason>
+  <exception test-set="op-same-key" test-case="same-key-006" run="false" report="n/a">
+    <created by="Michael Kay" on="2026-04-10"/>
+    <reason>Saxon 13 implements transitive equality even in 3.1 mode</reason>
+  </exception>
+  
+  <exception test-set="op-to" test-case="RangeExpr-408f
+    RangeExpr-408g
+    RangeExpr-408h
+    RangeExpr-408i
+    RangeExpr-408j
+    RangeExpr-408k
+    RangeExpr-410f
+    RangeExpr-410g
+    RangeExpr-410h
+    RangeExpr-410i
+    RangeExpr-410j
+    RangeExpr-410k" run="false" report="tooBig">
+    <created by="Michael Kay" on="2022-11-23"/>
+    <reason>Exceeds Saxon limit on max length of a sequence</reason>
   </exception>
   
   <exception test-set="method-xhtml" test-case="Serialization-xhtml-36
