@@ -11,91 +11,116 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Processor;
+import net.sf.saxon.s9api.XdmNode;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Untyped;
 
 public class XmlFixtureBuilder {
-    private final Outputter out;
-    private final Builder builder;
-    private NamespaceUri defaultNsUri;
-
-    public static Item document(DslLambda definition) throws XPathException {
-        Configuration configuration = new Configuration();
-        Controller controller = new Controller(configuration);
-        String staticBaseUri = "http://www.example.org/";
-        return document(definition, controller, staticBaseUri);
+    public static Item document(Configuration configuration, DslLambda definition) throws XPathException {
+        return new XmlFixtureBuilder(configuration).document(definition);
     }
 
-    public static Item document(DslLambda definition, Controller controller, String staticBaseUri) throws XPathException {
-        XmlFixtureBuilder builder = new XmlFixtureBuilder(controller, staticBaseUri);
-        builder.doc(definition);
-        return builder.getResult();
+    public static Item element(Configuration configuration, DslLambda definition) throws XPathException {
+        return new XmlFixtureBuilder(configuration).element(definition);
     }
 
-    XmlFixtureBuilder(Controller controller, String staticBaseUri) throws XPathException {
-        builder = controller.makeBuilder();
-        builder.setSystemId(staticBaseUri);
-        builder.setTiming(false);
-        builder.setDurability(Durability.TEMPORARY);
-        out = new ComplexContentOutputter(builder);
+    public Item document(DslLambda definition) throws XPathException {
+        return new BuilderDsl(controller, staticBaseUri).doc(definition);
     }
 
-    private XmlFixtureBuilder doc(DslLambda definition) throws XPathException {
-        out.open();
-        out.startDocument(ReceiverOption.NONE);
-        definition.buildWith(this);
-        return this;
+    public Item element(DslLambda definition) throws XPathException {
+        return new BuilderDsl(controller, staticBaseUri).root(definition);
     }
 
-    public XmlFixtureBuilder defaultNs(String uri) {
-        defaultNsUri = NamespaceUri.of(uri);
-        return this;
+    private final Configuration configuration;
+    private final String staticBaseUri;
+    private final Controller controller;
+
+    public XmlFixtureBuilder(Configuration configuration) {
+        this.configuration = configuration;
+        this.staticBaseUri = "http://www.example.org/";
+        this.controller = new Controller(configuration);
     }
 
-    private NodeName makeElementName(String name) {
-        NodeName qn = FingerprintedQName.fromEQName(name);
-        if (qn.getNamespaceUri() == NamespaceUri.NULL && defaultNsUri != null) {
-            return new FingerprintedQName(null, defaultNsUri, name);
+    public class BuilderDsl {
+        private final Outputter out;
+        private final Builder builder;
+        private NamespaceUri defaultNsUri;
+
+        BuilderDsl(Controller controller, String staticBaseUri) throws XPathException {
+            builder = controller.makeBuilder();
+            builder.setSystemId(staticBaseUri);
+            builder.setTiming(false);
+            builder.setDurability(Durability.TEMPORARY);
+            out = new ComplexContentOutputter(builder);
         }
-        return qn;
-    }
 
-    public XmlFixtureBuilder element(String name) throws XPathException {
-        element(name, el -> {});
-        return this;
-    }
+        private Item doc(DslLambda definition) throws XPathException {
+            out.open();
+            out.startDocument(ReceiverOption.NONE);
+            definition.buildWith(this);
+            out.endDocument();
+            out.close();
+            return builder.getCurrentRoot();
+        }
 
-    public XmlFixtureBuilder element(String name, DslLambda definition) throws XPathException {
-        NodeName qn = makeElementName(name);
-        out.startContent();
-        out.startElement(qn, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
-        definition.buildWith(this);
-        out.endElement();
-        return this;
-    }
+        private Item root(DslLambda definition) throws XPathException {
+            out.open();
+            definition.buildWith(this);
+            out.close();
+            return builder.getCurrentRoot();
+        }
 
-    public XmlFixtureBuilder element(String name, String content) throws XPathException {
-        element(name, el -> el.content(content));
-        return this;
-    }
+        public BuilderDsl defaultNs(String uri) {
+            defaultNsUri = NamespaceUri.of(uri);
+            return this;
+        }
 
-    public XmlFixtureBuilder attr(String name, String value) throws XPathException {
-        NodeName qn = FingerprintedQName.fromEQName(name);
-        out.attribute(qn, BuiltInAtomicType.STRING, value, Loc.NONE, ReceiverOption.NONE);
-        return this;
-    }
+        private NodeName makeElementName(String name) {
+            NodeName qn = FingerprintedQName.fromEQName(name);
+            if (qn.getNamespaceUri() == NamespaceUri.NULL && defaultNsUri != null) {
+                return new FingerprintedQName(null, defaultNsUri, name);
+            }
+            return qn;
+        }
 
-    public XmlFixtureBuilder content(String value) throws XPathException {
-        out.startContent();
-        out.characters(StringView.of(value), Loc.NONE, ReceiverOption.NONE);
-        return this;
-    }
+        public BuilderDsl element(String name) throws XPathException {
+            element(name, el -> {});
+            return this;
+        }
 
-    public Item getResult() throws XPathException {
-        out.endDocument();
-        out.close();
-        return builder.getCurrentRoot();
+        public BuilderDsl element(String name, DslLambda definition) throws XPathException {
+            NodeName qn = makeElementName(name);
+            out.startContent();
+            out.startElement(qn, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
+            definition.buildWith(this);
+            out.endElement();
+            return this;
+        }
+
+        public BuilderDsl element(String name, String content) throws XPathException {
+            element(name, el -> el.content(content));
+            return this;
+        }
+
+        public BuilderDsl attr(String name, String value) throws XPathException {
+            NodeName qn = FingerprintedQName.fromEQName(name);
+            out.attribute(qn, BuiltInAtomicType.STRING, value, Loc.NONE, ReceiverOption.NONE);
+            return this;
+        }
+
+        public BuilderDsl content(String value) throws XPathException {
+            out.startContent();
+            out.characters(StringView.of(value), Loc.NONE, ReceiverOption.NONE);
+            return this;
+        }
+
+        public Item getResult() throws XPathException {
+            out.endDocument();
+            out.close();
+            return builder.getCurrentRoot();
+        }
     }
 }

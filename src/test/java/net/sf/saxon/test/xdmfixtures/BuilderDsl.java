@@ -20,6 +20,10 @@ public interface BuilderDsl {
         return SequenceBuilder.build(s -> s.append(strings));
     }
 
+    default GroundedValue sequence(Integer... values) {
+        return SequenceBuilder.build(s -> s.append(values));
+    }
+
     default GroundedValue sequence() {
         return SequenceBuilder.empty();
     }

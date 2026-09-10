@@ -9,8 +9,24 @@ public class FixtureBuilder {
         return (MapItem) MapBuilder.build(definition);
     }
 
+    public static MapItem map() {
+        return MapBuilder.empty();
+    }
+
     public static GroundedValue sequence(DslLambda<SequenceBuilder> definition) {
         return SequenceBuilder.build(definition);
+    }
+
+    public static GroundedValue sequence(String... values) {
+        return SequenceBuilder.build(s -> s.append(values));
+    }
+
+    public static GroundedValue sequence(Integer... values) {
+        return SequenceBuilder.build(s -> s.append(values));
+    }
+
+    public static GroundedValue sequence() {
+        return SequenceBuilder.empty();
     }
 
     public static ArrayItem array(DslLambda<ArrayBuilder> definition) {
