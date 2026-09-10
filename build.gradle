@@ -41,6 +41,7 @@ repositories {
   mavenCentral()
   maven { url = "https://maven.apache.org" }
   maven { url "https://dev.saxonica.com/maven" }
+  maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
 }
 
 configurations.all {
