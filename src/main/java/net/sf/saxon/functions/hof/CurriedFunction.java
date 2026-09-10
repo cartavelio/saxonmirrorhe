@@ -167,7 +167,7 @@ public class CurriedFunction extends AbstractFunction {
         Sequence[] newArgs = new Sequence[boundValues.length];
         for (int i = 0; i < newArgs.length; i++) {
             if (boundValues[i] != null) {
-                newArgs[i] = boundValues[i];
+                newArgs[i] = boundValues[i].materialize();
             }
         }
         for (int i = 0; i < args.length; i++) {
