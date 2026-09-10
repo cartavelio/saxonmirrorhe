@@ -5394,15 +5394,17 @@ public class XQueryParser extends XPathParser {
      */
 
     public String uriLiteral(/*@NotNull*/ String in) throws XPathException {
-        return Whitespace.collapse(unescape(in)).toString();
+        return Whitespace.collapse(unescape(in));
     }
 
     @Override
     protected boolean atStartOfRelativePath() {
         return super.atStartOfRelativePath()
                 || t.currentToken instanceof Token.DirectElementConstructor
-                || t.currentToken instanceof Token.StringConstructor;
+                || t.currentToken instanceof Token.StringConstructor
+                || (!isAllowXPath40Syntax() && t.currentToken == Token.LT);
         // "<" after "/" is recognized in XQuery but not in XPath.
+        // In Query 3.1, `/ < 5` is an error, but in 4.0 it is a general comparison
     }
 
     @Override
