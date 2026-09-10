@@ -103,7 +103,7 @@ public class XSDComplexType extends SchemaElement {
             if (!isRedefinition) {
                 if (schema.getSchemaType(complexType.getTypeName()) != null && fp > 1023) {
                     // don't report duplicates for built-in types: this might be the schema for schemas
-                    duplicate("type", typeName);
+                    duplicate("type", attValue);
                 }
             }
         } else {
@@ -130,7 +130,7 @@ public class XSDComplexType extends SchemaElement {
         //  @block
         String blockVal = atts.getValue(NamespaceUri.NULL, "block");
         if (blockVal == null) {
-            complexType.setBlock(getXSDSchemaElement().getBlockDefault());
+            complexType.setBlock(getXSDSchema().getBlockDefault());
         } else {
             int f = parseFinalOrBlock("block",
                     blockVal,
@@ -142,7 +142,7 @@ public class XSDComplexType extends SchemaElement {
         //  @final
         String finalVal = atts.getValue(NamespaceUri.NULL, "final");
         if (finalVal == null) {
-            complexType.setFinalProhibitions(getXSDSchemaElement().getFinalDefault());
+            complexType.setFinalProhibitions(getXSDSchema().getFinalDefault());
         } else {
             int f = parseFinalOrBlock("final",
                     finalVal,
@@ -303,7 +303,7 @@ public class XSDComplexType extends SchemaElement {
             }
             complexType.setRedefinitionLevel(oldType.getRedefinitionLevel() + 1);
             // rename the type being redefined
-            NamespaceUri uri = getXSDSchemaElement().getTargetNamespace();
+            NamespaceUri uri = getXSDSchema().getTargetNamespace();
             NamePool pool = getNamePool();
             String localName = pool.getLocalName(complexType.getFingerprint());
             String newLocalName = localName + '_' + complexType.hashCode();
@@ -352,12 +352,12 @@ public class XSDComplexType extends SchemaElement {
         String openContentMode = null;
 
         AttributeGroupReference defaultAttributes;
-        XSDSchemaElement schemaDefiningDefaults;
+        XSDSchema schemaDefiningDefaults;
         if (getParent() instanceof XSDOverride) {
             SchemaDocument original = ((XSDOverride) getParent()).getOriginalSchemaDocument();
-            schemaDefiningDefaults = original.getXSDSchemaElement();
+            schemaDefiningDefaults = original.getXSDSchema();
         } else {
-            schemaDefiningDefaults = getXSDSchemaElement();
+            schemaDefiningDefaults = getXSDSchema();
         }
         defaultAttributes = schemaDefiningDefaults.getDefaultAttributeGroupReference();
         if (defaultAttributes != null && defaultAttributesApply) {
