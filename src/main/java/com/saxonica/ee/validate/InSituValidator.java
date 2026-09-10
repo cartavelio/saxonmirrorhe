@@ -66,7 +66,9 @@ public class InSituValidator {
             options.setTopLevelElement(NameOfNode.makeName(root).getStructuredQName());
             validator = config.getElementValidator(endPoint, options, Loc.NONE);
         }
-        pipe.setComponent("net.sf.saxon.event.CopyInformee", new NodeCounter(nodeBuffer));
+        NodeCounter nodeCounter = new NodeCounter(nodeBuffer);
+        //noinspection Convert2MethodRef
+        pipe.setCopyInformee(element -> nodeCounter.notifyElementNode(element));
         // Run the validation by invoking the copy() method to send events to the validation pipeline
         root.copy(validator, CopyOptions.ALL_NAMESPACES, Loc.NONE);
     }

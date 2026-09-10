@@ -45,10 +45,6 @@ public abstract class GeneratedCode {
         return config;
     }
 
-    //abstract public boolean effectiveBooleanValue(AtomicValue val);
-
-    //abstract public boolean effectiveBooleanValue(SequenceIterator seq);
-
     /**
      * Helper method for use at run-time allowing the generated code to throw a dynamic error
      *

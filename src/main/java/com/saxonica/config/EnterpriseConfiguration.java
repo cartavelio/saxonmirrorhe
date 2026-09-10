@@ -1242,7 +1242,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             DocumentValidator dv = new DocumentValidator(pathMaintainer, hostLanguage == HostLanguage.XSLT ? "XTTE1550" : "XQDY0061");
 
             LocationCopier copier = new LocationCopier(true);
-            pipe.setComponent("net.sf.saxon.event.CopyInformee", copier);
+            //noinspection Convert2MethodRef
+            pipe.setCopyInformee((element) -> copier.notifyElementNode(element));
 
             vc.startValidation(systemId);
 

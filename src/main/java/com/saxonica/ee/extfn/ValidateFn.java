@@ -22,7 +22,6 @@ import net.sf.saxon.value.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 
 /**
@@ -172,9 +171,10 @@ public class ValidateFn extends SystemFunction {
         pipe.setXPathContext(context);
         //pipe.getParseOptions().setContinueAfterValidationErrors(true);
 
-        pipe.setComponent("net.sf.saxon.event.CopyInformee", (Consumer<NodeInfo>) element -> {
+        pipe.setCopyInformee(element -> {
             currentErrorNode.clear();
             currentErrorNode.add(element);
+            return null;
         });
         parseOptions.setInvalidityHandler(new LocalInvalidityHandler(config, currentErrorNode, errorList));
 

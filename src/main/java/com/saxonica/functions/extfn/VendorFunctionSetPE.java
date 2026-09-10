@@ -205,7 +205,7 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
         register("function-annotations", 1, FunctionAnnotations.class, FunctionAnnotations.RETURN_TYPE, STAR, 0)
                 .arg(0, AnyFunctionType.getInstance(), ONE, null);
 
-        register("get-pseudo-attribute", 1, GetPseudoAttribute.class, BuiltInAtomicType.STRING, OPT | CITEM, 0)
+        register("get-pseudo-attribute", 1, GetPseudoAttribute.class, BuiltInAtomicType.STRING, OPT, CITEM | LATE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY);
 
 
@@ -214,7 +214,7 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
                 .arg(1, predicate, ONE, EMPTY);
 
         register("hexBinary-to-octets", 1, HexBinaryToOctets.class, BuiltInAtomicType.INTEGER, STAR, 0)
-                .arg(0, BuiltInAtomicType.BASE64_BINARY, ONE, null);
+                .arg(0, BuiltInAtomicType.HEX_BINARY, ONE, null);
 
         register("hexBinary-to-string", 2, HexBinaryToString.class, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, BuiltInAtomicType.HEX_BINARY, ONE, null)

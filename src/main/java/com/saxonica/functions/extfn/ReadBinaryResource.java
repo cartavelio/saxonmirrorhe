@@ -27,7 +27,7 @@ public class ReadBinaryResource extends SystemFunction {
             InputStream stream;
             try {
                 stream = Loader.urlStream(url);
-            } catch (IllegalArgumentException e) {
+            } catch (RuntimeException e) {
                 // Not well documented, but this happens when given an invalid URL
                 throw new XPathException("saxon:read-binary-resource - invalid URL " + arg, SaxonErrorCode.SXJE0053);
             }

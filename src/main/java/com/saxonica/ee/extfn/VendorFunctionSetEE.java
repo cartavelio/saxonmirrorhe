@@ -65,7 +65,7 @@ public class VendorFunctionSetEE extends BuiltInFunctionSet {
                 .arg(2, BuiltInAtomicType.STRING, OPT, null);
 
         register("type", 1, SchemaTypeFn.class, SpecificFunctionType.COMPONENT_FUNCTION_TYPE, OPT, 0)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
+                .arg(0, AnyItemType.getInstance(), OPT, null);
 
     }
 

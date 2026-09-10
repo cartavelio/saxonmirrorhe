@@ -223,7 +223,8 @@ public abstract class SchemaReader {
                 schemaBuilder.setSystemId(base);
             }
             LocationCopier copier = new LocationCopier(((NodeInfo) source).getNodeKind() == Type.DOCUMENT);
-            pipe.setComponent("net.sf.saxon.event.CopyInformee", copier);
+            //noinspection Convert2MethodRef
+            pipe.setCopyInformee(element -> copier.notifyElementNode(element));
         }
 
         // Alternative pipeline for compiled schema documents

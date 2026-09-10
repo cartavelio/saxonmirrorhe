@@ -1237,9 +1237,10 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
             for (File child : file.listFiles()) {
                 deleteRecursive(child);
             }
-            file.delete();
-        } else {
-            file.delete();
+        }
+        boolean ok = file.delete();
+        if (!ok) {
+            throw new IOException("Failed to delete " + file.getAbsolutePath());
         }
     }
 
