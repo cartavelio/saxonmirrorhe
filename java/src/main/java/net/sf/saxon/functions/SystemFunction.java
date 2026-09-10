@@ -426,7 +426,17 @@ public abstract class SystemFunction extends AbstractFunction implements IFuncti
         if ((details.properties & BuiltInFunctionSet.NEW) != 0) {
             return StaticProperty.ALL_NODES_NEWLY_CREATED;
         }
-        int p = StaticProperty.NO_NODES_NEWLY_CREATED;
+        int p = 0;
+        boolean createsNodes = false;
+        for (Expression argument : arguments) {
+            if (!(argument.hasSpecialProperty(StaticProperty.NO_NODES_NEWLY_CREATED))) {
+                createsNodes = true;
+                break;
+            }
+        }
+        if (!createsNodes) {
+            p = StaticProperty.NO_NODES_NEWLY_CREATED;
+        }
         if ((details.properties & BuiltInFunctionSet.SIDE) != 0) {
              p |= StaticProperty.HAS_SIDE_EFFECTS;
         }
