@@ -229,22 +229,27 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
                 return n2;
             }
         } else {
-            // No existing entry for the prefix exists
-            int insertionPoint = -position - 1;
-            String[] p2 = new String[prefixes.length + 1];
-            NamespaceUri[] u2 = new NamespaceUri[uris.length + 1];
-            System.arraycopy(prefixes, 0, p2, 0, insertionPoint);
-            System.arraycopy(uris, 0, u2, 0, insertionPoint);
-            p2[insertionPoint] = prefix;
-            u2[insertionPoint] = uri;
-            System.arraycopy(prefixes, insertionPoint, p2, insertionPoint+1, prefixes.length - insertionPoint);
-            System.arraycopy(uris, insertionPoint, u2, insertionPoint+1, prefixes.length - insertionPoint);
-
-            NamespaceMap n2 = makeNamespaceMap();
-            n2.prefixes = p2;
-            n2.uris = u2;
-            return n2;
+            return putNoExistingEntry(position, prefix, uri);
         }
+    }
+
+    private NamespaceMap putNoExistingEntry(int position, String prefix, NamespaceUri uri)
+    {
+        // No existing entry for the prefix exists
+        int insertionPoint = -position - 1;
+        String[] p2 = new String[prefixes.length + 1];
+        NamespaceUri[] u2 = new NamespaceUri[uris.length + 1];
+        System.arraycopy(prefixes, 0, p2, 0, insertionPoint);
+        System.arraycopy(uris, 0, u2, 0, insertionPoint);
+        p2[insertionPoint] = prefix;
+        u2[insertionPoint] = uri;
+        System.arraycopy(prefixes, insertionPoint, p2, insertionPoint+1, prefixes.length - insertionPoint);
+        System.arraycopy(uris, insertionPoint, u2, insertionPoint+1, prefixes.length - insertionPoint);
+
+        NamespaceMap n2 = makeNamespaceMap();
+        n2.prefixes = p2;
+        n2.uris = u2;
+        return n2;
     }
 
     private boolean isPointlessMapping(String prefix, NamespaceUri uri) {
