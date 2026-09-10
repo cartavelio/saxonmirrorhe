@@ -429,6 +429,10 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, AnyItemType.getInstance(), STAR, BooleanValue.FALSE)
                 .arg(2, compareFnType, OPT, null));
 
+        register("string-join", 2, e -> e.populate(StringJoin::new, BuiltInAtomicType.STRING, ONE, 0)
+                .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, StringValue.EMPTY_STRING)
+                .arg(1, BuiltInAtomicType.STRING, OPT, null));
+
         register("subsequence", 3, e -> e.populate(Subsequence_3::new, Type.ITEM_TYPE, STAR, AS_ARG0 | FILTER)
                 .arg(0, Type.ITEM_TYPE, STAR | TRA, EMPTY)
                 .arg(1, NumericType.getInstance(), ONE, null)
