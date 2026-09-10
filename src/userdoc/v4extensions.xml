@@ -492,7 +492,21 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       
       <p>Returns true if the values in <code>$values</code> are all equal. A collation may be supplied as the second argument.</p>
       
+      <kbd>fn:build-uri(
+         $parts	as map(*),	
+         $options as map(*) := map{}	
+         ) as xs:string</kbd>
       
+      <p>Constructs a URI, given its components. Available from 12.1</p>
+      
+      <p>The <code>$parts</code> may include <code>scheme</code>,
+         <code>authority</code>, <code>userinfo</code>, <code>host</code>, <code>port</code>,
+         <code>path</code>, <code>query</code>, <code>fragment</code>, <code>path-segments</code> (an array of strings),
+         and <code>query-segments</code> (an array of key-value pairs represented as <code>record(key, value)</code>).</p>
+         
+      
+      <p>The options available are <code>path-separator</code>, <code>query-separator</code>, <code>allow-deprecated-features</code>,
+      and <code>omit-default-ports</code>.</p>
       
       <kbd>fn:characters(
          $value	as xs:string?	
@@ -671,13 +685,22 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       <p>Parses a string as a QName (using namespace bindings from the static context where necessary). The string may
          take one of the formats <code>"local"</code>, <code>"prefix:local"</code>, or <code>"Q{uri}local"</code>.</p>
       
+      <kbd>fn:parse-uri(
+         $uri	as xs:string,
+         $options as map(*) := map{}
+         ) as map(*)</kbd>
+      
+      <p>Parses a URI value, returning a map that identifies the component parts of the URI. Inverse of <code>fn:build-uri</code>.</p>
+      
       <kbd>fn:parts($in as item()) as map(xs:string, xs:anyAtomicType)</kbd>
       
       <p>Decomposes a composite "atomic" value into its parts, in the form of a map. For example, an <code>xs:dateTime</code>
       value is decomposed into year, month, day, hour, minute, second, and timezone. Other values that are decomposable include
       <code>xs:date</code>, <code>xs:time</code>, <code>xs:duration</code>, <code>xs:QName</code>, and <code>xs:anyURI</code>.
       For values that are not decomposable, the resulting map contains a single entry whose key is "value" and whose corresponding
-      value is the input value.</p>
+      value is the input value.</p> 
+      
+      <p><emph>Likely to be dropped.</emph></p>
       
       <kbd>fn:range()</kbd>
       
@@ -923,6 +946,9 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
             <p>The use of keyword arguments to supply options in an options parameter declared with a map type 
                (for example <code>serialize($x, method:="xml", indent:=true())</code>) is dropped in Saxon 12.</p>
             
+            <p>The draft specification allows keywords to be used in a partial function application (for example
+            <code>f(x := ?, y := ?)</code> but this is not currently implemented in Saxon.</p>
+            
          </section>
          
          <section id="downcasting" title="Automatic downcasting">
@@ -962,6 +988,23 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
                
                <p>The operator syntax is borrowed from Raku (formerly Perl6), other operators such as "?" and ":"
                being unavailable for the purpose.</p>
+               
+               <p><emph>This feature has recently been dropped from the draft specification, so it should
+               not be used. It will be removed in a future Saxon release.</emph></p>
+            </section>
+            
+            <section id="braced-conditionals" title="Braced Conditionals">
+               <h1>Braced Conditionals</h1>
+               
+               <p>The syntax <code>if <i>condition</i> "{"  <i>thenExpr</i> "}" ("else" "{" <i>elseExpr</i> "}")?</code> is introduced
+                  as an alternative for <code>if (<i>condition</i>) then <i>thenExpr</i> else <i>elseExpr</i></code>.
+                  The semantics are identical, but the <code>else</code> part is optional, and defaults to an empty
+                  sequence.</p>
+               
+               <p>For example, in XQuery, <code>if ($break) {<br/>}</code> outputs a <code>br</code> element
+               if <code>$break</code> is true, and does nothing if it is false.</p>
+               
+              
             </section>
       
       <section id="otherwise" title="Otherwise operator">

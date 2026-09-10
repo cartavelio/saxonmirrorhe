@@ -319,12 +319,16 @@
         <p>The proposed 4.0 functions <code>array:empty()</code>, <code>array:exists()</code>, 
             <code>array:foot()</code>, <code>array:index-where()</code>, and <code>array:trunk()</code> are implemented.</p>
         
-        <p>From Saxon 12.1, the <code>options</code> parameter of <code>fn:deep-equal()</code> is implemented.</p>
+        <p>From Saxon 12.1:</p>
         
-        <p>From Saxon 12.1, the <code>fn:atomic-equal()</code> function is implemented.</p>
+        <ul>
+            <li><p>The <code>options</code> parameter of <code>fn:deep-equal()</code> is implemented.</p></li>
+            <li><p>The <code>fn:atomic-equal()</code> function is implemented.</p></li>
+            <li><p>The <code>fn:slice()</code> function (available in 12.0) is dropped.</p></li>
+            <li><p>The functions <code>fn:build-uri()</code>and <code>fn:parse-uri()</code> are implemented.</p></li>
+        </ul>
         
-        <p>From Saxon 12.1, the <code>fn:slice()</code> function (available in 12.0) is dropped.</p>
-        
+      
         <h2>Dropped or Changed Extension Functions</h2>
         
         <p>The Saxon extension functions <code>saxon:evaluate()</code>, <code>saxon:eval()</code>, and <code>saxon:expression()</code>
