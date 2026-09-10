@@ -8,15 +8,13 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.elab.BooleanElaborator;
-import net.sf.saxon.expr.elab.BooleanEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
@@ -29,19 +27,22 @@ import java.util.function.Supplier;
 
 
 /**
- * Class to handle equivalence comparisons of singletons. This only handles equality comparison.
- * It follows the rules used for grouping and for XQuery 3.0 switch expressions:
+ * Class to handle comparisons for XQuery switch expressions. This only handles equality comparison.
+ * It implements the rules used for XQuery 3.0 switch expressions:
  * - each operand must be zero or one atomic values
  * - untypedAtomic is treated as string
  * - non-comparable values are not equal (no type errors)
  * - two empty sequences are equal to each other
  * - two NaN values are equal to each other
+ * In 4.0 this is extended so the second operand can contain multiple values,
+ * and the result is true if any of them match.
  */
 
-public class EquivalenceComparison extends BinaryExpression implements ComparisonExpression {
+public class SwitchCaseComparison extends BinaryExpression implements ComparisonExpression {
 
     private AtomicComparer comparer;
     private boolean knownToBeComparable = false;
+    private boolean allowMultiple;
 
     /**
      * Create a singleton comparison - that is, a comparison between two singleton (0:1) sequences
@@ -50,10 +51,12 @@ public class EquivalenceComparison extends BinaryExpression implements Compariso
      * @param p1       the first operand
      * @param operator the operator
      * @param p2       the second operand
+     * @param allowMultiple true if the 4.0 semantics are implemented (second operand may be a sequence)
      */
 
-    public EquivalenceComparison(Expression p1, int operator, Expression p2) {
+    public SwitchCaseComparison(Expression p1, int operator, Expression p2, boolean allowMultiple) {
         super(p1, operator, p2);
+        this.allowMultiple = allowMultiple;
     }
 
     /**
@@ -71,7 +74,7 @@ public class EquivalenceComparison extends BinaryExpression implements Compariso
         if (collation == null) {
             collation = CodepointCollator.getInstance();
         }
-        comparer = new EquivalenceComparer(collation, config.getConversionContext());
+        comparer = new SwitchCaseComparer(collation, config.getConversionContext());
 
         Expression oldOp0 = getLhsExpression();
         Expression oldOp1 = getRhsExpression();
@@ -84,14 +87,15 @@ public class EquivalenceComparison extends BinaryExpression implements Compariso
         setLhsExpression(getLhsExpression().unordered(false, false));
         setRhsExpression(getRhsExpression().unordered(false, false));
 
-        SequenceType atomicType = SequenceType.OPTIONAL_ATOMIC;
+        SequenceType lhsType = SequenceType.OPTIONAL_ATOMIC;
+        SequenceType rhsType = allowMultiple ? SequenceType.ATOMIC_SEQUENCE : SequenceType.OPTIONAL_ATOMIC;
         TypeChecker tc = config.getTypeChecker(false);
 
         Supplier<RoleDiagnostic> role0 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "eq", 0);
-        setLhsExpression(tc.staticTypeCheck(getLhsExpression(), atomicType, role0, visitor));
+        setLhsExpression(tc.staticTypeCheck(getLhsExpression(), lhsType, role0, visitor));
 
         Supplier<RoleDiagnostic> role1 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "eq", 1);
-        setRhsExpression(tc.staticTypeCheck(getRhsExpression(), atomicType, role1, visitor));
+        setRhsExpression(tc.staticTypeCheck(getRhsExpression(), rhsType, role1, visitor));
 
         if (getLhsExpression() != oldOp0) {
             adoptChildExpression(getLhsExpression());
@@ -140,9 +144,6 @@ public class EquivalenceComparison extends BinaryExpression implements Compariso
             // if early evaluation fails, suppress the error: the value might
             // not be needed at run-time
         }
-
-//        comparer = GenericAtomicComparer.makeAtomicComparer(
-//                    pt0, pt1, collation, getConfiguration().getConversionContext());
 
         return this;
     }
@@ -219,7 +220,11 @@ public class EquivalenceComparison extends BinaryExpression implements Compariso
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        EquivalenceComparison sc = new EquivalenceComparison(getLhsExpression().copy(rebindings), operator, getRhsExpression().copy(rebindings));
+        SwitchCaseComparison sc = new SwitchCaseComparison(
+                getLhsExpression().copy(rebindings),
+                operator,
+                getRhsExpression().copy(rebindings),
+                allowMultiple);
         ExpressionTool.copyLocationInfo(this, sc);
         sc.comparer = comparer;
         sc.knownToBeComparable = knownToBeComparable;
@@ -247,17 +252,7 @@ public class EquivalenceComparison extends BinaryExpression implements Compariso
 
     @Override
     public boolean effectiveBooleanValue(XPathContext context) throws XPathException {
-        AtomicValue v0 = (AtomicValue) getLhsExpression().evaluateItem(context);
-        AtomicValue v1 = (AtomicValue) getRhsExpression().evaluateItem(context);
-
-        if (v0 == null || v1 == null) {
-            return (v0 == v1);
-        }
-
-        AtomicComparer comp2 = comparer.provideContext(context);
-        return (knownToBeComparable || Type.isGuaranteedComparable(v0.getPrimitiveType(), v1.getPrimitiveType(), false))
-                && comp2.comparesEqual(v0, v1);
-
+        return makeElaborator().elaborateForBoolean().eval(context);
     }
 
     /**
@@ -285,22 +280,48 @@ public class EquivalenceComparison extends BinaryExpression implements Compariso
     private static class EquivalenceComparisonElaborator extends BooleanElaborator {
         @Override
         public BooleanEvaluator elaborateForBoolean() {
-            EquivalenceComparison expr = (EquivalenceComparison)getExpression();
+            SwitchCaseComparison expr = (SwitchCaseComparison)getExpression();
             ItemEvaluator eval0 = expr.getLhsExpression().makeElaborator().elaborateForItem();
-            ItemEvaluator eval1 = expr.getRhsExpression().makeElaborator().elaborateForItem();
-            return context -> {
-                AtomicValue v0 = (AtomicValue) eval0.eval(context);
-                AtomicValue v1 = (AtomicValue) eval1.eval(context);
+            if (expr.allowMultiple) {
+                // Switch expression has been generalized in 4.0
+                PullEvaluator eval1 = expr.getRhsExpression().makeElaborator().elaborateForPull();
+                return context -> {
+                    AtomicValue v0 = (AtomicValue) eval0.eval(context);
+                    SequenceIterator iter1 = eval1.iterate(context);
+                    AtomicComparer comp2 = expr.comparer.provideContext(context);
+                    if (v0 == null) {
+                        boolean empty = iter1.next() == null;
+                        iter1.close();
+                        return empty;
+                    } else {
+                        AtomicValue v1;
+                        while ((v1 = (AtomicValue)iter1.next()) != null) {
+                            if (((expr.knownToBeComparable || Type.isGuaranteedComparable(v0.getPrimitiveType(), v1.getPrimitiveType(), false)))
+                                    && comp2.comparesEqual(v0, v1)) {
+                                iter1.close();
+                                return true;
+                            }
+                        }
+                        return false;
+                    }
+                };
 
-                if (v0 == null || v1 == null) {
-                    return (v0 == v1);
-                }
+            } else {
+                ItemEvaluator eval1 = expr.getRhsExpression().makeElaborator().elaborateForItem();
+                return context -> {
+                    AtomicValue v0 = (AtomicValue) eval0.eval(context);
+                    AtomicValue v1 = (AtomicValue) eval1.eval(context);
 
-                AtomicComparer comp2 = expr.comparer.provideContext(context);
-                return (expr.knownToBeComparable || Type.isGuaranteedComparable(v0.getPrimitiveType(), v1.getPrimitiveType(), false))
-                        && comp2.comparesEqual(v0, v1);
+                    if (v0 == null || v1 == null) {
+                        return (v0 == v1);
+                    }
 
-            };
+                    AtomicComparer comp2 = expr.comparer.provideContext(context);
+                    return ((expr.knownToBeComparable || Type.isGuaranteedComparable(v0.getPrimitiveType(), v1.getPrimitiveType(), false)))
+                            && comp2.comparesEqual(v0, v1);
+
+                };
+            }
         }
     }
 }

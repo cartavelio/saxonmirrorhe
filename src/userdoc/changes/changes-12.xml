@@ -453,6 +453,9 @@
         <code>""</code>), or the context item expression <code>.</code>. This restriction is imposed pending clarification
         of the specification.</p>
         
+        <p>From 12.3, XQuery switch expressions are generalized so that each <code>case</code> may match multiple values,
+        for example <code>case 0 to 9 return "single"</code>.</p>
+        
         <h2>XSLT extensions</h2>
         
         

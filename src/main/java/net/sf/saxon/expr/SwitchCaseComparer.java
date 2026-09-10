@@ -18,16 +18,17 @@ import net.sf.saxon.value.StringValue;
  * A comparer that compares atomic values for equality, with the properties:
  * - non-comparable types compare false
  * - NaN compares equal to NaN
+ * Used for comparisons in XQuery Switch expressions
  */
-public class EquivalenceComparer extends GenericAtomicComparer {
+public class SwitchCaseComparer extends GenericAtomicComparer {
 
-    protected EquivalenceComparer(StringCollator collator, XPathContext context) {
+    protected SwitchCaseComparer(StringCollator collator, XPathContext context) {
         super(collator, context);
     }
 
     @Override
-    public EquivalenceComparer provideContext(XPathContext context) {
-        return new EquivalenceComparer(getStringCollator(), context);
+    public SwitchCaseComparer provideContext(XPathContext context) {
+        return new SwitchCaseComparer(getStringCollator(), context);
     }
 
     /**
@@ -60,19 +61,6 @@ public class EquivalenceComparer extends GenericAtomicComparer {
         }
     }
 
-
-
-//    /**
-//     * Compare two values that are known to be non-comparable. In the base class this method
-//     * throws a ClassCastException. In this subclass it is overridden to return
-//     * {@link net.sf.saxon.om.SequenceTool#INDETERMINATE_ORDERING}
-//     */
-//
-//    @Override
-//    protected int compareNonComparables(AtomicValue a, AtomicValue b) {
-//        return SequenceTool.INDETERMINATE_ORDERING;
-//    }
-
     /**
      * Create a string representation of this AtomicComparer that can be saved in a compiled
      * package and used to reconstitute the AtomicComparer when the package is reloaded
@@ -81,6 +69,8 @@ public class EquivalenceComparer extends GenericAtomicComparer {
      */
     @Override
     public String save() {
+        // Note: the PackageLoader doesn't actually recognise this format. It doesn't need to, because
+        // this comparer is only currently used in XQuery.
         return "EQUIV|" + super.save();
     }
 }
