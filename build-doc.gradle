@@ -992,7 +992,7 @@ task saxonc_doxygen(type: Exec, dependsOn: ['saxonc_doc_setup']) {
     '-v', "${projectDir}/src/main/c/Saxon.C.API:/src",
     '-v', "${projectDir}/src/docs/doc/img:/img",
     '-v', "${buildDir}:/build",
-    'saxonica-docbuild',
+    "${docbuildImage}:${docbuildImageTag}",
     'doxygen', 'docbuild/Saxon.C.API/Doxyfile'
 }
 
@@ -1006,7 +1006,7 @@ task saxonc_pydoc3_setup(type: Exec, dependsOn: ['saxonc_doc_setup']) {
   commandLine 'docker', 'run', '-i', '--rm',
     '-v', "${buildDir}/docbuild/Saxon.C.API:/build",
     '--workdir', '/build/python-saxon',
-    'saxonica-docbuild',
+    "${docbuildImage}:${docbuildImageTag}",
     'python3', 'saxon-setup.py', 'build_ext', '-if'
 }
 
@@ -1019,19 +1019,6 @@ task saxonc_pydoc3(type: Exec, dependsOn: ['saxonc_pydoc3_setup']) {
   commandLine 'docker', 'run', '-i', '--rm',
     '-v', "${buildDir}/docbuild/Saxon.C.API:/build",
     '--workdir', '/build/python-saxon',
-    'saxonica-docbuild',
+    "${docbuildImage}:${docbuildImageTag}",
     'pydoc3', '-w', 'saxonc'
 }
-
-/*
-  }
-}
-*/
-/*
-Meanwhile the Python documentation is generated using `pydoc3 -w
-saxonc` from src/main/c/Saxon.C.API/python. And depends on having
-Cython installed, and first running `python3 saxon-setup.py build_ext
--if`.
-      
-  
-$ docker run -it --rm -v /Volumes/Saxonica/src/saxonica/saxondev/build:/build -v /Volumes/Saxonica/src/saxonica/saxondev/src/main/c/Saxon.C.API:/src -v /Volumes/Saxonica/src/saxonica/saxondev/build/pydoc/build:/src/python-saxon/build -v /Volumes/Saxonica/src/saxonica/saxondev/build/pydoc/__pycache:/src/python-saxon/__pycache__  saxonica-docbuild /bin/bash*/
