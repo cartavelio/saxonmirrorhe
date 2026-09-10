@@ -529,7 +529,9 @@ task dotnetRelease(
 
   doLast {
     signExe("${buildDir}/cs/bin/Release/net5.0/SaxonCS.dll")
-    if (!systemOs.isWindows()) {
+    if (systemOs.isWindows()) {
+      signNuget("${buildDir}/cs/bin/Release/SaxonCS.${csver}.nupkg")
+    } else {
       signExe("${buildDir}/cs/bin/Release/SaxonCS.${csver}.nupkg")
     }
   }
