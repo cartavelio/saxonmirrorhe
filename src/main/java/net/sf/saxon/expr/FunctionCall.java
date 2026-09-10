@@ -247,11 +247,7 @@ public abstract class FunctionCall extends Expression {
                                                          (getFunctionName() == null ? "" : getFunctionName().getDisplayName()),
                                                  "XPST0141");
                     }
-                    if (arg instanceof DefaultedArgumentExpression.DefaultCollationArgument) {
-                        arg = new StringLiteral(visitor.getStaticContext().getDefaultCollationName());
-                    } else {
-                        arg = fd.getDefaultValueExpression(i).copy(new RebindingMap());
-                    }
+                    arg = fd.getDefaultValueExpression(i).copy(new RebindingMap());
                 }
                 if (arg != null && !(arg instanceof DefaultedArgumentExpression)) {
                     setArg(i, tc.staticTypeCheck(
