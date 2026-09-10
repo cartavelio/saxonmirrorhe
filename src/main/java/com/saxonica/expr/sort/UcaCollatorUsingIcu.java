@@ -2,15 +2,18 @@ package com.saxonica.expr.sort;
 
 import com.ibm.icu.lang.UScript;
 import com.ibm.icu.text.CollationElementIterator;
+import com.ibm.icu.text.Collator;
 import com.ibm.icu.text.RuleBasedCollator;
 import com.ibm.icu.util.ULocale;
 import com.ibm.icu.util.VersionInfo;
-import com.saxonica.config.ICULibrary;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.CollationMatchKey;
 import net.sf.saxon.lib.SubstringMatcher;
-import net.sf.saxon.str.*;
+import net.sf.saxon.str.EmptyUnicodeString;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.StringConverter;
 import net.sf.saxon.type.ValidationFailure;
 import net.sf.saxon.value.AnyURIValue;
@@ -35,7 +38,7 @@ public class UcaCollatorUsingIcu implements SubstringMatcher {
     private final String uri;
     private com.ibm.icu.text.RuleBasedCollator uca;
     private Strength strengthLevel;
-    private int[] maxIgnorable;
+    public int[] maxIgnorable;
 
 
     private static final String[] keywords = {"fallback", "lang", "version", "strength",
@@ -49,7 +52,7 @@ public class UcaCollatorUsingIcu implements SubstringMatcher {
      * @return UCA version as nn.nn.nn.nn
      */
     public static String getUCAVersion() {
-        VersionInfo v = RuleBasedCollator.getInstance().getUCAVersion();
+        VersionInfo v = com.ibm.icu.text.Collator.getInstance().getUCAVersion();
         return v.getMajor() + "." + v.getMinor()
                 + "." + v.getMilli() + "." + v.getMicro();
     }
@@ -63,12 +66,12 @@ public class UcaCollatorUsingIcu implements SubstringMatcher {
 
     public UcaCollatorUsingIcu(String uri) throws XPathException {
         this.uri = uri;
-        uca = (RuleBasedCollator) RuleBasedCollator.getInstance();
+        uca = (RuleBasedCollator) com.ibm.icu.text.Collator.getInstance();
         setProps(parseProps(uri));
     }
 
     /**
-     * Get the underlying ICU collator represention by this collation object
+     * Get the underlying ICU collator represented by this collation object
      * @return the underlying ICU collator
      */
 
@@ -76,21 +79,22 @@ public class UcaCollatorUsingIcu implements SubstringMatcher {
         return uca;
     }
 
-    /**
-     * Return the locales supported in this version of ICU
-     * Note that with Java 6 this method has been known to throw an array index exception from RuleBasedCollator,
-     * With Java 7 this performs correctly and getAvailableLocales() does not appear to be
-     * invoked from any of the UCA or numbering support.
-     *
-     * @return The language tags and display names separated by semicolon
-     */
-    public static String[] getLocales() {
-        ArrayList<String> locales = new ArrayList<>();
-        for (Locale l : RuleBasedCollator.getAvailableLocales()) {
-            locales.add(ICULibrary.getLanguageTag(l) + ";" + l.getDisplayName());
-        }
-        return locales.toArray(new String[0]);
-    }
+//    /**
+//     * Return the locales supported in this version of ICU
+//     * Note that with Java 6 this method has been known to throw an array index exception from RuleBasedCollator,
+//     * With Java 7 this performs correctly and getAvailableLocales() does not appear to be
+//     * invoked from any of the UCA or numbering support.
+//     *
+//     * @return The language tags and display names separated by semicolon
+//     */
+//    public static String[] getLocales() {
+//        ArrayList<String> locales = new ArrayList<>();
+//        Locale[] availableLocales = RuleBasedCollator.getAvailableLocales();
+//        for (Locale l : availableLocales) {
+//            locales.add(ICULibrary.getLanguageTag(l) + ";" + l.getDisplayName());
+//        }
+//        return locales.toArray(new String[0]);
+//    }
 
     private void error(String field, String allowed) throws XPathException {
         error("value of " + field + " must be " + allowed);
@@ -104,6 +108,7 @@ public class UcaCollatorUsingIcu implements SubstringMatcher {
         throw new XPathException("Error in UCA Collation URI " + uri + ": " + message, "FOCH0002");
     }
 
+    //#if CSHARP==false
     /**
      * Display details of this collation
      * @return a string suitable for diagnostic display
@@ -122,6 +127,7 @@ public class UcaCollatorUsingIcu implements SubstringMatcher {
             return "No RuleBasedCollator initialised";
         }
     }
+    //#endif
 
     /**
      * Factory method to generate a collation key for a given string, using this collation
@@ -133,7 +139,7 @@ public class UcaCollatorUsingIcu implements SubstringMatcher {
 
     public CollationKey getCollationKey(String source) {
 //        System.err.println("UCA.getCollationKey:" + source);
-        return new UcaCollationKeyUsingIcu(source, new String(uca.getCollationKey(source).toByteArray()));
+        return new UcaCollationKeyUsingIcu(source, uca.getCollationKey(source).toByteArray());
     }
 
     /**
@@ -183,7 +189,7 @@ public class UcaCollatorUsingIcu implements SubstringMatcher {
             if (parts.length > 2) {
                 variant = parts[2];
             }
-            Locale loc = new Locale(language, country, variant);
+            Locale loc = makeLocale(language, country, variant);
             uca = (RuleBasedCollator) com.ibm.icu.text.Collator.getInstance(loc);
         }
 
@@ -366,15 +372,15 @@ public class UcaCollatorUsingIcu implements SubstringMatcher {
             ArrayList<Integer> codesInt = new ArrayList<>();
             for (String param : reorder.split(",")) {
                 if (param.equals("space")) {
-                    codesInt.add(com.ibm.icu.text.Collator.ReorderCodes.SPACE);
+                    codesInt.add(Collator.ReorderCodes.SPACE);
                 } else if (param.equals("punct")) {
-                    codesInt.add(com.ibm.icu.text.Collator.ReorderCodes.PUNCTUATION);
+                    codesInt.add(Collator.ReorderCodes.PUNCTUATION);
                 } else if (param.equals("symbol")) {
-                    codesInt.add(com.ibm.icu.text.Collator.ReorderCodes.SYMBOL);
+                    codesInt.add(Collator.ReorderCodes.SYMBOL);
                 } else if (param.equals("currency")) {
-                    codesInt.add(com.ibm.icu.text.Collator.ReorderCodes.CURRENCY);
+                    codesInt.add(Collator.ReorderCodes.CURRENCY);
                 } else if (param.equals("digit")) {
-                    codesInt.add(com.ibm.icu.text.Collator.ReorderCodes.DIGIT);
+                    codesInt.add(Collator.ReorderCodes.DIGIT);
                 } else if (param.length() == 4) {
                     int[] script = UScript.getCode(param);
                     if (script != null) {
@@ -398,6 +404,23 @@ public class UcaCollatorUsingIcu implements SubstringMatcher {
         maxIgnorable = new int[]{m, m, m, m, 0};
     }
 
+    @CSharpReplaceBody(code="return makeCSharpLocale(language, country, variant);")
+    private static Locale makeLocale(String language, String country, String variant) {
+        return new Locale(language, country, variant);
+    }
+
+    //#if CSHARP==true
+    private static Locale makeCSharpLocale(String language, String country, String variant) {
+        StringBuilder sb = new StringBuilder(language);
+        if (country != null) {
+            sb.append("-").append(country);
+        }
+        if (variant != null) {
+            sb.append("-").append(variant);
+        }
+        return new Locale(sb.toString());
+    }
+    //#endif
 
     private Properties parseProps(String uri) throws XPathException {
         URI uuri;
@@ -410,6 +433,9 @@ public class UcaCollatorUsingIcu implements SubstringMatcher {
         Properties props = new Properties();
         String query = AnyURIValue.decode(uuri.getRawQuery());
         if (query != null && !query.isEmpty()) {
+            if (query.startsWith("?")) { // Happens on .NET
+                query = query.substring(1);
+            }
             for (String s : query.split(";")) {
                 String[] tokens = s.split("=");
                 if (!keys.contains(tokens[0])) {
@@ -437,9 +463,9 @@ public class UcaCollatorUsingIcu implements SubstringMatcher {
         return uca.getStrength();
     }
 
-    public ULocale getLocale() {
-        return uca.getLocale(ULocale.ACTUAL_LOCALE);
-    }
+//    public ULocale getLocale() {
+//        return uca.getLocale(ULocale.ACTUAL_LOCALE);
+//    }
 
     @Override
     public boolean comparesEqual(UnicodeString s1, UnicodeString s2) {
@@ -591,7 +617,7 @@ public class UcaCollatorUsingIcu implements SubstringMatcher {
                 return false;
             }
             //System.err.println("Compare " + show(e0) + " ~ " + show(e1) + " = " + strengthLevel.compare(e0, e1));
-            if (strengthLevel.compare(e0, e1) != 0) {
+            if (strengthLevel.compareCollationElements(e0, e1) != 0) {
                 return false;
             }
         }
@@ -607,16 +633,16 @@ public class UcaCollatorUsingIcu implements SubstringMatcher {
         if (strengthLevel == null) {
             switch (getStrength()) {
                 case com.ibm.icu.text.Collator.PRIMARY:
-                    strengthLevel = new Primary();
+                    strengthLevel = new Primary(this);
                     break;
                 case com.ibm.icu.text.Collator.SECONDARY:
-                    strengthLevel = new Secondary();
+                    strengthLevel = new Secondary(this);
                     break;
                 case com.ibm.icu.text.Collator.TERTIARY:
-                    strengthLevel = new Tertiary();
+                    strengthLevel = new Tertiary(this);
                     break;
                 default:
-                    strengthLevel = new Identical();
+                    strengthLevel = new Identical(this);
                     break;
             }
         }
@@ -652,7 +678,7 @@ public class UcaCollatorUsingIcu implements SubstringMatcher {
         e0 = CollationElementIterator.NULLORDER;
         while (true) {
             // scan the first string to find a matching character
-            while (strengthLevel.compare(e0, e1) != 0) {
+            while (strengthLevel.compareCollationElements(e0, e1) != 0) {
                 do {
                     e0 = s0.next();
                 } while (strengthLevel.isIgnored(e0));
@@ -699,28 +725,55 @@ public class UcaCollatorUsingIcu implements SubstringMatcher {
     }
 
 
-    public interface Strength {
-        int compare(int ce1, int ce2);
+    private static abstract class Strength {
 
-        boolean isIgnored(int ce);
+        protected UcaCollatorUsingIcu collator;
+
+        public Strength(UcaCollatorUsingIcu thisCollator) {
+            this.collator = thisCollator;
+        }
+        /**
+         * Compare two collation elements
+         * @param ce1 the first collation element
+         * @param ce2 the second collation element
+         * @return -1, 0, or +1 depending on the ordering relation between the two collation elements
+         */
+
+        abstract public int compareCollationElements(int ce1, int ce2);
+
+        /**
+         * Ask whether a collation element should be ignored
+         * @param ce the collation element
+         * @return true if the collation element should be ignored
+         */
+        abstract public boolean isIgnored(int ce);
     }
 
-    public class Primary implements Strength {
+    private static class Primary extends Strength {
+
+        public Primary(UcaCollatorUsingIcu collator) {
+            super(collator);
+        }
         @Override
-        public int compare(int ce1, int ce2) {
+        public int compareCollationElements(int ce1, int ce2) {
             return Integer.compare(CollationElementIterator.primaryOrder(ce1), CollationElementIterator.primaryOrder(ce2));
         }
 
         @Override
         public boolean isIgnored(int ce) {
             return ce != CollationElementIterator.NULLORDER &&
-                    (CollationElementIterator.primaryOrder(ce) == CollationElementIterator.IGNORABLE || ce < maxIgnorable[0]);
+                    (CollationElementIterator.primaryOrder(ce) == CollationElementIterator.IGNORABLE
+                             || ce < collator.maxIgnorable[0]);
         }
     }
 
-    public class Secondary implements Strength {
+    private static class Secondary extends Strength {
+
+        public Secondary(UcaCollatorUsingIcu collator) {
+            super(collator);
+        }
         @Override
-        public int compare(int ce1, int ce2) {
+        public int compareCollationElements(int ce1, int ce2) {
             int c1 = Integer.compare(CollationElementIterator.primaryOrder(ce1), CollationElementIterator.primaryOrder(ce2));
             if (c1 == 0) {
                 return Integer.compare(CollationElementIterator.secondaryOrder(ce1), CollationElementIterator.secondaryOrder(ce2));
@@ -735,9 +788,13 @@ public class UcaCollatorUsingIcu implements SubstringMatcher {
         }
     }
 
-    public class Tertiary implements Strength {
+    private static class Tertiary extends Strength {
+
+        public Tertiary(UcaCollatorUsingIcu collator) {
+            super(collator);
+        }
         @Override
-        public int compare(int ce1, int ce2) {
+        public int compareCollationElements(int ce1, int ce2) {
             int c1 = Integer.compare(CollationElementIterator.primaryOrder(ce1), CollationElementIterator.primaryOrder(ce2));
             if (c1 == 0) {
                 int c2 = Integer.compare(CollationElementIterator.secondaryOrder(ce1), CollationElementIterator.secondaryOrder(ce2));
@@ -756,13 +813,18 @@ public class UcaCollatorUsingIcu implements SubstringMatcher {
             //System.err.println("isIgnored " + show(ce) + "?");
             return ce != CollationElementIterator.NULLORDER &&
                     CollationElementIterator.secondaryOrder(ce) < 6 &&
-                    CollationElementIterator.primaryOrder(ce) < CollationElementIterator.primaryOrder(maxIgnorable[0]);
+                    CollationElementIterator.primaryOrder(ce) < CollationElementIterator.primaryOrder(collator.maxIgnorable[0]);
         }
     }
 
-    public class Identical implements Strength {
+    private static class Identical extends Strength {
+
+        public Identical(UcaCollatorUsingIcu collator) {
+            super(collator);
+        }
+
         @Override
-        public int compare(int ce1, int ce2) {
+        public int compareCollationElements(int ce1, int ce2) {
             return Integer.compare(ce1, ce2);
         }
 

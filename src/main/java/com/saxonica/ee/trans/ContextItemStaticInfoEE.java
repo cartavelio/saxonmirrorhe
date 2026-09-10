@@ -19,7 +19,7 @@ public class ContextItemStaticInfoEE extends ContextItemStaticInfo {
     private Posture explicitPosture;
     private boolean strictStreamabilityRules;
     private Actor container;
-    private AccumulatorFn.Phase accumulatorPhase;
+    private AccumulatorFn.Phase accumulatorPhase = AccumulatorFn.Phase.UNSPECIFIED;
 
 
     /**

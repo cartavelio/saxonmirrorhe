@@ -1,5 +1,7 @@
 package com.saxonica.expr.sort;
 
+import net.sf.saxon.transpile.CSharpModifiers;
+
 import java.text.CollationKey;
 
 /**
@@ -21,9 +23,9 @@ public class UcaCollationKeyUsingIcu extends CollationKey {
      * @param key the internal collation key as allocated by UCA
      */
 
-    UcaCollationKeyUsingIcu(String source, String key) {
+    UcaCollationKeyUsingIcu(String source, byte[] key) {
         super(source);
-        this.ucaKey = new com.ibm.icu.text.CollationKey(source, key.getBytes());
+        this.ucaKey = new com.ibm.icu.text.CollationKey(source, key);
     }
 
     /**
@@ -44,6 +46,7 @@ public class UcaCollationKeyUsingIcu extends CollationKey {
      */
 
     @Override
+    @CSharpModifiers(code={"public", "override"})
     public int compareTo(CollationKey target) {
         return ucaKey.compareTo(((UcaCollationKeyUsingIcu)target).getKey());
     }
@@ -54,6 +57,7 @@ public class UcaCollationKeyUsingIcu extends CollationKey {
      */
 
     @Override
+    @CSharpModifiers(code = {"public", "override"})
     public byte[] toByteArray() {
         return ucaKey.toByteArray();
     }

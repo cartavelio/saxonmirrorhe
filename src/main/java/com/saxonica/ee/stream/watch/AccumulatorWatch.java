@@ -35,7 +35,6 @@ import net.sf.saxon.type.Type;
 import net.sf.saxon.value.ExternalObject;
 import net.sf.saxon.value.ObjectValue;
 
-import java.util.Optional;
 import java.util.Stack;
 
 /**
@@ -65,7 +64,7 @@ public class AccumulatorWatch extends PatternWatch {
     private FleetingNode lastPredescentNode = null;
     private FleetingNode lastPostdescentNode = null;
 
-    private Optional<AccumulatorFn.Phase> beingComputed = Optional.empty();
+    private AccumulatorFn.Phase beingComputed = AccumulatorFn.Phase.UNSPECIFIED;
 
 
     // localContext contains the iterator over the nodes selected by the apply-templates instruction,
@@ -143,9 +142,9 @@ public class AccumulatorWatch extends PatternWatch {
         Rule rule = preDescentMode.getRule(node, context);
         Sequence value = currentValue;
         if (rule != null) {
-            beingComputed = Optional.of(AccumulatorFn.Phase.BEFORE);
+            beingComputed = AccumulatorFn.Phase.BEFORE;
             value = applyRule(node, rule);
-            beingComputed = Optional.empty();
+            beingComputed = AccumulatorFn.Phase.UNSPECIFIED;
             currentValue = value;
             if (accumulator.isTracing()) {
                 context.getConfiguration().getLogger().info(accumulator.getAccumulatorName().getDisplayName() +
@@ -222,7 +221,7 @@ public class AccumulatorWatch extends PatternWatch {
     }
 
     public boolean isBeingComputed(AccumulatorFn.Phase phase) {
-        return beingComputed.isPresent() && beingComputed.get() == phase;
+        return beingComputed == phase;
     }
 
     /**
@@ -251,9 +250,9 @@ public class AccumulatorWatch extends PatternWatch {
         lastPredescentNode = node;
         Rule rule = preDescentMode.getRule(item, context);
         if (rule != null) {
-            beingComputed = Optional.of(AccumulatorFn.Phase.BEFORE);
+            beingComputed = AccumulatorFn.Phase.BEFORE;
             currentValue = applyRule(node, rule);
-            beingComputed = Optional.empty();
+            beingComputed = AccumulatorFn.Phase.UNSPECIFIED;
             if (accumulator.isTracing()) {
                 context.getConfiguration().getLogger().info(accumulator.getAccumulatorName().getDisplayName() +
                                                                     " BEFORE " + Navigator.getPath(node) + ": " + Err.depictSequence(currentValue));
@@ -263,9 +262,9 @@ public class AccumulatorWatch extends PatternWatch {
         setAtDepth(preDescentStack, depth, currentValue);
         rule = postDescentMode.getRule(item, context);
         if (rule != null) {
-            beingComputed = Optional.of(AccumulatorFn.Phase.AFTER);
+            beingComputed = AccumulatorFn.Phase.AFTER;
             currentValue = applyRule(node, rule);
-            beingComputed = Optional.empty();
+            beingComputed = AccumulatorFn.Phase.UNSPECIFIED;
             if (accumulator.isTracing()) {
                 context.getConfiguration().getLogger().info(accumulator.getAccumulatorName().getDisplayName() +
                                                                     " AFTER " + Navigator.getPath(node) + ": " + Err.depictSequence(currentValue));
@@ -295,9 +294,9 @@ public class AccumulatorWatch extends PatternWatch {
         lastPostdescentNode = node;
         Rule rule = postDescentMode.getRule(node, context);
         if (rule != null) {
-            beingComputed = Optional.of(AccumulatorFn.Phase.AFTER);
+            beingComputed = AccumulatorFn.Phase.AFTER;
             currentValue = applyRule(node, rule);
-            beingComputed = Optional.empty();
+            beingComputed = AccumulatorFn.Phase.UNSPECIFIED;
             if (accumulator.isTracing()) {
                 context.getConfiguration().getLogger().info(accumulator.getAccumulatorName().getDisplayName() +
                                                                     " AFTER " + Navigator.getPath(node) + ": " + Err.depictSequence(currentValue));

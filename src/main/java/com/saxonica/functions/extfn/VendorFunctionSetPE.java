@@ -30,7 +30,10 @@ import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.serialize.charcode.UTF8CharacterSet;
 import net.sf.saxon.str.StringTool;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.trans.*;
+import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.Mode;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.tiny.TinyAttributeImpl;
 import net.sf.saxon.tree.util.Orphan;
@@ -46,10 +49,7 @@ import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * The VendorFunctionLibraryPE represents additions to the set of Saxon vendor-supplied
@@ -710,11 +710,12 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
                 dt = dt.adjustTimezone(context.getImplicitTimezone());
             }
 
-            Boolean b = NamedTimeZone.inSummerTime(dt, arguments[0].head().getStringValue());
-            if (b == null) {
+            Optional<Boolean> b = NamedTimeZone.inSummerTime(dt, arguments[0].head().getStringValue());
+            if (b.isPresent()) {
+                return BooleanValue.get(b.get());
+            } else {
                 return EmptySequence.getInstance();
             }
-            return BooleanValue.get(b);
         }
     }
 
