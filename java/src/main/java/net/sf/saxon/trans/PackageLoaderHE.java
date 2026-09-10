@@ -2548,13 +2548,6 @@ public class PackageLoaderHE implements IPackageLoader {
             return fe;
         });
 
-        eMap.put("filterAM", (loader, element) -> {
-            Expression lhs = loader.getFirstChildExpression(element);
-            Expression rhs = loader.getSecondChildExpression(element);
-            FilterExpressionAM fe = new FilterExpressionAM(lhs, rhs);
-            return fe;
-        });
-
         eMap.put("first", (loader, element) -> {
             Expression base = loader.getFirstChildExpression(element);
             return FirstItemExpression.makeFirstItemExpression(base);
