@@ -2165,6 +2165,7 @@ void * userFunctionPHPNativeCall(char * functionName, void * proc, void * func, 
 
     zval* callOnObj = NULL;
 
+    //TODO error tests on function names
     ZVAL_STRING(&function_name, nativeString2.c_str());
     if (getenv("SAXONC_DEBUG_FLAG")) {
           std::cerr<<"PHP internal: call_user_function on = "<<nativeString2<< std::endl;
@@ -2177,8 +2178,6 @@ void * userFunctionPHPNativeCall(char * functionName, void * proc, void * func, 
           std::cerr<<"PHP internal: call_user_function FAILED!!!"<< std::endl;
        }
        return nullptr;
-    } else{
-
     }
 
     void * resultValue = makeXdmValueFromPHPZVal(nprocessor, &retval);

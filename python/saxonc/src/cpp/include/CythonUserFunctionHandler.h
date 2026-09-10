@@ -68,7 +68,22 @@ void * makeXdmValueFromPythonObject(PyObject * result){
 
     if(typeObj != nullptr) {
 
-        if (PyLong_Check(result)) {
+       const char* c_typeObjStr = typeObj->tp_name;
+       std::string typeObjStr = std::string(c_typeObjStr);
+       std::string prefix("PyXdm");
+
+
+       if (getenv("SAXONC_DEBUG_FLAG")) {
+            fprintf(stderr, "We are in a CythonUserFunctionHandler type= %s\n", c_typeObjStr);
+            fflush(stdout);
+       }
+
+       if(typeObjStr.find(prefix) != std::string::npos) {
+            //We have a PyXdm object
+            long resulti = PyLong_AsLong(PyObject_CallMethodNoArgs(result, PyUnicode_FromString("_get_underlying_int_value")));
+            return (void *)resulti;
+
+       } else if (PyLong_Check(result)) {
             long valueL = PyLong_AsLong(result);
             int64_t longValueRef = j_makeLongValue(thread1, valueL);
             return (void *)longValueRef;
@@ -85,7 +100,7 @@ void * makeXdmValueFromPythonObject(PyObject * result){
             return (void *)boolValueRef;
 
         } else if(PyUnicode_Check(result)) {
-
+            //TODO clauses required for other encodings
             const char* ss = PyUnicode_AsUTF8(result);
             if (ss == NULL) {
                 return nullptr;
@@ -124,40 +139,141 @@ void * makeXdmValueFromPythonObject(PyObject * result){
             j_handles_destroy(thread1, (void *)accumulatorValue);
             return arrayValue;
 
+        } else if(PyDict_Check(result)) {
+            PyObject *key, *value;
+            Py_ssize_t pos = 0;
+
+            Py_ssize_t  pmapSize = PyDict_Size(result);
+
+            if (pmapSize > INT_MAX || pmapSize < INT_MIN) {
+                if (getenv("SAXONC_DEBUG_FLAG")) {
+                    fprintf(stderr, "OVerflow error for the size of the map\n");
+                    fflush(stdout);
+                }
+                return nullptr;
+            }
+
+            int rv_map_length = (int) pmapSize;
+
+              int64_t mapDataRef = j_create_mapDataWithCapacity(thread1, rv_map_length);
+
+            while (PyDict_Next(result, &pos, &key, &value)) {
+                // key and value are borrowed references
+                const char* k = PyUnicode_AsUTF8(key);
+                /*if (getenv("SAXONC_DEBUG_FLAG")) {
+                    printf("key = %s\n", k);
+                }*/
+
+                void * valueii = makeXdmValueFromPythonObject(value);
+                void * keyii = (void *)j_makeStringValue(thread1, (char *)k, nullptr);
+
+                j_addMapPair(thread1, (void *)mapDataRef,
+                                 (void *)keyii,
+                                 (void *)valueii);
+
+
+                j_handles_destroy(thread1, (void *)valueii);
+                j_handles_destroy(thread1, (void *)keyii);
+            }
+
+            void * xdmmapRef = (void *)j_makeXdmMap(thread1, (void *)mapDataRef);
+
+            j_handles_destroy(thread1, (void *)mapDataRef);
+
+            return xdmmapRef;
+
+
+
+        } else if(PySet_Check(result)) {
+            Py_ssize_t ssetSize = PySet_Size(result);
+
+            if (ssetSize > INT_MAX || ssetSize < INT_MIN) {
+                if (getenv("SAXONC_DEBUG_FLAG")) {
+                    fprintf(stderr, "OVerflow error for the size of the set\n");
+                    fflush(stdout);
+                }
+                return nullptr;
+            }
+
+            int rv_set_length = (int) ssetSize;
+
+            if(rv_set_length == 0) {
+                //create empty sequence
+                return nullptr;
+            }
+
+            PyObject *itemii;
+
+            PyObject *iter = PyObject_GetIter(result);
+            if (!iter) {
+                // handle error
+            }
+
+            void * xdmsetRef = (void *)createProcessorDataWithCapacity(thread1, rv_set_length);
+
+            while ((itemii = PyIter_Next(iter))) {
+                void * valueii = makeXdmValueFromPythonObject(itemii);
+                addProcessorValue(thread1, xdmsetRef,valueii);
+
+                j_handles_destroy(thread1, (void *)valueii);
+                Py_DECREF(itemii);
+            }
+            Py_DECREF(iter);
+
+            return xdmsetRef;
+        } else if(PyIter_Check(result)){
+            // PyIter are treated as XdmValues
+            void * resultVoidValue  = (void *)createProcessorData(thread1);
+
+            PyObject *item;
+            while ((item = PyIter_Next(result))) {
+                void * valueii = makeXdmValueFromPythonObject(item);
+                // Use item
+                if(valueii != nullptr) {
+                    addProcessorValue(thread1, resultVoidValue,valueii);
+                	j_handles_destroy(thread1, valueii);
+                } else {
+                    // The item is not in a form we can handle, therefore ignore. Or maybe we should report error?
+                }
+                Py_DECREF(item);
+            }
+
+            return resultVoidValue;
+
+        } else if(PyGen_Check(result)){
+            // PyGen are treated as XdmValues
+            void * resultVoidValue  = (void *)createProcessorData(thread1);
+            PyObject *item = NULL;
+
+            while ((item = PyIter_Next(result)) != NULL) {
+                 void * valueii = makeXdmValueFromPythonObject(item);
+                // Use item
+                if(valueii != nullptr) {
+                    addProcessorValue(thread1, resultVoidValue,valueii);
+                	j_handles_destroy(thread1, valueii);
+                } else {
+                    // The item is not in a form we can handle, therefore ignore. Or maybe we should report error?
+                }
+                Py_DECREF(item);
+            }
+            return resultVoidValue;
+
+        } else if(PyTuple_Check(result)) {
+            //TODO handle PyTuple
         }
 
-        //TODO handle other python types - e.g Set, Dict, list
 
-
-
-        //PyObject * typeObji = PyType_GetName(typeObj);
-        const char* c_typeObjStr = typeObj->tp_name; //PyUnicode_AsUTF8(typeObji);
-
-        std::string typeObjStr = std::string(c_typeObjStr);
-
-        std::string prefix("PyXdm");
-        if (getenv("SAXONC_DEBUG_FLAG")) {
-            fprintf(stderr, "We are in a CythonUserFunctionHandler type= %s\n", c_typeObjStr);
-            fflush(stdout);
-        }
-
-        if(typeObjStr.find(prefix) == std::string::npos) {
-            //TODO try to handle Python primitive types
-            return nullptr;
-        }
 
     }
 
-    long resulti = PyLong_AsLong(PyObject_CallMethodNoArgs(result, PyUnicode_FromString("_get_underlying_int_value")));
 
-
-    return (void *)resulti;
+    return nullptr;
 
 
 
 }
 
-PyObject *makePythonValue(void * value){
+PyObject *makePythonValue(void * proc, void * value){
     graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
     int typeRef = j_getXdmObjectType(thread, value);
 
@@ -234,10 +350,11 @@ PyObject *makePythonValue(void * value){
     } else if (xdm_type == XDM_NODE) {
 
         //TODO shift creation of XdmNode to the python code
+        //TODO create unit test
         int64_t copiedValue = (int64_t)j_copy_handles(SaxonProcessor::sxn_environ->thread, value);
-        XdmNode * nxdmItem = new XdmNode(copiedValue);
+        PyObject * nxdmItem = PyObject_CallMethodOneArg((PyObject *) proc, PyUnicode_FromString("convert_c_obj"), PyLong_FromLong(copiedValue));
 
-        return nullptr;
+        return nxdmItem;
 
 
       }  else if (xdm_type == XDM_MAP) {
@@ -260,29 +377,42 @@ PyObject *makePythonValue(void * value){
 
         long long * rawMapValues = j_xdmMap_values(thread,(void *)fn, (void *)value);
 
-        char * ss = nullptr;
+        //char * ss = nullptr;
 
           if (getenv("SAXONC_DEBUG_FLAG")) {
             std::cerr<<"PHPValue: XDMMap before loop call"<<std::endl;
           }
 
+        PyObject *dict = PyDict_New();
+        if (!dict) return NULL;
+
         for (int j = 0; j < count; j++) {
           //XdmValue * avaluej =mitem->get(aKeys[j]);
-          //todo add encoding instead of NULL
-          ss = getStringValueForXdmItem(thread,(void *)fn, (void *)rawKeys[j], NULL);
-          //const char * ss = aKeys[j]->getStringValue();
-        if (getenv("SAXONC_DEBUG_FLAG")) {
-          std::cerr<<"PythonValue: XDMMap key str="<<ss<<std::endl;
-        }
-         // zend_string * keyzvalj = zend_string_init(ss, strlen(ss), 0);
+          //todo add encoding instead of NULL, get the encoding from the Java code
+          //ss = getStringValueForXdmItem(thread,(void *)fn, (void *)rawKeys[j], NULL);
+          PyObject * retkeyvalj = makePythonValue(proc, (void *)rawKeys[j]);
 
 
-          PyObject * retvalj = makePythonValue((void *)rawMapValues[j]);
+          PyObject * retvalj = makePythonValue(proc, (void *)rawMapValues[j]);
 
-          //TODO add value to the python dict
-          //delete avaluej;
+          if (!retkeyvalj || !retvalj) {
+            Py_XDECREF(retkeyvalj);
+            Py_XDECREF(retvalj);
+            Py_DECREF(dict);
+            return NULL;
+          }
 
-          operator delete(ss);
+          if (PyDict_SetItem(dict, retkeyvalj, retvalj) < 0) {
+                      Py_DECREF(retkeyvalj);
+                      Py_DECREF(retvalj);
+                      Py_DECREF(dict);
+                      return NULL;
+          }
+          Py_DECREF(retkeyvalj);
+          Py_DECREF(retvalj);
+
+
+          //operator delete(ss);
 
         }
         //delete [] aKeys;
@@ -297,14 +427,9 @@ PyObject *makePythonValue(void * value){
         /*delete mitem;
         delete value;*/
 
-        //value->resetRelinquishedItems();
-        //delete value;
+        return dict;
 
-        //TODO XdmMap objectHandle pool not getting cleared.. Clear Keys and values
-
-        return nullptr;//retval;
-
-        } else if (xdm_type == XDM_ARRAY) {
+      } else if (xdm_type == XDM_ARRAY) {
 
         graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
         int count = j_xdmArray_arrayLength(thread,(void *)value);
@@ -314,11 +439,13 @@ PyObject *makePythonValue(void * value){
         }
 
         ///// creating Python array
-        //TODO create python array
 
         long idx = 0;
         int64_t avaluej =-1;
         PyObject *  retvali = nullptr;
+        PyObject *list = PyList_New(count);
+        if (!list) return NULL;
+
         for (int j = 0; j < count; j++) {
 
           avaluej =
@@ -326,17 +453,46 @@ PyObject *makePythonValue(void * value){
           //XdmValue * avaluej =aitem->get(j);
           //itemi->incrementRefCount();
 
-          retvali = makePythonValue((void *)avaluej);
+          retvali = makePythonValue(proc, (void *)avaluej);
+          // Steals reference to value
+          PyList_SetItem(list, j, retvali);
+
+          Py_DECREF(retvali);
 
           j_handles_destroy(thread, (void *)avaluej);
 
-          //TODO add item to the array
 
           idx++;
         }
-        return nullptr;
+        return list;
 
-}
+    } else if(xdm_type == XDM_VALUE) {
+        allocFn fn = operator new;
+        graal_isolatethread_t *thread1 = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+        long long *rawValues = makeArrayFromXdmValue2(thread1, (void *)fn, (void *)value);
+
+        int count = (int) rawValues[0];
+        if (getenv("SAXONC_DEBUG_FLAG")) {
+            std::cerr<<"PHPValue: XDMValue size="<<count<<std::endl;
+        }
+
+        PyObject *list = PyList_New(count);
+        if (!list) return NULL;
+
+        for(int i=1; i <= count; i++) {
+            PyObject * itemii = makePythonValue(proc, (void *)rawValues[i]);
+            PyList_SetItem(list, i-1, itemii);
+            Py_DECREF(itemii);
+
+            //TODO j_handle_destroy required on rawValues[i]
+        }
+
+        // Get an iterator for the list
+        PyObject *iter = PyObject_GetIter(list);
+        Py_DECREF(list);
+        return iter;
+    }
+    Py_RETURN_NONE;
 }
 
 void * userFunctionPythonNativeCall(void * proc, void * func, int useProc, int useNativeTypes, int numOfArguments,  void ** argumentsi){
@@ -413,7 +569,7 @@ void * userFunctionPythonNativeCall(void * proc, void * func, int useProc, int u
             long argxi = (long)argumentsi[i]; //TODO we may need to copy arguments: j_copy_handles(thread, (void *)argumentsi[i]);
 
             if(useNativeTypes) {
-                argi = makePythonValue(argumentsi[i]);
+                argi = makePythonValue(proc, argumentsi[i]);
             } else {
                 //TODO how to we handle an emptySequence??
                 argi = PyObject_CallMethodOneArg((PyObject *) proc, PyUnicode_FromString("convert_c_obj"), PyLong_FromLong(argxi));
@@ -423,7 +579,7 @@ void * userFunctionPythonNativeCall(void * proc, void * func, int useProc, int u
                 fprintf(stdout, "cython user function checkpoint 0\n");
             }
 
-            if(argi == Py_None ||  argi == nullptr) {
+            if(argi == nullptr) {
                 if (getenv("SAXONC_DEBUG_FLAG")) {
                     PyErr_Print();
                 }
@@ -465,6 +621,7 @@ void * userFunctionPythonNativeCall(void * proc, void * func, int useProc, int u
 
     PyObject* result = PyObject_Call((PyObject *)func, args, kwargs);
     if (getenv("SAXONC_DEBUG_FLAG")) {
+      PyErr_Print();
         if(result != nullptr) {
             PyErr_Print();
             fprintf(stdout, "user function in c code python returned a value\n");

@@ -764,6 +764,7 @@ cdef class PySaxonProcessor:
     def register_user_function(self, ns, func, signatureJSON, encoding=None, use_python_types=False):
 
         '''PyObject_CallNoArgs(func)'''
+        '''TODO handle PyDict as alternative to JSON'''
         if encoding is None:
             encoding = sys.getdefaultencoding()
         cdef char * c_signatureJSON_str_ = NULL
@@ -783,7 +784,7 @@ cdef class PySaxonProcessor:
 
         ptr = <void *>func
         proc_ptr = <void *>self
-
+        '''Move the line below to Processor constructor'''
         saxoncClasses.setNativePythonFunction()
         self.thisptr.registerUserFunctionWithProcessor(proc_ptr, c_ns_str_, ptr, c_signatureJSON_str_, True, useNativeTypes)
 
