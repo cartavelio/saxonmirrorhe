@@ -35,25 +35,27 @@ int main()
 
     create_graalvm_isolate(environi);
 
-    c_createSaxonProcessor((environi->thread), processor, 0);
+    c_createSaxonProcessor(environi, processor, 0);
+
+    sxnc_xpath * xpathProc = c_createXPathProcessor(environi, processor);
 
     const char *verCh = version(environi, processor);
     printf("XPath Tests\n\nSaxon version: %s \n", verCh);
     setProperty(&properties, &propLen, &propCap, "s", "../data/cat.xml");
     
 
-    sxnc_value * result = evaluate(environi,&processor, NULL, "/out/person", 0, properties, 0, propLen);
+    sxnc_value * result = evaluate(environi,xpathProc, cwd, "/out/person", 0, properties, 0, propLen);
 
- bool resultBool = effectiveBooleanValue(environi,&processor, NULL, "count(/out/person)>0", 0, properties, 0, propLen);
+    bool resultBool = effectiveBooleanValue(environi,xpathProc, cwd, "count(/out/person)>0", 0, properties, 0, propLen);
  
     if(!result) {
       printf("result is null");
     }else {
-      printf("%s", getStringValue(environi, *result));
+      printf("Test 1  - Result = %s\n", getStringValue(environi, *result));
     }
 
    if(resultBool==1) {
-      printf("Boolean result is as expected: true");
+      printf("Test 2 - Boolean result is as expected: true\n");
     }else {
       printf("Boolean result is incorrectly: false");
       const char * errorMessage = c_getErrorMessage(environi);

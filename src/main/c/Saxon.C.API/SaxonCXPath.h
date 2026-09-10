@@ -84,6 +84,8 @@ EXTERN_SAXONC
 
 sxnc_value * xdmValue(sxnc_environment *environi, const char* type, const char* str);
 
+sxnc_xpath * c_createXPathProcessor(sxnc_environment *environi, sxnc_processor * processor);
+
 
     /**
      * Compile and evaluate an XPath expression, supplied as a character string, with properties and parameters required
@@ -94,7 +96,11 @@ sxnc_value * xdmValue(sxnc_environment *environi, const char* type, const char* 
      * @param values -  The values for the parameters and properties required by the XPath expression
     **/
 
-sxnc_value * evaluate(sxnc_environment *environi, sxnc_processor ** proc, char * cwd, char * xpathStr, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen);
+sxnc_value * evaluate(sxnc_environment *environi, sxnc_xpath * proc, char * cwd, char * xpathStr, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen);
+
+
+
+sxnc_value * evaluateSingle(sxnc_environment *environi, sxnc_xpath * proc, char * cwd, char * xpathStr, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen);
 
 
     /**
@@ -108,7 +114,7 @@ sxnc_value * evaluate(sxnc_environment *environi, sxnc_processor ** proc, char *
      *
      **/
 
-bool effectiveBooleanValue(sxnc_environment* environi, sxnc_processor ** proc, char * cwd, char * xpathStr, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen);
+bool effectiveBooleanValue(sxnc_environment* environi, sxnc_xpath * proc, char * cwd, char * xpathStr, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen);
 
 
     /**

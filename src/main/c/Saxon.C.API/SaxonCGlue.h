@@ -177,7 +177,7 @@ int detach_graalvm_thread(sxnc_environment * env);
 int64_t createSaxonProcessor2(graal_isolatethread_t *thread, int license);
 
 
-sxnc_processor* c_createSaxonProcessor(graal_isolatethread_t *thread, sxnc_processor * proc, int license);
+sxnc_processor* c_createSaxonProcessor(sxnc_environment *environi, sxnc_processor * proc, int license);
 
 
 /*

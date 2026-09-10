@@ -65,133 +65,139 @@ sxnc_value * xdmValue(sxnc_environment *environi, const char* type, const char* 
    return NULL;
 }
 
-sxnc_value * evaluate(sxnc_environment *environi, sxnc_processor ** proc, char * cwd, char * xpathStr, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen){
+
+
+sxnc_xpath * c_createXPathProcessor(sxnc_environment *environi, sxnc_processor * processor) {
+
+
+    int64_t result = -1;
+
+
+    if(processor) {
+        result = createXPathProcessorWithProcessor(environi->thread, processor->value);
+    } else {
+        result = createXPathProcessor(environi->thread);
+    }
+
+    if(result < 0) {
+        return NULL;
+    }
+
+
+    sxnc_xpath* xproc = (sxnc_value *)malloc(sizeof(sxnc_xpath));
+    xproc->xpathProc = result;
+
+     return xproc;
+}
+
+sxnc_value * evaluate(sxnc_environment *environi, sxnc_xpath * proc, char * cwd, char * xpathStr, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen){
 	
-	/*static jmethodID emID = NULL; //cache the methodID
-	if(!proc){} // code to avoid warning of unused variable. TODO: Remove use of variable in next release
-	jclass cppClass = lookForClass(environi->env, "net/sf/saxon/option/cpp/XPathProcessor");
 
-	if(!cpp) {
-		cpp = (jobject) createSaxonProcessor (environi->env, cppClass, "(Z)V", NULL, (jboolean)sxn_license);
-	}
 
-	if(emID == NULL) {
-		emID = (jmethodID)(*(environi->env))->GetMethodID (environi->env, cppClass,"evaluateSingle", "(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)Lnet/sf/saxon/s9api/XdmItem;");
-		if (!emID) {
-		        printf("Error: MyClassInDll. evaluateSingle not found\n");
-			fflush (stdout);
-			return 0;
-		 } 
-	}
- 	
-	jobjectArray stringArray = NULL;
-	jobjectArray objectArray = NULL;
-	int size = parLen + propLen+1; //We add one here for the resources-dir property
+    	int size = parLen + propLen;
+         int64_t processorDataRef = createProcessorDataWithCapacity(environi->thread, size);
+    	if(size >0) {
 
-	if(size >0) {
-           jclass objectClass = lookForClass(environi->env, "java/lang/Object");
-	   jclass stringClass = lookForClass(environi->env, "java/lang/String");
-	   objectArray = (*(environi->env))->NewObjectArray(environi->env, (jint)size, objectClass, 0 );
-	   stringArray = (*(environi->env))->NewObjectArray(environi->env, (jint)size, stringClass, 0 );
-	   if((!objectArray) || (!stringArray)) { return 0;}
-	   int i=0;
-	   for(i =0; i< parLen; i++) {
-		
-	     (*(environi->env))->SetObjectArrayElement(environi->env, stringArray, i, (*(environi->env))->NewStringUTF(environi->env, parameters[i].name) );
-	     (*(environi->env))->SetObjectArrayElement(environi->env, objectArray, i, (jobject)(parameters[i].value) );
-	
-	   }
+    	   int i=0;
+    	   for(i =0; i< parLen; i++) {
 
-	   (*(environi->env))->SetObjectArrayElement(environi->env, stringArray, i, (*(environi->env))->NewStringUTF(environi->env,"resources"));
-	     (*(environi->env))->SetObjectArrayElement(environi->env, objectArray, i, (jobject)((*(environi->env))->NewStringUTF(environi->env, getResourceDirectory())) );
-	    i++;
-	   int j=0;	
-  	   for(; j < propLen; j++, i++) {
-	     (*(environi->env))->SetObjectArrayElement(environi->env, stringArray, i, (*(environi->env))->NewStringUTF(environi->env, properties[j].name));
-	     (*(environi->env))->SetObjectArrayElement(environi->env, objectArray, i, (jobject)((*(environi->env))->NewStringUTF(environi->env, properties[j].value)) );
-	   }
-	  
-	}
-      jobject resultObj = (jstring)((*(environi->env))->CallObjectMethod(environi->env, cpp, emID, (cwd== NULL ? (*(environi->env))->NewStringUTF(environi->env, "") : (*(environi->env))->NewStringUTF(environi->env, cwd)), (*(environi->env))->NewStringUTF(environi->env,xpathStr), stringArray, objectArray ));
+    	       addProcessorDataPair(environi->thread, (void *)processorDataRef, (char *)parameters[i].name, (void *)parameters[i].value);
 
-      (*(environi->env))->DeleteLocalRef(environi->env, objectArray);
-      (*(environi->env))->DeleteLocalRef(environi->env, stringArray);
-      if(resultObj) {
-	 sxnc_value* result = (sxnc_value *)malloc(sizeof(sxnc_value));
-         result->xdmvalue = resultObj;  
-	
-	 
-	return result;
-     }
+    	   }
 
-    checkForException(environi);*/
-    return 0;
 
+    	    i++;
+    	    int j=0;
+      	   for(; j<propLen; j++, i++) {
+    	     addProcessorPropertyPair(environi->thread, (void *)processorDataRef, (char *)properties[j].name, (char *)properties[j].value);
+    	   }
+
+    	}
+
+        int64_t result = j_evaluate(environi->thread, (void *)proc->xpathProc, cwd, xpathStr, (void *)processorDataRef);
+        if(result == -2) {
+            return NULL;
+        }
+
+        sxnc_value* resultValue = (sxnc_value *)malloc(sizeof(sxnc_value));
+        resultValue->xdmvalue = result;
+
+        return resultValue;
 }
 
 
-bool effectiveBooleanValue(sxnc_environment *environi, sxnc_processor ** proc, char * cwd, char * xpathStr, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen){
+
+sxnc_value * evaluateSingle(sxnc_environment *environi, sxnc_xpath * proc, char * cwd, char * xpathStr, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen){
+
+
+
+    	int size = parLen + propLen;
+         int64_t processorDataRef = createProcessorDataWithCapacity(environi->thread, size);
+    	if(size >0) {
+
+    	   int i=0;
+    	   for(i =0; i< parLen; i++) {
+
+    	       addProcessorDataPair(environi->thread, (void *)processorDataRef, (char *)parameters[i].name, (void *)parameters[i].value);
+
+    	   }
+
+
+    	    i++;
+    	    int j=0;
+      	   for(; j<propLen; j++, i++) {
+    	     addProcessorPropertyPair(environi->thread, (void *)processorDataRef, (char *)properties[j].name, (char *)properties[j].value);
+    	   }
+
+    	}
+
+        int64_t result = j_evaluateSingle(environi->thread, (void *)proc->xpathProc, cwd, xpathStr, (void *)processorDataRef);
+        if(result == -2) {
+            return NULL;
+        }
+
+        sxnc_value* resultValue = (sxnc_value *)malloc(sizeof(sxnc_value));
+        resultValue->xdmvalue = result;
+
+        return resultValue;
+}
+
+
+bool effectiveBooleanValue(sxnc_environment *environi, sxnc_xpath* proc, char * cwd, char * xpathStr, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen){
 	
-	/*static jmethodID bmID = NULL; //cache the methodID
-	if(!proc){} // code to avoid warning of unused variable. TODO: Remove use of variable in next release
-	jclass cppClass = lookForClass(environi->env, "net/sf/saxon/option/cpp/XPathProcessor");
+    	int size = parLen + propLen;
 
-	if(!cpp) {
-		cpp = (jobject) createSaxonProcessor (environi->env, cppClass, "(Z)V", NULL, (jboolean)sxn_license);
-	}
+    	if(!proc) {
+    	    proc = c_createXPathProcessor(environi, NULL);
+    	}
 
-	if(bmID == NULL) {
-		bmID = (jmethodID)(*(environi->env))->GetMethodID (environi->env, cppClass,"effectiveBooleanValue", "(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)Z");
-		if (!bmID) {
-		        printf("Error: MyClassInDll. effectiveBooleanValue not found\n");
-			fflush (stdout);
-			return 0;
-		 } 
-	}
- 	
-	jobjectArray stringArray = NULL;
-	jobjectArray objectArray = NULL;
-	int size = parLen + propLen+1; //We add one here for the resources-dir property
 
-	if(size >0) {
-           jclass objectClass = lookForClass(environi->env, "java/lang/Object");
-	   jclass stringClass = lookForClass(environi->env, "java/lang/String");
-	   objectArray = (*(environi->env))->NewObjectArray(environi->env, (jint)size, objectClass, 0 );
-	   stringArray = (*(environi->env))->NewObjectArray(environi->env, (jint)size, stringClass, 0 );
-	   if((!objectArray) || (!stringArray)) { 
-		printf("Error: parameter and property arrays have some inconsistencies \n");
-		fflush (stdout);		
-		return 0; //false
-	   }
-	   int i=0;
-	   for(i =0; i< parLen; i++) {
-		
-	     (*(environi->env))->SetObjectArrayElement(environi->env, stringArray, i, (*(environi->env))->NewStringUTF(environi->env, parameters[i].name) );
-	     (*(environi->env))->SetObjectArrayElement(environi->env, objectArray, i, (jobject)(parameters[i].value) );
-	
-	   }
+         int64_t processorDataRef = createProcessorDataWithCapacity(environi->thread, size);
+    	if(size >0) {
 
-	   (*(environi->env))->SetObjectArrayElement(environi->env, stringArray, i, (*(environi->env))->NewStringUTF(environi->env,"resources"));
-	     (*(environi->env))->SetObjectArrayElement(environi->env, objectArray, i, (jobject)((*(environi->env))->NewStringUTF(environi->env, getResourceDirectory())) );
-	    i++;
-	   int j=0;	
-  	   for(; j<propLen; j++, i++) {
-	     (*(environi->env))->SetObjectArrayElement(environi->env, stringArray, i, (*(environi->env))->NewStringUTF(environi->env, properties[j].name));
-	     (*(environi->env))->SetObjectArrayElement(environi->env, objectArray, i, (jobject)((*(environi->env))->NewStringUTF(environi->env, properties[j].value)) );
-	   }
-	  
-	}
-      jboolean resultObj = (jboolean)((*(environi->env))->CallBooleanMethod(environi->env, cpp, bmID, (cwd== NULL ? (*(environi->env))->NewStringUTF(environi->env, "") : (*(environi->env))->NewStringUTF(environi->env, cwd)), (*(environi->env))->NewStringUTF(environi->env,xpathStr), (jobjectArray)stringArray, (jobjectArray)objectArray ));
+    	   int i=0;
+    	   for(i =0; i< parLen; i++) {
 
-      (*(environi->env))->DeleteLocalRef(environi->env, objectArray);
-      (*(environi->env))->DeleteLocalRef(environi->env, stringArray);
-      if(resultObj) {
-	 checkForException(environi);
-	return resultObj;
-     }
+    	       addProcessorDataPair(environi->thread, (void *)processorDataRef, (char *)parameters[i].name, (void *)parameters[i].value);
 
-    checkForException(environi);*/
-    return 0; //false
+    	   }
+
+
+    	    i++;
+    	    int j=0;
+      	   for(; j<propLen; j++, i++) {
+    	     addProcessorPropertyPair(environi->thread, (void *)processorDataRef, (char *)properties[j].name, (char *)properties[j].value);
+    	   }
+
+    	}
+
+        int result = j_effectiveBooleanValue(environi->thread, (void *)proc->xpathProc, cwd, xpathStr, (void *)processorDataRef);
+
+        if(result == -2) {
+            return 0;
+        }
+
+        return result;
 }
 
 const char * getStringValue(sxnc_environment *environi, sxnc_value value){
