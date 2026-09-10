@@ -130,7 +130,7 @@ public class KeyManager {
             try {
                 IndependentContext sc = new IndependentContext(config);
                 sc.setPackageData(packageData);
-                sc.setXPathLanguageLevel(31);
+                sc.setXPathLanguageLevel(packageData.getHostLanguageVersion() == 40 ? 40 : 31);
                 RetainedStaticContext rsc = new RetainedStaticContext(sc);
                 Expression sf = SystemFunction.makeCall("string", rsc, new ContextItemExpression());
                 Expression use = SystemFunction.makeCall("tokenize", rsc, sf);    // Use the new tokenize#1
