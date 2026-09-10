@@ -120,7 +120,7 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
                         } else {
                             // ignore this entry
                             Instrumentation.count("Duplicate ignored");
-                            break;
+                            continue;
                         }
                     } else {
                         retainedKeys.add(key);
