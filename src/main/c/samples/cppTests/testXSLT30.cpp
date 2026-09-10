@@ -197,7 +197,7 @@ void testApplyTemplates2a_Error(SaxonProcessor *processor, Xslt30Processor *tran
 
         input = processor->parseXmlFromFile("../data/cat.xml");
 
-    }catch(SaxonApiException e){
+    }catch(SaxonApiException &e){
             sresult->failure++;
             sresult->failureList.push_back("testApplyTemplates2a_Error");
             cerr<<"Error ="<<e.what();
@@ -221,7 +221,7 @@ void testApplyTemplates2a_Error(SaxonProcessor *processor, Xslt30Processor *tran
 
     delete executable;
 
-    }catch(SaxonApiException e){
+    }catch(SaxonApiException &e){
         printf("Expected result is null \n");
         sresult->success++;
         cerr<<"Error ="<<e.what();
@@ -238,27 +238,36 @@ Should be error. Source file does not exist
 void testTransformToString2b(SaxonProcessor *processor, Xslt30Processor *trans, sResultCount *sresult) {
 
     cout << endl << "Test: TransformToString2b:" << endl;
+    const char *result = nullptr;
+    try {
+        result = trans->transformFileToString("cat-error.xml", "test-error.xsl");
 
-    const char * result  = trans->transformFileToString("cat-error.xml", "test-error.xsl");
+    } catch(SaxonApiException &e) {
+        const char *emessage = e.getMessage();
+        const char * code = e.getErrorCode();
+        cout<<"Exception found: ";
+        if(code != nullptr) {
+            cout<<" error code ="<<code<<endl;
 
-    if(result== nullptr) {
-        if(trans->exceptionOccurred()) {
-            cerr<<"Expected failure = "<<trans->getErrorMessage()<<endl;
+        }
+        if(emessage != nullptr) {
+            cout<<" message = "<<emessage<<endl;
+
         }
         sresult->success++;
-        trans->exceptionClear();
         return;
-    }else {
+
+    }
+
+    if(result!= nullptr) {
         delete result;
+    }
         sresult->failure++;
         sresult->failureList.push_back("testTransformToString2b");
         cerr << "testTransformToString2b NULL found" << endl;
-        if (trans->exceptionOccurred()) {
-            cerr <<"Error: "<< trans->getErrorMessage() << endl;
-        }
-        trans->exceptionClear();
+
         return;
-    }
+
 
 
 }
@@ -468,27 +477,36 @@ void testTransformFromstring(SaxonProcessor *processor, Xslt30Processor *trans, 
 void testTransformFromstring2Err(SaxonProcessor *processor, Xslt30Processor *trans, sResultCount *sresult) {
     cout << endl << "Test: testTransfromFromstring2-Error:" << endl;
 
-    XsltExecutable * executable = trans->compileFromString(
-            "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'>       <xsl:param name='values' select='(2,3,4)' /><xsl:output method='xml' indent='yes' fail='no' /><xsl:template match='*'><output><xsl:for-each select1='$values' ><out><xsl:value-of select1='. * 3'/></out></xsl:for-each></output></xsl:template></xsl:stylesheet>");
+    XsltExecutable * executable = nullptr;
+    try {
+        executable = trans->compileFromString(
+                "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'>       <xsl:param name='values' select='(2,3,4)' /><xsl:output method='xml' indent='yes' fail='no' /><xsl:template match='*'><output><xsl:for-each select1='$values' ><out><xsl:value-of select1='. * 3'/></out></xsl:for-each></output></xsl:template></xsl:stylesheet>");
 
-    if(executable== nullptr) {
+    } catch(SaxonApiException &e){
         sresult->success++;
 
-        if (trans->exceptionOccurred()) {
-            SaxonApiException * exception = trans->getException();
-            cerr <<"Error expected: "<< exception->getMessage() << endl;
-
-            const char * smessages = exception->getCombinedStaticErrorMessages();
-            cerr <<"Static Error count: "<< exception->staticErrorCount() << endl;
-            if(smessages != nullptr) {
+        const char * smessages = e.getCombinedStaticErrorMessages();
+        const char * ecmessage = e.getMessageWithErrorCode();
+        cerr <<"Static Error count: "<< e.staticErrorCount() << endl;
+        if(smessages != nullptr) {
                 cerr <<"Static Error expected: "<< smessages << endl;
-            } else {
+            cerr <<"Test other exception methods: "<< e.getMessage() << endl;
+        } else {
                 cerr <<"Static Errors is null: "<< endl;
-            }
         }
-        trans->exceptionClear();
+        if(ecmessage != nullptr) {
+            cerr <<"Static Error with error code expected: "<< ecmessage << endl;
+        } else {
+            cerr <<"Static Errors with error code is null: "<< endl;
+        }
+
+
+
         return;
+
+
     }
+
 
 
     sresult->failure++;
@@ -564,51 +582,35 @@ void testTrackingOfValueReferenceError(SaxonProcessor *processor, Xslt30Processo
     ostringstream test;
     ostringstream valStr;
     ostringstream name;
-    for (int i = 0; i < 2; i++) {
-        test << "v" << i;
-        valStr << "<out><person>text1</person><person>text2</person><person>text3</person><value>" << test.str()
-               << "<value></out>";
-        name << "value" << i;
+    try {
+        for (int i = 0; i < 2; i++) {
+            test << "v" << i;
+            valStr << "<out><person>text1</person><person>text2</person><person>text3</person><value>" << test.str()
+                   << "<value></out>";
+            name << "value" << i;
 
-        XdmValue *values = (XdmValue *) processor->parseXmlFromString(valStr.str().c_str());
-        if(values == nullptr) {
-            cerr<<"values NULL ====== FAIL ======="<<endl;
-            processor->exceptionClear();
-        } else {
-            trans->setParameter(name.str().c_str(), values);
-        }
-        test.str("");
-        valStr.str("");
-        name.str("");
-    }
-    std::map<std::string, XdmValue *> parMap = trans->getParameters();
-    cout << "Parameter Map size: " << parMap.size() << endl;
-
-    ostringstream name1;
-    bool errorFound = false;
-    for (int i = 0; i < 2; i++) {
-        name1 << "sparam:value" << i;
-        cout << " i:" << i << " Map size:" << parMap.size() << ", ";
-        try {
-
-            XdmValue *valuei = parMap.at(name1.str());
-            if (valuei != nullptr) {
-                cout << name1.str();
-                if (valuei->itemAt(0) != nullptr)
-                    cout << "= " << valuei->itemAt(0)->getStringValue();
-                cout << endl;
+            XdmValue *values = (XdmValue *) processor->parseXmlFromString(valStr.str().c_str());
+            if (values == nullptr) {
+                cerr << "values NULL ====== FAIL =======" << endl;
+                processor->exceptionClear();
+            } else {
+                trans->setParameter(name.str().c_str(), values);
             }
-        } catch (const std::out_of_range &oor) {
-            cout << "Out of range exception occurred. Exception " << endl;
-            if (!errorFound) {
-                sresult->success++;
-                errorFound = true;
-
-                return;
-            }
+            test.str("");
+            valStr.str("");
+            name.str("");
         }
-        name1.str("");
+        std::map < std::string, XdmValue * > parMap = trans->getParameters();
+        cout << "Parameter Map size: " << parMap.size() << endl;
+
+    } catch (SaxonApiException &e) {
+
+        std::cerr<< "Success: Exception thrown "<<e.getMessageWithErrorCode()<<endl;
+        sresult->success++;
+        return;
     }
+
+
     sresult->failure++;
     sresult->failureList.push_back("testTrackingOfValueReferenceError");
 
@@ -805,7 +807,7 @@ void exampleSimple1Err(Xslt30Processor *proc, sResultCount *sresult) {
     {
         executable = proc->compileFromFile("err.xsl");
     }
-    catch (SaxonApiException e)
+    catch(SaxonApiException &e)
         {
             const char * errorCode = e.getErrorCode();
             const char * emessage = e.what();
@@ -837,7 +839,7 @@ void exampleSimple2(Xslt30Processor *proc, sResultCount *sresult) {
         {
             executable = proc->compileFromFile("../php/xsl/foo.xsl");
         }
-    catch (SaxonApiException e)
+    catch(SaxonApiException &e)
             {
         sresult->failure++;
         sresult->failureList.push_back("exampleSimple2");
@@ -855,7 +857,7 @@ void exampleSimple2(Xslt30Processor *proc, sResultCount *sresult) {
     executable->setOutputFile(filename);
     try {
     executable->applyTemplatesReturningFile("output1.xml");
-    } catch (SaxonApiException e) {
+    } catch(SaxonApiException &e) {
         cout << e.getMessage() << endl;
         sresult->failure++;
         sresult->failureList.push_back("exampleSimple2");
@@ -885,7 +887,7 @@ void exampleTransformToFile(SaxonProcessor * sproc, Xslt30Processor *proc, sResu
     XdmNode* xmlfile = nullptr;
     try {
         xmlfile = sproc->parseXmlFromFile("../php/xml/foo.xml");
-    } catch(SaxonApiException e) {
+    } catch(SaxonApiException &e) {
        sresult->failure++;
        sresult->failureList.push_back("exampleTransformToFile");
        const char * errorMessage = e.what();
@@ -910,7 +912,7 @@ void exampleTransformToFile(SaxonProcessor * sproc, Xslt30Processor *proc, sResu
     XsltExecutable * executable = nullptr;
     try{
         executable = proc->compileFromFile("../php/xsl/foo.xsl");
-    } catch(SaxonApiException e) {
+    } catch(SaxonApiException &e) {
        if (proc->exceptionOccurred()) {
                    cerr <<"exampleTransformToFile error: "<< e.what() << endl;
        }
@@ -951,7 +953,7 @@ void exampleTransformToString(SaxonProcessor * sproc, Xslt30Processor *proc, sRe
     XdmNode* xmlfile = nullptr;
     try {
     sproc->parseXmlFromString("<xml><value>5</value></xml>");
-    } catch(SaxonApiException e){
+    } catch(SaxonApiException &e){
         sresult->failure++;
         sresult->failureList.push_back("exampleTransformToString");
         cerr << "exampleTransformToFile NULL found" << endl;
@@ -980,7 +982,7 @@ void exampleTransformToString(SaxonProcessor * sproc, Xslt30Processor *proc, sRe
                                                           "  </xsl:template>\n"
                                                           "</xsl:stylesheet>");
 
-    } catch(SaxonApiException e) {
+    } catch(SaxonApiException &e) {
         sresult->failure++;
         sresult->failureList.push_back("exampleTransformToString");
         cerr << "exampleTransformToString NULL found" << endl;
@@ -998,7 +1000,7 @@ void exampleTransformToString(SaxonProcessor * sproc, Xslt30Processor *proc, sRe
     const char * result  =nullptr;
     try{
         result = executable->transformToString();
-    } catch(SaxonApiException e) {
+    } catch(SaxonApiException &e) {
                cerr << "exampleTransformToString: exception thrown" << endl;
                cout << e.what() << endl;
                sresult->failure++;
@@ -1042,7 +1044,7 @@ void exampleSimple3(SaxonProcessor *saxonProc, Xslt30Processor *proc, sResultCou
 
     try {
         executable = proc->compileFromFile("../php/xsl/foo.xsl");
-    } catch (SaxonApiException e) {
+    } catch(SaxonApiException &e) {
         cout<<"Error message="<<e.getMessage()<<endl;
         sresult->failure++;
         sresult->failureList.push_back("exampleSimple3");
@@ -1068,7 +1070,7 @@ void exampleSimple3aError(SaxonProcessor *saxonProc, Xslt30Processor *proc, sRes
     XsltExecutable * executable = nullptr;
     try {
         executable = proc->compileFromFile(nullptr);
-    } catch(SaxonApiException e) {
+    } catch(SaxonApiException &e) {
           cout << "Expected failure of test exampleSimple3aError:" << endl;
           const char * message = e.getMessage();
           cout << "cp0" << endl;
@@ -1096,7 +1098,7 @@ void exampleParam(SaxonProcessor *saxonProc, Xslt30Processor *proc, sResultCount
     XsltExecutable * executable = nullptr;
     try {
         executable = proc->compileFromFile("../php/xsl/foo.xsl");
-    } catch(SaxonApiException e) {
+    } catch(SaxonApiException &e) {
                 cout << "Expected failure of test exampleSimple3aError:" << endl;
                 const char * message = e.getMessage();
 
@@ -1139,7 +1141,7 @@ void exampleParam(SaxonProcessor *saxonProc, Xslt30Processor *proc, sResultCount
     const char *result = nullptr;
     try {
         result = executable->applyTemplatesReturningString();
-    } catch(SaxonApiException e){
+    } catch(SaxonApiException &e){
         cout << "Result is NULL<br/>  ======= fail =====" << endl;
         sresult->failure++;
         sresult->failureList.push_back("exampleParam");
@@ -1173,7 +1175,7 @@ void exampleParam(SaxonProcessor *saxonProc, Xslt30Processor *proc, sResultCount
 
     try {
         result2 = executable->applyTemplatesReturningString();
-    } catch(SaxonApiException e){
+    } catch(SaxonApiException &e){
         cout << "Result2 is NULL<br/>  ======= fail =====" << endl;
         sresult->failure++;
         sresult->failureList.push_back("exampleParam");
@@ -1229,7 +1231,7 @@ void exampleParam(SaxonProcessor *saxonProc, Xslt30Processor *proc, sResultCount
 
     try {
         result3 = executable->applyTemplatesReturningString();
-    } catch(SaxonApiException e){
+    } catch(SaxonApiException &e){
         cout << "Error in result ===== FAIL =======" << endl;
         sresult->failure++;
         sresult->failureList.push_back("exampleParam");
@@ -1282,7 +1284,7 @@ void exampleParam2(SaxonProcessor *saxonProc, Xslt30Processor *proc, sResultCoun
 
     try {
     result = executable->applyTemplatesReturningString();
-    } catch(SaxonApiException e) {
+    } catch(SaxonApiException &e) {
         cout<<"Result is NULL<br/>  ======= fail ====="<<endl;
         const char * emessage = e.getMessage();
         if(emessage != nullptr){
@@ -1318,7 +1320,7 @@ void exampleParam2(SaxonProcessor *saxonProc, Xslt30Processor *proc, sResultCoun
     const char *result2 = nullptr;
     try {
         result2 = executable->applyTemplatesReturningString();
-    } catch(SaxonApiException e) {
+    } catch(SaxonApiException &e) {
         cout<<"Error in result ===== FAIL ======="<<endl;
         sresult->failure++;
         sresult->failureList.push_back("exampleParam");
@@ -1342,7 +1344,7 @@ void exampleParam2(SaxonProcessor *saxonProc, Xslt30Processor *proc, sResultCoun
 
     try {
         result3 = executable->applyTemplatesReturningString();
-    } catch(SaxonApiException e) {
+    } catch(SaxonApiException &e) {
         cout<<"Error in result ===== FAIL ======="<<endl;
         sresult->failure++;
         sresult->failureList.push_back("exampleParam");
@@ -1370,7 +1372,7 @@ void xmarkTest1(Xslt30Processor *proc, sResultCount *sresult) {
 
     try {
         result = proc->transformFileToValue("../data/xmark100k.xml", "../data/q12.xsl");
-    } catch(SaxonApiException e) {
+    } catch(SaxonApiException &e) {
         printf("Exception thrown \nCheck For errors:");
         sresult->failure++;
         sresult->failureList.push_back("xmarkTest1");
@@ -1407,7 +1409,7 @@ void xmarkTest2(Xslt30Processor *proc, sResultCount *sresult) {
     XdmValue *result = nullptr;
     try {
         result = proc->transformFileToValue("../data/xmark100k.xml", "../data/q12.xsl");
-    } catch(SaxonApiException e) {
+    } catch(SaxonApiException &e) {
         printf("Exception thrown \nCheck For errors:");
         sresult->failure++;
         sresult->failureList.push_back("xmarkTest2");
@@ -1441,7 +1443,7 @@ void exampleSimple_xmark(Xslt30Processor *proc, sResultCount *sresult) {
     XdmValue *result = nullptr;
     try {
         result = proc->transformFileToValue("../data/xmark100k.xml", "../data/q12.xsl");
-    } catch(SaxonApiException e){
+    } catch(SaxonApiException &e){
         printf("Result is null \nCheck For errors:");
         const char * message = e.getMessage();
             if(message != nullptr) {
@@ -1509,7 +1511,7 @@ void testPackage1a(Xslt30Processor *trans, sResultCount *sresult) {
 
     try {
         trans->compileFromFileAndSave("../data/test.xsl", "test1a.sef");
-    } catch(SaxonApiException e) {
+    } catch(SaxonApiException &e) {
         const char * message = e.getMessage();
         if (message != nullptr) {
             cout << "Error message =" << message << endl;
@@ -1540,7 +1542,7 @@ void testPackage1a(Xslt30Processor *trans, sResultCount *sresult) {
         delete executable;
 
 
-    } catch(SaxonApiException e){
+    } catch(SaxonApiException &e){
               const char *message = e.getMessage();
               if (message != nullptr) {
                 cout << "Error message =" << message << endl;
@@ -1563,7 +1565,7 @@ void testPackage2_Error(Xslt30Processor *trans, sResultCount *sresult) {
     const char *stylesheet = "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'>       <xsl:param name='values' select='(2,3,4)' /><xsl:output method='xml' indent='yes' /><xsl:template match='*'><output><xsl:for-each select='$values' ><out><xsl:value-of select='. * 3'/></out><xsl:for-each></output></xsl:template><xsl:stylesheet>";
     try {
         trans->compileFromStringAndSave(stylesheet, "test2.sef");
-    } catch(SaxonApiException e) {
+    } catch(SaxonApiException &e) {
         const char *message = e.getMessage();
         if (message != nullptr) {
             cout << "Error message =" << message << endl;
@@ -1589,7 +1591,7 @@ void testCallFunction(SaxonProcessor *proc, Xslt30Processor *trans, sResultCount
     XsltExecutable * executable = nullptr;
     try {
     executable = trans->compileFromString(source);
-    } catch(SaxonApiException e) {
+    } catch(SaxonApiException &e) {
         const char * emessage = e.getMessage();
        if(emessage != nullptr) {
                 cerr << "Error: " << emessage << endl;
@@ -1630,7 +1632,7 @@ void testCallFunction(SaxonProcessor *proc, Xslt30Processor *trans, sResultCount
         delete executable;
 
 
-    } catch(SaxonApiException e){
+    } catch(SaxonApiException &e){
 
             cout << "testCallFunction ======= FAIL ======" << endl;
 
@@ -1708,7 +1710,7 @@ void  testResultDocumentAsMap(SaxonProcessor *proc, Xslt30Processor *trans, sRes
     return;
 
 
-    } catch(SaxonApiException e) {
+    } catch(SaxonApiException &e) {
        sresult->failure++;
        sresult->failureList.push_back("testResultDocumentAsMap");
        const char * message = e.getMessage();
@@ -1761,7 +1763,7 @@ void testResolveUri(SaxonProcessor *proc, Xslt30Processor *trans, sResultCount *
 
     delete executable;
 
-    } catch(SaxonApiException e) {
+    } catch(SaxonApiException &e) {
         sresult->failure++;
         sresult->failureList.push_back("testResolveUri");
             const char * message = e.getMessage();
@@ -1938,7 +1940,7 @@ void testContextNotRootNamedTemplateValue(SaxonProcessor *proc, Xslt30Processor 
     delete node;
     delete executable;
 
-    } catch(SaxonApiException e) {
+    } catch(SaxonApiException &e) {
         cout << "Error: "<< e.what() << endl;
         sresult->failure++;
         sresult->failureList.push_back("testContextNotRootNamedTemplateValue");
@@ -2306,7 +2308,7 @@ void testPipeline(SaxonProcessor *proc, sResultCount *sresult) {
 
     delete inn;
     inn = nullptr;
-
+cerr<<"testPipeline cp0"<<endl;
 }
 
 
@@ -2354,7 +2356,7 @@ void testCatalog(const char * cwd, SaxonProcessor * proc, sResultCount *sresult)
     delete trans;
     trans = nullptr;
 
-    } catch(SaxonApiException e) {
+    } catch(SaxonApiException &e) {
         const char *message = e.getMessage();
         if(message != nullptr) {
             cerr << "exception-proc=" << message << endl;
@@ -2398,7 +2400,7 @@ void testSaxSourceNoSystemId(SaxonProcessor * proc, DocumentBuilder * builder, s
 
         }
      delete builder;
-     }catch(SaxonApiException e){
+     }catch(SaxonApiException &e){
              const char * emessage = e.getMessage();
              if(emessage != nullptr) {
                  cerr << "exception=" << emessage << endl;
@@ -2444,7 +2446,7 @@ void testSaxSourceDTDValidation(SaxonProcessor * proc, sResultCount *sresult) {
         try {
             d = builder->parseXmlFromString(validXML.c_str());
 
-        } catch(SaxonApiException e) {
+        } catch(SaxonApiException &e) {
                     sresult->failure++;
                     sresult->failureList.push_back("testSaxSourceDTDValidation");
 
@@ -2467,7 +2469,7 @@ void testSaxSourceDTDValidation(SaxonProcessor * proc, sResultCount *sresult) {
             delete d;
             delete builder;
             return;
-        } catch(SaxonApiException e){
+        } catch(SaxonApiException &e){
             builder->exceptionClear();
 
         }
@@ -2479,7 +2481,7 @@ void testSaxSourceDTDValidation(SaxonProcessor * proc, sResultCount *sresult) {
             delete d;
             sresult->success++;
 
-        } catch(SaxonApiException e) {
+        } catch(SaxonApiException &e) {
             sresult->failure++;
             sresult->failureList.push_back("testSaxSourceDTDValidation-3");
         }
