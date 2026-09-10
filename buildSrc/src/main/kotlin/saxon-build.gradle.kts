@@ -80,7 +80,7 @@ tasks.register(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME) {
       // The build directory depends on what subproject runs this task...
       var saxonRoot: String? = null
       val buildDir = "${layout.buildDirectory.get()}"
-      
+
       var pos = buildDir.indexOf("/java/")
       if (pos > 0) {
         saxonRoot = buildDir.substring(0, pos+1)
@@ -88,11 +88,28 @@ tasks.register(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME) {
         pos = buildDir.indexOf("/csharp/")
         if (pos > 0) {
           saxonRoot = buildDir.substring(0, pos+1)
+        } else {
+          pos = buildDir.indexOf("/python/")
+          if (pos > 0) {
+            saxonRoot = buildDir.substring(0, pos+1)
+          }
         }
       }
 
       if (saxonRoot == null) {
         println("FAILED TO PARSE: ${buildDir}")
+      } else if (buildDir.indexOf("/python/") > 0) {
+        for (edition in listOf("ee", "pe", "he")) {
+          val testroot = "${saxonRoot}python/${edition}/build/test-results/"
+          val copyroot = "${archive}${edition}c/${version}/"
+          println("${testroot}->${copyroot}")
+          project.copy {
+            into(copyroot)
+            from(testroot) {
+              include("**/${dateStamp}/**")
+            }
+          }
+        }
       } else {
         val relativePath = mapOf(
             "eej" to "java/build/test-results/",

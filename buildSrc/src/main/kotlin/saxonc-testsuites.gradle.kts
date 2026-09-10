@@ -32,7 +32,7 @@ fun qtNTestSuite(qtVersion: String, lang: String): TaskProvider<TestSuiteTask> {
 
         driver = layout.projectDirectory.file("../testsuite_driver/qt3_test_suite_driver.py")
         suiteDir = layout.projectDirectory.dir("../../submodules/${qtVersion}")
-        outputDir = layout.buildDirectory.dir("suite/${qtVersion}_${lang}")
+        outputDir = layout.buildDirectory.dir("test-results/${qtVersion}/${saxonBuild.dateStamp.get()}")
         language = lang
         wheelInstaller(testsuiteInstallWheel)
         driverRequirements(testsuitesPipInstall)
@@ -65,7 +65,7 @@ listOf("xslt30", "xslt40").forEach { xslt ->
 
         driver = layout.projectDirectory.file("../testsuite_driver/xslt30_test_suite_driver.py")
         suiteDir = layout.projectDirectory.dir("../../submodules/${xslt}")
-        outputDir = layout.buildDirectory.dir("suite/${xslt}")
+        outputDir = layout.buildDirectory.dir("test-results/${xslt}/${saxonBuild.dateStamp.get()}")
         wheelInstaller(testsuiteInstallWheel)
         driverRequirements(testsuitesPipInstall)
     }
