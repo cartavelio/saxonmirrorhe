@@ -103,7 +103,8 @@ public final class NamePool {
      *
      * @param nameCode a code identifying an expanded QName, e.g. of an element or attribute
      * @return a qName containing the URI and local name corresponding to the supplied name code.
-     * The prefix will be set to an empty string.
+     * The prefix will be set to an empty string. Return null if the fingerprint has not been
+     * allocated.
      */
 
     public StructuredQName getUnprefixedQName(int nameCode) {
@@ -119,7 +120,7 @@ public final class NamePool {
      *
      * @param fingerprint a code identifying an expanded QName, e.g. of an element or attribute
      * @return a qName containing the URI and local name corresponding to the supplied fingerprint.
-     * There will be no prefix
+     * There will be no prefix. Return null if the fingerprint has not been allocated.
      */
 
     public StructuredQName getStructuredQName(int fingerprint) {
