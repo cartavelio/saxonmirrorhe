@@ -13,17 +13,12 @@
 
 //===============================================================================================//
 
-/*! <code>sxnc_value</code>. This struct is used to capture the xdmvalue and its type information.
- * <p/>
- */
-typedef struct {
-		int64_t xdmvalue; /*!< Internal use only. The value given as a Java object. */
-	} sxnc_value;
+
 
 EXTERN_SAXONC
 
 
-long long int j_makeStringValue(graal_isolatethread_t*, char * str);
+/*long long int j_makeStringValue(graal_isolatethread_t*, char * str);
 
 
 long long int j_makeIntegerValue(graal_isolatethread_t*, int i);
@@ -43,11 +38,39 @@ long long int j_makeBooleanValue(graal_isolatethread_t*, bool b);
 
 long long int j_makeQNameValue(graal_isolatethread_t*, char * itype, char *str);
 
-char * getStringValueForXdmItem(graal_isolatethread_t*, int64_h itemRef);
+char * getStringValueForXdmItem(graal_isolatethread_t*, int64_t itemRef);
 
-char * getStringValueForXdmValue(graal_isolatethread_t*, int64_h valueRef);
+char * getStringValueForXdmValue(graal_isolatethread_t*, int64_t valueRef);
 
-char * xdmItemToString(graal_isolatethread_t*, int64_h valueRef);
+char * xdmItemToString(graal_isolatethread_t*, int64_t valueRef);
+
+char * xdmNodeToString(graal_isolatethread_t*, int64_t valueRef);
+
+char * j_getPrimitiveTypeName(graal_isolatethread_t*, int64_t valueRef);
+
+long j_getLongValue(graal_isolatethread_t*, int64_t valueRef);
+
+int j_getHashCode(graal_isolatethread_t*, int64_t valueRef);
+
+double j_getDoubleValue(graal_isolatethread_t*, int64_t valueRef);
+
+double j_getBooleanValue(graal_isolatethread_t*, int64_t valueRef);
+
+int j_getNodeKind(graal_isolatethread_t*, int64_t nodeRef);
+
+char * j_getLocalName(graal_isolatethread_t*, int64_t nodeRef);
+
+char * j_getNodeName(graal_isolatethread_t*, int64_t nodeRef);
+
+long j_getTypedValue(graal_isolatethread_t*, int64_t nodeRef);
+
+char * getBaseURIForXdmNode(graal_isolatethread_t*, int64_t nodeRef);
+
+long getParentForXdmNode(graal_isolatethread_t*, int64_t nodeRef);
+
+char * j_getAttributeValue(graal_isolatethread_t*, int64_t nodeRef, char * eqname); */
+
+
 
 
     /**
@@ -55,7 +78,7 @@ char * xdmItemToString(graal_isolatethread_t*, int64_h valueRef);
      * @param val - boolean value
      */
 
-jobject booleanValue(sxnc_environment* environi, bool);
+    int64_t booleanValue(sxnc_environment* environi, bool);
 
 
     /**
@@ -63,7 +86,7 @@ jobject booleanValue(sxnc_environment* environi, bool);
      * @param val - int value
      */
 
-jobject integerValue(sxnc_environment *environi, int i);
+    int64_t integerValue(sxnc_environment *environi, int i);
 
 
     /**
@@ -71,7 +94,7 @@ jobject integerValue(sxnc_environment *environi, int i);
      * @param val - double value
      */
 
-jobject doubleValue(sxnc_environment* environi, double d);
+    int64_t doubleValue(sxnc_environment* environi, double d);
 
 
     /**
@@ -79,7 +102,7 @@ jobject doubleValue(sxnc_environment* environi, double d);
      * @param val - float value
      */
 
-jobject floatValue(sxnc_environment *environi, float f);
+    int64_t floatValue(sxnc_environment *environi, float f);
 
 
     /**
@@ -87,7 +110,7 @@ jobject floatValue(sxnc_environment *environi, float f);
      * @param val - Long value
      */
 
-jobject longValue(sxnc_environment *environi, long l);
+    int64_t longValue(sxnc_environment *environi, long l);
 
 
     /**
@@ -95,7 +118,7 @@ jobject longValue(sxnc_environment *environi, long l);
      * @param val - as char array value
      */
 
-jobject getJavaStringValue(sxnc_environment *environi, const char *str);
+    int64_t getJavaStringValue(sxnc_environment *environi, const char *str);
 
     /**
      * A Constructor. Create a XdmValue based on the target type. Conversion is applied if possible
@@ -103,7 +126,7 @@ jobject getJavaStringValue(sxnc_environment *environi, const char *str);
      * @param val - Value to convert
      */
 
-jobject xdmValueAsObj(sxnc_environment *environi, const char* type, const char* str);
+    int64_t xdmValueAsObj(sxnc_environment *environi, const char* type, const char* str);
 
     /**
      * A Constructor. Create a XdmValue based on the target type. Conversion is applied if possible
@@ -170,7 +193,7 @@ sxnc_value * itemAt(sxnc_environment *environi, sxnc_value, int i);
 
 
 
-jobject getvalue(sxnc_environment *environi, sxnc_value);
+int64_t getvalue(sxnc_environment *environi, sxnc_value);
 
 
    /**

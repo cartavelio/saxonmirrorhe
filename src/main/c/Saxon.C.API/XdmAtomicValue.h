@@ -51,7 +51,7 @@ public:
      * Wrap a Java XdmAtomicValue object.
      * @param val - Java XdmAtomicValue object
      */
-    XdmAtomicValue(jobject val);
+    XdmAtomicValue(int64_t val);
 
     //! A Java Wrapper Constructor
     /**
@@ -59,7 +59,7 @@ public:
      * @param val - Java XdmAtomicValue object
      * @param ty - type of the XdmAtomicValue
      */
-    XdmAtomicValue(jobject val, const char* ty);
+    XdmAtomicValue(int64_t val, const char* ty);
 
     //! Get the primitive type of this atomic value, as a QName.
     /**

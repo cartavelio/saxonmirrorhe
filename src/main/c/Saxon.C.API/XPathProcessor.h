@@ -248,9 +248,9 @@ private:
     void setParameter(const char * name, XdmValue*value, bool withParam);
 
 	SaxonProcessor * proc; /*!< SaxonProcessor pointer to object. This is the object that created the XPathProcessor */
-        std::string cwdXP; /*!< current working directory */
-	jclass  cppClass; /*!< Reference to the XPathProcessor Java class under JNI */
-	jobject cppXP; /*!< The XPathProcessor underlying Java object  */
+    std::string cwdXP; /*!< current working directory */
+	//jclass  cppClass; /*!< Reference to the XPathProcessor Java class under JNI */
+	int64_t cppXP; /*!< The XPathProcessor underlying Java object  */
 	std::map<std::string,XdmValue*> parameters; /*!< map of parameters used for the transformation as (string, value) pairs */
 	std::map<std::string,std::string> properties; /*!< map of properties used for the transformation as (string, string) pairs */
     SaxonApiException * exception; /*!< exception object created when there is an error */

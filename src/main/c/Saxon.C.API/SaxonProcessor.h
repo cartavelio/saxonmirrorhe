@@ -253,15 +253,6 @@ public:
      */
     XdmAtomicValue *makeStringValue(const char *str);
 
-    //! Factory method. Unlike the constructor, this avoids creating a new StringValue in the case
-    /*!
-     *
-     * of a zero-length string (and potentially other strings, in future)
-     *
-     * @param value the std:string
-     * @return the corresponding StringValue
-     */
-    static XdmAtomicValue *makeStringValue2(std::string str);
 
     /*!
      * Factory method: makes either an Int64Value or a BigIntegerValue depending on the value supplied
@@ -485,7 +476,7 @@ public:
      * @param callingClass
      * @param callingObject
     */
-    static SaxonApiException *checkForExceptionCPP(JNIEnv *env, jclass callingClass, jobject callingObject);
+    static SaxonApiException *checkForExceptionCPP(/*JNIEnv *env, jclass callingClass, jobject callingObject*/);
 
     //! Clean up and destroy Java VM to release memory used. Method to be called at the end of the program
     static void release();
@@ -553,7 +544,7 @@ public:
      * @param signature of the native method
      * @param fnPtr Pointer to the native method
     */
-    void addNativeMethod(char *name, char *signature, void *fnPtr) {
+    /*void addNativeMethod(char *name, char *signature, void *fnPtr) {
 
         JNINativeMethod method;
         method.name = name;
@@ -563,7 +554,7 @@ public:
         nativeMethodVect.push_back(method);
 
 
-    }
+    }*/
 
     //! Register several native methods for one class.
     /**
@@ -573,7 +564,7 @@ public:
      which cause assumption is made the user has added native methods using the method addNativeMethod .
     * @return bool success of registered native method
     */
-    bool registerCPPFunction(char *libName, JNINativeMethod *gMethods = nullptr) {
+    /*bool registerCPPFunction(char *libName, JNINativeMethod *gMethods = nullptr) {
         if (libName != nullptr) {
             setConfigurationProperty("extc", libName);
 
@@ -592,7 +583,7 @@ public:
 
         }
         return false;
-    }
+    } */
 
     //! Register several native methods for one class.
     /**
@@ -602,7 +593,7 @@ public:
      * @param numMethods
     * @return bool success of registered native method
     */
-    static bool registerNativeMethods(JNIEnv *env, const char *className,
+    /*static bool registerNativeMethods(JNIEnv *env, const char *className,
                                       JNINativeMethod *gMethods, int numMethods) {
         jclass clazz;
         clazz = env->FindClass(className);
@@ -616,7 +607,7 @@ public:
             return false;
         }
         return true;
-    }
+    } **/
 
     //! Check for exception thrown in the underlying JNI. Then create the SaxonApiException class which the user can retrieve
     /**
@@ -624,7 +615,7 @@ public:
      * @param cppClass
      * @return The SaxonApiException with information about the exception thrown
      */
-    SaxonApiException *checkAndCreateException(jclass cppClass);
+   // SaxonApiException *checkAndCreateException(jclass cppClass);
 
 
 
@@ -658,7 +649,7 @@ protected:
     int64_t procRef;
 
     //JNINativeMethod *nativeMethods; /*!< native methods variable used in extension methods */
-    std::vector<JNINativeMethod> nativeMethodVect; /*!< Vector of native methods defined by user */
+    //std::vector<JNINativeMethod> nativeMethodVect; /*!< Vector of native methods defined by user */
     SaxonApiException *exception; /*!< SaxonApiException object to capture exceptions thrown from the underlying Java code via JNI */
 
 

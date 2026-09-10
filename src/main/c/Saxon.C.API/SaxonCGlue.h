@@ -11,7 +11,7 @@
 
 
 
-#include "saxonc_graalvm_isolate.h" //<graalvm-ee-12.1.h>
+#include <graalvm-ee-12.1.h>
 
 
 #if defined __linux__ || defined __APPLE__
@@ -102,7 +102,12 @@ typedef struct {
     int64_t parameterDataRef; /*!< Internal use only. The value of the parameter points to the Java object. */
 } sxnc_property;
 
-
+/*! <code>sxnc_value</code>. This struct is used to capture the xdmvalue and its type information.
+ * <p/>
+ */
+typedef struct {
+    int64_t xdmvalue; /*!< Internal use only. The value given as a Java object. */
+} sxnc_value;
 
 extern int64_t cpp;
 
@@ -112,7 +117,7 @@ extern const char * failure;
 
 
 // Graalvm entrypoint methods
-void vmLocatorSymbol(graal_isolatethread_t* thread);
+/*void vmLocatorSymbol(graal_isolatethread_t* thread);
 long long int  createSaxonProcessor(graal_isolatethread_t*, int license);
 
 long long int createProcessorData(graal_isolatethread_t*);
@@ -129,7 +134,7 @@ void addProcessorPropertyPair(graal_isolatethread_t*, int64_t processorDataRef, 
 
 void addProcessorValue(graal_isolatethread_t*,  int64_t processorDataRef, int64_t valueRef);
 
-void setCatalogFile(graal_isolatethread_t*, char * filename);
+void setCatalogFile(graal_isolatethread_t*, char * filename); */
 
 
 
@@ -173,18 +178,18 @@ void graal_tear_down (graal_isolatethread_t *thread);
 /*
  * Get a parameter from list
  */
-//jobject getParameter(sxnc_parameter *parameters,  int parLen, const char* namespacei, const char * name);
+int64_t getParameter(sxnc_parameter *parameters,  int parLen, const char* namespacei, int64_t value);
 
 /*
  * Get a property from list
  */
-char* getProperty(sxnc_property * properties, const char * name, const char* value);
+//char* getProperty(sxnc_property * properties, const char * name, const char* value);
 
 
 /*
  * set a parameter
  */
-void setParameter(sxnc_parameter *parameters, const char * name, sxnc_value * value);
+//void setParameter(sxnc_parameter *parameters, const char * name, sxnc_value * value);
 
 
 /*

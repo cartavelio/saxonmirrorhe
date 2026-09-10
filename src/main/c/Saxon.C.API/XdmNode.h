@@ -37,7 +37,7 @@ public:
      * XdmNode constructor created from a JNI Java object. This is for internal use only
      * @param obj - The internal Java object for the XdmNode is wrapped here in the C++ XdmNode
      */
-	XdmNode(jobject);
+	XdmNode(int64_t);
 
     //! XdmNode constructor created as a wrapper around an existing Saxon Java object
     /**
@@ -199,7 +199,7 @@ public:
 	 *
 	 * @return jobject - The unwrapped JNI object for the XdmNode
 	 */
-	jobject getUnderlyingValue() {
+	int64_t getUnderlyingValue() {
 
 		return XdmItem::getUnderlyingValue();
 

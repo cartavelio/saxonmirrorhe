@@ -8,9 +8,9 @@
 
 #jc =p MyDll.prj
 #rm -rf MyDll_jetpdb
-export JET_HOME=/usr/lib/rt
-export PATH=$JET_HOME/bin:$PATH
-export LD_LIBRARY_PATH=$JET_HOME/lib/amd64/shared:$LD_LIBRARY_PATH
+#export JET_HOME=/usr/lib/rt
+#export PATH=$JET_HOME/bin:$PATH
+#export LD_LIBRARY_PATH=$JET_HOME/lib/amd64/shared:$LD_LIBRARY_PATH
 export SAXON_ERRORS="-Wall -Werror -Wextra"
 
 
