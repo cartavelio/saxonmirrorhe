@@ -683,7 +683,9 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
                             return new PrependSequenceIterator(separator, action.iterate(cxt));
                         }
                     };
-                    return new ContextMappingIterator(mapper, context);
+                    XPathContextMinor c2 = context.newMinorContext();
+                    c2.trackFocus(select.iterate(context));
+                    return new ContextMappingIterator(mapper, c2);
                 };
 
             }
