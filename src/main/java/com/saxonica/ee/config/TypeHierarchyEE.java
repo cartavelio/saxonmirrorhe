@@ -38,7 +38,7 @@ public class TypeHierarchyEE extends TypeHierarchy {
      *         {@link Affinity#SUBSUMED_BY}, {@link Affinity#DISJOINT}, {@link Affinity#OVERLAPS}
      */
     @Override
-    protected Affinity computeContentRelationship(ItemType t1, ItemType t2, Optional<IntSet> on1, Optional<IntSet> on2) {
+    protected Affinity computeContentRelationship(ItemType t1, ItemType t2) {
         Affinity contentRelationship = DISJOINT;
         boolean nillable1 = true;
         boolean nillable2 = true;
@@ -60,11 +60,15 @@ public class TypeHierarchyEE extends TypeHierarchy {
             // the element being tested.
             SchemaType s1 = ((NodeTest) t1).getContentType();
             SchemaType s2 = ((NodeTest) t2).getContentType();
+
+            Optional<IntSet> on1 = ((NodeTest) t1).getRequiredNodeNames();
+            Optional<IntSet> on2 = ((NodeTest) t2).getRequiredNodeNames();
+
             try {
                 if (t1 instanceof SchemaElementTest && on2.isPresent() && on2.get().size() == 1) {
                     IntIterator ii2 = on2.get().iterator();
                     int name2 = ii2.hasNext() ? ii2.next() : -1;
-                    SchemaDeclaration decl2 = ((SchemaElementTest)t1).getSchema().getElementDecl(name2);
+                    SchemaDeclaration decl2 = config.getElementDeclaration(name2);
                     if (decl2 != null) {
                         s1 = decl2.getType();
                     }
@@ -76,7 +80,7 @@ public class TypeHierarchyEE extends TypeHierarchy {
                 if (t2 instanceof SchemaElementTest && on1.isPresent() && on1.get().size() == 1) {
                     IntIterator ii1 = on1.get().iterator();
                     int name1 = ii1.hasNext() ? ii1.next() : -1;
-                    SchemaDeclaration decl1 = ((SchemaElementTest) t2).getSchema().getElementDecl(name1);
+                    SchemaDeclaration decl1 = config.getElementDeclaration(name1);
                     if (decl1 != null) {
                         s2 = decl1.getType();
                     }
