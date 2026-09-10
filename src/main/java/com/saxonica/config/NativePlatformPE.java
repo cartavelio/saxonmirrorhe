@@ -18,7 +18,7 @@ import net.sf.saxon.trans.XPathException;
  * (as distinct from .NET and Java) for Saxon-PE and Saxon-EE.
  * This is a singleton class with no instance data.
  * The key differences to the JavaPlatformPE is that we have no reference to registerAllBuiltInObjectModels and the
- * environment variable for Saxon/C we use SAXONC_HOME
+ * environment variable for SaxonC we use SAXONC_HOME
  */
 public class NativePlatformPE extends NativePlatform {
 

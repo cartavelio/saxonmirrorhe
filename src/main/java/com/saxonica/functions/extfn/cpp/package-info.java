@@ -1,5 +1,5 @@
 /**
- * <p>This package contains classes used by the Saxon/C product to support calling out to
+ * <p>This package contains classes used by the SaxonC product to support calling out to
  * extension functions written in C++ or PHP.</p>
  * <p>None of these classes will be used directly by typical user applications.</p>
  */
