@@ -323,7 +323,7 @@ public class TestOutcome {
                             driver.println(wrongError);
                         }
                     } else {
-                        driver.println("Expected error " + assertion.attribute("code") + "; got success");
+                        driver.println("Expected error " + assertion.attribute("code") + ", got success");
                     }
                 } else if (!success && isException()) {
                     StringBuilder fsb = new StringBuilder(32);
