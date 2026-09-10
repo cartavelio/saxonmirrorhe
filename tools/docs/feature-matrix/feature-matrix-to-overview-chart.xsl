@@ -240,10 +240,10 @@
             <xsl:otherwise>
                 <div id="aside">
                     <h2>Packages by platform</h2>
-                    <p><b>Java:</b> SaxonJ 12 first released Dec 2022.</p>
+                    <p><b>Java:</b> SaxonJ 12 first released Jan 2023.</p>
                     <p><b>.NET:</b> SaxonCS 12 for .NET 6 available only as the Enterprise Edition, first
-                        released Dec 2022.</p>
-                    <p><b>Native:</b> SaxonC 12 first released Dec 2022, built from SaxonJ 12.</p>
+                        released Jan 2023.</p>
+                    <p><b>Native:</b> SaxonC 12 first released Jan 2023, built from SaxonJ 12.</p>
                     <p><b>JavaScript:</b> SaxonJS 2 does not require a commercial license.</p>
                 </div>
                 
