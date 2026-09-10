@@ -938,9 +938,7 @@ public class ExpressionTool {
         Optimizer opt = visitor.obtainOptimizer();
         if (opt.isOptionSet(OptimizerOptions.MISCELLANEOUS)) {
             ExpressionTool.resetPropertiesWithinSubtree(body);
-            if (opt.isOptionSet(OptimizerOptions.MISCELLANEOUS)) {
-                body = body.optimize(visitor, cisi);
-            }
+            body = body.optimize(visitor, cisi);
             body.setParentExpression(null);
             if (extractGlobals && compilation != null) {
                 Expression exp2 = opt.promoteExpressionsToGlobal(body, compilation.getPrincipalStylesheetModule(), visitor);
