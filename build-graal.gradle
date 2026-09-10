@@ -693,12 +693,22 @@ task setup_eec_pypi(
 }
 
 task saxon_eec_pypi(
-  type: Exec,
   dependsOn: ["setup_eec_pypi"]
 ) {
   inputs.files setup_eec_pypi.outputs.getFiles()
   outputs.files fileTree(dir: "${buildDir}/pypi/dist")
 
-  workingDir "${buildDir}/pypi"
-  commandLine "python3", "setup.py", "bdist_wheel"
+  doLast {
+    exec {
+      workingDir "${buildDir}/pypi"
+      commandLine "python3", "-mpip", "install", "-r", "requirements.txt"
+    }
+  }
+
+  doLast {
+    exec {
+      workingDir "${buildDir}/pypi"
+      commandLine "python3", "setup.py", "bdist_wheel"
+    }
+  }
 }
