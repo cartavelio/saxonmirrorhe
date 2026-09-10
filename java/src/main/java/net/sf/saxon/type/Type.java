@@ -7,7 +7,6 @@
 
 package net.sf.saxon.type;
 
-import com.saxonica.ee.schema.UserAtomicType;
 import com.saxonica.functions.qt4.pin.LabeledItem;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.ma.arrays.ArrayItem;
@@ -333,7 +332,7 @@ public abstract class Type {
     public static boolean isSubType(AtomicType one, AtomicType two) {
         while (true) {
             if (one.getFingerprint() == two.getFingerprint()) {
-                if (one != two && one instanceof UserAtomicType && two instanceof UserAtomicType) {
+                if (one != two && !one.isBuiltInType() && !two.isBuiltInType()) {
                     throw new UncheckedXPathException("There are two different types with the same name " + one.getEQName() +
                             "; this probably means the schema has been loaded twice, once to validate a source document, " +
                             "and once as a static schema import.", "XTSE0220");
