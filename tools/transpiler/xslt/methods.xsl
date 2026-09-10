@@ -1344,7 +1344,7 @@
          <xsl:apply-templates select="." mode="diamond"/>
       </xsl:variable>
       <xsl:choose>
-         <xsl:when test="name/@identifier = ('empty', 'of') and $targetClass">
+         <xsl:when test="name/@identifier = ('empty', 'of', 'ofNullable') and $targetClass">
             <xsl:text>Saxon.Ejava.util.Optional&lt;{f:renameGenericType($targetClass)}>.{name/@identifier}(</xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>

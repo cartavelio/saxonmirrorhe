@@ -27,6 +27,10 @@ namespace Saxon.Ejava.util {
             return !_present;
         }
 
+        public T orElse(T other) {
+            return _present ? _value : other;
+        }
+
         public static Optional<T> empty() {
             return new();
         }
@@ -34,6 +38,10 @@ namespace Saxon.Ejava.util {
         public static Optional<T> of(T value) {
             // TODO: require non-null?
             return new Optional<T>(value);
+        }
+        
+        public static Optional<T> ofNullable(T value) {
+            return value == null ? new Optional<T>() : new Optional<T>(value);
         }
 
         public override bool Equals(object other) {
