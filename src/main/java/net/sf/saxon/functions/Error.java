@@ -79,9 +79,19 @@ public class Error extends SystemFunction implements Callable {
                     if (errorElement != null) {
                         String module = errorElement.getAttributeValue("", "module");
                         String lineVal = errorElement.getAttributeValue("", "line");
-                        int line = lineVal == null ? -1 : Integer.parseInt(lineVal);
+                        int line;
+                        try {
+                            line = lineVal == null ? -1 : Integer.parseInt(lineVal);
+                        } catch (NumberFormatException ex) {
+                            line = -1;
+                        }
                         String columnVal = errorElement.getAttributeValue("", "column");
-                        int col = columnVal == null ? -1 : Integer.parseInt(columnVal);
+                        int col;
+                        try {
+                            col = columnVal == null ? -1 : Integer.parseInt(columnVal);
+                        } catch (NumberFormatException ex) {
+                            col = -1;
+                        }
                         Loc locator = new Loc(module, line, col);
                         e.setLocator(locator);
                     }
