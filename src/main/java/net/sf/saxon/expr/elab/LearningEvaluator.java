@@ -31,8 +31,8 @@ public class LearningEvaluator implements SequenceEvaluator {
 
     private final Expression expression;
     private SequenceEvaluator evaluator;
-    private final AtomicInteger completed = new AtomicInteger(0);
-    private final AtomicInteger count = new AtomicInteger(0);
+    private final AtomicInteger completed;
+    private final AtomicInteger count;
 
 
     /**
@@ -46,12 +46,10 @@ public class LearningEvaluator implements SequenceEvaluator {
      *             themselves eagerly all the time.
      */
     public LearningEvaluator(Expression expr, SequenceEvaluator lazy) {
-//        monitoring = expr.toShortString().contains("$return-val");
-//        if (monitoring) {
-//            System.err.println("New learning evaluator for " + expr.toShortString());
-//        }
         this.expression = expr;
         this.evaluator = lazy;
+        this.completed = new AtomicInteger(0);
+        this.count = new AtomicInteger(0);
     }
 
     /**
