@@ -2,8 +2,6 @@
 package com.saxonica.ee.optim;
 
 import com.saxonica.ee.bytecode.util.CompilerService;
-import net.sf.saxon.expr.elab.PushEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
 import com.saxonica.ee.stream.*;
 import com.saxonica.ee.stream.watch.StreamWatch;
 import com.saxonica.ee.stream.watch.Watch;
@@ -13,12 +11,12 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.instruct.GlobalContextRequirement;
 import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.Optimizer;
-import net.sf.saxon.expr.parser.OptimizerOptions;
 import net.sf.saxon.expr.parser.PathMap;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.Logger;
@@ -159,15 +157,11 @@ public class XQueryExpressionEE extends XQueryExpression {
     
     @Override
     protected void processQuery(Outputter dest, XPathContext context) throws XPathException {
-        if (getConfiguration().getOptimizerOptions().isSet(OptimizerOptions.ELABORATION)) {
-            if (pusher == null) {
-                pusher = Elaborator.makeElaborator(expression).elaborateForPush();
-            }
-            TailCall tc = pusher.process(dest, context);
-            Expression.dispatchTailCall(tc);
-        } else {
-            super.processQuery(dest, context);
+        if (pusher == null) {
+            pusher = expression.makeElaborator().elaborateForPush();
         }
+        TailCall tc = pusher.processLeavingTail(dest, context);
+        Expression.dispatchTailCall(tc);
     }
 
     /**

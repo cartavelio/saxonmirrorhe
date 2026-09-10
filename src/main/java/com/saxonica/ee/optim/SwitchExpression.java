@@ -380,44 +380,13 @@ public class SwitchExpression extends Expression implements TailCallReturner, Co
 
     @Override
     public void process(Outputter output, XPathContext context) throws XPathException {
-        AtomicValue subjectValue = (AtomicValue) getSubjectExpression().evaluateItem(context);
-        if (subjectValue == null) {
-            getOtherwiseExpression().process(output, context);
-            return;
-        }
-        AtomicMatchKey key = subjectValue.getXPathMatchKey(collation, context.getImplicitTimezone());
-        int selection = getIndex(key);
-        if (selection == -1) {
-            getOtherwiseExpression().process(output, context);
-        } else {
-            actions.get(selection).getChildExpression().process(output, context);
-        }
+        dispatchTailCall(makeElaborator().elaborateForPush().processLeavingTail(output, context));
     }
 
     @Override
     public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        AtomicValue subjectValue = (AtomicValue) getSubjectExpression().evaluateItem(context);
-        if (subjectValue == null) {
-            return doTailCall(getOtherwiseExpression(), output, context);
-        }
-        AtomicMatchKey key = subjectValue.getXPathMatchKey(collation, context.getImplicitTimezone());
-        int selection = map.getOrDefault(key, -1);
-        if (selection == -1) {
-            return doTailCall(getOtherwiseExpression(), output, context);
-        } else {
-            return doTailCall(actions.get(selection).getChildExpression(), output, context);
-        }
+        return makeElaborator().elaborateForPush().processLeavingTail(output, context);
     }
-
-    private TailCall doTailCall(Expression o, Outputter output, XPathContext context) throws XPathException {
-        if (o instanceof TailCallReturner) {
-            return ((TailCallReturner) o).processLeavingTail(output, context);
-        } else {
-            o.process(output, context);
-            return null;
-        }
-    }
-
 
     @Override
     public int getImplementationMethod() {
@@ -504,12 +473,12 @@ public class SwitchExpression extends Expression implements TailCallReturner, Co
 
         public PullEvaluator elaborateForPull() {
             final SwitchExpression expr = (SwitchExpression) getExpression();
-            final ItemEvaluator subjectEvaluator = Elaborator.makeElaborator(expr.getSubjectExpression()).elaborateForItem();
+            final ItemEvaluator subjectEvaluator = expr.getSubjectExpression().makeElaborator().elaborateForItem();
             final List<PullEvaluator> actionEvaluators = new ArrayList<>(expr.getActions().size());
             for (Operand o : expr.getActions()) {
-                actionEvaluators.add(Elaborator.makeElaborator(o.getChildExpression()).elaborateForPull());
+                actionEvaluators.add(o.getChildExpression().makeElaborator().elaborateForPull());
             }
-            final PullEvaluator otherwiseEvaluator = Elaborator.makeElaborator(expr.getOtherwiseExpression()).elaborateForPull();
+            final PullEvaluator otherwiseEvaluator = expr.getOtherwiseExpression().makeElaborator().elaborateForPull();
             return context -> {
                 AtomicValue subjectValue = (AtomicValue) subjectEvaluator.eval(context);
                 if (subjectValue == null) {
@@ -528,12 +497,12 @@ public class SwitchExpression extends Expression implements TailCallReturner, Co
         @Override
         public ItemEvaluator elaborateForItem() {
             final SwitchExpression expr = (SwitchExpression) getExpression();
-            final ItemEvaluator subjectEvaluator = Elaborator.makeElaborator(expr.getSubjectExpression()).elaborateForItem();
+            final ItemEvaluator subjectEvaluator = expr.getSubjectExpression().makeElaborator().elaborateForItem();
             final List<ItemEvaluator> actionEvaluators = new ArrayList<>(expr.getActions().size());
             for (Operand o : expr.getActions()) {
-                actionEvaluators.add(Elaborator.makeElaborator(o.getChildExpression()).elaborateForItem());
+                actionEvaluators.add(o.getChildExpression().makeElaborator().elaborateForItem());
             }
-            final ItemEvaluator otherwiseEvaluator = Elaborator.makeElaborator(expr.getOtherwiseExpression()).elaborateForItem();
+            final ItemEvaluator otherwiseEvaluator = expr.getOtherwiseExpression().makeElaborator().elaborateForItem();
             return context -> {
                 AtomicValue subjectValue = (AtomicValue) subjectEvaluator.eval(context);
                 if (subjectValue == null) {
@@ -552,23 +521,23 @@ public class SwitchExpression extends Expression implements TailCallReturner, Co
         @Override
         public PushEvaluator elaborateForPush() {
             final SwitchExpression expr = (SwitchExpression) getExpression();
-            final ItemEvaluator subjectEvaluator = Elaborator.makeElaborator(expr.getSubjectExpression()).elaborateForItem();
+            final ItemEvaluator subjectEvaluator = expr.getSubjectExpression().makeElaborator().elaborateForItem();
             final List<PushEvaluator> actionEvaluators = new ArrayList<>(expr.getActions().size());
             for (Operand o : expr.getActions()) {
-                actionEvaluators.add(Elaborator.makeElaborator(o.getChildExpression()).elaborateForPush());
+                actionEvaluators.add(o.getChildExpression().makeElaborator().elaborateForPush());
             }
-            final PushEvaluator otherwiseEvaluator = Elaborator.makeElaborator(expr.getOtherwiseExpression()).elaborateForPush();
+            final PushEvaluator otherwiseEvaluator = expr.getOtherwiseExpression().makeElaborator().elaborateForPush();
             return (out, context) -> {
                 AtomicValue subjectValue = (AtomicValue) subjectEvaluator.eval(context);
                 if (subjectValue == null) {
-                    return otherwiseEvaluator.process(out, context);
+                    return otherwiseEvaluator.processLeavingTail(out, context);
                 }
                 AtomicMatchKey key = subjectValue.getXPathMatchKey(expr.getCollation(), context.getImplicitTimezone());
                 int selection = expr.getIndex(key);
                 if (selection == -1) {
-                    return otherwiseEvaluator.process(out, context);
+                    return otherwiseEvaluator.processLeavingTail(out, context);
                 } else {
-                    return actionEvaluators.get(selection).process(out, context);
+                    return actionEvaluators.get(selection).processLeavingTail(out, context);
                 }
             };
         }

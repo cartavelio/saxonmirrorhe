@@ -351,7 +351,7 @@ public final class IndexedFilterExpression extends Expression {
             }
         } else {
             if (basePullEvaluator == null) {
-                basePullEvaluator = Elaborator.makeElaborator(baseExp).elaborateForPull();
+                basePullEvaluator = baseExp.makeElaborator().elaborateForPull();
             }
             indexedValue = SearchableValue.makeSearchableValue(basePullEvaluator.iterate(context));
         }
@@ -363,7 +363,7 @@ public final class IndexedFilterExpression extends Expression {
         }
         AtomicComparer comparer = this.comparer.provideContext(context);
         if (searchPullEvaluator == null) {
-            searchPullEvaluator = Elaborator.makeElaborator(getSearchExpression()).elaborateForPull();
+            searchPullEvaluator = getSearchExpression().makeElaborator().elaborateForPull();
         }
         SequenceIterator values = searchPullEvaluator.iterate(context);
         return indexedValue.findItems(getUseExpression(), values, convertUntypedToOther,
