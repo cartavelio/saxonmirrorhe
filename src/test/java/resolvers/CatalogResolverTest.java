@@ -13,6 +13,7 @@ import java.io.FileInputStream;
 import java.util.Iterator;
 
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CatalogResolverTest {
     @Test
@@ -167,6 +168,23 @@ public class CatalogResolverTest {
                 System.out.println(iter.next().toString());
             }
 
+        } catch (Exception ex) {
+            fail();
+        }
+    }
+
+
+    @Test
+    public void testMagicUri() {
+        try {
+            Processor processor = new Processor(false);
+            XPathCompiler xpc = processor.newXPathCompiler();
+            // This is a special URI that can be used to check that the xmlresolver is present and correct
+            XPathExecutable exec = xpc.compile("doc-available('https://xmlresolver.org/data/resolver/succeeded/test/check.xml')");
+            XPathSelector s = exec.load();
+            XdmValue val = s.evaluate();
+            assertTrue(val instanceof XdmAtomicValue);
+            assertTrue(((XdmAtomicValue)val).getBooleanValue());
         } catch (Exception ex) {
             fail();
         }
