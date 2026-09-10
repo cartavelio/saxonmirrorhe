@@ -23,6 +23,8 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.gnode.AnyGNodeType;
+import net.sf.saxon.type.gnode.AnyXNodeType;
+import net.sf.saxon.type.gnode.XNodeType;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
@@ -33,11 +35,11 @@ import java.util.function.Supplier;
  * An SequenceCoercer is an expression that performs coercion on a sequence of items:
  */
 
-public final class SequenceCoercer extends UnaryExpression {
+public class SequenceCoercer extends UnaryExpression {
 
-    private final SequenceType requiredType;
-    private final Supplier<RoleDiagnostic> roleSupplier;
-    private final boolean allow40;
+    protected final SequenceType requiredType;
+    protected final Supplier<RoleDiagnostic> roleSupplier;
+    protected final boolean allow40;
 
 
     /**
@@ -47,7 +49,7 @@ public final class SequenceCoercer extends UnaryExpression {
      * @param requiredType the function item type to which all items in the sequence should be converted,
      */
 
-    private SequenceCoercer(Expression sequence, SequenceType requiredType,
+    protected SequenceCoercer(Expression sequence, SequenceType requiredType,
                            Supplier<RoleDiagnostic> role, boolean allow40) {
         super(sequence);
         this.requiredType = requiredType;
@@ -62,6 +64,9 @@ public final class SequenceCoercer extends UnaryExpression {
         // Also, nodes are handled specially when streaming. So if the required type is a node type,
         // we use an ItemChecker and/or CardinalityChecker.
 
+        // TODO: where the required type is GNode or JNode, we're currently coercing a map or array
+        //   to a root JNode. This conversion should happen only on the LHS of the "/" operator.
+
         ItemType requiredItemType = requiredType.getPrimaryType();
         Genre supplied = sequence.getItemType().getGenre();
         if (requiredItemType.isAtomicType() && supplied == Genre.XNODE) {
@@ -69,6 +74,20 @@ public final class SequenceCoercer extends UnaryExpression {
         }
         if (requiredItemType == AnyGNodeType.getInstance() && (supplied == Genre.ARRAY || supplied == Genre.MAP)) {
             requiredType = SequenceType.makeSequenceType(AnyJNodeType.getInstance(), requiredType.getCardinality());
+            requiredItemType = AnyJNodeType.getInstance();
+        }
+        if (requiredItemType instanceof XNodeType) {
+            Expression result = sequence;
+            if (requiredType.getCardinality() != StaticProperty.ALLOWS_ZERO_OR_MORE) {
+                result = CardinalityChecker.makeCardinalityChecker(result, requiredType.getCardinality(), role);
+            }
+            if (requiredItemType != AnyXNodeType.getInstance()) {
+                result = new ItemChecker(result, requiredItemType, role);
+            }
+            return result;
+        }
+        if (requiredItemType == AnyGNodeType.getInstance()) {
+            return new GNodeSequenceCoercer(sequence, requiredType, role, allow40);
         }
         return new SequenceCoercer(sequence, requiredType, role, allow40);
     }
