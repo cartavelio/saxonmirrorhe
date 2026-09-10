@@ -166,6 +166,7 @@ public class ICUNumbererPE extends AbstractNumberer {
         for (String s : rules) {
             if (s.startsWith(spelloutCardinalPattern)) {
                 spelloutCardinalRulesets.add(s);
+                ordinalParamIndex.put(s, s);
             }
             if (s.startsWith(spelloutOrdinalPattern)) {
                 spelloutOrdinalRulesets.add(s);
@@ -396,6 +397,12 @@ public class ICUNumbererPE extends AbstractNumberer {
                                 }
                             }
                         } else if (ordinalParam.startsWith("%")) {
+                            for (String pref : preferences) {
+                                if (ordinalParamIndex.containsKey(ordinalParam + pref)) {
+                                    ordinalParam = ordinalParamIndex.get(ordinalParam + pref);
+                                    break;
+                                }
+                            }
                             rule = ordinalParam;
                         }
                     }
