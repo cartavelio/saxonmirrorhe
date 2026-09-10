@@ -15,6 +15,7 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.functions.AbstractFunction;
+import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
@@ -218,6 +219,15 @@ public class CoercedFunction extends AbstractFunction {
     private static String wrongArityMessage(FunctionItem supplied, int expected) {
         return "The supplied function (" + supplied.getDescription() + ") has " + FunctionCall.plural(supplied.getArity(), "parameter") +
                 " - expected a function with " + FunctionCall.plural(expected, "parameter");
+    }
+
+    @Override
+    public boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual.DeepEqualOptions options) throws XPathException {
+        if (other instanceof CoercedFunction cf) {
+            return targetFunction.deepEqual40(cf.targetFunction, context, options)
+                    && requiredType.equals(cf.requiredType);
+        }
+        return false;
     }
 
     /**

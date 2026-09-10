@@ -18,6 +18,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
@@ -207,6 +208,38 @@ public class CurriedFunction extends AbstractFunction {
     }
 
     @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(targetFunction);
+        sb.append("(");
+        for (Sequence seq : boundValues) {
+            if (seq == null) {
+                sb.append("?");
+            } else {
+                sb.append(seq.toString());
+            }
+        }
+        sb.append(")");
+        return sb.toString();
+    }
+
+    @Override
+    public String toShortString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(targetFunction.toShortString());
+        sb.append("(");
+        for (Sequence seq : boundValues) {
+            if (seq == null) {
+                sb.append("?");
+            } else {
+                sb.append(Err.depictSequence(seq));
+            }
+        }
+        sb.append(")");
+        return sb.toString();
+    }
+
+    @Override
     public boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual.DeepEqualOptions options) throws XPathException {
         if (other instanceof CurriedFunction cf) {
             if (this.getArity() != cf.getArity()) {
@@ -216,8 +249,17 @@ public class CurriedFunction extends AbstractFunction {
                 return false;
             }
             for (int i = 0; i < boundValues.length; i++) {
-                if (!DeepEqual.deepEqual(boundValues[i].iterate(), cf.boundValues[i].iterate(), context, options)) {
-                    return false;
+                if (boundValues[i] == null) {
+                    if (cf.boundValues[i] != null) {
+                        return false;
+                    }
+                } else {
+                    if (cf.boundValues[i] == null) {
+                        return false;
+                    }
+                    if (!DeepEqual.deepEqual(boundValues[i].iterate(), cf.boundValues[i].iterate(), context, options)) {
+                        return false;
+                    }
                 }
             }
             if (!getFunctionItemType().equals(cf.getFunctionItemType())) {

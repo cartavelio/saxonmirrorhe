@@ -8,6 +8,7 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
@@ -125,6 +126,14 @@ public class ConstantFunction extends AbstractFunction  {
 
     public GroundedValue getConstantValue() {
         return value;
+    }
+
+    @Override
+    public boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual.DeepEqualOptions options) throws XPathException {
+        if (other instanceof ConstantFunction cf) {
+            return DeepEqual.deepEqual(value.iterate(), cf.value.iterate(), context, options);
+        }
+        return false;
     }
 
 }

@@ -17,6 +17,7 @@ import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.instruct.UserFunctionParameter;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.AbstractFunction;
+import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.functions.IFunctionWithRetainedParameterNames;
 import net.sf.saxon.functions.registry.FunctionDefinition;
 import net.sf.saxon.om.*;
@@ -560,6 +561,20 @@ public class UserFunctionReference extends Expression
             }
             if (other instanceof BoundUserFunction buf) {
                 return getTargetFunction() == buf.getTargetFunction() && getArity() == buf.getArity();
+            }
+            return false;
+        }
+
+        @Override
+        public boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual.DeepEqualOptions options) throws XPathException {
+            if (other instanceof BoundUserFunction buf) {
+                if (this == buf) {
+                    return true;
+                }
+                if (arity != buf.arity) {
+                    return false;
+                }
+                return getTargetFunction().deepEqual40(buf.getTargetFunction(), context, options);
             }
             return false;
         }
