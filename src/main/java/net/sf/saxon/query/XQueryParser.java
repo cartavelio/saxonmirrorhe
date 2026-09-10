@@ -102,6 +102,7 @@ public class XQueryParser extends XPathParser {
 
     private XQueryParser newParser() {
         XQueryParser qp = new XQueryParser();
+        qp.env = env;
         qp.setLanguage(language, languageVersion);
         qp.setParserExtension(parserExtension);
         return qp;

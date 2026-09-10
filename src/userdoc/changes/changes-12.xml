@@ -107,7 +107,7 @@
     <category name="xquery31">
         <p>From 12.3, the <code>math</code>, <code>map</code>, and <code>array</code> prefixes are predeclared in XQuery.
         This is permitted but not required by the XQuery 3.1 specification; it is likely to be required in XQuery 4.0.
-        Queries that explitly declare these namespaces do not need to be changed.</p>
+        Queries that explicitly declare these namespaces do not need to be changed.</p>
     </category>
 
     <category name="JAXP" class="javaonly">
@@ -428,6 +428,14 @@
         
         <p>From 12.2, numeric integer literals can be written in hex (<code>0xFFFF0000</code>) or binary
             (<code>0b101010</code>), and underscores can be used as separators (<code>1_000_000</code>).</p>
+        
+        <p>From 12.3, the non-ASCII characters <code>×</code> (xD7) and <code>÷</code> (xF7) can be
+        used in place of <code>*</code> and <code>div</code> to represent the multiplication and division
+        operators. The <code>＜</code> and <code>＞</code> characters (xFF1C and xFF1E) can be used
+        in place of <code>&lt;</code> and <code>&gt;</code> to represent the less-than and greater-than
+            operators; these characters can also be used in place of <code>&lt;</code> and <code>&gt;</code>
+            in the compound tokens <code>&lt;=</code>, <code>>=</code>, <code>&lt;&lt;</code>,
+        <code>&gt;&gt;</code>, <code>=&gt;</code>, and <code>-&gt;</code>.</p>
         
         
         <h2>XQuery 4.0 extensions</h2>

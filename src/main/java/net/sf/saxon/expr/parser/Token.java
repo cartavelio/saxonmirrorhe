@@ -365,6 +365,18 @@ public abstract class Token {
      */
     public static final int THIN_ARROW = 83;
 
+    /**
+     * Mathematical multiply operator "×"
+     */
+
+    public static final int MATH_MULT = 84;
+
+    /**
+     * Mathematical divide operator "÷"
+     */
+
+    public static final int MATH_DIVIDE = 85;
+
 
     // The following tokens are used only in the query prolog. They are categorized
     // as operators on the basis that a following name is treated as a name rather than
@@ -648,7 +660,9 @@ public abstract class Token {
         tokens[PLUS] = "+";
         tokens[MINUS] = "-";
         tokens[MULT] = "*";
+        tokens[MATH_MULT] = "×";
         tokens[DIV] = "div";
+        tokens[MATH_DIVIDE] = "÷";
         tokens[MOD] = "mod";
         tokens[IS] = "is";
         tokens[DOLLAR] = "$";

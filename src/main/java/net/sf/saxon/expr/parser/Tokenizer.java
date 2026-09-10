@@ -25,6 +25,9 @@ import java.util.List;
 
 public final class Tokenizer {
 
+    public static final char FULL_WIDTH_LT = '＜'; // xFF1C
+    public static final char FULL_WIDTH_GT = '＞'; // xFF1E
+
     @CSharpModifiers(code={"public", "const"})    // The transpiler handles this for int but not for char??
     public final static char NUL = (char)0;
 
@@ -245,7 +248,7 @@ public final class Tokenizer {
                 }
                 break;
             case Token.LT:
-                if (isXQuery && followsOperator(precedingToken)) {
+                if (isXQuery && followsOperator(precedingToken) && !currentTokenValue.equals("" + FULL_WIDTH_LT)) {
                     currentToken = Token.TAG;
                 }
                 break;
@@ -647,8 +650,7 @@ public final class Tokenizer {
                     nextToken = Token.PLUS;
                     return;
                 case '-':
-                    if (inputOffset < inputLength
-                            && input.charAt(inputOffset) == '>') {
+                    if (inputOffset < inputLength && isGreaterThanChar(input.charAt(inputOffset))) {
                         inputOffset++;
                         nextToken = Token.THIN_ARROW;
                         return;
@@ -656,8 +658,7 @@ public final class Tokenizer {
                     nextToken = Token.MINUS;   // not detected if part of a name
                     return;
                 case '=':
-                    if (inputOffset < inputLength
-                            && input.charAt(inputOffset) == '>') {
+                    if (inputOffset < inputLength && isGreaterThanChar(input.charAt(inputOffset))) {
                         inputOffset++;
                         nextToken = Token.FAT_ARROW;
                         return;
@@ -690,11 +691,44 @@ public final class Tokenizer {
                     }
                     nextToken = Token.STAR;
                     return;
+                case '×':
+                    if (languageLevel >= 40) {
+                        nextToken = Token.MATH_MULT;
+                        return;
+                    } else {
+                        throw new XPathException("Multiply operator '×' is recognized only when XPath 4.0 is enabled");
+                    }
+                case '÷':
+                    if (languageLevel >= 40) {
+                        nextToken = Token.MATH_DIVIDE;
+                        return;
+                    } else {
+                        throw new XPathException("Divide operator '÷' is recognized only when XPath 4.0 is enabled");
+                    }
                 case ',':
                     nextToken = Token.COMMA;
                     return;
                 case '$':
                     nextToken = Token.DOLLAR;
+                    return;
+                case FULL_WIDTH_LT:
+                case '<':
+                    if (c == FULL_WIDTH_LT && languageLevel < 40) {
+                        throw new XPathException("Operator character FULL_WIDTH_LESS_THAN (xFF1C) requires XPath 4.0 to be enabled");
+                    }
+                    if (inputOffset < inputLength
+                            && input.charAt(inputOffset) == '=') {
+                        inputOffset++;
+                        nextToken = Token.LE;
+                        return;
+                    }
+                    if (inputOffset < inputLength && isLessThanChar(input.charAt(inputOffset))) {
+                        inputOffset++;
+                        nextToken = Token.PRECEDES;
+                        return;
+                    }
+                    nextToken = Token.LT;
+                    nextTokenValue = c + "";  // The parser needs to know which character was used
                     return;
                 case '|':
                     if (inputOffset < inputLength && input.charAt(inputOffset) == '|') {
@@ -707,30 +741,18 @@ public final class Tokenizer {
                 case '#':
                     nextToken = Token.HASH;
                     return;
-                case '<':
-                    if (inputOffset < inputLength
-                            && input.charAt(inputOffset) == '=') {
-                        inputOffset++;
-                        nextToken = Token.LE;
-                        return;
-                    }
-                    if (inputOffset < inputLength
-                            && input.charAt(inputOffset) == '<') {
-                        inputOffset++;
-                        nextToken = Token.PRECEDES;
-                        return;
-                    }
-                    nextToken = Token.LT;
-                    return;
                 case '>':
+                case FULL_WIDTH_GT:
+                    if (c == FULL_WIDTH_GT && languageLevel < 40) {
+                        throw new XPathException("Operator character FULL_WIDTH_GREATER_THAN (xFF1E) requires XPath 4.0 to be enabled");
+                    }
                     if (inputOffset < inputLength
                             && input.charAt(inputOffset) == '=') {
                         inputOffset++;
                         nextToken = Token.GE;
                         return;
                     }
-                    if (inputOffset < inputLength
-                            && input.charAt(inputOffset) == '>') {
+                    if (inputOffset < inputLength && isGreaterThanChar(input.charAt(inputOffset))) {
                         inputOffset++;
                         nextToken = Token.FOLLOWS;
                         return;
@@ -1166,6 +1188,14 @@ public final class Tokenizer {
             default:
                 return Token.UNKNOWN;
         }
+    }
+
+    private boolean isLessThanChar(char c) {
+        return c == '<' || (languageLevel >= 40 && c == FULL_WIDTH_LT);
+    }
+
+    private boolean isGreaterThanChar(char c) {
+        return c == '>' || (languageLevel >= 40 && c == FULL_WIDTH_GT);
     }
 
     /**
