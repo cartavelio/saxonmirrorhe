@@ -20,10 +20,7 @@ import net.sf.saxon.ma.jnode.RootJNodeType;
 import net.sf.saxon.ma.jnode.SpecificJNodeType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
-import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
-import net.sf.saxon.pattern.nodetest.NodePredicate;
-import net.sf.saxon.pattern.nodetest.NodeTest;
-import net.sf.saxon.pattern.nodetest.NodeTestStar;
+import net.sf.saxon.pattern.nodetest.*;
 import net.sf.saxon.pattern.qname.AnyQNameTest;
 import net.sf.saxon.pattern.qname.NamespaceQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
@@ -858,7 +855,7 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
      */
 
     public SequenceIterator iterate(GNode origin) {
-        return Navigator.iterateAxis(origin, axis, test);
+        return Navigator.iterateAxis(origin, axis, test==null ? AnyGNode.TEST : test);
     }
 
     /**
@@ -980,10 +977,7 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
         public PullEvaluator elaborateForPull() {
             AxisExpression axisExpression = (AxisExpression) getExpression();
             NodeTest test = axisExpression.getNodeTest();
-            NodePredicate predicate =
-                    (test == AnyXNodeType.getInstance()
-                    || test == AnyGNodeType.getInstance()
-                    || test == AnyJNodeType.getInstance()) ? null : test;
+            NodePredicate predicate = test == null ? AnyGNode.TEST : test;
             int axis = axisExpression.getAxis();
             // These variables are computed in the hope that the optimizer will remove runtime error tests
             // that aren't needed because the condition cannot occur
@@ -997,6 +991,13 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
                     reportIsNotNode(axisExpression, cxt);
                 }
             };
+            if (axis == AxisInfo.CHILD && predicate == AnyGNode.TEST) {
+                return context -> {
+                    Item origin = context.getContextItem();
+                    checkOrigin.accept(origin, context);
+                    return ((GNode) origin).iterateChildAxis();
+                };
+            }
             return switch (axis) {
                 case AxisInfo.ANCESTOR -> context -> {
                     Item origin = context.getContextItem();

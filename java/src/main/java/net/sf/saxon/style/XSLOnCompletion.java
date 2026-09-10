@@ -78,7 +78,7 @@ public class XSLOnCompletion extends StyleElement {
             }
         };
 
-        if (select != null && iterateChildAxis(AnyGNode.TEST).next() != null) {
+        if (select != null && iterateChildAxis()   .next() != null) {
             compileError("An xsl:on-completion element with a select attribute must be empty", "XTSE3125");
         }
         select = typeCheck("select", select);

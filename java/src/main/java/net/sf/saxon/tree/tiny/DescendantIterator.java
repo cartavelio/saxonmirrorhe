@@ -9,10 +9,12 @@ package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 
+import java.util.Objects;
 import java.util.function.IntPredicate;
 
 /**
@@ -38,11 +40,12 @@ final class DescendantIterator implements SequenceIterator {
      *
      * @param tree        the containing TinyTree
      * @param node        the node whose descendants are required
-     * @param predicate   test to be satisfied by each returned node. May be null
+     * @param predicate   test to be satisfied by each returned node. Use {@link AnyGNode#TEST}
      *                    to indicate that all nodes are to be returned
      */
 
     DescendantIterator(TinyTree tree, TinyNodeImpl node, NodePredicate predicate) {
+        Objects.requireNonNull(predicate);
         this.tree = tree;
         this.predicate = predicate;
         nextNodeNr = node.nodeNr;
@@ -76,7 +79,7 @@ final class DescendantIterator implements SequenceIterator {
             }
             if (tree.nodeKind[nextNodeNr] == Type.TEXTUAL_ELEMENT) {
                 NodeInfo text = ((TinyTextualElement)tree.getNode(nextNodeNr)).getTextNode();
-                if (predicate==null || predicate.test(text)) {
+                if (predicate.test(text)) {
                     pending = text;
                 }
             }

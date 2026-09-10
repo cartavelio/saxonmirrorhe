@@ -2182,7 +2182,7 @@ public abstract class StyleElement extends ElementImpl {
             vars.addAll(onEmpties);
             return compileSequenceConstructor(compilation, decl, new ListIterator.Of<>(vars), includeParams);
         } else {
-            return compileSequenceConstructor(compilation, decl, iterateChildAxis(AnyGNode.TEST), includeParams);
+            return compileSequenceConstructor(compilation, decl, iterateChildAxis()   , includeParams);
         }
     }
 

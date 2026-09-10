@@ -14,6 +14,7 @@ import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.CopyOptions;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.s9api.Location;
@@ -196,7 +197,7 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
      * Get an iterator over the preceding-sibling axis, starting at this node; the nodes will
      * be in reverse document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     @Override
@@ -208,7 +209,7 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
      * Get an iterator over the preceding-sibling-or-self axis, starting at this node; the nodes will
      * be in reverse document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     @Override
@@ -344,7 +345,7 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
 
         // output the children
 
-        SequenceIterator children = iterateChildAxis(null);
+        SequenceIterator children = iterateChildAxis()   ;
         for (NodeInfo child; (child = (NodeInfo) children.next()) != null; ) {
             child.copy(out, copyOptions, locationId);
         }

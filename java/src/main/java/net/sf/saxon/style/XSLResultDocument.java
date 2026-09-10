@@ -277,7 +277,7 @@ public class XSLResultDocument extends StyleElement {
         if (formatExpression == null &&
                 globalProps.getProperty("method") == null &&
                 serializationAttributes.get(METHOD) == null) {
-            SequenceIterator kids = iterateChildAxis(AnyGNode.TEST);
+            SequenceIterator kids = iterateChildAxis()   ;
             NodeInfo first = (NodeInfo)kids.next();
             if (first instanceof LiteralResultElement) {
                 if (first.getNamespaceUri().equals(NamespaceUri.XHTML) && first.getLocalPart().equals("html")) {

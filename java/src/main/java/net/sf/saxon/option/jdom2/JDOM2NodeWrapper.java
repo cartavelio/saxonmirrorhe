@@ -411,7 +411,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
                 case Type.TEXT:
                 case Type.COMMENT:
                 case Type.PROCESSING_INSTRUCTION:
-                    iter = parent.iterateChildAxis(AnyGNode.TEST);
+                    iter = parent.iterateChildAxis()   ;
                     break;
                 case Type.ATTRIBUTE:
                     iter = parent.iterateAttributeAxis(AnyGNode.TEST);

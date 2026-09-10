@@ -9,6 +9,8 @@ package net.sf.saxon.tree.linked;
 
 import net.sf.saxon.pattern.nodetest.NodePredicate;
 
+import java.util.Objects;
+
 final class AncestorEnumeration extends TreeEnumeration {
 
     public AncestorEnumeration(NodeImpl node,

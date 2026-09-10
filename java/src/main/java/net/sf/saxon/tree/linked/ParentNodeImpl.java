@@ -33,6 +33,7 @@ import net.sf.saxon.type.gnode.AnyGNodeType;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Objects;
 
 /**
  * ParentNodeImpl is an implementation of a non-leaf node (specifically, an Element node
@@ -132,22 +133,39 @@ public abstract class ParentNodeImpl extends NodeImpl {
     /**
      * Get an enumeration of the _children of this node
      *
+     * @return an iterator over the _children of this node
+     */
+
+    protected final SequenceIterator iterateChildren() {
+        if (_children == null) {
+            return EmptyIterator.INSTANCE;
+        } else if (_children instanceof NodeImpl child) {
+            return SingletonIterator.makeIterator(child);
+        } else {
+            return new ArrayIterator.OfNodes<>((NodeImpl[]) _children);
+        }
+    }
+
+    /**
+     * Get an enumeration of the _children of this node
+     *
      * @param test A NodeTest to be satisfied by the child nodes, or null
      *             if all child node are to be returned
      * @return an iterator over the _children of this node
      */
 
     protected final SequenceIterator iterateChildren(NodePredicate test) {
+        Objects.requireNonNull(test);
         if (_children == null) {
             return EmptyIterator.INSTANCE;
         } else if (_children instanceof NodeImpl child) {
-            if (test == null || test == AnyGNode.TEST) {
+            if (test == AnyGNode.TEST) {
                 return SingletonIterator.makeIterator(child);
             } else {
                 return Navigator.filteredSingleton(child, test);
             }
         } else {
-            if (test == null || test == AnyGNodeType.getInstance()) {
+            if (test == AnyGNodeType.getInstance()) {
                 return new ArrayIterator.OfNodes<NodeImpl>((NodeImpl[]) _children);
             } else {
                 return new ChildEnumeration(this, test);

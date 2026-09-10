@@ -86,7 +86,7 @@ public class XSLText extends XSLLeafNodeConstructor {
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         if (isExpandingText()) {
-            TextImpl child = (TextImpl)iterateChildAxis(AnyGNode.TEST).next();
+            TextImpl child = (TextImpl)iterateChildAxis()   .next();
             if (child != null) {
                 List<Expression> contents = new ArrayList<>(10);
                 compileContentValueTemplate(child, contents);

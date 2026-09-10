@@ -84,7 +84,7 @@ public class DocumentNodeType extends XNodeType {
             return false;
         }
         NodeInfo node = (NodeInfo)item;
-        SequenceIterator iter = node.iterateChildAxis(AnyGNode.TEST);
+        SequenceIterator iter = node.iterateChildAxis()   ;
         // The match is true if there is exactly one element node child, no text node
         // children, and the element node matches the element test.
         boolean found = false;
@@ -186,7 +186,7 @@ public class DocumentNodeType extends XNodeType {
             return explanation;
         }
         NodeInfo node = (NodeInfo) item;
-        SequenceIterator iter = node.iterateChildAxis(AnyGNode.TEST);
+        SequenceIterator iter = node.iterateChildAxis()   ;
         // The match is true if there is exactly one element node child, no text node
         // children, and the element node matches the element test.
         boolean found = false;

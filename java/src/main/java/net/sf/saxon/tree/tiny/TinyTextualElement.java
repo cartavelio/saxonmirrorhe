@@ -16,6 +16,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
+import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -113,6 +114,11 @@ public class TinyTextualElement extends TinyElementImpl {
     @Override
     public UnicodeString getUnicodeStringValue() {
         return TinyTextImpl.getStringValue(tree, nodeNr);
+    }
+
+    @Override
+    public SequenceIterator iterateChildAxis() {
+        return new SingletonIterator(getTextNode());
     }
 
     @Override
@@ -516,7 +522,7 @@ public class TinyTextualElement extends TinyElementImpl {
          * Get an iterator over the child axis, starting at this node; the nodes will
          * be in document order.
          *
-         * @param predicate a condition that the nodes must satisfy, or null
+         * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
          * @return the required iterator
          */
         @Override
@@ -528,7 +534,7 @@ public class TinyTextualElement extends TinyElementImpl {
          * Get an iterator over the descendant axis, starting at this node; the nodes will
          * be in document order.
          *
-         * @param predicate a condition that the nodes must satisfy, or null
+         * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
          * @return the required iterator
          */
         @Override
@@ -540,7 +546,7 @@ public class TinyTextualElement extends TinyElementImpl {
          * Get an iterator over the following-sibling axis, starting at this node; the nodes will
          * be in document order.
          *
-         * @param predicate a condition that the nodes must satisfy, or null
+         * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
          * @return the required iterator
          */
         @Override
@@ -552,7 +558,7 @@ public class TinyTextualElement extends TinyElementImpl {
          * Get an iterator over the preceding-sibling axis, starting at this node; the nodes will
          * be in reverse document order.
          *
-         * @param predicate a condition that the nodes must satisfy, or null
+         * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
          * @return the required iterator
          */
         @Override

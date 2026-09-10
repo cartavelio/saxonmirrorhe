@@ -236,7 +236,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      * Get an iterator over the descendant axis, starting at this node; the nodes will
      * be in document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     @Override

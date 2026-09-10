@@ -257,7 +257,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
      * Get an iterator over the ancestor axis, starting at this node; the nodes will
      * be in reverse document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     @Override
@@ -269,7 +269,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
      * Get an iterator over the ancestor-or-self axis, starting at this node; the nodes will
      * be in reverse document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     @Override
@@ -281,7 +281,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
      * Get an iterator over the descendant axis, starting at this node; the nodes will
      * be in document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     @Override
@@ -293,7 +293,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
      * Get an iterator over the descendant-or-self axis, starting at this node; the nodes will
      * be in document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     @Override
@@ -305,7 +305,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
      * Get an iterator over the following axis, starting at this node; the nodes will
      * be in document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     @Override
@@ -317,7 +317,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
      * Get an iterator over the following-or-self axis, starting at this node; the nodes will
      * be in document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     @Override
@@ -329,7 +329,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
      * Get an iterator over the following-sibling axis, starting at this node; the nodes will
      * be in document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     @Override
@@ -346,7 +346,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
      * Get an iterator over the following-sibling-or-self axis, starting at this node; the nodes will
      * be in document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     @Override
@@ -362,7 +362,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
     /**
      * Get an iterator over the parent axis, starting at this node; returns zero or one nodes
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     @Override
@@ -374,7 +374,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
      * Get an iterator over the preceding axis, starting at this node; the nodes will
      * be in reverse document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     @Override
@@ -386,7 +386,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
      * Get an iterator over the preceding-or-self axis, starting at this node; the nodes will
      * be in reverse document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     @Override
@@ -398,7 +398,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
      * Get an iterator over the preceding-sibling axis, starting at this node; the nodes will
      * be in reverse document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     @Override
@@ -415,7 +415,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
      * Get an iterator over the preceding-sibling-or-self axis, starting at this node; the nodes will
      * be in reverse document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     @Override
@@ -432,7 +432,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
      * Get an iterator over the self axis, starting at this node; there will be zero
      * or one nodes.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     @Override
@@ -444,7 +444,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
      * Get an iterator over the attribute axis, starting at this node; the nodes will
      * be in document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     @Override
@@ -456,7 +456,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
      * Get an iterator over the namespace axis, starting at this node; the nodes will
      * be in reverse document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     @Override
@@ -468,7 +468,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
      * Get an iterator over the child axis, starting at this node; the nodes will
      * be in document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     @Override

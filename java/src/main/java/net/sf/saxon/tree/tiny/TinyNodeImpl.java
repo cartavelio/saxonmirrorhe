@@ -9,6 +9,7 @@ package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.s9api.Location;
@@ -18,6 +19,8 @@ import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.UType;
+
+import java.util.Objects;
 
 
 /**
@@ -367,15 +370,26 @@ public abstract class TinyNodeImpl implements NodeInfo {
     }
 
     @Override
-    public SequenceIterator iterateAncestorAxis(NodePredicate nodeTest) {
-        return new AncestorIterator(this, nodeTest);
+    public SequenceIterator iterateAncestorAxis(NodePredicate predicate) {
+        Objects.requireNonNull(predicate);
+        return new AncestorIterator(this, predicate);
+    }
+
+    @Override
+    public SequenceIterator iterateChildAxis() {
+        if (hasChildNodes()) {
+            return new SiblingIterator(tree, this, AnyGNode.TEST, true);
+        } else {
+            return EmptyIterator.INSTANCE;
+        }
     }
 
     @Override
     public SequenceIterator iterateChildAxis(NodePredicate predicate) {
+        Objects.requireNonNull(predicate);
         if (hasChildNodes()) {
             if (predicate instanceof NamedXNodePredicate fpTest) {
-                int fp = ((NamedXNodePredicate) predicate).getRequiredFingerprint();
+                int fp = fpTest.getRequiredFingerprint();
                 if (fp != -1 && fpTest.getNodeKind() == Type.ELEMENT) {
                     // fast path for common case
                     SequenceIterator namedElements = new NamedElementChildIterator(tree, this, fp);
@@ -394,6 +408,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
 
     @Override
     public SequenceIterator iterateDescendantAxis(NodePredicate predicate) {
+        Objects.requireNonNull(predicate);
         if (hasChildNodes()) {
             if (Navigator.getPotentialNodeKinds(predicate).overlaps(UType.TEXT)) {
                 return new DescendantIterator(tree, this, predicate);
@@ -407,8 +422,9 @@ public abstract class TinyNodeImpl implements NodeInfo {
 
     @Override
     public SequenceIterator iterateDescendantOrSelfAxis(NodePredicate nodeTest) {
+        Objects.requireNonNull(nodeTest);
         SequenceIterator descendants = iterateDescendantAxis(nodeTest);
-        if (nodeTest == null || nodeTest.test(this)) {
+        if (nodeTest.test(this)) {
             return new PrependIterator(this, descendants);
         } else {
             return descendants;
@@ -417,6 +433,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
 
     @Override
     public SequenceIterator iterateFollowingAxis(NodePredicate nodeTest) {
+        Objects.requireNonNull(nodeTest);
         int type = getNodeKind();
         if (type == Type.ATTRIBUTE || type == Type.NAMESPACE) {
             return new FollowingIterator(tree, getParent(), nodeTest, true);
@@ -429,6 +446,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
 
     @Override
     public SequenceIterator iterateFollowingSiblingAxis(NodePredicate nodeTest) {
+        Objects.requireNonNull(nodeTest);
         int type = getNodeKind();
         if (type == Type.ATTRIBUTE || type == Type.NAMESPACE || tree.depth[nodeNr] == 0) {
             return EmptyIterator.INSTANCE;
@@ -439,6 +457,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
 
     @Override
     public SequenceIterator iteratePrecedingAxis(NodePredicate nodeTest) {
+        Objects.requireNonNull(nodeTest);
         int type = getNodeKind();
         if (type == Type.ATTRIBUTE || type == Type.NAMESPACE) {
             return getParent().iteratePrecedingAxis(nodeTest);
@@ -451,6 +470,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
 
     @Override
     public SequenceIterator iteratePrecedingSiblingAxis(NodePredicate nodeTest) {
+        Objects.requireNonNull(nodeTest);
         int type = getNodeKind();
         if (type == Type.ATTRIBUTE || type == Type.NAMESPACE || tree.depth[nodeNr] == 0) {
             return EmptyIterator.INSTANCE;
@@ -544,13 +564,6 @@ public abstract class TinyNodeImpl implements NodeInfo {
     @Override
     public NodeInfo getRoot() {
         return nodeNr==0 ? this : tree.getRootNode();
-//        if (tree.depth[nodeNr] == 0) {
-//            return this;
-//        }
-//        if (parent != null) {
-//            return parent.getRoot();
-//        }
-//        return tree.getNode(tree.getRootNode(nodeNr));
     }
 
     /**
@@ -614,7 +627,8 @@ public abstract class TinyNodeImpl implements NodeInfo {
      */
 
     @Override
-    public void generateId(/*@NotNull*/ StringBuilder buffer) {
+    public void generateId(StringBuilder buffer) {
+        Objects.requireNonNull(buffer);
         buffer.append("d").append(tree.getDocumentNumber()).append(NODE_LETTER[getNodeKind()]).append(nodeNr);
     }
 
@@ -625,7 +639,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
      * @return true if this node is an ancestor-or-self of d
      */
 
-    public boolean isAncestorOrSelf(/*@NotNull*/ TinyNodeImpl d) {
+    public boolean isAncestorOrSelf(TinyNodeImpl d) {
         // If it's a different tree, return false
         if (tree != d.tree) {
             return false;

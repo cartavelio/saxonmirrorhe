@@ -57,7 +57,7 @@ public class DeepSkipRuleSet implements BuiltInRuleSet {
         if (item instanceof NodeInfo && ((NodeInfo) item).getNodeKind() == Type.DOCUMENT) {
             XPathContextMajor c2 = context.newContext();
             c2.setOrigin(this);
-            c2.trackFocus(((NodeInfo) item).iterateChildAxis(AnyGNode.TEST));
+            c2.trackFocus(((NodeInfo) item).iterateChildAxis()   );
             c2.setCurrentComponent(c2.getCurrentMode());
             TailCall tc = c2.getCurrentMode().getActor().applyTemplates(parameters, tunnelParams, null, output, c2, locationId);
             while (tc != null) {

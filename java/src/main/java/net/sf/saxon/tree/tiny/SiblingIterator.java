@@ -46,7 +46,7 @@ final class SiblingIterator implements SequenceIterator, LookaheadIterator, Atom
      *
      * @param tree        The TinyTree containing the context node
      * @param node        The context node, the start point for the iteration
-     * @param predicate   est that the selected nodes must satisfy, or null indicating
+     * @param predicate   est that the selected nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes) indicating
      *                    that all nodes are selected
      * @param getChildren True if children of the context node are to be returned, false
      *                    if following siblings are required

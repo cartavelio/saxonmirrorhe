@@ -40,10 +40,7 @@ import net.sf.saxon.type.gnode.NodeKindType;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
@@ -700,7 +697,7 @@ public final class Navigator {
         switch (node.getNodeKind()) {
             case Type.DOCUMENT: {
                 out.startDocument(CopyOptions.getStartDocumentProperties(copyOptions));
-                SequenceIterator children = node.iterateChildAxis(null);
+                SequenceIterator children = node.iterateChildAxis()   ;
                 for (NodeInfo child; (child = (NodeInfo) children.next()) != null; ) {
                     child.copy(out, copyOptions, locationId);
                 }
@@ -736,7 +733,7 @@ public final class Navigator {
 
                 // output the children
 
-                SequenceIterator children = node.iterateChildAxis(null);
+                SequenceIterator children = node.iterateChildAxis()   ;
                 for (NodeInfo child; (child = (NodeInfo) children.next()) != null; ) {
                     child.copy(out, copyOptions, locationId);
                 }
@@ -799,7 +796,7 @@ public final class Navigator {
         switch (node.getNodeKind()) {
             case Type.DOCUMENT: {
                 out.startDocument(CopyOptions.getStartDocumentProperties(copyOptions));
-                SequenceIterator children = node.iterateChildAxis(null);
+                SequenceIterator children = node.iterateChildAxis()   ;
                 for (NodeInfo child; (child = (NodeInfo) children.next()) != null; ) {
                     copy(child, out, copyOptions, locationId);
                 }
@@ -826,7 +823,7 @@ public final class Navigator {
 
                 // output the children
 
-                SequenceIterator children = node.iterateChildAxis(null);
+                SequenceIterator children = node.iterateChildAxis()   ;
                 for (NodeInfo child; (child = (NodeInfo) children.next()) != null; ) {
                     copy(child, out, copyOptions, locationId);
                 }
@@ -1233,13 +1230,15 @@ public final class Navigator {
      * otherwise return an empty iterator
      *
      * @param node     the singleton node, or null if the node does not exist
-     * @param nodeTest the test to be applied, or null if the node is to be selected unconditionally
+     * @param nodeTest the test to be applied, or {@link AnyGNode#TEST} if the node
+     *                 is to be selected unconditionally
      * @return an iterator over the node if it exists and matches the test.
      */
 
     /*@NotNull*/
     public static SequenceIterator filteredSingleton(GNode node, NodePredicate nodeTest) {
-        if (node != null && (nodeTest == null || nodeTest.test(node))) {
+        Objects.requireNonNull(nodeTest);
+        if (node != null && nodeTest.test(node)) {
             return new SingletonIterator(node);
         } else {
             return EmptyIterator.INSTANCE;
@@ -1247,9 +1246,10 @@ public final class Navigator {
     }
 
     public static SequenceIterator orSelf(GNode origin, SequenceIterator iter, NodePredicate predicate) {
+        Objects.requireNonNull(predicate);
         if (iter == EmptyIterator.INSTANCE) {
             return filteredSingleton(origin, predicate);
-        } else if (predicate == null || predicate.test(origin)) {
+        } else if (predicate.test(origin)) {
             return new PrependIterator(origin, iter);
         } else {
             return iter;
@@ -1260,14 +1260,14 @@ public final class Navigator {
      * Static helper method to iterate over an axis identified dynamically by axis number
      * @param origin the origin node
      * @param axisNumber the axis number
-     * @param predicate condition that the nodes on the axis must satisfy
+     * @param predicate condition that the nodes on the axis must satisfy, or {@link AnyGNode#TEST} to
+     *                  select all nodes
      * @return an iterator over the selected nodes, in axis order
      */
 
     public static SequenceIterator iterateAxis(GNode origin, int axisNumber, NodePredicate predicate) {
-        if (predicate == null) {
-            predicate = AnyGNode.TEST;
-        }
+        Objects.requireNonNull(origin);
+        Objects.requireNonNull(predicate);
         return switch (axisNumber) {
             case AxisInfo.ANCESTOR -> origin.iterateAncestorAxis(predicate);
             case AxisInfo.ANCESTOR_OR_SELF -> origin.iterateAncestorOrSelfAxis(predicate);
@@ -1339,8 +1339,18 @@ public final class Navigator {
         }
     }
 
+    /**
+     * Return an iterator that filters the nodes returned by a base iterator
+     * @param base the base iterator.
+     * @param predicate The predicate that the nodes must satisfy. Use {@link AnyGNode#TEST} to select
+     *                  everything.
+     * @return a filtering iterator
+     */
+
     public static SequenceIterator filter(SequenceIterator base, NodePredicate predicate) {
-        if (predicate == null || predicate == AnyGNode.TEST) {
+        Objects.requireNonNull(base);
+        Objects.requireNonNull(predicate);
+        if (predicate == AnyGNode.TEST) {
             return base;
         }
         return new AxisFilter(base, predicate);
@@ -1529,7 +1539,7 @@ public final class Navigator {
             } else {
                 // we're just starting...
                 if (start.hasChildNodes()) {
-                    children = start.iterateChildAxis(AnyGNode.TEST);
+                    children = start.iterateChildAxis()   ;
                     if (!forwards) {
                         children = Reverse.getReverseIterator(children);
                     }
@@ -1581,7 +1591,7 @@ public final class Navigator {
                     if (parent == null) {
                         siblingEnum = EmptyIterator.INSTANCE;
                     } else {
-                        siblingEnum = parent.iterateChildAxis(AnyGNode.TEST);
+                        siblingEnum = parent.iterateChildAxis()   ;
                     }
                     break;
                 default:
@@ -1633,15 +1643,19 @@ public final class Navigator {
      * Iterate over all preceding and ancestor nodes, in reverse document order.
      * This is the union of the preceding axis and the ancestor axis, and is
      * used internally by xsl:number and a few other constructs
+     * @param origin the node whose preceding and ancestor nodes are required
+     * @param predicate condition that the nodes must satisfy. Non-null.
      */
 
     public static SequenceIterator iteratePrecedingOrAncestorAxis(GNode origin, NodePredicate predicate) {
+        Objects.requireNonNull(origin);
+        Objects.requireNonNull(predicate);
         if (origin instanceof TinyNodeImpl n && !(origin instanceof TinyAttributeImpl)) {
             // Fast path for tinytree
             return new net.sf.saxon.tree.tiny.PrecedingIterator(n.getTree(), n, predicate, true);
         }
         PrecedingIterator iter = new PrecedingIterator(origin, true);
-        if (predicate != null && predicate != AnyGNode.TEST) {
+        if (predicate != AnyGNode.TEST) {
             return new AxisFilter(iter, predicate);
         }
         return iter;
@@ -1669,7 +1683,8 @@ public final class Navigator {
          *                         in the result
          */
 
-        public PrecedingIterator(/*@NotNull*/ GNode start, boolean includeAncestors) {
+        public PrecedingIterator(GNode start, boolean includeAncestors) {
+            Objects.requireNonNull(start);
             this.includeAncestors = includeAncestors;
             ancestorEnum = new AncestorIterator(start, false);
             siblingEnum = switch (start.getNodeKind()) {

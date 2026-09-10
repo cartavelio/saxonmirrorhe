@@ -13,6 +13,7 @@ import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 
+import java.util.Objects;
 import java.util.function.IntPredicate;
 
 /**
@@ -45,6 +46,7 @@ final class FollowingIterator implements SequenceIterator {
 
     public FollowingIterator(TinyTree doc, TinyNodeImpl node,
                              NodePredicate predicate, boolean includeDescendants) {
+        Objects.requireNonNull(predicate);
         tree = doc;
         this.predicate = predicate;
         startNode = node;
@@ -108,12 +110,12 @@ final class FollowingIterator implements SequenceIterator {
                 TinyTextualElement e = (TinyTextualElement)tree.getNode(nodeNr);
                 NodeInfo t = e.getTextNode();
                 if (matcher.test(nodeNr)) {
-                    if (predicate == null || predicate.test(t)) {
+                    if (predicate.test(t)) {
                         pending = t;
                     }
                     position++;
                     return current = tree.getNode(nodeNr);
-                } else if (predicate == null || predicate.test(t)) {
+                } else if (predicate.test(t)) {
                     position++;
                     return current = t;
                 }

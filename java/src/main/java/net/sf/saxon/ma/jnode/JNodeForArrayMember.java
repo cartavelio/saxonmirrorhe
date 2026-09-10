@@ -38,7 +38,7 @@ public class JNodeForArrayMember extends ChildJNode implements SiblingCountingNo
      * Get an iterator over the following-sibling axis, starting at this node; the nodes will
      * be in document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     @Override
@@ -87,7 +87,7 @@ public class JNodeForArrayMember extends ChildJNode implements SiblingCountingNo
      * Get an iterator over the preceding-sibling axis, starting at this node; the nodes will
      * be in reverse document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     @Override

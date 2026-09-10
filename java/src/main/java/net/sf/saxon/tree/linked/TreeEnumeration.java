@@ -9,8 +9,11 @@ package net.sf.saxon.tree.linked;
 
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.tree.iter.LookaheadIterator;
+
+import java.util.Objects;
 
 public abstract class TreeEnumeration implements SequenceIterator, LookaheadIterator {
 
@@ -25,11 +28,12 @@ public abstract class TreeEnumeration implements SequenceIterator, LookaheadIter
      * origin node
      *
      * @param origin   the node from which the axis originates
-     * @param nodeTest test to be satisfied by the returned nodes, or null if all nodes
-     *                 are to be returned.
+     * @param nodeTest test to be satisfied by the returned nodes.
+     * Use {@link AnyGNode#TEST} to select everything.
      */
 
     public TreeEnumeration(NodeImpl origin, NodePredicate nodeTest) {
+        Objects.requireNonNull(nodeTest);
         nextNode = origin;
         start = origin;
         this.nodeTest = nodeTest;

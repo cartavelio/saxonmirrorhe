@@ -506,8 +506,8 @@ public class SaxonDeepEqual extends SystemFunction {
                 CSharp.emitCode("goto case Saxon.Hej.type.Type.DOCUMENT;");
                 // fall through
             case Type.DOCUMENT:
-                SequenceIterator c1 = n1.iterateChildAxis(AnyGNode.TEST);
-                SequenceIterator c2 = n2.iterateChildAxis(AnyGNode.TEST);
+                SequenceIterator c1 = n1.iterateChildAxis()   ;
+                SequenceIterator c2 = n2.iterateChildAxis()   ;
                 while (true) {
                     NodeInfo d1 = (NodeInfo)c1.next();
                     while (d1 != null && isIgnorable(d1, flags)) {

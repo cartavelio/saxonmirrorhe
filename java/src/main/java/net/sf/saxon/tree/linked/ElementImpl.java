@@ -271,6 +271,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
 
     @Override
     public SequenceIterator iterateAttributeAxis(NodePredicate test) {
+        Objects.requireNonNull(test);
         if (attributeMap instanceof AttributeMapWithIdentity) {
             // this case needs special care because of the possibility of deleted attribute nodes
             return Navigator.filter(((AttributeMapWithIdentity) attributeMap).iterateAttributes(this), test);

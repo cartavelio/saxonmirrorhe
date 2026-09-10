@@ -60,7 +60,7 @@ public class PathMappedAccumulatorData implements IAccumulatorData {
             NodeInfo target = origin;
             while (!path.isEmpty()) {
                 int pos = path.pop();
-                SequenceIterator kids = target.iterateChildAxis(AnyGNode.TEST);
+                SequenceIterator kids = target.iterateChildAxis()   ;
                 while (pos-- > 0) {
                     target = (NodeInfo)kids.next();
                     assert (target != null);

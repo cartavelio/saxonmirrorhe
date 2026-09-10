@@ -95,7 +95,7 @@ public abstract class XSLLeafNodeConstructor extends StyleElement {
             String errorCode = getErrorCodeForSelectPlusContent();
             compileError("An " + getDisplayName() + " element with a select attribute must be empty", errorCode);
         }
-        SequenceIterator kids = iterateChildAxis(AnyGNode.TEST);
+        SequenceIterator kids = iterateChildAxis()   ;
         NodeInfo first = (NodeInfo)kids.next();
         if (select == null) {
             if (first == null) {

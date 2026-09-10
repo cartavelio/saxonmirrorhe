@@ -72,7 +72,7 @@ public class ShallowCopyRuleSet implements BuiltInRuleSet {
                     out.startDocument(ReceiverOption.NONE);
                     XPathContextMajor c2 = context.newContext();
                     c2.setOrigin(this);
-                    c2.trackFocus(node.iterateChildAxis(AnyGNode.TEST));
+                    c2.trackFocus(node.iterateChildAxis()   );
                     c2.setCurrentComponent(c2.getCurrentMode());  // Bug 3508
                     pipe.setXPathContext(c2);
                     TailCall tc = context.getCurrentMode().getActor().applyTemplates(parameters, tunnelParams, null, out, c2, locationId);
@@ -112,7 +112,7 @@ public class ShallowCopyRuleSet implements BuiltInRuleSet {
 
                     // apply-templates to all children
                     if (node.hasChildNodes()) {
-                        c2.trackFocus(node.iterateChildAxis(AnyGNode.TEST));
+                        c2.trackFocus(node.iterateChildAxis()   );
                         TailCall tc = c2.getCurrentMode().getActor().applyTemplates(parameters, tunnelParams, null, out, c2, locationId);
                         while (tc != null) {
                             tc = tc.processLeavingTail();

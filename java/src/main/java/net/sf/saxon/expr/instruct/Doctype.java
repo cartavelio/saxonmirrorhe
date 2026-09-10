@@ -135,7 +135,7 @@ public class Doctype extends Instruction {
                 builder.close();
                 NodeInfo dtdRoot = builder.getCurrentRoot();
 
-                SequenceIterator children = dtdRoot.iterateChildAxis(AnyGNode.TEST);
+                SequenceIterator children = dtdRoot.iterateChildAxis()   ;
                 NodeInfo docType = (NodeInfo) children.next();
                 if (docType == null || !"doctype".equals(docType.getLocalPart())) {
                     throw new XPathException("saxon:doctype instruction must contain dtd:doctype")
@@ -160,7 +160,7 @@ public class Doctype extends Instruction {
                 }
 
                 boolean openSquare = false;
-                children = docType.iterateChildAxis(AnyGNode.TEST);
+                children = docType.iterateChildAxis()   ;
 
                 NodeInfo child = (NodeInfo) children.next();
                 if (child != null) {
@@ -192,7 +192,7 @@ public class Doctype extends Instruction {
                         }
                         write(output, "\n  <!ATTLIST " + elname + ' ');
 
-                        SequenceIterator attributes = child.iterateChildAxis(AnyGNode.TEST);
+                        SequenceIterator attributes = child.iterateChildAxis()   ;
                         while (true) {
                             NodeInfo attDef = (NodeInfo) attributes.next();
                             if (attDef == null) {
@@ -255,7 +255,7 @@ public class Doctype extends Instruction {
                             write(output, "NDATA " + notation + ' ');
                         }
 
-                        SequenceIterator grandChildren = child.iterateChildAxis(null);
+                        SequenceIterator grandChildren = child.iterateChildAxis()   ;
                         for (NodeInfo content; (content = (NodeInfo) grandChildren.next()) != null; ) {
                             content.copy(output, 0, expr.getLocation());
                         }

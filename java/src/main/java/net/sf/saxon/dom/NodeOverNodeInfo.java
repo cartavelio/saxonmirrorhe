@@ -286,7 +286,7 @@ public abstract class NodeOverNodeInfo implements Node {
 
     @Override
     public Node getFirstChild() {
-        return wrap((NodeInfo)node.iterateChildAxis(AnyGNode.TEST).next());
+        return wrap((NodeInfo)node.iterateChildAxis()   .next());
     }
 
     /**
@@ -297,7 +297,7 @@ public abstract class NodeOverNodeInfo implements Node {
 
     @Override
     public Node getLastChild() {
-        SequenceIterator children = node.iterateChildAxis(AnyGNode.TEST);
+        SequenceIterator children = node.iterateChildAxis()   ;
         NodeInfo last = null;
         while (true) {
             NodeInfo next = (NodeInfo)children.next();

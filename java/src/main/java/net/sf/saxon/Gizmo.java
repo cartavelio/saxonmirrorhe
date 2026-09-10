@@ -808,7 +808,7 @@ public class Gizmo {
         out.close();
 
         NodeInfo root = builder.getCurrentRoot();
-        SequenceIterator top = root.iterateChildAxis(AnyGNode.TEST);
+        SequenceIterator top = root.iterateChildAxis()   ;
         SequenceExtent extent = SequenceExtent.from(top);
         int len = extent.getLength();
         NodeInfo[] array = new NodeInfo[len];

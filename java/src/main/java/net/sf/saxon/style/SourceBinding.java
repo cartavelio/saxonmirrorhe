@@ -358,7 +358,7 @@ public class SourceBinding {
         checkAgainstRequiredType(declaredType);
 
         if (select == null && !hasProperty(BindingProperty.DISALLOWS_CONTENT) && visibility != Visibility.ABSTRACT) {
-            SequenceIterator kids = sourceElement.iterateChildAxis(AnyGNode.TEST);
+            SequenceIterator kids = sourceElement.iterateChildAxis()   ;
             NodeInfo first = (NodeInfo)kids.next();
             if (first == null) {
                 if (declaredType == null) {

@@ -10,6 +10,7 @@ package net.sf.saxon.tree.linked;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
@@ -21,6 +22,8 @@ import net.sf.saxon.tree.util.SteppingNode;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.StringValue;
+
+import java.util.Objects;
 
 
 /**
@@ -499,11 +502,13 @@ public abstract class NodeImpl
      * Get an iterator over the ancestor axis, starting at this node; the nodes will
      * be in reverse document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy.
+     * Use {@link AnyGNode#TEST} to select everything.
      * @return the required iterator
      */
     @Override
     public SequenceIterator iterateAncestorAxis(NodePredicate predicate) {
+        Objects.requireNonNull(predicate);
         return new AncestorEnumeration(this, predicate, false);
     }
 
@@ -511,23 +516,42 @@ public abstract class NodeImpl
      * Get an iterator over the ancestor-or-self axis, starting at this node; the nodes will
      * be in reverse document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy. Use {@link AnyGNode#TEST} to
+     *                  select everything.
      * @return the required iterator
      */
     @Override
     public SequenceIterator iterateAncestorOrSelfAxis(NodePredicate predicate) {
+        Objects.requireNonNull(predicate);
         return new AncestorEnumeration(this, predicate, true);
     }
 
     /**
      * Get an iterator over the child axis, starting at this node; the nodes will
      * be in document order.
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateChildAxis() {
+        if (this instanceof ParentNodeImpl) {
+            return ((ParentNodeImpl) this).iterateChildren();
+        } else {
+            return EmptyIterator.INSTANCE;
+        }
+    }
+
+
+    /**
+     * Get an iterator over the child axis, starting at this node; the nodes will
+     * be in document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy. Use {@link AnyGNode#TEST} to
+     *  select everything.
      * @return the required iterator
      */
     @Override
     public SequenceIterator iterateChildAxis(NodePredicate predicate) {
+        Objects.requireNonNull(predicate);
         if (this instanceof ParentNodeImpl) {
             return ((ParentNodeImpl) this).iterateChildren(predicate);
         } else {
@@ -539,11 +563,12 @@ public abstract class NodeImpl
      * Get an iterator over the descendant axis, starting at this node; the nodes will
      * be in document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy
      * @return the required iterator
      */
     @Override
     public SequenceIterator iterateDescendantAxis(NodePredicate predicate) {
+        Objects.requireNonNull(predicate);
         if (hasChildNodes()) {
             return new SteppingNavigator.DescendantAxisIterator(this, false, predicate);
         } else {
@@ -555,11 +580,12 @@ public abstract class NodeImpl
      * Get an iterator over the descendant-or-self axis, starting at this node; the nodes will
      * be in document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy
      * @return the required iterator
      */
     @Override
     public SequenceIterator iterateDescendantOrSelfAxis(NodePredicate predicate) {
+        Objects.requireNonNull(predicate);
         return new SteppingNavigator.DescendantAxisIterator(this, true, predicate);
     }
 
@@ -567,11 +593,12 @@ public abstract class NodeImpl
      * Get an iterator over the following axis, starting at this node; the nodes will
      * be in document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy
      * @return the required iterator
      */
     @Override
     public SequenceIterator iterateFollowingAxis(NodePredicate predicate) {
+        Objects.requireNonNull(predicate);
         return new FollowingEnumeration(this, predicate);
     }
 
@@ -579,11 +606,12 @@ public abstract class NodeImpl
      * Get an iterator over the following-sibling axis, starting at this node; the nodes will
      * be in document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy
      * @return the required iterator
      */
     @Override
     public SequenceIterator iterateFollowingSiblingAxis(NodePredicate predicate) {
+        Objects.requireNonNull(predicate);
         return new FollowingSiblingEnumeration(this, predicate);
     }
 
@@ -591,11 +619,12 @@ public abstract class NodeImpl
      * Get an iterator over the preceding axis, starting at this node; the nodes will
      * be in reverse document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy
      * @return the required iterator
      */
     @Override
     public SequenceIterator iteratePrecedingAxis(NodePredicate predicate) {
+        Objects.requireNonNull(predicate);
         return new PrecedingEnumeration(this, predicate);
     }
 
@@ -603,11 +632,12 @@ public abstract class NodeImpl
      * Get an iterator over the preceding-sibling axis, starting at this node; the nodes will
      * be in reverse document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy
      * @return the required iterator
      */
     @Override
     public SequenceIterator iteratePrecedingSiblingAxis(NodePredicate predicate) {
+        Objects.requireNonNull(predicate);
         return new PrecedingSiblingEnumeration(this, predicate);
     }
 

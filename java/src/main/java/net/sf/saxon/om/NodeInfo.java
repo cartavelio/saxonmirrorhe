@@ -25,6 +25,7 @@ import net.sf.saxon.type.*;
 import org.xml.sax.Locator;
 
 import javax.xml.transform.SourceLocator;
+import java.util.Objects;
 
 /**
  * The NodeInfo interface represents a node in Saxon's implementation of the XPath 2.0 data model.
@@ -464,10 +465,21 @@ public interface NodeInfo extends GNode, Location
      */
 
     default Iterable<? extends NodeInfo> children() {
-        return new IterableSequenceIterator<NodeInfo>(iterateChildAxis(null));
+        return new IterableSequenceIterator<>(iterateChildAxis()   );
     }
 
+    /**
+     * Return the sequence of children of this node that satisfy a given predicate,
+     * as an {@code Iterable}. This
+     * method is designed to allow iteration over the children in a Java "for each" loop,
+     * in the form <code>for (NodeInfo child : children()) {...}</code>
+     * @param filter a predicate that the nodes must satisfy. Use
+     *               {@link AnyGNode#TEST} to allow any node.
+     * @return the children of the node, as an {@code Iterable}.
+     */
+
     default Iterable<? extends NodeInfo> children(NodePredicate filter) {
+        Objects.requireNonNull(filter);
         return new Navigator.ChildrenAsIterable(this, filter);
     }
 

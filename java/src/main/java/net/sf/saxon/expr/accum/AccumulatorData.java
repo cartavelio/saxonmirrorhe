@@ -15,6 +15,7 @@ import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.lib.TraceListener;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -121,7 +122,7 @@ public class AccumulatorData implements IAccumulatorData {
                 value = processRule(rule, node, false, value, context);
                 logChange(node, value, context, " BEFORE ");
             }
-            SequenceIterator children = node.iterateChildAxis(null);
+            SequenceIterator children = node.iterateChildAxis()   ;
             for (NodeInfo kid; (kid = (NodeInfo) children.next()) != null; ) {
                 value = visit(kid, value, context, listener);
             }

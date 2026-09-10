@@ -12,6 +12,7 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.tree.util.Navigator;
 
+import java.util.Objects;
 import java.util.function.IntPredicate;
 
 /**
@@ -35,11 +36,12 @@ final class DescendantIteratorSansText implements SequenceIterator {
      *
      * @param tree        the containing TinyTree
      * @param node        the node whose descendants are required
-     * @param predicate   test to be satisfied by each returned node; this must be a predicate
+     * @param predicate   test to be satisfied by each returned node; this must be a non-null predicate
      *                    that will never select text nodes
      */
 
     DescendantIteratorSansText(TinyTree tree, TinyNodeImpl node, NodePredicate predicate) {
+        Objects.requireNonNull(predicate);
         this.tree = tree;
         nextNodeNr = node.nodeNr;
         startDepth = tree.depth[nextNodeNr];

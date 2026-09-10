@@ -13,6 +13,7 @@ import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.jnode.JNode;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.trans.XPathException;
@@ -202,7 +203,7 @@ public abstract class SequenceReceiver implements Receiver {
                         previousAtomic = false;
                     } else if (kind == Type.DOCUMENT) {
                         startDocument(ReceiverOption.NONE); // needed to ensure that illegal namespaces or attributes in the content are caught
-                        SequenceIterator children = node.iterateChildAxis(null);
+                        SequenceIterator children = node.iterateChildAxis()   ;
                         for (NodeInfo child; (child = (NodeInfo) children.next()) != null; ) {
                             append(child, locationId, copyNamespaces);
                         }

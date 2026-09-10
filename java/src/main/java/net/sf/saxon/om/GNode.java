@@ -7,13 +7,17 @@
 
 package net.sf.saxon.om;
 
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.tree.NamespaceNode;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.IncrementalIterator;
 import net.sf.saxon.tree.iter.PrependIterator;
+import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
+
+import java.util.Objects;
 
 /**
  * A generalized node: that is, an XNode or JNode. New in 4.0. The GNode class itself is abstract,
@@ -30,22 +34,26 @@ public interface GNode extends Item {
     /**
      * Get an iterator over the ancestor axis, starting at this node; the nodes will
      * be in reverse document order.
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy. Use {@link AnyGNode#TEST} to select
+     *                  everything.
      * @return the required iterator
      */
     default SequenceIterator iterateAncestorAxis(NodePredicate predicate) {
+        Objects.requireNonNull(predicate);
         IncrementalIterator iter = new IncrementalIterator(this, GNode::getParent);
-        return predicate == null ? iter : Navigator.filter(iter, predicate);
+        return predicate == AnyGNode.TEST ? iter : Navigator.filter(iter, predicate);
     }
 
     /**
      * Get an iterator over the ancestor-or-self axis, starting at this node; the nodes will
      * be in reverse document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy. Use {@link AnyGNode#TEST} to select
+     *      *                  everything.
      * @return the required iterator
      */
     default SequenceIterator iterateAncestorOrSelfAxis(NodePredicate predicate) {
+        Objects.requireNonNull(predicate);
         SequenceIterator ancestors = iterateAncestorAxis(predicate);
         return Navigator.orSelf(this, ancestors, predicate);
     }
@@ -54,10 +62,12 @@ public interface GNode extends Item {
      * Get an iterator over the attribute axis, starting at this node; the nodes will
      * be in document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy.
+     * Use {@link AnyGNode#TEST} to select everything.
      * @return the required iterator
      */
     default SequenceIterator iterateAttributeAxis(NodePredicate predicate) {
+        Objects.requireNonNull(predicate);
         return EmptyIterator.INSTANCE;
     }
 
@@ -65,7 +75,18 @@ public interface GNode extends Item {
      * Get an iterator over the child axis, starting at this node; the nodes will
      * be in document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    default SequenceIterator iterateChildAxis() {
+        return iterateChildAxis(AnyGNode.TEST);
+    };
+
+
+    /**
+     * Get an iterator over the child axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     SequenceIterator iterateChildAxis(NodePredicate predicate);
@@ -74,7 +95,7 @@ public interface GNode extends Item {
      * Get an iterator over the descendant axis, starting at this node; the nodes will
      * be in document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy.
      * @return the required iterator
      */
     default SequenceIterator iterateDescendantAxis(NodePredicate predicate) {
@@ -86,7 +107,7 @@ public interface GNode extends Item {
      * Get an iterator over the descendant-or-self axis, starting at this node; the nodes will
      * be in document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     default SequenceIterator iterateDescendantOrSelfAxis(NodePredicate predicate) {
@@ -98,7 +119,7 @@ public interface GNode extends Item {
      * Get an iterator over the following axis, starting at this node; the nodes will
      * be in document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     default SequenceIterator iterateFollowingAxis(NodePredicate predicate) {
@@ -110,7 +131,7 @@ public interface GNode extends Item {
      * Get an iterator over the following-or-self axis, starting at this node; the nodes will
      * be in document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     default SequenceIterator iterateFollowingOrSelfAxis(NodePredicate predicate) {
@@ -122,7 +143,7 @@ public interface GNode extends Item {
      * Get an iterator over the following-sibling axis, starting at this node; the nodes will
      * be in document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     SequenceIterator iterateFollowingSiblingAxis(NodePredicate predicate);
@@ -131,7 +152,7 @@ public interface GNode extends Item {
      * Get an iterator over the following-sibling-or-self axis, starting at this node; the nodes will
      * be in document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     default SequenceIterator iterateFollowingSiblingOrSelfAxis(NodePredicate predicate) {
@@ -144,7 +165,7 @@ public interface GNode extends Item {
      * be in reverse document order. The default implementation must be overridden
      * for classes that implement element nodes.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     default SequenceIterator iterateNamespaceAxis(NodePredicate predicate) {
@@ -157,35 +178,42 @@ public interface GNode extends Item {
     /**
      * Get an iterator over the parent axis, starting at this node; returns zero or one nodes
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     default SequenceIterator iterateParentAxis(NodePredicate predicate) {
-        return Navigator.filteredSingleton(getParent(), predicate);
+        Objects.requireNonNull(predicate);
+        return predicate == AnyGNode.TEST ?
+                new SingletonIterator(getParent()) :
+                Navigator.filteredSingleton(getParent(), predicate);
     }
 
     /**
      * Get an iterator over the preceding axis, starting at this node; the nodes will
      * be in reverse document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy, or {@link AnyGNode#TEST} to
+     *                  select all nodes
      * @return the required iterator
      */
     default SequenceIterator iteratePrecedingAxis(NodePredicate predicate) {
+        Objects.requireNonNull(predicate);
         SequenceIterator prec = new Navigator.PrecedingIterator(this, false);
-        return predicate != null ? Navigator.filter(prec, predicate) : prec;
+        return predicate == AnyGNode.TEST ? prec : Navigator.filter(prec, predicate);
     }
 
     /**
      * Get an iterator over the preceding-or-self axis, starting at this node; the nodes will
      * be in reverse document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy, or {@link AnyGNode#TEST} to
+     *      *                  select all nodes
      * @return the required iterator
      */
     default SequenceIterator iteratePrecedingOrSelfAxis(NodePredicate predicate) {
+        Objects.requireNonNull(predicate);
         SequenceIterator prec = iteratePrecedingAxis(predicate);
-        return predicate == null || predicate.test(this)
+        return predicate == AnyGNode.TEST || predicate.test(this)
                 ? new PrependIterator(this, prec)
                 : prec;
     }
@@ -194,7 +222,7 @@ public interface GNode extends Item {
      * Get an iterator over the preceding-sibling axis, starting at this node; the nodes will
      * be in reverse document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy
      * @return the required iterator
      */
     SequenceIterator iteratePrecedingSiblingAxis(NodePredicate predicate);
@@ -203,12 +231,13 @@ public interface GNode extends Item {
      * Get an iterator over the preceding-sibling-or-self axis, starting at this node; the nodes will
      * be in reverse document order.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy, or {@link AnyGNode#TEST} to select all nodes
      * @return the required iterator
      */
     default SequenceIterator iteratePrecedingSiblingOrSelfAxis(NodePredicate predicate) {
+        Objects.requireNonNull(predicate);
         SequenceIterator prec = iteratePrecedingSiblingAxis(predicate);
-        return predicate == null || predicate.test(this)
+        return predicate.test(this)
                 ? new PrependIterator(this, prec)
                 : prec;
     }
@@ -217,7 +246,7 @@ public interface GNode extends Item {
      * Get an iterator over the self axis, starting at this node; there will be zero
      * or one nodes.
      *
-     * @param predicate a condition that the nodes must satisfy, or null
+     * @param predicate a condition that the nodes must satisfy (use {@link AnyGNode#TEST} to select all nodes)
      * @return the required iterator
      */
     default SequenceIterator iterateSelfAxis(NodePredicate predicate) {
