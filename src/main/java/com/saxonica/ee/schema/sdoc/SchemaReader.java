@@ -1,6 +1,5 @@
 package com.saxonica.ee.schema.sdoc;
 
-import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.config.StandardSchemaResolver;
 import com.saxonica.ee.jaxp.SchemaFactoryImpl;
 import com.saxonica.ee.schema.SchemaCompiler;
@@ -8,14 +7,13 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.SchemaURIResolver;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
-import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.linked.LinkedTreeBuilder;
@@ -66,7 +64,7 @@ public abstract class SchemaReader {
                 sources = r.resolve(targetNamespace, baseURI, locations);
             }
             if (sources == null || (sources.length == 1 && sources[0] == null)) {
-                r = new StandardSchemaResolver((EnterpriseConfiguration) compiler.getConfiguration());
+                r = new StandardSchemaResolver(compiler.getConfiguration());
                 sources = r.resolve(targetNamespace, baseURI, locations);
             }
             if (sources.length == 0 || sources[0] == null) {
@@ -104,7 +102,7 @@ public abstract class SchemaReader {
         try {
             Source[] sources = compiler.getSchemaURIResolver().resolve(targetNamespace.toString(), baseURI, relativeURIs);
             if (sources == null) {
-                SchemaURIResolver r = new StandardSchemaResolver((EnterpriseConfiguration) compiler.getConfiguration());
+                SchemaURIResolver r = new StandardSchemaResolver(compiler.getConfiguration());
                 sources = r.resolve(targetNamespace.toString(), baseURI, relativeURIs);
             }
             return sources;
@@ -229,7 +227,7 @@ public abstract class SchemaReader {
 
         TinyBuilder scmBuilder = new TinyBuilder(pipe);
         scmBuilder.setSystemId(source.getSystemId());
-        Valve valve = new Valve(NamespaceConstant.SCM, commentStripper, scmBuilder);
+        Valve valve = new Valve(NamespaceUri.SCM, commentStripper, scmBuilder);
 
 
         // build the schema document
@@ -250,8 +248,6 @@ public abstract class SchemaReader {
             }
             schemaBuilder.reset();
         } catch (XPathException err) {
-            //System.err.println("SchemaReader failed " + err.getMessage());
-            //err.printStackTrace();
             Throwable cause = err.getException();
             if (cause != null) {
                 if (isSAXException(cause)) {
@@ -340,13 +336,6 @@ public abstract class SchemaReader {
         config.reuseStyleParser(parser);
     }
 //#endif
-
-    //    public static void main(String[] args) throws Exception {
-//        Configuration config = new EnterpriseConfiguration();
-//        config.setLineNumbering(true);
-//        NodeInfo node = config.buildDocument(new StreamSource(new File("c:/temp/test.xsd")));
-//        config.addSchemaSource(node);
-//    }
 
 
 }
