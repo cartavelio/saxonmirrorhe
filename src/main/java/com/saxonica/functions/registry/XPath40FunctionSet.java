@@ -666,6 +666,9 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("trunk", 1, e -> e.populate(Trunk::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, EmptySequence.getInstance()));
 
+        register("unix-dateTime", 0, 1, e -> e.populate(UnixDateTime::new, BuiltInAtomicType.DATE_TIME_STAMP, ONE, 0)
+                .arg(0, BuiltInAtomicType.INTEGER, OPT, EmptySequence.getInstance()));
+
         register("unparcel", 1, e -> e.populate(UnparcelFn::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, Parcel.TYPE, ONE, null));
 
