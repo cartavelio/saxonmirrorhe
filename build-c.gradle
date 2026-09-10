@@ -3,6 +3,7 @@ def excelsiorJetHome = null
 ["${excelsiorJet}",
  "/opt/jet15.3-ent-amd64",
  "/usr/local/jet15.3-ent-amd64",
+ "/usr/local/jet",
  "c:/jet15.3-ent-amd64"].each { jet ->
   if (excelsiorJetHome == null && jet != "" && pathExists(jet)) {
     excelsiorJetHome = jet
@@ -14,10 +15,14 @@ task test_jetHome(
 ) {
   def images = new ByteArrayOutputStream()
   doLast {
-    exec {
-      commandLine "docker", "images", "-q", "--filter=reference=jet:${excelsiorJetVersion}",
-                  "--format", "{{.Repository}}:{{.Tag}}"
-      standardOutput = images
+    try {
+      exec {
+        commandLine "docker", "images", "-q", "--filter=reference=jet:${excelsiorJetVersion}",
+                    "--format", "{{.Repository}}:{{.Tag}}"
+        standardOutput = images
+      }
+    } catch (Exception ex) {
+      // whatever
     }
   }
   doLast {
