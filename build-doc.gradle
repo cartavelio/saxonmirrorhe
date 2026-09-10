@@ -311,8 +311,7 @@ task product_xmljavadoc(
                "-d", "${buildDir}/xmljavadoc",
                "-classpath", cp,
                "-doclet", "com.saxonica.xmldoclet.XmlDoclet",
-               "-docletpath", cp,
-               "-source", "1.8"] + packages.keySet()
+               "-docletpath", cp] + packages.keySet()
   }
 
   doLast {
