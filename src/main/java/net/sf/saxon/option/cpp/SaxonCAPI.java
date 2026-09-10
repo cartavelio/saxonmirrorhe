@@ -11,6 +11,7 @@ import com.saxonica.config.ProfessionalConfiguration;
 import com.saxonica.config.Verifier;
 import com.saxonica.functions.extfn.cpp.NativeCall;
 import net.sf.saxon.Configuration;
+
 import net.sf.saxon.Gizmo;
 import net.sf.saxon.Query;
 import net.sf.saxon.Transform;
@@ -377,16 +378,13 @@ public class SaxonCAPI {
     public static byte j_isLicensed(IsolateThread thread, ObjectHandle procRef) {
         Processor proc = objectHandles.get(procRef);
         Configuration config = proc.getUnderlyingConfiguration();
-        if(config instanceof EnterpriseConfiguration) {
-            EnterpriseConfiguration ec = (EnterpriseConfiguration) config;
-            return CTypeConversion.toCBoolean(ec.isLicenseFound());
-        } else if(config instanceof ProfessionalConfiguration) {
+//#if EE==true || PE==true
+        if(config instanceof ProfessionalConfiguration) {
             ProfessionalConfiguration pc = (ProfessionalConfiguration) config;
             return CTypeConversion.toCBoolean(pc.isLicenseFound());
-        } else{
-            return CTypeConversion.toCBoolean(false);
         }
-
+//#endif
+        return CTypeConversion.toCBoolean(false);
 
     }
 
@@ -2156,8 +2154,8 @@ public class SaxonCAPI {
 
     public static void testj() throws SaxonApiException {
         SaxonCAPI.debug  = true;
-        Processor processor = new Processor(true);
-        processor.setConfigurationProperty(Feature.LICENSE_FILE_LOCATION, "/Users/ond1/work/development/git/private/saxon-license.lic");
+
+
         //Source result = SaxonCAPI.resolveFileToSource(processor, "/Users/ond1/work/development/git/saxon-dev/saxondev/build/releases/libsaxon-EEC-mac-x86_64-v12.3/samples/cppTests", "../php/xsl/foo.xsl", ResourceRequest.XSLT_NATURE);
         String input = "home/ond1/file.txt";
         Path path = Paths.get("/", input).normalize();
@@ -2197,36 +2195,7 @@ public class SaxonCAPI {
 
 
     public static void main(String [] args) throws SaxonApiException, URISyntaxException {
-          //SaxonCAPI.testj();
-
-        SaxonCAPI.debug = true;
-        Processor processor = new Processor();
-
-
-
-        XdmValue signatureValue = processor.newJsonBuilder().parseJson("{\n" +
-                        "\"myFunc\": {\n" +
-                        "      \"as\": \"xs:boolean?\",\n" +
-                        "      \"param\": [\n" +
-                        "        \"xs:integer\"\n" +
-                        "      ],\n" +
-                        "      \"arity\": [1]\n" +
-                        "    }\n" +
-                        "}");
-
-
-        //#if EE==true || PE==true
-        //SaxonCAPI.registerFunctionDefinition(processor, "http://www.example.com", signatureValue, null, null, null, false);
-        //#endif
-        /*XPathCompiler xpath = processor.newXPathCompiler();
-
-        xpath.declareNamespace("dy", "http://www.example.com");
-        XPathExecutable executable = xpath.compile("dy:myFunc(5)");
-        XPathSelector selector = executable.load();
-        XdmNode node = main_parseXmlString(null,processor,null, null,"<x/>");
-        selector.setContextItem(node);
-        XdmValue result = selector.evaluate();*/
-
+          SaxonCAPI.testj();
 
     }
 
