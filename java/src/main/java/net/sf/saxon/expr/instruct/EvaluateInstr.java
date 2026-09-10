@@ -383,6 +383,13 @@ public final class EvaluateInstr extends Expression {
         return new EvaluateInstrElaborator();
     }
 
+    private record CacheKey (
+            String exprText, String baseUri, boolean schemaAware, Optional<NodeInfo> namespaceContext) {}
+
+    private record CacheValue (
+            Expression expr, SlotManager slotManager, Collection<XPathVariable> variables) {}
+
+
     private static class EvaluateInstrElaborator extends PullElaborator {
 
         @Override
@@ -433,33 +440,38 @@ public final class EvaluateInstr extends Expression {
 
                 // Create a cache key so the compiled expression can be reused
 
-                StringBuilder fsb = new StringBuilder(exprText.length() + (baseUri == null ? 4 : baseUri.length()) + 40);
-                fsb.append(baseUri);
-                fsb.append("##");
-                fsb.append(schemaAwareAttr);
-                fsb.append("##");
-                fsb.append(exprText);
-                if (namespaceContextBase != null) {
-                    fsb.append("##");
-                    namespaceContextBase.generateId(fsb);
-                }
-                String cacheKey = fsb.toString();
+                CacheKey cacheKey = new CacheKey(exprText,
+                                                 baseUri,
+                                                 isSchemaAware,
+                                                 Optional.ofNullable(namespaceContextBase));
+
+//                StringBuilder fsb = new StringBuilder(exprText.length() + (baseUri == null ? 4 : baseUri.length()) + 40);
+//                fsb.append(baseUri);
+//                fsb.append("##");
+//                fsb.append(schemaAwareAttr);
+//                fsb.append("##");
+//                fsb.append(exprText);
+//                if (namespaceContextBase != null) {
+//                    fsb.append("##");
+//                    namespaceContextBase.generateId(fsb);
+//                }
+//                String cacheKey = fsb.toString();
                 Collection<XPathVariable> declaredVars = null;
 
                 Controller controller = context.getController();
-                LFUCache<String, Object[]> cache;
+                LFUCache<CacheKey, CacheValue> cache;
                 //noinspection SynchronizationOnLocalVariableOrMethodParameter
                 synchronized(controller) {
-                    cache = (LFUCache<String, Object[]>) controller.getUserData(instr.getLocation(), "xsl:evaluate");
+                    cache = (LFUCache<CacheKey, CacheValue>) controller.getUserData(instr.getLocation(), "xsl:evaluate");
                     if (cache == null) {
                         cache = new LFUCache<>(100);
                         controller.setUserData(instr.getLocation(), "xsl:evaluate", cache);
                     } else {
-                        Object[] o = cache.get(cacheKey);
+                        CacheValue o = cache.get(cacheKey);
                         if (o != null) {
-                            expr = (Expression) o[0];
-                            slotMap = (SlotManager) o[1];
-                            declaredVars = (Collection<XPathVariable>) o[2];
+                            expr = o.expr();
+                            slotMap = o.slotManager();
+                            declaredVars = o.variables();
                         }
                     }
                 }
@@ -580,11 +592,11 @@ public final class EvaluateInstr extends Expression {
 
                     // Save the compiled expression in the cache for next time
 
-                    if (cacheKey != null) {
+                    //if (cacheKey != null) {
                         declaredVars = env.getDeclaredVariables();
-                        cache.put(cacheKey, new Object[]{expr, slotMap, declaredVars});
+                        cache.put(cacheKey, new CacheValue(expr, slotMap, declaredVars));
                         //System.err.println("Cache miss, size = " + cache.size());
-                    }
+                    //}
                 }
 
                 XPathContextMajor c2 = context.newContext();
