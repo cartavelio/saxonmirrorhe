@@ -8,13 +8,9 @@
 package net.sf.saxon.style;
 
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.instruct.DocumentInstr;
-import net.sf.saxon.expr.instruct.GlobalVariable;
-import net.sf.saxon.expr.instruct.SlotManager;
-import net.sf.saxon.expr.instruct.ValueOf;
+import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.s9api.XmlProcessingError;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.SaxonErrorCode;
@@ -243,6 +239,7 @@ public class SourceBinding {
         }
 
         if (extraAsAtt != null) {
+            // TODO: saxon:as is obsolescent
             SequenceType extraResultType = null;
             try {
                 extraResultType = sourceElement.makeExtendedSequenceType(extraAsAtt);
@@ -551,6 +548,18 @@ public class SourceBinding {
                     XmlProcessingError error = new XmlProcessingException(err);
                     sourceElement.compileError(error);
                     select = new ErrorExpression(error);
+                }
+                if (sourceElement instanceof XSLLocalParam xslParam &&
+                        sourceElement.getParent() instanceof XSLFunction xslFunction) {
+                    // Default parameter value for an XSLT 4.0 function
+                    UserFunction userFunction = xslFunction.getCompiledFunction();
+                    for (int i=0; i< userFunction.getArity(); i++) {
+                        UserFunctionParameter ufp = userFunction.getParameterDefinitions()[i];
+                        if (ufp.getVariableQName().equals(xslParam.getVariableQName())) {
+                            ufp.setDefaultValueExpression(() -> select);
+                            break;
+                        }
+                    }
                 }
             }
         }

@@ -1168,7 +1168,7 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
         }
         for (int a = 0; a < maxArity; a++) {
             if (expandedArgs[a] == null) {
-                expandedArgs[a] = new DefaultedArgumentExpression(); // to be fixed up later;
+                expandedArgs[a] = new DefaultedArgumentExpression(fd, a); // to be fixed up later;
             }
         }
         return expandedArgs;

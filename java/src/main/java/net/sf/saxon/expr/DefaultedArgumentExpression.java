@@ -8,11 +8,16 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.parser.ContextItemStaticInfo;
-import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.expr.elab.PullElaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.RebindingMap;
+import net.sf.saxon.functions.registry.FunctionDefinition;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
+import net.sf.saxon.tree.iter.EmptyIterator;
+
+import java.util.function.Supplier;
 
 /**
  * <code>DefaultedArgumentExpression</code> is a placeholder used in a function call for an argument
@@ -24,11 +29,18 @@ import net.sf.saxon.trans.XPathException;
 
 public class DefaultedArgumentExpression extends PseudoExpression {
 
+    private final FunctionDefinition function;
+    private final int arg;
+
     /**
      * Constructor
+     * @param function the function definition from which the default parameter value is taken
+     * @param arg the zero-based position of the defaulted argument
      */
 
-    public DefaultedArgumentExpression() {
+    public DefaultedArgumentExpression(FunctionDefinition function, int arg) {
+        this.function = function;
+        this.arg = arg;
     }
 
 
@@ -72,16 +84,27 @@ public class DefaultedArgumentExpression extends PseudoExpression {
 
     @Override
     public Elaborator getElaborator() {
-        return Literal.makeEmptySequence().getElaborator();
+        return new DefaultArgumentExpressionElaborator();
     }
 
-    public static class DefaultCollationArgument extends DefaultedArgumentExpression {
+    public static class DefaultArgumentExpressionElaborator extends PullElaborator {
+
+
         @Override
-        public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
-            return new StringLiteral(visitor.getStaticContext().getDefaultCollationName());
+        public PullEvaluator elaborateForPull() {
+            DefaultedArgumentExpression expr = (DefaultedArgumentExpression) getExpression();
+            Supplier<Expression> defaultValueExpression = expr.function.getDefaultValueExpression(expr.arg);
+            if (defaultValueExpression == null) {
+                return context -> EmptyIterator.INSTANCE;
+            }
+            Expression defaultValueExpr = defaultValueExpression.get();
+            if (defaultValueExpr instanceof Literal lit) {
+                return context -> lit.getGroundedValue().iterate();
+            }
+            return CSharp.methodRef(defaultValueExpr::iterate);
         }
-    }
 
+    }
 
 }
 

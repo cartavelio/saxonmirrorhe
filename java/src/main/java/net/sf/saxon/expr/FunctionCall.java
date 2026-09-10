@@ -266,12 +266,12 @@ public abstract class FunctionCall extends Expression {
                                                              (getFunctionName() == null ? "" : getFunctionName().getDisplayName()),
                                                      "XPST0017");
                         }
-                        if (arg instanceof DefaultedArgumentExpression.DefaultCollationArgument) {
-                            arg = new StringLiteral(visitor.getStaticContext().getDefaultCollationName());
-                        } else {
+//                        if (arg instanceof DefaultedArgumentExpression.DefaultCollationArgument) {
+//                            arg = new StringLiteral(visitor.getStaticContext().getDefaultCollationName());
+//                        } else {
                             Supplier<Expression> defaultValue = fd.getDefaultValueExpression(i);
-                            if (defaultValue == null || defaultValue.get() == null) {
-                                arg = Literal.makeEmptySequence();
+                            if (defaultValue == null || defaultValue.get() == null || defaultValue.get() instanceof DefaultedArgumentExpression) {
+                                //arg = Literal.makeEmptySequence();
                                 // This only happens if there's an error in the function definition
 //                                throw new XPathException("No value or default available for " + RoleDiagnostic.ordinal(i + 1) +
 //                                                                 " parameter of function " +
@@ -281,7 +281,7 @@ public abstract class FunctionCall extends Expression {
                                 arg = defaultValue.get().copy(new RebindingMap());
                             }
                             adoptChildExpression(arg);
-                        }
+//                        }
                     } else if (target instanceof net.sf.saxon.functions.SystemFunction) {
                         // A system function with default argument values
                         BuiltInFunctionSet.Entry details = ((SystemFunction) target).getDetails();

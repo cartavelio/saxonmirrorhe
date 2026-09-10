@@ -85,6 +85,7 @@ public class XSLLocalParam extends XSLGeneralVariable {
             }
             sourceBinding.prepareAttributes(permittedAttributes);
             if (sourceBinding.hasProperty(SourceBinding.BindingProperty.TUNNEL) && !(getParent() instanceof XSLTemplate)) {
+                assert getParent() != null;
                 compileError("For attribute 'tunnel' within an " + getParent().getDisplayName() +
                         " parameter, the only permitted value is 'no'", "XTSE0020");
             }
@@ -110,7 +111,7 @@ public class XSLLocalParam extends XSLGeneralVariable {
                             }
                         }
                         if (defaultVal == null && !sourceBinding.hasProperty(SourceBinding.BindingProperty.REQUIRED)) {
-                            defaultVal = new DefaultedArgumentExpression();
+                            defaultVal = new DefaultedArgumentExpression(uf, pos);
                         }
                         final Expression finalDefault = defaultVal;
                         ufp.setDefaultValueExpression(() -> finalDefault);
@@ -162,7 +163,7 @@ public class XSLLocalParam extends XSLGeneralVariable {
             compileError("Function parameters cannot have a default value", "XTSE0760");
         }
 
-        // it must be a text node; allow it if all whitespace
+        // Examine the preceding siblings of the xsl:param element
         SequenceTool.supply(iteratePrecedingSiblingAxis(AnyGNode.TEST), (ItemConsumer<? super Item>) node -> {
             if (node instanceof XSLLocalParam) {
                 if (name.equals(((XSLLocalParam) node).sourceBinding.getVariableQName())) {
@@ -203,6 +204,11 @@ public class XSLLocalParam extends XSLGeneralVariable {
         }
 
         super.validate(decl);
+    }
+
+    @Override
+    public void postValidate() throws XPathException {
+        super.postValidate();
     }
 
     public boolean isTunnelParam() {
