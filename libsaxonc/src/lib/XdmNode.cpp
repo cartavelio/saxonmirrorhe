@@ -8,14 +8,14 @@
 
 XdmNode::XdmNode(int64_t obj)
     : XdmItem(obj), baseURI(nullptr), nodeName(nullptr), localName(nullptr),
-      childCount(-1), children(nullptr),
-      attrValues(nullptr), attrCount(-1), nodeKind(UNKNOWN), axisCount(0) {
+      children(nullptr), childCount(-1), axisCount(0),
+      attrValues(nullptr), attrCount(-1), nodeKind(UNKNOWN) {
 }
 
 XdmNode::XdmNode(XdmNode *p, int64_t obj, XDM_NODE_KIND kind)
     : XdmItem(obj), baseURI(nullptr), nodeName(nullptr), localName(nullptr),
-      childCount(-1), children(nullptr),
-      attrValues(nullptr), attrCount(-1), nodeKind(kind), axisCount(0) {}
+      children(nullptr), childCount(-1), axisCount(0),
+      attrValues(nullptr), attrCount(-1), nodeKind(kind) {}
 
 XdmNode::XdmNode(const XdmNode &other): XdmItem(other) {
   baseURI = nullptr;
@@ -279,28 +279,28 @@ XdmNode **XdmNode::getAttributeNodes(bool cached) {
   }
 }
 
-int XdmNode::axisNodeCount() { return axisCount; }
+int XdmNode::axisNodeCount() {return axisCount; }
 
 XdmNode **XdmNode::axisNodes(EnumXdmAxis axis) {
   allocFn fn = operator new;
   long long *results = j_axisIterator(SaxonProcessor::sxn_environ->thread,
                                       (void *)fn, (void *)value, int(axis));
   if (results == nullptr) {
+    axisCount = 0;
     return nullptr;
   }
-  axisCount = results[0];
+  axisCount = (int) results[0];
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+    std::cerr << "axisNodes count=" << axisCount << std::endl;
+  }
   if (axisCount == 0) {
     return nullptr;
   }
-  /*if (getenv("SAXONC_DEBUG_FLAG")) {
-    std::cerr << "axisNodes count=" << axisCount << std::endl;
-  } */
   XdmNode **valuesi = nullptr;
 
   valuesi = new XdmNode *[axisCount];
   XdmNode *tempNode = nullptr;
   for (int p = 1; p < axisCount + 1; ++p) {
-
     tempNode = new XdmNode(this, results[p], UNKNOWN);
     valuesi[p - 1] = tempNode;
   }

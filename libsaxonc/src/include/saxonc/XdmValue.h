@@ -211,9 +211,6 @@ protected:
     values = nullptr;
     relinquished_values = nullptr;
     // relinquished_values[0] = 0;
-   if (getenv("SAXONC_DEBUG_FLAG")) {
-    std::cerr << "XdmValue initialize called:" << " ob ref=" << (this) << " ref=" <<((long)jValues) << std::endl;
-   }
   }
 
   char *valueType; /*!< Cached. The type of the XdmValue */

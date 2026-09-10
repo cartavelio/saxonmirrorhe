@@ -17,6 +17,7 @@
 #include <direct.h>
 #define GetCurrentDir _getcwd
 #endif
+#include <cstdarg>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -77,6 +78,17 @@ public:
       cout << "Unable to open this file." << endl;*/
 
     return false;
+  }
+
+  static const std::string concat(int n, ...) {
+    std::string result;
+    va_list args;
+    va_start(args, n);
+    for (int i = 0; i < n; i++) {
+      result.append(va_arg(args, char*));
+    }
+    va_end(args);
+    return result;
   }
 
 private:

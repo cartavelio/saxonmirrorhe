@@ -1,6 +1,5 @@
 import threading
-
-from saxonc import *
+import saxonche as saxonc
 
 from random import randint
 from time import sleep
@@ -35,8 +34,7 @@ def run_transform(threadName, counter, node, xslt30_processor, saxon_proc):
     '''saxon_proc.detach_current_thread'''
 
 
-with PySaxonProcessor(license = False) as saxon_proc:
-
+with saxonc.PySaxonProcessor(license = False) as saxon_proc:
     xdm_node = saxon_proc.parse_xml(xml_file_name = 'threading-example/input-samples/sample-1.xml')
     if xdm_node is None:
         print(saxon_proc.error_message)

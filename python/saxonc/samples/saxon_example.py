@@ -1,11 +1,9 @@
-import saxonc@@edition@@
+import saxoncee as saxonc
 
-with saxonc@@edition@@.PySaxonProcessor(license=True) as proc:
-   
+with saxonc.PySaxonProcessor(license=True) as proc:
    print("Test Python")
    print(proc.version)
    #print(dir(proc))
-
 
    xdmAtomicval = proc.make_boolean_value(False)
 
@@ -41,7 +39,7 @@ with saxonc@@edition@@.PySaxonProcessor(license=True) as proc:
    print('test 1\n node='+node.string_value)
    xp.set_context(xdm_item=node)
    item = xp.evaluate_single('//person[1]')
-   if isinstance(item,saxonc@@edition@@.PyXdmNode):
+   if isinstance(item, saxonc.PyXdmNode):
        print(item.string_value)
 
    value = proc.make_double_value(3.5)
@@ -69,7 +67,3 @@ with saxonc@@edition@@.PySaxonProcessor(license=True) as proc:
    attrs = children[1].attributes
    if len(attrs) == 2:
        print('Surname in attribute='+  attrs[1].string_value)
-
-
-
-

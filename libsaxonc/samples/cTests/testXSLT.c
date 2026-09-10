@@ -36,7 +36,11 @@ void test_xinclude(sxnc_environment *environi, sxnc_processor *processor, char *
   parameters = (sxnc_parameter *)calloc(cap, sizeof(sxnc_parameter));
   properties = (sxnc_property *)calloc(cap, sizeof(sxnc_property));
 
-  setCatalog(environi, processor, cwd, "catalog.xml");
+  char ** catalogFiles = calloc(1, sizeof(char *));
+
+  catalogFiles[0] = "catalog.xml";
+
+  setCatalogFiles(environi, processor, cwd, catalogFiles, 1);
   setConfigurationProperty(environi, processor, "http://saxon.sf.net/feature/xinclude-aware", "on");
 
   char sample1_xml_file[FILENAME_MAX];

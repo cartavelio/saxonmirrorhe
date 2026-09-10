@@ -62,7 +62,29 @@ void setCatalog(sxnc_environment *environi, sxnc_processor *proc,
   j_handles_destroy(environi->thread, (void *)processorDataRef);
   }
 
+}
+
+void setCatalogFiles(sxnc_environment *environi, sxnc_processor *proc,
+                                            char *cwd, char **catalogFileNames, int length){
+
+    if (catalogFileNames != NULL ) {
+  int64_t processorDataRef =
+      createProcessorDataWithCapacity(environi->thread, length);
+
+  for(int i = 0; i < length; i++){
+     char* catFile = (char *)catalogFileNames[i];
+     if(catFile != NULL){
+         addProcessorProperty(environi->thread, (void *)processorDataRef,
+                       (char *)catalogFileNames);
+     }
   }
+
+  long result =
+      j_setCatalogFiles(environi->thread, (void *)proc->value,
+                        (char *)cwd, (void *)processorDataRef);
+  j_handles_destroy(environi->thread, (void *)processorDataRef);
+  }
+}
 
 void xsltSaveResultToFile(sxnc_environment *environi, sxnc_processor *proc,
                           char *cwd, char *source, char *stylesheet,
@@ -158,7 +180,7 @@ void executeQueryToFile(sxnc_environment *environi, sxnc_processor *proc,
   }
 
   j_executeQueryToFile(environi->thread, (void *)proc->value, cwd, NULL,
-                           outputfile, NULL, (void *)processorDataRef);
+                       outputfile, NULL, (void *)processorDataRef);
 }
 
 const char *executeQueryToString(sxnc_environment *environi,

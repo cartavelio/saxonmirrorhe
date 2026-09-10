@@ -186,7 +186,7 @@ void setParameter(sxnc_parameter **parameters, int *parLen, int *parCap,
     }
     *parameters = temp;
   }
-  int nameLen = strlen(name) + 7;
+  int nameLen = (int) strlen(name) + 7;
   char *newName = malloc(sizeof(char) * nameLen);
   snprintf(newName, nameLen, "%s%s", "param:", name);
   (*parameters)[(*parLen) - 1].name = (char *)newName;
@@ -212,7 +212,7 @@ void setProperty(sxnc_property **properties, int *propLen, int *propCap,
     }
     *properties = temp;
   }
-  int nameLen = strlen(name) + 1;
+  int nameLen = (int) strlen(name) + 1;
   char *newName = (char *)malloc(sizeof(char) * nameLen);
   snprintf(newName, nameLen, "%s", name);
   char *newValue = (char *)malloc(sizeof(char) * strlen(value) + 1);

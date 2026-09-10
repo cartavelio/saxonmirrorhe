@@ -176,7 +176,9 @@ void testValidator3(SaxonProcessor *processor, SchemaValidator *val,
   }
 }
 
-void testValidator4(const char *cwd, sResultCount *sresult) {
+void testValidator4(const char *cwd,
+                    const std::string *const dataDir,
+                    sResultCount *sresult) {
 
   SaxonProcessor *processor = new SaxonProcessor(true);
   processor->setConfigurationProperty("xsdversion", "1.1");
@@ -190,10 +192,10 @@ void testValidator4(const char *cwd, sResultCount *sresult) {
        << endl;
 
   try {
-    val->registerSchemaFromFile("../data/family-ext.xsd");
+    val->registerSchemaFromFile(CppTestUtils::concat(2, dataDir->c_str(), "/family-ext.xsd").c_str());
 
-    val->registerSchemaFromFile("../data/family.xsd");
-    val->validate("../data/family.xml");
+    val->registerSchemaFromFile(CppTestUtils::concat(2, dataDir->c_str(), "/family.xsd").c_str());
+    val->validate(CppTestUtils::concat(2, dataDir->c_str(), "/family.xml").c_str());
     cout << endl << "Doc1 is OK" << endl;
     sresult->success++;
   } catch (SaxonApiException &e) {
@@ -214,7 +216,7 @@ void testValidator4(const char *cwd, sResultCount *sresult) {
   delete processor;
 }
 
-void testValidator4a(sResultCount *sresult) {
+void testValidator4a(const std::string *const dataDir, sResultCount *sresult) {
   SaxonProcessor *processor = new SaxonProcessor(true);
   processor->setConfigurationProperty("xsdversion", "1.1");
   SchemaValidator *val = processor->newSchemaValidator();
@@ -226,9 +228,10 @@ void testValidator4a(sResultCount *sresult) {
        << endl;
 
   try {
-    val->registerSchemaFromFile("../data/family-ext.xsd");
-    val->registerSchemaFromFile("../data/family.xsd");
-    XdmNode *node = val->validateToNode("../data/family.xml");
+    val->registerSchemaFromFile(CppTestUtils::concat(2, dataDir->c_str(), "/family-ext.xsd").c_str());
+
+    val->registerSchemaFromFile(CppTestUtils::concat(2, dataDir->c_str(), "/family.xsd").c_str());
+    XdmNode *node = val->validateToNode(CppTestUtils::concat(2, dataDir->c_str(), "/family.xml").c_str());
 
     const char *valueStr = node->toString();
     if (valueStr != nullptr) {
@@ -369,7 +372,9 @@ void testValidator6(SaxonProcessor *processor, SchemaValidator *val,
   }
 }
 
-void testValidatorToFile(const char *cwd, sResultCount *sresult) {
+void testValidatorToFile(const char *cwd,
+                         const std::string *const dataDir,
+                         sResultCount *sresult) {
 
   SaxonProcessor *processor = new SaxonProcessor(true);
   SchemaValidator *val = processor->newSchemaValidator();
@@ -384,10 +389,10 @@ void testValidatorToFile(const char *cwd, sResultCount *sresult) {
           "family.xsd and output result in file validatedDoc.xml" << endl;
 
   try {
-    val->registerSchemaFromFile("../data/family-ext.xsd");
+    val->registerSchemaFromFile(CppTestUtils::concat(2, dataDir->c_str(), "/family-ext.xsd").c_str());
 
-    val->registerSchemaFromFile("../data/family.xsd");
-    val->validate("../data/family.xml");
+    val->registerSchemaFromFile(CppTestUtils::concat(2, dataDir->c_str(), "/family.xsd").c_str());
+    val->validate(CppTestUtils::concat(2, dataDir->c_str(), "/family.xml").c_str());
 
         if (CppTestUtils::exists("validatedDoc.xml")) {
           cout << "The file validatedDoc.xml exists" << endl;
@@ -430,6 +435,7 @@ void testValidatorToFile(const char *cwd, sResultCount *sresult) {
 }
 
 int main(int argc, char *argv[]) {
+  const std::string dataDir = argc > 1 ? string(argv[1]) : string();
 
   SaxonProcessor *processor = new SaxonProcessor(true);
   // setDebugMode(SaxonProcessor::sxn_environ->thread, 1);
@@ -439,17 +445,10 @@ int main(int argc, char *argv[]) {
        << endl;
 
   const char *cwd = nullptr;
-  if (argc > 1) {
-    cwd = argv[1];
-  }
-  if (cwd != nullptr) {
-    processor->setcwd(cwd);
-  } else {
-    char buff[FILENAME_MAX]; // create string buffer to hold path
-    GetCurrentDir(buff, FILENAME_MAX);
-    processor->setcwd(buff);
-    cwd = (const char *)buff;
-  }
+  char buff[FILENAME_MAX]; // create string buffer to hold path
+  GetCurrentDir(buff, FILENAME_MAX);
+  processor->setcwd(buff);
+  cwd = (const char *)buff;
 
   cout << "CWD = " << cwd << endl;
 
@@ -473,13 +472,13 @@ int main(int argc, char *argv[]) {
   processor->setConfigurationProperty(
       "http://saxon.sf.net/feature/multipleSchemaImports", "on");
   SchemaValidator *validator2 = processor->newSchemaValidator();
-  testValidator4(cwd, sresult);
-  testValidator4a(sresult);
+  testValidator4(cwd, &dataDir, sresult);
+  testValidator4a(&dataDir, sresult);
   processor->setConfigurationProperty("xsdversion", "1.1");
   SchemaValidator *validator3 = processor->newSchemaValidator();
   testValidator5(processor, validator3, sresult);
   testValidator6(processor, validator3, sresult);
-  testValidatorToFile(cwd, sresult);
+  testValidatorToFile(cwd, &dataDir, sresult);
 
   std::cout << "\nTest Results - Number of tests= "
             << (sresult->success + sresult->failure)

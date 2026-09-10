@@ -28,30 +28,15 @@ XdmItem::XdmItem(int64_t objRef): XdmValue() {
   itemToString = nullptr;
 }
 
-bool XdmItem::isAtomic() {
-    return XDM_ATOMIC_VALUE == j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,
-                                 (void *)value);
-}
+bool XdmItem::isAtomic() { return false; }
 
-bool XdmItem::isNode() {
-    return XDM_NODE == j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,
-                                                                           (void *)value);
-}
+bool XdmItem::isNode() { return false; }
 
-bool XdmItem::isFunction() {
-    return XDM_FUNCTION_ITEM == j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,
-                                                  (void *)value);
-}
+bool XdmItem::isFunction() { return false; }
 
-bool XdmItem::isMap() {
-    return XDM_MAP == j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,
-                                                  (void *)value);
-}
+bool XdmItem::isMap() { return false; }
 
-bool XdmItem::isArray() {
-    return XDM_ARRAY == j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,
-                                                  (void *)value);
-}
+bool XdmItem::isArray() { return false; }
 
 XdmItem *XdmItem::getHead() { return this; }
 
@@ -101,11 +86,13 @@ XDM_TYPE XdmItem::getType() { return XDM_ITEM; }
 
 XdmItem::~XdmItem() {
   SaxonProcessor::attachCurrentThread();
+
   if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr << "~XdmItem destructor called:" << refCount
               << " ob ref=" << (this) << " value =" << ((long)value)
               << std::endl;
   }
+
   if (value > 0) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)value);
   }
@@ -115,12 +102,10 @@ XdmItem::~XdmItem() {
 
 void XdmItem::incrementRefCount() {
   refCount++;
-#ifdef DEBUG
   if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr << "after refCount-inc-xdmItem=" << refCount
               << " ob ref=" << (this) << std::endl;
   }
-#endif
 }
 
 void XdmItem::decrementRefCount() {
@@ -129,7 +114,7 @@ void XdmItem::decrementRefCount() {
 #ifdef DEBUG
     if (getenv("SAXONC_DEBUG_FLAG")) {
         std::cerr << "after refCount-dec-xdmItem=" << refCount
-                  << " ob ref=" << (this) << " ref=" << ((long)value) << std::endl;
+                  << " ob ref=" << (this) << std::endl;
     }
 #endif
 }

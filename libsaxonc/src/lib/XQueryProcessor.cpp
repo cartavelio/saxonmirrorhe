@@ -79,8 +79,7 @@ XQueryProcessor::XQueryProcessor(const XQueryProcessor &other) {
 }
 
 XQueryProcessor *XQueryProcessor::clone() {
-  XQueryProcessor *proc = new XQueryProcessor(*this);
-  return proc;
+  return new XQueryProcessor(*this);
 }
 
 std::map<std::string, XdmValue *> &XQueryProcessor::getParameters() {
@@ -114,7 +113,7 @@ void XQueryProcessor::declareNamespace(const char *prefix, const char *uri) {
     return;
   } else {
     // setProperty("ns-prefix", uri);
-    int s = properties.size();
+    size_t s = properties.size();
     std::string skey = std::string("ns-prefix:") + prefix;
     properties.insert(
         std::pair<std::string, std::string>(skey, std::string(uri)));

@@ -380,6 +380,11 @@ public:
    */
   SaxonApiException *getException();
 
+  /**
+   * Get the SaxonProcessor which created this XPathProcessor.
+   */
+  SaxonProcessor* getSaxonProcessor() { return proc; }
+
 private:
   void createException(const char *message = nullptr);
 

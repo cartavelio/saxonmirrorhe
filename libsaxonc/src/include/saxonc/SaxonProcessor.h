@@ -147,7 +147,7 @@ class SAXONC_EXPORT SaxonProcessor {
 
   friend class XdmValue;
 
- friend class XdmItem;
+  friend class XdmItem;
 
   friend class XdmAtomicValue;
 
@@ -249,6 +249,9 @@ public:
    * @return Pointer to a new SchemaValidator. The caller is responsible for deallocation of memory using `delete`.
    */
   SchemaValidator *newSchemaValidator();
+
+
+  void setExtensionLibrary(const char * libraryName);
 
   /**
    * Factory method to create an <code>xs:string</code> atomic value as a new XdmAtomicValue.
@@ -614,7 +617,7 @@ public:
    * Deprecated. Set a catalog file to be used in Saxon.
    * @param catalogFile - file name to the catalog
    * @throws SaxonApiException if there is a failure to set the catalog file
-   * @deprecated
+   * @deprecated - Use the setCatalogFiles() method
    */
   void setCatalog(const char *catalogFile);
 
@@ -652,7 +655,7 @@ public:
  * configuration that has been created, rather than the software that has been installed; which depends on
  * the license key supplied, as well as the software edition installed. For example it is possible to
  * instantiate an "HE" configuration even when using the "PE" or "EE" software.
- * @return The Saxon edition code: "EE", "PE", or "HE". Memory deallocation is handled internally.
+ * @return The Saxon edition code: "ee", "pe", or "he". Memory deallocation is handled internally.
  */
  const char * getSaxonEdition();
 
@@ -758,9 +761,6 @@ public:
     } 
   }
 
-    static XdmValue *makeXdmValueFromRef(int64_t valueRef);
-
-
   /**
    * Internal method for diagnostics
    */
@@ -811,12 +811,12 @@ private:
                         std::map<std::string, std::string> properties,
                         int additions = 0);
 
-  std::map<std::string, UserFunctionDescriptor *> userFunctionRegister;
-
   static int64_t
   createParameterJArray2(std::map<std::string, XdmValue *> parameters);
 
   static int64_t createJArray(XdmValue **values, int length);
+
+  static XdmValue *makeXdmValueFromRef(int64_t valueRef);
 
   static XdmItem *makeXdmItemFromRef(int64_t valueRef);
 

@@ -10,7 +10,7 @@
 #define new new (__FILE__, __LINE__)
 #endif
 
-XdmFunctionItem::XdmFunctionItem() : XdmItem(), arity(-1), fname(nullptr) {}
+XdmFunctionItem::XdmFunctionItem() : XdmItem(), fname(nullptr), arity(-1) {}
 
 XdmFunctionItem::XdmFunctionItem(const XdmFunctionItem &aVal) : XdmItem(aVal) {
   arity = aVal.arity;
@@ -18,7 +18,7 @@ XdmFunctionItem::XdmFunctionItem(const XdmFunctionItem &aVal) : XdmItem(aVal) {
 }
 
 XdmFunctionItem::XdmFunctionItem(int64_t obj)
-    : XdmItem(obj), arity(-1), fname(nullptr) {}
+    : XdmItem(obj), fname(nullptr), arity(-1) {}
 
 XdmValue *XdmFunctionItem::getXdmValueSubClass(int64_t results) {
   if (results > 0) {

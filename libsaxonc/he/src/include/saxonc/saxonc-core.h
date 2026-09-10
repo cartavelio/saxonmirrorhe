@@ -10,5 +10,5 @@
 #include <saxonc-core-he.h>
 
 #ifndef SAXONC_EDITION
-#define SAXONC_EDITION "ee"
+#define SAXONC_EDITION "he"
 #endif

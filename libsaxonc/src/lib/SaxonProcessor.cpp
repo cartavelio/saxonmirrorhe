@@ -293,8 +293,12 @@ void SaxonProcessor::initialize(bool l) {
   if (SaxonProcessor::jvmCreatedCPP == 0) {
     SaxonProcessor::jvmCreatedCPP = 1;
     SaxonProcessor::sxn_environ =
-        new sxnc_environment; //(sxnc_environment
-                              //*)malloc(sizeof(sxnc_environment));
+        new sxnc_environment;
+
+    SaxonProcessor::sxn_environ->isolate = NULL;
+	SaxonProcessor::sxn_environ->mainthread = NULL;
+	SaxonProcessor::sxn_environ->thread = NULL;
+
 
     /*
      * InitializeGraalvm run-time.
@@ -887,8 +891,9 @@ void SaxonProcessor::setCatalogFiles(const char **catalogFiles, int length) {
   for (int i = 0; i < length; i++) {
 
     if (catalogFiles[i] != nullptr) {
+      char* catFile = (char *)catalogFiles[i];
       addProcessorProperty(sxn_environ->thread, (void *)processorDataRef,
-                           (char *)catalogFiles[i]);
+                           catFile);
     }
   }
 

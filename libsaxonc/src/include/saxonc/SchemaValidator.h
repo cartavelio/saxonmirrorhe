@@ -151,8 +151,8 @@ public:
 
   /**
    * Get the validation report.
-   * The validation-report option must have been set to true in the properties
-   * to use this feature.
+   * The 'report-node' option must have been set to true in the properties
+   * to use this feature: e.g. using setProperty("report-node", true) on the class object.
    * @return XdmNode - Pointer to XdmNode. Return nullptr if validation
    * reporting feature has not been enabled. The caller is responsible for memory deallocation.
    * @throws SaxonApiException
@@ -268,6 +268,11 @@ public:
    * Get the underlying Java object of the C++ schema validator.
    */
   int64_t getUnderlyingValidator() { return cppV; }
+
+  /**
+   * Get the SaxonProcessor which created this SchemaValidator.
+   */
+  SaxonProcessor* getSaxonProcessor() { return proc; }
 
 private:
   bool lax; /*!< Flag to indicate lax mode for the Schema validation */

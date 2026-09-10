@@ -268,7 +268,7 @@ std::map<std::string, XdmValue *> &XsltExecutable::getResultDocuments() {
     int64_t resultUrisRef = j_getResultDocumentURIs(
         SaxonProcessor::sxn_environ->thread, (void *)saxonResultDocRef);
     if (results != nullptr) {
-      int sizex = results[0];
+      int sizex = (int) results[0];
       // std::cerr<<"getResultDocuments cp0 size= "<<sizex<<std::endl;
       for (int i = 1; i <= sizex; i++) {
         XdmValue *value = nullptr;
@@ -1047,7 +1047,7 @@ XdmValue *XsltExecutable::getXslMessages() {
                          (void *)saxonMessageListenerRef);
 
     if (results != nullptr) {
-      int sizex = results[0];
+      int sizex = (int) results[0];
       /*if (getenv("SAXONC_DEBUG_FLAG")) {
         std::cerr << "C++: getXslMessages size= " << sizex << std::endl;
       }*/

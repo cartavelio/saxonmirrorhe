@@ -41,7 +41,7 @@ public:
    * XdmItem constructor to create an object which is a wrapper for a Java XdmItem object - internal use only
    * @param objRef - internal Java XdmItem object to be wrapped
    */
-  explicit XdmItem(int64_t);
+  explicit XdmItem(int64_t objRef);
 
   /**
    * XdmItem copy constructor.

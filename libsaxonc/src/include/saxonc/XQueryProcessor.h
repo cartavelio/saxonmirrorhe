@@ -355,6 +355,11 @@ public:
    */
   SaxonApiException *getException();
 
+  /**
+   * Get the SaxonProcessor which created this XQueryProcessor.
+   */
+  SaxonProcessor* getSaxonProcessor() { return proc; }
+
 private:
   void createException(const char *message = nullptr);
   bool streaming;

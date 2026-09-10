@@ -74,12 +74,12 @@ int XdmValue::size() { return xdmSize; }
 
 XdmValue::XdmValue(int64_t valRef) {
   initialize();
-  XdmItem *value = new XdmItem(valRef);
+  XdmItem *xdm_item = new XdmItem(valRef);
   values_cap = 1;
   values = new XdmItem *[values_cap];
   relinquished_values = new char[values_cap];
   relinquished_values[0] = 0;
-  addXdmItem(value);
+  addXdmItem(xdm_item);
   jValues = SXN_UNSET;
   valueType = nullptr;
   toStringValue = nullptr;
@@ -94,7 +94,7 @@ XdmValue::XdmValue(int64_t val, bool arr) {
     return;
   }
 
-  int xdmSizei = results[0]; //first value represents the size of the results array
+  int xdmSizei = (int) results[0]; // first value represents the size of the results array
   values_cap = xdmSizei;
   values = new XdmItem *[values_cap];
   relinquished_values = new char[values_cap];
@@ -139,7 +139,7 @@ XdmValue::XdmValue(int64_t val, bool arr) {
 void XdmValue::resetRelinquishedItems(){
 #ifdef DEBUG
     if (getenv("SAXONC_DEBUG_FLAG")) {
-        std::cerr << "resetRelinquishedItems called:" << " ob ref=" << (this)  << " ref=" <<((long)jValues) << std::endl;
+        std::cerr << "resetRelinquishedItems called:" << " ob ref=" << (this)  << std::endl;
     }
 #endif
     for (int i = 0; i < xdmSize; i++) {
@@ -160,7 +160,7 @@ XdmValue::~XdmValue() {
 #ifdef DEBUG
   if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr << "~XdmValue destructor called:" << refCount
-              << " ob ref=" << (this) << " j_object ref=" <<((long)jValues) << std::endl;
+              << " ob ref=" << (this)  << std::endl;
   }
 #endif
 
@@ -189,7 +189,7 @@ XdmValue::~XdmValue() {
   }
   if (jValues > 0) {
         if (getenv("SAXONC_DEBUG_FLAG")) {
-          std::cerr << "XdmValue j_handles_destroy ref=" <<((long)jValues) << std::endl;
+          std::cerr << "XdmValue on jValues j_handles_destroy" << std::endl;
         }
     j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)jValues);
     jValues = SXN_UNSET;

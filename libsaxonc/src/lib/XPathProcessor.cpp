@@ -86,14 +86,12 @@ XPathProcessor::~XPathProcessor() {
     clearProperties();
     clearParameters();
     if (xp_baseURI != nullptr) {
-        delete[] xp_baseURI;
+        operator delete(xp_baseURI);
     }
     if (cppXP != SXN_UNSET) {
         j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *) cppXP);
         cppXP = SXN_UNSET;
     }
-
-    // exceptionClear();
 }
 
 XdmValue *XPathProcessor::evaluate(const char *xpathStr, const char *encoding) {
@@ -281,12 +279,15 @@ void XPathProcessor::importSchemaNamespace(const char *uri) {
 #endif
 
 void XPathProcessor::setBaseURI(const char *uriStr) {
-
-    if (uriStr != nullptr) {
-        j_xp_setBaseURI(SaxonProcessor::sxn_environ->thread, (void *) cppXP,
-                        (char *) uriStr);
+    int64_t status = j_xp_setBaseURI(SaxonProcessor::sxn_environ->thread, (void *) cppXP,
+                    (char *) uriStr);
+    if (xp_baseURI != nullptr) {
         operator delete(xp_baseURI);
         xp_baseURI = nullptr;
+    }
+
+    if (status == SXN_EXCEPTION) {
+        throw SaxonApiException();
     }
 }
 
@@ -362,7 +363,7 @@ const char * XPathProcessor::getProperty(const char *name) {
 
 void XPathProcessor::setProperty(const char *name, const char *value) {
     if (name != nullptr) {
-        int s = properties.size();
+        size_t s = properties.size();
         std::string skey = std::string(name);
         properties.insert(std::pair<std::string, std::string>(
                 skey, std::string((value == nullptr ? "" : value))));

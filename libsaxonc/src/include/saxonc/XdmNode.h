@@ -59,18 +59,18 @@ class SAXONC_EXPORT XdmNode : public XdmItem {
 public:
   /**
    * XdmNode constructor to create an object which is a wrapper for a Java XdmNode object - internal use only
-   * @param obj - internal Java XdmNode object to be wrapped
+   * @param objRef - internal Java XdmNode object to be wrapped
    */
-  XdmNode(int64_t);
+  XdmNode(int64_t objRef);
 
   /**
    * XdmNode constructor to create an object which is a wrapper for a Java XdmNode object - internal use only
    * @param parent - the parent XdmNode to this node object
-   * @param obj - internal Java XdmNode object to be wrapped
+   * @param objRef - internal Java XdmNode object to be wrapped
    * @param kind - the kind of node, for example
    * <code>XdmNodeKind#ELEMENT</code> or <code>XdmNodeKind#ATTRIBUTE</code>
    */
-  XdmNode(XdmNode *parent, int64_t, XDM_NODE_KIND kind);
+  XdmNode(XdmNode *parent, int64_t objRef, XDM_NODE_KIND kind);
 
  /**
  * XdmNode == operator. Corresponds to the <code>equals()</code> relation -

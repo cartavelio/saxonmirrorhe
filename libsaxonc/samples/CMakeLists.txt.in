@@ -1,0 +1,29 @@
+cmake_minimum_required(VERSION 3.27)
+project(saxonc_samples)
+
+set(CMAKE_CXX_STANDARD 14)
+
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
+set(SaxonC@EDITION@_DIR ../SaxonC@EDITION@/lib/cmake/SaxonC@EDITION@)
+find_package(SaxonC@EDITION@ @version@ EXACT REQUIRED)
+
+add_executable(CTestXPath cTests/testXPath.c)
+target_link_libraries(CTestXPath PRIVATE SaxonC@EDITION@::saxonc-@edition@)
+
+add_executable(CTestXQuery cTests/testXQuery.c)
+target_link_libraries(CTestXQuery PRIVATE SaxonC@EDITION@::saxonc-@edition@)
+
+add_executable(CTestXslt cTests/testXSLT.c)
+target_link_libraries(CTestXslt PRIVATE SaxonC@EDITION@::saxonc-@edition@)
+
+add_executable(CppTestXPath cppTests/testXPath.cpp)
+target_link_libraries(CppTestXPath PRIVATE SaxonC@EDITION@::saxonc-@edition@)
+
+add_executable(CppTestXQuery cppTests/testXQuery.cpp)
+target_link_libraries(CppTestXQuery PRIVATE SaxonC@EDITION@::saxonc-@edition@)
+
+add_executable(CppTestXslt cppTests/testXSLT30.cpp)
+target_link_libraries(CppTestXslt PRIVATE SaxonC@EDITION@::saxonc-@edition@)
+target_link_libraries(CppTestXslt PRIVATE Threads::Threads)

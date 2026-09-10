@@ -1,5 +1,4 @@
-"""@package saxonc@@edition@@
-This documentation details the Python API for SaxonC, which has been written in cython for Python3.
+"""This documentation details the Python API for SaxonC, which has been written in cython for Python3.
 SaxonC is produced by compiling the Java source code of Saxon to a native executable using GraalVM,
 and adding APIs for C/C++, Python, and PHP.
 SaxonC provides processing in XSLT 3.0, XQuery 3.1 and XPath 3.1, and Schema validation 1.0/1.1.
@@ -8,9 +7,6 @@ PySchemaValidator, PyXdmValue, PyXdmItem, PyXdmAtomicValue, PyXdmNode, PyXdmFunc
 # distutils: language = c++
 # distutils: sources = SaxonProcessor.cpp
 # cython: language_level = 3
-
-__version__ = '@@VERSION@@'
-__author__ = 'Saxonica'
 
 cimport saxoncClasses
 from libcpp cimport bool
@@ -27,6 +23,8 @@ from libc.string cimport memcpy
 
 from cython import Py_ssize_t
 
+__version__ = "@VERSION@"
+
 ctypedef fused xdm_hierarchy:
     saxoncClasses.XdmValue
     saxoncClasses.XdmItem
@@ -34,7 +32,6 @@ ctypedef fused xdm_hierarchy:
 
 saxoncClasses.create_saxonc_api_py_exception()
 PySaxonApiError = <object> saxoncClasses.SaxonApiErrorWrapper
-
 
 class XdmType(IntEnum):
     XDM_VALUE = 0
@@ -626,6 +623,7 @@ cdef class PySaxonProcessor:
         cdef PyXdmAtomicValue atomic_value = PyXdmAtomicValue(self)
         atomic_value.derivedaptr = atomic_value.derivedptr = atomic_value.thisvptr = value_ptr
         value_ptr.incrementRefCount()
+
         return atomic_value
 
     def make_string_value(self, value, encoding = None):
@@ -3645,8 +3643,12 @@ cdef class PyXPathProcessor:
         Args:
             base_uri (str): the base output URI
         """
-        py_uri_string = base_uri.encode('UTF-8') if base_uri is not None else None
-        cdef char * c_uri = py_uri_string if base_uri is not None else ""
+        cdef char * c_uri
+        if base_uri is None:
+            c_uri = NULL
+        else:
+            py_uri_string = base_uri.encode('UTF-8')
+            c_uri = py_uri_string
         self.thisxpptr.setBaseURI(c_uri)
 
     @property
@@ -3752,7 +3754,6 @@ cdef class PyXPathProcessor:
             str: The error code associated with the exception. Returns None if the exception does not exist.
         """
         return make_py_str(self.thisxpptr.getErrorCode())
-
 
 cdef class PySchemaValidator:
     """A PySchemaValidator represents a factory for validating instance documents against a schema."""

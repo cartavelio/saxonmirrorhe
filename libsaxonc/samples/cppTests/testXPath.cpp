@@ -149,6 +149,9 @@ void testNullSetBaseURI(SaxonProcessor *processor, sResultCount *sresult) {
 
 
 }
+
+
+
 XdmNode *getRoot(XdmNode *document)
 {
   XdmNode *root = nullptr;
@@ -315,7 +318,7 @@ void testCopyConstructorForXdmNode(SaxonProcessor *processor,
   if(document == nullptr) {
     delete document;
     sresult->failure++;
-    sresult->failureList.push_back("testUnprefixedElementMatchingPolicy");
+    sresult->failureList.push_back("testCopyConstructorForXdmNode");
     return;
 
   }
@@ -674,21 +677,6 @@ void testXPathValues2(SaxonProcessor *processor, XPathProcessor *xpath,
   }
 }
 
-void testEdition(SaxonProcessor *processor, sResultCount *sresult) {
-  cout << endl << "Test testEdition:" << endl;
-  const char * edition  = processor->getSaxonEdition();
-
-  if (strcmp(edition, "@@EDITION@@") == 0) {
-    std::cerr<<"Edition = "<<processor->getSaxonEdition()<<endl;
-    sresult->success++;
-  } else {
-    sresult->failure++;
-    sresult->failureList.push_back("testEdition");
-
-  }
-
-}
-
 void testIsLicensed(sResultCount *sresult) {
   SaxonProcessor *processor = new SaxonProcessor(true);
   cout << endl << "Test testIsLicensed:" << endl;
@@ -742,6 +730,7 @@ void testEmptyXdmValueToString(SaxonProcessor *processor, XPathProcessor *xpath,
 
 
 }
+
 
 // Test case on the evaluate method in XPathProcessor. Here we test that we have
 // morethan one XdmItem.
@@ -1335,7 +1324,6 @@ int main(int argc, char *argv[]) {
        << endl
        << endl;
 
-  testEdition(processor, sresult);
   cout << endl
        << "============================================================="
        << endl
