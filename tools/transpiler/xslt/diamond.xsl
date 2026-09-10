@@ -49,9 +49,10 @@
    <!-- this.fieldname = new XXX<>() -->
    <!-- An example is found in the constructor of SmallAttributeMap -->
    <xsl:template match="*[@nodeType='AssignExpr'][target[@nodeType='FieldAccessExpr'][scope/@nodeType='ThisExpr']]/*">
+      <xsl:message expand-text="yes">DIAMOND#52 {path(.)}</xsl:message>
       <xsl:variable name="fieldRef" select="../target"/>
-      <xsl:variable name="fieldDecl" 
-         select="ancestor::members/*[@nodeType='FieldDeclaration'][variables/variable/name/@identifier = $fieldRef/name/@identifier]"/>
+      <xsl:variable name="fieldDecl" as="element()"
+         select="(ancestor::members/*[@nodeType='FieldDeclaration'][variables/variable/name/@identifier = $fieldRef/name/@identifier])[last()]"/>
       <xsl:variable name="type" select="$fieldDecl/variables/variable/type/@RESOLVED_TYPE"/>
       <xsl:value-of select="f:extract-type-arguments($type)"/>
    </xsl:template>
