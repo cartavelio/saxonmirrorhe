@@ -4788,8 +4788,8 @@ public class XPathParser {
 
         boolean hasKeywordPlaceMarkers = false;
         for (Object o : placeMarkerArgs) {
-            if (o instanceof Integer) {
-                args[(Integer)o] = new PlaceHolder((Integer) o);
+            if (o instanceof Integer k) {
+                args[k] = new PlaceHolder(k);
             } else {
                 hasKeywordPlaceMarkers = true;
                 break;
@@ -4800,11 +4800,10 @@ public class XPathParser {
             // Map the declared parameter names to their 0-based numeric positions
             // It must be a function item that knows the original parameter names
             StructuredQName[] paramNames = null;
-            if (functionExp instanceof FunctionLiteral && ((FunctionLiteral)functionExp).getGroundedValue() instanceof IFunctionWithRetainedParameterNames) {
-                IFunctionWithRetainedParameterNames fn = (IFunctionWithRetainedParameterNames) ((FunctionLiteral) functionExp).getGroundedValue();
+            if (functionExp instanceof FunctionLiteral lit && lit.getGroundedValue() instanceof IFunctionWithRetainedParameterNames fn) {
                 paramNames = fn.getParameterNames();
-            } else if (functionExp instanceof UserFunctionReference) {
-                UserFunction fn = ((UserFunctionReference)functionExp).getNominalTarget();
+            } else if (functionExp instanceof UserFunctionReference ref) {
+                UserFunction fn = ref.getNominalTarget();
                 paramNames = fn.getParameterNames();
             }
             if (paramNames != null) {
@@ -4814,14 +4813,14 @@ public class XPathParser {
                 }
                 for (int pm = 0; pm < placeMarkerArgs.size(); pm++) {
                     Object pmId = placeMarkerArgs.get(pm);
-                    if (pmId instanceof StructuredQName) {
-                        boolean present = paramNameMap.containsKey((StructuredQName) pmId);
+                    if (pmId instanceof StructuredQName name) {
+                        boolean present = paramNameMap.containsKey(name);
                         if (!present) {
-                            throw new XPathException("Keyword " + ((StructuredQName) pmId).getEQName()
+                            throw new XPathException("Keyword " + name.getEQName()
                                                              + " does not identify any parameter in the function being partially applied",
                                                      "XPST9999");
                         }
-                        Integer pos = paramNameMap.get((StructuredQName) pmId);
+                        Integer pos = paramNameMap.get(name);
                         args[pos] = new PlaceHolder(pm);
                     }
                 }

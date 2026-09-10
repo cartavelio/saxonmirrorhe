@@ -196,6 +196,12 @@ public class DraftFunctionCall extends DraftExpression {
         return new UnsupportedOperationException("Internal error. Function call " + toShortString() + " has not been resolved.");
     }
 
+    /**
+     * The {@code simplify} method applied to a DraftFunctionCall when the entire query has been parsed, so all user-defined
+     * functions are now known, enabling the name to be resolved.
+     * @return either a FunctionCall or a CurriedFunction
+     * @throws XPathException if resolution fails
+     */
     @Override
     public Expression simplify() throws XPathException {
         simplifyChildren();
@@ -260,10 +266,9 @@ public class DraftFunctionCall extends DraftExpression {
         SymbolicName.F sn = new SymbolicName.F(name, args.length);
         FunctionItem target = lib.getFunctionItem(sn, queryModule);
         if (target == null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Cannot find a ").append(args.length).append(
-                    "-argument function named ").append(name.getEQName()).append("()");
-            throw new XPathException(sb.toString(), "XPST0017").asStaticError();
+            String msg = "Cannot find a " + args.length
+                    + "-argument function named " + name.getEQName() + "()";
+            throw new XPathException(msg, "XPST0017").asStaticError();
         }
         if (target instanceof IContextAccessorFunction) {
             // For a context-dependent function, return a call on function-lookup(), which saves the context
