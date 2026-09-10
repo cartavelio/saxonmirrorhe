@@ -1186,7 +1186,7 @@ void exampleSimple_xmark(Xslt30Processor *proc, sResultCount *sresult) {
         delete result;
     } else {
         printf("Result is null \nCheck For errors:");
-        if (proc->exceptionOccurred() > 0) {
+        if (proc->exceptionOccurred()) {
             cout << proc->getErrorMessage() << endl;
         }
         sresult->failure++;
