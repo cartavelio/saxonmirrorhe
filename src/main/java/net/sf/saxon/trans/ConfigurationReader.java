@@ -360,7 +360,7 @@ public class ConfigurationReader implements Receiver {
         applyProperty(props, "optimizationLevel", FeatureCode.OPTIMIZATION_LEVEL);
         applyProperty(props, "parser", FeatureCode.SOURCE_PARSER_CLASS);
         applyProperty(props, "preEvaluateDoc", FeatureCode.PRE_EVALUATE_DOC_FUNCTION);
-        applyProperty(props, "preferJaxpParser", FeatureCode.PREFER_JAXP_PARSER);
+        //applyProperty(props, "preferJaxpParser", FeatureCode.PREFER_JAXP_PARSER);
         applyProperty(props, "recognizeUriQueryParameters", FeatureCode.RECOGNIZE_URI_QUERY_PARAMETERS);
         applyProperty(props, "retainNodeForDiagnostics", FeatureCode.RETAIN_NODE_FOR_DIAGNOSTICS);
         applyProperty(props, "schemaValidation", FeatureCode.SCHEMA_VALIDATION_MODE);
