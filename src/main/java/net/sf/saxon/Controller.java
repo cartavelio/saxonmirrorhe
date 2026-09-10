@@ -363,7 +363,7 @@ public class Controller implements ContextOriginator {
      */
 
     public SequenceCollector allocateSequenceOutputter() {
-        PipelineConfiguration pipe = makePipelineConfiguration(true);
+        PipelineConfiguration pipe = makePipelineConfiguration();
         return new SequenceCollector(pipe, 20);
     }
 
@@ -375,7 +375,7 @@ public class Controller implements ContextOriginator {
      */
 
     public SequenceCollector allocateSequenceOutputter(int size) {
-        PipelineConfiguration pipe = makePipelineConfiguration(true);
+        PipelineConfiguration pipe = makePipelineConfiguration();
         return new SequenceCollector(pipe, size);
     }
 
@@ -392,14 +392,7 @@ public class Controller implements ContextOriginator {
      * Controller as well as other configuration information.
      */
 
-    private ParseOptions cachedParseOptions;
-
     public PipelineConfiguration makePipelineConfiguration() {
-        return makePipelineConfiguration(false);
-    }
-
-    /*@NotNull*/
-    public PipelineConfiguration makePipelineConfiguration(boolean reuseParseOptions) {
 
         ParseOptions parseOptions = getConfiguration().getParseOptions()
                 .withSchemaValidationMode(validationMode)

@@ -83,6 +83,10 @@ public class ParseOptions {
 
     private final ImmutableMap<Key, Object> properties;
 
+    private List<Key> cacheKeys;
+    private List<Object> cacheValues;
+    private List<ParseOptions> cacheResults;
+
     /**
      * Create a ParseOptions object with default options set
      */
@@ -100,20 +104,68 @@ public class ParseOptions {
     }
 
     /**
+     * Look to see if the result of an update is already cached.
+     * Return the result if so; otherwise return null
+     */
+
+    private synchronized ParseOptions searchCache(Key key, Object value) {
+        if (cacheKeys == null) {
+            return null;
+        }
+        for (int i=0; i<cacheKeys.size(); i++) {
+            if (cacheKeys.get(i) == key && cacheValues.get(i) == value) {
+                return cacheResults.get(i);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Add a new entry to the cache
+     */
+
+     private synchronized void addToCache(Key key, Object value, ParseOptions result) {
+         if (cacheKeys == null) {
+             cacheKeys = new ArrayList<>(10);
+             cacheValues = new ArrayList<>(10);
+             cacheResults = new ArrayList<>(10);
+         } else if (cacheKeys.size() >= 10) {
+             // rough and ready - empty the cache and start again
+             cacheKeys.clear();
+             cacheValues.clear();
+             cacheResults.clear();
+         }
+         cacheKeys.add(key);
+         cacheValues.add(value);
+         cacheResults.add(result);
+     }
+
+    /**
      * Return a copy of the ParseOptions object with one property set to a different value
      * @param key the property to be set
      * @param value the new value for the property, or null to remove the property
      * @return a new ParseOptions object (or the original if there is no change)
      */
     private ParseOptions withProperty(Key key, Object value) {
+        //Instrumentation.count("ParseOptions change");
         if (value == properties.get(key)) {
             return this;
         }
-        if (value == null) {
-            return new ParseOptions(properties.remove(key));
-        } else {
-            return new ParseOptions(properties.put(key, value));
+        //Instrumentation.count("ParseOptions non-trivial change");
+        ParseOptions result = searchCache(key, value);
+        if (result != null) {
+            //Instrumentation.count("ParseOptions cache hit");
+            return result;
         }
+        //Instrumentation.count("ParseOptions cache miss");
+        if (value == null) {
+            result = new ParseOptions(properties.remove(key));
+        } else {
+            result = new ParseOptions(properties.put(key, value));
+        }
+        addToCache(key, value, result);
+        //Instrumentation.count("ParseOptions cache size " + cacheKeys.size());
+        return result;
     }
 
     /**
