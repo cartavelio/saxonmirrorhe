@@ -4,6 +4,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.EarlyEvaluationContext;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicComparer;
+import net.sf.saxon.expr.sort.AtomicMatcher;
 import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
 import net.sf.saxon.functions.DeepEqual;
@@ -62,8 +63,8 @@ public class IsDeepEqualTo extends TypeSafeDiagnosingMatcher<GroundedValue> {
     private boolean check(GroundedValue actual) throws XPathException {
         XPathContext ctxt = new EarlyEvaluationContext(new Configuration());
         StringCollator collator = CodepointCollator.getInstance();
-        AtomicComparer comparer = new GenericAtomicComparer(collator, ctxt);
-        return DeepEqual.deepEqual(expected.iterate(), actual.iterate(), comparer, ctxt, 0);
+        AtomicMatcher atomicMatcher = GenericAtomicComparer.getTransitiveAtomicMatcher(collator, 0);
+        return DeepEqual.deepEqual(expected.iterate(), actual.iterate(), atomicMatcher, ctxt, 0);
     }
 
     public static Matcher<GroundedValue> deepEquals(GroundedValue expected) {
