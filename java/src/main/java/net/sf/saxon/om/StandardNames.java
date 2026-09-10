@@ -297,7 +297,15 @@ public abstract class StandardNames {
 
     private static final String[] localNames = new String[1023];
     private static final HashMap<String, Integer> lookup = new HashMap<>(1023);
-    public static StructuredQName[] errorVariables = {
+    private static StructuredQName[] errorVariables31 = {
+            new StructuredQName("err", NamespaceUri.ERR, "code"),
+            new StructuredQName("err", NamespaceUri.ERR, "description"),
+            new StructuredQName("err", NamespaceUri.ERR, "value"),
+            new StructuredQName("err", NamespaceUri.ERR, "module"),
+            new StructuredQName("err", NamespaceUri.ERR, "line-number"),
+            new StructuredQName("err", NamespaceUri.ERR, "column-number"),
+    };
+    private static StructuredQName[] errorVariables40 = {
             new StructuredQName("err", NamespaceUri.ERR, "code"),
             new StructuredQName("err", NamespaceUri.ERR, "description"),
             new StructuredQName("err", NamespaceUri.ERR, "value"),
@@ -308,6 +316,9 @@ public abstract class StandardNames {
             new StructuredQName("err", NamespaceUri.ERR, "stack-trace"),
             new StructuredQName("err", NamespaceUri.ERR, "map")
     };
+    public static StructuredQName[] getErrorVariables(int version) {
+        return version >= 40 ? errorVariables40 : errorVariables31;
+    }
     // key is an expanded QName in Clark notation
     // value is a fingerprint, as a java.lang.Integer
 

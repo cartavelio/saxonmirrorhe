@@ -2042,7 +2042,7 @@ public class XPathParser {
                     return it;
                 } else if (this instanceof XQueryParser qp) {
                     // In XQuery, it might be a forwards reference
-                    return new DraftItemType(sq);
+                    return new DraftItemType(sq, (QueryModule)env);
                 }
             }
             grumble("Unknown item type " + qname, "XPST0051");
@@ -2122,7 +2122,7 @@ public class XPathParser {
             SchemaType st = env.getImportedSchema().getSchemaType(new StructuredQName("", uri, local));
             if (st == null) {
                 if (languageVersion >= 40 && language == ParsedLanguage.XQUERY) {
-                    return new DraftItemType(sq);
+                    return new DraftItemType(sq, (QueryModule)env);
                 }
                 if (languageVersion >= 30) {
                     grumble("Unknown simple type " + qname, "XQST0052");
@@ -3563,7 +3563,7 @@ public class XPathParser {
             ref = new LocalVariableReference(b);
         } else {
             if (catchDepth > 0) {
-                for (StructuredQName errorVariable : StandardNames.errorVariables) {
+                for (StructuredQName errorVariable : StandardNames.getErrorVariables(env.getXPathVersion())) {
                     if (errorVariable.getLocalPart().equals(vtest.getLocalPart())) {
                         StructuredQName functionName =
                                 new StructuredQName("saxon", NamespaceUri.SAXON, "dynamic-error-info");

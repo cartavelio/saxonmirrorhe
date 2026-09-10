@@ -321,12 +321,13 @@ public class ExpressionContext implements StaticContext {
                 return vref;
             }
             // it might be an implicit error variable in try/catch
-            if (getXPathVersion() >= 30 && qName.hasURI(NamespaceUri.ERR)) {
+            int version = getXPathVersion();
+            if (version >= 30 && qName.hasURI(NamespaceUri.ERR)) {
                 SequenceIterator catchers = element.iterateAncestorOrSelfAxis(
                         NamedXNodeType.make(Type.ELEMENT, StandardNames.XSL_CATCH, element.getConfiguration()));
                 StyleElement catcher = (StyleElement) catchers.next();
                 if (catcher != null) {
-                    for (StructuredQName errorVariable : StandardNames.errorVariables) {
+                    for (StructuredQName errorVariable : StandardNames.getErrorVariables(version)) {
                         if (errorVariable.getLocalPart().equals(qName.getLocalPart())) {
                             SystemFunction f = VendorFunctionSetHE.getInstance().makeFunction("dynamic-error-info", 1);
                             return f.makeFunctionCall(new StringLiteral(qName.getLocalPart()));
