@@ -11,6 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.ItemElaborator;
 import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.ma.arrays.ArrayItem;
@@ -335,7 +336,7 @@ public class FilterExpressionAM extends BinaryExpression
         public ItemEvaluator elaborateForItem() {
             FilterExpressionAM expr = (FilterExpressionAM) getExpression();
             ItemEvaluator select = expr.getSelectExpression().makeElaborator().elaborateForItem();
-            ItemEvaluator predicate = expr.getActionExpression().makeElaborator().elaborateForItem();
+            SequenceEvaluator predicate = expr.getActionExpression().makeElaborator().eagerly();
             return context -> {
                 Item input = select.eval(context);
                 if (input == null) {
@@ -350,7 +351,7 @@ public class FilterExpressionAM extends BinaryExpression
             };
         }
 
-        private MapItem filteredMap(XPathContext context, MapItem input, ItemEvaluator predicate) throws XPathException {
+        private MapItem filteredMap(XPathContext context, MapItem input, SequenceEvaluator predicate) throws XPathException {
             MapItem result = new HashTrieMap();
             int size = input.size();
             ManualIterator focus = new ManualIterator();
@@ -363,7 +364,7 @@ public class FilterExpressionAM extends BinaryExpression
                 ShapedMap kvp = new ShapedMap(Shape.KEY_VALUE_PAIR, pair.key, pair.value);
                 focus.setContextItem(kvp);
                 focus.incrementPosition();
-                Item predicateValue = predicate.eval(c2);
+                GroundedValue predicateValue = predicate.evaluate(c2).materialize();
                 if (predicateValue instanceof NumericValue) {
                     if (((NumericValue) predicateValue).isWholeNumber() && ((NumericValue) predicateValue).longValue() == position) {
                         result = result.addEntry(pair.key, pair.value);
@@ -375,7 +376,7 @@ public class FilterExpressionAM extends BinaryExpression
             return result;
         }
 
-        private ArrayItem filteredArray(XPathContext context, ArrayItem input, ItemEvaluator predicate) throws XPathException {
+        private ArrayItem filteredArray(XPathContext context, ArrayItem input, SequenceEvaluator predicate) throws XPathException {
             ArrayItem result = SimpleArrayItem.EMPTY_ARRAY;
             int size = input.arrayLength();
             ManualIterator focus = new ManualIterator();
@@ -388,12 +389,23 @@ public class FilterExpressionAM extends BinaryExpression
                 Item contextItem = member.getLength() == 1 ? member.head() : new Parcel(member);
                 focus.setContextItem(contextItem);
                 focus.incrementPosition();
-                Item predicateValue = predicate.eval(c2);
-                if (predicateValue instanceof NumericValue) {
-                    if (((NumericValue) predicateValue).isWholeNumber() && ((NumericValue) predicateValue).longValue() == position) {
-                        result = result.append(member);
+                GroundedValue predicateValue = predicate.evaluate(c2).materialize();
+                if (predicateValue.getLength() == 0) {
+                    continue;
+                }
+                if (predicateValue.itemAt(0) instanceof NumericValue) {
+                    for (Item it : predicateValue.asIterable()) {
+                        if (it instanceof NumericValue) {
+                            if (((NumericValue) it).isWholeNumber()
+                                    && ((NumericValue) it).longValue() == position) {
+                                result = result.append(member);
+                                break;
+                            }
+                        } else {
+                            throw new XPathException("If the first item in a predicate is numeric, remaining items must also be numeric", "FORG0006");
+                        }
                     }
-                } else if (predicateValue != null && predicateValue.effectiveBooleanValue()) {
+                } else if (predicateValue.effectiveBooleanValue()) {
                     result = result.append(member);
                 }
             }
