@@ -16,6 +16,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
 import javax.xml.parsers.SAXParserFactory;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Result;
 import javax.xml.transform.Transformer;
@@ -490,6 +491,56 @@ public class TestSerializer {
             e.printStackTrace(System.err);
         }
     }
+
+    @Test
+    public void testXmlStreamWriterNamespaces() {    // Bug 5075
+        try {
+            StringWriter sw = new StringWriter();
+            Serializer serializer = new Processor(false).newSerializer();
+            // Setup properties for indent
+            serializer.setOutputProperty(Serializer.Property.INDENT, "no");
+            serializer.setOutputWriter(sw);
+            XMLStreamWriter writer = serializer.getXMLStreamWriter();
+
+            // Start the document
+            writer.writeStartDocument("UTF-8", "1.0");
+
+            String uri0 = "http://www.sample.com/level/0";
+            String uri1 = "http://www.sample.com/level/1";
+            String uri2 = "http://www.sample.com/level/2";
+
+            writer.writeStartElement("ns0", "root", "uri0");
+
+            writer.writeNamespace("ns0", uri0);
+            writer.writeNamespace("ns1", uri1);
+            writer.writeNamespace("ns2", uri2);
+
+            writer.writeStartElement("ns1", "orders", uri1);
+            writer.writeStartElement("ns2", "order", uri2);
+
+            writer.writeEmptyElement("ns1", "item1", uri1);
+            writer.writeEmptyElement("ns2", "item2", uri2);
+
+            writer.writeEndElement();//close l2
+            writer.writeEndElement();//close L1
+            writer.writeEndElement();//close L0
+
+            writer.writeEndDocument(); // close document
+
+            writer.flush();
+            writer.close();
+            //System.err.println(sw);
+
+            assertTrue(sw.toString().contains("<ns0:root xmlns:ns0=\"http://www.sample.com/level/0\" xmlns:ns1=\"http://www.sample.com/level/1\" xmlns:ns2=\"http://www.sample.com/level/2\">"));
+                // namespace declarations could be in a different order...
+            assertTrue(sw.toString().contains("<ns1:orders><ns2:order><ns1:item1/><ns2:item2/></ns2:order></ns1:orders>"));
+        } catch (SaxonApiException e) {
+            fail();
+        } catch (XMLStreamException e) {
+            fail();
+        }
+    }
+   
 
 //    public void testBulkIndent() {
           // Test to check that indentation produces reasonable results. Commented out because
