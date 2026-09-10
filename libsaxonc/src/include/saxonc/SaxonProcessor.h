@@ -766,10 +766,6 @@ public:
    */
   void createHeapDump(bool live);
 
-  /**
-   * Get info on objects allocated and still in memory
-   */
-  static void getInfo();
 
   /*static JavaVM *jvm;*/
 
@@ -825,6 +821,16 @@ private:
   static XdmItem *makeXdmItemFromRef(int64_t valueRef);
 
   static const char *checkException();
+
+ /**
+ * Remove ObjectHandle from the pool. Free for the GC.
+ */
+  static void destroyHandle(int64_t handleRef);
+
+   /**
+   * Get info on objects allocated and still in memory
+   */
+  static void getInfo();
 };
 
 //===============================================================================================

@@ -683,7 +683,9 @@ void testTransformFromstring2Err2(sResultCount *sresult) {
 
     if (CppTestUtils::exists("SaxonCHE12ErrorOutputFile-Test1.txt")) {
       cout << "The file SaxonCHE12ErrorOutputFile-Test1.txt exists" << endl;
-      if(CppTestUtils::CheckWord("SaxonCHE12ErrorOutputFile-Test1.txt", "XTSE0090: Attribute @select1 is not allowed on element <xsl:for-each>")) {
+      string filename1 = "SaxonCHE12ErrorOutputFile-Test1.txt";
+      string text = "XTSE0090  Attribute @select1 is not allowed on element <xsl:for-each>";
+      if(CppTestUtils::CheckWord((char *)filename1.c_str(), (char *)text.c_str())) {
         sresult->success++;
       } else {
         sresult->failure++;
@@ -3100,16 +3102,13 @@ void RunThread(XsltExecutable *executable, int tid,
   att_arg.name = NULL;
   att_arg.group = NULL;*/
 
-  // SaxonProcessor::sxn_environ->jvm->AttachCurrentThread((void**)&SaxonProcessor::sxn_environ->env,
-  // NULL);
-  cerr << endl << "RunThread cp0,  THEAD ID=" << tid << endl;
+  //SaxonProcessor::attachCurrentThread();
+  //cerr << endl << "RunThread cp0-0,  THEAD ID=" << tid << endl;
   fflush(stderr);
   fflush(stdout);
 
   if (executable != nullptr) {
     executable->setInitialMatchSelectionAsFile(filename.c_str());
-
-    cerr << "RunThread cp1" << endl;
 
     const char *result = nullptr;
     result = executable->applyTemplatesReturningString();
@@ -3123,8 +3122,7 @@ void RunThread(XsltExecutable *executable, int tid,
   } else {
     cerr << "XsltExecutable is nullptr" << endl;
   }
-
-  //  (   SaxonProcessor::sxn_environ->jvm)->DetachCurrentThread();
+  SaxonProcessor::detachCurrentThread();
 }
 
 void testThreads(SaxonProcessor *processor, Xslt30Processor *trans,
@@ -3141,13 +3139,10 @@ void testThreads(SaxonProcessor *processor, Xslt30Processor *trans,
   try {
 
   for (int i = 0; i < s.size(); i++) {
-    cerr << endl << "testThreads before XsltExecutable cp0" << endl;
     XsltExecutable *executable = trans->compileFromFile(CppTestUtils::concat(2, dataDir->c_str(), "/q12.xsl").c_str());
-    cerr << endl << "testThreads after XsltExecutable cp1" << endl;
     if (executable == nullptr) {
       continue;
     }
-    cerr << endl << "testThreads after XsltExecutable cp2" << endl;
     threads.push_back(std::thread(RunThread, executable, i, s[i]));
   }
 
@@ -3165,11 +3160,9 @@ void testThreads(SaxonProcessor *processor, Xslt30Processor *trans,
   }
 
   for (auto &th : threads) {
-        cerr << "testThreads cp1 - loop" << endl;
     th.join();
-    cerr << "testThreads cp0 - loop" << endl;
   }
-        sresult->success++;
+   sresult->success++;
 }
 
 int main(int argc, char *argv[]) {

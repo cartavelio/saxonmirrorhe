@@ -550,6 +550,13 @@ XdmValue *SaxonProcessor::makeXdmValueFromRef(int64_t results) {
   return nullptr;
 }
 
+ void SaxonProcessor::destroyHandle(int64_t handleRef){
+
+   //SaxonProcessor::attachCurrentThread();
+   j_handles_destroy(SaxonProcessor::sxn_environ->thread,
+                    (void *)handleRef);
+ }
+
 XdmItem *SaxonProcessor::makeXdmItemFromRef(int64_t results) {
   if (results > 0) {
     int typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,
@@ -685,7 +692,7 @@ int64_t SaxonProcessor::createParameterJArray(
 
 int64_t SaxonProcessor::createParameterJArray2(
     std::map<std::string, XdmValue *> parameters) {
-  SaxonProcessor::attachCurrentThread();
+  //SaxonProcessor::attachCurrentThread();
   int size = (int) parameters.size();
   int64_t processorDataRef = createProcessorDataWithCapacity(
       SaxonProcessor::sxn_environ->thread, size);
@@ -1397,6 +1404,7 @@ XdmMap *SaxonProcessor::makeMap2(std::map<std::string, XdmValue *> dataMap) {
 
 XdmMap *SaxonProcessor::makeMap3(XdmAtomicValue **keys, XdmValue **values,
                                  int size) {
+  SaxonProcessor::attachCurrentThread();
   int64_t mapDataRef = SXN_UNSET;
 
   mapDataRef = j_create_mapDataWithCapacity(sxn_environ->thread, size);
