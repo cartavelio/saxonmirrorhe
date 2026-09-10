@@ -61,7 +61,13 @@ public class SimpleTypeComparison implements EqualityMatcher<AtomicSequence> {
 
     public int compareItems(AtomicValue a1, AtomicValue a2) {
         char c1 = a1.getItemType().getBasicAlphaCode().charAt(1);
+        if (c1 == 'Z') {
+            c1 = 'S'; // treat untypedAtomic as string
+        }
         char c2 = a2.getItemType().getBasicAlphaCode().charAt(1);
+        if (c2 == 'Z') {
+            c2 = 'S'; // treat untypedAtomic as string
+        }
         if (c1 != c2) {
             return SequenceTool.INDETERMINATE_ORDERING;
         }
@@ -113,9 +119,23 @@ public class SimpleTypeComparison implements EqualityMatcher<AtomicSequence> {
                     return ((DecimalValue) a1).getDecimalValue().compareTo(((DecimalValue) a2).getDecimalValue());
                 }
             case 'F': // float
-                return Float.compare(((FloatValue) a1).getFloatValue(), ((FloatValue) a2).getFloatValue());
+                //Note: Float.compare() gives the wrong answer with NaN and negative zero
+                float f1 = ((FloatValue) a1).getFloatValue();
+                float f2 = ((FloatValue) a2).getFloatValue();
+                if (f1 == f2) {
+                    return 0;
+                } else {
+                    return f1 < f2 ? -1 : 1;
+                }
             case 'O': // double
-                return Double.compare(((DoubleValue)a1).getDoubleValue(), ((DoubleValue) a2).getDoubleValue());
+                //Note: Double.compare() gives the wrong answer with NaN and negative zero
+                double d1 = ((DoubleValue) a1).getDoubleValue();
+                double d2 = ((DoubleValue) a2).getDoubleValue();
+                if (d1 == d2) {
+                    return 0;
+                } else {
+                    return d1 < d2 ? -1 : 1;
+                }
             default:
                 throw new IllegalStateException();
         }
@@ -136,16 +156,16 @@ public class SimpleTypeComparison implements EqualityMatcher<AtomicSequence> {
             switch (type) {
                 case 'S': // string
                 case 'Z': // UntypedAtomic
-                    h ^= a.getUnicodeStringValue().hashCode();
+                    h ^= val.getUnicodeStringValue().hashCode();
                     break;
                 case 'B': // boolean
-                    h ^= ((BooleanValue)a).hashCode();
+                    h ^= ((BooleanValue) val).hashCode();
                     break;
                 case 'R': // duration
-                    h ^= ((DurationValue) a).getSchemaComparable().hashCode();
+                    h ^= ((DurationValue) val).getSchemaComparable().hashCode();
                     break;
                 case 'M': // dateTime
-                    h ^= ((DateTimeValue) a).getSchemaComparable().hashCode();
+                    h ^= ((DateTimeValue) val).getSchemaComparable().hashCode();
                     break;
                 case 'A': // date
                 case 'G': // gYear
@@ -153,28 +173,28 @@ public class SimpleTypeComparison implements EqualityMatcher<AtomicSequence> {
                 case 'I': // gMonth
                 case 'J': // gMonthDay
                 case 'K': // gDay
-                    h ^= ((GDateValue) a).getSchemaComparable().hashCode();
+                    h ^= ((GDateValue) val).getSchemaComparable().hashCode();
                     break;
                 case 'T': // time
-                    h ^= ((TimeValue) a).getSchemaComparable().hashCode();
+                    h ^= ((TimeValue) val).getSchemaComparable().hashCode();
                     break;
                 case 'X': // hexBinary
-                    h ^= Arrays.hashCode(((HexBinaryValue)a).getBinaryValue());
+                    h ^= Arrays.hashCode(((HexBinaryValue) val).getBinaryValue());
                     break;
                 case '2': // base64Binary
-                    h ^= Arrays.hashCode(((Base64BinaryValue) a).getBinaryValue());
+                    h ^= Arrays.hashCode(((Base64BinaryValue) val).getBinaryValue());
                     break;
                 case 'U': // anyURI
-                    h ^= ((AnyURIValue)a).getUnicodeStringValue().hashCode();
+                    h ^= ((AnyURIValue) val).getUnicodeStringValue().hashCode();
                     break;
                 case 'Q': // QName
                 case 'N': // NOTATION
-                    h ^= ((QualifiedNameValue) a).getStructuredQName().hashCode();
+                    h ^= ((QualifiedNameValue) val).getStructuredQName().hashCode();
                     break;
                 case 'D': // decimal
                 case 'F': // float
                 case 'O': // double
-                    h ^= a.hashCode();
+                    h ^= val.hashCode();
                     break;
                 default:
                     throw new IllegalStateException("Alphacode " + type);
@@ -182,6 +202,32 @@ public class SimpleTypeComparison implements EqualityMatcher<AtomicSequence> {
             h <<= 1;
         }
         return h;
+    }
+
+    public boolean equalOrIdentical(AtomicSequence a1, AtomicSequence a2) {
+        if (a1.getLength() == 1 && a2.getLength() == 1) {
+            AtomicValue v1 = a1.head();
+            AtomicValue v2 = a2.head();
+            // Shortcut for the most common case
+            return compareItems(v1, v2) == 0 || (v1.isNaN() && v2.isNaN());
+        } else {
+            AtomicIterator iter1 = a1.iterate();
+            AtomicIterator iter2 = a2.iterate();
+            while (true) {
+                AtomicValue item1 = iter1.next();
+                AtomicValue item2 = iter2.next();
+                if (item1 == null && item2 == null) {
+                    return true;
+                }
+                if (item1 == null || item2 == null) {
+                    return false;
+                }
+                if (compareItems(item1, item2) == 0 || (item1.isNaN() && item2.isNaN())) {
+                    continue;
+                }
+                return false;
+            }
+        }
     }
 }
 

@@ -10,7 +10,7 @@ import java.util.List;
  * A map implementation using a custom equality matcher, to avoid having to wrap
  * each entry in a wrapper object to achieve customised equality testing.
  *
- * <p>Note: this doesn't implement {@code Set<T>} to save the effort of implemented
+ * <p>Note: this doesn't implement {@code Map<K, V>} to save the effort of implementing
  * methods like size() and iterator() that aren't required for our use cases. These
  * methods could easily be added without changing the basic design.
  * </p>
