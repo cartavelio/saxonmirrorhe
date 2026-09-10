@@ -107,6 +107,7 @@ public class UnicodeBlocks {
                 break;
             }
             String blockName = normalizeBlockName(item.getAttributeValue(NamespaceUri.NULL, "name"));
+            System.err.println("Loading " + blockName);
             IntSet range = null;
             for (NodeInfo rangeElement : item.children(NodeKindTest.ELEMENT)) {
                 int from = Integer.parseInt(rangeElement.getAttributeValue(NamespaceUri.NULL, "from").substring(2), 16);

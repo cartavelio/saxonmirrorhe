@@ -5,6 +5,14 @@
     <reason>Saxon 11 wrongly accepts concat#0 (and other 4.0 functions?) when 4.0 is not enabled</reason>
   </exception>-->
   
+  <exception test-case="for-each-group-068" run="false" report="disputed">
+    <created by="Michael Kay" on="2015-11-02"/>
+    <reason>
+      The test is specifically testing non-transitivity of grouping, which is acknowledged
+      as a bug in the spec, fixed in version 4.0. We decided to fix the bug and make 
+      grouping use a transitive equality comparison whether or not 4.0 conformance is requested.</reason>
+  </exception>
+  
   <exception test-case="package-017" run="false" report="disputed">
     <created by="Michael Kay" on="2015-11-02"/>
     <reason>Bug 29233</reason>

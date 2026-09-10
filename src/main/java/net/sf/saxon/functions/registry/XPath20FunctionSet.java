@@ -147,11 +147,11 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
 //                .arg(1, Type.ITEM_TYPE, STAR, null)
 //                .arg(2, BuiltInAtomicType.STRING, ONE, null));
 
-        register("deep-equal", 2, 4, e -> e.populate(DeepEqual::new, BuiltInAtomicType.BOOLEAN, ONE, BASE)
+        register("deep-equal", 2, 3, e -> e.populate(DeepEqual20::new, BuiltInAtomicType.BOOLEAN, ONE, BASE)
                 .arg(0, Type.ITEM_TYPE, STAR | ABS, null)
                 .arg(1, Type.ITEM_TYPE, STAR | ABS, null)
                 .arg(2, BuiltInAtomicType.STRING, OPT | ABS, null)
-                .arg(3, MapType.ANY_MAP_TYPE, OPT | ABS, null));
+                .arg(3, MapType.ANY_MAP_TYPE, OPT | ABS, null));  // 4th arg not allowed in 2.0/3.1, but we reject it at runtime
 
         register("default-collation", 0, e -> e.populate(() -> new StaticContextAccessor.DefaultCollation(), BuiltInAtomicType.STRING, ONE, DCOLL));
 

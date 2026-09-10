@@ -23,6 +23,9 @@
    <block name="Combining Diacritical Marks">
       <range from="#x0300" to="#x036F"/>
    </block>
+   <block name="Greek"> <!-- retain old name for compatibility -->
+      <range from="#x0370" to="#x03FF"/>
+   </block>
    <block name="Greek and Coptic">
       <range from="#x0370" to="#x03FF"/>
    </block>
@@ -226,6 +229,9 @@
    </block>
    <block name="Currency Symbols">
       <range from="#x20A0" to="#x20CF"/>
+   </block>
+   <block name="Combining Marks for Symbols"> <!-- retain old name for compatibility -->
+      <range from="#x20D0" to="#x20FF"/>
    </block>
    <block name="Combining Diacritical Marks for Symbols">
       <range from="#x20D0" to="#x20FF"/>
@@ -460,6 +466,11 @@
    </block>
    <block name="Private Use Area">
       <range from="#xE000" to="#xF8FF"/>
+   </block>
+   <block name="Private Use"> <!-- retained for compatibility -->
+      <range from="#xE000" to="#xF8FF"/>
+      <range from="#xF0000" to="#xFFFFD"/>
+      <range from="#x100000" to="#x10FFFD"/>
    </block>
    <block name="CJK Compatibility Ideographs">
       <range from="#xF900" to="#xFAFF"/>

@@ -4566,9 +4566,9 @@ public class XPathParser {
                 return dfc;
             }
 
-            // In other cases we simply wrap the returned function item in a
-            // {@code FunctionLiteral}.
-            return new FunctionLiteral(foundFunction);
+            Expression ref = makeNamedFunctionReference(functionName, foundFunction);
+            setLocation(ref, offset);
+            return ref;
         } catch (XPathException e) {
             grumble(e.getMessage(), "XPST0017", offset);
             return null;

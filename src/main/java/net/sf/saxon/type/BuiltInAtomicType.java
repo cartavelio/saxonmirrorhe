@@ -312,7 +312,7 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
         DATE_TIME_STAMP.coercionPlan40 = AtomicCoercionPlan.getInstance();
         BOOLEAN.coercionPlan40 = AtomicCoercionPlan.getInstance();
         DOUBLE.coercionPlan40 = DoubleCoercionPlan.getInstance();
-        FLOAT.coercionPlan40 = FloatCoercionPlan.getInstance();
+        FLOAT.coercionPlan40 = FloatCoercionPlan.getInstance(40);
         HEX_BINARY.coercionPlan40 = HexBinaryCoercionPlan.getInstance();
         BASE64_BINARY.coercionPlan40 = Base64BinaryCoercionPlan.getInstance();
         QNAME.coercionPlan40 = QNameCoercionPlan.getInstance();
@@ -361,7 +361,7 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
         DATE_TIME_STAMP.coercionPlan31 = AtomicCoercionPlan.getInstance();
         BOOLEAN.coercionPlan31 = AtomicCoercionPlan.getInstance();
         DOUBLE.coercionPlan31 = DoubleCoercionPlan.getInstance();
-        FLOAT.coercionPlan31 = FloatCoercionPlan.getInstance();
+        FLOAT.coercionPlan31 = FloatCoercionPlan.getInstance(31);
         HEX_BINARY.coercionPlan31 = AtomicCoercionPlan.getInstance();
         BASE64_BINARY.coercionPlan31 = AtomicCoercionPlan.getInstance();
         QNAME.coercionPlan31 = QNameCoercionPlan.getInstance();

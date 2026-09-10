@@ -12,8 +12,8 @@ import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.type.coercion.ChoiceCoercionPlan;
 import net.sf.saxon.type.coercion.CoercionPlan;
+import net.sf.saxon.type.coercion.UnionCoercionPlan;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
 
@@ -300,7 +300,7 @@ public class LocalUnionType extends ChoiceItemType implements PlainType, UnionTy
      */
     @Override
     public CoercionPlan getCoercionPlan(int version) {
-        return version >= 40 ? ChoiceCoercionPlan.INSTANCE40 : ChoiceCoercionPlan.INSTANCE31;
+        return version >= 40 ? UnionCoercionPlan.INSTANCE40 : UnionCoercionPlan.INSTANCE31;
     }
 
 }

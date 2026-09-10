@@ -186,8 +186,12 @@ public final class SequenceCoercer extends UnaryExpression {
     /**
      * @return the role locator
      */
-    public RoleDiagnostic getRoleSupplier() {
+    public RoleDiagnostic getRoleDiagnostic() {
         return roleSupplier.get();
+    }
+
+    public Supplier<RoleDiagnostic> getRoleSupplier() {
+        return roleSupplier;
     }
 
     /**
@@ -234,6 +238,14 @@ public final class SequenceCoercer extends UnaryExpression {
     }
 
     /**
+     * Construct a coercion plan
+     */
+
+    public CoercionPlan getCoercionPlan() {
+        return requiredType.getPrimaryType().getCoercionPlan(getPackageData().getHostLanguageVersion());
+    }
+
+    /**
      * Make an elaborator for this expression
      *
      * @return an appropriate {@link Elaborator}
@@ -252,7 +264,7 @@ public final class SequenceCoercer extends UnaryExpression {
             SequenceCoercer expr = (SequenceCoercer) getExpression();
             SequenceType requiredType = expr.requiredType;
             SequenceType suppliedType = SequenceType.makeSequenceType(expr.getItemType(), expr.getCardinality());
-            CoercionPlan plan = requiredType.getPrimaryType().getCoercionPlan(expr.getPackageData().getHostLanguageVersion());
+            CoercionPlan plan = expr.getCoercionPlan();
             PullEvaluator base = expr.getBaseExpression().makeElaborator().elaborateForPull();
             CoercionRequest request = new CoercionRequest(
                     suppliedType, expr.getConfiguration(), expr.roleSupplier, expr.getLocation());

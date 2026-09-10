@@ -1,14 +1,17 @@
 package net.sf.saxon.type.coercion;
 
 import net.sf.saxon.functions.hof.CoercedFunction;
+import net.sf.saxon.ma.zeno.ZenoSequence;
+import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.ChoiceType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.type.UnionType;
+import net.sf.saxon.value.AtomicValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,14 +19,14 @@ import java.util.List;
 /**
  * Coercion plan for use with 4.0 when the required item type is a choice item type or a union type
  */
-public class ChoiceCoercionPlan extends AtomicCoercionPlan {
+public class UnionCoercionPlan extends AtomicCoercionPlan {
 
     private final int version;
 
-    public final static ChoiceCoercionPlan INSTANCE31 = new ChoiceCoercionPlan(31);
-    public final static ChoiceCoercionPlan INSTANCE40 = new ChoiceCoercionPlan(40);
+    public final static UnionCoercionPlan INSTANCE31 = new UnionCoercionPlan(31);
+    public final static UnionCoercionPlan INSTANCE40 = new UnionCoercionPlan(40);
 
-    private ChoiceCoercionPlan(int version) {
+    private UnionCoercionPlan(int version) {
         this.version = version;
     }
 
@@ -38,8 +41,16 @@ public class ChoiceCoercionPlan extends AtomicCoercionPlan {
      */
     @Override
     public GroundedValue coerceItem(Item item, ItemType requiredType, CoercionRequest request) throws XPathException {
-        ChoiceType reqType = (ChoiceType)requiredType;
+        UnionType reqType = (UnionType)requiredType;
         TypeHierarchy th = request.config.getTypeHierarchy();
+        if (!(item instanceof AtomicValue)) {
+            AtomicSequence atomizedValue = item.atomize();
+            ZenoSequence result = new ZenoSequence();
+            for (AtomicValue atom : atomizedValue) {
+                result = result.appendSequence(coerceItem(atom, requiredType, request));
+            }
+            return result;
+        }
         if (requiredType.matches(item, th)) {
             // Generally we can return the item as is if it matches the required type. But
             // function coercion is needed even if the supplied item matches the required type

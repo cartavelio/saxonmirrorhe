@@ -42,6 +42,7 @@ import net.sf.saxon.z.IntSet;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * XSLT 2.0 deep-equal() function, where the collation is already known.
@@ -50,6 +51,20 @@ import java.util.function.Function;
  */
 
 public class DeepEqual extends CollatingFunctionFixed {
+
+    private int version;
+
+    public static Supplier<SystemFunction> makeDeepEqual(int version) {
+        return () -> new DeepEqual(version);
+    }
+
+    public DeepEqual() {
+        this(31);
+    }
+
+    private DeepEqual(int version) {
+        this.version = version;
+    }
 
     public static OptionsParameter OPTION_DETAILS;
 
@@ -100,16 +115,17 @@ public class DeepEqual extends CollatingFunctionFixed {
             newArgs[2] = arguments[2];
         }
         if (arguments.length < 4 || arguments[3] instanceof DefaultedArgumentExpression) {
-            newArgs[3] = Literal.makeLiteral(new DictionaryMap());
+            if (version < 40) {
+                throw new UncheckedXPathException("4-argument version of fn:deep-equal requires 4.0 to be enabled");
+            } else {
+                newArgs[3] = Literal.makeLiteral(new DictionaryMap());
+            }
         } else {
             newArgs[3] = arguments[3];
         }
         setArity(4);
         return super.makeFunctionCall(newArgs);
     }
-
-
-    // TODO: confine options param to 4.0.
 
     public static class DeepEqualOptions {
         public boolean baseUriSignificant = false;
@@ -144,7 +160,7 @@ public class DeepEqual extends CollatingFunctionFixed {
                 "type-annotations", "type-variety", "typed-values"};
 
 
-        public DeepEqualOptions(MapItem map, String collationName, XPathContext context) throws XPathException {
+        public DeepEqualOptions(MapItem map, String collationName, XPathContext context, int version) throws XPathException {
             Map<String, GroundedValue> values = OPTION_DETAILS.processSuppliedOptions(map, context);
             for (String option : DeepEqualOptions.booleanOptions) {
                 setBooleanOption(values, option);
@@ -172,8 +188,13 @@ public class DeepEqual extends CollatingFunctionFixed {
             if (stringCollator == null) {
                 throw new XPathException("Unknown collation " + collationName, "FOCH0002");
             }
-            comparer = (a, b) -> a.getXPathTransitiveMatchKey(stringCollator, context.getImplicitTimezone())
-                            .equals(b.getXPathTransitiveMatchKey(stringCollator, context.getImplicitTimezone()));
+            if (version >= 40) {
+                comparer = (a, b) -> a.getXPathTransitiveMatchKey(stringCollator, context.getImplicitTimezone())
+                        .equals(b.getXPathTransitiveMatchKey(stringCollator, context.getImplicitTimezone()));
+            } else {
+                comparer = (a, b) -> a.getXPathMatchKey(stringCollator, context.getImplicitTimezone())
+                        .equals(b.getXPathMatchKey(stringCollator, context.getImplicitTimezone()));
+            }
 
             if (normalizeSpace || normalizationForm != null) {
                 final BiFunction<AtomicValue, AtomicValue, Boolean> baseComparer = comparer;
@@ -1058,7 +1079,7 @@ public class DeepEqual extends CollatingFunctionFixed {
             }
         }
         //GenericAtomicComparer comparer = new GenericAtomicComparer(getStringCollator(), context);
-        DeepEqualOptions eqOptions = new DeepEqualOptions(options, collationName, context);
+        DeepEqualOptions eqOptions = new DeepEqualOptions(options, collationName, context, version);
         boolean b = deepEqual(arguments[0].iterate(), arguments[1].iterate(), context, eqOptions);
         return BooleanValue.get(b);
     }
