@@ -10,10 +10,13 @@ package net.sf.saxon.serialize;
 
 import net.sf.saxon.event.*;
 import net.sf.saxon.lib.SaxonOutputKeys;
+import net.sf.saxon.s9api.Serializer;
 import net.sf.saxon.str.StringView;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 
 import javax.xml.transform.OutputKeys;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * Define a set of serialization properties. These may contain simple output properties such as {@code method}
@@ -21,7 +24,7 @@ import java.util.Properties;
  * of character maps.
  */
 
-public class SerializationProperties {
+public class SerializationProperties implements Serializer.PropertySet {
 
     Properties properties;
     CharacterMapIndex charMapIndex;
@@ -93,6 +96,19 @@ public class SerializationProperties {
 
     public Properties getProperties() {
         return properties;
+    }
+
+    /**
+     * Get the set of property names that have been defined.
+     *
+     * @return the set of defined property names, in Clark notation, for example
+     * <code>"indent"</code> or <code>"{http://saxon.sf.net}indent-spaces"</code>
+     */
+
+    @Override
+    @CSharpReplaceBody(code="return new System.Collections.Generic.HashSet<string>(properties.stringPropertyNames());")
+    public Set<String> getPropertyNames() {
+        return properties.stringPropertyNames();
     }
 
     /**
@@ -206,6 +222,16 @@ public class SerializationProperties {
         }
         return sb.toString();
     }
+
+    //#if CSHARP == true
+    public String GetProperty(String propertyName) {
+        return getProperty(propertyName);
+    }
+
+    public Set<String> GetPropertyNames() {
+        return getPropertyNames();
+    }
+    //#endif
 
 
 }

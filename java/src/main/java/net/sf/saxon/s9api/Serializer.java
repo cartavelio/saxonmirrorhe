@@ -31,10 +31,8 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Properties;
+import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * A <code>Serializer</code> takes an XDM value and outputs a textual representation of the content.
@@ -75,6 +73,7 @@ public class Serializer extends AbstractDestination {
     private final StreamResult result = new StreamResult();
     private CharacterMapIndex characterMapIndex = null;
     private boolean mustClose = false;
+    private Consumer<SerializationEvent> listener;
 
     // Index of permitted property names
 
@@ -473,6 +472,39 @@ public class Serializer extends AbstractDestination {
         //#endif
         return propName;
     }
+
+    /**
+     * Interface defining a set of serialization properties (currently
+     * excluding character maps)
+     */
+
+    public interface PropertySet {
+
+        /**
+         * Get the set of property names that have been defined.
+         * @return the set of defined property names, in Clark notation, for example
+         * <code>"indent"</code> or <code>"{http://saxon.sf.net}indent-spaces"</code>
+         */
+
+        Set<String> getPropertyNames();
+
+        /**
+         * Get the value of a specific property, as a string. Boolean properties are
+         * represented as <code>"yes"</code> or <code>"no"</code>. QName-valued properties
+         * are in EQName notation ("Q{}local" or "Q{uri}local"). List-valued properties
+         * are space-separated.
+         */
+
+        String getProperty(String name);
+    }
+
+    /**
+     * Record giving information about a particular serialization event
+     * @param outputURI The output URI, if known (or null otherwise)
+     * @param properties The serialization properties used
+     */
+
+    public record SerializationEvent(String outputURI, PropertySet properties){}
 
     /**
      * Create a Serializer belonging to a specific processor
@@ -1005,6 +1037,28 @@ public class Serializer extends AbstractDestination {
     }
 
     /**
+     * Register a callback to be notified when serialization takes place.
+     * The callback is supplied with a string containing the
+     * output URI (null if unknown), and the serialization properties
+     * @param listener the listener to be notified when serialization takes place
+     * @since 13.1
+     */
+
+    public void setSerializationListener(Consumer<SerializationEvent> listener) {
+        this.listener = listener;
+    }
+
+    /**
+     * Get the registered serialization listener if any
+     * @return the registered serialization listener if any, or null otherwise
+     * @since 13.1
+     */
+
+    public Consumer<SerializationEvent> getSerializationListener() {
+        return listener;
+    }
+
+    /**
      * Return a receiver to which Saxon will send events. This method is provided
      * primarily for internal use, though it could also be called by user applications
      * wanting to make use of the Saxon serializer.
@@ -1025,6 +1079,9 @@ public class Serializer extends AbstractDestination {
         try {
             SerializerFactory sf = pipe.getConfiguration().getSerializerFactory();
             SerializationProperties mergedParams = getSerializationProperties().combineWith(params);
+            if (listener != null) {
+                listener.accept(new SerializationEvent(result.getSystemId(), mergedParams));
+            }
             Receiver target = sf.getReceiver(result, mergedParams, pipe);
             if (helper.getListeners() != null) {
                 if (target instanceof SequenceNormalizer) {
