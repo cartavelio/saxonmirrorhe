@@ -5,6 +5,7 @@ import com.saxonica.config.ProfessionalTransformerFactory;
 import com.saxonica.config.pe.ConfigurationReaderPE;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.TransformerFactoryImpl;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.UnparsedTextURIResolver;
@@ -55,7 +56,7 @@ public class ConfigTest {
 
     public String getDataDir() {
         if (DATA_DIR == null) {
-            DATA_DIR = junitDataDirectory();
+            DATA_DIR = Testdata.dir().toString() + "/";
         }
         return DATA_DIR;
     }
@@ -442,8 +443,8 @@ public class ConfigTest {
                             "</resources>\n" +
                         "</configuration>";
             Processor proc = new Processor(new StreamSource(new StringReader(config)));
-            XsdCompiler sm = proc.newXsdCompiler();
-            SchemaValidator v = sm.emptySchema().newValidator();
+            SchemaManager sm = proc.getSchemaManager();
+            SchemaValidator v = sm.newSchemaValidator();
             v.validate(new StreamSource(new File(getDataDir() + "books.xml")));
             try {
                 v.validate(new StreamSource(new File(getDataDir() + "config.xml")));
