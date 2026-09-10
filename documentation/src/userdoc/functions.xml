@@ -1680,7 +1680,7 @@
             for Unicode</a>. For full details see <a
             href="/localization/ICU-numbers-and-dates">Numbers and dates
             from ICU</a>.</p>
-        <p>Details of additional numbering support for several European languages: specifically
+        <!--<p>Details of additional numbering support for several European languages: specifically
             <code>da</code>, <code>de</code>, <code>fr</code>, <code>fr_BE</code>, <code>he</code>,
             <code>it</code>, <code>nl</code>, <code>nl_BE</code>, and <code>sv</code>, can be found
           in <a href="/localization/localizing-numbers-and-dates/other-numberings">Numberings for
@@ -1688,7 +1688,7 @@
           loaded ICU library. They are not built in with Saxon-HE, but are available as open source
           code, and it is possible to configure them by writing a subclass of <a class="javalink"
             href="net.sf.saxon.lib.LocalizerFactory">LocalizerFactory</a> and registering it with
-          the <a class="javalink" href="net.sf.saxon.Configuration">Configuration</a>.</p>
+          the <a class="javalink" href="net.sf.saxon.Configuration">Configuration</a>.</p>-->
 
         <p>Localization modules for other languages can be configured. They are written to implement
           the interface <a class="javalink" href="net.sf.saxon.lib.Numberer">Numberer</a>, typically

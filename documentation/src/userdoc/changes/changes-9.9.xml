@@ -553,8 +553,7 @@
             because a function <code>F</code> calls <code>saxon:do</code>, for example, does not prevent calls on <code>F</code> being moved
             out of a loop.</p>
         
-        <p>The extension XSLT instruction <a class="bodylink code"
-            href="/extensions/instructions/tabulate-maps">saxon:tabulate-maps</a> takes selected maps in a 
+        <p>The extension XSLT instruction <code>saxon:tabulate-maps</code> takes selected maps in a 
             structure containing maps and arrays, such as might be derived
             by parsing JSON input, and returns these maps, expanded with information taken from containing
             maps and arrays.</p>

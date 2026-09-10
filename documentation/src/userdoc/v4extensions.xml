@@ -58,7 +58,7 @@
          <ul/>
       </nav>
 
-      <section id="choice-types" title="Union types">
+      <section id="choice-types" title="Choice types">
          <h1>Choice types</h1>
 
          <aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled. Available since Saxon 9.8.</aside>

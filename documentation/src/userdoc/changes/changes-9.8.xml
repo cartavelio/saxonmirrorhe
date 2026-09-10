@@ -489,7 +489,7 @@
             when writing a function that is designed to take arguments of more than one type. They can also be used in other
             places where an <code>ItemType</code> is required, for example in a <code>cast as</code> expression. 
             Requires Saxon-EE. The semantics are the same as for union types defined in a schema. For further details
-            see <a class="bodylink" href="/v4extensions/new-types/union-types">Union types</a></p>
+            see <a class="bodylink" href="/v4extensions/new-types/choice-types">Union types</a></p>
         
         <p><b>Tuple Types</b> (subsequently renamed <b>Record Types</b>). A tuple type is an extension to the syntax for an <code>ItemType</code>. An example is
         <code>tuple(ssn: xs:string, emp: element(employee))</code>. A tuple type is essentially a way of defining a more

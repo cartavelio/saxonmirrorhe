@@ -67,7 +67,7 @@ TODO: rethink redefines and override
         
     </category>
     
-    <category name="Handling of Source Documents" class="javaonly">
+    <category name="sourcedocs" class="javaonly">
         <p>Line numbering of XML documents read using a SAX parser 
             (including schema documents and stylesheets) has changed.</p>
         
@@ -94,7 +94,7 @@ TODO: rethink redefines and override
         
     </category>
     
-    <category name="Functions, operators, and data types for XPath 3.1">
+    <category name="functions31">
          <p>The implementation of <code>xs:duration</code> and <code>xs:dayTimeDuration</code>
          has changed so the seconds component (representing the number of days, hours, minutes,
          and seconds) is now held internally as a <code>BigDecimal</code> value. This affects the
@@ -443,7 +443,6 @@ TODO: rethink redefines and override
         <p>The JSON serializer recognises the <code>xs:QName</code> value <code>fn:null</code>
         as a representation of the JSON null value. (PR 1028) Since QName literals are supported, this can
         be generated using, for example, <code>&lt;xsl:sequence select="#fn:null"/></code>.</p>
-     </p>
         
         <p>The implementation of enumeration types has been aligned with the current specification.
         Most practical use cases are unaffected, but:</p>
@@ -580,7 +579,7 @@ TODO: rethink redefines and override
             <li><p>PR1674 - composite sort keys in xsl:sort</p></li>
             <li><p>PR1622 - XSLT map-for-key function</p></li>
             <!--<li><p>JSON-Lines input and output</p></li>-->
-            <li><p>JNode patterns in XSLT (syntax <code>jnode(key, type)</code>) -- syntax now recognized, not well tested</p></o></li>
+            <li><p>JNode patterns in XSLT (syntax <code>jnode(key, type)</code>) -- syntax now recognized, not well tested</p></li>
         </ul>
         
         <p>XInclude processing (e.g. using the xinclude option of fn:doc) is not supported in SaxonCS.</p>

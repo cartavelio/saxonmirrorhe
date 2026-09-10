@@ -259,11 +259,11 @@
         <p>The ICU features require a sizeable (~7MByte) library which may be supplied either in the
           main JAR file, or as a separate JAR, which can itself either be a 'minimised' version in
           the Saxonica distribution, or a complete ICU4J JAR downloaded from the ICU site.</p>
-        <p>In the case that the ICU features have <strong>not</strong> been loaded within
+        <!--<p>In the case that the ICU features have <strong>not</strong> been loaded within
           Saxon-PE/EE, support for numbering and dates for Danish, Dutch, Flemish, French (and
           Belgian French), German, Italian and Swedish is provided as detailed in the table of <a
             href="/localization/localizing-numbers-and-dates/other-numberings">Numberings for selected
-            languages</a>.</p>
+            languages</a>.</p>-->
         <h2 class="subtitle">Numbering</h2>
         <p>ICU supports a large set of language-specific rulesets for supporting different forms of
           spelled-out numbering and digit-ordinal treatment. For example:</p>

@@ -585,7 +585,7 @@ for $i in 1 to 10 return eg:shift-left(2, $i)]]></code></pre>
     because that release introduced a new overload of <code>Thread.sleep()</code> accepting
     a <code>Duration</code> as the argument. This problem could have been prevented by
     implementing the extension function using the 
-      <a class="bodylink" href="ext-simple-J">simple interface</a>.</p></aside>
+      <a class="bodylink" href="../ext-simple-J">simple interface</a>.</p></aside>
       
     <p>Further information can be found in the following sections:</p>
      
