@@ -84,6 +84,30 @@ public class XQueryParser extends XPathParser {
     private final Set<StructuredQName> outputPropertiesSeen = new HashSet<>(4);
     private Properties parameterDocProperties;
 
+    private final static Set<String> reservedNames = new HashSet<>(200);
+    static {
+        String[] kw =
+                {"allowing", "ancestor", "ancestor-or-self", "and", "array", "as", "at", "attribute",
+                "base-uri", "boundary-space", "by", "case", "cast", "castable", "catch", "child", "collation", "comment",
+                "construction", "context", "copy-namespaces", "count", "decimal-format", "decimal-separator",
+                "declare", "default", "descendant", "descendant-or-self", "digit", "div", "document", "document-node",
+                "element", "else", "empty", "empty-sequence", "encoding", "end", "enum", "eq", "every", "except",
+                "exponent-separator", "false", "fixed", "fn", "following", "following-sibling", "for",
+                "function", "ge", "group", "grouping-separator", "gt", "idiv", "if", "import", "in", "infinity",
+                "inherit", "instance", "intersect", "is", "item", "items", "key", "keys", "lax", "le", "let", "lt",
+                "map", "member", "minus-sign", "mod", "module", "namespace", "namespace-node", "NaN", "ne",
+                "next", "no-inherit", "no-preserve", "node", "of", "only", "option", "or", "order", "ordered",
+                "ordering", "otherwise", "pairs", "parent", "pattern-separator", "per-mille", "percent",
+                "preceding", "preceding-sibling", "preserve", "previous", "processing-instruction",
+                "record", "return", "satisfies", "schema", "schema-attribute", "schema-element",
+                "self", "sliding", "some", "stable", "start", "strict", "strip", "switch", "text", "then",
+                "to", "treat", "true", "try", "tumbling", "type", "typeswitch", "union", "unordered",
+                "validate", "value", "values", "variable", "version", "when", "where", "while", "window",
+                "xquery", "zero-digit", "ascending",
+                "descending",  "external", "greatest", "least"};
+        reservedNames.addAll(Arrays.asList(kw));
+    }
+
 
     /**
      * Constructor for internal use: this class should be instantiated via the QueryModule
@@ -1611,7 +1635,7 @@ public class XQueryParser extends XPathParser {
         if (t.currentToken == Token.COLON_EQUALS) {
             nextToken();
             int refs = ((QueryModule) env).getForwardReferenceCount(varQName);
-            Expression exp = parseStandaloneExpr();
+            Expression exp = parseExprSingle();
             if (((QueryModule) env).getForwardReferenceCount(varQName) > refs && env.getXPathVersion() < 40) {
                 grumble("Variable $" + var.getVariableQName().getDisplayName()
                                 + " is referenced within its own declaration", "XPST0008");
@@ -1638,7 +1662,7 @@ public class XQueryParser extends XPathParser {
                 nextToken();
                 if (t.currentToken == Token.COLON_EQUALS) {
                     nextToken();
-                    Expression exp = parseStandaloneExpr();
+                    Expression exp = parseExprSingle();
                     exp = makeTracer(exp, varQName);
                     if (allowXPath40Syntax && requiredType != SequenceType.ANY_SEQUENCE) {
                         TypeChecker checker = env.getConfiguration().getTypeChecker(false);
@@ -1708,7 +1732,7 @@ public class XQueryParser extends XPathParser {
                 grumble("The context item must not be initialized in a library module", "XQST0113");
             }
             nextToken();
-            Expression exp = parseStandaloneExpr();
+            Expression exp = parseExprSingle();
             exp.setRetainedStaticContext(env.makeRetainedStaticContext());
             Supplier<RoleDiagnostic> role =
                     () -> new RoleDiagnostic(RoleDiagnostic.CONTEXT_ITEM, "context item declaration", 0);
@@ -1728,7 +1752,7 @@ public class XQueryParser extends XPathParser {
                     grumble("The context item must not be initialized in a library module", "XQST0113");
                 }
                 nextToken();
-                Expression exp = parseStandaloneExpr();
+                Expression exp = parseExprSingle();
                 Supplier<RoleDiagnostic> role =
                         () -> new RoleDiagnostic(RoleDiagnostic.CONTEXT_ITEM, "context item declaration", 0);
                 exp = CardinalityChecker.makeCardinalityChecker(exp, StaticProperty.EXACTLY_ONE, role);
@@ -1855,7 +1879,7 @@ public class XQueryParser extends XPathParser {
                     }
                     foundDefault = true;
                     nextToken();
-                    Expression defaultValue = parseStandaloneExpr();
+                    Expression defaultValue = parseExprSingle();
 //                    if (!(defaultValue instanceof Literal || defaultValue instanceof ContextItemExpression)) {
 //                        grumble("The default value for a function parameter must be either a constant, or '.' (temporary Saxon restriction)");
 //                    }
@@ -2492,7 +2516,7 @@ public class XQueryParser extends XPathParser {
             LocalVariableBinding v = new LocalVariableBinding(varQName, type);
 
             readToken(Token.COLON_EQUALS);
-            clause.initSequence(flwor, parseStandaloneExpr());
+            clause.initSequence(flwor, parseExprSingle());
             clause.setRangeVariable(v);
             declareRangeVariable(v);
         } while (t.currentToken == Token.COMMA);
@@ -2570,7 +2594,7 @@ public class XQueryParser extends XPathParser {
                 nextToken();
 
                 LocalVariableBinding v = new LocalVariableBinding(varQName, type);
-                Expression value = parseStandaloneExpr();
+                Expression value = parseExprSingle();
                 Supplier<RoleDiagnostic> role =
                         () -> new RoleDiagnostic(RoleDiagnostic.MISC, "grouping key", 0);
                 Expression atomizedValue = Atomizer.makeAtomizer(value, role);
@@ -3367,21 +3391,35 @@ public class XQueryParser extends XPathParser {
                     return null;
             }
         } else {
-            expectName();
+            String name;
+            if (t.currentToken instanceof Token.StringLiteral && allowXPath40Syntax) {
+                name = Whitespace.trim(((Token.StringLiteral) t.currentToken).getValue());
+            } else {
+                name = expectName();
+                if (allowXPath40Syntax) {
+                    checkUnreserved(name);
+                }
+            }
             switch (nodeKind) {
                 case "element":
-                    return parseNamedElementConstructor(offset);
+                    return parseNamedElementConstructor(name, offset);
                 case "attribute":
-                    return parseNamedAttributeConstructor(offset);
+                    return parseNamedAttributeConstructor(name, offset);
                 case "namespace":
-                    return parseNamedNamespaceConstructor(offset);
+                    return parseNamedNamespaceConstructor(name, offset);
                 case "processing-instruction":
-                    return parseNamedProcessingInstructionConstructor(offset);
+                    return parseNamedProcessingInstructionConstructor(name, offset);
                 default:
                     grumble("Unknown constructor for named node: " +  nodeKind);
                     return null;
 
             }
+        }
+    }
+
+    private void checkUnreserved(String name) throws XPathException {
+        if (reservedNames.contains(name)) {
+            grumble("Keyword `" + name + "` is reserved in XQuery 4.0 - it needs to be written in quotes");
         }
     }
 
@@ -3580,8 +3618,8 @@ public class XQueryParser extends XPathParser {
      * @throws XPathException if parsing fails
      */
 
-    private Expression parseNamedElementConstructor(int offset) throws XPathException {
-        NodeName nodeName = makeNodeName(t.currentName(), true);
+    private Expression parseNamedElementConstructor(String name, int offset) throws XPathException {
+        NodeName nodeName = makeNodeName(name, true);
         Expression content = null;
         nextToken();
         readToken(Token.LCURLY);
@@ -3694,9 +3732,8 @@ public class XQueryParser extends XPathParser {
      * @throws XPathException if a static error is found
      */
 
-    private Expression parseNamedAttributeConstructor(int offset) throws XPathException {
+    private Expression parseNamedAttributeConstructor(String attName, int offset) throws XPathException {
         String warningMessage = null;
-        String attName = expectName();
         if (attName.equals("xmlns") || attName.startsWith("xmlns:")) {
             warningMessage = "Cannot create a namespace declaration using an attribute constructor";
         }
@@ -3790,8 +3827,7 @@ public class XQueryParser extends XPathParser {
      * @throws XPathException if a static error is found
      */
 
-    private Expression parseNamedProcessingInstructionConstructor(int offset) throws XPathException {
-        String target = expectName();
+    private Expression parseNamedProcessingInstructionConstructor(String target, int offset) throws XPathException {
         String warningMessage = null;
         if (target.equalsIgnoreCase("xml")) {
             warningMessage = "A processing instruction must not be named 'xml' in any combination of upper and lower case";
@@ -3935,15 +3971,14 @@ public class XQueryParser extends XPathParser {
      */
 
     /*@NotNull*/
-    private Expression parseNamedNamespaceConstructor(int offset) throws XPathException {
+    private Expression parseNamedNamespaceConstructor(String prefix, int offset) throws XPathException {
         if (!allowXPath30Syntax) {
             grumble("Namespace node constructors require XQuery 3.0");
         }
-        String target = expectName();
-        if (!NameChecker.isValidNCName(target)) {
-            grumble("Invalid namespace prefix " + Err.wrap(target));
+        if (!NameChecker.isValidNCName(prefix)) {
+            grumble("Invalid namespace prefix " + Err.wrap(prefix));
         }
-        Expression nsName = new StringLiteral(target);
+        Expression nsName = new StringLiteral(prefix);
         Expression nsContent = null;
         nextToken();
         readToken(Token.LCURLY);

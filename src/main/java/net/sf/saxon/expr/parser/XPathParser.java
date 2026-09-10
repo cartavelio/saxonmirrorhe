@@ -780,7 +780,7 @@ public class XPathParser {
     /*@NotNull*/
     public Expression parseExpression() throws XPathException {
         int offset = t.currentTokenStartOffset;
-        Expression exp = parseStandaloneExpr();
+        Expression exp = parseExprSingle();
         ArrayList<Expression> list = null;
         while (t.currentToken == Token.COMMA) {
             // An expression containing a comma often contains many, so we accumulate all the
@@ -790,7 +790,7 @@ public class XPathParser {
                 list.add(exp);
             }
             nextToken();
-            Expression next = parseStandaloneExpr();
+            Expression next = parseExprSingle();
             setLocation(next);
             list.add(next);
         }
@@ -799,14 +799,6 @@ public class XPathParser {
             setLocation(exp, offset);
         }
         return exp;
-    }
-
-    public Expression parseStandaloneExpr() throws XPathException {
-        if (t.currentToken == Token.LCURLY) {
-            return parseMapExpression();
-        } else {
-            return parseExprSingle();
-        }
     }
 
     /**
@@ -1607,7 +1599,7 @@ public class XPathParser {
 
             // process the  ":=" clause
             readToken(Token.COLON_EQUALS);
-            Expression collection = parseStandaloneExpr();
+            Expression collection = parseExprSingle();
             firstClause.setSequence(collection);
             declareRangeVariable(lastClause);
             if (previous == null) {
@@ -3082,6 +3074,27 @@ public class XPathParser {
                         }
                         break;
                 }
+            } else if (t.peekAhead() instanceof Token.StringLiteral) {
+                String kind = t.currentName();
+                //String qname = ((Token.NameToken) t.peekAhead()).getValue();
+                // See K2-ForExprWithout-15: "for $n in $arg/element return $n". We need to check that
+                // the second keyword is followed by a left curly brace. The tokenizer doesn't give us enough
+                // lookahead, so we need to rely on backtracking
+                switch (kind) {
+                    case "element":
+                    case "attribute":
+                    case "processing-instruction":
+                    case "namespace":
+                        Tokenizer checkPoint = t.checkPoint();
+                        nextToken();
+                        Token nextButOne = t.peekAhead();
+                        t.rollbackTo(checkPoint);
+                        if (nextButOne == Token.LCURLY) {
+                            return parseComputedNodeConstructor();
+                        }
+                        break;
+
+                }
             }
             AxisExpression resultExpr = new AxisExpression(AxisInfo.CHILD, parseNodeTest(Type.ELEMENT));
             setLocation(resultExpr);
@@ -3135,7 +3148,7 @@ public class XPathParser {
 
         } else if (token == Token.LCURLY) {
             if (isAllowXPath40Syntax()) {
-                grumble("A map constructor following " + previousToken + " needs to use the `map` keyword (or parentheses)");
+                return parseMapExpression();
             } else {
                 grumble("Unexpected `{` after " + previousToken);
             }
@@ -4026,7 +4039,7 @@ public class XPathParser {
             while (true) {
                 Expression key = parseExprSingle();
                 keys.add(key);
-                if (!(key instanceof Literal)) {
+                if (!(key instanceof Literal && ((Literal)key).getGroundedValue() instanceof AtomicValue)) {
                     allLiteralKeys = false;
                 }
                 if (!(key instanceof StringLiteral)) {
@@ -4036,7 +4049,7 @@ public class XPathParser {
                     grumble("The ':=' notation is no longer accepted in map expressions: use ':' instead");
                 }
                 readToken(Token.COLON);
-                Expression value = parseStandaloneExpr();
+                Expression value = parseExprSingle();
                 values.add(value);
                 if (!(value instanceof Literal)) {
                     allLiteralValues = false;
@@ -4138,7 +4151,7 @@ public class XPathParser {
             return arrayBlock;
         }
         while (true) {
-            Expression member = parseStandaloneExpr();
+            Expression member = parseExprSingle();
             members.add(member);
             if (t.currentToken == Token.COMMA) {
                 nextToken();
@@ -4604,7 +4617,7 @@ public class XPathParser {
 
     /*@Nullable*/
     public Expression parseFunctionArgument() throws XPathException {
-        return parseStandaloneExpr();
+        return parseExprSingle();
     }
 
     /**
