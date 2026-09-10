@@ -242,7 +242,12 @@ public class EXPathBinaryFunctionSet extends BuiltInFunctionSet {
     @NotNull
     @CSharpReplaceBody(code = "return System.Text.Encoding.GetEncoding(encoding).GetBytes(s);")
     public static byte[] encode(String s, String encoding) throws XPathException {
-        CharsetEncoder encoder = Charset.forName(encoding).newEncoder();
+        CharsetEncoder encoder;
+        try {
+            encoder = Charset.forName(encoding).newEncoder();
+        } catch (Exception e) {
+            throw new XPathException("Unsupported encoding " + encoding, ERROR_CONVERSION);
+        }
         encoder.onMalformedInput(CodingErrorAction.REPORT);
 
         CharBuffer in = CharBuffer.wrap(s);
@@ -269,7 +274,12 @@ public class EXPathBinaryFunctionSet extends BuiltInFunctionSet {
     @NotNull
     @CSharpReplaceBody(code = "return new String(System.Text.Encoding.GetEncoding(encoding).GetChars(value, offset, len));")
     public static String decode(byte[] value, int offset, int len, String encoding) throws XPathException {
-        CharsetDecoder decoder = Charset.forName(encoding).newDecoder();
+        CharsetDecoder decoder;
+        try {
+            decoder = Charset.forName(encoding).newDecoder();
+        } catch (Exception e) {
+            throw new XPathException("Unsupported encoding " + encoding, ERROR_CONVERSION);
+        }
         decoder.onMalformedInput(CodingErrorAction.REPORT);
         ByteBuffer in = ByteBuffer.wrap(value, offset, len);
         char[] outChars = new char[len];
@@ -334,7 +344,7 @@ public class EXPathBinaryFunctionSet extends BuiltInFunctionSet {
             } else {
                 encoding = arguments[1].head().getStringValue();
             }
-            checkEncoding(encoding);
+            //checkEncoding(encoding);
             int offset;
             if (arguments.length < 3) {
                 offset = 0;
@@ -348,9 +358,9 @@ public class EXPathBinaryFunctionSet extends BuiltInFunctionSet {
                 len = (int) ((NumericValue) arguments[3].head()).longValue();
             }
             checkIndexInclusive(value, offset, len);
-            if (len == 0) {
-                return StringValue.EMPTY_STRING;
-            }
+//            if (len == 0) {
+//                return StringValue.EMPTY_STRING;
+//            }
             String result = decode(value.getBinaryValue(), offset, len, encoding);
             return new StringValue(result);
         }
@@ -372,7 +382,7 @@ public class EXPathBinaryFunctionSet extends BuiltInFunctionSet {
             } else {
                 encoding = arguments[1].head().getStringValue();
             }
-            checkEncoding(encoding);
+            //checkEncoding(encoding);
             byte[] data = encode(s, encoding);
             return one(data);
         }

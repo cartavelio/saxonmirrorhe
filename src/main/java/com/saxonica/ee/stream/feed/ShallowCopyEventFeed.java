@@ -44,8 +44,8 @@ public class ShallowCopyEventFeed extends ItemFeed {
             receiver.startDocument(ReceiverOption.NONE);
         } else {
             c2 = context.newContext();
-            SchemaType schemaType = node.getSchemaType() == Untyped.getInstance() ? Untyped.getInstance() : AnyType.getInstance();
-            // TODO: is this correct? See bug 5006
+            boolean schemaAware = context.getController().getExecutable().isSchemaAware();
+            SchemaType schemaType = schemaAware ? AnyType.getInstance() : Untyped.getInstance();
             receiver.startElement(NameOfNode.makeName(node), schemaType, Loc.NONE, ReceiverOption.NONE);
             for (NamespaceBinding ns : node.getAllNamespaces()) {
                 receiver.namespace(ns.getPrefix(), ns.getURI(), ReceiverOption.NONE);
