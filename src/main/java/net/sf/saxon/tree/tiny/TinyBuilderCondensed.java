@@ -9,7 +9,6 @@ package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.om.AttributeInfo;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.z.IntHashMap;
 
@@ -102,17 +101,6 @@ public class TinyBuilderCondensed extends TinyBuilder {
         return super.getAttValue(att).intern();
     }
 
-    /**
-     * Test whether two CharSequences contain the same characters
-     *
-     * @param a the first CharSequence
-     * @param b the second CharSequence
-     * @return true if a and b contain the same characters
-     */
-
-    private static boolean isEqual(CodePoints a, CodePoints b) {
-        return a.equals(b);
-    }
 
 }
 

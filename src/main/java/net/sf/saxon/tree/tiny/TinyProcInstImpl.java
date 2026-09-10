@@ -9,11 +9,10 @@ package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.om.AtomicSequence;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.str.CodePoints;
-import net.sf.saxon.s9api.Location;
-import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
@@ -98,7 +97,7 @@ final class TinyProcInstImpl extends TinyNodeImpl {
      */
 
     /*@NotNull*/
-    public CodePoints getData() {
+    public UnicodeString getData() {
         return getUnicodeStringValue();
     }
 

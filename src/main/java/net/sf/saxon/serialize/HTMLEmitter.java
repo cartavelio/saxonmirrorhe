@@ -457,7 +457,7 @@ public abstract class HTMLEmitter extends XMLEmitter {
      */
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties)
+    public void characters(UnicodeString chars, Location locationId, int properties)
             throws XPathException {
         if (inScript > 0) {
             properties |= ReceiverOption.DISABLE_ESCAPING;
@@ -470,7 +470,7 @@ public abstract class HTMLEmitter extends XMLEmitter {
      */
 
     @Override
-    public void processingInstruction(String target, CodePoints data, Location locationId, int properties)
+    public void processingInstruction(String target, UnicodeString data, Location locationId, int properties)
             throws XPathException {
         if (!started) {
             openDocument();

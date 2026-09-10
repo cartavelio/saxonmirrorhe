@@ -5,8 +5,6 @@ import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntIterator;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -15,26 +13,19 @@ import java.util.function.Consumer;
 
 public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
 
-    // We maintain the data as a list of segments, followed by a list of individual loose
-    // codepoints. When short strings are added, we append to the list of loose codepoints.
-    // When longer strings are added, we flush the list of loose codepoints, and add the string
-    // to the list of segments
-    private List<UnicodeString> segments;
-    private List<Integer> looseCodepoints;
-    long _length = 0;
-    int mask = 0;
+    ZenoString content = ZenoString.of(EmptyUnicodeString.getInstance());
     Consumer<UnicodeString> segmentConsumer = null;
 
     public UnicodeBuilder() {
-        segments = new ArrayList<>();
+
     }
 
     public UnicodeBuilder(int allocate) {  // used by bytecode, for compatibility with StringBuilder
-        segments = new ArrayList<>();
+
     }
 
     public UnicodeBuilder(Consumer<UnicodeString> consumer) {
-        segments = new ArrayList<>();
+        //segments = new ArrayList<>();
         segmentConsumer = consumer;
     }
 
@@ -45,7 +36,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      * @return the builder, with the new character added
      */
     public UnicodeBuilder append(char ch) {
-        append((int)ch);
+        content = content.concat(new UnicodeChar(ch));
         return this;
     }
 
@@ -57,12 +48,10 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      */
 
     public UnicodeBuilder append(int codePoint) {
-        if (looseCodepoints == null) {
-            looseCodepoints = new ArrayList<>();
-        }
-        looseCodepoints.add(codePoint);
-        _length++;
-        mask |= codePoint;
+        content = content.concat(new UnicodeChar(codePoint));
+//        if (content.length() % 100 == 0) {
+//            System.err.println("Length = " + content.length());
+//        }
         return this;
     }
 
@@ -82,7 +71,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      */
 
     public UnicodeBuilder appendLatin(String str) {
-        return appendCodePoints(StringTool.codePoints(str));
+        return append(new BMPString(str));
     }
 
     /**
@@ -94,86 +83,22 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      */
 
     public UnicodeBuilder append(CharSequence str) {
-        return appendCodePoints(StringTool.codePoints(str));
+        int uLength = StringTool.getStringLength(str);
+        if (uLength == str.length()) {
+            // No surrogate pairs
+        }
+        return append(StringTool.codePoints(str));
     }
 
     /**
-     * Append a UniString to the content.
+     * Append a UnicodeString object to the content.
      *
      * @param str the string to be appended. The length is currently restricted to 2^31.
      * @return the builder, with the new string added
      */
 
-    public UnicodeBuilder append(CodePoints str) {
-        if (!str.isEmpty()) {
-            flushLooseCodepoints();
-            UnicodeString t = str.tidy();
-            segments.add(t);
-            _length += t.length();
-            switch (t.getWidth()) {
-                case 7:
-                case 8:
-                    mask |= 0xff;
-                    break;
-                case 16:
-                    mask |= 0xffff;
-                    break;
-                default:
-                    mask |= 0xffffff;
-                    break;
-            }
-        }
-        return this;
-    }
-
-    private void flushLooseCodepoints() {
-        if (looseCodepoints != null) {
-            List<Integer> loose = looseCodepoints;
-            looseCodepoints = null;
-            _length -= loose.size();
-            int max = 0;
-            for (int i : loose) {
-                max = Math.max(max, i);
-            }
-            if (max < 255) {
-                byte[] content = new byte[loose.size()];
-                int k = 0;
-                for (int i : loose) {
-                     content[k++] = (byte)(i & 0xff);
-                }
-                accept(new Twine8(content));
-            } else if (max < 65535) {
-                char[] content = new char[loose.size()];
-                int k = 0;
-                for (int i : loose) {
-                    content[k++] = (char) (i & 0xffff);
-                }
-                accept(new Twine16(content));
-            } else {
-                byte[] content = new byte[loose.size() * 3];
-                int k = 0;
-                for (int cp : loose) {
-                    content[k++] = (byte) ((cp >> 16) & 0xff);
-                    content[k++] = (byte) ((cp >> 8) & 0xff);
-                    content[k++] = (byte) (cp & 0xff);
-                }
-                accept(new Twine24(content));
-            }
-        }
-    }
-
-    /**
-     * Append a sequence of Unicode characters to the content.
-     *
-     * @param codePoints An iterator over the sequence of Unicode codePoints to be added.
-     *                   The method consumes this iterator.
-     * @return the builder, with the new string added
-     */
-
-    public UnicodeBuilder appendCodePoints (IntIterator codePoints) {
-        while (codePoints.hasNext()) {
-            append(codePoints.next());
-        }
+    public UnicodeBuilder append(UnicodeString str) {
+        content = content.concat(str);
         return this;
     }
 
@@ -182,7 +107,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      * @return the size in codepoints
      */
     public long length() {
-        return _length;
+        return content.length();
     }
 
     /**
@@ -190,7 +115,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      * @return true if the size is zero
      */
     public boolean isEmpty() {
-        return _length == 0;
+        return content.isEmpty();
     }
 
     /**
@@ -199,96 +124,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      */
 
     public UnicodeString toUnicodeString() {
-        if (_length == 0) {
-            return EmptyUnicodeString.getInstance();
-        } else if (mask <= 0xff) {
-            byte[] target = new byte[(int)length()];
-            int k = 0;
-            for (UnicodeString t : segments) {
-                if (t instanceof Twine8) {
-                    byte[] content = ((Twine8)t).getByteArray();
-                    System.arraycopy(content, 0, target, k, content.length);
-                    k += content.length;
-                } else {
-                    IntIterator iter = t.codePoints();
-                    while (iter.hasNext()) {
-                        target[k++] = (byte)iter.next();
-                    }
-                }
-            }
-            if (looseCodepoints != null) {
-                for (Integer cp : looseCodepoints) {
-                    target[k++] = (byte) (cp & 0xff);
-                }
-            }
-            return new Twine8(target);
-        } else if (mask <= 0xffff) {
-            char[] target = new char[(int) length()];
-            int k = 0;
-            for (UnicodeString t : segments) {
-                if (t instanceof Twine8) {
-                    byte[] content = ((Twine8)t).getByteArray();
-                    for (byte b : content) {
-                        target[k++] = (char)(b & 0xff);
-                    }
-                } else if (t instanceof Twine16) {
-                    char[] content = ((Twine16) t).getCharArray();
-                    System.arraycopy(content, 0, target, k, content.length);
-                    k += content.length;
-                } else {
-                    IntIterator iter = t.codePoints();
-                    while (iter.hasNext()) {
-                        target[k++] = (char) iter.next();
-                    }
-                }
-            }
-            if (looseCodepoints != null) {
-                for (Integer cp : looseCodepoints) {
-                    target[k++] = (char) (int) cp;
-                }
-            }
-            return new Twine16(target);
-        } else {
-            byte[] target = new byte[(int) length()*3];
-            int k = 0;
-            for (UnicodeString t : segments) {
-                if (t instanceof Twine8) {
-                    byte[] content = ((Twine8) t).getByteArray();
-                    for (byte b : content) {
-                        target[k++] = 0;
-                        target[k++] = 0;
-                        target[k++] = (byte) (b & 0xff);
-                    }
-                } else if (t instanceof Twine16) {
-                    char[] content = ((Twine16) t).getCharArray();
-                    for (char c : content) {
-                        target[k++] = 0;
-                        target[k++] = (byte) ((c >> 8) & 0xff);
-                        target[k++] = (byte) (c & 0xff);
-                    }
-                } else if (t instanceof Twine24) {
-                    byte[] content = ((Twine24) t).getByteArray();
-                    System.arraycopy(content, 0, target, k, content.length);
-                    k += content.length;
-                } else {
-                    IntIterator iter = t.codePoints();
-                    while (iter.hasNext()) {
-                        int cp = iter.next();
-                        target[k++] = (byte) ((cp >> 16) & 0xff);
-                        target[k++] = (byte) ((cp >> 8) & 0xff);
-                        target[k++] = (byte) (cp & 0xff);
-                    }
-                }
-            }
-            if (looseCodepoints != null) {
-                for (Integer cp : looseCodepoints) {
-                    target[k++] = (byte) ((cp >> 16) & 0xff);
-                    target[k++] = (byte) ((cp >> 8) & 0xff);
-                    target[k++] = (byte) (cp & 0xff);
-                }
-            }
-            return new Twine24(target);
-        }
+        return content.economize();
     }
 
     /**
@@ -310,16 +146,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      */
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        for (CodePoints s : segments) {
-            sb.append(s.toString());
-        }
-        if (looseCodepoints != null) {
-            for (int cp : looseCodepoints) {
-                sb.appendCodePoint(cp);
-            }
-        }
-        return sb.toString();
+        return content.toString();
     }
 
 
@@ -329,9 +156,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      */
 
     public void clear() {
-        segments = new ArrayList<>();
-        looseCodepoints = null;
-        _length = 0;
+        content = ZenoString.of(EmptyUnicodeString.getInstance());
     }
 
     /**
@@ -351,6 +176,15 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
         }
         return result;
     }
+
+    public static char[] expandBytesToChars(byte[] in, int start, int end) {
+        char[] result = new char[end - start];
+        for (int i = start, j = 0; i < end; ) {
+            result[j++] = (char)in[i++];
+        }
+        return result;
+    }
+
 
     /**
      * Expand a byte array from 1-byte-per-character to 3-bytes-per-character
@@ -433,12 +267,12 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      * @param chars the characters to be processed
      */
     @Override
-    public UnicodeBuilder accept(CodePoints chars) {
+    public UnicodeBuilder accept(UnicodeString chars) {
         return append(chars);
     }
 
     @Override
-    public void write(CodePoints chars) {
+    public void write(UnicodeString chars) {
         append(chars);
     }
 

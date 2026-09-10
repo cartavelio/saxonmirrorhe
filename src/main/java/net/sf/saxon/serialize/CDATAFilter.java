@@ -90,7 +90,7 @@ public class CDATAFilter extends ProxyReceiver {
      */
 
     @Override
-    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, UnicodeString data, Location locationId, int properties) throws XPathException {
         flush();
         nextReceiver.processingInstruction(target, data, locationId, properties);
     }
@@ -100,7 +100,7 @@ public class CDATAFilter extends ProxyReceiver {
      */
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
 
         if (!ReceiverOption.contains(properties, ReceiverOption.DISABLE_ESCAPING)) {
             buffer.append(chars.toString());
@@ -117,7 +117,7 @@ public class CDATAFilter extends ProxyReceiver {
      */
 
     @Override
-    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void comment(UnicodeString chars, Location locationId, int properties) throws XPathException {
         flush();
         nextReceiver.comment(chars, locationId, properties);
     }
@@ -148,7 +148,7 @@ public class CDATAFilter extends ProxyReceiver {
             // In this situation the normalizer will be the next thing in the serialization pipeline.
 
             if (getNextReceiver() instanceof UnicodeNormalizer) {
-                CodePoints normal = ((UnicodeNormalizer) getNextReceiver()).normalize(buffer.toUnicodeString(), true);
+                UnicodeString normal = ((UnicodeNormalizer) getNextReceiver()).normalize(buffer.toUnicodeString(), true);
                 buffer = new UnicodeBuilder();
                 buffer.accept(normal);
                 end = (int)buffer.length();

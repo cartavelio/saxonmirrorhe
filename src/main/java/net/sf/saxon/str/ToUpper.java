@@ -764,7 +764,7 @@ public class ToUpper {
         init();
     }
 
-    public static UnicodeString toUpper(CodePoints input) {
+    public static UnicodeString toUpper(UnicodeString input) {
         UnicodeBuilder ub = new UnicodeBuilder((int)input.estimatedLength());
         IntIterator iter = input.codePoints();
         while (iter.hasNext()) {

@@ -14,7 +14,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 
@@ -113,10 +112,10 @@ public class CharacterMapExpander extends ProxyReceiver {
      */
 
     @Override
-    public void characters(/*@NotNull*/ CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(/*@NotNull*/ UnicodeString chars, Location locationId, int properties) throws XPathException {
 
         if (!ReceiverOption.contains(properties, ReceiverOption.DISABLE_CHARACTER_MAPS)) {
-            CodePoints mapped = charMap.map(chars.tidy(), useNullMarkers);
+            UnicodeString mapped = charMap.map(chars, useNullMarkers);
             if (mapped != chars) {
                 properties = (properties | ReceiverOption.USE_NULL_MARKERS)
                          &~ ReceiverOption.NO_SPECIAL_CHARS;

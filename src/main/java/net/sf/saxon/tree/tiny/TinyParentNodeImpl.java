@@ -8,8 +8,9 @@
 package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.str.EmptyUnicodeString;
-import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.ZenoString;
 import net.sf.saxon.type.Type;
 
 /**
@@ -97,7 +98,7 @@ public abstract class TinyParentNodeImpl extends TinyNodeImpl {
         if (sb == null) {
             return EmptyUnicodeString.getInstance();
         }
-        return sb.toUnicodeString();
+        return ZenoString.of(sb.toUnicodeString());
     }
 
 }

@@ -9,6 +9,7 @@ package net.sf.saxon.str;
 
 import net.sf.saxon.z.IntIterator;
 
+import java.util.Arrays;
 import java.util.function.IntPredicate;
 
 /**
@@ -111,24 +112,20 @@ public class CompressedWhitespace extends UnicodeString {
     }
 
     public static UnicodeString uncompress(long value) {
-        UnicodeBuilder buffer = new UnicodeBuilder();
-        uncompress(value, buffer);
-        return buffer.toUnicodeString();
-    }
-
-
-    public static void uncompress(long value, UnicodeBuilder buffer) {
+        byte[] bytes = new byte[1000];
+        int offset = 0;
         for (int s = 56; s >= 0; s -= 8) {
             byte b = (byte) ((value >> s) & 0xff);
             if (b == 0) {
                 break;
             }
-            char c = WHITE_CHARS[b >> 6 & 0x3];
+            byte c = (byte) (WHITE_CHARS[b >> 6 & 0x3] & 0xff);
             int len = b & 0x3f;
             for (int j = 0; j < len; j++) {
-                buffer.append(c);
+                bytes[offset++] = c;
             }
         }
+        return new Twine8(Arrays.copyOf(bytes, offset));
     }
 
     public long getCompressedValue() {
@@ -213,17 +210,13 @@ public class CompressedWhitespace extends UnicodeString {
     }
 
     @Override
-    public UnicodeString tidy() {
-        return uncompress();
-    }
-
-    @Override
     public IntIterator codePoints() {
         return uncompress().codePoints();
     }
 
     @Override
     public long indexOf(int codePoint, long from) {
+        // Faster implementations are possible, but not needed
         return uncompress().indexOf(codePoint, from);
     }
 
@@ -271,11 +264,19 @@ public class CompressedWhitespace extends UnicodeString {
 
     }
 
-
-    @Override
-    public void supplyContent(LargeTextBuffer consumer, long start, long length) {
-        uncompress().supplyContent(consumer, start, length);
+    void copy8bit(byte[] target, int offset) {
+        uncompress().copy8bit(target, offset);
     }
+
+    void copy16bit(char[] target, int offset) {
+        uncompress().copy16bit(target, offset);
+    }
+
+    void copy24bit(byte[] target, int offset) {
+        uncompress().copy24bit(target, offset);
+    }
+
+
 
     /**
      * Get the position of the first occurrence of the specified codepoint,

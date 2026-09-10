@@ -9,17 +9,17 @@ import java.util.Objects;
  * An implementation of the CodePoints interface that wraps an ordinary Java string.
  */
 
-public class StringView extends CodePoints {
+public class StringView extends UnicodeString {
 
-    private final String base;
-    private boolean codePointSafe; // indicates that the string is known to contain no surrogates
+    private final String baseString;
+    private UnicodeString baseUnicodeString; // created on demand
 
-    private StringView(String base) {
-        Objects.requireNonNull(base);
-        this.base = base;
+    private StringView(String baseString) {
+        Objects.requireNonNull(baseString);
+        this.baseString = baseString;
     }
 
-    public static CodePoints of(String base) {
+    public static UnicodeString of(String base) {
         return new StringView(base);
     }
 
@@ -33,42 +33,120 @@ public class StringView extends CodePoints {
 
     @Override
     public synchronized UnicodeString tidy() {
-        if (codePointSafe) {
-            return new BMPString(base);
+        if (baseUnicodeString != null) {
+            return baseUnicodeString;
         } else {
-            for (int i = 0; i < base.length(); i++) {
-                if (UTF16CharacterSet.isSurrogate(base.charAt(i))) {
-                    UnicodeBuilder ub = new UnicodeBuilder();
-                    ub.append(StringTool.codePoints(base));
-                    return ub.toUnicodeString();
+            int uLength = StringTool.getStringLength(baseString);
+            if (uLength == baseString.length()) {
+                // No surrogate pairs
+                return baseUnicodeString = new BMPString(baseString);
+            } else {
+                byte[] triples = new byte[uLength*3];
+                for (int i=0, j=0; i<baseString.length(); i++) {
+                    char c = baseString.charAt(i);
+                    if (UTF16CharacterSet.isSurrogate(c)) {
+                        int cp = UTF16CharacterSet.combinePair(c, baseString.charAt(++i));
+                        triples[j++] = (byte) ((cp >> 16) & 0xff);
+                        triples[j++] = (byte) ((cp >> 8) & 0xff);
+                        triples[j++] = (byte) (cp & 0xff);
+                    } else {
+                        triples[j++] = 0;
+                        triples[j++] = (byte)((c >> 8) & 0xff);
+                        triples[j++] = (byte) (c & 0xff);
+                    }
                 }
+                return baseUnicodeString = new Twine24(triples);
             }
-            codePointSafe = true;
-            return new BMPString(base);
         }
     }
 
 
     @Override
     public boolean isEmpty() {
-        return base.isEmpty();
+        return baseString.isEmpty();
     }
 
     @Override
     public long estimatedLength() {
-        return base.length();
+        return baseUnicodeString != null ? baseUnicodeString.length() : baseString.length();
     }
+
+    /**
+     * Get the length of the string
+     *
+     * @return the number of code points in the string
+     */
+    @Override
+    public long length() {
+        return tidy().length();
+    }
+
+    /**
+     * Get the number of bits needed to hold all the characters in this string
+     *
+     * @return 7 for ascii characters, 8 for latin-1, 16 for BMP, 24 for general Unicode.
+     */
+    @Override
+    public int getWidth() {
+        return tidy().getWidth();
+    }
+
+    /**
+     * Get the position of the first occurrence of the specified codepoint,
+     * starting the search at a given position in the string
+     *
+     * @param codePoint the sought codepoint
+     * @param from      the position from which the search should start (0-based). There
+     *                  is no restriction on the value. Negative values are treated as zero;
+     *                  values greater than or equal to length() return -1.
+     * @return the position (zero-based) of the first occurrence found, or -1 if not found
+     */
+    @Override
+    public long indexOf(int codePoint, long from) {
+        return tidy().indexOf(codePoint, from);
+    }
+
+    /**
+     * Get the code point at a given position in the string
+     *
+     * @param index the given position (0-based)
+     * @throws IndexOutOfBoundsException if the index is out of range
+     */
+    @Override
+    public int codePointAt(long index) {
+        return tidy().codePointAt(index);
+    }
+
+    /**
+     * Get a substring of this codepoint sequence, with a given start and end position
+     *
+     * @param start the start position (0-based): that is, the position of the first
+     *              code point to be included
+     * @param end   the end position (0-based): specifically, the position of the first
+     *              code point not to be included
+     * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
+     *                                       for codePoint access
+     */
+    @Override
+    public UnicodeString substring(long start, long end) {
+        return tidy().substring(start, end);
+    }
+
 
     @Override
     public IntIterator codePoints() {
-        return StringTool.codePoints(base);
+        return baseUnicodeString != null ? baseUnicodeString.codePoints() : StringTool.codePoints(baseString);
     }
 
     @Override
-    public CodePoints concat(CodePoints other) {
+    public UnicodeString concat(UnicodeString other) {
         if (other instanceof StringView) {
-            StringView sv = new StringView(base + ((StringView)other).base);
-            sv.codePointSafe = this.codePointSafe && ((StringView) other).codePointSafe;
+            StringView sv = new StringView(baseString + ((StringView)other).baseString);
+            UnicodeString us1 = baseUnicodeString;
+            UnicodeString us2 = ((StringView) other).baseUnicodeString;
+            if (us1 != null && us2 != null) {
+                baseUnicodeString = us1.concat(us2);
+            }
             return sv;
         } else {
             UnicodeBuilder ub = new UnicodeBuilder();
@@ -77,9 +155,9 @@ public class StringView extends CodePoints {
     }
 
     @Override
-    public int compareTo(CodePoints other) {
-        if (codePointSafe && other instanceof StringView && ((StringView)other).codePointSafe) {
-            return base.compareTo(((StringView)other).base);
+    public int compareTo(UnicodeString other) {
+        if (baseUnicodeString != null && other instanceof StringView && ((StringView)other).baseUnicodeString != null) {
+            return baseString.compareTo(((StringView)other).baseString);
         } else {
             return super.compareTo(other);
         }
@@ -88,9 +166,9 @@ public class StringView extends CodePoints {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof StringView) {
-            return this.base.equals(((StringView) obj).base);
+            return this.baseString.equals(((StringView) obj).baseString);
         } else if (obj instanceof BMPString) {
-            return this.base.equals(obj.toString());
+            return this.baseString.equals(obj.toString());
         } else {
             return super.equals(obj);
         }
@@ -98,7 +176,7 @@ public class StringView extends CodePoints {
 
     @Override
     public int hashCode() {
-        return base.hashCode();
+        return baseString.hashCode();
     }
 
     @Override
@@ -108,8 +186,22 @@ public class StringView extends CodePoints {
 
     @Override
     public String toString() {
-        return base;
+        return baseString;
     }
 
+    @Override
+    void copy8bit(byte[] target, int offset) {
+        tidy().copy8bit(target, offset);
+    }
+
+    @Override
+    void copy16bit(char[] target, int offset) {
+        tidy().copy16bit(target, offset);
+    }
+
+    @Override
+    void copy24bit(byte[] target, int offset) {
+        tidy().copy24bit(target, offset);
+    }
 }
 

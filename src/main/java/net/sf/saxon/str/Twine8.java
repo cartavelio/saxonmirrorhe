@@ -9,7 +9,6 @@ package net.sf.saxon.str;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.serialize.UTF8Writer;
-import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.z.IntIterator;
@@ -27,7 +26,6 @@ import java.util.function.IntPredicate;
  * to 2^31-1 codepoints.
  */
 
-@CSharpInjectMembers(code="")
 public class Twine8 extends UnicodeString {
 
     // Array of bytes containing codepoints in the range 0-255
@@ -84,22 +82,21 @@ public class Twine8 extends UnicodeString {
         return bytes.length;
     }
 
-    /**
-     * Concatenate another string
-     *
-     * @param other the string to be appended to this one
-     * @return the result of the concatenation (neither input string is altered)
-     */
-    @Override
-    public UnicodeString concat(UnicodeString other) {
-        if (other instanceof Twine8 && this.length32() + other.length32() < 4096) {
-            Twine8 t = (Twine8)other;
-            byte[] b2 = new byte[bytes.length + t.bytes.length];
-            System.arraycopy(bytes, 0, b2, 0, bytes.length);
-            System.arraycopy(t.bytes, 0, b2, bytes.length, t.bytes.length);
-            return new Twine8(b2);
-        } else {
-            return super.concat(other);
+    void copy8bit(byte[] target, int offset) {
+        System.arraycopy(bytes, 0, target, offset, bytes.length);
+    }
+
+    void copy16bit(char[] target, int offset) {
+        for (int i=0, j=offset; i<bytes.length; ) {
+             target[j++] = (char)(bytes[i++] & 0xff);
+        }
+    }
+
+    void copy24bit(byte[] target, int offset) {
+        for (int i = 0, j = offset; i < bytes.length; ) {
+            target[j++] = (byte) 0;
+            target[j++] = (byte) 0;
+            target[j++] = bytes[i++];
         }
     }
 
@@ -263,11 +260,7 @@ public class Twine8 extends UnicodeString {
         if (cachedHash != 0) {
             return cachedHash;
         }
-        int h = 0;
-        for (byte b : bytes) {
-            h = 31 * h + (b & 0xff);
-        }
-        return cachedHash = h;
+        return cachedHash = super.hashCode();
     }
 
     /**
@@ -293,7 +286,7 @@ public class Twine8 extends UnicodeString {
     }
 
     @Override
-    public int compareTo(CodePoints other) {
+    public int compareTo(UnicodeString other) {
         if (other instanceof Twine8) {
             // TODO: for Java9, use Arrays.compareUnsigned(bytes, o.bytes);
             Twine8 o = (Twine8) other;
@@ -320,11 +313,6 @@ public class Twine8 extends UnicodeString {
     @CSharpReplaceBody(code="return Saxon.Impl.Helpers.StringUtils.LATIN_1.GetString(bytes);")
     public String toString() {
         return new String(bytes, StandardCharsets.ISO_8859_1);
-    }
-
-    @Override
-    public void supplyContent(LargeTextBuffer consumer, long start, long len) {
-        consumer.append8(bytes, requireInt(start), requireInt(len));
     }
 
     private void write(Writer writer, long start, long len) throws IOException {

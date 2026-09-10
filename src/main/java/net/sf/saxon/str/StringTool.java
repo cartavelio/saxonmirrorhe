@@ -35,10 +35,9 @@ public class StringTool {
      * @return an array of integers representing the Unicode code points
      */
 
-    public static int[] expand(CodePoints s) {
-        UnicodeString t = s.tidy();
-        int[] array = new int[t.length32()];
-        IntIterator iter = t.codePoints();
+    public static int[] expand(UnicodeString s) {
+        int[] array = new int[s.length32()];
+        IntIterator iter = s.codePoints();
         int i = 0;
         while (iter.hasNext()) {
             array[i++] = iter.next();

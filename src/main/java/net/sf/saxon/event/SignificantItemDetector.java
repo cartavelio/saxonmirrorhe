@@ -10,7 +10,7 @@ package net.sf.saxon.event;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.om.*;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
@@ -94,7 +94,7 @@ public class SignificantItemDetector extends ProxyOutputter {
     }
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         if (!chars.isEmpty()) {
             start();
         }
@@ -102,13 +102,13 @@ public class SignificantItemDetector extends ProxyOutputter {
     }
 
     @Override
-    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, UnicodeString data, Location locationId, int properties) throws XPathException {
         start();
         getNextOutputter().processingInstruction(target, data, locationId, properties);
     }
 
     @Override
-    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void comment(UnicodeString chars, Location locationId, int properties) throws XPathException {
         start();
         getNextOutputter().comment(chars, locationId, properties);
     }

@@ -21,7 +21,6 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.regex.ARegularExpression;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.regex.charclass.Categories;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
@@ -328,7 +327,7 @@ public class FormatInteger extends SystemFunction implements StatefulSystemFunct
      * @param excludePositions the positions to be filtered out from the string, counted as positions from the end
      * @return the items from the original array that are not filtered out
      */
-    private static UnicodeString extractSeparators(CodePoints arr, IntSet excludePositions) {
+    private static UnicodeString extractSeparators(UnicodeString arr, IntSet excludePositions) {
         // TODO: this doesn't do what the documentation says: it ignores the supplied positions entirely
         UnicodeBuilder ub = new UnicodeBuilder();
         IntIterator iter = arr.codePoints();

@@ -55,6 +55,20 @@ public final class EmptyUnicodeString extends UnicodeString {
         return other;
     }
 
+    public void copy8bit(byte[] target, int offset) {
+        // no action
+    }
+
+    @Override
+    void copy16bit(char[] target, int offset) {
+        // no action
+    }
+
+    @Override
+    void copy24bit(byte[] target, int offset) {
+        // no action
+    }
+
     /**
      * Get a substring of this string (following the rules of {@link String#substring}, but measuring
      * Unicode codepoints rather than 16-bit code units)
@@ -66,37 +80,14 @@ public final class EmptyUnicodeString extends UnicodeString {
 
     @Override
     public UnicodeString substring(long start, long end) {
-        if (start < 0 || end < start || end > 0) {
-            throw new IndexOutOfBoundsException();
-        }
+        checkSubstringBounds(start, end);
         return this;
-    }
-
-    /**
-     * Concatenate another string.
-     *
-     * @param other the string to be concatenated
-     * @return the concatenation of the two strings. Neither of the input strings is modified.
-     */
-
-    @Override
-    public CodePoints concat(CodePoints other) {
-        return other;
     }
 
     @Override
     public int codePointAt(long index) throws IndexOutOfBoundsException {
         throw new IndexOutOfBoundsException();
     }
-
-    /**
-     * Get the first position, at or beyond start, where a given codepoint appears
-     * in this string.
-     *
-     * @param code the sought codepoint
-     * @param from the position (0-based) where searching is to start (counting in codepoints)
-     * @return the first position where the substring is found, or -1 if it is not found
-     */
 
     @Override
     public long indexOf(int code, long from) {
@@ -168,14 +159,14 @@ public final class EmptyUnicodeString extends UnicodeString {
      */
 
     public boolean equals(Object o) {
-        if (o instanceof CodePoints) {
-            return ((CodePoints) o).isEmpty();
+        if (o instanceof UnicodeString) {
+            return ((UnicodeString) o).isEmpty();
         }
         return false;
     }
 
     @Override
-    public int compareTo(CodePoints other) {
+    public int compareTo(UnicodeString other) {
         return other.isEmpty() ? 0 : -1;
     }
 
@@ -186,11 +177,6 @@ public final class EmptyUnicodeString extends UnicodeString {
     /*@NotNull*/
     public String toString() {
         return "";
-    }
-
-    @Override
-    public void supplyContent(LargeTextBuffer consumer, long start, long length) {
-        // No action
     }
 
     /**

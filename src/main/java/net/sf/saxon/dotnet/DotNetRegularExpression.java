@@ -13,7 +13,6 @@ import cli.System.Text.RegularExpressions.Regex;
 import cli.System.Text.RegularExpressions.RegexOptions;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.regex.RegularExpression;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
@@ -40,7 +39,7 @@ public class DotNetRegularExpression implements RegularExpression {
      *          if the syntax of the regular expression or flags is incorrect
      */
 
-    public DotNetRegularExpression(CodePoints regex, String flags)
+    public DotNetRegularExpression(UnicodeString regex, String flags)
             throws XPathException {
         String translated = "";
         try {

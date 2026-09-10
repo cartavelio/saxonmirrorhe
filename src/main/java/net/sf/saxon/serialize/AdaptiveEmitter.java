@@ -20,7 +20,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.query.QueryResult;
 import net.sf.saxon.regex.ARegularExpression;
 import net.sf.saxon.str.BMPString;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.str.UnicodeWriter;
 import net.sf.saxon.trans.XPathException;
@@ -94,7 +93,7 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
         }
     }
 
-    private void emit(CodePoints s) throws XPathException {
+    private void emit(UnicodeString s) throws XPathException {
         try {
             writer.write(s);
         } catch (IOException e) {

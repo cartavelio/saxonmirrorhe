@@ -147,7 +147,7 @@ public class Whitespace {
      *         characters. (So the result is true for a zero-length string.)
      */
 
-    public static boolean isAllWhite(CodePoints content) {
+    public static boolean isAllWhite(UnicodeString content) {
         if (content instanceof CompressedWhitespace) {
             return true;
         }
@@ -238,7 +238,7 @@ public class Whitespace {
      */
 
     /*@NotNull*/
-    public static UnicodeString normalizeWhitespace(CodePoints input) {
+    public static UnicodeString normalizeWhitespace(UnicodeString input) {
         UnicodeBuilder sb = new UnicodeBuilder();
         IntIterator iter = input.codePoints();
         while (iter.hasNext()) {

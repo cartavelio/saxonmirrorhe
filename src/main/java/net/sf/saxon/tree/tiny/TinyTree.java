@@ -385,7 +385,8 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      */
 
     void appendChars(UnicodeString chars) {
-        chars.supplyContent(textBuffer, 0, chars.length());
+        textBuffer.appendUnicodeString(chars);
+//        chars.supplyContent(textBuffer, 0, chars.length());
 //        ensureTextCapacity(1);
 //        textChunks[textChunksUsed++] = chars;
     }
@@ -1598,7 +1599,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      */
 
     /*@Nullable*/
-    public CodePoints getCommentBuffer() {
+    public UnicodeString getCommentBuffer() {
         return commentBuffer;
     }
 

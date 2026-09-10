@@ -1,6 +1,8 @@
 package net.sf.saxon.str;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
+import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
+import net.sf.saxon.serialize.charcode.XMLCharacterData;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Base64BinaryValue;
 import net.sf.saxon.z.IntIterator;
@@ -12,7 +14,7 @@ import java.util.function.IntPredicate;
  * <p>The interface is future-proofed to support code points in the range 0 to 2^31, and string lengths of
  * up to 2^63 characters. Implementations may (and do) impose lower limits.</p>
  */
-public abstract class UnicodeString extends CodePoints implements AtomicMatchKey {
+public abstract class UnicodeString implements AtomicMatchKey, Comparable<UnicodeString> {
 
     /**
      * Ensure that the implementation is capable of counting codepoints in the string. For an
@@ -20,8 +22,11 @@ public abstract class UnicodeString extends CodePoints implements AtomicMatchKey
      * @return this {@code UnicodeString}
      */
 
-    @Override
     public UnicodeString tidy() {
+        return this;
+    }
+
+    public UnicodeString economize() {
         return this;
     }
 
@@ -48,8 +53,7 @@ public abstract class UnicodeString extends CodePoints implements AtomicMatchKey
      * @return for a {@code UnicodeString}, the actual length of the string in codepoints
      */
 
-    @Override
-    public final long estimatedLength() {
+    public long estimatedLength() {
         return length();
     }
 
@@ -58,7 +62,6 @@ public abstract class UnicodeString extends CodePoints implements AtomicMatchKey
      * @return true if the length of the string is zero
      */
 
-    @Override
     public boolean isEmpty() {
         return length() == 0;
     }
@@ -182,6 +185,15 @@ public abstract class UnicodeString extends CodePoints implements AtomicMatchKey
     }
 
     /**
+     * Get an iterator over the code points present in the string. Note that this method
+     * is always available, whether or not the {@code UniString} has been prepared for codePoint access.
+     *
+     * @return an iterator that delivers the individual code points
+     */
+
+    public abstract IntIterator codePoints();
+
+    /**
      * Get the code point at a given position in the string
      * @param index the given position (0-based)
      * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
@@ -205,6 +217,14 @@ public abstract class UnicodeString extends CodePoints implements AtomicMatchKey
     }
 
     /**
+     * Concatenate with another string, returning a new string
+     */
+
+    public UnicodeString concat(UnicodeString other) {
+        return ZenoString.of(this).concat(other);
+    }
+
+    /**
      * Get a substring of this codepoint sequence, with a given start and end position
      * @param start the start position (0-based): that is, the position of the first
      *              code point to be included
@@ -216,25 +236,56 @@ public abstract class UnicodeString extends CodePoints implements AtomicMatchKey
 
     public abstract UnicodeString substring(long start, long end);
 
-    /**
-     * Concatenate another string
-     * @param other the string to be appended to this one
-     * @return the result of the concatenation (neither input string is altered)
-     */
+    protected void checkSubstringBounds(long start, long end) {
+        if (start < 0) {
+            throw new IndexOutOfBoundsException("UnicodeString.substring(): start < 0");
+        }
+        if (end < start) {
+            throw new IndexOutOfBoundsException("UnicodeString.substring(): end < start");
+        }
+        if (end > length()) {
+            throw new IndexOutOfBoundsException("UnicodeString.substring(): end > length()");
+        }
+    }
 
-    public UnicodeString concat(UnicodeString other) {
-        return Rope.makeRope(this, other);
+    /**
+     * Diagnostic method: verify that all the characters in the string are valid XML codepoints
+     * @throw IllegalStateException if the contents are invalid
+     */
+    public void verifyCharacters() {
+        IntIterator iter = codePoints();
+        int p = 0;
+        while (iter.hasNext()) {
+            int x = iter.next();
+            if (!XMLCharacterData.isValid11(x)) {
+                throw new IllegalStateException("Invalid char " + x + " in " + getClass() + " at offset " + p);
+            }
+            p++;
+        }
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof UnicodeString) {
-            UnicodeString other = (UnicodeString)obj;
-            if (this.length() != other.length() || this.hashCode() != other.hashCode()) {
-                return false;
+            UnicodeString other = (UnicodeString) obj;
+            IntIterator iter1 = codePoints();
+            IntIterator iter2 = other.codePoints();
+            while (true) {
+                boolean more1 = iter1.hasNext();
+                boolean more2 = iter2.hasNext();
+                if (more1 && more2) {
+                    int ch1 = iter1.next();
+                    int ch2 = iter2.next();
+                    if (ch1 != ch2) {
+                        return false;
+                    }
+                } else {
+                    return !(more1 || more2);
+                }
             }
+        } else {
+            return false;
         }
-        return super.equals(obj);
     }
 
     /**
@@ -245,10 +296,44 @@ public abstract class UnicodeString extends CodePoints implements AtomicMatchKey
      *
      * @return the hash code
      */
-    @Override
+
     public int hashCode() {
-        return super.hashCode();
+        int h = 0;
+        IntIterator iter = codePoints();
+        while (iter.hasNext()) {
+            int cp = iter.next();
+            if ((cp & 0xff0000) != 0) {
+                h = 31 * h + UTF16CharacterSet.highSurrogate(cp);
+                h = 31 * h + UTF16CharacterSet.lowSurrogate(cp);
+            } else {
+                h = 31 * h + cp;
+            }
+        }
+        return h;
     }
+
+    @Override
+    public int compareTo(UnicodeString other) {
+        IntIterator iter1 = codePoints();
+        IntIterator iter2 = other.codePoints();
+        while (true) {
+            boolean more1 = iter1.hasNext();
+            boolean more2 = iter2.hasNext();
+            if (more1 && more2) {
+                int ch1 = iter1.next();
+                int ch2 = iter2.next();
+                int diff = ch1 - ch2;
+                if (diff != 0) {
+                    return diff;
+                }
+            } else if (!more1 && !more2) {
+                return 0;
+            } else {
+                return more1 ? 1 : -1;
+            }
+        }
+    }
+
 
     /**
      * Get the codepoints of the string as a byte array, allocating three
@@ -283,16 +368,6 @@ public abstract class UnicodeString extends CodePoints implements AtomicMatchKey
     }
 
     /**
-     * Append the content, or part of the content, to a {@link LargeTextBuffer}
-     * @param consumer the recipient of the content
-     * @param start the start offset (in codepoints) to be sent to the consumer
-     * @param length the number of codepoints to be sent
-     * @throws IndexOutOfBoundsException if the start or end are out of range
-     */
-
-    public abstract void supplyContent(LargeTextBuffer consumer, long start, long length);
-
-    /**
      * Utility method for use where strings longer than 2^31 characters cannot yet be handled.
      * @param value the actual value of a character position within a string, or the length of
      *              a string
@@ -306,5 +381,20 @@ public abstract class UnicodeString extends CodePoints implements AtomicMatchKey
         }
         return (int) value;
     }
+
+
+    void copy8bit(byte[] target, int offset) {
+        throw new UnsupportedOperationException();
+    }
+
+    void copy16bit(char[] target, int offset) {
+        throw new UnsupportedOperationException();
+    }
+
+    void copy24bit(byte[] target, int offset) {
+        throw new UnsupportedOperationException();
+    }
+
+
 }
 

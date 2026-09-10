@@ -9,7 +9,7 @@ package net.sf.saxon.om;
 
 import net.sf.saxon.serialize.charcode.XMLCharacterData;
 import net.sf.saxon.str.StringTool;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.z.IntIterator;
@@ -177,7 +177,7 @@ public abstract class NameChecker {
      * @return true if nmtoken is a valid Nmtoken
      */
 
-    public static boolean isValidNmtoken(CodePoints in) {
+    public static boolean isValidNmtoken(UnicodeString in) {
         IntIterator codePoints = in.codePoints();
         boolean empty = true;
         while (codePoints.hasNext()) {

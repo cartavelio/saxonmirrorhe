@@ -7,9 +7,12 @@
 
 package net.sf.saxon.event;
 
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceMap;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 
@@ -115,11 +118,11 @@ public abstract class Event {
 
     public static class Text extends Event {
 
-        CodePoints content;
+        UnicodeString content;
         Location location;
         int properties;
 
-        public Text(CodePoints content, Location location, int properties) {
+        public Text(UnicodeString content, Location location, int properties) {
             this.content = content;
             this.location = location;
             this.properties = properties;
@@ -137,11 +140,11 @@ public abstract class Event {
 
     public static class Comment extends Event {
 
-        CodePoints content;
+        UnicodeString content;
         Location location;
         int properties;
 
-        public Comment(CodePoints content, Location location, int properties) {
+        public Comment(UnicodeString content, Location location, int properties) {
             this.content = content;
             this.location = location;
             this.properties = properties;
@@ -159,11 +162,11 @@ public abstract class Event {
 
     public static class ProcessingInstruction extends Event {
         String target;
-        CodePoints content;
+        UnicodeString content;
         Location location;
         int properties;
 
-        public ProcessingInstruction(String target, CodePoints content, Location location, int properties) {
+        public ProcessingInstruction(String target, UnicodeString content, Location location, int properties) {
             this.target = target;
             this.content = content;
             this.location = location;

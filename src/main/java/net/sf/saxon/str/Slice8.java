@@ -78,20 +78,12 @@ public class Slice8 extends UnicodeString {
 
     @Override
     public UnicodeString substring(long start, long end) {
-        long len = length();
-        if (start < 0 || end < start || end > len) {
-            throw new IndexOutOfBoundsException();
-        }
+        checkSubstringBounds(start, end);
         if (end == start) {
             return EmptyUnicodeString.getInstance();
         } else {
             return new Slice8(bytes, requireInt(start) + this.start, requireInt(end) + this.start);
         }
-    }
-
-    @Override
-    public void supplyContent(LargeTextBuffer consumer, long start, long len) {
-        consumer.append8(bytes, requireInt(start) + this.start, requireInt(len));
     }
 
     private void write(Writer writer, long start, long len) throws IOException {
@@ -139,6 +131,25 @@ public class Slice8 extends UnicodeString {
         };
     }
 
+
+    public void copy8bit(byte[] target, int offset) {
+        System.arraycopy(bytes, start, target, offset, end - start);
+    }
+
+    public void copy16bit(char[] target, int offset) {
+        for (int i = start, j = offset; i < end; ) {
+            target[j++] = (char) bytes[i++];
+        }
+    }
+
+    void copy24bit(byte[] target, int offset) {
+        for (int i = start, j = offset; i < end; ) {
+            target[j++] = (byte) 0;
+            target[j++] = (byte) 0;
+            target[j++] = bytes[i++];
+        }
+    }
+
     /**
      * Compute a hashCode. All implementations of {@code UniString use compatible hash codes and the
      * hashing algorithm is therefore identical to that for {@code java.lang.String}. This means
@@ -159,6 +170,21 @@ public class Slice8 extends UnicodeString {
         }
         return cachedHash = h;
     }
+
+    /**
+     * Concatenate another string
+     *
+     * @param other the string to be appended to this one
+     * @return the result of the concatenation (neither input string is altered)
+     */
+//    @Override
+//    public UnicodeString concat(UnicodeString other) {
+//        if (other.getWidth() <= 8) {
+//            return ZenoString.concatSegments(this, other);
+//        } else {
+//            return super.concat(other);
+//        }
+//    }
 
     /**
      * Display as a string.

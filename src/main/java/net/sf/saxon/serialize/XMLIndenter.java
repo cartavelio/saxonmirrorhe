@@ -17,7 +17,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.CompressedWhitespace;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyType;
 import net.sf.saxon.type.ComplexType;
@@ -197,7 +197,7 @@ public class XMLIndenter extends ProxyReceiver {
      */
 
     @Override
-    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, UnicodeString data, Location locationId, int properties) throws XPathException {
         if (afterEndTag) {
             indent();
         } else {
@@ -213,7 +213,7 @@ public class XMLIndenter extends ProxyReceiver {
      */
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         if (suppressedAtLevel < 0 && Whitespace.isAllWhite(chars)) {
             pendingWhitespace = new Event.Text(chars, locationId, properties);
         } else {
@@ -239,7 +239,7 @@ public class XMLIndenter extends ProxyReceiver {
      */
 
     @Override
-    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void comment(UnicodeString chars, Location locationId, int properties) throws XPathException {
         if (afterEndTag) {
             indent();
         } else {

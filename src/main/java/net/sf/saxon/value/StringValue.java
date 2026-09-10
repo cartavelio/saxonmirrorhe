@@ -424,12 +424,12 @@ public class StringValue extends AtomicValue {
         UnicodeBuilder buffer = new UnicodeBuilder();
 
         @Override
-        public UniStringConsumer accept(CodePoints chars) {
+        public UniStringConsumer accept(UnicodeString chars) {
             buffer.accept(chars);
             return this;
         }
 
-        public CodePoints getStringValue() {
+        public UnicodeString getStringValue() {
             return buffer.toUnicodeString();
         }
 

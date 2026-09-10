@@ -292,7 +292,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      * @return a zero-length string if s is null, otherwise s
      */
 
-    private static CodePoints emptyIfNull(String s) {
+    private static UnicodeString emptyIfNull(String s) {
         return s == null ? EmptyUnicodeString.getInstance() : StringView.of(s);
     }
 

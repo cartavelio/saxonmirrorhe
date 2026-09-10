@@ -143,7 +143,7 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
     @Override
     public void processValue(UnicodeString value, Outputter output, XPathContext context) throws XPathException {
         String expandedName = evaluateName(context);
-        CodePoints data = checkContent(value, context);
+        UnicodeString data = checkContent(value, context);
         output.processingInstruction(expandedName, data, getLocation(), ReceiverOption.NONE);
     }
 

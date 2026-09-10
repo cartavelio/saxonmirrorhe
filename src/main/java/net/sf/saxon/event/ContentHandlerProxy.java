@@ -15,7 +15,7 @@ import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.lib.TraceListener;
 import net.sf.saxon.om.*;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.AttributeCollectionImpl;
@@ -429,7 +429,7 @@ public class ContentHandlerProxy implements Receiver {
      */
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         currentLocation = locationId;
         boolean disable = ReceiverOption.contains(properties, ReceiverOption.DISABLE_ESCAPING);
         if (disable) {
@@ -471,7 +471,7 @@ public class ContentHandlerProxy implements Receiver {
      */
 
     @Override
-    public void processingInstruction(String target, CodePoints data, Location locationId, int properties)
+    public void processingInstruction(String target, UnicodeString data, Location locationId, int properties)
             throws XPathException {
         currentLocation = locationId;
         try {
@@ -487,7 +487,7 @@ public class ContentHandlerProxy implements Receiver {
      */
 
     @Override
-    public void comment(CodePoints chars, Location locationId, int properties)
+    public void comment(UnicodeString chars, Location locationId, int properties)
             throws XPathException {
         currentLocation = locationId;
         try {

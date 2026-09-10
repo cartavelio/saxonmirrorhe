@@ -450,7 +450,7 @@ public class StaxBridge implements PullProvider {
      */
 
     @Override
-    public CodePoints getStringValue() throws XPathException {
+    public UnicodeString getStringValue() throws XPathException {
         switch (currentEvent) {
             case TEXT:
                 return StringTool.compress(reader.getTextCharacters(), reader.getTextStart(), reader.getTextLength(), true);

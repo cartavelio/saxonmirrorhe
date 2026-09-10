@@ -1,5 +1,6 @@
 package net.sf.saxon.str;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.z.IntIterator;
 
@@ -29,6 +30,9 @@ class Slice24 extends UnicodeString {
         this.bytes = bytes;
         this.start = start;
         this.end = end;
+        if (Configuration.isAssertionsEnabled()) {
+            verifyCharacters();
+        }
     }
 
     @Override
@@ -46,7 +50,7 @@ class Slice24 extends UnicodeString {
         byte b0 = (byte) ((codePoint >> 16) & 0xff);
         byte b1 = (byte) ((codePoint >> 8) & 0xff);
         byte b2 = (byte) (codePoint & 0xff);
-        for (int i = (start + requireInt(from))*3; i < end*3; i+=3) {
+        for (int i = (start + Math.max(requireInt(from), 0))*3; i < end*3; i+=3) {
             if (bytes[i+2] == b2 && bytes[i+1] == b1 && bytes[i] == b0) {
                 return (i - start) / 3;
             }
@@ -87,10 +91,7 @@ class Slice24 extends UnicodeString {
 
     @Override
     public UnicodeString substring(long start, long end) {
-        long len = length();
-        if (start < 0 || end < start || end > len) {
-            throw new IndexOutOfBoundsException();
-        }
+        checkSubstringBounds(start, end);
         if (end == start) {
             return EmptyUnicodeString.getInstance();
         } else {
@@ -98,9 +99,8 @@ class Slice24 extends UnicodeString {
         }
     }
 
-    @Override
-    public void supplyContent(LargeTextBuffer consumer, long start, long len) {
-        consumer.append24(bytes, requireInt(start) + this.start, requireInt(len));
+    void copy24bit(byte[] target, int offset) {
+        System.arraycopy(bytes, start*3, target, offset, (end - start)*3);
     }
 
     @Override
@@ -165,6 +165,8 @@ class Slice24 extends UnicodeString {
         }
         return sb.toString();
     }
+
+
 
 }
 

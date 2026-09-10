@@ -669,7 +669,7 @@ public class XMLEmitter extends Emitter {
      * first offending character if not
      */
 
-    protected int testCharacters(CodePoints chars) {
+    protected int testCharacters(UnicodeString chars) {
         IntIterator iter = chars.codePoints();
         while (iter.hasNext()) {
             int ch = iter.next();
@@ -684,7 +684,7 @@ public class XMLEmitter extends Emitter {
      * Where characters are not available in the selected encoding, substitute them
      */
 
-    protected CodePoints convertToAscii(CodePoints chars) {
+    protected UnicodeString convertToAscii(UnicodeString chars) {
         UnicodeBuilder buff = new UnicodeBuilder();
         IntIterator iter = chars.codePoints();
         while (iter.hasNext()) {
@@ -724,7 +724,7 @@ public class XMLEmitter extends Emitter {
      */
 
     @Override
-    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         if (!started) {
             openDocument();
         }
@@ -792,7 +792,7 @@ public class XMLEmitter extends Emitter {
      */
 
     @Override
-    public void processingInstruction(String target, CodePoints data, Location locationId, int properties)
+    public void processingInstruction(String target, UnicodeString data, Location locationId, int properties)
             throws XPathException {
         if (!started) {
             openDocument();
@@ -944,7 +944,7 @@ public class XMLEmitter extends Emitter {
      */
 
     @Override
-    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
+    public void comment(UnicodeString chars, Location locationId, int properties) throws XPathException {
         if (!started) {
             openDocument();
         }

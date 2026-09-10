@@ -66,7 +66,7 @@ public final class ValueOf extends SimpleNodeConstructor {
         // escaped when the time comes for serialization
         if (select instanceof StringLiteral) {
             boolean special = false;
-            CodePoints val = ((StringLiteral) select).getString();
+            UnicodeString val = ((StringLiteral) select).getString();
             IntIterator iter = val.codePoints();
             while (iter.hasNext()) {
                 int c = iter.next();

@@ -88,9 +88,7 @@ public class Twine16 extends UnicodeString {
         int start32 = StringTool.requireInt(start);
         int end32 = StringTool.requireInt(end);
         int len = length32();
-        if (start < 0 || end < start || end > len) {
-            throw new IndexOutOfBoundsException();
-        }
+        checkSubstringBounds(start, end);
         if (end == start) {
             return EmptyUnicodeString.getInstance();
         } else if (start == 0 && end == len) {
@@ -124,7 +122,7 @@ public class Twine16 extends UnicodeString {
         if (codePoint < 0 || codePoint > 65535) {
             return -1;
         }
-        int from32 = requireInt(from);
+        int from32 = Math.max(requireInt(from), 0);
         int last = chars.length;
         for (int i = from32; i < last; i++) {
             if (chars[i] == codePoint) {
@@ -181,6 +179,19 @@ public class Twine16 extends UnicodeString {
     @Override
     public boolean isEmpty() {
         return chars.length == 0;
+    }
+
+    void copy16bit(char[] target, int offset) {
+        System.arraycopy(chars, 0, target, offset, chars.length);
+    }
+
+    void copy24bit(byte[] target, int offset) {
+        for (int i=0, j=offset; i<chars.length;) {
+            char c = chars[i++];
+            target[j++] = 0;
+            target[j++] = (byte) (c>>8);
+            target[j++] = (byte) (c&0xff);
+        }
     }
 
     @Override
@@ -250,7 +261,7 @@ public class Twine16 extends UnicodeString {
     }
 
     @Override
-    public int compareTo(CodePoints other) {
+    public int compareTo(UnicodeString other) {
         if (other instanceof Twine16) {
             // Java9: return Arrays.compare(chars, ((Twine16)other).chars);
             Twine16 o = (Twine16) other;
@@ -278,11 +289,6 @@ public class Twine16 extends UnicodeString {
         return new String(chars);
     }
 
-
-    @Override
-    public void supplyContent(LargeTextBuffer consumer, long start, long len) {
-        consumer.append16(chars, requireInt(start), requireInt(len));
-    }
 
     /**
      * Get the position of the first occurrence of the specified codepoint,
