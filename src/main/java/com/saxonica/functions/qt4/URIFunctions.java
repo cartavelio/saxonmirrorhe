@@ -14,13 +14,10 @@ import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
 
 import java.io.ByteArrayOutputStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Common declarations for BuildURI and ParseURI.
@@ -51,7 +48,7 @@ abstract public class URIFunctions extends SystemFunction {
     protected static final AtomicValue PATH = new StringValue("path");
     protected static final AtomicValue FILEPATH = new StringValue("filepath");
     protected static final AtomicValue PATH_SEGMENTS = new StringValue("path-segments");
-    protected static final AtomicValue QUERY_SEGMENTS = new StringValue("query-segments");
+    protected static final AtomicValue QUERY_PARAMETERS = new StringValue("query-parameters");
     protected static final AtomicValue QUERY = new StringValue("query");
     protected static final AtomicValue KEY = new StringValue("key");
     protected static final AtomicValue VALUE = new StringValue("value");

@@ -1,24 +1,24 @@
 package com.saxonica.functions.qt4;
 
-import net.sf.saxon.expr.DefaultedArgumentExpression;
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.ma.arrays.SimpleArrayItem;
-import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.HashTrieMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.StringValue;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * Supports the fn:build-uri function.
  * Supports the fn:build-uri function.
  */
 public class ParseURI extends URIFunctions {
@@ -164,20 +164,30 @@ public class ParseURI extends URIFunctions {
                 filepath = uristr;
             }
             map = map.addEntry(PATH, new StringValue(uristr));
-            final ArrayList<GroundedValue> pathSegments = new ArrayList<>();
+            GroundedValue pathSegments = null;
             // Can't use string split here because it collapses leading, trailing, and repeated delimiters
             pos = uristr.indexOf(pathSeparator);
             while (pos >= 0) {
                 String seg = decodeString(uristr.substring(0,pos));
-                if (pathSegments.size() == 0 && "tel".equals(scheme) && seg.startsWith(" ")) {
+                if (pathSegments == null && "tel".equals(scheme) && seg.startsWith(" ")) {
                     seg = "+" + seg.substring(1);
                 }
-                pathSegments.add(new StringValue(seg));
+
+                if (pathSegments == null) {
+                    pathSegments = new StringValue(seg);
+                } else {
+                    pathSegments = pathSegments.concatenate(new StringValue(seg));
+                }
+
                 uristr = uristr.substring(pos+pathSeparator.length());
                 pos = uristr.indexOf(pathSeparator);
             }
-            pathSegments.add(new StringValue(decodeString(uristr)));
-            map = map.addEntry(PATH_SEGMENTS, new SimpleArrayItem(pathSegments));
+            if (pathSegments == null) {
+                pathSegments = new StringValue(decodeString(uristr));
+            } else {
+                pathSegments = pathSegments.concatenate(new StringValue(decodeString(uristr)));
+            }
+            map = map.addEntry(PATH_SEGMENTS, pathSegments);
         }
 
         if (filepath != null) {
@@ -186,21 +196,41 @@ public class ParseURI extends URIFunctions {
         }
 
         if (query != null) {
-            final ArrayList<GroundedValue> querySegments = new ArrayList<>();
+            Map<String, List<String>> qparam = new HashMap<>();
             for (String str : query.split(querySeparator)) {
-                MapItem seg = new HashTrieMap();
                 pos = str.indexOf("=");
+                final String key;
+                final String value;
+
                 if (pos >= 0) {
-                    String key = str.substring(0, pos);
-                    String value = str.substring(pos+1);
-                    seg = seg.addEntry(KEY, new StringValue(decodeString(key)));
-                    seg = seg.addEntry(VALUE, new StringValue(decodeString(value)));
+                    key = decodeString(str.substring(0, pos));
+                    value = decodeString(str.substring(pos + 1));
                 } else {
-                    seg = seg.addEntry(VALUE, new StringValue(decodeString(str)));
+                    key = "";
+                    value = decodeString(str);
                 }
-                querySegments.add(seg);
+
+                if (!qparam.containsKey(key)) {
+                    qparam.put(key, new ArrayList<>());
+                }
+                qparam.get(key).add(value);
             }
-            map = map.addEntry(QUERY_SEGMENTS, new SimpleArrayItem(querySegments));
+
+            MapItem querySegments = new HashTrieMap();
+            for (String qkey : qparam.keySet()) {
+                AtomicValue key = new StringValue(qkey);
+                GroundedValue value = null;
+                for (String qvalue : qparam.get(qkey)) {
+                    if (value == null) {
+                        value = new StringValue(qvalue);
+                    } else {
+                        value = value.concatenate(new StringValue(qvalue));
+                    }
+                }
+                querySegments = querySegments.addEntry(key, value);
+            }
+
+            map = map.addEntry(QUERY_PARAMETERS, querySegments);
         }
 
         return map;

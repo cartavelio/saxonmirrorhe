@@ -1,15 +1,18 @@
 package com.saxonica.functions.qt4;
 
-import net.sf.saxon.expr.DefaultedArgumentExpression;
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.Literal;
+import com.ibm.icu.util.ValueIterator;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.ma.arrays.ArrayItem;
-import net.sf.saxon.ma.map.DictionaryMap;
+import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
+
+import java.util.ArrayList;
 
 /**
  * Supports the fn:build-uri function.
@@ -71,35 +74,49 @@ public class BuildURI extends URIFunctions {
         }
 
         if (parts.get(PATH_SEGMENTS) != null) {
-            ArrayItem value = (ArrayItem) parts.get(PATH_SEGMENTS);
-            uri.append(hierarchical ? encodePathSegment(value.get(0)) : value.get(0).getStringValue());
-            for (int pos = 1; pos < value.arrayLength(); pos++) {
-                uri.append(pathSeparator);
-                uri.append(encodePathSegment(value.get(pos)));
+            GroundedValue value = parts.get(PATH_SEGMENTS);
+            int pos = 0;
+            try (SequenceIterator iter = value.iterate()) {
+                GroundedValue svalue = iter.next();
+                while (svalue != null) {
+                    if (pos == 0) {
+                        uri.append(hierarchical ? encodePathSegment(svalue) : svalue.getStringValue());
+                    } else {
+                        uri.append(pathSeparator);
+                        uri.append(encodePathSegment(svalue));
+                    }
+                    pos = pos + 1;
+                    svalue = iter.next();
+                }
             }
-        } else if (parts.get(PATH) != null) {
+       } else if (parts.get(PATH) != null) {
             uri.append(parts.get(PATH).getStringValue());
         }
 
-        if (parts.get(QUERY_SEGMENTS) != null) {
+        if (parts.get(QUERY_PARAMETERS) != null) {
             String sep = "?";
-            ArrayItem value = (ArrayItem) parts.get(QUERY_SEGMENTS);
-            for (int pos = 0; pos < value.arrayLength(); pos++) {
-                MapItem param = (MapItem) value.get(pos);
-                if (param.get(KEY) != null || param.get(VALUE) != null) {
-                    uri.append(sep);
-                    sep = querySeparator;
-                    if (param.get(KEY) != null) {
-                        if (param.get(VALUE) != null) {
-                            uri.append(encodeOtherSegment(param.get(KEY)));
-                            uri.append("=");
-                            uri.append(encodeOtherSegment(param.get(VALUE)));
-                        } else {
-                            uri.append(encodeOtherSegment(param.get(KEY)));
+            MapItem qmap = (MapItem) parts.get(QUERY_PARAMETERS).head();
+            try (SequenceIterator kiter = qmap.keys()) {
+                GroundedValue kvalue = kiter.next();
+                while (kvalue != null) {
+                    String key = kvalue.getStringValue();
+                    GroundedValue vvalue = qmap.get((AtomicValue) kvalue);
+                    try (SequenceIterator viter = vvalue.iterate()) {
+                        GroundedValue value = viter.next();
+                        while (value != null) {
+                            uri.append(sep);
+                            sep = querySeparator;
+                            if (key.isEmpty()) {
+                                uri.append(encodeOtherSegment(value));
+                            } else {
+                                uri.append(encodeOtherSegment(kvalue));
+                                uri.append("=");
+                                uri.append(encodeOtherSegment(value));
+                            }
+                            value = viter.next();
                         }
-                    } else {
-                        uri.append(encodeOtherSegment(param.get(VALUE)));
                     }
+                    kvalue = kiter.next();
                 }
             }
         } else if (parts.get(QUERY) != null) {
