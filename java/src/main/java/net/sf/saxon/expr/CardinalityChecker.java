@@ -150,7 +150,7 @@ public final class CardinalityChecker extends UnaryExpression {
                 message = "An empty sequence is not allowed as the " + role.getMessage();
             } else {
                 message = "The " + role.getMessage() +
-                        " does not satisfy the cardinality constraints";
+                        " must contain " + Cardinality.describe(requiredCardinality) + " item(s)";
             }
             throw new XPathException(message)
                     .withErrorCode(role.getErrorCode())

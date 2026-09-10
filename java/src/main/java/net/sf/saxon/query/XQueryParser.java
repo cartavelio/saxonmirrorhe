@@ -17,6 +17,7 @@ import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
+import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.UnionQNameTest;
@@ -2519,20 +2520,102 @@ public class XQueryParser extends XPathParser {
             }
             clauseList.add(clause);
             nextToken();
+            readToken(Token.DOLLAR);
             if (first) {
                 first = false;
             } else {
                 //clause.offset = t.currentTokenStartOffset;
             }
 
-            StructuredQName varQName = readVariableName();
-            SequenceType type = readOptionalAsClause(SequenceType.ANY_SEQUENCE);
-            LocalVariableBinding v = new LocalVariableBinding(varQName, type);
+            StructuredQName var;
+            SequenceType requiredType;
+
+            List<StructuredQName> componentNames = new ArrayList<>(2);
+            List<SequenceType> componentTypes = new ArrayList<>(2);
+            String destructure = null;
+            if (allowXPath40Syntax && t.currentToken == Token.LPAREN) {
+                var = new StructuredQName("vv", NamespaceUri.SAXON_GENERATED_VARIABLE, "seq" + t.currentTokenStartOffset);
+                gatherComponents(componentNames, componentTypes, SequenceType.OPTIONAL_ITEM, Token.RPAREN);
+                destructure = "seq";
+            } else if (allowXPath40Syntax && t.currentToken == Token.LSQB) {
+                var = new StructuredQName("vv", NamespaceUri.SAXON_GENERATED_VARIABLE, "arr" + t.currentTokenStartOffset);
+                requiredType = ArrayItemType.SINGLE_ARRAY;
+                gatherComponents(componentNames, componentTypes, SequenceType.ANY_SEQUENCE, Token.RSQB);
+                destructure = "arr";
+            } else if (allowXPath40Syntax && t.currentToken == Token.LCURLY) {
+                var = new StructuredQName("vv", NamespaceUri.SAXON_GENERATED_VARIABLE, "map" + t.currentTokenStartOffset);
+                requiredType = SequenceType.SINGLE_MAP;
+                gatherComponents(componentNames, componentTypes, SequenceType.ANY_SEQUENCE, Token.RCURLY);
+                destructure = "map";
+            } else {
+                String name = readName();
+                var = makeStructuredQName(name, NamespaceUri.NULL);
+            }
+            requiredType = readOptionalAsClause(SequenceType.ANY_SEQUENCE);
+
+
+            LocalVariableBinding v = new LocalVariableBinding(var, requiredType);
 
             readToken(Token.COLON_EQUALS);
             clause.initSequence(flwor, parseExprSingle());
             clause.setRangeVariable(v);
             declareRangeVariable(v);
+
+            // For a destructuring assignment, declare the component variables
+
+            int clauses = 1;
+            if (destructure != null) {
+                switch (destructure) {
+                    case "seq":
+                        for (int c = 0; c < componentNames.size(); c++) {
+                            Expression componentValue = new SubscriptExpression(new LocalVariableReference(v),
+                                                                                Literal.makeLiteral(Int64Value.makeIntegerValue(c + 1)));
+                            LocalVariableBinding v2 = new LocalVariableBinding(componentNames.get(c), componentTypes.get(c));
+                            LetClause subclause = new LetClause();
+                            setLocation(subclause, t.currentTokenStartOffset);
+                            subclause.setRepeated(containsLoopingClause(clauseList));
+                            clauseList.add(subclause);
+                            subclause.initSequence(flwor, componentValue);
+                            subclause.setRangeVariable(v2);
+                            declareRangeVariable(v2);
+                        }
+                        break;
+                    case "arr":
+                        for (int c = 0; c < componentNames.size(); c++) {
+                            Expression componentValue = ArrayFunctionSet.getInstance(40).makeFunction("get", 3).makeFunctionCall(
+                                    new LocalVariableReference(v),
+                                    Literal.makeLiteral(Int64Value.makeIntegerValue(c + 1)),
+                                    Literal.makeEmptySequence());
+                            LocalVariableBinding v2 = new LocalVariableBinding(componentNames.get(c), componentTypes.get(c));
+                            LetClause subclause = new LetClause();
+                            setLocation(subclause, t.currentTokenStartOffset);
+                            subclause.setRepeated(containsLoopingClause(clauseList));
+                            clauseList.add(subclause);
+                            subclause.initSequence(flwor, componentValue);
+                            subclause.setRangeVariable(v2);
+                            declareRangeVariable(v2);
+                        }
+                        break;
+                    case "map":
+                        for (int c = 0; c < componentNames.size(); c++) {
+                            Expression componentValue = MapFunctionSet.getInstance(40).makeFunction("get", 2).makeFunctionCall(
+                                    new LocalVariableReference(v),
+                                    new StringLiteral(componentNames.get(c).getLocalPart()));
+                            LocalVariableBinding v2 = new LocalVariableBinding(componentNames.get(c), componentTypes.get(c));
+                            LetClause subclause = new LetClause();
+                            setLocation(subclause, t.currentTokenStartOffset);
+                            subclause.setRepeated(containsLoopingClause(clauseList));
+                            clauseList.add(subclause);
+                            subclause.initSequence(flwor, componentValue);
+                            subclause.setRangeVariable(v2);
+                            declareRangeVariable(v2);
+                        }
+                        break;
+                    default:
+                        throw new IllegalStateException();
+                }
+            }
+
         } while (t.currentToken == Token.COMMA);
     }
 

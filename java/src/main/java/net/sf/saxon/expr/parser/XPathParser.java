@@ -1556,6 +1556,24 @@ public class XPathParser {
         return makeTracer(result, result.getVariableQName());
     }
 
+    // Parse the component variable bindings of a 4.0 destructured assignment
+    protected void gatherComponents(List<StructuredQName> componentNames,
+                                  List<SequenceType> componentTypes,
+                                  SequenceType defaultType,
+                                  Token closingToken) throws XPathException {
+        nextToken();
+        while (true) {
+            componentNames.add(readVariableName());
+            componentTypes.add(readOptionalAsClause(defaultType));
+            if (t.currentToken == closingToken) {
+                nextToken();
+                return;
+            } else {
+                readToken(Token.COMMA);
+            }
+        }
+    }
+
     private Expression parseLetExpression() throws XPathException {
         int clauses = 0;
         int offset;
@@ -1564,9 +1582,33 @@ public class XPathParser {
         do {
             offset = t.currentTokenStartOffset;
             nextToken();
-            StructuredQName var = readVariableName();
-            
+
+            readToken(Token.DOLLAR);
+
+            StructuredQName var;
             SequenceType requiredType = SequenceType.ANY_SEQUENCE;
+
+            List<StructuredQName> componentNames = new ArrayList<>(2);
+            List<SequenceType> componentTypes = new ArrayList<>(2);
+            String destructure = null;
+            if (allowXPath40Syntax && t.currentToken == Token.LPAREN) {
+                var = new StructuredQName("vv", NamespaceUri.SAXON_GENERATED_VARIABLE, "seq" + offset);
+                gatherComponents(componentNames, componentTypes, SequenceType.OPTIONAL_ITEM, Token.RPAREN);
+                destructure = "seq";
+            } else if (allowXPath40Syntax && t.currentToken == Token.LSQB) {
+                var = new StructuredQName("vv", NamespaceUri.SAXON_GENERATED_VARIABLE, "arr" + offset);
+                requiredType = ArrayItemType.SINGLE_ARRAY;
+                gatherComponents(componentNames, componentTypes, SequenceType.ANY_SEQUENCE, Token.RSQB);
+                destructure = "arr";
+            } else if (allowXPath40Syntax && t.currentToken == Token.LCURLY) {
+                var = new StructuredQName("vv", NamespaceUri.SAXON_GENERATED_VARIABLE, "map" + offset);
+                requiredType = SequenceType.SINGLE_MAP;
+                gatherComponents(componentNames, componentTypes, SequenceType.ANY_SEQUENCE, Token.RCURLY);
+                destructure = "map";
+            } else {
+                String name = readName();
+                var = makeStructuredQName(name, NamespaceUri.NULL);
+            }
             if (allowXPath40Syntax) {
                 requiredType = readOptionalAsClause(SequenceType.ANY_SEQUENCE);
             }
@@ -1594,6 +1636,60 @@ public class XPathParser {
                 previous.setAction(firstClause);
             }
             previous = lastClause;
+
+            // For a destructuring assignment, declare the component variables
+
+            if (destructure != null) {
+                switch (destructure) {
+                    case "seq":
+                        for (int c = 0; c < componentNames.size(); c++) {
+                            Expression componentValue = new SubscriptExpression(new LocalVariableReference(lastClause),
+                                                                                Literal.makeLiteral(Int64Value.makeIntegerValue(c + 1)));
+                            LetExpression componentBinding = new LetExpression();
+                            componentBinding.setVariableQName(componentNames.get(c));
+                            componentBinding.setRequiredType(componentTypes.get(c));
+                            componentBinding.setSequence(componentValue);
+                            declareRangeVariable(componentBinding);
+                            clauses++;
+                            previous.setAction(componentBinding);
+                            previous = componentBinding;
+                        }
+                        break;
+                    case "arr":
+                        for (int c = 0; c < componentNames.size(); c++) {
+                            Expression componentValue = ArrayFunctionSet.getInstance(40).makeFunction("get", 3).makeFunctionCall(
+                                    new LocalVariableReference(lastClause),
+                                    Literal.makeLiteral(Int64Value.makeIntegerValue(c + 1)),
+                                    Literal.makeEmptySequence());
+                            LetExpression componentBinding = new LetExpression();
+                            componentBinding.setVariableQName(componentNames.get(c));
+                            componentBinding.setRequiredType(componentTypes.get(c));
+                            componentBinding.setSequence(componentValue);
+                            declareRangeVariable(componentBinding);
+                            clauses++;
+                            previous.setAction(componentBinding);
+                            previous = componentBinding;
+                        }
+                        break;
+                    case "map":
+                        for (int c = 0; c < componentNames.size(); c++) {
+                            Expression componentValue = MapFunctionSet.getInstance(40).makeFunction("get", 2).makeFunctionCall(
+                                    new LocalVariableReference(lastClause),
+                                    new StringLiteral(componentNames.get(c).getLocalPart()));
+                            LetExpression componentBinding = new LetExpression();
+                            componentBinding.setVariableQName(componentNames.get(c));
+                            componentBinding.setRequiredType(componentTypes.get(c));
+                            componentBinding.setSequence(componentValue);
+                            declareRangeVariable(componentBinding);
+                            clauses++;
+                            previous.setAction(componentBinding);
+                            previous = componentBinding;
+                        }
+                        break;
+                    default:
+                        throw new IllegalStateException();
+                }
+            }
         } while (t.currentToken == Token.COMMA || (allowXPath40Syntax && isKeyword("let")));
 
         // process the "return" expression (called the "action") - or in 4.0 a FOR expression
