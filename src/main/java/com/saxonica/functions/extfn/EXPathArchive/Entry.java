@@ -1,8 +1,5 @@
 package com.saxonica.functions.extfn.EXPathArchive;
 
-import net.sf.saxon.ma.map.HashTrieMap;
-import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Base64BinaryValue;
 
 
@@ -76,14 +73,7 @@ public class Entry {
         return name != null && name.endsWith("/");
     }
 
-    public HashTrieMap makeMap(XPathContext context) throws XPathException {
-        HashTrieMap map = new HashTrieMap();
-        map = Archive.add(map, "name", name);
-        if (content != null) {
-            map = Archive.add(map, "content", content);
-        }
-        return map;
-    }
+
 }
 
 // Copyright (c) 2018-2023 Saxonica Limited

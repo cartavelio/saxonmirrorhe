@@ -636,11 +636,11 @@ public class ElementsToMaps extends SystemFunction {
     private MapItem makeListPlusElementContent(NodeInfo element,
                                            ConversionContext cc,
                                            int childFingerprint) throws XPathException {
-        MapItem innerMap = new HashTrieMap();
+        StringMapBuilder innerMap = new StringMapBuilder();
         AxisIterator atts = element.iterateAxis(AxisInfo.ATTRIBUTE);
         for (NodeInfo att; (att = atts.next()) != null; ) {
             if (att.getNamespaceUri() != NamespaceUri.SCHEMA_INSTANCE) {
-                innerMap = innerMap.put(new StringValue(cc.makeName(att)), cc.makeSimpleContent(att));
+                innerMap.put(StringView.of(cc.makeName(att)), cc.makeSimpleContent(att));
             }
         }
         if (element.isNilled()) {
@@ -648,10 +648,10 @@ public class ElementsToMaps extends SystemFunction {
         }
         cc.elementNameStack.push(element.getQName());
         List<GroundedValue> list = new ArrayList<>();
-        StringValue innerKey = null;
+        String innerKey = null;
         for (NodeInfo child : element.children(NodeKindTest.ELEMENT)) {
             if (innerKey == null) {
-                innerKey = new StringValue(cc.makeName(child));
+                innerKey = cc.makeName(child);
             }
             MapItem item = processElement(child, cc);
             for (KeyValuePair pair : item.keyValuePairs()) {
@@ -660,15 +660,15 @@ public class ElementsToMaps extends SystemFunction {
             }
         }
         if (innerKey != null) {
-            innerMap = innerMap.put(innerKey, new SimpleArrayItem(list));
+            innerMap.put(StringView.of(innerKey), new SimpleArrayItem(list));
         } else if (childFingerprint > 0) {
             Orphan e = new Orphan(cc.config);
             e.setNodeKind(Type.ELEMENT);
             e.setNodeName(new FingerprintedQName(cc.config.getNamePool().getStructuredQName(childFingerprint)));
-            innerMap = innerMap.put(new StringValue(cc.makeName(e)), SimpleArrayItem.EMPTY_ARRAY);
+            innerMap.put(StringView.of(cc.makeName(e)), SimpleArrayItem.EMPTY_ARRAY);
         }
         cc.elementNameStack.pop();
-        return new SingleEntryMap(new StringValue(cc.makeName(element)), innerMap);
+        return new SingleEntryMap(new StringValue(cc.makeName(element)), innerMap.getCompletedMapConfidently());
     }
 
     /**
@@ -683,41 +683,36 @@ public class ElementsToMaps extends SystemFunction {
      */
     private MapItem makeRecordElementContent(NodeInfo element, ConversionContext cc) throws XPathException {
         cc.elementNameStack.push(element.getQName());
-        MapItem innerMap = new HashTrieMap();
+        StringMapBuilder innerMap = new StringMapBuilder();
+        innerMap.setCombiner((a, b) -> {
+            if (a instanceof ArrayItem) {
+                return ((ArrayItem) a).append(b);
+            } else {
+                return SimpleArrayItem.of(a, b);
+            }
+        });
         AxisIterator atts = element.iterateAxis(AxisInfo.ATTRIBUTE);
         for (NodeInfo att; (att = atts.next()) != null; ) {
             if (att.getNamespaceUri() != NamespaceUri.SCHEMA_INSTANCE) {
-                innerMap = addCombiningDuplicates(innerMap, new StringValue(cc.makeName(att)), cc.makeSimpleContent(att));
+                innerMap.put(StringView.of(cc.makeName(att)), cc.makeSimpleContent(att));
             }
         }
         if (element.isNilled()) {
-            innerMap = innerMap.put(new StringValue("#content"), EmptySequence.getInstance());
+            innerMap.put(new Twine8("#content"), EmptySequence.getInstance());
         } else {
             for (NodeInfo child : element.children()) {
                 if (child.getNodeKind() == Type.ELEMENT) {
                     MapItem entry = processElement(child, cc);
                     assert entry != null;
                     for (KeyValuePair pair : entry.keyValuePairs()) {
-                        innerMap = addCombiningDuplicates(innerMap, pair.key, pair.value);
+                        innerMap.put(pair.key.getUnicodeStringValue(), pair.value);
                     }
                 }
             }
         }
         cc.elementNameStack.pop();
-        return new SingleEntryMap(new StringValue(cc.makeName(element)), innerMap);
-    }
-
-    private MapItem addCombiningDuplicates(MapItem map, AtomicValue key, GroundedValue value) {
-        GroundedValue existing = map.get(key);
-        if (existing == null) {
-            return map.put(key, value);
-        } else if (existing instanceof ArrayItem) {
-            ArrayItem extended = ((ArrayItem)existing).append(value);
-            return map.put(key, extended);
-        } else {
-            ArrayItem extended = SimpleArrayItem.of(existing, value);
-            return map.put(key, extended);
-        }
+        return new SingleEntryMap(new StringValue(cc.makeName(element)),
+                                  innerMap.getCompletedMapConfidently());
     }
 
     private MapItem makeSequenceElementContent(NodeInfo element, ConversionContext cc) throws XPathException {

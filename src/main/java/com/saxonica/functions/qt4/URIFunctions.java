@@ -10,7 +10,6 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
 
 import java.util.*;
@@ -30,25 +29,25 @@ abstract public class URIFunctions extends SystemFunction {
         defaultPorts.put("ftp", "21");
     }
 
-    protected static final AtomicValue URI = new StringValue("uri");
-    protected static final AtomicValue ALLOW_DEPRECATED_FEATURES = new StringValue("allow-deprecated-features");
-    protected static final AtomicValue OMIT_DEFAULT_PORTS = new StringValue("omit-default-ports");
-    protected static final AtomicValue UNC_PATH = new StringValue("unc-path");
-    protected static final AtomicValue SCHEME = new StringValue("scheme");
-    protected static final AtomicValue AUTHORITY = new StringValue("authority");
-    protected static final AtomicValue USERINFO = new StringValue("userinfo");
-    protected static final AtomicValue HOST = new StringValue("host");
-    protected static final AtomicValue PORT = new StringValue("port");
-    protected static final AtomicValue PATH = new StringValue("path");
-    protected static final AtomicValue FILEPATH = new StringValue("filepath");
-    protected static final AtomicValue PATH_SEGMENTS = new StringValue("path-segments");
-    protected static final AtomicValue QUERY_PARAMETERS = new StringValue("query-parameters");
-    protected static final AtomicValue QUERY = new StringValue("query");
-    protected static final AtomicValue KEY = new StringValue("key");
-    protected static final AtomicValue VALUE = new StringValue("value");
-    protected static final AtomicValue FRAGMENT = new StringValue("fragment");
-    protected static final AtomicValue HIERARCHICAL = new StringValue("hierarchical");
-    protected static final AtomicValue ABSOLUTE = new StringValue("absolute");
+    protected static final StringValue URI = new StringValue("uri");
+    protected static final StringValue ALLOW_DEPRECATED_FEATURES = new StringValue("allow-deprecated-features");
+    protected static final StringValue OMIT_DEFAULT_PORTS = new StringValue("omit-default-ports");
+    protected static final StringValue UNC_PATH = new StringValue("unc-path");
+    protected static final StringValue SCHEME = new StringValue("scheme");
+    protected static final StringValue AUTHORITY = new StringValue("authority");
+    protected static final StringValue USERINFO = new StringValue("userinfo");
+    protected static final StringValue HOST = new StringValue("host");
+    protected static final StringValue PORT = new StringValue("port");
+    protected static final StringValue PATH = new StringValue("path");
+    protected static final StringValue FILEPATH = new StringValue("filepath");
+    protected static final StringValue PATH_SEGMENTS = new StringValue("path-segments");
+    protected static final StringValue QUERY_PARAMETERS = new StringValue("query-parameters");
+    protected static final StringValue QUERY = new StringValue("query");
+    protected static final StringValue KEY = new StringValue("key");
+    protected static final StringValue VALUE = new StringValue("value");
+    protected static final StringValue FRAGMENT = new StringValue("fragment");
+    protected static final StringValue HIERARCHICAL = new StringValue("hierarchical");
+    protected static final StringValue ABSOLUTE = new StringValue("absolute");
 
     protected static final Set<Character> escapedPathCharacters;
     static {

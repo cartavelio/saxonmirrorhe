@@ -1,11 +1,13 @@
 package com.saxonica.functions.qt4;
 
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.ma.map.HashTrieMap;
-import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.StringMapBuilder;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.str.EmptyUnicodeString;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.EmptySequence;
@@ -25,9 +27,9 @@ public class ParseURI extends URIFunctions {
             return EmptySequence.getInstance();
         }
         String uristr = arg0.getStringValue();
-        MapItem map = new HashTrieMap();
+        StringMapBuilder builder = new StringMapBuilder().unordered();
 
-        map = map.put(URI, new StringValue(uristr));
+        builder.put(URI.getUnicodeStringValue(), new StringValue(uristr));
         uristr = uristr.replaceAll("\\\\", "/");
 
         try {
@@ -41,7 +43,7 @@ public class ParseURI extends URIFunctions {
         if (pos >= 0) {
             fragid = DecodeFromURI.decode(uristr.substring(pos + 1));
             if (!fragid.trim().isEmpty()) {
-                map = map.put(FRAGMENT, new StringValue(fragid));
+                builder.put(FRAGMENT.getUnicodeStringValue(), new StringValue(fragid));
             }
             uristr = uristr.substring(0, pos);
         } else {
@@ -56,7 +58,7 @@ public class ParseURI extends URIFunctions {
                 query = null;
             } else {
                 query = querystr;
-                map = map.put(QUERY, new StringValue(query));
+                builder.put(QUERY.getUnicodeStringValue(), new StringValue(query));
             }
             uristr = uristr.substring(0, pos);
         } else {
@@ -88,19 +90,19 @@ public class ParseURI extends URIFunctions {
         }
 
         if (scheme != null) {
-            map = map.put(SCHEME, new StringValue(scheme));
+            builder.put(SCHEME.getUnicodeStringValue(), new StringValue(scheme));
         }
 
         if (scheme != null && hierarchicalSchemes.contains(scheme)) {
             hierarchical = true;
-            map = map.put(HIERARCHICAL, BooleanValue.get(hierarchical));
+            builder.put(HIERARCHICAL.getUnicodeStringValue(), BooleanValue.get(hierarchical));
         } else if (scheme != null && nonHierarchicalSchemes.contains(scheme)) {
             hierarchical = false;
-            map = map.put(HIERARCHICAL, BooleanValue.get(hierarchical));
+            builder.put(HIERARCHICAL.getUnicodeStringValue(), BooleanValue.get(hierarchical));
         } else {
             hierarchical = uristr.startsWith("/");
             if (!uristr.isEmpty()) {
-                map = map.put(HIERARCHICAL, BooleanValue.get(hierarchical));
+                builder.put(HIERARCHICAL.getUnicodeStringValue(), BooleanValue.get(hierarchical));
             }
         }
 
@@ -109,7 +111,7 @@ public class ParseURI extends URIFunctions {
         }
 
         if (absolute) {
-            map = map.put(ABSOLUTE, BooleanValue.get(absolute));
+            builder.put(ABSOLUTE.getUnicodeStringValue(), BooleanValue.get(absolute));
         }
 
         String filepath = null;
@@ -154,7 +156,7 @@ public class ParseURI extends URIFunctions {
         }
 
         if (authority != null) {
-            map = map.put(AUTHORITY, new StringValue(authority));
+            builder.put(AUTHORITY.getUnicodeStringValue(), new StringValue(authority));
         }
 
         String port = null;
@@ -169,13 +171,13 @@ public class ParseURI extends URIFunctions {
             }
 
             if (userinfo != null) {
-                map = map.put(USERINFO, new StringValue(userinfo));
+                builder.put(USERINFO.getUnicodeStringValue(), new StringValue(userinfo));
             }
 
             pattern = Pattern.compile("^([^@]*@)?(\\[[^]]*])(:([^:]*))?$");
             matcher = pattern.matcher(authority);
             if (matcher.find()) {
-                map = map.put(HOST, new StringValue(matcher.group(2)));
+                builder.put(HOST.getUnicodeStringValue(), new StringValue(matcher.group(2)));
                 port = "".equals(matcher.group(4)) ? null : matcher.group(4);
             } else {
                 pattern = Pattern.compile("^([^@]*@)?\\[.*$");
@@ -186,7 +188,7 @@ public class ParseURI extends URIFunctions {
                     pattern = Pattern.compile("^([^@]*@)?([^:]+)(:([^:]*))?$");
                     matcher = pattern.matcher(authority);
                     if (matcher.find()) {
-                        map = map.put(HOST, new StringValue(matcher.group(2)));
+                        builder.put(HOST.getUnicodeStringValue(), new StringValue(matcher.group(2)));
                         port = "".equals(matcher.group(4)) ? null : matcher.group(4);
                     }
                 }
@@ -198,14 +200,14 @@ public class ParseURI extends URIFunctions {
         }
 
         if (port != null) {
-            map = map.put(PORT, new StringValue(port));
+            builder.put(PORT.getUnicodeStringValue(), new StringValue(port));
         }
 
         if (!"".equals(uristr)) {
             if (filepath == null && (scheme == null || "file".equals(scheme))) {
                 filepath = uristr;
             }
-            map = map.put(PATH, new StringValue(uristr));
+            builder.put(PATH.getUnicodeStringValue(), new StringValue(uristr));
             GroundedValue pathSegments = EmptySequence.getInstance();
             // Can't use string split here because it collapses leading, trailing, and repeated delimiters
             pos = uristr.indexOf("/");
@@ -219,40 +221,34 @@ public class ParseURI extends URIFunctions {
                 pos = uristr.indexOf("/");
             }
             pathSegments = pathSegments.concatenate(new StringValue(DecodeFromURI.decode(uristr)));
-            map = map.put(PATH_SEGMENTS, pathSegments);
+            builder.put(PATH_SEGMENTS.getUnicodeStringValue(), pathSegments);
         }
 
         if (filepath != null) {
-             String decoded = DecodeFromURI.decode(filepath);
-            map = map.put(FILEPATH, new StringValue(decoded));
+            String decoded = DecodeFromURI.decode(filepath);
+            builder.put(FILEPATH.getUnicodeStringValue(), new StringValue(decoded));
         }
 
         if (query != null) {
-            HashTrieMap querySegments = new HashTrieMap();
+            StringMapBuilder querySegments = new StringMapBuilder();
+            querySegments.setCombiner(GroundedValue::concatenate);
             for (String str : query.split("&")) {
                 pos = str.indexOf("=");
-                final StringValue key;
+                final UnicodeString key;
                 final StringValue value;
                 if (pos >= 0) {
-                    key = new StringValue(DecodeFromURI.decode(str.substring(0, pos)));
+                    key = StringView.of(DecodeFromURI.decode(str.substring(0, pos)));
                     value = new StringValue(DecodeFromURI.decode(str.substring(pos+1)));
                 } else {
-                    key = new StringValue("");
+                    key = EmptyUnicodeString.getInstance();
                     value = new StringValue(DecodeFromURI.decode(str));
                 }
-
-                GroundedValue currentValue = querySegments.get(key);
-                if (currentValue == null) {
-                    // Cast needed for transpiled C#
-                    querySegments = (HashTrieMap) querySegments.put(key, value);
-                } else {
-                    querySegments = (HashTrieMap) querySegments.put(key, currentValue.concatenate(value));
-                }
+                querySegments.put(key, value);
             }
-            map = map.put(QUERY_PARAMETERS, querySegments);
+            builder.put(QUERY_PARAMETERS.getUnicodeStringValue(), querySegments.getCompletedMap());
         }
 
-        return map;
+        return builder.getCompletedMapConfidently();
     }
 }
 

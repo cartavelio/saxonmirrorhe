@@ -139,7 +139,7 @@ public class NewMapStreamer extends StreamingAdjunct implements FeedMaker {
         @Override
         public void open(Terminator terminator) throws XPathException {
             super.open(terminator);
-            resultMap = new HashTrieMap();
+            resultMap = EmptyMap.getInstance();
             final Operand[] actions = streamer.getChildren();
             for (int i = 0; i < actions.length; i++) {
                 Expression action = actions[i].getChildExpression();

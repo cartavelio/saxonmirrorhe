@@ -4,12 +4,12 @@ import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.ma.map.HashTrieMap;
-import net.sf.saxon.ma.map.KeyValuePair;
-import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.QName;
 import net.sf.saxon.sapling.SaplingElement;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.Twine8;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -23,7 +23,10 @@ import java.math.BigDecimal;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.nio.charset.*;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CoderResult;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -346,23 +349,23 @@ public class Archive {
         return CompressionType.UNKNOWN;
     }
 
-    /* Helper functions to add to immutable maps */
-    private static HashTrieMap add(HashTrieMap map, String key, HashTrieMap val) {
-        return map.put(new StringValue(key), val);
-    }
-
-    /* the following can be used externally */
-    public static HashTrieMap add(HashTrieMap map, String key, AtomicValue val) throws XPathException {
-        return map.put(new StringValue(key), val);
-    }
-
-    public static HashTrieMap add(HashTrieMap map, String key, String val) throws XPathException {
-        return add(map, key, new StringValue(val));
-    }
-
-    public static HashTrieMap add(HashTrieMap map, String key, long val) throws XPathException {
-        return add(map, key, new Int64Value(val));
-    }
+//    /* Helper functions to add to immutable maps */
+//    private static DictionaryMap add(DictionaryMap map, String key, HashTrieMap val) {
+//        return map.put(StringView.of(key), val);
+//    }
+//
+//    /* the following can be used externally */
+//    public static HashTrieMap add(HashTrieMap map, String key, AtomicValue val) throws XPathException {
+//        return map.put(new StringValue(key), val);
+//    }
+//
+//    public static HashTrieMap add(HashTrieMap map, String key, String val) throws XPathException {
+//        return add(map, key, new StringValue(val));
+//    }
+//
+//    public static HashTrieMap add(HashTrieMap map, String key, long val) throws XPathException {
+//        return add(map, key, new Int64Value(val));
+//    }
 
     // Returns entries in archive order
     private static ArrayList<ZipEntry> getEntries(ZipInputStream in) throws IOException {
@@ -439,7 +442,6 @@ public class Archive {
     // archM:entries($in as xs:base64Binary, $return-content as xs:boolean) as map(xs:string, map(xs:string,item()))
     public static MapItem entriesMap(XPathContext context, Base64BinaryValue in, BooleanValue returnContent)
             throws IOException, XPathException {
-        HashTrieMap result = new HashTrieMap();
         ZipInputStream zi = new ZipInputStream(new ByteArrayInputStream(
                 in.getBinaryValue()));
         byte[] buffer = new byte[4096];
@@ -447,44 +449,45 @@ public class Archive {
         ZipEntry next;
         long val;
         int position = 1;
+        StringMapBuilder outerBuilder = new StringMapBuilder();
         while ((next = zi.getNextEntry()) != null) {
-
-            HashTrieMap properties = new HashTrieMap();
-            properties = add(properties, "position", position++);
+            StringMapBuilder innerBuilder = new StringMapBuilder();
+            innerBuilder.put(new Twine8("position"), new Int64Value(position++));
             if ((val = next.getSize()) != -1) {
-                properties = add(properties, "size", val);
+                innerBuilder.put(new Twine8("size"), new Int64Value(val));
             }
             if ((val = next.getCompressedSize()) != -1) {
-                properties = add(properties, "compressed-size", val);
+                innerBuilder.put(new Twine8("compressed-size"), new Int64Value(val));
             }
             if ((val = next.getTime()) != -1) {
-                properties = add(properties, "last-modified", DateTimeValue.fromJavaTime(val)
-                        .getStringValue());
+                innerBuilder.put(new Twine8("last-modified"), DateTimeValue.fromJavaTime(val));
             }
-            properties = add(properties, "compression", compressionTypes.get(zipCompressions(next.getMethod())));
+            innerBuilder.put(new Twine8("compression"),
+                        new StringValue(compressionTypes.get(zipCompressions(next.getMethod()))));
             if (returnContent.getBooleanValue()) {
                 int len;
                 while ((len = zi.read(buffer)) > 0) {
                     output.write(buffer, 0, len);
                 }
-                properties = add(properties, "content", new Base64BinaryValue(
-                        output.toByteArray()));
+                innerBuilder.put(new Twine8("content"), new Base64BinaryValue(output.toByteArray()));
                 output.reset();
             }
-            result = add(result, next.getName(), properties);
+            outerBuilder.put(StringView.of(next.getName()), innerBuilder.getCompletedMapConfidently());
             zi.closeEntry();
         }
         zi.close();
-        return result;
+        return outerBuilder.getCompletedMap();
     }
 
     // archM:options($in as xs:base64Binary) as map(xs:string,item())
     public static MapItem optionsMap(XPathContext context, Base64BinaryValue in)
             throws IOException, XPathException {
-        HashTrieMap result = new HashTrieMap();
-        result = add(result, "format", archiveTypes.get(archiveType(in)));
-        result = add(result, "compression", compressionTypes.get(compressionMethods(in)));
-        return result;
+        StringMapBuilder builder = new StringMapBuilder(2).unordered();
+        builder.put(new Twine8("format"),
+                    new StringValue(archiveTypes.get(archiveType(in))));
+        builder.put(new Twine8("compression"),
+                    new StringValue(compressionTypes.get(compressionMethods(in))));
+        return builder.getCompletedMapConfidently();
     }
 
     // arch:options($in as xs:base64Binary) as element(arch:options)*

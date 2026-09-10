@@ -12,7 +12,7 @@ import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.functions.DeepEqual;
-import net.sf.saxon.ma.map.HashTrieMap;
+import net.sf.saxon.ma.map.EmptyMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.SingleEntryMap;
 import net.sf.saxon.om.Item;
@@ -123,7 +123,7 @@ public class DeepEqualStreamer extends StreamingAdjunct implements FeedMaker {
             }
             if (options == null) {
                 try {
-                    options = new DeepEqual.DeepEqualOptions(new HashTrieMap(), context, 31);
+                    options = new DeepEqual.DeepEqualOptions(EmptyMap.getInstance(), context, 31);
                 } catch (XPathException e2) {
                     dynamicError(e2);
                 }
