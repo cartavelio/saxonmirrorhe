@@ -25,9 +25,9 @@ import java.util.function.BiFunction;
 
 public class ARegularExpression implements RegularExpression {
 
-    UnicodeString rawPattern;
-    String rawFlags;
-    REProgram regex;
+    private final UnicodeString rawPattern;
+    private final String rawFlags;
+    private final REProgram regex;
 
     /**
      * Create and compile a regular expression

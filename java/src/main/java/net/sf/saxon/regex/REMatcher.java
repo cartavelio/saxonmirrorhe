@@ -602,7 +602,7 @@ public class REMatcher {
         int len = in.length32();
 
         // Try a match at each position
-        while (pos < len && match(in, pos)) {
+        while (pos <= len && match(in, pos)) {
             // Append chars from input string before match
             for (long i = pos; i < getParenStart(0); i++) {
                 sb.append(in.codePointAt(i));
