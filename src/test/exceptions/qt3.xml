@@ -4,34 +4,45 @@
   
 
   
-  <exception test-set="misc-UCACollation" test-case="UCA-reorder-codes-009" run="false" report="known bug in ICU">
+  <exception test-set="misc-UCACollation" test-case="UCA-reorder-codes-009" run="false" report="notRun">
     <created by="Michael Kay" on="2018-02-01"/>
     <reason>Known bug in ICU</reason>
   </exception>
   
-  <exception test-set="misc-UCACollation" test-case="UCA-reorder-codes-010" run="false" report="known bug in ICU">
+  <exception test-set="misc-UCACollation" test-case="UCA-reorder-codes-010" run="false" report="notRun">
     <created by="Michael Kay" on="2018-02-01"/>
     <reason>Known bug in ICU</reason>
   </exception>
   
-  <exception test-set="fn-string-join" test-case="fn-string-join-27" run="false" report="known restriction">
+  <exception test-set="fn-string-join" test-case="fn-string-join-27" run="false" report="n/a">
     <created by="Michael Kay" on="2019-03-11"/>
     <reason>Pre-3.1 semantics of fn:string-join no longer supported</reason>
   </exception>
   
-  <exception test-set="prod-CastExpr" test-case="K-SeqExprCast-71a" run="false" report="known restriction">
+  <exception test-set="prod-CastExpr" test-case="K-SeqExprCast-71a" run="false" report="n/a">
     <created by="Michael Kay" on="2019-03-11"/>
     <reason>Pre-3.1 rules for casting to QName no longer supported</reason>
   </exception>
   
-  <exception test-set="prod-CastableExpr" test-case="CastableAs648" run="false" report="known restriction">
+  <exception test-set="prod-CastableExpr" test-case="CastableAs648" run="false" report="n/a">
     <created by="Michael Kay" on="2019-03-11"/>
     <reason>Pre-3.1 rules for casting to QName no longer supported</reason>
   </exception>
   
-  <exception test-set="prod-FunctionCall" test-case="K-FunctionCallExpr-15" run="false" report="known restriction">
+  <exception test-set="prod-FunctionCall" test-case="K-FunctionCallExpr-15" run="false" report="n/a">
     <created by="Michael Kay" on="2019-03-11"/>
     <reason>format-number() is allowed under XPath 2.0 though it should not be</reason>
+  </exception>
+  
+  <exception test-set="app-spec-examples" test-case="
+    fo-test-fn-id-001
+    fo-test-fn-id-002
+    fo-test-fn-element-with-id-001
+    fo-test-fn-element-with-id-002
+    fo-test-fn-idref-001
+    fo-test-fn-idref-002" run="false" edition="HE PE" report="n/a">
+    <created by="Michael Kay" on="2023-02-02"/>
+    <reason>(Generated) Tests use a validate expression but are not tagged as schema-aware.</reason>
   </exception>
   
  
