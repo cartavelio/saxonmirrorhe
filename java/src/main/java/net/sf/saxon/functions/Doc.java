@@ -191,6 +191,10 @@ public class Doc extends SystemFunction implements Callable {
             parseOptions = parseOptions.withSchema(packageData.getImportedSchema(""));
         }
 
+        if (getRetainedStaticContext().getPackageData().getHostLanguageVersion() < 40) {
+            parseOptions = parseOptions.withTrusted(true);
+        }
+
         NodeInfo item = DocumentFn.makeDoc(href, getRetainedStaticContext().getStaticBaseUriString(), packageData, parseOptions, context, null, false);
         if (item == null) {
             // we failed to read the document
