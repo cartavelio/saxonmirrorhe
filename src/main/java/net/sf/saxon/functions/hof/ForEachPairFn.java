@@ -52,7 +52,7 @@ public class ForEachPairFn extends SystemFunction {
                                           SequenceIterator seq0,
                                           SequenceIterator seq1,
                                           final XPathContext context) {
-        PairedSequenceIterator triples = new PairedSequenceIterator(seq0, seq1);
+        PairedSequenceIterator triples = new PairedSequenceIterator(seq0, seq1, function.getArity());
         return MappingIterator.map(triples, item -> {
             Sequence[] triple = ((ObjectValue<Sequence[]>) item).getObject();
             return dynamicCall(function, context, triple).iterate();
@@ -68,30 +68,40 @@ public class ForEachPairFn extends SystemFunction {
 
         private final SequenceIterator seq0;
         private final SequenceIterator seq1;
-        private final Sequence[] args = new Sequence[3];
+        private final Sequence[] args;
         int position = 0;
+        int arity;
 
         public PairedSequenceIterator(SequenceIterator seq0,
-                                      SequenceIterator seq1) {
+                                      SequenceIterator seq1,
+                                      int arity) {
             this.seq0 = seq0;
             this.seq1 = seq1;
+            this.args = new Sequence[arity];
+            this.arity = arity;
         }
 
         @Override
         public ObjectValue<Sequence[]> next() {
-            Item i0 = seq0.next();
-            if (i0 == null) {
-                close();
-                return null;
+            if (arity > 0) {
+                Item i0 = seq0.next();
+                if (i0 == null) {
+                    close();
+                    return null;
+                }
+                args[0] = i0;
             }
-            Item i1 = seq1.next();
-            if (i1 == null) {
-                close();
-                return null;
+            if (arity > 1) {
+                Item i1 = seq1.next();
+                if (i1 == null) {
+                    close();
+                    return null;
+                }
+                args[1] = i1;
             }
-            args[0] = i0;
-            args[1] = i1;
-            args[2] = new Int64Value(++position);
+            if (arity > 2) {
+                args[2] = new Int64Value(++position);
+            }
             return new ObjectValue<>(args);
         }
 
