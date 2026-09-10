@@ -142,7 +142,7 @@ def process_catalog(path: pathlib.Path, catalogi: pathlib.Path):
             '''write resultpostamble'''
             if results_path is None:
                 results_path = path
-                test_report.write_result_file_postamble(driver_proc, results_path)
+            test_report.write_result_file_postamble(driver_proc, results_path)
         else:
             print(f'Failed to open {catalogi}')
 
