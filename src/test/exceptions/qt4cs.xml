@@ -145,6 +145,24 @@
       <created by="Michael Kay" on="2023-11-18"/>
       <reason>Not yet implemented</reason>
    </exception>
+   
+   <exception test-set="prod-ContextValueDecl"  run="false" report="n/a">
+      <created by="Michael Kay" on="2023-11-20"/>
+      <reason>Context value declaration not yet implemented</reason>
+   </exception>
+   
+   <exception test-set="prod-VersionDecl" test-case="version_declaration-015
+      version_declaration-016" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-11-20"/>
+      <reason>Leading zeroes in version numbers not yet implemented</reason>
+   </exception>
+   
+
+   
+   <exception test-set="prod-DefaultNamespaceDecl" test-case="default-namespace-40-01" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-11-20"/>
+      <reason>Fixed default namespace declaration not yet implemented</reason>
+   </exception>
 
    
    <exception test-set="op-to" test-case="RangeExpr-408f
@@ -262,6 +280,16 @@
       " run="false" report="n/a">
       <created by="Michael Kay" on="2023-02-28"/>
       <reason>Third argument as xs:QName not yet implemented</reason>
+   </exception>
+   
+   <exception test-set="fn-message" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-28"/>
+      <reason>Function fn:message not yet implemented</reason>
+   </exception>
+   
+   <exception test-set="fn-function-annotations" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-28"/>
+      <reason>Function fn:function-annotations not yet implemented</reason>
    </exception>
    
    <exception test-set="prod-ForClause.member" test-case="for-member-032" run="false" report="n/a">
