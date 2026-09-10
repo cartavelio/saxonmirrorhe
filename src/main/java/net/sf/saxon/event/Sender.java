@@ -171,6 +171,9 @@ public abstract class Sender {
 //#if EE==true
             // Add a document validator to the pipeline
             Schema schema = options.getSchema();
+            if (schema == null && sv == Validation.STRICT) {
+                throw new XPathException("Cannot perform strict schema validation; no schema supplied");
+            }
             if (schema != null && !(receiver instanceof DocumentValidator)) {
                 receiver = schema.getDocumentValidator(receiver, systemId, options, null);
             }

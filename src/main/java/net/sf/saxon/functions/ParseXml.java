@@ -90,12 +90,14 @@ public class ParseXml extends SystemFunction implements Callable {
         val = checkedOptions.get("xsd-validation");
         boolean validating = false;
         if (val != null) {
-            String validationValue = val.getStringValue();
+            String validationValue = Whitespace.normalize(val.getStringValue());
             validating = !"skip".equals(validationValue);
             if (validationValue.equals("strict")) {
                 parseOptions = parseOptions.withSchemaValidationMode(Validation.STRICT);
+                parseOptions = parseOptions.withSchema(getRetainedStaticContext().getPackageData().getImportedSchema());
             } else if (validationValue.equals("lax")) {
                 parseOptions = parseOptions.withSchemaValidationMode(Validation.LAX);
+                parseOptions = parseOptions.withSchema(getRetainedStaticContext().getPackageData().getImportedSchema());
             } else if (validationValue.equals("skip")) {
                 parseOptions = parseOptions.withSchemaValidationMode(Validation.SKIP);
             } else if (validationValue.startsWith("type ")) {
@@ -114,6 +116,7 @@ public class ParseXml extends SystemFunction implements Callable {
                     throw new XPathException("Unknown type " + eqName, "FODC0008");
                 }
                 parseOptions = parseOptions
+                        .withSchema(pd.getImportedSchema())
                         .withSchemaValidationMode(Validation.BY_TYPE)
                         .withTopLevelType(type);
             } else {
