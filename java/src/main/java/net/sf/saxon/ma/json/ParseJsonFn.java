@@ -87,13 +87,13 @@ public class ParseJsonFn extends JsonToXMLFn {
                 nullRepresentation = nullOption;
             }
         }
-        JsonHandlerMap handler = new JsonHandlerMap(context, parser, flags);
         if ((flags & JsonParser.DUPLICATES_RETAINED) != 0) {
             throw new XPathException("parse-json: duplicates=retain is not allowed", "FOJS0005");
         }
         if ((flags & JsonParser.DUPLICATES_SPECIFIED) == 0) {
             flags |= JsonParser.DUPLICATES_FIRST;
         }
+        JsonHandlerMap handler = new JsonHandlerMap(context, parser, flags);
         if (options != null) {
             handler.setFallbackFunction(options, context);
             handler.setNullRepresentation(nullRepresentation);
