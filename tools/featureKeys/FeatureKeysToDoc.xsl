@@ -29,6 +29,12 @@
     
     <xsl:template match="feature">
         <tr style="border-bottom: solid">
+            <xsl:if test="platforms='J'">
+                <xsl:attribute name="class">javaonly</xsl:attribute>
+            </xsl:if>
+            <xsl:if test="platforms='CS'">
+                <xsl:attribute name="class">csonly</xsl:attribute>
+            </xsl:if>
             <td><p id="{name}"><xsl:value-of select="if (string-length(name) le 20) then name else replace(name, '_', '_&#xad;')"/></p>
                 <xsl:if test="commandline">
                     <p><xsl:value-of select="commandline"/></p>

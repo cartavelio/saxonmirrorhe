@@ -1141,7 +1141,7 @@
         <type>Instance of <link>net.sf.saxon.lib.OutputURIResolver</link></type>
         <uri>http://saxon.sf.net/feature/outputURIResolver</uri>
         <editions>HE PE EE</editions>
-        <platforms>J CS</platforms>
+        <platforms>J</platforms>
         <setter class="net.sf.saxon.Configuration">setOutputURIResolver</setter>
         <getter class="net.sf.saxon.Configuration">getOutputURIResolver</getter>
         <desc>
