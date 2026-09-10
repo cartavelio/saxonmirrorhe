@@ -156,6 +156,11 @@ public interface GroundedValue extends Sequence {
         return Err.depictSequence(this).toString();
     }
 
+    /**
+     * Get an {@link Iterable<Item>} that wraps this <code>GroundedValue</code>, allowing
+     * it to be used in a Java for-each loop.
+     * @return an iterable delivering the contents of this value
+     */
     default Iterable<? extends Item> asIterable() {
         return new GroundedValueAsIterable<Item>(this);
     }

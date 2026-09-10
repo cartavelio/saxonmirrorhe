@@ -1,3 +1,10 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2018-2022 Saxonica Limited
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+// This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 package net.sf.saxon.expr.sort;
 
 import net.sf.saxon.om.AtomicSequence;
@@ -24,11 +31,18 @@ import java.util.Arrays;
  * a set or map that uses explicit equals() logic rather than relying on the {@code equals()}
  * and {@code hashCode()} methods of the supplied objects - thus avoiding the need to create
  * wrapper objects purely to redefine equality semantics.</p>
+ *
+ * <p>The class is a singleton that cannot be externally instantiated.</p>
  */
 
 public class SimpleTypeComparison implements EqualityMatcher<AtomicSequence> {
 
     private static final SimpleTypeComparison INSTANCE = new SimpleTypeComparison();
+
+    /**
+     * Get the singleton instance of the class
+     * @return  the singleton instance
+     */
     public static SimpleTypeComparison getInstance() {
         return INSTANCE;
     }

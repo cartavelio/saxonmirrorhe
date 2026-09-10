@@ -1,3 +1,10 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2018-2022 Saxonica Limited
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+// This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 package net.sf.saxon.lib;
 
 import net.sf.saxon.resource.TypedStreamSource;
@@ -14,9 +21,7 @@ import java.io.IOException;
 import java.util.Collections;
 
 /**
- * The standard implementation of the ResourceResolver for use with catalogs.
-
- *
+ * The standard implementation of the {@link ResourceResolver} interface for use with catalogs.
  * @since 11
  */
 

@@ -1,4 +1,15 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2018-2022 Saxonica Limited
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+// This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 package net.sf.saxon.expr.parser;
+
+/**
+ * Constants for different mechanisms of expression evaluation
+ */
 
 public class Evaluators {
 
@@ -22,6 +33,11 @@ public class Evaluators {
     public static final int STREAMING_ARGUMENT = 15;
     public static final int CALL_EVALUATE_SINGLE_ITEM = 16;
 
+    /**
+     * Get an evaluator for a given evaluation mechanism
+     * @param code one of the constants identifying an evaluation mechanism
+     * @return the corresponding {@link Evaluator}
+     */
     public static Evaluator getEvaluator(int code) {
         switch(code) {
             case UNDECIDED:

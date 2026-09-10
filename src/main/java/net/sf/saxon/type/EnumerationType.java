@@ -1,3 +1,10 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2018-2022 Saxonica Limited
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+// This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 package net.sf.saxon.type;
 
 import com.saxonica.ee.schema.UserSimpleType;
@@ -14,10 +21,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Proposed extension for XPath 4.0: an enumeration type is a way of defining a subtype of xs:string,
+ * with a defined set of permitted values, without recourse to a schema or schema-awareness.
+ *
+ * <p>The XPath syntax proposed is <code>enum("A", "B", "C")</code></p>
+ */
 public class EnumerationType implements AtomicType {
 
     private Set<String> values;
 
+    /**
+     * Create an enumeration type permitting a defined set of values
+     * @param values the values to be permitted
+     */
     public EnumerationType(Set<String> values) {
         this.values = values;
     }
