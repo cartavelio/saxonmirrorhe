@@ -15,7 +15,7 @@
 
 // using namespace std;
 
-
+   int c_nativeCall(void *thread){return 0;}
 
 /*
  * Test transform to String. Source and stylesheet supplied as arguments
