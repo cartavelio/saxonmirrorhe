@@ -28,15 +28,15 @@ import net.sf.saxon.value.QNameValue;
 
 
 /**
- * This class represents a call to a function in its raw form, before it has been resolved to an
- * actual function.
+ * This class represents a reference to a function in its raw lexical form, before it has been resolved to an
+ * actual function. Used in XQuery only, where function references can be forwards references to functions not
+ * yet declared.
  */
 @CSharpUsing(code="Saxon.Hej.trans")
 public class DraftFunctionReference extends DraftExpression {
 
     private final String lexicalName;
     private final QueryModule queryModule;
-    private final NamespaceResolver resolver;
     private final int arity;
 
     /**
@@ -45,11 +45,9 @@ public class DraftFunctionReference extends DraftExpression {
 
     public DraftFunctionReference(String lexicalName,
                                   QueryModule env,
-                                  NamespaceResolver resolver,
                                   int arity) {
         this.lexicalName = lexicalName;
         this.queryModule = env;
-        this.resolver = resolver;
         this.arity = arity;
     }
 
@@ -80,7 +78,7 @@ public class DraftFunctionReference extends DraftExpression {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        return new DraftFunctionReference(lexicalName, queryModule, resolver, arity);
+        return new DraftFunctionReference(lexicalName, queryModule, arity);
     }
 
     /**
@@ -182,7 +180,7 @@ public class DraftFunctionReference extends DraftExpression {
             if (queryModule.getXPathVersion() >= 40) {
                 // For an unprefixed function name in 4.0, we look first for a no-namespace name,
                 // then for a name in the default function namespace.
-                SymbolicName.F sn = new SymbolicName.F(new StructuredQName("",NamespaceUri.NULL, lexicalName), arity);
+                SymbolicName.F sn = new SymbolicName.F(new StructuredQName("", NamespaceUri.NULL, lexicalName), arity);
                 if (lib.getFunctionItem(sn, queryModule) != null) {
                     qName = sn.getComponentName();
                 } else {
@@ -192,6 +190,7 @@ public class DraftFunctionReference extends DraftExpression {
                 qName = new StructuredQName("", queryModule.getDefaultFunctionNamespace(), lexicalName);
             }
         } else {
+            NamespaceResolver resolver = getRetainedStaticContext();
             QNameParser qp = new QNameParser(resolver)
                     .withAcceptEQName(true, queryModule.getXPathVersion());
             qName = qp.parse(lexicalName, NamespaceUri.NULL);

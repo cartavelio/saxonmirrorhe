@@ -36,8 +36,9 @@ import static net.sf.saxon.expr.parser.XPathParser.makeNamedFunctionReference;
 
 
 /**
- * This class represents a call to a function in its raw form, before it has been resolved to an
- * actual function.
+ * This class represents a call to a function in its raw lexical form, before it has been resolved to an
+ * actual function. Used in XQuery only, where function references can be forwards references to functions not
+ *  * yet declared.
  */
 @CSharpUsing(code="Saxon.Hej.trans")
 public class DraftFunctionCall extends DraftExpression {
