@@ -15,7 +15,7 @@ import net.sf.saxon.value.DayTimeDurationValue;
 import net.sf.saxon.z.IntHashMap;
 
 import java.io.*;
-import java.net.URL;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -120,25 +120,19 @@ public abstract class Verifier {
         boolean exists = false;
         try {
             if (filename.startsWith("file:")) {
-                is = connectToURI(filename);
-            } else {
-                exists = new File(filename).exists();
-                is = new FileInputStream(filename);
+                filename = new File(new URI(filename)).getPath();
             }
+            exists = new File(filename).exists();
+            is = new FileInputStream(filename);
             primaryLicense = readLicenseFile(is);
             status = AVAILABLE;
             is.close();
-        } catch (IOException e) {
+        } catch (IOException|java.net.URISyntaxException e) {
             primaryLicense = null;
             status = UNAVAILABLE;
             throw new LicenseException("Failed to read license file " + filename,
                     exists ? LicenseException.NOT_FOUND : LicenseException.CANNOT_READ);
         }
-    }
-
-    @CSharpReplaceBody(code="return new System.Net.WebClient().OpenRead(uri);")
-    protected InputStream connectToURI(String uri) throws IOException {
-        return new URL(uri).openStream();
     }
 
     /**

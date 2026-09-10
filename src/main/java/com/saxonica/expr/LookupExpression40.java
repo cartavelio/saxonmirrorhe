@@ -331,14 +331,6 @@ public class LookupExpression40 extends LookupExpression {
         return makeElaborator().elaborateForPull().iterate(context);
     }
 
-    private static SequenceIterator optionalGroundedValueIterator(GroundedValue value) {
-        if (value == null) {
-            return EmptyIterator.getInstance();
-        } else {
-            return value.iterate();
-        }
-    }
-
     protected static void mustBeArrayOrMap(Expression exp, Item baseItem) throws XPathException {
         throw new XPathException("The items on the LHS of the '?' operator must be maps or arrays; but value (" +
                                          baseItem.toShortString() + ") was supplied", "XPTY0004")
