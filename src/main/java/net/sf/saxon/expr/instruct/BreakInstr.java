@@ -82,11 +82,7 @@ public class BreakInstr extends Instruction implements TailCallLoop.TailCallInfo
     }
 
     public void markContext(XPathContext context) {
-        XPathContext c = context;
-        while (!(c instanceof XPathContextMajor)) {
-            c = c.getCaller();
-        }
-        ((XPathContextMajor) c).requestTailCall(this, null);
+        context.getMajorContext().requestTailCall(this, null);
     }
 
     @Override

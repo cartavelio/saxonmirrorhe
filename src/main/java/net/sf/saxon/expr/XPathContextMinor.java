@@ -108,7 +108,7 @@ public class XPathContextMinor implements XPathContext {
 
     @Override
     public ParameterSet getLocalParameters() {
-        return getCaller().getLocalParameters();
+        return getMajorContext().getLocalParameters();
     }
 
     /**
@@ -119,7 +119,7 @@ public class XPathContextMinor implements XPathContext {
 
     @Override
     public ParameterSet getTunnelParameters() {
-        return getCaller().getTunnelParameters();
+        return getMajorContext().getTunnelParameters();
     }
 
     /**
@@ -157,6 +157,19 @@ public class XPathContextMinor implements XPathContext {
     @Override
     public final XPathContext getCaller() {
         return caller;
+    }
+
+    /**
+     * Get the nearest XPathContextMajor (the next one down the stack). This will be null if unknown, or
+     * if the bottom of the stack has been reached.
+     */
+
+    public final XPathContextMajor getMajorContext() {
+        XPathContext c = this;
+        while (c != null && !(c instanceof XPathContextMajor)) {
+            c = c.getCaller();
+        }
+        return (XPathContextMajor)c;
     }
 
     /**
@@ -386,7 +399,7 @@ public class XPathContextMinor implements XPathContext {
 
     @Override
     public synchronized void waitForChildThreads() throws XPathException {
-        getCaller().waitForChildThreads();
+        getMajorContext().waitForChildThreads();
     }
 
     /**
@@ -447,7 +460,7 @@ public class XPathContextMinor implements XPathContext {
     @Override
     public int useLocalParameter(
             StructuredQName parameterId, int slotNumber, boolean isTunnel) throws XPathException {
-        return getCaller().useLocalParameter(parameterId, slotNumber, isTunnel);
+        return getMajorContext().useLocalParameter(parameterId, slotNumber, isTunnel);
     }
 
     /**
@@ -458,7 +471,7 @@ public class XPathContextMinor implements XPathContext {
 
     @Override
     public Component.M getCurrentMode() {
-        return getCaller().getCurrentMode();
+        return getMajorContext().getCurrentMode();
     }
 
     /**
@@ -484,7 +497,7 @@ public class XPathContextMinor implements XPathContext {
 
     @Override
     public GroupIterator getCurrentGroupIterator() {
-        return getCaller().getCurrentGroupIterator();
+        return getMajorContext().getCurrentGroupIterator();
     }
 
     /**
@@ -496,7 +509,7 @@ public class XPathContextMinor implements XPathContext {
 
     @Override
     public GroupIterator getCurrentMergeGroupIterator() {
-        return getCaller().getCurrentMergeGroupIterator();
+        return getMajorContext().getCurrentMergeGroupIterator();
     }
 
     /**
@@ -508,7 +521,7 @@ public class XPathContextMinor implements XPathContext {
 
     @Override
     public RegexIterator getCurrentRegexIterator() {
-        return getCaller().getCurrentRegexIterator();
+        return getMajorContext().getCurrentRegexIterator();
     }
 
     /**
@@ -553,7 +566,7 @@ public class XPathContextMinor implements XPathContext {
 
     @Override
     public Component getTargetComponent(int bindingSlot) {
-        return getCaller().getTargetComponent(bindingSlot);
+        return getMajorContext().getTargetComponent(bindingSlot);
     }
 
     // Note: consider eliminating this class. A new XPathContextMinor is created under two circumstances,

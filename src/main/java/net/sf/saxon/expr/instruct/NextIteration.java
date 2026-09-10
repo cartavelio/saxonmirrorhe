@@ -114,11 +114,7 @@ public class NextIteration extends Instruction implements TailCallLoop.TailCallI
     /*@Nullable*/
     @Override
     public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        XPathContext c = context;
-        while (!(c instanceof XPathContextMajor)) {
-            c = c.getCaller();
-        }
-        XPathContextMajor cm = (XPathContextMajor)c;
+        XPathContextMajor cm = context.getMajorContext();
         if (actualParams.length == 1) {
             cm.setLocalVariable(actualParams[0].getSlotNumber(), actualParams[0].getSelectValue(context));
         } else {

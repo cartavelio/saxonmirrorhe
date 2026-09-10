@@ -68,6 +68,15 @@ public class EarlyEvaluationContext implements XPathContext {
     }
 
     /**
+     * Get the nearest XPathContextMajor (the next one down the stack). This will be null if unknown, or
+     * if the bottom of the stack has been reached.
+     */
+    @Override
+    public XPathContextMajor getMajorContext() {
+        return null;
+    }
+
+    /**
      * Get the URI resolver. This gets the local URIResolver set in the XPathContext if there
      * is one; if not, it gets the URIResolver from the Controller (which itself defaults to the
      * one set in the Configuration).

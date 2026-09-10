@@ -18,6 +18,7 @@ import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.RuleManager;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -323,6 +324,8 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
         if (returnTailCall) {
             XPathContextMajor context2 = context.newContext();
             context2.setOrigin(this);
+            // Allow context object of caller to be garbage-collected (only affects diagnostics)
+            context2.setCaller(context.getCaller());
             return new ApplyTemplatesPackage(
                     ExpressionTool.lazyEvaluate(getSelect(), context, false),
                     targetMode, params, tunnels, separator, output, context2, getLocation());
@@ -594,14 +597,14 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
 
     protected static class ApplyTemplatesPackage implements TailCall {
 
-        private Sequence selectedItems;
-        private Component.M targetMode;
-        private ParameterSet params;
-        private ParameterSet tunnelParams;
-        private NodeInfo separator;
-        private XPathContextMajor evaluationContext;
-        private Outputter output;
-        private Location locationId;
+        private final Sequence selectedItems;
+        private final Component.M targetMode;
+        private final ParameterSet params;
+        private final ParameterSet tunnelParams;
+        private final NodeInfo separator;
+        private final XPathContextMajor evaluationContext;
+        private final Outputter output;
+        private final Location locationId;
 
         ApplyTemplatesPackage(Sequence selectedItems,
                               Component.M targetMode,

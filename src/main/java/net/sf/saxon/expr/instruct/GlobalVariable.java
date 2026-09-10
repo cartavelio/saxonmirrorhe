@@ -776,9 +776,7 @@ public class GlobalVariable extends Actor
 
     protected static void setDependencies(GlobalVariable var, XPathContext context) throws XPathException {
         Controller controller = context.getController();
-        if (!(context instanceof XPathContextMajor)) {
-            context = getMajorCaller(context);
-        }
+        context = context.getMajorContext();
         while (context != null) {
             do {
                 ContextOriginator origin = ((XPathContextMajor) context).getOrigin();
@@ -786,17 +784,13 @@ public class GlobalVariable extends Actor
                     controller.registerGlobalVariableDependency((GlobalVariable) origin, var);
                     return;
                 }
-                context = getMajorCaller(context);
+                context = context.getCaller();
+                if (context != null) {
+                    context = context.getMajorContext();
+                }
             } while (context != null);
         }
-    }
 
-    private static XPathContextMajor getMajorCaller(XPathContext context) {
-        XPathContext caller = context.getCaller();
-        while (!(caller == null || caller instanceof XPathContextMajor)) {
-            caller = caller.getCaller();
-        }
-        return (XPathContextMajor) caller;
     }
 
     /**

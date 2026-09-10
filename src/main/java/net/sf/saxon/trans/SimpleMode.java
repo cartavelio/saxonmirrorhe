@@ -665,9 +665,7 @@ public class SimpleMode extends Mode {
 
     protected Rule searchRuleChain(Item item, XPathContext context, /*@Nullable*/ Rule bestRule, RuleChain chain) throws XPathException {
 
-        while (!(context instanceof XPathContextMajor)) {
-            context = context.getCaller();
-        }
+        context = context.getMajorContext();
 
         // Get the rule search state object - this could be reusable within a rule chain.
         RuleSearchState ruleSearchState = makeRuleSearchState(chain, context);
