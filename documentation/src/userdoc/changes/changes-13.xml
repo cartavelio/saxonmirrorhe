@@ -188,7 +188,14 @@ TODO: rethink redefines and override
     
     <category name="localization" class="javaonly">
         
- 
+        <p>The home-grown localization classes such as <code>Numberer_da</code> (for Danish)
+        are no longer shipped with the product. In previous releases they were only used if explicitly
+        requested via the configuration API; by default Saxon-PE and Saxon-EE use the ICU4J library
+        for localization, which is much more comprehensive. The API for registering a home-grown
+        localization class remains available, and the source code for these dropped classes
+        can continue to be integrated if required.</p>
+        
+        <p>TODO: check what's in the saxon-resources download.</p>
         
     </category>
     

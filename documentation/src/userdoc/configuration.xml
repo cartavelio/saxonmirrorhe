@@ -507,8 +507,8 @@
     xmlns:saxon="http://saxon.sf.net/"/>
     
   <localizations defaultLanguage="en" defaultCountry="US">
-    <localization lang="da" class="net.sf.saxon.option.local.Numberer_da"/>
-    <localization lang="de" class="net.sf.saxon.option.local.Numberer_de"/>
+    <localization lang="da" class="org.example.localize.Numberer_da"/>
+    <localization lang="de" class="org.example.localize.Numberer_de"/>
   </localizations>
   
   <resources>
@@ -643,10 +643,9 @@
          <p>The element contains zero or more child <code>localization</code> elements as detailed below.</p>
          <p>Each <code>localization</code> element may have the following attributes:</p>
          <xi:include href="featureKeys/ConfigFileDoc-localization.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-         <p>Note that numberers for various European languages (da, de, fr, dr-BE, it, nl, nl-BE, sv) are supplied in package
-               <code>net.sf.saxon.option.local</code>. In Saxon-PE and Saxon-EE these are compiled into the standard JAR file, but they are not configured by
-            default. In Saxon-HE they are not built-in to the product, but can be integrated from the supplied source code in the same way as user-written
-            localizations.</p>
+         <p>Previous Saxon releases supplied numberers for various European languages (da, de, fr, dr-BE, it, nl, nl-BE, sv). 
+            These are no longer supplied with the product, but the versions supplied with earlier releases
+            should still work.</p>
       </section>
    </section>
    <section id="config-features" title="Configuration features">

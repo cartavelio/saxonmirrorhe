@@ -60,11 +60,11 @@
         any other language is requested, the output falls back to English. There is an API, <code
           java="net.sf.saxon.Configuration#setLocalizerFactory">Configuration.setLocalizerFactory()</code>,
         allowing plug-in code to be registered for other
-        languages, and there are some open-source components available (issued with the
-          <code>saxon-resources</code> download) providing plug-ins for some common European languages.</li>
+        languages, and there are some open-source components available
+        providing plug-ins for some common European languages.</li>
       <li class="javaonly">In SaxonJ-PE and -EE, spellout numbering is available via the ICU4J library, which
         supports a large variety of languages. This does not require any special configuration.</li>
-      <li class="csonly">In SaxonCS, spellout numbering is not currently available.</li>
+      <li class="csonly">In SaxonCS, spellout numbering is similarly available via the ICU4N library.</li>
     </ul>
 
     <p>As well as spellout numbering, the choice of language also affects ordinal numbering, for example 10 is
@@ -218,18 +218,18 @@
         <code>format-dateTime()</code>. The feature is primarily intended to provide language-dependent
       numbers and dates, but in fact it can be used to provide arbitrary numbering sequences.</p>
 
-    <p>Additional numbering sequences are available as described in <a class="bodylink"
-        href="other-numberings">Numberings for selected languages</a>.</p>
+    <!--<p>Additional numbering sequences are available as described in <a class="bodylink"
+        href="other-numberings">Numberings for selected languages</a>.</p>-->
 
     <p>To implement a numberer for language X, you need to define a class that implements the interface <a
         class="javalink" href="net.sf.saxon.lib.Numberer">Numberer</a>; usually it will be convenient to write
       the class as a subclass of the supplied <a class="javalink"
+        href="net.sf.saxon.expr.number.AbstractNumberer">AbstractNumberer</a>,
+        or if you want to use English as a fallback, the class <a class="javalink" href="net.sf.saxon.expr.number.Numberer_en">Numberer_en</a>
+       which is itself a subclass of <a class="javalink"
         href="net.sf.saxon.expr.number.AbstractNumberer">AbstractNumberer</a>.</p>
 
-    <p>Normally your localization class will extend the class <code>AbstractNumberer</code> so that you can
-      reuse functionality like roman numerals which do not need to be localized. Alternatively, if you only
-      want to modify the existing English localization, you could choose to implement a subclass of
-        <code>Numberer_en</code>.</p>
+    
 
     <p>You can override any of the non-private methods in the base class, but the most useful ones to
       implement are the following:</p>
@@ -292,7 +292,7 @@
     </table>
 
     <p>The class name can be anything you like, but by convention the Numberer for language LL is named
-        <code>net.sf.saxon.option.local.Numberer_LL</code>.</p>
+        <code>Numberer_LL</code>.</p>
 
     <p>There are two ways to register the numberer with the Saxon <a class="javalink"
         href="net.sf.saxon.Configuration">Configuration</a>.</p>
@@ -316,178 +316,7 @@ config.setLocalizerFactory(new LocalizerFactory() {
 
 
 
-    <section id="other-numberings" title="Numberings for selected languages" class="javaonly">
-      <h1>Numberings for selected languages</h1>
-      <p>
-        <code>Numberer</code> implementations are available for several selected European languages, and
-        you can use these as a prototype to write your own.</p>
-      <p>In Saxon-PE/EE these numberers are used for the given languages only if the JAR file containing the ICU libraries
-        is not available on the classpath. (This is a transitional arrangement for Saxon 9.6, to ease transition to ICU.
-        This mechanism will probably be dropped in a later release.)
-        These numberers are not built in with Saxon-HE, but are available as open source code, and it is possible
-        to configure them by writing a subclass of <a class="javalink"
-          href="net.sf.saxon.lib.LocalizerFactory">LocalizerFactory</a> and registering it with
-        the <a class="javalink" href="net.sf.saxon.Configuration">Configuration</a>.</p>
-      <p>The languages available are:</p>
-      <table>
-        <thead class="params">
-          <tr>
-            <td>
-              <p>code</p>
-            </td>
-            <td>
-              <p>Language</p>
-            </td>
-            <td>
-              <p>Class</p>
-            </td>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <p>da</p>
-            </td>
-            <td>
-              <p>
-                <dfn>Danish</dfn>
-              </p>
-            </td>
-            <td>
-              <p>
-                <code>net.sf.saxon.option.local.Numberer_da</code>
-              </p>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <p>de</p>
-            </td>
-            <td>
-              <p>
-                <dfn>German</dfn>
-              </p>
-            </td>
-            <td>
-              <p>
-                <code>net.sf.saxon.option.local.Numberer_de</code>
-              </p>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <p>en</p>
-            </td>
-            <td>
-              <p>
-                <dfn>English</dfn>
-              </p>
-            </td>
-            <td>
-              <p>
-                <code>net.sf.saxon.option.local.Numberer_en</code>
-              </p>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <p>fr</p>
-            </td>
-            <td>
-              <p>
-                <dfn>French</dfn>
-              </p>
-            </td>
-            <td>
-              <p>
-                <code>net.sf.saxon.option.local.Numberer_fr</code>
-              </p>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <p>fr-BE</p>
-            </td>
-            <td>
-              <p>
-                <dfn>French (Belgium)</dfn>
-              </p>
-            </td>
-            <td>
-              <p>
-                <code>net.sf.saxon.option.local.Numberer_frBE</code>
-              </p>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <p>it</p>
-            </td>
-            <td>
-              <p>
-                <dfn>Italian</dfn>
-              </p>
-            </td>
-            <td>
-              <p>
-                <code>net.sf.saxon.option.local.Numberer_it</code>
-              </p>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <p>nl</p>
-            </td>
-            <td>
-              <p>
-                <dfn>Dutch</dfn>
-              </p>
-            </td>
-            <td>
-              <p>
-                <code>net.sf.saxon.option.local.Numberer_nl</code>
-              </p>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <p>nl-BE</p>
-            </td>
-            <td>
-              <p>
-                <dfn>Flemish (Belgium)</dfn>
-              </p>
-            </td>
-            <td>
-              <p>
-                <code>net.sf.saxon.option.local.Numberer_nlBE</code>
-              </p>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <p>sv</p>
-            </td>
-            <td>
-              <p>
-                <dfn>Swedish</dfn>
-              </p>
-            </td>
-            <td>
-              <p>
-                <code>net.sf.saxon.option.local.Numberer_sv</code>
-              </p>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      
-      <p>For English, the language codes <code>en-x-hyphen</code> and <code>en-x-nohyphen</code> can be used to control whether numbers in the range 21 to 99
-        are spelled out with hyphen or space as a separator ("thirty-one" versus "thirty one"). By default, a hyphen is used for ordinal numbers, while a space
-        is used for cardinal numbers.</p>
-      
-    </section>
-  </section>
+    
   
   <xi:include href="extensibility/locales-ICU-numbering.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
 
