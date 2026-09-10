@@ -4,5 +4,6 @@
   {"version": "3.11", "macOsMinVersions": {"ARM64": "11", "X86_64": "10.11"}},
   {"version": "3.12", "macOsMinVersions": {"ARM64": "11", "X86_64": "10.11"}},
   {"version": "3.13", "macOsMinVersions": {"ARM64": "11", "X86_64": "10.11"}},
-  {"version": "3.14", "specificVersion": "3.14.0rc2", "macOsMinVersions": {"ARM64": "11", "X86_64": "11"}}
+  {"version": "3.14", "macOsMinVersions": {"ARM64": "11", "X86_64": "11"}},
+  {"version": "3.14t", "macOsMinVersions": {"ARM64": "11", "X86_64": "11"}}
 ]
