@@ -12,6 +12,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.functions.SystemFunction;
 import com.saxonica.functions.registry.XPath40FunctionSet;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -25,6 +26,15 @@ import net.sf.saxon.trans.XPathException;
 
 public class XSLArrayMember extends XSLSequence {
 
+    /**
+     * Ask whether the element is in the XSLT namespace
+     *
+     * @return true if the element is in the XSLT namespace
+     */
+    @Override
+    public boolean isInXsltNamespace() {
+        return getNodeName().hasURI(NamespaceUri.XSLT);
+    }
 
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
