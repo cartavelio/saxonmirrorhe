@@ -19,7 +19,7 @@ public class AncestorCharacteristic extends Characteristic {
 
     /**
      * Define an AncestorCharacteristic
-     * @param pattern the pattern that an ancestor/parent must satisfy if the the characteristic
+     * @param pattern the pattern that an ancestor/parent must satisfy if the characteristic
      *                is to have the value true
      * @param isParent true if the pattern must match the immediate parent; false if the pattern
      *                 must match some ancestor

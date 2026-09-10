@@ -2777,7 +2777,7 @@ public class UserComplexType extends UserDefinedType
         }
         if (baseUniqueSet.size() + baseKeySet.size() + baseKeyRefSet.size() > 0) {
             compiler.warning("Saxon is not able to verify that the identity constraints in element " +
-                    eName(sub) + " are compatible with those in the the base type",
+                    eName(sub) + " are compatible with those in the base type",
                              SaxonErrorCode.SXSD1009, sub);
             // TODO: we could actually compare the constraints, but it's not 100% clear what the rules are
         }

@@ -88,7 +88,7 @@ public final class AttributeGroupReference extends SchemaStructure
     /**
      * Set the fingerprint of the target of this reference
      *
-     * @param target the the name of the referenced attribute group
+     * @param target the name of the referenced attribute group
      */
 
     public void setTargetComponentName(StructuredQName target) {
@@ -109,7 +109,7 @@ public final class AttributeGroupReference extends SchemaStructure
      * Returns the attribute wildcard in the referenced attribute group, if any.
      *
      * @param compiler May be null if used at validation time.
-     * @return the the attribute wildcard (xs:anyAttribute element) in the referenced
+     * @return the attribute wildcard (xs:anyAttribute element) in the referenced
      *         attribute group, if there is one; otherwise null.
      * @throws MissingComponentException
      *          if the reference to the attribute group
