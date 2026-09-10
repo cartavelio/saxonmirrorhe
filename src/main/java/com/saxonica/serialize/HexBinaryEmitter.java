@@ -1,9 +1,12 @@
 package com.saxonica.serialize;
 
+import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.HexBinaryValue;
 import net.sf.saxon.value.Whitespace;
+
+import javax.xml.transform.stream.StreamResult;
 
 
 /**
@@ -12,6 +15,10 @@ import net.sf.saxon.value.Whitespace;
  * by writing the corresponding octets to the output file. All other serialization parameters are ignored
  */
 public class HexBinaryEmitter extends BinaryEmitter {
+
+    public HexBinaryEmitter(StreamResult stream, PipelineConfiguration pipe) throws XPathException {
+        super(stream, pipe);
+    }
 
     @Override
     protected byte[] textNodeToBinary(UnicodeString chars) throws XPathException {

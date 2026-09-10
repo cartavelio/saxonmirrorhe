@@ -5,10 +5,10 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.PreparedStylesheet;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.instruct.GlobalParameterSet;
-import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.lib.SerializerFactory;
 import net.sf.saxon.query.SequenceWrapper;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.serialize.*;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.trans.*;
@@ -38,30 +38,33 @@ public class SerializerFactoryPE extends SerializerFactory {
             String method, SerializationProperties serProps,
             PipelineConfiguration pipe,
             CharacterMapExpander characterMapExpander,
-            ProxyReceiver normalizer, StreamResult result) throws XPathException {
+            ProxyReceiver normalizer,
+            ExpandedStreamResult expandedResult,
+            Result result) throws XPathException {
 
         Properties props = serProps.getProperties();
         pipe.getConfiguration().checkLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION, "custom serialization", -1);
         if (SaxonOutputKeys.SAXON_XQUERY_METHOD.equals(method)) {
             XMLEmitter emitter = new XQueryEmitter();
             emitter.setPipelineConfiguration(pipe);
-            emitter.setStreamResult(result);
+            if (result instanceof UnicodeWriterResult) {
+                emitter.setUnicodeWriter(((UnicodeWriterResult)result).getUnicodeWriter());
+            } else {
+                emitter.setUnicodeWriter(expandedResult.obtainUnicodeWriter());
+            }
             props.setProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
             emitter.setOutputProperties(props);
             return createXMLSerializer(emitter, serProps);
 
         } else if (SaxonOutputKeys.SAXON_BASE64_BINARY_METHOD.equals(method)) {
-            Emitter emitter = new Base64BinaryEmitter();
-            emitter.setPipelineConfiguration(pipe);
-            emitter.setStreamResult(result);
+            BinaryEmitter emitter = new Base64BinaryEmitter((StreamResult) result, pipe);
             props.setProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
             emitter.setOutputProperties(props);
             return emitter;
 
         } else if (SaxonOutputKeys.SAXON_HEX_BINARY_METHOD.equals(method)) {
-            Emitter emitter = new HexBinaryEmitter();
+            Emitter emitter = new HexBinaryEmitter((StreamResult) result, pipe);
             emitter.setPipelineConfiguration(pipe);
-            emitter.setStreamResult(result);
             props.setProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
             emitter.setOutputProperties(props);
             return emitter;
@@ -69,7 +72,11 @@ public class SerializerFactoryPE extends SerializerFactory {
         } else if (SaxonOutputKeys.SAXON_XML_TO_JSON_METHOD.equals(method)) {
             Emitter emitter = new TEXTEmitter();
             emitter.setPipelineConfiguration(pipe);
-            emitter.setStreamResult(result);
+            if (result instanceof UnicodeWriterResult) {
+                emitter.setUnicodeWriter(((UnicodeWriterResult)result).getUnicodeWriter());
+            } else {
+                emitter.setUnicodeWriter(expandedResult.obtainUnicodeWriter());
+            }
             props.setProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
             emitter.setOutputProperties(props);
             return emitter;

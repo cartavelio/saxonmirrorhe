@@ -1,34 +1,33 @@
 package com.saxonica.serialize;
 
+import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.om.AttributeMap;
-import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.str.CodePoints;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.Emitter;
+import net.sf.saxon.serialize.ExpandedStreamResult;
+import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import javax.xml.transform.stream.StreamResult;
+import java.io.*;
+import java.net.URISyntaxException;
 
 /**
  * This is an abstract superclass for the two binary output methods saxon:base64Binary and saxon:hexBinary.
  */
 public abstract class BinaryEmitter extends Emitter {
 
-    /**
-     * Determine whether the Emitter wants a Writer for character output or
-     * an OutputStream for binary output. The standard Emitters all use a Writer, so
-     * this returns true; but a subclass can override this if it wants to use an OutputStream
-     *
-     * @return false: this Emitter uses an OutputStream
-     */
+    protected OutputStream outputStream;
+    private boolean mustClose;
 
-    @Override
-    public boolean usesWriter() {
-        return false;
+    public BinaryEmitter(StreamResult streamResult, PipelineConfiguration pipe) throws XPathException {
+        setPipelineConfiguration(pipe);
+        this.outputStream = makeOutputStream(streamResult);
     }
 
     @Override
@@ -59,20 +58,7 @@ public abstract class BinaryEmitter extends Emitter {
 
     @Override
     public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
-        if (outputStream == null) {
-            if (streamResult == null) {
-                throw new IllegalStateException("BinaryEmitter must have a StreamResult to write to");
-            }
-            OutputStream os = streamResult.getOutputStream();
-            if (os == null) {
-                os = makeOutputStream();
-            }
-            if (os != null) {
-                setOutputStream(os);
-            } else {
-                throw new IllegalStateException("BinaryEmitter's StreamResult must have an OutputStream to write to");
-            }
-        }
+        assert outputStream != null;
         byte[] bytes = textNodeToBinary(chars.tidy());
         try {
             outputStream.write(bytes);
@@ -93,9 +79,50 @@ public abstract class BinaryEmitter extends Emitter {
 
     }
 
+    /**
+     * Notify the end of the event stream
+     *
+     * @throws XPathException if an error occurs
+     */
+    @Override
+    public void close() throws XPathException {
+        try {
+            if (mustClose && outputStream != null) {
+                outputStream.close();
+            }
+        } catch (IOException e) {
+            throw new XPathException(e);
+        }
+    }
+
     @Override
     public boolean usesTypeAnnotations() {
         return false;
+    }
+
+    protected OutputStream makeOutputStream(StreamResult streamResult) throws XPathException {
+        if (streamResult.getOutputStream() != null) {
+            return streamResult.getOutputStream();
+        }
+        String uriString = streamResult.getSystemId();
+        if (uriString == null) {
+            throw new XPathException("BinaryEmitter result has no system ID or output stream defined", SaxonErrorCode.SXRD0004);
+        }
+
+        try {
+            File file = ExpandedStreamResult.makeWritableOutputFile(uriString);
+            outputStream = new FileOutputStream(file);
+            // Set the outputstream in the StreamResult object so that the
+            // call on OutputURIResolver.close() can close it
+            streamResult.setOutputStream(outputStream);
+            mustClose = true;
+        } catch (FileNotFoundException | URISyntaxException | IllegalArgumentException fnf) {
+            // for example, the system ID doesn't use the file: scheme
+            XPathException err = new XPathException("Unable to write to output destination", fnf);
+            err.setErrorCode(SaxonErrorCode.SXRD0004);
+            throw err;
+        }
+        return outputStream;
     }
 }
 

@@ -2,8 +2,7 @@ package com.saxonica.serialize;
 
 import net.sf.saxon.serialize.CharacterReferenceGenerator;
 import net.sf.saxon.serialize.HexCharacterReferenceGenerator;
-
-import java.io.Writer;
+import net.sf.saxon.str.UnicodeWriter;
 
 /**
  * A class that represents a character as a decimal character reference and writes
@@ -219,12 +218,12 @@ public class HTMLEntityReferenceGenerator implements CharacterReferenceGenerator
     }
 
     @Override
-    public void outputCharacterReference(int c, Writer writer) throws java.io.IOException {
+    public void outputCharacterReference(int c, UnicodeWriter writer) throws java.io.IOException {
         if (c > 160 && c <= 255) {
             // if chararacter in iso-8859-1, use an entity reference
-            writer.write('&');
+            writer.writeCodePoint('&');
             writer.write(latin1Entities[c - 160]);
-            writer.write(';');
+            writer.writeCodePoint(';');
         } else {
             fallback.outputCharacterReference(c, writer);
         }

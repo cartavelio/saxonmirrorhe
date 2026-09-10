@@ -56,6 +56,7 @@ import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.JSONEmitter;
+import net.sf.saxon.serialize.UTF8Writer;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.StyleNodeFactory;
@@ -1685,7 +1686,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
                 options.target = "JS";
                 options.targetVersion = 2;
                 PipelineConfiguration pipe = makePipelineConfiguration();
-                JSONEmitter writer = new JSONEmitter(pipe, new StreamResult(destination), new Properties());
+                JSONEmitter writer = new JSONEmitter(pipe, new UTF8Writer(destination), new Properties());
                 presenter.init(this, new ExpressionPresenterToJson(writer, pipe), true);
                 break;
             default:
