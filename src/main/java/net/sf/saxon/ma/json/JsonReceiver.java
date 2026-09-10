@@ -289,7 +289,6 @@ public class JsonReceiver implements Receiver {
 
         } else if (local.equals("string")) {
             output.accept(BMPString.of("\""));
-            String str = textBuffer.toString();
             if (escaped) {
                 output.accept(StringView.of(handleEscapedString(content)));
             } else {
