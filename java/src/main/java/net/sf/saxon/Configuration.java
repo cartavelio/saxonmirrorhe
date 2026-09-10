@@ -1400,7 +1400,7 @@ public class Configuration implements SourceResolver {
         };
     }
 
-    public BuiltInFunctionSet getXQueryUpdateFunctionSet() {
+    public BuiltInFunctionSet getXQueryUpdateFunctionSet(int version) {
         return null;
     }
 
