@@ -133,6 +133,9 @@ extern const char *failure;
 
 char *_getResourceDirectory();
 
+int c_nativeCall();
+
+
 /**
  * Load dll using the default setting in SaxonC.
  * Recommended method to use to load library.

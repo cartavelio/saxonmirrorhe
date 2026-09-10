@@ -106,6 +106,8 @@ typedef enum eXdmType {
   XDM_ITEM = 7,
 } XDM_TYPE;
 
+
+
 //==========================================
 
 //! The <code>SaxonProcessor</code> class acts as a factory for generating

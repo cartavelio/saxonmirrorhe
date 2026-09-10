@@ -25,6 +25,13 @@ char * dllPath =
 
 char *_getResourceDirectory() { return resources_dir; }
 
+int c_nativeCall() {
+  fprintf(stdout, "We are in a c function\n");
+  fflush(stdout);
+  return 5;
+}
+
+
 /*
  * Load dll.
  */

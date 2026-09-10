@@ -7,6 +7,8 @@
 
 using namespace std;
 
+
+
 // Test case on the evaluate method in XPathProcessor. Here we test that we have
 // more than one XdmItem.
 void testXPathSingle(SaxonProcessor *processor, XPathProcessor *xpath,
@@ -525,13 +527,7 @@ int main() {
   cwd = (const char *)buff;
 
   XPathProcessor *xpathProc = processor->newXPathProcessor();
-   std::cerr<<"cppExtensionFunction cp0"<<std::endl;
-   try{
-  processor->setExtensionLibrary("cppExtensionFunction");
-  } catch (SaxonApiException &e) {
-      cerr << " Exception thrown=" << e.what() << endl;
-    }
- std::cerr<<"cppExtensionFunction cp1"<<std::endl;
+
   xpathProc->setLanguageVersion("3.1");
   sResultCount *sresult = new sResultCount();
   cout << endl

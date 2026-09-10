@@ -13,15 +13,29 @@
 
 // TODO: write test case for checking parameters which are null
 
-// using namespace std;
+ using namespace std;
 
-   int c_nativeCall(void *thread){return 0;}
+
+int main() {
+
+  const char *cwd = nullptr;
+
+  SaxonProcessor *processor = new SaxonProcessor(false);
+
+   std::cerr<<"cppExtensionFunction cp0"<<std::endl;
+   try{
+    j_testNativeC(SaxonProcessor::sxn_environ->thread);
+  } catch (SaxonApiException &e) {
+      cerr << " Exception thrown=" << e.what() << endl;
+    }
+
+    }
 
 /*
  * Test transform to String. Source and stylesheet supplied as arguments
  */
-void cppExtensionFunction::cppNativeCall(char * funcName, XdmValue ** arguments,
-                                                                                           int argumentLength) {
+//void cppExtensionFunction::cppNativeCall(char * funcName, XdmValue ** arguments,
+//                                                                                           int argumentLength) {
 
  /* JNIEnv *senv = SaxonProcessor::sxn_environ->env;
 
@@ -134,7 +148,7 @@ void cppExtensionFunction::cppNativeCall(char * funcName, XdmValue ** arguments,
   }
   return SaxonProcessor::sxn_environ->env->NewStringUTF(
       "result from extension!!"); */
-}
+//}
 
 /*string cppExtensionFunction::nativeExtensionMethod(char *param1, int number) {
 
