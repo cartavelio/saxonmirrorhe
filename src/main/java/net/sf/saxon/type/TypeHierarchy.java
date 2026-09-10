@@ -380,7 +380,7 @@ public class TypeHierarchy {
      * <ul>
      *     <li>If subtype(A, B) and subtype(B, A) then SAME_TYPE</li>
      *     <li>Else, if subtype(A, B) then SUBSUMED_BY</li>
-     *     <li>Else, if subtype(A, B) then SUBSUMES</li>
+     *     <li>Else, if subtype(B, A) then SUBSUMES</li>
      *     <li>Else, if the value spaces of A and B have a non-empty intersection then OVERLAPS</li>
      *     <li>Else, DISJOINT.</li>
      * </ul>
@@ -787,10 +787,12 @@ public class TypeHierarchy {
      * they are permitted, and supported in Saxon-HE.
      *
      * @param t1 the first type
-     * @param t2 the second types
+     * @param t2 the second type
      * @param n1 the set of element names allowed by the first type
      * @param n2 the set of element names allowed by the second type
-     * @return the relationship (same type, subsumes, overlaps, subsumed-by)
+     * @return the relationship, as one of the constants
+     *         {@link Affinity#SAME_TYPE}, {@link Affinity#SUBSUMES},
+     *         {@link Affinity#SUBSUMED_BY}, {@link Affinity#DISJOINT}, {@link Affinity#OVERLAPS}
      */
     protected Affinity computeContentRelationship(ItemType t1, ItemType t2, Optional<IntSet> n1, Optional<IntSet> n2) {
         Affinity contentRelationship;
@@ -964,7 +966,7 @@ public class TypeHierarchy {
     }
 
     public ItemType getGenericFunctionItemType() {
-        return AnyItemType.getInstance();
+        return AnyFunctionType.getInstance();
     }
 
 

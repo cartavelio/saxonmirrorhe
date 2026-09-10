@@ -16,7 +16,7 @@ import static net.sf.saxon.type.Affinity.DISJOINT;
 import static net.sf.saxon.type.Affinity.OVERLAPS;
 
 /**
- * Refinement of the TypeHierarchy class to handle function items and schema-aware types such as schema-element(A).
+ * Refinement of the TypeHierarchy class to handle schema-aware types such as schema-element(A).
  */
 
 public class TypeHierarchyEE extends TypeHierarchy {
@@ -25,20 +25,17 @@ public class TypeHierarchyEE extends TypeHierarchy {
         super(config);
     }
 
-    @Override
-    public ItemType getGenericFunctionItemType() {
-        return AnyFunctionType.getInstance();
-    }
-
 
     /**
      * Compute the relationship between the allowed content-types of two types
      *
      * @param t1 the first type
-     * @param t2 the second types
+     * @param t2 the second type
      * @param on1 the set of element names allowed by the first type
      * @param on2 the set of element names allowed by the second type
-     * @return the relationship (same type, subsumes, overlaps, subsumed-by)
+     * @return the relationship, as one of the constants
+     *         {@link Affinity#SAME_TYPE}, {@link Affinity#SUBSUMES},
+     *         {@link Affinity#SUBSUMED_BY}, {@link Affinity#DISJOINT}, {@link Affinity#OVERLAPS}
      */
     @Override
     protected Affinity computeContentRelationship(ItemType t1, ItemType t2, Optional<IntSet> on1, Optional<IntSet> on2) {
