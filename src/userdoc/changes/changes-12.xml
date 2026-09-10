@@ -437,8 +437,16 @@
             in the compound tokens <code>&lt;=</code>, <code>>=</code>, <code>&lt;&lt;</code>,
         <code>&gt;&gt;</code>, <code>=&gt;</code>, and <code>-&gt;</code>.</p>
         
+        <p>From 12.3, the mapping arrow operator <code>=!></code>is implemented. This is similar to the XPath 3.1 arrow operator
+        (for example <code>$x => abs()</code>), but it applies the function on the right-hand side to each item delivered
+        by the left-hand side individually. For example <code>(-2 to +2) =!> abs()</code> returns <code>(2, 1, 0, 1, 2)</code>.
+        The effect is similar to writing <code>(-2 to +2) ! abs(.)</code>, but the operator precedences make it
+        easier to construct a pipeline of operations without parentheses.</p>
+        
         
         <h2>XQuery 4.0 extensions</h2>
+        
+        <p>See also XPath 4.0 extensions.</p>
         
         <p>Function declarations may declare some parameters as optional, with a default value. From Saxon 12.1, the default
         value must either be a constant (for example, <code>()</code>, <code>0</code>, <code>false()</code>, or

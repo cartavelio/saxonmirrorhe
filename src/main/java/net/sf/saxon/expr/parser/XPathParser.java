@@ -191,6 +191,7 @@ public class XPathParser {
         m.put(Token.CASTABLE_AS, 17);
         m.put(Token.CAST_AS, 18);
         m.put(Token.FAT_ARROW, 19);
+        m.put(Token.MAPPING_ARROW, 19);
 
                 // remainder commented out because not used in precedence parsing (but perhaps they could be)
 //            case Token.BANG:
@@ -945,6 +946,9 @@ public class XPathParser {
                     break;
                 case Token.FAT_ARROW:
                     lhs = parseArrowPostfix(lhs);
+                    break;
+                case Token.MAPPING_ARROW:
+                    lhs = parseMappingArrowPostfix(lhs);
                     break;
                 default:
                     nextToken();
@@ -2631,6 +2635,46 @@ public class XPathParser {
             return null;
         }
     }
+
+    /**
+     * Parse an XPath 4.0 mapping arrow operator ("=!&gt;")
+     *
+     * @param lhs the expression on the left of the arrow operator
+     * @return the expression that results from the parsing
+     * @throws XPathException if the syntax is wrong
+     */
+
+    /*@NotNull*/
+    protected Expression parseMappingArrowPostfix(Expression lhs) throws XPathException {
+        checkLanguageVersion40();
+        nextToken();
+
+        ForExpression forExpr = new ForExpression();
+        forExpr.setSequence(lhs);
+        StructuredQName varName = new StructuredQName("vv", NamespaceUri.SAXON_GENERATED_VARIABLE, ""+lhs.hashCode());
+        forExpr.setVariableQName(varName);
+        VariableReference varRef = new LocalVariableReference(forExpr);
+
+        int token = getTokenizer().currentToken;
+        Expression rhs;
+        if (token == Token.NAME || token == Token.FUNCTION) {
+            rhs = parseFunctionCall(varRef);
+        } else if (token == Token.DOLLAR) {
+            Expression var = parseVariableReference();
+            expect(Token.LPAR);
+            rhs = parseDynamicFunctionCall(var, varRef);
+        } else if (token == Token.LPAR) {
+            Expression var = parseParenthesizedExpression();
+            expect(Token.LPAR);
+            rhs = parseDynamicFunctionCall(var, varRef);
+        } else {
+            grumble("Unexpected " + Token.tokens[token] + " after '=>'");
+            return null;
+        }
+        forExpr.setAction(rhs);
+        return forExpr;
+    }
+
 
     /**
      * Parse the expression within a predicate. A separate method so it can be overridden

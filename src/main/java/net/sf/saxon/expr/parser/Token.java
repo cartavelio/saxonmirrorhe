@@ -377,6 +377,11 @@ public abstract class Token {
 
     public static final int MATH_DIVIDE = 85;
 
+    /**
+     * Arrow operator "=&gt;" (XQuery 3.1)
+     */
+    public static final int MAPPING_ARROW = 86;
+
 
     // The following tokens are used only in the query prolog. They are categorized
     // as operators on the basis that a following name is treated as a name rather than
@@ -716,6 +721,7 @@ public abstract class Token {
 
         tokens[COLON] = ":";
         tokens[FAT_ARROW] = "=>";
+        tokens[MAPPING_ARROW] = "=!>";
         tokens[THIN_ARROW] = "->";
         tokens[AND_ALSO] = "andAlso";
         tokens[OR_ELSE] = "orElse";
