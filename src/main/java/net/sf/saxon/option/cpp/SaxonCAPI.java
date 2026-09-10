@@ -47,11 +47,12 @@ public class SaxonCAPI {
 
     //Properties props = new Properties();
     protected Processor processor = null;
-    //protected List<SaxonApiException> saxonExceptions = new ArrayList<SaxonApiException>();
-    //protected List<SaxonApiException> saxonWarnings = new ArrayList<SaxonApiException>();
+
     public static boolean debug = false;
     protected boolean schemaAware = false;
     public static String RESOURCES_DIR = null;
+
+    public static ObjectHandles objectHandles = ObjectHandles.create();
 
 
 
@@ -101,39 +102,11 @@ public class SaxonCAPI {
 //#endif
     }
 
+    @CEntryPoint(name = "createSaxonProcessor")
+    public static long createSaxonProcessor(IsolateThread thread, boolean license) throws SaxonApiException {
+        ObjectHandle handle = objectHandles.create(new Processor(license));
+        return handle.rawValue();
 
-    @CEntryPoint(name = "transformSimple")
-    public static CCharPointer transformSimple(IsolateThread thread, CCharPointer xml, CCharPointer xslt) {
-        try {
-            String result = transform(CTypeConversion.toJavaString(xml), CTypeConversion.toJavaString(xslt));
-            final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(result);
-            return holder.get();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            return CTypeConversion.toCString(e.getMessage()).get();
-        }
-    }
-
-    private static String transform(String xml, String xslt) throws SaxonApiException {
-
-        // TODO: For complex transforms, we need to make a new Processor per request
-        // For simple transforms, we can shared a common Processor.
-
-
-        Processor processor = new Processor(false);
-
-
-
-        XdmNode node = parseXmlString(null, processor, null, null, xml);
-
-        Xslt30Processor cpp = new Xslt30Processor(processor);
-        String [] pname =  {"node"};
-        Object [] pObj = {node};
-        XsltExecutable executable = cpp.compileFromString(null, xslt, false, null, null);
-        String result = new String(net.sf.saxon.option.cpp.Xslt30Processor.applyTemplatesReturningString(null,executable, null, pname, pObj));
-
-        return result;
     }
 
 
