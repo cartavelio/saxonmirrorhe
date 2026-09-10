@@ -208,6 +208,11 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                     .arg(2, BuiltInAtomicType.INTEGER, OPT, null)
                     .arg(3, BuiltInAtomicType.INTEGER, OPT, null));
 
+            register("replace", 3, e -> e.populate(ArrayReplace::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
+                    .arg(1, BuiltInAtomicType.INTEGER, ONE | ABS, null)
+                    .arg(2, forEachFunctionType, OPT, null));
+
             register("trunk", 1, e -> e.populate(ArrayTrunk::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
 
@@ -615,6 +620,25 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         }
 
     }
+
+    /**
+     * Implementation of the function array:replace(array, position, action) =&gt; array
+     */
+    public static class ArrayReplace extends SystemFunction {
+
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            ArrayItem array = (ArrayItem) arguments[0].head();
+            IntegerValue index = (IntegerValue) arguments[1].head();
+            int pos = checkSubscript(index, array.arrayLength()) - 1;
+            GroundedValue oldVal = array.get(pos);
+            FunctionItem fn = (FunctionItem) arguments[2].head();
+            GroundedValue newVal = dynamicCall(fn, context, oldVal).materialize();
+            return array.put(pos, newVal);
+        }
+
+    }
+
 
     /**
      * Implementation of the function array:reverse(array, xs:integer, xs:integer) =&gt; array
