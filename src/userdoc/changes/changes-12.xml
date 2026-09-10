@@ -379,10 +379,15 @@
             grouping as a higher-order function.</p></li>
             <li><p>The <code>map:of()</code> function is implemented. This provides another way of constructing
             a map from a set of key-value pairs.</p></li>
+            <li><p>The <code>map:pairs()</code> function is implemented. This decomposes a map
+                into a set of key-value pairs. The function was previously available under the
+                name <code>map:key-value-pairs</code>.</p></li>
             <li><p>The <code>fn:remove()</code> function allows several items to be removed from a sequence
             at the same time.</p></li>
             <li><p>The <code>fn:slice()</code> function is implemented; it allows selection of part of a sequence
             with capability for numbering from the end, counting backwards, selecting every Nth item, etc.</p></li>
+            <li><p>The <code>array:replace()</code> function is implemented; it replaces one member of an array
+                with a new value that is computed by applying a function to the existing value.</p></li>
             <li><p>The <code>array:slice()</code> function is implemented; it does the same as <code>fn:slice()</code>,
                 but for arrays rather than sequences.</p></li>
             <li><p>The <code>map:keys#2</code> function is implemented; the second argument is a function that
