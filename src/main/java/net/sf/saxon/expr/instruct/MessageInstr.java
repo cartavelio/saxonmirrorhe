@@ -27,10 +27,7 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.type.AnyItemType;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.Type;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
@@ -217,48 +214,50 @@ public class MessageInstr extends Instruction {
 
     /**
      * The MessageAdapter is a filter applied to the message pipeline which is designed to ensure that outputting an attribute
-     * with no containing element (for example &lt;xsl:message select="@x"/&gt;) is not an error. Such an attribute is wrapped in
-     * a processing instruction so it can exist as a child of a document node.
+     * with no containing element (for example &lt;xsl:message select="@x"/&gt;) is not an error. Instead (see bug 6609) we
+     * output a text node containing the attribute's value.
      */
 
-    private static class MessageAdapter extends ProxyReceiver {
+    private static class MessageAdapter extends ProxyOutputter {
 
-        public MessageAdapter(SequenceReceiver next) {
+        public MessageAdapter(Outputter next) {
             super(next);
         }
 
         @Override
-        public void startDocument(int properties) throws XPathException {
-            super.startDocument(properties);
-            //processingInstruction("error-code", errorCode, location, ReceiverOption.NONE);
+        public void attribute(NodeName attName, SimpleType typeCode, String value, Location location, int properties) throws XPathException {
+            try {
+                super.attribute(attName, typeCode, value, location, properties);
+            } catch (XPathException e) {
+                characters(StringView.of(value), location, properties);
+                //processingInstruction("attribute", StringView.of("name=\"" + attName.getDisplayName() + "\" value=\"" + value + "\""), location, ReceiverOption.NONE);
+            }
         }
 
         @Override
-        public void startElement(NodeName elemName, SchemaType type,
-                                 AttributeMap attributes, NamespaceMap namespaces,
-                                 Location location, int properties) throws XPathException {
-            super.startElement(elemName, type, attributes, namespaces, location, properties);
+        public void namespace(String prefix, NamespaceUri namespaceUri, int properties) throws XPathException {
+            try {
+                super.namespace(prefix, namespaceUri, properties);
+            } catch (XPathException e) {
+                characters(namespaceUri.toUnicodeString(), Loc.NONE, properties);
+                //processingInstruction("namespace", StringView.of("prefix=\"" + prefix + "\" uri=\"" + namespaceUri + "\""), Loc.NONE, ReceiverOption.NONE);
+            }
         }
 
         @Override
         public void append(Item item, Location locationId, int copyNamespaces) throws XPathException {
             if (item instanceof NodeInfo) {
                 int kind = ((NodeInfo) item).getNodeKind();
-                if (kind == Type.ATTRIBUTE) {
-                    String attName = ((NodeInfo)item).getDisplayName();
-                    processingInstruction("attribute", StringView.of("name=\"" + attName + "\" value=\"" + item.getUnicodeStringValue() + "\""), locationId, ReceiverOption.NONE);
-                    return;
-                } else if (kind == Type.NAMESPACE) {
-                    String prefix = ((NodeInfo) item).getLocalPart();
-                    processingInstruction("namespace", StringView.of("prefix=\"" + prefix + "\" uri=\"" + item.getUnicodeStringValue() + "\""), Loc.NONE, ReceiverOption.NONE);
-                    return;
+                if (kind == Type.ATTRIBUTE || kind == Type.NAMESPACE) {
+                    characters(item.getUnicodeStringValue(), locationId, ReceiverOption.NONE);
                 }
+                return;
             } else if (item instanceof FunctionItem && !((FunctionItem) item).isArray()) {
                 String representation = ((FunctionItem) item).isMap() ? Err.depict(item) : "Function " + Err.depict(item);
-                nextReceiver.characters(StringView.of(representation), locationId, ReceiverOption.NONE);
+                characters(StringView.of(representation), locationId, ReceiverOption.NONE);
                 return;
             }
-            nextReceiver.append(item, locationId, copyNamespaces);
+            getNextOutputter().append(item, locationId, copyNamespaces);
         }
     }
 
@@ -328,28 +327,28 @@ public class MessageInstr extends Instruction {
                 Builder builder = controller.makeBuilder();
                 builder.setDurability(Durability.TEMPORARY);
                 builder.setTiming(false);
-                Receiver rec = new MessageAdapter(new TreeReceiver(builder));
-                rec.open();
 
-                ComplexContentOutputter cco = new ComplexContentOutputter(rec);
-                cco.startDocument(abort ? ReceiverOption.TERMINATE : ReceiverOption.NONE);
+                ComplexContentOutputter cco = new ComplexContentOutputter(builder);
+                Outputter rec = new MessageAdapter(cco);
+                rec.open();
+                rec.startDocument(abort ? ReceiverOption.TERMINATE : ReceiverOption.NONE);
 
                 try {
                     try {
-                        TailCall tc = select.processLeavingTail(cco, context);
+                        TailCall tc = select.processLeavingTail(rec, context);
                         dispatchTailCall(tc);
                     } catch (UncheckedXPathException e) {
                         throw e.getXPathException();
                     }
                 } catch (XPathException e) {
-                    cco.append(new StringValue("Error " + e.showErrorCode() +
+                    rec.append(new StringValue("Error " + e.showErrorCode() +
                                                        " while evaluating xsl:message at line "
                                                        + expr.getLocation().getLineNumber() + " of " + expr.getLocation().getSystemId() +
                                                        ": " + e.getMessage()));
                 }
 
-                cco.endDocument();
-                cco.close();
+                rec.endDocument();
+                rec.close();
                 builder.close();
                 NodeInfo content = builder.getCurrentRoot();
                 Message message = expr.makeMessage(abort, errorCode, content);

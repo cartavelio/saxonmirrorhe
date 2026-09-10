@@ -223,6 +223,7 @@ public class ComputedElement extends ElementCreator {
                 getNameExp().copy(rebindings), getNamespaceExp() == null ? null : getNamespaceExp().copy(rebindings),
                 /*defaultNamespace,*/ schema, getSchemaType(),
                 getValidationAction(), bequeathNamespacesToChildren, allowNameAsQName);
+        ce.preservingTypes = preservingTypes;
         ExpressionTool.copyLocationInfo(this, ce);
         ce.setContentExpression(getContentExpression().copy(rebindings));
         return ce;

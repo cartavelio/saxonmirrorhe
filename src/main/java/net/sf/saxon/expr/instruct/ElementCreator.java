@@ -336,12 +336,18 @@ public abstract class ElementCreator extends ParentNodeConstructor {
         if (!bequeathNamespacesToChildren) {
             flags += "C";
         }
+        if (preservingTypes) {
+            flags += "V";
+        }
         return flags;
     }
 
     public void setInheritanceFlags(String flags) {
         inheritNamespacesFromParent = !flags.contains("P");
         bequeathNamespacesToChildren = !flags.contains("C");
+        if (flags.contains("V")) {
+            preservingTypes = true;
+        }
     }
 
     public ElementCreationDetails makeElementCreationDetails() {

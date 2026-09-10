@@ -173,6 +173,7 @@ public class FixedElement extends ElementCreator {
         FixedElement fe = new FixedElement(elementName, namespaceBindings, bequeathNamespacesToChildren,
                                            inheritNamespacesFromParent, schema, getSchemaType(), getValidationAction());
         fe.setContentExpression(getContentExpression().copy(rebindings));
+        fe.preservingTypes = preservingTypes;
         ExpressionTool.copyLocationInfo(this, fe);
         return fe;
     }
