@@ -640,6 +640,11 @@ public enum Untyped implements ComplexType {
         return false;
     }
 
+    @Override
+    public OpenContentVariety getOpenContentMode() {
+        return OpenContentVariety.ABSENT;
+    }
+
 
     //#if SCHEMA==true
     /**

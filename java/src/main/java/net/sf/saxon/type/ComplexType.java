@@ -263,6 +263,13 @@ public interface ComplexType extends SchemaType {
 
     boolean hasAssertions();
 
+    /**
+     * Get the open content mode for this complex type
+     * @return the open content mode
+     */
+
+    OpenContentVariety getOpenContentMode();
+
 
 }
 

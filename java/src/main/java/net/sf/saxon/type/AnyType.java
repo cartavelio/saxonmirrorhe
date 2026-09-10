@@ -642,7 +642,12 @@ public enum AnyType implements ComplexType {
     public boolean hasAssertions() {
         return false;
     }
-    
+
+    @Override
+    public OpenContentVariety getOpenContentMode() {
+        return OpenContentVariety.ABSENT;
+    }
+
 
     //#if SCHEMA==true
 
