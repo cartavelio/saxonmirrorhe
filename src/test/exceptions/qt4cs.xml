@@ -157,7 +157,18 @@
       <reason>Leading zeroes in version numbers not yet implemented</reason>
    </exception>
    
-
+   <exception test-set="prod-TryCatchExpr" test-case="try-catch-map1
+      try-catch-map2
+      try-catch-map3
+      try-catch-map4
+      try-catch-map5
+      try-catch-map6
+      try-catch-map7" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-11-20"/>
+      <reason>Try/Catch map variable not yet implemented</reason>
+   </exception>
+   
+ 
    
    <exception test-set="prod-DefaultNamespaceDecl" test-case="default-namespace-40-01
       default-namespace-40-04" run="false" report="n/a">
