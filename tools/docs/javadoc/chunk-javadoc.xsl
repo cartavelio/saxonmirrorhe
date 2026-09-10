@@ -95,7 +95,7 @@ as required; implementing-classes key correction
     <xsl:template match="attribute[@name eq '@see']">
         <xsl:choose>
             <!-- @see "string" or @see <a/> etc -->
-            <xsl:when test='body/div/element() or starts-with(normalize-space(.), """")'>
+            <xsl:when test='*:body/*:div/element() or starts-with(normalize-space(.), """")'>
                 <attribute>
                     <xsl:apply-templates select="@*|node()"/>
                 </attribute>
@@ -147,13 +147,13 @@ as required; implementing-classes key correction
     <xsl:template match="importedTypes"/>
 
     <!-- Only <tag kind="see"/> converted to links; <tag kind="code"/> should just be wrapped as <code/> -->
-    <xsl:template match="tag[@kind eq 'code']" mode="tag-only">
+    <xsl:template match="*:tag[@kind eq 'code']" mode="tag-only">
         <code>
             <xsl:apply-templates select="node()" mode="tag-only" />
         </code>
     </xsl:template>
     
-    <xsl:template match="tag[@kind eq 'see']" mode="#default tag-only">
+    <xsl:template match="*:tag[@kind eq 'see']" mode="#default tag-only">
         <xsl:choose>
             <xsl:when test="contains(., '#') and not(starts-with(., '#')) and not(contains(., '.'))">
                 <tag>
@@ -168,9 +168,9 @@ as required; implementing-classes key correction
                 </tag>
             </xsl:when>
             <xsl:otherwise>
-                <xsl:copy>
+                <tag>
                     <xsl:apply-templates select="node()|@*"/>
-                </xsl:copy>
+                </tag>
             </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
