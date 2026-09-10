@@ -5,8 +5,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Saxon C |release| documentation
-===============================
+Saxon C |release| Python API documentation
+==========================================
 
 .. toctree::
    :maxdepth: 2
