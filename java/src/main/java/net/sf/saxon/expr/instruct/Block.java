@@ -343,9 +343,10 @@ public class Block extends Instruction {
         boolean[] isLiteralText = new boolean[size()];
         boolean hasAdjacentTextNodes = false;
         for (int i = 0; i < size(); i++) {
-            isLiteralText[i] = child(i) instanceof ValueOf &&
-                    ((ValueOf) child(i)).getSelect() instanceof StringLiteral &&
-                    !((ValueOf) child(i)).isDisableOutputEscaping();
+            isLiteralText[i] = child(i) instanceof ValueOf vOf &&
+                    vOf.getSelect() instanceof StringLiteral &&
+                    !vOf.isDisableOutputEscaping() &&
+                    vOf.getCdataExpression() == null;
 
             if (i > 0 && isLiteralText[i] && isLiteralText[i - 1]) {
                 hasAdjacentTextNodes = true;

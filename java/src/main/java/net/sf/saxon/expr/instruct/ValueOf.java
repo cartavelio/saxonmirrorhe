@@ -85,6 +85,10 @@ public final class ValueOf extends SimpleNodeConstructor {
         cdataOperand = new Operand(this, cdataExpression, OperandRole.SINGLE_ATOMIC);
     }
 
+    public Expression getCdataExpression() {
+        return cdataOperand == null ? null : cdataOperand.getChildExpression();
+    }
+
     /**
      * Indicate that this is really an xsl:number instruction
      */
