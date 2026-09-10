@@ -195,25 +195,16 @@
       <reason>Test result challenged - see spec issue #1948</reason>
    </exception>
    
-   <!--<exception test-set="bin-decode-string" 
-      test-case="bin-decode-string-032
-                  bin-decode-string-039
-                  bin-decode-string-046
-                  bin-decode-string-053" 
+   <exception test-set="EXPath-file" 
+      test-case="EXPath-file-read-fallback-003
+                 EXPath-file-read-text-lines-fallback-001
+                 EXPath-file-read-text-lines-fallback-003" 
       run="false" report="n/a">
-      <created by="Michael Kay" on="2026-02-11"/>
-      <reason>Test result challenged - see qt4tests issue #325</reason>
-   </exception>-->
-   
-
-   
-   
-   <!--<exception test-set="prod-PathExpr.J" 
-      test-case="PathExpr-J-166 PathExpr-J-168" 
-      run="false" report="n/a">
-      <created by="Michael Kay" on="2026-01-06"/>
-      <reason>Spec unclear: see issue 2359</reason>
+      <created by="Michael Kay" on="2026-03-23"/>
+      <reason>Fallback option not yet implemented</reason>
    </exception>
--->
+   
+   
+   
 
 </exceptions>
