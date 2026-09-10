@@ -351,8 +351,9 @@
       <h1>What is Saxon?</h1>
 
 
-      <p>The Saxon package is a collection of tools for processing XML documents. The main
-         components are: </p>
+      <p>Saxon is a software package that implements the latest versions of the W3C XSLT, XQuery,
+         XPath and XSD specifications, together with other tools for processing both XML documents
+         and other data formats such as JSON and CSV. The main components are: </p>
       <ul>
          <li>
             <p>An XSLT processor, which can be used from the command line, or invoked from an
