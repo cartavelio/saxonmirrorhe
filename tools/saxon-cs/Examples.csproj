@@ -12,7 +12,7 @@
     <Authors>Saxonica Ltd.</Authors>
     <Description>SaxonCS examples.</Description>
     <PackageTags>XML,XSLT,Saxonica,SaxonCS</PackageTags>
-    <Copyright>Copyright © 2021 Saxonica, Ltd.</Copyright>
+    <Copyright>Copyright © 2021-2023 Saxonica, Ltd.</Copyright>
     <PackageProjectUrl>https://saxonica.com/</PackageProjectUrl>
     <PackageReleaseNotes>These example demonstrate the SaxonCS APIs.</PackageReleaseNotes>
     <PackageSummary>Examples of the SaxonCS API.</PackageSummary>
