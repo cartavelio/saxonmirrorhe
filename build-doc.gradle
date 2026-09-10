@@ -279,7 +279,7 @@ task product_xmljavadoc(
   // unclear why.
   inputs.files fileTree(dir: "${buildDir}/javadoc_src")
   inputs.file "${projectDir}/lib/jeldoc.jar"
-  outputs.files fileTree(dir: "${buildDir}/jeljavadoc")
+  outputs.files fileTree(dir: "${buildDir}/xmljavadoc")
 
   def cp = ""
   configurations.documentation.resolve().each { path ->
