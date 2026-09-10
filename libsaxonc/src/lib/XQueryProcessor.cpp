@@ -235,7 +235,6 @@ const char * XQueryProcessor::getQueryBaseURI() {
 }
 
 void XQueryProcessor::setUpdating(bool updating) {
-  SaxonProcessor::attachCurrentThread();
   if (updating) {
     setProperty("updating", "on");
   } else {
@@ -247,8 +246,6 @@ void XQueryProcessor::executeQueryToFile(const char *infilename,
                                          const char *ofilename,
                                          const char *query,
                                          const char *encoding) {
-  SaxonProcessor::attachCurrentThread();
-
   setProperty("resources", proc->getResourcesDirectory());
   if (infilename != nullptr) {
     setProperty("s", infilename);
@@ -261,19 +258,19 @@ void XQueryProcessor::executeQueryToFile(const char *infilename,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
 
-  if (status == SXN_EXCEPTION) {
-    throw SaxonApiException();
-  }
   if (processorDataRef > 0) {
     j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
+  if (status == SXN_EXCEPTION) {
+    throw SaxonApiException();
+  }
+
 }
 
 XdmValue *XQueryProcessor::executeQueryToValue(const char *infilename,
                                                const char *query,
                                                const char *encoding) {
-  SaxonProcessor::attachCurrentThread();
   setProperty("resources", proc->getResourcesDirectory());
   if (infilename != nullptr) {
     setProperty("s", infilename);
@@ -301,7 +298,6 @@ XdmValue *XQueryProcessor::executeQueryToValue(const char *infilename,
 const char *XQueryProcessor::executeQueryToString(const char *infilename,
                                                   const char *query,
                                                   const char *encoding) {
-  SaxonProcessor::attachCurrentThread();
   setProperty("resources", proc->getResourcesDirectory());
   if (infilename != nullptr) {
     setProperty("s", infilename);
@@ -315,12 +311,12 @@ const char *XQueryProcessor::executeQueryToString(const char *infilename,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
 
-  if (result == nullptr) {
-    throw SaxonApiException();
-  }
   if (processorDataRef > 0) {
     j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
+  }
+  if (result == nullptr) {
+    throw SaxonApiException();
   }
   return (const char *)result;
 }

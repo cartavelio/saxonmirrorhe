@@ -194,53 +194,7 @@ XdmValue **XdmArray::values() {
 
   for (int p = 0; p < sizex; ++p) {
 
-    int typeRef = j_getXdmObjectType(thread,(void *)results[p]);
-    XdmItem *xdmItem = nullptr;
-    if (typeRef == -2) {
-      // exception = new SaxonApiException();
-      std::cerr << "XdmArray.values() failed with exception" << std::endl;
-
-      SaxonApiException *exception = new SaxonApiException();
-      std::cerr << "Exception message = " << exception->getMessage()
-                << std::endl;
-      delete exception;
-      delete [] arr;
-      return nullptr;
-    }
-    if (typeRef == 1) {
-      tempValue = new XdmValue();
-      xdmItem = new XdmAtomicValue(results[p]);
-      tempValue->addXdmItem(xdmItem);
-
-    } else if (typeRef == 2) {
-      tempValue = new XdmValue();
-      xdmItem = new XdmNode(results[p]);
-      tempValue->addXdmItem(xdmItem);
-
-    } else if (typeRef == 4) {
-      tempValue = new XdmValue();
-      xdmItem = new XdmMap(results[p]);
-      tempValue->addXdmItem(xdmItem);
-
-    } else if (typeRef == 3) {
-      tempValue = new XdmValue();
-      xdmItem = new XdmArray(results[p]);
-      tempValue->addXdmItem(xdmItem);
-
-    } else if (typeRef == 5) {
-      tempValue = new XdmValue();
-      xdmItem = new XdmFunctionItem(results[p]);
-      tempValue->addXdmItem(xdmItem);
-    } else if (typeRef == 6) {
-      // Empty Sequence detected.
-      // TODO Maybe we should create an EmptySequence object
-      std::cerr << "XdmArray.values() failed - EmptySequence not handled"
-                << std::endl;
-      j_handles_destroy(thread,(void *)results[p]);
-
-    } else {
-      tempValue = new XdmValue((int64_t)results[p], true);
-    }
+    tempValue = SaxonProcessor::makeXdmValueFromRef(results[p]);
 
     arr[p] = tempValue;
   }
