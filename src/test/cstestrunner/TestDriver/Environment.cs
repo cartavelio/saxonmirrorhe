@@ -314,7 +314,7 @@ namespace TestDriver {
                 string defaultAtt = basei.GetAttributeValue("default");
                 if (defaultAtt != null && (defaultAtt.Trim().Equals("true") || defaultAtt.Trim().Equals("1"))) {
                     environment.xpathCompiler.DeclareDefaultCollation(uri);
-                    //environment.xqueryCompiler.DeclareCollation(uri, true);
+                    environment.xqueryCompiler.DefaultCollationName = uri;
                     if (environment.xsltCompiler != null) {
                         environment.xsltCompiler.DefaultCollationName = uri;
                     }
