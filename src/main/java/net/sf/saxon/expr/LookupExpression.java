@@ -98,19 +98,7 @@ public class LookupExpression extends BinaryExpression {
                 }
             } else if (isMapLookup) {
                 ItemType mapType = getLhsExpression().getItemType();
-                if (mapType instanceof RecordTest && getRhsExpression() instanceof StringLiteral) {
-                    String fieldName = ((StringLiteral) getRhsExpression()).stringify();
-                    SequenceType fieldType = ((RecordTest) mapType).getFieldType(fieldName);
-                    if (fieldType == null) {
-                        if (((RecordTest) mapType).isExtensible()) {
-                            return AnyItemType.getInstance();
-                        } else {
-                            return ErrorType.getInstance();
-                        }
-                    } else {
-                        return fieldType.getPrimaryType();
-                    }
-                } else if (mapType instanceof MapType) {
+                if (mapType instanceof MapType) {
                     return ((MapType) mapType).getValueType().getPrimaryType();
                 }
             }
@@ -153,8 +141,7 @@ public class LookupExpression extends BinaryExpression {
 
         ItemType containerType = getLhsExpression().getItemType();
         isArrayLookup = containerType instanceof ArrayItemType;
-        boolean isTupleLookup = containerType instanceof RecordType || originalType instanceof RecordType;
-        isMapLookup = containerType instanceof MapType || isTupleLookup;
+        isMapLookup = containerType instanceof MapType;
         //#if CSHARP==false
         if (th.isSubType(containerType, AnyExternalObjectType.THE_INSTANCE)) {
             config.checkLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION, "use of lookup expressions on external objects", -1);
@@ -193,17 +180,6 @@ public class LookupExpression extends BinaryExpression {
         }
         setRhsExpression(tc.staticTypeCheck(getRhsExpression(), req, role, visitor));
         isSingleEntry = getRhsExpression().getCardinality() == StaticProperty.EXACTLY_ONE;
-
-        if (isTupleLookup && getRhsExpression() instanceof StringLiteral) {
-            RecordType tt = (RecordType)(containerType instanceof RecordType ? containerType : originalType);
-            if (!tt.isExtensible()) {
-                String fieldName = ((StringLiteral) getRhsExpression()).stringify();
-                if (tt.getFieldType(fieldName) == null) {
-                    throw new XPathException("Field '" + fieldName + "' is not defined in the record type", "XPTY0004")
-                            .asTypeError().withLocation(getLocation());
-                }
-            }
-        }
 
         isClassified = true;
         return this;

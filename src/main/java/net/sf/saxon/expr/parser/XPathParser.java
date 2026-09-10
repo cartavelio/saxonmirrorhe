@@ -2580,7 +2580,7 @@ public class XPathParser {
             final Expression exp = parseRemainingPath(slashExp);
             setLocation(exp, offset);
             return exp;
-        } else if (t.currentToken instanceof Token.NameToken && t.peekAhead() != Token.LPAREN) {
+        } else if (t.currentToken instanceof Token.NameToken && t.peekAhead() != Token.LPAREN && t.peekAhead() != Token.HASH) {
             String name = t.currentName();
             if (name.equals("true") || name.equals("false")) {
                 warning("The expression is looking for a child element named '" + name +
@@ -2793,6 +2793,11 @@ public class XPathParser {
                 } else {
                     grumble("Unexpected " + token + " after '=>'");
                     return null;
+                }
+            } else if (t.peekAhead() == Token.LPAREN) {
+                if (isKeyword("function") || isKeyword("fn")) {
+                    Expression fn = parseInlineFunction(AnnotationList.EMPTY);
+                    return parseDynamicFunctionCall(fn, lhs);
                 }
             }
             return parseFunctionCall(t.currentName(), lhs);

@@ -688,7 +688,6 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
         return c2;
     }
 
-
     /**
      * Call this function to return a value.
      *

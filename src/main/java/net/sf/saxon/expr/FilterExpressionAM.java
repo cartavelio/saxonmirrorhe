@@ -365,11 +365,19 @@ public class FilterExpressionAM extends BinaryExpression
                 focus.setContextItem(kvp);
                 focus.incrementPosition();
                 GroundedValue predicateValue = predicate.evaluate(c2).materialize();
-                if (predicateValue instanceof NumericValue) {
-                    if (((NumericValue) predicateValue).isWholeNumber() && ((NumericValue) predicateValue).longValue() == position) {
-                        result = result.addEntry(pair.key, pair.value);
+                if (predicateValue.itemAt(0) instanceof NumericValue) {
+                    for (Item it : predicateValue.asIterable()) {
+                        if (it instanceof NumericValue) {
+                            if (((NumericValue) it).isWholeNumber()
+                                    && ((NumericValue) it).longValue() == position) {
+                                result = result.addEntry(pair.key, pair.value);
+                                break;
+                            }
+                        } else {
+                            throw new XPathException("If the first item in a predicate is numeric, remaining items must also be numeric", "FORG0006");
+                        }
                     }
-                } else if (predicateValue != null && predicateValue.effectiveBooleanValue()) {
+                } else if (predicateValue.effectiveBooleanValue()) {
                     result = result.addEntry(pair.key, pair.value);
                 }
             }
