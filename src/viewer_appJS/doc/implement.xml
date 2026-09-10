@@ -13,7 +13,7 @@
     <default id='exslt-sets' saxon="PE/EE"/>
     <default id='exslt-dates-and-times' saxon="PE/EE" platform="J"/>
     
-    <default id='expath-archive' saxon="9.6 PE/EE" xpath="2.0" platform="J"/> 
+    <default id='expath-archive' saxon="9.6 PE/EE" xpath="2.0" platform="J C"/> 
     <default id='expath-binary' saxon="9.6 PE/EE" xpath="2.0"/>
     <default id='expath-file' saxon="9.5 PE/EE" xpath="2.0"/>
     

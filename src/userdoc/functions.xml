@@ -9479,7 +9479,7 @@ return if ($bookDecl('type definition')('variety') = 'element-only')
         </proto>
       </signatures>
       <status>
-        <p>This extension function is not available on SaxonCS.</p>
+        <p>This extension function is not available on SaxonCS or SaxonC.</p>
         <p>Use of this function requires the JavaMail API. The mail.jar must be available on the
           classpath. From Saxon 9.9, the required jar is compiled against version 1.6 (previously,
           this was version 1.4). The jar is not redistributed as part
