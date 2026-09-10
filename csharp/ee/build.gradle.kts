@@ -466,14 +466,25 @@ for (buildArch in architectures) {
     arch = buildArch
     inputs.files(layout.projectDirectory.file("../tools/generateCSProj.xsl"))
     inputs.files(layout.projectDirectory.file("../tools/generateTestDriverCSProj.xsl"))
+    inputs.files(layout.projectDirectory.file("../tools/generateNUnitCSProj.xsl"))
     outputs.files(layout.buildDirectory.file("${buildArch}/SaxonCS/SaxonCS.csproj"))
     outputs.files(layout.buildDirectory.file("${buildArch}/TestDrivers/TestDrivers.csproj"))
+    outputs.files(layout.buildDirectory.file("${buildArch}/NUnitTests/NUnitTests.csproj"))
   }
   configure_task { dependsOn(configure) }
+
+  val nunit = tasks.register<Copy>("dotnetNUnit_${buildArch}") {
+    from(layout.projectDirectory.dir("../src/test/nunit/SaxonCS-NUnit")) {
+      include("**/*.cs")
+    }
+    into(layout.buildDirectory.dir("${buildArch}/NUnitTests"))
+  }
+  build_task { dependsOn(nunit) }
 
   val build = tasks.register<DotNetBuild>("dotnetBuild_${buildArch}") {
     group = LifecycleBasePlugin.BUILD_GROUP
     dependsOn(configure)
+    dependsOn(nunit)
     target = "SaxonCS"
     arch = buildArch
     inputs.files(configure)
@@ -484,7 +495,6 @@ for (buildArch in architectures) {
     outputs.dir(layout.buildDirectory.dir("${buildArch}/SaxonCS"))
   }
   build_task { dependsOn(build) }
-
 
   val platform = saxonCS.platform.get()
   val csrid = "${platform}-${buildArch}"

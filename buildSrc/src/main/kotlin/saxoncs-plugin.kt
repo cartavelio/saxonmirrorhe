@@ -86,7 +86,13 @@ abstract class DotNetConfiguration @Inject constructor(private val ex: ExecOpera
   val generateTestCsProj = project.layout.projectDirectory.file("../tools/generateTestDriverCSProj.xsl")
 
   @get:Internal
+  val generateNUnitCsProj = project.layout.projectDirectory.file("../tools/generateNUnitCSProj.xsl")
+
+  @get:Internal
   val testCsProj = this.arch.map { project.layout.buildDirectory.file("${it}/TestDrivers/core.csproj").get() }
+
+  @get:Internal
+  val nunitCsProj = this.arch.map { project.layout.buildDirectory.file("${it}/NUnitTests/NUnitTests.csproj").get() }
 
   @get:Internal
   val appSlnFile = this.arch.map { project.layout.buildDirectory.file("${it}/SaxonCS/SaxonCS.sln").get() }
@@ -134,6 +140,19 @@ abstract class DotNetConfiguration @Inject constructor(private val ex: ExecOpera
            "-o:${testCsProj.get()}",
            "saxonVersion=${saxonBuild.version.get()}",
            "edition=${saxonCS.edition.get()}",
+           "optimize=true",
+           "csrid=${csrid}")
+    }
+
+    ex.javaexec {
+      classpath = saxonCS.classpath.get()
+      mainClass.set("net.sf.saxon.Transform") // .set() WTF?
+      args("-it",
+           "-xsl:${generateNUnitCsProj}",
+           "-o:${nunitCsProj.get()}",
+           "saxonVersion=${saxonBuild.version.get()}",
+           "edition=${saxonCS.edition.get()}",
+           "configuration=${configuration.get()}",
            "optimize=true",
            "csrid=${csrid}")
     }
