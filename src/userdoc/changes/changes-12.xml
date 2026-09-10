@@ -403,6 +403,8 @@
         <ul>
             <li><p>Functions that accept a collation argument now allow it to be set to an empty sequence,
             which has the same effect as omitting the argument.</p></li>
+            <li><p>The <code>fn:duplicate-values()</code> function is implemented. This returns all
+            values that appear more than once in the input sequence.</p></li>
         </ul>
         
       
@@ -493,6 +495,10 @@
         
         <p>From 12.3, Switch and Typeswitch expressions in XQuery allow curly braces, for example:
         <code>switch($x){case 1: return "a" case 2: return "b" default: return "?"}</code></p>
+        
+        <p>From 12.4, element and attribute tests can use the syntax <code>element(A|B)</code>
+        and <code>attribute(A|B)</code> to accept a union of names. Wildcards are also allowed,
+        for example <code>element(p:*|q:*)</code></p>
         
         
         <h2>XQuery 4.0 extensions</h2>
