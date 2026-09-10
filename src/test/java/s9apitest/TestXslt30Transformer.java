@@ -2352,6 +2352,36 @@ public class TestXslt30Transformer {
         }
     }
 
+   @Test
+    public void TestBug5341() {
+       try {
+           String xslt = "<xsl:stylesheet \n"
+                   + "         xmlns:xsl='http://www.w3.org/1999/XSL/Transform' \n"
+                   + "         version='3.0'>\n"
+                   + "\n"
+                   + "            <xsl:template match = '/'>\n"
+                   + "                <xsl:sequence select = \"substring-after(/eventItem/contentMeta/scheduled/start, 'T')\"/>\n"
+                   + "            </xsl:template>\n"
+                   + "    </xsl:stylesheet>";
+
+
+           Processor processor = new Processor(true);
+           XsltCompiler xsltCompiler = processor.newXsltCompiler();
+           xsltCompiler.setXsltLanguageVersion ("3.0");
+           StringReader rdr = new StringReader(xslt);
+           XsltExecutable exec = xsltCompiler.compile(new StreamSource(rdr));
+           Xslt30Transformer transf = exec.load30();
+           StringWriter sw = new StringWriter();
+           Serializer ser = processor.newSerializer(sw);
+           StreamSource stream = new StreamSource(new File(ConfigTest.DATA_DIR + "cirkev.xml"));
+
+           transf.applyTemplates(stream, ser);
+           assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>10:00", sw.toString());
+       } catch (SaxonApiException e) {
+           fail();
+       }
+   }
+
 
 }
 
