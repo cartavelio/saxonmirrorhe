@@ -115,6 +115,17 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate {
     }
 
     /**
+     * Extract a QNameTest (the strongest one possible) that must be satisfied by a node
+     * if it is to satisfy this NodeTest
+     *
+     * @return the strongest possible QNameTest
+     */
+    @Override
+    public QNameTest getQNameTest() {
+        return nameTest;
+    }
+
+    /**
      * Get the set of allowed node names that this type if capable
      * of matching
      *
