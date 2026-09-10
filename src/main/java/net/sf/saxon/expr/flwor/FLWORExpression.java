@@ -473,6 +473,7 @@ public class FLWORExpression extends Expression {
             final ExpressionVisitor visitor,
             final ContextItemStaticInfo contextItemType) throws XPathException {
 
+        Optimizer opt = visitor.obtainOptimizer();
         //verifyParentPointers();
         // Optimize all the subexpressions
         for (Clause c : clauses) {
@@ -505,6 +506,7 @@ public class FLWORExpression extends Expression {
                     LetClause lc = (LetClause) c;
                     if (!ExpressionTool.dependsOnVariable(this, new Binding[]{lc.getRangeVariable()})) {
                         clauses.remove(c);
+                        opt.trace("Removed unused variable " + lc.getRangeVariable().getVariableQName().getDisplayName(), this);
                         tryAgain = true;
                         break;
                     }
@@ -522,6 +524,7 @@ public class FLWORExpression extends Expression {
                         if (oneRef || simpleSeq) {
                             ExpressionTool.replaceVariableReferences(this, lc.getRangeVariable(), lc.getSequence(), true);
                             clauses.remove(c);
+                            opt.trace("Inlined variable " + lc.getRangeVariable().getVariableQName().getDisplayName(), this);
                             if (clauses.isEmpty()) {
                                 return getReturnClause();
                             }
