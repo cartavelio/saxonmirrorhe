@@ -8,8 +8,10 @@
 package net.sf.saxon.sapling;
 
 import net.sf.saxon.s9api.QName;
+//#if CSHARP == false
 import net.sf.saxon.sapling.dsl.DocumentBuilder;
 import net.sf.saxon.sapling.dsl.ElementBuilder;
+//#endif
 
 /**
  * This is a non-instantiable class holding a number of convenience methods for creating
@@ -31,6 +33,7 @@ public class Saplings {
         return new SaplingDocument();
     }
 
+//#if CSHARP == false
     /**
      * Create a sapling document node, which is passed to the DSL lambda
      * @param definition the DSL definition to build with
@@ -43,6 +46,7 @@ public class Saplings {
         definition.buildWith(builder);
         return builder.getResult();
     }
+//#endif
 
     /**
      * Create a sapling document node with a specified base URI, with no children
@@ -54,6 +58,7 @@ public class Saplings {
         return new SaplingDocument(baseUri);
     }
 
+//#if CSHARP == false
     /**
      * Create a sapling document nodewith a specified base URI, which is passed to the DSL lambda
      * @param baseUri the base URI of the document
@@ -67,6 +72,7 @@ public class Saplings {
         definition.buildWith(builder);
         return builder.getResult();
     }
+//#endif
 
     /**
      * Create a sapling element node, in no namespace, with no attributes and no children
@@ -91,6 +97,7 @@ public class Saplings {
         return new SaplingElement(qName);
     }
 
+//#ifdef CSHARP == false
     /**
      * Create a sapling element node, in no namespace, which is passed to the DSL lambda
      * @param name the local name of the element node. This must be a valid NCName, but the
@@ -121,6 +128,7 @@ public class Saplings {
         definition.buildWith(builder);
         return builder.getResult();
     }
+//#endif
 
     /**
      * Create a sapling text node, with a given string value

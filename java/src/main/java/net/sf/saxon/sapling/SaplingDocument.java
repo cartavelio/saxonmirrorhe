@@ -52,7 +52,7 @@ import javax.xml.transform.Source;
           "        public void Send(Saxon.Api.Processor processor, Saxon.Api.IDestination destination) {"
         + "            try {"
         + "                Saxon.Hej.@event.PipelineConfiguration pipe = processor.Implementation.makePipelineConfiguration();"
-        + "                deliver(destination.GetUnderlyingDestination().getReceiver(pipe, new Saxon.Hej.serialize.SerializationProperties()), null);"
+        + "                deliver(destination.UnderlyingDestination.getReceiver(pipe, new Saxon.Hej.serialize.SerializationProperties()), null);"
         + "            } catch (Saxon.Hej.trans.XPathException e) {"
         + "                throw new Saxon.Api.SaxonApiException(e);"
         + "            }"

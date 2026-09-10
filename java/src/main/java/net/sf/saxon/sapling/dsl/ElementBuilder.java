@@ -1,18 +1,17 @@
 package net.sf.saxon.sapling.dsl;
 
-import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.QName;
 import net.sf.saxon.sapling.*;
 
 public class ElementBuilder implements CommonBuilder<ElementBuilder> {
     private String name;
     private QName qName;
-    private String defaultNs;
+    private String defaultNamespace;
     private SaplingElement element;
 
     public ElementBuilder(SaplingElement element) {
         this.element = element;
-        this.defaultNs = null;
+        this.defaultNamespace = null;
     }
 
     @Override
@@ -42,13 +41,13 @@ public class ElementBuilder implements CommonBuilder<ElementBuilder> {
 
     @Override
     public ElementBuilder defaultNs(String uri) {
-        this.defaultNs = uri;
+        this.defaultNamespace = uri;
         return this;
     }
 
     @Override
     public String getDefaultNs() {
-        return defaultNs;
+        return defaultNamespace;
     }
 
     public SaplingElement getResult() {

@@ -288,6 +288,7 @@ public class SaplingElement extends SaplingNode {
         return builder.getCurrentRoot();
     }
 
+//#ifdef CSHARP == false
     /**
      * Convert the sapling element to a regular element node, returning the {@link XdmNode} object
      * representing the parentless element node at the root of the resulting tree
@@ -300,6 +301,26 @@ public class SaplingElement extends SaplingNode {
 
     public XdmNode toXdmNode(Processor processor) throws SaxonApiException {
         try {
+            return (XdmNode) XdmValue.wrap(toNodeInfo(processor.getUnderlyingConfiguration()));
+        } catch (XPathException e) {
+            throw new SaxonApiException(e);
+        }
+    }
+//#endif
+
+    /**
+     * Convert the sapling element to a regular element node, returning the {@link XdmNode} object
+     * representing the parentless element node at the root of the resulting tree
+     *
+     * @param configuration the configuration that is to own the resulting tree
+     * @return the element node at the root of the constructed tree. The implementation model for the
+     * tree will be the default tree model of the Processor's Configuration
+     * @throws SaxonApiException if construction fails; this could happen if constraints have been violated
+     */
+
+    public XdmNode toXdmNode(Configuration configuration) throws SaxonApiException {
+        try {
+            Processor processor = new Processor(configuration);
             return (XdmNode) XdmValue.wrap(toNodeInfo(processor.getUnderlyingConfiguration()));
         } catch (XPathException e) {
             throw new SaxonApiException(e);

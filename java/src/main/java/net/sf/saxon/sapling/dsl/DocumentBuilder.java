@@ -4,7 +4,7 @@ import net.sf.saxon.sapling.*;
 
 public class DocumentBuilder implements CommonBuilder<DocumentBuilder>{
     private SaplingDocument document;
-    private String defaultNs;
+    private String defaultNamespace;
 
     public DocumentBuilder(SaplingDocument document) {
         this.document = document;
@@ -25,12 +25,12 @@ public class DocumentBuilder implements CommonBuilder<DocumentBuilder>{
     }
 
     public DocumentBuilder defaultNs(String uri) {
-        this.defaultNs = uri;
+        this.defaultNamespace = uri;
         return this;
     }
 
     @Override
     public String getDefaultNs() {
-        return defaultNs;
+        return defaultNamespace;
     }
 }
