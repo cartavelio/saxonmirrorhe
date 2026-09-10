@@ -2,12 +2,11 @@ package com.saxonica.functions.qt4;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.EmptySequence;
+import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.IntegerValue;
 
@@ -83,11 +82,10 @@ public class IndexWhere extends SystemFunction {
                             result = dynamicCall(predicate, context, baseItem, ix);
                             break;
                         default:
-                            result = EmptySequence.getInstance();
+                            result = BooleanValue.FALSE;
                             break;
                     }
-                    boolean ebv = ExpressionTool.effectiveBooleanValue(result.iterate());
-                    if (ebv) {
+                    if (((BooleanValue)result.head()).getBooleanValue()) {
                         return ix;
                     }
                 } catch (XPathException e) {

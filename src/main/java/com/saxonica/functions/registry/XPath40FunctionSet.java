@@ -57,10 +57,6 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER},
                 SequenceType.SINGLE_BOOLEAN).withAcceptReducedArity();
 
-        SpecificFunctionType predicate2ebv = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER},
-                SequenceType.ANY_SEQUENCE).withAcceptReducedArity();
-
         SpecificFunctionType compareFnType = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_ITEM},
                 SequenceType.ANY_SEQUENCE);
@@ -229,7 +225,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         register("every", 2, e -> e.populate(EveryFn::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, BooleanValue.TRUE)
-                .arg(1, predicate2ebv, OPT, null));
+                .arg(1, predicate2, OPT, null));
 
         register("expanded-QName", 1, e -> e.populate(ExpandedQNameFn::new, BuiltInAtomicType.STRING, OPT, 0)
                 .arg(0, BuiltInAtomicType.QNAME, OPT, null));
@@ -249,7 +245,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("filter", 2, e -> e.populate(FilterFn::new, AnyItemType.getInstance(),
                                               STAR, AS_ARG0 | LATE)
                 .arg(0, AnyItemType.getInstance(), STAR | TRA, EMPTY)
-                .arg(1, predicate2ebv, ONE, null));
+                .arg(1, predicate2, ONE, null));
 
         register("foot", 1, e -> e.populate(FootFn::new, AnyItemType.getInstance(), OPT, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, EmptySequence.getInstance()));
@@ -276,7 +272,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         register("index-where", 2, e -> e.populate(IndexWhere::new, BuiltInAtomicType.INTEGER, STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, predicate2ebv, ONE, null));
+                .arg(1, predicate2, ONE, null));
 
         register("in-scope-namespaces", 1, e -> e.populate(InScopeNamespacesFn::new, MapType.ANY_MAP_TYPE, ONE, LATE)
                 .arg(0, NodeKindTest.ELEMENT, STAR, null));
@@ -454,7 +450,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         register("some", 2, e -> e.populate(SomeFn::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, BooleanValue.FALSE)
-                .arg(1, predicate2ebv, OPT, null));
+                .arg(1, predicate2, OPT, null));
 
         register("starts-with", 3, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.BOOLEAN, ONE, BASE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
@@ -496,7 +492,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         register("take-while", 1, 2, e -> e.populate(TakeWhile::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, predicate2ebv, OPT, null));
+                .arg(1, predicate2, ONE, null));
 
         register("tokenize", 2, e -> e.populate(RegexFunctionSansFlags::new, BuiltInAtomicType.STRING, STAR, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY)

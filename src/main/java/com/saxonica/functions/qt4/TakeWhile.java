@@ -1,11 +1,11 @@
 package com.saxonica.functions.qt4;
 
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.Int64Value;
 
 /**
@@ -73,17 +73,16 @@ public class TakeWhile extends SystemFunction {
                     boolean matches;
                     switch (whileArity) {
                         case 0:
-                            matches = ExpressionTool.effectiveBooleanValue(
-                                    whileCondition.call(context, new Sequence[]{}).iterate());
+                            matches = ((BooleanValue)whileCondition.call(context, new Sequence[]{}).head()).getBooleanValue();
                             break;
                         case 1:
-                            matches = ExpressionTool.effectiveBooleanValue(
-                                    whileCondition.call(context, new Sequence[]{item}).iterate());
+                            matches = ((BooleanValue) whileCondition.call(context, new Sequence[]{item}).head()).getBooleanValue();
                             break;
                         case 2:
                         default:
-                            matches = ExpressionTool.effectiveBooleanValue(
-                                    whileCondition.call(context, new Sequence[]{item, Int64Value.makeIntegerValue(position)}).iterate());
+                            final Int64Value pos = Int64Value.makeIntegerValue(position);
+                            matches = ((BooleanValue) whileCondition.call(context,
+                                                                          new Sequence[]{item, pos}).head()).getBooleanValue();
                             break;
                     }
                     if (matches) {
