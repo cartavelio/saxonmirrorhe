@@ -174,8 +174,9 @@ saxon:evaluate($expression)
       <aside>
         <p>These extensions are available in Saxon-PE and Saxon-EE "out of the box". Except for
         the Common module functions, they are not available in Saxon-HE. The source code is
-        available in the Subversion repository on the
-        <a href="http://dev.saxonica.com/" class="bodylink">dev.saxonica.com</a> site, package
+        available in the Git repository at
+          <a href="https://saxonica.plan.io/projects/saxonmirrorhe/repository"
+            class="bodylink">https://saxonica.plan.io/projects/saxonmirrorhe/repository</a>, package
           <code>net.sf.saxon.option.exslt</code>. The code is available under the Mozilla Public
         License version 2.0.</p>
         <p>The extension functions in modules Sets, Math, Date, and Random are not available on SaxonCS; and
