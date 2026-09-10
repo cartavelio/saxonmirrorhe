@@ -179,7 +179,6 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
 
     @Override
     public void generateId(/*@NotNull*/ StringBuilder buffer) {
-        System.err.println("generateId(/)");
         buffer.append('d');
         buffer.append(getTreeInfo().getDocumentNumber());
     }
