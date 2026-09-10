@@ -119,27 +119,22 @@ function exampleSimple2($proc, $xmlFile, $xslFile)
 }
 
 /* simple example to show importing a document as string and stylesheet as a string */
-function exampleSimple3($saxonProc, $proc)
+function catalogTest($saxonProc)
 {
-    echo '<b>exampleSimple3:</b><br/>';
+    echo '<b>catalogTest:</b><br/>';
     //$proc->clearParameters();
     try {
-        $xdmNode = $saxonProc->parseXmlFromString("<doc><b>text value of out</b></doc>");
-        if ($xdmNode == null) {
-            echo 'xdmNode is null';
-            return;
-        }
-        echo "cp0======\n";
-        $executable = $proc->compileFromString("<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'>
-					    	<xsl:template match='/'>
-					    	    <xsl:copy-of select='.'/>
-					    	</xsl:template>
-					    </xsl:stylesheet>");
+        $catalogFiles = array("php/xml/catalog.xml", "php/xml/catalog2.xml");
+        $saxonProc->setCatalogFiles($catalogFiles);
+        //$saxonProc->setcwd("../");
+        $trans = $saxonProc->newXslt30Processor();
+        $executable = $trans->compileFromFile("http://example.com/books.xsl");
 
-        $executable->setInitialMatchSelection($xdmNode);
+        $executable->setInitialMatchSelectionAsFile("php/xml/books.xml");
+        $executable->setGlobalContextFromFile("php/xml/books.xml");
 
-        $result = $executable->transformToString();
-        echo '<b>exampleSimple3</b>:<br/>';
+        $result = $executable->applyTemplatesReturningString();
+        echo '<b>catalogTest</b>:<br/>';
         if ($result != null) {
             echo 'Output:' . $result;
         } else {
@@ -148,11 +143,13 @@ function exampleSimple3($saxonProc, $proc)
 
         $executable->clearParameters();
         $executable->clearProperties();
-        unset($xdmNode);
+
     } catch(Exception $e) {
         echo "Exception".$e->getMessage();
     }
 }
+
+
 
 function exampleLoopVar($saxonProc, $proc, $xml, $xslt)
 {
@@ -598,6 +595,8 @@ function testPerformance()
     testCallTemplate1($saxonProc, $proc);
     echo '<br/>';
     exampleSimple1($saxonProc, $proc, $foo_xml, $foo_xsl);
+    echo '<br/>';
+    catalogTest($saxonProc);
     echo '<br/>';
     exampleSimple2($proc, "xml/foo.xml", $foo_xsl);
     echo '<br/>';

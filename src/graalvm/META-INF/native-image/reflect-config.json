@@ -40,7 +40,8 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"com.saxonica.ee.domino.DominoNode"
+  "name":"com.saxonica.ee.domino.DominoNode",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
   "name":"com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl",

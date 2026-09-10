@@ -736,7 +736,7 @@ void SaxonProcessor::setCatalog(const char *catalogFile) {
 
   addProcessorProperty(sxn_environ->thread, (void *)processorDataRef,(char *) catalogFile);
 
-  long result = j_setCatalogFiles(sxn_environ->thread, (void *)procRef,
+  long result = j_setCatalogFiles(sxn_environ->thread, (void *)procRef, (char *)cwd.c_str(),
                                  (void *)processorDataRef);
   if (result == SXN_UNSET) {
     throw SaxonApiException("setCatalogFile failed");
@@ -765,12 +765,12 @@ void SaxonProcessor::setCatalogFiles(const char ** catalogFiles, int length) {
   for (int i= 0; i <length; i++) {
 
     if(catalogFiles[i] != nullptr) {
-        addProcessorProperty(sxn_environ->thread, (void *) processorDataRef,(char *) catalogFiles[i]);
+        addProcessorProperty(sxn_environ->thread, (void *) processorDataRef,  (char *) catalogFiles[i]);
     }
   }
 
 
-  long result = j_setCatalogFiles(sxn_environ->thread, (void *)procRef,
+  long result = j_setCatalogFiles(sxn_environ->thread, (void *)procRef, (char *)cwd.c_str(),
                                  (void *)processorDataRef);
   if (result == SXN_UNSET) {
     throw SaxonApiException("setCatalogFile failed");

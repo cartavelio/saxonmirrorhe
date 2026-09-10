@@ -707,22 +707,28 @@ public class SaxonCAPI {
      * @throws SaxonApiException  if we cannot convert the catalogFile string to Java object
      */
     @CEntryPoint(name = "j_setCatalogFiles", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long j_setCatalogFiles(IsolateThread thread, ObjectHandle processorRef, ObjectHandle catalogFilesRef) throws SaxonApiException {
-
-        if (debug) {
-            System.err.println("JAVA DEBUG: start j_setCatalogFiles");
-        }
+    public static long j_setCatalogFiles(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, ObjectHandle catalogFilesRef) throws SaxonApiException {
+        
         if (processorRef == WordFactory.nullPointer() || catalogFilesRef == WordFactory.nullPointer()) {
-            if (debug) {
-                System.err.println("catalog failed!!");
-            }
             return net.sf.saxon.option.cpp.SaxonCAPI.STATUS_FAIL;
+        }
+
+        String cwd = null;
+        if (ccwd != WordFactory.nullPointer()) {
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
 
         Processor processor = objectHandles.get(processorRef);
         ProcessorDataAccumulator accumulator = objectHandles.get(catalogFilesRef);
 
         ArrayList<String>  catalogFiles = accumulator.getParameterNamesAsArrayList();
+        ArrayList<String>  catalogFilesConverted = new ArrayList<String>();
+
+        int sizea = catalogFiles.size();
+        for(int i =0; i < sizea;i++) {
+            catalogFilesConverted.add(SaxonCAPI.resolveFileToURI(processor,cwd, catalogFiles.get(i), ResourceRequest.XML_NATURE).toASCIIString());
+        }
+
         if(catalogFiles.size() == 0) {
             if (debug) {
                 System.err.println("catalog size = " + 0);
@@ -733,15 +739,13 @@ public class SaxonCAPI {
 
         if (debug) {
             System.err.println("catalog size  =" + catalogFiles.size());
-            int sizea = catalogFiles.size();
             for(int i =0; i < sizea;i++) {
                 System.err.println("catalog file= " + catalogFiles.get(i));
             }
         }
-        //list.add(SaxonCAPI.toJavaString(catalogFile, WordFactory.nullPointer()));
         Configuration config = processor.getUnderlyingConfiguration();
         if (config.getResourceResolver() instanceof ConfigurableResourceResolver) {
-            CommandLineOptions.setCatalogFiles(((ConfigurableResourceResolver) config.getResourceResolver() ), catalogFiles);
+            CommandLineOptions.setCatalogFiles(((ConfigurableResourceResolver) config.getResourceResolver() ), catalogFilesConverted);
         }  else {
             return net.sf.saxon.option.cpp.SaxonCAPI.STATUS_FAIL;
         }
