@@ -106,6 +106,9 @@ public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyVa
                                                              + Err.depictSequence(valueList.get(existing)) + "; second value: "
                                                              + Err.depictSequence(values.get(i)), e).withErrorCode(e.getXPathException().getErrorCodeQName());
                         }
+                        // In 4.0 we have the option of using the old or the new key. But 3.1 requires the new
+                        // key, so we use that.
+                        keyList.set(existing, keys.get(i));
                         valueList.set(existing, newVal);
                     }
                 }
