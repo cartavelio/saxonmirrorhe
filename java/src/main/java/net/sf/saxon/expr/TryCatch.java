@@ -14,10 +14,7 @@ import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.instruct.BreakInstr;
 import net.sf.saxon.expr.instruct.TailCall;
-import net.sf.saxon.expr.parser.ContextItemStaticInfo;
-import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.expr.parser.RebindingMap;
+import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.qname.QNameTest;
@@ -28,9 +25,12 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.Cardinality;
+import net.sf.saxon.value.EmptySequence;
+import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 
 /**
@@ -43,6 +43,7 @@ import java.util.List;
 public class TryCatch extends Expression {
 
     private final Operand tryOp;
+    private Operand finallyOp;
     private final List<CatchClause> catchClauses = new ArrayList<>();
     private boolean rollbackOutput;
 
@@ -55,6 +56,10 @@ public class TryCatch extends Expression {
         clause.catchOp = new Operand(this, catchExpr, OperandRole.SAME_FOCUS_ACTION);
         clause.nameTest = test;
         catchClauses.add(clause);
+    }
+
+    public void setFinallyExpression(Expression finallyExpr) {
+        finallyOp = new Operand(this, finallyExpr, OperandRole.SAME_FOCUS_ACTION);
     }
 
     public void setRollbackOutput(boolean rollback) {
@@ -160,7 +165,23 @@ public class TryCatch extends Expression {
         for (CatchClause cc : catchClauses) {
             list.add(cc.catchOp);
         }
+        if (finallyOp != null) {
+            list.add(finallyOp);
+        }
         return list;
+    }
+
+    public Expression typeCheck(ExpressionVisitor visitor,
+                                ContextItemStaticInfo contextInfo) throws XPathException {
+        typeCheckChildren(visitor, contextInfo);
+        if (finallyOp != null) {
+            Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.SUBEXPRESSION, "try/finally", 0);
+            TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
+            Expression checked = tc.staticTypeCheck(
+                    finallyOp.getChildExpression(), SequenceType.EMPTY_SEQUENCE, role, visitor);
+            setFinallyExpression(checked);
+        }
+        return this;
     }
 
     @Override
@@ -291,6 +312,7 @@ public class TryCatch extends Expression {
             clause.catchOp.getChildExpression().export(out);
             out.endElement();
         }
+        // There's no `finally` operand in XSLT
         out.endElement();
     }
 
@@ -400,21 +422,27 @@ public class TryCatch extends Expression {
         public PullEvaluator elaborateForPull() {
             TryCatch expr = (TryCatch)getExpression();
             SequenceEvaluator tryEval = expr.getTryExpr().makeElaborator().eagerly();
+            SequenceEvaluator finallyEval;
+            if (expr.finallyOp == null) {
+                finallyEval = (context) -> EmptySequence.getInstance();
+            } else {
+                finallyEval = expr.finallyOp.getChildExpression().makeElaborator().eagerly();
+            }
             return context -> {
                 XPathContextMajor c1 = context.newContext();
                 c1.createThreadManager();
                 c1.setErrorReporter(new FilteringErrorReporter(context.getErrorReporter(), expr.catchClauses));
+                Sequence result = null;
                 try {
                     try {
                         // Need to do eager iteration of the first argument to flush any errors out
-                        Sequence v = tryEval.evaluate(c1);
+                        result = tryEval.evaluate(c1);
                         c1.waitForChildThreads();
                         // check for xsl:break within xsl:try - test iterate-035
                         TailCallLoop.TailCallInfo tci = c1.getTailCallInfo();
                         if (tci instanceof BreakInstr) {
                             ((BreakInstr) tci).markContext(context);
                         }
-                        return v.iterate();
                     } catch (UncheckedXPathException ue) {
                         throw ue.getXPathException();
                     }
@@ -437,6 +465,7 @@ public class TryCatch extends Expression {
                                 if (tci instanceof BreakInstr) {
                                     ((BreakInstr) tci).markContext(context);
                                 }
+                                finallyEval.evaluate(context);
                                 return v.iterate();
                             }
                         }
@@ -444,6 +473,8 @@ public class TryCatch extends Expression {
                     err.setHasBeenReported(false);
                     throw err;
                 }
+                finallyEval.evaluate(context);
+                return result.iterate();
             };
         }
 
@@ -451,11 +482,18 @@ public class TryCatch extends Expression {
         public ItemEvaluator elaborateForItem() {
             TryCatch expr = (TryCatch) getExpression();
             SequenceEvaluator tryEval = expr.getTryExpr().makeElaborator().eagerly();
+            SequenceEvaluator finallyEval;
+            if (expr.finallyOp == null) {
+                finallyEval = (context) -> EmptySequence.getInstance();
+            } else {
+                finallyEval = expr.finallyOp.getChildExpression().makeElaborator().eagerly();
+            }
             return context -> {
                 XPathContext c1 = context.newMinorContext();
+                Item result;
                 try {
                     try {
-                        return tryEval.evaluate(c1).head();
+                        result = tryEval.evaluate(c1).head();
                     } catch (UncheckedXPathException e) {
                         throw e.getXPathException();
                     }
@@ -479,6 +517,8 @@ public class TryCatch extends Expression {
                     err.setHasBeenReported(false);
                     throw err;
                 }
+                finallyEval.evaluate(context);
+                return result;
             };
         }
     }

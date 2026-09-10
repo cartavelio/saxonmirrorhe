@@ -3926,8 +3926,22 @@ public class XQueryParser extends XPathParser {
             readToken(Token.RCURLY);
             catchDepth--;
         }
+        if (isKeyword("finally")) {
+            Expression finallyExpr;
+            foundOneCatch = true;
+            nextToken();
+            readToken(Token.LCURLY);
+            if (t.currentToken == Token.RCURLY) {
+                finallyExpr = Literal.makeEmptySequence();
+            } else {
+                finallyExpr = parseExpression();
+            }
+            readToken(Token.RCURLY);
+            tryCatch.setFinallyExpression(finallyExpr);
+        }
         if (!foundOneCatch) {
-            grumble("After try{}, expected 'catch'");
+            grumble("After try{}, expected 'catch'" +
+                    (allowXPath40Syntax ? " or 'finally'" : "") );
         }
 
         return tryCatch;
