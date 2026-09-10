@@ -91,7 +91,7 @@ and JSON, or do custom conversions from one to the other.
 
 ## Where do I find documentation?
 
-It's all online at [https://www.saxonica.com/documentation/]. 
+It's all [online](https://www.saxonica.com/documentation/). 
 
 (Delivered, in case you're interested, by Saxon-JS running in your browser.)
 
