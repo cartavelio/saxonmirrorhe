@@ -7,6 +7,7 @@
 
 package net.sf.saxon.str;
 
+import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntIterator;
@@ -18,6 +19,8 @@ import java.util.Arrays;
 /**
  * Builder class to construct a UnicodeString by appending text incrementally
  */
+
+@CSharpInjectMembers(code={"public override System.Text.Encoding Encoding { get => System.Text.Encoding.UTF8; }"})
 
 public final class UnicodeBuilder extends Writer implements UniStringConsumer, UnicodeWriter {
 
