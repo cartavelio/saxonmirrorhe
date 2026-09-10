@@ -29,7 +29,7 @@ public class LookaheadIteratorImpl implements LookaheadIterator {
 
     /*@NotNull*/
     public static LookaheadIterator makeLookaheadIterator(/*@NotNull*/ SequenceIterator base) throws XPathException {
-        if (base.getProperties().contains(Property.LOOKAHEAD)) {
+        if (base.getProperties().contains(SequenceIteratorProperty.LOOKAHEAD)) {
             return (LookaheadIterator) base;
         } else {
             return new LookaheadIteratorImpl(base);
@@ -57,8 +57,8 @@ public class LookaheadIteratorImpl implements LookaheadIterator {
     }
 
     @Override
-    public EnumSet<Property> getProperties() {
-        return EnumSet.of(Property.LOOKAHEAD);
+    public EnumSet<SequenceIteratorProperty> getProperties() {
+        return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD);
     }
 }
 

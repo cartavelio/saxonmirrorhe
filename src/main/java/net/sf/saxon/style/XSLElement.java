@@ -185,13 +185,13 @@ public class XSLElement extends StyleElement {
                 // Local name and namespace are both known statically: generate a FixedElement instruction
                 FingerprintedQName qn = new FingerprintedQName(parts[0], nsuri, parts[1]);
                 qn.obtainFingerprint(getNamePool());
-                FixedElement inst = new FixedElement(qn,
+                FixedElement FixedElementInst = new FixedElement(qn,
                         NamespaceMap.emptyMap(),
                         inheritNamespaces,
                         true, schemaType,
                         validation);
-                inst.setLocation(allocateLocation());
-                return compileContentExpression(exec, decl, inst);
+                FixedElementInst.setLocation(allocateLocation());
+                return compileContentExpression(exec, decl, FixedElementInst);
             }
         }
 

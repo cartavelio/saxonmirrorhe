@@ -9,12 +9,14 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
+import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.ZeroOrMore;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.QNameValue;
 
 import java.util.HashSet;
 
@@ -24,6 +26,12 @@ import java.util.HashSet;
 
 public class DistinctValues extends CollatingFunctionFixed {
 
+
+    /**
+     * A match key for use in situations where NaN = NaN
+     */
+
+    public static final AtomicMatchKey NaN_MATCH_KEY = new QNameValue("", NamespaceConstant.SAXON, "+NaN+");
 
     @Override
     public String getStreamerName() {
@@ -75,7 +83,7 @@ public class DistinctValues extends CollatingFunctionFixed {
                 }
                 AtomicMatchKey key;
                 if (nextBase.isNaN()) {
-                    key = AtomicMatchKey.NaN_MATCH_KEY;
+                    key = NaN_MATCH_KEY;
                 } else {
                     key = nextBase.getXPathComparable(false, collator, implicitTimezone);
                 }

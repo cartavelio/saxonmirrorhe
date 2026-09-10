@@ -45,7 +45,7 @@ public class GeneralComparison20 extends GeneralComparison {
         gc.setRetainedStaticContext(getRetainedStaticContext());
         gc.comparer = comparer;
         gc.singletonOperator = singletonOperator;
-        gc.needsRuntimeCheck = needsRuntimeCheck;
+        gc.runtimeCheckNeeded = runtimeCheckNeeded;
         gc.comparisonCardinality = comparisonCardinality;
         return gc;
     }

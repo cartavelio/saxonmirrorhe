@@ -49,7 +49,7 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
 
     protected Expression body;
     protected Pattern matchPattern;
-    private boolean hasRequiredParams;
+    private boolean _hasRequiredParams;
     private boolean bodyIsTailCallReturner;
     private SequenceType requiredType;
     private boolean declaredStreamable;
@@ -177,7 +177,7 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
      */
 
     public void setHasRequiredParams(boolean has) {
-        hasRequiredParams = has;
+        _hasRequiredParams = has;
     }
 
     /**
@@ -187,7 +187,7 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
      */
 
     public boolean hasRequiredParams() {
-        return hasRequiredParams;
+        return _hasRequiredParams;
     }
 
     /**
@@ -493,7 +493,7 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
         if (matchPattern != null) {
             tr.matchPattern = matchPattern.copy(new RebindingMap());
         }
-        tr.hasRequiredParams = hasRequiredParams;
+        tr._hasRequiredParams = _hasRequiredParams;
         tr.bodyIsTailCallReturner = bodyIsTailCallReturner;
         tr.requiredType = requiredType;
         tr.declaredStreamable = declaredStreamable; // ? this can vary from one mode to another

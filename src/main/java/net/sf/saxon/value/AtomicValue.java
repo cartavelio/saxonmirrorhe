@@ -7,6 +7,7 @@
 
 package net.sf.saxon.value;
 
+import net.sf.saxon.Virtual;
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
@@ -149,6 +150,7 @@ public abstract class AtomicValue
      * evaluated dynamically.
      */
 
+    @Virtual
     public abstract AtomicMatchKey getXPathComparable(boolean ordered, StringCollator collator, int implicitTimezone)
             throws NoDynamicContextException;
 
@@ -158,6 +160,7 @@ public abstract class AtomicValue
      * keys in maps.
      */
 
+    @Virtual
     public AtomicMatchKey asMapKey() {
         try {
             return getXPathComparable(false, CodepointCollator.getInstance(), CalendarValue.NO_TIMEZONE);
@@ -194,6 +197,7 @@ public abstract class AtomicValue
      * @return true if the two values are identical, false otherwise.
      */
 
+    @Virtual
     public boolean isIdentical(/*@NotNull*/ AtomicValue v) {
         // default implementation
         return getSchemaComparable().equals(v.getSchemaComparable());
@@ -329,6 +333,7 @@ public abstract class AtomicValue
      * @return true if the value is float NaN or double NaN or precisionDecimal NaN; otherwise false
      */
 
+    @Virtual
     public boolean isNaN() {
         return false;
     }
@@ -373,6 +378,7 @@ public abstract class AtomicValue
      * @throws UnsupportedOperationException if applied to a value of a type that has no components
      */
 
+    @Virtual
     public AtomicValue getComponent(AccessorFn.Component component) throws XPathException {
         throw new UnsupportedOperationException("Data type does not support component extraction");
     }
@@ -423,6 +429,7 @@ public abstract class AtomicValue
      * @throws XPathException if it can't be handled in Saxon-JS
      */
 
+    @Virtual
     public void checkValidInJavascript() throws XPathException {
         // default - no action
     }
@@ -465,6 +472,7 @@ public abstract class AtomicValue
      * otherwise.
      */
 
+    @Virtual
     public String show() {
         return typeLabel + "(\"" + this.getUnicodeStringValue() + "\")";
     }

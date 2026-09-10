@@ -96,15 +96,15 @@ public class EmptyIterator implements SequenceIterator,
      * Get properties of this iterator, as a bit-significant integer.
      *
      * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link Property#GROUNDED}, {@link Property#LAST_POSITION_FINDER},
-     *         and {@link Property#LOOKAHEAD}. It is always
+     *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
+     *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
      *         acceptable to return the value zero, indicating that there are no known special properties.
      *         It is acceptable for the properties of the iterator to change depending on its state.
      */
 
     @Override
-    public EnumSet<Property> getProperties() {
-        return EnumSet.of(Property.LOOKAHEAD, Property.GROUNDED, Property.LAST_POSITION_FINDER, Property.ATOMIZING);
+    public EnumSet<SequenceIteratorProperty> getProperties() {
+        return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD, SequenceIteratorProperty.GROUNDED, SequenceIteratorProperty.LAST_POSITION_FINDER, SequenceIteratorProperty.ATOMIZING);
     }
 
     /**

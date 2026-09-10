@@ -31,8 +31,8 @@ public class TypeAvailable extends SystemFunction {
         StructuredQName qName;
         try {
             if (lexicalName.indexOf(':') < 0 && !lexicalName.startsWith("Q{")) {
-                String uri = getRetainedStaticContext().getURIForPrefix("", true);
-                qName = new StructuredQName("", uri, lexicalName);
+                String defaultNS = getRetainedStaticContext().getURIForPrefix("", true);
+                qName = new StructuredQName("", defaultNS, lexicalName);
             } else {
                 qName = StructuredQName.fromLexicalQName(lexicalName,
                         false, true,

@@ -19,6 +19,7 @@ import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 
+import net.sf.saxon.tree.jiter.WrappingJavaIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
 import org.xml.sax.Locator;
@@ -377,19 +378,6 @@ public interface NodeInfo extends Source, Item, Location {
     }
 
     /**
-     * Bit setting in the returned type annotation indicating a DTD_derived type on an attribute node
-     */
-
-    int IS_DTD_TYPE = 1 << 30;
-
-    /**
-     * Bit setting for use alongside a type annotation indicating that the is-nilled property is set
-     */
-
-    int IS_NILLED = 1 << 29;
-
-
-    /**
      * Get the typed value. This will either be a single AtomicValue or a value whose items are
      * atomic values.
      * @return the typed value of the node
@@ -497,7 +485,7 @@ public interface NodeInfo extends Source, Item, Location {
     default Iterable<? extends NodeInfo> children() {
         if (hasChildNodes()) {
             NodeInfo parent = this;
-            return () -> parent.iterateAxis(AxisInfo.CHILD).asIterator();
+            return () -> new WrappingJavaIterator<>(parent.iterateAxis(AxisInfo.CHILD));
         } else {
             return Collections.emptyList();
         }
@@ -513,7 +501,7 @@ public interface NodeInfo extends Source, Item, Location {
     default Iterable<? extends NodeInfo> children(Predicate<? super NodeInfo> filter) {
         if (hasChildNodes()) {
             NodeInfo parent = this;
-            return () -> parent.iterateAxis(AxisInfo.CHILD, filter).asIterator();
+            return () -> new WrappingJavaIterator<>(parent.iterateAxis(AxisInfo.CHILD, filter));
         } else {
             return Collections.emptyList();
         }

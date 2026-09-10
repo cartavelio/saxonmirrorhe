@@ -106,7 +106,7 @@ public class CharacterMapExpander extends ProxyReceiver {
             }
 
         }
-        nextReceiver.startElement(elemName, type, AttributeMap.fromList(atts2), namespaces, location, properties);
+        nextReceiver.startElement(elemName, type, SequenceTool.attributeMapFromList(atts2), namespaces, location, properties);
     }
 
     /**

@@ -12,11 +12,13 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.Count;
+import net.sf.saxon.functions.DistinctValues;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.value.AtomicValue;
 
 import java.util.ArrayList;
@@ -44,7 +46,7 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
     private List<Item> currentMembers;
     private List<AtomicMatchKey> nextComparisonKey;
     private List<AtomicValue> nextKey = null;
-    private Item next;
+    private Item nextItem;
     private Item current = null;
     private int position = 0;
     private boolean composite = false;
@@ -59,8 +61,8 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
         this.population = runningContext.trackFocus(select.iterate(baseContext));
         this.collator = collator;
         this.composite = composite;
-        next = population.next();
-        if (next != null) {
+        nextItem = population.next();
+        if (nextItem != null) {
             nextKey = getKey(runningContext);
             nextComparisonKey = getComparisonKey(nextKey, baseContext);
         }
@@ -90,7 +92,7 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
         for (AtomicValue aKey : key) {
             AtomicMatchKey comparisonKey;
             if (aKey.isNaN()) {
-                comparisonKey = AtomicMatchKey.NaN_MATCH_KEY;
+                comparisonKey = DistinctValues.NaN_MATCH_KEY;
             } else {
                 comparisonKey = aKey.getXPathComparable(false, collator, keyContext.getImplicitTimezone());
             }
@@ -114,7 +116,7 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
                 if (currentComparisonKey.equals(newComparisonKey)) {
                     currentMembers.add(nextCandidate);
                 } else {
-                    next = nextCandidate;
+                    nextItem = nextCandidate;
                     nextComparisonKey = newComparisonKey;
                     nextKey = newKey;
                     return;
@@ -127,7 +129,7 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
                 throw err;
             }
         }
-        next = null;
+        nextItem = null;
         nextKey = null;
     }
 
@@ -143,17 +145,17 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
 
     @Override
     public boolean hasNext() {
-        return next != null;
+        return nextItem != null;
     }
 
     @Override
     public Item next() throws XPathException {
-        if (next == null) {
+        if (nextItem == null) {
             current = null;
             position = -1;
             return null;
         }
-        current = next;
+        current = nextItem;
         if (nextKey.size() == 1) {
             currentKey = nextKey.get(0);
         } else {
@@ -174,15 +176,15 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
      * Get properties of this iterator, as a bit-significant integer.
      *
      * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link Property#GROUNDED}, {@link Property#LAST_POSITION_FINDER},
-     *         and {@link Property#LOOKAHEAD}. It is always
+     *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
+     *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
      *         acceptable to return the value zero, indicating that there are no known special properties.
      *         It is acceptable for the properties of the iterator to change depending on its state.
      */
 
     @Override
-    public EnumSet<Property> getProperties() {
-        return EnumSet.of(Property.LOOKAHEAD, Property.LAST_POSITION_FINDER);
+    public EnumSet<SequenceIteratorProperty> getProperties() {
+        return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD, SequenceIteratorProperty.LAST_POSITION_FINDER);
     }
 
 

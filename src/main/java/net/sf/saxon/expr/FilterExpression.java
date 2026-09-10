@@ -1115,8 +1115,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                                 Item i = ((Literal) getBase()).getGroundedValue().itemAt(pos - 1);
                                 return i == null ? EmptyIterator.emptyIterator() : i.iterate();
                             } else {
-                                SequenceIterator baseIter = getBase().iterate(context);
-                                return SubsequenceIterator.make(baseIter, pos, pos);
+                                return SubsequenceIterator.make(getBase().iterate(context), pos, pos);
                             }
                         }
                         // a non-integer value or non-positive number will never be equal to position()

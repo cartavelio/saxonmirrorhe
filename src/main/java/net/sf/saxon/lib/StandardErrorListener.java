@@ -470,7 +470,7 @@ public class StandardErrorListener extends StandardDiagnostics implements ErrorL
 
     /**
      * Generate a stack trace for a dynamic error. The default implementation
-     * calls {@link #printStackTrace(XPathContext, Logger, int)} supplying as
+     * calls {@link #logStackTrace(XPathContext, Logger, int)} supplying as
      * the third argument the current setting of {@link #setStackTraceDetail(int)},
      * which defaults to 2.
      *
@@ -479,7 +479,7 @@ public class StandardErrorListener extends StandardDiagnostics implements ErrorL
      */
 
     protected void outputStackTrace(Logger out, XPathContext context) {
-        printStackTrace(context, out, stackTraceDetail);
+        logStackTrace(context, out, stackTraceDetail);
     }
 
     /**

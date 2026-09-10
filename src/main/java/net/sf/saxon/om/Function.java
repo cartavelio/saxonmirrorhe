@@ -166,10 +166,6 @@ public interface Function extends Item, Callable, GroundedValue {
     default Genre getGenre() {
         return Genre.FUNCTION;
     }
-
-    @SafeVarargs
-    static Sequence[] argumentArray(Sequence... args) {
-        return args;
-    }
+    
 }
 

@@ -27,7 +27,7 @@ public class PackageData {
 
     protected Configuration config;
     private HostLanguage hostLanguage;
-    private boolean isSchemaAware;
+    private boolean schemaAware;
     private DecimalFormatManager decimalFormatManager = null;
     protected KeyManager keyManager = null;
     private AccumulatorRegistry accumulatorRegistry = null;
@@ -178,7 +178,7 @@ public class PackageData {
      */
 
     public boolean isSchemaAware() {
-        return isSchemaAware;
+        return schemaAware;
     }
 
     /**
@@ -187,7 +187,7 @@ public class PackageData {
      */
 
     public void setSchemaAware(boolean schemaAware) {
-        isSchemaAware = schemaAware;
+        this.schemaAware = schemaAware;
     }
 
     /**

@@ -7,14 +7,12 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.om.EnumSetTool;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ArrayIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 
 import java.util.EnumSet;
 
@@ -67,7 +65,7 @@ public class TailIterator
             return base;
         } else if (base instanceof ArrayIterator) {
             return ((ArrayIterator) base).makeSliceIterator(start, Integer.MAX_VALUE);
-        } else if (base.getProperties().contains(SequenceIterator.Property.GROUNDED)) {
+        } else if (base.getProperties().contains(SequenceIteratorProperty.GROUNDED)) {
             GroundedValue value = base.materialize();
             if (start > value.getLength()) {
                 return EmptyIterator.emptyIterator();
@@ -112,17 +110,17 @@ public class TailIterator
      * Get properties of this iterator, as a bit-significant integer.
      *
      * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link Property#GROUNDED}, {@link Property#LAST_POSITION_FINDER},
-     *         and {@link Property#LOOKAHEAD}. It is always
+     *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
+     *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
      *         acceptable to return the value zero, indicating that there are no known special properties.
      *         It is acceptable for the properties of the iterator to change depending on its state.
      */
 
     @Override
-    public EnumSet<Property> getProperties() {
+    public EnumSet<SequenceIteratorProperty> getProperties() {
         return EnumSetTool.intersect(
                 base.getProperties(),
-                EnumSet.of(Property.LAST_POSITION_FINDER, Property.LOOKAHEAD));
+                EnumSet.of(SequenceIteratorProperty.LAST_POSITION_FINDER, SequenceIteratorProperty.LOOKAHEAD));
     }
 }
 

@@ -747,7 +747,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
             pendingNSMap = pendingNSMap.remove("");
         }
 
-        AttributeMap attributes = AttributeMap.fromList(pendingAttributes);
+        AttributeMap attributes = SequenceTool.attributeMapFromList(pendingAttributes);
 
         nextReceiver.startElement(elcode, currentSimpleType, attributes, pendingNSMap, startElementLocationId, props);
 

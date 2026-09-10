@@ -65,11 +65,11 @@ public class PullPushTee extends PullFilter {
      * copies it to the branch Receiver, and then returns the event to the caller.
      *
      * @return an integer code indicating the type of event. The code
-     *         {@link Event#END_OF_INPUT} is returned at the end of the sequence.
+     *         {@link PullEvent#END_OF_INPUT} is returned at the end of the sequence.
      */
 
     @Override
-    public Event next() throws XPathException {
+    public PullEvent next() throws XPathException {
         currentEvent = super.next();
         copyEvent(currentEvent);
         return currentEvent;
@@ -82,7 +82,7 @@ public class PullPushTee extends PullFilter {
      * @param event the pull event to be copied
      */
 
-    private void copyEvent(Event event) throws XPathException {
+    private void copyEvent(PullEvent event) throws XPathException {
         PullProvider in = getUnderlyingProvider();
         Location loc = in.getSourceLocator();
         if (loc == null) {
@@ -183,7 +183,7 @@ public class PullPushTee extends PullFilter {
                 throw new UnsupportedOperationException("" + event);
 
         }
-        previousAtomic = event == Event.ATOMIC_VALUE;
+        previousAtomic = event == PullEvent.ATOMIC_VALUE;
     }
 }
 

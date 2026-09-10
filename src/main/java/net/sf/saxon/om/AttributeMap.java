@@ -97,7 +97,7 @@ public interface AttributeMap extends Iterable<AttributeInfo> {
             }
         }
         list.add(att);
-        return AttributeMap.fromList(list);
+        return SequenceTool.attributeMapFromList(list);
     }
 
     /**
@@ -115,7 +115,7 @@ public interface AttributeMap extends Iterable<AttributeInfo> {
                 list.add(a);
             }
         }
-        return AttributeMap.fromList(list);
+        return SequenceTool.attributeMapFromList(list);
     }
 
     default void verify() {}
@@ -125,7 +125,7 @@ public interface AttributeMap extends Iterable<AttributeInfo> {
         for (AttributeInfo a : this) {
             list.add(mapper.apply(a));
         }
-        return AttributeMap.fromList(list);
+        return SequenceTool.attributeMapFromList(list);
     }
 
     /**
@@ -158,32 +158,6 @@ public interface AttributeMap extends Iterable<AttributeInfo> {
 
     default AttributeInfo itemAt(int index) {
         return asList().get(index);
-    }
-
-    /**
-     * Construct an AttributeMap given a list of {@link AttributeInfo} objects
-     * representing the individual attributes.
-     * @param list the list of attributes. It is the caller's responsibility
-     *             to ensure that this list contains no duplicates. The method
-     *             may detect this, but is not guaranteed to do so. Calling
-     *             {@link #verify} after constructing the attribute map verifies
-     *             that there are no duplicates. The order of items in the input
-     *             list is not necessarily preserved.
-     * @return an AttributeMap containing the specified attributes.
-     * @throws IllegalArgumentException if duplicate attributes are detected
-     */
-
-    static AttributeMap fromList(List<AttributeInfo> list) {
-        int n = list.size();
-        if (n == 0) {
-            return EmptyAttributeMap.getInstance();
-        } else if (n == 1) {
-            return SingletonAttributeMap.of(list.get(0));
-        } else if (n <= SmallAttributeMap.LIMIT) {
-            return new SmallAttributeMap(list);
-        } else {
-            return new LargeAttributeMap(list);
-        }
     }
 
 }

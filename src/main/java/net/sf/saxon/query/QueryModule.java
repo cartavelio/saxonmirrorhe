@@ -40,13 +40,13 @@ import java.util.*;
  */
 
 public class QueryModule implements StaticContext {
-    private boolean isMainModule;
+    private boolean moduleIsMainModule;
     private final Configuration config;
     private StaticQueryContext userQueryContext;
     private final QueryModule topModule;
     private URI locationURI;
     private String baseURI;
-    private String moduleNamespace; // null only if isMainModule is false
+    private String moduleNamespace; // null only if moduleIsMainModule is false
     private HashMap<String, String> explicitPrologNamespaces;
     private Stack<NamespaceBinding> activeNamespaces;  // The namespace bindings declared in element constructors
     private HashMap<StructuredQName, GlobalVariable> variables;
@@ -78,7 +78,7 @@ public class QueryModule implements StaticContext {
     private boolean defaultEmptyLeast = true;
     private String defaultCollationName;
     private int revalidationMode = Validation.SKIP;
-    private boolean isUpdating = false;
+    private boolean updating = false;
     private ItemType requiredContextItemType = AnyItemType.getInstance(); // must be the same for all modules
     private DecimalFormatManager decimalFormatManager = null;   // used only in XQuery 3.0
     private CodeInjector codeInjector;
@@ -98,7 +98,7 @@ public class QueryModule implements StaticContext {
 
     public QueryModule(/*@NotNull*/ StaticQueryContext sqc) throws XPathException {
         config = sqc.getConfiguration();
-        isMainModule = true;
+        moduleIsMainModule = true;
         topModule = this;
         languageLevel = sqc.getLanguageVersion();
         activeNamespaces = new Stack<>();
@@ -200,7 +200,7 @@ public class QueryModule implements StaticContext {
                 constructionMode = Validation.STRIP;
             }
             requiredContextItemType = sqc.getRequiredContextItemType();
-            isUpdating = sqc.isUpdatingEnabled();
+            updating = sqc.isUpdatingEnabled();
             codeInjector = sqc.getCodeInjector();
             optimizerOptions = sqc.getOptimizerOptions();
         }
@@ -366,7 +366,7 @@ public class QueryModule implements StaticContext {
      */
 
     public void setIsMainModule(boolean main) {
-        isMainModule = main;
+        moduleIsMainModule = main;
     }
 
     /**
@@ -376,7 +376,7 @@ public class QueryModule implements StaticContext {
      */
 
     public boolean isMainModule() {
-        return isMainModule;
+        return moduleIsMainModule;
     }
 
     /**
@@ -779,15 +779,15 @@ public class QueryModule implements StaticContext {
     public void declareVariable(/*@NotNull*/ GlobalVariable var) throws XPathException {
         StructuredQName key = var.getVariableQName();
         if (variables.get(key) != null) {
-            GlobalVariable old = variables.get(key);
-            if (old == var || old.getUltimateOriginalVariable() == var.getUltimateOriginalVariable()) {
+            GlobalVariable oldVar = variables.get(key);
+            if (oldVar == var || oldVar.getUltimateOriginalVariable() == var.getUltimateOriginalVariable()) {
                 // do nothing
             } else {
-                String oldloc = " (see line " + old.getLineNumber();
-                String oldSysId = old.getSystemId();
+                String oldloc = " (see line " + oldVar.getLineNumber();
+                String oldSysId = oldVar.getSystemId();
                 if (oldSysId != null &&
                         !oldSysId.equals(var.getSystemId())) {
-                    oldloc += " in module " + old.getSystemId();
+                    oldloc += " in module " + oldVar.getSystemId();
                 }
                 oldloc += ")";
                 XPathException err = new XPathException("Duplicate definition of global variable "
@@ -911,11 +911,11 @@ public class QueryModule implements StaticContext {
                     ExpressionTool.gatherReferencedVariables(select, list);
                     for (Binding b : list) {
                         if (b instanceof GlobalVariable) {
-                            String uri = ((GlobalVariable) b).getSystemId();
+                            String sysId = ((GlobalVariable) b).getSystemId();
                             StructuredQName qName = b.getVariableQName();
                             boolean synthetic = qName.hasURI(NamespaceConstant.SAXON_GENERATED_VARIABLE);
-                            if (!synthetic && uri != null && !uri.equals(getSystemId())) {
-                                QueryModule sqc = executable.getQueryModuleWithSystemId(uri, topModule);
+                            if (!synthetic && sysId != null && !sysId.equals(getSystemId())) {
+                                QueryModule sqc = executable.getQueryModuleWithSystemId(sysId, topModule);
                                 if (sqc != null) {
                                     sqc.lookForModuleCycles(referees, ((GlobalVariable) b).getLineNumber());
                                 }
@@ -925,9 +925,9 @@ public class QueryModule implements StaticContext {
                     List<UserFunction> fList = new ArrayList<>(5);
                     ExpressionTool.gatherCalledFunctions(select, fList);
                     for (UserFunction f : fList) {
-                        String uri = f.getSystemId();
-                        if (uri != null && !uri.equals(getSystemId())) {
-                            QueryModule sqc = executable.getQueryModuleWithSystemId(uri, topModule);
+                        String sysId = f.getSystemId();
+                        if (sysId != null && !sysId.equals(getSystemId())) {
+                            QueryModule sqc = executable.getQueryModuleWithSystemId(sysId, topModule);
                             if (sqc != null) {
                                 sqc.lookForModuleCycles(referees, f.getLineNumber());
                             }
@@ -1541,12 +1541,12 @@ public class QueryModule implements StaticContext {
         if (activeNamespaces != null) {
             for (int i = activeNamespaces.size() - 1; i >= 0; i--) {
                 if (activeNamespaces.get(i).getPrefix().equals(prefix)) {
-                    String uri = activeNamespaces.get(i).getURI();
-                    if (uri.equals("") && !prefix.equals("")) {
+                    String ns = activeNamespaces.get(i).getURI();
+                    if (ns.equals("") && !prefix.equals("")) {
                         // the namespace is undeclared
                         return null;
                     }
-                    return uri;
+                    return ns;
                 }
             }
         }
@@ -1778,7 +1778,7 @@ public class QueryModule implements StaticContext {
      */
 
     public boolean isUpdating() {
-        return isUpdating;
+        return updating;
     }
 
     /**

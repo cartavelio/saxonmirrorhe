@@ -119,11 +119,11 @@ public class CompressedWhitespace extends UnicodeString {
 
     public static void uncompress(long value, UnicodeBuilder buffer) {
         for (int s = 56; s >= 0; s -= 8) {
-            byte b = (byte) ((value >>> s) & 0xff);
+            byte b = (byte) ((value >> s) & 0xff);
             if (b == 0) {
                 break;
             }
-            char c = WHITE_CHARS[b >>> 6 & 0x3];
+            char c = WHITE_CHARS[b >> 6 & 0x3];
             int len = b & 0x3f;
             for (int j = 0; j < len; j++) {
                 buffer.append(c);
@@ -148,7 +148,7 @@ public class CompressedWhitespace extends UnicodeString {
     public static int length(long value) {
         int count = 0;
         for (int s = 56; s >= 0; s -= 8) {
-            int c = (int) ((value >>> s) & 0x3f);
+            int c = (int) ((value >> s) & 0x3f);
             if (c == 0) {
                 break;
             }
@@ -180,13 +180,13 @@ public class CompressedWhitespace extends UnicodeString {
     public int codePointAt(long index) {
         int count = 0;
         for (int s = 56; s >= 0; s -= 8) {
-            byte b = (byte) ((value >>> s) & 0xff);
+            byte b = (byte) ((value >> s) & 0xff);
             if (b == 0) {
                 break;
             }
             count += b & 0x3f;
             if (count > index) {
-                return WHITE_CHARS[b >>> 6 & 0x3];
+                return WHITE_CHARS[b >> 6 & 0x3];
             }
         }
         throw new IndexOutOfBoundsException(index + "");
@@ -260,11 +260,11 @@ public class CompressedWhitespace extends UnicodeString {
 
     public void write(/*@NotNull*/ UnicodeWriter writer) throws java.io.IOException {
         for (int s = 56; s >= 0; s -= 8) {
-            final byte b = (byte) ((value >>> s) & 0xff);
+            final byte b = (byte) ((value >> s) & 0xff);
             if (b == 0) {
                 break;
             }
-            final char c = WHITE_CHARS[b >>> 6 & 0x3];
+            final char c = WHITE_CHARS[b >> 6 & 0x3];
             final int len = b & 0x3f;
             writer.writeRepeatedAscii((byte) c, len);
         }
@@ -302,11 +302,11 @@ public class CompressedWhitespace extends UnicodeString {
 
     public void writeEscape(boolean[] specialChars, UnicodeWriter writer) throws java.io.IOException {
         for (int s = 56; s >= 0; s -= 8) {
-            final byte b = (byte) ((value >>> s) & 0xff);
+            final byte b = (byte) ((value >> s) & 0xff);
             if (b == 0) {
                 break;
             }
-            final char c = WHITE_CHARS[b >>> 6 & 0x3];
+            final char c = WHITE_CHARS[b >> 6 & 0x3];
             final int len = b & 0x3f;
             if (specialChars[c]) {
                 byte[] e = null;

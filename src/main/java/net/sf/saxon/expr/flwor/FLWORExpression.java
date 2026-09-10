@@ -369,9 +369,9 @@ public class FLWORExpression extends Expression {
             List<Clause> expandedList = new ArrayList<>(clauses.size() * 2);
             expandedList.add(clauses.get(0));
             for (int i = 1; i < clauses.size(); i++) {
-                Clause extra = injector.injectClause(this, clauses.get(i - 1));
-                if (extra != null) {
-                    expandedList.add(extra);
+                Clause extraClause = injector.injectClause(this, clauses.get(i - 1));
+                if (extraClause != null) {
+                    expandedList.add(extraClause);
                 }
                 expandedList.add(clauses.get(i));
             }
@@ -600,6 +600,11 @@ public class FLWORExpression extends Expression {
         return this;
     }
 
+    private static class WhereClauseStruct {
+        int whereIndex = 0;
+        WhereClause whereClause;
+    }
+
     /**
      * @param visitor         the expression visitor
      * @param contextItemType the type of the context item
@@ -614,10 +619,6 @@ public class FLWORExpression extends Expression {
             throws XPathException {
         WhereClause whereClause;
         int whereIndex = 0;
-        class WhereClauseStruct {
-            int whereIndex = 0;
-            WhereClause whereClause;
-        }
         List<WhereClauseStruct> whereList = new ArrayList<>();
 
         for (Clause c : clauses) {

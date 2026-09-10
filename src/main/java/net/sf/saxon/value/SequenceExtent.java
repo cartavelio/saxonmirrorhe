@@ -13,10 +13,8 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.GroundedIterator;
+import net.sf.saxon.tree.iter.*;
 import net.sf.saxon.tree.iter.ListIterator;
-import net.sf.saxon.tree.iter.ReverseListIterator;
-import net.sf.saxon.tree.iter.UnfailingIterator;
 
 
 import java.util.*;
@@ -77,7 +75,7 @@ public class SequenceExtent implements GroundedValue {
      */
 
     public SequenceExtent(SequenceIterator iter) throws XPathException {
-        int len = !iter.getProperties().contains(SequenceIterator.Property.LAST_POSITION_FINDER)
+        int len = !iter.getProperties().contains(SequenceIteratorProperty.LAST_POSITION_FINDER)
                 ? 20
                 : ((LastPositionFinder)iter).getLength();
         List<Item> list = new ArrayList<>(len);
@@ -141,7 +139,7 @@ public class SequenceExtent implements GroundedValue {
      */
 
     public static GroundedValue makeResidue(SequenceIterator iter) throws XPathException {
-        if (iter.getProperties().contains(SequenceIterator.Property.GROUNDED)) {
+        if (iter.getProperties().contains(SequenceIteratorProperty.GROUNDED)) {
             return ((GroundedIterator) iter).getResidue();
         }
         SequenceExtent extent = new SequenceExtent(iter);

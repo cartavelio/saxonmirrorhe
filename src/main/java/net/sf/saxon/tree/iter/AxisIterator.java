@@ -9,7 +9,6 @@ package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.om.NodeInfo;
 
-import java.util.Iterator;
 import java.util.function.Consumer;
 
 
@@ -25,32 +24,6 @@ public interface AxisIterator extends UnfailingIterator {
 
     @Override
     NodeInfo next();
-
-    /**
-     * Get a Java {@link Iterator} over the same nodes as this {@code AxisIterator}.
-     * This is normally called when the iterator is positioned at the start; in principle,
-     * however, it can be called at any point in the iteration. The Java iterator picks
-     * up where the original {@code AxisIterator} left off
-     * @return a Java {@link Iterator} over the same nodes as this {@code AxisIterator}.
-     */
-
-    default Iterator<NodeInfo> asIterator() {
-        return new Iterator<NodeInfo>() {
-            NodeInfo next = AxisIterator.this.next();
-
-            @Override
-            public boolean hasNext() {
-                return next != null;
-            }
-
-            @Override
-            public NodeInfo next() {
-                NodeInfo curr = next;
-                next = AxisIterator.this.next();
-                return curr;
-            }
-        };
-    }
 
     default void forEachNode(Consumer<? super NodeInfo> consumer) {
         NodeInfo item;

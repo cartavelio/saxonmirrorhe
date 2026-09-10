@@ -316,7 +316,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
             atts.add(new AttributeInfo(att.getNodeName(), BuiltInAtomicType.UNTYPED_ATOMIC, att.getValue(), att.getLocation(), 0));
         }
 
-        out.startElement(NameOfNode.makeName(this), typeCode, AttributeMap.fromList(atts),
+        out.startElement(NameOfNode.makeName(this), typeCode, SequenceTool.attributeMapFromList(atts),
                          ns, location,
                          ReceiverOption.BEQUEATH_INHERITED_NAMESPACES_ONLY | ReceiverOption.NAMESPACE_OK);
 

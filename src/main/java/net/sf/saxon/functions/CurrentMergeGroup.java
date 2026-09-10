@@ -29,7 +29,7 @@ import java.util.Set;
 
 public class CurrentMergeGroup extends SystemFunction {
 
-    private boolean isInLoop = false;
+    private boolean inLoop = false;
     private MergeInstr controllingInstruction = null; // may be unknown, when current group has dynamic scope
     private final Set<String> allowedNames = new HashSet<>();
 
@@ -42,7 +42,7 @@ public class CurrentMergeGroup extends SystemFunction {
 
     public void setControllingInstruction(MergeInstr instruction, boolean isInLoop) {
         this.controllingInstruction = instruction;
-        this.isInLoop = isInLoop;
+        this.inLoop = isInLoop;
         for (MergeInstr.MergeSource m : instruction.getMergeSources()) {
             String name = m.sourceName;
             if (name != null) {
@@ -67,7 +67,7 @@ public class CurrentMergeGroup extends SystemFunction {
      */
 
     public boolean isInLoop() {
-        return isInLoop;
+        return inLoop;
     }
 
     /**

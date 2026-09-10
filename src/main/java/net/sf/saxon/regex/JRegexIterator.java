@@ -9,6 +9,7 @@ package net.sf.saxon.regex;
 
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.functions.Count;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.StringItem;
@@ -35,7 +36,7 @@ public class JRegexIterator implements RegexIterator, LastPositionFinder {
     private final Pattern pattern;    // the regex against which the string is matched
     private final Matcher matcher;    // the Matcher object that does the matching, and holds the state
     /*@Nullable*/ private String current;     // the string most recently returned by the iterator
-    private String next;        // if the last string was a matching string, null; otherwise the next substring
+    private String nextSubstring;        // if the last string was a matching string, null; otherwise the next substring
     //        matched by the regex
     private int prevEnd = 0;    // the position in the input string of the end of the last match or non-match
     private IntToIntHashMap nestingTable = null;
@@ -55,7 +56,7 @@ public class JRegexIterator implements RegexIterator, LastPositionFinder {
         theString = string;
         this.pattern = pattern;
         matcher = pattern.matcher(string);
-        next = null;
+        nextSubstring = null;
     }
 
     @Override
@@ -73,26 +74,26 @@ public class JRegexIterator implements RegexIterator, LastPositionFinder {
 
     @Override
     public StringItem next() {
-        if (next == null && prevEnd >= 0) {
+        if (nextSubstring == null && prevEnd >= 0) {
             // we've returned a match (or we're at the start), so find the next match
             if (matcher.find()) {
                 int start = matcher.start();
                 int end = matcher.end();
                 if (prevEnd == start) {
                     // there's no intervening non-matching string to return
-                    next = null;
+                    nextSubstring = null;
                     current = theString.substring(start, end);
                     prevEnd = end;
                 } else {
                     // return the non-matching substring first
                     current = theString.substring(prevEnd, start);
-                    next = theString.substring(start, end);
+                    nextSubstring = theString.substring(start, end);
                 }
             } else {
                 // there are no more regex matches, we must return the final non-matching text if any
                 if (prevEnd < theString.length()) {
                     current = theString.substring(prevEnd);
-                    next = null;
+                    nextSubstring = null;
                 } else {
                     // this really is the end...
                     current = null;
@@ -104,8 +105,8 @@ public class JRegexIterator implements RegexIterator, LastPositionFinder {
         } else {
             // we've returned a non-match, so now return the match that follows it, if there is one
             if (prevEnd >= 0) {
-                current = next;
-                next = null;
+                current = nextSubstring;
+                nextSubstring = null;
                 prevEnd = matcher.end();
             } else {
                 current = null;
@@ -119,15 +120,15 @@ public class JRegexIterator implements RegexIterator, LastPositionFinder {
      * Get properties of this iterator, as a bit-significant integer.
      *
      * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link Property#GROUNDED}, {@link Property#LAST_POSITION_FINDER},
-     *         and {@link Property#LOOKAHEAD}. It is always
+     *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
+     *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
      *         acceptable to return the value zero, indicating that there are no known special properties.
      *         It is acceptable for the properties of the iterator to change depending on its state.
      */
 
     @Override
-    public EnumSet<Property> getProperties() {
-        return EnumSet.of(Property.LAST_POSITION_FINDER);
+    public EnumSet<SequenceIteratorProperty> getProperties() {
+        return EnumSet.of(SequenceIteratorProperty.LAST_POSITION_FINDER);
     }
 
     /**
@@ -140,7 +141,7 @@ public class JRegexIterator implements RegexIterator, LastPositionFinder {
 
     @Override
     public boolean isMatching() {
-        return next == null && prevEnd >= 0;
+        return nextSubstring == null && prevEnd >= 0;
     }
 
     /**
@@ -178,7 +179,7 @@ public class JRegexIterator implements RegexIterator, LastPositionFinder {
      */
 
     @Override
-    public void processMatchingSubstring(MatchHandler action) throws XPathException {
+    public void processMatchingSubstring(RegexMatchHandler action) throws XPathException {
         int c = matcher.groupCount();
         if (c == 0) {
             action.characters(StringView.of(current));

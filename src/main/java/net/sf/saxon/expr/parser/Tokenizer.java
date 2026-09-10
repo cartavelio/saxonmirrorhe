@@ -696,7 +696,7 @@ public final class Tokenizer {
                     boolean allowE = true;
                     boolean allowSign = false;
                     boolean allowDot = true;
-                    numloop:
+                    boolean keepGoing = true;
                     while (true) {
                         switch (c) {
                             case '0':
@@ -717,7 +717,8 @@ public final class Tokenizer {
                                     allowSign = false;
                                 } else {
                                     inputOffset--;
-                                    break numloop;
+                                    keepGoing = false;
+                                    //break numloop;
                                 }
                                 break;
                             case 'E':
@@ -727,7 +728,8 @@ public final class Tokenizer {
                                     allowE = false;
                                 } else {
                                     inputOffset--;
-                                    break numloop;
+                                    keepGoing = false;
+                                    //break numloop;
                                 }
                                 break;
                             case '+':
@@ -736,7 +738,8 @@ public final class Tokenizer {
                                     allowSign = false;
                                 } else {
                                     inputOffset--;
-                                    break numloop;
+                                    keepGoing = false;
+                                    //break numloop;
                                 }
                                 break;
                             default:
@@ -745,9 +748,11 @@ public final class Tokenizer {
                                     throw new XPathException("Separator needed after numeric literal");
                                 }
                                 inputOffset--;
-                                break numloop;
+                                keepGoing = false;
+                                break;
+                                //break numloop;
                         }
-                        if (inputOffset >= inputLength) {
+                        if (!keepGoing || inputOffset >= inputLength) {
                             break;
                         }
                         c = input.charAt(inputOffset++);
@@ -878,7 +883,7 @@ public final class Tokenizer {
                     /* fall through */
                 case '_':
                     boolean foundColon = false;
-                    loop:
+                    boolean breakLoop = false;
                     for (; inputOffset < inputLength; inputOffset++) {
                         c = input.charAt(inputOffset);
                         switch (c) {
@@ -912,7 +917,7 @@ public final class Tokenizer {
                                     }
                                     foundColon = true;
                                 } else {
-                                    break loop;
+                                    breakLoop = true;
                                 }
                                 break;
                             case '.':
@@ -932,9 +937,12 @@ public final class Tokenizer {
 
                             default:
                                 if (c < 0x80 && !Character.isLetterOrDigit(c)) {
-                                    break loop;
+                                    breakLoop = true;
                                 }
                                 break;
+                        }
+                        if (breakLoop) {
+                            break;
                         }
                     }
                     nextTokenValue = input.substring(nextTokenStartOffset, inputOffset);

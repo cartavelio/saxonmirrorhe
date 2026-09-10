@@ -244,9 +244,9 @@ public class ExpressionContext implements StaticContext {
                     }
                 });
 
-                GlobalVariable var = (GlobalVariable) comp.getActor();
-                GlobalVariableReference vref = new GlobalVariableReference(var);
-                vref.setStaticType(var.getRequiredType(), null, 0);
+                GlobalVariable globalVar = (GlobalVariable) comp.getActor();
+                GlobalVariableReference vref = new GlobalVariableReference(globalVar);
+                vref.setStaticType(globalVar.getRequiredType(), null, 0);
                 return vref;
             }
             // it might be an implicit error variable in try/catch
@@ -264,10 +264,10 @@ public class ExpressionContext implements StaticContext {
                 }
             }
 
-            XPathException err = new XPathException("Variable " + qName.getDisplayName() +
+            XPathException error = new XPathException("Variable " + qName.getDisplayName() +
                                                             " has not been declared (or its declaration is not in scope)", "XPST0008");
-            err.setIsStaticError(true);
-            throw err;
+            error.setIsStaticError(true);
+            throw error;
         }
 
         VariableReference var;

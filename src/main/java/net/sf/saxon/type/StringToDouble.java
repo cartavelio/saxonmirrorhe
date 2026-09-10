@@ -51,7 +51,7 @@ public class StringToDouble extends StringConverter {
             int dot = -1;
             int lastDigit = -1;
             boolean onlySpaceAllowed = false;
-            loop:
+            boolean breakLoop = false;
             for (int i = 0; i < len; i++) {
                 int c = s.codePointAt(i);
                 switch (c) {
@@ -99,12 +99,16 @@ public class StringToDouble extends StringConverter {
                     case 'N':
                         containsDisallowedChars = true;
                         useJava = true;
-                        break loop;
+                        breakLoop = true;
+                        break;
                     default:
                         // there's something like a sign or an exponent: take the slow train instead
                         // But keep going to look for disallowed characters - bug 3495
                         useJava = true;
                         break;
+                }
+                if (breakLoop) {
+                    break;
                 }
             }
             if (!useJava) {
@@ -118,7 +122,7 @@ public class StringToDouble extends StringConverter {
                 }
             }
         } else {
-            loop2:
+            boolean breakLoop2 = false;
             for (int i = 0; i < len; i++) {
                 int c = s.codePointAt(i);
                 switch (c) {
@@ -146,7 +150,11 @@ public class StringToDouble extends StringConverter {
                         break;
                     default:
                         containsDisallowedChars = true;
-                        break loop2;
+                        breakLoop2 = true;
+                        break;
+                }
+                if (breakLoop2) {
+                    break;
                 }
             }
         }

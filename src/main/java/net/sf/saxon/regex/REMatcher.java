@@ -165,7 +165,7 @@ public class REMatcher {
     int maxParen = MAX_PAREN;
 
     // Parenthesized subexpressions
-    State captureState = new State();
+    State _captureState = new State();
 
     // Backreferences
     int[] startBackref;                 // Lazily-allocated array of backref starts
@@ -219,7 +219,7 @@ public class REMatcher {
      * @return Number of available parenthesized subexpressions
      */
     public int getParenCount() {
-        return captureState.parenCount;
+        return _captureState.parenCount;
     }
 
     /**
@@ -230,7 +230,7 @@ public class REMatcher {
      */
     public UnicodeString getParen(int which) {
         int start;
-        if (which < captureState.parenCount && (start = getParenStart(which)) >= 0) {
+        if (which < _captureState.parenCount && (start = getParenStart(which)) >= 0) {
             return search.substring(start, getParenEnd(which));
         }
         return null;
@@ -243,8 +243,8 @@ public class REMatcher {
      * @return String index
      */
     public final int getParenStart(int which) {
-        if (which < captureState.startn.length) {
-            return captureState.startn[which];
+        if (which < _captureState.startn.length) {
+            return _captureState.startn[which];
         }
         return -1;
     }
@@ -256,8 +256,8 @@ public class REMatcher {
      * @return String index
      */
     public final int getParenEnd(int which) {
-        if (which < captureState.endn.length) {
-            return captureState.endn[which];
+        if (which < _captureState.endn.length) {
+            return _captureState.endn[which];
         }
         return -1;
     }
@@ -269,13 +269,13 @@ public class REMatcher {
      * @param i     Index in input array
      */
     protected final void setParenStart(int which, int i) {
-        while (which > captureState.startn.length - 1) {
-            int[] s2 = new int[captureState.startn.length * 2];
-            System.arraycopy(captureState.startn, 0, s2, 0, captureState.startn.length);
-            Arrays.fill(s2, captureState.startn.length, s2.length, -1);
-            captureState.startn = s2;
+        while (which > _captureState.startn.length - 1) {
+            int[] s2 = new int[_captureState.startn.length * 2];
+            System.arraycopy(_captureState.startn, 0, s2, 0, _captureState.startn.length);
+            Arrays.fill(s2, _captureState.startn.length, s2.length, -1);
+            _captureState.startn = s2;
         }
-        captureState.startn[which] = i;
+        _captureState.startn[which] = i;
     }
 
     /**
@@ -285,13 +285,13 @@ public class REMatcher {
      * @param i     Index in input array
      */
     protected final void setParenEnd(int which, int i) {
-        while (which > captureState.endn.length - 1) {
-            int[] e2 = new int[captureState.endn.length * 2];
-            System.arraycopy(captureState.endn, 0, e2, 0, captureState.endn.length);
-            Arrays.fill(e2, captureState.endn.length, e2.length, -1);
-            captureState.endn = e2;
+        while (which > _captureState.endn.length - 1) {
+            int[] e2 = new int[_captureState.endn.length * 2];
+            System.arraycopy(_captureState.endn, 0, e2, 0, _captureState.endn.length);
+            Arrays.fill(e2, _captureState.endn.length, e2.length, -1);
+            _captureState.endn = e2;
         }
-        captureState.endn[which] = i;
+        _captureState.endn[which] = i;
     }
 
     /**
@@ -300,9 +300,9 @@ public class REMatcher {
      */
 
     protected void clearCapturedGroupsBeyond(int pos) {
-        for (int i = 0; i < captureState.startn.length; i++) {
-            if (captureState.startn[i] >= pos) {
-                captureState.endn[i] = captureState.startn[i];
+        for (int i = 0; i < _captureState.startn.length; i++) {
+            if (_captureState.startn[i] >= pos) {
+                _captureState.endn[i] = _captureState.startn[i];
             }
         }
         if (startBackref != null) {
@@ -325,7 +325,7 @@ public class REMatcher {
      */
     protected boolean matchAt(int i, boolean anchored) {
         // Initialize start pointer, paren cache and paren count
-        captureState.parenCount = 1;
+        _captureState.parenCount = 1;
         anchoredMatch = anchored;
         setParenStart(0, i);
 
@@ -345,7 +345,7 @@ public class REMatcher {
         }
 
         // Didn't match
-        captureState.parenCount = 0;
+        _captureState.parenCount = 0;
         return false;
     }
 
@@ -357,7 +357,7 @@ public class REMatcher {
      * @return true if the regex matches the whols string
      */
 
-    public boolean anchoredMatch(UnicodeString search) {
+    public boolean isAnchoredMatch(UnicodeString search) {
         this.search = search;
         return matchAt(0, true);
     }
@@ -377,7 +377,7 @@ public class REMatcher {
         this.search = search.tidy();
 
         // Clear the captured group state
-        captureState = new State();
+        _captureState = new State();
 
         // Can we optimize the search by looking for new lines?
         if ((program.optimizationFlags & REProgram.OPT_HASBOL) == REProgram.OPT_HASBOL) {
@@ -790,11 +790,11 @@ public class REMatcher {
     }
 
     public State captureState() {
-        return new State(captureState);
+        return new State(_captureState);
     }
 
     public void resetState(State state) {
-        captureState = new State(state);
+        _captureState = new State(state);
     }
 
     public static class State {

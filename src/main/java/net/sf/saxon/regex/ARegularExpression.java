@@ -100,7 +100,7 @@ public class ARegularExpression implements RegularExpression {
             return true;
         }
         REMatcher matcher = new REMatcher(regex);
-        return matcher.anchoredMatch(input.tidy());
+        return matcher.isAnchoredMatch(input.tidy());
     }
 
     /**

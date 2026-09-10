@@ -36,7 +36,7 @@ public class LetExpression extends Assignation implements TailCallReturner {
     private Evaluator evaluator = null;
     private boolean needsEagerEvaluation = false;
     private boolean needsLazyEvaluation = false;
-    private boolean isInstruction;
+    private boolean _isInstruction;
 
     /**
      * Create a LetExpression
@@ -54,7 +54,7 @@ public class LetExpression extends Assignation implements TailCallReturner {
      */
 
     public void setInstruction(boolean inst) {
-        isInstruction = inst;
+        _isInstruction = inst;
     }
 
     /**
@@ -66,7 +66,7 @@ public class LetExpression extends Assignation implements TailCallReturner {
 
     @Override
     public boolean isInstruction() {
-        return isInstruction;
+        return _isInstruction;
     }
 
 
@@ -280,7 +280,7 @@ public class LetExpression extends Assignation implements TailCallReturner {
             // of references.
 
             boolean considerRemoval = ((references != null && references.size() < 2) || getSequence() instanceof VariableReference) &&
-                    !isIndexedVariable && !hasLoopingReference && !needsEagerEvaluation;
+                    !indexedVariable && !hasLoopingReference && !needsEagerEvaluation;
 
             if (considerRemoval) {
                 verifyReferences();
@@ -346,7 +346,7 @@ public class LetExpression extends Assignation implements TailCallReturner {
         while (tries++ < 5) {
             Expression seq0 = getSequence();
             getSequenceOp().optimize(visitor, contextItemType);
-            if (getSequence() instanceof Literal && !isIndexedVariable) {
+            if (getSequence() instanceof Literal && !indexedVariable) {
                 return optimize(visitor, contextItemType);
             }
             if (seq0 == getSequence()) {
@@ -361,7 +361,7 @@ public class LetExpression extends Assignation implements TailCallReturner {
             if (act0 == getAction()) {
                 break;
             }
-            if (!isIndexedVariable && !needsEagerEvaluation) {
+            if (!indexedVariable && !needsEagerEvaluation) {
                 verifyReferences();
                 if (references != null && references.size() < 2) {
                     if (references.isEmpty()) {
@@ -701,7 +701,7 @@ public class LetExpression extends Assignation implements TailCallReturner {
     public Expression copy(RebindingMap rebindings) {
         LetExpression let = new LetExpression();
         rebindings.put(this, let);
-        let.isIndexedVariable = isIndexedVariable;
+        let.indexedVariable = indexedVariable;
         let.hasLoopingReference = hasLoopingReference;
         let.setNeedsEagerEvaluation(needsEagerEvaluation);
         let.setNeedsLazyEvaluation(needsLazyEvaluation);

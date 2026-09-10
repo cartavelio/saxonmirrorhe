@@ -92,13 +92,13 @@ public class XdmFunctionItem extends XdmItem {
 
     public java.util.function.Function<? super XdmValue, ? extends XdmValue> asFunction(Processor processor) {
         if (getArity() == 1) {
-            return (java.util.function.Function<XdmValue, XdmValue>) arg -> {
+            return (java.util.function.Function<XdmValue, XdmValue>) (arg -> {
                 try {
                     return XdmFunctionItem.this.call(processor, arg);
                 } catch (SaxonApiException e) {
                     throw new SaxonApiUncheckedException(e);
                 }
-            };
+            });
         } else {
             throw new IllegalStateException("Function arity must be one");
         }

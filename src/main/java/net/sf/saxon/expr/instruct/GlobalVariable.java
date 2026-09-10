@@ -52,13 +52,13 @@ public class GlobalVariable extends Actor
     private StructuredQName variableQName;
     private SequenceType requiredType;
 
-    private boolean indexed;
-    private boolean isPrivate = false;
-    private boolean isAssignable = false;
+    private boolean _indexed;
+    private boolean _isPrivate = false;
+    private boolean _isAssignable = false;
     private GlobalVariable originalVariable;
     private int binderySlotNumber;
-    private boolean isRequiredParam;
-    private boolean isStatic;
+    private boolean _isRequiredParam;
+    private boolean _isStatic;
 
     /**
      * Create a global variable
@@ -112,7 +112,7 @@ public class GlobalVariable extends Actor
      */
 
     public void setStatic(boolean declaredStatic) {
-        isStatic = declaredStatic;
+        _isStatic = declaredStatic;
     }
 
     /**
@@ -121,7 +121,7 @@ public class GlobalVariable extends Actor
      */
 
     public boolean isStatic() {
-        return this.isStatic;
+        return this._isStatic;
     }
 
     /**
@@ -226,7 +226,7 @@ public class GlobalVariable extends Actor
      */
 
     public boolean isPrivate() {
-        return isPrivate;
+        return _isPrivate;
     }
 
     /**
@@ -235,7 +235,7 @@ public class GlobalVariable extends Actor
      * @param b true if this variable is external
      */
     public void setPrivate(boolean b) {
-        isPrivate = b;
+        _isPrivate = b;
     }
 
     /**
@@ -245,7 +245,7 @@ public class GlobalVariable extends Actor
      */
 
     public void setAssignable(boolean assignable) {
-        isAssignable = assignable;
+        _isAssignable = assignable;
     }
 
     /**
@@ -256,7 +256,7 @@ public class GlobalVariable extends Actor
 
     @Override
     public final boolean isAssignable() {
-        return isAssignable;
+        return _isAssignable;
     }
 
 
@@ -313,7 +313,7 @@ public class GlobalVariable extends Actor
      */
 
     public void setIndexedVariable() {
-        indexed = true;
+        _indexed = true;
     }
 
     /**
@@ -323,7 +323,7 @@ public class GlobalVariable extends Actor
      */
 
     public boolean isIndexedVariable() {
-        return indexed;
+        return _indexed;
     }
 
     /**
@@ -397,7 +397,7 @@ public class GlobalVariable extends Actor
      */
 
     public void setRequiredParam(boolean requiredParam) {
-        this.isRequiredParam = requiredParam;
+        this._isRequiredParam = requiredParam;
     }
 
     /**
@@ -407,7 +407,7 @@ public class GlobalVariable extends Actor
      */
 
     public boolean isRequiredParam() {
-        return this.isRequiredParam;
+        return this._isRequiredParam;
     }
 
     /**
@@ -655,7 +655,7 @@ public class GlobalVariable extends Actor
                 c2.setTemporaryOutputState(StandardNames.XSL_VARIABLE);
                 c2.setCurrentOutputUri(null);
                 GroundedValue result;
-                if (indexed) {
+                if (_indexed) {
                     result = c2.getConfiguration().makeSequenceExtent(select, FilterExpression.FILTERED, c2);
                 } else {
                     result = select.iterate(c2).materialize();
@@ -743,7 +743,7 @@ public class GlobalVariable extends Actor
             }
 
             GroundedValue value = getSelectValue(context, target);
-            if (indexed) {
+            if (_indexed) {
                 value = controller.getConfiguration().obtainOptimizer().makeIndexedValue(value.iterate());
             }
             return b.saveGlobalVariableValue(this, value);
@@ -902,16 +902,16 @@ public class GlobalVariable extends Actor
 
     protected String getFlags() {
         String flags = "";
-        if (isAssignable) {
+        if (_isAssignable) {
             flags += "a";
         }
-        if (indexed) {
+        if (_indexed) {
             flags += "x";
         }
-        if (isRequiredParam) {
+        if (_isRequiredParam) {
             flags += "r";
         }
-        if (isStatic) {
+        if (_isStatic) {
             flags += "s";
         }
         return flags;

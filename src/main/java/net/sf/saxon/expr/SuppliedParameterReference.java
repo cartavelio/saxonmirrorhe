@@ -168,7 +168,7 @@ public class SuppliedParameterReference extends Expression {
         try {
             return c.evaluateLocalVariable(slotNumber);
         } catch (AssertionError e) {
-            new StandardDiagnostics().printStackTrace(c, c.getConfiguration().getLogger(), 2);
+            new StandardDiagnostics().logStackTrace(c, c.getConfiguration().getLogger(), 2);
             throw new AssertionError(e.getMessage() + ". No value has been set for parameter " + slotNumber);
         }
     }

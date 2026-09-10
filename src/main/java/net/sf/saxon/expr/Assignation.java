@@ -31,7 +31,7 @@ public abstract class Assignation extends Expression implements LocalBinding {
     // (initialized to ensure a crash if no real slot is allocated)
     protected StructuredQName variableName;
     protected SequenceType requiredType;
-    protected boolean isIndexedVariable = false;
+    protected boolean indexedVariable = false;
     protected boolean hasLoopingReference = false;
     protected List<VariableReference> references = null;
 
@@ -434,7 +434,7 @@ public abstract class Assignation extends Expression implements LocalBinding {
      */
 
     public int getNominalReferenceCount() {
-        if (isIndexedVariable) {
+        if (indexedVariable) {
             return FilterExpression.FILTERED;
         } else if (references == null || hasLoopingReference) {
             return 10;
@@ -531,7 +531,7 @@ public abstract class Assignation extends Expression implements LocalBinding {
 
     @Override
     public boolean isIndexedVariable() {
-        return isIndexedVariable;
+        return indexedVariable;
     }
 
     /**
@@ -562,7 +562,7 @@ public abstract class Assignation extends Expression implements LocalBinding {
 
     @Override
     public void setIndexedVariable() {
-        isIndexedVariable = true;
+        indexedVariable = true;
     }
 }
 

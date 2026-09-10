@@ -78,8 +78,8 @@ public class AdjacentTextNodeMergingIterator implements LookaheadIterator {
     }
 
     @Override
-    public EnumSet<Property> getProperties() {
-        return EnumSet.of(Property.LOOKAHEAD);
+    public EnumSet<SequenceIteratorProperty> getProperties() {
+        return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD);
     }
 }
 

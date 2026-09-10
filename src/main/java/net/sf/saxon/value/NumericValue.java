@@ -7,6 +7,7 @@
 
 package net.sf.saxon.value;
 
+import net.sf.saxon.Virtual;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.trans.XPathException;
@@ -177,6 +178,7 @@ public abstract class NumericValue extends AtomicValue
      * @return true if this value is float or double negative zero
      */
 
+    @Virtual
     public boolean isNegativeZero() {
         return false;
     }

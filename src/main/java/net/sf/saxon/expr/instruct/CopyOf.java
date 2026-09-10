@@ -791,18 +791,18 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
         SimpleType annotation = BuiltInAtomicType.UNTYPED_ATOMIC;
         if (schemaType != null) {
             if (schemaType.isNamespaceSensitive()) {
-                XPathException err = new XPathException("Cannot create a parentless attribute whose " +
+                XPathException nsErr = new XPathException("Cannot create a parentless attribute whose " +
                                                                 "type is namespace-sensitive (such as xs:QName)");
-                err.setErrorCode("XTTE1545");
-                throw err;
+                nsErr.setErrorCode("XTTE1545");
+                throw nsErr;
             }
-            ValidationFailure err = schemaType.validateContent(
+            ValidationFailure valErr = schemaType.validateContent(
                     value, DummyNamespaceResolver.getInstance(), context.getConfiguration().getConversionRules());
-            if (err != null) {
-                err.setMessage("Attribute being copied does not match the required type. " +
-                                       err.getMessage());
-                err.setErrorCode("XTTE1510");
-                throw err.makeException();
+            if (valErr != null) {
+                valErr.setMessage("Attribute being copied does not match the required type. " +
+                                       valErr.getMessage());
+                valErr.setErrorCode("XTTE1510");
+                throw valErr.makeException();
             }
             annotation = schemaType;
         } else if (validation == Validation.STRICT || validation == Validation.LAX) {

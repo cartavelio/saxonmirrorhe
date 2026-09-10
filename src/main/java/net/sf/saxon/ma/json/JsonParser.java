@@ -486,7 +486,8 @@ public class JsonParser {
             if (position >= input.length()) {
                 return JsonToken.EOF;
             }
-            ws: while (true) {
+            boolean breakLoop = false;
+            do {
                 char c = input.charAt(position);
                 switch (c) {
                     case '\n':
@@ -502,9 +503,10 @@ public class JsonParser {
                         }
                         break;
                     default:
-                        break ws;
+                        breakLoop = true;
+                        break;
                 }
-            }
+            } while (!breakLoop);
             char ch = input.charAt(position++);
             switch (ch) {
                 case '[':

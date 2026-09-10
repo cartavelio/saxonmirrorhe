@@ -230,10 +230,10 @@ public class StandardUnparsedTextResolver implements UnparsedTextURIResolver {
         }
 
         // The following is necessary to ensure that encoding errors are not recovered.
-        Charset charset = Charset.forName(encoding);
-        CharsetDecoder decoder = charset.newDecoder();
-        decoder = decoder.onMalformedInput(CodingErrorAction.REPORT);
-        decoder = decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+        Charset charset2 = Charset.forName(encoding);
+        CharsetDecoder decoder = charset2.newDecoder()
+                .onMalformedInput(CodingErrorAction.REPORT)
+                .onUnmappableCharacter(CodingErrorAction.REPORT);
         return new BufferedReader(new InputStreamReader(inputStream, decoder));
 
     }

@@ -250,8 +250,8 @@ public class Serializer extends AbstractDestination {
 
         private final String name;
 
-        Property(String name) {
-            this.name = name;
+        Property(String propertyName) {
+            this.name = propertyName;
         }
 
         /**

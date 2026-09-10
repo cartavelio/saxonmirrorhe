@@ -65,7 +65,7 @@ public abstract class Builder implements Receiver {
 
     protected boolean started = false;
     protected boolean timing = false;
-    protected boolean open = false;
+    protected boolean opened = false;
 
     private long startTime;
 
@@ -243,7 +243,7 @@ public abstract class Builder implements Receiver {
 
     @Override
     public void open() {
-        if (timing && !open) {
+        if (timing && !opened) {
             String sysId = getSystemId();
             if (sysId == null) {
                 sysId = "(unknown systemId)";
@@ -252,12 +252,12 @@ public abstract class Builder implements Receiver {
                     "Building tree for " + sysId + " using " + getClass());
             startTime = System.nanoTime();
         }
-        open = true;
+        opened = true;
     }
 
     @Override
     public void close() throws XPathException {
-        if (timing && open) {
+        if (timing && opened) {
             long endTime = System.nanoTime();
             getConfiguration().getLogger().info(
                     "Tree built in " + CommandLineOptions.showExecutionTimeNano(endTime - startTime));
@@ -266,7 +266,7 @@ public abstract class Builder implements Receiver {
             }
             startTime = endTime;
         }
-        open = false;
+        opened = false;
     }
 
     /**
@@ -310,7 +310,7 @@ public abstract class Builder implements Receiver {
         lineNumbering = false;
         started = false;
         timing = false;
-        open = false;
+        opened = false;
     }
 
 }

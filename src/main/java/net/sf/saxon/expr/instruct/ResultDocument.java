@@ -449,9 +449,9 @@ public class ResultDocument extends Instruction
                     output -> {
                         // Validation can add redundant namespace declarations so we
                         // need to follow it with a namespace reducer
-                        NamespaceReducer nr = new NamespaceReducer(output);
+                        NamespaceReducer reducer = new NamespaceReducer(output);
                         return config.getDocumentValidator(
-                                nr, output.getSystemId(), validationOptions, getLocation());
+                                reducer, output.getSystemId(), validationOptions, getLocation());
                     }
             );
         }

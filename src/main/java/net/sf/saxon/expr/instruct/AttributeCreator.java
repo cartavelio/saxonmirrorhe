@@ -34,7 +34,7 @@ public abstract class AttributeCreator extends SimpleNodeConstructor implements 
     /*@Nullable*/ SimpleType schemaType = null;
     private int validationAction;
     private int options = ReceiverOption.NONE;
-    private boolean isInstruction;
+    private boolean _isInstruction;
 
     /**
      * Say whether this attribute creator originates as an XSLT instruction
@@ -42,7 +42,7 @@ public abstract class AttributeCreator extends SimpleNodeConstructor implements 
      */
 
     public void setInstruction(boolean inst) {
-        isInstruction = inst;
+        _isInstruction = inst;
     }
 
     /**
@@ -54,7 +54,7 @@ public abstract class AttributeCreator extends SimpleNodeConstructor implements 
 
     @Override
     public boolean isInstruction() {
-        return isInstruction;
+        return _isInstruction;
     }
 
     /**

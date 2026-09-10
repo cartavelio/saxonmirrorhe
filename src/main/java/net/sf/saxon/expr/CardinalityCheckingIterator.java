@@ -85,13 +85,13 @@ public final class CardinalityCheckingIterator implements SequenceIterator {
                 return null;
             }
         }
-        Item current = base.next();
-        if (current == null) {
+        Item nextBase = base.next();
+        if (nextBase == null) {
             position = -1;
         } else {
             position++;
         }
-        return current;
+        return nextBase;
     }
 
     @Override

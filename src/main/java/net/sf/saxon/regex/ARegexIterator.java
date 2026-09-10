@@ -9,6 +9,7 @@ package net.sf.saxon.regex;
 
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.SaxonErrorCode;
@@ -33,7 +34,7 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
     private final UnicodeString regex;
     private final REMatcher matcher;    // the Matcher object that does the matching, and holds the state
     private UnicodeString current;     // the string most recently returned by the iterator
-    private UnicodeString next;        // if the last string was a matching string, null; otherwise the next substring
+    private UnicodeString nextSubstring;        // if the last string was a matching string, null; otherwise the next substring
     //        matched by the regex
     private int prevEnd = 0;    // the position in the input string of the end of the last match or non-match
     private IntToIntHashMap nestingTable = null;
@@ -57,7 +58,7 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
         theString = string;
         this.regex = regex;
         this.matcher = matcher;
-        next = null;
+        nextSubstring = null;
     }
 
     @Override
@@ -79,7 +80,7 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
     @Override
     public StringItem next() throws XPathException {
         try {
-            if (next == null && prevEnd >= 0) {
+            if (nextSubstring == null && prevEnd >= 0) {
                 // we've returned a match (or we're at the start), so find the next match
                 int searchStart = prevEnd;
                 if (skip) {
@@ -88,7 +89,7 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
                     if (searchStart >= theString.length()) {
                         if (prevEnd < theString.length()) {
                             current = theString.substring(prevEnd);
-                            next = null;
+                            nextSubstring = null;
                         } else {
                             current = null;
                             prevEnd = -1;
@@ -102,19 +103,19 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
                     skip = start == end;
                     if (prevEnd == start) {
                         // there's no intervening non-matching string to return
-                        next = null;
+                        nextSubstring = null;
                         current = theString.substring(start, end);
                         prevEnd = end;
                     } else {
                         // return the non-matching substring first
                         current = theString.substring(prevEnd, start);
-                        next = theString.substring(start, end);
+                        nextSubstring = theString.substring(start, end);
                     }
                 } else {
                     // there are no more regex matches, we must return the final non-matching text if any
                     if (prevEnd < theString.length()) {
                         current = theString.substring(prevEnd);
-                        next = null;
+                        nextSubstring = null;
                     } else {
                         // this really is the end...
                         current = null;
@@ -126,8 +127,8 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
             } else {
                 // we've returned a non-match, so now return the match that follows it, if there is one
                 if (prevEnd >= 0) {
-                    current = next;
-                    next = null;
+                    current = nextSubstring;
+                    nextSubstring = null;
                     prevEnd = matcher.getParenEnd(0);
                 } else {
                     current = null;
@@ -151,15 +152,15 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
      * Get properties of this iterator, as a bit-significant integer.
      *
      * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link Property#GROUNDED}, {@link Property#LAST_POSITION_FINDER},
-     *         and {@link Property#LOOKAHEAD}. It is always
+     *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
+     *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
      *         acceptable to return the value zero, indicating that there are no known special properties.
      *         It is acceptable for the properties of the iterator to change depending on its state.
      */
 
     @Override
-    public EnumSet<Property> getProperties() {
-        return EnumSet.of(Property.LAST_POSITION_FINDER);
+    public EnumSet<SequenceIteratorProperty> getProperties() {
+        return EnumSet.of(SequenceIteratorProperty.LAST_POSITION_FINDER);
     }
 
     /**
@@ -172,7 +173,7 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
 
     @Override
     public boolean isMatching() {
-        return next == null && prevEnd >= 0;
+        return nextSubstring == null && prevEnd >= 0;
     }
 
     /**
@@ -205,13 +206,13 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
      * Process a matching substring, performing specified actions at the start and end of each captured
      * subgroup. This method will always be called when operating in "push" mode; it writes its
      * result to context.getReceiver(). The matching substring text is all written to the receiver,
-     * interspersed with calls to the {@link net.sf.saxon.regex.RegexIterator.MatchHandler} methods onGroupStart() and onGroupEnd().
+     * interspersed with calls to the {@link RegexMatchHandler} methods onGroupStart() and onGroupEnd().
      *
      * @param action  defines the processing to be performed at the start and end of a group
      */
 
     @Override
-    public void processMatchingSubstring(MatchHandler action) throws XPathException {
+    public void processMatchingSubstring(RegexMatchHandler action) throws XPathException {
         int c = matcher.getParenCount() - 1;
         if (c == 0) {
             action.characters(current);
