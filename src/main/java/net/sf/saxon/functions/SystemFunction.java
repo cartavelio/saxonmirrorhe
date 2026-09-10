@@ -70,7 +70,8 @@ public abstract class SystemFunction extends AbstractFunction {
 
     public static SystemFunction makeFunction(String name, RetainedStaticContext rsc, int arity) {
         Objects.requireNonNull(rsc);
-        SystemFunction fn = rsc.getConfiguration().makeSystemFunction(name, arity);
+        int version = rsc.getPackageData().getHostLanguageVersion();
+        SystemFunction fn = rsc.getConfiguration().makeSystemFunction(name, arity, version);
         if (fn == null) {
             fn = makeFunction40(name, rsc, arity);
         }

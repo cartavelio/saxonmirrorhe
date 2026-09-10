@@ -25,7 +25,7 @@ public class RegexFunctionSansFlags extends SystemFunction {
         Configuration config = getRetainedStaticContext().getConfiguration();
         int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
         SystemFunction fixed = config.makeSystemFunction(
-                getFunctionName().getLocalPart(), getArity() + 1, version);
+            getFunctionName().getLocalPart(), getArity() + 1, version);
 
         fixed.setRetainedStaticContext(getRetainedStaticContext());
         return fixed;

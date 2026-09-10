@@ -1438,16 +1438,16 @@ public class Configuration implements SourceResolver, NotationSet {
      * @return the function
      */
 
-    public SystemFunction makeSystemFunction(String localName, int arity) {
+    public SystemFunction makeSystemFunction(String localName, int arity, int version) {
         try {
-            return getXSLTFunctionSet(30).makeFunction(localName, arity);
+            return getXSLTFunctionSet(version).makeFunction(localName, arity);
         } catch (XPathException e) {
             return null;
         }
     }
 
     public SystemFunction makeSystemFunction40(String localName, int arity) {
-        return makeSystemFunction(localName, arity);
+        return makeSystemFunction(localName, arity, 40);
     }
 
     /**
