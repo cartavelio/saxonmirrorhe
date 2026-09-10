@@ -37,7 +37,7 @@ public class CompressedWhitespace extends WhitespaceString {
         int runlength = 1;
         int outlength = 0;
         for (int i = 0; i < len; i++) {
-            final char c = in[i];
+            final char c = in[start + i];
             if (c <= 32 && CODES[c] >= 0) {
                 if (i == len - 1 || c != in[i + 1] || runlength == 63) {
                     runlength = 1;
@@ -56,7 +56,7 @@ public class CompressedWhitespace extends WhitespaceString {
         runlength = 1;
         int[] out = new int[outlength];
         for (int i = 0; i < len; i++) {
-            final char c = in[i];
+            final char c = in[start + i];
             if (i == len - 1 || c != in[i + 1] || runlength == 63) {
                 out[ix++] = (CODES[c] << 6) | runlength;
                 runlength = 1;
