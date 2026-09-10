@@ -172,6 +172,11 @@
         user-written code to initialize the Saxon configuration. This can be used, for example, to register
         extension functions or collations.</p>
         
+        <p>For SaxonJ, the <code>Transform</code> and <code>Query</code> commands, when used with the <code>-TP</code>
+        option for performance profiling, now accept an additional option <code>-TPxsl:filename</code>; the value is
+        the filename or URI of a stylesheet to be used for formatting the result. This allows you, for example, to
+        output the results in XML or JSON format, or to filter or reorder the results for analysis.</p>
+        
        
         
     </category>
@@ -221,11 +226,18 @@
                 to <code>use-last</code>. If a singleton map does not match any template rule, then it is effectively skipped.</li>
         </ul>
         
-       <p>The proposed 4.0 functions fn:all-equal(), fn:all-different(), and fn:replicate() are implemented.</p>
+       <p>The proposed 4.0 functions fn:all-equal(), fn:all-different(), fn:intersperse(), and fn:replicate() are implemented.</p>
+        
+        <p>The proposed 4.0 function map:filter() is implemented</p>
         
         <p>The attributes <code>@array</code> and <code>@map</code> attributes of <code>xsl:for-each</code>, 
             <code>xsl:for-each-group</code>, and <code>xsl:iterate</code> are dropped. In their place, use
         <code>select="array:members($array)"</code> or <code>select="map:key-value-pairs($map)"</code></p>
+        
+        <p>Some experimental syntax extensions intended for 4.0 have been dropped. "Dot Functions" (written as <code>.{.+1}</code>
+            or <code>fn{.+1}</code>)
+        are now written as <code>->{.+1}</code>. "Underscore functions" (written as <code>_{$1 + $2}</code>) are dropped
+        entirely (write instead <code>->($p1, $p2){$p1 + $p2}</code>).</p>
  
 
     
