@@ -12,7 +12,7 @@ import net.sf.saxon.expr.elab.EagerEvaluator;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.ItemElaborator;
 import net.sf.saxon.expr.elab.ItemEvaluator;
-import net.sf.saxon.expr.freq.Ping;
+import net.sf.saxon.expr.elab.Ping;
 import net.sf.saxon.expr.oper.OperandArray;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;

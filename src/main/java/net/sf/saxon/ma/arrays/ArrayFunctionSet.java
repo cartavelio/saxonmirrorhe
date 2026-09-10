@@ -8,7 +8,7 @@
 package net.sf.saxon.ma.arrays;
 
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.freq.Ping;
+import net.sf.saxon.expr.elab.Ping;
 import net.sf.saxon.functions.Fold;
 import net.sf.saxon.functions.FoldingFunction;
 import net.sf.saxon.functions.SystemFunction;
