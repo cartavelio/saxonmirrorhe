@@ -7,7 +7,10 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.DefaultedArgumentExpression;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.StringLiteral;
+import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.CodepointCollator;

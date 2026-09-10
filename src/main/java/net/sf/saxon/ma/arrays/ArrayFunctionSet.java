@@ -11,11 +11,13 @@ import com.saxonica.functions.qt4.Slice;
 import com.saxonica.functions.qt4.UnparcelFn;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.elab.Pingable;
+import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.functions.Fold;
 import net.sf.saxon.functions.FoldingFunction;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.ma.Parcel;
+import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -219,7 +221,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
 
             register("index-of", 2, 3, e -> e.populate(ArrayIndexOf::new, BuiltInAtomicType.INTEGER, STAR, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
-                    .arg(1, BuiltInAtomicType.ANY_ATOMIC, STAR, null)
+                    .arg(1, AnyItemType.getInstance(), STAR, null)
                     .arg(2, BuiltInAtomicType.STRING, OPT, null));
 
             register("index-where", 2, e -> e.populate(ArrayIndexWhere::new, BuiltInAtomicType.INTEGER, STAR, 0)
@@ -996,14 +998,15 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             ArrayItem array1 = (ArrayItem) arguments[0].head();
             assert array1 != null;
             GroundedValue search = arguments[1].materialize();
+            String collation = getRetainedStaticContext().getDefaultCollationName();
             if (arguments.length > 2) {
                 Item collationItem = arguments[2].head();
                 if (collationItem != null) {
-                    String collation = collationItem.getStringValue();
+                    collation = collationItem.getStringValue();
                 }
             }
             for (int i = 0; i < array1.arrayLength(); i++) {
-                boolean ok = compareValues(array1.get(i), search);
+                boolean ok = compareValues(array1.get(i), search, collation, context);
                 if (ok) {
                     result.add(new Int64Value(i + 1));
                 }
@@ -1011,20 +1014,14 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             return SequenceExtent.makeSequenceExtent(result);
         }
 
-        private boolean compareValues(GroundedValue a, GroundedValue b) {
-
-            if (a.getLength() != b.getLength()) {
-                return false;
-            }
-            for (int i=0; i<a.getLength(); i++) {
-                // TODO: this is a crude first cut comparison function
-                if (!a.itemAt(i).equals(b.itemAt(i))) {
-                    return false;
-                }
-            }
-            return true;
-
+        private boolean compareValues(GroundedValue a, GroundedValue b,
+                                      String collation, XPathContext context) throws XPathException {
+            DictionaryMap optionsMap = new DictionaryMap();
+            optionsMap.initialPut("collation", new StringValue(collation));
+            DeepEqual.DeepEqualOptions options = new DeepEqual.DeepEqualOptions(optionsMap, context, 40);
+            return DeepEqual.deepEqual(a.iterate(), b.iterate(), context, options);
         }
+
     }
 
 
