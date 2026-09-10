@@ -729,10 +729,12 @@ public:
 
   //! Utility method required for python and PHP extension to delete string
   //! created in the C++ code-base
-  static void deleteString(const char *data) {
-    if (data != nullptr) {
-      // std::cerr<<"static method SaxonProcessor.deleteString - deleting string
-      // data"<<std::endl;
+  /**
+  * @param data - the string data to be deleted using the operator delete
+  * @param deleteFlag - this is a special case to handle the empty sequence which returns empty string there has not allowed any memory
+  */
+  static void deleteString(const char *data, char deleteFlag=0) {
+    if (data != nullptr && deleteFlag == 0) {
       operator delete((char *)data);
       data = nullptr;
     }

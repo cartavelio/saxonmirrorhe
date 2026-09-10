@@ -874,6 +874,33 @@ def testEmptySequenceXdmValue(saxonproc):
     result = xp.evaluate_single("(1,2,3)[10]")
     assert result == None
 
+
+def transform_to_value(saxonproc, data_dir):
+
+    input_xml =os.path.join(data_dir, "input.xml")
+    stylesheet = os.path.join(data_dir, "test.xslt")
+    xsltproc = proc.new_xslt30_processor()
+
+    input_xdm = proc.parse_xml(xml_file_name=input_xml)
+    assert "PyXdmNode" in str(type(input_xdm))
+
+
+    stylesheet_xdm = proc.parse_xml(xml_file_name=stylesheet)
+    assert "PyXdmNode" in str(type(stylesheet_xdm))
+
+
+    executable = xsltproc.compile_stylesheet(stylesheet_node=stylesheet_xdm)
+    assert executable is not None
+
+    result_xdm = executable.transform_to_value(xdm_node=input_xdm)
+    assert result_xdm is not None
+    assert "PyXdmNode" in str(type(result_xdm))
+
+
+    result_str = executable.transform_to_string(xdm_node=input_xdm)
+    assert type(result_str) is str
+    print(result_str)
+
 def testEmptySequenceXdmValue2(saxonproc):
     xp = saxonproc.new_xpath_processor()
     xp.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")

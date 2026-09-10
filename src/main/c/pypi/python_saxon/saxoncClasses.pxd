@@ -29,7 +29,7 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
         void detachCurrentThread()  except +raise_py_error
 
         @staticmethod
-        void deleteString(const char * data);
+        void deleteString(const char * data, char delete_flag)
 
         XdmValue ** createXdmValueArray(int len)
 
