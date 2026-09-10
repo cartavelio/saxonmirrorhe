@@ -158,7 +158,7 @@ public abstract class GDateValue extends CalendarValue {
      */
 
     public static boolean isValidTimezone(int timezoneInMinutes) {
-        return Math.abs(timezoneInMinutes) <= (14 * 60) || timezoneInMinutes == NO_TIMEZONE;
+        return timezoneInMinutes == NO_TIMEZONE || Math.abs(timezoneInMinutes) <= (14 * 60);
     }
 
     /**
