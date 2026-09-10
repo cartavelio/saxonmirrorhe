@@ -39,7 +39,7 @@ import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.pattern.PatternParser30;
+import net.sf.saxon.pattern.PatternParser;
 import net.sf.saxon.pull.PullProvider;
 import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.query.XQueryParser;
@@ -630,7 +630,7 @@ public class ProfessionalConfiguration extends Configuration {
             }
             return parser;
         } else if ("PATTERN".equals(language)) {
-            PatternParser30 parser = new PatternParser30();
+            PatternParser parser = new PatternParser();
             if (isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
                 parser.setParserExtension(new SaxonSyntaxExtension());
             }
