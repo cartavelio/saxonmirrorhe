@@ -3,16 +3,14 @@ package net.sf.saxon.resource;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceivingContentHandler;
-import net.sf.saxon.lib.ActiveSource;
-import net.sf.saxon.lib.ParseOptions;
-import net.sf.saxon.lib.StandardErrorHandler;
-import net.sf.saxon.lib.StandardErrorReporter;
+import net.sf.saxon.lib.*;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import org.xml.sax.*;
 
 import javax.xml.transform.sax.SAXSource;
+import java.util.Map;
 
 public class ActiveSAXSource extends SAXSource implements ActiveSource  {
 
@@ -57,6 +55,100 @@ public class ActiveSAXSource extends SAXSource implements ActiveSource  {
                 parser.setErrorHandler(new StandardErrorHandler(options.getErrorReporter()));
             } else {
                 parser.setErrorHandler(new StandardErrorHandler(new StandardErrorReporter()));
+            }
+            if (!options.isExpandAttributeDefaults()) {
+                try {
+                    parser.setFeature("http://xml.org/sax/features/use-attributes2", true);
+                } catch (SAXNotRecognizedException | SAXNotSupportedException err) {
+                    // ignore the failure, we did our best (Xerces gives us an Attribute2 even though it
+                    // doesn't recognize this request!)
+                }
+            }
+
+            boolean dtdRecover = options.getDTDValidationMode() == Validation.LAX;
+
+            Map<String, Boolean> parserFeatures = options.getParserFeatures();
+            Map<String, Object> parserProperties = options.getParserProperties();
+
+            if (parserFeatures != null) {
+                for (Map.Entry<String, Boolean> entry : parserFeatures.entrySet()) {
+                    try {
+                        String name = entry.getKey();
+                        boolean value = entry.getValue();
+                        if (name.equals("http://apache.org/xml/features/xinclude")) {
+                            boolean tryAgain = false;
+                            try {
+                                // This feature name is supported in Xerces 2.9.0
+                                parser.setFeature(name, value);
+                            } catch (SAXNotRecognizedException | SAXNotSupportedException err) {
+                                tryAgain = true;
+                            }
+                            if (tryAgain) {
+                                try {
+                                    // This feature name is supported in the version of Xerces bundled with JDK 1.5
+                                    parser.setFeature(name + "-aware", value);
+                                } catch (SAXNotRecognizedException err) {
+                                    throw new XPathException(namedParser(parser) +
+                                                                     " does not recognize request for XInclude processing", err);
+                                } catch (SAXNotSupportedException err) {
+                                    throw new XPathException(namedParser(parser) +
+                                                                     " does not support XInclude processing", err);
+                                }
+                            }
+                        } else {
+                            parser.setFeature(entry.getKey(), entry.getValue());
+                        }
+                    } catch (SAXNotRecognizedException err) {
+                        // No warning if switching a feature off doesn't work: bugs 2540 and 2551
+                        if (entry.getValue()) {
+                            Logger logger = receiver.getPipelineConfiguration().getConfiguration().getLogger();
+                            logger.warning(namedParser(parser) + " does not recognize the feature " + entry.getKey());
+                        }
+                    } catch (SAXNotSupportedException err) {
+                        if (entry.getValue()) {
+                            Logger logger = receiver.getPipelineConfiguration().getConfiguration().getLogger();
+                            logger.warning(namedParser(parser) + " does not support the feature " + entry.getKey());
+                        }
+                    }
+                }
+            }
+
+            if (parserProperties != null) {
+                for (Map.Entry<String, Object> entry : parserProperties.entrySet()) {
+                    try {
+                        parser.setProperty(entry.getKey(), entry.getValue());
+                    } catch (SAXNotRecognizedException err) {
+                        Logger logger = receiver.getPipelineConfiguration().getConfiguration().getLogger();
+                        logger.warning(namedParser(parser) + " does not recognize the property " + entry.getKey());
+                    } catch (SAXNotSupportedException err) {
+                        Logger logger = receiver.getPipelineConfiguration().getConfiguration().getLogger();
+                        logger.warning(namedParser(parser) + " does not support the property " + entry.getKey());
+                    }
+
+                }
+            }
+
+            boolean xInclude = options.isXIncludeAware();
+            if (xInclude) {
+                boolean tryAgain = false;
+                try {
+                    // This feature name is supported in the version of Xerces bundled with JDK 1.5
+                    parser.setFeature("http://apache.org/xml/features/xinclude-aware", true);
+                } catch (SAXNotRecognizedException | SAXNotSupportedException err) {
+                    tryAgain = true;
+                }
+                if (tryAgain) {
+                    try {
+                        // This feature name is supported in Xerces 2.9.0
+                        parser.setFeature("http://apache.org/xml/features/xinclude", true);
+                    } catch (SAXNotRecognizedException err) {
+                        throw new XPathException(namedParser(parser) +
+                                                         " does not recognize request for XInclude processing", err);
+                    } catch (SAXNotSupportedException err) {
+                        throw new XPathException(namedParser(parser) +
+                                                         " does not support XInclude processing", err);
+                    }
+                }
             }
             //System.err.println("Parse " + getSystemId());
             parser.parse(getInputSource());

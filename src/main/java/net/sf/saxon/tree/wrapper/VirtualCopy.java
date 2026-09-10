@@ -753,7 +753,7 @@ public class VirtualCopy implements NodeInfo {
         public NodeInfo next() {
             NodeInfo next = base.next();
             if (next != null) {
-                if (testInclusion && !parent.isIncludedInCopy(next)) {
+                if (testInclusion && !isIncludedInCopy(next)) {
                     // we're only interested in nodes within the subtree that was copied.
                     // Assert: once we find a node outside this subtree, all further nodes will also be outside
                     //         the subtree.

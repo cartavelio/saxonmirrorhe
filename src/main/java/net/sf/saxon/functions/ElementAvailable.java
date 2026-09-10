@@ -13,7 +13,10 @@ import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.NameChecker;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.str.StringTool;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
@@ -114,6 +117,12 @@ public class ElementAvailable extends SystemFunction {
                 return false;
         }
     }
+
+    public static boolean isXslt40Element(int fp) {
+        return isXslt30Element(fp)
+                || fp == StandardNames.XSL_ARRAY
+                || fp == StandardNames.XSL_ARRAY_MEMBER;
+    }
     
     /**
      * Special-case for element-available('xsl:evaluate') which may be dynamically-disabled,
@@ -158,7 +167,8 @@ public class ElementAvailable extends SystemFunction {
 
         if (qName.hasURI(NamespaceConstant.XSLT)) {
             int fp = context.getConfiguration().getNamePool().getFingerprint(NamespaceConstant.XSLT, qName.getLocalPart());
-            boolean known = isXslt30Element(fp);
+            int xsltVersion = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
+            boolean known = xsltVersion == 40 ? isXslt40Element(fp) : isXslt30Element(fp);
             if (fp == StandardNames.XSL_EVALUATE) {
                 known = known && !context.getConfiguration().getBooleanProperty(Feature.DISABLE_XSL_EVALUATE);
             }

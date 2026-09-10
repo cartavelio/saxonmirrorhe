@@ -47,7 +47,6 @@ public class StylesheetPackage extends PackageData {
     private PackageVersion packageVersion = null;
     private String packageName;
     private final List<StylesheetPackage> usedPackages = new ArrayList<>();
-    private int xsltVersion;
 
     private RuleManager ruleManager;
     private CharacterMapIndex characterMapIndex;
@@ -97,7 +96,7 @@ public class StylesheetPackage extends PackageData {
 
     public StylesheetPackage(Configuration config) {
         super(config);
-        setHostLanguage(HostLanguage.XSLT);
+        setHostLanguage(HostLanguage.XSLT, 30);
         setAccumulatorRegistry(config.makeAccumulatorRegistry());
     }
 
@@ -151,8 +150,8 @@ public class StylesheetPackage extends PackageData {
      *
      * @param version the version (times ten) as an integer
      */
-    public void setVersion(int version) {
-        this.xsltVersion = version;
+    public void setLanguageVersion(int version) {
+        this.hostLanguageVersion = version;
     }
 
     /**
@@ -162,15 +161,6 @@ public class StylesheetPackage extends PackageData {
      */
     public void setPackageName(String packageName) {
         this.packageName = packageName;
-    }
-
-    /**
-     * Get the version of the XSLT language specification to which the package manifest conforms
-     *
-     * @return the version of the xslPackage, times ten, as an integer
-     */
-    public int getVersion() {
-        return xsltVersion;
     }
 
     /**

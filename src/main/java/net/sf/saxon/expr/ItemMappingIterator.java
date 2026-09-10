@@ -129,7 +129,7 @@ public class ItemMappingIterator
 
     @Override
     public boolean supportsHasNext() {
-        return base instanceof LookaheadIterator && ((LookaheadIterator)base).supportsHasNext();
+        return oneToOne && base instanceof LookaheadIterator && ((LookaheadIterator)base).supportsHasNext();
     }
 
 

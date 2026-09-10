@@ -363,7 +363,7 @@ public class ReceivingContentHandler
     @Override
     public void startElement(String uri, String localname, String rawname, Attributes atts)
             throws SAXException {
-        //System.err.println("ReceivingContentHandler#startElement " + localname + " (depth=" + namespaceStack.size() + ")");
+        //System.err.println("ReceivingContentHandler#startElement " + localname + " sysId=" + localLocator.getSystemId());
         //for (int a=0; a<atts.getLength(); a++) {
         //     System.err.println("  Attribute " + atts.getURI(a) + "/" + atts.getLocalName(a) + "/" + atts.getQName(a));
         //}
