@@ -3,6 +3,8 @@ package com.saxonica.trans;
 import com.saxonica.config.JavaExtensionLibrary;
 import com.saxonica.config.ProfessionalConfiguration;
 import com.saxonica.expr.JavaExtensionFunctionCall;
+import com.saxonica.functions.extfn.EXPathBinaryFunctionSet;
+import com.saxonica.functions.extfn.EXPathFileFunctionSet;
 import com.saxonica.xsltextn.instruct.Assign;
 import com.saxonica.xsltextn.instruct.DeepUpdate;
 import com.saxonica.xsltextn.instruct.DoInstr;
@@ -17,6 +19,7 @@ import net.sf.saxon.expr.instruct.MemoFunction;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
+import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.hof.AtomicConstructorFunction;
 import net.sf.saxon.functions.hof.FunctionLiteral;
 import net.sf.saxon.functions.hof.UserFunctionReference;
@@ -186,6 +189,16 @@ public class PackageLoaderPE extends PackageLoaderHE {
     @Override
     protected void addVendorFunctionLibrary(FunctionLibraryList targetList, Configuration config) {
         targetList.addFunctionLibrary(((ProfessionalConfiguration)config).getVendorFunctionSet());
+    }
+
+    @Override
+    protected SystemFunction makeEXPathBinaryFunction(StructuredQName qName, int arity) throws XPathException {
+        return EXPathBinaryFunctionSet.getInstance().makeFunction(qName.getLocalPart(), arity);
+    }
+
+    @Override
+    protected SystemFunction makeEXPathFileFunction(StructuredQName qName, int arity) throws XPathException {
+        return EXPathFileFunctionSet.getInstance().makeFunction(qName.getLocalPart(), arity);
     }
 
 
