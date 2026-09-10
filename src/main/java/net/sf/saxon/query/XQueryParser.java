@@ -1325,6 +1325,9 @@ public class XQueryParser extends XPathParser {
         if (mImport.locationURIs.isEmpty()) {
             List<QueryModule> list = executable.getQueryLibraryModules(mImport.namespaceURI);
             if (list != null && !list.isEmpty()) {
+                for (QueryModule target : list) {
+                    ((QueryModule) env).addImportedModule(target);
+                }
                 return;
             }
         }

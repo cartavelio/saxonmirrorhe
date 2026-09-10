@@ -64,12 +64,8 @@ public class QueryModule implements StaticContext {
     // For the top-level module only, all imported schemas for all modules,
     // Key is the targetNamespace, value is the set of absolutized location URIs
     private Executable executable;
-    private List<QueryModule> importers;  // A list of QueryModule objects representing the modules that import this one,
-    // Null for the main module
-    // This is needed *only* to implement the rules banning cyclic imports
     private FunctionLibraryList functionLibraryList;
     private XQueryFunctionLibrary globalFunctionLibrary;      // used only on a top-level module
-    private int globalFunctionLibraryNr;
     private int localFunctionLibraryNr;
     private int importedFunctionLibraryNr;
     private int unboundFunctionLibraryNr;
@@ -95,6 +91,7 @@ public class QueryModule implements StaticContext {
     private int languageLevel;
     private UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy
             = UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE;
+    private Set<QueryModule> importedModules = new HashSet<>();
 
     /**
      * Create a QueryModule for a main module, copying the data that has been set up in a
@@ -118,7 +115,6 @@ public class QueryModule implements StaticContext {
             throw new XPathException("Invalid location URI: " + baseURI);
         }
         executable = sqc.makeExecutable();
-        importers = null;
         init(sqc);
 
         PackageData pd = new PackageData(config);
@@ -164,14 +160,11 @@ public class QueryModule implements StaticContext {
 
     public QueryModule(Configuration config, /*@Nullable*/ QueryModule importer) {
         this.config = config;
-        importers = null;
         if (importer == null) {
             topModule = this;
         } else {
             topModule = importer.topModule;
             userQueryContext = importer.userQueryContext;
-            importers = new ArrayList<>(2);
-            importers.add(importer);
         }
         init(userQueryContext);
         packageData = importer.getPackageData();
@@ -246,6 +239,7 @@ public class QueryModule implements StaticContext {
         Objects.requireNonNull(baseURI, "Base URI of XQuery module must not be null");
         Configuration config = executable.getConfiguration();
         QueryModule module = new QueryModule(config, importer);
+        importer.addImportedModule(module);
         try {
             module.setLocationURI(new URI(baseURI));
         } catch (URISyntaxException e) {
@@ -386,31 +380,6 @@ public class QueryModule implements StaticContext {
 
     public boolean isMainModule() {
         return moduleIsMainModule;
-    }
-
-    /**
-     * Check whether this module is allowed to import a module with namespace N. Note that before
-     * calling this we have already handled the exception case where a module imports another in the same
-     * namespace (this is the only case where cycles are allowed, though as a late change to the spec they
-     * are no longer useful, since they cannot depend on each other cyclically)
-     *
-     * @param namespace the namespace to be tested
-     * @return true if the import is permitted
-     */
-
-    public boolean mayImportModule(/*@NotNull*/ String namespace) {
-        if (namespace.equals(moduleNamespace)) {
-            return false;
-        }
-        if (importers == null) {
-            return true;
-        }
-        for (QueryModule importer : importers) {
-            if (!importer.mayImportModule(namespace)) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /**
@@ -1233,6 +1202,14 @@ public class QueryModule implements StaticContext {
                 // ignore the URI if it's not valid
             }
         }
+    }
+
+    public void addImportedModule(QueryModule module) {
+        importedModules.add(module);
+    }
+
+    public Set<QueryModule> getImportedModules() {
+        return importedModules;
     }
 
     /**
