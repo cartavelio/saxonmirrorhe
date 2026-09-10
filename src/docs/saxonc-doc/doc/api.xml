@@ -151,7 +151,7 @@
    <section id="saxon_c_cpp_api" title="SaxonC C++ API">
       <h1>SaxonC C++ API</h1>
 
-      <p>SaxonC 1.2 is built from the Saxon 9.9.1.5 Java product by cross compiling using Excelsior
+      <p>SaxonC 11 is built from the SaxonJ 11 Java product by cross compiling using Excelsior
          JET Enterprise 15.3 edition (MP1). This generates platform specific machine code, which is
          interfaced with C/C++ using the Java Native Interace (JNI). The following SaxonC API
          classes are available in C++ to process XSLT, XQuery, XPath and Schema validation:</p>
