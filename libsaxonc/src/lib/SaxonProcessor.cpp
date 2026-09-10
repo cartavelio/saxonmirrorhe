@@ -77,7 +77,7 @@ void SaxonProcessor::getInfo() {
 
 #endif
 
-extern "C" void * c_nativeCall(char * functionName, void * proc, void * func, int useNativeTypes, int numOfArguments, void ** arguments) {
+extern "C" void * c_nativeCall(void *thread, char * functionName, void * proc, void * func, int useNativeTypes, int numOfArguments, void ** arguments) {
     if (getenv("SAXONC_DEBUG_FLAG")) {
         fprintf(stdout, "We are in a c function. calling function name %s=\n", functionName);
     }
@@ -121,6 +121,14 @@ extern "C" void * c_nativeCall(char * functionName, void * proc, void * func, in
   } */
 
   return userFuncResult;
+}
+
+extern "C" void * c_nativeCallX(void *thread, char * functionName) {
+  fprintf(stdout, "We are in the C++ c_nativeCallX function\n");
+  // loop through the values
+  fflush(stdout);
+  int64_t longValueRef = j_makeLongValue(SaxonProcessor::sxn_environ->thread, 5);
+  return (void *)longValueRef;
 }
 
 
@@ -491,6 +499,9 @@ const char * SaxonProcessor::getSaxonEdition() {
 
 void SaxonProcessor::registerUserFunctionWithProcessor(void * python_procPtr, const char * ns1, void * func, const char * signature, bool useNativeTypes) {
   XdmValue * signatureValue = parseJsonFromString(signature);
+nativeFn fn1 = c_nativeCall;
+
+  j_testIndirectFunction(SaxonProcessor::sxn_environ->thread, (void *)fn1);
 
   if(signatureValue == nullptr) {
     throw new SaxonApiException("Failed to create function signature from JSON");

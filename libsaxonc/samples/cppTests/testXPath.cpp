@@ -109,19 +109,21 @@ void testUserExtensionFunction(SaxonProcessor *processor, XPathProcessor *xpath,
     if(result != nullptr) {
 
       const char *resultStr = result->getStringValue();
-      fprintf(stdout, "Value of result from function= %s\n", resultStr);
-      fflush(stdout);
-
+      if (strcmp(resultStr, "8") == 0) {
+        fprintf(stdout, "Value of result from function= %s\n", resultStr);
+        fflush(stdout);
+        sresult->success++;
+      } else {
+        sresult->failure++;
+        sresult->failureList.push_back("testUserExtensionFunction");
+      }
     }
 
-    fprintf(stdout, "Ran user defined function\n");
-    fflush(stdout);
-    sresult->success++;
     delete result;
   } catch (SaxonApiException &e) {
     cout << "Error Message = " << e.what() << endl;
     sresult->failure++;
-    sresult->failureList.push_back("testXPathSingle");
+    sresult->failureList.push_back("testUserExtensionFunction");
   }
 
   xpath->clearParameters();
@@ -1348,7 +1350,7 @@ int main(int argc, char *argv[]) {
        << "Test: XPathProcessor with Saxon version=" << processor->version()
        << endl;
   testXPathSingle(processor, xpathProc, sresult);
-//  testUserExtensionFunction(processor, xpathProc, sresult);
+  testUserExtensionFunction(processor, xpathProc, sresult);
   cout << endl
        << "============================================================="
        << endl

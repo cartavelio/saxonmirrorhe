@@ -165,6 +165,7 @@ public class SaxonCAPI {
         return SaxonCAPI.STATUS_FAIL;
     }
 
+
     @CEntryPoint(name = "j_registerFunctionDefinition", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long j_registerFunctionDefinition(IsolateThread thread, ObjectHandle procRef, CCharPointer c_namespace, ObjectHandle signatureRef, CFunctionPointer pythonProc, CFunctionPointer func, AllocatorFn alloc, int c_useNativeTypes) throws SaxonApiException {
         if (SaxonCAPI.debug) {

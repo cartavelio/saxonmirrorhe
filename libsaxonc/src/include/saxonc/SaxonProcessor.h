@@ -119,7 +119,7 @@ struct UserFunctionDescriptor{
 
 
 
-extern "C" void * c_nativeCall(char * functionName, void * proc, void * func, int useNativeTypes, int numOfArguments, void ** arguments);
+//extern "C" void * c_nativeCall(char * functionName, void * proc, void * func, int useNativeTypes, int numOfArguments, void ** arguments);
 
 
 

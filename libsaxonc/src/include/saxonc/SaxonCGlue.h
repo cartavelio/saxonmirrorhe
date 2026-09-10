@@ -125,6 +125,8 @@ typedef struct {
 extern int64_t cpp;
 
 typedef void *(*allocFn)(size_t length);
+//c_nativeCall(char * functionName, void * proc, void * func, int useNativeTypes, int numOfArguments, void ** arguments)
+typedef void * (*nativeFn)(void * t, char * functionName, void * proc, void * func, int useNativeTypes, int numOfArguments, void ** arguments);
 
 extern const char *failure;
 
