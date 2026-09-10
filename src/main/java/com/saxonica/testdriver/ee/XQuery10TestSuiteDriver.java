@@ -431,7 +431,7 @@ public class XQuery10TestSuiteDriver {
                         try {
                             boolean bv = exp.effectiveBooleanValue(c);
                             if (!bv) {
-                                log.info("** Optimization assertion failed");
+                                log.info("** Optimization assertion failed: " + assertion);
                                 optimizationOK = false;
                             }
                         } catch (Exception e) {
