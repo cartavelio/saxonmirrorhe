@@ -160,7 +160,7 @@ public abstract class TwineBuilder {
                 return EmptyUnicodeString.getInstance();
             }
             if (used == 1) {
-                return new UnicodeChar(buffer[0]);
+                return new UnicodeChar(buffer[0] & 0xff);
             }
             return new Twine8(buffer, 0, used);
         }
