@@ -67,6 +67,8 @@ void executeQueryToFile(sxnc_environment *environi, sxnc_processor * proc, char 
 
 const char * executeQueryToString(sxnc_environment *environi, sxnc_processor * proc, char * cwd, sxnc_parameter *parameters, sxnc_property * properties, int parLen, int propLen);
 
+const char * c_getErrorMessage(sxnc_environment *environi);
+
 EXTERN_SAXONC_END
 
 #endif 

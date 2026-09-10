@@ -56,6 +56,10 @@ int main()
       printf("Boolean result is as expected: true");
     }else {
       printf("Boolean result is incorrectly: false");
+      const char * errorMessage = c_getErrorMessage(environi);
+      if(errorMessage) {
+        printf("Error message %s \n", errorMessage);
+      }
     }
       fflush(stdout);   
 

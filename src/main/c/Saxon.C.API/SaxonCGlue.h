@@ -194,18 +194,18 @@ void graal_tear_down (graal_isolatethread_t *thread);
 /*
  * Get a parameter from list
  */
-int64_t getParameter(sxnc_parameter *parameters,  int parLen, const char* namespacei, int64_t value);
+int64_t getParameter(sxnc_parameter *parameters,  int parLen, const char* name);
 
 /*
  * Get a property from list
  */
-//char* getProperty(sxnc_property * properties, const char * name, const char* value);
+char* getProperty(sxnc_property * properties, int propLen, const char * name);
 
 
 /*
  * set a parameter
  */
-//void setParameter(sxnc_parameter *parameters, const char * name, sxnc_value * value);
+void setParameter(sxnc_parameter **parameters, int * parLen, int * parCap, const char * name, sxnc_value * value);
 
 
 /*

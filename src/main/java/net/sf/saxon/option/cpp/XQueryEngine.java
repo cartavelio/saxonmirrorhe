@@ -334,6 +334,14 @@ public class XQueryEngine extends SaxonCAPI {
             }
             ByteArrayOutputStream bStream = new ByteArrayOutputStream();
             Serializer serializer = processor.newSerializer(bStream);
+            if(SaxonCAPI.debug) {
+                System.err.println("Params length="+ params.length + ", Values length="+values.length);
+                if(params.length > 0) {
+                    for(int i=0; i< params.length;i++){
+                        System.err.println("Params["+i+"]= "+ params[i]);
+                    }
+                }
+            }
             XQueryEvaluator eval = xqueryEvaluator(processor, cwd, params, values, serializer);
             eval.run(serializer);
             final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(bStream.toString());
