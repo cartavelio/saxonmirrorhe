@@ -1,15 +1,14 @@
 package com.saxonica.functions.qt4;
 
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.SubsequenceIterator;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.zeno.ZenoSequence;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.EmptySequence;
+import net.sf.saxon.value.IntegerRange;
 import net.sf.saxon.value.IntegerValue;
 
 /**
@@ -47,6 +46,21 @@ public class ItemsAt extends SystemFunction {
          if (input.getLength() == 0) {
              return EmptySequence.getInstance();
          }
+        if (arguments[1] instanceof IntegerRange) {
+            // Special-case itemsAt($input, N to M) to avoid materializing the result
+            IntegerRange range = (IntegerRange) arguments[1];
+            if (range.getStep() == 1L
+                    && Math.abs(range.getStart()) < Integer.MAX_VALUE
+                    && Math.abs(range.getEnd()) < Integer.MAX_VALUE) {
+                int start = (int) range.getStart();
+                if (start > 0) {
+                    return new LazySequence(
+                            SubsequenceIterator.make(arguments[0].iterate(),
+                                                     start,
+                                                     start - 1 + (int) range.getEnd()));
+                }
+            }
+        }
          ZenoSequence result = new ZenoSequence();
          SequenceIterator positions = arguments[1].iterate();
          for (Item it; (it = positions.next()) != null; ) {
