@@ -959,16 +959,18 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 		</section>
 
 	</section>
+	
 	<h3 class="subtitle">XPath syntax</h3>
 	<p>The functions provided in the XPath function library are listed separately: see the <a class="bodylink" href="/functions">Function library</a> section. This section summarizes the following syntactic constructs and operators provided in XPath 2.0 and higher:</p>
 	<nav except="xpath30new xpath31new">
 		<ul/>
 	</nav>
-	<section id="literals" title="Constants">
-		<h1>Constants</h1>
+	<section id="literals" title="Literals">
+		<h1>Literals</h1>
 		<?source https://www.w3.org/TR/xpath-30/#id-literals?>
 		<p><strong>String literals</strong> are written as <code>"London"</code> or <code>'Paris'</code>. In each case you can use the opposite kind of quotation mark within the string: <code>'He said "Boo"'</code>, or <code>"That's rubbish"</code>. In a stylesheet XPath expressions always appear within XML attributes, so it is usual to use one kind of delimiter for the attribute and the other kind for the literal. Anything else can be written using XML character entities. String delimiters can be doubled within the string to represent the delimiter itself: for example <code>&lt;xsl:value-of select='"He said, ""Go!"""'/&gt;</code></p>
-		<p><strong>Numeric constants</strong> follow the Java rules for decimal literals: for example, <code>12</code> or <code>3.05</code>; a negative number can be written as (say) <code>-93.7</code>, though technically the minus sign is not part of the literal. (Also, note that you may need a space before the minus sign to avoid it being treated as a hyphen within a preceding name). The numeric literal is taken as a double precision floating point number if it uses scientific notation (e.g. <code>1.0e7</code>), as fixed point decimal if it includes a full stop, or as an integer otherwise. Decimal values (and integers) in Saxon have unlimited precision and range (they use the Java classes <code>BigInteger</code> and <code>BigDecimal</code> internally). Note that a value such as <code>3.5</code> was handled as a double-precision floating point number in XPath 1.0, but as a decimal number in XPath 2.0: this may affect the precision of arithmetic results.</p>
+		<p><strong>Numeric literals</strong> follow the Java rules for decimal literals: for example, <code>12</code> or <code>3.05</code>; a negative number can be written as (say) <code>-93.7</code>, though technically the minus sign is not part of the literal. (Also, note that you may need a space before the minus sign to avoid it being treated as a hyphen within a preceding name). The numeric literal is taken as a double precision floating point number if it uses scientific notation (e.g. <code>1.0e7</code>), as fixed point decimal if it includes a full stop, or as an integer otherwise. Decimal values (and integers) in Saxon have unlimited precision and range (they use the Java classes <code>BigInteger</code> and <code>BigDecimal</code> internally). Note that a value such as <code>3.5</code> was handled as a double-precision floating point number in XPath 1.0, but as a decimal number in XPath 2.0: this may affect the precision of arithmetic results.</p>
+		<p>Since XPath 4.0, numeric integer literals can be written in hex (<code>0xFFFF0000</code>) or binary (<code>0b101010</code>), and underscores can be used as separators (<code>1_000_000</code>).</p>
 		<p>There are no boolean constants as such: instead use the function calls <a class="bodylink code" href="/functions/fn/true">true()</a> and <a class="bodylink code" href="/functions/fn/false">false()</a>.</p>
 		<p>Constants of other data types can be written using constructors, which look like function calls but generally take a string literal as their argument. For example, <code>xs:float("10.7")</code> produces a single-precision floating point number. Saxon implements constructors for all of the built-in data types defined in XML Schema Part 2.</p>
 		<p>An example for <strong>date</strong> and <strong>dateTime</strong> values: you can write constants for these data types as <code>xs:date("2002-04-30")</code> or <code>xs:dateTime("1966-07-31T15:00:00Z")</code>.</p>
@@ -980,12 +982,21 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 		<p>The variable is always bound at the textual place where the expression containing it appears; for example a variable used within an <a class="bodylink code" href="/xsl-elements/attribute-set">xsl:attribute-set</a> must be in scope at the point where the attribute-set is defined, not the point where it is used.</p>
 		<p>A variable may be declared to be of a particular type, for example it may be constrained to be an integer, or a sequence of strings, or an attribute node. In a schema-aware environment, this may also be a reference to a user-defined type in a schema. If there is no type declared for the variable, it may take a value of any data type, and in general it is not possible to determine its data type statically.</p>
 		<p>It is an error to refer to a variable that has not been declared.</p>
-		<p>Starting with XPath 2.0, variables (known as range variables) may be declared within an XPath expression, not only using <a class="bodylink code" href="/xsl-elements/variable">xsl:variable</a> elements in an XSLT stylesheet. The expressions that declare variables are the <a class="bodylink" href="../for">for expressions</a>, and <a class="bodylink" href="../quantified">quantified expressions</a> (<code>some</code> and <code>every</code>). In XPath 3.0, variables can also be declared in a <a class="bodylink" href="../let">let expression</a>, as well as in the signature of an inline function.</p>
+		<p>Starting with XPath 2.0, variables (known as range variables) may be declared within an XPath expression, not only using <a class="bodylink code" href="/xsl-elements/variable">xsl:variable</a> elements in an XSLT stylesheet. The expressions that declare variables are the <a class="bodylink" href="../for">for expressions</a>, and <a class="bodylink" href="../quantified">quantified expressions</a> (<code>some</code> and <code>every</code>). In XPath 3.0, variables can also be declared in a <a class="bodylink" href="/expressions/for/for-let-expressions">let expression</a>, as well as in the signature of an inline function.</p>
 	</section>
 	<section id="functioncalls" title="Function calls">
 		<h1>Function calls</h1>
 		<p>A function call in XPath 2.0 takes the form <code>F ( arg1, arg2, ...)</code>. In general, the function name is a QName. A library of core functions is defined in the XPath and XSLT specifications (in versions 2.0, 3.0, and 3.1). For details of these functions, including notes on their implementation in this Saxon release, see the <a class="bodylink" href="/functions">Function library</a>. Additional functions are available (in a special namespace) as Saxon extensions: these are also listed in the <a class="bodylink" href="/functions">Function library</a>, with some further information in the <a class="bodylink" href="/extensions">Extensions</a> section. Further functions may be implemented by the user, either as XSLT <i>stylesheet functions</i> (see <a class="bodylink code" href="/xsl-elements/function">xsl:function</a>), as XQuery functions, or as Java <i>extension functions</i> (see the <a class="bodylink" href="/extensibility">Extensibility mechanisms</a> section).</p>
 		<p>XPath 3.0 introduces dynamic function calls: <code>EXPR ( arg1, arg2, ...)</code> where <code>EXPR</code> is an expression that evaluates to a function item.</p>
+	</section>
+	<section id="path" title="Path expressions">
+		<h1>Path expressions</h1>
+		<p>A path expression is a sequence of steps separated by the <code>/</code> or <code>//</code> operator. For example, <code>../@desc</code> selects the <code>desc</code> attribute of the parent of the context node.</p>
+		<p>In XPath 2.0, path expressions were generalized so that any expression can be used as an operand of <code>/</code>, (both on the left and the right), so long as the value of the left-hand operand is a sequence of nodes. For example, it is possible to use a union expression (in parentheses) or a call to the <a class="bodylink code" href="/functions/fn/id">id()</a> or <a class="bodylink code" href="/functions/fn/key">key()</a> functions. The right-hand operand is evaluated once for each node in the sequence that results from evaluating the left-hand operand, with that node as the context item. In the result of the path expression, nodes are sorted in document order, and duplicates are eliminated.</p>
+		<p>In practice, it only makes sense to use expressions on the right of <code>/</code> if they depend on the context item. It is legal to write <code>$x/$y</code> provided both <code>$x</code> and <code>$y</code> are sequences of nodes, but the result is exactly the same as writing <code>./$y</code>.</p>
+		<p>Note that the expressions <code>./$X</code> or <code>$X/.</code> can be used to remove duplicates from <code>$X</code> and sort the results into document order. The same effect can be achieved by writing <code>$X|()</code>.</p>
+		<p>The operator <code>//</code> is an abbreviation for <code>/descendant-or-self::node()/</code>. An expression of the form <code>/E</code> is shorthand for <code>root(.)/E</code>, and the expression <code>/</code> on its own is shorthand for <code>root(.)</code>.</p>
+		<p>The expression on the left of the <code>/</code> operator must return a node or sequence of nodes. The expression on the right can return either a sequence of nodes or a sequence of atomic items (but not a mixture of the two). This allows constructs such as <code>$x/number()</code>, which returns the sequence obtained by converting each item in <code>$x</code> to a number.</p>
 	</section>
 	<section id="axissteps" title="Axis steps">
 		<h1>Axis steps</h1>
@@ -1104,114 +1115,212 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 				<p><code>schema-attribute(N)</code> to select any attribute node whose name is <code>N</code>, that conforms to the schema-defined type for a global attribute declaration named <code>N</code> in an imported schema</p>
 			</li>
 		</ul>
-	</section>
-	<section id="parentheses" title="Parentheses and operator precedence">
-		<h1>Parentheses and operator precedence</h1>
-		<p>In general an expression may be enclosed in parentheses without changing its meaning.</p>
-		<p>If parentheses are not used, operator precedence follows the sequence below, starting with the operators that bind most tightly. Within each group the operators are evaluated left-to-right.</p>
-		<table>
-			<tr>
-				<td><p><strong>Operator</strong></p></td>
-				<td><p><strong>Meaning</strong></p></td>
-			</tr>
-			<tr>
-				<td><p>unary <code>?</code></p></td>
-				<td><p>unary lookup operator</p></td>
-			</tr>
-			<tr>
-				<td><p><code>[]</code>, <code>()</code>, binary <code>?</code></p></td>
-				<td><p>predicate, function call, lookup operator</p></td>
-			</tr>
-			<tr>
-				<td><p><code>/</code>, <code>//</code></p></td>
-				<td><p>path operator</p></td>
-			</tr>
-			<tr>
-				<td><p><code>!</code></p></td>
-				<td><p>simple mapping operator</p></td>
-			</tr>
-			<tr>
-				<td><p>unary <code>-</code>, unary <code>+</code></p></td>
-				<td><p>unary plus and minus</p></td>
-			</tr>
-			<tr>
-				<td><p><code>=&gt;</code></p></td>
-				<td><p>arrow operator</p></td>
-			</tr>
-			<tr>
-				<td><p><code>cast as</code></p></td>
-				<td><p>dynamic type conversion</p></td>
-			</tr>
-			<tr>
-				<td><p><code>castable as</code></p></td>
-				<td><p>type test</p></td>
-			</tr>
-			<tr>
-				<td><p><code>treat as</code></p></td>
-				<td><p>static type conversion</p></td>
-			</tr>
-			<tr>
-				<td><p><code>instance of</code></p></td>
-				<td><p>type test</p></td>
-			</tr>
-			<tr>
-				<td><p><code>except</code>, <code>intersect</code></p></td>
-				<td><p>set difference and intersection</p></td>
-			</tr>
-			<tr>
-				<td><p><code>|</code>, <code>union</code></p></td>
-				<td><p>union operation on sets</p></td>
-			</tr>
-			<tr>
-				<td><p><code>*</code>, <code>div</code>, <code>idiv</code>, <code>mod</code></p></td>
-				<td><p>multiply, divide, integer divide, modulo</p></td>
-			</tr>
-			<tr>
-				<td><p><code>+</code>, <code>-</code></p></td>
-				<td><p>plus, minus</p></td>
-			</tr>
-			<tr>
-				<td><p><code>to</code></p></td>
-				<td><p>range expression</p></td>
-			</tr>
-			<tr>
-				<td><p><code>||</code></p></td>
-				<td><p>string concatenation (XPath 3.0)</p></td>
-			</tr>
-			<tr>
-				<td><p><code>=</code>, <code>!=</code>, <code>is</code>, <code>&lt;</code>, <code>&lt;=;</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>eq</code>, <code>ne</code>, <code>lt</code>, <code>le</code>, <code>gt</code>, <code>ge</code></p></td>
-				<td><p>comparisons</p></td>
-			</tr>
-			<tr>
-				<td><p><code>and</code></p></td>
-				<td><p>Boolean and</p></td>
-			</tr>
-			<tr>
-				<td><p><code>or</code></p></td>
-				<td><p>Boolean or</p></td>
-			</tr>
-			<tr>
-				<td><p><code>if</code></p></td>
-				<td><p>conditional expressions</p></td>
-			</tr>
-			<tr>
-				<td><p><code>some</code>, <code>every</code></p></td>
-				<td><p>quantified expressions</p></td>
-			</tr>
-			<tr>
-				<td><p><code>let</code></p></td>
-				<td><p>variable declaration (XPath 3.0)</p></td>
-			</tr>
-			<tr>
-				<td><p><code>for</code></p></td>
-				<td><p>iteration (mapping) over a sequence</p></td>
-			</tr>
-			<tr>
-				<td><p><code>,</code> (comma)</p></td>
-				<td><p>Sequence concatenation</p></td>
-			</tr>
-		</table>
-		<p>The various operators are described, in roughly the above order, in the sections that follow.</p>
+	</section>	
+	<section id="operators" title="Operators">
+		<h1>Operators</h1>
+				
+		<nav>
+			<ul/>
+		</nav>
+		
+		<section id="parentheses" title="Parentheses and operator precedence">
+			<h1>Parentheses and operator precedence</h1>
+			<p>In general an expression may be enclosed in parentheses without changing its meaning.</p>
+			<p>If parentheses are not used, operator precedence follows the sequence below, starting with the operators that bind most tightly. Within each group the operators are evaluated left-to-right.</p>
+			<table>
+				<tr>
+					<td><p><strong>Operator</strong></p></td>
+					<td><p><strong>Meaning</strong></p></td>
+				</tr>
+				<tr>
+					<td><p>unary <code>?</code></p></td>
+					<td><p>unary lookup operator</p></td>
+				</tr>
+				<tr>
+					<td><p><code>[]</code>, <code>()</code>, binary <code>?</code></p></td>
+					<td><p>predicate, function call, lookup operator</p></td>
+				</tr>
+				<tr>
+					<td><p><code>/</code>, <code>//</code></p></td>
+					<td><p>path operator</p></td>
+				</tr>
+				<tr>
+					<td><p><code>!</code></p></td>
+					<td><p>simple mapping operator</p></td>
+				</tr>
+				<tr>
+					<td><p>unary <code>-</code>, unary <code>+</code></p></td>
+					<td><p>unary plus and minus</p></td>
+				</tr>
+				<tr>
+					<td><p><code>=&gt;</code></p></td>
+					<td><p>arrow operator</p></td>
+				</tr>
+				<tr>
+					<td><p><code>cast as</code></p></td>
+					<td><p>dynamic type conversion</p></td>
+				</tr>
+				<tr>
+					<td><p><code>castable as</code></p></td>
+					<td><p>type test</p></td>
+				</tr>
+				<tr>
+					<td><p><code>treat as</code></p></td>
+					<td><p>static type conversion</p></td>
+				</tr>
+				<tr>
+					<td><p><code>instance of</code></p></td>
+					<td><p>type test</p></td>
+				</tr>
+				<tr>
+					<td><p><code>except</code>, <code>intersect</code></p></td>
+					<td><p>set difference and intersection</p></td>
+				</tr>
+				<tr>
+					<td><p><code>|</code>, <code>union</code></p></td>
+					<td><p>union operation on sets</p></td>
+				</tr>
+				<tr>
+					<td><p><code>*</code>, <code>div</code>, <code>idiv</code>, <code>mod</code></p></td>
+					<td><p>multiply, divide, integer divide, modulo</p></td>
+				</tr>
+				<tr>
+					<td><p><code>+</code>, <code>-</code></p></td>
+					<td><p>plus, minus</p></td>
+				</tr>
+				<tr>
+					<td><p><code>to</code></p></td>
+					<td><p>range expression</p></td>
+				</tr>
+				<tr>
+					<td><p><code>||</code></p></td>
+					<td><p>string concatenation (XPath 3.0)</p></td>
+				</tr>
+				<tr>
+					<td><p><code>=</code>, <code>!=</code>, <code>is</code>, <code>&lt;</code>, <code>&lt;=;</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>eq</code>, <code>ne</code>, <code>lt</code>, <code>le</code>, <code>gt</code>, <code>ge</code></p></td>
+					<td><p>comparisons</p></td>
+				</tr>
+				<tr>
+					<td><p><code>and</code></p></td>
+					<td><p>Boolean and</p></td>
+				</tr>
+				<tr>
+					<td><p><code>or</code></p></td>
+					<td><p>Boolean or</p></td>
+				</tr>
+				<tr>
+					<td><p><code>if</code></p></td>
+					<td><p>conditional expressions</p></td>
+				</tr>
+				<tr>
+					<td><p><code>some</code>, <code>every</code></p></td>
+					<td><p>quantified expressions</p></td>
+				</tr>
+				<tr>
+					<td><p><code>let</code></p></td>
+					<td><p>variable declaration (XPath 3.0)</p></td>
+				</tr>
+				<tr>
+					<td><p><code>for</code></p></td>
+					<td><p>iteration (mapping) over a sequence</p></td>
+				</tr>
+				<tr>
+					<td><p><code>,</code> (comma)</p></td>
+					<td><p>Sequence concatenation</p></td>
+				</tr>
+			</table>
+			<p>The various operators are described, in roughly the above order, in the sections that follow.</p>
+		</section>
+		<section id="union" title="Union">
+			<h1>Union</h1>
+			<p>The <code>|</code> operator was available in XPath 1.0; the keyword <code>union</code> was added in XPath 2.0 as a synonym, because it is familiar to SQL users.</p>
+			<p>The expression <code>E1 union E2</code> selects all nodes that are in either <code>E1</code> or <code>E2</code> or both. Both expressions must return sequences of nodes. The results are returned in document order. For example, <code>/book/(chapter | appendix)/section</code> returns all <code>section</code> elements within a <code>chapter</code> or <code>appendix</code> of the selected <code>book</code> element.</p>
+		</section>
+		<section id="boolean" title="Boolean operators: AND and OR">
+			<h1>Boolean operators: AND and OR</h1>
+			<p>The expression <code>E1 and E2</code> returns true if the <i>effective boolean values</i> of <code>E1</code> and <code>E2</code> are both true.</p>
+			<p>The expression <code>E1 or E2</code> returns true if the <i>effective boolean values</i> of either or both of <code>E1</code> and <code>E2</code> are true.</p>
+			<p>The specification allows the operands to be evaluated in either order, but Saxon will normally evaluate them left-to-right, which means if you write something like <code>$a instance of xs:integer and $x = (1 to $a)</code>, then you won't get an error if <code>$a</code> is not an integer. But the specification doesn't guarantee this.</p>
+			
+			<section id="short-circuit" title="Short-circuit boolean operators">
+				<h1>Short-circuit boolean operators</h1>
+				
+				<aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled.</aside>
+				
+				<p>Saxon 11 implemented two additional boolean operators: <code class="bold">orElse</code> and <code class="bold">andAlso</code>. These are retained in Saxon 12, but they are likely to be dropped as the community group has taken a different direction.</p>
+				
+				<p>The <code>and</code> and <code>or</code> operators now have stricter rules governing optimization. It is still permitted to evaluate the operands in either order, but an error in evaluating the right-hand operand must not be reported unless evaluation of that operand is actually necessary.</p>
+				
+				<p>Saxon implements this rule as follows:</p>
+				
+				<ul>
+					<li>
+						<p>In the case of <code>and</code>, an error evaluating one operand is reported only if evaluation of the other operand returns <code>true</code>.</p>
+					</li>
+					<li>
+						<p>In the case of <code>or</code>, an error evaluating one operand is reported only if evaluation of the other operand returns <code>false</code>.</p>
+					</li>
+				</ul>
+				
+				<p>This means that the expression:</p>
+				
+				<pre><code class="language-xquery">//chapter[pages=0 or length div pages]</code></pre>
+				
+				<p>will never fail with a divide-by-zero error, even if the operands are evaluated in a different order.</p>
+				
+				<p>A similar rule is adopted for expressions with multiple predicates, for example the following is now guaranteed to return no failure if <code>@code</code> is non-numeric:</p>
+				
+				<pre><code class="language-xquery">@code[. castable as xs:integer][xs:integer(.) = 2]</code></pre>
+								
+			</section>
+			
+		</section>
+		
+		<section id="except" title="Set difference and intersection">
+			<h1>Set difference and intersection</h1>
+			<p>These operators were introduced in XPath 2.0.</p>
+			<p>The expression <code>E1 except E2</code> selects all nodes that are in <code>E1</code> unless they are also in <code>E2</code>. Both expressions must return sequences of nodes. The results are returned in document order. For example, <code>@* except @note</code> returns all attributes except the <code>note</code> attribute.</p>
+			<p>The expression <code>E1 intersect E2</code> selects all nodes that are in both <code>E1</code> and <code>E2</code>. Both expressions must return sequences of nodes. The results are returned in document order. For example, <code>preceding::fig intersect ancestor::chapter//fig</code> returns all preceding <code>fig</code> elements within the current chapter.</p>
+		</section>
+		<section id="otherwise" title="Otherwise operator">
+			<h1>Otherwise operator</h1>
+			
+			
+			<p>XPath 4.0 proposes an additional operator: <code class="bold">otherwise</code>. The expression <code>A otherwise B</code> returns the value of <code>A</code> unless it is an empty sequence, in which case it returns the value of <code>B</code>. For example, the expression:</p>
+			
+			<pre><code class="language-xquery">chapter[title='Introduction'] otherwise chapter[1]</code></pre>
+			
+			<p>returns the chapter(s) entited "Introduction" if such a chapter exists; otherwise it returns the first chapter.</p>
+			
+			<p>The precedence of the operator as implemented in Saxon 13 matches the current XPath 4.0 draft specification (September 2024), which has changed since Saxon 12. The precedence is greater than comparison operators such as <code>=</code>, but less than arithmetic operators such as <code>+</code>. So <code>$a = $b + $c otherwise $d</code> means <code>$a = (($b + $c) otherwise $d)</code>. Use parentheses to make your intended meaning clear and to avoid any compatibility problems.</p>		
+			
+		</section>	
+		<section id="lookup-generalization" title="Lookup expressions">
+			<h1>Lookup expressions: removal of restrictions</h1>
+			
+			<p>From XPath 4.0 onwards, the lookup operator "?" (in both its unary and binary forms) can now be followed by:</p>
+			
+			<ul>
+				<li>A string literal, for example <code>$person?'date of birth'</code></li>
+				<li>A variable reference, for example <code>$array?$index</code></li>
+			</ul>
+			
+			<p>The effect is the same as if the string literal or variable were written in parentheses.</p>
+		</section>
+		<section id="non-ascii-operators" title="Non-ASCII operator symbols">
+			<h1>Non-ASCII operator symbols</h1>
+			<p>Since XPath 4.0, the non-ASCII characters <code>×</code> (xD7) and <code>÷</code> (xF7) can be used in place of <code>*</code> and <code>div</code> to represent the multiplication and division operators.</p>
+			<p>The <code>＜</code> and <code>＞</code> characters (xFF1C and xFF1E) can be used in place of <code>&lt;</code> and <code>&gt;</code> to represent the less-than and greater-than operators; these characters can also be used in place of <code>&lt;</code> and <code>&gt;</code> in the compound tokens <code>&lt;=</code>, <code>>=</code>, <code>&lt;&lt;</code>, <code>&gt;&gt;</code>, <code>=&gt;</code>, <code>-&gt;</code>, and <code>=!&gt;</code>.</p>
+			<p>This feature is implemented from Saxon 12.3.</p>
+		</section>
+		
+	</section>	
+	<section id="sequence" title="Sequence expressions">
+		<h1>Sequence expressions</h1>
+		<p>The expression <code>E1 , E2</code> returns the sequence obtained by concatenating the sequences <code>E1</code> and <code>E2</code>.</p>
+		<p>For example, <code>$x = ("London", "Paris", "Tokyo")</code> returns true if the value of <code>$x</code> is one of the strings listed.</p>
+		<p>A sequence is often written in parentheses, as in the above example, but the parentheses are technically necessary only for operator precedence reasons.</p>
+		<p>The expression <code>()</code> denotes an empty sequence, which is often used to indicate absence of a value.</p>
 	</section>
 	<section id="filter" title="Filter expressions">
 		<h1>Filter expressions</h1>
@@ -1219,15 +1328,6 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 		<p>From XPath 2.0, <code>E</code> may be any sequence, it is not restricted to a node sequence. Within the predicate, the expression <code>.</code> (dot) refers to the context item, that is, the item currently being tested. The XPath 1.0 concept of context node has thus been generalized, for example <code>.</code> can refer to a string or a number.</p>
 		<p>Generally the order of items in the result preserves the order of items in <code>E</code>. As a special case, however, if <code>E</code> is a step using a reverse axis (e.g. preceding-sibling), the position of nodes for the purpose of evaluating the predicate is in reverse document order, but the result of the filter expression is in forwards document order.</p>
 		<p>In XPath 3.0, the postfix operators <code>[]</code> (filter) and <code>()</code> (function call) may be mixed and apply in left-to-right order. For example <code>$a[3](2)</code> selects the third item in a sequence (of function items), and calls it with the argument value 2; while <code>$a(2)[3]</code> calls the function item <code>$a</code> with argument value 2, and then selects the third item in the resulting sequence.</p>
-	</section>
-	<section id="path" title="Path expressions">
-		<h1>Path expressions</h1>
-		<p>A path expression is a sequence of steps separated by the <code>/</code> or <code>//</code> operator. For example, <code>../@desc</code> selects the <code>desc</code> attribute of the parent of the context node.</p>
-		<p>In XPath 2.0, path expressions were generalized so that any expression can be used as an operand of <code>/</code>, (both on the left and the right), so long as the value of the left-hand operand is a sequence of nodes. For example, it is possible to use a union expression (in parentheses) or a call to the <a class="bodylink code" href="/functions/fn/id">id()</a> or <a class="bodylink code" href="/functions/fn/key">key()</a> functions. The right-hand operand is evaluated once for each node in the sequence that results from evaluating the left-hand operand, with that node as the context item. In the result of the path expression, nodes are sorted in document order, and duplicates are eliminated.</p>
-		<p>In practice, it only makes sense to use expressions on the right of <code>/</code> if they depend on the context item. It is legal to write <code>$x/$y</code> provided both <code>$x</code> and <code>$y</code> are sequences of nodes, but the result is exactly the same as writing <code>./$y</code>.</p>
-		<p>Note that the expressions <code>./$X</code> or <code>$X/.</code> can be used to remove duplicates from <code>$X</code> and sort the results into document order. The same effect can be achieved by writing <code>$X|()</code>.</p>
-		<p>The operator <code>//</code> is an abbreviation for <code>/descendant-or-self::node()/</code>. An expression of the form <code>/E</code> is shorthand for <code>root(.)/E</code>, and the expression <code>/</code> on its own is shorthand for <code>root(.)</code>.</p>
-		<p>The expression on the left of the <code>/</code> operator must return a node or sequence of nodes. The expression on the right can return either a sequence of nodes or a sequence of atomic items (but not a mixture of the two). This allows constructs such as <code>$x/number()</code>, which returns the sequence obtained by converting each item in <code>$x</code> to a number.</p>
 	</section>
 	<section id="simplemapping" title="Simple mapping expressions">
 		<h1>Simple mapping expressions</h1>
@@ -1239,17 +1339,8 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 		<p>The expression <code>E cast as T</code> converts the value of expression <code>E</code> to type <code>T</code>. Whether <code>T</code> is a built-in type or a user-defined type, the effect is exactly the same as using the constructor function <code>T (E)</code>.</p>
 		<p>The expression <code>E treat as T</code> is designed for environments that perform static type checking. Saxon doesn't do static type checking, so this expression has very little use, except to document an assertion that the expression <code>E</code> is of a particular type. A run-time failure will be reported if the value of <code>E</code> is not of type <code>T</code>; no attempt is made to convert the value to this type.</p>
 	</section>
-	<section id="except" title="Set difference and intersection">
-		<h1>Set difference and intersection</h1>
-		<p>These operators were introduced in XPath 2.0.</p>
-		<p>The expression <code>E1 except E2</code> selects all nodes that are in <code>E1</code> unless they are also in <code>E2</code>. Both expressions must return sequences of nodes. The results are returned in document order. For example, <code>@* except @note</code> returns all attributes except the <code>note</code> attribute.</p>
-		<p>The expression <code>E1 intersect E2</code> selects all nodes that are in both <code>E1</code> and <code>E2</code>. Both expressions must return sequences of nodes. The results are returned in document order. For example, <code>preceding::fig intersect ancestor::chapter//fig</code> returns all preceding <code>fig</code> elements within the current chapter.</p>
-	</section>
-	<section id="union" title="Union">
-		<h1>Union</h1>
-		<p>The <code>|</code> operator was available in XPath 1.0; the keyword <code>union</code> was added in XPath 2.0 as a synonym, because it is familiar to SQL users.</p>
-		<p>The expression <code>E1 union E2</code> selects all nodes that are in either <code>E1</code> or <code>E2</code> or both. Both expressions must return sequences of nodes. The results are returned in document order. For example, <code>/book/(chapter | appendix)/section</code> returns all <code>section</code> elements within a <code>chapter</code> or <code>appendix</code> of the selected <code>book</code> element.</p>
-	</section>
+
+
 	<section id="arithmetic" title="Arithmetic expressions">
 		<h1>Arithmetic expressions</h1>
 		<h2 class="subtitle">Unary plus and minus</h2>
@@ -1290,6 +1381,13 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 		<h1>Conditional expressions</h1>
 		<p>XPath 2.0 introduced a conditional expression of the form <code>if ( E1 ) then E2 else E3</code>. For example, <code>if (@discount) then @discount else 0</code> returns the value of the <code>discount</code> attribute if it is present, or zero otherwise.</p>
 		<p>It's also worth noting the coding pattern <code>(@price, 5)[1]</code> which returns the value of <code>@price</code> if it exists, or 5 otherwise.</p>
+		
+		<h2 id="braced-conditionals" title="Braced Conditionals">Braced Conditionals</h2>
+			
+		<p>XPath 4.0 introduces an alternate syntax for conditionals, known as a <i>BracedAction</i>.  For example, <code>if (<i>condition</i>) then <i>thenExpr</i> else <i>elseExpr</i></code> may now be written as <code>if <i>condition</i> "{" <i>thenExpr</i> "}" ("else" "{" <i>elseExpr</i> "}")?</code>. The semantics are identical, but the <code>else</code> part is optional, and defaults to an empty sequence.</p>
+		
+		<p>For example, in XQuery, <code>if ($break) {&lt;br/&gt;}</code> outputs a <code>br</code> element if <code>$break</code> is true, and does nothing if it is false.</p>
+			
 	</section>
 	<section id="quantified" title="Quantified expressions">
 		<h1>Quantified expressions</h1>
@@ -1299,24 +1397,68 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 	<section id="for" title="For expressions">
 		<h1>For expressions</h1>
 		<p>The expression <code>for $x in E1 return E2</code> returns the sequence that results from evaluating <code>E2</code> once for every item in the sequence <code>E1</code>. Note that <code>E2</code> must use the range variable <code>$x</code> to refer to the item being tested; it does not become the context item. For example, <code>sum(for $v in order-item return $v/price * $v/quantity)</code> returns the total value of (price times quantity) for all the selected <code>order-item</code> elements.</p>
+		
+		<section id="for-member-expression" title="For-member expressions">
+			<h1>For-member expressions</h1>
+			
+			<aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled. Available since Saxon 10.</aside>
+			
+			<p>The <code class="bold">for member</code> expression was a Saxon extension to XPath 3.1 syntax introduced in Saxon 10 and since adopted into XPath 4.0. It allows convenient iterative processing of the members of an array.</p>
+			
+			<p>For example: </p>
+			<pre><code class="language-xquery">for member $m in [(3,5,6), (8,12)] return sum($m)</code></pre>
+			<p>returns the sequence <code>(14, 20)</code>.</p>
+			
+			<p>A <code>ForMemberExpr</code> is a new kind of <code>ExprSingle</code>; this means it can be used anywhere a <code>ForExpr</code> or <code>LetExpr</code> is allowed. The syntax is:</p>
+			
+			<samp>ForMemberExpr ::= "for" "member" SimpleForBinding ("," SimpleForBinding)* "return" ExprSingle</samp>
+			
+			<p>Here <code>SimpleForBinding</code> takes the same form as in a <code>ForExpr</code>: </p>
+			<samp>"$" VarName "in" ExprSingle</samp>
+			
+			<p>The semantics are as follows:</p>
+			
+			<ul>
+				<li>Each expression in a <code>SimpleForBinding</code> must evaluate to a single array.</li>
+				<li>The expression <code>for member $x in X, $y in Y return R</code> is equivalent to <code>for member $x in X return for member $y in Y return R</code>.</li>
+				<li>The expression <code>for $x in X return R</code> binds the variable <code>$x</code> to each member of the array <code>X</code> in turn, evaluates <code>R</code> with this variable binding in scope, and returns the sequence-concatenation of all the evaluations of <code>R</code>, in order.</li>
+			</ul>
+			
+			<aside>The expression <code>for member $x in $X return f($x)</code> is equivalent to <code>for $x in array:members($x) return f(unparcel($x))</code>.</aside>
+			
+			<p>The <code>for member</code> expression is currently available only as a free-standing expression; it cannot be used as a clause within an XQuery FLWOR expression.</p>
+			
+			<p>Some further examples:</p>
+			
+			<pre><code class="language-xquery"><![CDATA[let $json := '[{"x":1, "y":"one"}, {"x":2, "y":"two"}]'
+return for member $map in parse-json($json) return $map?y]]></code></pre>
+			
+			<p>returns <code>("one", "two")</code>.</p>
+			
+			<pre><code class="language-xquery"><![CDATA[let $json := '[[1,2,3], [4,5,6]]'
+return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
+			
+			<p>returns <code>(2, 4, 6, 8, 10, 12)</code>.</p>
+			
+			<p>Note that the result of the expression is a sequence, not an array.</p>
+							
+		</section>
+		
+		<section id="for-let-expressions" title="For and let expressions">
+			<h1>For and let expressions</h1>
+			
+			<p>XPath 3.0 allows <code>let</code> expressions, previously available only in XQuery. For example the expression <code>let $x := . return //a[@status=$x]</code> binds the variable <code>$x</code> to the context item, and then evaluates the expression <code>//a[@status=$x]</code> which makes use of this variable.</p>
+			
+			<p>XPath 4.0 allows multiple <code>let</code> clauses, or multiple <code>for</code> clauses (but not a mixture) in an expression. For example:</p>
+			<ul>
+				<li><code>let $i := 2 let $j := 3 return $i + $j</code></li>
+				<li><code>for $i in 1 to 10 for $j in 1 to 3 return $i * $j</code></li>
+			</ul>
+			<p>This feature is implemented from Saxon 12.3.</p>
+		</section>
+		
 	</section>
-	<section id="let" title="Let expressions">
-		<h1>Let expressions</h1>
-		<p>XPath 3.0 allows <code>let</code> expressions, previously available only in XQuery. For example the expression <code>let $x := . return //a[@status=$x]</code> binds the variable <code>$x</code> to the context item, and then evaluates the expression <code>//a[@status=$x]</code> which makes use of this variable.</p>
-	</section>
-	<section id="boolean" title="Boolean expressions: AND and OR">
-		<h1>Boolean expressions: AND and OR</h1>
-		<p>The expression <code>E1 and E2</code> returns true if the <i>effective boolean values</i> of <code>E1</code> and <code>E2</code> are both true.</p>
-		<p>The expression <code>E1 or E2</code> returns true if the <i>effective boolean values</i> of either or both of <code>E1</code> and <code>E2</code> are true.</p>
-		<p>The specification allows the operands to be evaluated in either order, but Saxon will normally evaluate them left-to-right, which means if you write something like <code>$a instance of xs:integer and $x = (1 to $a)</code>, then you won't get an error if <code>$a</code> is not an integer. But the specification doesn't guarantee this.</p>
-	</section>
-	<section id="sequence" title="Sequence expressions">
-		<h1>Sequence expressions</h1>
-		<p>The expression <code>E1 , E2</code> returns the sequence obtained by concatenating the sequences <code>E1</code> and <code>E2</code>.</p>
-		<p>For example, <code>$x = ("London", "Paris", "Tokyo")</code> returns true if the value of <code>$x</code> is one of the strings listed.</p>
-		<p>A sequence is often written in parentheses, as in the above example, but the parentheses are technically necessary only for operator precedence reasons.</p>
-		<p>The expression <code>()</code> denotes an empty sequence, which is often used to indicate absence of a value.</p>
-	</section>
+
 	<section id="xpath30new" title="New features in XPath 3.0">
 		<h1>New features in XPath 3.0</h1>
 		<aside>From Saxon 9.6, Saxon supports XPath 3.0 by default. Some features vary by Saxon edition: higher-order functions require Saxon-PE or higher, and schema-awareness requires Saxon-EE.</aside>
@@ -1329,7 +1471,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 				<p>A new <a class="bodylink" href="../simplemapping">simple mapping operator</a> is available, <code>!</code>. This works rather like <code>/</code>, except there is no restriction that the left hand operand must be a node sequence, and there is no sorting of results into document order. For example, <code>(1 to 7)!(.*.)</code> returns the sequence <code>(1, 4, 9, 16, 25, 36, 49)</code>.</p>
 			</li>
 			<li>
-				<p>Local variables can be declared in a <a class="bodylink" href="../let">let expression</a>, for example <code>let $x := /*/@version return //e[@version = $x]</code>.</p>
+				<p>Local variables can be declared in a <a class="bodylink" href="/expressions/for/for-let-expressions">let expression</a>, for example <code>let $x := /*/@version return //e[@version = $x]</code>.</p>
 			</li>
 			<li>
 				<p>Inline function items can be declared, and used as arguments to higher-order functions. For example <code>map(//employee, function($e){$e/salary + $e/bonus})</code>. A <i>function item</i> is a third kind of item, alongside nodes and atomic items. The function represented by a function item <code>$f</code> can be invoked using a dynamic function call <code>$f(args)</code>. <i>Higher-order functions require Saxon-PE or higher.</i></p>
@@ -1360,4 +1502,90 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 		</ol>
 		<p>A number of new functions are available, including <code>random-number-generator()</code>, <code>sort()</code>, <code>parse-ietf-date()</code>, and functions to read and write data in JSON format. For details see the <a class="bodylink" href="/functions">Functions library</a>.</p>
 	</section>
+	<section id="new-in-xpath40" title="New features in XPath 4.0">
+		<h1>New features in XPath 4.0</h1>
+		
+		<p>For full details of the changes in XPath 4.0, see the W3C specifications:</p>
+		<ul>
+			<li><p><a href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html">XQuery and XPath Data Model 4.0</a></p></li>
+			<li><p><a href="https://qt4cg.org/specifications/xquery-40/xpath-40.html">XML Path Language (XPath) 4.0</a></p></li>
+		</ul>
+		
+		<ul>
+			<li><p>The previously optional Static Typing Feature has been dropped completely (see XPath 3.1 for a <a href="https://www.w3.org/TR/2017/REC-xpath-31-20170321/#dt-xpath-static-typing-feature">description of the feature</a> prior to 4.0).</p></li>
+			<li><p>The rules have been relaxed regarding the use of <a href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#xml-and-xsd-versions">non-XML characters</a> in instances of <code>xs:string</code>.  This has an impact on <a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#func-parse-json"><code>fn:parse-json</code></a>, <a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#func-json-to-xml"><code>fn:json-to-xml</code></a> and the new function <a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#func-decode-from-uri"><code>fn:decode-from-uri</code></a>.</p></li>
+			<li><p>The concept of a <i>context item</i> has been generalised so that it is no longer restricted to representing a single item.  Where this is the case, it may be referred to as the <i>context value</i>.  In XSLT, where the restriction still applies, it is still referred to as the <i>context item</i>.</p></li>
+			<li><p>A <i>document-uri</i> is no longer guaranteed to always represent the same document.</p></li>
+			<li><p>The term <i>atomic item</i> replaces <i>atomic value</i></p></li>
+			<li>
+				<p>It's now possible to compare and sort all types of atomic item:</p>
+				<ul>
+					<li><p>Atomic types are categorized into type families to make it clear which values are comparable.</p></li>
+					<li><p>Every atomic type has a sort order, including <code>xs:duration</code>.</p></li>
+				</ul>
+			</li>
+			<li>
+				<p>Support for new item types:</p>
+				<ul>
+					<li><p>Generic nodes (GNode)</p></li>
+					<li><p>JSON nodes (JNode)</p></li>
+					<li><p>A new name for XML nodes: XNode</p></li>
+					<li><p><a class="bodylink" href="/expressions/type-system/choice-types">Choice item types</a></p></li>
+					<li>
+						<p><a class="bodylink" href="/expressions/type-system/record-types">Record types</a>, including 5 built-in named record types:</p>
+						<ul>
+							<li><a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#load-xquery-module-record"><code>fn:load-xquery-module-record</code></a> - <i>holds the result of <code>fn:load-xquery-module</code></i></li>
+							<li><a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#parsed-csv-structure-record"><code>fn:parsed-csv-structure-record</code></a> - <i>holds the result of <code>fn:parse-csv</code></i></li>
+							<li><a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#random-number-generator-record"><code>fn:random-number-generator-record</code></a> - <i>holds the result of <code>fn:random-number-generator</code></i></li>
+							<li><a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#schema-type-record"><code>fn:schema-type-record</code></a> - <i>represents the properties of a simple or complex type in a schema</i></li>
+							<li><a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#uri-structure-record"><code>fn:uri-structure-record</code></a> - <i>represents the components of a URI</i></li>
+						</ul>
+					</li>
+					<li><p><a class="bodylink" href="/expressions/type-system/enum-types">Enum types</a></p></li>
+					<li><p><a class="bodylink" href="/expressions/type-system/kindtests">KindTests and NodeTests</a></p></li>
+					<li><p><a class="bodylink" href="/expressions/types/named-item-types">Named item types</a></p></li>
+				</ul>
+			</li>
+			<li><p>Function items now have identity, impacting <code>fn:deep-equal</code>.</p></li>
+			<li>
+				<p>Changes to map items:</p>
+				<ul>
+					<li><p>constructors are added</p></li>
+					<li><p>the single accessor function is now an iterator over the key/value pairs in the map.</p></li>
+					<li><p>the items in a map are now ordered</p></li>
+				</ul>
+			</li>
+			<li>
+				<p>Changes to array items:</p>
+				<ul>
+					<li><p>constructors are added</p></li>
+					<li><p>the single accessor function is now an iterator over members of the array.</p></li>
+				</ul>
+			</li>
+			<li><p>The default namespace for elements and types can be set to the value <a href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#static_context"><code>##any</code></a>, allowing unprefixed names in axis steps to match elements with a given local name in any namespace.</p></li>
+			<li><p>A URIQualifiedName <a href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-namespaces-and-qnames">may now supply a prefix</a> as well as a URI and local name.</p></li>
+			<li>
+				<p>Changes to <code>fn:format-number</code>:</p>
+				<ul>
+					<li><p>The decimal format name can now be supplied as a value of type <code>xs:QName</code>, as an alternative to supplying a lexical QName as an instance of <code>xs:string</code></p></li>
+					<li><p>Decimal format parameters can now be supplied directly as a map in the third argument, rather than referencing a format defined in the static context.</p></li>
+					<li><p>For selected properties including minus sign, exponent-separator, percent and per-mille, it is now possible to specify a single-character marker to be used in the picture string, together with a multi-character rendition to be used in the formatted output.</p></li>
+				</ul>
+			</li>
+			<li>
+				<p>The XPath language specification now includes a section on <i>External Resources and Security</i>, which introduces the following changes:</p>
+				<ul>
+					<li>
+						<p>Some functions now accept an option named <code>trusted</code>:</p>
+						<ul>
+							<li><p>for <code>fn:load-xquery-module</code>, <code>fn:transform</code> and <code>xsl:evaluate</code>, to specify whether dynamically loaded code is trusted</p></li>
+							<li><p>for <code>fn:parse-xml</code>, <code>fn:doc</code>, <code>fn:xsd-validator</code>, to specify whether dynamically loaded XML is allowed to reference further external resources (such as external entities)</p></li>								
+						</ul>
+					</li>
+					<li><p>Some functions now accept an option named <code>xinclude</code>, to specify whether <code>xi:include</code> elements in the input are to be expanded: <code>fn:doc</code>, <code>fn:parse-xml</code></p></li>
+				</ul>
+			</li>	
+			<li><p>An <a href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-conditionals">alternate syntax</a> has been introduced for conditional expressions.  It uses curly braces and the else sub-expression can be ommitted, for example: <code>if ($condition = true()) { $do_something }</code></p></li>
+		</ul>
+	</section>	
 </article>
