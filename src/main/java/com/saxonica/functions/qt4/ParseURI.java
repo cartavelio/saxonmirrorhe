@@ -98,7 +98,7 @@ public class ParseURI extends URIFunctions {
             Pattern pattern = Pattern.compile("^(///*)([^/]+)(/.*)?$");
             Matcher matcher = pattern.matcher(uristr);
             if (matcher.find()) {
-                if (matcher.group(3) == null) {
+                if (matcher.group(3) == null || matcher.group(3).isEmpty()) {  // second condition is for transpiled code
                     if (matcher.group(1).length() == 2) {
                         authority = matcher.group(2);
                         map = map.addEntry(AUTHORITY, new StringValue(authority));

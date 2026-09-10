@@ -5,6 +5,7 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
 
@@ -92,12 +93,17 @@ abstract public class URIFunctions extends SystemFunction {
             if (ch == ' ') {
                 output.append("+");
             } else if (ch == '=' || ch == '&' || ch == ';' || ch == '?' || ch == '#' || ch == '\'') {
-                output.append(String.format("%%%02X", (int) ch));
+                output.append("%").append(toTwoHexDigits((int)ch));
             } else {
                 output.append(ch);
             }
         }
         return output.toString();
+    }
+
+    @CSharpReplaceBody(code="return String.Format(\"{0:X2}\", ch);")
+    private String toTwoHexDigits(int ch) {
+        return String.format("%02X", ch);
     }
 
     protected String decodeString(String value) {
