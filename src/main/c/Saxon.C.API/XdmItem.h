@@ -126,6 +126,8 @@ public:
      */
      virtual const char * getStringValue();
 
+     const char * toString();
+
      /**
      * Get the first item in the sequence
      * @return XdmItem or nullptr if sequence is empty
