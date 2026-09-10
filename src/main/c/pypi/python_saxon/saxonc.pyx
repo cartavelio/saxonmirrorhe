@@ -351,7 +351,8 @@ cdef class PySaxonProcessor:
         Convert EQName string to clark name notation.
         Args:
             name (str): The URI in EQName notation: <code>Q{uri}local</code> if the name is in a namespace.
-            For a name in no namespace, either of the forms <code>Q{}local</code> or simply <code>local</code> are accepted.
+                For a name in no namespace, either of the forms <code>Q{}local</code> or simply <code>local</code>
+                are accepted.
         Returns:
             str: the URI inb clark notation
         """
@@ -365,12 +366,12 @@ cdef class PySaxonProcessor:
     def clark_name_to_eqname(self, name):
         """
         clark_name_to_eqname(self, name)
-        Convert clark name string to EQName notation. The expanded name, as a string using the notation defined by the EQName production in XPath 3.0.
-        If the name is in a namespace, the resulting string takes the form <code>Q{uri}local</code>.
-        Otherwise, the value is the local part of the name.
+        Convert clark name string to EQName notation; i.e. the expanded name, as a string using the notation defined
+        by the EQName production in XPath 3.0. If the name is in a namespace, the resulting string takes the form
+        <code>Q{uri}local</code>. Otherwise, the value is the local part of the name.
         Args:
-            name (str): The URI in Clark notation: <code>{uri}local</code> if the
-            name is in a namespace, or simply <code>local</code> if not.
+            name (str): The URI in Clark notation: <code>{uri}local</code> if the name is in a namespace,
+                or simply <code>local</code> if not.
         Returns:
             str: the expanded name, as a string using the notation defined by the EQName production in XPath 3.0.
         """
@@ -826,7 +827,7 @@ cdef class PyDocumentBuilder:
        """Set the PySchemaValidator to be used. This determines whether schema validation is applied to an input
        document and whether type annotations in a supplied document are retained. If no PySchemaValidator is supplied,
        then schema validation does not take place.
-       This option requires the schema-aware version of the Saxon product (Saxon-EE).
+       This option requires the schema-aware version of the Saxon product (SaxonC-EE).
        Since a PySchemaValidator is serially reusable but not thread-safe, using this method is not appropriate when
        the PyDocumentBuilder is shared between threads.
        Args:
@@ -956,8 +957,8 @@ cdef class PyXslt30Processor:
                 it means that static errors in the stylesheet will not necessarily cause the
                 compile(Source) method to throw an exception (errors in code that is
                 actually executed will still be notified but this may happen after the compile(Source)
-                method returns). This option is enabled by default in Saxon-EE, and is not available
-                in Saxon-HE or Saxon-PE.
+                method returns). This option is enabled by default in SaxonC-EE, and is not available
+                in SaxonC-HE or SaxonC-PE.
                 Recommendation: disable this option unless you are confident that the
                 stylesheet you are compiling is error-free.
         """
@@ -2620,10 +2621,12 @@ cdef class PyXQueryProcessor:
      def set_streaming(self, bool option):
          """
          set_streaming(self, bool option)
-         Say whether the query should be compiled and evaluated to use streaming. Option requires saxoncee
+         Say whether the query should be compiled and evaluated to use streaming. Option requires SaxonC-EE.
          Args:
-             option (bool): option if true, the compiler will attempt to compile a query to be capable of executing in streaming mode. If the query cannot be streamed, a
-             compile-time exception is reported. In streaming mode, the source document is supplied as a stream, and no tree is built in memory. The default is false.
+             option (bool): if true, the compiler will attempt to compile a query to be capable of executing in
+                streaming mode. If the query cannot be streamed, a compile-time exception is reported. In
+                streaming mode, the source document is supplied as a stream, and no tree is built in memory.
+                The default is false.
          """
          cdef bool c_option
          c_option = option
@@ -2726,8 +2729,8 @@ cdef class PyXQueryProcessor:
         Execute a query and return the result as a PyXdmValue object.
         Args:
             **kwds: Possible keyword arguments: input_file_name (str) or input_xdm_item (PyXdmItem) can be used to
-                supply the input; query_file (str) or query_text (str) can be used to supply the query.
-                lang (str) Say which version of XQuery should be used, options: '3.1' or '4.0'
+                supply the input; query_file (str) or query_text (str) can be used to supply the query;
+                lang (str) can be used to specify which version of XQuery should be used, options: '3.1' or '4.0'
         Returns:
             PyXdmValue: Output result as a PyXdmValue
         """
@@ -2794,8 +2797,8 @@ cdef class PyXQueryProcessor:
         Execute a query and return the result as a string.
         Args:
             **kwds: Possible keyword arguments: input_file_name (str) or input_xdm_item (PyXdmItem) can be used to
-                supply the input; query_file (str) or query_text (str) can be used to supply the query.
-                lang (str) Say which version of XQuery should be used, options: '3.1' or '4.0'
+                supply the input; query_file (str) or query_text (str) can be used to supply the query;
+                lang (str) can be used to specify which version of XQuery should be used, options: '3.1' or '4.0'
         Returns:
             str: Output result as a string
         """
@@ -2827,9 +2830,9 @@ cdef class PyXQueryProcessor:
         Execute a query with the result saved to file.
         Args:
             **kwds: Required keyword argument: output_file_name (str) to specify the output file.
-                Possible arguments: input_file_name (str) or input_xdm_item (PyXdmItem) can be used to
-                supply the input; query_file (str) or query_text (str) can be used to supply the query.
-                lang (str) Say which version of XQuery should be used, options: '3.1' or '4.0'
+                Possible arguments: input_file_name (str) or input_xdm_item (PyXdmItem) can be used to supply
+                the input; query_file (str) or query_text (str) can be used to supply the query;
+                lang (str) can be used to specify which version of XQuery should be used, options: '3.1' or '4.0'
         """
         if len(kwds) == 0:
           self.thisxqptr.runQueryToFile()
@@ -3328,9 +3331,9 @@ cdef class PySchemaValidator:
      def register_schema(self, **kwds):
         """
         register_schema(self, **kwds)
-        Register a schema supplied as file name or schema text
+        Register a schema supplied as file name, schema text, or XDM node
         Args:
-            **kwds: Possible keyword arguments: must be one of the following (xsd_text|xsd_file)
+            **kwds: Possible keyword arguments: must be one of the following (xsd_text|xsd_file|xsd_node)
         """
         py_error_message = "Error: register_schema should only contain one of the following keyword arguments: (xsd_text|xsd_file|xsd_node)"
         if len(kwds) != 1:
