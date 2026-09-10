@@ -534,7 +534,7 @@ TODO: rethink redefines and override
         <p>In XSLT, the <code>xsl:sequence</code> instruction now allows an <code>@as</code> attribute.</p>
         
         <p>In XSLT, <code>xsl:include</code> declarations now allow cycles and "diamond" structures: if
-        the same module is included more than once at the same stylesheet (import) level. all but the first
+        the same module is included more than once at the same stylesheet (import) level, all but the first
         <code>xsl:include</code> declarations are ignored.</p>
         
         <p>The experimental attribute <code>break-when</code> for <code>xsl:for-each-group</code> is

@@ -1644,6 +1644,8 @@
                 <attribute name="schema-aware" use="optional">If <code>yes</code>, the XPath
                     expression has access to the schema components imported into the
                     stylesheet.</attribute>
+                <attribute name="trusted" class="qt4">New in XSLT 4.0. Not implemented in Saxon
+                    13.</attribute>
                 <attribute name="with-params" use="optional">A map used to supply values for
                     variables in the target expression, if the names are only known
                     dynamically.</attribute>
@@ -1701,11 +1703,11 @@
                     implemented since Saxon 9.6. The switch to disable the feature (required by the
                     W3C specification) became available in Saxon 9.8. The <code>saxon:options</code>
                     attribute became available in Saxon 9.9.</p>
-                <p/>
                 <p>If you are concerned about security implications of this feature, you can disable
                     it either statically or dynamically, by setting the configuration property <a
                         class="feature" href="DISABLE_XSL_EVALUATE"/>.</p>
-
+                <p class="qt4">The XSLT 4.0 attribute <code>trusted</code> is not yet implemented in
+                    Saxon.</p>
             </status>
         </xsl-element>
     </section>
@@ -2320,7 +2322,10 @@
                 <attribute name="namespace" use="optional">Specifies the target namespace of the
                     schema to be imported. The attribute should be omitted when importing a schema
                     with no target namespace.</attribute>
-                <attribute name="role">FIXME:</attribute>
+                <attribute name="role" class="qt4">New in XSLT 4.0. Specifies the role name for the
+                    imported schema, so that it is then used only in parts of the stylesheet within
+                    the scope of an <code>[xsl:]schema-role</code> attribute specifying this role
+                    name.</attribute>
                 <attribute name="schema-location" use="optional">Specifies where the schema document
                     can be found. This URI is passed through the <code>URIResolver</code> in the
                     same way as the URIs used on <a class="bodylink code" href="../include"
@@ -2338,6 +2343,8 @@
                 <p>The <code>xsl:import-schema</code> declaration requires a schema-aware processor,
                     so is only available in Saxon-EE. For further information see <a
                         class="bodylink" href="/schema-processing">Using XML Schema (XSD)</a>.</p>
+                <p class="qt4">The XSLT 4.0 attribute <code>role</code>is implemented since Saxon
+                    13.</p>
             </status>
             <see-also name="include" type="xsl-elements"/>
             <see-also name="import" type="xsl-elements"/>
@@ -2388,7 +2395,12 @@
             <in-spec>xslt30</in-spec>
             <in-spec>xslt40</in-spec>
             <saxon-edition>ALL</saxon-edition>
-            <status-ok/>
+            <status>
+                <p class="qt4">Since Saxon 13, in XSLT 4.0, <code>xsl:include</code> declarations
+                    now allow cycles and "diamond" structures: if the same module is included more
+                    than once at the same stylesheet (import) level, all but the first
+                    <code>xsl:include</code> declarations are ignored.</p>
+            </status>
             <see-also name="import" type="xsl-elements"/>
         </xsl-element>
     </section>
@@ -3856,6 +3868,7 @@
                 <attribute name="byte-order-mark" use="optional">Indicates whether UTF-8/UTF-16
                     output is to start with a byte order mark. The default is
                     <code>no</code>.</attribute>
+                <attribute name="canonical" class="qt4">FIXME:</attribute>
                 <attribute name="cdata-section-elements" use="optional">Used only for XML output.
                     The value is a whitespace-separated list of element names. Character data
                     belonging to these output elements will be written within CDATA
@@ -3877,7 +3890,10 @@
                     characters will be represented as character entities; and to document the
                     encoding in the output file itself. The default (and fallback) is
                     utf-8.</attribute>
-                <attribute name="escape-solidus">FIXME:</attribute>
+                <attribute name="escape-solidus" class="qt4">New in XSLT 4.0. Implemented since Saxon
+                    12.3. Used only for JSON output. Controls whether the character <code>/</code>
+                    is escaped as <code>\/</code> by the JSON serialization method. The default is
+                    <code>yes</code>.</attribute>
                 <attribute name="escape-uri-attributes" use="optional">New in XSLT 2.0. Affects HTML
                     output only. Controls whether non-ASCII characters in HTML URI-valued attributes
                     (for example, <code>href</code>) are escaped using the %HH convention. The
@@ -3896,7 +3912,10 @@
                     extra whitespace except between two tags. The emphasis is on conformance rather
                     than aesthetics!</attribute>
                 <attribute name="item-separator" use="optional">Not available in XSLT.</attribute>
-                <attribute name="json-lines">FIXME:</attribute>
+                <attribute name="json-lines" class="qt4">New in XSLT 4.0. Implemented since Saxon
+                    13. Used only for JSON output. Determines whether multiple JSON values should be
+                    output in json-lines format (one value per line). The default value is
+                    <code>no</code>. </attribute>
                 <attribute name="json-node-output-method" use="optional">Used only for JSON output,
                     available in XPath 3.1, implemented since Saxon 9.7. Defines the serialization
                     method for nodes encountered while serializing as JSON. </attribute>
@@ -3973,8 +3992,12 @@
                         parameters</a> for descriptions of additional attributes supported by
                     Saxon-PE and Saxon-EE on the <code>xsl:output</code> declaration.</p>
 
-                <p>The new XSLT 3.0 attribute <code>parameter-document</code> is first implemented
+                <p>The XSLT 3.0 attribute <code>parameter-document</code> is first implemented
                     in Saxon 9.8.</p>
+                
+                <p class="qt4">The XSLT 4.0 attribute <code>escape-solidus</code> is implemented
+                    since Saxon 12.3; while the attribute <code>json-lines</code> is implemented
+                    since Saxon 13.</p>
             </status>
             <see-also name="character-map" type="xsl-elements"/>
             <see-also name="result-document" type="xsl-elements"/>
@@ -4068,7 +4091,8 @@
                 <attribute name="extension-element-prefixes" use="optional">Standard attribute that
                     may appear on any XSLT element. Used to declare the use of extension
                     instructions in a particular namespace.</attribute>
-                <attribute name="fixed-namespaces">FIXME:</attribute>
+                <attribute name="fixed-namespaces" class="qt4">New in XSLT 4.0. Defines the fixed
+                    namespace bindings for a stylesheet module.</attribute>
                 <attribute name="id">Optional identifier, not used by the XSLT processor; may be
                     used to identify a package within a larger XML document.</attribute>
                 <attribute name="input-type-annotations">Used to request stripping of type
@@ -4079,7 +4103,9 @@
                         <code>xsl:use-package</code> declarations. </attribute>
                 <attribute name="package-version">Version identifier, used to distinguish between
                     different versions of a package. </attribute>
-                <attribute name="schema-role">FIXME:</attribute>
+                <attribute name="schema-role" class="qt4">New in XSLT 4.0. Standard attribute that
+                    may appear on any XSLT element. Used to allow different parts of a stylesheet to
+                    use different schemas.</attribute>
                 <attribute name="use-when" use="optional">Standard attribute that may appear on any
                     XSLT element. Used to conditionally include or exclude elements. The value is an
                     XPath expression that can be evaluated statically. If the effective boolean
@@ -4109,6 +4135,8 @@
                     to export a package in compiled (SEF) form to filestore, and only Saxon-PE or
                     -EE can be used to load a compiled package from filestore. With Saxon-HE,
                     packages must be compiled from source code every time they are used.</p>
+                <p class="qt4">The XSLT 4.0 attributes <code>fixed-namespaces</code> and
+                    <code>schema-role</code> are implemented since Saxon 13.</p>
             </status>
             <see-also name="expose" type="xsl-elements"/>
             <see-also name="use-package" type="xsl-elements"/>
@@ -4395,6 +4423,7 @@
                     more information.</attribute>
                 <attribute name="byte-order-mark" use="optional">Serialization attribute, see
                     Details for more information.</attribute>
+                <attribute name="canonical" class="qt4">FIXME:</attribute>
                 <attribute name="cdata-section-elements" use="optional">Serialization attribute, see
                     Details for more information.</attribute>
                 <attribute name="doctype-public" use="optional">Serialization attribute, see Details
@@ -4403,12 +4432,13 @@
                     for more information.</attribute>
                 <attribute name="encoding" use="optional">Serialization attribute, see Details for
                     more information.</attribute>
-                <attribute name="escape-solidus">FIXME:</attribute>
+                <attribute name="escape-solidus" class="qt4">Serialization attribute, see Details
+                    for more information.</attribute>
                 <attribute name="escape-uri-attributes" use="optional">Serialization attribute, see
                     Details for more information.</attribute>
                 <attribute name="format" use="optional">If present, it gives the name of an <a
                         class="bodylink code" href="../output">xsl:output</a> element that describes
-                    the serialization format for this output document; if absent, the unnamed
+                    the serialization format for this secondary output; if absent, the unnamed
                         <code>xsl:output</code> declaration is used.</attribute>
                 <attribute name="href" use="optional">
                     <p>The URI for the result document. If this is a relative URI, it is interpreted
@@ -4441,7 +4471,8 @@
                 <attribute name="indent" use="optional">Serialization attribute, see Details for
                     more information.</attribute>
                 <attribute name="item-separator" use="optional">Not available in XSLT.</attribute>
-                <attribute name="json-lines">FIXME:</attribute>
+                <attribute name="json-lines" class="qt4">Serialization attribute, see Details for
+                    more information.</attribute>
                 <attribute name="json-node-output-method" use="optional">Serialization attribute,
                     see Details for more information.</attribute>
                 <attribute name="media-type" use="optional">Serialization attribute, see Details for
@@ -4458,7 +4489,9 @@
                 <attribute name="parameter-document" use="optional">New in XSLT 3.0. Implemented
                     since Saxon 9.8. Allows serialization to be configured in an external
                     document.</attribute>
-                <attribute name="select">FIXME:</attribute>
+                <attribute name="select" class="qt4">The input for the instruction may be
+                    defined either by a <code>select</code> attribute, or by an enclosed sequence
+                    constructor. </attribute>
                 <attribute name="standalone" use="optional">Serialization attribute, see Details for
                     more information.</attribute>
                 <attribute name="suppress-indentation" use="optional">Serialization attribute, see
@@ -4492,13 +4525,13 @@
                     reinstated in Saxon 9.9 as a synonym for <code>xsl:result-document</code> since
                     legacy stylesheets still use it). </p>
 
-                <p>The destination of the result document can be altered programmatically as
+                <p>The destination of the secondary output can be altered programmatically as
                     described in <a class="bodylink"
                         href="/using-xsl/stylesheet-output/secondary-output">Secondary output</a>.
-                    In other cases the document is serialized and written to the file identified by
+                    In other cases the secondary output is serialized and written to the file identified by
                     the URI in the <code>href</code> attribute, resolved if it is relative against
                     the base output URI for the transformation (which defaults to the destination of
-                    the principal output document). The destination must use the <code>file:/</code>
+                    the principal output). The destination must use the <code>file:/</code>
                     URI scheme. Any previous file at this location is overwritten. If the
                     transformation fails with a dynamic error, the content of any output files is
                     undefined (no attempt is made to reset them to their original state).</p>
@@ -4507,9 +4540,9 @@
                         <code>allow-duplicate-names</code>, <code>build-tree</code>,
                         <code>byte-order-mark</code>, <code>cdata-section-elements</code>,
                         <code>doctype-public</code>, <code>doctype-system</code>,
-                        <code>encoding</code>, <code>escape-uri-attributes</code>,
+                    <code>encoding</code>, <code>escape-uri-attributes</code>, <code>escape-solidus</code>,
                         <code>html-version</code>, <code>include-content-type</code>,
-                        <code>indent</code>, <code>item-separator</code>,
+                    <code>indent</code>, <code>item-separator</code>, <code>json-lines</code>,
                         <code>json-node-output-method</code>, <code>media-type</code>,
                         <code>normalization-form</code>, <code>omit-xml-declaration</code>,
                         <code>standalone</code>, <code>suppress-indentation</code>,
@@ -4562,7 +4595,7 @@
             <saxon-edition>ALL</saxon-edition>
             <status>
                 <p>Since Saxon 9.5, the <code>xsl:result-document</code> instruction in Saxon-EE is
-                    asynchronous. That is, the code to output the result document runs in a separate
+                    asynchronous. That is, the code to produce the secondary output runs in a separate
                     thread, in parallel with other processing. The maximum number of threads used by
                         <code>xsl:result-document</code> instructions is limited by the
                     configuration property <a class="feature" href="RESULT_DOCUMENT_THREADS"/> which
@@ -4581,7 +4614,7 @@
                     Asynchronous processing of <code>xsl:result-document</code> is automatically
                     suppressed if tracing (using a <code>TraceListener</code>) is enabled.</p>
 
-                <p>The new XSLT 3.0 attribute <code>parameter-document</code> is first implemented
+                <p>The XSLT 3.0 attribute <code>parameter-document</code> is first implemented
                     in Saxon 9.8.</p>
 
                 <p>There was a change in Saxon 9.9 regarding the way in which an
@@ -4598,6 +4631,10 @@
                     more information, see <a class="bodylink"
                         href="/using-xsl/stylesheet-output/secondary-output">Secondary
                     output</a>.</p>
+                
+                <p class="qt4">The XSLT 4.0 attribute <code>escape-solidus</code> is implemented
+                    since Saxon 12.3; while the attributes <code>json-lines</code> and
+                    <code>select</code> are implemented since Saxon 13.</p>
             </status>
             <see-also name="output" type="xsl-elements"/>
         </xsl-element>
@@ -4627,7 +4664,8 @@
                     atomic values, and essentially adds these to the result sequence.</p>
             </description>
             <attributes>
-                <attribute name="as">FIXME:</attribute>
+                <attribute name="as" class="qt4">New in XSLT 4.0. Defines the required type of the
+                    result sequence. Defaults to <code>item()*</code>.</attribute>
                 <attribute name="select" use="optional">Specifies the input. Mandatory attribute in
                     XSLT 2.0, but in XSLT 3.0 (and implemented since Saxon 9.5) the input may be
                     specified either by a <code>select</code> attribute, or by the enclosed sequence
@@ -4705,7 +4743,10 @@
             <in-spec>xslt30</in-spec>
             <in-spec>xslt40</in-spec>
             <saxon-edition>ALL</saxon-edition>
-            <status-ok/>
+            <status>
+                <p class="qt4">The XSLT 4.0 attribute <code>as</code> is implemented since Saxon
+                    13.</p>
+            </status>
             <see-also name="copy-of" type="xsl-elements"/>
             <see-also name="function" type="xsl-elements"/>
             <see-also name="template" type="xsl-elements"/>
@@ -5026,13 +5067,18 @@
                 <attribute name="extension-element-prefixes" use="optional">Standard attribute that
                     may appear on any XSLT element. Used to declare the use of extension
                     instructions in a particular namespace.</attribute>
-                <attribute name="fixed-namespaces">FIXME:</attribute>
+                <attribute name="fixed-namespaces" class="qt4">New in XSLT 4.0. Defines the fixed
+                    namespace bindings for a stylesheet module.</attribute>
                 <attribute name="id" use="optional">Used to reference stylesheet modules embedded in
                     a document.</attribute>
                 <attribute name="input-type-annotations" use="optional">Used to request stripping of
                     type annotations. The default is <code>unspecified</code>.</attribute>
-                <attribute name="main-module">FIXME:</attribute>
-                <attribute name="schema-role">FIXME:</attribute>
+                <attribute name="main-module" class="qt4">New in XSLT 4.0. Not implemented in Saxon
+                    13. Purely documentary - used to identify the principal stylesheet module of a
+                    package.</attribute>
+                <attribute name="schema-role" class="qt4">New in XSLT 4.0. Standard attribute that
+                    may appear on any XSLT element. Used to allow different parts of a stylesheet to
+                    use different schemas.</attribute>
                 <attribute name="use-when" use="optional">Standard attribute that may appear on any
                     XSLT element. Used to conditionally include or exclude elements. The value is an
                     XPath expression that can be evaluated statically. If the effective boolean
@@ -5056,7 +5102,11 @@
             <in-spec>xslt30</in-spec>
             <in-spec>xslt40</in-spec>
             <saxon-edition>ALL</saxon-edition>
-            <status-ok/>
+            <status>
+                <p class="qt4">The XSLT 4.0 attributes <code>fixed-namespaces</code> and
+                    <code>schema-role</code> are implemented since Saxon 13; while the attribute
+                    <code>main-module</code> is not yet implemented in Saxon.</p>
+            </status>
             <see-also name="transform" type="xsl-elements"/>
             <see-also name="package" type="xsl-elements"/>
         </xsl-element>
@@ -5369,14 +5419,21 @@
                     within an <code>xsl:text</code> element.</p>
             </description>
             <attributes>
+                <attribute name="cdata" class="qt4">New in XSLT 4.0. Used to request serialization
+                    of a text node as a CDATA section.</attribute>
                 <attribute name="disable-output-escaping" use="optional"> If set to
                     <code>yes</code>, special characters such as "&lt;" and "&amp;" will be output
                     as themselves, not as entities. Be aware that in general this can produce
                     non-well-formed XML or HTML. It is useful, however, when generating things such
                     as ASP or JSP pages. Escaping may not be disabled when writing to a result tree
                     fragment. The default is <code>no</code>.</attribute>
-                <attribute name="select">FIXME:</attribute>
-                <attribute name="separator">FIXME:</attribute>
+                <attribute name="select" class="qt4">New in XSLT 4.0. The string value of the new
+                    text node can be defined either by a <code>select</code> attribute or by an
+                    enclosed sequence constructor.</attribute>
+                <attribute name="separator" class="qt4">New in XSLT 4.0. The separator defaults to a
+                    single space if the <code>select</code> attribute is used, or to a zero-length
+                    string if a sequence constructor is used. The <code>separator</code> attribute
+                    may be specified as an attribute value template.</attribute>
             </attributes>
             <details>
                 <p>In XSLT 3.0, note that generally text value templates (expressions within curly
@@ -5393,7 +5450,10 @@
             <in-spec>xslt30</in-spec>
             <in-spec>xslt40</in-spec>
             <saxon-edition>ALL</saxon-edition>
-            <status-ok/>
+            <status>
+                <p class="qt4">The XSLT 4.0 attributes <code>select</code>, <code>separator</code>
+                    and <code>cdata</code> are implemented since Saxon 13.</p>
+            </status>
             <see-also name="character-map" type="xsl-elements"/>
             <see-also name="value-of" type="xsl-elements"/>
         </xsl-element>
@@ -5574,6 +5634,8 @@
                     tree.</p>
             </description>
             <attributes>
+                <attribute name="cdata" class="qt4">New in XSLT 4.0. Used to request serialization
+                    of a text node as a CDATA section.</attribute>
                 <attribute name="disable-output-escaping" use="optional"> If set to
                     <code>yes</code>, special characters such as "&lt;" and "&amp;" will be output
                     as themselves, not as entities. Be aware that in general this can produce
@@ -5732,7 +5794,10 @@
             <in-spec>xslt30</in-spec>
             <in-spec>xslt40</in-spec>
             <saxon-edition>ALL</saxon-edition>
-            <status-ok/>
+            <status>
+                <p class="qt4">The XSLT 4.0 attribute <code>cdata</code> is implemented since Saxon
+                    13.</p>
+            </status>
             <see-also name="copy-of" type="xsl-elements"/>
             <see-also name="text" type="xsl-elements"/>
         </xsl-element>
