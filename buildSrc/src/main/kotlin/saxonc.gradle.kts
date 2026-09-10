@@ -153,6 +153,8 @@ val bundleDependencies = tasks.register<UnjarBundleDependencies>("bundleJarDepen
         jar("jline-${project.findProperty("jlineVersion")}.jar")
         jar("xmlresolver-${project.findProperty("xmlresolverVersion")}.jar")
         jar("xmlresolver-${project.findProperty("xmlresolverVersion")}-data.jar")
+        jar("coffeefilter-${project.findProperty("ninemlVersion")}.jar")
+        jar("coffeegrinder-${project.findProperty("ninemlVersion")}.jar")
     }
 }
 
