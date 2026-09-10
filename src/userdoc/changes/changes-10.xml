@@ -53,13 +53,13 @@
             the parsing of the instruction now follows the <a href="https://www.w3.org/TR/2010/REC-xml-stylesheet-20101028/">W3C specification</a> much
         more rigorously, meaning that errors may now be detected that previously passed unnoticed.</p>
  
-        <p>Saxon 10 is capable of generating SEF files suitable for Saxon 10 or Saxon-JS 2.0. The formats
+        <p>Saxon 10 is capable of generating SEF files suitable for Saxon 10 or SaxonJS 2.0. The formats
         are different (the most obvious difference is that SEF files for Saxon 10 are in XML format, while
-        those for Saxon-JS 2.0 are in JSON), so the right target must be selected when exporting. SEF files
-        generated using Saxon 10 cannot be loaded by Saxon 9.9 or by Saxon-JS 1.x. SEF files generated using
+        those for SaxonJS 2.0 are in JSON), so the right target must be selected when exporting. SEF files
+        generated using Saxon 10 cannot be loaded by Saxon 9.9 or by SaxonJS 1.x. SEF files generated using
         Saxon 9.9 or earlier releases cannot be loaded by Saxon 10.</p>
       
-      <aside><p>Saxon-JS 2.0 is not available at the time of first release of Saxon 10; however,
+      <aside><p>SaxonJS 2.0 is not available at the time of first release of Saxon 10; however,
       development is well advanced.</p></aside>
  
     </category>
@@ -821,7 +821,7 @@
         when the context item is a node "in an HTML DOM", and elements in no namespace otherwise. It is difficult to reproduce this
         rule precisely in Saxon, because it's not clear what being "in an HTML DOM" means when the data model is XDM (for example, does it apply
         to a node constructed by using <code>xsl:copy-of</code> applied to an HTML element?). But this option provides an approximation
-        that ensures Saxon (in particular, Saxon-JS) will behave the same way as an XSLT 1.0 stylesheet running in the browser in most
+        that ensures Saxon (in particular, SaxonJS) will behave the same way as an XSLT 1.0 stylesheet running in the browser in most
         practical situations. The option applies when an NCName is used as a <code>NameTest</code> (on any axis other than the attribute and namespace
         axes) and to the element name in an <code>ElementTest</code> (that is, <code>element(name)</code>), whether in an XPath expression,
         a pattern, or a <code>SequenceType</code>. It does not apply to unprefixed type names or to names used in a <code>SchemaElementTest</code>

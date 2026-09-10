@@ -153,7 +153,7 @@ namespace Saxon.Api {
 
         /// <summary>
         /// Indicates the Saxon edition under which any compiled package is intended to execute. The value
-        /// should be set to "JS" when compiling packages intended for execution under Saxon-JS 2.0 or later.
+        /// should be set to "JS" when compiling packages intended for execution under SaxonJS 2.0 or later.
         /// </summary>
         /// 
         public string TargetEdition {

@@ -3,7 +3,7 @@
 <release number="9.9" date="2018-09-27" xmlns="http://www.saxonica.com/ns/doc/changes">
     
     <category name="documentation">
-        <p>The documentation application now runs using Saxon-JS (XSLT 3.0 in the browser).</p>
+        <p>The documentation application now runs using SaxonJS (XSLT 3.0 in the browser).</p>
         <p>The search mechanism has been updated to make it is easier to browse the pages with hits:
             as well as the original pop-up box (top left) showing the number of hits with up/down
             buttons used to move between these pages with hits, a second pop-up box (bottom left)

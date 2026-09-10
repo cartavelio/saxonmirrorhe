@@ -96,9 +96,9 @@ to report any problems you find.
 
 ## Where do I find documentation?
 
-It's all [online](https://www.saxonica.com/documentation11/). 
+It's all [online](https://www.saxonica.com/documentation12/). 
 
-(Delivered, in case you're interested, by Saxon-JS running in your browser.)
+(Delivered, in case you're interested, by SaxonJS running in your browser.)
 
 ## What if I hit problems?
 

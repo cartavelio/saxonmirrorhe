@@ -45,7 +45,7 @@ for details.
 5. saxonc-userdoc
 -----------------
 Provided as a zip. Unzip to access the SaxonC documentation in directory
-saxonc-userdoc/documentation11.
+saxonc-userdoc/documentation12.
 
 Like the main Saxon documentation in source-userdoc below, the SaxonC documentation supplied in this
 resources download runs as an interactive application driven by SaxonJS in the browser, which
