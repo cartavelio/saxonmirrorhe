@@ -442,6 +442,9 @@ TODO: rethink redefines and override
             <li><p>Local union types have been generalized to choice types; the syntax
             <code>union(xs:int, xs:long)</code> now becomes <code>(xs:int | xs:long)</code>,
             and unions of other types are allowed (for example <code>(map(*) | array(*))</code>.</p></li>
+            <li>The <code>pin()</code> and <code>label()</code> functions are dropped
+            (replaced by JNodes). For the time being, though, the saxon:deep-update extension function
+            continues to use pinned and labelled items; this is likely to change in due course.</li>
         </ul>
         
         <p>Some Saxon extension functions that were essentially prototypes of 
@@ -500,7 +503,7 @@ TODO: rethink redefines and override
             <li><p>xsl:record instruction</p></li>
             <li><p>The <code>include-template-content</code> option of <code>parse-html</code>
             and <code>html-doc</code>.</p></li>
-            <li><p></p></li>
+            <li><p>JSON-Lines input and output</p></li>
             <li><p></p></li>
         </ul>
         
