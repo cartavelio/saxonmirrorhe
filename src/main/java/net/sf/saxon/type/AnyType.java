@@ -631,6 +631,15 @@ public enum AnyType implements ComplexType {
         return false;
     }
 
+    /**
+     * Decide what kind of layout to use when formatting an element of this type using the
+     * xdm-to-json function. The result is a layout name, such as "record", "list", "mixed", "sequence"
+     */
+    @Override
+    public String getPreferredJsonLayout() {
+        return "mixed";
+    }
+
     //#ifdefined SCHEMA
 
     @Override

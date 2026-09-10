@@ -1401,7 +1401,11 @@ public final class Tokenizer {
         u.inputOffset = inputOffset;
         u.lineNumber = lineNumber;
         u.nextLineNumber = nextLineNumber;
-        u.newlineOffsets = newlineOffsets == null ? null : new ArrayList<>(newlineOffsets);
+        if (newlineOffsets == null) { // written this way for transpilation reasons
+            u.newlineOffsets = null;
+        } else {
+            u.newlineOffsets = new ArrayList<>(newlineOffsets);
+        }
         u.state = state;
     }
 

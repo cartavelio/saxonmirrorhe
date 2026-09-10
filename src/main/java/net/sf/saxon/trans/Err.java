@@ -176,10 +176,11 @@ public class Err {
     }
 
     public static String depictCodepoint(int cp) {
-        if (cp >= 20 && cp <= UTF16CharacterSet.SURROGATE1_MIN) {
-            return "'" + (char)cp + "' (#x" + Integer.toString(cp, 16) + ")";
+        String hexCode = "#x" + Integer.toHexString(cp);
+        if (cp >= 20 && cp < UTF16CharacterSet.SURROGATE1_MIN) {
+            return "'" + (char)cp + "'(" + hexCode + ")";
         } else {
-            return "#x" + Integer.toString(cp, 16);
+            return hexCode;
         }
     }
 
