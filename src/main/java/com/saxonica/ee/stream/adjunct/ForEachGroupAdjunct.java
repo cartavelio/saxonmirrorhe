@@ -321,7 +321,7 @@ public class ForEachGroupAdjunct extends ForEachAdjunct  {
         public void close() throws XPathException {
             ForEachGroup inst = (ForEachGroup) getExpression();
             Literal pop = Literal.makeLiteral(SequenceExtent.makeSequenceExtent(population), inst);
-            GroupIterator groupIterator = inst.getGroupIterator(pop, getContext());
+            GroupIterator groupIterator = inst.getGroupIterator(context -> pop.iterate(), getContext());
             XPathContextMajor c2 = getContext().newContext();
             FocusIterator focusIterator = c2.trackFocus(groupIterator);
             c2.setCurrentGroupIterator(groupIterator);
