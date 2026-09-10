@@ -1,0 +1,13 @@
+Saxon-CS License
+================
+
+Saxon-CS is proprietary software created and distributed by Saxonica Ltd.
+
+Use of the software is subject to the terms and conditions published from time to time
+at https://saxonica.com/license/license.xml, or other conditions that may be agreed
+contractually.
+
+The software is activated by a license key obtainable from Saxonica Ltd, either by
+purchase at https://www.saxonica.com/shop/index.html or offline by contacting
+saxon-orders@saxonica.com. Time-limited evaluation licenses are available.
+
