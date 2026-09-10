@@ -9,6 +9,7 @@ import org.gradle.kotlin.dsl.*
 
 plugins {
     id("java-library")
+    `jvm-test-suite`
     id("saxon-build")
 }
 
@@ -91,6 +92,15 @@ dependencies {
     compileOnly("xerces:xercesImpl:${project.findProperty("xercesVersion")}")
     compileOnly("com.ibm.icu:icu4j:${project.findProperty("icu4jVersion")}")
     compileOnly("org.nineml:coffeefilter:${project.findProperty("ninemlVersion")}")
+
+    testImplementation(platform("org.junit:junit-bom:6.1.0"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+//    testImplementation("org.apiguardian:apiguardian-api:1.0.0")
+    testImplementation("org.hamcrest:hamcrest:2.2")
+//    testImplementation("org.apache.ant:ant:1.10.9")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
+    testImplementation("com.sparkjava:spark-core:2.9.4")
 }
 
 java {
@@ -226,6 +236,26 @@ val universalCMakeFilenames = EDITION.map(cmakeFilenameMapper(universalCMakeFile
 val configPackageOutputDir = layout.buildDirectory.dir("cmake-package")
 
 val editionLibName = extension.edition.map { edition -> "saxonc-core-${edition}" }
+
+sourceSets {
+    test {
+        java {
+            srcDir(layout.projectDirectory.dir("../../java/src/test/java"))
+            include("net/sf/saxon/option/cpp/**/*")
+            include("net/sf/saxon/test/**/*")
+            include("net/sf/saxon/lib/**/*")
+            include("net/sf/saxon/junit/**/*")
+        }
+    }
+}
+
+testing {
+    suites {
+        val test by getting(JvmTestSuite::class) {
+            useJUnitJupiter()
+        }
+    }
+}
 
 fun setupConfigTasks(config: String, debug: Boolean, taskBlock: Action<Task>): TaskProvider<CMakePackageBuilder> {
     val configTaskName = config.lowercase()

@@ -27,7 +27,7 @@ XsltExecutable::XsltExecutable(int64_t procRefi, int64_t exRef,
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   rawResultsFlag = false;
   selectionRef = SXN_UNSET;
-  saxonMessageListenerRef = SXN_UNSET;
+  saxonMessageHandlerRef = SXN_UNSET;
   saxonResultDocRef = SXN_UNSET;
   executableRef = exRef;
   procRef = j_copy_handles(thread, (void *)procRefi);
@@ -41,10 +41,10 @@ XsltExecutable::~XsltExecutable() {
   clearProperties();
   clearParameters();
 
-  if (saxonMessageListenerRef != SXN_UNSET) {
+  if (saxonMessageHandlerRef != SXN_UNSET) {
     j_handles_destroy(thread,
-                      (void *)saxonMessageListenerRef);
-    saxonMessageListenerRef = SXN_UNSET;
+                      (void *)saxonMessageHandlerRef);
+    saxonMessageHandlerRef = SXN_UNSET;
   }
   if (saxonResultDocRef != SXN_UNSET) {
     j_handles_destroy(thread,
@@ -80,7 +80,7 @@ XsltExecutable::XsltExecutable(const XsltExecutable &other) {
   cwdXE = other.cwdXE;
   selectionRef = other.selectionRef;
   rawResultsFlag = other.rawResultsFlag;
-  saxonMessageListenerRef = SXN_UNSET;
+  saxonMessageHandlerRef = SXN_UNSET;
   selectionStringFlag = other.selectionStringFlag;
   saxonResultDocRef = SXN_UNSET;
 
@@ -416,10 +416,10 @@ void XsltExecutable::exportStylesheet(const char *filename) {
 
 void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-  
+
 
   int additions = 0;
-  if (saxonMessageListenerRef != SXN_UNSET) {
+  if (saxonMessageHandlerRef != SXN_UNSET) {
     additions++;
   }
   if (saxonResultDocRef != SXN_UNSET) {
@@ -437,12 +437,12 @@ void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
 
   std::string optionStr;
   // TODO change map to set values as int64_t then we can add
-  // saxonMessageListenerRef directly
-  if (saxonMessageListenerRef != SXN_UNSET) {
+  // saxonMessageHandlerRef directly
+  if (saxonMessageHandlerRef != SXN_UNSET) {
     optionStr = "m";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonMessageListenerRef, &r);
+                         (void *)saxonMessageHandlerRef, &r);
   }
   if (saxonResultDocRef > 0) {
     optionStr = "rd";
@@ -473,11 +473,11 @@ void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
 
 const char *XsltExecutable::applyTemplatesReturningString() {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);//get_or_attach_thread(SaxonProcessor::sxn_environ);
-  
+
 
   int additions = 0;
 
-  if (saxonMessageListenerRef != SXN_UNSET) {
+  if (saxonMessageHandlerRef != SXN_UNSET) {
     additions++;
   }
   if (saxonResultDocRef != SXN_UNSET) {
@@ -487,11 +487,11 @@ const char *XsltExecutable::applyTemplatesReturningString() {
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties, additions);
   std::string optionStr;
-  if (saxonMessageListenerRef != SXN_UNSET ) {
+  if (saxonMessageHandlerRef != SXN_UNSET ) {
     optionStr = "m";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonMessageListenerRef, &r);
+                         (void *)saxonMessageHandlerRef, &r);
 
     if (r.status != SAXON_OK) {
       throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
@@ -527,11 +527,11 @@ const char *XsltExecutable::applyTemplatesReturningString() {
 
 XdmValue *XsltExecutable::applyTemplatesReturningValue() {
   
-  
+
 
   int additions = 0;
 
-  if(saxonMessageListenerRef != SXN_UNSET ) {
+  if(saxonMessageHandlerRef != SXN_UNSET ) {
       additions++;
   }
   if(saxonResultDocRef != SXN_UNSET) {
@@ -542,15 +542,15 @@ XdmValue *XsltExecutable::applyTemplatesReturningValue() {
       SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
   // TODO change map to set values as int64_t then we can add
-  // saxonMessageListenerRef directly
+  // saxonMessageHandlerRef directly
   std::string optionStr;
   saxon_error_t r = SAXON_ERROR_DEFAULT;
-  if (saxonMessageListenerRef != SXN_UNSET) {
+  if (saxonMessageHandlerRef != SXN_UNSET) {
 
     optionStr = "m";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonMessageListenerRef, &r);
+                         (void *)saxonMessageHandlerRef, &r);
     if (r.status != SAXON_OK) {
       
       throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
@@ -593,10 +593,10 @@ void XsltExecutable::callFunctionReturningFile(const char *functionName,
                                                const char *outfile) {
 
   
-  
+
 
   int additions = 0;
-  if(saxonMessageListenerRef != SXN_UNSET ) {
+  if(saxonMessageHandlerRef != SXN_UNSET ) {
       additions++;
   }
   if(saxonResultDocRef > 0) {
@@ -609,12 +609,12 @@ void XsltExecutable::callFunctionReturningFile(const char *functionName,
 
   std::string optionStr;
   // TODO change map to set values as int64_t then we can add
-  // saxonMessageListenerRef directly
-  if (saxonMessageListenerRef != SXN_UNSET) {
+  // saxonMessageHandlerRef directly
+  if (saxonMessageHandlerRef != SXN_UNSET) {
     optionStr = "m";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonMessageListenerRef, &r);
+                         (void *)saxonMessageHandlerRef, &r);
 
     if (r.status != SAXON_OK) {
       throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
@@ -665,11 +665,11 @@ const char *XsltExecutable::callFunctionReturningString(
     const char *functionName, XdmValue **arguments, int argument_length) {
 
   
-  
+
 
   int additions = 0;
 
-  if (saxonMessageListenerRef != SXN_UNSET) {
+  if (saxonMessageHandlerRef != SXN_UNSET) {
     additions++;
   }
 
@@ -684,12 +684,12 @@ const char *XsltExecutable::callFunctionReturningString(
 
   std::string optionStr;
   // TODO change map to set values as int64_t then we can add
-  // saxonMessageListenerRef directly
-  if (saxonMessageListenerRef != SXN_UNSET) {
+  // saxonMessageHandlerRef directly
+  if (saxonMessageHandlerRef != SXN_UNSET) {
     optionStr = "m";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonMessageListenerRef, &r);
+                         (void *)saxonMessageHandlerRef, &r);
     if (r.status != SAXON_OK) {
       throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
     }
@@ -742,11 +742,11 @@ XdmValue *XsltExecutable::callFunctionReturningValue(const char *functionName,
                                                      int argument_length) {
 
   
-  
+
 
   int additions = 0;
 
-  if(saxonMessageListenerRef != SXN_UNSET ) {
+  if(saxonMessageHandlerRef != SXN_UNSET ) {
       additions++;
   }
   if(saxonResultDocRef > 0) {
@@ -759,12 +759,12 @@ XdmValue *XsltExecutable::callFunctionReturningValue(const char *functionName,
 
   std::string optionStr;
   // TODO change map to set values as int64_t then we can add
-  // saxonMessageListenerRef directly
-  if (saxonMessageListenerRef != SXN_UNSET) {
+  // saxonMessageHandlerRef directly
+  if (saxonMessageHandlerRef != SXN_UNSET) {
     optionStr = "m";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonMessageListenerRef, &r);
+                         (void *)saxonMessageHandlerRef, &r);
 
     if (r.status != SAXON_OK) {
       throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
@@ -821,7 +821,7 @@ void XsltExecutable::callTemplateReturningFile(const char *templateName,
 
   int additions = 0;
 
-  if (saxonMessageListenerRef != SXN_UNSET) {
+  if (saxonMessageHandlerRef != SXN_UNSET) {
     additions++;
   }
   if (saxonResultDocRef > 0) {
@@ -833,13 +833,13 @@ void XsltExecutable::callTemplateReturningFile(const char *templateName,
       SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
   // TODO change map to set values as int64_t then we can add
-  // saxonMessageListenerRef directly
+  // saxonMessageHandlerRef directly
   std::string optionStr;
-  if (saxonMessageListenerRef != SXN_UNSET) {
+  if (saxonMessageHandlerRef != SXN_UNSET) {
     optionStr = "m";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonMessageListenerRef, &r);
+                         (void *)saxonMessageHandlerRef, &r);
 
     if (r.status != SAXON_OK) {
       throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
@@ -873,10 +873,10 @@ void XsltExecutable::callTemplateReturningFile(const char *templateName,
 const char *
 XsltExecutable::callTemplateReturningString(const char *templateName) {
   
-  
+
 
   int additions = 0;
-  if (saxonMessageListenerRef != SXN_UNSET) {
+  if (saxonMessageHandlerRef != SXN_UNSET) {
     additions++;
   }
   if (saxonResultDocRef != SXN_UNSET) {
@@ -890,12 +890,12 @@ XsltExecutable::callTemplateReturningString(const char *templateName) {
       SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
   // TODO change map to set values as int64_t then we can add
-  // saxonMessageListenerRef directly
-  if (saxonMessageListenerRef != SXN_UNSET) {
+  // saxonMessageHandlerRef directly
+  if (saxonMessageHandlerRef != SXN_UNSET) {
     optionStr = "m";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonMessageListenerRef, &r);
+                         (void *)saxonMessageHandlerRef, &r);
   }
   if (saxonResultDocRef > 0) {
     optionStr = "rd";
@@ -921,11 +921,11 @@ XsltExecutable::callTemplateReturningString(const char *templateName) {
 
 XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
   
-  
+
 
   int additions = 0;
 
-  if(saxonMessageListenerRef != SXN_UNSET ) {
+  if(saxonMessageHandlerRef != SXN_UNSET ) {
       additions++;
   }
   if(saxonResultDocRef > 0) {
@@ -939,12 +939,12 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
 
   std::string optionStr;
   // TODO change map to set values as int64_t then we can add
-  // saxonMessageListenerRef directly
-  if (saxonMessageListenerRef != SXN_UNSET) {
+  // saxonMessageHandlerRef directly
+  if (saxonMessageHandlerRef != SXN_UNSET) {
     optionStr = "m";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonMessageListenerRef, &r);
+                         (void *)saxonMessageHandlerRef, &r);
 
     if (r.status != SAXON_OK) {
       throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
@@ -983,11 +983,11 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
 XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
 
 
-  
+
 
   int additions = 0;
 
-  if(saxonMessageListenerRef != SXN_UNSET ) {
+  if(saxonMessageHandlerRef != SXN_UNSET ) {
       additions++;
   }
   if(saxonResultDocRef > 0) {
@@ -1000,12 +1000,12 @@ XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
   std::string optionStr;
   saxon_error_t r = SAXON_ERROR_DEFAULT;
   // TODO change map to set values as int64_t then we can add
-  // saxonMessageListenerRef directly
-  if (saxonMessageListenerRef != SXN_UNSET) {
+  // saxonMessageHandlerRef directly
+  if (saxonMessageHandlerRef != SXN_UNSET) {
     optionStr = "m";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonMessageListenerRef, &r);
+                         (void *)saxonMessageHandlerRef, &r);
     if (r.status != SAXON_OK) {
       throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
     }
@@ -1053,11 +1053,11 @@ XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
 void XsltExecutable::transformFileToFile(const char *source,
                                          const char *outputfile) {
 
-  
+
 
   int additions = 0;
 
-  if(saxonMessageListenerRef != SXN_UNSET ) {
+  if(saxonMessageHandlerRef != SXN_UNSET ) {
       additions++;
   }
   if(saxonResultDocRef > 0) {
@@ -1069,12 +1069,12 @@ void XsltExecutable::transformFileToFile(const char *source,
   saxon_error_t r = SAXON_ERROR_DEFAULT;
   std::string optionStr;
   // TODO change map to set values as int64_t then we can add
-  // saxonMessageListenerRef directly
-  if (saxonMessageListenerRef != SXN_UNSET) {
+  // saxonMessageHandlerRef directly
+  if (saxonMessageHandlerRef != SXN_UNSET) {
     optionStr = "m";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonMessageListenerRef, &r);
+                         (void *)saxonMessageHandlerRef, &r);
 
     if (r.status != SAXON_OK) {
       throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
@@ -1119,51 +1119,41 @@ void XsltExecutable::transformFileToFile(const char *source,
 
 void XsltExecutable::setSaveXslMessage(bool create, const char *filename) {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   if (create) {
-    saxon_error_t r = SAXON_ERROR_DEFAULT;
     if (filename == nullptr) {
-      if (saxonMessageListenerRef != SXN_UNSET) {
+      if (saxonMessageHandlerRef != SXN_UNSET) {
         j_handles_destroy(thread,
-                  (void *)saxonMessageListenerRef);
-        saxonMessageListenerRef = SXN_UNSET;
+                  (void *)saxonMessageHandlerRef);
+        saxonMessageHandlerRef = SXN_UNSET;
       }
-      std::string optionStr = "-:on";
-      saxonMessageListenerRef = createSaxonCMessageListener(
-          thread, (void *)procRef,
-          (char *)cwdXE.c_str(), (char *)optionStr.c_str(), &r);
-
-      setProperty("m", "on");
+      saxonMessageHandlerRef = j_xsltExecutable_messageHandler_store(thread, &r);
     } else {
-      saxonMessageListenerRef = createSaxonCMessageListener(
-          thread, (void *)procRef,
+      saxonMessageHandlerRef = j_xsltExecutable_messageHandler_file(thread, (void *)procRef,
           (char *)cwdXE.c_str(), (char *)filename, &r);
     }
-    if (r.status != SAXON_OK) {
-      
-      saxonMessageListenerRef = SXN_UNSET;
-      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
-    }
-    /*if (getenv("SAXONC_DEBUG_FLAG")) {
-      std::cerr << "C++: setSaveXslMessage saxonMessageListenerRef = "
-                << ((long)saxonMessageListenerRef) << std::endl;
-    }*/
   } else {
-    if (saxonMessageListenerRef != SXN_UNSET) {
+    if (saxonMessageHandlerRef != SXN_UNSET) {
       j_handles_destroy(thread,
-                        (void *)saxonMessageListenerRef);
+                        (void *)saxonMessageHandlerRef);
     }
-    saxonMessageListenerRef = SXN_UNSET;
-    setProperty("m", "-:off");
+    saxonMessageHandlerRef = j_xsltExecutable_messageHandler_null(thread, &r);;
+  }
+
+  if (r.status != SAXON_OK) {
+
+    saxonMessageHandlerRef = SXN_UNSET;
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number, r.num_of_errors);
   }
 }
 
 XdmValue *XsltExecutable::getXslMessages() {
-  if (saxonMessageListenerRef != SXN_UNSET) {
+  if (saxonMessageHandlerRef != SXN_UNSET) {
     graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
     allocFn fn = operator new;
     long long *results =
         j_getXslMessages(thread, (void *)fn,
-                         (void *)saxonMessageListenerRef);
+                         (void *)saxonMessageHandlerRef);
 
     if (results != nullptr) {
       int sizex = (int) results[0];
@@ -1186,21 +1176,21 @@ XdmValue *XsltExecutable::getXslMessages() {
 
 
 void XsltExecutable::clearXslMessages() {
-  if (saxonMessageListenerRef != SXN_UNSET) {
+  if (saxonMessageHandlerRef != SXN_UNSET) {
     graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
         j_clearXslMessages(thread,
-                         (void *)saxonMessageListenerRef);
+                         (void *)saxonMessageHandlerRef);
 
   }
 }
 
 const char *XsltExecutable::transformFileToString(const char *source) {
 
-  
+
 
   int additions = 0;
 
-  if(saxonMessageListenerRef != SXN_UNSET ) {
+  if(saxonMessageHandlerRef != SXN_UNSET ) {
       additions++;
   }
   if(saxonResultDocRef > 0) {
@@ -1211,14 +1201,14 @@ const char *XsltExecutable::transformFileToString(const char *source) {
       SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
   // TODO change map to set values as int64_t then we can add
-  // saxonMessageListenerRef directly
+  // saxonMessageHandlerRef directly
   std::string optionStr;
   saxon_error_t r = SAXON_ERROR_DEFAULT;
-  if (saxonMessageListenerRef > 0) {
+  if (saxonMessageHandlerRef > 0) {
     optionStr = "m";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonMessageListenerRef, &r);
+                         (void *)saxonMessageHandlerRef, &r);
 
     if (r.status != SAXON_OK) {
       throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);

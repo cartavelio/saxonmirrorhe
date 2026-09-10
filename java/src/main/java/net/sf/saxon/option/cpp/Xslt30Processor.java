@@ -9,6 +9,7 @@ package net.sf.saxon.option.cpp;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.*;
+import net.sf.saxon.option.cpp.messages.MessageHandler;
 import net.sf.saxon.s9api.*;
 
 import javax.xml.transform.Source;
@@ -1961,12 +1962,11 @@ public class Xslt30Processor extends SaxonCAPI {
 
             if (map.containsKey("m")) {
                 Object value = map.get("m");
-                if (value instanceof SaxonCMessageListener) {
-                    transformer.setMessageListener((SaxonCMessageListener) value);
-                } else {
-                    transformer.setMessageListener(new SaxonCMessageListener(processor, cwd, (String) value));
+                if (value instanceof MessageHandler) {
+                    transformer.setMessageHandler((MessageHandler) value);
+                } else if (SaxonCAPI.debug) {
+                    System.err.println("DEBUG: Not able to set the message handler. Please check type of object");
                 }
-
             }
 
             if (map.containsKey("rd")) {

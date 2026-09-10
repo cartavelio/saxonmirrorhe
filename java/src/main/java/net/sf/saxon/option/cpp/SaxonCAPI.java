@@ -789,7 +789,7 @@ public class SaxonCAPI {
      * @param refs - Java long array
      * @return CLongPointer - array of long values in the C memory space
      */
-    static CLongPointer longArrayToNativeWithLength(AllocatorFn alloc, long[] refs) {
+    public static CLongPointer longArrayToNativeWithLength(AllocatorFn alloc, long[] refs) {
         if (refs.length == 0) {
             return WordFactory.nullPointer();
         }

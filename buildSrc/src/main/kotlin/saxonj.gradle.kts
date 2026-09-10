@@ -187,9 +187,10 @@ dependencies {
     compileOnly("org.graalvm.nativeimage:svm:${findProperty("graalSvmVersion")}")
     compileOnly(libTidyPath.map { files(it.asFile) })
 
-    testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.2")
+    testImplementation(platform("org.junit:junit-bom:5.9.2"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine")
     testImplementation("org.apiguardian:apiguardian-api:1.0.0")
     testImplementation("org.hamcrest:hamcrest:2.2")
     testImplementation("org.apache.ant:ant:1.10.9")

@@ -270,13 +270,15 @@ public:
   void deleteXdmValueArray(XdmValue **arr, int len);
 
   /**
-   * This method gives users the option to switch on or off the <code>xsl:message</code> feature.
-   * It is also possible
-   * to send the <code>xsl:message</code> outputs to file given by file name.
-   * @param show - boolean to indicate if xsl:message should be outputted.
-   * Default is on.
-   * @param filename - if the filename argument is present then the xsl:message
-   * output is appended to the given filename with location cwd+filename
+   * This method gives users the option to handle or ignore <code>xsl:message</code>-
+   * and <code>xsl:assert</code>-generated messages. By default messages go to stderr.
+   * Calling this method will result in messages not going to stderr.
+   *
+   * @param show - boolean to indicate if xsl:message should be outputted. Set to
+   * false to ignore all messages, true to handle them. Default is on.
+   * @param filename - if filename is null, messages will be saved to a
+   * sequence of XdmNodes. If the filename argument is present then messages are
+   * appended to the given filename with location cwd+filename.
    */
   void setSaveXslMessage(bool show, const char *filename = nullptr);
 
@@ -574,7 +576,7 @@ private:
   //SaxonProcessor *proc; /*! Pointer to the SaxonProcessor object which created this XsltExecutable */
                         // jclass  cppClass;
   // jclass messageListenerClass, resultDocumentClass;
-  int64_t procRef, executableRef, selectionRef, saxonMessageListenerRef,
+  int64_t procRef, executableRef, selectionRef, saxonMessageHandlerRef,
       saxonResultDocRef;
   bool selectionStringFlag;  /*!< Flag to indicate that the selection was
                                 retrieved as a string file value instead of
