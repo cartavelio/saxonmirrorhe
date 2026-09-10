@@ -434,7 +434,7 @@ tasks.named(LifecycleTasks.DOCUMENTATION_TASK_NAME) {
   description = "Build the documentation and pages for website"
   dependsOn("update_documentation")
   dependsOn("gen_contents_ref")
-  //dependsOn("gen_feature_matrix") // Temporarily removed for 13.0 - not ready yet
+  dependsOn("gen_feature_matrix")
   // Just a place to hang dependencies
 }
 
@@ -442,7 +442,7 @@ tasks.register("website") {
   group = LifecycleTasks.DOCUMENTATION_GROUP
   description = "Build the documentation, product descriptions and pages for website"
   dependsOn("documentation")
-  //dependsOn("copy_prod_desc_pdf") // Temporarily removed for 13.0 - not ready yet
+  dependsOn("copy_prod_desc_pdf")
   dependsOn("saxonc_documentation")
 }
 
@@ -717,7 +717,7 @@ listOf("J", "C").forEach { plat ->
     variants.add("${plat}-${pk}")
   }
 }
-listOf("EEQ", "EET", "EEV", "EE").forEach { pk ->
+listOf("EEQ", "EET", "EEV", "EE", "HE").forEach { pk ->
   variants.add("CS-${pk}")
 }
 

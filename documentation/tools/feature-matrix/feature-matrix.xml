@@ -1,4 +1,4 @@
-<featureMatrix version="12" release="Jan 2023" Jrelease="Jan 2023" Crelease="Jan 2023" JSversion="2" JSrelease="Jun 2020">
+<featureMatrix version="13" release="May 2026" Jrelease="May 2026" Crelease="May 2026" JSversion="2" JSrelease="Jun 2020">
   
   <!-- For different descriptions in the Product Descriptions, but not the feature matrix table,
       use description and alt-description elements.
@@ -9,7 +9,7 @@
   --> 
   
   <packages>
-    <package edition="HE" platforms="J C JS"/>
+    <package edition="HE" platforms="J CS C JS"/>
     <package edition="PE" platforms="J C"/>
     <package edition="EE" platforms="J CS C"/>
     <package edition="EET" platforms="J CS C"/>
@@ -146,6 +146,23 @@
     </products>
   </feature>
   
+  <feature class="XSLT" lang="XSLT 4.0">
+    <shortName>XSLT 4.0 Extensions</shortName>
+    <description>
+      <p>Provides many features from the draft XSLT 4.0 specification. Generally, Saxonica aims to avoid
+        making incompatible changes except in major releases. But since the 4.0 features are not yet entirely
+        stable, this policy does not apply: the aim instead will be to respond rapidly to changes in the
+        developing specification. Maintenance releases in the 13.x series may therefore reflect changes in the
+        draft specifications.</p>
+    </description>
+    <spec name="XSLT 4.0" level="Draft Specification"
+      link="https://qt4cg.org/specifications/xslt-40/Overview.html"/>
+    <details link="v4extensions" name="QT4 extensions"/>
+    <products>
+      <product J="PE" CS="PE" C="PE"/>
+    </products>
+  </feature>
+  
   <feature class="heading">
     <shortName>XPath Features</shortName>
   </feature>
@@ -194,6 +211,23 @@
     <details JSlink="conformance/xslt30" JSname="XSLT 3.0 and XPath 3.1 conformance"/>
     <products>
       <product J="HE" CS="HE" C="HE" JS="HE"/>
+    </products>
+  </feature>
+  
+  <feature class="XPath" lang="XPath 4.0">
+    <shortName>XPath 4.0 Extensions</shortName>
+    <description>
+      <p>Provides many features from the draft XPath 4.0 specification. Generally, Saxonica aims to avoid
+        making incompatible changes except in major releases. But since the 4.0 features are not yet entirely
+        stable, this policy does not apply: the aim instead will be to respond rapidly to changes in the
+        developing specification. Maintenance releases in the 13.x series may therefore reflect changes in the
+        draft specifications.</p>
+    </description>
+    <spec name="XPath 4.0" level="Draft Specification"
+      link="https://qt4cg.org/specifications/xquery-40/xpath-40.html"/>
+    <details link="v4extensions" name="QT4 extensions"/>
+    <products>
+      <product J="PE" CS="PE" C="PE"/>
     </products>
   </feature>
   
@@ -318,6 +352,23 @@
     </products>
   </feature>
   
+  <feature class="XQuery" lang="XPath 4.0">
+    <shortName>XQuery 4.0 Extensions</shortName>
+    <description>
+      <p>Provides many features from the draft XQuery 4.0 specification. Generally, Saxonica aims to avoid
+        making incompatible changes except in major releases. But since the 4.0 features are not yet entirely
+        stable, this policy does not apply: the aim instead will be to respond rapidly to changes in the
+        developing specification. Maintenance releases in the 13.x series may therefore reflect changes in the
+        draft specifications.</p>
+    </description>
+    <spec name="XQuery 4.0" level="Draft Specification"
+      link="https://qt4cg.org/specifications/xquery-40/xquery-40.html"/>
+    <details link="v4extensions" name="QT4 extensions"/>
+    <products>
+      <product J="PE" CS="PE" C="PE"/>
+    </products>
+  </feature>
+  
   <feature class="heading">
     <shortName>XML Schema Features</shortName>
   </feature>
@@ -362,19 +413,6 @@
 
   <feature class="heading">
     <shortName>Performance Features</shortName>
-  </feature>
-
-  <feature class="Performance">
-    <shortName>Document projection</shortName>
-    <description>
-      <p>This feature performs static analysis of a query and uses this to filter a document during
-        loading, so that the only parts held in memory are those parts needed to answer the query.
-        For simple queries on large documents this can give substantial memory savings.</p>
-    </description>
-    <details link="sourcedocs/projection" name="Document projection"/>
-    <products>
-      <product J="EEQ" CS="EEQ" C="EEQ"/>
-    </products>
   </feature>
   
   <feature class="Performance">
@@ -559,7 +597,18 @@
   </feature>
   
   <feature class="Extensibility">
-    <shortName>Extensibility using reflexion (JavaScript)</shortName>
+    <shortName>User-defined extension functions (C++, PHP and Python)</shortName>
+    <description>
+      <p>Ability to access existing C++, PHP and Python functions dynamically. </p>
+    </description>
+    <details Clink="extensibility" name="Extension functions" subpages="has-subpages"/>
+    <products>
+      <product C="PE"/>
+    </products>
+  </feature>
+  
+  <feature class="Extensibility">
+    <shortName>User-defined extension functions (JavaScript)</shortName>
     <description>
       <p>Ability to access existing JavaScript objects and functions dynamically. </p>
     </description>
@@ -641,8 +690,8 @@
       <p>Numbers can be formatted as words in English.</p>
     </description>
     <products>
-      <product J="HE" C="HE">
-        <subsumed-by feature="ICU-numbers"/>
+      <product J="HE" CS="HE" C="HE">
+        <subsumed-by feature="ICU-numbers-dates"/>
       </product>
     </products>
   </feature>
@@ -655,47 +704,50 @@
     </description>
     <products>
       <product J="HE" CS="HE" C="HE" JS="HE">
-        <subsumed-by feature="ICU-dates"/>
+        <subsumed-by feature="ICU-numbers-dates"/>
       </product>
     </products>
   </feature>
   
-  <feature class="Localization">
-    <shortName>Formatting numbers and dates for select languages</shortName>
-    <details link="localization/localizing-numbers-and-dates/other-numberings" name="Numberings for selected
-      languages"/>
+  <feature class="Localization" id="ICU-numbers-dates">
+    <shortName>Formatting numbers and dates using ICU</shortName>
+    <details link="localization/ICU-numbers-and-dates" name="Numbers and dates from ICU" subpages="has-subpages"/>
     <description>
-      <p>A set of numberers provide support for formatting numbers and dates as words in some other European languages:
-        Danish (da), German (de), French (fr), Belgium French (fr-BE), Italian (it), Dutch (nl), Belgium
-        Flemish (nl-BE), and Swedish (sv). These numberers are included in Saxon-PE/EE, and are available as
-        installable plug-ins for SaxonJ-HE.</p>
+      <p>Full support for formatting numbers and dates as words in different languages is provided using the <a
+        href="https://icu.unicode.org" class="bodylink">ICU library</a> for the relevant platform (ICU4J
+        for SaxonJ, and ICU4N for SaxonCS).</p>
     </description>
-    <alt-description J="HE">
-      <p>A set of installable numberers are available to provide support for formatting numbers and dates as
-        words in some other European languages: Danish (da), German (de), French (fr), Belgium French (fr-BE),
-        Italian (it), Dutch (nl), Belgium Flemish (nl-BE), and Swedish (sv).</p>
+    <alt-description J="PE">
+      <p>Full support for formatting numbers and dates as words in different languages is provided using the <a
+        href="https://icu.unicode.org" class="bodylink">ICU4J library</a>.</p>
     </alt-description>
-    <!--<alt-description C="PE">
-      <p>A set of numberers provide support for formatting numbers and dates as words in some other European
-        languages: Danish (da), German (de), French (fr), Belgium French (fr-BE), Italian (it), Dutch (nl),
-        Belgium Flemish (nl-BE), and Swedish (sv).</p>
-    </alt-description>-->
+    <alt-description CS="PE">
+      <p>Full support for formatting numbers and dates as words in different languages is provided using the ICU4N
+        library.</p>
+    </alt-description>
     <products>
-      <product J="HE"><!-- C="PE" -->
-        <subsumed-by feature="ICU-numbers ICU-dates"/>
-      </product>
+      <product J="PE" CS="PE"/>
     </products>
   </feature>
   
-  <feature class="Localization" id="ICU-numbers">
+  <!--<feature class="Localization" id="ICU-numbers">
     <shortName>Formatting numbers using ICU</shortName>
     <details link="localization/ICU-numbers-and-dates" name="Numbers and dates from ICU" subpages="has-subpages"/>
     <description>
       <p>Full support for formatting numbers as words in different languages is provided using the <a
-        href="https://icu.unicode.org" class="bodylink">ICU4J library</a>.</p>
+        href="https://icu.unicode.org" class="bodylink">ICU library</a> for the relevant platform (ICU4J
+        for SaxonJ, and ICU4N for SaxonCS).</p>
     </description>
+    <alt-description J="PE">
+      <p>Full support for formatting numbers as words in different languages is provided using the <a
+        href="https://icu.unicode.org" class="bodylink">ICU4J library</a>.</p>
+    </alt-description>
+    <alt-description CS="PE">
+      <p>Full support for formatting numbers as words in different languages is provided using the ICU4N
+        library.</p>
+    </alt-description>
     <products>
-      <product J="PE"/>
+      <product J="PE" CS="PE"/>
     </products>
   </feature>
   
@@ -703,9 +755,6 @@
     <shortName>Formatting dates using ICU</shortName>
     <details link="localization/ICU-numbers-and-dates" name="Numbers and dates from ICU" subpages="has-subpages"/>
     <description>
-      <!--<p>Full support for formatting dates as words in different languages is provided using the <a
-        href="https://icu.unicode.org" class="bodylink">ICU library</a> for the relevant platform (ICU4J
-        for SaxonJ and SaxonC, and ICU4N for SaxonCS).</p>-->
       <p>Full support for formatting dates as words in different languages is provided using the <a
         href="https://icu.unicode.org" class="bodylink">ICU library</a> for the relevant platform (ICU4J
         for SaxonJ, and ICU4N for SaxonCS).</p>
@@ -721,17 +770,26 @@
     <products>
       <product J="PE" CS="PE"/>
     </products>
-  </feature>
+  </feature>-->
   
   <feature class="Localization">
-    <shortName>Sorting and collations using JDK locales</shortName>
+    <shortName>Sorting and collations using platform locales</shortName>
     <details link="localization/sorting-and-collations" name="Sorting and collations"/>
     <description>
       <p>Support for sorting and comparison of strings using the Unicode Collation Algorithm uses the
-        collation facilities available directly from the JDK.</p>
+        collation facilities available directly from the core library for the relevant platform (the JDK for
+        SaxonJ and SaxonC, and the core .NET library for SaxonCS).</p>
     </description>
+    <alt-description J="HE" C="HE">
+      <p>Support for sorting and comparison of strings using the Unicode Collation Algorithm uses the
+        collation facilities available directly from the JDK.</p>
+    </alt-description>
+    <alt-description CS="HE">
+      <p>Support for sorting and comparison of strings using the Unicode Collation Algorithm uses the
+        collation facilities available directly from the core .NET library.</p>
+    </alt-description>
     <products>
-      <product J="HE" C="HE">
+      <product J="HE" CS="HE" C="HE">
         <subsumed-by feature="ICU-sort"/>
       </product>
     </products>
@@ -741,9 +799,6 @@
     <shortName>Sorting and collations using ICU</shortName>
     <details link="localization/unicode-collation-algorithm" name="Unicode Collation Algorithm" subpages="has-subpages"/>
     <description>
-      <!--<p>Support for sorting and comparison of strings using the Unicode Collation Algorithm uses the
-        collation facilities available from the <a href="https://icu.unicode.org" class="bodylink">ICU
-          library</a> for the relevant platform (ICU4J for SaxonJ and SaxonC, and ICU4N for SaxonCS).</p>-->
       <p>Support for sorting and comparison of strings using the Unicode Collation Algorithm uses the
         collation facilities available from the <a href="https://icu.unicode.org" class="bodylink">ICU
           library</a> for the relevant platform (ICU4J for SaxonJ, and ICU4N for SaxonCS).</p>
@@ -883,7 +938,7 @@
     <alt-description JS="HE">
       <p>Ability to use a DOM (Document Object Model) for the input and output of transformations.</p>
     </alt-description>
-    <details link="sourcedocs/thirdparty" name="Object models"/>
+    <details link="sourcedocs/tree-models/thirdparty" name="Object models"/>
     <details JSlink="xdm/nodes" JSname="Nodes"/>
     <products>
       <product J="HE" CS="HE" JS="HE"/>
@@ -895,7 +950,7 @@
     <description>
       <p>Indexing of a supplied DOM tree to provide fast navigation (the Domino Model).</p>
     </description>
-    <details link="sourcedocs/domino" name="Domino tree model"/>
+    <details link="sourcedocs/tree-models/domino" name="Domino tree model"/>
     <products>
       <product J="EEV"/>
     </products>
@@ -908,7 +963,7 @@
         and queries. Note that the code for these interfaces is open source and can be compiled to
         work with Saxon-HE, but it does not come packaged with the Saxon-HE download.</p>
     </description>
-    <details link="sourcedocs/thirdparty" name="Object models"/>
+    <details link="sourcedocs/tree-models/thirdparty" name="Object models"/>
     <products>
       <product level="Open" J="HE">
         <description><p>Although the code for these interfaces does not come packaged with the Saxon-HE download,

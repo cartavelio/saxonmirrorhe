@@ -32,7 +32,7 @@
                     download below.</p>
                 <p>
                     <i>For features in older versions of the products, see the relevant Feature Matrix:<br />
-                        <xsl:for-each select="(11, 10, 9.9, 9.8, 9.7, 9.6)[number($version) ge .]">
+                        <xsl:for-each select="(12, 11, 10, 9.9, 9.8)[number($version) ge .]">
                             <a class="bodylink" href="feature-matrix-{replace(string(.), '\.', '-')}.xml">Saxon <xsl:value-of select="string(.)"/></a>
                             <xsl:if test="not(position()=last())">
                                 <xsl:text>, </xsl:text>
@@ -120,8 +120,11 @@
                                                         <xsl:if test="exists($spec)">
                                                             <p><a href="{$spec/@link}" target="_blank">
                                                                 <i><xsl:value-of
-                                                                    select="concat(($spec/@name, $topic-shortName)[1],
-                                                                    ' ', $spec/@level, ' (', $spec/@date, ')')"/></i>
+                                                                    select="if (exists($spec/@date)) then
+                                                                    concat(($spec/@name, $topic-shortName)[1],
+                                                                    ' ', $spec/@level, ' (', $spec/@date, ')')
+                                                                    else concat(($spec/@name, $topic-shortName)[1], 
+                                                                    ' ', $spec/@level)"/></i>
                                                             </a>
                                                             </p>                                                               
                                                         </xsl:if>
@@ -241,21 +244,21 @@
             <xsl:otherwise>
                 <div id="aside">
                     <h2>Packages by platform</h2>
-                    <p><b>Java:</b> SaxonJ 12 first released Jan 2023.</p>
-                    <p><b>.NET:</b> SaxonCS 12 for .NET 6 <b>available only as the Enterprise Edition</b>, first
-                        released Jan 2023.</p>
-                    <p><b>Native:</b> SaxonC 12 first released Jan 2023, built from SaxonJ 12.</p>
+                    <p><b>Java:</b> SaxonJ 13 for Java 17+ first released May 2026.</p>
+                    <p><b>.NET:</b> SaxonCS 13 for .NET 8+ first released May 2026, available in Home and
+                        Enterprise Editions.</p>
+                    <p><b>Native:</b> SaxonC 13 first released May 2026, built from SaxonJ 13.</p>
                     <p><b>JavaScript:</b> SaxonJS 2 does not require a commercial license.</p>
                 </div>
                 
                 <div id="aside">
                     <h2>Product packages</h2>
-                    <p>Editions available for SaxonJ and SaxonC:</p>
                     <ul>
                         <li>
-                            <b>HE: </b>Saxon Home Edition (open source)</li>
+                            <b>HE: </b>Saxon Home Edition (open source) - available for SaxonJ, SaxonCS, and
+                            SaxonC</li>
                         <li>
-                            <b>PE: </b>Saxon Professional Edition</li>
+                            <b>PE: </b>Saxon Professional Edition - available for SaxonJ and SaxonC</li>
                     </ul>
                     <p>Enterprise Edition packages for SaxonJ, SaxonCS, and SaxonC:</p>
                     <ul>
@@ -307,8 +310,11 @@
             <xsl:when test="empty($minEdition)">
                 <xsl:value-of select="'&#xa0;'"/>
             </xsl:when>
-            <xsl:when test="$minEdition = ('HE','PE','EEV')">
+            <xsl:when test="$minEdition = 'HE'">
                 <xsl:value-of select="'&#x25cf;'"/>
+            </xsl:when>
+            <xsl:when test="$minEdition = ('PE','EEV')">
+                <xsl:value-of select="'EEV'"/>
             </xsl:when>
             <xsl:otherwise>
                 <xsl:value-of select="$minEdition"/>

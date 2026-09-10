@@ -104,6 +104,7 @@
     'J-EET',
     'J-EEQ',
     'J-EEV',
+    'CS-HE',
     'CS-EE',
     'CS-EET',
     'CS-EEQ',

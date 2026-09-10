@@ -451,8 +451,8 @@
         </xsl:variable>
         <xsl:variable name="platform-desc">
             <xsl:choose>
-                <xsl:when test="$platform = 'J'">, for Java</xsl:when>
-                <xsl:when test="$platform = 'CS'">, for .NET 6</xsl:when>
+                <xsl:when test="$platform = 'J'">, for Java 17+</xsl:when>
+                <xsl:when test="$platform = 'CS'">, for .NET 8+</xsl:when>
                 <xsl:when test="$platform = 'C'">, for C/C++, PHP and Python</xsl:when>
                 <xsl:when test="$platform = 'JS'">, for JavaScript in the browser and on Node.js</xsl:when>
                 <xsl:otherwise>
