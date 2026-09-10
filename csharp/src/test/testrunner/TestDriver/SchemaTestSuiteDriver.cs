@@ -10,7 +10,6 @@ using Saxon.Hej.om;
 using DocumentBuilder = Saxon.Api.DocumentBuilder;
 using NullDestination = Saxon.Api.NullDestination;
 using Processor = Saxon.Api.Processor;
-using SchemaManager = Saxon.Api.SchemaManager;
 using SchemaValidator = Saxon.Api.SchemaValidator;
 
 namespace TestDriver {
@@ -37,14 +36,14 @@ namespace TestDriver {
         private QName xlinkHref;
         private readonly SortedSet<string> failingTests = new();
 
-        private XdmNode getChildElement(XdmNode parent, QName child) {
+        private static XdmNode getChildElement(XdmNode parent, QName child) {
             IEnumerator e = parent.EnumerateAxis(XdmAxis.Child, child);
             return e.MoveNext() ? (XdmNode) e.Current : null;
         }
 
         
         private XdmNode getLinkedDocument(XdmNode element, Processor processor) {
-            String href = element.GetAttributeValue(xlinkHref);
+            string href = element.GetAttributeValue(xlinkHref);
             DocumentBuilder builder = processor.NewDocumentBuilder();
             Uri target = new Uri(element.BaseUri, href);
             builder.LineNumbering = true;
@@ -76,6 +75,10 @@ namespace TestDriver {
                 return false;
             }
         }
+        
+        /**
+         * Entry point to the schema test suite driver
+         */
 
         public static void MainXSD(string[] args) {
             long startTime = Saxon.Ejava.lang.System.nanoTime();
@@ -94,8 +97,7 @@ namespace TestDriver {
          * @throws URISyntaxException
          */
         private void go(string[] args) {
-            string usage =
-                "SchemaTestSuiteDriver testDir -lang:XSD [-w] [-onwards] -c:contributor? -s:setName? -g:groupName? [-o:outputdir]";
+            const string usage = "SchemaTestSuiteDriver testDir -lang:XSD [-w] [-onwards] -c:contributor? -s:setName? -g:groupName? [-o:outputdir]";
             if (args.Length == 0 || args[0] == "-?") {
                 Console.WriteLine(usage);
             }
@@ -104,8 +106,8 @@ namespace TestDriver {
             Console.WriteLine("Testing Saxon " + processor.ProductVersion);
 
             testSuiteDir = args[0];
-            if (testSuiteDir.EndsWith("/")) {
-                testSuiteDir = testSuiteDir.Substring(0, testSuiteDir.Length - 1);
+            if (testSuiteDir.EndsWith('/')) {
+                testSuiteDir = testSuiteDir[..^1];
             }
 
             string saxonDir = testSuiteDir.Replace("xsdtests", "xsdtests-results");
@@ -198,13 +200,13 @@ namespace TestDriver {
                     string set = exception.GetAttributeValue("test-set");
                     string group = exception.GetAttributeValue("test-case");
                     string comment = "unspecified reason";
-                    if (exception.Children("reason").Count() > 0) {
+                    if (exception.Children("reason").Any()) {
                         comment = exception.Children("reason").First().StringValue;
                     }
                     exceptions[set + "#" + group] = comment;
                 }
 
-                foreach (var testSetRef in catalog.Select(Steps.Descendant("testSetRef"))) {
+                foreach (XdmNode testSetRef in catalog.Select(Steps.Descendant("testSetRef"))) {
                     XdmNode testSetDoc = getLinkedDocument(testSetRef, processor);
                     XdmNode testSetElement = getChildElement(testSetDoc, testSetNT);
 
@@ -234,7 +236,7 @@ namespace TestDriver {
                         continue;
                     }
 
-                    foreach (var testGroup in testSetElement.Children("testGroup")) {
+                    foreach (XdmNode testGroup in testSetElement.Children("testGroup")) {
                         string testGroupName = testGroup.GetAttributeValue(nameAtt);
                         bool isException = exceptions.TryGetValue(testSetName + "#" + testGroupName, out var exception);
 
@@ -242,10 +244,7 @@ namespace TestDriver {
                             continue;
                         }
                         
-                        String testGroupVn = testGroup.GetAttributeValue("version");
-                        if (testGroupVn == null) {
-                            testGroupVn = "";
-                        }
+                        string testGroupVn = testGroup.GetAttributeValue("version") ?? "";
                         if (testGroupVn == "full-xpath-in-CTA") {
                             testGroupVn = "1.1";
                         }
@@ -288,10 +287,10 @@ namespace TestDriver {
                                 results.WriteAttributeString("saxon", "outcome", NamespaceConstant.SAXON, "notRun");
                                 results.WriteAttributeString("saxon", "comment", NamespaceConstant.SAXON, exception);
                                 results.WriteEndElement();
-                                
+
                                 continue;
                             }
-                            
+
                             string schemaTestVn = schemaTest.GetAttributeValue("version");
                             if (schemaTestVn != null && !schemaTestVn.Contains(versionUnderTest)) {
                                 continue;
@@ -301,7 +300,7 @@ namespace TestDriver {
                             XdmNode statusElement = getChildElement(schemaTest, currentNT);
                             if (statusElement != null) {
                                 string status = statusElement.GetAttributeValue("status");
-                                queried = "queried" == status || "disputed-test" == status || "disputed-spec"  == status;
+                                queried = "queried" == status || "disputed-test" == status || "disputed-spec" == status;
                                 bugzillaRef = statusElement.GetAttributeValue("bugzilla");
                             }
 
@@ -310,10 +309,17 @@ namespace TestDriver {
                             }
 
                             Console.WriteLine("TEST SCHEMA " + testName + (queried ? " (queried)" : ""));
-                            
-                            
+
+                            List<XdmNode> schemaDocs = new List<XdmNode>();
                             foreach (XdmNode schemaDocumentRef in schemaTest.Children("schemaDocument")) {
 
+                                string schemaRole = schemaDocumentRef.GetAttributeValue("role");
+                                if (schemaRole is "overridden") {
+                                    Console.WriteLine("Not loading schema at " +
+                                                      schemaDocumentRef.GetAttributeValue(xlinkHref) + " because overridden");
+                                    continue;
+                                }
+                                
                                 Console.WriteLine("Loading schema at " +
                                                   schemaDocumentRef.GetAttributeValue(xlinkHref));
                                 XdmNode schemaDoc;
@@ -323,7 +329,8 @@ namespace TestDriver {
                                 catch (Exception schemaParseErr) {
                                     // Happens with documents saying xml version="1.1"
                                     feedback(
-                                        "Failed to parse schema document " + schemaDocumentRef + ": " + schemaParseErr.Message, true);
+                                        "Failed to parse schema document " + schemaDocumentRef + ": " +
+                                        schemaParseErr.Message, true);
                                     results.WriteComment(schemaParseErr.Message);
                                     schemaOK = false;
                                     break;
@@ -340,10 +347,20 @@ namespace TestDriver {
                                     }
                                 }
 
-                                List<Error> errorList = new ();
+                                schemaDocs.Add(schemaDoc);
+                            }
+
+                            if (schemaDocs.Count > 0) {
+                                XsdCompiler.SchemaSource[] sources = new XsdCompiler.SchemaSource[schemaDocs.Count];
+                                int s = 0;
+                                foreach (XdmNode doc in schemaDocs) {
+                                    sources[s++] = new XsdCompiler.SchemaSource(doc);
+                                }
+
+                                List<Error> errorList = new();
                                 schemaManager.ErrorReporter = errorList.Add;
                                 try {
-                                    schema = schemaManager.Compile(schemaDoc);
+                                    schema = schemaManager.Compile(sources);
                                 }
                                 catch (Exception e) {
                                     if (errorList.Count == 0) {
@@ -362,51 +379,64 @@ namespace TestDriver {
                                         break;
                                     }
                                 }
-                            }
 
 
-                            XdmNode expected = schemaTest.Children("expected").Where(versionCondition).FirstOrDefault();
-                            
-                            string expectedOutcome = (expected == null ? "indeterminate" :
-                                expected.GetAttributeValue("validity"));
-                            bool ok = "indeterminate" == expectedOutcome ||
-                                      "implementation-defined" == expectedOutcome ||
-                                      "implementation-dependent" == expectedOutcome ||
-                                      schemaOK == ("valid" == expectedOutcome);
-                            if (ok) {
-                                passed++;
-                            }
-                            else if (queried) {
-                                if (debug) {
-                                    feedback("Failed disputed schema test " + testName 
-                                                                              + " (expected outcome " + expectedOutcome + ")", true);
+                                XdmNode expected = schemaTest.Children("expected").Where(versionCondition)
+                                    .FirstOrDefault();
+
+                                string expectedOutcome = (expected == null
+                                    ? "indeterminate"
+                                    : expected.GetAttributeValue("validity"));
+                                bool ok = "indeterminate" == expectedOutcome ||
+                                          "implementation-defined" == expectedOutcome ||
+                                          "implementation-dependent" == expectedOutcome ||
+                                          schemaOK == ("valid" == expectedOutcome);
+                                if (ok) {
+                                    passed += schemaDocs.Count;
                                 }
-                            }
-                            else {
-                                if (debug) {
-                                    feedback("Failed schema test " + testName 
-                                                                     + " (expected outcome " + expectedOutcome + ")", true);
+                                else if (queried) {
+                                    if (debug) {
+                                        feedback("Failed disputed schema test " + testName
+                                            + " (expected outcome " + expectedOutcome + ")", true);
+                                    }
                                 }
-                                failed++;
-                                failingTests.Add(contributor + "/" + testSetName + "/" + testGroupName + "/" + testName);
-                            }
+                                else {
+                                    if (debug) {
+                                        feedback("Failed schema test " + testName
+                                                                       + " (expected outcome " + expectedOutcome + ")",
+                                            true);
+                                    }
 
-                            //feedback("Passed " + passed + " failed " + failed + " total " + total, true);
-                            results.WriteStartElement("testResult");
-                            results.WriteAttributeString("set", testSetName);
-                            results.WriteAttributeString("group", testGroupName);
-                            results.WriteAttributeString("test", testName);
-                            if (queried) {
-                                results.WriteAttributeString("saxon", "queried", NamespaceConstant.SAXON, "true");
-                                results.WriteAttributeString("saxon", "bugzilla", NamespaceConstant.SAXON, bugzillaRef);
+                                    failed += schemaDocs.Count;
+                                    failingTests.Add(contributor + "/" + testSetName + "/" + testGroupName + "/" +
+                                                     testName);
+                                }
+
+                                //feedback("Passed " + passed + " failed " + failed + " total " + total, true);
+                                results.WriteStartElement("testResult");
+                                results.WriteAttributeString("set", testSetName);
+                                results.WriteAttributeString("group", testGroupName);
+                                results.WriteAttributeString("test", testName);
+                                if (queried) {
+                                    results.WriteAttributeString("saxon", "queried", NamespaceConstant.SAXON, "true");
+                                    results.WriteAttributeString("saxon", "bugzilla", NamespaceConstant.SAXON,
+                                        bugzillaRef);
+                                }
+
+                                results.WriteAttributeString("validity", (schemaOK ? "valid" : "invalid"));
+                                results.WriteAttributeString("saxon", "outcome", NamespaceConstant.SAXON,
+                                    (ok ? "same" : "different"));
+                                results.WriteAttributeString("saxon", "comment", NamespaceConstant.SAXON, exception);
+                                results.WriteEndElement();
                             }
-                            results.WriteAttributeString("validity", (schemaOK ? "valid" : "invalid"));
-                            results.WriteAttributeString("saxon", "outcome", NamespaceConstant.SAXON, (ok ? "same" : "different"));
-                            results.WriteAttributeString("saxon", "comment", NamespaceConstant.SAXON, exception);
-                            results.WriteEndElement();
                         }
 
                         if (schemaOK) {
+                            // Now run the instance tests.
+                            
+                            // If no schema was provided, start with an empty schema
+                            schema ??= testConfig.NewXsdCompiler().EmptySchema();
+
                             foreach (XdmNode instanceTest in testGroup.Children("instanceTest")) {
                                 string testName = instanceTest.GetAttributeValue("name");
 
@@ -460,7 +490,6 @@ namespace TestDriver {
                                           success == ("valid" == expectedOutcome);
 
 
-                                //XdmNode expected = getChildElement(instanceTest, expectedNT);
                                 bool expectedSuccess = expected == null ||
                                                        expected.GetAttributeValue(validityAtt) == "valid";
                                 if (ok) {
