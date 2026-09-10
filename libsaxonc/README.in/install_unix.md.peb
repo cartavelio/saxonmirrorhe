@@ -6,35 +6,40 @@ at runtime, and the binaries are on your PATH.
 
 If you’re intending to also use the C API, then you need to ensure the header 
 files and also installed somewhere your build system can find them. We do not 
-currently recommend using the C++ API with the pre-compiled `libsaxonc` in case 
-of ABI conflict, for that you can compile `libsaxonc` yourself.
+currently recommend using the C++ API with the pre-compiled `{{ model.libsaxonc }}` in
+case of ABI conflict, for that you can compile `{{ model.libsaxonc }}` yourself.
 
-If you’re intending to compile `libsaxonc` yourself, then what you need to do 
+If you’re intending to compile `{{ model.libsaxonc }}` yourself, then what you need to do
 will depend on your project and its build system. We provide out-of-the-box 
 compatibility with CMake, but using other systems should be straightforward.
 
 ### Installing the files
-We recommend copying the contents of the `{{model.binDirName}}/{{model.SaxonCCorePackage}}` and `{{model.binDirName}}/{{model.SaxonCPackage}}`
-directories within the zip to a location like /opt/saxonica/. You would then end 
-up with a structure like /opt/saxonica/lib, /opt/saxonica/bin, and 
-/opt/saxonica/include.
+We recommend unpacking the release `.zip` under
+`{{model.installPath}}`, and then adding the relevant
+folders to your PATH and {{model.runtimeLinkerVar}} environment variables. This allows
+you to install more than one version, or edition, side-by-side,
+should you need it.
 
 For example:
 
-	mkdir -p /opt/saxonica
-	cp -a {{model.binDirName}}/{{model.SaxonCCorePackage}}/* /opt/saxonica/
-	cp -a {{model.binDirName}}/{{model.SaxonCPackage}}/* /opt/saxonica/
+	mkdir -p {{model.installPrefix}}
 
-If you’re only going to use the pre-compiled `libsaxonc-core`, you may only need 
-to copy the contents of `{{model.SaxonCCorePackage}}`, depending on your build system.
+    cd {{ model.installPrefix }}
+
+    unzip /path/to/{{ model.releaseFileName }}
+
 
 ### Set the {{model.runtimeLinkerVar}} and PATH environment variables
-The {{model.runtimeLinkerVar}} variable must be set to the location of the lib directory
-containing the SaxonC libraries. For instance:
+The {{model.runtimeLinkerVar}} variable must be include the locations of the lib
+directories containing the SaxonC libraries. For instance:
 
-	export {{model.runtimeLinkerVar}}="/opt/saxonica/lib:${{model.runtimeLinkerVar}}"
+	export {{ model.runtimeLinkerVar }}="{{ model.SaxonCCorePackageLibPath }}:{{ model.SaxonCPackageLibPath }}:${{ model.runtimeLinkerVar }}"
 
-To run the {{model.editionBinariesSentence}} binaries without referencing their full
+If you’re only going to use the pre-compiled `{{ model.libsaxoncCore }}`, and compile
+`{{ model.libsaxonc }}` yourself, you only need to add the `{{model.SaxonCCorePackage}}` lib path to
+`{{ model.runtimeLinkerVar }}`.
+
+To run the {{ model.editionBinariesSentence }} binaries without referencing their full
 path, the PATH variable can be set. For instance:
 
-	export PATH="/opt/saxonica/bin:$PATH"
+	export PATH="{{ model.SaxonCPackageBinPath }}:$PATH"
