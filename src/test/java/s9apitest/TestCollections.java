@@ -259,7 +259,7 @@ public class TestCollections {
             Processor p = new Processor(true);
             Configuration config = p.getUnderlyingConfiguration();
             config.registerFileExtension("json", "personal/plain");
-            config.registerMediaType("personal/plain", (config2, details) -> new JSONResource(details));
+            config.registerMediaType("personal/plain", (config2, details) -> new JSONResource(context, details));
             XPathCompiler c = p.newXPathCompiler();
             c.setLanguageVersion("3.1");
             XPathExecutable exec = c.compile("for $X in (collection(.))" +
