@@ -138,6 +138,7 @@ public class GlobalExtractor {
         gvd.setPackageData(rsc.getPackageData());
         gvd.setSystemId(expr.getLocation().getSystemId());
         gvd.setLineNumber(expr.getLocation().getLineNumber());
+        gvd.setColumnNumber(expr.getLocation().getColumnNumber());
         gvd.setRequiredType(SequenceType.makeSequenceType(
                 expr.getItemType(), expr.getCardinality()));
         gvd.setBody(expr);
