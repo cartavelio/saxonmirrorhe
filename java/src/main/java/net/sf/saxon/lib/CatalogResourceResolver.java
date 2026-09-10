@@ -102,7 +102,8 @@ public class CatalogResourceResolver implements
             return null;
         }
 
-        org.xmlresolver.ResourceRequest xmlreq = xmlResolver.getRequest(request.uri, request.baseUri, request.nature, request.purpose);
+        String href = request.relativeUri == null ? request.uri : request.relativeUri;
+        org.xmlresolver.ResourceRequest xmlreq = xmlResolver.getRequest(href, request.baseUri, request.nature, request.purpose);
         if (ResourceRequest.EXTERNAL_ENTITY_NATURE.equals(request.nature)) {
             xmlreq.setEntityName(request.entityName);
             xmlreq.setPublicId(request.publicId);
