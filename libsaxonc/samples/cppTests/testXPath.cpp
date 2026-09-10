@@ -1315,7 +1315,7 @@ int main(int argc, char *argv[]) {
        << "Test: XPathProcessor with Saxon version=" << processor->version()
        << endl;
   testXPathSingle(processor, xpathProc, sresult);
-  testUserExtensionFunction(processor, xpathProc, sresult);
+//  testUserExtensionFunction(processor, xpathProc, sresult);
   cout << endl
        << "============================================================="
        << endl

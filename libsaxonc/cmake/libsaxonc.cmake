@@ -75,6 +75,7 @@ target_sources(${saxonc}
             ../src/include/saxonc/SaxonCXPath.h
             ../src/include/saxonc/SaxonProcessor.h
             ../src/include/saxonc/SchemaValidator.h
+            ../src/include/saxonc/UserFunctionHandler.h
             ../src/include/saxonc/XPathProcessor.h
             ../src/include/saxonc/XQueryProcessor.h
             ../src/include/saxonc/XdmArray.h
