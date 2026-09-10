@@ -554,7 +554,7 @@ public class TestXsltTransformer {
         int fp = config.getNamePool().allocateFingerprint(
                 NamespaceUri.of(childName.getComponent(AccessorFn.Component.NAMESPACE).getStringValue()),
                 childName.getComponent(AccessorFn.Component.LOCALNAME).getStringValue());
-        int cardinality = ((ComplexType) parentType).getElementParticleCardinality(fp, true);
+        int cardinality = ((ComplexType) parentType).getElementParticleCardinality(fp, null, true);
         return Cardinality.allowsZero(cardinality);
     }
 
