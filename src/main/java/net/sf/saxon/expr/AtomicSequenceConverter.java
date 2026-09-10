@@ -418,6 +418,16 @@ public class AtomicSequenceConverter extends UnaryExpression {
     }
 
     /**
+     * The toString() method for an expression attempts to give a representation of the expression
+     * in an XPath-like form, but there is no guarantee that the syntax will actually be true XPath.
+     * In the case of XSLT instructions, the toString() method gives an abstracted view of the syntax
+     */
+    @Override
+    public String toString() {
+        return "convertTo_" + getRequiredItemType().toString() + "(" + getBaseExpression().toString() + ")";
+    }
+
+    /**
      * Is this expression the same as another expression?
      */
 
