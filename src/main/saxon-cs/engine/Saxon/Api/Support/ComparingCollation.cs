@@ -98,6 +98,11 @@ namespace Saxon.Api.Support {
                 }
                 return h;
             }
+
+            public long longHashCode() {
+                return ((long)hashCode()) << 32 | (long)hashCode();
+            }
+
             public bool equals(System.Object obj) {
                 if (!(((obj is ComparingCollation.SortKeyWrapper)))) {
                     return false;

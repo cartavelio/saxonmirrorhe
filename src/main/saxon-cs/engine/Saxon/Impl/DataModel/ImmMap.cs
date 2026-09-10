@@ -27,30 +27,7 @@ namespace Saxon.Impl.DataModel {
 
         protected SCI.ImmutableDictionary<AtomicMatchKey, Saxon.Hej.ma.map.KeyValuePair> imap;
 
-        // The following values are maintained incrementally when
-        // entries are added to the map. They are not changed when entries are removed,
-        // so the actual type may be narrower than these values suggest. The purpose of
-        // keeping this information is to try and avoid dynamic checking of the map
-        // contents against a required type wherever possible. We therefore have
-        // a guarantee that all entries in the map conform to the types maintained here;
-        // but there is no guarantee that they do not also conform to some more specific
-        // type.
-
-        // The set of UTypes of keys in the map
-        private UType keyUType = UType.VOID;
-
-        // The set of UTypes of items in the values in the map
-        private UType valueUType = UType.VOID;
-
-        // The atomic type of all keys, if they are homogeneous; otherwise null
-        private AtomicType keyAtomicType = ErrorType.getInstance();
-
-        // The item type of all items in values, if they are homogeneous; otherwise null
-        private ItemType valueItemType = ErrorType.getInstance();
-
-        // The "envelope" cardinality of values in the map (0:1, 0:0, 1:1, 0:many, 1:many)
-        private int valueCardinality = 0;
-
+        
         
         protected class GeneralMapBuilder : Saxon.Hej.ma.map.MapBuilder {
             protected SCI.ImmutableDictionary<Saxon.Hej.expr.sort.AtomicMatchKey,Saxon.Hej.ma.map.KeyValuePair>? imap 
@@ -97,17 +74,7 @@ namespace Saxon.Impl.DataModel {
         public ImmMap() {
             this.imap = SCI.ImmutableDictionary.Create<AtomicMatchKey, Saxon.Hej.ma.map.KeyValuePair>();
         }
-
-
-        /**
-         * Create a singleton map with a single key and value
-         * @param key the key value
-         * @param value the associated value
-         * @return a singleton map
-         */
-        public static ImmMap singleton(AtomicValue key, GroundedValue value) {
-            return (ImmMap) new ImmMap().addEntry(key, value);
-        }
+        
 
         /**
          * Create a map whose contents are a copy of an existing immutable map
@@ -130,46 +97,10 @@ namespace Saxon.Impl.DataModel {
 
             ImmMap m2 = new ImmMap();
             foreach (SaxonKVP pair in map.keyValuePairs()) {
-                m2 = (ImmMap) m2.addEntry(pair.key, pair.value);
+                m2 = (ImmMap) m2.put(pair.key, pair.value);
             }
 
             return m2;
-        }
-
-        /**
-         * After adding an entry to the map, update the cached type information
-         * @param key the new key
-         * @param val the new associated value
-         * @param wasEmpty true if the map was empty before adding these values
-         */
-        protected void updateTypeInformation(AtomicValue key, Sequence val, bool wasEmpty) {
-            if (wasEmpty) {
-                keyUType = key.getUType();
-                valueUType = SequenceTool.getUType(val);
-                keyAtomicType = key.getItemType();
-                valueItemType = MapItem.getItemTypeOfSequence(val);
-                valueCardinality = SequenceTool.getCardinality(val);
-            }
-            else {
-                keyUType = keyUType.union(key.getUType());
-                valueUType = valueUType.union(SequenceTool.getUType(val));
-                valueCardinality = Cardinality.union(valueCardinality, SequenceTool.getCardinality(val));
-                if (key.getItemType() != keyAtomicType) {
-                    keyAtomicType = null;
-                }
-
-                if (!MapItem.isKnownToConform(val, valueItemType)) {
-                    valueItemType = null;
-                }
-            }
-        }
-
-        public void copyTypeInfoFrom(ImmMap m2) {
-            valueCardinality = m2.valueCardinality;
-            keyUType = m2.keyUType;
-            valueUType = m2.valueUType;
-            keyAtomicType = m2.keyAtomicType;
-            valueItemType = m2.valueItemType;
         }
         
         /**
@@ -188,121 +119,7 @@ namespace Saxon.Impl.DataModel {
             return imap.IsEmpty;
         }
 
-        /**
-         * Ask whether the map conforms to a given map type
-         *
-         * @param requiredKeyType   the required keyType
-         * @param requiredValueType the required valueType
-         * @param th        the type hierarchy cache for the configuration
-         * @return true if the map conforms to the required type
-         */
-        public override bool conforms(PlainType requiredKeyType, SequenceType requiredValueType, TypeHierarchy th) {
-            if (isEmpty()) {
-                return true;
-            }
-
-            if (keyAtomicType == requiredKeyType && valueItemType == requiredValueType.getPrimaryType() &&
-                Cardinality.subsumes(requiredValueType.getCardinality(), valueCardinality)) {
-                return true;
-            }
-
-            bool needFullCheck = false;
-            if (requiredKeyType != BuiltInAtomicType.ANY_ATOMIC) {
-                ItemType upperBoundKeyType = keyUType.toItemType();
-                Affinity rel = th.relationship(requiredKeyType, upperBoundKeyType);
-                if (rel == Affinity.SAME_TYPE || rel == Affinity.SUBSUMES) {
-                    // The key type is matched
-                }
-                else if (rel == Affinity.DISJOINT) {
-                    return false;
-                }
-                else {
-                    needFullCheck = true;
-                }
-            }
-
-            ItemType requiredValueItemType = requiredValueType.getPrimaryType();
-            if (requiredValueItemType != BuiltInAtomicType.ANY_ATOMIC) {
-                ItemType upperBoundValueType = valueUType.toItemType();
-                Affinity rel = th.relationship(requiredValueItemType, upperBoundValueType);
-                if (rel == Affinity.SAME_TYPE || rel == Affinity.SUBSUMES) {
-                    // The value type is matched
-                }
-                else if (rel == Affinity.DISJOINT) {
-                    return false;
-                }
-                else {
-                    needFullCheck = true;
-                }
-            }
-
-            int requiredValueCard = requiredValueType.getCardinality();
-            if (!Cardinality.subsumes(requiredValueCard, valueCardinality)) {
-                needFullCheck = true;
-            }
-
-            if (needFullCheck) {
-                // we need to test the entries individually
-                AtomicIterator keyIter = keys();
-                AtomicValue key;
-                while ((key = (AtomicValue) keyIter.next()) != null) {
-                    if (!requiredKeyType.matches(key, th)) {
-                        return false;
-                    }
-
-                    if (!requiredValueType.matches(get(key), th)) {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
-        }
-
-        /**
-         * Get the type of the map. This method is used largely for diagnostics, to report
-         * the type of a map when it differs from the required type. This method has the side-effect
-         * of updating the internal type information held within the map.
-         *
-         * @param th The type hierarchy cache for the configuration
-         * @return the type of this map
-         */
-        public override ItemType getItemType(TypeHierarchy th) {
-            AtomicType keyType = null;
-            ItemType valueType = null;
-            int valueCard = 0;
-            // we need to test the entries individually
-            AtomicIterator keyIter = keys();
-            AtomicValue key;
-            while ((key = (AtomicValue) keyIter.next()) != null) {
-                Sequence val = get(key);
-                if (keyType == null) {
-                    keyType = key.getItemType();
-                    valueType = SequenceTool.getItemType(val, th);
-                    valueCard = SequenceTool.getCardinality(val);
-                }
-                else {
-                    keyType = (AtomicType) Type.getCommonSuperType(keyType, key.getItemType(), th);
-                    valueType = Type.getCommonSuperType(valueType, SequenceTool.getItemType(val, th), th);
-                    valueCard = Cardinality.union(valueCard, SequenceTool.getCardinality(val));
-                }
-            }
-
-            if (keyType == null) {
-                // implies the map is empty
-                this.keyUType = UType.VOID;
-                this.valueUType = UType.VOID;
-                this.valueCardinality = 0;
-                return MapType.ANY_MAP_TYPE;
-            }
-            else {
-                this.keyUType = keyType.getUType();
-                this.valueUType = valueType.getUType();
-                this.valueCardinality = valueCard;
-                return new MapType(keyType, SequenceType.makeSequenceType(valueType, valueCard));
-            }
-        }
-
+        
         /**
          * Get the lowest common item type of the keys in the map
          *
@@ -310,7 +127,7 @@ namespace Saxon.Impl.DataModel {
          *         empty, return UType.VOID (the type with no instances)
          */
         public override UType getKeyUType() {
-            return keyUType;
+            return null;
         }
 
         /**
@@ -322,22 +139,12 @@ namespace Saxon.Impl.DataModel {
          * @param value   the value associated with the new entry
          * @return the new map containing the additional entry
          */
-        public override MapItem addEntry(AtomicValue key, GroundedValue value) {
+        public override MapItem put(AtomicValue key, GroundedValue value) {
             AtomicMatchKey amk = makeKey(key);
 
-            bool isNew = !imap.ContainsKey(amk);
-            bool empty = isEmpty();
             SCI.ImmutableDictionary<AtomicMatchKey, SaxonKVP> imap2 =
                 imap.SetItem(amk, new SaxonKVP(key, value));
-            ImmMap t2 = new (imap2) {
-                valueCardinality = this.valueCardinality,
-                keyUType = keyUType,
-                valueUType = valueUType,
-                keyAtomicType = keyAtomicType,
-                valueItemType = valueItemType
-            };
-            t2.updateTypeInformation(key, value, empty);
-
+            ImmMap t2 = new(imap2);
             return t2;
         }
 
@@ -355,7 +162,6 @@ namespace Saxon.Impl.DataModel {
             bool empty = isEmpty();
             bool exists = imap.ContainsKey(amk);
             imap = imap.SetItem(amk, new SaxonKVP(key, value));
-            updateTypeInformation(key, value, empty);
             return exists;
         }
 
@@ -379,11 +185,7 @@ namespace Saxon.Impl.DataModel {
                 return this;
             }
 
-            ImmMap result = new (m2) {
-                keyUType = keyUType,
-                valueUType = valueUType,
-                valueCardinality = valueCardinality,
-            };
+            ImmMap result = new (m2);
             return result;
         }
 

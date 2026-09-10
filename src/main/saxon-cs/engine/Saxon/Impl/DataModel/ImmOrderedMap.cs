@@ -107,7 +107,7 @@ namespace Saxon.Impl.DataModel {
          * @param value   the value associated with the new entry
          * @return the new map containing the additional entry
          */
-        public override MapItem addEntry(AtomicValue key, GroundedValue value) {
+        public override MapItem put(AtomicValue key, GroundedValue value) {
             AtomicMatchKey k = key.asMapKey();
             ImmutableDictionary<AtomicMatchKey, SaxonKVP> imap2;
             ImmOrderedMap t2;
@@ -115,8 +115,6 @@ namespace Saxon.Impl.DataModel {
                 ExtendedKeyValuePair quad = new (key, value, null, lastKey);
                 imap2 = imap.SetItem(k, quad);
                 t2 = new (imap2);
-                t2.copyTypeInfoFrom(this);
-                t2.updateTypeInformation(key, value, isEmpty());
                 t2.firstKey = k;
                 t2.lastKey = k;
                 return t2;
@@ -132,8 +130,6 @@ namespace Saxon.Impl.DataModel {
                         new(lastQuad.key, lastQuad.value, k, lastQuad.priorKey);
                     imap2 = imap2.SetItem(lastKey, replacement);
                     t2 = new (imap2);
-                    t2.copyTypeInfoFrom(this);
-                    t2.updateTypeInformation(key, value, isEmpty());
                     t2.firstKey = firstKey;
                     t2.lastKey = k;
                     return t2;
@@ -144,8 +140,6 @@ namespace Saxon.Impl.DataModel {
                     ExtendedKeyValuePair quad1 = new (key, value, quad0.nextKey, quad0.priorKey);
                     imap2 = imap.SetItem(k, quad1);
                     t2 = new (imap2);
-                    t2.copyTypeInfoFrom(this);
-                    t2.updateTypeInformation(key, value, isEmpty());
                     t2.firstKey = firstKey;
                     t2.lastKey = lastKey;
                     return t2;
@@ -197,7 +191,6 @@ namespace Saxon.Impl.DataModel {
             imap = imap.Remove(amk);
 
             ImmOrderedMap result = new ImmOrderedMap(imap);
-            result.copyTypeInfoFrom(this);
             return result;
         }
         
