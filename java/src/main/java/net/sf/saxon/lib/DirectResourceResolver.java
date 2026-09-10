@@ -79,8 +79,14 @@ public class DirectResourceResolver implements ResourceResolver {
         Source ss;
         try {
             // Get an input stream from the request URI
-            stream = ResourceLoader.urlStream(config, request.uri);
-        } catch (IOException e) {
+            if (request.baseUri != null) {
+                URI base = new URI(request.baseUri);
+                URI href = new URI(request.uri);
+                stream = ResourceLoader.urlStream(config, base.resolve(href).toString());
+            } else {
+                stream = ResourceLoader.urlStream(config, request.uri);
+            }
+        } catch (IOException | URISyntaxException e) {
             stream = null; // Carry on, the XML parser might know what to do with it.
         }
 
