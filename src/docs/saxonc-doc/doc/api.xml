@@ -885,6 +885,21 @@
                      (SEF).</div>
                </td>
             </tr>
+
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">importPackage(string
+                     $packageFileName)</span>
+                  <div class="fcomment">Calling this method makes the supplied package available for reference
+                     in the <code>xsl:use-package</code> declarations of subsequent compilations performed using this
+                     <a class="bodylink code" href="../saxon_c_php_xslt30processor">Saxon\Xslt30Processor</a>.
+                     The $packageFileName is given as the SEF file name of the package to be imported. File name resolved
+                     against the cwd which is set using the <code>setcwd()</code>.</div>
+               </td>
+            </tr>
             
             <tr>
                <td>
