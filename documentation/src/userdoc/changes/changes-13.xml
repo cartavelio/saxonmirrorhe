@@ -122,16 +122,8 @@ TODO: rethink redefines and override
  
     </category>-->
     
-    <category name="xpath40">
-        <p>Support for new XPath 4.0 types by default.  See:</p>
-        <ul>
-            <li><p><a class="bodylink" href="/expressions/type-system/choice-types">Choice item types</a></p></li>
-            <li><p><a class="bodylink" href="/expressions/type-system/record-types">Record types</a></p></li>
-            <li><p><a class="bodylink" href="/expressions/type-system/enum-types">Enum types</a></p></li>
-            <li><p><a class="bodylink" href="/expressions/type-system/kindtests">KindTests and NodeTests</a></p></li>
-            <li><p><a class="bodylink" href="/expressions/type-system/type-aliases">Type aliases</a></p></li>
-        </ul>             
-    </category>
+    <!-- category name="xpath40">         
+    </category -->
     
     <!--<category name="functions31">
 
@@ -188,7 +180,7 @@ TODO: rethink redefines and override
     <code>ItemType.builtInAtomicType(localName)</code> provides a quick way of getting an <code>ItemType</code>
        such as <code>ItemType.DATE_TIME</code> if the local name is not known statically. The method
        <code>ItemType.validateAtomic(String)</code> tests whether a given string is in the lexical space
-       of an atomic type, and returns the corresponding atomic value if it is.</p>
+       of an atomic type, and returns the corresponding atomic item if it is.</p>
         
         <p>You can now set an <code>ErrorReporter</code> on the <code>DocumentBuilder</code> object.</p>
         

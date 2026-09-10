@@ -650,7 +650,7 @@
             </td>
             <td>
                <p>Wraps the result sequence in an XML element structure that indicates the type of
-                  each node or atomic value in the query result. This format can handle any type of
+                  each node or atomic item in the query result. This format can handle any type of
                   query result. In the absence of this option, the command effectively wraps a
                      <code>document{}</code> constructor around the supplied query, so that the
                   result is a single XML document, which is then serialized. This will fail if the
@@ -1426,7 +1426,7 @@ XdmValue v2 = new XdmAtomicValue(5).append(new XdmAtomicValue(2));
 XdmValue result = ev.callFunction(
    new QName("http://www.w3.org/2005/xquery-local-functions", "t1"), new XdmValue[]{v1, v2});]]></code></pre>
       
-      <p>The value of <code>result</code> will be the atomic value 2, of type <code>xs:double</code>. The function conversion rules take care of
+      <p>The value of <code>result</code> will be the atomic item 2, of type <code>xs:double</code>. The function conversion rules take care of
       the fact that a supplied sequence of integers is accepted where the required type is a sequence of <code>xs:double</code> values.</p>
          
       </div>  
@@ -1473,7 +1473,7 @@ XdmValue v2 = new XdmAtomicValue(5).append(new XdmAtomicValue(2));
 XdmValue result = ev.CallFunction(
    new QName("http://www.w3.org/2005/xquery-local-functions", "t1"), v1, v2);]]></code></pre>
       
-      <p>The value of <code>result</code> will be the atomic value 2, of type <code>xs:double</code>. The function conversion rules take care of
+      <p>The value of <code>result</code> will be the atomic item 2, of type <code>xs:double</code>. The function conversion rules take care of
          the fact that a supplied sequence of integers is accepted where the required type is a sequence of <code>xs:double</code> values.</p>
       
       </div>
@@ -1483,7 +1483,7 @@ XdmValue result = ev.CallFunction(
       <h1>Result format</h1>
 
 
-      <p>The result of a query is a sequence of nodes and atomic values - which means it is not, in
+      <p>The result of a query is a sequence of nodes and atomic items - which means it is not, in
          general, an XML document. This raises the question as to how the results should be
          output.</p>
       
@@ -1495,7 +1495,7 @@ XdmValue result = ev.CallFunction(
       <p>XQuery 3.1 defines the <b>adaptive</b> output method to handle non-XML output: you can select this
       with the command line option <code>!method=adaptive</code>. (On some shells, the "!" may need to
       be escaped as "\!".) The adaptive output method attempts to display each of the items in the result
-      in an intuitive format: XML format for nodes, string format for atomic values, JSON format for
+      in an intuitive format: XML format for nodes, string format for atomic items, JSON format for
       maps and arrays.</p>
 
       

@@ -261,7 +261,7 @@
             called with parameters to execute the statement.</p>
          <p>The arity of the returned function (the "invocation function") is equal to the number of 
             question-marks appearing in the source statement.</p>
-         <p>The invocation function expects the supplied arguments to be atomic values. The data types of the arguments
+         <p>The invocation function expects the supplied arguments to be atomic items. The data types of the arguments
             should correspond to the types of the values expected by the SQL statement: for example, <code>xs:string</code>
             for a <code>VARCHAR</code> column, <code>xs:decimal</code> for a SQL decimal, and so on.</p>
          <p>The invocation function always returns an empty sequence, though to avoid over-aggressive optimization, it is
@@ -303,12 +303,12 @@
             <code>sql:prepared-query</code> returns a function which can be called with parameters to execute the query.</p>
          <p>The arity of the returned function (the "invocation function") is equal to the number of 
             question-marks appearing in the source query.</p>
-         <p>The invocation function expects the supplied arguments to be atomic values. The data types of the arguments
+         <p>The invocation function expects the supplied arguments to be atomic items. The data types of the arguments
             should correspond to the types of the values expected by the SQL query: for example, <code>xs:string</code>
             for a <code>VARCHAR</code> column, <code>xs:decimal</code> for a SQL decimal, and so on.</p>
          <p>The value returned by the invocation function is a sequence of maps. Each row in the query result is
             represented by one map in this sequence. The map represents a row in the result using a string-valued key
-            to represent the column name, and an appropriately-typed atomic value to represent the value of the column.
+            to represent the column name, and an appropriately-typed atomic item to represent the value of the column.
             A SQL <code>NULL</code> value is represented by an empty sequence.</p>
          <p>Note that the result is a sequence rather than an array. It can be converted to an array (for example,
             for serializing in JSON) using the expression <code>array{$result}</code>.</p>
@@ -371,7 +371,7 @@
   
          <p>The value returned by the function is a sequence of maps. Each row in the query result is
             represented by one map in this sequence. The map represents a row in the result using a string-valued key
-            to represent the column name, and an appropriately-typed atomic value to represent the value of the column.
+            to represent the column name, and an appropriately-typed atomic item to represent the value of the column.
             A SQL <code>NULL</code> value is represented by an empty sequence.</p>
          <p>Note that the result is a sequence rather than an array. It can be converted to an array (for example,
             for serializing in JSON) using the expression <code>array{$result}</code>.</p>

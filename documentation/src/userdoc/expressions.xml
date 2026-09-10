@@ -33,8 +33,8 @@
    <h3 class="subtitle">XPath basics</h3>
 
    <p>In XPath 2.0 (and higher) all values are considered as sequences. A sequence consists of zero
-      or more items; an item may be a node or an atomic value, or in 3.0 it may also be a function
-      item. Examples of atomic values are integers, strings, booleans, and dates. A single value
+      or more items; an item may be a node or an atomic item, or in 3.0 it may also be a function
+      item. Examples of atomic items are integers, strings, booleans, and dates. A single value
       such as a number is considered as a sequence of length 1. The empty sequence is written as
          <code>()</code>; a singleton sequence may be written as <code>"a"</code> or
          <code>("a")</code>, and a general sequence is written as <code>("a", "b", "c")</code>.</p>
@@ -246,7 +246,7 @@ local:format("2016-10-07", $fmt)]]></code></pre>
             birth".</p>
 
          <p>Using records makes stronger type checking possible. With a general-purpose map, any
-            atomic value can be supplied as a key, and the <code>map:get()</code> function (or a
+            atomic item can be supplied as a key, and the <code>map:get()</code> function (or a
             dynamic call on the map as a function) returns an empty sequence if the entry is not
             present. With records, however, supplying a key value that is not a string, or that is
             not one of the known field names, results in a static type error if it can be detected
@@ -1135,7 +1135,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 
       <p>The expression on the left of the <code>/</code> operator must return a node or sequence of
          nodes. The expression on the right can return either a sequence of nodes or a sequence of
-         atomic values (but not a mixture of the two). This allows constructs such as
+         atomic items (but not a mixture of the two). This allows constructs such as
             <code>$x/number()</code>, which returns the sequence obtained by converting each item in
             <code>$x</code> to a number.</p>
    </section>
@@ -1275,11 +1275,11 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 
 
       <p>The simplest comparison operators are <code>eq</code>, <code>ne</code>, <code>lt</code>
-         <code>le</code>, <code>gt</code>, and <code>ge</code>. These compare two atomic values of
+         <code>le</code>, <code>gt</code>, and <code>ge</code>. These compare two atomic items of
          the same type, for example two integers, two dates, or two strings. In the case of strings,
          the default collation is used (this can be set using the configuration property
          <a class="feature" href="DEFAULT_COLLATION"/>). If the operands are
-         not atomic values, an error is raised.</p>
+         not atomic items, an error is raised.</p>
 
       <p>The operators <code>=</code>, <code>!=</code>, <code>&lt;</code>, <code>&lt;=</code>,
             <code>&gt;</code>, and <code>&gt;=</code> can compare arbitrary sequences. The result is
@@ -1441,7 +1441,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
             <p>Inline function items can be declared, and used as arguments to higher-order
                functions. For example <code>map(//employee, function($e){$e/salary +
                   $e/bonus})</code>. A <i>function item</i> is a third kind of item, alongside nodes
-               and atomic values. The function represented by a function item <code>$f</code> can be
+               and atomic items. The function represented by a function item <code>$f</code> can be
                invoked using a dynamic function call <code>$f(args)</code>. <i>Higher-order
                   functions require Saxon-PE or higher.</i></p>
          </li>
@@ -1520,15 +1520,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
             library</a>.</p>
 
    </section>
-   <section id="xpath40new" title="New features in XPath 4.0">
-      <h1>New features in XPath 4.0</h1>
-
-      <aside>From Saxon 13, Saxon supports XPath 4.0 by default.</aside>
-
-      <p>Some of the new features in XPath 4.0 are as follows. For full details, see the W3C
-         specifications, and for further Saxon implementation details see <a class="bodylink" href="/changes/xpath40/12-13">XPath 4.0 implementation changes from 12 to 13</a> and <a class="bodylink"
-            href="/conformance/xpath40">Conformance</a>.</p>
-   </section>
+   
    <section id="xpath30maps" title="Maps in XPath">
       <h1>Maps in XPath</h1>
 
@@ -1544,7 +1536,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
          of an algorithm).</p>
 
       <p>A map is a set of entries. Each entry is a key-value pair. The <i>key</i> is always an
-         atomic value. The <i>value</i> is any XDM value: a sequence of nodes, atomic values,
+         atomic item. The <i>value</i> is any XDM value: a sequence of nodes, atomic item,
          functions, or maps.</p>
 
       <p>Maps, like sequences, are immutable. When you add an entry to a map, you get a new map; the
@@ -1661,7 +1653,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       <ul>
          <li>
             <p>Arrays can be nested (an array can have other arrays as its members). In fact the members
-               of an array can be arbitrary XDM values, including nodes, atomic values, sequences, functions, and maps.
+               of an array can be arbitrary XDM values, including nodes, atomic items, sequences, functions, and maps.
                A member of an array can also be an empty sequence. 
             </p>
          </li>
@@ -1692,8 +1684,8 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
             They don't return an error, because an array is a sequence of length one, but they don't return the result you
             might have expected. Instead, there is a library of functions available to perform analogous operations on arrays.</p>
             
-            <p>However, operators designed to work on sequences of atomic values will also produce useful results when applied to
-            arrays of atomic values. This is because atomizing an array produces the corresponding sequence. So, for example,
+            <p>However, operators designed to work on sequences of atomic items will also produce useful results when applied to
+            arrays of atomic items. This is because atomizing an array produces the corresponding sequence. So, for example,
             <code>sum([1,2,3,4])</code> returns 10, as does <code>sum([[1,2], [3,4]])</code>.</p>
          </li>
       </ul>
@@ -1811,7 +1803,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
                For example, <code>array:size([[1,2], [3,4]])</code> returns <code>2</code>.</p>
          </li>
          <li>
-            <p><code>array:sort</code>: sorts the members of an array, either by their own atomic value, or by the result of applying
+            <p><code>array:sort</code>: sorts the members of an array, either by their own atomic item, or by the result of applying
                a function to compute a sort key. A collation can also be specified.
                For example, <code>array:sort([4, 8, 2])</code> returns <code>[2, 4, 8]</code>.</p>
          </li>

@@ -977,7 +977,7 @@ public static int lineNumber(XPathContext c) {
         will be accepted, but a value of type <code>jt:java.util.HashMap</code> will not.</p>
 
       <p>In the XPath type hierarchy, external object types are a fourth kind of item, alongside
-        nodes, atomic values, and functions. (In earlier Saxon releases, external object types were
+        nodes, atomic items, and functions. (In earlier Saxon releases, external object types were
         considered subtypes of <code>xs:anyAtomicType</code>, but this is no longer the case.)</p>
       
     </section>
@@ -1266,10 +1266,10 @@ public static int lineNumber(XPathContext c) {
         or an empty sequence. If it is an empty sequence, null will be passed. If it is a singleton
         node, an instance of <a class="javalink" href="net.sf.saxon.om.NodeInfo"
           >net.sf.saxon.om.NodeInfo</a> will be passed. If it is a wrapped Java object, that Java
-        object will be passed. If it is a singleton atomic value, the value will be converted to the
+        object will be passed. If it is a singleton atomic item, the value will be converted to the
         nearest equivalent Java object: for example an <code>xs:boolean</code> becomes
           <code>java.lang.Boolean</code>, an <code>xs:string</code> becomes
-          <code>java.lang.String</code>, and so on. An untyped atomic value is treated as a string.
+          <code>java.lang.String</code>, and so on. An untyped atomic item is treated as a string.
         An <code>xs:integer</code> (even if it belongs to a subtype such as <code>xs:short</code>)
         is converted to a Java <code>BigInteger</code>. The more specialized XML Schema primitive
         types such as <code>xs:hexBinary</code> and <code>xs:duration</code> are passed in their
@@ -1316,12 +1316,12 @@ public static int lineNumber(XPathContext c) {
       
     </section>
 
-        <section id="converting-atomic" title="Converting atomic values" class="javaonly">
-      <h1>Converting atomic values</h1>
+        <section id="converting-atomic" title="Converting atomic items" class="javaonly">
+      <h1>Converting atomic items</h1>
 
 
       <p>This section describes the conversions that occur when calling a method that expects an
-        atomic value, such as a <code>String</code> or a <code>Boolean</code>.</p>
+        atomic item, such as a <code>String</code> or a <code>Boolean</code>.</p>
 
       <p>If the supplied value is a node, then it is atomized.</p>
 
@@ -1718,7 +1718,7 @@ public static int lineNumber(XPathContext c) {
         value (in the XDM type hierarchy, the type representing <code>java.lang.Object</code> was a
         peer of primitive types such as <code>xs:string</code> and <code>xs:boolean</code>). In Saxon
         9.5, this changed so that wrapped objects are a fourth subtype of <code>item()</code>, at
-        the same level in the type hierarchy as nodes, atomic values, and function items. Atomizing
+        the same level in the type hierarchy as nodes, atomic items, and function items. Atomizing
         a wrapped Java object produces an instance of <code>xs:string</code> containing the
         result of the <code>toString()</code> method applied to the underlying object.</p>
       
@@ -2005,7 +2005,7 @@ Console.WriteLine("Square root of 2 is " + result);]]></code></pre>
         <ul>
           <li><a class="javalink"
             href="net.sf.saxon.s9api.XdmAtomicValue"
-            >net.sf.saxon.s9api.XdmAtomicValue</a> for atomic values</li>
+            >net.sf.saxon.s9api.XdmAtomicValue</a> for atomic items</li>
           <li><a class="javalink"
             href="net.sf.saxon.s9api.XdmNode"
             >net.sf.saxon.s9api.XdmNode</a> for nodes</li>
@@ -2027,7 +2027,7 @@ Console.WriteLine("Square root of 2 is " + result);]]></code></pre>
       </li>
     </ul>
     
-    <h2 class="subtitle">Converting atomic values</h2>
+    <h2 class="subtitle">Converting atomic items</h2>
     
     <p>This section describes Java classes that are recognized as equivalents to XDM atomic types.</p>
     
@@ -2496,7 +2496,7 @@ Console.WriteLine("Square root of 2 is " + result);]]></code></pre>
       API behavior.</p>
       
       <p>At the s9api level, the data passed from an <code>Xslt30Transformer</code> or <code>XQueryEvaluator</code>
-      to a <code>Destination</code> is always a raw sequence (any sequence of items, nodes or atomic values or functions, not wrapped
+      to a <code>Destination</code> is always a raw sequence (any sequence of items, nodes or atomic items or functions, not wrapped
       in a document node). This is delivered over Saxon's internal <code>Receiver</code> interface, which allows nodes to be passed either 
       in <i>composed</i> form (as a <code>NodeInfo</code> object along with its entire subtree), or in <i>decomposed</i> form
       (as a sequence of events like <code>startElement</code> and <code>endElement</code>). There are strict rules on the "well-formedness" of

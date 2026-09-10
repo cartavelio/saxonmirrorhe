@@ -259,7 +259,7 @@
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
-        <p>Returns a record containing information about the type annotation of an atomic value.</p>
+        <p>Returns a record containing information about the type annotation of an atomic item.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -2798,7 +2798,7 @@
           the values require higher precision than <code>xs:double</code> retains. It is also
           possible to return the string value as written using the option <code>'number-parser' :
             xs:string#1</code>. In general, the value of the option is any function that takes as
-          input the string value as written, and that delivers an atomic value containing the
+          input the string value as written, and that delivers an atomic item containing the
           desired representation of the number.</p>
       </status>
       <saxon-edition>ALL 9.7</saxon-edition>
@@ -2836,7 +2836,7 @@
           the values require higher precision than <code>xs:double</code> retains. It is also
           possible to return the string value as written using the option <code>'number-parser' :
             xs:string#1</code>. In general, the value of the option is any function that takes as
-          input the string value as written, and that delivers an atomic value containing the
+          input the string value as written, and that delivers an atomic item containing the
           desired representation of the number.</p>
       </status>
       <saxon-edition>ALL 9.7</saxon-edition>
@@ -4597,7 +4597,7 @@
       <signatures>
         <proto return-type="xs:string">
           <arg name="value" type="item()?" default="."
-            desc="A node whose string value is required, or an atomic value to be converted to a string"/>
+            desc="A node whose string value is required, or an atomic item to be converted to a string"/>
           <in-spec>xpath20</in-spec>
           <in-spec>xpath30</in-spec>
           <in-spec>xpath31</in-spec>
@@ -8028,7 +8028,7 @@
             supplied function. This information is provided in the form of a map, with two entries.
             The entry with key "name" holds the name of the annotation, as an <code>xs:QName</code>
             value. The entry with key "params" holds the values of the parameters of the annotation,
-            as a sequence of atomic values.</p>
+            as a sequence of atomic items.</p>
 
           <p>For example, if the function is declared as:</p>
 
@@ -8532,7 +8532,7 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
       <saxon-edition>PE/EE 10</saxon-edition>
       <details>
         <div>
-          <p>This function takes as input a single atomic value, and returns true if the value is
+          <p>This function takes as input a single atomic item, and returns true if the value is
             the <code>xs:double</code> or <code>xs:float</code> value <code>NaN</code>.</p>
           <p>For example, the call <code>saxon:is-NaN(number("N/A"))</code> returns true.</p>
         </div>
@@ -9252,7 +9252,7 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
             </li>
             <li>
               <p>Since the declared type of the first argument is namespace sensitive, error
-                  <code>XPTY0117</code> will be raised if an untyped atomic value (or an untyped
+                  <code>XPTY0117</code> will be raised if an untyped atomic item (or an untyped
                 node) is supplied as the actual argument. Conversion to a string should therefore be
                 done explicitly. For example, to convert the element <code>&lt;prop name="x"
                   value="y"/&gt;</code> to the attribute node <code>x="y"</code>, use
@@ -9434,7 +9434,7 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
             </li>
             <li>
               <p>Since the declared type of the first argument is namespace sensitive, error
-                  <code>XPTY0117</code> will be raised if an untyped atomic value (or an untyped
+                  <code>XPTY0117</code> will be raised if an untyped atomic item (or an untyped
                 node) is supplied as the actual argument. Conversion to a string should therefore be
                 done explicitly. For example, to convert <code>&lt;prop name="x"
                   value="y"/&gt;</code> to <code>&lt;x&gt;y&lt;/x&gt;</code>, use
@@ -10327,7 +10327,7 @@ let $q1 := "declare variable $x external; declare variable $y external; &lt;z&gt
               <tr>
                 <td>value constraint</td>
                 <td>If present, a function with properties ("class": "Value Constraint", "variety":
-                  "fixed" or "default", "value": atomic value, "lexical form": string</td>
+                  "fixed" or "default", "value": atomic item, "lexical form": string</td>
                 <td/>
               </tr>
               <tr>
@@ -10673,7 +10673,7 @@ let $q1 := "declare variable $x external; declare variable $y external; &lt;z&gt
                 <td>typed-value</td>
                 <td>For the enumeration facet only, array(xs:anyAtomicType*)</td>
                 <td>An array containing the enumeration values, each of which may in general be a
-                  sequence of atomic values. (Note: for the enumeration facet, the "value" property
+                  sequence of atomic items. (Note: for the enumeration facet, the "value" property
                   is a sequence of strings, regardless of the actual type)</td>
               </tr>
             </tbody>
@@ -11225,7 +11225,7 @@ return if ($bookDecl('type definition')('variety') = 'element-only')
 
               <p>In addition to the above options, any string-valued parameter whose name begins
                 with <code>"mail."</code> is passed unchanged as a property to the Java mail API.
-                The value can be any atomic value: it will be converted to a string. For example,
+                The value can be any atomic item: it will be converted to a string. For example,
                 the option <code>mail.smtp.timeout</code> can be set, as an integer, or
                   <code>mail.debug</code> can be set, as a boolean. Similarly, options can be set to
                 select an SSL transport. Any option values supplied in this form take precedence
@@ -11802,7 +11802,7 @@ xs:duration('PT0.001S')}ms &lt;/xsl:message&gt;</code></pre>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">type</name>
       <description>
-        <p>Returns information about the type annotation of a node or atomic value.</p>
+        <p>Returns information about the type annotation of a node or atomic item.</p>
       </description>
       <signatures>
         <proto return-type="function(*)?">
@@ -11832,7 +11832,7 @@ xs:duration('PT0.001S')}ms &lt;/xsl:message&gt;</code></pre>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">type-annotation</name>
       <description>
-        <p>Returns the name of the type annotation of a node or atomic value.</p>
+        <p>Returns the name of the type annotation of a node or atomic item.</p>
       </description>
       <signatures>
         <proto return-type="xs:QName?">
@@ -11858,7 +11858,7 @@ xs:duration('PT0.001S')}ms &lt;/xsl:message&gt;</code></pre>
           <p>For a text node, the function returns <code>xs:untypedAtomic</code>, and for comment,
             processing-instruction, and namespace nodes, it returns <code>xs:string</code>.</p>
 
-          <p>If the argument is an atomic value, the function returns the type label of the atomic
+          <p>If the argument is an atomic item, the function returns the type label of the atomic
             value, again as a QName.</p>
 
           <p>If the argument is an empty sequence, the function returns an empty sequence.</p>
@@ -12172,7 +12172,7 @@ xs:duration('PT0.001S')}ms &lt;/xsl:message&gt;</code></pre>
             </li>
           </ol>
           <p>Any maps or arrays returned by these functions and operators (but not other values,
-            such as nodes and atomic values) will have a pedigree that can be obtained using the <a
+            such as nodes and atomic items) will have a pedigree that can be obtained using the <a
               class="bodylink code" href="/functions/saxon/pedigree">saxon:pedigree()</a> function.
             The pedigree is represented as a map containing a number of entries: the
               <code>"container"</code> entry holds the immediately containing map or array; the

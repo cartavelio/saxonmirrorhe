@@ -1911,7 +1911,7 @@
          </li>
          <li>
             <p><i>It is implementation-defined whether, when the Adaptive output method is used, a serializer 
-               includes hyperlinks in its output to record the types of atomic values, the bindings of namespace 
+               includes hyperlinks in its output to record the types of atomic items, the bindings of namespace 
                prefixes, the causes of error indicators, and other information. (See 10 Adaptive Output Method)</i></p>
             <p>&#x25BA; Saxon does not include hyperlinks in its output.</p>
          </li>
@@ -2097,11 +2097,11 @@
          functions <code>string()</code>, <code>number()</code>, or <code>boolean()</code>. Items
          after the first in the atomized sequence are discarded. If the return type requested is
             <code>NODE</code>, Saxon returns the first item in the result sequence if it is a node,
-         and reports an error if it is an atomic value. If the result sequence is empty, it returns
+         and reports an error if it is an atomic item. If the result sequence is empty, it returns
          null. If the return type requested is <code>NODELIST</code>, Saxon returns a Java List
          containing all the items in the sequence, whether they are nodes or not, except in the case
          where the result consists of DOM Nodes, in which case a DOM NodeList is returned. Nodes are
-         returned using the native node object in the input data model; atomic values are returned
+         returned using the native node object in the input data model; atomic items are returned
          using the most appropriate Java class. Note that in the case of numeric results, it is not
          always easy to predict whether the result will be a Long, a Double, or a BigDecimal, and it
          is advisable to cast the data to one of the numeric types within the XPath expression to

@@ -109,7 +109,7 @@ in the case of XQuery and XPath where the output is an arbitrary sequence.</p>
       <ul>
          <li>
             <p>
-               <a class="cslink" href="Saxon.Api.XdmValue">XdmValue</a>: an XPath value. This is in general a sequence, whose items are nodes or atomic values.
+               <a class="cslink" href="Saxon.Api.XdmValue">XdmValue</a>: an XPath value. This is in general a sequence, whose items are nodes or atomic items.
 You can supply an <code>XdmValue</code> as the value of a stylesheet or query parameter, and receive an <code>XdmValue</code>
 as the result of evaluating a query or XPath expression.</p>
          </li>
@@ -128,7 +128,7 @@ property provides a simple way to serialize the node.</p>
          </li>
          <li>
             <p>
-               <a class="cslink" href="Saxon.Api.XdmAtomicValue">XdmAtomicValue</a>: an atomic value, as defined in the XDM model. You can construct an atomic value directly
+               <a class="cslink" href="Saxon.Api.XdmAtomicValue">XdmAtomicValue</a>: an atomic item, as defined in the XDM model. You can construct an atomic item directly
 from common objects such as an integer, a string, a double, or a URI; or you can construct one by specifying a string
 containing the lexical representation, and a QName identifying the required type.</p>
          </li>

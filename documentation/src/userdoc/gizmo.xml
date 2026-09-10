@@ -128,7 +128,7 @@
     
     <p>After each node <i>N</i> selected by the expression, the query is evaluated (with <i>N</i> as the context item), and its result is 
       inserted as an immediate following sibling of <i>N</i>. Both the expression and the query must return nodes that are capable of having
-    siblings: that is, element, text, comment, or processing instruction nodes. But if the query returns an atomic value,
+    siblings: that is, element, text, comment, or processing instruction nodes. But if the query returns an atomic item,
     it is treated as a text node with the same string value.</p>
     
     <p>The result of the operation can be inspected using the command 
@@ -180,7 +180,7 @@
     <p>Outputs a representation of the result of the expression.</p>
     <p>If a node is selected, it is shown as a path (for example <code>DOC/SECTION[3]/PARA[2]</code>), preceded
     by a line number if one is available.</p>
-    <p>If an atomic value is selected, its string value is displayed.</p>
+    <p>If an atomic item is selected, its string value is displayed.</p>
     
     <p>Line numbers are available in documents loaded directly from filestore, but not
       in documents constructed using commands such as <code>rename</code> or <code>delete</code>.</p>
@@ -281,7 +281,7 @@
     
     <p>Before each node <i>N</i> selected by the expression, the query is evaluated (with <i>N</i> as the context item), and its result is 
       inserted as an immediate preceding sibling of <i>N</i>. Both the expression and the query must return nodes that are capable of having
-      siblings: that is, element, text, comment, or processing instruction nodes. But if the query returns an atomic value,
+      siblings: that is, element, text, comment, or processing instruction nodes. But if the query returns an atomic item,
       it is treated as a text node with the same string value.</p>
     
     <p>The result of the operation can be inspected using the command 
@@ -328,7 +328,7 @@
     <p>For every node <i>N</i> selected by the expression, the query is evaluated (with <i>N</i> as the context item), and its result is 
       inserted as the first child of <i>N</i>. The expression must return nodes that are capable of having children (that is document
       or element nodes). The query must return nodes that are capable of having
-      siblings (that is, element, text, comment, or processing instruction nodes). But if the query returns an atomic value,
+      siblings (that is, element, text, comment, or processing instruction nodes). But if the query returns an atomic item,
       it is treated as a text node with the same string value.</p>
     <p>As a special case, if the query returns an attribute node, it is added as an attribute of the selected element,
       replacing any existing attribute with the same name.</p>
@@ -586,7 +586,7 @@
     
     <p>Outputs a representation of the result of the expression.</p>
     <p>If a node is selected, it is shown as an XML serialization of the content of the node.</p>
-    <p>If an atomic value is selected, its string value is displayed.</p>
+    <p>If an atomic item is selected, its string value is displayed.</p>
     <p>The expression may be omitted, and defaults to <code>/</code>, which displays
     the current document.</p>
     
@@ -637,7 +637,7 @@
     <p>For every node <i>N</i> selected by the expression, the query is evaluated (with <i>N</i> as the context item), and its result is 
       inserted as the last child of <i>N</i>. The expression must return nodes that are capable of having children (that is document
       or element nodes). The query must return nodes that are capable of having
-      siblings (that is, element, text, comment, or processing instruction nodes). But if the query returns an atomic value,
+      siblings (that is, element, text, comment, or processing instruction nodes). But if the query returns an atomic item,
       it is treated as a text node with the same string value.</p>
     
     <h3 class="subtitle">Example</h3>

@@ -2571,9 +2571,9 @@ documentBuilder.build(as);]]></code></pre>
           <td>
             <p> Determines how the resource is processed. For example if the media type is 
             <code>application/xml</code> then it will be parsed as XML and returned as a document node;
-            if it is <code>text/plain</code> then it is returned as an atomic value of type
+            if it is <code>text/plain</code> then it is returned as an atomic item of primitive type
             <code>xs:string</code>; if it is <code>application/binary</code> then it is returned
-            as an atomic value of type <code>xs:base64Binary</code>.</p>
+            as an atomic item of primitive type <code>xs:base64Binary</code>.</p>
             <p>If this parameter is absent, then the <code
               java="net.sf.saxon.lib.CollectionFinder">CollectionFinder</code> attempts to discern the
             content type first by looking at the file extension, and then, if necessary, by

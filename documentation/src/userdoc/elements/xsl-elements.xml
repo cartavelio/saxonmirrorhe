@@ -567,8 +567,8 @@
             <saxon-edition>ALL</saxon-edition>
             <status>
                 <p>In XSLT 3.0, the <code>xsl:apply-templates</code> instruction can select atomic
-                    values as well as nodes, and the match pattern syntax of
-                        <code>xsl:template</code> is extended to allow atomic values as well as
+                    items as well as nodes, and the match pattern syntax of
+                        <code>xsl:template</code> is extended to allow atomic items as well as
                     nodes to be matched. See <a class="bodylink" href="../patterns/patterns-30"
                         >Patterns in XSLT 3.0</a> for more details. All of the extensions to the
                     syntax of match patterns are implemented since Saxon 9.6.</p>
@@ -1405,7 +1405,7 @@
                     copy the contents of a SOAP message without copying the namespaces declared in
                     its envelope.</attribute>
                 <attribute name="select" use="mandatory">Value to be copied (which may be any
-                    sequence of nodes, atomic values, and/or function items), given by an
+                    sequence of nodes, atomic items, and/or function items), given by an
                     expression. If this expression is a string, a number, or a boolean, the effect
                     is the same as using <a class="bodylink code" href="../sequence"
                         >xsl:sequence</a>.</attribute>
@@ -1908,7 +1908,7 @@
         <xsl-element xmlns="http://www.saxonica.com/ns/doc/elements">
             <name>for-each-group</name>
             <description>
-                <p>Selects a sequence of nodes and/or atomic values and organizes them into subsets
+                <p>Selects a sequence of nodes and/or atomic items and organizes them into subsets
                     called groups.</p>
             </description>
             <attributes>
@@ -1972,7 +1972,7 @@
                 <p>In XSLT 3.0, the capabilities of the <code>xsl:for-each-group</code> instruction
                     are extended by virtue of the fact that the pattern used in
                         <code>group-starting-with</code> or <code>group-ending-with</code> can now
-                    match atomic values as well as nodes.</p>
+                    match atomic items as well as nodes.</p>
 
                 <p class="qt4">In XSLT 4.0, two new ways of defining the grouping are introduced
                     using the new attributes <code>merge-when</code> and <code>split-when</code>.
@@ -2559,7 +2559,7 @@
                     Saxon: see <a class="bodylink" href="/localization/sorting-and-collations"
                         >Sorting and collations</a>.</attribute>
                 <attribute name="composite" use="optional">Implemented since Saxon 9.7. If the key
-                    specifier returns a sequence of atomic values, then this attribute determines
+                    specifier returns a sequence of atomic items, then this attribute determines
                     whether each value is treated as an individual key (when
                         <code>composite="no"</code>, the default), or the sequence is treated as a
                     composite key (when <code>composite="yes"</code>). </attribute>
@@ -4690,7 +4690,7 @@
             <name>sequence</name>
             <description>
                 <p>Used to construct arbitrary sequences. It may select any sequence of nodes and/or
-                    atomic values, and essentially adds these to the result sequence.</p>
+                    atomic items, and essentially adds these to the result sequence.</p>
             </description>
             <attributes>
                 <attribute name="as" class="qt4">New in XSLT 4.0. Defines the required type of the
@@ -4702,7 +4702,7 @@
             </attributes>
             <details>
                 <p>The <code>xsl:sequence</code> element may be used to produce any sequence of
-                    nodes and/or atomic values. These are included in the result sequence directly.
+                    nodes and/or atomic items. These are included in the result sequence directly.
                     Unlike <a class="bodylink code" href="../copy-of">xsl:copy-of</a>, no copy is
                     made.</p>
 
@@ -4729,7 +4729,7 @@
 &lt;/xsl:function&gt;</code></pre>
                 </example>
                 <example>
-                    <p>Copying atomic values into a tree:</p>
+                    <p>Copying atomic items into a tree:</p>
                     <pre><code class="language-xml">&lt;e&gt;
     &lt;xsl:sequence select="1 to 5"/&gt;
     &lt;br/&gt;
@@ -5149,13 +5149,13 @@
                     the value of a supplied expression.</p>
             </description>
             <attributes>
-                <attribute name="select" use="mandatory">Computes an atomic value that is compared
+                <attribute name="select" use="mandatory">Computes an atomic item that is compared
                     with the values in the <code>test</code> attributes of the <code>xsl:when</code>
                     children.</attribute>
             </attributes>
             <details>
                 <p>The <code>select</code> attribute contains an expression which must deliver a
-                    single atomic value (it is atomized if necessary). This value is compared with
+                    single atomic item (it is atomized if necessary). This value is compared with
                     the values of the <code>test</code> conditions in each of the contained <a
                         class="bodylink code" href="../when">xsl:when</a> elements in turn until the
                     first match is found. If a match is found, that <code>xsl:when</code> element is
@@ -5166,7 +5166,7 @@
 
                 <p>Unlike <a class="bodylink code" href="../choose">xsl:choose</a>, the test
                     condition in the <code>xsl:when</code> element is an expression that can
-                    evaluate to any sequence of atomic values. The comparison is done using the "="
+                    evaluate to any sequence of atomic items. The comparison is done using the "="
                     operator, so the test succeeds if any of the values matches.</p>
             </details>
             <examples>
@@ -5957,7 +5957,7 @@
                 <p>The contained sequence constructor is evaluated in the usual way, but any item in
                     the result of the sequence constructor that is "deemed empty" is discarded.
                     Examples of items that are "deemed empty" are elements with no children (even if
-                    they have attributes), and nodes and atomic values whose string value is
+                    they have attributes), and nodes and atomic items whose string value is
                     zero-length. Document nodes are deemed empty if they have no children, as are
                     empty maps and arrays. Text nodes containing whitespace are NOT deemed
                     empty.</p>
@@ -6102,7 +6102,7 @@
 
         <p>This section gives an informal description of the syntax of XSLT patterns. For a formal
             specification, see the XSLT recommendation. XSLT 3.0 introduces extensions, described
-            below, to allow atomic values as well as nodes to be matched, and removes a number of
+            below, to allow atomic items as well as nodes to be matched, and removes a number of
             restrictions. Saxon (since version 9.6) implements these extensions.</p>
 
         <p>Patterns define a condition that an item may or may not satisfy: an item either matches
@@ -6123,7 +6123,7 @@
                 <p>Predicate patterns, for example <code>.[@x = 2]</code>. A predicate pattern
                     consists of "." followed by zero or more predicates, and it matches an item if
                     all the predicates are true when applied to that item. Predicate patterns can be
-                    used to match atomic values and maps as well as nodes.</p>
+                    used to match atomic items and maps as well as nodes.</p>
             </li>
         </ul>
 

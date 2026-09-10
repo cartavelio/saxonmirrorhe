@@ -178,7 +178,7 @@
       <samp><![CDATA[XdmValue (any sequence)
    XdmItem (any single item, that is, a sequence of length one)
       XdmNode (any node)
-      XdmAtomicValue (any atomic value)
+      XdmAtomicValue (any atomic item)
       XdmFunctionItem (a function item)
          XdmMap (a map)
          XdmArray (an array)
@@ -287,7 +287,7 @@
          <li>
             <p>The result of an XPath expression is in general an <a class="javalink"
                   href="net.sf.saxon.s9api.XdmValue">XdmValue</a>, representing a value as defined
-               in the XDM data model (that is, a sequence of nodes and/or atomic values). Subclasses
+               in the XDM data model (that is, a sequence of nodes and/or atomic items). Subclasses
                of <code>XdmValue</code> include <a class="javalink"
                   href="net.sf.saxon.s9api.XdmItem">XdmItem</a>, <a class="javalink"
                   href="net.sf.saxon.s9api.XdmNode">XdmNode</a>, and <a class="javalink"
@@ -629,7 +629,7 @@ XPath xpath = xpathFactory.newXPath();
             <li>
                <p>The result of an XPath expression is in general an <a class="cslink"
                   href="Saxon.Api.XdmValue">XdmValue</a>, representing a value as defined
-                  in the XDM data model (that is, a sequence of nodes and/or atomic values). Subclasses
+                  in the XDM data model (that is, a sequence of nodes and/or atomic items). Subclasses
                   of <code>XdmValue</code> include <a class="cslink"
                      href="Saxon.Api.XdmItem">XdmItem</a>, <a class="cslink"
                         href="Saxon.Api.XdmNode">XdmNode</a>, and <a class="cslink"
@@ -807,7 +807,7 @@ XPath xpath = xpathFactory.newXPath();
                <p>The result of an XPath expression is in general an <a class="bodylink code"
                   href="https://www.saxonica.com/saxon-c/doc12/html/classXdmValue.html">XdmValue</a>,
                   representing a value as defined in the XDM data model (that is, a sequence of nodes and/or
-                  atomic values). Subclasses of <code>XdmValue</code> include <a class="bodylink code"
+                  atomic items). Subclasses of <code>XdmValue</code> include <a class="bodylink code"
                      href="https://www.saxonica.com/saxon-c/doc12/html/classXdmItem.html" >XdmItem</a>, <a
                         class="bodylink code"
                         href="https://www.saxonica.com/saxon-c/doc12/html/classXdmNode.html" >XdmNode</a>, and
@@ -871,7 +871,7 @@ XPath xpath = xpathFactory.newXPath();
                <p>The result of an XPath expression is in general a <a class="bodylink code"
                   href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXdmValue">PyXdmValue</a>,
                   representing a value as defined in the XDM data model (that is, a sequence of nodes and/or
-                  atomic values). Subclasses of <code>XdmValue</code> include <a class="bodylink code"
+                  atomic items). Subclasses of <code>XdmValue</code> include <a class="bodylink code"
                      href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXdmItem" >PyXdmItem</a>, <a
                         class="bodylink code"
                         href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXdmNode" >PyXdmNode</a>, and
@@ -934,7 +934,7 @@ XPath xpath = xpathFactory.newXPath();
                <p>The result of an XPath expression is in general an <a class="bodylink code"
                   href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_xdmvalue">XdmValue</a>,
                   representing a value as defined in the XDM data model (that is, a sequence of nodes and/or
-                  atomic values). Subclasses of <code>XdmValue</code> include <a class="bodylink code"
+                  atomic items). Subclasses of <code>XdmValue</code> include <a class="bodylink code"
                      href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_xdmitem"
                      >XdmItem</a>, <a class="bodylink code"
                         href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_xdmnode"
@@ -1072,10 +1072,10 @@ XPath xpath = xpathFactory.newXPath();
             </td>
             <td>
                <p>Gets the typed value of a node, as defined in the XPath 2.0 data model. This is in
-                  general a sequence of atomic values, so the result is an <a class="javalink"
+                  general a sequence of atomic items, so the result is an <a class="javalink"
                      href="net.sf.saxon.om.AtomicSequence">AtomicSequence</a>. In most
-               cases the typed value will either be a single atomic value or an empty sequence;
-               a single atomic value will be represented using class 
+               cases the typed value will either be a single atomic item or an empty sequence;
+               a single atomic item will be represented using class 
                   <a class="javalink" href="net.sf.saxon.value.AtomicValue">AtomicValue</a>
                (which implements <code>AtomicSequence</code>) or one of its subclasses such as
                   <a class="javalink" href="net.sf.saxon.value.StringValue">StringValue</a>. 
