@@ -16,7 +16,7 @@ latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Descri
         <Copyright>Copyright © 2021 Saxonica, Ltd.</Copyright>
         <PackageProjectUrl>https://saxonica.com/</PackageProjectUrl>
         <PackageReleaseNotes>Our first native C# release.</PackageReleaseNotes>
-        <PackageSummary>An XSLT 3.0 processor for .NET 5</PackageSummary>
+        <PackageSummary>An XSLT 3.0 processor for .NET 6</PackageSummary>
         <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>    
@@ -47,7 +47,8 @@ latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Descri
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="HtmlAgilityPack" Version="1.11.33" />
+      <!--<PackageReference Include="HtmlAgilityPack" Version="1.11.33" />-->
+      <PackageReference Include="AngleSharp" Version="0.17.1" />
       <PackageReference Include="ICU4N" Version="60.1.0-alpha.354" />
       <PackageReference Include="ICU4N.Collation" Version="60.1.0-alpha.354" />
       <PackageReference Include="ICU4N.CurrencyData" Version="60.1.0-alpha.354" />
@@ -59,10 +60,11 @@ latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Descri
       <PackageReference Include="XmlResolverData" Version="1.2.0" />
       <PackageReference Include="Singulink.Numerics.BigDecimal" Version="2.0.0" />
       <PackageReference Include="Singulink.Numerics.BigIntegerExtensions" Version="2.0.1" />
-      <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="5.0.0" />
+      <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="6.0.0" />
+      <PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
     </ItemGroup>
 
     

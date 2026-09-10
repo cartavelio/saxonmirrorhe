@@ -1,4 +1,7 @@
-using HtmlAgilityPack;
+//using HtmlAgilityPack;
+using AngleSharp;
+using AngleSharp.Dom;
+using AngleSharp.Html.Parser;
 using Saxon.Hej.functions;
 using Saxon.Impl.Dom;
 
@@ -9,10 +12,17 @@ namespace Saxon.Impl.Helpers {
             Saxon.Hej.Controller controller = context.getController();
             Saxon.Hej.Configuration config = controller.getConfiguration();
             Saxon.Hej.value.AtomicValue content = (Saxon.Hej.value.AtomicValue)(arguments[0].head());
-            HtmlDocument doc = new HtmlDocument();
-            doc.LoadHtml(content.getStringValue());
-            return new HtmlDocumentWrapper(doc, getStaticBaseUriString(), config);
+            var angleSharpConfig = Configuration.Default;
+
+            //Create a new context for evaluating webpages with the given config
+            var angleSharpContext = BrowsingContext.New(angleSharpConfig);
             
+            IHtmlParser parser = angleSharpContext.GetService<IHtmlParser>();
+            var source = "<h1>Some example source</h1><p>This is a paragraph element";
+            IDocument htmlDoc = parser.ParseDocument(content.getStringValue());
+            return new HtmlDocumentWrapper(htmlDoc, getRetainedStaticContext().getStaticBaseUriString(), config);
+
+
         }
     }
 }
