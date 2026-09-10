@@ -17,10 +17,8 @@ import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.wrapper.AbstractNodeWrapper;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.value.StringValue;
-import org.apache.axiom.om.OMContainer;
-import org.apache.axiom.om.OMDocument;
-import org.apache.axiom.om.OMNode;
-import org.apache.axiom.om.OMText;
+import org.apache.axiom.om.*;
+import org.apache.axiom.om.impl.llom.OMDocumentImpl;
 
 import java.util.Iterator;
 
@@ -139,11 +137,13 @@ public abstract class AxiomParentNodeWrapper extends AbstractNodeWrapper
         public NodeInfo next() {
             while (true) {
                 if (base.hasNext()) {
-                    OMNode node = (OMNode)base.next();
-                    if (!isIgnoredNode(node)) {
-                        NodeInfo wrapper = wrap(node);
-                        if (predicate.test(wrapper)) {
-                            return wrapper;
+                    Object node = base.next();
+                    if (node instanceof OMNode || node instanceof OMDocument) {
+                        if (node instanceof OMDocument || !isIgnoredNode((OMNode) node)) {
+                            NodeInfo wrapper = wrap(node);
+                            if (predicate.test(wrapper)) {
+                                return wrapper;
+                            }
                         }
                     }
                 } else {
