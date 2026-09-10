@@ -37,7 +37,7 @@
 
     <xsl:template match="section">
         <xsl:copy>
-            <xsl:sequence select="@id|@title"/>
+            <xsl:sequence select="@id|@title|@class"/>
             <!--<xsl:apply-templates select="el:xsl-element" mode="#current">
                 <xsl:sort select="/name"/>
             </xsl:apply-templates>-->
@@ -95,8 +95,13 @@
         <element-syntax xmlns="http://www.saxonica.com/ns/doc/elements" name="{$el-name}">
             <xsl:for-each select="$element-in-catalog/e:attribute">
                 <!--<xsl:message>@<xsl:value-of select="@name"/></xsl:message>-->
+                <xsl:variable name="att-name" select="@name" as="xs:string"/>
                 <attribute xmlns="http://www.saxonica.com/ns/doc/elements">
                     <xsl:apply-templates select="@*" mode="#current"/>
+                    <xsl:if test="exists($current-element/el:attributes/el:attribute[@name eq $att-name]/@class)">
+                        <xsl:attribute name="class" select="$current-element/el:attributes/el:attribute[@name eq
+                            $att-name]/@class"/>
+                    </xsl:if>
                     <desc>
                         <xsl:sequence select="$atts(@name)"/>
                         <xsl:if test="empty($atts(@name)) and not($el-name eq 'transform')">

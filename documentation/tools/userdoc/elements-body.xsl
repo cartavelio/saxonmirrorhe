@@ -120,6 +120,9 @@
         <table class="element-att">
             <xsl:for-each select="el:attribute">
                 <tr>
+                    <xsl:if test="@class">
+                        <xsl:attribute name="class" select="@class"/>
+                    </xsl:if>
                     <td>
                         <p>
                             <code>

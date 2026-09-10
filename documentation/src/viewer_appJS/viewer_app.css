@@ -381,6 +381,17 @@ div.section h2{
    margin: 1em auto;
    border-color: #688790;
 }
+.qt4 {
+   padding: .5em;
+   border: .5em;
+   border-left-style: solid;
+   margin: 1em auto;
+   border-color: #F7E44F;
+   /*background-image: url("https://qt4cg.org/img/QT4_shaded-64.png");
+   background-repeat: no-repeat;
+   background-position-x: right;
+   background-origin: content-box;*/
+}
 .signature, .fullsignature {
     font-size:inherit;
     font-family:monospace;
