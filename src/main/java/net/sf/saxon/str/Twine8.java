@@ -119,7 +119,7 @@ public class Twine8 extends UnicodeString {
             throw new IndexOutOfBoundsException();
         }
         if (end == start) {
-            return EmptyUniString.getInstance();
+            return EmptyUnicodeString.getInstance();
         } else if (start == 0 && end == len) {
             return this;
         } else {

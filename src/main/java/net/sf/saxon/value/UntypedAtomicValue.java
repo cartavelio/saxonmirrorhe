@@ -7,7 +7,7 @@
 
 package net.sf.saxon.value;
 
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -22,7 +22,7 @@ import net.sf.saxon.type.BuiltInAtomicType;
 public class UntypedAtomicValue extends StringValue {
 
     public static final UntypedAtomicValue ZERO_LENGTH_UNTYPED =
-            new UntypedAtomicValue(EmptyUniString.getInstance());
+            new UntypedAtomicValue(EmptyUnicodeString.getInstance());
 
     /**
      * Constructor

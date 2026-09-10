@@ -9,7 +9,7 @@ package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.AtomicSequence;
@@ -41,7 +41,7 @@ final class TinyCommentImpl extends TinyNodeImpl {
         int start = tree.alpha[nodeNr];
         int len = tree.beta[nodeNr];
         if (len == 0) {
-            return EmptyUniString.getInstance();
+            return EmptyUnicodeString.getInstance();
         }
         return tree.commentBuffer.substring(start, start + len);
     }

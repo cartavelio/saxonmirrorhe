@@ -8,7 +8,7 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.event.Outputter;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.str.UnicodeString;
@@ -61,7 +61,7 @@ public abstract class PseudoExpression extends Expression {
     @Override
     public final UnicodeString evaluateAsString(XPathContext context) throws XPathException {
         cannotEvaluate();
-        return EmptyUniString.getInstance();
+        return EmptyUnicodeString.getInstance();
     }
 
     @Override

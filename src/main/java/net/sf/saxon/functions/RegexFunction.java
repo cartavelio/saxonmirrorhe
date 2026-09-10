@@ -14,7 +14,7 @@ import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.regex.RegularExpression;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 
@@ -47,7 +47,7 @@ public abstract class RegexFunction extends SystemFunction implements StatefulSy
                 }
                 List<String> warnings = new ArrayList<>(1);
                 staticRegex = config.compileRegularExpression(re, flags, hostLang, warnings);
-                if (!allowRegexMatchingEmptyString() && staticRegex.matches(EmptyUniString.getInstance())) {
+                if (!allowRegexMatchingEmptyString() && staticRegex.matches(EmptyUnicodeString.getInstance())) {
                     staticRegex = null;
                     // will cause a dynamic error
                 }
@@ -129,7 +129,7 @@ public abstract class RegexFunction extends SystemFunction implements StatefulSy
         List<String> warnings = new ArrayList<>(1);
         RegularExpression regex = config.compileRegularExpression(regexArg, flags, hostLang, warnings);
 
-        if (!allowRegexMatchingEmptyString() && regex.matches(EmptyUniString.getInstance())) {
+        if (!allowRegexMatchingEmptyString() && regex.matches(EmptyUnicodeString.getInstance())) {
             throw new XPathException("The regular expression must not be one that matches a zero-length string", "FORX0003");
         }
         return regex;

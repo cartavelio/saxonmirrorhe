@@ -21,7 +21,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTestPattern;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.query.QueryResult;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -376,7 +376,7 @@ public class Literal extends Expression {
     public UnicodeString evaluateAsString(XPathContext context) throws XPathException {
         AtomicValue value = (AtomicValue) evaluateItem(context);
         if (value == null) {
-            return EmptyUniString.getInstance();
+            return EmptyUnicodeString.getInstance();
         }
         return value.getUnicodeStringValue();
     }

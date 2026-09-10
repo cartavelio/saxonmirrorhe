@@ -8,7 +8,7 @@
 package net.sf.saxon.om;
 
 import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpInjectMembers;
@@ -63,7 +63,7 @@ public class ZeroOrOne<T extends Item> implements GroundedValue {
     /*@NotNull*/
     @Override
     public UnicodeString getUnicodeStringValue() {
-        return item == null ? EmptyUniString.getInstance() : item.getUnicodeStringValue();
+        return item == null ? EmptyUnicodeString.getInstance() : item.getUnicodeStringValue();
     }
 
     @Override

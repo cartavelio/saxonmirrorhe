@@ -280,7 +280,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
                     return emptyIfNull(node.getNodeValue()).tidy();
 
                 default:
-                    return EmptyUniString.getInstance();
+                    return EmptyUnicodeString.getInstance();
             }
         }
     }
@@ -293,7 +293,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      */
 
     private static CodePoints emptyIfNull(String s) {
-        return s == null ? EmptyUniString.getInstance() : StringView.of(s);
+        return s == null ? EmptyUnicodeString.getInstance() : StringView.of(s);
     }
 
     public static void expandStringValue(NodeList list, UnicodeBuilder sb) {

@@ -8,7 +8,7 @@
 package net.sf.saxon.expr.sort;
 
 import net.sf.saxon.lib.SubstringMatcher;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 
 import java.text.CollationElementIterator;
@@ -108,7 +108,7 @@ public class RuleBasedSubstringMatcher extends SimpleCollation implements Substr
         if (ba) {
             return s1.substring(ia[1]);
         } else {
-            return EmptyUniString.getInstance();
+            return EmptyUnicodeString.getInstance();
         }
     }
 
@@ -133,7 +133,7 @@ public class RuleBasedSubstringMatcher extends SimpleCollation implements Substr
         if (bb) {
             return s1.substring(0, ib[0]);
         } else {
-            return EmptyUniString.getInstance();
+            return EmptyUnicodeString.getInstance();
         }
     }
 

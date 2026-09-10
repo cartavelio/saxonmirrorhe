@@ -484,7 +484,7 @@ public class StaxBridge implements PullProvider {
                                 if (combinedText != null) {
                                     return combinedText.toUnicodeString();
                                 } else {
-                                    return EmptyUniString.getInstance();
+                                    return EmptyUnicodeString.getInstance();
                                 }
                             }
                         }

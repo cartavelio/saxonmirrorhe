@@ -12,7 +12,7 @@ import cli.System.Globalization.CompareOptions;
 import cli.System.Globalization.SortKey;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.lib.SubstringMatcher;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Base64BinaryValue;
@@ -159,7 +159,7 @@ public class DotNetComparator implements SubstringMatcher {
         String g2 = s2.toString();
         int i = comparer.IndexOf(g1, g2, options);
         if (i < 0) {
-            return EmptyUniString.getInstance();
+            return EmptyUnicodeString.getInstance();
         }
         // We need to know where the matched string ends. Start with a guess, that the matched string
         // is the same length as s2. If it's not, try shorter and longer strings until we find one that's
@@ -185,7 +185,7 @@ public class DotNetComparator implements SubstringMatcher {
             }
             if (reachedStart && reachedEnd) {
                 // shouldn't happen
-                return EmptyUniString.getInstance();
+                return EmptyUnicodeString.getInstance();
             }
         }
     }
@@ -209,7 +209,7 @@ public class DotNetComparator implements SubstringMatcher {
         String g2 = s2.toString();
         int j = comparer.IndexOf(g1, g2, options);
         if (j < 0) {
-            return EmptyUniString.getInstance();
+            return EmptyUnicodeString.getInstance();
         }
         return s1.substring(0, j);
     }

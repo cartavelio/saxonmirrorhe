@@ -18,7 +18,7 @@ import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.CodePoints;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
@@ -152,7 +152,7 @@ public class TypeCheckingFilter extends ProxyOutputter {
                 checkAllowsMany(Loc.NONE);
             }
             checkItemType(NodeKindTest.DOCUMENT,
-                          nodeSupplier(Type.DOCUMENT, null, null, EmptyUniString.getInstance()), Loc.NONE);
+                          nodeSupplier(Type.DOCUMENT, null, null, EmptyUnicodeString.getInstance()), Loc.NONE);
         }
         level++;
         getNextOutputter().startDocument(properties);
@@ -198,7 +198,7 @@ public class TypeCheckingFilter extends ProxyOutputter {
                         new NameTest(Type.ELEMENT, elemName, namePool),
                         Token.INTERSECT,
                         new ContentTypeTest(Type.ELEMENT, elemType, config, false));
-                checkItemType(type, nodeSupplier(Type.ELEMENT, elemName, elemType, EmptyUniString.getInstance()), location);
+                checkItemType(type, nodeSupplier(Type.ELEMENT, elemName, elemType, EmptyUnicodeString.getInstance()), location);
             } else {
                 if (count == 2) {
                     checkAllowsMany(location);
@@ -209,7 +209,7 @@ public class TypeCheckingFilter extends ProxyOutputter {
                             new NameTest(Type.ELEMENT, elemName, namePool),
                             Token.INTERSECT,
                             new ContentTypeTest(Type.ELEMENT, elemType, config, false));
-                    checkItemType(type, nodeSupplier(Type.ELEMENT, elemName, elemType, EmptyUniString.getInstance()), location);
+                    checkItemType(type, nodeSupplier(Type.ELEMENT, elemName, elemType, EmptyUnicodeString.getInstance()), location);
                     checkedElements.add(key);
                 }
             }

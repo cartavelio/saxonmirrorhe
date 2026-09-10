@@ -110,7 +110,7 @@ public abstract class AbstractNumberer implements Numberer {
                                String ordinal) {
 
         return format(number, picture,
-                new RegularGroupFormatter(groupSize, groupSeparator, EmptyUniString.getInstance()),
+                new RegularGroupFormatter(groupSize, groupSeparator, EmptyUnicodeString.getInstance()),
                 letterValue, ordinal);
     }
 

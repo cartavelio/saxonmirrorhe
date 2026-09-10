@@ -432,7 +432,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                     if (len > 0) {
                         receiver.comment(tree.commentBuffer.substring(start, start + len), location, ReceiverOption.NONE);
                     } else {
-                        receiver.comment(EmptyUniString.getInstance(), Loc.NONE, ReceiverOption.NONE);
+                        receiver.comment(EmptyUnicodeString.getInstance(), Loc.NONE, ReceiverOption.NONE);
                     }
                     break;
                 }

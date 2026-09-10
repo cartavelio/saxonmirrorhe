@@ -29,7 +29,7 @@ import java.nio.charset.StandardCharsets;
 
 public final class AnyURIValue extends StringValue {
 
-    /*@NotNull*/ public static final AnyURIValue EMPTY_URI = new AnyURIValue(EmptyUniString.getInstance());
+    /*@NotNull*/ public static final AnyURIValue EMPTY_URI = new AnyURIValue(EmptyUnicodeString.getInstance());
 
 
     /**
@@ -41,7 +41,7 @@ public final class AnyURIValue extends StringValue {
      */
 
     public AnyURIValue(UnicodeString value) {
-        super(value == null ? (UnicodeString) EmptyUniString.getInstance() : Whitespace.collapseWhitespace(value));
+        super(value == null ? (UnicodeString) EmptyUnicodeString.getInstance() : Whitespace.collapseWhitespace(value));
         typeLabel = BuiltInAtomicType.ANY_URI;
     }
 

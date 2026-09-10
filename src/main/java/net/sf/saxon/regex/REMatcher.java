@@ -587,7 +587,7 @@ public class REMatcher {
      */
     public UnicodeString replace(UnicodeString in, UnicodeString replacement) {
         // String to return
-        UnicodeString result = EmptyUniString.getInstance();
+        UnicodeString result = EmptyUnicodeString.getInstance();
 
         // Start at position 0 and search the whole string
         int pos = 0;

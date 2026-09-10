@@ -15,7 +15,7 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UniStringConsumer;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
@@ -97,7 +97,7 @@ public class Concat extends SystemFunction implements PushableFunction {
 
     @Override
     public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
-        UnicodeString str = EmptyUniString.getInstance();
+        UnicodeString str = EmptyUnicodeString.getInstance();
         for (Sequence arg : arguments) {
             SequenceIterator iter = arg.iterate();
             Item item;

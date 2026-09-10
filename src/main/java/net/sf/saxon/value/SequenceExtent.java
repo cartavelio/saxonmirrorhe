@@ -223,12 +223,12 @@ public abstract class SequenceExtent implements GroundedValue {
         public UnicodeString getUnicodeStringValue() throws XPathException {
             switch (getLength()) {
                 case 0:
-                    return EmptyUniString.getInstance();
+                    return EmptyUnicodeString.getInstance();
                 case 1:
                     return this.head().getUnicodeStringValue();
                 default:
                     UnicodeBuilder builder = new UnicodeBuilder();
-                    UnicodeString separator = EmptyUniString.getInstance();
+                    UnicodeString separator = EmptyUnicodeString.getInstance();
                     for (T item : items) {
                         builder.append(separator);
                         separator = StringConstants.SINGLE_SPACE;

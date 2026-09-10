@@ -16,7 +16,7 @@ import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
@@ -250,7 +250,7 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
                 return StringView.tidy(node.get_Value());
 
             default:
-                return EmptyUniString.getInstance();
+                return EmptyUnicodeString.getInstance();
         }
     }
 

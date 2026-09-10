@@ -13,7 +13,7 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -587,7 +587,7 @@ public abstract class SystemFunction extends AbstractFunction {
 
     protected UnicodeString getUniStringArg(Sequence supplied) throws XPathException {
         StringValue item = (StringValue)supplied.head();
-        return item == null ? EmptyUniString.getInstance() : item.getUnicodeStringValue();
+        return item == null ? EmptyUnicodeString.getInstance() : item.getUnicodeStringValue();
     }
 
 

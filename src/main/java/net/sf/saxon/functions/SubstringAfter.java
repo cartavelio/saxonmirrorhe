@@ -10,7 +10,7 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.SubstringMatcher;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.StringValue;
@@ -44,16 +44,16 @@ public class SubstringAfter extends CollatingFunctionFixed {
 
     private static UnicodeString substringAfter(UnicodeString arg1, UnicodeString arg2, SubstringMatcher collator) {
         if (arg1 == null) {
-            arg1 = EmptyUniString.getInstance();
+            arg1 = EmptyUnicodeString.getInstance();
         }
         if (arg2 == null) {
-            arg2 = EmptyUniString.getInstance();
+            arg2 = EmptyUnicodeString.getInstance();
         }
         if (arg2.isEmpty()) {
             return arg1;
         }
         if (arg1.isEmpty()) {
-            return EmptyUniString.getInstance();
+            return EmptyUnicodeString.getInstance();
         }
 
         return collator.substringAfter(arg1, arg2);

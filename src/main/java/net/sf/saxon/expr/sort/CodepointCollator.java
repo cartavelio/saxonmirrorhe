@@ -10,7 +10,7 @@ package net.sf.saxon.expr.sort;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.lib.SubstringMatcher;
-import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 
 
@@ -124,7 +124,7 @@ public class CodepointCollator implements StringCollator, SubstringMatcher {
     public UnicodeString substringAfter(UnicodeString s1, UnicodeString s2) {
         long i = s1.indexOf(s2, 0);
         if (i < 0) {
-            return EmptyUniString.getInstance();
+            return EmptyUnicodeString.getInstance();
         }
         return s1.substring(i + s2.length());
     }
@@ -142,7 +142,7 @@ public class CodepointCollator implements StringCollator, SubstringMatcher {
     public UnicodeString substringBefore(/*@NotNull*/ UnicodeString s1, UnicodeString s2) {
         long j = s1.indexOf(s2, 0);
         if (j < 0) {
-            return EmptyUniString.getInstance();
+            return EmptyUnicodeString.getInstance();
         }
         return s1.substring(0, j);
     }
