@@ -263,15 +263,6 @@ task eecs_preprocess(
   }
 }
 
-task eecs_resources(
-  type: Copy,
-  dependsOn: ["compile_function_library"],
-  description: "Copy the SEF file for SaxonCS"
-) {
-  from "${buildDir}/resources/main/net/sf/saxon/data/sef/function-library.sef.xml"
-  into "${buildDir}/cs/resources/sef"
-}
-
 task eecs_sources(
   type: Copy,
   dependsOn: ["eecs_preprocess"],
@@ -392,7 +383,7 @@ task eecs_generateCSharp(
 
 task eecs_project_files (
   type: Copy,
-  dependsOn: ["eecs_generateCSharp", "eecs_resources"],
+  dependsOn: ["eecs_generateCSharp", "processResources"],
   description: "Prepare the project files used for EECS build"
 ) {
   from "src/main/saxon-cs/csproj"

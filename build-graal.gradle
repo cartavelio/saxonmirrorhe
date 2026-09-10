@@ -465,7 +465,7 @@ task unjar_htmlParser(
 task graal_hec_jar(
   type: Jar,
   dependsOn: ["graal_hecCompile", "hej_MetaInf", "rejar_Xerces",
-              "compile_function_library", "unjar_ICU4jJar"],
+              "processResources", "unjar_ICU4jJar"],
   description: "Build the HE jar file for SaxonC"
 ) {
   inputs.files fileTree(dir: "${buildDir}/services/saxon-he/META-INF")
@@ -473,7 +473,6 @@ task graal_hec_jar(
   inputs.files fileTree(dir: "${projectDir}/src/main/resources/net")
   inputs.files fileTree(dir: "${buildDir}/xerces")
   inputs.files fileTree(dir: "${buildDir}/icu")
-  inputs.file  "${buildDir}/resources/main/net/sf/saxon/data/sef/function-library.sef.xml"
   outputs.file "${buildDir}/c/jars/hec/saxon-he-${saxonVersion}.jar"
 
   archiveBaseName = "saxon-he-${saxonVersion}"
@@ -492,13 +491,10 @@ task graal_hec_jar(
     include "net/**"
   }
   from ("${buildDir}/xerces") {
-      include "**/*.class"
-      include "**/*.properties"
-      exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
-      exclude "META-INF/MANIFEST.MF"
-    }
-  from("${buildDir}/resources/main"){
-    include "net/sf/saxon/data/sef/function-library.sef.xml"
+    include "**/*.class"
+    include "**/*.properties"
+    exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
+    exclude "META-INF/MANIFEST.MF"
   }
   doFirst {
     mkdir "build/c/jars/hec"
@@ -508,7 +504,7 @@ task graal_hec_jar(
 task graal_pec_jar(
   type: Jar,
   dependsOn: ["graal_pecCompile", "pej_MetaInf", "rejar_Xerces", "unjar_htmlParser",
-              "compile_function_library", "unjar_ICU4jJar"],
+              "processResources", "unjar_ICU4jJar"],
   description: "Build the PE jar file for SaxonC \"unjar_ICU4jJar\", \"unjar_JLineJar\""
 ) {
   inputs.files fileTree(dir: "${buildDir}/services/saxon-pe/META-INF")
@@ -516,7 +512,6 @@ task graal_pec_jar(
   inputs.files fileTree(dir: "${projectDir}/src/main/resources/net")
   inputs.files fileTree(dir: "${buildDir}/xerces")
   inputs.files fileTree(dir: "${buildDir}/icu")
-  inputs.file  "${buildDir}/resources/main/net/sf/saxon/data/sef/function-library.sef.xml"
   outputs.file "${buildDir}/c/jars/pec/saxon-pe-${saxonVersion}.jar"
 
   archiveBaseName = "saxon-pe-${saxonVersion}"
@@ -569,13 +564,10 @@ task graal_pec_jar(
       exclude "META-INF/MANIFEST.MF"
     }
   from ("${buildDir}/jLine") {
-      include "**/*.class"
-      include "**/*.*"
-      include "**/*.properties"
-      exclude "META-INF/MANIFEST.MF"
-    }
-  from("${buildDir}/resources/main"){
-    include "net/sf/saxon/data/sef/function-library.sef.xml"
+    include "**/*.class"
+    include "**/*.*"
+    include "**/*.properties"
+    exclude "META-INF/MANIFEST.MF"
   }
   doFirst {
     mkdir "build/c/pec"
@@ -585,7 +577,7 @@ task graal_pec_jar(
 task graal_eec_jar(
   type: Jar,
   dependsOn: ["graal_eecCompile", "eej_MetaInf", "rejar_Xerces", "unjar_htmlParser",
-              "compile_function_library", "unjar_ICU4jJar"],
+              "processResources","unjar_ICU4jJar"],
   description: "Build the EE jar file for SaxonC, removed  \"unjar_ICU4jJar\", \"unjar_JLineJar\""
 ) {
   inputs.files fileTree(dir: "${buildDir}/services/saxon-ee/META-INF")
@@ -593,7 +585,6 @@ task graal_eec_jar(
   inputs.files fileTree(dir: "${projectDir}/src/main/resources/net")
   inputs.files fileTree(dir: "${buildDir}/xerces")
   inputs.files fileTree(dir: "${buildDir}/icu")
-  inputs.file  "${buildDir}/resources/main/net/sf/saxon/data/sef/function-library.sef.xml"
   outputs.file "${buildDir}/c/jars/eec/saxon-ee-${saxonVersion}.jar"
 
   archiveBaseName = "saxon-ee-${saxonVersion}"
@@ -634,14 +625,11 @@ task graal_eec_jar(
       exclude "META-INF/MANIFEST.MF"
     }
   from ("${buildDir}/jLine") {
-      include "**/*.class"
-      include "**/*.*"
-      include "**/*.res"
-      include "**/*.properties"
-      exclude "META-INF/MANIFEST.MF"
-    }
-  from("${buildDir}/resources/main"){
-    include "net/sf/saxon/data/sef/function-library.sef.xml"
+    include "**/*.class"
+    include "**/*.*"
+    include "**/*.res"
+    include "**/*.properties"
+    exclude "META-INF/MANIFEST.MF"
   }
   doFirst {
     mkdir "${buildDir}/c/eec"

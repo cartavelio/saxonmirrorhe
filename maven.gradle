@@ -38,7 +38,7 @@ task mavenEe() {
 
   t = task "maven${Release}SaxonJar"(
     type: Jar,
-    dependsOn: ["${release}jJar", "compile_function_library"]) {
+    dependsOn: ["${release}jJar", "processResources"]) {
     archiveBaseName = "Saxon-${RELEASE}"
     archiveVersion = saxonVersion
     destinationDirectory = project.file("${buildDir}/maven")
@@ -65,7 +65,7 @@ task mavenEe() {
 
   t = task "maven${Release}SourceJar"(
     type: Jar,
-    dependsOn: ["${release}j_preprocess", "eej_preprocess", "compile_function_library"]) {
+    dependsOn: ["${release}j_preprocess", "eej_preprocess", "processResources"]) {
     archiveBaseName = "Saxon-${RELEASE}"
     archiveClassifier = 'sources'
     archiveVersion = saxonVersion

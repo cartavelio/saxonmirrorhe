@@ -210,8 +210,6 @@ net/sf/saxon/data/json.xsd
 net/sf/saxon/data/override.xsl
 net/sf/saxon/data/profile-json.xsl
 net/sf/saxon/data/profile.xsl
-net/sf/saxon/data/sef/
-net/sf/saxon/data/sef/function-library.sef.xml
 net/sf/saxon/data/unicodeBlocks.xml
 net/sf/saxon/data/xml-to-json-indent.xsl
 net/sf/saxon/data/xml-to-json-pkg.xsl

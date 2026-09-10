@@ -63,9 +63,6 @@
     },
     {
       "pattern":"\\Qnet/sf/saxon/data/analyze-string.xsd\\E"
-    },
-    {
-      "pattern":"\\Qnet/sf/saxon/data/sef/function-library.sef.xml\\E"
     }
 
   ]},

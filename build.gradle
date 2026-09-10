@@ -1030,25 +1030,6 @@ task eej_MetaInf(
 
 // ============================================================
 
-task compile_function_library(dependsOn: ["eejCompile", "processResources"]) {
-  // Chicken, meet egg. We need to build the compiler to compile the
-  // stylesheet to provide function implementations for SaxonJ
-  inputs.files fileTree("${projectDir}/src/main/xslt")
-  outputs.files "${buildDir}/resources/main/net/sf/saxon/data/sef/function-library.sef.xml"
-  doLast {
-    javaexec {
-      classpath = configurations.productTests + project.files(file("${buildDir}/classes/eej"))
-      mainClass = "com.saxonica.Transform"
-      args "-xsl:src/main/xslt/function-library.xsl",
-        "-export:${buildDir}/resources/main/net/sf/saxon/data/sef/function-library.sef.xml",
-        "-target:HE", "-nogo", "--allowSyntaxExtensions:on"
-    }
-  }
-}
-compileTestJava.dependsOn compile_function_library
-
-// ============================================================
-
 // The jar Class-Path allows the jar to find dependent libraries
 // locally. These are for the libraries we ship with the product.
 def heJarClassPath = "lib/xmlresolver-${xmlresolverVersion}.jar lib/xmlresolver.jar "
@@ -1153,7 +1134,7 @@ def compareManifests(File jarfile, File jargold) {
 
 task hejJar(
   type: Jar,
-  dependsOn: ["hej_MetaInf", "hejCompile", "compile_function_library"],
+  dependsOn: ["hej_MetaInf", "hejCompile", "processResources"],
   description: "Build the HE jar file"
 ) {
   archiveBaseName = "saxon-he-${saxonVersion}"
@@ -1229,7 +1210,7 @@ if (file("${projectDir}/src/main/java/com/saxonica/xqj").exists()) {
 
 task pejJar(
   type: Jar,
-  dependsOn: ["pej_MetaInf", "pejCompile", "compile_function_library"],
+  dependsOn: ["pej_MetaInf", "pejCompile", "processResources"],
   description: "Build the PE jar file"
 ) {
   archiveBaseName = "saxon-pe-${saxonVersion}"
@@ -1281,7 +1262,7 @@ pejJarSql.finalizedBy(testPejJarSql)
 
 task eejJar(
   type: Jar,
-  dependsOn: ["eej_MetaInf", "eejCompile", "compile_function_library"],
+  dependsOn: ["eej_MetaInf", "eejCompile", "processResources"],
   description: "Build the EE jar file"
 ) {
   archiveBaseName = "saxon-ee-${saxonVersion}"
