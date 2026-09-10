@@ -1130,7 +1130,7 @@ void xmarkTest2(Xslt30Processor *proc, sResultCount *sresult) {
 
     proc->setJustInTimeCompilation(true);
 
-    XdmValue *result = proc->transformFileToValue("xmark100k.xml", "q12.xsl");
+    XdmValue *result = proc->transformFileToValue("../data/xmark100k.xml", "../data/q12.xsl");
     if (result != nullptr && !proc->exceptionOccurred()) {
         cout << "XdmNode returned" << endl;
         sresult->success++;
@@ -1140,20 +1140,21 @@ void xmarkTest2(Xslt30Processor *proc, sResultCount *sresult) {
         printf("result is null \nCheck For errors:");
         sresult->failure++;
         sresult->failureList.push_back("xmarkTest2");
-        if (proc->exceptionOccurred() > 0) {
+        if (proc->exceptionOccurred()) {
             SaxonApiException * exception = proc->getException();
             if(exception != nullptr) {
                 const char *message = exception->getMessage();
                 if (message != nullptr) {
                     cerr << message << endl;
-		    proc->exceptionClear();
+
                 }
                 delete exception;
-            } else {
+            } /*else {
                 cerr << "Exception object is nullptr" << endl;
                 SaxonProcessor::sxn_environ->env->ExceptionDescribe();
-		SaxonProcessor::sxn_environ->env->ExceptionClear();
-            }
+		        SaxonProcessor::sxn_environ->env->ExceptionClear();
+            } */
+            proc->exceptionClear();
         }
     }
 

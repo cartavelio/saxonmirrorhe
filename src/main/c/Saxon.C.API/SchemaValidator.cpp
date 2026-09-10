@@ -439,12 +439,12 @@ void SchemaValidator::exceptionClear(){
 
 const char * SchemaValidator::getErrorCode(int i) {
 	if(proc->exception == nullptr) {return nullptr;}
-	return nullptr; // TODO proc->exception->getErrorCode(i);
+	return proc->exception->getErrorCode();
 }
 
 const char * SchemaValidator::getErrorMessage(int i ){
  if(proc->exception == nullptr) {return nullptr;}
- return nullptr;//TODO fix this up. proc->exception->getErrorMessage(i);
+ return proc->exception->getMessage();
  }
 
 bool SchemaValidator::exceptionOccurred() {

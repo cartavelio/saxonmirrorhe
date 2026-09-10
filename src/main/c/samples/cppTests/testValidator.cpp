@@ -66,7 +66,7 @@ void testValidator3(SaxonProcessor * processor, SchemaValidator * val){
   const char* sch1 = "<?xml version='1.0' encoding='UTF-8'?><schema targetNamespace='http://myexample/family' xmlns:fam='http://myexample/family' xmlns='http://www.w3.org/2001/XMLSchema'><element name='FamilyMember' type='string' /><element name='Parent' type='string' substitutionGroup='fam:FamilyMember'/><element name='Child' type='string' substitutionGroup='fam:FamilyMember'/><element name='Family'><complexType><sequence><element ref='fam:FamilyMember' maxOccurs='unbounded'/></sequence></complexType></element>  </schema>";
 	
 	val->registerSchemaFromString(sch1);
-
+    val->setProperty("http://saxon.sf.net/feature/multipleSchemaImports", "on");
 	val->validate("family.xml");
 	if(!val->exceptionOccurred()) {
 		cout<<endl<<"Doc1 is OK"<<endl;
@@ -171,6 +171,9 @@ void testValidator6(SaxonProcessor * processor, SchemaValidator * val){
 
     if(error != NULL) {
        cout<<endl<<"Error: Validation error: "<<error<<endl;
+    } else {
+        cout<<endl<<"No errors found"<<endl;
+
     }
 }
 
