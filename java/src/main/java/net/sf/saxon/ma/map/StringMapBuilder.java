@@ -172,7 +172,7 @@ public class StringMapBuilder {
      */
 
     public MapItem getCompletedMapConfidently() {
-        if (keys.size() == 0) {
+        if (keys.isEmpty()) {
             return EmptyMap.getInstance(specVersion);
         } else if (keys.size() == 1) {
             return new SingleEntryMap(new StringValue(keys.get(0)), values.get(0), specVersion);
