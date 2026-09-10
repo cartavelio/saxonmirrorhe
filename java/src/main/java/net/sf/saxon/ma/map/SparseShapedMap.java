@@ -87,9 +87,8 @@ public class SparseShapedMap extends ShapedMap {
      */
     @Override
     public AtomicIterator keys() {
-        int length = size();
-        List<AtomicValue> list = new ArrayList<>(length);
-        for (int i = 0; i < length; i++) {
+        List<AtomicValue> list = new ArrayList<>(values.length);
+        for (int i = 0; i < values.length; i++) {
             if (values[i] != null) {
                 list.add(new StringValue(shape.getKey(i)));
             }
@@ -104,9 +103,8 @@ public class SparseShapedMap extends ShapedMap {
      */
     @Override
     public Iterable<KeyValuePair> keyValuePairs() {
-        int length = size();
-        List<KeyValuePair> list = new ArrayList<>(length);
-        for (int i = 0; i < length; i++) {
+        List<KeyValuePair> list = new ArrayList<>(values.length);
+        for (int i = 0; i < values.length; i++) {
             if (values[i] != null) {
                 list.add(new KeyValuePair(new StringValue(shape.getKey(i)), values[i]));
             }
