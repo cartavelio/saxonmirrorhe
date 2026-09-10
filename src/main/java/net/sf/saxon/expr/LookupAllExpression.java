@@ -18,7 +18,6 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
-import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.ma.arrays.SquareArrayConstructor;
 import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.GroundedValue;
@@ -31,7 +30,6 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.SequenceType;
@@ -49,8 +47,6 @@ import java.util.List;
 
 public class LookupAllExpression extends UnaryExpression {
 
-    private SequenceType requiredType;
-    private LookupExpression.Modifier modifier;
 
     /**
      * Constructor
@@ -58,10 +54,8 @@ public class LookupAllExpression extends UnaryExpression {
      * @param lhs The left hand operand (which must always select a sequence of maps or arrays).
      */
 
-    public LookupAllExpression(Expression lhs, LookupExpression.Modifier modifier, SequenceType requiredType) {
+    public LookupAllExpression(Expression lhs) {
         super(lhs);
-        this.requiredType = requiredType;
-        this.modifier = modifier;
     }
 
     @Override
@@ -78,19 +72,8 @@ public class LookupAllExpression extends UnaryExpression {
 
     /*@NotNull*/
     @Override
-    public final ItemType getItemType() {
-        if (requiredType.getPrimaryType() == AnyItemType.getInstance()) {
-            ItemType lhs = getBaseExpression().getItemType();
-            if (lhs instanceof MapType) {
-                return ((MapType) lhs).getValueType().getPrimaryType();
-            } else if (lhs instanceof ArrayItemType) {
-                return ((ArrayItemType) lhs).getMemberType().getPrimaryType();
-            } else {
-                return AnyItemType.getInstance();
-            }
-        } else {
-            return requiredType.getPrimaryType();
-        }
+    public ItemType getItemType() {
+        return AnyItemType.getInstance();
     }
 
 
@@ -216,7 +199,7 @@ public class LookupAllExpression extends UnaryExpression {
     /*@NotNull*/
     @Override
     public LookupAllExpression copy(RebindingMap rebindings) {
-        return new LookupAllExpression(getBaseExpression().copy(rebindings), modifier, requiredType);
+        return new LookupAllExpression(getBaseExpression().copy(rebindings));
     }
 
     /**
@@ -269,9 +252,6 @@ public class LookupAllExpression extends UnaryExpression {
     @Override
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("lookupAll", this);
-        if (requiredType != SequenceType.ANY_SEQUENCE) {
-            destination.emitAttribute("type", AlphaCode.fromSequenceType(requiredType));
-        }
         getBaseExpression().export(destination);
         destination.endElement();
     }
@@ -303,7 +283,7 @@ public class LookupAllExpression extends UnaryExpression {
         public PullEvaluator elaborateForPull() {
             LookupAllExpression expr = (LookupAllExpression) getExpression();
             PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
-            SequenceType req = expr.requiredType;
+            SequenceType req = SequenceType.ANY_SEQUENCE;
             TypeHierarchy th = getConfiguration().getTypeHierarchy();
             return context -> {
                 SequenceIterator lhs = baseEval.iterate(context);
@@ -316,25 +296,10 @@ public class LookupAllExpression extends UnaryExpression {
                         return EmptyIterator.getInstance();
                     }
                 });
-                if (req != SequenceType.ANY_SEQUENCE) {
-                    entries = new ItemMappingIterator(entries, entry ->
-                        req.matches(((ShapedMap)entry).get("value"), th) ? entry : null
-                    );
-                }
-                switch (expr.modifier) {
-                    case ENTRY:
-                        return entries;
-                    case KEY:
-                        return new ItemMappingIterator(entries, item ->
-                                (AtomicValue)((ShapedMap)item).get("key"));
-                    case VALUE:
-                        return new ItemMappingIterator(entries, item ->
-                                SimpleArrayItem.makeSimpleArrayItem(((ShapedMap) item).get("value").iterate()));
-                    case CONTENT:
-                    default:
-                        return new MappingIterator(entries, item ->
-                                ((ShapedMap) item).get("value").iterate());
-                }
+
+                return new MappingIterator(entries, item ->
+                        ((ShapedMap) item).get("value").iterate());
+
             };
         }
     }

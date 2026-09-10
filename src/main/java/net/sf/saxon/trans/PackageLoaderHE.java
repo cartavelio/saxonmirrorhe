@@ -2683,7 +2683,7 @@ public class PackageLoaderHE implements IPackageLoader {
             if (typeAtt != null) {
                 type = AlphaCode.toSequenceType(typeAtt, loader.getConfiguration());
             }
-            return new LookupAllExpression(select, null, type);  // TODO: add modifier
+            return new LookupAllExpression(select);  // TODO: add modifier and type
         });
 
         eMap.put("map", (loader, element) -> {

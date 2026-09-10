@@ -28,6 +28,42 @@ public class ParserExtension {
     public ParserExtension() {
     }
 
+    /**
+     * Supporting code for lookup expressions (A?B) where B is the wildcard "*"
+     *
+     * @param lhs     the LHS operand of the lookup expression
+     * @param allow40
+     * @return the result of parsing the expression
+     */
+
+    public Expression lookupStar(Expression lhs,
+                                 LookupExpression.Modifier modifier,
+                                 SequenceType type,
+                                 boolean deep,
+                                 boolean allow40) {
+        if (deep) {
+            throw new UnsupportedOperationException();
+        } else {
+            return new LookupAllExpression(lhs);
+        }
+    }
+
+    /**
+     * Supporting code for lookup expressions (A?B) where B is an NCName
+     *
+     * @param lhs  the LHS operand of the lookup expression
+     * @param rhs  the RHS operand of the lookup expression
+     * @param deep true if the operator is "??" (in 4.0)
+     * @return the result of parsing the expression
+     */
+
+    public Expression lookupName(Expression lhs, LookupExpression.Modifier modifier, String rhs, boolean deep, boolean allow40) {
+        if (deep) {
+            throw new UnsupportedOperationException();
+        } else {
+            return new LookupExpression(lhs, modifier, new StringLiteral(rhs));
+        }
+    }
 
 
     public void needExtension(XPathParser p, String what) throws XPathException {
@@ -53,6 +89,14 @@ public class ParserExtension {
 
     public ItemType parseExtendedItemType(XPathParser p) throws XPathException {
         return null;
+    }
+
+    public Expression makeLookupExpression(Expression lhs, LookupExpression.Modifier modifier, Expression rhs, boolean deep, boolean allow40) {
+        if (deep) {
+            throw new UnsupportedOperationException();
+        } else {
+            return new LookupExpression(lhs, modifier, rhs);
+        }
     }
 
 

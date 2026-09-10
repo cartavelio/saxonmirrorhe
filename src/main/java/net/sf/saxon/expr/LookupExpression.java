@@ -7,8 +7,6 @@
 
 package net.sf.saxon.expr;
 
-//import com.saxonica.ee.pin.pin.LabeledArrayItem;
-//import com.saxonica.ee.pin.pin.LabeledItem;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.ItemEvaluator;
@@ -18,7 +16,6 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.ConstantAnonymousFunction;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
-import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.Twine8;
@@ -27,7 +24,6 @@ import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
@@ -58,7 +54,7 @@ public class LookupExpression extends BinaryExpression {
         ENTRY
     }
 
-    protected Modifier modifier;
+    public Modifier modifier;
 
     /**
      * Constructor
@@ -369,7 +365,7 @@ public class LookupExpression extends BinaryExpression {
     @Override
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("lookup", this);
-        String flag;
+        String flag = "";
         switch (modifier) {
             case CONTENT:
                 flag = "c";
@@ -384,7 +380,7 @@ public class LookupExpression extends BinaryExpression {
                 flag = "e";
                 break;
         }
-        destination.emitAttribute("flags", "flag");
+        destination.emitAttribute("flags", flag);
         getLhsExpression().export(destination);
         getRhsExpression().export(destination);
         destination.endElement();
@@ -432,9 +428,6 @@ public class LookupExpression extends BinaryExpression {
 
                         return context -> {
                             ArrayItem array = (ArrayItem) lhs.eval(context);
-                            if (!(array instanceof LabeledArrayItem)) {
-                                array = LabeledArrayItem.makePinnedArrayItem(array);
-                            }
                             IntegerValue subscript = (IntegerValue) rhs.eval(context);
                             return array.getIfPresent(subscript.asSubscript() - 1).iterate();
                         };
@@ -447,9 +440,6 @@ public class LookupExpression extends BinaryExpression {
                             int subscript = subscriptValue.asSubscript() - 1;
                             return MappingIterator.map(lhs.iterate(context), baseItem -> {
                                 ArrayItem array = (ArrayItem) baseItem;
-//                                if (!(array instanceof LabeledArrayItem)) {
-//                                    array = LabeledArrayItem.makePinnedArrayItem(array);
-//                                }
                                 return array.getIfPresent(subscript).iterate();
                             });
                         };
@@ -468,9 +458,6 @@ public class LookupExpression extends BinaryExpression {
                             return MappingIterator.map(baseIterator, baseItem ->
                                     MappingIterator.map(rhsValue.iterate(), index -> {
                                         ArrayItem array = (ArrayItem) baseItem;
-//                                        if (!(array instanceof LabeledArrayItem)) {
-//                                            array = LabeledArrayItem.makePinnedArrayItem(array);
-//                                        }
                                         return array.get(((IntegerValue) index).asSubscript() - 1).iterate();
                                     })
                             );
@@ -591,176 +578,7 @@ public class LookupExpression extends BinaryExpression {
 
                     };
                 }
-            } else if (expr.modifier == Modifier.ENTRY) {
-                PullEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForPull();
-                PullEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForPull();
-                return context -> {
-                    SequenceIterator baseIterator = lhs.iterate(context);
-                    GroundedValue rhsVal;
-                    try {
-                        rhsVal = SequenceTool.toGroundedValue(rhs.iterate(context));
-                    } catch (UncheckedXPathException e) {
-                        throw e.getXPathException();
-                    }
-                    MappingFunction mappingFunction = SequenceMapper.of(baseItem -> {
-                        switch (baseItem.getGenre()) {
-                            case ARRAY: {
-                                MappingFunction arrayAccess = SequenceMapper.of(index -> {
-                                    if (index instanceof IntegerValue) {
-                                        int subscript = (int)((IntegerValue)index).longValue();
-                                        GroundedValue member = ((ArrayItem) baseItem).get(subscript - 1);
-                                        return SingletonIterator.makeIterator(
-                                                makeEntry((IntegerValue)index, member, baseItem));
-                                    } else {
-                                        throw new XPathException(
-                                                "An item on the LHS of the '?' operator (" + expr.getLhsExpression().toShortString() + ") is an array, but a value on the RHS of the operator (" +
-                                                        baseItem.toShortString() + ") is not an integer", "XPTY0004")
-                                                .asTypeError()
-                                                .withLocation(expr.getLocation())
-                                                .withFailingExpression(expr);
-                                    }
-                                });
-                                SequenceIterator rhsIter = rhsVal.iterate();
-                                return new MappingIterator(rhsIter, arrayAccess);
-                            }
-                            case MAP: {
-                                MappingFunction mapAccess = SequenceMapper.of(key -> {
-                                    GroundedValue member = ((MapItem) baseItem).get((AtomicValue) key);
-                                    if (member != null) {
-                                        return SingletonIterator.makeIterator(
-                                                makeEntry((AtomicValue)key, member, baseItem));
-                                    } else {
-                                        return EmptyIterator.getInstance();
-                                    }
-                                });
-                                SequenceIterator rhsIter = rhsVal.iterate();
-                                return new MappingIterator(rhsIter, mapAccess);
-                            }
-                            case EXTERNAL: {
-                                throw new UnsupportedOperationException();
-                            }
-                            default: {
-                                mustBeArrayOrMap(expr, baseItem);
-                                return null;
-                            }
-                        }
-                    });
-                    return new MappingIterator(baseIterator, mappingFunction);
-
-                };
-            } else if (expr.modifier == Modifier.KEY) {
-                PullEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForPull();
-                PullEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForPull();
-                return context -> {
-                    SequenceIterator baseIterator = lhs.iterate(context);
-                    GroundedValue rhsVal;
-                    try {
-                        rhsVal = SequenceTool.toGroundedValue(rhs.iterate(context));
-                    } catch (UncheckedXPathException e) {
-                        throw e.getXPathException();
-                    }
-                    MappingFunction mappingFunction = SequenceMapper.of(baseItem -> {
-                        switch (baseItem.getGenre()) {
-                            case ARRAY: {
-                                MappingFunction arrayAccess = SequenceMapper.of(index -> {
-                                    if (index instanceof IntegerValue) {
-                                        // TODO: exclude if out of range
-                                        return SingletonIterator.makeIterator(index);
-                                    } else {
-                                        throw new XPathException(
-                                                "An item on the LHS of the '?' operator (" + expr.getLhsExpression().toShortString() + ") is an array, but a value on the RHS of the operator (" +
-                                                        baseItem.toShortString() + ") is not an integer", "XPTY0004")
-                                                .asTypeError()
-                                                .withLocation(expr.getLocation())
-                                                .withFailingExpression(expr);
-                                    }
-                                });
-                                SequenceIterator rhsIter = rhsVal.iterate();
-                                return new MappingIterator(rhsIter, arrayAccess);
-                            }
-                            case MAP: {
-                                MappingFunction mapAccess = SequenceMapper.of(key -> {
-                                    GroundedValue member = ((MapItem) baseItem).get((AtomicValue) key);
-                                    if (member != null) {
-                                        return SingletonIterator.makeIterator(key);
-                                    } else {
-                                        return EmptyIterator.getInstance();
-                                    }
-                                });
-                                SequenceIterator rhsIter = rhsVal.iterate();
-                                return new MappingIterator(rhsIter, mapAccess);
-                            }
-                            case EXTERNAL: {
-                                throw new UnsupportedOperationException();
-                            }
-                            default: {
-                                mustBeArrayOrMap(expr, baseItem);
-                                return null;
-                            }
-                        }
-                    });
-                    return new MappingIterator(baseIterator, mappingFunction);
-
-                };
-            } else if (expr.modifier == Modifier.VALUE) {
-                PullEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForPull();
-                PullEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForPull();
-                return context -> {
-                    SequenceIterator baseIterator = lhs.iterate(context);
-                    GroundedValue rhsVal;
-                    try {
-                        rhsVal = SequenceTool.toGroundedValue(rhs.iterate(context));
-                    } catch (UncheckedXPathException e) {
-                        throw e.getXPathException();
-                    }
-                    MappingFunction mappingFunction = SequenceMapper.of(baseItem -> {
-                        switch (baseItem.getGenre()) {
-                            case ARRAY: {
-                                MappingFunction arrayAccess = SequenceMapper.of(index -> {
-                                    if (index instanceof IntegerValue) {
-                                        int subscript = (int) ((IntegerValue) index).longValue();
-                                        GroundedValue member = ((ArrayItem) baseItem).get(subscript - 1);
-                                        SimpleArrayItem arrayItem = SimpleArrayItem.makeSimpleArrayItem(member.iterate());
-                                        return SingletonIterator.makeIterator(arrayItem);
-                                    } else {
-                                        throw new XPathException(
-                                                "An item on the LHS of the '?' operator (" + expr.getLhsExpression().toShortString() + ") is an array, but a value on the RHS of the operator (" +
-                                                        baseItem.toShortString() + ") is not an integer", "XPTY0004")
-                                                .asTypeError()
-                                                .withLocation(expr.getLocation())
-                                                .withFailingExpression(expr);
-                                    }
-                                });
-                                SequenceIterator rhsIter = rhsVal.iterate();
-                                return new MappingIterator(rhsIter, arrayAccess);
-                            }
-                            case MAP: {
-                                MappingFunction mapAccess = SequenceMapper.of(key -> {
-                                    GroundedValue member = ((MapItem) baseItem).get((AtomicValue) key);
-                                    if (member != null) {
-                                        SimpleArrayItem arrayItem = SimpleArrayItem.makeSimpleArrayItem(member.iterate());
-                                        return SingletonIterator.makeIterator(arrayItem);
-                                    } else {
-                                        return EmptyIterator.getInstance();
-                                    }
-                                });
-                                SequenceIterator rhsIter = rhsVal.iterate();
-                                return new MappingIterator(rhsIter, mapAccess);
-                            }
-                            case EXTERNAL: {
-                                throw new UnsupportedOperationException();
-                            }
-                            default: {
-                                mustBeArrayOrMap(expr, baseItem);
-                                return null;
-                            }
-                        }
-                    });
-                    return new MappingIterator(baseIterator, mappingFunction);
-
-                };
             }
-
             throw new UnsupportedOperationException();
         }
     }
@@ -777,15 +595,7 @@ public class LookupExpression extends BinaryExpression {
         Item rootItem = container;
         List<Item> ancestorItems = new ArrayList<>();
         ancestorItems.add(container);
-        while (container instanceof LabeledItem) {
-            StringMap label = container.getLabel();
-            Item gp = (Item)label.get("parent");
-            if (gp != null) {
-                ancestorItems.add(gp);
-                rootItem = gp;
-            }
-            container = gp;
-        }
+
         FunctionItem ancestors = new ConstantAnonymousFunction(
                 SequenceExtent.makeSequenceExtent(ancestorItems), SequenceType.ANY_SEQUENCE);
         FunctionItem root = new ConstantAnonymousFunction(

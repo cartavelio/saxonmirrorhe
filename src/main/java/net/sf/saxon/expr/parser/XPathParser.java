@@ -8,6 +8,7 @@
 package net.sf.saxon.expr.parser;
 
 
+import com.saxonica.expr.DeepLookupExpression;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
 import net.sf.saxon.expr.*;
@@ -3686,9 +3687,9 @@ public class XPathParser {
                 SequenceType requiredType = parseSequenceType();
                 expect(Token.RPAREN);
                 nextToken();
-                result = lookupStar(lhs, modifier, requiredType, deep);
+                result = parserExtension.lookupStar(lhs, modifier, requiredType, deep, allowXPath40Syntax);
             } else {
-                result = lookupName(lhs, modifier, name, deep);
+                result = parserExtension.lookupName(lhs, modifier, name, deep, allowXPath40Syntax);
             }
         } else if (token instanceof Token.NumericLiteral) {
             NumericValue number = ((Token.NumericLiteral)token).getValue();
@@ -3702,12 +3703,12 @@ public class XPathParser {
             result = makeLookupExpression(lhs, modifier, Literal.makeLiteral(number), deep);
         } else if (token == Token.STAR) {
             nextToken();
-            result = lookupStar(lhs, modifier, SequenceType.ANY_SEQUENCE, deep);
+            result = parserExtension.lookupStar(lhs, modifier, SequenceType.ANY_SEQUENCE, deep, allowXPath40Syntax);
         } else if (token == Token.LPAREN) {
             result = makeLookupExpression(lhs, modifier, parseParenthesizedExpression(), deep);
         } else if (token instanceof Token.StringLiteral) {
             checkLanguageVersion40();
-            result = lookupName(lhs, modifier, t.currentTokenValue, deep);
+            result = parserExtension.lookupName(lhs, modifier, t.currentTokenValue, deep, allowXPath40Syntax);
             nextToken();
         } else if (token == Token.DOLLAR) {
             checkLanguageVersion40();
@@ -3722,48 +3723,8 @@ public class XPathParser {
         return result;
     }
 
-    private Expression makeLookupExpression(Expression lhs, LookupExpression.Modifier modifier, Expression rhs, boolean deep) {
-        if (deep) {
-            return new DeepLookupExpression(lhs, modifier, rhs);
-        } else {
-            return new LookupExpression(lhs, modifier, rhs);
-        }
-    }
-
-
-    /**
-     * Supporting code for lookup expressions (A?B) where B is an NCName
-     *
-     * @param lhs the LHS operand of the lookup expression
-     * @param rhs the RHS operand of the lookup expression
-     * @param deep true if the operator is "??" (in 4.0)
-     * @return the result of parsing the expression
-     */
-
-    private Expression lookupName(Expression lhs, LookupExpression.Modifier modifier, String rhs, boolean deep) {
-        if (deep) {
-            return new DeepLookupExpression(lhs, modifier, new StringLiteral(rhs));
-        } else {
-            return new LookupExpression(lhs, modifier, new StringLiteral(rhs));
-        }
-    }
-
-    /**
-     * Supporting code for lookup expressions (A?B) where B is the wildcard "*"
-     *
-     * @param lhs the LHS operand of the lookup expression
-     * @return the result of parsing the expression
-     */
-
-    private static Expression lookupStar(Expression lhs,
-                                         LookupExpression.Modifier modifier,
-                                         SequenceType type,
-                                         boolean deep) {
-        if (deep) {
-            return new DeepLookupAllExpression(lhs, modifier, type);
-        } else {
-            return new LookupAllExpression(lhs, modifier, type);
-        }
+    protected Expression makeLookupExpression(Expression lhs, LookupExpression.Modifier modifier, Expression rhs, boolean deep) {
+        return parserExtension.makeLookupExpression(lhs, modifier, rhs, deep, allowXPath40Syntax);
     }
 
 
@@ -5747,6 +5708,7 @@ public class XPathParser {
     public void setAllowAbsentExpression(boolean allowEmpty) {
         this.allowAbsentExpression = allowEmpty;
     }
+
 
 
     /**
