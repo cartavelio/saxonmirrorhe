@@ -17,7 +17,9 @@ public class CopyOfAdjunct extends ComposingAdjunct implements FeedMaker {
         CopyOf exp = (CopyOf) getExpression();
         feed.setCopyNamespaces(exp.isCopyNamespaces());
         feed.setCopyAccumulators(exp.isCopyAccumulators());
-        feed.setValidationOptions(exp.getValidationAction(), exp.getSchemaType());
+        feed.setValidationOptions(exp.getRetainedStaticContext().getPackageData().getImportedSchema(),
+                                  exp.getValidationAction(),
+                                  exp.getSchemaType());
         return feed;
 
     }
