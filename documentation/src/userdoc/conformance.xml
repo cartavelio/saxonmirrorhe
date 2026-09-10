@@ -1068,20 +1068,10 @@
 			</ul>
 
 			<ul>
-				<!-- TODO: Are changes being made to Saxon that correspond with this change?
-        	     For example, renaming:
-        	     - net.net.sf.saxon.value.AtomicValue
-        	     - Saxon.Api.XdmAtomicValue
-        	<li>
-        		<p>Terminology changes:</p>
-        		<ul>
-        			<li><p><em>Atomic item</em> replaces <em>atomic value</em></p></li>
-        		</ul>
-        	</li>
-        	-->
-				<li>
-					<p>The rules have been relaxed regarding the use of <a href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#xml-and-xsd-versions">non-XML characters</a> in instances of <code>xs:string</code>.  This has an impact on <a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#func-parse-json"><code>fn:parse-json</code></a>, <a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#func-json-to-xml"><code>fn:json-to-xml</code></a> and the new function <a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#func-decode-from-uri"><code>fn:decode-from-uri</code></a>.</p>
-				</li>
+				<li><p>The previously optional Static Typing Feature has been dropped completely (see XPath 3.1 for a <a href="https://www.w3.org/TR/2017/REC-xpath-31-20170321/#dt-xpath-static-typing-feature">description of the feature</a> prior to 4.0).</p></li>
+				<li><p>The rules have been relaxed regarding the use of <a href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#xml-and-xsd-versions">non-XML characters</a> in instances of <code>xs:string</code>.  This has an impact on <a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#func-parse-json"><code>fn:parse-json</code></a>, <a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#func-json-to-xml"><code>fn:json-to-xml</code></a> and the new function <a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#func-decode-from-uri"><code>fn:decode-from-uri</code></a>.</p></li>
+				<li><p>The concept of a <i>context item</i> has been generalised so that it is no longer restricted to representing a single item.  Where this is the case, it may be referred to as the <i>context value</i>.  In XSLT, where the restriction still applies, it is still referred to as the <i>context item</i>.</p></li>
+				<li><p>A <i>document-uri</i> is no longer guaranteed to always represent the same document.</p></li>
 				<li><p>The term <i>atomic item</i> replaces <i>atomic value</i></p></li>
 				<li>
 					<p>It's now possible to compare and sort all types of atomic item:</p>
@@ -1138,6 +1128,19 @@
 						<li><p>For selected properties including minus sign, exponent-separator, percent and per-mille, it is now possible to specify a single-character marker to be used in the picture string, together with a multi-character rendition to be used in the formatted output.</p></li>
 					</ul>
 				</li>
+				<li>
+					<p>The XPath language specification now includes a section on <i>External Resources and Security</i>, which introduces the following changes:</p>
+					<ul>
+						<li>
+							<p>Some functions now accept an option named <code>trusted</code>:</p>
+							<ul>
+								<li><p>for <code>fn:load-xquery-module</code>, <code>fn:transform</code> and <code>xsl:evaluate</code>, to specify whether dynamically loaded code is trusted</p></li>
+								<li><p>for <code>fn:parse-xml</code>, <code>fn:doc</code>, <code>fn:xsd-validator</code>, to specify whether dynamically loaded XML is allowed to reference further external resources (such as external entities)</p></li>								
+							</ul>
+						</li>
+						<li><p>Some functions now accept an option named <code>xinclude</code>, to specify whether <code>xi:include</code> elements in the input are to be expanded: <code>fn:doc</code>, <code>fn:parse-xml</code></p></li>
+					</ul>
+				</li>				
 			</ul>
 		</section>
 

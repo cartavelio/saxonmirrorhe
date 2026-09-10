@@ -561,10 +561,6 @@
 			<li><p><a href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-atomic-comparisons">Atomic Comparisons: An Overview (Non-Normative)</a></p></li>
 		</ul>
 
-		<nav>
-			<ul/>
-		</nav>
-
 		<section id="xpath30maps" title="Maps in XPath">
 			<h1>Maps in XPath</h1>
 

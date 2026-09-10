@@ -1,6 +1,6 @@
 Section	Summary	Issue	Pull Request	Implemented	First Introduced	Changes in Saxon 13	QT4 Tests	Notes	Where in Userdocs
 1 Introduction	If a section of this specification has been updated since version 3.1, an overview of the changes is provided, along with links to navigate to the next or previous change.			N/A					
-1 Introduction	Sections with significant changes are marked with a âœ­ symbol in the table of contents.			N/A					
+1 Introduction	Sections with significant changes are marked with a ✭ symbol in the table of contents.			N/A					
 2.1 Terminology	The EBNF operators ++ and ** have been introduced, for more concise representation of sequences using a character such as "," as a separator. The notation is borrowed from Invisible XML.	1366	1498	N/A				This is a change to how the language may be described in the specification, not how it may actually be used.	
 2.1.1 Grammar Notation	The EBNF notation has been extended to allow the constructs (A ++ ",") (one or more occurrences of A, comma-separated, and (A ** ",") (zero or more occurrences of A, comma-separated.	1366	1498	N/A				This is a change to how the language may be described in the specification, not how it may actually be used.	
 2.1.2 Expression Names	This section describes and formalizes a convention that was already in use, but not explicitly stated, in earlier versions of the specification.	2084	2115	N/A				This is a change to how the language may be described in the specification, not how it may actually be used.	
@@ -11,10 +11,10 @@ Section	Summary	Issue	Pull Request	Implemented	First Introduced	Changes in Saxon
 2.2.1 Static Context	Parts of the static context that were there purely to assist in static typing, such as the statically known documents, were no longer referenced and have therefore been dropped.	1343	1181, 1344, 1496, 1991	?					
 2.2.1 Static Context	The context value static type, which was there purely to assist in static typing, has been dropped.	1495	1181, 1344, 1496, 1991	?					
 2.2.1 Static Context	Named record types used in the signatures of built-in functions are now available as standard in the static context.	835	1181, 1344, 1496, 1991	Yes					/conformance/xpath40/new-in-xpath40
-2.2.1.2 Decimal Formats	Several decimal format properties, including minus sign, exponent separator, percent, and per-mille, can now be rendered as arbitrary strings rather than being confined to a single character.	1048	1250						
-2.2.2 Dynamic Context	The concept of the context item has been generalized, so it is now a context value. That is, it is no longer constrained to be a single item.	129	368, 1265						
-2.2.2 Dynamic Context	The rules regarding the document-uri property of nodes returned by the fn:collection function have been relaxed.	1161	368, 1265						
-2.3 External Resources and Security	This section (External Resources and Security) is new.	2047	2213						
+2.2.1.2 Decimal Formats	Several decimal format properties, including minus sign, exponent separator, percent, and per-mille, can now be rendered as arbitrary strings rather than being confined to a single character.	1048	1250	Yes				FormatNumber.java (net.sf.saxon.functions.FormatNumber)	/conformance/xpath40/new-in-xpath40
+2.2.2 Dynamic Context	The concept of the context item has been generalized, so it is now a context value. That is, it is no longer constrained to be a single item.	129	368, 1265	Yes				The restriction to a single item still applies in XSLT 4.0 and there it is still referred to as the context item.	/conformance/xpath40/new-in-xpath40
+2.2.2 Dynamic Context	The rules regarding the document-uri property of nodes returned by the fn:collection function have been relaxed.	1161	368, 1265	?				Not sure if any code change is required here. I would have thought that there might be checks in place that are no longer required.	/conformance/xpath40/new-in-xpath40
+2.3 External Resources and Security	This section (External Resources and Security) is new.	2047	2213	Yes				Some functions now accept the trusted and xinclude options, to control whether external content (entities, xincludes) is resolved when dynamically loading content.	/conformance/xpath40/new-in-xpath40
 2.4 Processing Model	The static typing option has been dropped.	1343	1344						
 2.5.5 Guarded Expressions	The rules for â€œerrors and optimizationâ€ have been tightened up to disallow many cases of optimizations that alter error behavior. In particular there are restrictions on reordering the operands of and and or, and of predicates in filter expressions, in a way that might allow the processor to raise dynamic errors that the author intended to prevent.	71	230						
 2.5.6 Implausible Expressions	The rules for reporting type errors during static analysis have been changed so that a processor has more freedom to report errors in respect of constructs that are evidently wrong, such as @price/@value, even though dynamic evaluation is defined to return an empty sequence rather than an error.	602	603						
@@ -41,7 +41,7 @@ Section	Summary	Issue	Pull Request	Implemented	First Introduced	Changes in Saxon
 3.3.2.5.3 Subtyping Nodes: Elements	The type schema-element(N) is now defined to be a subtype of element() and of various other element tests.	2201	2202						
 3.3.2.5.4 Subtyping Nodes: Attributes	The type schema-attribute(N) is now defined to be a subtype of attribute() and of various other attribute tests.	2201	2202						
 3.4 Coercion Rules	The term "function conversion rules" used in 3.1 has been replaced by the term "coercion rules".		254, 815, 911, 1501, 1874						
-3.4 Coercion Rules	The coercion rules allow â€œrelabelingâ€ of a supplied atomic item where the required type is a derived atomic type: for example, it is now permitted to supply the value 3 when calling a function that expects an instance of xs:positiveInteger.	117	254, 815, 911, 1501, 1874						
+3.4 Coercion Rules	'The coercion rules allow “relabeling” of a supplied atomic item where the required type is a derived atomic type: for example, it is now permitted to supply the value 3 when calling a function that expects an instance of xs:positiveInteger.'	117	254, 815, 911, 1501, 1874						
 3.4 Coercion Rules	The coercion rules now allow any numeric type to be implicitly converted to any other, for example an xs:double is accepted where the required type is xs:decimal.	980	254, 815, 911, 1501, 1874						
 3.4 Coercion Rules	The coercion rules now allow conversion in either direction between xs:hexBinary and xs:base64Binary.	130, 480	254, 815, 911, 1501, 1874						
 3.4 Coercion Rules	The coercion rules now apply recursively to the members of an array and the entries in a map.	1318	254, 815, 911, 1501, 1874						
@@ -60,7 +60,7 @@ Section	Summary	Issue	Pull Request	Implemented	First Introduced	Changes in Saxon
 4.7.5.1 Axes	Four new axes have been defined: preceding-or-self, preceding-sibling-or-self, following-or-self, and following-sibling-or-self.	1519	1532						
 4.7.5.2 Node Tests	If the default namespace for elements and types has the special value ##any, then an unprefixed name in a NameTest acts as a wildcard, matching names in any namespace or none.	296	1181						
 4.7.5.6 Implausible Axis Steps	The rules for reporting type errors during static analysis have been changed so that a processor has more freedom to report errors in respect of constructs that are evidently wrong, such as @price/@value, even though dynamic evaluation is defined to return an empty sequence rather than an error.	602	603						
-4.9 Arithmetic Expressions	The symbols Ã— and Ã· can be used for multiplication and division.								
+4.9 Arithmetic Expressions	The symbols × and ÷ can be used for multiplication and division.								
 4.10.2 String Templates	'String templates provide a new way of constructing strings: for example `{$greeting}, {$planet}!` is equivalent to $greeting || '', '' || $planet || ''!'''	58	324						
 4.11.1 Value Comparisons	The rules for value comparisons when comparing values of different types (for example, decimal and double) have changed to be transitive. A decimal value is no longer converted to double, instead the double is converted to a decimal without loss of precision. This may affect compatibility in edge cases involving comparison of values that are numerically very close.	986	2218, 2256						
 4.11.1 Value Comparisons	An ordering is now defined for all data types.	2216	2218, 2256						
@@ -68,7 +68,7 @@ Section	Summary	Issue	Pull Request	Implemented	First Introduced	Changes in Saxon
 4.11.3 GNode Comparisons	Operator is-not is introduced, as a complement to the operator is.		2130, 2176						
 4.11.3 GNode Comparisons	Operators precedes and follows are introduced as synonyms for operators << and >>.		2130, 2176						
 4.11.3 GNode Comparisons	Operators precedes-or-is and follows-or-is are introduced as synonyms for the union of operators << and is and for the union of operators >> and is, respectively.		2130, 2176						
-4.12 Logical Expressions	The rules for â€œerrors and optimizationâ€ have been tightened up to disallow many cases of optimizations that alter error behavior. In particular there are restrictions on reordering the operands of and and or, and of predicates in filter expressions, in a way that might allow the processor to raise dynamic errors that the author intended to prevent.	71, 2132	230						
+4.12 Logical Expressions	'The rules for “errors and optimizationâ€ have been tightened up to disallow many cases of optimizations that alter error behavior. In particular there are restrictions on reordering the operands of and and or, and of predicates in filter expressions, in a way that might allow the processor to raise dynamic errors that the author intended to prevent.'	71, 2132	230						
 4.13.1 For Expressions	A for member clause is added to FLWOR expressions to allow iteration over an array.	49	28, 344, 1131, 1249						
 4.13.1 For Expressions	Multiple for and let clauses can be combined in an expression without an intervening return keyword.	22	28, 344, 1131, 1249						
 4.13.1 For Expressions	A for key/value clause is added to FLWOR expressions to allow iteration over maps.	31	28, 344, 1131, 1249						
@@ -91,7 +91,9 @@ Section	Summary	Issue	Pull Request	Implemented	First Introduced	Changes in Saxon
 4.18.5 Treat	The treat as expression now raises a type error rather than a dynamic error when it fails.	2165							
 4.19 Pipeline operator	With the pipeline operator ->, the result of an expression can be bound to the context value before evaluating another expression.	1685	1686						
 4.21 Arrow Expressions	The syntax on the right-hand side of an arrow operator has been relaxed; a dynamic function call no longer needs to start with a variable reference or a parenthesized expression, it can also be (for example) an inline function expression or a map or array constructor.	1716, 1829	1763, 1830						
-4.21.2 Mapping Arrow Expressions	The arrow operator => is now complemented by a â€œmapping arrowâ€ operator =!> which applies the supplied function to each item in the input sequence independently.								
+
+4.21.2 Mapping Arrow Expressions	'The arrow operator => is now complemented by a “mapping arrow” operator =!> which applies the supplied function to each item in the input sequence independently.'								
+
 5 Conformance	Support for higher-order functions is now a mandatory feature (in 3.1 it was optional).	205	326, 1344						
 5 Conformance	The static typing feature has been dropped.	1343	326, 1344						
 A.1 EBNF	The EBNF operators ++ and ** have been introduced, for more concise representation of sequences using a character such as "," as a separator. The notation is borrowed from Invisible XML.	1366	1498						
