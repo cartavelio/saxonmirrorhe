@@ -42,7 +42,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
 
     @FunctionalInterface
     private interface ExpressionMaker {
-        Expression make(List<String> tokens, StaticContext env) throws XPathException;
+        Expression make(List<Token> tokens, StaticContext env) throws XPathException;
     }
 
     public static final Token NOMINAL_NAME = new Token.NameToken("N");
@@ -79,24 +79,23 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         try {
             t.tokenize(expression, start, -1);
 
-            List<Token> tokenTypes = new ArrayList<>();
+            List<Token> tokens = new ArrayList<>();
             List<String> tokenValues = new ArrayList<>();
 
             while (t.currentToken != Token.EOF) {
-                if (tokenTypes.size() > 6) {
+                if (tokens.size() > 6) {
                     return null;
                 }
-                tokenTypes.add(t.currentToken);
-                tokenValues.add(t.currentTokenValue);
+                tokens.add(t.currentToken);
                 t.next();
             }
 
-            String keyValue = key(tokenTypes);
+            String keyValue = key(tokens);
             ExpressionMaker maker = patterns.get(keyValue);
             if (maker == null) {
                 return null;
             }
-            Expression result = maker.make(tokenValues, env);
+            Expression result = maker.make(tokens, env);
             if (result != null) {
                 result.setLocation(env.getContainingLocation());
             }
@@ -184,43 +183,43 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         // [] - empty array
         patterns.put(
                 key(Token.LSQB, Token.RSQB),
-                (values, env) -> Literal.makeLiteral(SimpleArrayItem.EMPTY_ARRAY));
+                (tokens, env) -> Literal.makeLiteral(SimpleArrayItem.EMPTY_ARRAY));
 
         // . - context item
         patterns.put(
                 key(Token.DOT),
-                (values, env) -> new ContextItemExpression());
+                (tokens, env) -> new ContextItemExpression());
 
         // .. - select parent
         patterns.put(
                 key(Token.DOT_DOT),
-                (values, env) -> new AxisExpression(AxisInfo.PARENT, AnyNodeTest.getInstance()));
+                (tokens, env) -> new AxisExpression(AxisInfo.PARENT, AnyNodeTest.getInstance()));
 
         // * - all element children
         patterns.put(
                 key(Token.STAR),
-                (values, env) -> new AxisExpression(AxisInfo.CHILD, NodeKindTest.ELEMENT));
+                (tokens, env) -> new AxisExpression(AxisInfo.CHILD, NodeKindTest.ELEMENT));
 
         // string literal
         patterns.put(
                 key(NOMINAL_STRING),
-                (values, env) -> StringLiteral.makeLiteral(StringValue.makeStringValue(values.get(0))));
+                (tokens, env) -> StringLiteral.makeLiteral(StringValue.makeStringValue(((Token.StringLiteral)tokens.get(0)).getValue())));
 
         // numeric literal
         patterns.put(
                 key(NOMINAL_NUMBER),
-                (values, env) -> toNumericLiteral(values.get(0)));
+                (tokens, env) -> toNumericLiteral(((Token.NumericLiteral)tokens.get(0)).getValue()));
 
         // "/" - select root of document
         patterns.put(
                 key(Token.SLASH),
-                (values, env) -> new RootExpression());
+                (tokens, env) -> new RootExpression());
 
         // nodekind() - select children with given node kind.
         patterns.put(
                 key(NOMINAL_NAME, Token.LPAREN, Token.RPAREN),
-                (values, env) -> {
-                    String kind = values.get(0);
+                (tokens, env) -> {
+                    String kind = ((Token.NameToken)tokens.get(0)).getValue();
                     NodeTest test = null;
                     switch (kind) {
                         case "node":
@@ -239,7 +238,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
                             test = NodeKindTest.PROCESSING_INSTRUCTION;
                             break;
                         default:
-                            StructuredQName name = verifyFunctionQName(values.get(0), env);
+                            StructuredQName name = verifyFunctionQName(((Token.NameToken) tokens.get(0)).getValue(), env);
                             List<String> reasons = new ArrayList<>();
                             return env.getFunctionLibrary().bind(
                                     new SymbolicName.F(name, 0), new Expression[]{}, null, env, reasons);
@@ -250,16 +249,16 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         // $name - variable reference
         patterns.put(
                 key(Token.DOLLAR, NOMINAL_NAME),
-                (values, env) -> {
-                    StructuredQName name = verifyQName(values.get(1), env);
+                (tokens, env) -> {
+                    StructuredQName name = verifyQName(((Token.NameToken) tokens.get(1)).getValue(), env);
                     return env.bindVariable(name);
                 });
 
         // @name - select named attribute
         patterns.put(
                 key(Token.AT, NOMINAL_NAME),
-                (values, env) -> {
-                    StructuredQName name = verifyQName(values.get(1), env);
+                (tokens, env) -> {
+                    StructuredQName name = verifyQName(((Token.NameToken) tokens.get(1)).getValue(), env);
                     return new AxisExpression(AxisInfo.ATTRIBUTE,
                                               new NameTest(Type.ATTRIBUTE, name.getNamespaceUri(), name.getLocalPart(), env.getConfiguration().getNamePool()));
                 });
@@ -267,16 +266,16 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         // @* - select all attributes
         patterns.put(
                 key(Token.AT, Token.STAR),
-                (values, env) -> new AxisExpression(AxisInfo.ATTRIBUTE, NodeKindTest.ATTRIBUTE));
+                (tokens, env) -> new AxisExpression(AxisInfo.ATTRIBUTE, NodeKindTest.ATTRIBUTE));
 
         // name - select named child elements
         patterns.put(
                 key(NOMINAL_NAME),
-                (values, env) -> {
+                (tokens, env) -> {
                     if (env.getUnprefixedElementMatchingPolicy() != UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE) {
                         return null;
                     }
-                    StructuredQName name = verifyElementQName(values.get(0), env);
+                    StructuredQName name = verifyElementQName(((Token.NameToken) tokens.get(0)).getValue(), env);
                     return new AxisExpression(AxisInfo.CHILD,
                                               new NameTest(Type.ELEMENT, name.getNamespaceUri(), name.getLocalPart(), env.getConfiguration().getNamePool()));
                 });
@@ -284,8 +283,8 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         // keyword { } - for example, empty map or array constructor
         patterns.put(
                 key(NOMINAL_NAME, Token.LCURLY, Token.RCURLY),
-                (values, env) -> {
-                    String name = values.get(0);
+                (tokens, env) -> {
+                    String name = ((Token.NameToken) tokens.get(0)).getValue();
                     if (name.equals("map")) {
                         return Literal.makeLiteral(EmptyMap.getInstance());
                     } else if (name.equals("array")) {
@@ -298,18 +297,18 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         // { } - empty map constructor
         patterns.put(
                 key(Token.LCURLY, Token.RCURLY),
-                (values, env) -> Literal.makeLiteral(EmptyMap.getInstance()));
+                (tokens, env) -> Literal.makeLiteral(EmptyMap.getInstance()));
 
         // [ ] - empty map constructor
         patterns.put(
                 key(Token.LSQB, Token.RSQB),
-                (values, env) -> Literal.makeLiteral(SimpleArrayItem.EMPTY_ARRAY));
+                (tokens, env) -> Literal.makeLiteral(SimpleArrayItem.EMPTY_ARRAY));
 
         // fn(.) - function with "." as single argument
         patterns.put(
                 key(NOMINAL_NAME, Token.LPAREN, Token.DOT, Token.RPAREN),
-                (values, env) -> {
-                    StructuredQName name = verifyFunctionQName(values.get(0), env);
+                (tokens, env) -> {
+                    StructuredQName name = verifyFunctionQName(((Token.NameToken) tokens.get(0)).getValue(), env);
                     List<String> reasons = new ArrayList<>();
                     Expression cie = new ContextItemExpression();
                     cie.setLocation(env.getContainingLocation());
@@ -320,9 +319,9 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         // fn(name) - function with child element reference as single argument
         patterns.put(
                 key(NOMINAL_NAME, Token.LPAREN, NOMINAL_NAME, Token.RPAREN),
-                (values, env) -> {
-                    StructuredQName fnName = verifyFunctionQName(values.get(0), env);
-                    StructuredQName elName = verifyElementQName(values.get(1), env);
+                (tokens, env) -> {
+                    StructuredQName fnName = verifyFunctionQName(((Token.NameToken) tokens.get(0)).getValue(), env);
+                    StructuredQName elName = verifyElementQName(((Token.NameToken) tokens.get(2)).getValue(), env);
                     List<String> reasons = new ArrayList<>();
                     Expression child = new AxisExpression(
                             AxisInfo.CHILD,
@@ -335,11 +334,11 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         // fn($var) - function with variable reference as single argument
         patterns.put(
                 key(NOMINAL_NAME, Token.LPAREN, Token.DOLLAR, NOMINAL_NAME, Token.RPAREN),
-                (values, env) -> {
-                    StructuredQName varName = verifyQName(values.get(2), env);
+                (tokens, env) -> {
+                    StructuredQName varName = verifyQName(((Token.NameToken) tokens.get(3)).getValue(), env);
                     Expression varRef = env.bindVariable(varName);
                     varRef.setLocation(env.getContainingLocation());
-                    StructuredQName name = verifyFunctionQName(values.get(0), env);
+                    StructuredQName name = verifyFunctionQName(((Token.NameToken) tokens.get(0)).getValue(), env);
                     List<String> reasons = new ArrayList<>();
                     return env.getFunctionLibrary().bind(
                             new SymbolicName.F(name, 1), new Expression[]{varRef}, null, env, reasons);
@@ -348,13 +347,13 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         // fn(@att) - function with attribute reference as single argument
         patterns.put(
                 key(NOMINAL_NAME, Token.LPAREN, Token.AT, NOMINAL_NAME, Token.RPAREN),
-                (values, env) -> {
-                    StructuredQName attName = verifyQName(values.get(2), env);
+                (tokens, env) -> {
+                    StructuredQName attName = verifyQName(((Token.NameToken) tokens.get(3)).getValue(), env);
                     AxisExpression arg = new AxisExpression(
                             AxisInfo.ATTRIBUTE,
                             new NameTest(Type.ATTRIBUTE, attName.getNamespaceUri(), attName.getLocalPart(), env.getConfiguration().getNamePool()));
                     arg.setLocation(env.getContainingLocation());
-                    StructuredQName name = verifyFunctionQName(values.get(0), env);
+                    StructuredQName name = verifyFunctionQName(((Token.NameToken) tokens.get(0)).getValue(), env);
                     List<String> reasons = new ArrayList<>();
                     return env.getFunctionLibrary().bind(
                             new SymbolicName.F(name, 1), new Expression[]{arg}, null, env, reasons);
@@ -363,10 +362,10 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         // fn('string') - function with string literal as single argument
         patterns.put(
                 key(NOMINAL_NAME, Token.LPAREN, NOMINAL_STRING, Token.RPAREN),
-                (values, env) -> {
-                    Expression arg = StringLiteral.makeLiteral(StringValue.makeStringValue(values.get(1)));
+                (tokens, env) -> {
+                    Expression arg = StringLiteral.makeLiteral(StringValue.makeStringValue(((Token.StringLiteral)tokens.get(2)).getValue()));
                     arg.setLocation(env.getContainingLocation());
-                    StructuredQName name = verifyFunctionQName(values.get(0), env);
+                    StructuredQName name = verifyFunctionQName(((Token.NameToken) tokens.get(0)).getValue(), env);
                     List<String> reasons = new ArrayList<>();
                     return env.getFunctionLibrary().bind(
                             new SymbolicName.F(name, 1), new Expression[]{arg}, null, env, reasons);
@@ -375,17 +374,17 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         // name/name - simple path expression selecting grandchildren
         patterns.put(
                 key(NOMINAL_NAME, Token.SLASH, NOMINAL_NAME),
-                (values, env) -> {
+                (tokens, env) -> {
                     if (env.getUnprefixedElementMatchingPolicy() != UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE) {
                         return null;
                     }
-                    StructuredQName first = verifyElementQName(values.get(0), env);
+                    StructuredQName first = verifyElementQName(((Token.NameToken) tokens.get(0)).getValue(), env);
                     AxisExpression start =
                             new AxisExpression(
                                     AxisInfo.CHILD,
                                     new NameTest(Type.ELEMENT, first.getNamespaceUri(), first.getLocalPart(), env.getConfiguration().getNamePool()));
                     start.setLocation(env.getContainingLocation());
-                    StructuredQName second = verifyElementQName(values.get(2), env);
+                    StructuredQName second = verifyElementQName(((Token.NameToken) tokens.get(2)).getValue(), env);
                     AxisExpression step =
                             new AxisExpression(
                                     AxisInfo.CHILD,
@@ -397,17 +396,17 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         // name | name - simple union expression selecting children
         patterns.put(
                 key(NOMINAL_NAME, Token.VBAR, NOMINAL_NAME),
-                (values, env) -> {
+                (tokens, env) -> {
                     if (env.getUnprefixedElementMatchingPolicy() != UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE) {
                         return null;
                     }
-                    StructuredQName first = verifyElementQName(values.get(0), env);
+                    StructuredQName first = verifyElementQName(((Token.NameToken) tokens.get(0)).getValue(), env);
                     AxisExpression one =
                             new AxisExpression(
                                     AxisInfo.CHILD,
                                     new NameTest(Type.ELEMENT, first.getNamespaceUri(), first.getLocalPart(), env.getConfiguration().getNamePool()));
                     one.setLocation(env.getContainingLocation());
-                    StructuredQName second = verifyElementQName(values.get(2), env);
+                    StructuredQName second = verifyElementQName(((Token.NameToken) tokens.get(2)).getValue(), env);
                     AxisExpression two =
                             new AxisExpression(
                                     AxisInfo.CHILD,
@@ -419,17 +418,17 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         // name/@name - simple path expression selecting attributes of children
         patterns.put(
                 key(NOMINAL_NAME, Token.SLASH, Token.AT, NOMINAL_NAME),
-                (values, env) -> {
+                (tokens, env) -> {
                     if (env.getUnprefixedElementMatchingPolicy() != UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE) {
                         return null;
                     }
-                    StructuredQName first = verifyElementQName(values.get(0), env);
+                    StructuredQName first = verifyElementQName(((Token.NameToken) tokens.get(0)).getValue(), env);
                     AxisExpression start =
                             new AxisExpression(
                                     AxisInfo.CHILD,
                                     new NameTest(Type.ELEMENT, first.getNamespaceUri(), first.getLocalPart(), env.getConfiguration().getNamePool()));
                     start.setLocation(env.getContainingLocation());
-                    StructuredQName second = verifyQName(values.get(3), env);
+                    StructuredQName second = verifyQName(((Token.NameToken) tokens.get(3)).getValue(), env);
                     AxisExpression step =
                             new AxisExpression(
                                     AxisInfo.ATTRIBUTE,
@@ -441,11 +440,11 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         // $var/@name - simple path expression selecting attributes of element in variable
         patterns.put(
                 key(Token.DOLLAR, NOMINAL_NAME, Token.SLASH, Token.AT, NOMINAL_NAME),
-                (values, env) -> {
-                    StructuredQName first = verifyQName(values.get(1), env);
+                (tokens, env) -> {
+                    StructuredQName first = verifyQName(((Token.NameToken) tokens.get(1)).getValue(), env);
                     Expression varRef = env.bindVariable(first);
                     varRef.setLocation(env.getContainingLocation());
-                    StructuredQName second = verifyQName(values.get(4), env);
+                    StructuredQName second = verifyQName(((Token.NameToken) tokens.get(4)).getValue(), env);
                     AxisExpression step =
                             new AxisExpression(
                                     AxisInfo.ATTRIBUTE,
@@ -457,14 +456,15 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         // $var[number] - simple numeric filter
         patterns.put(
                 key(Token.DOLLAR, NOMINAL_NAME, Token.LSQB, NOMINAL_NUMBER, Token.RSQB),
-                (values, env) -> {
-                    StructuredQName first = verifyQName(values.get(1), env);
+                (tokens, env) -> {
+                    StructuredQName first = verifyQName(((Token.NameToken) tokens.get(1)).getValue(), env);
                     Expression varRef = env.bindVariable(first);
                     varRef.setLocation(env.getContainingLocation());
-                    if (values.get(3).equals("1")) {
+                    NumericValue nv = ((Token.NumericLiteral) tokens.get(3)).getValue();
+                    if (nv.isWholeNumber() && nv.equals(Int64Value.PLUS_ONE)) {
                         return FirstItemExpression.makeFirstItemExpression(varRef);
                     } else {
-                        Expression subscript = toNumericLiteral(values.get(3));
+                        Expression subscript = toNumericLiteral(nv);
                         subscript.setLocation(env.getContainingLocation());
                         return new FilterExpression(varRef, subscript);
                     }
@@ -473,27 +473,27 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         // $var?name - lookup expression in a map
         patterns.put(
                 key(Token.DOLLAR, NOMINAL_NAME, Token.QMARK, NOMINAL_NAME),
-                (values, env) -> {
-                    StructuredQName first = verifyQName(values.get(1), env);
+                (tokens, env) -> {
+                    StructuredQName first = verifyQName(((Token.NameToken) tokens.get(1)).getValue(), env);
                     Expression varRef = env.bindVariable(first);
                     varRef.setLocation(env.getContainingLocation());
-                    if (!NameChecker.isValidNCName(values.get(3))) {
+                    if (!NameChecker.isValidNCName(((Token.NameToken) tokens.get(3)).getValue())) {
                         return null;
                     }
-                    return new LookupExpression(varRef, LookupExpression.Modifier.CONTENT, new StringLiteral(values.get(3)));
+                    return new LookupExpression(varRef, LookupExpression.Modifier.CONTENT, new StringLiteral(((Token.NameToken) tokens.get(3)).getValue()));
                 });
 
         // $name = string-literal - variable reference = string literal
         patterns.put(
                 key(Token.DOLLAR, NOMINAL_NAME, Token.EQUALS, NOMINAL_STRING),
-                (values, env) -> {
+                (tokens, env) -> {
                     if (env.isInBackwardsCompatibleMode()) {
                         return null;
                     }
-                    StructuredQName name = verifyQName(values.get(1), env);
+                    StructuredQName name = verifyQName(((Token.NameToken) tokens.get(1)).getValue(), env);
                     Expression varRef = env.bindVariable(name);
                     varRef.setLocation(env.getContainingLocation());
-                    Expression comparand = new StringLiteral(values.get(3));
+                    Expression comparand = new StringLiteral(((Token.StringLiteral) tokens.get(3)).getValue());
                     comparand.setLocation(env.getContainingLocation());
                     return new GeneralComparison20(varRef, OperatorSymbol.EQUALS, comparand);
                 });
@@ -501,14 +501,14 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         // $name != string-literal - variable reference != string literal
         patterns.put(
                 key(Token.DOLLAR, NOMINAL_NAME, Token.NE, NOMINAL_STRING),
-                (values, env) -> {
+                (tokens, env) -> {
                     if (env.isInBackwardsCompatibleMode()) {
                         return null;
                     }
-                    StructuredQName name = verifyQName(values.get(1), env);
+                    StructuredQName name = verifyQName(((Token.NameToken) tokens.get(1)).getValue(), env);
                     Expression varRef = env.bindVariable(name);
                     varRef.setLocation(env.getContainingLocation());
-                    Expression comparand = new StringLiteral(values.get(3));
+                    Expression comparand = new StringLiteral(((Token.StringLiteral) tokens.get(3)).getValue());
                     comparand.setLocation(env.getContainingLocation());
                     return new GeneralComparison20(varRef, OperatorSymbol.NE, comparand);
                 });
@@ -516,14 +516,14 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         // $name = numeric-literal - variable reference = numeric literal
         patterns.put(
                 key(Token.DOLLAR, NOMINAL_NAME, Token.EQUALS, NOMINAL_NUMBER),
-                (values, env) -> {
+                (tokens, env) -> {
                     if (env.isInBackwardsCompatibleMode()) {
                         return null;
                     }
-                    StructuredQName name = verifyQName(values.get(1), env);
+                    StructuredQName name = verifyQName(((Token.NameToken) tokens.get(1)).getValue(), env);
                     Expression varRef = env.bindVariable(name);
                     varRef.setLocation(env.getContainingLocation());
-                    Expression comparand = toNumericLiteral(values.get(3));
+                    Expression comparand = toNumericLiteral(((Token.NumericLiteral) tokens.get(3)).getValue());
                     comparand.setLocation(env.getContainingLocation());
                     return new GeneralComparison20(varRef, OperatorSymbol.EQUALS, comparand);
                 });
@@ -531,14 +531,14 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         // $name != numeric-literal - variable reference != numeric literal
         patterns.put(
                 key(Token.DOLLAR, NOMINAL_NAME, Token.NE, NOMINAL_NUMBER),
-                (values, env) -> {
+                (tokens, env) -> {
                     if (env.isInBackwardsCompatibleMode()) {
                         return null;
                     }
-                    StructuredQName name = verifyQName(values.get(1), env);
+                    StructuredQName name = verifyQName(((Token.NameToken) tokens.get(1)).getValue(), env);
                     Expression varRef = env.bindVariable(name);
                     varRef.setLocation(env.getContainingLocation());
-                    Expression comparand = toNumericLiteral(values.get(3));
+                    Expression comparand = toNumericLiteral(((Token.NumericLiteral) tokens.get(3)).getValue());
                     comparand.setLocation(env.getContainingLocation());
                     return new GeneralComparison20(varRef, OperatorSymbol.NE, comparand);
                 });
@@ -546,14 +546,14 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         // $name + number - variable reference + numeric literal
         patterns.put(
                 key(Token.DOLLAR, NOMINAL_NAME, Token.PLUS, NOMINAL_NUMBER),
-                (values, env) -> {
+                (tokens, env) -> {
                     if (env.isInBackwardsCompatibleMode()) {
                         return null;
                     }
-                    StructuredQName name = verifyQName(values.get(1), env);
+                    StructuredQName name = verifyQName(((Token.NameToken) tokens.get(1)).getValue(), env);
                     Expression varRef = env.bindVariable(name);
                     varRef.setLocation(env.getContainingLocation());
-                    Expression addend = toNumericLiteral(values.get(3));
+                    Expression addend = toNumericLiteral(((Token.NumericLiteral) tokens.get(3)).getValue());
                     addend.setLocation(env.getContainingLocation());
                     return new ArithmeticExpression(varRef, OperatorSymbol.PLUS, addend);
                 });
@@ -561,13 +561,13 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         // <axis> name - select elements on explicit axis
         patterns.put(
                 key(NOMINAL_NAME, Token.COLON_COLON, NOMINAL_NAME),
-                (values, env) -> {
-                    int axis = AxisInfo.getAxisNumber(values.get(0));
+                (tokens, env) -> {
+                    int axis = AxisInfo.getAxisNumber(((Token.NameToken) tokens.get(0)).getValue());
                     boolean reverse = !AxisInfo.isForwards[axis];
                     if (reverse || axis == AxisInfo.ATTRIBUTE || axis == AxisInfo.NAMESPACE) {
                         return null;
                     }
-                    StructuredQName name = verifyElementQName(values.get(1), env);
+                    StructuredQName name = verifyElementQName(((Token.NameToken) tokens.get(2)).getValue(), env);
                     return new AxisExpression(
                             axis,
                             new NameTest(Type.ELEMENT, name.getNamespaceUri(), name.getLocalPart(), env.getConfiguration().getNamePool()));
@@ -575,12 +575,11 @@ public class QuickXPathParser implements XPathParser.Accelerator {
 
     }
 
-    private static Expression toNumericLiteral(String value) {
-        NumericValue number = NumericValue.parseNumber(value);
-        if (number.isNaN()) {
+    private static Expression toNumericLiteral(NumericValue value) {
+        if (value.isNaN()) {
             return null;
         }
-        return Literal.makeLiteral(number);
+        return Literal.makeLiteral(value);
     }
 
 

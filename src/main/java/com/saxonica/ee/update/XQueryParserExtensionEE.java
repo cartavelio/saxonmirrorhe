@@ -1,9 +1,10 @@
 package com.saxonica.ee.update;
 
-import com.saxonica.expr.DeepUpdate2;
-import com.saxonica.expr.UpdateTarget;
-import com.saxonica.expr.XQueryParserExtensionPE;
+import com.saxonica.expr.*;
+import com.saxonica.expr.DeepLookupExpression;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.LookupExpression;
+import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.parser.Tokenizer;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.lib.Validation;
@@ -12,6 +13,7 @@ import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.query.QueryModule;
 import net.sf.saxon.query.XQueryParser;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.SequenceType;
 
 /**
  * Parser extension for syntax in XQuery Update and/or XQuery 3.0 that is supported
@@ -28,23 +30,54 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
     }
 
 
+    public Expression makeLookupExpression(Expression lhs, LookupExpression.Modifier modifier, Expression rhs, boolean deep, boolean allow40) {
+        if (allow40) {
+            if (deep) {
+                return new DeepLookupExpression(lhs, modifier, rhs);
+            } else {
+                return new com.saxonica.expr.LookupExpression40(lhs, modifier, rhs);
+            }
+        } else {
+            return new LookupExpression(lhs, modifier, rhs);
+        }
+    }
+
     /**
-     * Get the permitted set of standard functions in this environment
+     * Supporting code for lookup expressions (A?B) where B is the wildcard "*"
+     *
+     * @param lhs     the LHS operand of the lookup expression
+     * @param allow40
+     * @return the result of parsing the expression
+     */
+    @Override
+    public Expression lookupStar(Expression lhs,
+                                 LookupExpression.Modifier modifier,
+                                 SequenceType type,
+                                 boolean deep, boolean allow40) {
+        if (deep) {
+            return new DeepLookupAllExpression(lhs, modifier, type);
+        } else {
+            return new LookupAllExpression40(lhs, modifier, type);
+        }
+    }
+
+    /**
+     * Supporting code for lookup expressions (A?B) where B is an NCName
+     *
+     * @param lhs  the LHS operand of the lookup expression
+     * @param rhs  the RHS operand of the lookup expression
+     * @param deep true if the operator is "??" (in 4.0)
+     * @return the result of parsing the expression
      */
 
-//    public int getPermittedFunctions() {
-//        int allowed = BuiltInFunctionSet.CORE;
-//        if (allowXPath30Syntax) {
-//            allowed |= BuiltInFunctionSet.XPATH30;
-//        }
-//        if (allowXPath31Syntax) {
-//            allowed |= BuiltInFunctionSet.XPATH31;
-//        }
-//        if (acceptUpdateSyntax) {
-//            allowed |= BuiltInFunctionSet.XQUPDATE;
-//        }
-//        return allowed;
-//    }
+    public Expression lookupName(Expression lhs, LookupExpression.Modifier modifier, String rhs, boolean deep, boolean allow40) {
+        if (deep) {
+            return new DeepLookupExpression(lhs, modifier, new StringLiteral(rhs));
+        } else {
+            return new LookupExpression(lhs, modifier, new StringLiteral(rhs));
+        }
+    }
+
 
     /**
      * Parse the "declare revalidation" declaration (XQuery Update).
