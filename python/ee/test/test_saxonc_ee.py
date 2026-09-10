@@ -492,4 +492,21 @@ def test_sequence():
         print(err)
         assert False
 
+def test_user_function_signature_dict():
+    proc = saxoncee.PySaxonProcessor(license=True)
+    try:
+        signature = {'tuple_example' : { 'as': 'xs:integer*', 'param': ['xs:integer'], 'arity':1}}
+        proc.register_user_function("http://www.example.com", tuple_example, signature_map= signature, use_python_types=True)
+
+        xpath_processor = proc.new_xpath_processor()
+        xpath_processor.declare_namespace("dy", "http://www.example.com")
+
+        value1 = xpath_processor.evaluate("dy:tuple_example(9)")
+
+        assert value1.item_at(2).integer_value == 3
+
+    except Exception as err:
+        print(err)
+        assert False
+
 

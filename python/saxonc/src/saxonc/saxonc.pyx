@@ -18,6 +18,7 @@ from cython.operator import dereference, postincrement
 from os.path import isfile
 import sys
 import os
+import json
 from enum import IntEnum
 
 from libc.stdlib cimport free, malloc, realloc
@@ -792,9 +793,10 @@ cdef class PySaxonProcessor:
                                 if not all(isinstance(item, str) for item in sub_value):
                                     raise PySaxonApiError("    ERROR: 'param' should be a list")
 
-                            if sub_key == "arity" and (not isinstance(sub_value, int) or not isinstance(sub_value, str)):
-                                raise PySaxonApiError("    ERROR: 'arity' should be an int or str")
-                py_signature_str = str(signature_map)
+                            if sub_key == "arity":
+                                    if (not isinstance(sub_value, int) and not isinstance(sub_value, str)):
+                                        raise PySaxonApiError("    ERROR: 'arity' should be an int or str")
+                py_signature_str = json.dumps(signature_map)
                 py_signatureJSON_str = py_signature_str.encode(encoding) if py_signature_str is not None else None
                 c_signatureJSON_str_ = py_signatureJSON_str
             else:

@@ -972,6 +972,10 @@ XdmValue *SaxonProcessor::parseJsonFromString(const char *source,
     throw SaxonApiException("JSON source string is null");
   }
 
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+    std::cerr << "SaxonProc: JSON string: "<< source << std::endl;
+  }
+
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t xdmValueRef = parseJsonString(thread, (void *)procRef,
                                         (char *)source, (char *)encoding);
