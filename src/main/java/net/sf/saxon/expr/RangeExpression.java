@@ -53,6 +53,10 @@ public class RangeExpression extends Expression {
         return new RangeExpression(((RangeExpression) lhs).getStartExpression(), rhs, ((RangeExpression) lhs).getEndExpression());
     }
 
+    public boolean isDefaultedStep() {
+        return defaultedStep;
+    }
+
     /**
      * Construct a RangeExpression with increment of 1
      * @param start expression that computes the start of the range
