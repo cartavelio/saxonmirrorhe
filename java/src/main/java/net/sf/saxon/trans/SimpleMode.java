@@ -293,6 +293,11 @@ public class SimpleMode extends Mode {
 
     }
 
+    @Override
+    boolean isCopyNamespaces() {
+        return !"no".equals(explicitPropertyValues.get("copy-namespaces"));
+    }
+
     /**
      * Get the value of a property of this mode, e.g. the "typed" property
      *

@@ -209,6 +209,11 @@ public class CompoundMode extends Mode {
         return r;
     }
 
+    @Override
+    boolean isCopyNamespaces() {
+        return base.isCopyNamespaces();
+    }
+
     /**
      * Export expression structure. The abstract expression tree
      * is written to the supplied outputstream.

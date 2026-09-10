@@ -709,7 +709,7 @@ public abstract class Mode extends Actor {
         if (!hasRules) {
             flags += "e";
         }
-        if ("no".equals(getProperty("copy-namespaces"))) {
+        if (!isCopyNamespaces()) {
             flags += "n";
         }
         if (!flags.isEmpty()) {
@@ -729,6 +729,8 @@ public abstract class Mode extends Actor {
     public boolean isMustBeTyped() {
         return mustBeTyped;
     }
+
+    abstract boolean isCopyNamespaces();
 
     public void explain(ExpressionPresenter presenter) throws XPathException {
         int s = presenter.startElement("mode");
