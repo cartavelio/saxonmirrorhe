@@ -399,6 +399,18 @@ public class Configuration implements SourceResolver, NotationSet {
         internalSetBooleanProperty(FeatureCode.DISABLE_XSL_EVALUATE, FeatureKeys.DISABLE_XSL_EVALUATE, false);
         //internalSetBooleanProperty(FeatureKeys.STABLE_COLLECTION_URI, true);
 
+        //@if CSHARP==false
+        String initializationClass = System.getProperty("SAXON_INITIALIZER");
+        if (initializationClass != null) {
+            try {
+                Initializer initializer = (Initializer) getInstance(initializationClass);
+                initializer.initialize(this);
+            } catch (TransformerException e) {
+                System.err.println("Warning: Failed to invoke Saxon Initializer " + initializationClass + ": " + e.getMessage());
+            }
+        }
+        //@endif
+
         registerFileExtension("xml", "application/xml");
         registerFileExtension("html", "application/html");
         registerFileExtension("atom", "application/atom");
