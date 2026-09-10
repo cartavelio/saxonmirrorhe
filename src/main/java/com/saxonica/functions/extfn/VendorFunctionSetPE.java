@@ -170,6 +170,9 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.DECIMAL, OPT, EMPTY)
                 .arg(2, BuiltInAtomicType.INTEGER, ONE, null));
 
+        register("exact-decimal", 1, e -> e.populate(ExactDecimal::new, BuiltInAtomicType.DECIMAL, ONE, 0)
+                .arg(0, BuiltInAtomicType.DOUBLE, ONE, null));
+
         register("discard-document", 1, e -> e.populate( DiscardDocument::new, NodeKindTest.DOCUMENT, OPT, 0)
                 .arg(0, NodeKindTest.DOCUMENT, OPT, null));
 
