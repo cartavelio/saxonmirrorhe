@@ -297,7 +297,7 @@ public class ParamKeywords {
         fnParamNames.put("year-from-dateTime", "value");
         fnParamNames.put("years-from-duration", "value");
         fnParamNames.put("zero-or-one", "input");
-        mapParamNames.put("build", "input|keys|value|options");
+        mapParamNames.put("build", "input|key|value|options");
         mapParamNames.put("contains", "map|key");
         mapParamNames.put("empty", "map");
         mapParamNames.put("entries", "map");

@@ -3058,11 +3058,15 @@ public class XPathParser {
                         
                 }
 
-            } else if (t.peekAhead() == Token.HASH_BEFORE_NAME) {
-                return parseComputedNodeConstructor();
-
             } else if (t.peekAhead() == Token.HASH) {
-                return parseNamedFunctionReference();
+                Tokenizer checkPoint = t.checkPoint();
+                nextToken();
+                Token nextButOne = t.peekAhead();
+                t.rollbackTo(checkPoint);
+                if (nextButOne instanceof Token.NumericLiteral) {
+                    return parseNamedFunctionReference();
+                }
+                return parseComputedNodeConstructor();
                 
             } else if (t.peekAhead() == Token.COLON_COLON) {
                 int axis;
@@ -3199,7 +3203,7 @@ public class XPathParser {
                 return parseInlineFunction(annotations);
             }
 
-        } else if (token == Token.HASH_BEFORE_NAME && isAllowXPath40Syntax()) {
+        } else if (token == Token.HASH && isAllowXPath40Syntax()) {
             StructuredQName qn = parseEQName();
             return Literal.makeLiteral(new QNameValue(qn,BuiltInAtomicType.QNAME));
 

@@ -872,7 +872,7 @@ public class XQueryParser extends XPathParser {
                     } else if (tok instanceof Token.NumericLiteral) {
                         arg = ((Token.NumericLiteral)tok).getValue();
                         nextToken();
-                    } else if (tok == Token.HASH_BEFORE_NAME && allowXPath40Syntax) {
+                    } else if (tok == Token.HASH && allowXPath40Syntax) {
                         StructuredQName qn = parseEQName();
                         arg = new QNameValue(qn, BuiltInAtomicType.QNAME);
                     } else if ((isKeyword("true") || isKeyword("false")) && t.peekAhead() == Token.LPAREN) {
@@ -3515,8 +3515,7 @@ public class XQueryParser extends XPathParser {
             switch (nodeKind) {
                 case "element":
                 case "attribute":
-                    if (t.currentToken == Token.HASH_BEFORE_NAME
-                            && allowXPath40Syntax) {
+                    if (t.currentToken == Token.HASH && allowXPath40Syntax) {
                         qName = parseEQName();
                     } else {
                         name = expectName();
@@ -3527,8 +3526,7 @@ public class XQueryParser extends XPathParser {
                     break;
                 case "namespace":
                 case "processing-instruction":
-                    if (t.currentToken == Token.HASH_BEFORE_NAME
-                            && allowXPath40Syntax) {
+                    if (t.currentToken == Token.HASH && allowXPath40Syntax) {
                         nextToken();
                         name = expectName();
                     } else {
