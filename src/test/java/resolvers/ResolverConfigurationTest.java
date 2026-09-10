@@ -1,9 +1,10 @@
 package resolvers;
 
+import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.lib.CatalogResourceResolver;
-import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.ResourceRequest;
+import net.sf.saxon.lib.*;
+import net.sf.saxon.om.TreeInfo;
+import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
 import org.junit.Test;
 import org.xml.sax.InputSource;
@@ -12,7 +13,11 @@ import org.xmlresolver.ResolverFeature;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
+import javax.xml.transform.stream.StreamSource;
+import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -62,8 +67,7 @@ public class ResolverConfigurationTest {
         }
     }
 
-<<<<<<< Updated upstream
-=======
+
     @Test
     public void wrappedUriResolver2() {
         try {
@@ -105,8 +109,7 @@ public class ResolverConfigurationTest {
             fail();
         }
     }
-
->>>>>>> Stashed changes
+    
     private class MyResolver extends CatalogResourceResolver {
         private final CatalogResourceResolver resolver;
 
