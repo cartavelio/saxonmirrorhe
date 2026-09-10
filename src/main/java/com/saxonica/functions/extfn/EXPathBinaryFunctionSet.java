@@ -817,12 +817,12 @@ public class EXPathBinaryFunctionSet extends BuiltInFunctionSet {
             int offset = (int) ((NumericValue) arguments[1].head()).longValue();
             int len = (int) ((NumericValue) arguments[2].head()).longValue();
             checkIndex(value, offset, len);
-            byte[] in = value.getBinaryValue();
-            boolean negative = (in[offset] & 0x80) != 0;
             boolean bigEnd = endianness(arguments, 3);
             if (len == 0) {
                 return Int64Value.ZERO;
             }
+            byte[] in = value.getBinaryValue();
+            boolean negative = (in[bigEnd ? offset : offset + 1] & 0x80) != 0;
             if (len > 7) {
                 BigInteger big = bigIntegerFromBytes(offset, len, in, bigEnd);
                 return new BigIntegerValue(big);
