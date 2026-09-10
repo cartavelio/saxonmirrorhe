@@ -65,7 +65,7 @@ public class PrincipalOutputGatekeeper extends ProxyReceiver {
         if (!opened) {
             open();
         }
-        //checkNotClosed();
+        useAsPrimary();
         nextReceiver.startDocument(properties);
     }
 
