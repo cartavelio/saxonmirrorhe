@@ -6,12 +6,8 @@ import net.sf.saxon.expr.sort.DocumentOrderIterator;
 import net.sf.saxon.expr.sort.GlobalOrderComparer;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.om.FunctionItem;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.EmptySequence;
@@ -19,7 +15,6 @@ import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.SequenceExtent;
 import net.sf.saxon.value.SequenceType;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -49,6 +44,9 @@ public class TransitiveClosure extends SystemFunction {
                 max = (int) supplied.longValue(); // TODO: value range
             }
         }
+        if (max < min) {
+            throw new XPathException("In call to transitive-closure, max<min", "FORG0013");
+        }
         return new CallableFunction(1, new TransitiveClosureResult(step, min, max), resultType);
     }
 
@@ -71,45 +69,44 @@ public class TransitiveClosure extends SystemFunction {
                 return EmptySequence.getInstance();
             }
             Sequence[] stepArgs = new Sequence[1];
-            // Find the nodes reachable in exactly "min" steps
+            // startSet holds the input nodes to the current iteration
             Set<NodeInfo> startSet = new HashSet<>();
             startSet.add(origin);
-            for (int i=0; i<min; i++) {
-                Set<NodeInfo> endSet = new HashSet<>();
+
+            // resultSet contains nodes that are to form part of the final result
+            Set<NodeInfo> resultSet = new HashSet<>();
+            if (min == 0) {
+                resultSet.add(origin);
+            }
+
+            for (int i=1; i<=max; i++) {
+                // thisSet holds the nodes reached in this step that were not already reached
+                // in an earlier step
+                Set<NodeInfo> thisSet = new HashSet<>();
                 for (NodeInfo node : startSet) {
                     stepArgs[0] = node;
                     SequenceIterator stepResult = step.call(context, stepArgs).iterate();
                     NodeInfo resultNode;
-                    while ((resultNode = (NodeInfo)stepResult.next()) != null) {
-                        endSet.add(resultNode);
+                    while ((resultNode = (NodeInfo) stepResult.next()) != null) {
+                        if (!resultSet.contains(resultNode)) {
+                            thisSet.add(resultNode);
+                        }
                     }
                 }
-                startSet = endSet;
-                if (startSet.isEmpty()) {
-                    return EmptySequence.getInstance();
+                if (thisSet.isEmpty()) {
+                    // No new nodes found, we're done
+                    break;
                 }
+                if (i >= min) {
+                    // Add the nodes found in this step to the result set if we have made "min" steps
+                    resultSet.addAll(thisSet);
+                }
+                // Proceed to the next step
+                startSet = thisSet;
             }
-            // Find the nodes reachable in up to (max-min) further steps, stopping when no further nodes are found
-            Set<NodeInfo> result = startSet;
-            int steps = min;
-            boolean foundMoreNodes;
-            do {
-                int size = result.size();
-                Set<NodeInfo> nextResult = new HashSet<>(result);
-                for (NodeInfo n : result) {
-                    stepArgs[0] = n;
-                    SequenceIterator stepResult = step.call(context, stepArgs).iterate();
-                    NodeInfo target;
-                    while ((target = (NodeInfo) stepResult.next()) != null) {
-                        nextResult.add(target);
-                    }
-                }
-                result = nextResult;
-                foundMoreNodes = nextResult.size() > size;
-                steps++;
-            } while (foundMoreNodes && steps < max);
 
-            SequenceIterator resultIter = new ListIterator.Of<NodeInfo>(new ArrayList<NodeInfo>(result));
+            // Finally, sort the set of nodes into document order
+            SequenceIterator resultIter = new IteratorWrapper(resultSet.iterator());
             DocumentOrderIterator sortedIter = new DocumentOrderIterator(resultIter, new GlobalOrderComparer());
             return SequenceExtent.from(sortedIter);
 

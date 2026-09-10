@@ -270,8 +270,8 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         register("transitive-closure", 1, 3, e -> e.populate(TransitiveClosure::new, TransitiveClosure.resultType, STAR, 0)
                 .arg(0, navigator, ONE, null)
-                .arg(1, BuiltInAtomicType.INTEGER, OPT, null)
-                .arg(2, BuiltInAtomicType.INTEGER, OPT, null));
+                .arg(1, BuiltInAtomicType.NON_NEGATIVE_INTEGER, OPT, null)
+                .arg(2, BuiltInAtomicType.POSITIVE_INTEGER, OPT, null));
 
         register("trunk", 1, e -> e.populate(Trunk::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, EmptySequence.getInstance()));
