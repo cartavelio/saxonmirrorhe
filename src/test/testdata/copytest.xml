@@ -1,0 +1,6 @@
+<doc>
+    <p:section id="p1" xml:space="preserve" xmlns:p="http://namespace.p.com/" 
+               xmlns:q="http://namespace.q.com/"/>
+    <section2 id="p2" my:extra="zoo" xmlns:my="http://namespace.my.com/" 
+              xml:space="preserve" xmlns="http://namespace.p2.com/"  xmlns:q="http://namespace.q.com/"/>
+</doc>

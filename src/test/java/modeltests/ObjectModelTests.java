@@ -5,9 +5,13 @@ import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import javax.xml.transform.stream.StreamSource;
 import java.io.File;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -25,6 +29,7 @@ import static net.sf.saxon.s9api.streams.Steps.attribute;
 import static net.sf.saxon.s9api.streams.Steps.child;
 import static net.sf.saxon.s9api.streams.Steps.descendant;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -322,9 +327,63 @@ public abstract class ObjectModelTests {
     }
 
 
+    @Test
+    public void testDeepCopy() {
+        try {
+            Processor proc = new Processor(true);
+            XdmNode doc = buildExternalDocument(proc, "copytest.xml");
+            XdmNode root = doc.getOutermostElement();
+            XdmNode p1 = root.select(child("http://namespace.p.com/", "section")).firstItem();
+            XdmNode p2 = root.select(child("http://namespace.p2.com/", "section2")).firstItem();
+            XsltCompiler comp = proc.newXsltCompiler();
+
+            String xsl = "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='3.0'>" +
+                    "<xsl:template name='t1'><xsl:copy-of select='.' copy-namespaces='yes'/></xsl:template>" +
+                    "<xsl:template name='t2'><xsl:copy-of select='.' copy-namespaces='no'/></xsl:template>" +
+                    "</xsl:stylesheet>";
+            XsltExecutable exec = comp.compile(new StreamSource(new StringReader(xsl)));
+            XsltTransformer trans = exec.load();
 
 
+            String result = doCopyTransform(proc, trans, p1, "t1");
+            assertTrue(result.contains("xmlns:p=\"http://namespace.p.com/\""));
+            assertTrue(result.contains("xmlns:q=\"http://namespace.q.com/\""));
 
+            result = doCopyTransform(proc, trans, p1, "t2");
+            assertTrue(result.contains("xmlns:p=\"http://namespace.p.com/\""));
+            assertFalse(result.contains("xmlns:q=\"http://namespace.q.com/\""));
+
+            result = doCopyTransform(proc, trans, p2, "t1");
+            assertTrue(result.contains("xmlns=\"http://namespace.p2.com/\""));
+            assertTrue(result.contains("xmlns:my=\"http://namespace.my.com/\""));
+            assertTrue(result.contains("xmlns:q=\"http://namespace.q.com/\""));
+
+            result = doCopyTransform(proc, trans, p2, "t2");
+            assertTrue(result.contains("xmlns=\"http://namespace.p2.com/\""));
+            assertTrue(result.contains("xmlns:my=\"http://namespace.my.com/\""));
+            assertFalse(result.contains("xmlns:q=\"http://namespace.q.com/\""));
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assertions.fail(e);
+        }
+    }
+
+    private static String doCopyTransform(Processor proc, XsltTransformer trans, XdmNode input, String initialTemplate) throws SaxonApiException {
+        try {
+            StringWriter sw = new StringWriter();
+            trans.setSource(input.asSource());
+            trans.setDestination(proc.newSerializer(sw));
+            trans.setInitialTemplate(new QName(initialTemplate));
+            trans.transform();
+            return sw.toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assertions.fail(e);
+            throw e;
+        }
+    }
 
 
 }
