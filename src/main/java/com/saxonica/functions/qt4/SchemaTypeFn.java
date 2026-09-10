@@ -1,9 +1,7 @@
 package com.saxonica.functions.qt4;
 
-import net.sf.saxon.expr.Callable;
-import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.functions.CallableFunction;
+import net.sf.saxon.functions.SimpleLazyFunction;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapItem;
@@ -108,9 +106,8 @@ public class SchemaTypeFn extends SystemFunction {
         result.initialPut("variety", new StringValue(variety));  // TODO: should be an enum type
 
         if (st.isAtomicType() && !st.isSameType(BuiltInAtomicType.ANY_ATOMIC)) {
-            Callable callable = new CallableDelegate((context, args) -> makeSchemaRecord(((AtomicType) st).getPrimitiveAtomicType()));
-            CallableFunction fn = new CallableFunction(0, callable,
-                                                       new SpecificFunctionType(SequenceType.one(schemaTypeRecord)));
+            SimpleLazyFunction fn = new SimpleLazyFunction(() -> makeSchemaRecord(((AtomicType) st).getPrimitiveAtomicType()),
+                                                           SequenceType.one(schemaTypeRecord));
             result.initialPut("primitive-type", fn);
 
         }

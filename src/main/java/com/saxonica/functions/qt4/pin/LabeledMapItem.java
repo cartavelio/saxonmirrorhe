@@ -1,8 +1,7 @@
 package com.saxonica.functions.qt4.pin;
 
 import com.saxonica.xsltextn.pedigree.DelegatingMapItem;
-import net.sf.saxon.expr.CallableDelegate;
-import net.sf.saxon.functions.CallableFunction;
+import net.sf.saxon.functions.SimpleLazyFunction;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.ShapedMap;
@@ -10,7 +9,6 @@ import net.sf.saxon.ma.map.StringMap;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.*;
 
 import java.util.ArrayList;
@@ -118,22 +116,22 @@ public class LabeledMapItem extends DelegatingMapItem implements LabeledItem {
 
 
     private static FunctionItem makeAncestorsFunction(Item start) {
-        CallableDelegate logic = new CallableDelegate((context, arguments) -> {
-            List<Item> ancestors = new ArrayList<>();
-            Item parent = (Item)start.getLabel().get(new StringValue("parent"));
-            while (parent != null && parent.getLabel() != null) {
-                ancestors.add(parent);
-                parent = (Item)parent.getLabel().get(new StringValue("parent"));
-            }
-            return SequenceExtent.makeSequenceExtent(ancestors);
-        });
-        logic.setDescription("fn:label()?ancestors");
-        return new CallableFunction(0, logic,
-                                    new SpecificFunctionType(SequenceType.ANY_SEQUENCE));
+        return new SimpleLazyFunction(
+                () -> {
+                    List<Item> ancestors = new ArrayList<>();
+                    Item parent = (Item) start.getLabel().get(new StringValue("parent"));
+                    while (parent != null && parent.getLabel() != null) {
+                        ancestors.add(parent);
+                        parent = (Item) parent.getLabel().get(new StringValue("parent"));
+                    }
+                    return SequenceExtent.makeSequenceExtent(ancestors);
+                },
+                SequenceType.ANY_SEQUENCE)
+                .withDescription("fn:label()?ancestors");
     }
 
     private static FunctionItem makePathFunction(Item start) {
-        CallableDelegate logic = new CallableDelegate((context, arguments) -> {
+        return new SimpleLazyFunction(() -> {
             List<Item> path = new ArrayList<>();
             Item parent = start;
             do {
@@ -146,10 +144,8 @@ public class LabeledMapItem extends DelegatingMapItem implements LabeledItem {
                 parent = (Item) label.get(new StringValue("parent"));
             } while (parent != null && parent.getLabel() != null);
             return SequenceExtent.makeSequenceExtent(path);
-        });
-        logic.setDescription("fn:label()?key");
-        return new CallableFunction(0, logic,
-                                    new SpecificFunctionType(SequenceType.ANY_SEQUENCE));
+        }, SequenceType.ANY_SEQUENCE)
+                .withDescription("fn:label()?path");
     }
 
 //    public static LabeledItem makeLabeledItem(Item subject, StringMap label) {

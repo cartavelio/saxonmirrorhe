@@ -3,10 +3,9 @@ package com.saxonica.functions.extfn;
 import com.saxonica.config.JavaExtensionLibrary;
 import com.saxonica.config.ProfessionalConfiguration;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.functions.CallableFunction;
+import net.sf.saxon.functions.ConstantFunction;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.hof.CurriedFunction;
 import net.sf.saxon.lib.Feature;
@@ -19,7 +18,6 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.AnyFunctionType;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.ObjectValue;
@@ -119,9 +117,7 @@ public class ObjectMap extends SystemFunction {
             }
         }
 
-
-        CallableDelegate returnThis = new CallableDelegate((context, args) -> value);
-        mapView.initialPut("this", new CallableFunction(0, returnThis, AnyFunctionType.getInstance()));
+        mapView.initialPut("this", new ConstantFunction(value, SequenceType.SINGLE_FUNCTION));
         return mapView;
     }
 
