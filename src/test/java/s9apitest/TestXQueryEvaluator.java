@@ -905,29 +905,6 @@ public class TestXQueryEvaluator {
         }
     }
 
-    /**
-     * This was supposed to test that streaming works with bytecode enabled. Actually it only
-     * works because byte code generation is suppressed for streamable code.
-     */
-
-    @Test
-    public void testStreamingWithByteCode() {
-        try {
-            Processor p = new Processor(true);
-            p.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, true);
-            XQueryCompiler c = p.newXQueryCompiler();
-            c.setStreaming(true);
-            XQueryEvaluator eval = c.compile("round(avg(//QUANTITY/data()), 2)").load();
-            StringWriter sw = new StringWriter();
-            Serializer out = p.newSerializer(sw);
-            out.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
-            StreamSource in = new StreamSource(new File(configTest.getDataDir() + "books.xml"));
-            eval.runStreamed(in, out);
-            assertEquals("128.67", sw.toString());
-        } catch (SaxonApiException e) {
-            fail(e.getMessage());
-        }
-    }
 
     @Test
     public void testStreamingFailure() {

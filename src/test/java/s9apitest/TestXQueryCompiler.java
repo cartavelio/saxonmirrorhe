@@ -8,7 +8,6 @@ import net.sf.saxon.dom.DocumentWrapper;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.query.DynamicQueryContext;
 import net.sf.saxon.s9api.*;
@@ -270,51 +269,6 @@ public class TestXQueryCompiler {
         }
     }
 
-    @Test
-    public void testSeparateCompilationDiamondByteCode() {
-        try {
-            Processor proc = new Processor(true);
-            proc.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, true);
-            XQueryCompiler comp = proc.newXQueryCompiler();
-
-            try {
-                comp.setBaseURI(new URI("http://www.example.com/module-one"));
-            } catch (URISyntaxException e) {
-                //
-            }
-            comp.compileLibrary(new StringReader("module namespace m1='http://www.example.com/module-one'; " +
-                    "declare function m1:add($a as xs:integer, $b as xs:integer) as xs:integer { $a + $b };"));
-            try {
-                comp.setBaseURI(new URI("http://www.example.com/module-two"));
-            } catch (URISyntaxException e) {
-                //
-            }
-            comp.compileLibrary("module namespace m2='http://www.example.com/module-two'; " +
-                    "import module namespace m1='http://www.example.com/module-one';" +
-                    "declare function m2:subtract($a as xs:integer, $b as xs:integer) as xs:integer { m1:add($a, -$b) };");
-            try {
-                comp.setBaseURI(new URI("http://www.example.com/module-three"));
-            } catch (URISyntaxException e) {
-                //
-            }
-            comp.compileLibrary("module namespace m3='http://www.example.com/module-three'; " +
-                    "import module namespace m1='http://www.example.com/module-one';" +
-                    "declare function m3:times($a as xs:integer, $b as xs:integer) as xs:integer { " +
-                    "   if ($b=1) then $a else m1:add($a, m3:times($a, $b - 1)) };");
-            String q1 = "import module namespace m2='http://www.example.com/module-two'; " +
-                    "import module namespace m3='http://www.example.com/module-three';" +
-                    "m2:subtract(m3:times(4,2),1)";
-            XQueryEvaluator ev = comp.compile(q1).load();
-            assertEquals("7", "7", ev.evaluate().toString());
-            String q2 = "import module namespace m2='http://www.example.com/module-two'; " +
-                    "import module namespace m3='http://www.example.com/module-three';" +
-                    "m2:subtract(m3:times(5,2),1)";
-            XQueryEvaluator ev2 = comp.compile(q2).load();
-            assertEquals("9", "9", ev2.evaluate().toString());
-        } catch (SaxonApiException e) {
-            fail(e.getMessage());
-        }
-    }
 
     @Test
     public void testSeparateCompilationDiamondWithVariables() {
@@ -663,9 +617,6 @@ public class TestXQueryCompiler {
     public void testBug5680() {
         try {
             Configuration c = new EnterpriseConfiguration();
-            c.setBooleanProperty(FeatureKeys.GENERATE_BYTE_CODE, true); //the test passes with disabled bytecode
-            c.setBooleanProperty(FeatureKeys.DEBUG_BYTE_CODE, true);
-            c.setConfigurationProperty(FeatureKeys.THRESHOLD_FOR_HOTSPOT_BYTE_CODE, 1);
 
             Processor processor = new Processor(c);
             XQueryCompiler qc = processor.newXQueryCompiler();

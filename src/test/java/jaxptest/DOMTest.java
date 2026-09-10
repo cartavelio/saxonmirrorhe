@@ -1463,7 +1463,6 @@ public class DOMTest {
             Document doc = builder.parse(new InputSource(new StringReader(xml)));
 
             TransformerFactory tfactory = new TransformerFactoryImpl();
-            tfactory.setAttribute(FeatureKeys.GENERATE_BYTE_CODE, false);
             String ss = "<xsl:transform xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'> "
                     + "<xsl:strip-space elements='*'/>"
                     + "<xsl:template match='/'><z count='{ext:count(//*)}' xmlns:ext='java:jaxptest.DOMTest'/></xsl:template>"

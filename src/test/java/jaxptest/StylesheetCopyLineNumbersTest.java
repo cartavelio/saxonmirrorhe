@@ -2,12 +2,12 @@ package jaxptest;
 
 import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.lib.ErrorReporter;
-import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.StandardErrorListener;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.tree.tiny.TinyDocumentImpl;
 import net.sf.saxon.tree.tiny.TinyNodeImpl;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
 import javax.xml.transform.ErrorListener;
@@ -26,17 +26,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Test that line numbers are reported correctly for dynamic errors, both for interpreted stylesheets
- * and when bytecode is generated.
+ * Test that line numbers are reported correctly for dynamic errors
  */
 public class StylesheetCopyLineNumbersTest {
     private final ConfigTest configTest = new ConfigTest();
 
-    public static void testStylesheetCopyCompiled() throws Exception {
-        testStylesheetCopyTree(true);
-        testStylesheetCopySax(true);
-    }
 
+    @Test
     public static void testStylesheetCopyInterpreted() throws Exception {
         testStylesheetCopyTree(false);
         testStylesheetCopySax(false);
@@ -45,7 +41,6 @@ public class StylesheetCopyLineNumbersTest {
     public static void testStylesheetCopyTree(boolean compile) throws Exception {
         ConfigTest ctest = new ConfigTest();
         TransformerFactoryImpl factory = new TransformerFactoryImpl();
-        factory.getConfiguration().setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, compile);
 
         // Run the stylesheets with an empty document to show the difference in error line number
         ErrorListener el = new StandardErrorListener() {
@@ -88,7 +83,6 @@ public class StylesheetCopyLineNumbersTest {
     public static void testStylesheetCopySax(boolean compile) throws Exception {
         ConfigTest ctest = new ConfigTest();
         TransformerFactoryImpl factory = new TransformerFactoryImpl();
-        factory.getConfiguration().setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, compile);
 
         Source sourceToCache = new SAXSource(new InputSource(new FileInputStream(ctest.getDataDir() + "runtime-error.xsl")));
 
@@ -126,6 +120,7 @@ public class StylesheetCopyLineNumbersTest {
      * pipeline rather than during expression interpretation, when the originating expression isn't directly available.
      */
 
+    @Test
     public static void testMultiPackageLocationInfo() {
         try {
             Processor p = new Processor(true);
