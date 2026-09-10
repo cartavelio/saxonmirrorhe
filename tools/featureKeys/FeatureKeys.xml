@@ -2163,15 +2163,21 @@
         <configfiledesc>
             <p>Controls whether XInclude processing is applied to input files.</p>
         </configfiledesc>
-        <commandline for="T">-xi:(on|off)</commandline>
+        <commandline for="TQV">-xi:(on|off)</commandline>
         <desc>
-            <p>Indicates whether source documents should have any XInclude directives expanded.</p>
-            <p>The default is false. The option applies to all input XML documents, including
-                stylesheets and schema documents. It can be overridden for individual documents
-                using the <link>net.sf.saxon.lib.ParseOptions</link> class.</p>
+            <p>Indicates whether XML documents should have any XInclude directives expanded.
+                The default is false.</p>
             <p>This option relies on support in the underlying XML parser. If the XML parser does
                 not support XInclude processing, setting this option results in a parsing failure.</p>
-        </desc>
+            <p>The effect of the option is to set a flag to request XInclude expansion in the
+                default parse options held at Configuration level. These options are used on most occasions
+                that an XML document is parsed (including parsing of XSD schema documents), but with one 
+                notable exception: XSLT stylesheet documents. XInclude directives are never expanded in
+                stylesheet modules, except of course when they are processed using APIs (such as the
+                <code>DocumentBuilder</code>, or a call on <code>fn:document("")</code>) that treat 
+                them as generic XML documents.
+                The default options can be overridden in many APIs by custom parsing options.</p>
+        </desc>       
     </feature>
     <feature>
         <featureCode>95</featureCode>
