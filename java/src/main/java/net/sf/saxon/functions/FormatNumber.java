@@ -191,7 +191,7 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
      * @return the result of conversion to a double
      */
 
-    @CSharpReplaceBody(code="return Singulink.Numerics.BigDecimal.FromDouble(value, Singulink.Numerics.FloatConversion.Truncate);") // keep it simple for now...
+    @CSharpReplaceBody(code="return Singulink.Numerics.BigDecimal.FromDouble(value, Singulink.Numerics.FloatConversion.ParseString);") // keep it simple for now...
     public static BigDecimal adjustToDecimal(double value, int precision) {
         final String zeros = precision == 1 ? "00000" : "000000000";
         final String nines = precision == 1 ? "99999" : "999999999";
