@@ -722,12 +722,12 @@ public class DominoNode implements NodeInfo, VirtualNode {
 
 
     /**
-     * Get the string value of the item as a {@link }UnicodeString}. This is in some cases more efficient than
+     * Get the string value of the item as a {@link UnicodeString}. This is in some cases more efficient than
      * the version of the method that returns a String. The method satisfies the rule that
      * <code>X.getStringValueCS().toString()</code> returns a string that is equal to
      * <code>X.getStringValue()</code>.
      * <p>If the calling code can handle a UnicodeString, this method should
-     * be used. If the caller requires a string, the {@link #getStringValue} method is preferred.</p>
+     * be used. If the caller requires a string, the {@link #getStringValue()} method is preferred.</p>
      *
      * @return the string value of the item
      * @throws UnsupportedOperationException if the item is a function item (an unchecked exception

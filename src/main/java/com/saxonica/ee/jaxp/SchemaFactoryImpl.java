@@ -77,12 +77,11 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
      * Default constructor. This is designed to be invoked via the JAXP SchemaFactory.newInstance()
      * mechanism, but it can also be invoked directly if the application will always be using the Saxon
      * implementation. Instantiating a SchemaFactory directly in this way is likely to be a lot faster
-     * than the JAXP mechanism, because it avoid the expensive search of all JARs on the classpath.
-     * <p>This constructor creates an EnterpriseConfiguration: to do so it calls the registered
-     * ConfigurationProvider. The ConfigurationProvider can be customized using the (static) method
-     * {@link }.</p>
-     * <p>The constructor does not at this stage check
-     * that a license key is installed.</p>
+     * than the JAXP mechanism, because it avoids the expensive search of all JARs on the classpath.
+     * <p>This constructor creates an {@code EnterpriseConfiguration}: to do so it calls the registered
+     * Configuration factory. The Configuration factory can be customized using the (static) method
+     * {@link #setConfigurationFactory(Supplier)}.</p>
+     * <p>The constructor does not at this stage check that a license key is installed.</p>
      */
 
     public SchemaFactoryImpl() {

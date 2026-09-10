@@ -10,9 +10,7 @@ import java.util.List;
 
 
 /**
- * AttributeIterator is an enumeration of all the attribute nodes of an Element. This
- * class is used only in conjunction with a FleetingElementNode, that is an element node
- * in a streamed document.
+ * AttributeIterator iterates over all the attribute nodes of a streamed Element node.
  */
 
 final public class AttributeIterator implements AxisIterator, LookaheadIterator {
@@ -24,8 +22,7 @@ final public class AttributeIterator implements AxisIterator, LookaheadIterator 
     /**
      * Constructor
      *
-     * @param element:  the element whose attributes are required. This may be any type of node,
-     *                  but if it is not an element the enumeration will be empty
+     * @param element   the element whose attributes are required.
      */
 
     public AttributeIterator(FleetingElementNode element, AttributeMap attributes) {

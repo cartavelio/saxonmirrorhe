@@ -121,7 +121,7 @@ public class ForEachGroupParallelAction extends ForEachAction {
      * any attributes selected by the last step in the selection are ignored
      *
      * @throws XPathException if a dynamic error occurs while processing the start-element event
-     * @return
+     * @return a Receiver to be notified of subsequent events, or null
      */
 
     /*@Nullable*/

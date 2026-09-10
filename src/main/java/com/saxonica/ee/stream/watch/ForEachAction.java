@@ -100,7 +100,7 @@ public class ForEachAction extends ItemFeed {
      * @throws net.sf.saxon.type.ValidationException
      *          May be raised if the constraint implemented by this
      *          Watch is violated @param locationId the location of the node in the source, or of the instruction that created it
-     * @return always null
+     * @return always null for this method, but may be non-null in subclasses
      */
 
     /*@Nullable*/

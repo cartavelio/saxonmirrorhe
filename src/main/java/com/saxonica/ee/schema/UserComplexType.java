@@ -183,7 +183,7 @@ public class UserComplexType extends UserDefinedType
      * Get the variety of this complex type. This will be one of the values
      * {@link ComplexVariety#EMPTY}, {@link ComplexVariety#MIXED}, {@link ComplexVariety#SIMPLE}, or
      * {@link ComplexVariety#ELEMENT_ONLY}
-     * @return
+     * @return the variety of this complex type
      */
 
     @Override

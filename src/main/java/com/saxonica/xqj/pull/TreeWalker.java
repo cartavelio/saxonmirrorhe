@@ -345,7 +345,7 @@ public class TreeWalker implements UnfailingPullProvider, Location {
      * This method cannot be used to obtain the string value of an element, or of a namespace
      * node. If the most recent event was anything other than {@link PullEvent#START_ELEMENT}, {@link PullEvent#TEXT},
      * {@link PullEvent#PROCESSING_INSTRUCTION}, or {@link PullEvent#ATOMIC_VALUE}, the result is undefined.
-     * @return
+     * @return the string value of the current node, if defined
      */
 
     @Override
