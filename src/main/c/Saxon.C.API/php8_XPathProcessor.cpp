@@ -65,6 +65,30 @@ PHP_METHOD(XPathProcessor, setProperty) {
   }
 }
 
+PHP_METHOD(XPathProcessor, getProperty) {
+  XPathProcessor *xpathProcessor;
+  char *name;
+  size_t len1;
+
+  if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &len1) == FAILURE) {
+    RETURN_NULL();
+  }
+  zend_object *pobj = Z_OBJ_P(getThis());
+  xpathProcessor_object *obj =
+      (xpathProcessor_object *)((char *)pobj -
+                                 XtOffsetOf(xpathProcessor_object, std));
+  xpathProcessor = obj->xpathProcessor;
+  if (xpathProcessor != nullptr) {
+
+    const char * valueStr = xpathProcessor->getProperty(name);
+    if(valueStr != nullptr) {
+      RETURN_STRING(valueStr);
+    } else {
+      RETURN_NULL();
+    }
+  }
+}
+
 PHP_METHOD(XPathProcessor, setParameter) {
 
   XPathProcessor *xpathProcessor;
@@ -691,6 +715,7 @@ zend_function_entry XPathProcessor_methods[] = {
                                             arginfo_saxonc_xpath_setParameter,
                                             ZEND_ACC_PUBLIC)
                     PHP_ME(XPathProcessor, setProperty,arginfo_saxonc_xpath_setProperty,ZEND_ACC_PUBLIC)
+                    PHP_ME(XPathProcessor, getProperty,arginfo_saxonc_xpath_getProperty,ZEND_ACC_PUBLIC)
                     PHP_ME(XPathProcessor,setLanguageVersion,arginfo_saxonc_xpath_setLanguageVersion,ZEND_ACC_PUBLIC)
                     PHP_ME(XPathProcessor, clearParameters,arginfo_saxonc_xpath_clearParameters,ZEND_ACC_PUBLIC)
                     PHP_ME(XPathProcessor,clearProperties,arginfo_saxonc_xpath_clearProperties,ZEND_ACC_PUBLIC)

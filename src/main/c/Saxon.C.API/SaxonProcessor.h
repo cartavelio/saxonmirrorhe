@@ -764,13 +764,12 @@ public:
   //! created in the C++ code-base
   /**
   * @param data - the string data to be deleted using the operator delete
-  * @param deleteFlag - this is a special case to handle the empty sequence which returns empty string there has not allowed any memory
   */
-  static void deleteString(const char *data, char deleteFlag=0) {
-    if (data != nullptr && deleteFlag == 0) {
+  static void deleteString(const char *data) {
+    if (data != nullptr) {
       operator delete((char *)data);
       data = nullptr;
-    }
+    } 
   }
 
     static XdmValue *makeXdmValueFromRef(int64_t valueRef);

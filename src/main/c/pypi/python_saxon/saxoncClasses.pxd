@@ -37,7 +37,7 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
         void detachCurrentThread()  except +raise_py_error
 
         @staticmethod
-        void deleteString(const char * data, char delete_flag)
+        void deleteString(const char * data)
 
         XdmValue ** createXdmValueArray(int len)
 
@@ -507,6 +507,8 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
         bool removeParameter(const char * name)
 
         void setProperty(const char * name, const char * value)
+
+        const char * getProperty(const char * name)
 
         void declareNamespace(const char *prefix, const char * uri)  except +raise_py_error
 

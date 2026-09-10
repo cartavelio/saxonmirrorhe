@@ -761,7 +761,7 @@ public class SaxonCAPI {
      *   Method to convert a Java string to native C char array in the C memory space
      * @param alloc  - The allocator from C/C++
      * @param string - The Java string object
-     * @return  Pointer to the C char array held in the C/C++ memory space. It is the caller's responsibility yo delete the associated memory
+     * @return  Pointer to the C char array held in the C/C++ memory space. It is the caller's responsibility to delete the associated memory
      */
     static CCharPointer stringToNative2(net.sf.saxon.option.cpp.SaxonCAPI.AllocatorCCharFn alloc, String string) {
         /*if(string.isEmpty()) {

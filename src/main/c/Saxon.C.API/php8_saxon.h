@@ -368,6 +368,7 @@ PHP_METHOD(XPathProcessor, setLanguageVersion);
 PHP_METHOD(XPathProcessor, importSchemaNamespace);
 PHP_METHOD(XPathProcessor, setParameter);          // checks for old values, then add new one, increment refCount
 PHP_METHOD(XPathProcessor, setProperty);
+PHP_METHOD(XPathProcessor, getProperty);
 PHP_METHOD(XPathProcessor, clearParameters);   // do decrementing of values and delete if refCount == 0
 PHP_METHOD(XPathProcessor, clearProperties);
 PHP_METHOD(XPathProcessor, exceptionClear);
