@@ -145,6 +145,13 @@ public class SaxonOutputKeys {
     public static final String ITEM_SEPARATOR = "item-separator";
 
     /**
+     * escape-solidus = yes|no.
+     * <p>Defines whether forward slash is escaped by the JSON output method</p>
+     */
+
+    /*@NotNull*/ public static final String JSON_LINES = "json-lines";
+
+    /**
      * json-node-output-method = method-name
      * <p>Defines the serialization method for nodes encountered while serializing as JSON</p>
      */

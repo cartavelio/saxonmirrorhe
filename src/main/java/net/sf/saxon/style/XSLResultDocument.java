@@ -58,6 +58,7 @@ public class XSLResultDocument extends StyleElement {
         fans.add("include-content-type");
         fans.add("indent");
         fans.add("item-separator");
+        fans.add("json-lines");
         fans.add("json-node-output-method");
         fans.add("media-type");
         fans.add("method");

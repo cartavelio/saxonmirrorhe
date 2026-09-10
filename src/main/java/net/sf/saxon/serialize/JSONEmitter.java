@@ -45,6 +45,7 @@ public class JSONEmitter {
     private Properties outputProperties;
     private CharacterSet characterSet;
     private boolean isIndenting;
+    private boolean isJsonLines;
     private int indentSpaces = 2;
     private int maxLineLength;
     private boolean first = true;
@@ -72,6 +73,9 @@ public class JSONEmitter {
         this.outputProperties = details;
         if ("yes".equals(details.getProperty(OutputKeys.INDENT))) {
             isIndenting = true;
+        }
+        if ("yes".equals(details.getProperty(SaxonOutputKeys.JSON_LINES))) {
+            isJsonLines = true;
         }
         if ("yes".equals(details.getProperty(SaxonOutputKeys.UNFAILING))) {
             unfailing = true;
@@ -291,7 +295,7 @@ public class JSONEmitter {
     private void emitClose(char bracket, int level) throws XPathException {
         boolean oneLiner = oneLinerStack.pop();
         if (isIndenting) {
-            if (oneLiner) {
+            if (oneLiner || isJsonLines) {
                 emit(' ');
             } else {
                 indent(level - 1);
@@ -308,6 +312,8 @@ public class JSONEmitter {
         boolean actuallyIndenting = isIndenting && level != 0 && !oneLiner;
         if (first) {
             first = false;
+        } else if (level == 0 && isJsonLines) {
+            return;
         } else if (!afterKey) {
             emit(',');
             if (oneLiner && isIndenting) {
@@ -330,6 +336,10 @@ public class JSONEmitter {
         for (int i = 0; i < indentSpaces * level; i++) {
             emit(' ');
         }
+    }
+
+    public void newLine() throws XPathException {
+        emit('\n');
     }
 
     private UnicodeString escape(UnicodeString cs) throws XPathException {
@@ -397,7 +407,7 @@ public class JSONEmitter {
      */
 
     public void close() throws XPathException {
-        if (first) {
+        if (first && !isJsonLines) {
             emit("null");
         }
         if (writer != null) {

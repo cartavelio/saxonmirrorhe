@@ -49,6 +49,7 @@ public class JSONSerializer extends SequenceWriter implements ReceiverWithOutput
     private Properties outputProperties;
     private CharacterSet characterSet;
     private boolean isIndenting;
+    private boolean isJsonLines;
     private Comparator<AtomicValue> propertySorter;
 
     private boolean unfailing = false;
@@ -72,6 +73,9 @@ public class JSONSerializer extends SequenceWriter implements ReceiverWithOutput
         }
         if ("yes".equals(details.getProperty(OutputKeys.INDENT))) {
             isIndenting = true;
+        }
+        if ("yes".equals(details.getProperty(SaxonOutputKeys.JSON_LINES))) {
+            isJsonLines = true;
         }
         if ("yes".equals(details.getProperty(SaxonOutputKeys.UNFAILING))) {
             unfailing = true;
@@ -135,7 +139,11 @@ public class JSONSerializer extends SequenceWriter implements ReceiverWithOutput
     @Override
     public void write(Item item) throws XPathException {
         if (level == 0 && ++topLevelCount >= 2) {
-            throw new XPathException("JSON output method cannot handle sequences of two or more items", "SERE0023");
+            if (isJsonLines) {
+                emitter.newLine();
+            } else {
+                throw new XPathException("JSON output method cannot handle sequences of two or more items", "SERE0023");
+            }
         }
 
         if (item instanceof AtomicValue) {
@@ -250,7 +258,7 @@ public class JSONSerializer extends SequenceWriter implements ReceiverWithOutput
      */
     @Override
     public void close() throws XPathException {
-        if (topLevelCount == 0) {
+        if (topLevelCount == 0 && !isJsonLines) {
             emitter.writeAtomicValue(null);
         }
         emitter.close();

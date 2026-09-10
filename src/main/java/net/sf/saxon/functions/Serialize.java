@@ -57,6 +57,7 @@ public class Serialize extends SystemFunction implements Callable {
         op.addAllowedOption("include-content-type", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
         op.addAllowedOption("indent", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
         op.addAllowedOption("item-separator", SequenceType.SINGLE_STRING); //string-param-type
+        op.addAllowedOption("json-lines", SequenceType.SINGLE_BOOLEAN);
         op.addAllowedOption("json-node-output-method", SequenceType.SINGLE_STRING);
         //json-node-output-method-param-type  json-node-output-method-type - xs:string or xs:QName
         op.addAllowedOption("media-type", SequenceType.SINGLE_STRING); //string-param-type
@@ -98,7 +99,7 @@ public class Serialize extends SystemFunction implements Callable {
     private final String[] paramNames = new String[]{
         "allow-duplicate-names", "byte-order-mark", "cdata-section-elements", "doctype-public", "doctype-system",
         "encoding", "escape-solidus", "escape-uri-attributes", "html-version", "include-content-type", "indent", "item-separator",
-        "json-node-output-method", "media-type", "method", "normalization-form", "omit-xml-declaration", "standalone",
+        "json-lines", "json-node-output-method", "media-type", "method", "normalization-form", "omit-xml-declaration", "standalone",
         "suppress-indentation", "undeclare-prefixes", "use-character-maps", "version"
     };
 
@@ -142,6 +143,7 @@ public class Serialize extends SystemFunction implements Callable {
         requiredTypes.put("include-content-type", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
         requiredTypes.put("indent", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
         requiredTypes.put("item-separator", SequenceType.SINGLE_STRING); //string-param-type
+        requiredTypes.put("json-lines", SequenceType.SINGLE_BOOLEAN);
         requiredTypes.put("json-node-output-method", SequenceType.SINGLE_STRING);
         //json-node-output-method-param-type  json-node-output-method-type - xs:string or xs:QName
         requiredTypes.put("media-type", SequenceType.SINGLE_STRING); //string-param-type
@@ -394,6 +396,9 @@ public class Serialize extends SystemFunction implements Callable {
         }
         if ((seqVal = map.get("item-separator")) != null) {
             props.setProperty("item-separator", seqVal.head().getStringValue());
+        }
+        if ((seqVal = map.get("json-lines")) != null) {
+            props.setProperty("json-lines", toYesNoTypeString(seqVal));
         }
         if ((seqVal = map.get("json-node-output-method")) != null) {
             props.setProperty("json-node-output-method", toMethodTypeString(seqVal));

@@ -1109,6 +1109,7 @@ public class SerializerFactory {
                 case SaxonOutputKeys.ALLOW_DUPLICATE_NAMES:
                 case SaxonOutputKeys.ESCAPE_URI_ATTRIBUTES:
                 case SaxonOutputKeys.INCLUDE_CONTENT_TYPE:
+                case SaxonOutputKeys.JSON_LINES:
                 case OutputKeys.INDENT:
                 case OutputKeys.OMIT_XML_DECLARATION:
 
