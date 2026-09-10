@@ -1679,9 +1679,9 @@ cdef class PyXsltExecutable:
         if len(kwds) > 0:
             self.thisxptr.setInitialTemplateParameters(parameters, c_tunnel)
 
-     def set_save_xsl_Message(self, show, str file_name = None):
+     def set_save_xsl_message(self, show, str file_name = None):
         """
-        set_save_xsl_Message(self, show, str file_name)
+        set_save_xsl_message(self, show, str file_name)
         Gives users the option to switch the xsl:message feature on or off. It is also possible
         to send the xsl:message outputs to file given by file name.
         Args:
@@ -3508,7 +3508,7 @@ cdef class PySchemaValidator:
         Args:
             **kwds: Possible keyword arguments: must be one of the following (file_name|xml_text|xdm_node).
                 Specifies the source file to be validated. Allow None when source document is
-                supplied using the set_source method
+                supplied using the set_source_node method
         """
         py_error_message = "Error: validate should only contain one of the following keyword arguments: (file_name|xdm_node|xml_text)"
         if len(kwds) > 1:
@@ -3536,7 +3536,7 @@ cdef class PySchemaValidator:
         Args:
             **kwds: Possible keyword arguments: must be one of the following (file_name|xml_text|xdm_node).
                 Specifies the source file to be validated. Allow None when source document is supplied
-                using the set_source method.
+                using the set_source_node method.
         Returns:
             PyXdmNode: The validated document returned to the calling program as a PyXdmNode
         """
