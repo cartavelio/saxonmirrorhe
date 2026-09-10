@@ -98,6 +98,29 @@ public class TestReflexionHelper {
         return new ArrayList<String>();
     }
 
+    public static String maxi(String label, DoubleValue... doubles) {
+        double max = Double.MIN_VALUE;
+        for (DoubleValue val : doubles) {
+            max = val.getDoubleValue() > max ? val.getDoubleValue() : max;
+        }
+        return label + ": " + max;
+    }
+
+    public static String maxi2(String label, DoubleValue... doubles) {
+        double max = Double.MIN_VALUE;
+        for (DoubleValue val : doubles) {
+            max = val.getDoubleValue() > max ? val.getDoubleValue() : max;
+        }
+        return label + " (s) : " + max;
+    }
+
+    public static String maxi2(java.net.URI label, DoubleValue... doubles) {
+        double max = Double.MIN_VALUE;
+        for (DoubleValue val : doubles) {
+            max = val.getDoubleValue() > max ? val.getDoubleValue() : max;
+        }
+        return label + " (u) : " + max;
+    }
 
     public static NodeInfo makeDocGood(XPathContext context) throws XPathException {
         return context.getConfiguration().buildDocumentTree(new StreamSource(new StringReader("<doc/>"))).getRootNode();

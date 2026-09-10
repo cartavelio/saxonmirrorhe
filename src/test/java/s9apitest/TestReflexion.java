@@ -550,7 +550,7 @@ public class TestReflexion {
                 exec = c.compile(
                         "name(this:makeDocGood()[last()]/*)");
                 val = exec.load().evaluate();
-                assertTrue(((XdmAtomicValue) val).getStringValue().trim().equals("doc"));
+                assertEquals("doc", ((XdmAtomicValue) val).getStringValue().trim());
                 try {
                     exec = c.compile(
                             "name(this:makeDocBad()[last()]/*)");
@@ -562,7 +562,7 @@ public class TestReflexion {
                 exec = c.compile(
                         "name(this:makeDocsGood()[last()]/*)");
                 val = exec.load().evaluate();
-                assertTrue(((XdmAtomicValue) val).getStringValue().trim().equals("doc2"));
+                assertEquals("doc2", ((XdmAtomicValue) val).getStringValue().trim());
                 try {
                     exec = c.compile(
                             "name(this:makeDocsBad()[last()]/*)");
@@ -586,9 +586,93 @@ public class TestReflexion {
             XQueryExecutable exec = c.compile(
                     "let $n :=  Q{java:s9apitest.MyFoo}new() return Q{java:s9apitest.MyFoo}foo($n)");
             XdmValue val = exec.load().evaluate();
-            assertTrue("foo".equals(val.toString()));
+            assertEquals("foo", val.toString());
         } catch (SaxonApiException e) {
             fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testVarArgsWithSingleArg() {
+        try {
+            XQueryCompiler c = makeCompiler();
+            c.getProcessor().setConfigurationProperty(Feature.TRACE_EXTERNAL_FUNCTIONS, true);
+            XQueryExecutable exec = c.compile(
+                    "this:maxi('abc', 1e0)");
+            XdmValue val = exec.load().evaluate();
+            assertEquals("abc: 1.0", val.toString());
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testVarArgsWithSequenceArg() {
+        try {
+            XQueryCompiler c = makeCompiler();
+            c.getProcessor().setConfigurationProperty(Feature.TRACE_EXTERNAL_FUNCTIONS, true);
+            XQueryExecutable exec = c.compile(
+                    "this:maxi('abc', (1e0, 2e0))");
+            XdmValue val = exec.load().evaluate();
+            assertEquals("abc: 2.0", val.toString());
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testVarArgsWithMultipleArgs() {
+        try {
+            XQueryCompiler c = makeCompiler();
+            c.getProcessor().setConfigurationProperty(Feature.TRACE_EXTERNAL_FUNCTIONS, true);
+            XQueryExecutable exec = c.compile(
+                    "this:maxi('abc', 1e0, 2e0)");
+            XdmValue val = exec.load().evaluate();
+            fail("Unexpected success");
+        } catch (SaxonApiException e) {
+            assertEquals("XPST0017", e.getErrorCode().getLocalName());
+        }
+    }
+
+    @Test
+    public void testAmbiguousVarArgsWithSingleArg() {
+        try {
+            XQueryCompiler c = makeCompiler();
+            c.getProcessor().setConfigurationProperty(Feature.TRACE_EXTERNAL_FUNCTIONS, true);
+            XQueryExecutable exec = c.compile(
+                    "this:maxi2('abc', 1e0)");
+            XdmValue val = exec.load().evaluate();
+            assertEquals("abc (s) : 1.0", val.toString());
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testAmbiguousVarArgsWithSequenceArg() {
+        try {
+            XQueryCompiler c = makeCompiler();
+            c.getProcessor().setConfigurationProperty(Feature.TRACE_EXTERNAL_FUNCTIONS, true);
+            XQueryExecutable exec = c.compile(
+                    "this:maxi2('abc', (1e0, 2e0))");
+            XdmValue val = exec.load().evaluate();
+            assertEquals("abc (s) : 2.0", val.toString());
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testAmbiguousVarArgsWithMultipleArgs() {
+        try {
+            XQueryCompiler c = makeCompiler();
+            c.getProcessor().setConfigurationProperty(Feature.TRACE_EXTERNAL_FUNCTIONS, true);
+            XQueryExecutable exec = c.compile(
+                    "this:maxi2('abc', 1e0, 2e0)");
+            XdmValue val = exec.load().evaluate();
+            fail("Unexpected success");
+        } catch (SaxonApiException e) {
+            assertEquals("XPST0017", e.getErrorCode().getLocalName());
         }
     }
 
