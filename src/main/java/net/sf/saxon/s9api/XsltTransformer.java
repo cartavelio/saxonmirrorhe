@@ -15,6 +15,7 @@ import net.sf.saxon.expr.instruct.GlobalParameterSet;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.NodeSource;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -218,6 +219,9 @@ public class XsltTransformer extends AbstractXsltTransformer implements Destinat
     public XdmNode getInitialContextNode() {
         if (initialSource instanceof NodeInfo) {
             return (XdmNode) XdmValue.wrap((NodeInfo) initialSource);
+        } else if (initialSource instanceof NodeSource) {
+            NodeInfo n = ((NodeSource)initialSource).getNode();
+            return (XdmNode) XdmValue.wrap(n);
         } else {
             return null;
         }
