@@ -10,7 +10,6 @@ package net.sf.saxon.event;
 import net.sf.saxon.lib.DigestMaker;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.s9api.QName;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
@@ -41,6 +40,15 @@ public class CheckSumFilter extends ProxyReceiver {
     private boolean digestFound = false;
     private boolean requireDigest = false;
     private boolean rootElement = true;
+
+    // The code that uses the checksum asks for it after the document element
+    // has been processed but before endDocument is called, so we use depth
+    // to keep track of when we end the document element (we need to make an
+    // adjustment to the checksum).
+    private int depth = 0;
+
+    // We have to generate different checksum values for XML and JSON outputs
+    private String target = "unknown";
 
     public final static String SIGMA = "Σ";
     public final static String SIGMA2 = "Σ2";
@@ -119,6 +127,7 @@ public class CheckSumFilter extends ProxyReceiver {
         checksum ^= hash(elemName, sequence++);
         trace("After startElement " + elemName.getDisplayName() + ": " + checksum);
         checksumCorrect = false;
+        depth++;
 
         if (rootElement) {
             rootElement = false;
@@ -147,6 +156,11 @@ public class CheckSumFilter extends ProxyReceiver {
                 } catch (NumberFormatException e) {
                     requireDigest = true;
                 }
+            }
+
+            target = attributes.getValue("target");
+            if (target == null) {
+                target = "unknown";
             }
         }
 
@@ -189,6 +203,20 @@ public class CheckSumFilter extends ProxyReceiver {
      */
     @Override
     public void endElement() throws XPathException {
+        depth--;
+        if (depth == 0 && target.startsWith("JS")) {
+            // We've reached the end. Update the checksum with a checksum of the
+            // SIGMA2 hash (because that's what SaxonJS2 is going to have done).
+            // The sequence is 1 when SIGMA2 is seen by the JS2 verifier.
+            //
+            // This only applies when the output is JSON because when the output
+            // is XML, the checksums are stored in processing instructions and
+            // are always ignored by the verifier.
+            checksum ^= hash("", 1); // SIGMA2 is in no namespace
+            checksum ^= hash(SIGMA2, 1);
+            checksum ^= hash(getDigest(), 1);
+        }
+
         checksum ^= 1;
         trace("After endElement: " + checksum);
         super.endElement();
@@ -274,7 +302,7 @@ public class CheckSumFilter extends ProxyReceiver {
         digest.update(sequence);
         digest.update(s);
 
-        int h = sequence<<8;
+        int h = sequence << 8;
         for (int i=0; i<s.length(); i++) {
             h = (h<<1) + s.charAt(i);
         }
