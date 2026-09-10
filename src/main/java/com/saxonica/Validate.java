@@ -85,18 +85,22 @@ public class Validate {
         options.setPermittedValues("dtd", new String[]{"on", "off", "recover"}, "on");
         options.addRecognizedOption("export", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Schema output file in SCM format");
+        //#if CSHARP==false
         options.addRecognizedOption("ext", CommandLineOptions.TYPE_BOOLEAN,
                 "Allow calls to Java extension functions");
         options.addRecognizedOption("init", CommandLineOptions.TYPE_CLASSNAME,
                 "User-supplied net.sf.saxon.lib.Initializer class to initialize the Saxon Configuration");
+        //#endif
         options.addRecognizedOption("limits", CommandLineOptions.TYPE_INTEGER_PAIR,
                 "Limits for correct processing of minOccurs and maxOccurs");
         options.addRecognizedOption("opt", CommandLineOptions.TYPE_INTEGER | CommandLineOptions.VALUE_REQUIRED,
                 "Use optimization level 0..10");
+        //#if CSHARP==false
         options.addRecognizedOption("quit", CommandLineOptions.TYPE_BOOLEAN | CommandLineOptions.VALUE_REQUIRED,
                 "Quit JVM if execution fails");
         options.addRecognizedOption("r", CommandLineOptions.TYPE_CLASSNAME | CommandLineOptions.VALUE_REQUIRED,
                 "Use named URIResolver class");
+        //#endif
         options.addRecognizedOption("report", CommandLineOptions.TYPE_CLASSNAME | CommandLineOptions.VALUE_REQUIRED,
                 "Report XML file name for validation error reporting");
         options.addRecognizedOption("s", CommandLineOptions.TYPE_FILENAME_LIST | CommandLineOptions.VALUE_REQUIRED,
@@ -117,6 +121,7 @@ public class Validate {
         options.addRecognizedOption("val", CommandLineOptions.TYPE_ENUMERATION | CommandLineOptions.VALUE_REQUIRED,
                 "Apply strict or lax validation");
         options.setPermittedValues("val", new String[]{"strict", "lax"}, "strict");
+        //#if CSHARP==false
         options.addRecognizedOption("x", CommandLineOptions.TYPE_CLASSNAME | CommandLineOptions.VALUE_REQUIRED,
                 "Use named XMLReader class for parsing source documents");
         options.addRecognizedOption("xi", CommandLineOptions.TYPE_BOOLEAN,
@@ -124,6 +129,7 @@ public class Validate {
         options.addRecognizedOption("xmlversion", CommandLineOptions.TYPE_ENUMERATION | CommandLineOptions.VALUE_REQUIRED,
                 "Indicate whether XML 1.1 is supported");
         options.setPermittedValues("xmlversion", new String[]{"1.0", "1.1"}, null);
+        //#endif
         options.addRecognizedOption("xsd", CommandLineOptions.TYPE_FILENAME_LIST | CommandLineOptions.VALUE_REQUIRED,
                 "List of schema documents to be preloaded");
         options.addRecognizedOption("xsdversion", CommandLineOptions.TYPE_ENUMERATION | CommandLineOptions.VALUE_REQUIRED,
@@ -131,8 +137,10 @@ public class Validate {
         options.setPermittedValues("xsdversion", new String[]{"1.0", "1.1"}, null);
         options.addRecognizedOption("xsiloc", CommandLineOptions.TYPE_BOOLEAN,
                 "Load schemas named in xsi:schemaLocation (default on)");
+        //#if CSHARP==false
         options.addRecognizedOption("y", CommandLineOptions.TYPE_CLASSNAME | CommandLineOptions.VALUE_REQUIRED,
                 "Use named XMLReader class for parsing schema documents");
+        //#endif
         options.addRecognizedOption("?", CommandLineOptions.VALUE_PROHIBITED,
                 "Display command line help text");
 
