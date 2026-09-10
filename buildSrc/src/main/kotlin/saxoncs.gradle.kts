@@ -175,6 +175,7 @@ val transpileToXml = tasks.register<JavaExec>("transpileToXml") {
     "-h:${layout.buildDirectory.dir("src/main/java").get()}",
     "-src:${layout.buildDirectory.dir("src/main/java").get()}",
     "-jar:${transpilerInputSaxonJar.map { it.singleFile }.get() }",
+    "-jar:${jarFinder.find("xmlresolver-${findProperty("xmlresolverVersion")}.jar")}",
     "-jar:${jarFinder.find("icu4j-${findProperty("icu4jVersion")}.jar")}",
     "-jar:${jarFinder.find("coffeegrinder-${findProperty("ninemlVersion")}.jar")}",
     "-jar:${jarFinder.find("coffeefilter-${findProperty("ninemlVersion")}.jar")}")
@@ -233,6 +234,7 @@ val generateCode = tasks.register<JavaExec>("generateCode") {
     "-digest:${layout.buildDirectory.file("digest.xml").get()}",
     "-jar:${transpilerInputSaxonJar.map { it.singleFile }.get() }",
     "-jar:${jarFinder.find("icu4j-${findProperty("icu4jVersion")}.jar")}",
+    "-jar:${jarFinder.find("xmlresolver-${findProperty("xmlresolverVersion")}.jar")}",
     "-jar:${jarFinder.find("coffeegrinder-${findProperty("ninemlVersion")}.jar")}",
     "-jar:${jarFinder.find("coffeefilter-${findProperty("ninemlVersion")}.jar")}",
     "-debug")
