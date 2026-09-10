@@ -1252,7 +1252,7 @@ public class XdmUtils {
             throw new SaxonApiException("XdmMap object is null");
         }
         XdmMap xdmMap = SaxonCAPI.objectHandles.get(mapRef);
-        if(xdmMap.isEmpty()) {
+        if(xdmMap.isEmptyMap()) {
             return WordFactory.nullPointer();
         }
         XdmValue [] values = getXdmMapKeys(xdmMap);
