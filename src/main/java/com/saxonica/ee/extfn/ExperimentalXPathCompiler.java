@@ -248,7 +248,6 @@ public class ExperimentalXPathCompiler {
             options.suppressStaticContext = true;
             options.target = "JS";
             options.targetVersion = 2;
-            options.addStaticType = true;
             out.setOptions(options);
             expr.export(out);
             b.close();

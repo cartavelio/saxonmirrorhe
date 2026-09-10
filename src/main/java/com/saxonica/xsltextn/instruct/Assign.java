@@ -2,13 +2,17 @@ package com.saxonica.xsltextn.instruct;
 
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.elab.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PushElaborator;
+import net.sf.saxon.expr.elab.PushEvaluator;
+import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.expr.instruct.Instruction;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceType;
 
@@ -100,7 +104,9 @@ public class Assign extends Instruction implements BindingReference {
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
         if ("JS".equals(out.getOptions().target)) {
-            throw new XPathException("Export failure: SaxonJS does not implement saxon:assign");
+            throw new XPathException(
+                    "Export failure: SaxonJS does not implement saxon:assign",
+                    SaxonErrorCode.SXJS0001);
         }
         out.startElement("assign", this);
         out.emitAttribute("name", binding.getVariableQName());

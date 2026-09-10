@@ -1460,7 +1460,9 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     /**
      * Get a new ExpressionPresenter capable of exporting a compiled stylesheet
      *
-     * @param target      the target environment, e.g. EE, JS
+     * @param target      the target environment, e.g. EE, JS. For export to SaxonJS
+     *                    the values JS2 and JS3 are recognised to distinguish the target
+     *                    version
      * @param destination the destination for the output file
      * @param rootPackage the compiled stylesheet package
      * @return a suitable Expression Presenter
@@ -1469,17 +1471,17 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
     @Override
     public ExpressionPresenter newExpressionExporter(String target, OutputStream destination, StylesheetPackage rootPackage) throws XPathException {
-        if (!isLicensedFeature(LicenseFeature.ENTERPRISE_XSLT)) {
-            throw new XPathException("Stylesheet export requires a Saxon-EE license");
-        }
+        checkLicensedFeature(LicenseFeature.ENTERPRISE_XSLT, "stylesheeet export", -1);
         ExpressionPresenter presenter = new ExpressionPresenter();
         ExpressionPresenter.ExportOptions options = new ExpressionPresenter.ExportOptions();
         options.rootPackage = rootPackage;
         presenter.setOptions(options);
         switch (target) {
             case "JS":
+            case "JS2":
+            case "JS3":
                 options.target = "JS";
-                options.targetVersion = 2;
+                options.targetVersion = target.equals("JS3") ? 3 : 2;
                 PipelineConfiguration pipe = makePipelineConfiguration();
                 JSONEmitter writer = new JSONEmitter(pipe, new UTF8Writer(destination), new Properties());
                 presenter.init(this, new ExpressionPresenterToJson(writer, pipe), true);
