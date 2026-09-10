@@ -36,8 +36,6 @@ task resources_notices(
         include "JAMESCLARK.txt"
         include "JLINE2.txt"
         include "LICENSE.txt"
-        include "THAI.txt"
-        include "UNICODE.txt"
     }
 }
 
