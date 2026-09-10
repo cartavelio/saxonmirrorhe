@@ -7,6 +7,8 @@
 
 package net.sf.saxon.expr.number;
 
+import java.util.Locale;
+
 /**
  * Numberer class for the English language.
  */
@@ -47,6 +49,11 @@ public class Numberer_en extends AbstractNumberer {
         tensUnitsSeparatorOrdinal = separator;
     }
 
+    @Override
+    public Locale defaultedLocale() {
+        return null;
+    }
+
     /**
      * Set the language used by this numberer. Useful because it can potentially handle variants of English
      * (and subclasses can handle other languages)
@@ -54,7 +61,6 @@ public class Numberer_en extends AbstractNumberer {
      * @param language the requested language. Note that "en-x-hyphen" is recognized as a request to hyphenate
      *                 numbers in the range 21-99.
      */
-
     @Override
     public void setLanguage(String language) {
         super.setLanguage(language);

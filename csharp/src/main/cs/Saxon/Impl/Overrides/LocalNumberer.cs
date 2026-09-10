@@ -27,23 +27,30 @@ namespace Saxon.Impl.Overrides {
 #if EE        
         private readonly UCultureInfo uCulture;   // ICU4N version
         private readonly Dictionary<string, string> ordinalParamIndex = new ();
+        private CultureInfo defaultLocale = null;
 #else
         private readonly Numberer_en numberer = new Numberer_en();
 #endif
 
         public LocalNumberer(string language, string country) {
             try {
-                culture = CultureInfo.GetCultureInfo(language);
+                culture = CultureInfo.GetCultureInfo(language, true);
 #if EE
                 uCulture = UCultureInfo.GetCultureInfoByIetfLanguageTag(language);
 #endif
             }
             catch (System.Globalization.CultureNotFoundException) {
-                culture = CultureInfo.GetCultureInfo("en-US");
+                culture = CultureInfo.GetCultureInfo("en");
+                defaultLocale = culture;
 #if EE
-                uCulture = UCultureInfo.GetCultureInfoByIetfLanguageTag("en-US");
+                uCulture = UCultureInfo.GetCultureInfoByIetfLanguageTag("en");
 #endif
             }
+        }
+
+        public override System.Globalization.CultureInfo defaultedLocale()
+        {
+            return defaultLocale;
         }
         
         public override string monthName(int month, int minWidth, int maxWidth) {

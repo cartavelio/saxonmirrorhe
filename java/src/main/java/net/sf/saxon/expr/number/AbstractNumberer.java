@@ -45,10 +45,7 @@ public abstract class AbstractNumberer implements Numberer {
      * @return the locale used, null if it wasn't defaulted
      */
     @Override
-    public Locale defaultedLocale() {
-        return null;
-    }
-
+    public abstract Locale defaultedLocale();
     /**
      * Set the country used by this numberer (currently used only for names of timezones)
      */
