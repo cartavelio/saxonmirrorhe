@@ -20,6 +20,7 @@ target/
 .run/
 __pycache__
 temp/
+tmp/
 sandpit/
 /extra/lib/
 *.log
