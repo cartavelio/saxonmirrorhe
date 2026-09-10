@@ -18,7 +18,7 @@ import net.sf.saxon.value.*;
 import javax.xml.transform.SourceLocator;
 import java.util.*;
 
-import static net.sf.saxon.type.SchemaComponent.ValidationStatus.*;
+import static net.sf.saxon.type.SchemaValidationStatus.*;
 
 /**
  * The object represents an element declaration in the schema. It may be a global element
@@ -259,8 +259,8 @@ public class ElementDecl extends SchemaStructure
      * model.
      *
      * @return the substitution group exclusions, represented as a bit-significant integer,
-     *         the relevant bits being {@link SchemaType#DERIVATION_EXTENSION} and
-     *         {@link SchemaType#DERIVATION_RESTRICTION}
+     *         the relevant bits being {@link Derivation#DERIVATION_EXTENSION} and
+     *         {@link Derivation#DERIVATION_RESTRICTION}
      */
 
     public int getSubstitutionGroupExclusions() {
@@ -272,7 +272,7 @@ public class ElementDecl extends SchemaStructure
      * from this type is allowed, based on the "final" property (that is,
      * the {substitution group exclusions} in the component model
      *
-     * @param derivation the kind of derivation, e.g. {@link SchemaType#DERIVATION_EXTENSION}
+     * @param derivation the kind of derivation, e.g. {@link Derivatiion#DERIVATION_EXTENSION}
      * @return true if this kind of derivation is allowed
      */
     public boolean allowsDerivation(int derivation) {
@@ -630,7 +630,7 @@ public class ElementDecl extends SchemaStructure
      *
      * @param block the value of the block attribute for this
      *              element definition, indicating the types of derivation that are not allowed,
-     *              as a bit-significant integer, using constants such as {@link SchemaType#DERIVATION_EXTENSION}
+     *              as a bit-significant integer, using constants such as {@link Derivatiion#DERIVATION_EXTENSION}
      */
 
     public void setBlock(int block) {
@@ -1061,7 +1061,7 @@ public class ElementDecl extends SchemaStructure
             return null;
         }
         // rule 2.1
-        if ((block & SchemaType.DERIVE_BY_SUBSTITUTION) != 0) {
+        if ((block & Derivation.DERIVE_BY_SUBSTITUTION) != 0) {
             return "substitution has been blocked";
         }
         // rule 2.2
@@ -1311,23 +1311,23 @@ public class ElementDecl extends SchemaStructure
 
         if (finalProhibitions != 0) {
             String ex = "";
-            if ((finalProhibitions & SchemaType.DERIVATION_EXTENSION) != 0) {
+            if ((finalProhibitions & Derivation.DERIVATION_EXTENSION) != 0) {
                 ex = "extension";
             }
-            if ((finalProhibitions & SchemaType.DERIVATION_RESTRICTION) != 0) {
+            if ((finalProhibitions & Derivation.DERIVATION_RESTRICTION) != 0) {
                 ex += (ex.isEmpty() ? "" : " ") + "restriction";
             }
             serializer.emitAttribute("final", ex);
         }
         if (block != 0) {
             String dis = "";
-            if ((block & SchemaType.DERIVATION_EXTENSION) != 0) {
+            if ((block & Derivation.DERIVATION_EXTENSION) != 0) {
                 dis = "extension";
             }
-            if ((block & SchemaType.DERIVATION_RESTRICTION) != 0) {
+            if ((block & Derivation.DERIVATION_RESTRICTION) != 0) {
                 dis += (dis.isEmpty() ? "" : " ") + "restriction";
             }
-            if ((block & SchemaType.DERIVE_BY_SUBSTITUTION) != 0) {
+            if ((block & Derivation.DERIVE_BY_SUBSTITUTION) != 0) {
                 dis += (dis.isEmpty() ? "" : " ") + "substitution";
             }
             serializer.emitAttribute("block", dis);
@@ -1394,7 +1394,7 @@ public class ElementDecl extends SchemaStructure
                                     return EmptySequence.getInstance();
                             }
                         };
-                        return new CallableFunction(1, typeTable, COMPONENT_FUNCTION_TYPE);
+                        return new CallableFunction(1, typeTable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
                     } else {
                         return EmptySequence.getInstance();
                     }
@@ -1420,7 +1420,7 @@ public class ElementDecl extends SchemaStructure
                                 return EmptySequence.getInstance();
                         }
                     };
-                    return new CallableFunction(1, scopeFunction, COMPONENT_FUNCTION_TYPE);
+                    return new CallableFunction(1, scopeFunction, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
                 case "value constraint":
                     return getValueConstraintAsFunction(ElementDecl.this);
                 case "nillable":
@@ -1439,23 +1439,23 @@ public class ElementDecl extends SchemaStructure
                     return SequenceExtent.makeSequenceExtent(groups);
                 case "substitution group exclusions": {
                     List<StringItem> exclusions = new ArrayList<>();
-                    if ((getSubstitutionGroupExclusions() & SchemaType.DERIVATION_EXTENSION) != 0) {
+                    if ((getSubstitutionGroupExclusions() & Derivation.DERIVATION_EXTENSION) != 0) {
                         exclusions.add(StringItem.bmp("extension"));
                     }
-                    if ((getSubstitutionGroupExclusions() & SchemaType.DERIVATION_RESTRICTION) != 0) {
+                    if ((getSubstitutionGroupExclusions() & Derivation.DERIVATION_RESTRICTION) != 0) {
                         exclusions.add(StringItem.bmp("restriction"));
                     }
                     return SequenceExtent.makeSequenceExtent(exclusions);
                 }
                 case "disallowed substitutions": {
                     List<StringItem> exclusions = new ArrayList<>();
-                    if ((getBlock() & SchemaType.DERIVATION_EXTENSION) != 0) {
+                    if ((getBlock() & Derivation.DERIVATION_EXTENSION) != 0) {
                         exclusions.add(StringItem.bmp("extension"));
                     }
-                    if ((getBlock() & SchemaType.DERIVATION_RESTRICTION) != 0) {
+                    if ((getBlock() & Derivation.DERIVATION_RESTRICTION) != 0) {
                         exclusions.add(StringItem.bmp("restriction"));
                     }
-                    if ((getBlock() & SchemaType.DERIVE_BY_SUBSTITUTION) != 0) {
+                    if ((getBlock() & Derivation.DERIVE_BY_SUBSTITUTION) != 0) {
                         exclusions.add(StringItem.bmp("substitution"));
                     }
                     return SequenceExtent.makeSequenceExtent(exclusions);
@@ -1466,7 +1466,7 @@ public class ElementDecl extends SchemaStructure
                     return EmptySequence.getInstance();
             }
         };
-        return new CallableFunction(1, callable, COMPONENT_FUNCTION_TYPE);
+        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 
     public boolean equals(Object other) {

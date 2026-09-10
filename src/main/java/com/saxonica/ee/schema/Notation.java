@@ -9,6 +9,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.AnyURIValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
@@ -16,7 +17,7 @@ import net.sf.saxon.value.StringItem;
 
 import javax.xml.transform.SourceLocator;
 
-import static net.sf.saxon.type.SchemaComponent.ValidationStatus.VALIDATED;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
 
 /**
  * A Notation Declaration Schema Component
@@ -238,7 +239,7 @@ public class Notation extends SchemaStructure implements UserSchemaComponent, Se
                 }
             }
         };
-        return new CallableFunction(1, callable, COMPONENT_FUNCTION_TYPE);
+        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 
 

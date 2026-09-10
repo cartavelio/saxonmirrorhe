@@ -21,7 +21,7 @@ import net.sf.saxon.value.SequenceType;
  * therefore not be a delegating map.</p>
  */
 
-public abstract class DelegatingMapItem implements MapItem {
+public abstract class DelegatingMapItem extends MapItem {
 
     private final MapItem base;
 

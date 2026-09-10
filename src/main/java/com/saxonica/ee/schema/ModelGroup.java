@@ -12,13 +12,14 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.MissingComponentException;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntHashMap;
 import net.sf.saxon.z.IntHashSet;
 
 import java.util.*;
 
-import static net.sf.saxon.type.SchemaComponent.ValidationStatus.*;
+import static net.sf.saxon.type.SchemaValidationStatus.*;
 
 /**
  * An XML Schema Model Group. This corresponds to a sequence, choice, or all in the
@@ -155,15 +156,8 @@ public abstract class ModelGroup extends SchemaStructure implements UserSchemaCo
      */
 
     public boolean containsAll(boolean simplified) throws MissingComponentException {
-        Iterator<Particle> iter;
-        if (simplified) {
-            List<Particle> model = getSimplifiedContentModel();
-            iter = model.iterator();
-        } else {
-            iter = contentModel.iterator();
-        }
-        while (iter.hasNext()) {
-            Particle p = iter.next();
+        List<Particle> particles = simplified ? getSimplifiedContentModel() : contentModel;
+        for (Particle p : particles) {
             if (p instanceof ModelGroupParticle && ((ModelGroupParticle) p).getGroup().containsAll(simplified)) {
                 return true;
             }
@@ -616,7 +610,7 @@ public abstract class ModelGroup extends SchemaStructure implements UserSchemaCo
                 }
             }
         };
-        return new CallableFunction(1, callable, COMPONENT_FUNCTION_TYPE);
+        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 
 

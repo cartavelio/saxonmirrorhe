@@ -6,8 +6,8 @@ import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.ee.schema.TypeReference;
 import com.saxonica.ee.schema.UserSimpleType;
 import net.sf.saxon.om.*;
+import net.sf.saxon.type.Derivation;
 import net.sf.saxon.type.SchemaException;
-import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
 
 /**
@@ -98,10 +98,10 @@ public class XSDSimpleType extends SchemaElement {
         } else {
             int f = parseFinalOrBlock("final",
                     finalVal,
-                    SchemaType.DERIVATION_LIST |
-                            SchemaType.DERIVATION_UNION |
-                            SchemaType.DERIVATION_RESTRICTION |
-                            SchemaType.DERIVATION_EXTENSION);
+                    Derivation.DERIVATION_LIST |
+                                              Derivation.DERIVATION_UNION |
+                                              Derivation.DERIVATION_RESTRICTION |
+                                              Derivation.DERIVATION_EXTENSION);
             // The inclusion of EXTENSION here assumes the resolution of specification bug 2074
             simpleTypeDef.setFinalProhibitions(f);
         }
@@ -133,15 +133,15 @@ public class XSDSimpleType extends SchemaElement {
             switch (child.getFingerprint()) {
                 case StandardNames.XS_RESTRICTION:
                     foundRestriction = true;
-                    simpleTypeDef.setDerivationMethod(SchemaType.DERIVATION_RESTRICTION);
+                    simpleTypeDef.setDerivationMethod(Derivation.DERIVATION_RESTRICTION);
                     break;
 
                 case StandardNames.XS_LIST:
-                    simpleTypeDef.setDerivationMethod(SchemaType.DERIVATION_LIST);
+                    simpleTypeDef.setDerivationMethod(Derivation.DERIVATION_LIST);
                     break;
 
                 case StandardNames.XS_UNION:
-                    simpleTypeDef.setDerivationMethod(SchemaType.DERIVATION_UNION);
+                    simpleTypeDef.setDerivationMethod(Derivation.DERIVATION_UNION);
                     break;
             }
         }

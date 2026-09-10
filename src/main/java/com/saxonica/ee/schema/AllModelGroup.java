@@ -13,7 +13,7 @@ import net.sf.saxon.z.IntToIntMap;
 
 import java.util.*;
 
-import static net.sf.saxon.type.SchemaComponent.ValidationStatus.INVALID;
+import static net.sf.saxon.type.SchemaValidationStatus.INVALID;
 
 
 /**

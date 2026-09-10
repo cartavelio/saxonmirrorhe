@@ -9,16 +9,13 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.MissingComponentException;
-import net.sf.saxon.type.SchemaException;
-import net.sf.saxon.type.SimpleType;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
 import net.sf.saxon.value.StringItem;
 
-import static net.sf.saxon.type.SchemaComponent.ValidationStatus.VALIDATED;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
 
 /**
  * An XML Schema Attribute Use: that is, a reference to an attribute declaration
@@ -466,7 +463,7 @@ public final class AttributeUse extends SimpleComponentReference
                     return EmptySequence.getInstance();
             }
         };
-        return new CallableFunction(1, callable, COMPONENT_FUNCTION_TYPE);
+        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 
 }

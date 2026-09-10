@@ -9,17 +9,14 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.sxpath.XPathVariable;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.MissingComponentException;
-import net.sf.saxon.type.SchemaComponent;
-import net.sf.saxon.type.SchemaException;
-import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
 import net.sf.saxon.value.StringItem;
 
 import java.util.Map;
 
-import static net.sf.saxon.type.SchemaComponent.ValidationStatus.INVALID;
+import static net.sf.saxon.type.SchemaValidationStatus.INVALID;
 
 /**
  * A TypeAlternative schema component (See XML Schema 1.1 Part 1 Working Draft)
@@ -235,7 +232,7 @@ public class TypeAlternative extends SchemaStructure implements SchemaComponent 
                     return EmptySequence.getInstance();
             }
         };
-        return new CallableFunction(1, callable, COMPONENT_FUNCTION_TYPE);
+        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 }
 

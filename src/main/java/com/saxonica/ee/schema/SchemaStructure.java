@@ -8,8 +8,9 @@ import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.tree.util.Navigator;
-import net.sf.saxon.type.SchemaComponent;
 import net.sf.saxon.type.SchemaException;
+import net.sf.saxon.type.SchemaValidationStatus;
+import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.AnyURIValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceExtent;
@@ -40,12 +41,12 @@ public abstract class SchemaStructure implements Location {
      * The fixup status
      */
 
-    private SchemaComponent.ValidationStatus fixupStatus = SchemaComponent.ValidationStatus.UNVALIDATED;
+    private SchemaValidationStatus fixupStatus = SchemaValidationStatus.UNVALIDATED;
 
     /**
      * The validation status
      */
-    private SchemaComponent.ValidationStatus validationStatus = SchemaComponent.ValidationStatus.UNVALIDATED;
+    private SchemaValidationStatus validationStatus = SchemaValidationStatus.UNVALIDATED;
 
     /**
      * The configuration under which this component was created
@@ -199,7 +200,7 @@ public abstract class SchemaStructure implements Location {
      *         has completed successfully, or has completed unsuccessfully
      */
 
-    public SchemaComponent.ValidationStatus getValidationStatus() {
+    public SchemaValidationStatus getValidationStatus() {
         return validationStatus;
     }
 
@@ -209,7 +210,7 @@ public abstract class SchemaStructure implements Location {
      */
 
     public boolean isValidationNeeded() {
-        return validationStatus == SchemaComponent.ValidationStatus.UNVALIDATED;
+        return validationStatus == SchemaValidationStatus.UNVALIDATED;
     }
 
     /**
@@ -218,7 +219,7 @@ public abstract class SchemaStructure implements Location {
      * @param status an integer code indicating whether validation has not yet been started, is underway,
      *               has completed successfully, or has completed unsuccessfully
      */
-    public void setValidationStatus(SchemaComponent.ValidationStatus status) {
+    public void setValidationStatus(SchemaValidationStatus status) {
         validationStatus = status;
     }
 
@@ -229,7 +230,7 @@ public abstract class SchemaStructure implements Location {
      *         has completed successfully, or has completed unsuccessfully
      */
 
-    public SchemaComponent.ValidationStatus getFixupStatus() {
+    public SchemaValidationStatus getFixupStatus() {
         return fixupStatus;
     }
 
@@ -239,7 +240,7 @@ public abstract class SchemaStructure implements Location {
      * @param status an integer code indicating whether fixup of component references has not yet been started, is underway,
      *               has completed successfully, or has completed unsuccessfully
      */
-    public void setFixupStatus(SchemaComponent.ValidationStatus status) {
+    public void setFixupStatus(SchemaValidationStatus status) {
         fixupStatus = status;
     }
 
@@ -361,7 +362,7 @@ public abstract class SchemaStructure implements Location {
                                     return EmptySequence.getInstance();
                             }
                         };
-                        bindings.add(new CallableFunction(1, binding, SchemaComponent.COMPONENT_FUNCTION_TYPE));
+                        bindings.add(new CallableFunction(1, binding, SpecificFunctionType.COMPONENT_FUNCTION_TYPE));
                     }
                     return SequenceExtent.makeSequenceExtent(bindings);
                 case "default namespace":
@@ -374,7 +375,7 @@ public abstract class SchemaStructure implements Location {
                     return EmptySequence.getInstance();
             }
         };
-        return new CallableFunction(1, callable, SchemaComponent.COMPONENT_FUNCTION_TYPE);
+        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 
     /**

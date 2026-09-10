@@ -5,7 +5,6 @@ import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntSet;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -61,11 +60,11 @@ public class DeterminizedState extends AutomatonState {
      */
 
     Set<Term> originalTerms(FiniteStateMachine nfsa) {
-        Set<Term> terms = new HashSet<Term>(10);
+        Set<Term> terms = new HashSet<>(10);
         for (IntIterator p = provenance.iterator(); p.hasNext(); ) {
             NonDeterminizedState orig = (NonDeterminizedState) nfsa.getState(p.next());
-            for (Iterator<Edge> e = orig.getEdges(); e.hasNext(); ) {
-                terms.add(e.next().getTerm());
+            for (Edge e : orig.getEdges()) {
+                terms.add(e.getTerm());
             }
         }
         return terms;

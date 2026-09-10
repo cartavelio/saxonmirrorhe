@@ -3,7 +3,6 @@ package com.saxonica.ee.schema.fsa;
 import com.saxonica.ee.schema.UserComplexType;
 
 import java.util.Collections;
-import java.util.Iterator;
 
 /**
  * The state of a finite state machine that is processing "suffix" open content. In this state
@@ -67,8 +66,8 @@ public class SuffixState implements State {
 
     /*@NotNull*/
     @Override
-    public Iterator<Edge> getEdges() {
-        return Collections.EMPTY_LIST.iterator();
+    public Iterable<Edge> getEdges() {
+        return Collections.emptyList();
     }
 }
 

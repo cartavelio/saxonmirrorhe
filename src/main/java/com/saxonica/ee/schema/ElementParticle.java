@@ -12,7 +12,7 @@ import javax.xml.transform.SourceLocator;
 import java.util.Collection;
 import java.util.Stack;
 
-import static net.sf.saxon.type.SchemaComponent.ValidationStatus.*;
+import static net.sf.saxon.type.SchemaValidationStatus.*;
 
 /**
  * A reference to an element declaration within the content model of a complex type.

@@ -784,19 +784,19 @@ public abstract class SchemaElement extends ElementImpl {
                 int v;
                 switch (token) {
                     case "union":
-                        v = SchemaType.DERIVATION_UNION;
+                        v = Derivation.DERIVATION_UNION;
                         break;
                     case "list":
-                        v = SchemaType.DERIVATION_LIST;
+                        v = Derivation.DERIVATION_LIST;
                         break;
                     case "restriction":
-                        v = SchemaType.DERIVATION_RESTRICTION;
+                        v = Derivation.DERIVATION_RESTRICTION;
                         break;
                     case "extension":
-                        v = SchemaType.DERIVATION_EXTENSION;
+                        v = Derivation.DERIVATION_EXTENSION;
                         break;
                     case "substitution":
-                        v = SchemaType.DERIVE_BY_SUBSTITUTION;
+                        v = Derivation.DERIVE_BY_SUBSTITUTION;
                         break;
                     default:
                         String err = "Invalid " + Err.wrap(attrName, Err.ATTRIBUTE) + " value " +
@@ -971,23 +971,32 @@ public abstract class SchemaElement extends ElementImpl {
         int state = 0;
         AxisIterator iter = iterateAxis(AxisInfo.CHILD);
         NodeImpl child;
-    lex:
+
         while ((child = (NodeImpl)iter.next()) != null) {
             final int fp = child.getFingerprint();
             int[] terms = stateTerms[state];
             int[] targets = stateTargets[state];
+            boolean continueOuter = false;
             for (int i = 0; i < terms.length; i++) {
                 if (fp == terms[i]) {
                     state = targets[i];
-                    continue lex;
+                    continueOuter = true;
+                    break;
                 }
+            }
+            if (continueOuter) {
+                continue;
             }
             if (allowWildcards && !NamespaceConstant.SCHEMA.equals(child.getURI())) {
                 for (int i = 0; i < terms.length; i++) {
                     if (terms[i] == -1) {
                         state = targets[i];
-                        continue lex;
+                        continueOuter = true;
+                        break;
                     }
+                }
+                if (continueOuter) {
+                    continue;
                 }
             }
 

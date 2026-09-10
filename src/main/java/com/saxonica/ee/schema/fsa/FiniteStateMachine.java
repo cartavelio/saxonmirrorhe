@@ -417,13 +417,10 @@ public class FiniteStateMachine {
             State baseState = p[0];
             State derivedState = p[1];
 
-            Iterator<Edge> derivedEdges = derivedState.getEdges();
-
             // for each edge DE leaving P.derived, if there is an edge leaving P.base which matches DE,
             // then add a pair <BE.end, DE.end> to SS (unless it's already there), otherwise fail
 
-            while (derivedEdges.hasNext()) {
-                Edge derivedEdge = derivedEdges.next();
+            for (Edge derivedEdge : derivedState.getEdges()) {
                 State newDerivedState;
                 try {
                     newDerivedState = derivedEdge.makeTransition(derivedState);
@@ -445,9 +442,7 @@ public class FiniteStateMachine {
                             return "Cannot prove the restriction is valid, because there are missing schema components. " + e.getMessage();
                         }
                     }
-                    if (s == null) {
-                        // Indicates a match
-                    } else {
+                    if (s != null) {
                         switch (s) {
                             case "No match":
                                 return "The restricted type allows element " +

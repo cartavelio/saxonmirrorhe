@@ -7,8 +7,8 @@ import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.type.Derivation;
 import net.sf.saxon.type.SchemaException;
-import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.z.IntHashSet;
 import net.sf.saxon.z.IntSet;
 
@@ -60,7 +60,7 @@ public class XSDSimpleContentRestriction extends SchemaElement {
         simpleTypeDef = new SimpleTypeDefinition((EnterpriseConfiguration) getConfiguration());
         simpleTypeDef.setLocator(this);
         simpleTypeDef.setIsSimpleContent(true);
-        simpleTypeDef.setDerivationMethod(SchemaType.DERIVATION_RESTRICTION);
+        simpleTypeDef.setDerivationMethod(Derivation.DERIVATION_RESTRICTION);
         simpleTypeDef.setContextComponent(complexType);
         // The type is anonymous, give it a system-allocated name
         // (and more importantly, a fingerprint, which will act as the type annotation)

@@ -17,7 +17,7 @@ import javax.xml.transform.SourceLocator;
 import java.util.ArrayList;
 import java.util.Stack;
 
-import static net.sf.saxon.type.SchemaComponent.ValidationStatus.*;
+import static net.sf.saxon.type.SchemaValidationStatus.*;
 
 /**
  * A Model Group Definition: a schema component corresponding to a top-level (named) xs:group
@@ -173,14 +173,14 @@ public class ModelGroupDefinition extends ModelGroup implements SerializableSche
             ModelGroupParticle rp = new ModelGroupParticle(compiler.getConfiguration(), null);
             rp.setTarget(this);
             r.setParticle(rp);
-            r.setVariety(ComplexType.VARIETY_ELEMENT_ONLY);
+            r.setVariety(ComplexVariety.ELEMENT_ONLY);
             r.setBaseTypeReference(ref);
             r.validate(compiler);
             UserComplexType b = new UserComplexType(compiler.getConfiguration(), redefinedModelGroupDefinition);
             ModelGroupParticle bp = new ModelGroupParticle(compiler.getConfiguration(), null);
             bp.setTarget(redefinedModelGroupDefinition);
             b.setParticle(bp);
-            b.setVariety(ComplexType.VARIETY_ELEMENT_ONLY);
+            b.setVariety(ComplexVariety.ELEMENT_ONLY);
             b.setBaseTypeReference(ref);
             b.validate(compiler);
             String problem = r.isSubsumedBy(b, compiler);
@@ -257,7 +257,7 @@ public class ModelGroupDefinition extends ModelGroup implements SerializableSche
                 }
             }
         };
-        return new CallableFunction(1, callable, COMPONENT_FUNCTION_TYPE);
+        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 
 }

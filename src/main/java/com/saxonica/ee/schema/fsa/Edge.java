@@ -3,7 +3,11 @@ package com.saxonica.ee.schema.fsa;
 import com.saxonica.ee.schema.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.jiter.MonoIterator;
 import net.sf.saxon.type.*;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Iterator;
 
 /**
  * Internal class to represent the data associated with a transition:
@@ -11,7 +15,7 @@ import net.sf.saxon.type.*;
  * from the transition.
  */
 
-public class Edge {
+public class Edge implements Iterable<Edge> {
     private Term term;
     private Particle particle; // this is the particle to which the transition is attributed for the purpose
     // of evaluating the UPA constraint. In the case of an element that is permitted
@@ -199,7 +203,7 @@ public class Edge {
             } else {
                 // TODO: invoke Type Derivation OK (Complex)
                 while (!baseType.isSameType(subType)) {
-                    if (subType.getDerivationMethod() != SchemaType.DERIVATION_RESTRICTION) {
+                    if (subType.getDerivationMethod() != Derivation.DERIVATION_RESTRICTION) {
                         elementTypeOK = false;
                         break;
                     }
@@ -326,7 +330,7 @@ public class Edge {
                     if (et == eent) {
                         return null;
                     }
-                    if (et.getDerivationMethod() != SchemaType.DERIVATION_RESTRICTION) {
+                    if (et.getDerivationMethod() != Derivation.DERIVATION_RESTRICTION) {
                         break;
                     }
                     et = et.getBaseType();
@@ -349,7 +353,7 @@ public class Edge {
                     if (et == eent) {
                         return null;
                     }
-                    if (et.getDerivationMethod() != SchemaType.DERIVATION_RESTRICTION) {
+                    if (et.getDerivationMethod() != Derivation.DERIVATION_RESTRICTION) {
                         break;
                     }
                     et = et.getBaseType();
@@ -375,6 +379,12 @@ public class Edge {
             return null;
         }
         return "No match";
+    }
+
+    @NotNull
+    @Override
+    public Iterator<Edge> iterator() {
+        return new MonoIterator<>(this);
     }
 
     /**

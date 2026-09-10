@@ -11,8 +11,8 @@ import javax.xml.transform.SourceLocator;
 import java.util.List;
 import java.util.Stack;
 
-import static net.sf.saxon.type.SchemaComponent.ValidationStatus.INVALID;
-import static net.sf.saxon.type.SchemaComponent.ValidationStatus.VALIDATED;
+import static net.sf.saxon.type.SchemaValidationStatus.INVALID;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
 
 /**
  * A reference within the content model of a complex type to a Model Group Definition.

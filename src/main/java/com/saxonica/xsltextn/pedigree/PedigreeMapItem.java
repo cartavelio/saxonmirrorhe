@@ -4,7 +4,6 @@ import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.value.AtomicValue;
 
 import java.util.Iterator;
@@ -14,7 +13,7 @@ import java.util.Iterator;
  * that is, retained information about how the map was selected within a JSON-like tree.
  */
 
-public class PedigreeMapItem extends DelegatingMapItem implements MapItem, PedigreeValue {
+public class PedigreeMapItem extends DelegatingMapItem implements PedigreeValue {
 
     private final Pedigree pedigree;
 

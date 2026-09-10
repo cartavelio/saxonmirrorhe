@@ -220,7 +220,7 @@ public class ComplexContentValidator extends AttributeValidator {
         StringBuilder fsb = new StringBuilder(64);
 
         if (getContainingElement() != null) {
-            fsb.append("In content of " + getContainingElementName() + ": ");
+            fsb.append("In content of ").append(getContainingElementName()).append(": ");
         }
 
         boolean explained = false;
@@ -235,8 +235,7 @@ public class ComplexContentValidator extends AttributeValidator {
                     StructuredQName omission;
                     StructuredQName firstOmission = null;
                     HashSet<StructuredQName> possibleOmissions = new HashSet<>();
-                    for (Iterator<Edge> edges = state.getEdges(); edges.hasNext(); ) {
-                        Edge e = edges.next();
+                    for (Edge e : state.getEdges()) {
                         if (e.getParticle() instanceof ElementParticle) {
                             omission = e.getParticle().getTargetComponentName();
                             int omittedfp = ((ElementParticle) e.getParticle()).getDeclaration().getFingerprint();
@@ -251,9 +250,9 @@ public class ComplexContentValidator extends AttributeValidator {
                     }
                     if (!possibleOmissions.isEmpty()) {
                         if (possibleOmissions.size() == 1) {
-                            fsb.append("It would be valid if followed by " + Err.wrap(firstOmission.getEQName(), Err.ELEMENT) + ". ");
+                            fsb.append("It would be valid if followed by ").append(Err.wrap(firstOmission.getEQName(), Err.ELEMENT)).append(". ");
                         } else if (possibleOmissions.size() > 5) {
-                            fsb.append("It would be valid if followed by another element, for example " + Err.wrap(firstOmission.getEQName(), Err.ELEMENT) + ". ");
+                            fsb.append("It would be valid if followed by another element, for example ").append(Err.wrap(firstOmission.getEQName(), Err.ELEMENT)).append(". ");
                         } else {
                             fsb.append("It would be valid if followed by one of: ");
                             boolean first = true;
@@ -275,9 +274,9 @@ public class ComplexContentValidator extends AttributeValidator {
             }
         } else {
             if (state instanceof SuffixState) {
-                fsb.append("The content model does not allow element " +
-                        Err.wrap(nodeName.getStructuredQName().getDisplayName(), Err.ELEMENT) +
-                        " to appear after an element that matches the suffix open content wildcard. ");
+                fsb.append("The content model does not allow element ")
+                        .append(Err.wrap(nodeName.getStructuredQName().getDisplayName(), Err.ELEMENT))
+                        .append(" to appear after an element that matches the suffix open content wildcard. ");
                 explained = true;
             } else {
                 fsb.append("The content model does not allow element ");
@@ -308,8 +307,7 @@ public class ComplexContentValidator extends AttributeValidator {
                         StructuredQName omission;
                         StructuredQName firstOmission = null;
                         HashSet<StructuredQName> possibleOmissions = new HashSet<>();
-                        for (Iterator<Edge> edges = state.getEdges(); edges.hasNext(); ) {
-                            Edge e = edges.next();
+                        for (Edge e : state.getEdges()) {
                             if (e.getParticle() instanceof ElementParticle) {
                                 omission = e.getParticle().getTargetComponentName();
                                 int omittedfp = ((ElementParticle) e.getParticle()).getDeclaration().getFingerprint();
@@ -324,9 +322,13 @@ public class ComplexContentValidator extends AttributeValidator {
                         }
                         if (!possibleOmissions.isEmpty()) {
                             if (possibleOmissions.size() == 1) {
-                                fsb.append("It must be preceded by " + Err.wrap(firstOmission.getEQName(), Err.ELEMENT) + ". ");
+                                fsb.append("It must be preceded by ")
+                                        .append(Err.wrap(firstOmission.getEQName(), Err.ELEMENT))
+                                        .append(". ");
                             } else if (possibleOmissions.size() > 5) {
-                                fsb.append("It must be preceded by another element, for example " + Err.wrap(firstOmission.getEQName(), Err.ELEMENT) + ". ");
+                                fsb.append("It must be preceded by another element, for example ")
+                                        .append(Err.wrap(firstOmission.getEQName(), Err.ELEMENT))
+                                        .append(". ");
                             } else {
                                 fsb.append("It must be preceded by one of: ");
                                 boolean first = true;
@@ -351,18 +353,16 @@ public class ComplexContentValidator extends AttributeValidator {
                 }
                 if (!explained) {
                     // See if there is an element with the same local name that would be OK here
-                    for (Iterator<Edge> edges = state.getEdges(); edges.hasNext(); ) {
-                        String foundLocal = nodeName.getLocalPart();
-                        String foundURI = nodeName.getURI();
-                        Edge e = edges.next();
+                    String foundLocal = nodeName.getLocalPart();
+                    String foundURI = nodeName.getURI();
+                    for (Edge e : state.getEdges()) {
                         if (e.getParticle() instanceof ElementParticle) {
                             String local = ((ElementParticle) e.getParticle()).getName();
                             if (local.equals(foundLocal)) {
                                 String uri = ((ElementParticle) e.getParticle()).getNamespaceURI();
-                                fsb.append("The element is in " +
-                                        ("".equals(foundURI) ? "no namespace" : "namespace " + foundURI) +
-                                        " but it should be in " +
-                                        ("".equals(uri) ? "no namespace" : "namespace " + uri) + ". ");
+                                fsb.append("The element is in ")
+                                        .append("".equals(foundURI) ? "no namespace" : "namespace " + foundURI)
+                                        .append(" but it should be in ").append("".equals(uri) ? "no namespace" : "namespace " + uri).append(". ");
                                 explained = true;
                                 break;
                             }
@@ -387,8 +387,7 @@ public class ComplexContentValidator extends AttributeValidator {
             StructuredQName expected = null;
             Set<String> specificURIs = new HashSet<>();
             String namespace = null;
-            for (Iterator<Edge> ii = state.getEdges(); ii.hasNext(); ) {
-                Edge e = ii.next();
+            for (Edge e : state.getEdges()) {
                 if (e.getParticle() instanceof ElementParticle) {
                     expected = e.getParticle().getTargetComponentName();
                     specificTransitions.add(((ElementParticle) e.getParticle()).getDisplayName());
@@ -397,8 +396,7 @@ public class ComplexContentValidator extends AttributeValidator {
                 }
             }
             Set<Wildcard> wildcards = new HashSet<>();
-            for (Iterator<Edge> ii = state.getEdges(); ii.hasNext(); ) {
-                Edge e = ii.next();
+            for (Edge e : state.getEdges()) {
                 if (e.getParticle() instanceof ElementWildcard) {
                     wildcards.add(((ElementWildcard) e.getParticle()).getWildcard());
                 }

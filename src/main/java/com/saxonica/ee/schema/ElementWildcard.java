@@ -7,7 +7,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.z.IntHashSet;
 
-import static net.sf.saxon.type.SchemaComponent.ValidationStatus.VALIDATED;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
 
 /**
  * This class represents an <code>&lt;any&gt;</code> element in the schema.

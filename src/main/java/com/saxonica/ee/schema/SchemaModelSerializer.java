@@ -71,9 +71,7 @@ public class SchemaModelSerializer {
         }
         PreparedSchema schema = config.getSuperSchema();
         // System.err.println("Serializing schema " + schema);
-        Iterator iter = schema.iterateTypes();
-        while (iter.hasNext()) {
-            SchemaType type = (SchemaType) iter.next();
+        for (SchemaType type : schema.getAllTypes()) {
             if (type instanceof SimpleTypeDefinition) {
                 type = ((SimpleTypeDefinition)type).getWorkingType();
             }
@@ -82,34 +80,24 @@ public class SchemaModelSerializer {
             }
         }
 
-        iter = schema.iterateElementDeclarations();
-        while (iter.hasNext()) {
-            ElementDecl decl = (ElementDecl) iter.next();
+        for (ElementDecl decl : schema.getElementDeclarations()) {
             serializeComponent(decl);
         }
 
-        iter = schema.iterateAttributeDeclarations();
-        while (iter.hasNext()) {
-            AttributeDecl decl = (AttributeDecl) iter.next();
+        for (AttributeDecl decl : schema.getAttributeDeclarations()) {
             serializeComponent(decl);
         }
 
-        iter = schema.iterateModelGroups();
-        while (iter.hasNext()) {
-            ModelGroupDefinition decl = (ModelGroupDefinition) iter.next();
+        for (ModelGroupDefinition decl : schema.getAllModelGroups()) {
             serializeComponent(decl);
         }
 
-        iter = schema.iterateAttributeGroups();
-        while (iter.hasNext()) {
-            AttributeGroupDecl decl = (AttributeGroupDecl) iter.next();
-            serializeComponent(decl);
+        for (AttributeGroupDecl group : schema.getAllAttributeGroups()) {
+            serializeComponent(group);
         }
 
-        iter = schema.iterateNotations();
-        while (iter.hasNext()) {
-            Notation decl = (Notation) iter.next();
-            serializeComponent(decl);
+        for (Notation notation : schema.getAllNotations()) {
+            serializeComponent(notation);
         }
 
         while (!pendingComponents.isEmpty()) {

@@ -13,7 +13,7 @@ import net.sf.saxon.value.*;
 
 import java.math.BigInteger;
 
-import static net.sf.saxon.type.SchemaComponent.ValidationStatus.INVALID;
+import static net.sf.saxon.type.SchemaValidationStatus.INVALID;
 
 /**
  * Represents any of the facets minInclusive, maxInclusive, minExclusive, maxExclusive
@@ -229,7 +229,7 @@ public abstract class ValueRangeFacet extends Facet {
                     return EmptySequence.getInstance();
             }
         };
-        return new CallableFunction(1, callable, SchemaComponent.COMPONENT_FUNCTION_TYPE);
+        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 
 }

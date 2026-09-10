@@ -8,6 +8,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 
 import net.sf.saxon.type.SchemaException;
+import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntHashSet;
 import net.sf.saxon.z.IntIterator;
@@ -911,7 +912,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
                                 }
                             }
                         };
-                        return new CallableFunction(1, constraintFunction, COMPONENT_FUNCTION_TYPE);
+                        return new CallableFunction(1, constraintFunction, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
                     case "process contents":
                         return new StringItem(getProcessContents());
                     default:
@@ -919,7 +920,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
                 }
             }
         };
-        return new CallableFunction(1, callable, COMPONENT_FUNCTION_TYPE);
+        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 }
 

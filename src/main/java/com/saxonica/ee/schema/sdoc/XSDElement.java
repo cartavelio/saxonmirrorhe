@@ -9,8 +9,8 @@ import net.sf.saxon.str.StringView;
 import net.sf.saxon.tree.iter.AxisIterator;
 
 import net.sf.saxon.tree.util.Navigator;
+import net.sf.saxon.type.Derivation;
 import net.sf.saxon.type.SchemaException;
-import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 
 import java.util.StringTokenizer;
@@ -220,9 +220,9 @@ public class XSDElement extends SchemaElement {
             } else {
                 int f = parseFinalOrBlock("block",
                         attValue,
-                        SchemaType.DERIVATION_EXTENSION |
-                                SchemaType.DERIVATION_RESTRICTION |
-                                SchemaType.DERIVE_BY_SUBSTITUTION);
+                        Derivation.DERIVATION_EXTENSION |
+                                                  Derivation.DERIVATION_RESTRICTION |
+                                                  Derivation.DERIVE_BY_SUBSTITUTION);
                 element.setBlock(f);
             }
 
@@ -241,8 +241,8 @@ public class XSDElement extends SchemaElement {
             } else {
                 int f = parseFinalOrBlock("final",
                         attValue,
-                        SchemaType.DERIVATION_EXTENSION |
-                                SchemaType.DERIVATION_RESTRICTION);
+                        Derivation.DERIVATION_EXTENSION |
+                                                  Derivation.DERIVATION_RESTRICTION);
                 element.setFinalProhibitions(f);
             }
 

@@ -5,7 +5,6 @@ import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.type.ValidationFailure;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -138,11 +137,10 @@ public class CountingState implements State {
 
     /*@NotNull*/
     @Override
-    public Iterator<Edge> getEdges() {
-        Iterator<Edge> baseEdges = automatonState.getEdges();
-        List<Edge> newEdges = new ArrayList<Edge>();
-        while (baseEdges.hasNext()) {
-            Edge baseEdge = baseEdges.next();
+    public Iterable<Edge> getEdges() {
+        Iterable<Edge> baseEdges = automatonState.getEdges();
+        List<Edge> newEdges = new ArrayList<>();
+        for (Edge baseEdge : baseEdges) {
             if (baseEdge.getTargetState() == automatonState) {
                 // this is a counting edge, returning to the current state with an incremented counter.
                 // include it only if there is a maxOccurs and the counter has not yet reached maxOccurs.
@@ -159,7 +157,7 @@ public class CountingState implements State {
                 }
             }
         }
-        return newEdges.iterator();
+        return newEdges;
     }
 
     public boolean equals(Object obj) {

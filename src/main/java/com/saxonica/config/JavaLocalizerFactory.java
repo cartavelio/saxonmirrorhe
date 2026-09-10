@@ -132,10 +132,12 @@ public class JavaLocalizerFactory extends LocalizerFactory {
             outer:
             for (int i = 0; i < 2; i++) {
                 String lang = candidates[i].toLowerCase();
+                boolean breakOuter = false;
                 while (true) {
                     className = numbererClassNames.get(lang);
                     if (className != null) {
-                        break outer;
+                        breakOuter = true;
+                        break;
                     }
                     if ("en".equals(lang)) {
                         className = "net.sf.saxon.expr.number.Numberer_en";
@@ -143,9 +145,12 @@ public class JavaLocalizerFactory extends LocalizerFactory {
                     }
                     int hyphen = lang.indexOf("-");
                     if (hyphen < 0) {
-                        continue outer;
+                        break;
                     }
                     lang = lang.substring(0, hyphen);
+                }
+                if (breakOuter) {
+                    break;
                 }
             }
             if (className == null) {

@@ -49,7 +49,8 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
      * supplying an OEM license key
      */
 
-    private static Supplier<EnterpriseConfiguration> configurationFactory = EnterpriseConfiguration::new;
+    @SuppressWarnings("Convert2MethodRef") // For Java-C# conversion
+    private static Supplier<EnterpriseConfiguration> configurationFactory = () -> new EnterpriseConfiguration();
 
     static ErrorHandler DRACONIAN_ERROR_HANDLER = new ErrorHandler() {
         @Override

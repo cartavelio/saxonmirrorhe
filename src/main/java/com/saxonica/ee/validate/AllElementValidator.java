@@ -146,7 +146,7 @@ public class AllElementValidator extends AttributeValidator {
                 if (openWildcard != null) {
                     if (openWildcard.matches(elemName, true, config, type)) {
                         annotation = processWildcardTerm(openWildcard, elemName, location);
-                        inOpenSuffix = type.getOpenContentMode() == ComplexType.OPEN_CONTENT_SUFFIX;
+                        inOpenSuffix = type.getOpenContentMode() == OpenContentVariety.SUFFIX;
                     }
                 }
             }

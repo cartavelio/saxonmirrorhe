@@ -14,7 +14,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
-import static net.sf.saxon.type.SchemaComponent.ValidationStatus.*;
+import static net.sf.saxon.type.SchemaValidationStatus.*;
 
 /**
  * An XML Schema Attribute Declaration. This includes global attribute declarations,
@@ -564,7 +564,7 @@ public final class AttributeDecl extends SchemaStructure
                                 return EmptySequence.getInstance();
                         }
                     };
-                    return new CallableFunction(1, scopeFunction, COMPONENT_FUNCTION_TYPE);
+                    return new CallableFunction(1, scopeFunction, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
                 case "value constraint":
                     return getValueConstraintAsFunction(AttributeDecl.this);
                 case "inheritable":
@@ -573,7 +573,7 @@ public final class AttributeDecl extends SchemaStructure
                     return EmptySequence.getInstance();
             }
         };
-        return new CallableFunction(1, callable, COMPONENT_FUNCTION_TYPE);
+        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 
 }

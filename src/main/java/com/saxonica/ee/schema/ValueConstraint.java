@@ -149,7 +149,7 @@ public class ValueConstraint {
                     return EmptySequence.getInstance();
             }
         };
-        return new CallableFunction(1, constraintFunction, SchemaComponent.COMPONENT_FUNCTION_TYPE);
+        return new CallableFunction(1, constraintFunction, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
 
     }
 

@@ -25,7 +25,7 @@ import javax.xml.transform.SourceLocator;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static net.sf.saxon.type.SchemaComponent.ValidationStatus.*;
+import static net.sf.saxon.type.SchemaValidationStatus.*;
 
 /**
  * A user-defined complex type (that is, any complex type other than xs:anyType)
@@ -41,10 +41,10 @@ public class UserComplexType extends UserDefinedType
     private boolean debug = false;
 
     /**
-     * The {variety} property: one of {@link #VARIETY_EMPTY}, {@link #VARIETY_MIXED}, {@link #VARIETY_SIMPLE}, or
-     * {@link #VARIETY_ELEMENT_ONLY}
+     * The {variety} property: one of {@link ComplexVariety#EMPTY}, {@link ComplexVariety#MIXED}, {@link ComplexVariety#SIMPLE}, or
+     * {@link ComplexVariety#ELEMENT_ONLY}
      */
-    private int variety;
+    private ComplexVariety variety;
 
     /**
      * The abstract flag for this UserComplexType
@@ -131,11 +131,11 @@ public class UserComplexType extends UserDefinedType
     private Wildcard openContentWildcard;
 
     /**
-     * The open content mode: {@link #OPEN_CONTENT_NONE}, {@link #OPEN_CONTENT_ABSENT},
-     * {@link #OPEN_CONTENT_INTERLEAVE}, or {@link #OPEN_CONTENT_SUFFIX}
+     * The open content mode: {@link OpenContentVariety#NONE}, {@link OpenContentVariety#ABSENT},
+     * {@link OpenContentVariety#INTERLEAVE}, or {@link OpenContentVariety#SUFFIX}
      */
 
-    private int openContentMode = OPEN_CONTENT_ABSENT;
+    private OpenContentVariety openContentMode = OpenContentVariety.ABSENT;
 
     /**
      * A boolean indicating whether open content applies even if the content model would otherwise be empty
@@ -179,10 +179,11 @@ public class UserComplexType extends UserDefinedType
      * Get the variety of this complex type. This will be one of the values
      * {@link #VARIETY_EMPTY}, {@link #VARIETY_MIXED}, {@link #VARIETY_SIMPLE}, or
      * {@link #VARIETY_ELEMENT_ONLY}
+     * @return
      */
 
     @Override
-    public int getVariety() {
+    public ComplexVariety getVariety() {
         return variety;
     }
 
@@ -311,7 +312,7 @@ public class UserComplexType extends UserDefinedType
     private boolean makeCombinedAttributeGroup(SchemaCompiler compiler) throws SchemaException {
         if (extendedAttributes != null) {
             return true;
-        } else if (getDerivationMethod() == SchemaType.DERIVATION_EXTENSION) {
+        } else if (getDerivationMethod() == Derivation.DERIVATION_EXTENSION) {
             boolean result;
             if (compiler != null) {
                 result = attributes.validate(compiler);
@@ -447,7 +448,7 @@ public class UserComplexType extends UserDefinedType
      */
     @Override
     public boolean isComplexContent() {
-        return variety != VARIETY_SIMPLE;
+        return variety != ComplexVariety.SIMPLE;
     }
 
     /**
@@ -459,7 +460,7 @@ public class UserComplexType extends UserDefinedType
 
     @Override
     public boolean isSimpleContent() {
-        return variety == VARIETY_SIMPLE;
+        return variety == ComplexVariety.SIMPLE;
     }
 
     /**
@@ -492,7 +493,7 @@ public class UserComplexType extends UserDefinedType
 
         SchemaType base;
         if (particle == null &&
-                getDerivationMethod() == SchemaType.DERIVATION_EXTENSION &&
+                getDerivationMethod() == Derivation.DERIVATION_EXTENSION &&
                 (base = getBaseType()) instanceof ComplexType &&
                 ((ComplexType) base).isAllContent()) {
             return allContent = true;
@@ -540,7 +541,7 @@ public class UserComplexType extends UserDefinedType
             }
             return null;
         } else if (extendedParticle == null &&
-                getDerivationMethod() == SchemaType.DERIVATION_EXTENSION &&
+                getDerivationMethod() == Derivation.DERIVATION_EXTENSION &&
                 (base = getBaseType()) instanceof ComplexType &&
                 ((ComplexType) base).isAllContent()) {
             return ((UserComplexType) base).getAllCompositor();
@@ -616,7 +617,7 @@ public class UserComplexType extends UserDefinedType
 
     @Override
     public boolean isEmptyContent() {
-        return variety == VARIETY_EMPTY;
+        return variety == ComplexVariety.EMPTY;
     }
 
     /**
@@ -627,7 +628,7 @@ public class UserComplexType extends UserDefinedType
 
     @Override
     public boolean isMixedContent() {
-        return variety == VARIETY_MIXED;
+        return variety == ComplexVariety.MIXED;
     }
 
     /**
@@ -691,23 +692,23 @@ public class UserComplexType extends UserDefinedType
     /**
      * Ask whether open content permitted on this complex type is interleaved or suffixed.
      *
-     * @return the open content mode: {@link #OPEN_CONTENT_NONE}, {@link #OPEN_CONTENT_ABSENT},
-     *         {@link #OPEN_CONTENT_INTERLEAVE}, or {@link #OPEN_CONTENT_SUFFIX}
+     * @return the open content mode: {@link OpenContentVariety#NONE}, {@link OpenContentVariety#ABSENT},
+     *         {@link OpenContentVariety#INTERLEAVE}, or {@link OpenContentVariety#SUFFIX}
      */
 
-    public int getOpenContentMode() {
+    public OpenContentVariety getOpenContentMode() {
         return openContentMode;
     }
 
     public String getOpenContentModeString() {
         switch (openContentMode) {
-            case OPEN_CONTENT_ABSENT:
+            case ABSENT:
                 return "absent";
-            case OPEN_CONTENT_NONE:
+            case NONE:
                 return "none";
-            case OPEN_CONTENT_INTERLEAVE:
+            case INTERLEAVE:
                 return "interleave";
-            case OPEN_CONTENT_SUFFIX:
+            case SUFFIX:
                 return "suffix";
         }
         return null;
@@ -767,7 +768,7 @@ public class UserComplexType extends UserDefinedType
      *                {@link #VARIETY_ELEMENT_ONLY}
      */
 
-    public void setVariety(int variety) {
+    public void setVariety(ComplexVariety variety) {
         this.variety = variety;
     }
 
@@ -802,11 +803,11 @@ public class UserComplexType extends UserDefinedType
     public void setOpenContentWildcard(Wildcard wildcard, String mode, boolean appliesToEmpty) {
         openContentWildcard = wildcard;
         if ("interleave".equals(mode)) {
-            openContentMode = OPEN_CONTENT_INTERLEAVE;
+            openContentMode = OpenContentVariety.INTERLEAVE;
         } else if ("suffix".equals(mode)) {
-            openContentMode = OPEN_CONTENT_SUFFIX;
+            openContentMode = OpenContentVariety.SUFFIX;
         } else if ("none".equals(mode)) {
-            openContentMode = OPEN_CONTENT_NONE;
+            openContentMode = OpenContentVariety.NONE;
         } else {
             throw new IllegalArgumentException("Invalid value of open content mode - " + mode);
         }
@@ -1010,13 +1011,13 @@ public class UserComplexType extends UserDefinedType
 
         // DERIVATION BY EXTENSION
 
-        if (getDerivationMethod() == SchemaType.DERIVATION_EXTENSION) {
+        if (getDerivationMethod() == Derivation.DERIVATION_EXTENSION) {
             result &= validateExtension(compiler, base);
         }
 
         // DERIVATION BY RESTRICTION
 
-        if (getDerivationMethod() == SchemaType.DERIVATION_RESTRICTION) {
+        if (getDerivationMethod() == Derivation.DERIVATION_RESTRICTION) {
             result &= validateRestriction(compiler, base);
         }
 
@@ -1144,7 +1145,7 @@ public class UserComplexType extends UserDefinedType
         // Schema Component Constraint: Derivation Valid (Extension)
 
         // Rules 1.1, 2.2
-        if (!base.allowsDerivation(SchemaType.DERIVATION_EXTENSION)) {
+        if (!base.allowsDerivation(Derivation.DERIVATION_EXTENSION)) {
             String err = "The complex type " + getDescription() +
                     " is derived by extension, but the base type prohibits extension";
             compiler.error(err, this);
@@ -1154,8 +1155,8 @@ public class UserComplexType extends UserDefinedType
 
         // Calculate whether the contentType is Empty
 
-        if (variety == VARIETY_ELEMENT_ONLY && isLocallyEmpty() && isEmptyContent(base)) {
-            variety = VARIETY_EMPTY;
+        if (variety == ComplexVariety.ELEMENT_ONLY && isLocallyEmpty() && isEmptyContent(base)) {
+            variety = ComplexVariety.EMPTY;
             particle = null;
         }
 
@@ -1245,7 +1246,7 @@ public class UserComplexType extends UserDefinedType
                 // <complexContent>, extending a complex type with simple content with a null
                 // extension appears (in XML Schema 1.0) to be a legitimate way of creating a complex type with
                 // *simple* content. In 1.1 it violates Derivation Valid (Extension) - see bug 5943
-                setVariety(VARIETY_SIMPLE);
+                setVariety(ComplexVariety.SIMPLE);
                 setValidationStatus(UNVALIDATED);
                 return validate(compiler);
             }
@@ -1300,7 +1301,7 @@ public class UserComplexType extends UserDefinedType
                 }
             } else if (isLocallyEmpty()) {
                 if (base instanceof ComplexType && cbase.isMixedContent()) {
-                    setVariety(VARIETY_MIXED);
+                    setVariety(ComplexVariety.MIXED);
                     // Note: if the mixed attribute is absent, we override it. If the attribute
                     // was explicitly set to "false", this is apparently not an error.
                 }
@@ -1309,7 +1310,7 @@ public class UserComplexType extends UserDefinedType
             // Default openContent to the openContent of the base type
 
             if (base instanceof UserComplexType) {
-                if (openContentMode == OPEN_CONTENT_NONE) {
+                if (openContentMode == OpenContentVariety.NONE) {
 
                 }
                 if (openContentWildcard == null /*&& openContentMode != OPEN_CONTENT_NONE*/) {
@@ -1320,10 +1321,10 @@ public class UserComplexType extends UserDefinedType
                     // See 3.4.6.3 Derivation Valid (Extension) rule 1.4.3.2.2.3
                     Wildcard baseOpenWildcard = ((UserComplexType) base).getOpenContentWildcard();
                     boolean baseOpenWildcardInterleaved =
-                            ((UserComplexType) base).getOpenContentMode() == OPEN_CONTENT_INTERLEAVE;
+                            ((UserComplexType) base).getOpenContentMode() == OpenContentVariety.INTERLEAVE;
                     if (baseOpenWildcard != null) {
                         if (openContentWildcard != null && baseOpenWildcardInterleaved &&
-                                openContentMode != OPEN_CONTENT_INTERLEAVE) {
+                                openContentMode != OpenContentVariety.INTERLEAVE) {
                             String err = "Invalid extension. The type " + getDescription() +
                                     " has interleaved open content," +
                                     " but its base type has suffix open content";
@@ -1376,7 +1377,7 @@ public class UserComplexType extends UserDefinedType
                     while (b instanceof UserComplexType) {
                         int derivation = b.getDerivationMethod();
                         SchemaType g = b.getBaseType();
-                        if (g instanceof UserComplexType && derivation == DERIVATION_RESTRICTION) {
+                        if (g instanceof UserComplexType && derivation == Derivation.DERIVATION_RESTRICTION) {
                             AttributeUse baseAttributeUse =
                                     ((UserComplexType) g).getCombinedAttributeGroup().getAttributeUse(fp);
                             if (baseAttributeUse != null) {
@@ -1422,7 +1423,7 @@ public class UserComplexType extends UserDefinedType
                         while (b instanceof UserComplexType) {
                             int derivation = b.getDerivationMethod();
                             SchemaType g = b.getBaseType();
-                            if (g instanceof UserComplexType && derivation == DERIVATION_RESTRICTION) {
+                            if (g instanceof UserComplexType && derivation == Derivation.DERIVATION_RESTRICTION) {
                                 SchemaType original = ((UserComplexType) g).getElementParticleType(fp, false);
                                 if (original != null) {
                                     SchemaType derived = particle.getElementParticleType(fp);
@@ -1482,7 +1483,7 @@ public class UserComplexType extends UserDefinedType
 
     private boolean validateRestriction(SchemaCompiler compiler, SchemaType base) throws SchemaException {
 
-        if (!base.allowsDerivation(SchemaType.DERIVATION_RESTRICTION)) {
+        if (!base.allowsDerivation(Derivation.DERIVATION_RESTRICTION)) {
             String err = "The complex type " + getDescription() +
                     " is derived by restriction, but the base type prohibits restriction";
             compiler.error(err, this);
@@ -1492,10 +1493,10 @@ public class UserComplexType extends UserDefinedType
 
         // Calculate whether the contentType of this UserComplexType is empty
 
-        if (variety == VARIETY_ELEMENT_ONLY &&
+        if (variety == ComplexVariety.ELEMENT_ONLY &&
                 (openContentWildcard == null || !openContentAppliesToEmpty) &&
                 isLocallyEmpty()) {
-            variety = VARIETY_EMPTY;
+            variety = ComplexVariety.EMPTY;
             particle = null;
         }
 
@@ -1595,12 +1596,12 @@ public class UserComplexType extends UserDefinedType
                 if (particle.isPointless(null)) {
                     ModelGroup group = ((ModelGroupParticle) particle).getGroup();
                     List<Particle> contentModel = group.getSimplifiedContentModel();
-                    if (variety == VARIETY_ELEMENT_ONLY && contentModel.isEmpty() &&
+                    if (variety == ComplexVariety.ELEMENT_ONLY && contentModel.isEmpty() &&
                             !(group instanceof ChoiceModelGroup) /* bug 2388 */ &&
                             (openContentWildcard == null || !openContentAppliesToEmpty)) {
                         // NOTE: seems redundant, we have done this check already
                         particle = null;
-                        variety = VARIETY_EMPTY;
+                        variety = ComplexVariety.EMPTY;
                     } else if (contentModel.size() == 1 && !(group instanceof AllModelGroup)) {
                         // Cannot reduce an All model group, because it affects the rules for derivation by extension
                         // (See Saxonica test All311)
@@ -1757,7 +1758,7 @@ public class UserComplexType extends UserDefinedType
             Particle extended = makeExtendedParticle(compiler);
             if (extended == null) {
                 machine.getInitialState().setFinalState(true);
-                machine.setOpenContentWildcard(openContentWildcard, openContentMode == OPEN_CONTENT_INTERLEAVE);
+                machine.setOpenContentWildcard(openContentWildcard, openContentMode == OpenContentVariety.INTERLEAVE);
             } else {
                 //makeAutomaton(compiler);
                 compiler.scheduleAutomaton(this);
@@ -1798,7 +1799,7 @@ public class UserComplexType extends UserDefinedType
                 machine.display(err);
             }
 
-            machine.setOpenContentWildcard(openContentWildcard, openContentMode == OPEN_CONTENT_INTERLEAVE);
+            machine.setOpenContentWildcard(openContentWildcard, openContentMode == OpenContentVariety.INTERLEAVE);
             //initialState = machine.getInitialState();
         } catch (SchemaException err) {
             compiler.error("Error in complex type " +
@@ -1885,7 +1886,7 @@ public class UserComplexType extends UserDefinedType
         if (compiler != null) {
             lookForCycles(new Stack(), compiler);
         }
-        if (getDerivationMethod() == SchemaType.DERIVATION_EXTENSION) {
+        if (getDerivationMethod() == Derivation.DERIVATION_EXTENSION) {
             // For derivation by extension, construct a new Sequence compositor
             // combining the particles from the base type and this type
             ComplexType cbase = (ComplexType) getBaseType();
@@ -1911,7 +1912,7 @@ public class UserComplexType extends UserDefinedType
                     mgp.setLocator(this);
                     extendedParticle = mgp;
                     extendedParticle.setMinOccurs(particle.getMinOccurs());
-                    variety = variety == VARIETY_MIXED ? VARIETY_MIXED : VARIETY_ELEMENT_ONLY;
+                    variety = variety == ComplexVariety.MIXED ? ComplexVariety.MIXED : ComplexVariety.ELEMENT_ONLY;
                 }
                 return extendedParticle;
 
@@ -1928,8 +1929,8 @@ public class UserComplexType extends UserDefinedType
                     List contentModel = seq.getSimplifiedContentModel();
                     if (contentModel.isEmpty()) {
                         extendedParticle = null;
-                        if (variety == VARIETY_ELEMENT_ONLY) {
-                            variety = VARIETY_EMPTY;
+                        if (variety == ComplexVariety.ELEMENT_ONLY) {
+                            variety = ComplexVariety.EMPTY;
                         }
                     } else if (contentModel.size() == 1) {
                         extendedParticle = (Particle) contentModel.get(0);
@@ -1988,11 +1989,11 @@ public class UserComplexType extends UserDefinedType
             }
             if (p.isPointless(null) && (p instanceof ModelGroupParticle)) {
                 List contentModel = ((ModelGroupParticle) p).getGroup().getSimplifiedContentModel();
-                if (variety == VARIETY_ELEMENT_ONLY && contentModel.isEmpty() &&
+                if (variety == ComplexVariety.ELEMENT_ONLY && contentModel.isEmpty() &&
                     !(((ModelGroupParticle) p).getGroup() instanceof ChoiceModelGroup) /* bug 2388 */ &&
                         (openContentWildcard == null || !openContentAppliesToEmpty)) {
                     extendedParticle = null;
-                    variety = VARIETY_EMPTY;
+                    variety = ComplexVariety.EMPTY;
                 } else if (contentModel.size() == 1) {
                     extendedParticle = (Particle) contentModel.get(0);
                 } else {
@@ -2604,8 +2605,8 @@ public class UserComplexType extends UserDefinedType
                                 " is weaker than that on the open content wildcard of the base type";
                     }
                     if (!isLocallyEmpty()) {
-                        boolean bInterleaved = cbase.getOpenContentMode() == OPEN_CONTENT_INTERLEAVE;
-                        boolean rInterleaved = this.getOpenContentMode() == OPEN_CONTENT_INTERLEAVE;
+                        boolean bInterleaved = cbase.getOpenContentMode() == OpenContentVariety.INTERLEAVE;
+                        boolean rInterleaved = this.getOpenContentMode() == OpenContentVariety.INTERLEAVE;
                         if (rInterleaved && !bInterleaved) {
                             return "Restricted type allows interleaved open content, but " +
                                     "base type only allows suffixed open content";
@@ -2698,7 +2699,7 @@ public class UserComplexType extends UserDefinedType
             elementTypeOK = reason == null;
         } else {
             while (!baseType.isSameType(subType)) {
-                if (subType.getDerivationMethod() != SchemaType.DERIVATION_RESTRICTION) {
+                if (subType.getDerivationMethod() != Derivation.DERIVATION_RESTRICTION) {
                     elementTypeOK = false;
                     break;
                 }
@@ -3153,39 +3154,39 @@ public class UserComplexType extends UserDefinedType
         serializer.emitAttribute("base", serializer.getTypeLink(getBaseType()));
         if (finalProhibitions != 0) {
             String ex = "";
-            if ((finalProhibitions & SchemaType.DERIVATION_EXTENSION) != 0) {
+            if ((finalProhibitions & Derivation.DERIVATION_EXTENSION) != 0) {
                 ex = (ex.isEmpty() ? "" : " ") + "extension";
             }
-            if ((finalProhibitions & SchemaType.DERIVATION_RESTRICTION) != 0) {
+            if ((finalProhibitions & Derivation.DERIVATION_RESTRICTION) != 0) {
                 ex += (ex.isEmpty() ? "" : " ") + "restriction";
             }
             serializer.emitAttribute("final", ex);
         }
         if (block != 0) {
             String dis = "";
-            if ((block & SchemaType.DERIVATION_EXTENSION) != 0) {
+            if ((block & Derivation.DERIVATION_EXTENSION) != 0) {
                 dis = "extension";
             }
-            if ((block & SchemaType.DERIVATION_RESTRICTION) != 0) {
+            if ((block & Derivation.DERIVATION_RESTRICTION) != 0) {
                 dis += (dis.isEmpty() ? "" : " ") + "restriction";
             }
             serializer.emitAttribute("block", dis);
         }
         serializer.emitAttribute("derivationMethod",
-                getDerivationMethod() == SchemaType.DERIVATION_EXTENSION ? "extension" : "restriction");
+                getDerivationMethod() == Derivation.DERIVATION_EXTENSION ? "extension" : "restriction");
         serializer.emitAttribute("abstract", isAbstract() ? "true" : "false");
         String varietyName;
         switch (variety) {
-            case VARIETY_EMPTY:
+            case EMPTY:
                 varietyName = "empty";
                 break;
-            case VARIETY_MIXED:
+            case MIXED:
                 varietyName = "mixed";
                 break;
-            case VARIETY_SIMPLE:
+            case SIMPLE:
                 varietyName = "simple";
                 break;
-            case VARIETY_ELEMENT_ONLY:
+            case ELEMENT_ONLY:
             default:
                 varietyName = "element-only";
                 break;
@@ -3196,15 +3197,15 @@ public class UserComplexType extends UserDefinedType
             serializer.emitAttribute("simpleType", serializer.getTypeLink(st));
         }
         if (openContentWildcard != null &&
-                openContentMode != OPEN_CONTENT_ABSENT && openContentMode != OPEN_CONTENT_NONE) {
+                openContentMode != OpenContentVariety.ABSENT && openContentMode != OpenContentVariety.NONE) {
             String modeName;
             switch (openContentMode) {
                 default:
                     throw new IllegalStateException("openContent mode must be suffix or interleave");
-                case OPEN_CONTENT_INTERLEAVE:
+                case INTERLEAVE:
                     modeName = "interleave";
                     break;
-                case OPEN_CONTENT_SUFFIX:
+                case SUFFIX:
                     modeName = "suffix";
                     break;
             }
@@ -3265,10 +3266,10 @@ public class UserComplexType extends UserDefinedType
                     case "final": {
                         List<StringItem> list = new ArrayList<StringItem>();
                         int f = type.getFinalProhibitions();
-                        if ((f & SchemaType.DERIVATION_RESTRICTION) != 0) {
+                        if ((f & Derivation.DERIVATION_RESTRICTION) != 0) {
                             list.add(StringItem.bmp("restriction"));
                         }
-                        if ((f & SchemaType.DERIVATION_EXTENSION) != 0) {
+                        if ((f & Derivation.DERIVATION_EXTENSION) != 0) {
                             list.add(StringItem.bmp("extension"));
                         }
                         return SequenceExtent.makeSequenceExtent(list);
@@ -3282,7 +3283,7 @@ public class UserComplexType extends UserDefinedType
                         }
                     case "derivation method":
                         return new StringItem(
-                                type.getDerivationMethod() == SchemaType.DERIVATION_RESTRICTION ? "restriction" : "extension");
+                                type.getDerivationMethod() == Derivation.DERIVATION_RESTRICTION ? "restriction" : "extension");
                     case "abstract":
                         return BooleanValue.get(type.isAbstract());
                     case "attribute uses":
@@ -3314,23 +3315,23 @@ public class UserComplexType extends UserDefinedType
                                     case "variety":
                                         String variety;
                                         switch (type.getVariety()) {
-                                            case UserComplexType.VARIETY_ELEMENT_ONLY:
+                                            case ELEMENT_ONLY:
                                                 variety = "element-only";
                                                 break;
-                                            case UserComplexType.VARIETY_EMPTY:
+                                            case EMPTY:
                                                 variety = "empty";
                                                 break;
-                                            case UserComplexType.VARIETY_MIXED:
+                                            case MIXED:
                                                 variety = "mixed";
                                                 break;
-                                            case UserComplexType.VARIETY_SIMPLE:
+                                            case SIMPLE:
                                             default:
                                                 variety = "simple";
                                                 break;
                                         }
                                         return StringItem.bmp(variety);
                                     case "particle":
-                                        if (type.getVariety() == UserComplexType.VARIETY_MIXED || type.getVariety() == UserComplexType.VARIETY_ELEMENT_ONLY) {
+                                        if (type.getVariety() == ComplexVariety.MIXED || type.getVariety() == ComplexVariety.ELEMENT_ONLY) {
                                             return ((UserComplexType) type).getParticle().getComponentAsFunction();
                                             // TODO: what about anyType, etc?
                                         } else {
@@ -3358,7 +3359,7 @@ public class UserComplexType extends UserDefinedType
                                                         }
                                                     }
                                                 };
-                                                return new CallableFunction(1, open, COMPONENT_FUNCTION_TYPE);
+                                                return new CallableFunction(1, open, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
                                             } else {
                                                 return EmptySequence.getInstance();
                                             }
@@ -3376,14 +3377,14 @@ public class UserComplexType extends UserDefinedType
                                 }
                             }
                         };
-                        return new CallableFunction(1, contentType, SchemaComponent.COMPONENT_FUNCTION_TYPE);
+                        return new CallableFunction(1, contentType, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
                     case "prohibited substitutions": {
                         List<StringItem> list = new ArrayList<>();
                         int s = type.getBlock();
-                        if ((s & SchemaType.DERIVATION_EXTENSION) != 0) {
+                        if ((s & Derivation.DERIVATION_EXTENSION) != 0) {
                             list.add(StringItem.bmp("extension"));
                         }
-                        if ((s & SchemaType.DERIVATION_RESTRICTION) != 0) {
+                        if ((s & Derivation.DERIVATION_RESTRICTION) != 0) {
                             list.add(StringItem.bmp("restriction"));
                         }
                         return SequenceExtent.makeSequenceExtent(list);
@@ -3403,7 +3404,7 @@ public class UserComplexType extends UserDefinedType
                 }
             }
         };
-        return new CallableFunction(1, callable, COMPONENT_FUNCTION_TYPE);
+        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 }
 

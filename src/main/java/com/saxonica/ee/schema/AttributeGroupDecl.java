@@ -14,7 +14,7 @@ import net.sf.saxon.z.*;
 
 import java.util.*;
 
-import static net.sf.saxon.type.SchemaComponent.ValidationStatus.*;
+import static net.sf.saxon.type.SchemaValidationStatus.*;
 
 /**
  * An XML Schema Attribute Group Declaration. This represents a named attribute group,
@@ -427,15 +427,11 @@ public final class AttributeGroupDecl extends SchemaStructure
         setValidationStatus(VALIDATING);
 
 
-        Iterator iter = attributes.iterator();
-        while (iter.hasNext()) {
-            Object obj = iter.next();
-            UserSchemaComponent structure = (UserSchemaComponent) obj;
-            result &= structure.validate(compiler);
+        for (AttributeUse att : attributes) {
+            result &= att.validate(compiler);
         }
-        iter = references.iterator();
-        while (iter.hasNext()) {
-            AttributeGroupReference ref = (AttributeGroupReference) iter.next();
+
+        for (AttributeGroupReference ref : references) {
             result &= ref.validate(compiler);
         }
 
@@ -454,11 +450,9 @@ public final class AttributeGroupDecl extends SchemaStructure
             String foundID = null;
             List<AttributeUse> attributeList = new ArrayList<>();
             gatherAttributeUses(attributeList);
-            Iterator<AttributeUse> agi = attributeList.iterator();
             Set<StructuredQName> fingerprintSet = new HashSet<>(attributeList.size() * 2);
             final TypeHierarchy th = compiler.getConfiguration().getTypeHierarchy();
-            while (agi.hasNext()) {
-                AttributeUse att = agi.next();
+            for (AttributeUse att : attributeList) {
                 result &= att.validate(compiler);
                 if (result) {
                     AttributeDecl decl = (AttributeDecl) att.getTarget();
@@ -781,7 +775,7 @@ public final class AttributeGroupDecl extends SchemaStructure
                 }
             }
         };
-        return new CallableFunction(1, callable, COMPONENT_FUNCTION_TYPE);
+        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 }
 

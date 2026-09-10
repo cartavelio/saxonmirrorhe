@@ -326,15 +326,15 @@ public class SchemaModelLoader extends ProxyReceiver {
             String defaultValue = attributes.getValue("", "default");
             int finalSet = parseFinalOrBlock("final",
                     finalAtt,
-                    SchemaType.DERIVATION_EXTENSION |
-                            SchemaType.DERIVATION_RESTRICTION |
-                            SchemaType.DERIVE_BY_SUBSTITUTION);
+                    Derivation.DERIVATION_EXTENSION |
+                                                     Derivation.DERIVATION_RESTRICTION |
+                                                     Derivation.DERIVE_BY_SUBSTITUTION);
             String blockAtt = attributes.getValue("", "block");
             int blockSet = parseFinalOrBlock("block",
                     blockAtt,
-                    SchemaType.DERIVATION_EXTENSION |
-                            SchemaType.DERIVATION_RESTRICTION |
-                            SchemaType.DERIVE_BY_SUBSTITUTION);
+                    Derivation.DERIVATION_EXTENSION |
+                                                     Derivation.DERIVATION_RESTRICTION |
+                                                     Derivation.DERIVE_BY_SUBSTITUTION);
             elementDecl = new ElementDecl(config, isGlobal, null);
             elementDecl.setGeneratedId(id);
             components.put(id, elementDecl);
@@ -749,19 +749,19 @@ public class SchemaModelLoader extends ProxyReceiver {
                     fixups.add(new Fixup(complexType, base, FIXUP_COMPLEX_TYPE_BASE_TYPE));
                 }
             }
-            int varietyCode = ComplexType.VARIETY_ELEMENT_ONLY;
+            ComplexVariety varietyCode = ComplexVariety.ELEMENT_ONLY;
             switch (variety) {
                 case "mixed":
-                    varietyCode = ComplexType.VARIETY_MIXED;
+                    varietyCode = ComplexVariety.MIXED;
                     break;
                 case "empty":
-                    varietyCode = ComplexType.VARIETY_EMPTY;
+                    varietyCode = ComplexVariety.EMPTY;
                     break;
                 case "element-only":
-                    varietyCode = ComplexType.VARIETY_ELEMENT_ONLY;
+                    varietyCode = ComplexVariety.ELEMENT_ONLY;
                     break;
                 case "simple":
-                    varietyCode = ComplexType.VARIETY_SIMPLE;
+                    varietyCode = ComplexVariety.SIMPLE;
                     break;
             }
             complexType.setVariety(varietyCode);
@@ -783,14 +783,14 @@ public class SchemaModelLoader extends ProxyReceiver {
             String blockAtt = attributes.getValue("", "block");
             int blockSet = parseFinalOrBlock("block",
                     blockAtt,
-                    SchemaType.DERIVATION_EXTENSION |
-                            SchemaType.DERIVATION_RESTRICTION);
+                    Derivation.DERIVATION_EXTENSION |
+                                                     Derivation.DERIVATION_RESTRICTION);
             complexType.setBlock(blockSet);
             String finalAtt = attributes.getValue("", "final");
             int finalSet = parseFinalOrBlock("final",
                     finalAtt,
-                    SchemaType.DERIVATION_EXTENSION |
-                            SchemaType.DERIVATION_RESTRICTION);
+                    Derivation.DERIVATION_EXTENSION |
+                                                     Derivation.DERIVATION_RESTRICTION);
             complexType.setFinalProhibitions(finalSet);
         }
 
@@ -1811,19 +1811,19 @@ public class SchemaModelLoader extends ProxyReceiver {
                 int v;
                 switch (token) {
                     case "union":
-                        v = SchemaType.DERIVATION_UNION;
+                        v = Derivation.DERIVATION_UNION;
                         break;
                     case "list":
-                        v = SchemaType.DERIVATION_LIST;
+                        v = Derivation.DERIVATION_LIST;
                         break;
                     case "restriction":
-                        v = SchemaType.DERIVATION_RESTRICTION;
+                        v = Derivation.DERIVATION_RESTRICTION;
                         break;
                     case "extension":
-                        v = SchemaType.DERIVATION_EXTENSION;
+                        v = Derivation.DERIVATION_EXTENSION;
                         break;
                     case "substitution":
-                        v = SchemaType.DERIVE_BY_SUBSTITUTION;
+                        v = Derivation.DERIVE_BY_SUBSTITUTION;
                         break;
                     default:
                         String err = "Invalid " + Err.wrap(attrName, Err.ATTRIBUTE) + " value " +

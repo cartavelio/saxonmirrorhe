@@ -11,7 +11,7 @@ import net.sf.saxon.type.SchemaException;
 
 import java.util.Stack;
 
-import static net.sf.saxon.type.SchemaComponent.ValidationStatus.*;
+import static net.sf.saxon.type.SchemaValidationStatus.*;
 
 /**
  * An XML Schema Attribute Group Reference, corresponding to an

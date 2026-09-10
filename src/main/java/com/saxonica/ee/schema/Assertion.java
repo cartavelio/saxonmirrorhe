@@ -22,6 +22,7 @@ import net.sf.saxon.sxpath.XPathVariable;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.type.SchemaComponent;
+import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.type.ValidationParams;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
@@ -364,7 +365,7 @@ public class Assertion extends SchemaStructure implements SchemaComponent, Seria
                     return EmptySequence.getInstance();
             }
         };
-        return new CallableFunction(1, callable, COMPONENT_FUNCTION_TYPE);
+        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 }
 

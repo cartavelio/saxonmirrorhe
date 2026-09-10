@@ -45,7 +45,7 @@ public abstract class UserDefinedType extends SchemaStructure
     /**
      * The derivation method, for example SchemaType.DERIVATION_RESTRICTION
      */
-    private int derivation = SchemaType.DERIVATION_RESTRICTION;
+    private int derivation = Derivation.DERIVATION_RESTRICTION;
 
     /**
      * The fingerprint of this type in the Saxon NamePool
@@ -206,7 +206,7 @@ public abstract class UserDefinedType extends SchemaStructure
 
     /**
      * Returns the value of the 'block' attribute for this type, as a bit-signnificant
-     * integer with fields such as {@link SchemaType#DERIVATION_LIST} and {@link SchemaType#DERIVATION_EXTENSION}
+     * integer with fields such as {@link Derivatiion#DERIVATION_LIST} and {@link Derivatiion#DERIVATION_EXTENSION}
      *
      * @return the value of the 'block' attribute for this type
      */
@@ -267,7 +267,7 @@ public abstract class UserDefinedType extends SchemaStructure
      * Gets the integer code of the derivation method used to derive this type from its
      * parent. Returns zero for primitive types.
      *
-     * @return a numeric code representing the derivation method, for example {@link SchemaType#DERIVATION_RESTRICTION}
+     * @return a numeric code representing the derivation method, for example {@link Derivation#DERIVATION_RESTRICTION}
      */
 
     @Override
@@ -279,7 +279,7 @@ public abstract class UserDefinedType extends SchemaStructure
      * Determines whether derivation (of a particular kind)
      * from this type is allowed, based on the "final" property
      *
-     * @param derivation the kind of derivation, for example {@link SchemaType#DERIVATION_LIST}
+     * @param derivation the kind of derivation, for example {@link Derivatiion#DERIVATION_LIST}
      * @return true if this kind of derivation is allowed
      */
 
@@ -292,7 +292,7 @@ public abstract class UserDefinedType extends SchemaStructure
      * Get the types of derivation that are not permitted, by virtue of the "final" property.
      *
      * @return the types of derivation that are not permitted, as a bit-significant integer
-     *         containing bits such as {@link net.sf.saxon.type.SchemaType#DERIVATION_EXTENSION}
+     *         containing bits such as {@link net.sf.saxon.type.Derivatiion#DERIVATION_EXTENSION}
      */
     @Override
     public int getFinalProhibitions() {
@@ -310,16 +310,16 @@ public abstract class UserDefinedType extends SchemaStructure
     public void setDerivationMethodName(String method) throws SchemaException {
         switch (method) {
             case "restriction":
-                derivation = SchemaType.DERIVATION_RESTRICTION;
+                derivation = Derivation.DERIVATION_RESTRICTION;
                 break;
             case "union":
-                derivation = SchemaType.DERIVATION_UNION;
+                derivation = Derivation.DERIVATION_UNION;
                 break;
             case "list":
-                derivation = SchemaType.DERIVATION_LIST;
+                derivation = Derivation.DERIVATION_LIST;
                 break;
             case "extension":
-                derivation = SchemaType.DERIVATION_EXTENSION;
+                derivation = Derivation.DERIVATION_EXTENSION;
                 break;
             default:
                 throw new SchemaException("Unknown derivation method: " + method);
@@ -329,7 +329,7 @@ public abstract class UserDefinedType extends SchemaStructure
     /**
      * Sets the derivation method code (without validating it)
      *
-     * @param method the derivation method as an integer code, for example {@link SchemaType#DERIVATION_UNION}
+     * @param method the derivation method as an integer code, for example {@link Derivatiion#DERIVATION_UNION}
      */
     public void setDerivationMethod(int method) {
         derivation = method;

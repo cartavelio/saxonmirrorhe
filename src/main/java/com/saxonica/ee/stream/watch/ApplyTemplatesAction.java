@@ -20,10 +20,14 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.TraceListener;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.pattern.*;
+import net.sf.saxon.pattern.AncestorQualifiedPattern;
+import net.sf.saxon.pattern.AnchorPattern;
+import net.sf.saxon.pattern.MultipleNodeKindTest;
+import net.sf.saxon.pattern.NodeTestPattern;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.rules.BuiltInRuleSet;
+import net.sf.saxon.trans.rules.BuiltInRules;
 import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.trans.rules.RuleSetWithWarnings;
 import net.sf.saxon.tree.iter.AxisIterator;
@@ -148,26 +152,26 @@ public class ApplyTemplatesAction extends ItemFeed {
             if (builtInRuleSet instanceof RuleSetWithWarnings) {
                 ((RuleSetWithWarnings)builtInRuleSet).outputWarning(node, localContext);
             }
-            int[] action = builtInRuleSet.getActionForParentNodes(node.getNodeKind());
+            BuiltInRules[] action = builtInRuleSet.getActionForParentNodes(node.getNodeKind());
             switch (action[0]) {
-                case BuiltInRuleSet.DEEP_COPY: {
+                case DEEP_COPY: {
                     //currentActivation.isSkipped = true;
                     ItemFeed out = new NoOpenOrCloseFeed(getResult(), getContext());
                     Watch copyWatch = CopyOfFeed.getWatch(out, AnchorPattern.getInstance(), watchManager, getContext());
                     watchManager.addWatch(copyWatch, true);
                     return null;
                 }
-                case BuiltInRuleSet.FAIL: {
+                case FAIL: {
                     XPathException err = new XPathException("No user-defined template rule matches the node " +
                         Navigator.getPath(node), "XTDE0555");
                     err.setLocator(locationId);
                     throw err;
                 }
-                case BuiltInRuleSet.DEEP_SKIP: {
+                case DEEP_SKIP: {
                     //currentActivation.isSkipped = true;
                     return null;
                 }
-                case BuiltInRuleSet.SHALLOW_COPY: {
+                case SHALLOW_COPY: {
                     //currentActivation.shallowCopiedNode = node;
                     XPathContext context = localContext;
                     //currentActivation.isSkipped = false;
@@ -187,10 +191,10 @@ public class ApplyTemplatesAction extends ItemFeed {
                 default: {
                     boolean applyTemplatesToAttributes = false;
                     boolean applyTemplatesToChildren = false;
-                    for (int i : action) {
-                        if (i == BuiltInRuleSet.APPLY_TEMPLATES_TO_ATTRIBUTES) {
+                    for (BuiltInRules i : action) {
+                        if (i == BuiltInRules.APPLY_TEMPLATES_TO_ATTRIBUTES) {
                             applyTemplatesToAttributes = true;
-                        } else if (i == BuiltInRuleSet.APPLY_TEMPLATES_TO_CHILDREN) {
+                        } else if (i == BuiltInRules.APPLY_TEMPLATES_TO_CHILDREN) {
                             applyTemplatesToChildren = true;
                         }
                     }

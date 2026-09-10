@@ -101,7 +101,8 @@ public class UserListType extends UserSimpleType implements ListType {
         return true;
     }
 
-    private Function<UnicodeString, AtomicIterator<StringItem>> tokenizerFactory = Whitespace.Tokenizer::new;
+    @SuppressWarnings("Convert2MethodRef")  // For Java-C# conversion
+    private Function<UnicodeString, AtomicIterator<StringItem>> tokenizerFactory = str -> new Whitespace.Tokenizer(str);
 
     /**
      * Get the extended facet list, creating it if necessary. The extended facet

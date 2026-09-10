@@ -4,6 +4,7 @@ import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaException;
+import net.sf.saxon.type.SchemaValidationStatus;
 
 
 /**
@@ -86,12 +87,12 @@ public class AttributeWildcard extends SchemaStructure implements UserSchemaComp
     /**
      * Get the validation status of this component.
      *
-     * @return the value {@link net.sf.saxon.type.SchemaComponent.ValidationStatus#UNVALIDATED}
+     * @return the value {@link SchemaValidationStatus#UNVALIDATED}
      */
 
     @Override
-    public ValidationStatus getValidationStatus() {
-        return ValidationStatus.UNVALIDATED;
+    public SchemaValidationStatus getValidationStatus() {
+        return SchemaValidationStatus.UNVALIDATED;
     }
 
 

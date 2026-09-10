@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static net.sf.saxon.type.SchemaComponent.ValidationStatus.*;
+import static net.sf.saxon.type.SchemaValidationStatus.*;
 
 /**
  * A simple type definition holds all the information about a simpleType
@@ -102,7 +102,7 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
     @Override
     public boolean isListType() {
         return itemTypeReference != null ||
-                getDerivationMethod() == SchemaType.DERIVATION_RESTRICTION &&
+                getDerivationMethod() == Derivation.DERIVATION_RESTRICTION &&
                         getBaseTypeReference() != null &&
                         ((SimpleType) getBaseType()).isListType();
     }
@@ -118,7 +118,7 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
     @Override
     public boolean isUnionType() {
         return members != null ||
-                getDerivationMethod() == SchemaType.DERIVATION_RESTRICTION &&
+                getDerivationMethod() == Derivation.DERIVATION_RESTRICTION &&
                         getBaseTypeReference() != null &&
                         ((SimpleType) getBaseType()).isUnionType();
     }
@@ -322,12 +322,12 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
         // Now create a SimpleType object containing the relevant information,
         // for use at run-time
 
-        if (getDerivationMethod() == SchemaType.DERIVATION_LIST) {
+        if (getDerivationMethod() == Derivation.DERIVATION_LIST) {
             boolean badItemType = false;
             boolean b = checkFacetsForListType(compiler);
             if (b) {
                 SimpleType itemType = (SimpleType) itemTypeReference.getTarget();
-                if (!itemType.allowsDerivation(SchemaType.DERIVATION_LIST)) {
+                if (!itemType.allowsDerivation(Derivation.DERIVATION_LIST)) {
                     badItemType = true;
                     compiler.error("The item type of the list type " +
                                            getDescription() + " disallows derivation by list", this);
@@ -354,7 +354,7 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
                 list.setItemTypeReference(itemTypeReference);
             }
 
-        } else if (getDerivationMethod() == SchemaType.DERIVATION_UNION) {
+        } else if (getDerivationMethod() == Derivation.DERIVATION_UNION) {
             if (members == null) {
                 members = Collections.emptyList();
             }
@@ -365,7 +365,7 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
             }
             for (TypeReference member : members) {
                 SimpleType mem = (SimpleType) member.getTarget();
-                if (!mem.allowsDerivation(SchemaType.DERIVATION_UNION)) {
+                if (!mem.allowsDerivation(Derivation.DERIVATION_UNION)) {
                     compiler.error("The member type " + mem.getDescription() +
                             " of the type " + getDescription() +
                             " disallows derivation by union", this);
@@ -388,7 +388,7 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
             // type, depending on whether the base type is a list type, union type, or
             // atomic type.
             SchemaType base = getBaseType();
-            if (!base.allowsDerivation(SchemaType.DERIVATION_RESTRICTION)) {
+            if (!base.allowsDerivation(Derivation.DERIVATION_RESTRICTION)) {
                 compiler.error("The base type of the type " +
                         getDescription() + " disallows derivation by restriction", this);
                 setFixupStatus(INVALID);

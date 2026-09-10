@@ -307,7 +307,7 @@ public abstract class Particle extends SimpleComponentReference implements UserS
                 }
             }
         };
-        return new CallableFunction(1, callable, COMPONENT_FUNCTION_TYPE);
+        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 
 }

@@ -18,7 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static net.sf.saxon.type.SchemaComponent.ValidationStatus.*;
+import static net.sf.saxon.type.SchemaValidationStatus.*;
 
 
 /**
@@ -525,14 +525,14 @@ public abstract class UserSimpleType extends UserDefinedType
             return null;
         }
         // rule 2.1 (first half)
-        if ((derivation & DERIVATION_RESTRICTION) != 0) {
+        if ((derivation & Derivation.DERIVATION_RESTRICTION) != 0) {
             return "Simple type derivation is not OK: " +
                     "'restriction' is in the set of disallowed derivations";
         }
 
         // rule 2.1 (second half)
         SchemaType actualBase = d.getBaseType();
-        if (actualBase != null && !actualBase.allowsDerivation(DERIVATION_RESTRICTION)) {
+        if (actualBase != null && !actualBase.allowsDerivation(Derivation.DERIVATION_RESTRICTION)) {
             return "Simple type derivation is not OK: " +
                     "the base type of type " + d.getDescription() + " does not allow derivation by restriction";
         }
@@ -741,7 +741,7 @@ public abstract class UserSimpleType extends UserDefinedType
 
     @Override
     public void elaborate(SchemaCompiler compiler) throws SchemaException {
-        if (getValidationStatus() == ValidationStatus.UNVALIDATED) {
+        if (getValidationStatus() == SchemaValidationStatus.UNVALIDATED) {
             if (getBaseType() instanceof UserSchemaComponent) {
                 ((UserSchemaComponent) getBaseType()).elaborate(compiler);
             }
@@ -751,7 +751,7 @@ public abstract class UserSimpleType extends UserDefinedType
                 }
             }
             mergeEnumerationFacets(compiler);
-            setValidationStatus(ValidationStatus.VALIDATED);
+            setValidationStatus(SchemaValidationStatus.VALIDATED);
         }
     }
 
@@ -772,13 +772,13 @@ public abstract class UserSimpleType extends UserDefinedType
         serializer.emitAttribute("base", serializer.getTypeLink(getBaseType()));
         if (finalProhibitions != 0) {
             String ex = "";
-            if ((finalProhibitions & SchemaType.DERIVATION_RESTRICTION) != 0) {
+            if ((finalProhibitions & Derivation.DERIVATION_RESTRICTION) != 0) {
                 ex = "restriction";
             }
-            if ((finalProhibitions & SchemaType.DERIVATION_LIST) != 0) {
+            if ((finalProhibitions & Derivation.DERIVATION_LIST) != 0) {
                 ex += (ex.isEmpty() ? "" : " ") + "list";
             }
-            if ((finalProhibitions & SchemaType.DERIVATION_UNION) != 0) {
+            if ((finalProhibitions & Derivation.DERIVATION_UNION) != 0) {
                 ex += (ex.isEmpty() ? "" : " ") + "union";
             }
             serializer.emitAttribute("final", ex);
@@ -836,16 +836,16 @@ public abstract class UserSimpleType extends UserDefinedType
                 case "final": {
                     List<StringItem> list = new ArrayList<>();
                     int f = type.getFinalProhibitions();
-                    if ((f & SchemaType.DERIVATION_RESTRICTION) != 0) {
+                    if ((f & Derivation.DERIVATION_RESTRICTION) != 0) {
                         list.add(StringItem.bmp("restriction"));
                     }
-                    if ((f & SchemaType.DERIVATION_EXTENSION) != 0) {
+                    if ((f & Derivation.DERIVATION_EXTENSION) != 0) {
                         list.add(StringItem.bmp("extension"));
                     }
-                    if ((f & SchemaType.DERIVATION_LIST) != 0) {
+                    if ((f & Derivation.DERIVATION_LIST) != 0) {
                         list.add(StringItem.bmp("list"));
                     }
-                    if ((f & SchemaType.DERIVATION_UNION) != 0) {
+                    if ((f & Derivation.DERIVATION_UNION) != 0) {
                         list.add(StringItem.bmp("union"));
                     }
                     return SequenceExtent.makeSequenceExtent(list);
@@ -920,7 +920,7 @@ public abstract class UserSimpleType extends UserDefinedType
                     return EmptySequence.getInstance();
             }
         };
-        return new CallableFunction(1, callable, COMPONENT_FUNCTION_TYPE);
+        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 
     /**

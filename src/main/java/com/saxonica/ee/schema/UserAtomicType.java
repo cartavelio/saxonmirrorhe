@@ -607,7 +607,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
     @Override
     public String toExportString() {
         if (isAnonymousType()) {
-            return ((AtomicType)getNearestNamedType()).toExportString();
+            return ((AtomicType) TypeHierarchy.getNearestNamedType(this)).toExportString();
         } else {
             return toString();
         }

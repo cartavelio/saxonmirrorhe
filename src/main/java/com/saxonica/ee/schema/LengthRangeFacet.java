@@ -10,8 +10,8 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.SchemaComponent;
 import net.sf.saxon.type.SchemaException;
+import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.*;
 
 /**
@@ -116,7 +116,7 @@ public abstract class LengthRangeFacet extends Facet {
                 }
             }
         };
-        return new CallableFunction(1, callable, SchemaComponent.COMPONENT_FUNCTION_TYPE);
+        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 
 }

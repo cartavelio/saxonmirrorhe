@@ -132,8 +132,8 @@ public class XSDComplexType extends SchemaElement {
         } else {
             int f = parseFinalOrBlock("block",
                     blockVal,
-                    SchemaType.DERIVATION_EXTENSION |
-                            SchemaType.DERIVATION_RESTRICTION);
+                    Derivation.DERIVATION_EXTENSION |
+                                              Derivation.DERIVATION_RESTRICTION);
             complexType.setBlock(f);
         }
 
@@ -144,8 +144,8 @@ public class XSDComplexType extends SchemaElement {
         } else {
             int f = parseFinalOrBlock("final",
                     finalVal,
-                    SchemaType.DERIVATION_EXTENSION |
-                            SchemaType.DERIVATION_RESTRICTION);
+                    Derivation.DERIVATION_EXTENSION |
+                                              Derivation.DERIVATION_RESTRICTION);
             complexType.setFinalProhibitions(f);
         }
 
@@ -190,13 +190,13 @@ public class XSDComplexType extends SchemaElement {
 
         // Set the variety provisionally
         boolean thisMixed = mixed != null && mixed.booleanValue();
-        complexType.setVariety(thisMixed ? ComplexType.VARIETY_MIXED : ComplexType.VARIETY_ELEMENT_ONLY);
+        complexType.setVariety(thisMixed ? ComplexVariety.MIXED : ComplexVariety.ELEMENT_ONLY);
 
         for (NodeInfo child : children()) {
             int fp = child.getFingerprint();
             if (fp == StandardNames.XS_SIMPLE_CONTENT) {
                 foundSimpleContent = true;
-                complexType.setVariety(ComplexType.VARIETY_SIMPLE);
+                complexType.setVariety(ComplexVariety.SIMPLE);
                 if (thisMixed && compiler.getLanguageVersion() == Configuration.XSD11) {
                     // XSD 1.1 bans mixed="true" when simpleContent is used
                     error("The <complexType> must not specify mixed='true' when <simpleContent> is present");
@@ -211,7 +211,7 @@ public class XSDComplexType extends SchemaElement {
                     }
                 }
                 boolean eitherMixed = thisMixed || (ccMixed != null && ccMixed.booleanValue());
-                complexType.setVariety(eitherMixed ? ComplexType.VARIETY_MIXED : ComplexType.VARIETY_ELEMENT_ONLY);
+                complexType.setVariety(eitherMixed ? ComplexVariety.MIXED : ComplexVariety.ELEMENT_ONLY);
             } else if (fp == StandardNames.XS_ASSERT) {
                 if (compiler.getLanguageVersion() == Configuration.XSD10) {
                     error("Assertions require XSD 1.1 to be enabled");

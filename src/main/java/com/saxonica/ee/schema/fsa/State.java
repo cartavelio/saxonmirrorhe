@@ -2,8 +2,6 @@ package com.saxonica.ee.schema.fsa;
 
 import com.saxonica.ee.schema.UserComplexType;
 
-import java.util.Iterator;
-
 /**
  * A State is a dynamic state of the finite state machine. It may either be a static (non-counting) AutomatonState,
  * or a dynamically-created CountingState, which represents the combination of an AutomatonState and a counter value
@@ -54,7 +52,7 @@ public interface State {
      */
 
     /*@NotNull*/
-    Iterator<Edge> getEdges();
+    Iterable<Edge> getEdges();
 }
 
 // Copyright (c) 2008-2020 Saxonica Limited

@@ -18,7 +18,7 @@ import net.sf.saxon.value.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static net.sf.saxon.type.SchemaComponent.ValidationStatus.VALIDATED;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
 
 /**
  * The base class for the XML Schema Identity Constraints
@@ -358,7 +358,7 @@ public abstract class IdentityConstraint extends SchemaStructure
                     return EmptySequence.getInstance();
             }
         };
-        return new CallableFunction(1, callable, COMPONENT_FUNCTION_TYPE);
+        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 }
 

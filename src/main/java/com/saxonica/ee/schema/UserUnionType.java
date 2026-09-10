@@ -19,8 +19,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 
-import static net.sf.saxon.type.SchemaComponent.ValidationStatus.VALIDATED;
-import static net.sf.saxon.type.SchemaComponent.ValidationStatus.VALIDATING;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATING;
 
 /**
  * A class that represents the XML Schema simple-type with variety union.
@@ -184,11 +184,6 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
             isPlainUnion = 1;
         }
         return isPlainUnion == 1;
-    }
-
-    @Override
-    public boolean isTrueItemType() {
-        return isPlainType();
     }
 
     /**

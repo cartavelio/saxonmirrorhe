@@ -11,10 +11,8 @@ import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.trans.Err;
+import net.sf.saxon.type.Derivation;
 import net.sf.saxon.type.SchemaException;
-import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.Type;
 
 import java.util.*;
 
@@ -320,9 +318,9 @@ public class XSDSchema extends SchemaElement {
         if (attValue != null) {
             int v = parseFinalOrBlock("blockDefault",
                     attValue,
-                    SchemaType.DERIVATION_EXTENSION |
-                            SchemaType.DERIVATION_RESTRICTION |
-                            SchemaType.DERIVE_BY_SUBSTITUTION);
+                    Derivation.DERIVATION_EXTENSION |
+                                              Derivation.DERIVATION_RESTRICTION |
+                                              Derivation.DERIVE_BY_SUBSTITUTION);
             setBlockDefault(v);
         }
 
@@ -331,10 +329,10 @@ public class XSDSchema extends SchemaElement {
         if (attValue != null) {
             int v = parseFinalOrBlock("finalDefault",
                     attValue,
-                    SchemaType.DERIVATION_EXTENSION |
-                            SchemaType.DERIVATION_RESTRICTION |
-                            SchemaType.DERIVATION_LIST |
-                            SchemaType.DERIVATION_UNION);
+                    Derivation.DERIVATION_EXTENSION |
+                                              Derivation.DERIVATION_RESTRICTION |
+                                              Derivation.DERIVATION_LIST |
+                                              Derivation.DERIVATION_UNION);
             // the last two permitted by erratum E1-53
             setFinalDefault(v);
         }

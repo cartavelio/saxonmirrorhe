@@ -205,7 +205,7 @@ public class PreprocessFacet extends Facet {
                 }
             }
         };
-        return new CallableFunction(1, callable, SchemaComponent.COMPONENT_FUNCTION_TYPE);
+        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 }
 

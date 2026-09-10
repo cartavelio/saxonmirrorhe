@@ -273,10 +273,9 @@ public class SwitchExpression extends Expression implements TailCallReturner, Co
     @Override
     public ItemType getItemType() {
         ItemType type = getOtherwiseExpression().getItemType();
-        Iterator<Operand> iter = actions.iterator();
         TypeHierarchy th = getConfiguration().getTypeHierarchy();
-        while (iter.hasNext()) {
-            Expression action = iter.next().getChildExpression();
+        for (Operand operand : actions) {
+            Expression action = operand.getChildExpression();
             type = Type.getCommonSuperType(type, action.getItemType(), th);
         }
         return type;

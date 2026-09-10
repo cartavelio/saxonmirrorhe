@@ -6,9 +6,9 @@ import net.sf.saxon.om.Function;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.type.SchemaComponent;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SimpleType;
+import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.*;
 
 /**
@@ -136,7 +136,7 @@ public class ExplicitTimezoneFacet extends Facet {
                     return EmptySequence.getInstance();
             }
         };
-        return new CallableFunction(1, callable, SchemaComponent.COMPONENT_FUNCTION_TYPE);
+        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 
 

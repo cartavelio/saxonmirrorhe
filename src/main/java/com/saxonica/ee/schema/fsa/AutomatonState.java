@@ -2,12 +2,12 @@ package com.saxonica.ee.schema.fsa;
 
 import com.saxonica.ee.schema.*;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.tree.jiter.MonoIterator;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.om.CodedName;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.jiter.ConcatenatingIterable;
 import net.sf.saxon.type.MissingComponentException;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.z.IntHashMap;
@@ -222,9 +222,7 @@ public abstract class AutomatonState implements State {
 
         Wildcard thiscard = (Wildcard) transition.getTerm();
         if (specificTransitions != null && compiler.getLanguageVersion() == Configuration.XSD10) {
-            Iterator iter2 = iterateSpecificTransitions();
-            while (iter2.hasNext()) {
-                Edge other = (Edge) iter2.next();
+            for (Edge other : iterateSpecificTransitions()) {
                 if (thiscard.matches(((ElementDecl) other.getTerm()).getTargetNamespace())) {
                     throw new SchemaException(
                             "Ambiguous content model, element " +
@@ -442,9 +440,7 @@ public abstract class AutomatonState implements State {
 
     private void getAllowedElements(List<String> list) {
         if (specificTransitions != null) {
-            Iterator iter = iterateSpecificTransitions();
-            while (iter.hasNext()) {
-                Edge edge = (Edge) iter.next();
+            for (Edge edge : iterateSpecificTransitions()) {
                 ElementDecl decl = (ElementDecl) edge.getTerm();
                 String name = decl.getComponentName().getClarkName();
                 list.add(name);
@@ -465,16 +461,17 @@ public abstract class AutomatonState implements State {
      * @return an iterator whose returned items are Edge objects
      */
 
-    private Iterator<Edge> iterateSpecificTransitions() {
+    private Iterable<Edge> iterateSpecificTransitions() {
         if (specificTransitions == null) {
-            List<Edge> le = Collections.emptyList();
-            return le.iterator();
+            return Collections.emptyList();
         } else if (specificTransitions instanceof Edge) {
-            return new MonoIterator<>((Edge) specificTransitions);
+            return (Edge) specificTransitions;
         } else if (specificTransitions instanceof List) {
-            return ((List<Edge>) specificTransitions).iterator();
+            //noinspection unchecked
+            return (List<Edge>) specificTransitions;
         } else {
-            return ((IntHashMap) specificTransitions).valueIterator();
+            //noinspection unchecked
+            return ((IntHashMap<Edge>) specificTransitions).valueSet();
         }
     }
 
@@ -501,22 +498,20 @@ public abstract class AutomatonState implements State {
 
     /*@NotNull*/
     @Override
-    public Iterator<Edge> getEdges() {
+    public Iterable<Edge> getEdges() {
         if (specificTransitions == null) {
             if (wildcardEdges == null) {
-                List<Edge> le = Collections.emptyList();
-                return le.iterator();
+                return Collections.emptyList();
             } else {
-                return Arrays.asList(wildcardEdges).iterator();
+                return Arrays.asList(wildcardEdges);
             }
         } else {
             if (wildcardEdges == null) {
                 return iterateSpecificTransitions();
             } else {
-                return new EdgeIterator(
+                return new ConcatenatingIterable<>(
                         iterateSpecificTransitions(),
-                        Arrays.asList(wildcardEdges).iterator()
-                );
+                        Arrays.asList(wildcardEdges));
             }
         }
     }
@@ -536,9 +531,7 @@ public abstract class AutomatonState implements State {
         int key = map.size();
         map.put(this, key);
 
-        Iterator iter = getEdges();
-        while (iter.hasNext()) {
-            Edge edge = (Edge) iter.next();
+        for (Edge edge : getEdges()) {
             String symbol;
             if (edge.getTerm() instanceof ElementDecl) {
                 ElementDecl decl = (ElementDecl) edge.getTerm();
@@ -583,9 +576,7 @@ public abstract class AutomatonState implements State {
         err.info("State " + stateNumber + finalMarker(this));
         displayLambdaTransitions();
 
-        Iterator iter = getEdges();
-        while (iter.hasNext()) {
-            Edge edge = (Edge) iter.next();
+        for (Edge edge : getEdges()) {
             String symbol;
             if (edge.getTerm() instanceof ElementDecl) {
                 ElementDecl decl = (ElementDecl) edge.getTerm();
@@ -698,9 +689,7 @@ public abstract class AutomatonState implements State {
                 serializer.emitAttribute("afterMax", maxTransition.getTargetState().getStateNumber() + "");
             }
         }
-        Iterator iter = iterateSpecificTransitions();
-        while (iter.hasNext()) {
-            Edge edge = (Edge) iter.next();
+        for (Edge edge : iterateSpecificTransitions()) {
             edge.serialize(serializer);
         }
         if (wildcardEdges != null) {

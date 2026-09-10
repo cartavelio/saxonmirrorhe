@@ -298,14 +298,14 @@ public class PreparedSchema extends SchemaStructure implements NotationSet {
 
 
     /**
-     * Get an iterator over all the global attribute declarations defined in this schema
+     * Get all the global attribute declarations defined in this schema
      *
-     * @return an iterator over the attribute declarations. Each item returned by
+     * @return an iterable collection of attribute declarations. Each item returned by
      *         the iterator will be an instance of {@link AttributeDecl}
      */
 
-    public Iterator<AttributeDecl> iterateAttributeDeclarations() {
-        return attributesByName.values().iterator();
+    public Iterable<AttributeDecl> getAttributeDeclarations() {
+        return attributesByName.values();
     }
 
     /**
@@ -345,8 +345,8 @@ public class PreparedSchema extends SchemaStructure implements NotationSet {
      *         the iterator will be an instance of {@link AttributeGroupDecl}
      */
 
-    public Iterator<AttributeGroupDecl> iterateAttributeGroups() {
-        return attributeGroups.values().iterator();
+    public Iterable<AttributeGroupDecl> getAllAttributeGroups() {
+        return attributeGroups.values();
     }
 
     /**
@@ -388,8 +388,8 @@ public class PreparedSchema extends SchemaStructure implements NotationSet {
      *         the iterator will be an instance of {@link ModelGroupDefinition}
      */
 
-    public Iterator<ModelGroupDefinition> iterateModelGroups() {
-        return groups.values().iterator();
+    public Iterable<ModelGroupDefinition> getAllModelGroups() {
+        return groups.values();
     }
 
     /**
@@ -449,15 +449,14 @@ public class PreparedSchema extends SchemaStructure implements NotationSet {
     }
 
     /**
-     * Get an iterator over all the named simple and complex types defined in this schema.
-     * This iterator will not include built-in types or anonymous types.
+     * Get all the named simple and complex types defined in this schema.
+     * This iterable will not include built-in types or anonymous types.
      *
-     * @return an iterator over the types. Each item returned by
-     *         the iterator will be an instance of {@link SchemaType}
+     * @return an iterable of the types.
      */
 
-    public Iterator<SchemaType> iterateTypes() {
-        return typesByName.values().iterator();
+    public Iterable<SchemaType> getAllTypes() {
+        return typesByName.values();
     }
 
 
@@ -596,8 +595,8 @@ public class PreparedSchema extends SchemaStructure implements NotationSet {
      *         the iterator will be an instance of {@link ElementDecl}
      */
 
-    public Iterator<ElementDecl> iterateElementDeclarations() {
-        return elementsByName.values().iterator();
+    public Iterable<ElementDecl> getElementDeclarations() {
+        return elementsByName.values();
     }
 
     /**
@@ -637,11 +636,11 @@ public class PreparedSchema extends SchemaStructure implements NotationSet {
      *         the iterator will be an instance of {@link Notation}
      */
 
-    public Iterator<Notation> iterateNotations() {
+    public Iterable<Notation> getAllNotations() {
         if (notations == null) {
-            return Collections.emptyIterator();
+            return Collections.emptyList();
         }
-        return notations.values().iterator();
+        return notations.values();
     }
 
     /**
@@ -682,11 +681,11 @@ public class PreparedSchema extends SchemaStructure implements NotationSet {
      *         the iterator will be an instance of {@link IdentityConstraint}
      */
 
-    public Iterator<IdentityConstraint> iterateIdentityConstraints() {
+    public Iterable<IdentityConstraint> getIdentityConstraints() {
         if (identityConstraints == null) {
-            return Collections.emptyIterator();
+            return Collections.emptyList();
         }
-        return identityConstraints.values().iterator();
+        return identityConstraints.values();
     }
 
 

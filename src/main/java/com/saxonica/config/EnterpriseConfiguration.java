@@ -928,11 +928,11 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      */
 
     @Override
-    public Iterator<? extends SchemaType> getExtensionsOfType(SchemaType type) {
+    public Iterable<? extends SchemaType> getExtensionsOfType(SchemaType type) {
         if (type instanceof UserDefinedType) {
-            return ((UserDefinedType) type).getExtensionTypes().iterator();
+            return ((UserDefinedType) type).getExtensionTypes();
         } else {
-            return getSuperSchema().getExtensionsOfBuiltInType(type.getFingerprint()).iterator();
+            return getSuperSchema().getExtensionsOfBuiltInType(type.getFingerprint());
         }
     }
 
@@ -1002,61 +1002,54 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
                     return StringItem.bmp("Schema");
                 case "type definitions": {
                     List<Function> list = new ArrayList<>();
-                    Iterator<SchemaType> iter = getSuperSchema().iterateTypes();
-                    while (iter.hasNext()) {
-                        list.add(iter.next().getComponentAsFunction());
+                    for (SchemaType st : getSuperSchema().getAllTypes()) {
+                        list.add(st.getComponentAsFunction());
                     }
                     return SequenceExtent.makeSequenceExtent(list);
                 }
                 case "attribute declarations": {
                     List<Function> list = new ArrayList<>();
-                    Iterator<AttributeDecl> iter = getSuperSchema().iterateAttributeDeclarations();
-                    while (iter.hasNext()) {
-                        list.add(iter.next().getComponentAsFunction());
+                    for (AttributeDecl decl : getSuperSchema().getAttributeDeclarations()) {
+                        list.add(decl.getComponentAsFunction());
                     }
                     return SequenceExtent.makeSequenceExtent(list);
 
                 }
                 case "element declarations": {
                     List<Function> list = new ArrayList<>();
-                    Iterator<ElementDecl> iter = getSuperSchema().iterateElementDeclarations();
-                    while (iter.hasNext()) {
-                        list.add(iter.next().getComponentAsFunction());
+                    for (ElementDecl decl : getSuperSchema().getElementDeclarations()) {
+                        list.add(decl.getComponentAsFunction());
                     }
                     return SequenceExtent.makeSequenceExtent(list);
                 }
                 case "attribute group definitions": {
                     List<Function> list = new ArrayList<>();
-                    Iterator<AttributeGroupDecl> iter = getSuperSchema().iterateAttributeGroups();
-                    while (iter.hasNext()) {
-                        list.add(iter.next().getComponentAsFunction());
+                    for (AttributeGroupDecl group : getSuperSchema().getAllAttributeGroups()) {
+                        list.add(group.getComponentAsFunction());
                     }
                     return SequenceExtent.makeSequenceExtent(list);
 
                 }
                 case "model group definitions": {
                     List<Function> list = new ArrayList<>();
-                    Iterator<ModelGroupDefinition> iter = getSuperSchema().iterateModelGroups();
-                    while (iter.hasNext()) {
-                        list.add(iter.next().getComponentAsFunction());
+                    for (ModelGroupDefinition group : getSuperSchema().getAllModelGroups())  {
+                        list.add(group.getComponentAsFunction());
                     }
                     return SequenceExtent.makeSequenceExtent(list);
 
                 }
                 case "notation declarations": {
                     List<Function> list = new ArrayList<>();
-                    Iterator<Notation> iter = getSuperSchema().iterateNotations();
-                    while (iter.hasNext()) {
-                        list.add(iter.next().getComponentAsFunction());
+                    for (Notation notation : superSchema.getAllNotations()) {
+                        list.add(notation.getComponentAsFunction());
                     }
                     return SequenceExtent.makeSequenceExtent(list);
 
                 }
                 case "identity-constraint definitions": {
                     List<Function> list = new ArrayList<>();
-                    Iterator<IdentityConstraint> iter = getSuperSchema().iterateIdentityConstraints();
-                    while (iter.hasNext()) {
-                        list.add(iter.next().getComponentAsFunction());
+                    for (IdentityConstraint constraint : getSuperSchema().getIdentityConstraints()) {
+                        list.add(constraint.getComponentAsFunction());
                     }
                     return SequenceExtent.makeSequenceExtent(list);
 
@@ -1066,7 +1059,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
             }
         };
-        return new CallableFunction(1, schemaFunction, SchemaComponent.COMPONENT_FUNCTION_TYPE);
+        return new CallableFunction(1, schemaFunction, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
 
     }
 
@@ -1797,9 +1790,11 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         if (multithreaded || (getBooleanProperty(Feature.ALLOW_MULTITHREADING) &&
                 exec.createsSecondaryResult() &&
                 isLicensedFeature(LicenseFeature.ENTERPRISE_XSLT))) {
-            return MultithreadedFocusTrackingIterator::new;
+            //noinspection Convert2MethodRef
+            return (iter) -> new MultithreadedFocusTrackingIterator(iter); // written this way for Java-C# conversion
         } else {
-            return FocusTrackingIterator::new;
+            //noinspection Convert2MethodRef
+            return (iter) -> new FocusTrackingIterator(iter); // written this way for Java-C# conversion
         }
     }
 
