@@ -20,6 +20,23 @@
       <reason>4.0 change in numeric comparison semantics not yet implemented</reason>
    </exception>
    
+   <exception test-set="fn-graphemes" 
+      test-case="
+      graphemes-1172 
+      graphemes-1173 
+      graphemes-1180
+      graphemes-1181
+      graphemes-1182
+      graphemes-1183
+      graphemes-1184
+      graphemes-1185
+      graphemes-1189" run="false" report="known bug in ICU4N">
+      <created by="Michael Kay" on="2024-06-27"/>
+      <reason>ICU4N bug https://github.com/NightOwl888/ICU4N/issues/70</reason>
+   </exception>
+   
+   
+   
    <exception test-set="op-same-key" 
       test-case="same-key-006a" run="false" report="n/a">
       <created by="Michael Kay" on="2022-12-13"/>
