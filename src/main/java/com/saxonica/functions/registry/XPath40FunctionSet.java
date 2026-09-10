@@ -1,6 +1,7 @@
 package com.saxonica.functions.registry;
 
 import com.saxonica.functions.qt4.*;
+import com.saxonica.functions.qt4.csv.ParseCsv;
 import net.sf.saxon.functions.Error;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.hof.FilterFn;
@@ -305,6 +306,15 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         register("parcel", 1, e -> e.populate(ParcelFn::new, Parcel.TYPE, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null));
+
+        //#if EE==true || PE==true
+        register("parse-csv", 1, e -> e.populate(ParseCsv::new, MapType.ANY_MAP_TYPE, ONE, LATE | NEW)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
+
+        register("parse-csv", 2, e -> e.populate(ParseCsv::new, MapType.ANY_MAP_TYPE, ONE, LATE | NEW)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null)
+                .arg(1, MapType.ANY_MAP_TYPE, ONE, null));
+        //#endif
 
         //#if EE==true || PE==true
         register("parse-html", 1, e -> e.populate(ParseHtml::new, NodeKindTest.DOCUMENT, ONE, LATE | NEW)
