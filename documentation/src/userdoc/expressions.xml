@@ -55,7 +55,7 @@
 
    <section id="literals" title="Constants">
       <h1>Constants</h1>
-
+      <?source https://www.w3.org/TR/xpath-30/#id-literals?>
       <p><strong>String literals</strong> are written as <code>"London"</code> or
             <code>'Paris'</code>. In each case you can use the opposite kind of quotation mark
          within the string: <code>'He said "Boo"'</code>, or <code>"That's rubbish"</code>. In a
