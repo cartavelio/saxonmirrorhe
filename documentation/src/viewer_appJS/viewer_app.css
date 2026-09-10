@@ -383,14 +383,16 @@ div.section h2{
 }
 .qt4 {
    padding: .5em;
+   padding-right: 70px;
    border: .5em;
    border-left-style: solid;
    margin: 1em auto;
    border-color: #F7E44F;
-   /*background-image: url("https://qt4cg.org/img/QT4_shaded-64.png");
+   background-image: url("https://qt4cg.org/img/QT4_shaded-64.png");
    background-repeat: no-repeat;
-   background-position-x: right;
-   background-origin: content-box;*/
+   background-position-x: right -70px;
+   background-origin: content-box;
+   min-height: 60px;
 }
 .signature, .fullsignature {
     font-size:inherit;
