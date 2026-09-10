@@ -10,7 +10,10 @@ package net.sf.saxon.expr.instruct;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.FocusIterator;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -18,6 +21,8 @@ import net.sf.saxon.tree.iter.PrependSequenceIterator;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
+import net.sf.saxon.value.Int64Value;
+import net.sf.saxon.value.IntegerRange;
 
 /**
  * Handler for xsl:for-each elements in a stylesheet. The same class handles the "!" operator in XPath 3.0,
@@ -344,10 +349,76 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
             return new SimpleStepExpression(getSelect(), getAction());
         }
 
+        // Rewrite (1 to $N) ! (. + $M) as ($N to $N + $M)
+        if (getSelect() instanceof RangeExpression && isSimpleArithmeticShift(getAction())) {
+            ArithmeticExpression arith = (ArithmeticExpression) getAction();
+
+            RangeExpression range = (RangeExpression) getSelect();
+            return new RangeExpression(
+                    new ArithmeticExpression(range.getStartExpression().copy(new RebindingMap()),
+                                             arith.getOperator(),
+                                             arith.getRhsExpression().copy(new RebindingMap())),
+                    new ArithmeticExpression(range.getEndExpression().copy(new RebindingMap()),
+                                             arith.getOperator(),
+                                             arith.getRhsExpression().copy(new RebindingMap())))
+
+                    .typeCheck(visitor, contextInfo)
+                    .optimize(visitor, contextInfo);
+        }
+
+
+        // Rewrite (1 to 1000) ! (. + $N) as ($N to 1000 + $N)
+        if (getSelect() instanceof Literal
+                && ((Literal)getSelect()).getGroundedValue() instanceof IntegerRange
+                &&  isSimpleArithmeticShift(getAction())) {
+            ArithmeticExpression arith = (ArithmeticExpression) getAction();
+            IntegerRange range = (IntegerRange) ((Literal) getSelect()).getGroundedValue();
+            Expression shift = arith.getRhsExpression();
+            Expression newStart = new ArithmeticExpression(
+                    Literal.makeLiteral(new Int64Value(range.start), this),
+                    arith.getOperator(),
+                    shift.copy(new RebindingMap()));
+            Expression newEnd = new ArithmeticExpression(
+                    Literal.makeLiteral(new Int64Value(range.end), this),
+                    arith.getOperator(),
+                    shift.copy(new RebindingMap()));
+
+            return new RangeExpression(newStart, newEnd)
+                    .typeCheck(visitor, contextInfo)
+                    .optimize(visitor, contextInfo);
+
+        }
+
+
         if (threadsOp != null && !Literal.isEmptySequence(getThreads()) && !containsTailCall) {
             return visitor.obtainOptimizer().generateMultithreadedInstruction(this);
         }
         return this;
+    }
+
+
+    /**
+     * Test whether the supplied expression takes the form (. + X) or (. - X) where X is a literal
+     * or variable reference. (We don't allow anything more complex because it would involve
+     * introducing a new local variable).
+     * @param exp the expression to be tested
+     * @return true if it takes the required form
+     */
+    private boolean isSimpleArithmeticShift(Expression exp) {
+        if (!(exp instanceof ArithmeticExpression)) {
+            return false;
+        }
+        ArithmeticExpression arith = (ArithmeticExpression) exp;
+        if (!(arith.getLhsExpression() instanceof ContextItemExpression)) {
+            return false;
+        }
+        if (!(arith.getOperator() == Token.PLUS || arith.getOperator() == Token.MINUS)) {
+            return false;
+        }
+        if (!(arith.getRhsExpression() instanceof Literal || arith.getRhsExpression() instanceof VariableReference)) {
+            return false;
+        }
+        return true;
     }
 
     /**
