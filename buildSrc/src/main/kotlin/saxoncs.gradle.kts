@@ -259,7 +259,8 @@ data class DotNetTasks(
 private fun generateDotnetTasks(buildArch: Architectures, buildConfiguration: CSReleaseConfiguration, suffix: String): DotNetTasks {
   val configure = tasks.register<DotNetConfiguration>("dotnet-configure-${buildArch}-${suffix}") {
     csProjXsl = layout.projectDirectory.file("../tools/generateCSProjFiles.xsl")
-    resources.from(layout.projectDirectory.dir("..").files("README.md", "LICENSE.txt"))
+    resources.from(layout.projectDirectory.dir("..").files("LICENSE.txt"))
+    resources.from(layout.projectDirectory.dir(".").files("README.md"))
     group = LifecycleBasePlugin.BUILD_GROUP
     classpath = saxonClasspath
     dotnetversion = saxonBuild.dotnetversion

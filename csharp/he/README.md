@@ -1,0 +1,104 @@
+# SaxonCS-HE
+
+## What is SaxonCS?
+
+SaxonCS is a library for XSLT, XQuery, XPath, and XSD processing.
+
+It offers a high level of conformance with the latest W3C standards:
+XSLT 3.0, XQuery 3.1, XPath 3.1, XSD 1.1.
+
+It provides a C# API to allow transformations and queries to be controlled from a C# application,
+and also offers a command line interface.
+
+SaxonCS-HE is the Home Edition product for SaxonCS.
+SaxonCS-HE is derived from our open-source product, and is created and distributed by Saxonica Ltd.
+
+## How does it relate to other Saxon products?
+
+SaxonCS is built from the same source code as the long-established Java product. 
+It was created by converting the source code of SaxonJ to C# source 
+code, using a custom transpiler written by Saxonica
+(primarily in XSLT 3.0, since you asked).
+
+It is single-sourced with the Java product; the code has not been forked, and all maintenance 
+and future development will be done on the Java base code.
+
+The product includes some C# code for interfacing to the .NET platform,
+and to provide a C# API following C# coding conventions.
+
+SaxonCS-HE is based on the Home Edition of Saxon, which means that it does not include advanced 
+features such as advanced optimization, schema-awareness, streaming, and multi-threading.
+
+## How does it relate to other XML libraries on .NET?
+
+SaxonCS uses the `System.Xml.XmlParser` classes for parsing XML.
+
+SaxonCS can work with a DOM tree delivered as a `System.Xml.XmlDocument`. 
+You can either convert a DOM to Saxon's optimized internal tree structure, or
+you can use Saxon's XPath or XQuery engine to query a DOM tree directly.
+
+SaxonCS offers an alternative to the Microsoft XSLT 1.0 and XSD 1.0 processors bundled
+with .NET Core, which have never been updated to the latest W3C specifications.
+The newer standards offer a wide range of features that greatly extend the power
+of the tools. 
+
+It should be possible to run stylesheets developed for the 
+Microsoft XSLT 1.0 processor under SaxonCS provided that they do
+not take advantage of Microsoft-specific XSLT extensions. SaxonCS
+offers "1.0 compatibility mode" to assist with the transition.
+
+Since the functionality of the later standards is so much richer, Saxon does not
+attempt to offer API compatibility with the Microsoft processors.
+
+## What about the old Saxon/.NET product?
+
+Up to and including Saxon 10, Saxonica delivered a product on .NET Framework built
+from the Java product by converting the JAR files at bytecode level using
+the IKVMC cross-compiler. This product relied on a converted version of the 
+Java run-time library to function. The IKVMC technology was never ported
+to .NET Core, so a new approach was needed, and Saxonica settled on source
+code conversion as the most promising approach. A particular benefit is that
+it now uses the .NET run-time library in place of a converted Java run-time 
+library, which significantly reduces the footprint.
+
+The API for SaxonCS is closely based on the API for the older product,
+but it is not 100% compatible; some changes will be needed to existing 
+applications. The changes have been designed to improve the conformance
+to C# house-style and to take advantage of more modern features in the C# 
+language, for example by using delegates rather than interfaces for callbacks.
+
+The older Saxon/.NET product will remain supported for the time being,
+but will not be further developed.
+
+## What's new in SaxonCS?
+
+SaxonCS is built with .NET Core (SaxonCS 13 supports .NET 10). SaxonCS-HE 13 is the 
+first release of our Home Edition SaxonCS product for .NET.
+
+
+## What's new in this version?
+
+There's a comprehensive list of changes in the 
+[documentation](https://www.saxonica.com/documentation13/).
+
+For a record of bugs fixed in each maintenance release, please consult the
+[issues list](https://saxonica.plan.io/projects/saxon/issues) — you can filter
+the list on the property "Fixed in maintenance release". This is also the place
+to report any problems you find.
+
+## Where do I find documentation?
+
+It's all [online](https://www.saxonica.com/documentation13/). 
+
+(Delivered, in case you're interested, by SaxonJS running in your browser.)
+
+## What if I hit problems?
+
+If you have coding problems with XSLT, XPath, XQuery, or XSD, you will usually be
+able to get help by asking on StackOverflow.
+
+If you suspect a Saxon bug, please report it on the
+[issues list](https://saxonica.plan.io/projects/saxon/issues).
+
+
+

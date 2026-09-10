@@ -1,4 +1,4 @@
-# SaxonCS
+# SaxonCS-EE
 
 ## What is SaxonCS?
 
@@ -10,8 +10,9 @@ XSLT 3.0, XQuery 3.1, XPath 3.1, XSD 1.1.
 It provides a C# API to allow transformations and queries to be controlled from a C# application,
 and also offers a command line interface.
 
-SaxonCS is a proprietary product created and distributed by Saxonica Ltd. You will need to purchase a license key to activate the product. To acquire a license key, 
-use the [Saxonica online shop](https://www.saxonica.com/shop/index.html), or email
+SaxonCS-EE is the Enterprise Edition product for SaxonCS.
+SaxonCS-EE is a proprietary product created and distributed by Saxonica Ltd. You will need to purchase a 
+license key to activate the product. To acquire a license key, use the [Saxonica online shop](https://www.saxonica.com/shop/index.html), or email
 saxon-orders@saxonica.com.
 
 ## How does it relate to other Saxon products?
@@ -27,7 +28,7 @@ and future development will be done on the Java base code.
 The product includes some C# code for interfacing to the .NET platform,
 and to provide a C# API following C# coding conventions.
 
-SaxonCS, in its initial form, is based on the Enterprise Edition of Saxon, which means that it offers 
+SaxonCS-EE is based on the Enterprise Edition of Saxon, which means that it offers 
 high-performance features exclusive to the EE version, such as advanced
 optimization, schema-awareness, streaming, and multi-threading. 
 Some platform-specific features such as bytecode generation are excluded.
@@ -36,7 +37,7 @@ License files are compatible between SaxonCS, SaxonJ, and SaxonC.
 
 Stylesheet export files (SEF files) are compatible between SaxonCS, SaxonJ, and SaxonC.
 
-SaxonCS can also generate SEF files for SaxonJS.
+SaxonCS-EE can also generate SEF files for SaxonJS.
 
 ## How does it relate to other XML libraries on .NET?
 
@@ -81,7 +82,7 @@ but will not be further developed.
 
 ## What's new in SaxonCS?
 
-SaxonCS is built with .NET Core (SaxonCS 12 supports .NET 6). SaxonCS includes
+SaxonCS is built with .NET Core (SaxonCS 13 supports .NET 10). SaxonCS includes
 lots of new features to make processing JSON easier; it's getting close to
 the point where JSON is supported almost as well as XML. Certainly, there's
 no better library available for applications that need to mix and match XML
@@ -89,6 +90,9 @@ and JSON, or do custom conversions from one to the other.
 
 
 ## What's new in this version?
+
+SaxonCS-EE 13 includes support for many features in the XPath, XQuery, and XSLT
+4.0 specifications currently in development in the [QT4 Community Group](http://qt4cg.org/).
 
 There's a comprehensive list of changes in the 
 [documentation](https://www.saxonica.com/documentation13/).
@@ -111,12 +115,6 @@ able to get help by asking on StackOverflow.
 
 If you suspect a Saxon bug, please report it on the
 [issues list](https://saxonica.plan.io/projects/saxon/issues).
-
-## Will SaxonCS be integrated in Biztalk?
-
-Microsoft currently offer XSLT 3.0 capability in Biztalk based on an integration
-of Saxon-HE. We don't know if they have any plans for updating to SaxonCS; we'll
-let you know when we hear.
 
 
 
