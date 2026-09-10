@@ -1,12 +1,11 @@
 package com.saxonica.functions.registry;
 
-import com.saxonica.functions.qt4.pin.LabelFn;
 import com.saxonica.functions.qt4.*;
 import com.saxonica.functions.qt4.csv.CsvToArrays;
 import com.saxonica.functions.qt4.csv.CsvToXml;
 import com.saxonica.functions.qt4.csv.ParseCsv;
 import com.saxonica.functions.qt4.ixml.InvisibleXmlFn;
-import net.sf.saxon.expr.ContextValueExpression;
+import com.saxonica.functions.qt4.pin.LabelFn;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.functions.Error;
 import net.sf.saxon.functions.*;
@@ -396,8 +395,10 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("in-scope-namespaces", 1, e -> e.populate(InScopeNamespacesFn::new, inScopeNamespacesResult, ONE, LATE)
                 .arg(0, NodeKindTest.ELEMENT, ONE, null));
 
-        register("path", 0, 2, e -> e.populate(Path_1::new, BuiltInAtomicType.STRING, OPT, 0)
-                .arg(0, AnyNodeTest.getInstance(), OPT | NAV, null, ContextValueExpression::new)
+        register("path", 0, e -> e.populate(ContextItemAccessorFunction::new, BuiltInAtomicType.STRING, OPT, CITEM | LATE));
+
+        register("path", 1, 2, e -> e.populate(Path_1::new, BuiltInAtomicType.STRING, OPT, 0)
+                .arg(0, AnyNodeTest.getInstance(), OPT | NAV, null)
                 .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
                 .setOptionDetails(Path_1.getOptionDetails()));
 
