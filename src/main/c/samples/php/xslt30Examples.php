@@ -564,19 +564,19 @@ function testPerformance()
 }
 
 
-     $foo_xml = "xml/foo.xml";
-     $foo_xsl = "xsl/foo.xsl";
-     $baz_xml = "xml/baz.xml";
-     $baz_xsl = "xsl/baz.xsl";
-     $foo2_xsl = "xsl/foo2.xsl";
-     $foo3_xsl = "xsl/foo3.xsl";
-     $err_xsl = "xsl/err.xsl";
-     $err1_xsl = "xsl/err1.xsl";
-     $text_xsl = "xsl/text.xsl";
-     $cities_xml = "xml/cities.xml";
-     $embedded_xml = "xml/embedded.xml";
-     $multidoc_xsl = "xsl/multidoc.xsl";
-     $identity_xsl = "xsl/identity.xsl";
+     $foo_xml = "php/xml/foo.xml";
+     $foo_xsl = "php/xsl/foo.xsl";
+     $baz_xml = "php/xml/baz.xml";
+     $baz_xsl = "php/xsl/baz.xsl";
+     $foo2_xsl = "php/xsl/foo2.xsl";
+     $foo3_xsl = "php/xsl/foo3.xsl";
+     $err_xsl = "php/xsl/err.xsl";
+     $err1_xsl = "php/xsl/err1.xsl";
+     $text_xsl = "php/xsl/text.xsl";
+     $cities_xml = "php/xml/cities.xml";
+     $embedded_xml = "php/xml/embedded.xml";
+     $multidoc_xsl = "php/xsl/multidoc.xsl";
+     $identity_xsl = "php/xsl/identity.xsl";
 
      $saxonProc = new Saxon\SaxonProcessor(true);
 

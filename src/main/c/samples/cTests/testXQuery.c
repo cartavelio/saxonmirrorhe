@@ -50,7 +50,7 @@ int main() {
 
   const char *verCh = getProductVariantAndVersion(environi, processor);
   printf("XQuery Tests\n\nSaxon version: %s \n", verCh);
-  setProperty(&properties, &propLen, &propCap, "s", "../data/cat.xml");
+  setProperty(&properties, &propLen, &propCap, "s", "data/cat.xml");
 
   setProperty(&properties, &propLen, &propCap, "cwd", cwd);
 

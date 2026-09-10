@@ -51,11 +51,11 @@ int main() {
   printf("XSLT Tests\n\nSaxon version: %s \n", verCh);
 
   const char *result =
-      xsltApplyStylesheet(environi, processor, cwd, "../data/cat.xml",
+      xsltApplyStylesheet(environi, processor, cwd, "data/cat.xml",
                           "../data/test.xsl", 0, 0, 0, 0);
 
-  xsltSaveResultToFile(environi, processor, cwd, "../data/cat.xml",
-                       "../data/test.xsl", "outputFile.xml", 0, 0, 0, 0);
+  xsltSaveResultToFile(environi, processor, cwd, "data/cat.xml",
+                       "data/test.xsl", "outputFile.xml", 0, 0, 0, 0);
 
   if (!result) {
     printf("result is null \n");

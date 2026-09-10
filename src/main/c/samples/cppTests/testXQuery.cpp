@@ -24,7 +24,7 @@ void testxQuery1(SaxonProcessor *processor, XQueryProcessor *queryProc,
   cout << endl << "Test testXQuery1:" << endl;
   queryProc->clearParameters();
   queryProc->clearProperties();
-  queryProc->setProperty("s", "../data/cat.xml");
+  queryProc->setProperty("s", "data/cat.xml");
 
   queryProc->setProperty("qs", "<out>{count(/out/person)}</out>");
 
@@ -119,7 +119,7 @@ void testXQueryError2(SaxonProcessor *processor, XQueryProcessor *queryProc,
   cout << endl << "Test testXQueryError-test2:" << endl;
   queryProc->clearProperties();
   queryProc->clearParameters();
-  queryProc->setProperty("s", "../data/cat.xml");
+  queryProc->setProperty("s", "data/cat.xml");
 
   queryProc->setProperty("qs", "<out>{count(/out/person)}<out>");
 
@@ -332,7 +332,7 @@ void testXQueryLineNumberError(const char *cwd, sResultCount *sresult) {
   if (cwd != nullptr) {
     queryProc->setcwd(cwd);
   }
-  queryProc->setProperty("s", "../data/cat.xml");
+  queryProc->setProperty("s", "data/cat.xml");
 
   queryProc->setProperty("qs", "saxon:line-number((//person)[1])");
   const char *result = nullptr;
@@ -368,10 +368,10 @@ void testXQueryLineNumber(const char *cwd, sResultCount *sresult) {
   cerr << " BaseURI=" << baseURI.c_str() << endl;
   queryProc->setQueryBaseURI(baseURI.c_str());
 
-  // queryProc->setProperty("s", "../data/cat.xml");
+  // queryProc->setProperty("s", "data/cat.xml");
   queryProc->declareNamespace("saxon", "http://saxon.sf.net/");
 
-  queryProc->setProperty("qs", "saxon:line-number(doc('../data/cat.xml')/out/"
+  queryProc->setProperty("qs", "saxon:line-number(doc('data/cat.xml')/out/"
                                "person[1])"); /// out/person[1]
   try {
     const char *result = queryProc->runQueryToString();

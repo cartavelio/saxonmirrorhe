@@ -290,13 +290,13 @@ PHP_METHOD(Xslt30Processor, compileFromAssociatedFile) {
 PHP_METHOD(Xslt30Processor, compileFromString) {
   Xslt30Processor *xslt30Processor;
   char *stylesheetStr;
-  char * encodingStr = NULL;
+  char * encodingStr = nullptr;
   size_t len1, len2, myint;
 
-  if ( ZEND_NUM_ARGS() == 2 && zend_parse_parameters(ZEND_NUM_ARGS(), "s", &stylesheetStr, &len1) ==
+  if ( ZEND_NUM_ARGS() == 1 && zend_parse_parameters(ZEND_NUM_ARGS(), "s", &stylesheetStr, &len1) ==
       FAILURE) {
     RETURN_NULL();
-  } else if (ZEND_NUM_ARGS() == 3 && zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &stylesheetStr, &len1, $encodingStr, &len2) ==
+  } else if (ZEND_NUM_ARGS() == 2 && zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &stylesheetStr, &len1, &encodingStr, &len2) ==
         FAILURE) {
       RETURN_NULL();
    } else {
