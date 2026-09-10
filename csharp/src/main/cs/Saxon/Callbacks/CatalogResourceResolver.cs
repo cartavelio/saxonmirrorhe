@@ -109,10 +109,10 @@ namespace Saxon.Callbacks {
                 }
 
                 catch (WebException) {
-                    // Shouldn't be necessary, but the 0.4.0 resolver code is throwing this for a non-existent URI
+                    throw new XPathException("Failed to load document " + request.uri, "FODC0002");
                 }
                 catch (System.Net.Http.HttpRequestException) {
-                    // Thrown by XmlResolver 6.0.21 for an unknown resource
+                    throw new XPathException("Failed to load document " + request.uri, "FODC0002");
                 }
                 catch (System.ArgumentException) {
                     // Thrown for an unknown URI scheme
@@ -122,7 +122,7 @@ namespace Saxon.Callbacks {
                     throw new XPathException("Invalid URI: ", u);
                 }
                 catch (System.IO.FileNotFoundException) {
-                    // Shouldn't be necessary, but the 0.4.0 resolver code is throwing this for a non-existent file
+                    throw new XPathException("Failed to load document " + request.uri, "FODC0002");
                 }
                 catch (System.IO.DirectoryNotFoundException) {
                     // The resolver code is throwing this for a non-existent directory
