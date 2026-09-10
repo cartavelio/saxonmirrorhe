@@ -10,15 +10,12 @@ package net.sf.saxon.expr.number;
 
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.transpile.CSharpReplaceBody;
+import net.sf.saxon.transpile.CSharpReplaceException;
 import net.sf.saxon.value.CalendarValue;
 import net.sf.saxon.value.DateTimeValue;
-import net.sf.saxon.transpile.*;
 
 import java.time.Instant;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.format.TextStyle;
-import java.time.zone.ZoneRulesException;
 import java.util.*;
 
 /**
@@ -310,54 +307,76 @@ public class NamedTimeZone {
         if (!date.hasTimezone()) {
             return "";
         }
-        if (place == null) {
+        ZoneId referenceTimezone = null;
+        if (place.startsWith("America/")) {
+            place = "us";
+        }
+        switch (place) {
+            case "us":
+                referenceTimezone = ZoneId.of("America/New_York");
+                break;
+            case "uk":
+            case "gb":
+                referenceTimezone = ZoneId.of("Europe/London");
+                break;
+
+        }
+        if (referenceTimezone == null) {
             return formatTimeZoneOffset(date);
         }
-        ZoneId zone = null;
-        List<String> possibleZones;
+        boolean summerTime = inDaylightTime(referenceTimezone, date.secondsSinceEpoch().longValue());
         int tzMinutes = date.getTimezoneInMinutes();
-        if (place.contains("/")) {
-            zone = getNamedTimeZone(place);
-            //possibleZones = new ArrayList<String>(1);
-            //possibleZones.add(place);
+
+        if (summerTime) {
+            switch (tzMinutes) {
+                case 330:
+                    return "IST";
+                case 120:
+                    return "CEST";
+                case 60:
+                    return "BST";
+                case 0:
+                    return "GMT";
+                case -240:
+                    return "EDT";
+                case -300:
+                    return "CDT";
+                case -360:
+                    return "MDT";
+                case -420:
+                    return "PDT";
+                case -480:
+                    return "AKDT";
+                case -540:
+                    return "HDT";
+                default:
+                    return formatTimeZoneOffset(date);
+            }
         } else {
-            possibleZones = idForCountry.get(place.toLowerCase());
-            if (possibleZones == null) {
-                possibleZones = new ArrayList<>();
-            }
-            for (String z : possibleZones) {
-                //try {
-                    ZoneId tz = ZoneId.of(z);
-                    if (getOffsetInSecondsAtDateTime(tz, DateTimeValue.EPOCH) == tzMinutes * 60) {
-                        zone = tz;
-                        break;
-                    }
-//                } catch (DateTimeException e) {
-//                    break;
-//                }
-            }
-            if (zone == null) {
-                for (String z : worldTimeZones) {
-                    ZoneId tz = ZoneId.of(z);
-                    if (getOffsetInSecondsAtDateTime(tz, DateTimeValue.EPOCH) == tzMinutes * 60) {
-                        zone = tz;
-                        break;
-                    }
-                }
+            switch (tzMinutes) {
+                case 330:
+                    return "IST";
+                case 60:
+                    return "CET";
+                case 0:
+                    return "GMT";
+                case -300:
+                    return "EST";
+                case -360:
+                    return "CST";
+                case -420:
+                    return "MST";
+                case -480:
+                    return "PST";
+                case -540:
+                    return "AKST";
+                case -600:
+                    return "HST";
+                default:
+                    return formatTimeZoneOffset(date);
             }
         }
-        if (zone == null) {
-            return formatTimeZoneOffset(date);
-        }
 
-        boolean inSummerTime = inDaylightTime(zone, date.secondsSinceEpoch().longValue()*1000);
-        return getShortName(zone, inSummerTime);
-
-    }
-
-    @CSharpReplaceBody(code="return zone.getDisplayName(inSummerTime);")
-    private static String getShortName(ZoneId zone, boolean inSummerTime) {
-        return zone.getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
     }
 
     /**
@@ -452,7 +471,7 @@ public class NamedTimeZone {
         }
     }
 
-    @CSharpReplaceBody(code="return zone.inDaylightTime(secondsSinceEpoch*1000);")
+    @CSharpReplaceBody(code="return zone.inDaylightTime(secondsSinceEpoch);")
     private static boolean inDaylightTime(ZoneId zone, long secondsSinceEpoch) {
         return zone.getRules().isDaylightSavings(Instant.ofEpochSecond(secondsSinceEpoch));
     }
@@ -466,13 +485,13 @@ public class NamedTimeZone {
      * @param date      the date/time in question. If this has no timezone, it is assumed
      *                  to be in GMT.
      * @param olsonName the Olson (or IANA) name of the timezone, for example Europe/Lisbon
-     * @return the civil time offset, in milliseconds, to be applied to the given
+     * @return the civil time offset, in seconds, to be applied to the given
      * date/time. Returns zero if the timezone is not recognized.
      */
 
-    public static int civilTimeOffset(DateTimeValue date, String olsonName) {
+    public static int civilTimeOffsetInSeconds(DateTimeValue date, String olsonName) {
         ZoneId zone = olsonZoneOrUtc(olsonName);
-        return getOffsetInSecondsAtDateTime(zone, date)*1000;
+        return getOffsetInSecondsAtDateTime(zone, date);
     }
 
     /**
