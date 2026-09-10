@@ -72,14 +72,17 @@ class PyTestReport:
         ET.indent(tree, space=" ", level=0)
         if not cwd.endswith('/'):
             cwd = cwd + '/'
+
         if self.filename is None:
-            self.filename = cwd + self.product.lower() + 'c_' + self.test_driver + '_' + self.language + '.xml'
-        elif not self.filename.endswith('.xml'):
-                self.filename += '.xml'
+            outputfile = cwd + self.product.lower() + 'c_' + self.test_driver + '_' + self.language + '.xml'
+        else:
+            outputfile = cwd + self.filename
+
+        if not outputfile.endswith('.xml'):
+            outputfile += ".xml"
+
         if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
             print("cwd", cwd)
-            print("Saving to = ", self.filename)
+            print("Saving to = ", outputfile)
 
-
-        tree.write(file_or_filename=self.filename)
-
+        tree.write(file_or_filename=outputfile)

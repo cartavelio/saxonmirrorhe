@@ -171,6 +171,9 @@ abstract class TestSuiteTask  @Inject constructor(private val ex: ExecOperations
     @get:Optional
     abstract val language: Property<String>
 
+    @get:Input
+    abstract val edition: Property<String>
+
     private val testSetArg = StringArg()
 
     @Nullable
@@ -253,7 +256,15 @@ abstract class TestSuiteTask  @Inject constructor(private val ex: ExecOperations
     fun runTests() {
         val runner = this
 
-        arguments.add(driver, suiteDir, "-o", outputDir)
+        // This makes the report name match what the regression report builder
+        // expects. Since I don't think any one else cares...
+        val reportName = if (name.startsWith("test_suite_")) {
+          "${edition.get()}c_${name.substring(11)}"
+        } else {
+          name
+        }
+
+        arguments.add(driver, suiteDir, "-o", outputDir, "-r", reportName)
         if (language.isPresent) {
           runner.arguments.add("-l", language)
         }
