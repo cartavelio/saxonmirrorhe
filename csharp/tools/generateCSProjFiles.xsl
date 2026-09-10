@@ -198,11 +198,11 @@ EndGlobal
         <Project Sdk="Microsoft.NET.Sdk">
           <Import Project="core.csproj"/>
           <PropertyGroup>
-            <UseArtifactsOutput>true</UseArtifactsOutput>
+            <!--<UseArtifactsOutput>true</UseArtifactsOutput>-->
             <Description>SaxonCS NUnit tests.</Description>
             <IsTestProject>true</IsTestProject>
             <DefineConstants>{$EDITION}</DefineConstants>
-            <UseArtifactsOutput>true</UseArtifactsOutput>
+            <!--<UseArtifactsOutput>true</UseArtifactsOutput>-->
           </PropertyGroup>
           <ItemGroup>
             <Compile Include="SaxonCS-NUnit\**\*.cs"/>
@@ -235,7 +235,7 @@ EndGlobal
       <xsl:when test="$releaseBuild = 'NUnitTests'">
         <Project Sdk="Microsoft.NET.Sdk">
           <PropertyGroup>
-            <UseArtifactsOutput>true</UseArtifactsOutput>
+            <!--<UseArtifactsOutput>true</UseArtifactsOutput>-->
             <TargetFramework>{$framework}</TargetFramework>
             <ImplicitUsings>enable</ImplicitUsings>
             <Nullable>enable</Nullable>
@@ -268,7 +268,7 @@ EndGlobal
         <Project Sdk="Microsoft.NET.Sdk">
           <Import Project="{$core.csproj}"/>
           <PropertyGroup>
-            <UseArtifactsOutput>true</UseArtifactsOutput>
+            <!--<UseArtifactsOutput>true</UseArtifactsOutput>-->
             <StartupObject>Saxon.Cmd.Command</StartupObject>
             <OutputType>Exe</OutputType>
             <AssemblyName>SaxonCS-{$EDITION}</AssemblyName>
@@ -376,7 +376,7 @@ EndGlobal
   <Project Sdk="Microsoft.NET.Sdk">
     <Import Project="{$core.csproj}"/>
     <PropertyGroup>
-      <UseArtifactsOutput>true</UseArtifactsOutput>
+      <!--<UseArtifactsOutput>true</UseArtifactsOutput>-->
       <StartupObject>TestDriver.Driver</StartupObject>
       <OutputType>Exe</OutputType>
       <AssemblyName>TestDrivers</AssemblyName>
@@ -412,7 +412,7 @@ EndGlobal
 <Project Sdk="Microsoft.NET.Sdk">
    <Import Project="core.csproj"/>
    <PropertyGroup>
-     <UseArtifactsOutput>true</UseArtifactsOutput>
+     <!--<UseArtifactsOutput>true</UseArtifactsOutput>-->
       <LangVersion>10.0</LangVersion>
       <TargetFramework>net8.0</TargetFramework>
       <ImplicitUsings>enable</ImplicitUsings>
