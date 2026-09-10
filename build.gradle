@@ -108,6 +108,8 @@ ext {
   csarcarch = null
   csconfiguration = findProperty("csConfiguration") ?: "Release"
   csoptimize = findProperty("csOptimize") ?: "true"
+  dsaPublicKey = findProperty("dsaPublicKey") ?: null
+  ed25519PublicKey = findProperty("ed25519PublicKey") ?: null
   csplatform = null
   c_sendria = "sendriasmtp"
   testWithJava = null
@@ -459,6 +461,46 @@ def patchReleaseInfo(String src) {
 
     if (line.contains("@@")) {
       throw new GradleException("Replacing @@ failed in ${src}")
+    }
+
+    lines += line
+    line = reader.readLine()
+  }
+  reader.close()
+
+  PrintStream stream = new PrintStream(new FileOutputStream(src))
+  lines.each { pl ->
+    stream.println(pl)
+  }
+  stream.close()
+}
+
+def patchKey(String src, String keyType, String keyFile) {
+  if (keyFile == null) {
+    return
+  }
+
+  if (!(keyType == "dsa" || keyType == "ed25519")) {
+    throw new GradleException("Unknown key type: ${keyType}")
+  }
+
+  BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(keyFile)))
+  String publicKey = reader.readLine()
+  reader.close()
+
+  def lines = []
+  reader = new BufferedReader(new InputStreamReader(new FileInputStream(src)))
+  String line = reader.readLine()
+  while (line != null) {
+    if (keyType == "dsa" && line.indexOf("final String PUBLIC_KEY = ") > 0) {
+      while (line.indexOf(";") < 0) {
+        line = reader.readLine()
+      }
+      line = "    private static final String PUBLIC_KEY = \"${publicKey}\";"
+    }
+
+    if (keyType == "ed25519" && line.indexOf("final String PUBLIC_KEY2 = ") > 0) {
+      line = "    private static final String PUBLIC_KEY2 = \"${publicKey}\";"
     }
 
     lines += line
@@ -880,6 +922,8 @@ task "eej_preprocess"(
   }
   doLast {
     patchReleaseInfo("${buildDir}/src/eej/net/sf/saxon/Version.java")
+    patchKey("${buildDir}/src/eej/com/saxonica/config/JavaVerifier.java", "dsa", dsaPublicKey)
+    patchKey("${buildDir}/src/eej/com/saxonica/config/JavaVerifier.java", "ed25519", ed25519PublicKey)
   }
 }
 
