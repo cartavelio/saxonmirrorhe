@@ -39,6 +39,16 @@
       <kbd>dotnet SaxonCS transform -s:<i>source</i> -xsl:<i>stylesheet</i> -o:<i>output</i>
       </kbd>
       </div>
+
+      <div class="conly">
+         <p>For SaxonC we must first compile the <code>Transform.c</code> C
+                  program in the <code>command</code> directory which builds the command line program by running the batch script <code>./build-saxonc-commands.sh</code>
+                   on linux or MacOS and <code>build-saxonc-commands.bat</code> for Windows:</p>
+               <p>A command is available to apply a given stylesheet to a given source XML document.</p>
+      <p>This creates the <code>transform</code> executable file. The corresponding command (on MacOS and Linux) is:</p>
+      <kbd>./transform -s:<i>source</i> -xsl:<i>stylesheet</i> -o:<i>output</i>
+      </kbd>
+      </div>
       
       <p>Here <i>source</i>, <i>stylesheet</i>, and <i>output</i> are the source XML file, the XSLT
          stylesheet, and the output file respectively.</p>
@@ -99,6 +109,7 @@
                   to be redirected, typically to resources available locally. For more details see
                   <a class="bodylink" href="/sourcedocs/resources-and-uris/xml-catalogs">Using XML catalogs</a>.
                </p>
+               <p class="conly">Also available as an option on SaxonC.</p>
             </td>
          </tr>
          <tr>
@@ -207,6 +218,7 @@
                <p class="csonly">For SaxonCS, the value is the filename of a user-written assembly that contains an implementation
                   of the interface <code>Saxon.Api.IProcessorInitializer</code>. For details see <a class="bodylink"
                      href="/saxon-cs/callbacks">Callbacks</a>.</p>
+               <p class="conly">This option is not available on SaxonC.</p>
             </td>
          </tr>
          <tr>
@@ -433,6 +445,7 @@
                      <code>OutputURIResolver</code> is a user-defined class that implements the <a
                      class="javalink" href="net.sf.saxon.lib.OutputURIResolver"
                      >net.sf.saxon.lib.OutputURIResolver</a> interface.</p>
+               <p class="conly">This option is not available on SaxonC.</p>
             </td>
          </tr>
          <tr>
@@ -498,6 +511,7 @@
                      <code>xsl:include</code> and <code>xsl:import</code> elements, and (if
                      <code>-u</code> is also specified) to process the URIs of the source file and
                   stylesheet file provided on the command line.</p>
+               <p class="conly">This option is not available on SaxonC.</p>
             </td>
          </tr>
          <tr>
@@ -1581,20 +1595,20 @@
    <section id="xsltfromant" title="From Ant" class="javaonly">
 
       <h1>XSLT transformations from Ant</h1>
-      
+
       <p>It is possible to run a Saxon transformation from Ant using the standard <a
          href="http://ant.apache.org/manual/Tasks/style.html" class="bodylink">xslt task</a>, by
          using the <code>trax</code> processor and with an appropriate <code>classpath</code> that
          forces Saxon to be selected. This can now be used to provide the ability to take advantage
          of the full range of capabilities offered by XSLT 3.0 in general and Saxon in particular
          (for example, schema aware processing and multiple output files).</p>
-      
+
       <aside>The custom Ant task that was developed for earlier Saxon releases is no longer
          supported.</aside>
-      
+
       <p>To ensure that Saxon is the chosen XSLT processor it is safest to use the <code>&lt;factory name="factory-class"&gt;</code>
          element in the the Ant task. The relevant factory classes are:</p>
-      
+
       <ul>
          <li><code java="net.sf.saxon.BasicTransformerFactory">net.sf.saxon.BasicTransformerFactory</code> for Saxon-HE</li>
          <li><code java="com.saxonica.config.ProfessionalTransformerFactory">com.saxonica.config.ProfessionalTransformerFactory</code> for Saxon-PE</li>
@@ -1603,21 +1617,21 @@
             Note that if this option is selected, the global context item for the transformation (used when a global variable
             initializer references the context item) will be absent, so any reference to "." in a global variable throws an error.</li>
       </ul>
-      
+
       <p>Saxon-specific configuration options can be specified using the <code>attribute</code>
          child of the <code>factory</code> element. For example, the following switches on Saxon
          tracing (the equivalent of the <code>-T</code> option on the command line):</p>
       <samp><![CDATA[  <factory name="net.sf.saxon.TransformerFactoryImpl">
-     <attribute name="http://saxon.sf.net/feature/traceListenerClass" 
+     <attribute name="http://saxon.sf.net/feature/traceListenerClass"
                 value="net.sf.saxon.trace.XSLTTraceListener"/>
   </factory>
 ]]></samp>
-      
+
       <p>For a full list of feature names, see <a class="bodylink"
          href="/configuration/config-features">Configuration features</a> or the Javadoc
          documentation of class <a class="javalink" href="net.sf.saxon.lib.Feature"
             >net.sf.saxon.lib.Feature</a>.</p>
-      
+
       <p>A particularly useful feature for use with Ant is
          <code>http://saxon.sf.net/feature/ignoreSAXSourceParser</code>. When Ant invokes Saxon,
          it normally does so supplying a <code>SAXSource</code> object with a contained
@@ -1628,36 +1642,36 @@
          copies of these files, but can only use them if it is allowed to configure the parser
          accordingly. Setting this property authorises Saxon to ignore the parser supplied by Ant
          and use its own.</p>
-      
+
       <p>It is possible to get detailed control of the configuration by specifying the name of a
          Saxon configuration file using this mechanism, for example:</p>
       <samp><![CDATA[  <factory name="com.saxonica.config.EnterpriseTransformerFactory">
-    <attribute name="http://saxon.sf.net/feature/configuration-file" 
+    <attribute name="http://saxon.sf.net/feature/configuration-file"
                value="config-de.xml"/>
   </factory>]]></samp>
-      
+
       <p>In this case this must be the first attribute.</p>
-      
+
       <p>The initial template and initial mode for the transformation can be specified using the
          attribute names <code>http://saxon.sf.net/feature/initialTemplate</code> and
          <code>http://saxon.sf.net/feature/initialMode</code> respectively. The value is a QName
          in Clark notation (that is <code>{uri}local</code>).</p>
-      
+
       <p>Note that names in Clark notation may also be used for the qualified names of stylesheet
          parameters and serialization options.</p>
-      
+
       <p>Note that an Ant transformation always has an input file. If necessary, a dummy file can be
          specified.</p>
-      
+
       <p>There is a history of bugs in successive releases of Ant that mean not all these features
          work in every Ant version. In particular, the <code>classpath</code> attribute of the
          <code>xslt</code> task element has been unreliable: the safest approach is to ensure
          that the Jar files needed to run Saxon are present on the externally-specified classpath
          (the classpath at the point where Ant is invoked), rather than relying on the task-specific
          classpath.</p>
-      
+
    </section>
-   
+
 
    <section id="compiling" title="Compiling a stylesheet">
       <h1>Compiling a stylesheet</h1>
@@ -1675,7 +1689,7 @@
          <li>All the transformation APIs separate the process of compiling a stylesheet and
             the process of using it to transform a source document. (With JAXP the object
             representing the compiled stylesheet is the <code>javax.xml.transform.Templates</code>
-            object, with s9api or with Saxon.Api on C# it is the <code>XsltExecutable</code>. If you run
+            object, with s9api or with SaxonC on C++/PHP/Python or with Saxon.Api on C# it is the <code>XsltExecutable</code>. If you run
             transformations within a web service then it is always a good idea to cache the compiled
             form of the stylesheets it uses.</li>
          <li>With Saxon-EE it is also possible to export the compiled form of a stylesheet as an
@@ -1762,6 +1776,18 @@
          different stylesheets, it makes sense to define it as a reusable package, since this avoids
          the cost of compiling the code repeatedly, and avoids the need to keep multiple copies in
          memory.</p>
+
+         <p class="conly">In the SaxonC APIs, a package is exported as an stylesheet export file (sef) which can then we imported again. The
+               <code>Xslt30Processor</code> has methods <code>compileFromStringAndSave</code>,
+                           <code>compileFromFileAndSave</code> and <code>compileFromXdmNodeAndSave</code> which exports the
+               <code>xsl:package</code> to file store if successful. The package may be made available for use by
+            other packages being compiled, in the same or in a different <code>Xslt30Processor</code>, by
+            the <code>Xslt30Processor</code>'s <code>importPackage</code> method which takes the sef file name as argument. When an
+               <code>xsl:use-package</code> declaration is found while compiling one package, the
+            compiler searches for a matching package among those that have been imported by the
+               <code>Xslt30Processor</code> in this way. It is possible to import several different
+            versions of the same package, and the <code>package-version</code> attribute of
+               <code>xsl:use-package</code> determines which of them is loaded. </p>
       </section>
       
       <section id="jit-compilation" title="JIT compilation">
@@ -1786,7 +1812,9 @@
       <p>JIT compilation is enabled by default. It can be suppressed from the command line by setting <code>-jit:off</code>.
       Setting the <code>export</code>, <code>explain</code>, or <code>nogo</code> options also has the side-effect
       of suppressing JIT compilation. There is also an option available on the <code>XsltCompiler</code> object.</p>
-      
+
+      <p class="conly">On SAxonC there is also the method <code>setJustInTimeCompilation()</code> available on the <code>Xslt30Processor</code> object.</p>
+
       <p>It probably makes sense to suppress JIT compilation in any workload where the compiled stylesheet is
       cached and used repeatedly.</p>
          
@@ -1814,6 +1842,7 @@
       
       <kbd class="javaonly">java -jar <i>dir</i>/saxon-ee-12.0.jar -xsl:stylesheet.xsl -export:stylesheet.sef -nogo</kbd>
       <kbd class="csonly">dotnet SaxonCS transform -xsl:stylesheet.xsl -export:stylesheet.sef -nogo</kbd>
+      <kbd class="conly">./transform -xsl:stylesheet.xsl -export:stylesheet.sef -nogo</kbd>
       
       <p>Here, the option <code>-nogo</code> suppresses any attempt to execute the stylesheet.</p>
       
@@ -1833,6 +1862,7 @@
       
       <kbd class="javaonly">java -jar <i>dir</i>/saxon-ee-12.0.jar -xsl:stylesheet.sef -s:source.xml</kbd>
       <kbd class="csonly">dotnet SaxonCS transform -xsl:stylesheet.sef -s:source.xml</kbd>
+      <kbd class="conly">./transform -xsl:stylesheet.sef -s:source.xml</kbd>
       
       <aside><p>This means that you can generally use a stylesheet export file transparently with third-party tools,
       for example with the Ant <code>xslt</code> task. So long as the third-party tool does nothing with
@@ -1840,7 +1870,9 @@
       a source stylesheet should always work.</p>
       
       <p class="javaonly">In particular, stylesheet export files can be passed to the JAXP <code>newTemplates()</code>
-      method in place of a source stylesheet.</p></aside>
+      method in place of a source stylesheet.</p>
+         <p class="conly">In SaxonC, stylesheet export files can be passed to the <code>Xslt30Processor</code>
+               method in place of a source stylesheet. For example, <code>compileFromFile()</code> to create an <code>XsltExecutable</code></p></aside>
       
       
       <p>When exporting a package, all components (templates, functions, etc) from the packages it
@@ -1850,11 +1882,15 @@
       
       <p>Packages that are used by a stylesheet can be identified in a number of ways.
          They can be listed on the command line in the <code>-pack</code> option, or 
-         imported to the<code>XsltCompiler</code> API using the methods 
+         imported to the <code>XsltCompiler</code> API using the methods
             <code>loadLibraryPackage</code> and <code>loadExecutablePackage</code> (Java),
          or <code>LoadLibraryPackage</code> and <code>LoadExecutablePackage</code> (C#).
       Another option, probably the best option if many library packages are used, is to list
       them in a <a class="bodylink" href="/configuration/configuration-file">configuration file</a>.</p>
+
+         <p class="conly">In SaxonC, packages can be imported to the <code>Xslt30Processor</code> API using the methods
+                     <code>importPackage()</code> and <code>compileFromString()</code>,
+                  or <code>compileFromFile()</code> and <code>compileFromValue()</code> for C++, PHP and Python.</p>
 
       <p>In the case of schema-aware stylesheets, the schema components needed by a stylesheet are
          not exported along with the stylesheet code. The user of the stylesheet needs to import the
@@ -1877,7 +1913,7 @@
          cannot be incorporated as libraries into larger applications.</p>
 
       <p>Exporting stylesheet packages requires Saxon-EE, optionally with the Developer Master Key
-         if stylesheets with embedded license information are to be exported. From Saxon 9.9, importing stylesheet
+         if stylesheets with embedded license information are to be exported. From Saxon 9.9 (and for SaxonC 11.1), importing stylesheet
          packages is possible using any Saxon edition, provided that the run-time software and the
          run-time license key (where needed) support the features used by the stylesheet in question.</p>
       
@@ -1944,6 +1980,9 @@
       <nav>
          <ul/>
       </nav>
+
+      <p>In SaxonC, the mechanism for controlling the stylesheet output is different to Java and C#. Therefore we provide specific information in the section
+         SaxonC documentation, see: <a href="https://www.saxonica.com/saxon-c/documentation12/#!using-xsl/stylesheet-output">Handling output</a></p>
       
       <section id="principal-output" title="Principal output">
          <h1>Principal output</h1>
@@ -2152,6 +2191,9 @@
       <kbd>dotnet SaxonCS transform   -TP:profile.html   -s:<i>source</i>  
          -xsl:<i>stylesheet</i>
       </kbd>
+      <p> On SaxonC:
+      <kbd>./transform    -TP:profile.html   -s:<i>source</i>  
+         -xsl:<i>stylesheet</i></kbd></p>
       <p>Then view the resulting <code>profile.html</code> file in your browser.</p>
       <p>The output identifies templates and functions in the original stylesheet by their name or
          match pattern, line number, and the last part of the URI of their module. For
