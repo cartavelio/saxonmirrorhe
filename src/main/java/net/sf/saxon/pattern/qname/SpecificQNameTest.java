@@ -36,6 +36,10 @@ public class SpecificQNameTest implements QNameTest {
         return qName;
     }
 
+    public int getFingerprint() {
+        return fingerprint;
+    }
+
     @Override
     public boolean matches(StructuredQName qname) {
         return qname.equals(this.qName);

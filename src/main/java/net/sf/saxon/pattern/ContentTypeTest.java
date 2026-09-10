@@ -81,6 +81,14 @@ public class ContentTypeTest extends NodeTest {
         return null;
     }
 
+    @Override
+    public int getFingerprint() {
+        if (nameTest instanceof SpecificQNameTest) {
+            return ((SpecificQNameTest) nameTest).getFingerprint();
+        }
+        return -1;
+    }
+
     /**
      * The test is nillable if a question mark was specified as the occurrence indicator
      *
