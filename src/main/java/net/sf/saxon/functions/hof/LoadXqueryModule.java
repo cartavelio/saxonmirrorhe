@@ -92,7 +92,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
             xqueryVersionOption = checkedOptions.get("xquery-version");
             if (xqueryVersionOption != null) {
                 double vn = ((DecimalValue) xqueryVersionOption.head()).getDoubleValue();
-                if (vn*10 > 31) {
+                if (vn * 10 > 31) {
                     throw new XPathException("No XQuery version " + vn + " processor is available", "FOQM0006");
                 }
             }
@@ -131,18 +131,6 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
             streamSources[0] = new StreamSource(new StringReader(content), getStaticBaseUriString());
             staticQueryContext.setBaseURI(getStaticBaseUriString());
         }
-
-        staticQueryContext.setModuleURIResolver(moduleURIResolver);
-        String baseURI = getRetainedStaticContext().getStaticBaseUriString();
-        staticQueryContext.setBaseURI(baseURI);
-        staticQueryContext.preLoadSchema(getRetainedStaticContext().getPackageData().getImportedSchema());
-        StreamSource[] streamSources;
-        try {
-            String[] hints = locationHints.toArray(new String[0]);
-            streamSources = staticQueryContext.getModuleURIResolver().resolve(moduleUri.toString(), baseURI, hints);
-            if (streamSources == null) {
-                streamSources = new StandardModuleURIResolver(config).resolve(moduleUri.toString(), baseURI, hints);
-
 
 
         if (content == null) {
@@ -188,7 +176,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
 
         try {
             // Note: Location hints other than the first are ignored
-            String sourceQuery = QueryReader.readSourceQuery(config, streamSources[0], config.getValidCharacterChecker() );
+            String sourceQuery = QueryReader.readSourceQuery(config, streamSources[0], config.getValidCharacterChecker());
             staticQueryContext.compileLibrary(sourceQuery);
         } catch (XPathException e) {
             throw new XPathException(e.getMessage(), "FOQM0003"); // catch when module is invalid
@@ -232,7 +220,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
         }
 
         Controller newController = xqe.newController(dqc);
-        
+
         XPathContext newContext = newController.newXPathContext();
 
         // Evaluate the global variables, and add values to the result.
@@ -282,7 +270,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
                 }
                 functionsMap = functionsMap.addEntry(functionQName, newMap);
             }
-        };
+        }
 
         return new ShapedMap(RESULT_SHAPE, variablesMap, functionsMap);
     }
