@@ -83,9 +83,9 @@ public class DeepEqual extends CollatingFunctionFixed {
         o.addAllowedOption("collation", SequenceType.SINGLE_STRING);
         o.addAllowedOption("comments", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("debug", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        //o.addAllowedOption("false-on-error", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("id-property", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("idrefs-property", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        o.addAllowedOption("ignore-empty-entries", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("in-scope-namespaces", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("items-equal", itemsEqualFn, BooleanValue.FALSE);
         o.addAllowedOption("map-order", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
@@ -133,6 +133,7 @@ public class DeepEqual extends CollatingFunctionFixed {
         public boolean debug = false;
         public boolean idSignificant = false;
         public boolean idrefSignificant = false;
+        public boolean ignoreEmptyEntries = false;
         public boolean inScopeNamespacesSignificant = false;
         public boolean mapOrderSignificant = false;
         public boolean namespacePrefixesSignificant = false;
@@ -157,7 +158,7 @@ public class DeepEqual extends CollatingFunctionFixed {
 
         private static final String[] booleanOptions = new String[]{
                 "base-uri", "comments", "debug", "id-property", "idrefs-property",
-                "in-scope-namespaces", "map-order",
+                "ignore-empty-entries", "in-scope-namespaces", "map-order",
                 "namespace-prefixes", "nilled-property", "normalize-space",
                 "ordered", "processing-instructions", "text-boundaries", "timezones",
                 "type-annotations", "type-variety", "typed-values"};
@@ -269,6 +270,9 @@ public class DeepEqual extends CollatingFunctionFixed {
                     case "idrefs-property":
                         idrefSignificant = booleanValue;
                         return;
+                    case "ignore-empty-entries":
+                        ignoreEmptyEntries = booleanValue;
+                        return;
                     case "in-scope-namespaces":
                         inScopeNamespacesSignificant = booleanValue;
                         return;
@@ -290,9 +294,6 @@ public class DeepEqual extends CollatingFunctionFixed {
                     case "processing-instructions":
                         processingInstructionsSignificant = booleanValue;
                         return;
-//                    case "text-boundaries":
-//                        textBoundariesSignificant = booleanValue;
-//                        return;
                     case "timezones":
                         timezonesSignificant = booleanValue;
                         return;
@@ -324,29 +325,20 @@ public class DeepEqual extends CollatingFunctionFixed {
             // We can't do any useful hashing for this case, so all items get the same hash code
             return 1L;
         }
-        switch (item.getGenre()) {
-            case ATOMIC:
-                return 0x01L << 56 | (long)((AtomicValue)item).asMapKey(options.version).hashCode();
-            case XNODE:
-                return 0x02L << 56 | (long)nodeHashCode(((NodeInfo)item), options);
-            case MAP:
-                return 0x03L << 56 | (long)((MapItem)item).size();   // TODO: improve this
-            case ARRAY:
-                return 0x04L << 56 | (long)((ArrayItem) item).arrayLength();   // TODO: improve this
-            case FUNCTION:
-                return 0x05L << 56 | (long)System.identityHashCode(item);
-            case EXTERNAL:
-            default:
-                return 0x06L << 56 | (long)((ObjectValue<?>)item).getObject().hashCode();
-        }
+        return switch (item.getGenre()) {
+            case ATOMIC -> 0x01L << 56 | (long) ((AtomicValue) item).asMapKey(options.version).hashCode();
+            case XNODE -> 0x02L << 56 | (long) nodeHashCode(((NodeInfo) item), options);
+            case MAP -> 0x03L << 56 | (long) ((MapItem) item).size();   // TODO: improve this
+            case ARRAY -> 0x04L << 56 | (long) ((ArrayItem) item).arrayLength();   // TODO: improve this
+            case FUNCTION -> 0x05L << 56 | (long) System.identityHashCode(item);
+            default -> 0x06L << 56 | (long) ((ObjectValue<?>) item).getObject().hashCode();
+        };
     }
 
     private static Map<Long, List<Item>> makeHashMap(SequenceIterator iter, DeepEqualOptions options) {
         Map<Long, List<Item>> result = new HashMap<>();
         Item item;
-        //int count = 0;
         while ((item = iter.next()) != null) {
-            //count++;
             long itemHash = hash(item, options);
             List<Item> bucket = result.computeIfAbsent(itemHash, k -> new ArrayList<Item>());
             bucket.add(item);
@@ -1045,18 +1037,6 @@ public class DeepEqual extends CollatingFunctionFixed {
         }
     }
 
-//    private static String showNamespaces(HashSet<NamespaceBinding> bindings) {
-//        StringBuilder sb = new StringBuilder(256);
-//        for (NamespaceBinding binding : bindings) {
-//            sb.append(binding.getPrefix());
-//            sb.append("=");
-//            sb.append(binding.getNamespaceUri());
-//            sb.append(" ");
-//        }
-//        sb.setLength(sb.length() - 1);
-//        return sb.toString();
-//    }
-
     private static SequenceIterator mergeAdjacentTextNodes(SequenceIterator in) {
         List<Item> items = new ArrayList<>(20);
         boolean prevIsText = false;
@@ -1129,65 +1109,6 @@ public class DeepEqual extends CollatingFunctionFixed {
     public String getStreamerName() {
         return "DeepEqual";
     }
-
-//    private static class NormalizingComparer implements AtomicComparer {
-//
-//        private AtomicComparer baseComparer;
-//        private DeepEqualOptions options;
-//
-//        public NormalizingComparer(AtomicComparer baseComparer, DeepEqualOptions options) {
-//            this.baseComparer = baseComparer;
-//            this.options = options;
-//        }
-//
-//        @Override
-//        public StringCollator getCollator() {
-//            return baseComparer.getCollator();
-//        }
-//
-//        @Override
-//        public AtomicComparer provideContext(XPathContext context) {
-//            baseComparer = baseComparer.provideContext(context);
-//            return this; // TODO: thread safety?
-//        }
-//
-//        @Override
-//        public int compareAtomicValues(AtomicValue v0, AtomicValue v1) throws NoDynamicContextException {
-//            return baseComparer.compareAtomicValues(v0, v1);
-//        }
-//
-//        @Override
-//        public boolean comparesEqual(AtomicValue v0, AtomicValue v1) throws NoDynamicContextException {
-//            if (v0 instanceof StringValue && v1 instanceof StringValue) {
-//                UnicodeString u0 = v0.getUnicodeStringValue();
-//                UnicodeString u1 = v1.getUnicodeStringValue();
-//                if (options.normalizeSpace) {
-//                    u0 = Whitespace.collapseWhitespace(u0);
-//                    u1 = Whitespace.collapseWhitespace(u1);
-//                }
-//                if (options.normalizationForm != null) {
-//                    try {
-//                        u0 = StringView.of(NormalizeUnicode.normalize(u0.toString(), options.normalizationForm));
-//                    } catch (XPathException e) {
-//                        throw new IllegalArgumentException(e);
-//                    }
-//                    try {
-//                        u1 = StringView.of(NormalizeUnicode.normalize(u1.toString(), options.normalizationForm));
-//                    } catch (XPathException e) {
-//                        throw new IllegalArgumentException();
-//                    }
-//                }
-//                return getCollator().comparesEqual(u0, u1);
-//            } else {
-//                return baseComparer.comparesEqual(v0, v1);
-//            }
-//        }
-//
-//        @Override
-//        public String save() {
-//            return null;
-//        }
-//    }
 
 }
 

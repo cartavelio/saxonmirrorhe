@@ -28,6 +28,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.SequenceIteratorOverJavaIterator;
+import net.sf.saxon.tree.jiter.MappingJavaIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.*;
@@ -638,12 +639,20 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
     @Override
     @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual.DeepEqualOptions options) throws XPathException {
-        if (other instanceof MapItem &&
-                ((MapItem) other).size() == size()) {
+        if (other instanceof MapItem otherMap) {
+            if (!options.ignoreEmptyEntries && otherMap.size() != size()) {
+                return false;
+            }
             if (options.mapOrderSignificant) {
                 int specVersion = getSpecVersion();
                 Iterator<KeyValuePair> it1 = keyValuePairs().iterator();
-                Iterator<KeyValuePair> it2 = ((MapItem)other).keyValuePairs().iterator();
+                Iterator<KeyValuePair> it2 = otherMap.keyValuePairs().iterator();
+                if (options.ignoreEmptyEntries) {
+                    java.util.function.Function<KeyValuePair, KeyValuePair> mapper =
+                            kvp -> kvp.value().getLength() == 0 ? null : kvp;
+                    it1 = new MappingJavaIterator<>(it1, mapper);
+                    it2 = new MappingJavaIterator<>(it2, mapper);
+                }
                 while (it1.hasNext() && it2.hasNext()) {
                     KeyValuePair kvp1 = it1.next();
                     KeyValuePair kvp2 = it2.next();
@@ -659,13 +668,23 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
                 return true;
             } else {
                 for (KeyValuePair kvp : keyValuePairs()) {
-                    GroundedValue otherValue = ((MapItem) other).get(kvp.key());
+                    if (options.ignoreEmptyEntries && kvp.value().getLength() == 0) {
+                        continue;
+                    }
+                    GroundedValue otherValue = otherMap.get(kvp.key());
                     if (otherValue == null) {
                         return false;
                     }
                     if (!DeepEqual.deepEqual(otherValue.iterate(),
                                              kvp.value().iterate(), context, options)) {
                         return false;
+                    }
+                }
+                if (options.ignoreEmptyEntries) {
+                    for (KeyValuePair kvp : otherMap.keyValuePairs()) {
+                        if (kvp.value().getLength() != 0 && get(kvp.key()) == null) {
+                            return false;
+                        }
                     }
                 }
                 return true;
