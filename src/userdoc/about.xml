@@ -426,8 +426,9 @@
          license key.</p>
       
       <p>Also available, but not described here in detail, is SaxonJS, the JavaScript edition,
-      which runs on Node.js and in all modern browsers. For further information, see
-         <a href="https://www.saxonica.com/saxon-js/documentation2/index.html" class="bodylink"/>the SaxonJS documentation.</p>
+      which runs on Node.js and in all modern browsers. For further information, see the
+         <a class="bodylink"
+            href="http://www.saxonica.com/saxon-js/documentation">SaxonJS documentation</a>.</p>
 
       <p>There are also restricted licenses that work with SaxonJ-EE, SaxonCS or SaxonC-EE but restrict its
          capability:</p>
