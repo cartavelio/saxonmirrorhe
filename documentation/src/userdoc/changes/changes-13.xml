@@ -278,6 +278,22 @@ TODO: rethink redefines and override
         references (<code>fn:contains#2</code>) and dynamic access using <code>function-lookup</code>.
         If it is set for a function, <code>function-available</code> returns false.</p>
         
+        <p>There have been changes to the internal representation of schema information, which may affect
+        applications using low-level access to these data structures. A schema (that is, a collection of schema
+        components such as element and attribute declarations, complex and simple types) is generally
+        represented internally by a <code>com.saxonica.ee.schema.PreparedSchema</code> object. A
+        component such as a complex type may exist in more than one schema: this can happen, for example,
+        when a new schema is built by combining the types in a base schema with types referenced
+        using <code>xsi:schemaLocation</code> attributes. The <code>UserComplexType</code> object
+        representing such a component will be present in both schemas; but the compiled form of the
+        type (class <code>com.saxonica.ee.schema.CompiledComplexType</code>, which contains 
+        among other things, the finite state automaton used to validate instances) will
+        exist independently in both: this is affected by the presence of other components in the schema,
+        for example additional elements in substitution groups. Because multiple schemas are now allowed, many
+        internal methods used to navigate around schema information (for example, listing the allowed children
+        of an element) acquire an extra parameter to identify the schema, since a component such as an element
+        declaration is not exclusive to one schema.</p>
+        
        
     </category>
     
@@ -802,6 +818,7 @@ TODO: rethink redefines and override
             <li><p>PR2372 - Serializing processing instructions with the HTML serialization method.</p></li>
             <li><p>PR2337 - New values for <code>xsl:mode/@typed</code>.</p></li>
             <li><p>PR2387 - Handling of NaN and Infinity by the JSON serialization method.</p></li>
+            <li><p>The new EXPath file:list-roots function is not yet implemented.</p></li>
         </ul>
         
         <p>XInclude processing (e.g. using the xinclude option of fn:doc) is not supported in SaxonCS.</p>
