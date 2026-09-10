@@ -7,12 +7,13 @@ namespace SaxonCS_NUnit
         
         public static string repo = "/Users/mike/GitHub/saxon2020/";
         public static string qt4cg = "/Users/mike/GitHub/qt4cg/";
+        public static string extraTests = "/Users/mike/GitHub/extra-test-suites/";
         
         
         public static string NUNIT_DATA_DIR = repo + "src/test/nunit/testdata/";
 		public static string DATA_DIR = repo + "src/test/testdata/";
         public static string SANDPIT_DIR = DATA_DIR + "sandpit/";
-        public static string XMARK_DIR = repo + "src/test/xmark/";
+        public static string XMARK_DIR = extraTests + "data/xmark/";
         public static string RESOURCES_DIR = NUNIT_DATA_DIR;
         public static string XSLT3TS_DIR =  qt4cg + "xslt40-test/tests/";
 

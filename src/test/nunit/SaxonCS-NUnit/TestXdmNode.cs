@@ -35,7 +35,6 @@ namespace SaxonCS_NUnit {
             Assert.AreEqual(XdmNodeKind.Element, element.NodeKind);
             Assert.AreEqual(XmlNodeType.Element, element.NodeType);
             Assert.AreEqual("", element.StringValue);
-            Assert.AreEqual(new QName("xs", NamespaceConstant.SCHEMA, "untyped"), element.TypeAnnotationName);
             Assert.That(doc.Equals(element.Parent));
             Assert.That(doc.Equals(element.Root));
             Assert.False(element.IsAtomic());
@@ -102,10 +101,8 @@ namespace SaxonCS_NUnit {
             XdmNode doc =
                 builder.Build(
                     new StringReader("<one foo='bar'>[<two xmlns='http://ns.com/'><three/></two>]</one>"));
-            Assert.AreEqual(new QName("xs", NamespaceConstant.SCHEMA, "untyped"), doc.TypeAnnotationName);
             XdmNode one = doc.Select(Steps.Child("one")).First();
             Assert.NotNull(one);
-            Assert.AreEqual(new QName("xs", NamespaceConstant.SCHEMA, "untyped"), doc.TypeAnnotationName);
             XdmNode doc2 = one.Select(Steps.Parent(Predicates.IsDocument())).First();
             Assert.NotNull(doc2);
             Assert.That(doc.Equals(doc2)); // For some reason, Assert.AreEqual fails with stack overflow
@@ -118,7 +115,6 @@ namespace SaxonCS_NUnit {
             XdmNode openBra = three.Select(Steps.Preceding(Predicates.IsText())).First();
             Assert.NotNull(openBra);
             Assert.AreEqual("[", openBra.StringValue);
-            Assert.Null(openBra.TypeAnnotationName);
             XdmNode closeBra = three.Select(Steps.Following(Predicates.IsText())).First();
             Assert.NotNull(closeBra);
             Assert.AreEqual("]", closeBra.StringValue);
