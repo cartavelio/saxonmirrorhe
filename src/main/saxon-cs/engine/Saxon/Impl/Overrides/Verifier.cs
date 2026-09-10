@@ -39,7 +39,7 @@ namespace Saxon.Impl.Overrides {
         {
             var algorithm = SignatureAlgorithm.Ed25519;
             var publicKeyBytes = Convert.FromBase64String(ed25519Pem);
-            var signatureBytes = Convert.FromBase64String(signature);
+            var signatureBytes = decodeSignature(signature);
             var dataBytes = Encoding.UTF8.GetBytes(data);
             var publicKey = PublicKey.Import(algorithm, publicKeyBytes, KeyBlobFormat.PkixPublicKey);
             var valid = algorithm.Verify(publicKey, dataBytes, signatureBytes);
@@ -62,7 +62,7 @@ namespace Saxon.Impl.Overrides {
             "-----END PUBLIC KEY-----";
         
         // The public ED25519 key
-        private static string ed25519Pem = "MCowBQYDK2VwAyEAuJ5NKT1yC2v1G1XomulNaQDbsM6Be/RUumghBAmg5dY=";
+        private static string ed25519Pem = "MCowBQYDK2VwAyEAgn4Eh/0cFzMMaJj4yAB6/vlanZz57XmNuP5NiTMUg7M=";
         
         // Take the signature as it appears in the license file, and convert it to the
         // form expected by the .NET verification API. We first convert from hex to binary.
