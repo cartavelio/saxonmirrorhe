@@ -71,7 +71,7 @@ namespace Saxon.Api {
         /// <param name="indicator">The occurrence indicator. The values '*', '?', and '!' have
         /// their usual meaning. A single space (' ') indicates "exactly one", and digit zero ('0')
         /// indicates "exactly zero". These values are also available as constants in class
-        /// <c>XdmSequenceType.</param>
+        /// <c>XdmSequenceType</c>.</param>
         /// <returns>An <c>XdmSequenceType</c> that combines this <c>XdmItemType</c> with
         /// the given occurrence indicator.</returns>
 
@@ -183,7 +183,7 @@ namespace Saxon.Api {
         /// </remarks>
         /// <param name="item">item the supplied item whose type is required</param>
         /// <param name="processor">the Saxon Processor. This is needed because in some cases,
-        /// items are not tied to a particular Processor, but item types are.</para>
+        /// items are not tied to a particular Processor, but item types are.</param>
         /// <returns>a type that matches the supplied item</returns>
 
         public static XdmItemType ForItem(XdmItem item, Processor processor) {
