@@ -3608,7 +3608,7 @@ public class XPathParser {
             try {
                 ref = env.bindVariable(vtest);
             } catch (XPathException err) {
-                throw err.maybeWithLocation(makeLocation());
+                throw err.maybeWithLocation(makeLocation(offset));
             }
         }
         setLocation(ref, offset);
