@@ -502,7 +502,9 @@
             <p>This option establishes a default for use whenever source documents (not stylesheets
                 or schema documents) are parsed. The option can be overridden for individual
                 documents by setting the <link>net.sf.saxon.lib.ParseOptions</link> for that
-                individual document, for example from a <code>URIResolver</code>.</p>
+                individual document, for example from a <code>URIResolver</code>. With 4.0 enabled,
+                it can also be overridden using the <code>dtd-validation</code> option of functions
+                such as <code>fn:doc</code> and <code>fn:parse-xml</code>.</p>
         </desc>
     </feature>
     <feature>
@@ -1604,6 +1606,11 @@
             <p>The default is "ignorable". This whitespace stripping is additional to
                 any stripping done as a result of the <code>xsl:strip-space</code> declaration in an
                 XSLT stylesheet.</p>
+            <p>This configuration setting defines a default. The default can be overridden for individual
+               documents, for example by API methods such as 
+                <a class="javalink" href="net.sf.saxon.s9api.DocumentBuilder">DocumentBuilder.setWhitespaceStrippingPolicy</a>.
+            With 4.0 enabled, it can also be overridden by using
+               the <code>strip-space</code> option on functions such as <code>fn:doc</code> and <code>fn:parse-xml</code>.</p>
         </desc>
     </feature>
     <feature>
