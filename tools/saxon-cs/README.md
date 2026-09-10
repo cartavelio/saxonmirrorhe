@@ -81,13 +81,7 @@ but will not be further developed.
 
 ## What's new in this version?
 
-SaxonCS is based on version 11 of the source code, and was released
-ahead of the Java version. As usual there's a comprehensive list of changes
-in the documentation. Apart from supporting .NET 5, you'll find there are
-lots of new features to make processing JSON easier; it's getting close to
-the point where JSON is supported almost as well as XML. Certainly, there's
-no better library available for applications that need to mix and match XML
-and JSON, or do custom conversions from one to the other.
+There's a comprehensive list of changes in the documentation.
 
 For a record of bugs fixed in each maintenance release, please consult the
 [issues list](https://saxonica.plan.io/projects/saxon/issues) — you can filter
