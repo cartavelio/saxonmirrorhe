@@ -8,10 +8,7 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.elab.BooleanElaborator;
-import net.sf.saxon.expr.elab.BooleanEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.OperatorSymbol;
@@ -191,8 +188,13 @@ public class Empty extends Aggregate {
         public BooleanEvaluator elaborateForBoolean() {
             SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
             Expression arg = fnc.getArg(0);
-            PullEvaluator puller = arg.makeElaborator().elaborateForPull();
-            return context -> empty(puller.iterate(context));
+            if (Cardinality.allowsMany(arg.getCardinality())) {
+                PullEvaluator puller = arg.makeElaborator().elaborateForPull();
+                return context -> empty(puller.iterate(context));
+            } else {
+                ItemEvaluator eval = arg.makeElaborator().elaborateForItem();
+                return context -> eval.eval(context) == null;
+            }
         }
 
     }

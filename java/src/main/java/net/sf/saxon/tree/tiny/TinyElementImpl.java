@@ -230,6 +230,22 @@ public class TinyElementImpl extends TinyParentNodeImpl {
     }
 
     /**
+     * Get the attribute node with a given name, if it exists, or null otherwise
+     */
+
+    public TinyAttributeImpl getAttributeNode(int fp) {
+        int index = tree.alpha[nodeNr];
+        int[] attNames = tree.getAttributeNameCodeArray();
+        while (index < tree.numberOfAttributes && tree.attParent[index] == nodeNr) {
+            if (fp == (attNames[index] & NamePool.FP_MASK)) {
+                return tree.getAttributeNode(index);
+            }
+            index++;
+        }
+        return null;
+    }
+
+    /**
      * Get an iterator over the attribute axis, starting at this node; the nodes will
      * be in document order.
      *
@@ -241,8 +257,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
         if (tree.alpha[nodeNr] < 0) {
             return EmptyIterator.getInstance();
         }
-        if (predicate instanceof NamedXNodePredicate) {
-            NamedXNodePredicate fpTest = (NamedXNodePredicate) predicate;
+        if (predicate instanceof NamedXNodePredicate fpTest) {
             int fp = fpTest.getRequiredFingerprint();
             if (fp != -1 && fpTest.getNodeKind() == Type.ATTRIBUTE) {
                 int index = tree.alpha[nodeNr];
