@@ -301,7 +301,7 @@
         
         <p>From 12.3, the <code>Query</code> command line recognizes the option <code>-ns</code>, with the same values
         as on the <code>Transform</code> command. There is also API support for setting a default element namespace
-        policy in the s0api <code>XQueryCompiler</code>. </p>
+            policy in the s9api <code java="net.sf.saxon.s9api.XQueryCompiler">XQueryCompiler</code>. </p>
         
     </category>
     
@@ -377,17 +377,17 @@
             <code>0000_FFFE</code>.</p></li>
             <li><p>The <code>fn:partition()</code> function is implemented. This provides positional
             grouping as a higher-order function.</p></li>
-            <li><p>The <code>map:of</code> function is implemented. This provides another way of constructing
+            <li><p>The <code>map:of()</code> function is implemented. This provides another way of constructing
             a map from a set of key-value pairs.</p></li>
-            <li><p>The <code>fn:remove</code> function allows several items to be removed from a sequence
+            <li><p>The <code>fn:remove()</code> function allows several items to be removed from a sequence
             at the same time.</p></li>
-            <li><p>The <code>fn:slice</code> function is implemented; it allows selection of part of a sequence
+            <li><p>The <code>fn:slice()</code> function is implemented; it allows selection of part of a sequence
             with capability for numbering from the end, counting backwards, selecting every Nth item, etc.</p></li>
-            <li><p>The <code>array:slice</code> function is implemented; it does the same as <code>fn:slice</code>,
+            <li><p>The <code>array:slice()</code> function is implemented; it does the same as <code>fn:slice()</code>,
                 but for arrays rather than sequences.</p></li>
             <li><p>The <code>map:keys#2</code> function is implemented; the second argument is a function that
                 tests each value and decides whether the corresponding key should be returned.</p></li>
-            <li><p>The <code>fn:xdm-to-json</code> function is implemented. This allows conversion of an
+            <li><p>The <code>fn:xdm-to-json()</code> function is implemented. This allows conversion of an
             arbitrary XDM sequence (including, of course, an XML document) to JSON format.</p></li>
             
         </ul>
@@ -448,7 +448,7 @@
             in the compound tokens <code>&lt;=</code>, <code>>=</code>, <code>&lt;&lt;</code>,
         <code>&gt;&gt;</code>, <code>=&gt;</code>, <code>-&gt;</code>, and <code>=!&gt;</code>.</p>
         
-        <p>From 12.3, the mapping arrow operator <code>=!></code>is implemented. This is similar to the XPath 3.1 arrow operator
+        <p>From 12.3, the mapping arrow operator <code>=!></code> is implemented. This is similar to the XPath 3.1 arrow operator
         (for example <code>$x => abs()</code>), but it applies the function on the right-hand side to each item delivered
         by the left-hand side individually. For example <code>(-2 to +2) =!> abs()</code> returns <code>(2, 1, 0, 1, 2)</code>.
         The effect is similar to writing <code>(-2 to +2) ! abs(.)</code>, but the operator precedences make it
@@ -456,11 +456,11 @@
         
         <p>From 12.3, an inline function following the arrow operator no longer needs to be parenthesized:
         the expression <code>$in => (function($x){$x+1})()</code> can now be written 
-        <code>$in => function($x){$x+1}()</code>. It is also possible to use a focus functions:
+        <code>$in => function($x){$x+1}()</code>. It is also possible to use a focus function:
             <code>$in => function{.+1}()</code></p>
         
         <p>From 12.3, the function coercion rules are extended to allow a supplied function item to have lower arity
-        than that implied by the signature of the required type. For example, <code>map:for-each</code> expects a function with
+        than that implied by the signature of the required type. For example, <code>map:for-each()</code> expects a function with
         two arguments, which are set respectively to the key and the value of an entry in the map. But if you are only interested in the key,
         you can supply a function of arity 1, and your function will be called omitting the second argument. Similarly,
         for a function that expects a predicate (a function of arity one), you can now supply the value <code>fn:true#0</code>
@@ -556,7 +556,7 @@
         but if union types and/or record types are used in match patterns (for example <code>match="record(lat, long)"</code>)
         they should be disambiguated using explicit priorities.</p>
         
-        <p>From 12.3 the <code>xsl:matching-substring</code> and <code>xsl:non-matching-substring</code> may take
+        <p>From 12.3 <code>xsl:matching-substring</code> and <code>xsl:non-matching-substring</code> may take
         a <code>select</code> attribute in place of a contained sequence constructor.</p>
         
         <p>From 12.3 enclosing modes are implemented: <code>xsl:template</code> rules can be defined as a child

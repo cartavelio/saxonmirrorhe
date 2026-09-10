@@ -12,9 +12,9 @@
         specific to the Saxon implementation. Many also have further detailed descriptions and
         examples.</p>
     
-    <aside><p>This is not intended to be a complete specification of XSLT instructions. It
+    <aside>This is not intended to be a complete specification of XSLT instructions. It
     can be used as a quick reference, but it doesn't try to cover every edge case. The main
-    purpose is to provide information specific to the Saxon implementation.</p></aside>
+    purpose is to provide information specific to the Saxon implementation.</aside>
 
     <p>For information about the additional extension elements provided with the Saxon product, see
             <a class="bodylink" href="/extensions/instructions">Extension instructions</a>.</p>

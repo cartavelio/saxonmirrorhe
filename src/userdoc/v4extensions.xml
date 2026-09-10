@@ -727,7 +727,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
          $input as item()*,	
          $start as xs:integer? := (),
          $end   as xs:integer? := (),
-         $step  as xs:integer? := (),
+         $step  as xs:integer? := ()
          ) as item()*</kbd>
 
       <p>Selects items from a sequence. <code>$start</code> and <code>$end</code> can be positive integers for 1-based
@@ -812,10 +812,10 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
          $input as array(*),	
          $start as xs:integer? := (),
          $end   as xs:integer? := (),
-         $step  as xs:integer? := (),
+         $step  as xs:integer? := ()
          ) as array(*)</kbd>
 
-      <p>Same as <code>fn:slice</code>, but applied to an array.</p>
+      <p>Same as <code>fn:slice()</code>, but applied to an array.</p>
 
       <kbd>array:trunk(
          $array	as array(*)	
@@ -845,9 +845,9 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 
       <p>Accepts a map as input, and returns a new map containing those entries from the original map that satisfy the predicate function.</p>
 
-      <kbd>map:keys($map as map(*), $predicate as function(xs:anyAtomicType, item()*) as xs:boolean := true#0) as xs:atomicValue*</kbd>
+      <kbd>map:keys($map as map(*), $predicate as function(item()*) as xs:boolean := true#0) as xs:atomicValue*</kbd>
       
-      <p>The second argument is new in 2.0; if supplied,<code> map:keys</code> returns the keys from entries in the map where
+      <p>The second argument is new in 4.0; if supplied, <code>map:keys()</code> returns the keys from entries in the map where
          applying the predicate to the corresponding value returns true.</p>
       
 
@@ -889,9 +889,9 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
             anonymous inline functions. For example, <code>function($a, $b){$a + $b}</code> can be written as
                <code>($a, $b)->{$a + $b}</code>.</p>
          
-         <aside><p>This syntax is available from Saxon 12.3. The previous proposal <code>->($a, $b){$a + $b}</code>
+         <aside>This syntax is available from Saxon 12.3. The previous proposal <code>->($a, $b){$a + $b}</code>
          remains available for the time being. The new form does not allow argument types and return types to
-         be declared.</p></aside>
+         be declared.</aside>
 
          <p>The concise syntax is helpful when writing simple callbacks, for example <code>fold-left($seq, 1, ($x, $y)->{$x*$y})</code>
             to calculate the product of a sequence of numbers.</p>
@@ -1010,35 +1010,30 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
          <p>In 4.0, the term <em>coercion rules</em> replaces <em>function conversion rules</em>.</p>
          <p>These rules determine how the supplied value for a function argument or XSLT variable can differ
             from the declared type.</p>
-         <p>in XQuery 4.0, the coercion rules are now used to convert variable values to their required
+         <p>In XQuery 4.0, the coercion rules are now used to convert variable values to their required
          type. This includes both global variable declarations and local variables bound in <code>let</code>,
-         <code>for [member]</code>, and <code>group by</code> clauses of a FLWOR expression).</p>
+         <code>for [member]</code>, and <code>group by</code> clauses of a FLWOR expression.</p>
          
-         <section id="downcasting" title="Automatic downcasting">
-            <h2>Automatic downcasting</h2>
-   
-            
-            <p>The coercion rules now allow downcasting. For example, if the required type is declared as <code>xs:positiveInteger</code>
-                  then the supplied value can be <code>42</code>: there is no longer any need for the caller to cast it as 
-                  <code>xs:positiveInteger(42)</code>. Of course, an error occurs if the cast fails. The effect of this is to make
-                  derived types such as <code>xs:positiveInteger</code> much more usable. Note that this rule doesn't allow any
-                  casting operation, only a strict relabelling of the supplied value. For example, if the required type is <code>xs:integer</code>
-                  then you can supply the decimal value 3.0, but you can't supply 3.1, even though casting 3.1 to <code>xs:integer</code>
-                  is allowed.</p>
-         </section>
+         <h2>Automatic downcasting</h2>
          
-         <section id="arity-reduction" title="Arity reduction">
-            <h2>Arity reduction</h2>
-            
-            <p>The function coercion rules are extended to allow a supplied function item to have lower arity
-               than that implied by the signature of the required type. For example, <code>map:for-each</code> expects a function with
-               arguments, which are set respectively to the key and the value of an entry in the map. But if you are only interested in the key,
-               you can supply a function of arity 1, and your function will be called omitting the second argument. Similarly,
-               for a function that expects a predicate (a function of arity one), you can now supply the value <code>fn:true#0</code>
-               which has arity zero: this has the effect that the predicate will always be true.</p>
-            
-            <p>This feature is implemented from Saxon 12.3.</p>
-         </section>
+         <p>The coercion rules now allow downcasting. For example, if the required type is declared as <code>xs:positiveInteger</code>
+            then the supplied value can be <code>42</code>: there is no longer any need for the caller to cast it as 
+            <code>xs:positiveInteger(42)</code>. Of course, an error occurs if the cast fails. The effect of this is to make
+            derived types such as <code>xs:positiveInteger</code> much more usable. Note that this rule doesn't allow any
+            casting operation, only a strict relabelling of the supplied value. For example, if the required type is <code>xs:integer</code>
+            then you can supply the decimal value 3.0, but you can't supply 3.1, even though casting 3.1 to <code>xs:integer</code>
+            is allowed.</p>
+         
+         <h2>Arity reduction</h2>
+         
+         <p>The function coercion rules are extended to allow a supplied function item to have lower arity
+            than that implied by the signature of the required type. For example, <code>map:for-each()</code> expects a function with two
+            arguments, which are set respectively to the key and the value of an entry in the map. But if you are only interested in the key,
+            you can supply a function of arity 1, and your function will be called omitting the second argument. Similarly,
+            for a function that expects a predicate (a function of arity one), you can now supply the value <code>fn:true#0</code>
+            which has arity zero: this has the effect that the predicate will always be true.</p>
+         
+         <p>This feature is implemented from Saxon 12.3.</p>
       </section>
       <section id="mapping-arrow" title="Mapping arrow operator">
          <h1>Mapping arrow operator</h1>
@@ -1052,8 +1047,9 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
                which accounts for the choice of operator symbol.</p>
 
       </section>
+   </section>
 
-      <section id="other-xpath-extensions" title="Other XPath 4.0 extensions">
+      <section id="other-xpath-extensions" title="Other XPath 4.0 extensions"> 
 
          <h1>Other XPath 4.0 proposed extensions</h1>
 
@@ -1223,12 +1219,18 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp>
 
             <p>Note that the result of the expression is a sequence, not an array.</p>
             
-            <p>XPath 4.0 allows multiple <code>let</code> clauses, or multipe <code>for</code> clauses
+            
+         </section>
+         
+         <section id="for-let-expressions" title="For and let expressions">
+            <h1>For and let expressions</h1>
+            <p>XPath 4.0 allows multiple <code>let</code> clauses, or multiple <code>for</code> clauses
                (but not a mixture) in an expression. For example:</p>
             <ul>
                <li><code>let $i := 2 let $j := 3 return $i + $j</code></li>
                <li><code>for $i in 1 to 10 for $j in 1 to 3 return $i * $j</code></li>
             </ul>
+            <p>This feature is implemented from Saxon 12.3.</p>
          </section>
 
          <section id="numeric-literals" title="Numeric Literals">
@@ -1246,10 +1248,10 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp>
                   in place of <code>&lt;</code> and <code>&gt;</code> to represent the less-than and greater-than
                   operators; these characters can also be used in place of <code>&lt;</code> and <code>&gt;</code>
                   in the compound tokens <code>&lt;=</code>, <code>>=</code>, <code>&lt;&lt;</code>,
-                  <code>&gt;&gt;</code>, <code>=&gt;</code>, and <code>-&gt;</code>.</p>
+               <code>&gt;&gt;</code>, <code>=&gt;</code>, <code>-&gt;</code>, and <code>=!&gt;</code>.</p>
+            <p>This feature is implemented from Saxon 12.3.</p>
          </section>
 
-      </section>
    </section>
    <section id="xslt-syntax-extensions" title="XSLT 4.0 extensions">
       <h1>Experimental XSLT 4.0 extensions</h1>
@@ -1564,8 +1566,9 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp>
       <section id="enclosing-modes" title="Enclosing modes">
          <h1>Enclosing modes</h1>
          
-         <p>An <code>xsl:mode</code> declaration for a named mode can contain template rules within the body of the
-            <code>xsl:mode</code> declaration. This is known as an <emph>enclosing mode</emph>. Template rules
+         <p>An <a class="bodylink code" href="/xsl-elements/mode">xsl:mode</a> declaration for a named mode
+            can contain template rules within the body of the 
+            <code>xsl:mode</code> declaration. This is known as an <em>enclosing mode</em>. Template rules
          within the enclosing mode cannot have a <code>mode</code> attribute (they automatically belong to the enclosing
          mode), and any <code>xsl:apply-templates</code> instructions within these template rules default their <code>mode</code>
          attribute to the enclosing mode. Template rules within an enclosing mode cannot be overridden by template rules
@@ -1578,16 +1581,19 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp>
          <p>Template rules in an enclosing mode can in principle be overridden in another stylesheet package
          (using <code>xsl:override</code>) but this has not yet been tested.</p>
       </section>
+      
       <section id="miscellaneous-xslt40" title="Miscellaneous extensions">
          <h1>Miscellaneous extensions</h1>
 
-         <p>The <code>xsl:matching-substring</code> and <code>xsl:non-matching-substring</code> elements within
-         <code>xsl:analyze-string</code> may now take a <code>select</code> attribute in place of a contained
-         sequence constructor. (Implemented from Saxon 12.3)</p>
+         <p>The <a class="bodylink code" href="/xsl-elements/matching-substring">xsl:matching-substring</a>
+            and <a class="bodylink code" href="/xsl-elements/non-matching-substring">xsl:non-matching-substring</a> elements within
+            <a class="bodylink code" href="/xsl-elements/analyze-string">xsl:analyze-string</a> may now take a
+            <code>select</code> attribute in place of a contained sequence constructor. (Implemented from Saxon 12.3)</p>
       </section>
    </section>
+   
    <section id="xquery40-extensions" title="XQuery 4.0 extensions">
-      <head>XQuery 4.0 extensions</head>
+      <h1>XQuery 4.0 extensions</h1>
       
       <p>From 12.3, XQuery switch expressions are generalized so that each <code>case</code> may match multiple values,
          for example <code>case 0 to 9 return "single"</code>.</p>
@@ -1597,7 +1603,7 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp>
    </section>
       
       <section id="serialization40-extensions" title="Serialization 4.0 extensions">
-         <head>Serialization 4.0 extensions</head>
+         <h1>Serialization 4.0 extensions</h1>
          
          <p>From Saxon 12.3, a new serialization parameter <code>escape-solidus</code> is available. The XSLT and XQuery
             syntax for this requires 4.0 to be available, but it can be used in API calls and from the command line 

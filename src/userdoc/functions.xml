@@ -9613,10 +9613,10 @@ return saxon:serialize($x, <xsl:output method="xml"
       </signatures>
       <status>
         <p>Available since Saxon 11. The function is likely to become superseded by the proposed XPath 4.0
-        function <code>fn:slice</code>, which has a slightly different specification. All the
+        function <code>fn:slice()</code>, which has a slightly different specification. All the
         functionality except for the use of negative positions (to count from the end) is already available
-        using the XPath 4.0 function <code>fn:items-at</code>, and other common use cases can be achieved
-        using, for example, <code>fn:foot</code> and <code>fn:trunk</code>.</p>
+        using the XPath 4.0 function <code>fn:items-at()</code>, and other common use cases can be achieved
+        using, for example, <code>fn:foot()</code> and <code>fn:trunk()</code>.</p>
       </status>
       <saxon-edition>PE/EE 11</saxon-edition>
       <details>
