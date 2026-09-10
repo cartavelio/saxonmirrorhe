@@ -361,7 +361,7 @@ public class SquareArrayConstructor extends Expression implements Pingable {
             return context -> {
                 List<GroundedValue> members = new ArrayList<>(eagerEvaluators.size());
                 for (SequenceEvaluator e : eagerEvaluators) {
-                    members.add((GroundedValue)e.evaluate(context));
+                    members.add(e.evaluate(context).materialize());
                 }
                 return expr.makeArray(members);
             };
