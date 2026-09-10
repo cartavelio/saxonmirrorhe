@@ -10,6 +10,7 @@ package net.sf.saxon.option.axiom;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
+import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.tree.NamespaceNode;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
@@ -19,6 +20,7 @@ import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.Untyped;
 import net.sf.saxon.type.gnode.AnyGNodeType;
+import net.sf.saxon.type.gnode.NamedXNodeType;
 import net.sf.saxon.type.gnode.NodeKindType;
 import org.apache.axiom.om.*;
 
@@ -202,13 +204,28 @@ public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {
         } else if (nodeTest instanceof NamedXNodePredicate) {
             NamedXNodePredicate fpTest = ((NamedXNodePredicate) nodeTest);
             StructuredQName requiredName = fpTest.getMatchingNodeName();
-            String uri = requiredName.getURI();
-            String local = requiredName.getLocalPart();
-            OMAttribute att = ((OMElement) node).getAttribute(new QName(uri, local));
-            if (att == null) {
+            if (requiredName == null) {
+                // We don't have a specific name, so look for a match.
+                if (fpTest instanceof NamedXNodeType ftType) {
+                    Iterator attiter =((OMElement) node).getAllAttributes();
+                    while (attiter.hasNext()) {
+                        OMAttribute att = (OMAttribute) attiter.next();
+                        StructuredQName name = new StructuredQName(att.getQName().getPrefix(), att.getQName().getNamespaceURI(), att.getQName().getLocalPart());
+                        if (ftType.getQNameTest().matches(name)) {
+                            return SingletonIterator.makeIterator(new AxiomAttributeWrapper(att, this, -1));
+                        }
+                    }
+                }
                 return EmptyIterator.INSTANCE;
             } else {
-                return SingletonIterator.makeIterator(new AxiomAttributeWrapper(att, this, -1));
+                String uri = requiredName.getURI();
+                String local = requiredName.getLocalPart();
+                OMAttribute att = ((OMElement) node).getAttribute(new QName(uri, local));
+                if (att == null) {
+                    return EmptyIterator.INSTANCE;
+                } else {
+                    return SingletonIterator.makeIterator(new AxiomAttributeWrapper(att, this, -1));
+                }
             }
         } else {
             return new AttributeAxisIterator(this, nodeTest);

@@ -360,7 +360,10 @@ public abstract class AbstractNodeWrapper implements VirtualNode {
      */
     @Override
     public SequenceIterator iterateDescendantAxis(NodePredicate predicate) {
-        return iterateDescendants(predicate, false);
+        if (getNodeKind() == Type.DOCUMENT || getNodeKind() == Type.ELEMENT) {
+            return iterateDescendants(predicate, false);
+        }
+        return EmptyIterator.INSTANCE;
     }
 
     /**
