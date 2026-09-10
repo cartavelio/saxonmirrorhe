@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 public class TestXslt30TransformerEE {
 
-    private static class IsOptionalTest implements ExtensionFunction {
+    public static class IsOptionalTest implements ExtensionFunction {
 
         private final XsdSchema schema;
 

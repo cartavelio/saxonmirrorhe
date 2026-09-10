@@ -1,44 +1,25 @@
 package s9apitest;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.Controller;
-import net.sf.saxon.expr.PackageData;
-import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.instruct.Bindery;
-import net.sf.saxon.expr.instruct.Executable;
-import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.junit.Testdata;
-import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.FeatureKeys;
-import net.sf.saxon.lib.StandardOutputResolver;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.option.jdom2.JDOM2ObjectModel;
-import net.sf.saxon.option.xom.XOMDocumentWrapper;
-import net.sf.saxon.option.xom.XOMObjectModel;
 import net.sf.saxon.s9api.*;
-import net.sf.saxon.trace.XSLTTraceListener;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ComplexType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.QNameValue;
-import net.sf.saxon.value.StringValue;
 import org.junit.jupiter.api.Test;
-import org.xml.sax.InputSource;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.sax.SAXSource;
-import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.io.StringReader;
+import java.io.StringWriter;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 /**
@@ -81,21 +62,23 @@ public class TestXsltTransformerEE {
 
     @Test
     public void testExtensionWithSchemaAccess() {
-        // Create a Processor instance.
         try {
             Processor proc = new Processor(true);
             proc.setConfigurationProperty("http://saxon.sf.net/feature/timing", "true");
+
+            XsdCompiler sm = proc.newXsdCompiler();
+            XsdSchema schema = sm.compile(new StreamSource(Testdata.file("books.xsd")));
+            proc.registerExtensionFunction(new TestXslt30TransformerEE.IsOptionalTest(schema));
+
             XsltCompiler comp = proc.newXsltCompiler();
             comp.setSchemaAware(true);
-            StringReader sr = new StringReader("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:my='java:s9apitest.TestXsltTransformer' exclude-result-prefixes='my'>" +
+            StringReader sr = new StringReader("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:my='java:s9apitest.TestXslt30Transformer' exclude-result-prefixes='my'>" +
                     "<xsl:template match='*'><xsl:copy><xsl:copy-of select='@*'/><xsl:apply-templates/></xsl:copy></xsl:template>\n" +
                     "<xsl:template match='*/*/*/*[my:isOptional(.., node-name(.))]'/> \n" +
                     "</xsl:stylesheet>");
             XsltExecutable exec = comp.compile(new StreamSource(sr));
             XsltTransformer transformer = exec.load();
 
-            XsdCompiler sm = proc.newXsdCompiler();
-            XsdSchema schema = sm.compile(new StreamSource(Testdata.file("books.xsd")));
             DocumentBuilder builder = proc.newDocumentBuilder();
             builder.setSchemaValidator(schema.newValidator());
             XdmNode books = builder.build(Testdata.file("books.xml"));
