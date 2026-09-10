@@ -293,6 +293,38 @@ public class TestXslt30Transformer {
         }
     }
 
+    /**
+     * Test use of a resource resolver
+     */
+
+    @Test
+    public void testUseResourceResolver() {
+        try {
+            Processor proc = new Processor(false);
+            XsltCompiler xqcomp = proc.newXsltCompiler();
+
+            StringReader sr = new StringReader("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>\n" +
+                                          "<xsl:template name='xsl:initial-template'>\n" +
+                                          "<o><xsl:copy-of select=\"doc('file:///foo/bar/baz.xml')\"/></o>\n" +
+                                          "</xsl:template>\n" +
+                                          "</xsl:stylesheet>");
+
+            Xslt30Transformer trans = xqcomp.compile(new StreamSource(sr)).load30();
+            trans.setResourceResolver(request -> new StreamSource(new StringReader("<x>gotcha</x>")));
+            Serializer serializer = proc.newSerializer();
+            serializer.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
+            StringWriter sw = new StringWriter();
+            serializer.setOutputWriter(sw);
+
+            trans.callTemplate(null, serializer);
+
+            assertEquals("<o><x>gotcha</x></o>", sw.toString());
+
+        } catch (SaxonApiException e) {
+            fail();
+        }
+    }
+
 
     /**
      * Test for the case where the context item is not the root, when starting at a named template
