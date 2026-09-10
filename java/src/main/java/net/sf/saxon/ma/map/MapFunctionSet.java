@@ -244,7 +244,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     SequenceType.OPTIONAL_BOOLEAN
             );
 
-            register("filter", 2, e -> e.populate(MapFilter::new, MapType.ANY_MAP_TYPE, ONE, 0)
+            register("filter", 2, e -> e.populate(MapFilter::new, MapType.ANY_MAP_TYPE, ONE, AS_ARG0)
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                     .arg(1, FILTER_TYPE, ONE | INS, null));
 
@@ -946,6 +946,25 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             AtomicValue key = (AtomicValue) arguments[1].head();
             GroundedValue value = arguments[2].materialize();
             return baseMap.put(key, value);
+        }
+
+        @Override
+        public ItemType getResultItemType(Expression[] args) {
+            // Return type of existing map, provided the key and value are within this type
+            if (args[0].getItemType() instanceof MapType mapType) {
+                TypeHierarchy th = args[0].getConfiguration().getTypeHierarchy();
+                PlainType keyType = mapType.getKeyType();
+                SequenceType valueType = mapType.getValueType();
+                ItemType newKeyType = args[1].getItemType();
+                ItemType newValueType = args[2].getItemType();
+                int newValueCard = args[2].getCardinality();
+                if (th.isSubType(newKeyType, keyType) &&
+                        th.isSubType(newValueType, valueType.getPrimaryType()) &&
+                        Cardinality.subsumes(valueType.getCardinality(), newValueCard)) {
+                    return args[0].getItemType();
+                }
+            }
+            return super.getResultItemType(args);
         }
     }
 
