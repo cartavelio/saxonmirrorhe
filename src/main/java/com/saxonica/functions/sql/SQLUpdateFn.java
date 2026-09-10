@@ -62,6 +62,10 @@ public class SQLUpdateFn extends SystemFunction {
             values.add(as.head());
         }
 
+        if (!predicate.isEmpty()) {
+            statement.append(" WHERE ").append(predicate);
+        }
+
         try (PreparedStatement ps = connection.prepareStatement(statement.toString())) {
 
             ParameterMetaData metaData = ps.getParameterMetaData();

@@ -105,7 +105,6 @@ public class SQLInsertFn extends SystemFunction {
         } catch (SQLException ex) {
             throw new XPathException("sql:insert() failed: " + ex.getMessage(), SaxonErrorCode.SXSQ0004, context);
         }
-
         return EmptySequence.getInstance();
 
     }

@@ -1,12 +1,17 @@
 package com.saxonica.xsltextn.instruct;
 
-import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.Operand;
+import net.sf.saxon.expr.OperandRole;
+import net.sf.saxon.expr.StaticProperty;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.instruct.Instruction;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.EmptyIterator;
 
 /**
  * Compiled instruction deriving from saxon:do element in stylesheet.
@@ -58,7 +63,6 @@ public class DoInstr extends Instruction  {
         return StandardNames.SAXON_DO;
     }
 
-
     /**
      * Diagnostic print of expression structure. The abstract expression tree
      * is written to the supplied output destination.
@@ -70,6 +74,51 @@ public class DoInstr extends Instruction  {
         getActionExpr().export(out);
         out.endElement();
     }
+
+
+    @Override
+    public Elaborator getElaborator() {
+        return new DoInstructionElaborator();
+    }
+
+    public static class DoInstructionElaborator extends PushElaborator {
+
+        @Override
+        public PushEvaluator elaborateForPush() {
+            DoInstr expr = (DoInstr) getExpression();
+            SequenceEvaluator puller = expr.getActionExpr().makeElaborator().eagerly();
+            return (output, context) -> {
+                puller.evaluate(context);
+                return null;
+                // discard result
+            };
+        }
+
+        //@SuppressWarnings("Convert2MethodRef")
+        @Override
+        public PullEvaluator elaborateForPull() {
+            DoInstr expr = (DoInstr) getExpression();
+            SequenceEvaluator puller = expr.getActionExpr().makeElaborator().eagerly();
+            // discard result
+            return context -> {
+                puller.evaluate(context);
+                return EmptyIterator.getInstance();
+            };
+        }
+
+        //@SuppressWarnings("Convert2MethodRef")
+        @Override
+        public ItemEvaluator elaborateForItem() {
+            DoInstr expr = (DoInstr) getExpression();
+            SequenceEvaluator puller = expr.getActionExpr().makeElaborator().eagerly();
+            // discard result
+            return context -> {
+                puller.evaluate(context);
+                return null;
+            };
+        }
+    }
 }
+
 
 // Copyright (c) 2018-2022 Saxonica Limited
