@@ -125,7 +125,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         OptionsParameter mergeOptionDetails = new OptionsParameter(version);
         mergeOptionDetails.addAllowedOption("duplicates", duplicatesOptionType, StringValue.bmp("use-first"));
         // duplicates=unspecified is retained because that's what the XSLT 3.0 Rec incorrectly uses
-        mergeOptionDetails.addAllowedOption("retain-order", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        //mergeOptionDetails.addAllowedOption("retain-order", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
 
 
         register("merge", 2, e -> e.populate(() -> new MapMerge(version), MapType.ANY_MAP_TYPE, ONE, 0)
