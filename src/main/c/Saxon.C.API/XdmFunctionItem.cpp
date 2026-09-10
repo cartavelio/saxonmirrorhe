@@ -122,7 +122,7 @@
     }
 
     XdmValue * XdmFunctionItem::call(SaxonProcessor * processor, XdmValue ** arguments, int argument_length) {
-          if(argument_length > 0 && arguments == nullptr || processor == nullptr) {
+          if((argument_length > 0 && arguments == nullptr) || processor == nullptr) {
                       std::cerr << "Error in XdmFunctionItem.call.  nullptr arguments found." << std::endl;
                       return nullptr;
           }
