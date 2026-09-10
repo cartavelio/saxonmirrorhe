@@ -182,33 +182,11 @@ public class TypeChecker {
 
             if (reqItemType instanceof AtomicType && !itemTypeOK) {
                 int rt = ((AtomicType) reqItemType).getFingerprint();
+                ConversionRules rules = config.getConversionRules();
                 Expression promoted = null;
-                switch (rt) {
-                    case StandardNames.XS_DOUBLE:
-                        promoted = makePromoter(exp, new Converter.PromoterToDouble(), BuiltInAtomicType.DOUBLE);
-                        break;
-                    case StandardNames.XS_FLOAT:
-                        promoted = makePromoter(exp, new Converter.PromoterToFloat(), BuiltInAtomicType.FLOAT);
-                        break;
-                    case StandardNames.XS_STRING:
-                        promoted = makePromoter(exp, new Converter.PromoterToString(), BuiltInAtomicType.STRING);
-                        break;
-                    case StandardNames.XS_ANY_URI:
-                        if (allow40) {
-                            promoted = makePromoter(exp, new Converter.PromoterToAnyURI(), BuiltInAtomicType.ANY_URI);
-                        }
-                        break;
-                    case StandardNames.XS_HEX_BINARY:
-                        if (allow40) {
-                            promoted = makePromoter(exp, new Converter.PromoterToHexBinary(), BuiltInAtomicType.HEX_BINARY);
-                        }
-                        break;
-                    case StandardNames.XS_BASE64_BINARY:
-                        if (allow40) {
-                            promoted = makePromoter(exp, new Converter.PromoterToBase64Binary(), BuiltInAtomicType.BASE64_BINARY);
-                        }
-                        break;
-
+                Converter converter = makePromotingConverter(allow40, rt, rules);
+                if (converter != null) {
+                    promoted = makePromoter(exp, converter, BuiltInAtomicType.DOUBLE);
                 }
 
                 if (promoted != null) {
@@ -470,6 +448,65 @@ public class TypeChecker {
         }
 
         return exp;
+    }
+
+    /**
+     * Make an expression that performs type promotion on a supplied sequence
+     *
+     * @param allow40      true if XPath 4.0 is enabled
+     * @param requiredType the required type, the target of promotion
+     * @param rules        the conversion rules
+     * @return the promoting converter, if available for the required type, or null.
+     * Note that promoting converters not only implement
+     * type promotion (for example from decimal to double) but also perform conversion of untypedAtomic values
+     * to the target type.
+     */
+    public static Converter makePromotingConverter(boolean allow40, int requiredType, ConversionRules rules) {
+        switch (requiredType) {
+            case StandardNames.XS_DOUBLE:
+                return new Converter.PromoterToDouble(rules);
+            case StandardNames.XS_FLOAT:
+                return new Converter.PromoterToFloat(rules);
+            case StandardNames.XS_STRING:
+                return new Converter.PromoterToString();
+            case StandardNames.XS_ANY_URI:
+                if (allow40) {
+                    return new Converter.PromoterToAnyURI();
+                }
+                break;
+            case StandardNames.XS_HEX_BINARY:
+                if (allow40) {
+                    return new Converter.PromoterToHexBinary();
+                }
+                break;
+            case StandardNames.XS_BASE64_BINARY:
+                if (allow40) {
+                    return new Converter.PromoterToBase64Binary();
+                }
+                break;
+
+        }
+        return null;
+    }
+
+
+    /**
+     * Make an expression that performs type promotion on a supplied sequence
+     * @param exp the base expression (which delivers the supplied sequence)
+     * @param allow40 true if XPath 4.0 is enabled
+     * @param requiredType the required type, the target of promotion
+     * @param rules the conversion rules
+     * @return the promoter, if available for the required type, or null. Note that promoters not only implement
+     * type promotion (for example from decimal to double) but also perform conversion of untypedAtomic values
+     * to the target type.
+     */
+    public static Expression makePromoter(Expression exp, boolean allow40, int requiredType, ConversionRules rules) {
+        Converter converter = makePromotingConverter(allow40, requiredType, rules);
+        if (converter != null) {
+            return makePromoter(exp, converter, BuiltInAtomicType.DOUBLE);
+        } else {
+            return null;
+        }
     }
 
     public Expression makeArithmeticExpression(Expression lhs, int operator, Expression rhs) {

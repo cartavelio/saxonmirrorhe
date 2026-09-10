@@ -18,6 +18,8 @@ import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.*;
 
+import java.util.Objects;
+
 /**
  * A {@link Converter} that accepts a string as input. This subclass of Converter is provided
  * to avoid having to wrap the string into a StringValue prior to conversion. Every Converter whose
@@ -495,7 +497,7 @@ public abstract class StringConverter extends Converter {
 
     public static class StringToFloat extends StringConverter {
         public StringToFloat(ConversionRules rules) {
-            super(rules);
+            super(Objects.requireNonNull(rules));
         }
 
         

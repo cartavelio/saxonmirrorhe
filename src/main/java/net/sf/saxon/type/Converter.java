@@ -118,6 +118,15 @@ public abstract class Converter {
     }
 
     /**
+     * Ask if this converter implements promotion rules
+     * @return true if this Converter handles type promotion in the coercion rules
+     */
+
+    public boolean isPromoter() {
+        return false;
+    }
+
+    /**
      * Provide a namespace resolver, needed for conversion to namespace-sensitive types such as QName and NOTATION.
      * The resolver is ignored if the target type is not namespace-sensitive
      *
@@ -720,6 +729,10 @@ public abstract class Converter {
 
     public static class PromoterToDouble extends Converter {
 
+        public PromoterToDouble(ConversionRules rules) {
+            super(rules);
+        }
+
         /*@Nullable*/ private StringConverter stringToDouble = null;
 
         /*@NotNull*/
@@ -741,6 +754,10 @@ public abstract class Converter {
                 return err;
             }
         }
+
+        public boolean isPromoter() {
+            return true;
+        }
     }
 
     /**
@@ -750,6 +767,10 @@ public abstract class Converter {
     public static class PromoterToFloat extends Converter {
 
         /*@Nullable*/ private StringConverter stringToFloat = null;
+
+        public PromoterToFloat(ConversionRules rules) {
+            super(rules);
+        }
 
         /*@NotNull*/
         @Override
@@ -775,6 +796,11 @@ public abstract class Converter {
                 return err;
             }
         }
+
+        @Override
+        public boolean isPromoter() {
+            return true;
+        }
     }
 
     /**
@@ -798,6 +824,11 @@ public abstract class Converter {
                     err.setErrorCode("XPTY0004");
                     return err;
             }
+        }
+
+        @Override
+        public boolean isPromoter() {
+            return true;
         }
     }
 
@@ -823,6 +854,11 @@ public abstract class Converter {
                     err.setErrorCode("XPTY0004");
                     return err;
             }
+        }
+
+        @Override
+        public boolean isPromoter() {
+            return true;
         }
     }
 
@@ -850,6 +886,11 @@ public abstract class Converter {
                     return err;
             }
         }
+
+        @Override
+        public boolean isPromoter() {
+            return true;
+        }
     }
 
     public static class PromoterToBase64Binary extends Converter {
@@ -871,6 +912,11 @@ public abstract class Converter {
                     err.setErrorCode("XPTY0004");
                     return err;
             }
+        }
+
+        @Override
+        public boolean isPromoter() {
+            return true;
         }
     }
 
