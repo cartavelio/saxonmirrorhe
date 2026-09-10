@@ -92,6 +92,13 @@ public interface RegularExpression {
 
     String getFlags();
 
+    /**
+     * Ask whether the regular expression is using platform-native syntax (Java or .NET), or XPath syntax
+     * @return true if using platform-native syntax
+     */
+
+    boolean isPlatformNative();
+
 
 }
 
