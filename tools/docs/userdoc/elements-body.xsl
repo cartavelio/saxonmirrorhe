@@ -47,6 +47,8 @@
         <xsl:variable name="elemName" select="el:name"/>
         <xsl:variable name="default.saxon"
             select="$implementation-doc/implement/default[@id = $id]/@saxon"/>
+        <xsl:variable name="default.platform"
+            select="$implementation-doc/implement/default[@id = $id]/@platform"/>
         <h1>
             <xsl:if test="self::el:xsl-element">
                 <xsl:value-of select="concat('xsl:', $elemName)"/>
@@ -64,11 +66,6 @@
 
         <xsl:apply-templates select="el:description" mode="#current"/>
 
-        <aside>
-            <xsl:value-of select="el:specs(el:in-spec)"/>
-            <xsl:value-of select="el:edition((el:saxon-edition,$default.saxon,'default')[1])"/>
-        </aside>
-
 
         <xsl:if test="el:element-syntax/*[not(self::el:attribute)]">
             <xsl:apply-templates select="el:element-syntax" mode="model"/>
@@ -78,6 +75,13 @@
             <h3 class="subtitle">Attributes</h3>
             <xsl:apply-templates select="el:element-syntax" mode="#current"/>
         </xsl:if>
+        
+        <h3 class="subtitle">Saxon availability</h3>
+        <p>
+            <xsl:value-of select="el:specs(el:in-spec)"/>
+            <xsl:value-of select="el:edition((el:saxon-edition,$default.saxon,'default')[1])"/>
+            <xsl:value-of select="el:platform((el:saxon-edition/@platform,$default.platform,'ALL')[1])"/>
+        </p>
 
         <xsl:if test="el:status">
             <h3 class="subtitle">Notes on the Saxon implementation</h3>
@@ -408,23 +412,47 @@
     <xsl:template match="el:parent-category[@name='sequence-constructor']">
         <xsl:if test="position()>2">; </xsl:if> any XSLT element whose content model is 
         <i>sequence-constructor</i>; any literal result element </xsl:template>
+    
 
-
-    <!-- Determine text within 'Specs versions & Saxon editions' note: 
-  Spec versions in which the elements are defined. -->
+    <!-- Functions to determince the text within the 'Saxon availability' section.
+        Spec versions in which the elements are defined. -->
     <xsl:function name="el:specs" as="xs:string*">
         <xsl:param name="in" as="element(el:in-spec)*"/>
         <!-- in-spec elements should be in order such that first one $in[1] is earliest spec, to ensure the correct message. -->
         <xsl:value-of select="$implementation-doc/implement/spec[@value = $in[1]]"/>
     </xsl:function>
 
-    <!-- Determine text within 'Specs versions & Saxon editions' note: Saxon editons & versions. -->
+    <!-- Saxon editons & versions. -->
     <xsl:function name="el:edition" as="xs:string*">
         <xsl:param name="available" as="xs:string"/>
         <xsl:variable name="available"
             select="for $t in tokenize($available, '\s+') return upper-case($t)" as="xs:string*"/>
         <xsl:for-each select="$available">
             <xsl:value-of select="$implementation-doc/implement/saxon[@version = current()]"/>
+        </xsl:for-each>
+    </xsl:function>
+    
+    <!-- Availability for different platforms. -->
+    <xsl:function name="el:platform" as="xs:string*">
+        <xsl:param name="available" as="xs:string"/>
+        <xsl:variable name="availableSeq"
+            select="for $t in tokenize($available, '\s+') return upper-case($t)" as="xs:string*"/>
+        <xsl:variable name="platforms" as="xs:string">
+            <xsl:choose>
+                <xsl:when test="$availableSeq = 'J' and $availableSeq = 'C'">
+                    <xsl:value-of select="'J_C'"/>
+                </xsl:when>
+                <xsl:when test="$availableSeq = 'J' and $availableSeq = 'CS'">
+                    <xsl:value-of select="'J_CS'"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="$available"/>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+        
+        <xsl:for-each select="$platforms">
+            <xsl:value-of select="$implementation-doc/implement/saxon[@platform = current()]"/>
         </xsl:for-each>
     </xsl:function>
     
