@@ -65,7 +65,11 @@ public class SefFunction extends SystemFunction {
             List<String> messages = new ArrayList<>();
             InputStream is = Version.platform.locateResource("sef/function-library.sef.xml", messages);
             if (is == null) {
-                throw new XPathException("Failed to load built-in function library: " + messages.get(0));
+                StringBuilder sb = new StringBuilder("Failed to load built-in function library: function-library.sef.xml");
+                for (String msg : messages) {
+                    sb.append(": ").append(msg);
+                }
+                throw new XPathException(sb.toString());
             }
             pack = loader.loadPackage(new StreamSource(is));
         }
