@@ -63,16 +63,18 @@ XdmNode::~XdmNode() {
     operator delete((char *)localName);
     localName = nullptr;
   }
-//TODO fix this for C++
+    /*
+    //TODO - note that I have commented this out because it crashes in C++.
+    // This should be fine because its the users responsibility to delete children. Python/PHP does the delete.
     if (children != nullptr) {
 
         for (int p = 0; p < childCount; ++p) {
-            if(children[p]->getRefCount() < 1) {
+            if(children[p] != nullptr && children[p]->getRefCount() < 1) {
                 delete children[p];
             }
         }
         delete[] children;
-    }
+    } */
 
   /* if (nodeToString != nullptr) {
     delete[] nodeToString;

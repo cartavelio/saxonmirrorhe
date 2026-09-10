@@ -133,8 +133,10 @@ void testNodeAxis(SaxonProcessor *processor, XPathProcessor *xpath,
     }
     for (int i = 0; i < childCountA; i++) {
       delete childrenA[i];
+      childrenA[i] = nullptr;
     }
     delete[] childrenA;
+    childCountA = nullptr;
     delete[] namespaces;
   } catch (SaxonApiException &e) {
     cout << "Error Message = " << e.what() << endl;
@@ -333,6 +335,7 @@ void testXPathValues2(SaxonProcessor *processor, XPathProcessor *xpath,
         cout << "toString()=" << resultStr << endl;
         operator delete((char *)resultStr);
       }
+      sresult->success++;
     }
     delete resultValues;
   } catch (SaxonApiException &e) {
@@ -343,6 +346,75 @@ void testXPathValues2(SaxonProcessor *processor, XPathProcessor *xpath,
     sresult->failure++;
     sresult->failureList.push_back("testXPathAttrValues2");
   }
+}
+
+void testUnprefixedElementMatchingPolicy1(SaxonProcessor* processor,
+    XPathProcessor* xpath,
+    sResultCount* sresult) {
+
+    cout << endl << "Test testUnprefixedElementMatchingPolicy1:" << endl;
+    XdmNode* node = processor->parseXmlFromString(
+        "<root xmlns=\"http://example.com/ns\"><person>person 1</person><person>person 2</person></root>");
+    xpath->setContextItem((XdmItem*)node);
+    xpath->setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy::ANY_NAMESPACE);
+    try {
+
+        XdmItem* result = xpath->evaluateSingle("//person");
+        if (result == nullptr) {
+            cout << "No node found by XPath //person without prefix." << endl;
+            sresult->failure++;
+            sresult->failureList.push_back("testUnprefixedElementMatchingPolicy1");
+        }
+        else {
+            const char* resultStr = result->getStringValue();
+            cout << "String Value of result=" << resultStr << endl;
+            sresult->success++;
+            delete result;
+            operator delete((char*)resultStr);
+        }
+    }
+    catch (SaxonApiException& e) {
+        cout << "Error Message = " << e.what() << endl;
+        sresult->failure++;
+        sresult->failureList.push_back("testUnprefixedElementMatchingPolicy1");
+    }
+
+    xpath->clearParameters();
+    xpath->clearProperties();
+
+    delete node;
+}
+
+
+// Test case on XdmValue without any item (i.e. EmptySequence)
+void testEmptyXdmValueToString(SaxonProcessor *processor, XPathProcessor *xpath,
+                     sResultCount *sresult) {
+      cout << endl << "Test testEmptyXdmValueToString:" << endl;
+    XdmValue * value = new XdmValue();
+
+    try {
+
+        const char * result = value->toString();
+        if(result == nullptr) {
+               sresult->failure++;
+               sresult->failureList.push_back("testEmptyXdmValueToString");
+        } else {
+                cout << "XdmValue().toString() (should be empty)=" << result << endl;
+                operator delete((char *)result);
+            }
+            sresult->success++;
+
+
+    } catch(SaxonApiException &e) {
+
+               const char *message = e.getMessage();
+               cout << "Error Message = " << message << endl;
+
+               sresult->failure++;
+               sresult->failureList.push_back("testEmptyXdmValueToString");
+             }
+
+
 }
 
 // Test case on the evaluate method in XPathProcessor. Here we test that we have
@@ -506,6 +578,19 @@ int main() {
        << endl
        << endl;
   testXPathValues(processor, xpathProc, sresult);
+  cout << endl
+       << "============================================================="
+       << endl
+       << endl;
+
+    cout << endl
+         << "============================================================="
+         << endl
+         << endl;
+
+  testUnprefixedElementMatchingPolicy1(processor, xpathProc, sresult);
+
+  testEmptyXdmValueToString(processor, xpathProc, sresult);
   cout << endl
        << "============================================================="
        << endl
