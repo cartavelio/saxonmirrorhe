@@ -13,6 +13,10 @@ namespace java.util {
         public IdentityHashMap() : base (new java.util.ReferenceEqualityComparer<K>()) {            
             
         }
+        
+        public IdentityHashMap(int allocation) : base (allocation,new java.util.ReferenceEqualityComparer<K>()) {            
+            
+        }
     }
     
     public sealed class ReferenceEqualityComparer<K> : IEqualityComparer<K> {

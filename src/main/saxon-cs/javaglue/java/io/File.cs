@@ -21,6 +21,12 @@ namespace java.io {
             throw new NotImplementedException(); 
             // transpiler should convert to call on static factory method Resolve
         }
+        
+        public File(string dir, string name) {
+            throw new NotImplementedException();
+        }
+
+        public static string separator = "/";
 
         public static File Resolve(File dir, string localName) {
             return new File(Path.GetFullPath(Path.Combine(dir.fileName, localName)));
@@ -77,22 +83,59 @@ namespace java.io {
         public File getParentFile() {
             return new File(Path.GetDirectoryName(fileName));
         }
+        
+        public string getParent() {
+            return Path.GetDirectoryName(fileName);
+        }
 
         public bool isDirectory() {
             return SysIOFile.GetAttributes(Path.GetFullPath(fileName)).HasFlag(FileAttributes.Directory);
+        }
+        
+        public bool isFile() {
+            return !isDirectory();
+        }
+        
+        public bool isAbsolute() {
+            return Path.IsPathRooted(fileName);
+        }
+
+        public File getCanonicalFile() {
+            throw new NotImplementedException();
         }
 
         public bool isHidden() {
             return SysIOFile.GetAttributes(Path.GetFullPath(fileName)).HasFlag(FileAttributes.Hidden);
         }
 
+        public bool delete() {
+            throw new NotImplementedException();
+        }
+        
+        public void deleteOnExit() {
+            throw new NotImplementedException();
+        }
+
         public void createNewFile() {
             Stream stream = SysIOFile.Create(fileName); // TODO: use the returned stream...
             stream.Close();
         }
+        
+        public void mkdir() {
+            throw new NotImplementedException();
+        }
 
-        public void mkdirs() {
+        public bool mkdirs() {
             Directory.CreateDirectory(fileName);
+            return true;
+        }
+
+        public static File createTempFile(string prefix, string suffix) {
+            throw new NotImplementedException();
+        }
+        
+        public static File createTempFile(string prefix, string suffix, File dir) {
+            throw new NotImplementedException();
         }
 
         public bool renameTo(File file) {
@@ -102,9 +145,17 @@ namespace java.io {
         public string[] list() {
             return Directory.GetFiles(fileName);
         }
+        
+        public File[] listFiles() {
+            throw new NotImplementedException();
+        }
 
         public File[] listFiles(FilenameFilter filter) {
-            return new File[0];
+            throw new NotImplementedException();
+        }
+
+        public System.IO.FileStream makeAppendOutputStream() {
+            return new(fileName, FileMode.Append, FileAccess.Write);
         }
     }
 }

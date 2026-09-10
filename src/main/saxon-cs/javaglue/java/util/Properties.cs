@@ -36,6 +36,10 @@ namespace java.util {
             dict.Remove(key);
         }
 
+        public void clear() {
+            dict.Clear();
+        }
+
         // public Enumeration<string> propertyNames() {
         //     throw new UnsupportedOperationException("not yet implemented");
         // }

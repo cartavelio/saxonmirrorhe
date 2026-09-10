@@ -21,5 +21,7 @@ namespace java.net {
         public System.Uri toURI() {
             throw new NotImplementedException();
         }
+
+        
     }
 }

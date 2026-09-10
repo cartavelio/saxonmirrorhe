@@ -17,6 +17,11 @@ namespace javax.xml.transform.stream {
         public StreamResult(java.io.File file) {
             
         }
+
+        public StreamResult(string sysId) {
+            setSystemId(sysId);
+        }
+        
         public string getSystemId() {
             return sysId;
         }

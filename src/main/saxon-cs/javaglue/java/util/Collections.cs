@@ -42,6 +42,18 @@ namespace java.util
                 c.add(extra);
             }
         }
+        
+        public static bool disjoint<T>(SysCollGen.ISet<T> a, SysCollGen.ISet<T> b)
+        // More restrictive than the JDK method, but adequate for our purposes
+        {
+            foreach (T item in a) {
+                if (b.Contains(item)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
 
         public static SysCollGen.List<T> emptyList<T>() {
             return new SysCollGen.List<T>();

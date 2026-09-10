@@ -11,8 +11,8 @@ namespace java.lang {
             return _thread.GetHashCode();
         }
 
-        public static void sleep(int ms) {
-            SysThread.Thread.Sleep(ms);
+        public static void sleep(long ms) {
+            SysThread.Thread.Sleep((int)ms);
         }
         
         public static Thread currentThread() {

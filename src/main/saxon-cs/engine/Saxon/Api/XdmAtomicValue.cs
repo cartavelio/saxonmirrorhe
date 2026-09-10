@@ -43,7 +43,7 @@ namespace Saxon.Api {
         /// Construct an atomic value of type <c>xs:string</c>
         /// </summary>
         /// <param name="str">The string value</param>
-        public XdmAtomicValue(String str) : base(new StringItem(str)) {
+        public XdmAtomicValue(String str) : base(new StringValue(str)) {
         }
 
         /// <summary>
@@ -318,7 +318,7 @@ namespace Saxon.Api {
             else if (av is NumericValue) {
                 return !av.isNaN() && ((NumericValue) av).signum() != 0;
             }
-            else if (av is StringItem) {
+            else if (av is StringValue) {
                 String s = av.getStringValue().Trim();
                 return "1".Equals(s) || "true".Equals(s);
             }
@@ -345,7 +345,7 @@ namespace Saxon.Api {
                     throw new ArgumentException("Cannot cast item to an integer");
                 }
             }
-            else if (av is StringItem) {
+            else if (av is StringValue) {
                 StringToDouble converter = StringToDouble.getInstance();
                 return (long) converter.stringToNumber(av.getUnicodeStringValue());
             }
@@ -369,7 +369,7 @@ namespace Saxon.Api {
             else if (av is NumericValue) {
                 return ((NumericValue) av).getDoubleValue();
             }
-            else if (av is StringItem) {
+            else if (av is StringValue) {
                 try {
                     StringToDouble converter = StringToDouble11.getInstance();
                     return converter.stringToNumber(av.getUnicodeStringValue());
@@ -401,7 +401,7 @@ namespace Saxon.Api {
                     throw new ArgumentException("Cannot cast item to a decimal");
                 }
             }
-            else if (av is StringItem) {
+            else if (av is StringValue) {
                 return Convert.ToDecimal(av.getUnicodeStringValue().ToString());
             }
             else {

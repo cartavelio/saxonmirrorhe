@@ -138,7 +138,7 @@ namespace SaxonCS3.Saxon.Impl.Helpers {
             String g2 = s2.ToString();
             int i = comparer.IndexOf(g1, g2, options);
             if (i < 0) {
-                return EmptyUniString.getInstance();
+                return EmptyUnicodeString.getInstance();
             }
             // We need to know where the matched string ends. Start with a guess, that the matched string
             // is the same length as s2. If it's not, try shorter and longer strings until we find one that's
@@ -164,13 +164,13 @@ namespace SaxonCS3.Saxon.Impl.Helpers {
                 }
                 if (reachedStart && reachedEnd) {
                     // shouldn't happen
-                    return EmptyUniString.getInstance();
+                    return EmptyUnicodeString.getInstance();
                 }
             }
         }
 
-        private StringItem stringValueFrom(String s, int from) {
-            return new StringItem(s.Substring(from));
+        private StringValue stringValueFrom(String s, int from) {
+            return new StringValue(s.Substring(from));
         }
 
         /**
@@ -187,7 +187,7 @@ namespace SaxonCS3.Saxon.Impl.Helpers {
             String g2 = s2.ToString();
             int j = comparer.IndexOf(g1, g2, options);
             if (j < 0) {
-                return EmptyUniString.getInstance();
+                return EmptyUnicodeString.getInstance();
             }
             return s1.substring(0, j);
         }
