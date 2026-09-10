@@ -396,7 +396,7 @@
       </result>
    </test-case>
    
-   <test-case name="for-each-separator-011">
+   <test-case name="apply-templates-separator-011">
       <description>xsl:apply-templates/@separator="" inhibits space separation</description>
       <created by="Michael Kay" on="2020-07-08"/>
       <dependencies>
@@ -404,7 +404,7 @@
       </dependencies>
       <environment ref="sep-A"/>
       <test>
-         <stylesheet file="for-each-separator-011.xsl"/>
+         <stylesheet file="apply-templates-separator-011.xsl"/>
       </test>
       <result>
          <all-of>
