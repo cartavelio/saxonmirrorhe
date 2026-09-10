@@ -153,7 +153,7 @@ public class Trace extends SystemFunction implements Traceable {
      * Tracing Iterator class
      */
 
-    private class TracingIterator implements SequenceIterator {
+    private static class TracingIterator implements SequenceIterator {
 
         private final SequenceIterator base;
         private final String label;
