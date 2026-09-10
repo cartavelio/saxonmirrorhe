@@ -8,8 +8,12 @@
 package net.sf.saxon.expr.number;
 
 import net.sf.saxon.lib.Numberer;
-import net.sf.saxon.str.*;
+import net.sf.saxon.str.EmptyUnicodeString;
+import net.sf.saxon.str.StringTool;
+import net.sf.saxon.str.Twine8;
+import net.sf.saxon.str.UnicodeString;
 
+import java.util.Arrays;
 import java.util.Locale;
 
 /**
@@ -28,6 +32,9 @@ public abstract class AbstractNumberer implements Numberer {
     public static final int UPPER_CASE = 0;
     public static final int LOWER_CASE = 1;
     public static final int TITLE_CASE = 2;
+
+    public static int[] lowerCaseAlphabet = StringTool.expand(new Twine8("0123456789abcdefghijklmnopqrstuvwxyz"));
+    public static int[] upperCaseAlphabet = StringTool.expand(new Twine8("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
 
 
     /**
@@ -153,20 +160,13 @@ public abstract class AbstractNumberer implements Numberer {
                          String cardinal,
                          String ordinal) {
 
-        int radix = 10;
         int[] digits = westernDigits;
         if (letterValue != null && letterValue.startsWith("x")) {
-            radix = Integer.parseInt(letterValue.substring(1));
-            digits = new int[radix];
-            for (int i=0; i<radix; i++) {
-                digits[i] = "0123456789abcdefghijklmnopqrstuvwxyz".charAt(i);
-            }
+            int radix = Integer.parseInt(letterValue.substring(1));
+            digits = Arrays.copyOf(lowerCaseAlphabet, radix);
         } else if (letterValue != null && letterValue.startsWith("X")) {
-            radix = Integer.parseInt(letterValue.substring(1));
-            digits = new int[radix];
-            for (int i = 0; i < radix; i++) {
-                digits[i] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".charAt(i);
-            }
+            int radix = Integer.parseInt(letterValue.substring(1));
+            digits = Arrays.copyOf(upperCaseAlphabet, radix);
         }
         if (number < 0) {
             return "" + number;
@@ -178,7 +178,7 @@ public abstract class AbstractNumberer implements Numberer {
 
         StringBuilder sb = new StringBuilder(16);
         int formchar = picture.codePointAt(0);
-        if (radix != 10) {
+        if (formchar == 'X' || formchar == 'x') {
             formchar = '0';
         }
 
