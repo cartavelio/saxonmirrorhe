@@ -63,6 +63,11 @@ public class ValidationFailure
         setErrorCode("FORG0001");
     }
 
+    public ValidationFailure(String message, String errorCode) {
+        this.message = message;
+        setErrorCode(errorCode);
+    }
+
     /**
      * Creates a new ValidationFailure with the given nested
      * exception.

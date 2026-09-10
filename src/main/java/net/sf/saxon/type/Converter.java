@@ -228,7 +228,7 @@ public abstract class Converter {
                 return input;
             }
             if (input.getUType() != newType.getUType()) {
-                return new ValidationFailure("Cannot convert " + input.toShortString() + " to " + newType.getDisplayName());
+                return new ValidationFailure("Cannot convert " + input.toShortString() + " to " + newType.getDisplayName(), errorCode);
             }
             ValidationFailure f = newType.validate(input, lexicalForm, getConversionRules());
             if (f == null) {
