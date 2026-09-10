@@ -324,12 +324,11 @@ XdmValue * Xslt30Processor::transformFileToValue(const char* sourcefile,const ch
 		return nullptr;
 	}
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
-    int64_t  result = j_transformToValue(SaxonProcessor::sxn_environ->thread,(char *)cwdXT.c_str(), (void *)cppXT, (void *)-1, (char *)sourcefile, (char *)stylesheetfile, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
 
-std::cerr<<"transformFileToValue result="<<result<<std::endl;
+    int64_t  result = j_transformToValue(SaxonProcessor::sxn_environ->thread,(char *)cwdXT.c_str(), (void *)cppXT, (void *) nullptr, (char *)sourcefile, (char *)stylesheetfile, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
+
     if (result > 0) {
                 int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)result);
-        std::cerr<<"transformFileToValue type="<<typeRef<<std::endl;
 			    XdmValue * value = new XdmValue();
           		XdmItem * xdmItem = nullptr;
 
@@ -385,7 +384,7 @@ void Xslt30Processor::transformFileToFile(const char* source,
 		return;
 	}
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
-    long status = j_transformToFile(SaxonProcessor::sxn_environ->thread,(char *)cwdXT.c_str(), (void *)cppXT, (void *)-1, (char *)source, (char *)stylesheet, (char *)outputfile, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
+    long status = j_transformToFile(SaxonProcessor::sxn_environ->thread,(char *)cwdXT.c_str(), (void *)cppXT, (void *) nullptr, (char *)source, (char *)stylesheet, (char *)outputfile, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
     if(status == -2) {
         createException();
     }
@@ -406,7 +405,7 @@ const char * Xslt30Processor::transformFileToString(const char* source,
 	}
     allocFn fn = operator new;
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
-    char * result = j_transformToString(SaxonProcessor::sxn_environ->thread,(void *)fn, (char *)cwdXT.c_str(), (void *)cppXT, (void *)-1, (char *)source, (char *)stylesheet, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
+    char * result = j_transformToString(SaxonProcessor::sxn_environ->thread,(void *)fn, (char *)cwdXT.c_str(), (void *)cppXT, (void *) nullptr, (char *)source, (char *)stylesheet, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
     if(result == nullptr) {
         createException();
     }

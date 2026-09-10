@@ -893,7 +893,7 @@ void exampleTransformToFile(SaxonProcessor * sproc, Xslt30Processor *proc, sResu
 
 void exampleTransformToString(SaxonProcessor * sproc, Xslt30Processor *proc, sResultCount *sresult) {
     cout << "<b>exampleTransformToString:</b><br/>" << endl;
-
+    proc->exceptionClear();
     XdmNode* xmlfile = sproc->parseXmlFromString("<xml>\n"
                                                  " <value>5</value>\n"
                                                  "</xml>");
@@ -935,7 +935,7 @@ void exampleTransformToString(SaxonProcessor * sproc, Xslt30Processor *proc, sRe
 
     if (result == nullptr) {
 
-
+        cerr << "exampleTransformToString: result is NULL" << endl;
         if (executable->exceptionOccurred()) {
             cout << executable->getErrorMessage() << endl;
         }
@@ -1275,14 +1275,9 @@ void xmarkTest2(Xslt30Processor *proc, sResultCount *sresult) {
                     cerr << message << endl;
 
                 }
-                delete exception;
-                exception = nullptr;
 
-            } /*else {
-                cerr << "Exception object is nullptr" << endl;
-                SaxonProcessor::sxn_environ->env->ExceptionDescribe();
-		        SaxonProcessor::sxn_environ->env->ExceptionClear();
-            } */
+
+            }
             proc->exceptionClear();
         }
     }
@@ -1306,7 +1301,10 @@ void exampleSimple_xmark(Xslt30Processor *proc, sResultCount *sresult) {
     } else {
         printf("Result is null \nCheck For errors:");
         if (proc->exceptionOccurred()) {
-            cout << proc->getErrorMessage() << endl;
+            const char * message = proc->getErrorMessage();
+            if(message != nullptr) {
+                cout << proc->getErrorMessage() << endl;
+            }
         }
         sresult->failure++;
         sresult->failureList.push_back("exampleSimple_xmark");
