@@ -50,24 +50,24 @@
               >PySaxonApiError</a>, and in the PHP extension as a PHP exception.</p>
 
        <p>C++ Example: handling exceptions</p>
-       <samp><![CDATA[          try {
-              xmlfile = sproc->parseXmlFromString("<xml><value>5</value></xml>");
-          } catch (SaxonApiException &e) {
-              const char * emessage = e.getMessage();
-              if (emessage != nullptr) {
-                  cerr <<"exampleTransformToFile error: "<< emessage << endl;
-              }
-              return;
-          }]]></samp>
+       <pre><code class="language-clike"><![CDATA[try {
+    xmlfile = sproc->parseXmlFromString("<xml><value>5</value></xml>");
+} catch (SaxonApiException &e) {
+    const char * emessage = e.getMessage();
+    if (emessage != nullptr) {
+        cerr <<"exampleTransformToFile error: "<< emessage << endl;
+    }
+    return;
+}]]></code></pre>
 
        <p>Python Example: handling exceptions</p>
-       <samp><![CDATA[          try:
-              xdm_node = doc_builder.parse_xml(xml_file='example.xml')
-              if xdm_node is not None:
-                  print(xdm_node)
+       <pre><code class="language-python"><![CDATA[try:
+    xdm_node = doc_builder.parse_xml(xml_file='example.xml')
+    if xdm_node is not None:
+        print(xdm_node)
 
-          except  PySaxonApiError as err:
-              print("Error: ", err)]]></samp>
+except  PySaxonApiError as err:
+    print("Error: ", err)]]></code></pre>
        
        <h2 class="subtitle">Debugging tools</h2>
        

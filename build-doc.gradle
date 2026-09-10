@@ -971,7 +971,10 @@ task copy_saxonc_css(
   description: "Copy SaxonC documentation CSS"
 ) {
   into "${buildDir}/website/saxon-c/documentation${saxonMajorVersion}"
-  from "${projectDir}/src/docs/saxonc-doc/jstree.css"
+  from ("${projectDir}/src/docs/saxonc-doc") {
+    include "jstree.css"
+    include "prism.css"
+  }
   filter { line ->
     line.contains("url('saxon-base.css')")
             ? line.replace("saxon-base.css", "../../saxon-base.css")
