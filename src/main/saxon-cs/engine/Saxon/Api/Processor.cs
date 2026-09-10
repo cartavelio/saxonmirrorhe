@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Xml;
+using Org.XmlResolver.Features;
 using Saxon.Ejavax.xml.transform.stream;
 using Saxon.Hej;
 using Saxon.Hej.@event;
@@ -167,22 +169,36 @@ namespace Saxon.Api {
 
         public SchemaManager SchemaManager => schemaManager ??= new SchemaManager(this);
 
+        // /// <summary>
+        // /// An <c>XmlResolver</c>, which will be used while compiling and running queries, 
+        // /// XPath expressions, and stylesheets, if no other <c>XmlResolver</c> is nominated
+        // /// </summary>
+        // /// <remarks>
+        // /// <para>By default a <c>StandardXmlResolver</c> is used.</para>
+        // /// <para>When Saxon invokes a user-written <c>XmlResolver</c>, the <c>GetEntity</c> method
+        // /// may return any of: a <c>System.IO.Stream</c>; a <c>System.IO.TextReader</c>; or a
+        // /// <c>Saxon.Ejava.xml.transform.Source</c>.</para>
+        // /// </remarks>
+        //
+        // public XmlResolver XmlResolver {
+        //     get => Implementation.getCommonResourceResolver();
+        //     set {
+        //         Implementation.getCommonResourceResolver().chain(new XmlResolverWrapper(value));
+        //     }
+        // }
+        
         /// <summary>
-        /// An <c>XmlResolver</c>, which will be used while compiling and running queries, 
-        /// XPath expressions, and stylesheets, if no other <c>XmlResolver</c> is nominated
+        /// Set one or more catalog files to be used for resolving URIs
         /// </summary>
         /// <remarks>
-        /// <para>By default a <c>StandardXmlResolver</c> is used.</para>
-        /// <para>When Saxon invokes a user-written <c>XmlResolver</c>, the <c>GetEntity</c> method
-        /// may return any of: a <c>System.IO.Stream</c>; a <c>System.IO.TextReader</c>; or a
-        /// <c>Saxon.Ejava.xml.transform.Source</c>.</para>
+        /// <para>The call has no effect unless the configuration is using resolver that does not use catalogs.</para>
         /// </remarks>
+        /// <param name="fileNames">A list of filenames. (Usually a single filename.)
+        /// The call has no effect if the list is empty.
+        /// Relative filenames are interpreted relative to the current working directory.</param>
 
-        public XmlResolver XmlResolver {
-            get => Implementation.getCommonResourceResolver();
-            set {
-                Implementation.getCommonResourceResolver().chain(new XmlResolverWrapper(value));
-            }
+        public void SetCatalogFile(params string[] fileNames) {
+            Implementation.getCommonResourceResolver().SetFeature(ResolverFeature.CATALOG_FILES, fileNames.ToList());
         }
 
         /// <summary>
@@ -224,7 +240,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns>A new <c>DocumentBuilder</c></returns>
         public DocumentBuilder NewDocumentBuilder() {
-            return new DocumentBuilder(this) {EntityResolver = XmlResolver};
+            return new DocumentBuilder(this);
         }
         
         /// <summary>

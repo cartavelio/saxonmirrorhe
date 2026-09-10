@@ -2,6 +2,7 @@ using System;
 using System.Impl.Helpers;
 using System.IO;
 using System.Xml;
+using Saxon.Callbacks;
 using Saxon.Ejava.lang;
 using Saxon.Ejavax.xml.transform;
 using Saxon.Hej;
@@ -33,13 +34,20 @@ namespace Saxon.Api {
             this.processor = processor;
             this.s9Builder = processor.JProcessor.newDocumentBuilder();
             this.config = processor.Implementation;
-            this.resourceResolver = config.getCommonResourceResolver().DereferenceLocation;
+            this.resourceResolver = config.getCommonResourceResolver().chain(new DirectResourceResolver()).Resolve;
+            this.EntityResolver = config.getCommonResourceResolver().GetEntityResolver();
 
         }
         
         /// <summary>
         /// An XmlDocumentResolver used to resolve any URI passed to the <c>Build</c> method.
         /// </summary>
+        /// <remarks>
+        /// <para>If a resolver is supplied, it must take total responsibility for resolving all URIs;
+        /// there is no fallback if it returns null or raises an error. If the resolver is to handle
+        /// some URIs but delegate the handling of others, this can be achieved by creating a
+        /// <c>CommonResourceResolver</c> and chaining a <c>DirectResourceResolver</c>.</para>
+        /// </remarks>
         
         public ResourceResolver XmlDocumentResolver {
             get => resourceResolver;
@@ -52,6 +60,8 @@ namespace Saxon.Api {
         /// allocates an <c>XmlReader</c>.
         /// </summary>
         /// <remarks>
+        /// <para>If no <c>EntityResolver</c> is supplied, the <c>XmlResolver</c> associated with the
+        /// Saxon configuration is used (<c>Configuration.getCommonResourceResolver().GetEntityResolver()</c>)</para>
         /// <para>In Saxon releases prior to 11.1, an <c>XmlResolver</c> was also used to
         /// resolve the URI passed to the <c>DocumentBuilder.Build()</c> method.</para>
         /// </remarks>
@@ -253,7 +263,7 @@ namespace Saxon.Api {
                 Nature = ResourceRequest.XML_NATURE
             };
             IResource resource = XmlDocumentResolver.Invoke(request) 
-                                 ?? processor.Implementation.getCommonResourceResolver().DereferenceLocation(request);
+                                 ?? processor.Implementation.getCommonResourceResolver().Resolve(request);
 
             if (resource == null) {
                 throw new SaxonApiException("Unable to resolve URI " + uri);

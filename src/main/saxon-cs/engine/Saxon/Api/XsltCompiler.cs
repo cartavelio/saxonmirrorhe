@@ -46,7 +46,7 @@ namespace Saxon.Api {
             this.processor = processor;
             jXsltCompiler = processor.JProcessor.newXsltCompiler();
             jXsltCompiler.getUnderlyingCompilerInfo().setCommonResourceResolver(processor.Implementation.getCommonResourceResolver());
-            resourceResolver = request => processor.Implementation.getCommonResourceResolver().DereferenceLocation(request);
+            resourceResolver = processor.Implementation.getCommonResourceResolver().chain(new DirectResourceResolver()).Resolve;
         }
 
         /// <summary>
@@ -104,7 +104,7 @@ namespace Saxon.Api {
             get => resourceResolver;
             set {
                 resourceResolver = value;
-                jXsltCompiler.setURIResolver(new UriResolverWrappingDocumentResolver(value));
+                jXsltCompiler.setURIResolver(new UriResolverWrappingDocumentResolver(value, processor.Implementation));
             }
         }
 

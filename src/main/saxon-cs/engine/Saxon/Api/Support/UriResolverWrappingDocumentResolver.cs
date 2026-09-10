@@ -1,6 +1,8 @@
 using System;
 using System.Impl.Helpers;
+using Saxon.Callbacks;
 using Saxon.Ejavax.xml.transform;
+using Saxon.Hej;
 using Saxon.Hej.om;
 using Saxon.Hej.pull;
 
@@ -8,9 +10,11 @@ namespace Saxon.Api.Support {
     public class UriResolverWrappingDocumentResolver : URIResolver {
 
         private readonly ResourceResolver resolver;
+        private readonly Configuration config;
 
-        public UriResolverWrappingDocumentResolver(ResourceResolver resolver) {
+        public UriResolverWrappingDocumentResolver(ResourceResolver resolver, Configuration config) {
             this.resolver = resolver;
+            this.config = config;
         }
         public Source resolve(string relativeUri, string baseUri) {
             IResource resource = null;
@@ -45,9 +49,7 @@ namespace Saxon.Api.Support {
                 return source;
             }
             if (resource is TextResource text) {
-                string content = text.Content;
-                // TODO...
-                return null;
+                return StandardURIResolver.ConvertToActiveSource(text, text.ResourceUri, config);
             }
             else {
                 XdmNode node = (XdmNode)resource.GetXdmItem();

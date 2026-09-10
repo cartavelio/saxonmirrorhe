@@ -33,9 +33,18 @@ namespace Saxon.Api {
 
         // internal constructor
 
-        internal XQueryEvaluator(Saxon.Hej.s9api.XQueryEvaluator eval) {
+        internal XQueryEvaluator(Processor processor, Saxon.Hej.s9api.XQueryEvaluator eval) {
             this.evaluator = eval;
+            this.Processor = processor;
+            XmlDocumentResolver = processor.Implementation.getCommonResourceResolver()
+                .chain(new DirectResourceResolver()).Resolve;
         }
+        
+        /// <summary>
+        /// Get the <c>Processor</c> from which this <c>XQueryCompiler</c> was constructed
+        /// </summary>
+
+        public Processor Processor { get; }
 
         /// <summary>
         /// The context item for the query.
@@ -129,7 +138,7 @@ namespace Saxon.Api {
             get => xmlDocumentResolver;
             set {
                 xmlDocumentResolver = value;
-                evaluator.setURIResolver(new UriResolverWrappingDocumentResolver(value));
+                evaluator.setURIResolver(new UriResolverWrappingDocumentResolver(value, evaluator.getUnderlyingQueryContext().getConfiguration()));
             }
         }
 
