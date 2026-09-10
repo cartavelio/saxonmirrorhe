@@ -320,6 +320,22 @@ task product_xmljavadoc(
   }
 }
 
+task chunk_xmljavadoc(
+  type: JavaExec,
+  dependsOn: ["product_xmljavadoc"],
+  description: "Convert javadoc XML into format for documentation"
+) {
+  inputs.files fileTree(dir: "${buildDir}/xmljavadoc")
+  inputs.file "${projectDir}/tools/docs/javadoc/chunk-xmljavadoc.xsl"
+  outputs.files fileTree(dir: "${buildDir}/xmljavadoc-xml")
+  classpath = configurations.documentation
+  mainClass = "com.saxonica.Transform"
+  args "-s:${buildDir}/xmljavadoc/doclet.xml",
+          "-xsl:${projectDir}/tools/docs/javadoc/chunk-xmljavadoc.xsl",
+          "-o:${buildDir}/xmljavadoc-xml/out",
+          "base-output=${buildDir}/xmljavadoc-xml/"
+}
+
 task product_xsljavadoc(
   type: JavaExec,
   dependsOn: ["product_jeljavadoc"],
