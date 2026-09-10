@@ -498,7 +498,8 @@ TODO: rethink redefines and override
             <li><p>PR1622 - XSLT map-for-key function</p></li>
             <li><p>Deep lookup expressions with wildcards ??* (works in XQuery, not in XPath)</p></li>
             <li><p>xsl:record instruction</p></li>
-            <li><p></p></li>
+            <li><p>The <code>include-template-content</code> option of <code>parse-html</code>
+            and <code>html-doc</code>.</p></li>
             <li><p></p></li>
             <li><p></p></li>
         </ul>
