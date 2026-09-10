@@ -72,6 +72,11 @@ public class AdjacentTextNodeMerger extends UnaryExpression {
         }
     }
 
+    private static boolean canDeliverAdjacentTextNodes(Expression expr, TypeHierarchy th) {
+        return th.relationship(expr.getItemType(), NodeKindType.TEXT) != Affinity.DISJOINT
+                        && Cardinality.allowsMany(expr.getCardinality());
+    }
+
     /*@NotNull*/
     @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
@@ -80,23 +85,21 @@ public class AdjacentTextNodeMerger extends UnaryExpression {
         // This wrapper expression is unnecessary if the base expression cannot return text nodes,
         // or if it can return at most one item
         TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
-        if (th.relationship(getBaseExpression().getItemType(), NodeKindType.TEXT) == Affinity.DISJOINT) {
+        if (!canDeliverAdjacentTextNodes(getBaseExpression(), th)) {
             Expression base = getBaseExpression();
             base.setParentExpression(getParentExpression());
             return base;
         }
-        if (!Cardinality.allowsMany(getBaseExpression().getCardinality())) {
-            Expression base = getBaseExpression();
-            base.setParentExpression(getParentExpression());
-            return base;
-        }
-        // In a choose expression, we can push the wrapper down to the action branches (whence it may disappear)
+        // In a `choose` expression, we can push the wrapper down to the action branches (whence it may disappear)
         if (getBaseExpression() instanceof Choose) {
             Choose choose = (Choose) getBaseExpression();
             for (int i = 0; i < choose.size(); i++) {
-                AdjacentTextNodeMerger atm2 = new AdjacentTextNodeMerger(choose.getAction(i));
-                choose.setAction(i, atm2.typeCheck(visitor, contextInfo));
+                if (canDeliverAdjacentTextNodes(choose.getAction(i), th)) {
+                    AdjacentTextNodeMerger atm2 = new AdjacentTextNodeMerger(choose.getAction(i));
+                    choose.setAction(i, atm2);
+                }
             }
+            ExpressionTool.validateTree(choose);
             return choose;
         }
         // In a Block expression, check whether adjacent text nodes can occur (used in test strmode089)

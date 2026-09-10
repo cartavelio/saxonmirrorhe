@@ -54,7 +54,9 @@ public class BooleanFn extends SystemFunction {
         Configuration config = visitor.getConfiguration();
         TypeHierarchy th = config.getTypeHierarchy();
         boolean forStreaming = visitor.isOptimizeForStreaming();
-        exp = ExpressionTool.unsortedIfHomogeneous(exp, forStreaming);
+        Expression e2 = ExpressionTool.unsortedIfHomogeneous(exp, forStreaming);
+        boolean changed = e2 != exp;
+        exp = e2;
         if (exp instanceof Literal) {
             GroundedValue val = ((Literal)exp).getGroundedValue();
             if (val instanceof BooleanValue) {
@@ -86,7 +88,7 @@ public class BooleanFn extends SystemFunction {
             ExpressionTool.copyLocationInfo(exp, exists);
             return exists.optimize(visitor, contextItemType);
         } else {
-            return null;
+            return changed ? exp : null;
         }
     }
 
