@@ -1004,6 +1004,37 @@ public final class Tokenizer {
     }
 
     /**
+     * Construct a new tokenizer that includes a snapshot of the current state,
+     * so it can be restored later. This mechanism is used to achieve a limited
+     * backtracking capability and is not fully general.
+     * @return a snapshot copy of this tokenizer
+     */
+    public Tokenizer checkPoint() {
+        Tokenizer t2 = new Tokenizer();
+        t2.copyFrom(this);
+        return t2;
+    }
+
+    /**
+     * Restore the state of this tokenizer from a snapshot
+     * @param checkPoint the snapshot copy made using the {@link #checkPoint()} mechanism.
+     */
+
+    public void rollbackTo(Tokenizer checkPoint) {
+        copyFrom(checkPoint);
+    }
+
+    private void copyFrom(Tokenizer z) {
+        inputOffset = z.inputOffset;
+        lineNumber = z.lineNumber;
+        precedingToken = z.precedingToken;
+        currentToken = z.currentToken;
+        nextToken = z.nextToken;
+        braceDepth = z.braceDepth;
+    }
+
+
+    /**
      * Reposition for reading characters. Needs care!
      */
 

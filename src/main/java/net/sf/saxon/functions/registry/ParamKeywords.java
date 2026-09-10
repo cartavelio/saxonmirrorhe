@@ -260,7 +260,7 @@ public class ParamKeywords {
         fnParamNames.put("tokenize", "value|pattern|flags");
         fnParamNames.put("trace", "input|label");
         fnParamNames.put("transform", "options");
-        fnParamNames.put("transitive-closure", "step|min|max");
+        fnParamNames.put("transitive-closure", "node|step");
         fnParamNames.put("translate", "value|replace|with");
         fnParamNames.put("true", "");
         fnParamNames.put("trunk", "input");
@@ -290,11 +290,13 @@ public class ParamKeywords {
         mapParamNames.put("merge", "maps|options");
         mapParamNames.put("of", "pairs|combine");
         mapParamNames.put("pair", "key|value");
+        mapParamNames.put("pairs", "map");
         mapParamNames.put("put", "map|key|value");
         mapParamNames.put("remove", "map|keys");
         mapParamNames.put("replace", "map|key|action");
         mapParamNames.put("size", "map");
         mapParamNames.put("substitute", "map|action");
+        mapParamNames.put("values", "map");
         mathParamNames.put("acos", "value");
         mathParamNames.put("asin", "value");
         mathParamNames.put("atan", "value");

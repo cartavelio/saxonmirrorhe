@@ -18,8 +18,6 @@ import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.ma.trie.ImmutableList;
-import net.sf.saxon.ma.trie.ImmutableMap;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
@@ -949,7 +947,7 @@ public class QueryModule implements StaticContext {
      * declareVariable method of this class.</p>
      *
      * @param qName the name of the variable to be bound
-     * @return a VariableReference object representing a reference to a variable on the abstract syntac rtee of
+     * @return a VariableReference object representing a reference to a variable on the abstract syntax tree of
      *         the query.
      */
 
@@ -1072,6 +1070,10 @@ public class QueryModule implements StaticContext {
         throw new XPathException(message, errorCode).asStaticError();
     }
 
+    private static void staticError(String message, String errorCode, Location loc) throws XPathException {
+        throw new XPathException(message, errorCode, loc).asStaticError();
+    }
+
     /**
      * Bind function calls that could not be bound when first encountered. These
      * will either be forwards references to functions declared later in the same query module,
@@ -1167,11 +1169,16 @@ public class QueryModule implements StaticContext {
                     var = main.libraryVariables.get(qName);
                 }
             }
+            Iterator<BindingReference> iter = uv.iterateReferences();
+            BindingReference first = iter.hasNext() ? iter.next() : null;
+            Location firstLoc = first == null ? Loc.NONE : ((VariableReference)first).getLocation();
             if (var == null) {
                 staticError("Unresolved reference to variable $" +
-                        uv.getVariableQName().getDisplayName(), "XPST0008");
+                        uv.getVariableQName().getDisplayName(), "XPST0008", firstLoc);
             } else if (var.isPrivate() && !var.getSystemId().equals(getSystemId())) {
-                staticError("Cannot reference a private variable in a different module", "XPST0008");
+                staticError("Cannot reference a private variable $" +
+                                    uv.getVariableQName().getDisplayName() +
+                                    " in a different module", "XPST0008", firstLoc);
             } else {
                 uv.transferReferences(var);
             }

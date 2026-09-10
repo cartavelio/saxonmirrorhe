@@ -614,7 +614,7 @@ public class XQueryParser extends XPathParser {
                             grumble("Annotations can appear only in 'declare variable' and 'declare function'");
                         }
                     } else if (tryKeyword("fixed")) {
-                        checkLanguageVersion40();
+                        checkLanguageVersion40("a fixed default namespace");
                         readKeyword("default");
                         String genre = expectName();
                         switch (genre) {
@@ -1123,7 +1123,7 @@ public class XQueryParser extends XPathParser {
             prefix = readNamespaceBinding();
         } else {
             if (tryKeyword("fixed")) {
-                checkLanguageVersion40();
+                checkLanguageVersion40("a fixed namespace");
                 fixedDefault = true;
             }
             if (tryKeyword("default")) {
@@ -1911,9 +1911,9 @@ public class XQueryParser extends XPathParser {
                     foundDefault = true;
                     nextToken();
                     Expression defaultValue = parseExprSingle();
-                    if (!(defaultValue instanceof Literal || defaultValue instanceof ContextItemExpression)) {
-                        grumble("The default value for a function parameter must be either a constant, or '.' (temporary Saxon restriction)");
-                    }
+//                    if (!(defaultValue instanceof Literal || defaultValue instanceof ContextItemExpression)) {
+//                        grumble("The default value for a function parameter must be either a constant, or '.' (temporary Saxon restriction)");
+//                    }
                     defaultValue.setRetainedStaticContext(env.makeRetainedStaticContext());
                     arg.setDefaultValueExpression(defaultValue);
                     arg.setRequired(false);
@@ -2993,7 +2993,7 @@ public class XQueryParser extends XPathParser {
 
         boolean braced = false;
         if (t.currentToken == Token.LCURLY) {
-            checkLanguageVersion40();
+            checkLanguageVersion40("braces in a typeswitch expression");
             braced = true;
             nextToken();
         }
@@ -3122,16 +3122,16 @@ public class XQueryParser extends XPathParser {
             nextToken();
             comparand = parseExpression();
             readToken(Token.RPAREN);
-        } else if (t.currentToken == Token.LCURLY) {
-            checkLanguageVersion40();
+        } else {
+            checkLanguageVersion40("a switch expression with no explicit operand");
             comparand = Literal.makeLiteral(BooleanValue.TRUE);
+        }
+        if (t.currentToken == Token.LCURLY) {
+            checkLanguageVersion40("a switch expression with braces");
             braced = true;
             nextToken();
-        } else if (isKeyword("case")) {
-            checkLanguageVersion40();
-            comparand = Literal.makeLiteral(BooleanValue.TRUE);
         } else {
-            throw new AssertionError();
+            expectKeyword("case");
         }
 
 

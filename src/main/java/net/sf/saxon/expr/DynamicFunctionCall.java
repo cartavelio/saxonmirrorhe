@@ -190,7 +190,7 @@ public class DynamicFunctionCall extends Expression {
         Expression target = targetFunction.getChildExpression();
         Expression key = suppliedArguments.getOperandExpression(0);
         Expression getter = fnSet.makeFunction("get", 2).makeFunctionCall(target, key);
-        getter.setRetainedStaticContext(target.getRetainedStaticContext());
+        getter.setRetainedStaticContext(visitor.getStaticContext().makeRetainedStaticContext());
         // Use custom diagnostics for type errors on the argument of the call (bug 4772)
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(visitor.getStaticContext().isInBackwardsCompatibleMode());
         if (fnSet == MapFunctionSet.getInstance(31)) {

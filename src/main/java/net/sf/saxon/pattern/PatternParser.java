@@ -197,7 +197,7 @@ public class PatternParser extends XPathParser {
 
     private boolean isTypePattern(String pattern) throws XPathException {
         if (pattern.matches("^(type|record|map|array|union|atomic)\\s*\\(.+")) {
-            checkLanguageVersion40();
+            checkLanguageVersion40("a type pattern");
             return true;
         }
         return false;

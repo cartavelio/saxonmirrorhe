@@ -290,7 +290,12 @@
             <li><p>The "thin arrow" notation for inline functions (<code>->{.+1}</code> or
             <code>->($x){$x+1}</code>).</p></li>
             <li><p><code>fn:all</code> is renamed <code>fn:every</code>.</p></li>
-            <li><p></p></li>
+            <li><p>Saxon's experimental operators <code>andAlso</code> and <code>orElse</code>
+            are dropped. The 4.0 specification defines <code>and</code> and <code>or</code>
+            to have short-cut semantics, so these operators are unnecessary.</p></li>
+            <li><p>Local union types have been generalized to choice types; the syntax
+            <code>union(xs:int, xs:long)</code> now becomes <code>(xs:int | xs:long)</code>,
+            and unions of other types are allowed (for example <code>(map(*) | array(*))</code>.</p></li>
         </ul>
         
         <p>Some Saxon extension functions that were essentially prototypes of 

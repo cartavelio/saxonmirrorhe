@@ -958,7 +958,7 @@ public class XPathParser {
                     lhs = parseArrowPostfix(lhs);
                     break;
                 case MAPPING_ARROW:
-                    checkLanguageVersion40();
+                    checkLanguageVersion40("the mapping arrow =!>");
                     lhs = parseMappingArrowPostfix(lhs);
                     break;
                 default:
@@ -975,15 +975,15 @@ public class XPathParser {
                         }
                         rhs = parseBinaryExpression(rhs, prec);
                     }
-//                    if (getCurrentOperatorPrecedence() == prec && !allowMultipleOperators(operator)) {
-//                        String tok = t.currentToken.toString();
-//                        String message = "Left operand of '" + tok + "' needs parentheses";
-//                        if (tok.equals("<") || tok.equals(">")) {
-//                            // Example input: return <a>3</a><b>4</b> - bug 2659
-//                            message += ". Or perhaps an XQuery element constructor appears where it is not allowed";
-//                        }
-//                        grumble(message);
-//                    }
+                    if (getCurrentOperatorPrecedence() == prec && !allowMultipleOperators(operator)) {
+                        String tok = t.currentToken.toString();
+                        String message = "Left operand of " + tok + " needs parentheses";
+                        if (tok.equals("<") || tok.equals(">")) {
+                            // Example input: return <a>3</a><b>4</b> - bug 2659
+                            message += ". Or perhaps an XQuery element constructor appears where it is not allowed";
+                        }
+                        grumble(message);
+                    }
                     lhs = makeBinaryExpression(lhs, operator, rhs);
                     setLocation(lhs, offset);
                     break;
@@ -1158,7 +1158,7 @@ public class XPathParser {
      * @return a conditional expression with the correct semantics
      */
     private Expression makeOtherwiseExpression (Expression lhs, Expression rhs) throws XPathException {
-        checkLanguageVersion40();
+        checkLanguageVersion40("the `otherwise` operator");
         LetExpression let = new LetExpression();
         let.setVariableQName(new StructuredQName("vv", NamespaceUri.ANONYMOUS, "n" + lhs.hashCode()));
         let.setSequence(lhs);
@@ -1688,7 +1688,7 @@ public class XPathParser {
         readToken(Token.RPAREN);
         int thenoffset = t.currentTokenStartOffset;
         if (t.currentToken == Token.LCURLY) {
-            checkLanguageVersion40();
+            checkLanguageVersion40("curly braces in an `if` expression");
             return parseBracedActions(condition);
         }
         readKeyword("then");
@@ -2106,7 +2106,7 @@ public class XPathParser {
                 readToken(Token.RPAREN);
                 return ErrorType.getInstance();
             case "type":
-                checkLanguageVersion40();
+                checkLanguageVersion40("the syntax type(T)");
                 if (language != ParsedLanguage.XSLT_PATTERN) {
                     grumble("The syntax type(N) is allowed only in XSLT patterns, not in XPath expressions");
                 }
@@ -2125,7 +2125,7 @@ public class XPathParser {
 
     private ItemType parseRecordTest(XPathParser p) throws XPathException {
         // The initial "record" has been read
-        checkLanguageVersion40();
+        checkLanguageVersion40("a record test");
         Tokenizer t = p.getTokenizer();
         nextToken();
         p.readToken(Token.LPAREN);
@@ -2259,7 +2259,7 @@ public class XPathParser {
 
     public ItemType parseTypePattern() throws XPathException {
         // The initial "type(" has been read
-        checkLanguageVersion40();
+        checkLanguageVersion40("the syntax type(T)");
         nextToken();
         List<ItemType> memberTypes = new ArrayList<>(6);
         while (true) {
@@ -2283,7 +2283,7 @@ public class XPathParser {
 
     public EnumerationUnionType parseEnumType() throws XPathException {
         // The initial "enum" has been read
-        checkLanguageVersion40();
+        checkLanguageVersion40("enumeration types");
         nextToken();
         readToken(Token.LPAREN);
         List<SingletonEnumType> singletonEnums = new ArrayList<>();
@@ -2763,7 +2763,7 @@ public class XPathParser {
 
 
     protected Expression parseFilterExprAM(Expression step) throws XPathException {
-        checkLanguageVersion40();
+        checkLanguageVersion40("the `?[...]` syntax to filter maps and arrays");
         nextToken();
         Expression predicate = parsePredicate();
         readToken(Token.RSQB);
@@ -2830,7 +2830,7 @@ public class XPathParser {
 
     /*@NotNull*/
     protected Expression parseMappingArrowPostfix(Expression lhs) throws XPathException {
-        checkLanguageVersion40();
+        checkLanguageVersion40("the mapping arrow =!>");
         nextToken();
 
         ForExpression forExpr = new ForExpression();
@@ -3057,16 +3057,26 @@ public class XPathParser {
                 return ae;
 
             } else if (t.peekAhead() instanceof Token.NameToken) {
-                String name = t.currentName();
-                String next = ((Token.NameToken)t.peekAhead()).getValue();
-                switch (name) {
+                String kind = t.currentName();
+                String qname = ((Token.NameToken)t.peekAhead()).getValue();
+                // See K2-ForExprWithout-15: "for $n in $arg/element return $n". We need to check that
+                // the second keyword is followed by a left curly brace. The tokenizer doesn't give us enough
+                // lookahead, so we need to rely on backtracking
+                switch (kind) {
                     case "element":
                     case "attribute":
                     case "processing-instruction":
                     case "namespace":
-                        return parseComputedNodeConstructor();
+                        Tokenizer checkPoint = t.checkPoint();
+                        nextToken();
+                        Token nextButOne = t.peekAhead();
+                        t.rollbackTo(checkPoint);
+                        if (nextButOne == Token.LCURLY) {
+                            return parseComputedNodeConstructor();
+                        }
+                        break;
                     case "update":
-                        if (next.equals("map") || next.equals("array")) {
+                        if (qname.equals("map") || qname.equals("array")) {
                             return parseDeepUpdateExpression();
                         }
                         break;
@@ -3123,7 +3133,7 @@ public class XPathParser {
             return ae2;
 
         } else if (token == Token.LCURLY) {
-            checkLanguageVersion40();
+            checkLanguageVersion40("a map constructor without the `map` keyword");
             try {
                 return parseMapExpression();
             } catch (XPathException e) {
@@ -3149,7 +3159,7 @@ public class XPathParser {
             }
 
         } else if (token instanceof Token.StringTemplate) {
-            checkLanguageVersion40();
+            checkLanguageVersion40("a string template");
             return parseStringTemplate();
 
         } else if (token instanceof Token.StringConstructor) {
@@ -3576,7 +3586,7 @@ public class XPathParser {
         checkLanguageVersion31();
         boolean deep = t.currentToken == Token.QMARK_QMARK;
         if (deep) {
-            checkLanguageVersion40();
+            checkLanguageVersion40("the deep lookup operator `??`");
         }
         int offset = t.currentTokenStartOffset;
         nextToken();
@@ -3585,7 +3595,7 @@ public class XPathParser {
         Expression result;
         LookupExpression.Modifier modifier = LookupExpression.Modifier.CONTENT;
         if (token instanceof Token.NameToken && t.peekAhead() == Token.COLON_COLON) {
-            checkLanguageVersion40();
+            checkLanguageVersion40("modifiers after `?`");
             switch (t.currentName()) {
                 case "content":
                     //modifier = LookupExpression.LookupModifier.CONTENT;
@@ -3638,11 +3648,11 @@ public class XPathParser {
         } else if (token == Token.LPAREN) {
             result = makeLookupExpression(lhs, modifier, parseParenthesizedExpression(), deep);
         } else if (token instanceof Token.StringLiteral) {
-            checkLanguageVersion40();
+            checkLanguageVersion40("a string literal after `?`");
             result = parserExtension.lookupName(lhs, modifier, ((Token.StringLiteral)token).getValue(), deep, allowXPath40Syntax);
             nextToken();
         } else if (token == Token.DOLLAR) {
-            checkLanguageVersion40();
+            checkLanguageVersion40("a variable reference directly after `?`");
             offset = t.currentTokenStartOffset;
             StructuredQName varName = parseVariableName();
             result = makeLookupExpression(lhs, modifier, resolveVariableReference(offset, varName), deep);
@@ -3680,7 +3690,6 @@ public class XPathParser {
             nextToken();
             return test;
         } else if (tok == Token.LPAREN) {
-            checkLanguageVersion40();
             return parseUnionNodeTest(nodeType);
         } else if (tok == Token.STAR) {
             nextToken();
@@ -3698,6 +3707,7 @@ public class XPathParser {
         nextToken();
         NodeTest test = parseNodeTest(nodeType);
         while (t.currentToken == Token.VBAR) {
+            checkLanguageVersion40("choice item types");
             nextToken();
             test = new CombinedNodeTest(test, OperatorSymbol.UNION, parseNodeTest(nodeType));
         }
@@ -3996,6 +4006,13 @@ public class XPathParser {
         String lang = getLanguage();
         if (!allowXPath40Syntax) {
             grumble("The parser is not configured to allow use of " + lang + " 4.0 syntax");
+        }
+    }
+
+    protected void checkLanguageVersion40(String feature) throws XPathException {
+        String lang = getLanguage();
+        if (!allowXPath40Syntax) {
+            grumble("The parser is not configured to allow use of " + lang + " 4.0 syntax, which is needed when using " + feature);
         }
     }
 
@@ -5101,7 +5118,7 @@ public class XPathParser {
 
 
     public Expression parseFocusFunction(AnnotationList annotations) throws XPathException {
-        checkLanguageVersion40();
+        checkLanguageVersion40("inline focus functions");
         //Tokenizer t = getTokenizer();
         int offset = t.currentTokenStartOffset;
 

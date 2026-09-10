@@ -7,6 +7,7 @@
 
 package net.sf.saxon.functions;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.DefaultedArgumentExpression;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StringLiteral;
@@ -1029,17 +1030,21 @@ public class DeepEqual extends CollatingFunctionFixed {
         List<Item> items = new ArrayList<>(20);
         boolean prevIsText = false;
         UnicodeBuilder textBuffer = new UnicodeBuilder();
+        Configuration config = null;
         while (true) {
             Item next = in.next();
             if (next == null) {
                 break;
             }
             if (next instanceof NodeInfo && ((NodeInfo) next).getNodeKind() == Type.TEXT) {
+                if (config == null) {
+                    config = ((NodeInfo) next).getConfiguration();
+                }
                 textBuffer.accept(next.getUnicodeStringValue());
                 prevIsText = true;
             } else {
                 if (prevIsText) {
-                    Orphan textNode = new Orphan(null);
+                    Orphan textNode = new Orphan(config);
                     textNode.setNodeKind(Type.TEXT);
                     textNode.setStringValue(textBuffer.toUnicodeString());
                     items.add(textNode);
@@ -1050,7 +1055,7 @@ public class DeepEqual extends CollatingFunctionFixed {
             }
         }
         if (prevIsText) {
-            Orphan textNode = new Orphan(null);
+            Orphan textNode = new Orphan(config);
             textNode.setNodeKind(Type.TEXT);
             textNode.setStringValue(textBuffer.toUnicodeString());
             items.add(textNode);

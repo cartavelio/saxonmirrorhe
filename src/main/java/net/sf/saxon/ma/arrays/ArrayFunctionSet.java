@@ -208,7 +208,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             register("get", 3, e -> e.populate(ArrayGet::new, AnyItemType.getInstance(), STAR, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                     .arg(1, BuiltInAtomicType.INTEGER, ONE | ABS, null)
-                    .arg(2, fallbackType, ONE | INS, null));
+                    .arg(2, fallbackType, OPT | INS, null));     // TODO: check status of issue 1330
 
             register("empty", 1, e -> e.populate(ArrayEmpty::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
