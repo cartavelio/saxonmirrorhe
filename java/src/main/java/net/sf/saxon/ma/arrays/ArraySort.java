@@ -7,13 +7,17 @@
 
 package net.sf.saxon.ma.arrays;
 
+import com.saxonica.functions.qt4.UnparcelFn;
 import net.sf.saxon.expr.Atomizer;
+import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.AtomicSortComparer;
+import net.sf.saxon.functions.SortBy;
 import net.sf.saxon.lib.StringCollator;
+import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.om.*;
-import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
@@ -22,15 +26,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Implementation of the extension function array:sort(array, function) =&gt; array
+ * Implementation of the extension function array:sort(array, function) =&gt; array.
+ * The array:sort() function is implemented by wrapping each member of the array as
+ * a parcel, sorting the parcels using the same machinery as for fn:sort, and then
+ * unparceling the results.
  */
 public class ArraySort extends ArrayFunctionSet.ArrayGeneratingFunction {
-
-    public static class MemberToBeSorted{
-        public GroundedValue value;
-        public GroundedValue sortKey;
-        int originalPosition;
-    }
 
     /**
      * Create a call on this function. This method is called by the compiler when it identifies
@@ -40,57 +41,39 @@ public class ArraySort extends ArrayFunctionSet.ArrayGeneratingFunction {
      */
     @Override
     public ArrayItem call(XPathContext context, Sequence[] arguments) throws XPathException {
+
         ArrayItem array = (ArrayItem) arguments[0].head();
-        final ArrayList<MemberToBeSorted> inputList = new ArrayList<>(array.arrayLength());
-        int i = 0;
-        StringCollator collation;
-        if (arguments.length == 1) {
-            collation = context.getConfiguration().getCollation(getRetainedStaticContext().getDefaultCollationName());
-        } else {
-            StringValue collName = (StringValue)arguments[1].head();
-            if (collName == null) {
-                collation = context.getConfiguration().getCollation(getRetainedStaticContext().getDefaultCollationName());
-            } else {
-                collation = context.getConfiguration().getCollation(collName.getStringValue(), getStaticBaseUriString());
+        SequenceIterator parcels = array.parcels();
+
+        String collationName = getRetainedStaticContext().getDefaultCollationName();
+        if (arguments.length > 1) {
+            StringValue collationNameItem = (StringValue) arguments[1].head();
+            if (collationNameItem != null) {
+                collationName = collationNameItem.getStringValue();
             }
         }
-        FunctionItem key = null;
-        if (arguments.length == 3) {
-            key = (FunctionItem) arguments[2].head();
+        StringCollator collation = context.getConfiguration().getCollation(collationName);
+
+        AtomicComparer comparer = AtomicSortComparer.makeSortComparer(collation, StandardNames.XS_ANY_ATOMIC_TYPE, context);
+        Callable key = null;
+        if (arguments.length > 2) {
+            FunctionItem suppliedKeyFn = (FunctionItem) arguments[2].head();
+            // preprocess Parcels by unparceling them before calling the supplied function
+            key = new CallableDelegate((cxt, args) ->
+                suppliedKeyFn.call(cxt, new Sequence[]{((Parcel)args[0].head()).getValue()}));
         }
-        for (GroundedValue seq: array.members()){
-            MemberToBeSorted member = new MemberToBeSorted();
-            member.value = seq;
-            member.originalPosition = i++;
-            if (key != null) {
-                member.sortKey = dynamicCall(key, context, seq).materialize();
-            } else {
-                member.sortKey = atomize(seq);
-            }
-            inputList.add(member);
+        if (key == null) {
+            key = new CallableDelegate((cxt, args) -> Atomizer.atomize(((Parcel)args[0].head()).getValue()));
         }
-        final AtomicComparer atomicComparer =  AtomicSortComparer.makeSortComparer(
-                collation, StandardNames.XS_ANY_ATOMIC_TYPE, context);
-        try {
-            inputList.sort((a, b) -> {
-                int result = compareSortKeys(a.sortKey, b.sortKey, atomicComparer);
-                if (result == 0) {
-                    // TODO: unnecessary, we are now using a stable sort routine
-                    return a.originalPosition - b.originalPosition;
-                } else {
-                    return result;
-                }
-            });
-            //GenericSorter.quickSort(0, array.arrayLength(), sortable);
-        } catch (ClassCastException e) {
-            throw new XPathException("Non-comparable types found while sorting: " + e.getMessage())
-                    .withErrorCode("XPTY0004").asTypeError();
+        GroundedValue sortedParcels = 
+                SortBy.sort(parcels, SortBy.listOfOne(key), SortBy.listOfOne(comparer), context);
+
+        List<GroundedValue> members = new ArrayList<>(expectedSize());
+        for (Item parcel : sortedParcels.asIterable()) {
+            members.add(UnparcelFn.unparcel(parcel, context));
         }
-        List<GroundedValue> outputList = new ArrayList<>(array.arrayLength());
-        for (MemberToBeSorted member: inputList) {
-            outputList.add(member.value);
-        }
-        return makeArray(outputList);
+        return makeArray(members);
+
     }
 
     /**
@@ -122,16 +105,6 @@ public class ArraySort extends ArrayFunctionSet.ArrayGeneratingFunction {
                     return first;
                 }
             }
-        }
-    }
-
-    private static GroundedValue atomize(Sequence input) throws XPathException {
-        try {
-            SequenceIterator iterator = input.iterate();
-            SequenceIterator mapper = Atomizer.getAtomizingIterator(iterator, false);
-            return SequenceTool.toGroundedValue(mapper);
-        } catch (UncheckedXPathException e) {
-            throw e.getXPathException();
         }
     }
 }

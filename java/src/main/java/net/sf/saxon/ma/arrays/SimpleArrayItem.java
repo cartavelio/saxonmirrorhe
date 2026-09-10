@@ -67,6 +67,12 @@ public class SimpleArrayItem extends AbstractArrayItem {
         return result;
     }
 
+    /**
+     * Construct an array from a fixed set of grounded values
+     * @param members the grounded values to make up the array
+     * @return a new ArrayItem
+     */
+
     public static SimpleArrayItem of(GroundedValue... members) {
         List<GroundedValue> list = Arrays.asList(members);
         return new SimpleArrayItem(list);
