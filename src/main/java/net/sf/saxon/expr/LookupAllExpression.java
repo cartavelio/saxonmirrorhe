@@ -228,7 +228,7 @@ public class LookupAllExpression extends UnaryExpression {
 
     /*@NotNull*/
     @Override
-    @CSharpInnerClass(outer=true, extra={"net.sf.saxon.expr.XPathContext context"})
+    @CSharpInnerClass(outer=true, extra={"Saxon.Hej.expr.XPathContext context"})
     @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public SequenceIterator iterate(final XPathContext context) throws XPathException {
 

@@ -284,7 +284,7 @@ public class StyleNodeFactory implements NodeFactory {
         }
     }
 
-    @CSharpReplaceBody(code = "return (net.sf.saxon.style.StyleElement)System.Activator.CreateInstance(actualClass);")
+    @CSharpReplaceBody(code = "return (Saxon.Hej.style.StyleElement)System.Activator.CreateInstance(actualClass);")
     protected StyleElement makeStyleElement(Class<? extends StyleElement> actualClass) {
         StyleElement node;
         try {

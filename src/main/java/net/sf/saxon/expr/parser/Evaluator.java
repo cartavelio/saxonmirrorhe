@@ -56,16 +56,16 @@ public abstract class Evaluator {
      * An evaluator that always returns the empty sequence
      */
 
-    public final static class EmptySequence extends Evaluator {
-        public final static EmptySequence INSTANCE = new EmptySequence();
+    public final static class EmptySequenceEvaluator extends Evaluator {
+        public final static EmptySequenceEvaluator INSTANCE = new EmptySequenceEvaluator();
 
-        private EmptySequence() {
+        private EmptySequenceEvaluator() {
             setCode(Evaluators.RETURN_EMPTY_SEQUENCE);
         }
 
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) {
-            return net.sf.saxon.value.EmptySequence.getInstance();
+            return EmptySequence.getInstance();
         }
 
     };
@@ -170,7 +170,7 @@ public abstract class Evaluator {
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             Item item = expr.evaluateItem(context);
             if (item == null) {
-                return net.sf.saxon.value.EmptySequence.getInstance();
+                return EmptySequence.getInstance();
             } else {
                 return item;
             }
@@ -225,16 +225,16 @@ public abstract class Evaluator {
      * lazily on first use, and where the value might be needed more than once.
      */
 
-    public final static class MemoClosure extends Evaluator {
-        public final static MemoClosure INSTANCE = new MemoClosure();
+    public final static class MemoClosureEvaluator extends Evaluator {
+        public final static MemoClosureEvaluator INSTANCE = new MemoClosureEvaluator();
 
-        public MemoClosure() {
+        public MemoClosureEvaluator() {
             setCode(Evaluators.MAKE_MEMO_CLOSURE);
         }
 
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
-            return new net.sf.saxon.value.MemoClosure(expr, context);
+            return new MemoClosure(expr, context);
         }
 
     };
@@ -414,7 +414,7 @@ public abstract class Evaluator {
                 if (start == end) {
                     return Int64Value.makeIntegerValue(end);
                 } else if (start > end) {
-                    return net.sf.saxon.value.EmptySequence.getInstance();
+                    return EmptySequence.getInstance();
                 } else {
                     return new IntegerRange(start, step, end);
                 }

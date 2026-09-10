@@ -16,6 +16,7 @@ import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.CompilerInfo;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -28,6 +29,7 @@ import java.io.IOException;
  * @since 9.6
  */
 
+@CSharpModifiers(code = {"internal"})
 public class XsltPackage {
 
     private final XsltCompiler compiler;

@@ -10,6 +10,7 @@ package net.sf.saxon.s9api;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
@@ -25,6 +26,7 @@ import java.time.*;
  * be either a built-in type or a user-defined type.
  * <p>An <code>XdmAtomicValue</code> is immutable.</p>
  */
+@CSharpModifiers(code = {"internal"})
 public class XdmAtomicValue extends XdmItem {
 
     private XdmAtomicValue(){}

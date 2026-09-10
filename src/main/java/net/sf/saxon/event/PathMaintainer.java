@@ -96,7 +96,7 @@ public class PathMaintainer extends ProxyReceiver {
         return fsb.toString();
     }
 
-    @CSharpReplaceBody(code="return new net.sf.saxon.om.AbsolutePath(new List<net.sf.saxon.om.AbsolutePath.PathElement>(path.ToArray()));")
+    @CSharpReplaceBody(code="return new Saxon.Hej.om.AbsolutePath(new List<Saxon.Hej.om.AbsolutePath.PathElement>(path.ToArray()));")
     // Custom code needed for C# because a Stack is not a List.
     public AbsolutePath getAbsolutePath() {
         return new AbsolutePath(path);

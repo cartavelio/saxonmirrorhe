@@ -20,6 +20,7 @@ import net.sf.saxon.s9api.streams.XdmStream;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.value.AnyExternalObject;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceExtent;
@@ -48,6 +49,7 @@ import java.util.stream.StreamSupport;
  * @since 9.0
  */
 
+@CSharpModifiers(code = {"internal"})
 public class XdmValue implements Iterable<XdmItem> {
 
     private GroundedValue value;

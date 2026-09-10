@@ -2589,7 +2589,7 @@ public class XPathParser {
                     AnnotationList annotations = AnnotationList.EMPTY;
                     return parseInlineFunction(annotations);
                 }
-                CSharp.emitCode("goto case net.sf.saxon.expr.parser.Token.NAME;");
+                CSharp.emitCode("goto case Saxon.Hej.expr.parser.Token.NAME;");
                 // fall through!
             case Token.NAME:
             case Token.PREFIX:
@@ -2678,7 +2678,7 @@ public class XPathParser {
                     case "_":
                         return parserExtension.parseUnderscoreFunction(this);
                 }
-                CSharp.emitCode("goto case net.sf.saxon.expr.parser.Token.ELEMENT_QNAME;");
+                CSharp.emitCode("goto case Saxon.Hej.expr.parser.Token.ELEMENT_QNAME;");
                 // else fall through
             case Token.ELEMENT_QNAME:
             case Token.ATTRIBUTE_QNAME:

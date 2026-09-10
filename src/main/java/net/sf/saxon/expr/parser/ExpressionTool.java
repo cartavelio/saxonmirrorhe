@@ -224,7 +224,7 @@ public class ExpressionTool {
             if (base instanceof VariableReference) {
                 return Evaluator.LazyTail.INSTANCE;
             } else if (repeatable) {
-                return Evaluator.MemoClosure.INSTANCE;
+                return Evaluator.MemoClosureEvaluator.INSTANCE;
             } else {
                 return Evaluator.LazySequence.INSTANCE;
             }
@@ -241,7 +241,7 @@ public class ExpressionTool {
 
         } else if (repeatable) {
             // create a Closure, a wrapper for the expression and its context
-            return Evaluator.MemoClosure.INSTANCE;
+            return Evaluator.MemoClosureEvaluator.INSTANCE;
         } else {
             return Evaluator.LazySequence.INSTANCE;
         }
@@ -1402,7 +1402,7 @@ public class ExpressionTool {
         // now avoids generating warnings for this case.
         if (start instanceof RootExpression &&
                 step instanceof AxisExpression && ((AxisExpression) step).getAxis() == AxisInfo.PARENT) {
-            return net.sf.saxon.expr.Literal.makeEmptySequence();
+            return Literal.makeEmptySequence();
         }
 
         SlashExpression expr = new SlashExpression(start, step);

@@ -22,6 +22,7 @@ import net.sf.saxon.trace.*;
 import net.sf.saxon.trans.CommandLineOptions;
 import net.sf.saxon.trans.LicenseException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.ConversionResult;
 import net.sf.saxon.type.SchemaException;
@@ -805,6 +806,7 @@ public class Query {
      */
 
     /*@Nullable*/
+    @CSharpModifiers(code={"internal"})
     protected XQueryExecutable compileQuery(XQueryCompiler compiler, String queryFileName, boolean useURLs)
             throws SaxonApiException, IOException {
         XQueryExecutable exp;
@@ -913,7 +915,7 @@ public class Query {
      * @param evaluator   the dynamic query context
      * @throws SaxonApiException if processing fails
      */
-
+    @CSharpModifiers(code = {"internal"})
     protected void processSource(/*@Nullable*/ Source sourceInput, XQueryExecutable exp, XQueryEvaluator evaluator) throws SaxonApiException {
         if (sourceInput != null && !streaming) {
             DocumentBuilder builder = processor.newDocumentBuilder();
@@ -951,6 +953,7 @@ public class Query {
      * @param destination the destination for serialized results
      * @throws SaxonApiException if the query fails
      */
+    @CSharpModifiers(code = {"internal"})
     protected void runQuery(XQueryExecutable exp, XQueryEvaluator evaluator, Source input, Destination destination)
             throws SaxonApiException {
         try {
@@ -985,6 +988,7 @@ public class Query {
      * @param serializer the destination for serialized results
      * @throws SaxonApiException if the query fails
      */
+    @CSharpModifiers(code = {"internal"})
     protected void runUpdate(XQueryExecutable exp, XQueryEvaluator evaluator, final Serializer serializer)
             throws SaxonApiException {
 

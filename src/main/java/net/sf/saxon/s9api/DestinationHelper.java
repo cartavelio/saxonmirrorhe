@@ -7,6 +7,8 @@
 
 package net.sf.saxon.s9api;
 
+import net.sf.saxon.transpile.CSharpModifiers;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -14,6 +16,7 @@ import java.util.function.Consumer;
 /**
  * A helper class for implementing the {@link Destination} interface
  */
+@CSharpModifiers(code = {"internal"})
 public class DestinationHelper {
 
     private final Destination helpee;

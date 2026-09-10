@@ -736,7 +736,7 @@ public class PathMap {
                         }
                         break;
                     } else {
-                        CSharp.emitCode("goto case net.sf.saxon.om.AxisInfo.ANCESTOR;");
+                        CSharp.emitCode("goto case Saxon.Hej.om.AxisInfo.ANCESTOR;");
                         // fall through
                     }
 

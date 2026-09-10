@@ -100,7 +100,7 @@ public class ObjectValue<T> implements AnyExternalObject {
 
     /*@NotNull*/
     @Override
-    @CSharpReplaceBody(code="return net.sf.saxon.type.AnyExternalObjectType.THE_INSTANCE;")
+    @CSharpReplaceBody(code="return Saxon.Hej.type.AnyExternalObjectType.THE_INSTANCE;")
     public ItemType getItemType(/*@Nullable*/ TypeHierarchy th) {
         return th.getConfiguration().getJavaExternalObjectType(value.getClass());
     }

@@ -13,6 +13,7 @@ import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.transpile.CSharpDelegate;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.value.DayTimeDurationValue;
@@ -33,6 +34,7 @@ import java.util.*;
  * This is a helper class for classes such as net.sf.saxon.Transform and net.sf.saxon.Query that process
  * command line options
  */
+@CSharpModifiers(code = {"internal"})
 public class CommandLineOptions {
 
     public static final int TYPE_BOOLEAN = 1;

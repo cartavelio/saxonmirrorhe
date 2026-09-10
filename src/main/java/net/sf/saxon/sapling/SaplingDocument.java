@@ -17,6 +17,7 @@ import net.sf.saxon.lib.ActiveSource;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.type.Type;
 
 import javax.xml.transform.Source;
@@ -36,6 +37,26 @@ import javax.xml.transform.Source;
  * stated to the contrary.</p>
  */
 
+@CSharpInjectMembers(code={
+          "public Saxon.Api.XdmNode ToXdmNode(Saxon.Api.Processor processor) {"
+        + "            try {"
+        + "                return (Saxon.Api.XdmNode)(Saxon.Api.XdmValue.Wrap(toNodeInfo(processor.Implementation)));"
+        + "            } catch (Saxon.Hej.trans.XPathException e) {"
+        + "                throw new Saxon.Api.SaxonApiException(e);"
+        + "            }"
+        + "        }",
+          "        public void Serialize(Saxon.Api.Serializer serializer) {"
+        + "            Saxon.Api.Processor proc = serializer.Processor;"
+        + "            Send(proc, serializer);"
+        + "        }\n",
+          "        public void Send(Saxon.Api.Processor processor, Saxon.Api.IDestination destination) {"
+        + "            try {"
+        + "                Saxon.Hej.@event.PipelineConfiguration pipe = processor.Implementation.makePipelineConfiguration();"
+        + "                deliver(destination.GetUnderlyingDestination().getReceiver(pipe, new Saxon.Hej.serialize.SerializationProperties()), null);"
+        + "            } catch (Saxon.Hej.trans.XPathException e) {"
+        + "                throw new Saxon.Api.SaxonApiException(e);"
+        + "            }"
+        + "        }"})
 public class SaplingDocument extends SaplingNode implements ActiveSource {
 
     private String baseUri;
@@ -154,7 +175,7 @@ public class SaplingDocument extends SaplingNode implements ActiveSource {
         builder.close();
         return builder.getCurrentRoot();
     }
-
+    //#if CSHARP==false
     /**
      * Convert the sapling document to a regular document, returning the {@link XdmNode} object
      * representing the document node of the resulting tree
@@ -200,6 +221,8 @@ public class SaplingDocument extends SaplingNode implements ActiveSource {
             throw new SaxonApiException(e);
         }
     }
+
+    //#endif
 
 }
 

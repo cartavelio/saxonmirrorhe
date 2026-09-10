@@ -22,6 +22,7 @@ import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.transpile.CSharpInnerClass;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 
 import javax.xml.transform.ErrorListener;
@@ -46,6 +47,7 @@ import java.util.function.Consumer;
 //                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
 //                + "    }"
 //})
+@CSharpModifiers(code = {"abstract", "internal"})
 public abstract class AbstractXsltTransformer {
     protected Processor processor;
     protected XsltController controller;
@@ -194,7 +196,7 @@ public abstract class AbstractXsltTransformer {
 
     @CSharpInnerClass(
             outer=false,
-            extra={"System.Func<System.Uri,net.sf.saxon.s9api.Destination> handler"})
+            extra={"System.Func<System.Uri,Saxon.Hej.s9api.Destination> handler"})
     
     public void setResultDocumentHandler(java.util.function.Function<URI, Destination> handler) {
         controller.setResultDocumentResolver(new ResultDocumentResolver() {
@@ -532,10 +534,10 @@ public abstract class AbstractXsltTransformer {
     }
 
     @CSharpInnerClass(outer=true,
-            extra={ "net.sf.saxon.@event.Builder sourceTreeBuilder",
-                    "net.sf.saxon.trans.XsltController controller",
-                    "net.sf.saxon.s9api.Destination finalDestination",
-                    "net.sf.saxon.expr.instruct.GlobalParameterSet parameters"})
+            extra={ "Saxon.Hej.@event.Builder sourceTreeBuilder",
+                    "Saxon.Hej.trans.XsltController controller",
+                    "Saxon.Hej.s9api.Destination finalDestination",
+                    "Saxon.Hej.expr.instruct.GlobalParameterSet parameters"})
     private TreeReceiver makeTreeReceiver(XsltController controller, GlobalParameterSet parameters, Destination finalDestination, Builder sourceTreeBuilder, Receiver stripper) {
         return new TreeReceiver(stripper) {
             boolean closed = false;

@@ -347,7 +347,7 @@ public class DeepEqual extends CollatingFunctionFixed {
                         return false;
                     }
                 }
-                CSharp.emitCode("goto case net.sf.saxon.type.Type.DOCUMENT;");
+                CSharp.emitCode("goto case Saxon.Hej.type.Type.DOCUMENT;");
                 // fall through
             case Type.DOCUMENT:
                 AxisIterator c1 = n1.iterateAxis(AxisInfo.CHILD);
@@ -426,7 +426,7 @@ public class DeepEqual extends CollatingFunctionFixed {
                     explain(reporter, Type.displayTypeName(n1) + " names differ", flags, n1, n2);
                     return false;
                 }
-                CSharp.emitCode("goto case net.sf.saxon.type.Type.TEXT;");
+                CSharp.emitCode("goto case Saxon.Hej.type.Type.TEXT;");
                 // drop through
             case Type.TEXT:
             case Type.COMMENT:

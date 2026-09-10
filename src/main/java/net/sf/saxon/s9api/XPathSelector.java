@@ -15,6 +15,7 @@ import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.sxpath.XPathVariable;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 
 import javax.xml.transform.URIResolver;
 import java.util.Map;
@@ -30,6 +31,7 @@ import java.util.Objects;
 //                + "    }"
 //})
 @SuppressWarnings({"ForeachStatement"})
+@CSharpModifiers(code = {"internal"})
 public class XPathSelector implements Iterable<XdmItem> {
 
     private final XPathExpression exp;

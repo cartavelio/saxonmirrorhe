@@ -1014,7 +1014,7 @@ public class XsltController extends Controller {
      */
 
     /*@Nullable*/
-    @CSharpInnerClass(outer=true, extra="net.sf.saxon.@event.Outputter finalResult")
+    @CSharpInnerClass(outer=true, extra="Saxon.Hej.@event.Outputter finalResult")
     public Receiver getStreamingReceiver(Mode mode, Receiver result)
             throws XPathException {
         // System.err.println("*** TransformDocument");

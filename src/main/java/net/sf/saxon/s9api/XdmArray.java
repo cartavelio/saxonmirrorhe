@@ -13,6 +13,7 @@ import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -26,6 +27,7 @@ import java.util.List;
  * @since 9.8
  */
 
+@CSharpModifiers(code = {"internal"})
 public class XdmArray extends XdmFunctionItem {
 
     /**

@@ -68,7 +68,7 @@ public class StackFrame {
     }
 
     // Shallow-copy of a stack is tricky in C# because iteration reverses the order
-    @CSharpReplaceBody(code="return new Stack<net.sf.saxon.om.Sequence>(new Stack<net.sf.saxon.om.Sequence>(old));")
+    @CSharpReplaceBody(code="return new Stack<Saxon.Hej.om.Sequence>(new Stack<Saxon.Hej.om.Sequence>(old));")
     private Stack<Sequence> shallowCopy(Stack<Sequence> old) {
         Stack<Sequence> s2 = newStack();
         s2.addAll(old);
