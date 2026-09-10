@@ -3311,11 +3311,11 @@
                     support is provided using facilities from <a
                         href="http://site.icu-project.org/">ICU - International Components for
                         Unicode</a> as described in <a class="bodylink"
-                            href="/extensibility/localizing/ICU-numbering-dates">Numbers
+                            href="/localization/ICU-numbers-and-dates">Numbers
                             and Dates from ICU</a>. Otherwise, a selection of languages are
                     supported directly, and it is possible to add support for others, using
-                    <code>Numberer</code> classes as described in <a
-                        href="/extensibility/localizing">Localizing numbers and
+                    <code>Numberer</code> classes as described in <a class="bodylink"
+                        href="/localization/localizing-numbers-and-dates">Localizing numbers and
                         dates</a>.</attribute>
                 <attribute name="letter-value" use="optional">Disambiguates between numbering
                     sequences that use letters, since in many languages there are two commonly used

@@ -8,19 +8,21 @@
   <p>These facilities divide into three categories:</p>
 
   <ul>
-    <li>Formatting numbers</li>
-    <li>Formatting dates</li>
-    <li>Collations (sorting and comparison of strings)</li>
+    <li><a class="bodylink" href="number-formatting">Formatting numbers</a></li>
+    <li><a class="bodylink" href="date-formatting">Formatting dates</a></li>
+    <li><a class="bodylink" href="sorting-and-collations">Collations (sorting and comparison of strings)</a></li>
   </ul>
 
   <section id="number-formatting" title="Formatting Numbers">
     <h1>Formatting Numbers</h1>
 
-    <p>Formatting of numbers affects the output of the <code>xsl:number</code> instruction, and the
-        <code>fn:format-integer</code> function.</p>
+    <p>Formatting of numbers affects the output of the <a class="bodylink code"
+      href="/xsl-elements/number">xsl:number</a> instruction, and the <a class="bodylink code"
+        href="/functions/fn/format-integer">fn:format-integer()</a> function.</p>
 
     <aside>
-      <p>The <code>format-number</code> function itself is <b>not</b> directly affected by choice of language
+      <p>The <a class="bodylink code" href="/functions/fn/format-number">fn:format-number()</a> function itself is
+        <b>not</b> directly affected by the choice of language
         or country. If you want to use conventions appropriate to a particular locale, for example using a
         comma (",") as a decimal point, or using an apostrophe ("'") as a separator between groups of digits,
         you can define a custom decimal format to achieve this, but this is entirely under the control of the
@@ -32,7 +34,7 @@
         chosen locale.</p>
     </aside>
 
-    <p>In <code>xsl:number</code> and in <code>fn:format-integer</code> it is possible to request a specific
+    <p>In <code>xsl:number</code> and in <code>fn:format-integer()</code> it is possible to request a specific
       language using the <code>lang</code> attribute/argument. The default for this may be set using the Saxon
       configuration property <a class="feature" href="DEFAULT_LANGUAGE"/>; failing this, the default is taken
       from the operating system settings. This option mainly affects formatting of numbers as words (for
@@ -41,8 +43,9 @@
 
     <ul>
       <li class="javaonly">In SaxonJ-HE, spellout numbering is supported "out of the box" only for English; if
-        any other language is requested, the output falls back to English. There is an API
-          (<code>Configuration.setLocalizerFactory()</code>) allowing plug-in code to be registered for other
+        any other language is requested, the output falls back to English. There is an API, <code
+          java="net.sf.saxon.Configuration#setLocalizerFactory">Configuration.setLocalizerFactory()</code>,
+        allowing plug-in code to be registered for other
         languages, and there are some open-source components available (issued with the
           <code>saxon-resources</code> download) providing plug-ins for some common European languages.</li>
       <li class="javaonly">In SaxonJ-PE and -EE, spellout numbering is available via the ICU-J library, which
@@ -56,15 +59,17 @@
     <p>For more details on numbering using ICU, see TBA</p>
 
     <p>For more details on writing a plug-in for localizing numbers and dates, see <a
-        href="localizing-numbers-and-dates">Localizing Numbers and Dates</a>.</p>
+        href="../localizing-numbers-and-dates">Localizing Numbers and Dates</a>.</p>
 
   </section>
 
   <section id="date-formatting" title="Formatting Dates">
     <h1>Formatting Dates</h1>
 
-    <p>Formatting of dates is achieved using the functions <code>fn:format-date()</code>,
-        <code>fn:format-time()</code>, and <code>fn:format-dateTime()</code>. The third argument of these
+    <p>Formatting of dates is achieved using the functions <a class="bodylink code"
+      href="/functions/fn/format-date">fn:format-date()</a>, <a class="bodylink code"
+        href="/functions/fn/format-time">fn:format-time()</a>, and <a class="bodylink code"
+          href="/functions/fn/format-dateTime">fn:format-dateTime()</a>. The third argument of these
       functions supplies the requested language; the fifth argument supplies the requested "place". If not
       supplied, the defaults are taken from the Saxon configuration (properties <a class="feature"
         href="DEFAULT_LANGUAGE"/> and <a class="feature" href="DEFAULT_COUNTRY"/>; if these are not set, they
@@ -74,25 +79,23 @@
       the rules for formatting of numbers. This includes spellout numbering (for example "December First, Two
       Thousand and Twenty-One").</p>
 
-    <p>Month names and day names ("January", "Friday") are handled as follows:</p>
+    <p>Month names and day names (e.g. "January", "Friday") are handled as follows:</p>
 
-    <ul class="javaonly">
-      <li>In SaxonJ, the full English month names and day names are hard-coded in the product. Month names are
+    <ul>
+      <li class="javaonly">In SaxonJ, the full English month names and day names are hard-coded in the product. Month names are
         abbreviated to the required length by truncation; for day names, there are custom rules for
         abbreviation ("Weds" is preferred to "Wedn", and names are never shortened to the point where they
-        become ambiguous (thus "Tu" and "Th" for "Tuesday" and "Thursday").</li>
-      <li>In SaxonJ-HE, month and day names for languages other than English are not available unless a
-        localization plug-in is registered using the <code>Configuration.setLocalizerFactory()</code>
+        become ambiguous, thus "Tu" and "Th" for "Tuesday" and "Thursday").</li>
+      <li class="javaonly">In SaxonJ-HE, month and day names for languages other than English are not available unless a
+        localization plug-in is registered using the <code
+          java="net.sf.saxon.Configuration#setLocalizerFactory">Configuration.setLocalizerFactory()</code>
         mechanism</li>
-      <li>In SaxonJ-PE and -EE, month and day names are obtained using the ICU-J library. If the full name
+      <li class="javaonly">In SaxonJ-PE and -EE, month and day names are obtained using the ICU-J library. If the full name
         delivered by ICU exceeds the requested maximum lengh, the short name is requested from ICU.</li>
-    </ul>
-
-    <ul class="csonly">
-      <li>In SaxonCS, month and day names are obtained using the .NET <code>CultureInfo</code> class. If the
+      <li class="csonly">In SaxonCS, month and day names are obtained using the .NET <code>CultureInfo</code> class. If the
         full name (for example <code>CultureInfo.DateTimeFormat.GetMonthName(m)</code>) exceeds the requested
         maximum length, then the abbreviated form is used
-          (<code>DateTimeFormat.GetAbbreviatedMonthName(m)</code>). If necessary the result is space-padded on
+        (<code>DateTimeFormat.GetAbbreviatedMonthName(m)</code>). If necessary the result is space-padded on
         the right to the requested minimum width.</li>
     </ul>
 
@@ -105,7 +108,7 @@
       in some cases depends on which version of the JDK is in use.</aside>
 
     <p>For more details on writing a plug-in for localizing numbers and dates, see <a
-        href="localizing-numbers-and-dates">Localizing Numbers and Dates</a>.</p>
+        href="../localizing-numbers-and-dates">Localizing Numbers and Dates</a>.</p>
 
   </section>
 
@@ -126,10 +129,9 @@
       which one sorts first. Collations are identified using a URI.</p>
 
     <p>A collation URI may be used as an argument to many of the <a class="bodylink" href="/functions"
-        >standard functions</a>, and also as an attribute of various instructions
-        (<dfn><code>xsl:sort</code></dfn>, <dfn><code>xsl:for-each-group</code></dfn>,
-          <dfn><code>xsl:merge-key</code></dfn> in XSLT, and in the <dfn><code>order by</code></dfn> clause of
-      a FLWOR expression in XQuery.</p>
+        >standard functions</a>, and also as an attribute of various instructions (<code>xsl:sort</code>,
+      <code>xsl:for-each-group</code>, <code>xsl:merge-key</code> in XSLT, and in the <code>order by</code>
+      clause of  a FLWOR expression in XQuery.)</p>
 
     <p>In Saxon the default collation is always the "codepoint" collation. This collates strings based on the
       integer values assigned by Unicode to each character: for example "ah!" sorts before "ah?" because the
@@ -163,14 +165,16 @@
 
 
     <p>Further details on the Unicode Collation Algorithm are supplied <a class="bodylink"
-        href="./unicode-collation-algorithm">below</a>.</p>
+        href="../unicode-collation-algorithm">below</a>.</p>
 
     <p>Saxon also allows a collation to be supplied programmatically:</p>
 
     <ul>
-      <li class="javaonly">On SaxonJ, use the method <code>Processor.declareCollation()</code> or
-          <code>Configuration.registerCollation()</code>.</li>
-      <li class="csonly">On SaxonCS, use the method <code>Processor.DeclareCollation()</code>.</li>
+      <li class="javaonly">On SaxonJ, use the method <code
+        java="net.sf.saxon.s9api.Processor#declareCollation">Processor.declareCollation()</code> or
+        <code java="net.sf.saxon.Configuration#registerCollation">Configuration.registerCollation()</code>.</li>
+      <li class="csonly">On SaxonCS, use the method <code
+        cs="Saxon.Api.Processor#DeclareCollation">Processor.DeclareCollation()</code>.</li>
     </ul>
 
     <p>When the <code>xsl:sort</code> instruction is used without an explicit collation, Saxon attempts to
@@ -197,19 +201,13 @@
         <code>format-dateTime()</code>. The feature is primarily intended to provide language-dependent
       numbers and dates, but in fact it can be used to provide arbitrary numbering sequences.</p>
 
-
-    <p>Additional numbering sequences are available as described in <a
-        href="/extensibility/localizing/other-numberings">Numberings for selected languages</a>.</p>
-
-
+    <p>Additional numbering sequences are available as described in <a class="bodylink"
+        href="other-numberings">Numberings for selected languages</a>.</p>
 
     <p>To implement a numberer for language X, you need to define a class that implements the interface <a
         class="javalink" href="net.sf.saxon.lib.Numberer">Numberer</a>; usually it will be convenient to write
       the class as a subclass of the supplied <a class="javalink"
         href="net.sf.saxon.expr.number.AbstractNumberer">AbstractNumberer</a>.</p>
-
-
-
 
     <p>Normally your localization class will extend the class <code>AbstractNumberer</code> so that you can
       reuse functionality like roman numerals which do not need to be localized. Alternatively, if you only
@@ -301,9 +299,177 @@ config.setLocalizerFactory(new LocalizerFactory() {
 
 
 
-
-
-    <xi:include href="extensibility/other-numbering.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+    <section id="other-numberings" title="Numberings for selected languages" class="javaonly">
+      <h1>Numberings for selected languages</h1>
+      <p>
+        <code>Numberer</code> implementations are available for several selected European languages, and
+        you can use these as a prototype to write your own.</p>
+      <p>In Saxon-PE/EE these numberers are used for the given languages only if the JAR file containing the ICU libraries
+        is not available on the classpath. (This is a transitional arrangement for Saxon 9.6, to ease transition to ICU.
+        This mechanism will probably be dropped in a later release.)
+        These numberers are not built in with Saxon-HE, but are available as open source code, and it is possible
+        to configure them by writing a subclass of <a class="javalink"
+          href="net.sf.saxon.lib.LocalizerFactory">LocalizerFactory</a> and registering it with
+        the <a class="javalink" href="net.sf.saxon.Configuration">Configuration</a>.</p>
+      <p>The languages available are:</p>
+      <table>
+        <thead class="params">
+          <tr>
+            <td>
+              <p>code</p>
+            </td>
+            <td>
+              <p>Language</p>
+            </td>
+            <td>
+              <p>Class</p>
+            </td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <p>da</p>
+            </td>
+            <td>
+              <p>
+                <dfn>Danish</dfn>
+              </p>
+            </td>
+            <td>
+              <p>
+                <code>net.sf.saxon.option.local.Numberer_da</code>
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p>de</p>
+            </td>
+            <td>
+              <p>
+                <dfn>German</dfn>
+              </p>
+            </td>
+            <td>
+              <p>
+                <code>net.sf.saxon.option.local.Numberer_de</code>
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p>en</p>
+            </td>
+            <td>
+              <p>
+                <dfn>English</dfn>
+              </p>
+            </td>
+            <td>
+              <p>
+                <code>net.sf.saxon.option.local.Numberer_en</code>
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p>fr</p>
+            </td>
+            <td>
+              <p>
+                <dfn>French</dfn>
+              </p>
+            </td>
+            <td>
+              <p>
+                <code>net.sf.saxon.option.local.Numberer_fr</code>
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p>fr-BE</p>
+            </td>
+            <td>
+              <p>
+                <dfn>French (Belgium)</dfn>
+              </p>
+            </td>
+            <td>
+              <p>
+                <code>net.sf.saxon.option.local.Numberer_frBE</code>
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p>it</p>
+            </td>
+            <td>
+              <p>
+                <dfn>Italian</dfn>
+              </p>
+            </td>
+            <td>
+              <p>
+                <code>net.sf.saxon.option.local.Numberer_it</code>
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p>nl</p>
+            </td>
+            <td>
+              <p>
+                <dfn>Dutch</dfn>
+              </p>
+            </td>
+            <td>
+              <p>
+                <code>net.sf.saxon.option.local.Numberer_nl</code>
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p>nl-BE</p>
+            </td>
+            <td>
+              <p>
+                <dfn>Flemish (Belgium)</dfn>
+              </p>
+            </td>
+            <td>
+              <p>
+                <code>net.sf.saxon.option.local.Numberer_nlBE</code>
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p>sv</p>
+            </td>
+            <td>
+              <p>
+                <dfn>Swedish</dfn>
+              </p>
+            </td>
+            <td>
+              <p>
+                <code>net.sf.saxon.option.local.Numberer_sv</code>
+              </p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <p>For English, the language codes <code>en-x-hyphen</code> and <code>en-x-nohyphen</code> can be used to control whether numbers in the range 21 to 99
+        are spelled out with hyphen or space as a separator ("thirty-one" versus "thirty one"). By default, a hyphen is used for ordinal numbers, while a space
+        is used for cardinal numbers.</p>
+      
+    </section>
   </section>
   
   <xi:include href="extensibility/locales-ICU-numbering.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
@@ -322,13 +488,13 @@ config.setLocalizerFactory(new LocalizerFactory() {
         JDK.</li>
       <li class="javaonly">On SaxonJ-PE and -EE, Saxon uses the collation facilities available from the ICU-J
         library.</li>
-      <li class="javaonly">On SaxonCS, Saxon uses the collation facilities available from the ICU-N library,
+      <li class="csonly">On SaxonCS, Saxon uses the collation facilities available from the ICU-N library,
         which is a port to C# of a subset of ICU-J.</li>
     </ul>
 
     <p>This feature is requested by using a collation (specified either as a <code>collation</code> attribute
       on an <code>xsl:sort</code> instruction, an <code>xsl:default-collation</code> attribute within an XSLT
-      tree or the <code>$collation</code> argument of a comparison function, such as <code>fn:compare()</code>
+      tree, or the <code>$collation</code> argument of a comparison function, such as <code>fn:compare()</code>
       or <code>fn:deep-equal()</code>) that uses the scheme and path
         <code>http://www.w3.org/2013/collation/UCA</code> followed by an optional query part.</p>
     <p>The query is a semicolon-separated sequence of zero or more <code>keyword=value</code> pairs, e.g.
