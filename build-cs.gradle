@@ -1,48 +1,3 @@
-// Find C# compiler: the first path that exists in this list
-// will be used as the C# compiler.
-//
-def csharpCompiler = null
-["C:/Windows/Microsoft.net/Framework/${dotNetFrameworkVersion}/csc.exe",
- "/Library/Frameworks/Mono.framework/Commands/csc",
- "z:/some/other/compiler/path"].each { csc ->
-  // This only makes sense on Windows, so always using file:/// is ok
-  if (csharpCompiler == null && pathExists(csc)) {
-    csharpCompiler = csc
-  }
-}
-
-if (csharpCompiler == null) {
-  println("WARNING: Failed to find csc[.exe]!")
-}
-
-/*
-// Find nuget
-def nuget = null
-// Laboriously construct a search path that includes some default locations
-// plus the users actual path.
-def spath = ["/Library/Frameworks/Mono.framework/Commands"]
-System.getenv("PATH").split(System.getProperty("path.separator")).each { dir ->
-  spath += [dir]
-}
-spath.each { dir ->
-  if (nuget == null) {
-    def fn = new File(dir + "/nuget")
-    if (fn.exists() && fn.canExecute()) {
-      nuget = fn.toString()
-    } else {
-      fn = new File(dir + "/nuget.exe")
-      if (fn.exists() && fn.canExecute()) {
-        nuget = fn.toString()
-      }
-    }
-  }
-}
-
-if (nuget == null) {
-  println("WARNING: Failed to find nuget[.exe]!")
-}
-*/
-
 // Find dotnet
 def dotnet = null
 // Laboriously construct a search path that includes some default locations
@@ -66,7 +21,7 @@ spath.each { dir ->
 }
 
 if (dotnet == null) {
-  println("WARNING: Failed to find nuget[.exe]!")
+  println("WARNING: Failed to find dotnet[.exe]!")
 }
 
 task build_transpiler(
@@ -525,60 +480,13 @@ task hecs_project_files (
   dependsOn: ["generateCSharp"],
   description: "Prepare the project files used for dotnet build"
 ) {
-  from "src/main/saxon-cs/csproj/*.csproj"
+  from "src/main/saxon-cs/csproj"
   into "${buildDir}/cs"
+  include "*.csproj"
 }
-
-task singulink(
-  dependsOn: ["hecs_project_files"],
-  description: "Install the Singulink libraries"
-) {
-  inputs.files "${buildDir}/cs/*.csproj"
-  doLast {
-    if (dotnet == null) {
-      throw new GradleException("Cannot build: failed to find dotnet[.exe] on path.")
-    }
-    
-    def args = [dotnet,
-                "add", "package",
-                "Singulink.Numerics.BigDecimal"]
-    exec {
-      workingDir = "${buildDir}/cs"
-      commandLine args
-    }
-  }
-  doFirst {
-    mkdir "${buildDir}"
-  }
-}
-
-task  immutable(
-  dependsOn: ["hecs_project_files"],
-  description: "Install System.Collections.Immutable libraries"
-) {
-  inputs.files "${buildDir}/cs/*.csproj"
-  doLast {
-    if (dotnet == null) {
-      throw new GradleException("Cannot build: failed to find dotnet[.exe] on path.")
-    }
-    
-    def args = [dotnet,
-                "add", "package",
-                "System.Collections.Immutable"]
-    exec {
-      workingDir = "${buildDir}/cs"
-      commandLine args
-    }
-  }
-  doFirst {
-    mkdir "${buildDir}"
-  }
-}
-
-
 
 task hecs_dll(
-  dependsOn: ["singulink", "immutable"],
+  dependsOn: ["hecs_project_files"],
   description: "Compile Saxon-CS DLL for HE"
 ) {
   doLast {
