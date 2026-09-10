@@ -533,7 +533,7 @@
             <xsl:text>Saxon.Hej.type.PrimitiveUType.values()</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier='values'">
-            <xsl:text>System.Enum.GetValues(typeof({@RESOLVED_TYPE => f:adjustTypeNamespace()}))</xsl:text>
+            <xsl:text>System.Enum.GetValues&lt;{@RESOLVED_TYPE => f:adjustTypeNamespace()}&gt;()</xsl:text>
          </xsl:when>
       </xsl:choose>      
    </xsl:template>
