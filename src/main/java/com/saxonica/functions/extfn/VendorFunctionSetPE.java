@@ -233,20 +233,20 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.HEX_BINARY, OPT, EMPTY)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null));
 
-        register("highest", 1, e -> e.populate( HighestOrLowest::new, AnyItemType.getInstance(), STAR, 0)
-                .arg(0, AnyItemType.getInstance(), STAR, EMPTY));
-
-        register("highest", 2, e -> e.populate( HighestOrLowest::new, AnyItemType.getInstance(), STAR, 0)
-                .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
-                .arg(1, orderKey, ONE, null));
+//        register("highest", 1, e -> e.populate( HighestOrLowest::new, AnyItemType.getInstance(), STAR, 0)
+//                .arg(0, AnyItemType.getInstance(), STAR, EMPTY));
+//
+//        register("highest", 2, e -> e.populate( HighestOrLowest::new, AnyItemType.getInstance(), STAR, 0)
+//                .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
+//                .arg(1, orderKey, ONE, null));
 
         register("index", 2, e -> e.populate( Index::new, MapType.getInstance(), ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
                 .arg(1, AnyItemType.getInstance(), ONE, EMPTY));
 
-        register("index-where", 2, e -> e.populate(IndexWhere::new, BuiltInAtomicType.INTEGER, STAR, 0)
-                .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
-                .arg(1, predicate, ONE, EMPTY));
+//        register("index-where", 2, e -> e.populate(IndexWhere::new, BuiltInAtomicType.INTEGER, STAR, 0)
+//                .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
+//                .arg(1, predicate, ONE, EMPTY));
 
         register("in-scope-namespaces", 1, e -> e.populate(InScopeNamespacesFn::new, MapType.getInstance(), ONE, 0)
                 .arg(0, NodeKindTest.ELEMENT, ONE | INS, null));
@@ -258,8 +258,8 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
         register("is-defaulted", 1, e -> e.populate( IsDefaulted::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, AnyNodeTest.getInstance(), ONE, null));
 
-        register("is-NaN", 1, e -> e.populate(IsNaN::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
-                .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE, null));
+//        register("is-NaN", 1, e -> e.populate(IsNaN::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+//                .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE, null));
 
         register("items-after", 2, e -> e.populate(ItemsStarting.ItemsAfter::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR | TRA, EMPTY)
@@ -301,12 +301,12 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
         register("line-number", 1, e -> e.populate( LineNumber::new, BuiltInAtomicType.INTEGER, OPT, 0)
                 .arg(0, AnyNodeTest.getInstance(), OPT, EMPTY));
 
-        register("lowest", 1, e -> e.populate( HighestOrLowest::new, AnyItemType.getInstance(), STAR, 0)
-                .arg(0, AnyItemType.getInstance(), STAR, EMPTY));
-
-        register("lowest", 2, e -> e.populate( HighestOrLowest::new, AnyItemType.getInstance(), STAR, 0)
-                .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
-                .arg(1, orderKey, ONE, null));
+//        register("lowest", 1, e -> e.populate( HighestOrLowest::new, AnyItemType.getInstance(), STAR, 0)
+//                .arg(0, AnyItemType.getInstance(), STAR, EMPTY));
+//
+//        register("lowest", 2, e -> e.populate( HighestOrLowest::new, AnyItemType.getInstance(), STAR, 0)
+//                .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
+//                .arg(1, orderKey, ONE, null));
 
         FunctionItemType tester = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.ANY_SEQUENCE},
@@ -379,13 +379,13 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY)
                 .arg(1, BuiltInAtomicType.STRING, ONE, EMPTY));
         //#endif
-        register("parse-html", 1, e -> e.populate( com.saxonica.functions.qt4.ParseHtml::new, NodeKindTest.DOCUMENT, ONE, LATE | NEW)
-                .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY));
-
-        register("parse-html", 2, e -> e.populate( com.saxonica.functions.qt4.ParseHtml::new, NodeKindTest.DOCUMENT, ONE, LATE | NEW)
-                .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY)
-                .arg(1, MapType.ANY_MAP_TYPE, ONE, EMPTY)
-                .setOptionDetails(Doc_2.makeOptionsParameter()));
+//        register("parse-html", 1, e -> e.populate( com.saxonica.functions.qt4.ParseHtml::new, NodeKindTest.DOCUMENT, ONE, LATE | NEW)
+//                .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY));
+//
+//        register("parse-html", 2, e -> e.populate( com.saxonica.functions.qt4.ParseHtml::new, NodeKindTest.DOCUMENT, ONE, LATE | NEW)
+//                .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY)
+//                .arg(1, MapType.ANY_MAP_TYPE, ONE, EMPTY)
+//                .setOptionDetails(Doc_2.makeOptionsParameter()));
 
         register("parse-XPath", 3, e -> e.populate( ParseXPath::new, NodeKindTest.DOCUMENT, ONE, BuiltInFunctionSet.LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, EMPTY)
