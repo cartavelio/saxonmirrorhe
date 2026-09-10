@@ -224,14 +224,14 @@ public abstract class CoercionRules {
             // Add a check that the values conform to the required type
 
             Affinity relation = th.relationship(suppliedItemType, requiredItemType);
-
-            if (relation == DISJOINT) {
-                RoleDiagnostic role = roleSupplier.get();
-                throw new XPathException(
-                        "Failed to convert the " + role.getMessage() + ": " +
-                        "Cannot convert from " + suppliedItemType + " to "
-                                + requiredType, "XPTY0004");
-            }
+//
+//            if (relation == DISJOINT) {
+//                RoleDiagnostic role = roleSupplier.get();
+//                throw new XPathException(
+//                        "Failed to convert the " + role.getMessage() + ": " +
+//                        "Cannot convert from " + suppliedItemType + " to "
+//                                + requiredType, "XPTY0004");
+//            }
             if (!(relation == SAME_TYPE || relation == SUBSUMED_BY)) {
                 ItemTypeCheckingFunction itemChecker =
                         new ItemTypeCheckingFunction(requiredItemType, roleSupplier, locator, config);

@@ -39,6 +39,9 @@ public class StringValue extends AtomicValue {
     public static final StringValue SINGLE_SPACE = new StringValue(StringConstants.SINGLE_SPACE);
     public static final StringValue TRUE = new StringValue(StringConstants.TRUE);
     public static final StringValue FALSE = new StringValue(StringConstants.FALSE);
+    public static final StringValue CR = new StringValue("\r");
+    public static final StringValue LF = new StringValue("\n");
+    public static final StringValue CRLF = new StringValue("\r\n");
 
     public static final StringValue ZERO_LENGTH_UNTYPED = StringValue.makeUntypedAtomic(EmptyUnicodeString.getInstance());
 
