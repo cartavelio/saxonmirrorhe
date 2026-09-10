@@ -391,7 +391,7 @@
         is to copy the open-source implementations of these methods from the Saxon 9.9 distribution, and rename this as a user-defined
         class.</p>
         
-        <p>A new configuration option <code>Feature.RETAIN_NODE_FOR_DIAGNOSTICS</code> is provided. If set, this causes the location information
+        <p>A new configuration option <a class="feature" href="RETAIN_NODE_FOR_DIAGNOSTICS"/> is provided. If set, this causes the location information
         associated with instructions and expressions in an XSLT stylesheet to retain a reference to the node in the stylesheet tree where the
         error occurred (rather than simply retaining the node name and line number). This information can be useful to IDEs that wish to highlight
         where in the source the error occurred. The information is retained both for static and dynamic error reporting. The option is off by default 
@@ -681,9 +681,8 @@
         
         <h2>XPath Syntax Extensions</h2>
         
-        <aside>XPath Syntax Extensions require Saxon-PE or higher, and are available only if the configuration option
-            <a class="bodylink code"
-                href="/configuration/config-features">Feature.ALLOW_SYNTAX_EXTENSIONS</a> is enabled.</aside>
+        <aside>XPath Syntax Extensions require Saxon-PE or higher, and are available only if the configuration property
+            <a class="feature" href="ALLOW_SYNTAX_EXTENSIONS"/> is enabled.</aside>
         
         <h3>Tuple Types</h3>
         

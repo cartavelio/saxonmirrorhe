@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <article id="using-xsl" title="Using XSLT">
-   <h1>Using XSLT Stylesheets</h1>
+   <h1>Running XSLT Transformations</h1>
 
 
    <p>This section describes how to use XSLT stylesheets with Saxon, either from the command line,
@@ -22,21 +22,26 @@
       specification, and about the handling of implementation-defined features of the
       specifications, see <a class="bodylink" href="/conformance">Conformance</a>.</p>
 
-   <section id="commandline" title="Running XSLT from the Command Line">
+   <section id="commandline" title="From the Command Line">
       <h1>Running XSLT from the Command Line</h1>
 
 
-      <p>A command is available to apply a given stylesheet to a given source XML document. For
-         simple transformations on the Java platform, use the command:</p>
+      <p>A command is available to apply a given stylesheet to a given source XML document.</p>
+      
+      <div class="javaonly">
+      <p>For simple transformations on the Java platform, use the command:</p>
       <kbd>java net.sf.saxon.Transform -s:<i>source</i> -xsl:<i>stylesheet</i> -o:<i>output</i>
       </kbd>
+      </div>
 
-      <p>where <i>source</i>, <i>stylesheet</i>, and <i>output</i> are the source XML file, the XSLT
-         stylesheet, and the output file respectively.</p>
-
-      <p for="CS">For Saxon-CS, the corresponding command is:</p>
+      <div class="csonly">
+      <p class="csonly">For Saxon-CS, the corresponding command is:</p>
       <kbd>dotnet Saxon transform -s:<i>source</i> -xsl:<i>stylesheet</i> -o:<i>output</i>
       </kbd>
+      </div>
+      
+      <p>Here <i>source</i>, <i>stylesheet</i>, and <i>output</i> are the source XML file, the XSLT
+         stylesheet, and the output file respectively.</p>
 
       <p>For a schema-aware transformation, specify the option <code>-sa</code>. For more
          details see <a class="bodylink" href="/schema-processing/satransformcmd">Schema-Aware
@@ -51,27 +56,28 @@
          then a number of parameters provided as keyword=value pairs. The options must come first,
          then the file names if present, then the parameters.</p>
 
-      <p for="J">For this to work, all the necessary Java components must be available on the
-            <dfn>classpath</dfn>. See <a class="bodylink" href="/about/installationjava"
-            >Installation</a> for details of how to set up the classpath.</p>
-
-      <p for="J">If you are are not using any additional Java libraries, you can use the simpler form of
-         command (this example is for Saxon-HE 10.0):</p>
-      <kbd>java  -jar <i>dir</i>/saxon-he-10.0.jar [options] [params]</kbd>
-
-      <p for="J">
-         <i>Note, however, that this does not work if you need to load user-written extension
-            functions or other classes (such as the ICU localization library) from the classpath. It
-            will therefore not work if your stylesheet uses extension functions or other plug-in
-            components such as parsers or URI resolvers.</i>
-      </p>
-
+      <div class="javaonly">
+         <p>For this to work, all the necessary Java components must be available on the
+               <dfn>classpath</dfn>. See <a class="bodylink" href="/about/installationjava"
+               >Installation</a> for details of how to set up the classpath.</p>
+   
+         <p >If you are are not using any additional Java libraries, you can use the simpler form of
+            command (this example is for Saxon-HE 10.0):</p>
+         <kbd>java  -jar <i>dir</i>/saxon-he-10.0.jar [options] [params]</kbd>
+   
+         <p>
+            <i>Note, however, that this does not work if you need to load user-written extension
+               functions or other classes (such as the ICU localization library) from the classpath. It
+               will therefore not work if your stylesheet uses extension functions or other plug-in
+               components such as parsers or URI resolvers.</i>
+         </p>
+      </div> 
 
       <h2 class="subtitle">Command line options</h2>
 
       <p>The options are as follows (in any order). Square brackets indicate an optional value.</p>
       <table>
-         <tr for="J">
+         <tr class="javaonly">
             <td>
                <p>-a[:(on|off)]</p>
             </td>
@@ -189,7 +195,7 @@
                   written as <code>{uri}localname</code>. </p>
             </td>
          </tr>
-         <tr for="J">
+         <tr class="javaonly">
             <td>
                <p>-init:initializer</p>
             </td>
@@ -278,7 +284,7 @@
                   containing an embedded license key is being executed.</p>
             </td>
          </tr>
-         <tr for="J">
+         <tr class="javaonly">
             <td>
                <p>-m:classname</p>
             </td>
@@ -412,7 +418,7 @@
                The <code>j</code> option is an exception: enabling this option shifts work from compile time to run time.</aside>
             </td>
          </tr>
-         <tr for="J">
+         <tr class="javaonly">
             <td>
                <p>-or:classname</p>
             </td>
@@ -462,7 +468,7 @@
                   validation. </p>
             </td>
          </tr>
-         <tr for="J">
+         <tr class="javaonly">
             <td>
                <p>-quit:(on|off)</p>
             </td>
@@ -474,7 +480,7 @@
                   invoked from another Java application such as Ant. </p>
             </td>
          </tr>
-         <tr for="J">
+         <tr class="javaonly">
             <td>
                <p>-r:classname</p>
             </td>
@@ -629,7 +635,7 @@
                   however, this is not fully tested.</p>
             </td>
          </tr>
-         <tr for="J">
+         <tr class="javaonly">
             <td>
                <p>-TB:filename</p>
             </td>
@@ -641,7 +647,7 @@
                   and the cost of compilation.</p>
             </td>
          </tr>
-         <tr for="J">
+         <tr class="javaonly">
             <td>
                <p>-threads:N</p>
             </td>
@@ -651,7 +657,7 @@
                   runs in a single thread.</p>
             </td>
          </tr>
-         <tr for="J">
+         <tr class="javaonly">
             <td>
                <p>-TJ</p>
             </td>
@@ -758,7 +764,7 @@
                   default is <code>recover</code>.</p>
             </td>
          </tr>
-         <tr for="J">
+         <tr class="javaonly">
             <td>
                <p>-x:classname</p>
             </td>
@@ -783,7 +789,7 @@
                   factory class, <code>com.fasterxml.aalto.sax.SAXParserImpl</code>.</p>
             </td>
          </tr>
-         <tr for="J">
+         <tr class="javaonly">
             <td>
                <p>-xi:(on|off)</p>
             </td>
@@ -794,7 +800,7 @@
                   (but not on .NET).</p>
             </td>
          </tr>
-         <tr for="J">
+         <tr class="javaonly">
             <td>
                <p>-xmlversion:(1.0|1.1)</p>
             </td>
@@ -856,7 +862,7 @@
             </td>
          </tr>
          
-         <tr for="J">
+         <tr class="javaonly">
             <td>
                <p>-y:classname</p>
             </td>
@@ -997,86 +1003,8 @@
       </section>
    </section>
 
-   <section id="xsltfromant" title="Running Saxon XSLT Transformations from Ant">
-      <h1>Running Saxon XSLT Transformations from Ant</h1>
-
-
-      <p>It is possible to run a Saxon transformation from Ant using the standard <a
-            href="http://ant.apache.org/manual/Tasks/style.html" class="bodylink">xslt task</a>, by
-         using the <code>trax</code> processor and with an appropriate <code>classpath</code> that
-         forces Saxon to be selected. This can now be used to provide the ability to take advantage
-         of the full range of capabilities offered by XSLT 3.0 in general and Saxon in particular
-         (for example, schema aware processing and multiple output files).</p>
-
-      <aside>The custom Ant task that was developed for earlier Saxon releases is no longer
-         supported.</aside>
-      
-      <p>To ensure that Saxon is the chosen XSLT processor it is safest to use the <code>&lt;factory name="factory-class"&gt;</code>
-      element in the the Ant task. The relevant factory classes are:</p>
-      
-      <ul>
-         <li><code java="net.sf.saxon.BasicTransformerFactory">net.sf.saxon.BasicTransformerFactory</code> for Saxon-HE</li>
-        <li><code java="com.saxonica.config.ProfessionalTransformerFactory">com.saxonica.config.ProfessionalTransformerFactory</code> for Saxon-PE</li>
-        <li><code java="com.saxonica.config.EnterpriseTransformerFactory">com.saxonica.config.EnterpriseTransformerFactory</code> for Saxon-EE</li>
-        <li><code java="com.saxonica.config.StreamingTransformerFactory">com.saxonica.config.StreamingTransformerFactory</code> for a streaming transformation in Saxon-EE.
-         Note that if this option is selected, the global context item for the transformation (used when a global variable
-         initializer references the context item) will be absent, so any reference to "." in a global variable throws an error.</li>
-      </ul>
-
-      <p>Saxon-specific configuration options can be specified using the <code>attribute</code>
-         child of the <code>factory</code> element. For example, the following switches on Saxon
-         tracing (the equivalent of the <code>-T</code> option on the command line):</p>
-      <samp><![CDATA[  <factory name="net.sf.saxon.TransformerFactoryImpl">
-     <attribute name="http://saxon.sf.net/feature/traceListenerClass" 
-                value="net.sf.saxon.trace.XSLTTraceListener"/>
-  </factory>
-]]></samp>
-
-      <p>For a full list of feature names, see <a class="bodylink"
-            href="/configuration/config-features">Configuration Features</a> or the Javadoc
-         documentation of class <a class="javalink" href="net.sf.saxon.lib.Feature"
-            >net.sf.saxon.lib.Feature</a>.</p>
-
-      <p>A particularly useful feature for use with Ant is
-            <code>http://saxon.sf.net/feature/ignoreSAXSourceParser</code>. When Ant invokes Saxon,
-         it normally does so supplying a <code>SAXSource</code> object with a contained
-            <code>XMLReader</code>. Saxon will not normally change the properties of an
-            <code>XMLReader</code> supplied by the application. However, allowing Saxon to supply
-         its own <code>XMLReader</code> can be much more efficient, especially in the case where
-         there are references to W3C-defined HTML or SVG DTD and entity files: Saxon has internal
-         copies of these files, but can only use them if it is allowed to configure the parser
-         accordingly. Setting this property authorises Saxon to ignore the parser supplied by Ant
-         and use its own.</p>
-
-      <p>It is possible to get detailed control of the configuration by specifying the name of a
-         Saxon configuration file using this mechanism, for example:</p>
-      <samp><![CDATA[  <factory name="com.saxonica.config.EnterpriseTransformerFactory">
-    <attribute name="http://saxon.sf.net/feature/configuration-file" 
-               value="config-de.xml"/>
-  </factory>]]></samp>
-
-      <p>In this case this must be the first attribute.</p>
-
-      <p>The initial template and initial mode for the transformation can be specified using the
-         attribute names <code>http://saxon.sf.net/feature/initialTemplate</code> and
-            <code>http://saxon.sf.net/feature/initialMode</code> respectively. The value is a QName
-         in Clark notation (that is <code>{uri}local</code>).</p>
-
-      <p>Note that names in Clark notation may also be used for the qualified names of stylesheet
-         parameters and serialization options.</p>
-
-      <p>Note that an Ant transformation always has an input file. If necessary, a dummy file can be
-         specified.</p>
-
-      <p>There is a history of bugs in successive releases of Ant that mean not all these features
-         work in every Ant version. In particular, the <code>classpath</code> attribute of the
-            <code>xslt</code> task element has been unreliable: the safest approach is to ensure
-         that the Jar files needed to run Saxon are present on the externally-specified classpath
-         (the classpath at the point where Ant is invoked), rather than relying on the task-specific
-         classpath.</p>
-   </section>
-   <section id="embedding" title="Invoking XSLT from a Java application" for="J">
-      <h1>Invoking XSLT from a Java application</h1>
+   <section id="embedding" title="From a Java Application" class="javaonly">
+      <h1>Running XSLT Transformations from a Java Application</h1>
 
 
       <p>Rather than running XSLT transformations from the command line, you may want to invoke
@@ -1445,8 +1373,9 @@
       </section>
    </section>
    
-   <section id="Saxon-Api-transformation" title="Running Transformations from C#" for="CS">
-      <h1>Running Transformations from C#</h1>
+   <section id="Saxon-Api-transformation" title="From a C# Application" class="csonly">
+      <div class="csonly">
+      <h1>Running XSLT Transformations from C#</h1>
       
       
       <p>You can perform a transformation using the C# <code>Saxon.Api</code> interface as follows
@@ -1458,48 +1387,89 @@
                set any global configuration options on the <code>Processor</code>.
               It is recommended to create a single <code>Processor</code> for the entire
             application.</p>
+            <p><code>var processor = new Processor();</code></p>
          </li>
          <li>
             <p>Call <code>NewXsltCompiler()</code> to create an <a class="cslink"
                href="Saxon.Api.XsltCompiler">XsltCompiler</a> object, and set any options
                that are local to a specific compilation (for example, the destination of error
                messages).</p>
-            <aside>By default, error messages are directed to the <code>System.err</code> output
-               stream, which is fine for an application run from a console, but not so good if
-               it's executing on a web server, or behind a graphical interface. In such cases
-               you'll want to think carefully about where to direct the error messages. You can
-               control this by setting the <code>ErrorReporter</code> property to a suitable delegate:
-               for example <code>xsltCompiler.ErrorReporter = err => Console.Error.WriteLine(err.Message)</code>
-               outputs error messages to the console, while <code>xsltCompiler.ErrorReporter = err => errorList.Add(err)</code>
-               adds the errors to a list where the application can inspect them on completion.
-            </aside>
+            <p><code>var compiler = processor.NewXsltCompiler();</code></p>
+         </li>
+         <li>
+            <p>Decide how you want to handle compile-time errors. Some options are:</p>
+            <ul>
+               <li><p>If your application will only be used to execute stylesheets that have
+               been thoroughly tested elsewhere (for example, in a development environment
+               such as Oxygen), then you can simply rely on the exception thrown by the
+               compiler if an error occurs. However, the exception won't contain detailed
+               diagnostics to say what is wrong.</p></li>
+               <li><p>If your application runs from the command line, then in normal circumstances
+               any error messages will be written to the console, and no special action is needed.</p></li>
+               <li><p>If however the application runs in a web server, or within a GUI framework, then
+               you will need to think about where to direct the error messages. For example, you could send
+               them to a log file, or you could display them on screen. Either way, you will want to
+               register an <code cs="Saxon.Api.ErrorReporter">ErrorReporter</code> that deals with the messages. For example,
+               you could capture the messages in a list (for later analysis) like this:</p>
+                  <p><code>compiler.ErrorReporter = err => errorList.Add(err)</code></p>
+               <p>Or you could send them to a log file like this:</p>
+                  <p><code>compiler.ErrorReporter = err => Console.Error.WriteLine(err.Message)</code></p>
+               <p>The error object that is passed to the <code>ErrorReporter</code> delegate
+                  is not an exception (it cannot be thrown). It is an object of class 
+                  <code cs="Saxon.Api.XmlProcessingError">XmlProcessingError</code>, and its main properties
+               are:</p>
+                  <ul>
+                     <li><code>Message</code>: an error message</li>
+                     <li><code>ErrorCode</code>: the error code</li>
+                     <li><code>Location</code>: the location in the stylesheet where the error was detected</li>
+                     <li><code>IsWarning</code>: distinguishes warnings from fatal error conditions</li>
+                  </ul>
+               </li>
+            </ul>
          </li>
          <li>
             <p>Call the <code>Compile()</code> method to compile a stylesheet. The result is an
-               <a class="cslink" href="Saxon.Api.XsltExecutable"
-                  >XsltExecutable</a>, which can be used as often as you like, in the same thread or
+               <code cs="Saxon.Api.XsltExecutable">XsltExecutable</code>, which can be used as often as you like, in the same thread or
                in different threads.</p>
+            <p><code>var executable = compiler.Compile(...)</code></p>
+            <p>This method has a number of overloads, allowing the stylesheet to be supplied in different ways. It can be
+            supplied as a URI, as a <code>Stream</code>, as a <code>TextReader</code>, or as an <code>XmlReader</code>.</p>
+            <p>Except for trivial stylesheets containing a single module, it's important that the stylesheet should have
+            a known base URI. The base URI is used at compile time for resolving any relative URI reference appearing 
+            in an <code>xsl:include</code> or <code>xsl:import</code> declaration; it's also used at run-time when
+            calling functions such as <code>document()</code>, <code>unparsed-text()</code>, or <code>json-doc()</code>.
+            You can supply a base URI either by setting the <code>BaseUri</code> property on the <code>XsltCompiler</code>,
+            or as an (implicit or explicit) parameter on the call to the <code>Compile</code> method.</p>
+            <p>Compiling a stylesheet can often be an expensive processor in comparison with the actual
+            execution (especially when the stylesheet is large and the source document is small). It's therefore
+            desirable to reuse the <code cs="Saxon.Api.XsltExecutable">XsltExecutable</code> for multiple transformations where possible.
+               Once created, the <code cs="Saxon.Api.XsltExecutable">XsltExecutable</code> is read-only and thread-safe.</p>
          </li>
          <li>
-            <p>To run a transformation, call either the <code>Load()</code> or
-               <code>Load30()</code> method on the <a class="cslink"
-                  href="Saxon.Api.XsltExecutable">XsltExecutable</a>. This creates an <a
-                     class="cslink" href="Saxon.Api.XsltTransformer">XsltTransformer</a>
-               or <a class="cslink" href="Saxon.Api.Xslt30Transformer"
-                  >Xslt30Transformer</a> respectively. Either of these can be used to run the
+            <p>The next step is to create an <code cs="Saxon.Api.XsltTransformer">XsltTransformer</code>, 
+               or <code cs="Saxon.Api.Xslt30Transformer">Xslt30Transformer</code> object, by calling
+               the <code>Load()</code> or
+               <code>Load30()</code> method on the  cs="Saxon.Api.XsltExecutable".</p>
+            
+            <p><code>var transformer = executable.Load();</code></p>
+            <p><code>var transformer = executable.Load30();</code></p>
+            
+               <p>Either of these can be used to run the
                transformation (regardless of which XSLT version you are using), but they have
                different capabilities:</p>
             
-            <ol>
+            <ul>
                <li>
-                  <p>The <a class="cslink" href="Saxon.Api.XsltTransformer"
-                     >XsltTransformer</a> is geared towards the traditional way of running an
+                  <p>The <code cs="Saxon.Api.XsltTransformer">XsltTransformer</code> 
+                     is geared towards the traditional way of running an
                      XSLT transformation, by supplying a principal source document as input. When
                      you call the <code>Run()</code> method, the template rule that best
                      matches this source document is located and executed.</p>
                   
                   <p>The input document is supplied as a <code>Stream</code> (containing lexical XML),
-                     using the method <code>SetInputStream</code>.</p>
+                     using the method <code>SetInputStream</code>. This method also expects a URI, which
+                  is used as the base URI of the source document in case it contains relative references
+                  to other documents.</p>
                   
                   <p>The destination for the result is supplied as the argument to the <code>Run()</code>
                      method. This can be any implementation of the interface <a class="cslink" href="Saxon.Api.IDestination">IDestination</a>;
@@ -1527,17 +1497,18 @@
                   <p>You can use methods on the <code>XsltTransformer</code> to set values for
                      global stylesheet parameters, but not for parameters declared at the level
                      of a particular <code>xsl:template</code> element.</p>
-                  <p>The output of the transformation is specified as a <a class="javalink"
-                     href="net.sf.saxon.s9api.Destination">Destination</a> object, which
-                     allows a wide range of possibilities: you can send the output to a
-                     serializer, or to a SAX <code>ContentHandler</code>. You can build a tree
-                     either in Saxon's native format (represented by the s9api class
-                     <code>XdmNode</code>) or as a DOM. You can send the output to be
-                     validated against a schema by nominating a <a class="javalink"
-                        href="net.sf.saxon.s9api.SchemaValidator">SchemaValidator</a> as the
-                     destination, or you can pipe it through another transformation, because
-                     <code>XsltTransformer</code> itself implements the
-                     <code>Destination</code> interface.</p>
+                  <p>Typical usage:</p>
+                  <samp><![CDATA[
+ var transformer = executable.Load();
+ transformer.SetInputStream(...);
+ transformer.SetParameter(new QName("debug"), new XdmAtomicValue(true));
+ var writer = new StringWriter();
+ var serializer = processor.NewSerializer(writer);
+ serializer.SetOutputProperty(Serializer.INDENT, "yes");
+ transformer.Run(serializer);
+ Console.WriteLine(writer.ToString());
+                  ]]></samp>
+                  
                </li>
                <li>
                   <p>The <a class="cslink" href="Saxon.Api.Xslt30Transformer"
@@ -1568,7 +1539,7 @@
                      <code>IDestination</code> interface so it is not quite as convenient
                      as <code>Xslt30Transformer</code> when constructing a pipeline.</p>
                </li>
-            </ol>
+            </ul>
             
             <p>Both <code>XsltTransformer</code> and <code>Xslt30Transformer</code> can be
                serially reused, but they must not be shared across multiple threads. Both allow
@@ -1587,7 +1558,7 @@
       <p>For instance, "TransformA" in S9APIExamples tests the following (to run the <a class="bodylink"
          href="/samples/books">Book List Example</a>):</p>
       
-      <!-- TBA TODO CONVERT TO C# -->
+      <p>TBA TODO CONVERT TO C#</p>
       
       <samp><![CDATA[   Processor processor = new Processor(false);
    XsltCompiler compiler = processor.newXsltCompiler();
@@ -1597,9 +1568,88 @@
    out.setOutputProperty(Serializer.Property.INDENT, "yes");
    Xslt30Transformer transformer = stylesheet.load30();
    transformer.transform(new StreamSource(new File("data/books.xml")), out);]]></samp>
-      
+      </div>   
    </section>
    
+   <section id="xsltfromant" title="From Ant">
+
+      <h1>Running Saxon XSLT Transformations from Ant</h1>
+      
+      
+      <p>It is possible to run a Saxon transformation from Ant using the standard <a
+         href="http://ant.apache.org/manual/Tasks/style.html" class="bodylink">xslt task</a>, by
+         using the <code>trax</code> processor and with an appropriate <code>classpath</code> that
+         forces Saxon to be selected. This can now be used to provide the ability to take advantage
+         of the full range of capabilities offered by XSLT 3.0 in general and Saxon in particular
+         (for example, schema aware processing and multiple output files).</p>
+      
+      <aside>The custom Ant task that was developed for earlier Saxon releases is no longer
+         supported.</aside>
+      
+      <p>To ensure that Saxon is the chosen XSLT processor it is safest to use the <code>&lt;factory name="factory-class"&gt;</code>
+         element in the the Ant task. The relevant factory classes are:</p>
+      
+      <ul>
+         <li><code java="net.sf.saxon.BasicTransformerFactory">net.sf.saxon.BasicTransformerFactory</code> for Saxon-HE</li>
+         <li><code java="com.saxonica.config.ProfessionalTransformerFactory">com.saxonica.config.ProfessionalTransformerFactory</code> for Saxon-PE</li>
+         <li><code java="com.saxonica.config.EnterpriseTransformerFactory">com.saxonica.config.EnterpriseTransformerFactory</code> for Saxon-EE</li>
+         <li><code java="com.saxonica.config.StreamingTransformerFactory">com.saxonica.config.StreamingTransformerFactory</code> for a streaming transformation in Saxon-EE.
+            Note that if this option is selected, the global context item for the transformation (used when a global variable
+            initializer references the context item) will be absent, so any reference to "." in a global variable throws an error.</li>
+      </ul>
+      
+      <p>Saxon-specific configuration options can be specified using the <code>attribute</code>
+         child of the <code>factory</code> element. For example, the following switches on Saxon
+         tracing (the equivalent of the <code>-T</code> option on the command line):</p>
+      <samp><![CDATA[  <factory name="net.sf.saxon.TransformerFactoryImpl">
+     <attribute name="http://saxon.sf.net/feature/traceListenerClass" 
+                value="net.sf.saxon.trace.XSLTTraceListener"/>
+  </factory>
+]]></samp>
+      
+      <p>For a full list of feature names, see <a class="bodylink"
+         href="/configuration/config-features">Configuration Features</a> or the Javadoc
+         documentation of class <a class="javalink" href="net.sf.saxon.lib.Feature"
+            >net.sf.saxon.lib.Feature</a>.</p>
+      
+      <p>A particularly useful feature for use with Ant is
+         <code>http://saxon.sf.net/feature/ignoreSAXSourceParser</code>. When Ant invokes Saxon,
+         it normally does so supplying a <code>SAXSource</code> object with a contained
+         <code>XMLReader</code>. Saxon will not normally change the properties of an
+         <code>XMLReader</code> supplied by the application. However, allowing Saxon to supply
+         its own <code>XMLReader</code> can be much more efficient, especially in the case where
+         there are references to W3C-defined HTML or SVG DTD and entity files: Saxon has internal
+         copies of these files, but can only use them if it is allowed to configure the parser
+         accordingly. Setting this property authorises Saxon to ignore the parser supplied by Ant
+         and use its own.</p>
+      
+      <p>It is possible to get detailed control of the configuration by specifying the name of a
+         Saxon configuration file using this mechanism, for example:</p>
+      <samp><![CDATA[  <factory name="com.saxonica.config.EnterpriseTransformerFactory">
+    <attribute name="http://saxon.sf.net/feature/configuration-file" 
+               value="config-de.xml"/>
+  </factory>]]></samp>
+      
+      <p>In this case this must be the first attribute.</p>
+      
+      <p>The initial template and initial mode for the transformation can be specified using the
+         attribute names <code>http://saxon.sf.net/feature/initialTemplate</code> and
+         <code>http://saxon.sf.net/feature/initialMode</code> respectively. The value is a QName
+         in Clark notation (that is <code>{uri}local</code>).</p>
+      
+      <p>Note that names in Clark notation may also be used for the qualified names of stylesheet
+         parameters and serialization options.</p>
+      
+      <p>Note that an Ant transformation always has an input file. If necessary, a dummy file can be
+         specified.</p>
+      
+      <p>There is a history of bugs in successive releases of Ant that mean not all these features
+         work in every Ant version. In particular, the <code>classpath</code> attribute of the
+         <code>xslt</code> task element has been unreliable: the safest approach is to ensure
+         that the Jar files needed to run Saxon are present on the externally-specified classpath
+         (the classpath at the point where Ant is invoked), rather than relying on the task-specific
+         classpath.</p>
+   </section>
    
 
    <section id="compiling" title="Compiling a Stylesheet">
@@ -1625,7 +1675,7 @@
             XML file (called the <i>stylesheet export file</i>), in much the same way that 
             object code from other languages is saved to
             filestore, and distributed from developers to users.</li>
-         <li for="J">A related capability is the ability in Saxon-EE to generate bytecode (intermediate Java
+         <li class="javaonly">A related capability is the ability in Saxon-EE to generate bytecode (intermediate Java
             code) to improve the speed of stylesheet execution.</li>
       </ul>
 
@@ -1668,7 +1718,7 @@
          that function, the compiler can be confident that any overriding declaration of the
          function will still return an integer result.</p>
 
-      <p for="J">In the s9api interface (Java), a package is represented by an <code
+      <p class="javaonly">In the s9api interface (Java), a package is represented by an <code
             java="net.sf.saxon.s9api.XsltPackage">XsltPackage</code> object. The
             <code>XsltCompiler</code> has a method <code>compilePackage</code> which returns an
             <code>XsltPackage</code> if successful. The package may be made available for use by
@@ -1680,7 +1730,7 @@
          versions of the same package, and the <code>package-version</code> attribute of
             <code>xsl:use-package</code> determines which of them is loaded. </p>
       
-      <p for="CS">In the Saxon.API interface (C#), a package is represented by an <code
+      <p class="csonly">In the Saxon.API interface (C#), a package is represented by an <code
          cs="Saxon.Api.XsltPackage">XsltPackage</code> object. The
          <code>XsltCompiler</code> has a method <code>CompilePackage</code> which returns an
          <code>XsltPackage</code> if successful. The package may be made available for use by
@@ -1742,8 +1792,8 @@
       <p>The simplest way to generate an export file is from the command line, for example with
          Saxon-EE 10.0:</p>
       
-      <kbd for="J">java -jar <i>dir</i>/saxon-ee-10.0.jar -xsl:stylesheet.xsl -export:stylesheet.sef -nogo</kbd>
-      <kbd for="CS">dotnet Saxon transform -xsl:stylesheet.xsl -export:stylesheet.sef -nogo</kbd>
+      <kbd class="javaonly">java -jar <i>dir</i>/saxon-ee-10.0.jar -xsl:stylesheet.xsl -export:stylesheet.sef -nogo</kbd>
+      <kbd class="csonly">dotnet Saxon transform -xsl:stylesheet.xsl -export:stylesheet.sef -nogo</kbd>
       
       <p>Here, the option <code>-nogo</code> suppresses any attempt to execute the stylesheet.</p>
       
@@ -1761,15 +1811,15 @@
       <p>A stylesheet export file for a complete stylesheet (as distinct from a library package) is accepted
       by any Saxon interface that accepts a source stylesheet. For example, from the command line:</p>
       
-      <kbd for="J">java -jar <i>dir</i>/saxon-ee-10.0.jar -xsl:stylesheet.sef -s:source.xml</kbd>
-      <kbd for="CS">dotnet Saxon transform -xsl:stylesheet.sef -s:source.xml</kbd>
+      <kbd class="javaonly">java -jar <i>dir</i>/saxon-ee-10.0.jar -xsl:stylesheet.sef -s:source.xml</kbd>
+      <kbd class="csonly">dotnet Saxon transform -xsl:stylesheet.sef -s:source.xml</kbd>
       
       <aside><p>This means that you can generally use a stylesheet export file transparently with third-party tools,
       for example with the Ant <code>xslt</code> task. So long as the third-party tool does nothing with
       the supplied stylesheet other than passing it to Saxon, passing a stylesheet export file instead of
       a source stylesheet should always work.</p>
       
-      <p for="J">In particular, stylesheet export files can be passed to the JAXP <code>newTemplates()</code>
+      <p class="javaonly">In particular, stylesheet export files can be passed to the JAXP <code>newTemplates()</code>
       method in place of a source stylesheet.</p></aside>
       
       
@@ -1829,19 +1879,20 @@
       if the value of such a variable contains a sequence of ten elements that are siblings of each other, the
       reconstructed element nodes will not be siblings of each other (they will be parentless).</p>
 
-      <h2 class="subtitle" for="J">Bytecode generation</h2>
+     <div class="javaonly">
+      <h2 class="subtitle">Bytecode generation</h2>
 
-      <p for="J">When a stylesheet package is compiled into its in-memory representation, Saxon-EE (on Java only) by
+      <p>When a stylesheet package is compiled into its in-memory representation, Saxon-EE (on Java only) by
          default generates Java bytecode for faster execution of selected parts of the code. The
          generated bytecode is mixed with interpreted code, each calling the other where
          appropriate.</p>
       
-      <p for="J">From Saxon 9.8, bytecode generation is by default applied only to hotspots, that is, parts of the 
+      <p>From Saxon 9.8, bytecode generation is by default applied only to hotspots, that is, parts of the 
       executable code that are found to be frequently executed. These will often be predicates in filter
       expressions. The threshold for generating bytecode is configurable. Bytecode generation can be monitored
       using the <code>-TB</code> option on the command line.</p>
 
-      <p for="J">The performance boost achieved by bytecode generation is variable; 25% is typical. The
+      <p>The performance boost achieved by bytecode generation is variable; 25% is typical. The
          functions and templates that benefit the most are those where the expression tree contains
          many constructs that are relatively cheap in themselves, such as type conversion,
          comparisons, and arithmetic. This is because the saving from bytecode generation is mainly
@@ -1849,15 +1900,13 @@
          operations to perform: so the saving is greater where the number of operations is high
          relative to their average cost.</p>
 
-      <p for="J">There are configuration options to suppress bytecode generation
-            (<code>Feature.GENERATE_BYTE_CODE</code>), to insert debugging logic into the
-         generated bytecode (<code>Feature.DEBUG_BYTE_CODE</code>), and to display the generated
-         bytecode (<code>Feature.DISPLAY_BYTE_CODE</code>). See <a class="bodylink"
-            href="/configuration/config-features">Configuration Features</a> for more
-         information.</p>
+      <p>There are configuration options to suppress bytecode generation
+         (<a class="feature" href="GENERATE_BYTE_CODE"/>), to insert debugging logic into the
+         generated bytecode (<a class="feature" href="DEBUG_BYTE_CODE"/>), and to display the generated
+         bytecode (<a class="feature" href="DISPLAY_BYTE_CODE"/>).</p>
 
-      <p for="J">Currently, exported packages do not include bytecode.</p>
-
+      <p>Currently, exported packages do not include bytecode.</p>
+     </div>
    </section>
    <section id="performanceanalysis" title="Performance Analysis">
       <h1>Performance Analysis</h1>
@@ -1887,26 +1936,26 @@
          instructions that were only executed once but remained active for the duration of the
          transformation.</p>
      
-      <h2 class="subtitle" for="J">Monitoring Bytecode Performance</h2>
+      <h2 class="subtitle javaonly">Monitoring Bytecode Performance</h2>
      
-      <p for="J">Saxon-EE by default generates bytecode to speed up execution of the most frequently executed
+      <p class="javaonly">Saxon-EE by default generates bytecode to speed up execution of the most frequently executed
      parts of a stylesheet.</p>
      
      
-      <p for="J">On the Transform command line, the option <code>-TB:filename</code> can be used to request a
+      <p class="javaonly">On the Transform command line, the option <code>-TB:filename</code> can be used to request a
      report showing the effectiveness of bytecode generation. The output is in XML format, something 
      like this:</p>
      
-      <samp for="J"><![CDATA[<stats unit='microseconds'>
+      <samp class="javaonly"><![CDATA[<stats unit='microseconds'>
  <exp id="0" text="($title, ...)" intCount="1" ... module="books.xsl" line="36" />
  <exp id="2" text="@CODE" intCount="3" ... module="books.xsl" line="83" />
  <exp id="1" text="@DESC" intCount="3" ... module="books.xsl" line="82" />
 </stats>]]></samp>
      
-      <p for="J">In this report, each <code>exp</code> element represents an expression that was compiled as
+      <p class="javaonly">In this report, each <code>exp</code> element represents an expression that was compiled as
      a candidate for bytecode generation. The report contains the following attributes:</p>
      
-      <ul for="J">
+      <ul class="javaonly">
        <li><code>text</code>: Abbreviated text of the expression</li>
        <li><code>intCount</code>: Number of times the expression was evaluated in the interpreter</li>
        <li><code>intTime</code>: Cumulative time spent evaluating the expression (including subexpressions) in the interpreter</li>
@@ -1922,10 +1971,10 @@
        <li><code>line</code>: Line number of the expression within this module</li>
      </ul>
 
-      <aside for="J">The execution counts can be a handy diagnostic tool for understanding where stylesheet execution
+      <aside class="javaonly">The execution counts can be a handy diagnostic tool for understanding where stylesheet execution
      time is going, quite independent of bytecode generation.</aside>
      
-      <p for="J">Note that if an expression A contains an expression B
+      <p class="javaonly">Note that if an expression A contains an expression B
      and both are candidates for bytecode generation, then the statistics for B relate only
      to the time before A was compiled in its own right.</p>
      

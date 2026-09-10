@@ -98,8 +98,8 @@
         <code>unparsed-text-available()</code> to be stable: that is, repeated calls within a single query or stylesheet execution
         are required to return the result. Achieving this is expensive, because it means saving the results in memory just in case
         they are needed again. Previous Saxon releases did not attempt to satisfy this requirement. In Saxon 9.8 it can be achieved
-        at user option, by setting the configuration property <code
-            java="net.sf.saxon.lib.FeatureKeys#STABLE_UNPARSED_TEXT">STABLE_UNPARSED_TEXT</code>. For performance reasons, the default
+        at user option, by setting the configuration property 
+            <a class="feature" href="STABLE_UNPARSED_TEXT"/>. For performance reasons, the default
         remains that the results are not stable (that is, if the file contents change dynamically, a second call will return different
         results from the first).</p>
   
@@ -174,8 +174,7 @@
     </category>
 
     <category name="installation">
-        <p>A new Configuration option 
-            <code java="net.sf.saxon.lib.FeatureKeys#DEFAULT_REGEX_ENGINE">FeatureKeys.DEFAULT_REGEX_ENGINE</code> is supported.
+        <p>A new configuration property <a class="feature" href="DEFAULT_REGEX_ENGINE"/> is supported.
         The value indicates which regular expression engine will be used for evaluating regular expressions in XPath functions
         such as <code>matches()</code>, XSLT instructions such as <code>&lt;xsl:analyze-string&gt;</code>, and in XSD pattern
             facets. The possible values are "S" (the default) indicating the Saxon regular expression engine (derived from Apache Jakarta), "J"
@@ -192,8 +191,7 @@
         URIs passed to <code>unparsed-text()</code> and related functions) to be set at Configuration level, including
         via the Configuration file.</p>
         
-        <p>There is a new configuration option <code
-            java="net.sf.saxon.lib.FeatureKeys#MAX_COMPILED_CLASSES">FeatureKeys.MAX_COMPILED_CLASSES</code> to put a cap on the
+        <p>There is a new configuration property <a class="feature" href="MAX_COMPILED_CLASSES"/> to put a cap on the
             number of classes compiled when bytecode generation is
         enabled. This is to prevent the situation where the cost of generating such classes, and the memory they occupy,
         starts to exceed any benefit. The default value is 10,000 (ten thousand). If the limit is exceeded, Saxon falls back
@@ -433,10 +431,9 @@
         
         <h2>XPath Syntax Extensions</h2>
         
-        <p>Saxon implements a number of extensions to the XPath 3.1 grammar. These are enabled only if the configuration option
-            <code
-                java="net.sf.saxon.lib.FeatureKeys#ALLOW_SYNTAX_EXTENSIONS">FeatureKeys.ALLOW_SYNTAX_EXTENSIONS</code>
-            is set, and they require Saxon-PE or higher.</p>
+        <p>Saxon implements a number of extensions to the XPath 3.1 grammar. These are enabled only if the configuration property
+            <a class="feature" href="ALLOW_SYNTAX_EXTENSIONS"/>
+            is enabled, and they require Saxon-PE or higher.</p>
         
         <p><b>Simple inline functions</b>: an abbreviated syntax is available for defining simple inline functions. For example,
         the expression <code>fn{.+1}</code> represents a function that takes a single argument and returns the value of that
@@ -673,7 +670,8 @@
         entirely. Since the costs of bytecode generation can exceed the benefits unless the code is executed frequently enough to amortize the cost,
         this meant that the faster run time was sometimes insufficient to compensate for the increase in compile time. In Saxon-EE 9.8, by default, sections
         of XSLT or XQuery code are initially interpreted, with bytecode being generated only after the code has been executed a set number of times.
-        By default the threshold is 300 executions; this can be changed by setting the configuration property <code>FeatureKeys.GENERATE_BYTE_CODE</code>
+        By default the threshold is 300 executions; this can be changed by setting the configuration property 
+            <a class="feature" href="GENERATE_BYTE_CODE"/>
         to an integer value. (Boolean values for this property are still supported, with "true" setting a threshold of 0, and "false" setting a threshold
         of infinity.)</p>
         
@@ -692,7 +690,7 @@
         
         <p>A consequence of this change is that static errors in the stylesheet may go undetected if the template rule in question is not exercised.
         During stylesheet development, to ensure that all static errors are detected, users are therefore advised to disable this option. This can be done on
-        the command line using the option <code>-opt:-j</code>, or by setting the configuration property <code>FeatureKeys.OPTIMIZATION_LEVEL</code>
+        the command line using the option <code>-opt:-j</code>, or by setting the configuration property <a class="feature" href="OPTIMIZATION_LEVEL"/>
         to "-j".</p>
         
         <p>Just-in-time compilation is automatically disabled if a stylesheet is compiled for export using the <code>-export</code> option.</p>
@@ -705,7 +703,8 @@
         <p>Saxon-EE now generates bytecode for validation of input strings against user-defined simple types. This is most useful when there is a complex
         type hierarchy and many facets. Validation of simple types is often the main bottleneck during schema validation.</p>
         
-        <p>The optimizer trace produced with the <code>-explain</code> option on the command line, or with <code>FeatureKeys.TRACE_OPTIMIZER_DECISIONS</code>
+        <p>The optimizer trace produced with the <code>-explain</code> option on the command line, or with 
+            the configuration property <a class="feature" href="TRACE_OPTIMIZER_DECISIONS"/>,
         is now more compact, and also covers a wider range of optimizations.</p>
         
         <p>The code for loop-lifting and for extraction of global variables has been rewritten, making it more efficient.

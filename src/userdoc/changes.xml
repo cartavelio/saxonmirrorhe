@@ -133,9 +133,9 @@
          <p xmlns="" incompatible="true">The <code>xsl:result-document</code> instruction in Saxon-EE is now asynchronous. That is, the
              code to output the result document runs in a separate thread, in parallel with other
              processing. The maximum number of threads used by <code>xsl:result-document</code> instructions
-            is limited by the configuration option <code>FeatureKeys.RESULT_DOCUMENT_THREADS</code>
+            is limited by the configuration option <a class="feature" href="RESULT_DOCUMENT_THREADS"/>
             which defaults to the number of processors available to the Java VM; setting this to zero or one will
-            suppress multithreading. Setting <code>FeatureKeys.ALLOW_MULTITHREADING</code> to false has
+            suppress multithreading. Setting <a class="feature" href="ALLOW_MULTITHREADING"/> to false has
             the same effect. (This can be useful when debugging, because otherwise the output from
          <code>xsl:message</code> and <code>fn:trace()</code> can be very confusing).
          </p>
@@ -301,9 +301,9 @@
        
        <p xmlns="">At the end of the document, if there have been one or more validation 
        errors, then a fatal error is thrown unless the "recover after validation errors"
-       option (<code>FeatureKeys.VALIDATION_WARNINGS</code>) is set, in which case no exception occurs
+       option (<a class="feature" href="VALIDATION_WARNINGS"/>) is set, in which case no exception occurs
        and processing can continue. Note that in this case the type annotations in any
-       result document are unreliable. The setting <code>FeatureKeys.VALIDATION_WARNINGS</code> is
+       result document are unreliable. The setting <a class="feature" href="VALIDATION_WARNINGS"/> is
        ignored in the case where a document used as input to XQuery or XSLT is being
        validated, because in that case the incorrect type annotations would cause
        inconsistencies during subsequent processing. </p>
@@ -884,14 +884,14 @@
    etc. The only thing not covered is where names are checked by non-Saxon software, for example
    the XML parser.</p>         
             
-   <p xmlns="">A configuration option <code java="net.sf.saxon.lib.FeatureKeys">MULTIPLE_SCHEMA_IMPORTS</code> 
+      <p xmlns="">A configuration option <a class="feature" href="MULTIPLE_SCHEMA_IMPORTS"/>
             has been added to force
             <code>xs:import</code> to fetch the referenced schema document. By default the <code>xs:import</code>
    fetches the document only if no schema document for the given namespace has already been loaded. With this
    option in effect, the referenced schema document is loaded unless the absolute URI is the same as a schema document already
    loaded.</p>         
 
-            <p xmlns="">A configuration option <code java="net.sf.saxon.lib.FeatureKeys">ASSERTIONS_CAN_SEE_COMMENTS</code> has been added to control
+      <p xmlns="">A configuration option <a class="feature" href="ASSERTIONS_CAN_SEE_COMMENTS"/> has been added to control
    whether comments and processing instructions are visible to the XPath expression used to define
    an assertion. By default (unlike Saxon 9.3), they are not made visible.</p>
             
@@ -1113,7 +1113,7 @@ now default instead to using <code java="net.sf.saxon.Configuration#getStandardE
                   This can be set to a different destination by calling
                   <code java="net.sf.saxon.Configuration#setStandardErrorOutput">Configuration.setStandardErrorOutput()</code>
                            (which expects a <code>PrintStream</code>), or by setting the write-only configuration property
-                           <code java="net.sf.saxon.lib.FeatureKeys#STANDARD_ERROR_OUTPUT_FILE">FeatureKeys.STANDARD_ERROR_OUTPUT_FILE</code> 
+            <a class="feature" href="STANDARD_ERROR_OUTPUT_FILE"/> 
                            (which expects a filename, which will be appended to). 
 In the configuration file the corresponding setting
 is <code>global/@standardErrorOutputFile</code>. Note that this only redirects Saxon output; other application
@@ -1126,8 +1126,8 @@ output; the default destination for optimizer tracing and "explain" output.</p>
 
          <p xmlns="">Reflexive extension functions must now use the "strict" URI format (for example <code>"java:java.util.Date"</code>) rather than
                   the "liberal" format (which
-allows for example <code>"http://my.com/extensions/java.util.Date"</code>), unless the configuration property 
-                  <code java="net.sf.saxon.lib.FeatureKeys#ALLOW_OLD_JAVA_URI_FORMAT">ALLOW_OLD_JAVA_URI_FORMAT</code> is set. This
+allows for example <code>"http://my.com/extensions/java.util.Date"</code>), unless the configuration property
+            <a class="feature" href="ALLOW_OLD_JAVA_URI_FORMAT"/> is set. This
 change was documented for 9.2 but not implemented (the default value for the flag was to allow the old URI syntax). Note that because
 dynamic extension functions require at least Saxon-PE, this flag is not recognized in Saxon-HE.</p>
       </category>
@@ -1337,13 +1337,13 @@ reports any violations in the form of a warning rather than a hard error, to avo
 declared in the document. (This check is not performed during validation invoked by XSLT or XQuery validation, but it is performed during standalone
 schema validation.)</p>
 
-         <p xmlns="">There is a new switch <code java="net.sf.saxon.lib.FeatureKeys#VALIDATION_COMMENTS">FeatureKeys.VALIDATION_COMMENTS</code> to control whether comments 
+         <p xmlns="">There is a new switch <a class="feature" href="VALIDATION_COMMENTS"/> to control whether comments 
          are written into an instance document when validation fails.
-         Previously this always happened if the switch <code java="net.sf.saxon.lib.FeatureKeys#VALIDATION_WARNINGS">FeatureKeys.VALIDATION_WARNINGS</code>
+         Previously this always happened if the switch <a class="feature" href="VALIDATION_WARNINGS"/>
          was on; it can now be controlled separately, and the default is off. 
          A corresponding switch has been added to the configuration file. The command-line option <code>-outval:recover</code> sets both switches on. Internally the
          switches are held in the <code java="net.sf.saxon.lib.ParseOptions">ParseOptions</code> object and can thus be set differently for different validation episodes. 
-         For the <code java="net.sf.saxon.lib.FeatureKeys#VALIDATION_WARNINGS">FeatureKeys.VALIDATION_WARNINGS</code> switch, the two flags previously held
+            For the <a class="feature" href="VALIDATION_WARNINGS"/> switch, the two flags previously held
          in the default <code>ParseOptions</code> and in local
          <code java="net.sf.saxon.Configuration">Configuration</code> data have been combined into one, preventing the use of inconsistent settings. </p>
 
@@ -1751,8 +1751,8 @@ and <code>xs:untypedAtomic</code>. Of these, <code>xs:anyType</code> will appear
 query, and only when construction mode is "preserve".)</p>
 
          <p xmlns="">For XSLT a transformation can be set to be schema-aware, even if it does not import a schema, by setting the Configuration
-property <code>FeatureKeys.XSLT_SCHEMA_AWARE</code> to true. For XQuery, the same effect can be achieved by setting the Configuration
-property <code>FeatureKeys.XQUERY_SCHEMA_AWARE</code>.</p>
+            property <a class="feature" href="XSLT_SCHEMA_AWARE"/> to true. For XQuery, the same effect can be achieved by setting the Configuration
+            property <a class="feature" href="XQUERY_SCHEMA_AWARE"/>.</p>
          
 
          <p xmlns="">The command-line interfaces <code>Transform</code> and <code>Query</code> will now load an enterprise configuration if they
@@ -2346,7 +2346,7 @@ Equivalent facilities are now available via the configuration file, or using the
       <category name="optimization">
 
          <p xmlns="">A new configuration option is available to control the optimization level. This appears as the <code>-opt</code> option
-on the Query and Transform interfaces, and as <code>FeatureKeys.OPTIMIZATION_LEVEL</code> on APIs such as 
+            on the Query and Transform interfaces, and as <a class="feature" href="OPTIMIZATION_LEVEL"/> on APIs such as 
 <code>Configuration.setConfigurationProperty()</code> and <code>TransformerFactory.setAttribute()</code>. The value is
 an integer in the range 0 (no optimization) to 10 (full optimization); currently all values other than 0 result in full
 optimization but this is likely to change in future. The default is full optimization; this feature allows optimization
@@ -2497,7 +2497,7 @@ against the schema, it is not rolled back.</p>
          <p xmlns="">There is now a configuration flag to enable use of XML Schema 1.1 syntax; if this flag is not set, all new
 XML Schema 1.1 features will be disabled. The flag can be set using <code>-xsdversion:1.1</code> on the command
 line (of <code>Query</code>, <code>Transform</code>, or <code>Validate</code>), 
-or by calling <code>configuration.setConfigurationProperty(FeatureKeys.XSD_VERSION, "1.1")</code>.</p>
+            or by setting the configuration property <a class="feature" href="XSD_VERSION"/> to "1.1".</p>
 
          <p xmlns=""><b>Conditional Type Assignment</b> (often called co-constraints) is implemented. Any XPath expression
 may be used to define the condition, so long as it only accesses the attributes and namespaces of the 
@@ -2558,7 +2558,7 @@ schema validation run, and the line number given with the error message reflects
 
          <p xmlns="">A new configuration option is available to control whether the schema processor takes notice (and attempts to
 dereference) <code>xsi:schemaLocation</code> and <code>xsi:noNamespaceSchemaLocation</code> attributes encountered
-in an instance document that is being validated. This is available as the named property <code>FeatureKeys.USE_XSI_SCHEMA_LOCATION</code>
+            in an instance document that is being validated. This is available as the named property <a class="feature" href="USE_XSI_SCHEMA_LOCATION"/>
 on the <code>TransformerFactory</code> and <code>Configuration</code> classes, via methods on the S9API and .NET 
 <code>SchemaValidator</code> classes, and the XQJ class <code>SaxonXQDataSource</code>, and via the <code>-xsiloc</code>
 option on the command line interfaces <code>Validate</code>, <code>Transform</code>, and <code>Query</code>.</p>
@@ -2786,7 +2786,7 @@ Saxon into line with the reference implementation. (However, one difference with
 at the end of the validation run, Saxon throws an exception if any validation errors have been reported, whereas Xerces 
 exits as if validation were successful.)</p>
 
-         <p xmlns="">The Configuration property <code>FeatureKeys.STRIP_WHITESPACE</code> now affects the result of an
+         <p xmlns="">The Configuration property <a class="feature" href="STRIP_WHITESPACE"/> now affects the result of an
 <code>IdentityTransformerHandler</code>. Previously the setting <code>ignorable</code> affected the result,
 but the setting <code>all</code> did not.</p>
 
@@ -2906,10 +2906,10 @@ all names are now represented as expanded names.</p>
          <p xmlns="">New methods are available to allow the output from the <code>trace()</code> function to be directed
 to a specified output stream, or to be discarded.</p>
 
-         <p xmlns="">A new option <code>FeatureKeys.TRACE_LISTENER_CLASS</code> allows the TraceListener to be nominated as a class name,
+         <p xmlns="">A new option <a class="feature" href="TRACE_LISTENER_CLASS"/> allows the TraceListener to be nominated as a class name,
 rather than as an instance of the class. This is useful in environments such as Ant where the values of configuration properties
 must be supplied as strings. A new instance of the class is created for each query or transformation executed under
-the Configuration. The existing option <code>FeatureKeys.TRACE_LISTENER</code> remains available.</p>
+the Configuration. The existing option <a class="feature" href="TRACE_LISTENER"/> remains available.</p>
       </category>
       <category name="dotnet">
 
@@ -3418,7 +3418,7 @@ is loaded into a document pool held by the <code>Configuration</code>, whose mem
 the <code>Configuration</code> itself ceases to exist; (c) all queries and transformations using this
 document share the same copy; (d) any updates to the document that occur between compile-time and run-time
 have no effect. The option is selected by using <code>Configuration.setConfigurationProperty()</code>\
-or <code>TransformerFactory.setAttribute()</code> with the property name <code>FeatureKeys.PRE_EVALUATE_DOC_FUNCTION</code>.
+            or <code>TransformerFactory.setAttribute()</code> with the property name <a class="feature" href="PRE_EVALUATE_DOC_FUNCTION"/>.
 This option is not available from the command line because it has no useful effect with a single-shot
 compile-and-run interface.</p>
 
@@ -3862,8 +3862,7 @@ is used. (XInclude is not currently supported on .NET)</p>
 commands.</p>
 
          <p xmlns="">From the Java API, the equivalent is to call <code>setXInclude()</code> on the <code>Configuration</code> object,
-or to set the attribute denoted by <code>FeatureKeys.XINCLUDE</code> to <code>Boolean.TRUE</code> on the
-<code>TransformerFactory</code>.</p>
+            or to set the configuration property <a class="feature" href="XINCLUDE"/> to true.</p>
 
          <p xmlns="">XInclude processing can be requested at a per-document level by creating an <code>AugmentedSource</code> and calling
 its <code>setXIncludeAware()</code> method. The corresponding method is also recognized on Saxon's implementation of the
@@ -3917,7 +3916,7 @@ error XQST0073, which otherwise occurs when two modules in different namespace i
 
          <p xmlns="">It is now possible to set the <code>Configuration</code> used by a <code>TransformerFactory</code>
 or <code>DocumentBuilderFactory</code> using the <code>setAttribute()</code> method with the attribute
-name <code>FeatureKeys.CONFIGURATION</code>. By reading this attribute on a <code>TransformerFactory</code>,
+            name <a class="feature" href="CONFIGURATION"/>. By reading this attribute on a <code>TransformerFactory</code>,
 and setting it on a <code>DocumentBuilderFactory</code>, it is possible to ensure that all documents
 use the same Configuration without introducing any compile-time dependencies on Saxon.</p>
 
@@ -10405,7 +10404,8 @@ misdocumented in version 7.1).</p>
 document and other files read using the document() function. It requires an XML parser
 that supports validation.</p>
 
-<p xmlns="">The same feature is available in the API using <code>setFeature(FeatureKeys.VALIDATION, Boolean.TRUE)</code>
+<p xmlns="">The same feature is available in the API by setting the configuration property 
+   <a class="feature" href="VALIDATION"/> to true
 on the <code>TransformerFactory</code>.</p>
          
       </category>
@@ -10634,7 +10634,7 @@ is a temporary tree.</p>
 
 
 
-<p xmlns="">The meaning of the ALLOW_EXTENSION_FUNCTIONS attribute in the TransformerFactory has been
+         <p xmlns="">The meaning of the configuration property <a class="feature" href="ALLOW_EXTENSION_FUNCTIONS"/> has been
 extended so that setting the value to <code>false</code> also disables extension elements and
 the creation of multiple output files. This is because all these operations carry similar risks
 when a servlet is allowed to execute untrusted stylesheets.</p>

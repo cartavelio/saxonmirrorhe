@@ -154,8 +154,7 @@
         </p>
         
         <p>If <code>saxon:assign</code> is used then multithreading should be disabled by setting
-          the configuration property <a class="bodylink code"
-            href="/configuration/config-features">Feature.ALLOW_MULTITHREADING</a> to false.
+          the configuration property <a class="feature" href="ALLOW_MULTITHREADING"/> to false.
         A compile-time warning is issued if multi-threading is allowed, since the order of execution
         of instructions in the stylesheet is then unpredictable.</p>
 
@@ -184,7 +183,7 @@
         
         <p>Saxon issues a warning if <code>saxon:assign</code> is used in a configuration that
         allows multi-threading, since the construct is not thread-safe. Multi-threading can be
-        disabled using the configuration property <code>Feature.ALLOW_MULTITHREADING</code>.</p>
+        disabled using the configuration property <a class="feature" href="ALLOW_MULTITHREADING"/>.</p>
         
         <p>The <code>saxon:assign</code> instruction can be exported to a SEF file; the resulting SEF file
           can be used by Saxon/J but not by Saxon-JS.</p>
@@ -825,8 +824,7 @@
         <p>Type aliases are not recognized in static expressions (for example, in <code>use-when</code>).</p>
         
         <p>Use of the <code>saxon:item-type</code> syntax requires Saxon-PE or higher. Use of the "type(NNN)" syntax
-          in XPath expressions requires the configuration option
-          <a class="bodylink code" href="/configuration/config-features">Feature.ALLOW_SYNTAX_EXTENSIONS</a> to be enabled.</p>
+          in XPath expressions requires the configuration option <a class="feature" href="ALLOW_SYNTAX_EXTENSIONS"/> to be enabled.</p>
         
         <p>For further information about the syntax extension, see <a class="bodylink"
           href="/extensions/syntax-extensions/type-aliases">Type aliases</a>.</p>
@@ -870,8 +868,7 @@
               connection whatever URI scheme is used, and it should therefore work with
               any URI where the Java VM has the capability to open a writable connection.
               Users have reported success in using "ftp:" and "mailto:" URIs.</p>
-            <p>If the configuration option <a class="bodylink code"
-              href="/configuration/config-features">Feature.ALLOW_EXTERNAL_FUNCTIONS</a>
+            <p>If the configuration property <a class="feature" href="ALLOW_EXTERNAL_FUNCTIONS"/>
               is set, then for security reasons use of the
               <code>xsl:result-document</code> instruction with the <code>href</code>
               attribute is disallowed.</p>
@@ -1075,7 +1072,8 @@
           <desc>The default
             for Saxon-EE is <code>yes</code>, which causes the instruction to be evaluated
             in a separate thread, if there is a spare thread available (the maximum number
-            of threads used is configurable using <a class="bodylink code" href="/configuration/config-features">Feature.RESULT_DOCUMENT_THREADS</a>).
+            of threads used is configurable using the property
+            <a class="feature" href="RESULT_DOCUMENT_THREADS"/>).
             Use <code>no</code> to suppress multi-threading.
             Asynchronous processing of <code>xsl:result-document</code> is automatically
             suppressed if tracing (using a <code>TraceListener</code>) is enabled.
