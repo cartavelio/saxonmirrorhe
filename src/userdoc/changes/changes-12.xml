@@ -617,6 +617,9 @@
             is retained in the interface to avoid invalidating existing implementations, but it will be dropped in a future release.</p>
         <p>The reason for this change is that the object is no longer copied during operations such as function inlining; since it is no longer
             implemented as a node in the expression tree, this copying was found to be unnecessary.</p>
+        
+        <p>From 12.4, the conversions available between XPath and Java types include a mapping from <code>xs:string</code>
+        to <code>net.sf.saxon.str.UnicodeString</code> in both directions.</p>
     </category>
     
     <!--<category name="sql" class="javaonly">

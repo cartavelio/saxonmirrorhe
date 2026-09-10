@@ -3950,10 +3950,9 @@ public class Configuration implements SourceResolver, NotationSet {
      * @param lhs the left-hand operand
      * @param rhs the right-hand operand
      * @return the constructed expression
-     * @throws XPathException if anything goes wrong
      */
 
-    public Expression makeObjectLookupExpression(Expression lhs, Expression rhs) throws XPathException {
+    public Expression makeObjectLookupExpression(Expression lhs, Expression rhs) {
         throw new UnsupportedOperationException();
     }
 

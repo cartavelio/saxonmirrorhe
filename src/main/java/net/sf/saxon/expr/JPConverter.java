@@ -19,6 +19,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.*;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
@@ -62,6 +63,7 @@ public abstract class JPConverter {
         converterMap.put(ZeroOrOne.class, FromSequence.INSTANCE);
         converterMap.put(ZeroOrMore.class, FromSequence.INSTANCE);
         converterMap.put(String.class, FromString.INSTANCE);
+        converterMap.put(UnicodeString.class, FromUnicodeString.INSTANCE);
         converterMap.put(Boolean.class, FromBoolean.INSTANCE);
         converterMap.put(boolean.class, FromBoolean.INSTANCE);
         converterMap.put(Double.class, FromDouble.INSTANCE);
@@ -371,6 +373,21 @@ public abstract class JPConverter {
         @Override
         public GroundedValue convert(Object object, XPathContext context) throws XPathException {
             return new StringValue((String) object);
+        }
+
+        @Override
+        public ItemType getItemType() {
+            return BuiltInAtomicType.STRING;
+        }
+
+    }
+
+    public static class FromUnicodeString extends JPConverter {
+        public static final FromUnicodeString INSTANCE = new FromUnicodeString();
+
+        @Override
+        public GroundedValue convert(Object object, XPathContext context) throws XPathException {
+            return new StringValue((UnicodeString) object);
         }
 
         @Override

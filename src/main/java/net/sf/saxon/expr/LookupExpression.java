@@ -616,8 +616,13 @@ public class LookupExpression extends BinaryExpression {
                                             .withFailingExpression(expr);
                                 }
                                 String key = ((StringValue) rhsVal).getStringValue();
-                                return context.getConfiguration().externalObjectAsMap(
-                                        (ObjectValue<?>) baseItem, key).get((StringValue) rhsVal).iterate();
+                                final GroundedValue entry = context.getConfiguration().externalObjectAsMap(
+                                        (ObjectValue<?>) baseItem, key).get((StringValue) rhsVal);
+                                if (entry == null) {
+                                    throw new XPathException("There is no unique method named " + key +
+                                            " in the external object of type " + ((ObjectValue<?>) baseItem).getObject().getClass().getName(), "XPTY0004");
+                                }
+                                return entry.iterate();
                             }
                             default: {
                                 mustBeArrayOrMap(expr, baseItem);

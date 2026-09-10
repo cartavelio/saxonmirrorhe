@@ -984,12 +984,25 @@ public static int lineNumber(XPathContext c) {
       <p>The map produced to represent the object also has an entry with key <code>"this"</code>
       whose value is the original external object.</p>
       
-        <aside>Calling instance-level methods using a dynamic call (<code>$uri?getScheme()</code>
-          rather than <code>Q{java:java.net.URI}getScheme($uri)</code>) has advantages in terms of
-          readability, but it has the disadvantage that there is currently no static type checking. This
-          means that overloaded methods are not available, and there will be no compile-time diagnostics
-          if the method does not exist: only a rather cryptic run-time message that the target of a dynamic
-          function call must not be an empty sequence.</aside>
+        
+        <p>Given the expression <code>$object?method()</code>, the precise effect depends on whether Saxon
+        is able to determine the Java class of <code>$object</code> statically. If the type is known statically,
+        then the methods available on the class are established by reference to the static Java type;
+        if it is only known dynamically, they are established by reference to the dynamic Java type. Apart
+        from performance, this can have several consequences:</p>
+        
+        <ul>
+          <li><p>A method may be available on the dynamic type that is not available on the static type.
+          This may result in Saxon reporting a static type error when the method is used.</p></li>
+          <li><p>A method name may be unique on the static type, but ambiguous on the dynamic type.
+            Saxon will call the method that was established on the static type if known; but
+            if the type is not known statically, the call will fail saying that the method
+            name is not unique.</p></li>
+        </ul>
+        
+        <p>To ensure that the type is known statically, use a <code>treat as</code>
+          expression, for example 
+          <code>($object treat as Q{http://saxon.sf.net/java-type}java.util.Map)?get($key)</code>.</p>
       </li>
       
       <li><p>The second way to call instance-level methods is as a regular (static) function call with an extra
@@ -1136,6 +1149,10 @@ public static int lineNumber(XPathContext c) {
               </tr>
               <tr>
                 <td><code>CharSequence</code></td>
+                <td><code>xs:string?</code></td>
+              </tr>
+              <tr>
+                <td><code>net.sf.saxon.str.UnicodeString</code></td>
                 <td><code>xs:string?</code></td>
               </tr>
               <tr>
@@ -1308,7 +1325,7 @@ public static int lineNumber(XPathContext c) {
           </td>
           <td>
             <p>
-              <i>StringValue</i>, String, CharSequence</p>
+              <i>StringValue</i>, net.sf.saxon.str.UnicodeString, String, CharSequence</p>
           </td>
         </tr>        
         <tr>
