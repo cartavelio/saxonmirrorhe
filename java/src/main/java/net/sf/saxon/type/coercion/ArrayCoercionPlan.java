@@ -3,6 +3,7 @@ package net.sf.saxon.type.coercion;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
+import net.sf.saxon.ma.jnode.JNode;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
@@ -38,6 +39,11 @@ public final class ArrayCoercionPlan extends CoercionPlan {
 
     public GroundedValue coerceItem(Item item, ItemType requiredType, CoercionRequest request) throws XPathException {
         SequenceType requiredMemberType = ((ArrayItemType)requiredType).getMemberType();
+        if (item instanceof JNode) {
+            GroundedValue gv = ((JNode)item).getValue();
+            SequenceIterator coercedValue = coerceSequence(gv.iterate(), SequenceType.zeroOrMore(requiredType), request);
+            return SequenceExtent.from(coercedValue);
+        }
         if (item instanceof ArrayItem) {
             List<GroundedValue> result = new ArrayList<>(((ArrayItem)item).arrayLength());
             CoercionPlan memberPlan = requiredMemberType.getPrimaryType().getCoercionPlan(40);

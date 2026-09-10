@@ -1,11 +1,13 @@
 package net.sf.saxon.type.coercion;
 
+import net.sf.saxon.ma.jnode.JNode;
 import net.sf.saxon.ma.map.GeneralMapBuilder;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.PlainType;
@@ -38,6 +40,11 @@ public final class MapCoercionPlan extends CoercionPlan {
     public GroundedValue coerceItem(Item item, ItemType requiredType, CoercionRequest request) throws XPathException {
         PlainType requiredKeyType = ((MapType) requiredType).getKeyType();
         SequenceType requiredValueType = ((MapType)requiredType).getValueType();
+        if (item instanceof JNode) {
+            GroundedValue gv = ((JNode) item).getValue();
+            SequenceIterator coercedValue = coerceSequence(gv.iterate(), SequenceType.zeroOrMore(requiredType), request);
+            return SequenceExtent.from(coercedValue);
+        }
         if (item instanceof MapItem) {
             GeneralMapBuilder builder = new GeneralMapBuilder();
             CoercionPlan keyPlan = requiredKeyType.getCoercionPlan(40);

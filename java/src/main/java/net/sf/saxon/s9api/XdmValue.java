@@ -13,6 +13,7 @@ import net.sf.saxon.event.SequenceCopier;
 import net.sf.saxon.expr.sort.DocumentOrderIterator;
 import net.sf.saxon.expr.sort.GlobalOrderComparer;
 import net.sf.saxon.ma.arrays.ArrayItem;
+import net.sf.saxon.ma.jnode.JNode;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.streams.Step;
@@ -154,6 +155,8 @@ public class XdmValue implements Iterable<XdmItem> {
             Item first = gv.head();
             if (first instanceof NodeInfo) {
                 return new XdmNode((NodeInfo) first);
+            } else if (first instanceof JNode) {
+               return new XdmJNode((JNode) first);
             } else if (first instanceof AtomicValue) {
                 return new XdmAtomicValue((AtomicValue) first);
             } else if (first instanceof MapItem) {

@@ -50,7 +50,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
      */
     @Override
     public Genre getGenre() {
-        return Genre.NODE;
+        return Genre.XNODE;
     }
 
     /**

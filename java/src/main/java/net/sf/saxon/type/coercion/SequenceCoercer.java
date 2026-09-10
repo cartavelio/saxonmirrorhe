@@ -59,14 +59,14 @@ public final class SequenceCoercer extends UnaryExpression {
         // we use an ItemChecker and/or CardinalityChecker.
 
         ItemType requiredItemType = requiredType.getPrimaryType();
-        if (requiredItemType.getGenre() == Genre.NODE) {
+        if (requiredItemType.getGenre() == Genre.XNODE) {
             Expression result = new ItemChecker(sequence,requiredItemType, role);
             if (!Cardinality.subsumes(requiredType.getCardinality(),sequence.getCardinality())) {
                 result = CardinalityChecker.makeCardinalityChecker(result, requiredType.getCardinality(), role);
             }
             return result;
         }
-        if (requiredItemType.isAtomicType() && sequence.getItemType().getGenre() == Genre.NODE) {
+        if (requiredItemType.isAtomicType() && sequence.getItemType().getGenre() == Genre.XNODE) {
             sequence = new Atomizer(sequence, role);
         }
         return new SequenceCoercer(sequence, requiredType, role, allow40);

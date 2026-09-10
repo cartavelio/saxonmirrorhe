@@ -19,7 +19,8 @@ public enum Genre {
 
     ANY,
     ATOMIC,
-    NODE,
+    XNODE,
+    JNODE,
     FUNCTION,
     MAP,
     ARRAY,

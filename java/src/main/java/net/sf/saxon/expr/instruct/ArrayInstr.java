@@ -163,11 +163,11 @@ public class ArrayInstr extends Instruction {
                         }
                         return new SimpleArrayItem(members);
                     }
-                    case NODE: {
+                    case XNODE: {
                         List<GroundedValue> members = new ArrayList<>();
                         members.add(first);
                         for (Item item; (item = input.next()) != null; ) {
-                            if (item.getGenre() == Genre.NODE) {
+                            if (item.getGenre() == Genre.XNODE) {
                                 members.add(item);
                             } else {
                                 throw new XPathException("xsl:array: if the first item is a node, then all must be nodes")

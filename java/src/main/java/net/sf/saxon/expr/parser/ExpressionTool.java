@@ -644,7 +644,7 @@ public class ExpressionTool {
         }
         Genre genre = first.getGenre();  // Variable introduced for C# type checking
         switch (genre) {
-            case NODE:
+            case XNODE:
                 iterator.close();
                 return true;
             case ATOMIC: {

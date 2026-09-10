@@ -35,6 +35,8 @@ public class UType {
     public static final UType PI = PrimitiveUType.PI.toUType();
     public static final UType NAMESPACE = PrimitiveUType.NAMESPACE.toUType();
 
+    public static final UType JNODE = PrimitiveUType.JNODE.toUType();
+
     public static final UType FUNCTION = PrimitiveUType.FUNCTION.toUType();
 
     public static final UType STRING = PrimitiveUType.STRING.toUType();

@@ -855,7 +855,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
                         }
                         throw new XPathException(msg, errorCode, locationId);
                     }
-                case NODE:
+                case XNODE:
                 default:
                     decomposeNodeOrDefault(item, locationId, copyNamespaces);
                     break;

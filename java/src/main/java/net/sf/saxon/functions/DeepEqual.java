@@ -314,7 +314,7 @@ public class DeepEqual extends CollatingFunctionFixed {
         switch (item.getGenre()) {
             case ATOMIC:
                 return 0x01L << 56 | (long)((AtomicValue)item).asMapKey().hashCode();
-            case NODE:
+            case XNODE:
                 return 0x02L << 56 | (long)nodeHashCode(((NodeInfo)item), options);
             case MAP:
                 return 0x03L << 56 | (long)((MapItem)item).size();   // TODO: improve this

@@ -214,7 +214,7 @@ public class MemoFunction extends UserFunction {
                 }
                 Genre g0 = it0.getGenre();
 
-                if (g0 == Genre.NODE) {
+                if (g0 == Genre.XNODE) {
                     if (it1 instanceof NodeSurrogate) {
                         return ((NodeSurrogate)it1).getObject().apply((NodeInfo)it0);
                     } else {

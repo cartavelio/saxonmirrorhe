@@ -724,12 +724,12 @@ public interface NodeInfo extends Item, Location
     /**
      * Get the genre of this item
      *
-     * @return the genre: specifically, {@link Genre#NODE}. The default implementation (which should not
-     * be overridden) returns {@link Genre#NODE}.
+     * @return the genre: specifically, {@link Genre#XNODE}. The default implementation (which should not
+     * be overridden) returns {@link Genre#XNODE}.
      */
     @Override
     default Genre getGenre() {
-        return Genre.NODE;
+        return Genre.XNODE;
     }
 
 

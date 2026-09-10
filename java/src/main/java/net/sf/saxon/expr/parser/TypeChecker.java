@@ -183,9 +183,12 @@ public class TypeChecker {
         if (uSupplied.overlaps(uRequired)) {
             return true;
         }
+        if (uSupplied == UType.JNODE) {
+            return true;
+        }
         if (uRequired.overlaps(UType.ANY_ATOMIC)) {
             switch (supplied.getGenre()) {
-                case NODE: return true;
+                case XNODE: return true;
                 case ARRAY: return true;
                 case ATOMIC: return possiblePromotions(uSupplied).overlaps(uRequired);
                 case EXTERNAL: return true;

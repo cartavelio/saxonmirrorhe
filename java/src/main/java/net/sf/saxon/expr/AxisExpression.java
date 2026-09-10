@@ -137,7 +137,7 @@ public final class AxisExpression extends Expression {
         }
         Configuration config = visitor.getConfiguration();
 
-        if (contextItemType.getGenre() != Genre.NODE) {
+        if (contextItemType.getGenre() != Genre.XNODE) {
             TypeHierarchy th = config.getTypeHierarchy();
             Affinity relation = th.relationship(contextItemType, AnyNodeTest.getInstance());
             if (relation == Affinity.DISJOINT) {
@@ -890,7 +890,7 @@ public final class AxisExpression extends Expression {
             // These variables are computed in the hope that the optimizer will remove runtime error tests
             // that aren't needed because the condition cannot occur
             boolean checkContextItemExists = axisExpression.isContextPossiblyUndefined();
-            boolean checkContextItemIsNode = axisExpression.getContextItemType().getGenre() != Genre.NODE;
+            boolean checkContextItemIsNode = axisExpression.getContextItemType().getGenre() != Genre.XNODE;
             if (test == null || test instanceof AnyNodeTest) {
                 return context -> {
                     Item item = context.getContextItem();

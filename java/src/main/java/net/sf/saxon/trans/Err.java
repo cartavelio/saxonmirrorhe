@@ -303,7 +303,7 @@ public class Err {
                 return "any item";
             case ATOMIC:
                 return "an atomic value";
-            case NODE:
+            case XNODE:
                 return "a node";
             case FUNCTION:
                 return "a function";

@@ -192,7 +192,7 @@ public abstract class SequenceReceiver implements Receiver {
                     } else {
                         throw new XPathException("Cannot add a " + thing + " to an XDM node tree", errorCode, locationId);
                     }
-                case NODE:
+                case XNODE:
                 default:
                     NodeInfo node = (NodeInfo) item;
                     int kind = node.getNodeKind();

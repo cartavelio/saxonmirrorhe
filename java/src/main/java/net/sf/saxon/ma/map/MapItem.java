@@ -7,10 +7,14 @@
 
 package net.sf.saxon.ma.map;
 
-import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.ContextOriginator;
+import net.sf.saxon.expr.Literal;
+import net.sf.saxon.expr.OperandRole;
+import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicMatcher;
 import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.functions.SaxonDeepEqual;
+import net.sf.saxon.ma.MapOrArray;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
@@ -65,7 +69,7 @@ import java.util.Stack;
  *     <li>{@link RangeKey} - a sorted map used to support Saxon extensions</li>
  * </ul>
  */
-public abstract class MapItem implements FunctionItem {
+public abstract class MapItem extends MapOrArray implements FunctionItem {
 
     /**
      * Get an entry from the Map

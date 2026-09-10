@@ -314,7 +314,7 @@ public class SequenceTool {
 
     public static Object convertToJava(/*@NotNull*/ Item item) throws XPathException {
         switch (item.getGenre()) {
-            case NODE:
+            case XNODE:
                 Object node = item;
                 while (node instanceof VirtualNode) {
                     // strip off any layers of wrapping

@@ -198,7 +198,7 @@ public class MapType extends AnyFunctionType {
 
     @Override
     public CoercionPlan getCoercionPlan(int version) {
-        if (version >= 40 && !(keyType == BuiltInAtomicType.ANY_ATOMIC && valueType == SequenceType.ANY_SEQUENCE)) {
+        if (version >= 40 /*&& !(keyType == BuiltInAtomicType.ANY_ATOMIC && valueType == SequenceType.ANY_SEQUENCE)*/) {
             return MapCoercionPlan.getInstance();
         }
         return super.getCoercionPlan(version);

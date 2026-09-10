@@ -12,6 +12,8 @@ import net.sf.saxon.expr.ItemMappingIterator;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.functions.hof.FunctionSequenceCoercer;
 import net.sf.saxon.lib.FunctionAnnotationHandler;
+import net.sf.saxon.ma.jnode.GNodeType;
+import net.sf.saxon.ma.jnode.JNodeType;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.SequenceIterator;
@@ -333,18 +335,23 @@ public class TypeHierarchy {
                     // all options exhausted
                     throw new IllegalStateException();
                 }
+            } else if (t1 instanceof GNodeType) {
+                if (t2 instanceof JNodeType || t2 instanceof NodeTest) {
+                    return SUBSUMES;
+                }
+                return DISJOINT;
+            } else if (t1 instanceof JNodeType) {
+                if (t2 instanceof GNodeType) {
+                    return SUBSUMED_BY;
+                } else if (t2 instanceof JNodeType) {
+                    return sequenceTypeRelationship(((JNodeType)t1).getValueType(), ((JNodeType) t2).getValueType());
+                } else {
+                    return DISJOINT;
+                }
             } else if (t1 instanceof NodeTest) {
                 if (t2.isPlainType() || t2 instanceof FunctionItemType) {
                     return DISJOINT;
                 }
-                    // both types are NodeTests
-//                    if (t1 instanceof AnyNodeTest) {
-//                        return SUBSUMES;
-//                    } else if (t2 instanceof AnyNodeTest) {
-//                        return SUBSUMED_BY;
-//                    } else if (t2 instanceof ErrorType) {
-//                        return DISJOINT;
-//                    } else {
                 // first find the relationship between the node kinds allowed
                 Affinity nodeKindRelationship;
                 UType m1 = t1.getUType();

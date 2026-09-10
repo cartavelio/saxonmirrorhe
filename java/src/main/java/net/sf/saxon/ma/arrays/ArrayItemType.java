@@ -187,7 +187,7 @@ public class ArrayItemType extends AnyFunctionType {
 
     @Override
     public CoercionPlan getCoercionPlan(int version) {
-        if (version >= 40 && memberType != SequenceType.ANY_SEQUENCE) {
+        if (version >= 40 /*&& memberType != SequenceType.ANY_SEQUENCE*/) {
             return ArrayCoercionPlan.getInstance();
         }
         return super.getCoercionPlan(version);

@@ -506,6 +506,17 @@ public final class Tokenizer {
                 case '$':
                     nextToken = Token.DOLLAR;
                     return;
+                case '~':
+                    if (languageLevel < 40) {
+                        throw new XPathException("Tilde '~' requires XPath 4.0 to be enabled");
+                    }
+                    if (isFollowedBy('[')) {
+                        inputOffset++;
+                        nextToken = Token.TILDE_LSQB;
+                        return;
+                    } else {
+                        throw new XPathException("Tilde '~' can appear only as part of the token '~['");
+                    }
 
                 case FULL_WIDTH_GT:
                     if (languageLevel < 40) {

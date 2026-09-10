@@ -48,11 +48,11 @@ public abstract class NodeTest implements NodePredicate, ItemTypeWithSequenceTyp
     /**
      * Determine the Genre (top-level classification) of this type
      *
-     * @return the Genre to which this type belongs, specifically {@link Genre#NODE}
+     * @return the Genre to which this type belongs, specifically {@link Genre#XNODE}
      */
     @Override
     public Genre getGenre() {
-        return Genre.NODE;
+        return Genre.XNODE;
     }
 
     /**
