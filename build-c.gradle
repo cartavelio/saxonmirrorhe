@@ -159,7 +159,6 @@ task rejar_Xerces(
     doLast {
       copy {
         into "${buildDir}/c/${release}c"
-        
         from("${projectDir}/src/main/c") {
           include "Saxon.C.API/*.h"
           include "Saxon.C.API/*.c"
@@ -211,17 +210,20 @@ task rejar_Xerces(
           exclude "samples/data/config_file.xml"
           exclude "samples/data/package*"
           include "saxon-data/**/*"
+          include "command/*.c"
+          include "command/jni/**/*"
         }
+        filter { line ->
+          line.replaceAll("@@VERSION@@", saxonVersion)
+        }
+      }
 
+      copy {
+        into "${buildDir}/c/${release}c"
         from("${projectDir}/src/docs") {
           include "notices/JAMESCLARK.txt"
           include "notices/CERN.txt"
           include "notices/LICENSE.txt"
-        }
-
-        from("${projectDir}/src/main/c") {
-          include "command/*.c"
-          include "command/jni/**/*"
         }
       }
     }
