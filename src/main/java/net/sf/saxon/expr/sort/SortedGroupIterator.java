@@ -46,7 +46,7 @@ public class SortedGroupIterator extends SortedIterator implements GroupIterator
         SequenceIterator base = getBaseIterator();
         int allocated = SequenceTool.supportsGetLength(base) ? SequenceTool.getLength(base) : 100;
 
-        values = new ObjectToBeSorted[allocated];
+        values = new GroupToBeSorted[allocated];
         count = 0;
 
         XPathContextMajor c2 = context.newContext();
