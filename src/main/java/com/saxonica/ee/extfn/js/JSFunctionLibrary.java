@@ -10,7 +10,6 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.Schema;
 
 import java.util.Arrays;
 import java.util.List;
@@ -24,7 +23,7 @@ import java.util.Map;
 public class JSFunctionLibrary implements FunctionLibrary {
 
     @Override
-    public boolean isAvailable(SymbolicName.F functionName, Schema schema, int languageLevel) {
+    public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
         return NamespaceUri.GLOBAL_JS.equals(functionName.getComponentName().getNamespaceUri());
     }
 
@@ -32,6 +31,10 @@ public class JSFunctionLibrary implements FunctionLibrary {
     public Expression bind(SymbolicName.F functionName, Expression[] staticArgs, Map<StructuredQName, Integer> keywords, StaticContext env, List<String> reasons) {
         StructuredQName fName = functionName.getComponentName();
         if (NamespaceUri.GLOBAL_JS.equals(fName.getNamespaceUri())) {
+            if (keywords != null && !keywords.isEmpty()) {
+                reasons.add("Calls to external Javascript functions cannot use keyword arguments");
+                return null;
+            }
             try {
                 Expression windowCall = IXSLFunctionSet.getInstance().makeFunction("window", 0).makeFunctionCall();
                 Expression callCall = IXSLFunctionSet.getInstance().makeFunction("call", 3).makeFunctionCall(
