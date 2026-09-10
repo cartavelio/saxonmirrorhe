@@ -34,6 +34,21 @@ public class Replace extends RegexFunction  {
 
     private boolean replacementChecked = false;
 
+    private int version = 20;
+
+    public static Replace make20() {
+        Replace rep = new Replace();
+        rep.version = 20;
+        return rep;
+    }
+
+    public static Replace make40() {
+        Replace rep = new Replace();
+        rep.version = 40;
+        return rep;
+    }
+
+
     @Override
     protected boolean allowRegexMatchingEmptyString() {
         return false;
