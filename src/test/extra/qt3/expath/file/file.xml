@@ -2206,7 +2206,7 @@
       </all-of>
     </result>
   </test-case>
-  <test-case name="EXPath-file-writeBinary3-005">
+  <test-case name="EXPath-file-writeBinary3-006">
     <description>Use file:write-binary with three arguments, file already exists, offset just at
       end</description>
     <created by="John Lumley" on="2013-12-02"/>
