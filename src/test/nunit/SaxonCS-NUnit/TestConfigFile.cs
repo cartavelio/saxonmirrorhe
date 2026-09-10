@@ -53,13 +53,14 @@ namespace SaxonCS_NUnit {
                 // Phase 1: should pick up license file from build directory
                 string existingLicenseFileLocation =
                     Environment.GetEnvironmentVariable("SAXON_LICENSE_DIR") + "/saxon-license.lic";
-                string newLicenseLocation = ConfigTest.DATA_DIR.Replace("src/test/testdata", "build/license") + "/copied-license.text";
+                string newLicenseLocation = ConfigTest.DATA_DIR.Replace("src/test/testdata", "build/license") + "copied-license.text";
                 File.Copy(existingLicenseFileLocation, newLicenseLocation, true);
                 Uri address = new Uri(ConfigTest.DataDirUri, "config-with-link-to-license-file.config");
                 Stream configFile = new WebClient().OpenRead(address);
                 Processor processor = new(configFile, address);
                 Assert.NotNull(processor);
                 Assert.That(processor.Implementation.isLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION));
+                configFile.Close();
                 
                 // Phase 2: the same, except the license file is corrupted so we should get a failure
                 string content = File.ReadAllText(existingLicenseFileLocation);
@@ -68,7 +69,7 @@ namespace SaxonCS_NUnit {
 
                 try {
                     Stream configFile2 = new WebClient().OpenRead(address);
-                    Processor processor2 = new(configFile, address);
+                    Processor processor2 = new(configFile2, address);
                     Assert.Fail("Failed to detect invalid license");
                 }
                 catch (Exception e) {
@@ -82,45 +83,6 @@ namespace SaxonCS_NUnit {
                 Assert.Fail(ex.Message);
             }
         }
-        
-        // // Copy the license file from the standard location to a new location in the build directory,
-        // and then pick it up by reference from a configuration file. This test doesn't rule out the
-        // possibility that we're ignoring the configuration file and loading the license from the usual
-        // location. To eliminate that possibility, we do the same again, corrupting the license and
-        // checking that loading now fails.
-        // try {
-        //     // First phase - should work
-        //     String existingLicenseFileLocation = System.getenv("SAXON_LICENSE_DIR") + "/saxon-license.lic";
-        //     String newLicenseLocation = new ConfigTest().getDataDir().replace("src/test/testdata", "build/license");
-        //     Path newLicensePath = Paths.get(newLicenseLocation + "/copied-license.text");
-        //     Files.createDirectories(Paths.get(newLicenseLocation));
-        //     Files.copy(Paths.get(existingLicenseFileLocation), newLicensePath, StandardCopyOption.REPLACE_EXISTING);
-        //     Processor processor = new Processor(new StreamSource(new File(
-        //             new ConfigTest().getDataDir() + "config-with-link-to-license-file.config")));
-        //     assertNotNull(processor);
-        //     assertTrue(processor.getUnderlyingConfiguration().isLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION));
-        //     // Second phase - should fail
-        //     List<String> content = Files.readAllLines(newLicensePath);
-        //     for (int i=0; i<content.size(); i++) {
-        //         if (content.get(i).startsWith("Signature=")) {
-        //             content.set(i, "Signature=FFFFFFFF");
-        //         }
-        //     }
-        //     Files.write(newLicensePath, content);
-        //     try {
-        //         Processor proc2 = new Processor(new StreamSource(new File(
-        //                 new ConfigTest().getDataDir() + "config-with-link-to-license-file.config")));
-        //         assertNotNull(proc2);
-        //         processor.getUnderlyingConfiguration().isLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION);
-        //         fail("Invalid license not detected");
-        //     } catch (SaxonApiException e) {
-        //         assertTrue(e.getMessage().contains("Failed to process license"));
-        //         assertTrue(e.getMessage().contains("build/license/copied-license.text"));
-        //     }
-        // } catch (Exception ex) {
-        //     ex.printStackTrace();
-        //     fail(ex);
-        // }
 
         [Test]
         public void TestStringReaderSource() {
