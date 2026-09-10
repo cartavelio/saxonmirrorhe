@@ -1004,22 +1004,6 @@ public class QT3TestDriverHE extends TestDriver {
             //} catch (Exception )
         }
 
-//        @Override
-//        public Source resolve(String href, String base) throws TransformerException {
-//            try {
-//
-//                XdmNode node = env.sourceDocs.get(abs);
-//                if (node == null) {
-//                    node = env.sourceDocs.get(href);
-//                    if (node == null) {
-//                        return null;
-//                    }
-//                }
-//                return node.asSource();
-//            } catch (URISyntaxException e) {
-//                throw new XPathException("Invalid URI: " + e.getMessage(), "FODC0005");
-//            }
-//        }
     }
 
     /**
