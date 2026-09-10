@@ -12,6 +12,7 @@ import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.AnnotationList;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
@@ -39,6 +40,8 @@ import java.util.function.Supplier;
  * Extensible record types and optional fields are dropped in 13.1
  */
 public class RecordType implements FunctionItemType {
+
+    // TODO: use UnicodeString for field names, rather than String
 
     private final Map<String, SequenceType> fieldTypes = new HashMap<>();
     private final List<String> fieldNamesInOrder = new ArrayList<>();
@@ -247,6 +250,28 @@ public class RecordType implements FunctionItemType {
 
     public SequenceType getFieldType(String field) {
         return fieldTypes.get(field);
+    }
+
+    /**
+     * Get the type of a given field
+     *
+     * @param field the name of the field
+     * @return the type of the field if it is defined, or null otherwise
+     */
+
+    public SequenceType getFieldType(UnicodeString field) {
+        return fieldTypes.get(field.toString());
+    }
+
+    /**
+     * Ask whether a given field is defined for this record type
+     *
+     * @param field the name of the field
+     * @return true if the name is a defined field, or false otherwise
+     */
+
+    public boolean isDefinedField(UnicodeString field) {
+        return fieldTypes.containsKey(field.toString());
     }
 
     /**

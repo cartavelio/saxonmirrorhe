@@ -452,7 +452,7 @@ public class LookupExpression extends BinaryExpression {
                         GroundedValue value;
                         if (map instanceof RecordItem rec) {
                             // TODO: check that key is a string
-                            value = rec.safeGet(key.getStringValue());
+                            value = rec.safeGet(key.getUnicodeStringValue());
                         } else {
                             value = map.get(key);
                         }
