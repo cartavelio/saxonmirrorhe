@@ -127,6 +127,10 @@
                   fo-test-fn-matching-segments-004
                   fo-test-fn-matching-segments-005
                   fo-test-fn-parse-json-008
+                  fo-test-fn-regex-001
+                  fo-test-fn-regex-002
+                  fo-test-fn-regex-003
+                  fo-test-fn-regex-004
                   " 
       run="false" report="n/a">
       <created by="Michael Kay" on="2026-01-01"/>
@@ -277,6 +281,7 @@
                   Keywords-fn-scan-right-1
                   Keywords-fn-system-properties-1
                   Keywords-fn-matching-segments-1
+                  Keywords-fn-regex-1
                   " 
       run="false" report="n/a">
       <created by="Michael Kay" on="2026-01-05"/>
