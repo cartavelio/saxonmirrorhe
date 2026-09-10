@@ -1,5 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <exceptions>
+   
+   <exception test-set="saxon-sendmail" run="false" report="notRun">
+      <created by="Michael Kay" on="2026-01-15"/>
+      <reason>Dependency on mail.jar</reason>
+   </exception>
+   
+   <exception test-set="andAlso" run="false" report="notRun">
+      <created by="Michael Kay" on="2026-01-15"/>
+      <reason>Dropped in Saxon 13</reason>
+   </exception>
+   
+   <exception test-set="orElse" run="false" report="notRun">
+      <created by="Michael Kay" on="2026-01-15"/>
+      <reason>Dropped in Saxon 13</reason>
+   </exception>
+   
+   <exception test-set="saxon-highest" run="false" report="notRun">
+      <created by="Michael Kay" on="2026-01-15"/>
+      <reason>Dropped in Saxon 13</reason>
+   </exception>
+   
+   <exception test-set="saxon-lowest" run="false" report="notRun">
+      <created by="Michael Kay" on="2026-01-15"/>
+      <reason>Dropped in Saxon 13</reason>
+   </exception>
+   
+   <exception test-set="saxon-isNaN" run="false" report="notRun">
+      <created by="Michael Kay" on="2026-01-15"/>
+      <reason>Dropped in Saxon 13</reason>
+   </exception>
     
    <exception test-set="UCA-collation" test-case="UCA-reorder-codes-009" run="false" report="Bug in ICU-J">
       <created by="Michael Kay" on="2018-09-09"/>

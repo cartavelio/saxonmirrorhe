@@ -56,11 +56,11 @@ TODO: rethink redefines and override
        first forked from James Clark's xt implementation. The open-source license terms relating to these
        components have therefore been removed.</p>
         
-       <p>For some years Saxon has used an implementation of immutable hash maps based on an open
+       <!--<p>For some years Saxon has used an implementation of immutable hash maps based on an open
        source library created by Michael Froh. The introduction of ordered maps in XPath 4.0
        has promped a switch to a different open source library, VAVR: except that for the time being,
        because of a serious performance bug in VAVR, we are using a fork of the main library
-       that uses a different data structure (CHAMP trees) internally.</p>
+       that uses a different data structure (CHAMP trees) internally.</p>-->
         
         
         
@@ -70,6 +70,8 @@ TODO: rethink redefines and override
     <category name="sourcedocs" class="javaonly">
         <p>Line numbering of XML documents read using a SAX parser 
             (including schema documents and stylesheets) has changed.</p>
+        
+        <p>TODO: did we keep this change?</p>
         
         <p>Wherever possible, the line and column number associated with a node
         are now the position where the node starts: in the case of elements,
@@ -96,14 +98,14 @@ TODO: rethink redefines and override
     
     <category name="functions31">
          <p>The implementation of <code>xs:duration</code> and <code>xs:dayTimeDuration</code>
-         has changed so the seconds component (representing the number of days, hours, minutes,
+         has changed so the <code>seconds</code> component (representing the number of days, hours, minutes,
          and seconds) is now held internally as a <code>BigDecimal</code> value. This affects the
          range of values and precision that can be maintained (both are now essentially unlimited),
          and prevents arithmetic exceptions when manipulating extremely large or small
          values. The change also affects the internal APIs for constructing and manipulating 
          instances of these two types.</p>
         
-        <p>The months component is unaffected: the total number of months in a duration
+        <p>The <code>months</code> component is unaffected: the total number of months in a duration
         remains limited to 2^31.</p>
  
         
@@ -290,7 +292,8 @@ TODO: rethink redefines and override
         <p>A new Saxon serialization property is introduced: <code>saxon:conditional-cdata</code>.
         If set to true, text is output within a CDATA section only when (a) the containing element
         is named in the <code>cdata-section-elements</code> property, and (b) the text contains
-        at least one special character, specifically a less-than or ampersand character. TODO: perhaps drop this, it didn't make it into 4.0</p>
+        at least one special character, specifically a less-than or ampersand character. 
+        TODO: perhaps drop this, it didn't make it into 4.0</p>
         
         <p>When generating HTML5 output including a <code>meta</code> element, the <code>meta</code>
         element now uses the form mandated by the HTML5 living standard (with a <code>charset</code>
@@ -640,7 +643,7 @@ TODO: rethink redefines and override
         <code>xsl:include</code> declarations are ignored.</p>
         
         <p>The experimental attribute <code>break-when</code> for <code>xsl:for-each-group</code> is
-            renamed <code>split-when</code> in XSLT 4.0; for now <code>break-when</code> is retained
+            renamed <code>split-when</code> in XSLT 4.0; for the time being <code>break-when</code> is retained
         as a synonym.</p>
         
         <h2>Dropped experimental features</h2>
@@ -653,17 +656,19 @@ TODO: rethink redefines and override
             <li><p>Record tests using the keyword "tuple" rather than "record".</p></li>
             <li><p>Item types of the form "atomic(X)"</p></li>
             <li><p>Lambda expressions of the form <code>($a, $b) -> {$a + $b}</code></p></li>
-            <li><p>The syntax <code>type(T)</code> is now allowed only in XSLT patterns, not
-            as an item type in XPath expressions. T may be any item type, including the
-            name of a type alias.</p></li>
+            <li><p>The syntax <code>type(T)</code> is dropped. A type alias <code>T</code> is now referenced simply
+                    as <code>T</code>, not <code>type(T)</code>. In XSLT patterns, a match for items
+                    of type <code>T</code> is written <code>match="~T</code> rather than
+                    <code>match="type(T)"</code>.</p></li>
             <li><p>The "thin arrow" notation for inline functions (<code>->{.+1}</code> or
-            <code>->($x){$x+1}</code>).</p></li>
+            <code>->($x){$x+1}</code>). These are now written <code>fn{.+1}</code> or
+            <code>fn($x){$x+1}</code> respectively.</p></li>
             <li><p><code>fn:all</code> is renamed <code>fn:every</code>.</p></li>
             <li><p>Saxon's experimental operators <code>andAlso</code> and <code>orElse</code>
             are dropped. The 4.0 specification defines <code>and</code> and <code>or</code>
             to have short-cut semantics, so these operators are unnecessary.</p></li>
             <li><p>Local union types have been generalized to choice types; the syntax
-            <code>union(xs:int, xs:long)</code> now becomes <code>(xs:int | xs:long)</code>,
+            <code>union(xs:int, xs:long)</code> is dropped, replaced by <code>(xs:int | xs:long)</code>,
             and unions of other types are allowed (for example <code>(map(*) | array(*))</code>.</p></li>
             <li>The <code>fn:pin()</code> and <code>fn:label()</code> functions are dropped
             (replaced by JNodes). For the time being, though, the <code>saxon:deep-update</code> extension function
@@ -679,13 +684,14 @@ TODO: rethink redefines and override
             near-identical XPath 4.0 functions are dropped:</p>
         
         <ul>
+            <li><p><code>saxon:analyze-uri</code> is dropped, superseded by <code>fn:parse-uri</code>
+                    from the 4.0 specification.</p></li>
             <li><p><code>saxon:index</code> is superseded by <code>map:build</code>.</p></li>
             <li><p><code>saxon:index-where</code> is superseded by <code>fn:index-where</code>.</p></li>
-            <li><p><code>saxon:highest</code> and <code>saxon:lowest</code> are superseded by 
-                <code>fn:highest</code> and <code>fn:lowest</code>.</p></li>
-            <li><p><code>saxon:is-NaN</code> is superseded by <code>fn:is-NaN</code>.</p></li>
+            <li><p><code>saxon:highest</code> and <code>saxon:lowest</code> are dropped, superseded by 
+                <code>fn:highest</code> and <code>fn:lowest</code> from the 4.0 specification.</p></li>
+            <li><p><code>saxon:is-NaN</code> is dropped, superseded by <code>fn:is-NaN</code>.</p></li>
             <li><p><code>saxon:parse-html</code> is superseded by <code>fn:parse-html</code>.</p></li>
-            <li><p><code>saxon:analyze-uri</code> is superseded by <code>fn:parse-uri</code>.</p></li>
             <li><p><code>saxon:array-member</code> is dropped. A call on <code>saxon:array-member(x)</code>
             can be replaced with the expression <code>{'value': x}</code>.</p></li>
         </ul>
