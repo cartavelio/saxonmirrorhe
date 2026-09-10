@@ -105,7 +105,7 @@ namespace TestDriver {
         }
 
         public void writeResultFilePreamble(Processor processor, XdmNode catalog) {
-            resultsDoc = new Xslt30ResultsDocument(this.resultsDir, Spec.XT30);
+            resultsDoc = new Xslt30ResultsDocument(this.resultsDir, Spec.XT30, reportFilename);
             //super.writeResultFilePreamble(processor, catalog);
         }
 
@@ -127,7 +127,7 @@ namespace TestDriver {
                 throw new Exception("Unknown spec " + specStr);
             }
 
-            resultsDoc = new Xslt30ResultsDocument(this.resultsDir, Spec.XT30);
+            resultsDoc = new Xslt30ResultsDocument(this.resultsDir, Spec.XT30, reportFilename);
             // No action: always use XSLT
         }
 
