@@ -747,6 +747,8 @@ def main(argv):
 
         test_report = PyTestReport(spec.testsuite, "http://www.w3.org/2012/08/qt-fots-results", spec.spec_and_version, driver_proc.version[7:9], saxon_version, report_file_name if report_file_name is not None else None)
 
+        test_report.set_driver_args(argv)
+
     '''dir = os.getcwd()'''
     if spec is None:
         print("lang option not given")

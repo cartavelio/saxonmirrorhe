@@ -20,6 +20,7 @@ public abstract class TestReport {
     protected XMLStreamWriter results;
     protected Writer writer;
     protected String reportFilename;
+    protected String[] driverArgs = null;
 
     public TestReport(TestDriver testDriver, Spec sp) {
         this.testDriver = testDriver;
@@ -27,6 +28,10 @@ public abstract class TestReport {
 
         reportFilename = testDriver.getResultsDir() + "/results"
                 + "_" + spec.fullName + "_" + testDriver.getProductVersion() + ".xml";
+    }
+
+    public void setDriverArgs(String[] args) {
+        this.driverArgs = args;
     }
 
     public void setReportFilename(String fn) {

@@ -57,6 +57,18 @@ public class QT3TestReport extends TestReport {
 
         results.writeEndElement(); // submission
 
+        if (driverArgs != null) {
+            results.writeStartElement(ns, "implementation");
+            results.writeStartElement(ns, "arguments");
+            for (String arg : driverArgs) {
+                results.writeStartElement(ns, "arg");
+                results.writeCharacters(arg);
+                results.writeEndElement();
+            }
+            results.writeEndElement(); // arguments
+            results.writeEndElement(); // implementation
+        }
+
         results.writeStartElement(ns, "product");
 
         results.writeAttribute("vendor", "Saxonica");
@@ -82,7 +94,6 @@ public class QT3TestReport extends TestReport {
         }
 
         results.writeEndElement(); //product
-
     }
 
     @Override

@@ -45,6 +45,19 @@ namespace TestDriver
 
         results.WriteEndElement(); // submission
 
+        if (driverArgs != null)
+        {
+            results.WriteStartElement("implementation");
+            results.WriteStartElement("arguments");
+            foreach (string arg in driverArgs) {
+                results.WriteStartElement("argument");
+                results.WriteString(arg);
+                results.WriteEndElement();
+            }
+            results.WriteEndElement(); // arguments
+            results.WriteEndElement(); // implementation
+        }
+        
         results.WriteStartElement("product");
 
         results.WriteAttributeString("vendor", "Saxonica");

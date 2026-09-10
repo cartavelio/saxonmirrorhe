@@ -912,7 +912,7 @@ def main(argv):
 
         test_report = PyTestReport(spec.testsuite, "http://www.w3.org/2012/11/xslt30-test-results", spec.spec_and_version,driver_proc.version[:9], saxon_version, report_file_name if report_file_name is not None else None)
 
-
+        test_report.set_driver_args(argv)
 
     if spec is None:
         print("Error: lang option not given")

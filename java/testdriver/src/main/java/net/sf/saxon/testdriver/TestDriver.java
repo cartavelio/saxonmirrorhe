@@ -79,6 +79,7 @@ public abstract class TestDriver {
     protected Set<String> exceptionPredicates = new HashSet<>();
     protected boolean pushPolarity;
     protected int threads = 1;
+    protected String[] driverArgs;
 
     static Set<String> unsharedEnvironments = new HashSet<>();
     static {
@@ -93,6 +94,7 @@ public abstract class TestDriver {
     }
 
     public void go(String[] args) throws Exception {
+        driverArgs = args;
         long startTime = System.nanoTime();
         if (driverProc == null) {
             driverProc = new Processor(false);
@@ -341,6 +343,7 @@ public abstract class TestDriver {
         }
 
         try {
+            resultsDoc.setDriverArgs(driverArgs);
             writeResultFilePreamble(driverProc, catalog);
         } catch (Exception e) {
             throw new RuntimeException(e);

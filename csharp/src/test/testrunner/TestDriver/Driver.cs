@@ -52,7 +52,6 @@ namespace TestDriver {
 #endif        
         public bool schemaAware = false;
 
-
         static readonly HashSet<string> unsharedEnvironments = new();
         protected bool export = false;
         private string exceptionsFileName = "exceptions.xml";
@@ -265,6 +264,7 @@ namespace TestDriver {
                     feedback.Message("No results document specified (use -lang option)", true);
                 }
 
+                resultsDoc.SetDriverArgs(args);
                 schemaAware = edition == "EE";
                 driverSerializer.OutputStream = Console.OpenStandardError();
                 driverSerializer.SetOutputProperty(Serializer.METHOD, "adaptive");

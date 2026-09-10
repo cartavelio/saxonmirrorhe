@@ -48,15 +48,19 @@ public class Xslt30TestReport extends TestReport {
         if(testDriver.export) {
             results.writeAttribute("export", "on");
         }
-
-
+        if (driverArgs != null) {
+            results.writeStartElement("arguments");
+            for (String arg : driverArgs) {
+                results.writeStartElement("arg");
+                results.writeCharacters(arg);
+                results.writeEndElement();
+            }
+            results.writeEndElement();
+        }
         results.writeEndElement(); //implementation
         results.writeEmptyElement(NS, "test-run");
         results.writeAttribute("dateRun", getDate());
         results.writeAttribute("testsuiteVersion", "3.0.1");
-
-
-
     }
 
     @Override

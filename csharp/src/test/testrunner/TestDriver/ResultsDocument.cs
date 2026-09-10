@@ -16,6 +16,7 @@ namespace TestDriver
         protected Spec spec;
         protected XmlWriter results;
         private StreamWriter writer;
+        protected string[] driverArgs = null;
 
         protected ResultsDocument(String rdir, Spec sp, String fn)
         {
@@ -24,6 +25,11 @@ namespace TestDriver
             this.reportFilename = fn;
         }
 
+        public void SetDriverArgs(string[] args)
+        {
+            driverArgs = args;
+        }
+        
         protected void createWriter(Processor processor) {
 
             string fileName = resultsDir + "/results"
