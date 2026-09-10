@@ -23,10 +23,10 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.HostLanguage;
-import net.sf.saxon.s9api.push.Push;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.push.Document;
 import net.sf.saxon.s9api.push.Element;
+import net.sf.saxon.s9api.push.Push;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.trans.CompilerInfo;
@@ -36,6 +36,7 @@ import net.sf.saxon.value.StringValue;
 
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamSource;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -242,11 +243,19 @@ public class TimingTraceListener implements TraceListener {
     protected PreparedStylesheet getStyleSheet() throws XPathException {
         InputStream in = getStylesheetInputStream();
         StreamSource ss = new StreamSource(in, "profile.xsl");
+
         CompilerInfo info = config.getDefaultXsltCompilerInfo();
         info.setParameter(new StructuredQName("", NamespaceUri.NULL, "lang"),
                           StringValue.bmp(this.lang == HostLanguage.XSLT ? "XSLT" : "XQuery"));
-        return Compilation.compileSingletonPackage(config, info, ss);
+        PreparedStylesheet pss = Compilation.compileSingletonPackage(config, info, ss);
+        try {
+            in.close();
+        } catch (IOException err) {
+            // ignore the exception
+        }
+        return pss;
     }
+
 
     /**
      * Get an input stream containing the stylesheet used for formatting results.

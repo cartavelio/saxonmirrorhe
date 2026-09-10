@@ -12,7 +12,6 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.lib.TraceListener;
-import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.str.UnicodeString;
@@ -357,30 +356,30 @@ public class TraceExpression extends Instruction {
             };
         }
 
-        @Override
-        public SequenceEvaluator eagerly() {
-            TraceExpression expr = (TraceExpression) getExpression();
-            SequenceEvaluator baseEval = expr.getBody().makeElaborator().eagerly();
-            return context -> {
-                Controller controller = context.getController();
-                assert controller != null;
-                if (controller.isTracing()) {
-                    TraceListener listener = controller.getTraceListener();
-
-                    listener.enter(expr, expr.properties, context);
-                    GroundedValue result = (GroundedValue)baseEval.evaluate(context);
-                    listener.leave(expr);
-                    return result;
-                } else {
-                    return (GroundedValue) baseEval.evaluate(context);
-                }
-            };
-        }
-
-        @Override
-        public SequenceEvaluator lazily(boolean repeatable) {
-            return eagerly();
-        }
+//        @Override
+//        public SequenceEvaluator eagerly() {
+//            TraceExpression expr = (TraceExpression) getExpression();
+//            SequenceEvaluator baseEval = expr.getBody().makeElaborator().eagerly();
+//            return context -> {
+//                Controller controller = context.getController();
+//                assert controller != null;
+//                if (controller.isTracing()) {
+//                    TraceListener listener = controller.getTraceListener();
+//
+//                    listener.enter(expr, expr.properties, context);
+//                    GroundedValue result = (GroundedValue)baseEval.evaluate(context);
+//                    listener.leave(expr);
+//                    return result;
+//                } else {
+//                    return (GroundedValue) baseEval.evaluate(context);
+//                }
+//            };
+//        }
+//
+//        @Override
+//        public SequenceEvaluator lazily(boolean repeatable) {
+//            return eagerly();
+//        }
 
         @Override
         public PullEvaluator elaborateForPull() {

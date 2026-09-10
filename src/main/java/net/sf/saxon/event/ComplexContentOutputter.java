@@ -20,6 +20,7 @@ import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UniStringConsumer;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
@@ -107,6 +108,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
      */
 
     public ComplexContentOutputter(Receiver next) {
+        Instrumentation.count("CCO");
         PipelineConfiguration pipe = next.getPipelineConfiguration();
         setPipelineConfiguration(pipe);
         setReceiver(next);

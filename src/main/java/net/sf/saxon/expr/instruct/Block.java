@@ -12,7 +12,6 @@ import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.NodeKindTest;
@@ -86,7 +85,7 @@ public class Block extends Instruction {
      * @return the number of child subexpressions
      */
 
-    private int size() {
+    public int size() {
         return operanda.length;
     }
 
@@ -806,30 +805,7 @@ public class Block extends Instruction {
         public SequenceEvaluator lazily(boolean repeatable) {
             final Block expr = (Block) getExpression();
             if (expr.isCandidateForSharedAppend()) {
-                ChainAction[] actions = new ChainAction[expr.size()];
-                for (int i=0; i < expr.size(); i++) {
-                    Expression child = expr.getOperanda()[i].getChildExpression();
-                    if (child instanceof VariableReference) {
-                        SequenceEvaluator eval = child.makeElaborator().eagerly();
-                        actions[i] = (chain, context) -> chain.appendSequence((GroundedValue)eval.evaluate(context));
-                    } else {
-                        PullEvaluator pull = child.makeElaborator().elaborateForPull();
-                        actions[i] = (chain, context) -> {
-                            SequenceIterator iter = pull.iterate(context);
-                            for (Item item; (item = iter.next()) != null; ) {
-                                chain = chain.append(item);
-                            }
-                            return chain;
-                        };
-                    }
-                }
-                return context -> {
-                    ZenoSequence chain = new ZenoSequence();
-                    for (ChainAction action : actions) {
-                        chain = action.perform(chain, context);
-                    }
-                    return chain;
-                };
+                return new SharedAppendEvaluator(expr);
             } else {
                 return super.lazily(repeatable);
             }

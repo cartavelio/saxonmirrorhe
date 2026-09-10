@@ -9,13 +9,13 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.instruct.GlobalVariable;
+import net.sf.saxon.expr.parser.Evaluators;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharp;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -182,17 +182,38 @@ public class GlobalVariableReference extends VariableReference implements Compon
      * Elaborator for a global variable reference, for example {@code $globalVar}.
      */
 
-    public static class GlobalVariableReferenceElaborator extends PullElaborator {
+    public static class GlobalVariableReferenceElaborator extends PullElaborator implements SequenceEvaluator {
+
+        /**
+         * Evaluate a construct to produce a value (which might be a lazily evaluated Sequence)
+         *
+         * @param context the evaluation context
+         * @return a Sequence (not necessarily grounded)
+         * @throws XPathException if a dynamic error occurs during the evaluation.
+         */
+        @Override
+        public Sequence evaluate(XPathContext context) throws XPathException {
+            GlobalVariableReference varRef = (GlobalVariableReference) getExpression();
+            return varRef.evaluateVariable(context);
+        }
+
+        /**
+         * Get a code identifying the evaluator. Note that the codes are held in SEF files
+         * so they should be stable.
+         */
+        @Override
+        public int getEvaluationMethodCode() {
+            return Evaluators.EVALUATE_VARIABLE;
+        }
 
         @Override
         public SequenceEvaluator eagerly() {
-            GlobalVariableReference varRef = (GlobalVariableReference) getExpression();
-            return CSharp.methodRef(varRef::evaluateVariable);
+            return this;
         }
 
         @Override
         public SequenceEvaluator lazily(boolean repeatable) {
-            return eagerly();
+            return this;
         }
 
         @Override

@@ -260,14 +260,12 @@ public class SuppliedParameterReference extends Expression {
         public SequenceEvaluator eagerly() {
             SuppliedParameterReference varRef = (SuppliedParameterReference) getExpression();
             int slot = varRef.getSlotNumber();
-            return context -> context.evaluateLocalVariable(slot).materialize();
+            return new LocalVariableEvaluator(slot);
         }
 
         @Override
         public SequenceEvaluator lazily(boolean repeatable) {
-            SuppliedParameterReference varRef = (SuppliedParameterReference) getExpression();
-            int slot = varRef.getSlotNumber();
-            return context -> context.evaluateLocalVariable(slot);
+            return eagerly();
         }
 
         @Override

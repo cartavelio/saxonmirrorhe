@@ -4,7 +4,6 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.value.Cardinality;
-import net.sf.saxon.value.EmptySequence;
 
 public abstract class ItemElaborator extends Elaborator {
 
@@ -13,13 +12,9 @@ public abstract class ItemElaborator extends Elaborator {
         boolean maybeEmpty = Cardinality.allowsZero(getExpression().getCardinality());
         ItemEvaluator ie = elaborateForItem();
         if (maybeEmpty) {
-            return context -> {
-                Item it = ie.eval(context);
-                return it == null ? EmptySequence.getInstance() : it;
-            };
+            return new OptionalItemEvaluator(ie);
         } else {
-            //noinspection Convert2MethodRef
-            return context -> ie.eval(context);
+            return new SingleItemEvaluator(ie);
         }
     }
 

@@ -652,9 +652,8 @@ public final class LocalParam extends Instruction implements LocalBinding {
             if (expr.getSelectExpression() == null) {
                 selectEvaluator = null;
             } else if (expr.referenceCount == FilterExpression.FILTERED) {
-                final Optimizer optimizer = getConfiguration().obtainOptimizer();
                 PullEvaluator pullEval = expr.getSelectExpression().makeElaborator().elaborateForPull();
-                selectEvaluator = context -> optimizer.makeIndexedValue(pullEval.iterate(context));
+                selectEvaluator = new IndexedVariableEvaluator(pullEval);
             } else {
                 selectEvaluator = expr.getSelectExpression().makeElaborator().lazily(true);
             }

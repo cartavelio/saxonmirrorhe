@@ -12,11 +12,11 @@ public abstract class StringElaborator extends Elaborator {
         return false;
     }
 
-    @Override
-    public SequenceEvaluator eagerly() {
-        UnicodeStringEvaluator u = elaborateForUnicodeString(returnZeroLengthWhenAbsent());
-        return context -> new StringValue(u.eval(context));
-    }
+//    @Override
+//    public SequenceEvaluator eagerly() {
+//        UnicodeStringEvaluator u = elaborateForUnicodeString(returnZeroLengthWhenAbsent());
+//        return context -> new StringValue(u.eval(context));
+//    }
 
     @Override
     public PullEvaluator elaborateForPull() {

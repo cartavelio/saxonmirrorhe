@@ -120,6 +120,7 @@ public class Categories {
         options.setSchemaValidationMode(Validation.SKIP);
         options.setDTDValidationMode(Validation.SKIP);
         options.setTreeModel(Builder.TINY_TREE);
+        options.setPleaseCloseAfterUse(true);
         NodeInfo doc;
         try {
             doc = config.buildDocumentTree(new StreamSource(in, "categories.xml"), options).getRootNode();

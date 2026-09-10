@@ -78,6 +78,7 @@ public class UnicodeBlocks {
         options.setSchemaValidationMode(Validation.SKIP);
         options.setDTDValidationMode(Validation.SKIP);
         options.setSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
+        options.setPleaseCloseAfterUse(true);
         TreeInfo doc;
         try {
             doc = config.buildDocumentTree(new StreamSource(in, "unicodeBlocks.xml"), options);

@@ -1030,18 +1030,18 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
             }
         }
 
-        /**
-         * Get a function that evaluates the underlying expression lazily
-         *
-         * @param repeatable true if the resulting {@link Sequence} must be usable repeatedly; false
-         *                   if it only needs to be used once
-         * @return an evaluator for the expression that returns a {@link Sequence} (which may be a lazy sequence)
-         */
-        @Override
-        public SequenceEvaluator lazily(boolean repeatable) {
-            PullEvaluator pullEvaluator = elaborateForPull();
-            return context -> new LazySequence(pullEvaluator.iterate(context));
-        }
+//        /**
+//         * Get a function that evaluates the underlying expression lazily
+//         *
+//         * @param repeatable true if the resulting {@link Sequence} must be usable repeatedly; false
+//         *                   if it only needs to be used once
+//         * @return an evaluator for the expression that returns a {@link Sequence} (which may be a lazy sequence)
+//         */
+//        @Override
+//        public SequenceEvaluator lazily(boolean repeatable) {
+//            PullEvaluator pullEvaluator = elaborateForPull();
+//            return context -> new LazySequence(pullEvaluator.iterate(context));
+//        }
     }
 
 

@@ -3,7 +3,6 @@ package net.sf.saxon.expr.elab;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.UncheckedXPathException;
 
 public abstract class PullElaborator extends Elaborator {
@@ -14,13 +13,7 @@ public abstract class PullElaborator extends Elaborator {
     @Override
     public SequenceEvaluator eagerly() {
         PullEvaluator pull = elaborateForPull();
-        return context -> {
-            try {
-                return SequenceTool.toGroundedValue(pull.iterate(context));
-            } catch (UncheckedXPathException err) {
-                throw err.getXPathException();
-            }
-        };
+        return new EagerPullEvaluator(pull);
     }
 
     @Override

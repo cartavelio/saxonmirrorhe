@@ -6,7 +6,6 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.tree.util.Orphan;
 
@@ -15,8 +14,7 @@ public abstract class SimpleNodePushElaborator extends Elaborator {
     @Override
     public SequenceEvaluator eagerly() {
         ItemEvaluator itemEval = elaborateForItem();
-        //noinspection Convert2MethodRef
-        return CSharp.methodRef(context -> itemEval.eval(context));
+        return new OptionalItemEvaluator(itemEval);
     }
 
     @Override

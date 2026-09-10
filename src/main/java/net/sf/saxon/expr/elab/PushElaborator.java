@@ -11,7 +11,6 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.value.Cardinality;
-import net.sf.saxon.value.EmptySequence;
 
 public abstract class PushElaborator extends Elaborator {
 
@@ -43,21 +42,9 @@ public abstract class PushElaborator extends Elaborator {
         Expression expr = getExpression();
         if (Cardinality.allowsMany(expr.getCardinality())) {
             PushEvaluator pushEval = elaborateForPush();
-            return context -> {
-                Controller controller = context.getController();
-                assert controller != null;
-                SequenceCollector seq = controller.allocateSequenceOutputter();
-                TailCall tc = pushEval.processLeavingTail(new ComplexContentOutputter(seq), context);
-                Expression.dispatchTailCall(tc);
-                seq.close();
-                return seq.getSequence();
-            };
+            return new EagerPushEvaluator(pushEval);
         } else {
-            ItemEvaluator itemEval = elaborateForItem();
-            return context -> {
-                Item item = itemEval.eval(context);
-                return item == null ? EmptySequence.getInstance() : item;
-            };
+            return new OptionalItemEvaluator(elaborateForItem());
         }
     }
 

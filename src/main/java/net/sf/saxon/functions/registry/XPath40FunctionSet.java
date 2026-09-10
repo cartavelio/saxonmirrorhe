@@ -16,6 +16,7 @@ import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SpecificFunctionType;
+import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.SequenceType;
 
 /**
@@ -47,8 +48,11 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 new SequenceType[]{SequenceType.SINGLE_ITEM},
                 SequenceType.ATOMIC_SEQUENCE);
 
+        register("all", 1, e -> e.populate(AllFn::new, BuiltInAtomicType.BOOLEAN, ONE, AS_ARG0 | LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, BooleanValue.TRUE));
+
         register("all", 2, e -> e.populate(AllFn::new, BuiltInAtomicType.BOOLEAN, ONE, AS_ARG0 | LATE)
-                .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
+                .arg(0, AnyItemType.getInstance(), STAR, BooleanValue.TRUE)
                 .arg(1, predicate, ONE, null));
 
         register("characters", 1, e -> e.populate( CharactersFn::new, BuiltInAtomicType.STRING, STAR, 0)
@@ -144,8 +148,11 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, null));   // TODO: define a record type
 
+        register("some", 1, e -> e.populate(SomeFn::new, BuiltInAtomicType.BOOLEAN, ONE, AS_ARG0 | LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, BooleanValue.FALSE));
+
         register("some", 2, e -> e.populate(SomeFn::new, BuiltInAtomicType.BOOLEAN, ONE, AS_ARG0 | LATE)
-                .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
+                .arg(0, AnyItemType.getInstance(), STAR, BooleanValue.FALSE)
                 .arg(1, predicate, ONE, null));
 
         register("uniform", 1, e -> e.populate(UniformFn::new, BuiltInAtomicType.BOOLEAN, ONE, DCOLL | UO)

@@ -11,8 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Internal class used for instrumentation purposes. It maintains a number of counters and displays these at the
- * end of the run. The counters are output by calling Instrumentation.report(), typically at the end of a run.
+ * Internal class used for instrumentation purposes. It maintains a number of counters and displays these on request.
+ * The counters are output by calling {@code Instrumentation.report()}, typically at the end of a run.
  */
 
 public class Instrumentation {
