@@ -476,7 +476,7 @@ public class StylesheetModule {
 
     public void spliceIncludes() throws XPathException {
 
-        if (topLevel == null || topLevel.size() == 0) {
+        if (topLevel == null || topLevel.isEmpty()) {
             topLevel = new ArrayList<>(50);
         }
         minImportPrecedence = precedence;
