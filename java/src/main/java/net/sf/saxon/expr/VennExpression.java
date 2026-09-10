@@ -344,6 +344,7 @@ public class VennExpression extends BinaryExpression {
 
         Expression lhs = getLhsExpression();
         Expression rhs = getRhsExpression();
+        
         switch (operator) {
             case UNION:
                 if (Literal.isEmptySequence(lhs) &&
@@ -401,9 +402,7 @@ public class VennExpression extends BinaryExpression {
         // If both are axis expressions on the same axis, merge them
         // ie. rewrite (axis::test1 | axis::test2) as axis::(test1 | test2)
 
-        if (lhs instanceof AxisExpression && rhs instanceof AxisExpression) {
-            final AxisExpression a1 = (AxisExpression) lhs;
-            final AxisExpression a2 = (AxisExpression) rhs;
+        if (lhs instanceof AxisExpression a1 && rhs instanceof AxisExpression a2) {
             if (a1.getAxis() == a2.getAxis()) {
                 if (a1.getNodeTest().equals(a2.getNodeTest())) {
                     if (operator == OperatorSymbol.EXCEPT) {
@@ -453,30 +452,20 @@ public class VennExpression extends BinaryExpression {
         // Try merging two non-positional filter expressions:
         // A[exp0] | A[exp1] becomes A[exp0 or exp1]
 
-        if (lhs instanceof FilterExpression && rhs instanceof FilterExpression) {
-            final FilterExpression exp0 = (FilterExpression) lhs;
-            final FilterExpression exp1 = (FilterExpression) rhs;
+        if (lhs instanceof FilterExpression exp0 && rhs instanceof FilterExpression exp1) {
 
             if (!exp0.isPositional(th) &&
                     !exp1.isPositional(th) &&
                     exp0.getSelectExpression().isEqual(exp1.getSelectExpression())) {
-                final Expression filter;
-                switch (operator) {
-                    case UNION:
-                        filter = new OrExpression(exp0.getFilter(),
-                                exp1.getFilter());
-                        break;
-                    case INTERSECT:
-                        filter = new AndExpression(exp0.getFilter(),
-                                exp1.getFilter());
-                        break;
-                    case EXCEPT:
-                        Expression negate2 = SystemFunction.makeCall("not", getRetainedStaticContext(), exp1.getFilter());
-                        filter = new AndExpression(exp0.getFilter(), negate2);
-                        break;
-                    default:
-                        throw new AssertionError("Unknown operator " + operator);
-                }
+                final Expression filter = switch (operator) {
+                    case UNION -> new OrExpression(exp0.getFilter(),
+                                                   exp1.getFilter());
+                    case INTERSECT -> new AndExpression(exp0.getFilter(),
+                                                        exp1.getFilter());
+                    case EXCEPT -> new AndExpression(exp0.getFilter(),
+                                                     SystemFunction.makeCall("not", getRetainedStaticContext(), exp1.getFilter()));
+                    default -> throw new AssertionError("Unknown operator " + operator);
+                };
                 ExpressionTool.copyLocationInfo(this, filter);
                 FilterExpression f = new FilterExpression(exp0.getSelectExpression(), filter);
                 ExpressionTool.copyLocationInfo(this, f);
@@ -489,12 +478,10 @@ public class VennExpression extends BinaryExpression {
         // Convert @*|node() into @*,node() to eliminate the sorted merge operation
         // Avoid doing this when streaming because xsl:value-of select="@*,node()" is not currently streamable
         if (!visitor.isOptimizeForStreaming() && operator == OperatorSymbol.UNION &&
-                lhs instanceof AxisExpression && rhs instanceof AxisExpression) {
-            AxisExpression a0 = (AxisExpression) lhs;
-            AxisExpression a1 = (AxisExpression) rhs;
-            if (a0.getAxis() == AxisInfo.ATTRIBUTE && a1.getAxis() == AxisInfo.CHILD) {
+                lhs instanceof AxisExpression ax0 && rhs instanceof AxisExpression ax1) {
+            if (ax0.getAxis() == AxisInfo.ATTRIBUTE && ax1.getAxis() == AxisInfo.CHILD) {
                 return new Block(new Expression[]{lhs, rhs});
-            } else if (a1.getAxis() == AxisInfo.ATTRIBUTE && a0.getAxis() == AxisInfo.CHILD) {
+            } else if (ax1.getAxis() == AxisInfo.ATTRIBUTE && ax0.getAxis() == AxisInfo.CHILD) {
                 return new Block(new Expression[]{rhs, lhs});
             }
         }
@@ -614,8 +601,7 @@ public class VennExpression extends BinaryExpression {
 
     public boolean equals(Object other) {
         // NOTE: it's possible that the method in the superclass is already adequate for this
-        if (other instanceof VennExpression) {
-            VennExpression b = (VennExpression) other;
+        if (other instanceof VennExpression b) {
             if (operator != b.operator) {
                 return false;
             }
@@ -627,7 +613,7 @@ public class VennExpression extends BinaryExpression {
                 Set<Expression> s0 = new HashSet<>(10);
                 gatherComponents(operator, s0);
                 Set<Expression> s1 = new HashSet<>(10);
-                ((VennExpression) other).gatherComponents(operator, s1);
+                b.gatherComponents(operator, s1);
                 return s0.equals(s1);
             }
         }

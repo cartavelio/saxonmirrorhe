@@ -315,26 +315,20 @@ public class AlphaCode {
         @Override
         public void setStringProperty(AlphaCodeTree tree, String key, String value) {
             switch (key) {
-                case "o": // cardinality
-                    tree.cardinality = value;
-                    break;
-                case "p": // principal item type
-                    tree.principal = value;
-                    break;
-                case "n": // element or attribute name
-                    tree.name = value;
-                    break;
-                case "c": // element or attribute content type
-                    tree.content = value;
-                    break;
-                case "z": // nillable flag
-                    tree.nillable = true;
-                    break;
-                case "x": // extensible tuple type flag
-                    tree.extensibleTupleType = true;
-                    break;
-                default:
-                    throw new IllegalArgumentException("Bad alphacode component " + key);
+                case "o" -> // cardinality
+                        tree.cardinality = value;
+                case "p" -> // principal item type
+                        tree.principal = value;
+                case "n" -> // element or attribute name
+                        tree.name = value;
+                case "c" -> // element or attribute content type
+                        tree.content = value;
+                case "z" -> // nillable flag
+                        tree.nillable = true;
+                case "x" -> // extensible tuple type flag
+                        tree.extensibleTupleType = true;
+                default ->
+                        throw new IllegalArgumentException("Bad alphacode component " + key);
             }
         }
 
@@ -353,46 +347,39 @@ public class AlphaCode {
         @Override
         public void setTypeProperty(AlphaCodeTree tree, String key, AlphaCodeTree value) {
             switch (key) {
-                case "k": // key type of map
-                    tree.keyType = value;
-                    break;
-                case "v": // value type of map, member type of array
-                    tree.valueType = value;
-                    break;
-                case "r": // result type of function
-                    tree.resultType = value;
-                    break;
-                case "e": // element type of document type
-                    tree.elementType = value;
-                    break;
-                default:
-                    throw new IllegalArgumentException("Bad alphacode component " + key);
+                case "k" -> // key type of map
+                        tree.keyType = value;
+                case "v" -> // value type of map, member type of array
+                        tree.valueType = value;
+                case "r" -> // result type of function
+                        tree.resultType = value;
+                case "e" -> // element type of document type
+                        tree.elementType = value;
+                default ->
+                        throw new IllegalArgumentException("Bad alphacode component " + key);
             }
         }
 
         @Override
         public void setMultiTypeProperty(AlphaCodeTree tree, String key, List<AlphaCodeTree> value) {
             switch (key) {
-                case "a": // argument types of a function
-                    tree.argTypes = value;
-                    break;
-                case "m": // member types of a union
-                    tree.members = value;
-                    break;
-                case "i": // intersection of types
+                case "a" -> // argument types of a function
+                        tree.argTypes = value;
+                case "m" -> // member types of a union
+                        tree.members = value;
+                case "i" -> {
                     tree.vennOperands = value.toArray(new AlphaCodeTree[]{});
                     tree.vennOperator = OperatorSymbol.INTERSECT;
-                    break;
-                case "u": // union of types
+                }
+                case "u" -> {
                     tree.vennOperands = value.toArray(new AlphaCodeTree[]{});
                     tree.vennOperator = OperatorSymbol.UNION;
-                    break;
-                case "d": // difference of types
+                }
+                case "d" -> {
                     tree.vennOperands = value.toArray(new AlphaCodeTree[]{});
                     tree.vennOperator = OperatorSymbol.EXCEPT;
-                    break;
-                default:
-                    throw new IllegalArgumentException("Bad alphacode component " + key);
+                }
+                default -> throw new IllegalArgumentException("Bad alphacode component " + key);
             }
         }
 

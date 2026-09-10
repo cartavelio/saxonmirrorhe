@@ -160,6 +160,10 @@ public class NodeTestPattern extends Pattern {
     public void export(ExpressionPresenter presenter) throws XPathException {
         presenter.startElement("p.nodeTest");
         presenter.emitAttribute("test", AlphaCode.fromItemType(nodeTest.getItemType()));
+        String schemaRole = getRetainedStaticContext().getImportedSchemaRoleName();
+        if (!schemaRole.isEmpty()) {
+            presenter.emitAttribute("schemaRole", schemaRole);
+        }
         presenter.endElement();
     }
 

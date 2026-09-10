@@ -19,6 +19,8 @@ import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.functions.hof.FunctionLiteral;
 import net.sf.saxon.ma.arrays.ArrayItem;
+import net.sf.saxon.ma.jnode.JNode;
+import net.sf.saxon.ma.jnode.RootJNode;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
@@ -568,6 +570,16 @@ public class Literal extends Expression {
                 exportValue(kvp.value, out);
             }
             out.endElement();
+        } else if (value instanceof JNode) {
+            if (value instanceof RootJNode root) {
+                out.startElement("jnodeRoot");
+                exportValue(root.getContent(), out);
+                out.endElement();
+            } else {
+                throw new XPathException(
+                        "Cannot export a stylesheet containing a non-root JNode literal",
+                        SaxonErrorCode.SXST0070);
+            }
         } else if (value instanceof FunctionItem) {
             ((FunctionItem) value).export(out);
         } else if (value instanceof AnyExternalObject) {

@@ -142,6 +142,13 @@ public class PackageData {
     }
 
     /**
+     * Get all the imported schemata
+     */
+    public Map<String, Schema> getImportedSchemata() {
+        return this.importedSchemata;
+    }
+
+    /**
      * Set the local license id, identifying any local license in the case
      * where this package was loaded from a compiled package that contained its own
      * embedded license

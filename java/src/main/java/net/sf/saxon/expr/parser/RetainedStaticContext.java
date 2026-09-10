@@ -23,6 +23,7 @@ import net.sf.saxon.type.Schema;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * This class contains the part of the static context of expressions that (a) can change from one expression
@@ -48,9 +49,18 @@ public class RetainedStaticContext implements NamespaceResolver {
 
     public RetainedStaticContext(Configuration config) {
         this.config = config;
-        packageData = new PackageData(config);
-        namespaces = NamespaceMap.emptyMap();
-        defaultCollationName = NamespaceConstant.CODEPOINT_COLLATION_URI;
+        this.packageData = new PackageData(config);
+        this.namespaces = NamespaceMap.emptyMap();
+        this.defaultCollationName = NamespaceConstant.CODEPOINT_COLLATION_URI;
+        this.importedSchema = packageData.getImportedSchema("");
+    }
+
+    public RetainedStaticContext(Configuration config, PackageData pack) {
+        this.config = config;
+        this.packageData = pack;
+        this.namespaces = NamespaceMap.emptyMap();
+        this.defaultCollationName = NamespaceConstant.CODEPOINT_COLLATION_URI;
+        this.importedSchema = packageData.getImportedSchema("");
     }
 
     public RetainedStaticContext(StaticContext sc) {
@@ -197,6 +207,25 @@ public class RetainedStaticContext implements NamespaceResolver {
      */
     public Schema getImportedSchema() {
         return importedSchema;
+    }
+
+    /**
+     * Get the role name of the imported schema (for XSLT 4.0, which allows multiple schema imports)
+     * @return the schema role name
+     */
+
+    public String getImportedSchemaRoleName() {
+        if (importedSchema == getPackageData().getImportedSchema("")) {
+            // the most common case
+            return "";
+        }
+        Map<String, Schema> schemata = getPackageData().getImportedSchemata();
+        for (Map.Entry<String, Schema> entry : schemata.entrySet()) {
+            if (entry.getValue() == importedSchema) {
+                return entry.getKey();
+            }
+        }
+        throw new IllegalStateException("Imported schema not found");
     }
 
     /**

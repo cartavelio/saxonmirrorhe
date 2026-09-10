@@ -301,7 +301,7 @@ public class KeyDefinition extends Actor implements ContextOriginator {
     public void export(ExpressionPresenter out, boolean reusable, Map<Component, Integer> componentIdMap) throws XPathException {
         out.startElement("key");
         out.emitAttribute("name", getObjectName());
-        if (!NamespaceConstant.CODEPOINT_COLLATION_URI.equals(collationName)) {
+        if (collationName != null && !NamespaceConstant.CODEPOINT_COLLATION_URI.equals(collationName)) {
             out.emitAttribute("collation", collationName);
         }
         out.emitAttribute("line", getLineNumber() + "");

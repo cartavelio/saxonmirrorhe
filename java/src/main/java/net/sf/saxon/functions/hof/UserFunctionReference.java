@@ -291,6 +291,10 @@ public class UserFunctionReference extends Expression
      */
     @Override
     public ItemType getItemType() {
+        if (nominalTarget == null) {
+            // happens while reloading from a SEF file
+            return AnyFunctionType.INSTANCE;
+        }
         return nominalTarget.getFunctionItemType();
     }
 

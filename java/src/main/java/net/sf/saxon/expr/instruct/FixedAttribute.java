@@ -298,6 +298,10 @@ public final class FixedAttribute extends AttributeCreator {
         if (!flags.isEmpty()) {
             out.emitAttribute("flags", flags);
         }
+        String schemaRole = getRetainedStaticContext().getImportedSchemaRoleName();
+        if (!schemaRole.isEmpty()) {
+            out.emitAttribute("schemaRole", schemaRole);
+        }
         getSelect().export(out);
         out.endElement();
     }

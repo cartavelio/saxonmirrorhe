@@ -253,72 +253,73 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
                 return Literal.makeEmptySequence();
             }
         }
-        return this;
-    }
 
-        // TODO: reinstate the plausibility logic
+        // Test whether the axis ever selects anything, when starting at this context node
+        UType originUType = contextType.getUType();
 
-//        // Test whether the axis ever selects anything, when starting at this context node
-//        UType originUType = contextType.getUType();
-//
-//        if (originUType == UType.JNODE) {
-//            itemType = AnyJNodeType.getInstance();
-//            return this;
-//        }
-//        UType targetUType = AxisInfo.getTargetUType(originUType, axis);
-//        UType testUType = test == null ? UType.XNODE : test.getUType();
-//        if (targetUType.equals(UType.VOID)) {
-//            if (warnings) {
-//                visitor.issueWarning("The " + AxisInfo.axisName[axis] + " axis starting at " +
-//                                             originUType.toStringWithIndefiniteArticle() + " will never select anything",
-//                                     SaxonErrorCode.SXWN9037, getLocation());
-//            }
-//            return Literal.makeEmptySequence();
-//        }
-//
-//        if (contextInfo.isParentless() && (axis == AxisInfo.PARENT || axis == AxisInfo.ANCESTOR)) {
-//            if (warnings) {
-//                visitor.issueWarning("The " + AxisInfo.axisName[axis] + " axis will never select anything because the context item is parentless",
-//                                     SaxonErrorCode.SXWN9037, getLocation());
-//            }
-//            return Literal.makeEmptySequence();
-//        }
-//
-//        // Test whether the axis ever selects a node of the right kind, when starting at this context node
-//        if (!targetUType.overlaps(testUType)) {
-//            if (warnings) {
-//                visitor.issueWarning("The " + AxisInfo.axisName[axis] + " axis starting at " +
-//                                             originUType.toStringWithIndefiniteArticle() + " will never select " +
-//                                             test.getUType().toStringWithIndefiniteArticle(),
-//                                     SaxonErrorCode.SXWN9037, getLocation());
-//            }
-//            return Literal.makeEmptySequence();
-//        }
-//
-//        // For an X-or-self axis, if X never selects anything, then substitute the self axis.
-//        int nonSelf = AxisInfo.excludeSelfAxis[axis];
-//        UType kind = test == null ? UType.XNODE : test.getUType();
-//        if (axis != nonSelf) {
-//            UType nonSelfTarget = AxisInfo.getTargetUType(originUType, nonSelf);
-//            if (!nonSelfTarget.overlaps(testUType)) {
-//                axis = AxisInfo.SELF;
-//                targetUType = AxisInfo.getTargetUType(originUType, axis);
-//            }
-//        }
-//
-//        ItemType target = targetUType.toItemType();
-//        if (test == null || test instanceof AnyXNodeType) {
-//            itemType = target;
-//        } else if (target instanceof AnyXNodeType || targetUType.subsumes(test.getUType())) {
-//            itemType = test;
-//        } else {
-//            itemType = new CombinedNodeTest((NodeTest) target, OperatorSymbol.INTERSECT, test);
-//        }
-//
-//        if (test != null) {
-//
-//            // If the content type of the context item is known, see whether the node test can select anything
-//
+        if (originUType == UType.JNODE) {
+            itemType = AnyJNodeType.getInstance();
+            return this;
+        }
+        UType targetUType = AxisInfo.getTargetUType(originUType, axis);
+        UType testUType = test == null ? UType.XNODE : test.getUType();
+        if (targetUType.equals(UType.VOID)) {
+            if (warnings) {
+                visitor.issueWarning("The " + AxisInfo.axisName[axis] + " axis starting at " +
+                                             originUType.toStringWithIndefiniteArticle() + " will never select anything",
+                                     SaxonErrorCode.SXWN9037, getLocation());
+            }
+            return Literal.makeEmptySequence();
+        }
+
+        if (contextInfo.isParentless() && (axis == AxisInfo.PARENT || axis == AxisInfo.ANCESTOR)) {
+            if (warnings) {
+                visitor.issueWarning("The " + AxisInfo.axisName[axis] + " axis will never select anything because the context item is parentless",
+                                     SaxonErrorCode.SXWN9037, getLocation());
+            }
+            return Literal.makeEmptySequence();
+        }
+
+        // Test whether the axis ever selects a node of the right kind, when starting at this context node
+        if (!targetUType.overlaps(testUType)) {
+            if (warnings) {
+                visitor.issueWarning("The " + AxisInfo.axisName[axis] + " axis starting at " +
+                                             originUType.toStringWithIndefiniteArticle() + " will never select " +
+                                             test.getUType().toStringWithIndefiniteArticle(),
+                                     SaxonErrorCode.SXWN9037, getLocation());
+            }
+            return Literal.makeEmptySequence();
+        }
+
+        // For an X-or-self axis, if X never selects anything, then substitute the self axis.
+        int nonSelf = AxisInfo.excludeSelfAxis[axis];
+        UType kind = test == null ? UType.XNODE : test.getUType();
+        if (axis != nonSelf) {
+            UType nonSelfTarget = AxisInfo.getTargetUType(originUType, nonSelf);
+            if (!nonSelfTarget.overlaps(testUType)) {
+                axis = AxisInfo.SELF;
+                targetUType = AxisInfo.getTargetUType(originUType, axis);
+            }
+        }
+
+        if (targetUType.overlaps(UType.XNODE) && testUType.overlaps(UType.JNODE)) {
+            // mixed XNodes and JNodes, give up unless we can simplify the test some other way
+            return this;
+        }
+
+        ItemType target = targetUType.toItemType();
+        if (test == null || test instanceof AnyXNodeType) {
+            itemType = target;
+        } else if (target instanceof AnyXNodeType || targetUType.subsumes(test.getUType())) {
+            itemType = test.getItemType();
+        } else {
+            itemType = new CombinedNodeTest((NodeTest) target, OperatorSymbol.INTERSECT, test).getItemType();
+        }
+
+        if (test != null) {
+
+            // If the content type of the context item is known, see whether the node test can select anything
+
 //            if (contextType instanceof DocumentNodeType && kind.equals(UType.ELEMENT)) {
 //                NodeTest elementTest = ((DocumentNodeType) contextType).getElementTest();
 //                Optional<IntSet> outermostElementNames = elementTest.getRequiredNodeNames();
@@ -378,10 +379,12 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
 //                // fast exit in non-schema-aware case
 //                return this;
 //            }
-//
-//            Optimizer opt = visitor.obtainOptimizer();
-//            return opt.checkAxisExprAgainstSchema(this, visitor, contextInfo, warnings);
-//        }
+
+            Optimizer opt = visitor.obtainOptimizer();
+            return opt.checkAxisExprAgainstSchema(this, visitor, contextInfo, warnings);
+        }
+        return this;
+    }
 
 
 
@@ -437,20 +440,12 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
      */
     @Override
     public double getCost() {
-        switch (axis) {
-            case AxisInfo.SELF:
-            case AxisInfo.PARENT:
-            case AxisInfo.ATTRIBUTE:
-                return 1;
-            case AxisInfo.CHILD:
-            case AxisInfo.FOLLOWING_SIBLING:
-            case AxisInfo.PRECEDING_SIBLING:
-            case AxisInfo.ANCESTOR:
-            case AxisInfo.ANCESTOR_OR_SELF:
-                return 5;
-            default:
-                return 20;
-        }
+        return switch (axis) {
+            case AxisInfo.SELF, AxisInfo.PARENT, AxisInfo.ATTRIBUTE -> 1;
+            case AxisInfo.CHILD, AxisInfo.FOLLOWING_SIBLING, AxisInfo.PRECEDING_SIBLING, AxisInfo.ANCESTOR,
+                 AxisInfo.ANCESTOR_OR_SELF -> 5;
+            default -> 20;
+        };
     }
 
     /**
@@ -548,7 +543,7 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
 
     /*@NotNull*/
     @Override
-    public final ItemType getItemType() {
+    public ItemType getItemType() {
         if (itemType != null) {
             return itemType;
         }
@@ -864,6 +859,10 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
             destination.emitAttribute("nodeTest", AlphaCode.fromItemType((ItemType) test));
         } else {
             destination.emitAttribute("nodeTest", test.export());
+        }
+        String schemaRole = getRetainedStaticContext().getImportedSchemaRoleName();
+        if (!schemaRole.isEmpty()) {
+            destination.emitAttribute("schemaRole", schemaRole);
         }
         destination.endElement();
     }

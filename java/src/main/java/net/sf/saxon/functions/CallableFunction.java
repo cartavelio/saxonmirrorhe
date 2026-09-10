@@ -31,6 +31,7 @@ public class CallableFunction extends AbstractFunction {
     private final FunctionItemType type;
     private AnnotationList annotations;
     private String description;
+    private String tag;
 
     public CallableFunction(SymbolicName.F name, CallableDelegate.Lambda callable, FunctionItemType type) {
         this.name = name;
@@ -46,6 +47,18 @@ public class CallableFunction extends AbstractFunction {
 
     public CallableFunction withDescription(String decription) {
         this.description = decription;
+        return this;
+    }
+
+    /**
+     * Set a tag identifying this callable function. A CallableFunction must be tagged if it is
+     * to be exported into a SEF file, and the tag must be known to the package loader so that
+     * import can succeed.
+     * @param tag the identifier for this callable function
+     * @return this same callable function, modified to add the supplied tag.
+     */
+    public CallableFunction withTag(String tag) {
+        this.tag = tag;
         return this;
     }
 
@@ -132,6 +145,12 @@ public class CallableFunction extends AbstractFunction {
      */
     @Override
     public void export(ExpressionPresenter out) {
-        throw new UnsupportedOperationException("A CallableFunction is a transient value that cannot be exported");
+        if (tag != null) {
+            out.startElement("callable");
+            out.emitAttribute("tag", tag);
+            out.endElement();
+        } else {
+            throw new UnsupportedOperationException("An untagged CallableFunction is a transient value that cannot be exported");
+        }
     }
 }

@@ -138,11 +138,11 @@ public class XSLMap extends StyleElement implements AutoDocumentInhibitor {
         return exp;
     }
 
-    private final static FunctionItem mapConstructorDuplicatesAction = new CallableFunction(
+    public final static CallableFunction mapConstructorDuplicatesAction = new CallableFunction(
             (context, arguments) -> {
                 throw new UncheckedXPathException("Duplicate key in xsl:map instruction", "XTDE3365");
             },
             new SpecificFunctionType(new SequenceType[]{}, SequenceType.ANY_SEQUENCE)
-    );
+    ).withTag("xslMapOnDuplicates");
 
 }

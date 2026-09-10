@@ -542,6 +542,10 @@ public class FixedElement extends ElementCreator {
             out.emitAttribute("namespaces", fsb.toString());
         }
         exportValidationAndType(out);
+        String schemaRole = getRetainedStaticContext().getImportedSchemaRoleName();
+        if (!schemaRole.isEmpty()) {
+            out.emitAttribute("schemaRole", schemaRole);
+        }
         getContentExpression().export(out);
         out.endElement();
     }

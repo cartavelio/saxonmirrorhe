@@ -480,6 +480,10 @@ public class Copy extends ElementCreator {
         out.emitAttribute("flags", flags);
         String sType = SequenceType.makeSequenceType(selectItemType, getCardinality()).toAlphaCode();
         out.emitAttribute("sit", sType);
+        String schemaRole = getRetainedStaticContext().getImportedSchemaRoleName();
+        if (!schemaRole.isEmpty()) {
+            out.emitAttribute("schemaRole", schemaRole);
+        }
         out.setChildRole("content");
         getContentExpression().export(out);
         out.endElement();

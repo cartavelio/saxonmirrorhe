@@ -524,7 +524,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             URI baseOut = new File(resultsDir + "/results/output.xml").toURI();
             String baseOutputURI = new File(resultsDir + "/results/output.xml").toURI().toString();
             if (outputUri.isPresent()) {
-                if (outputUri.get().equals("")) {
+                if (outputUri.get().isEmpty()) {
                     // special case for test current-output-uri-014: the spec says it's relative to the
                     // test-set location, but that would mean overwriting the test set!
                     String testSetUri = testCase.getBaseURI().toASCIIString();
@@ -587,7 +587,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
 
         Optional<XdmNode> assertion = testCase.select(
                 path(child("result"), child().where(isElement()))).asOptionalNode();
-        if (!assertion.isPresent()) {
+        if (assertion.isEmpty()) {
             noteFailure(testSetName, testName);
             resultsDoc.writeTestcaseElement(testName, "fail", "No test assertions found");
             return;
@@ -1169,7 +1169,6 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         return params.toArray(new XdmValue[0]);
     }
 
-    @SuppressWarnings({"ResultOfMethodCallIgnored"})
     protected void saveResultsToFile(String content, File file) {
         try {
             Query.createFileIfNecessary(file);

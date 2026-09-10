@@ -495,8 +495,12 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
         if (copyAccumulators) {
             fsb.append('m');
         }
-        if (fsb.length() != 0) {
+        if (!fsb.isEmpty()) {
             out.emitAttribute("flags", fsb.toString());
+        }
+        String schemaRole = getRetainedStaticContext().getImportedSchemaRoleName();
+        if (!schemaRole.isEmpty()) {
+            out.emitAttribute("schemaRole", schemaRole);
         }
         getSelect().export(out);
         out.endElement();

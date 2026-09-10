@@ -157,6 +157,7 @@ public class Configuration implements SourceResolver {
     protected IndependentContext staticContextForSystemFunctions;
 
     private String label = null;
+    private final MinimalSchema minimalSchema;
 
 
     private DocumentNumberAllocator documentNumberAllocator = new DocumentNumberAllocator();
@@ -247,6 +248,7 @@ public class Configuration implements SourceResolver {
      */
 
     public Configuration() {
+        minimalSchema = new MinimalSchema(this);
         init();
     }
 
@@ -3026,8 +3028,10 @@ public class Configuration implements SourceResolver {
      * @return an empty schema containing only the built-in components.
      */
     public Schema emptySchema() {
-        return new MinimalSchema(this);
+        return minimalSchema;
     }
+    
+
 
     /**
      * Throw an error indicating that a request cannot be satisfied because it requires

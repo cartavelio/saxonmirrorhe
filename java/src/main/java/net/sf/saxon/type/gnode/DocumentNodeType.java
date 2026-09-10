@@ -67,7 +67,7 @@ public class DocumentNodeType extends XNodeType {
      */
     @Override
     public String getBasicAlphaCode() {
-        return null;
+        return "ND";
     }
 
     /**

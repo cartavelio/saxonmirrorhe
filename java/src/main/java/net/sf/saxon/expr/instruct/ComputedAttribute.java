@@ -488,6 +488,10 @@ public final class ComputedAttribute extends AttributeCreator {
             out.setChildRole("namespace");
             getNamespaceExp().export(out);
         }
+        String schemaRole = getRetainedStaticContext().getImportedSchemaRoleName();
+        if (!schemaRole.isEmpty()) {
+            out.emitAttribute("schemaRole", schemaRole);
+        }
         out.setChildRole("select");
         getSelect().export(out);
         out.endElement();

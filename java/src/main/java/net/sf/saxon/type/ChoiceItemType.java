@@ -7,6 +7,7 @@
 
 package net.sf.saxon.type;
 
+import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.pattern.MultipleNodeKindTest;
@@ -257,6 +258,8 @@ public class ChoiceItemType implements ItemType, ChoiceType {
         for (ItemType member : memberTypes) {
             if (member instanceof NodeKindType kind) {
                 combined = combined.union(kind.getUType());
+            } else if (member instanceof AnyJNodeType) {
+                combined = combined.union(UType.JNODE);
             } else {
                 return null;
             }

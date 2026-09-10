@@ -4471,12 +4471,12 @@ public class XPathParser {
 
     }
 
-    private final static FunctionItem mapConstructorDuplicatesAction = new CallableFunction(
+    public final static CallableFunction mapConstructorDuplicatesAction = new CallableFunction(
             (context, arguments) -> {
                 throw new UncheckedXPathException("Duplicate key in map constructor", "XQDY0137");
             },
             new SpecificFunctionType(new SequenceType[]{}, SequenceType.ANY_SEQUENCE)
-    );
+    ).withTag("onDuplicatesFail");
 
     /**
      * Parse a "square" array constructor

@@ -287,6 +287,10 @@ public class DocumentInstr extends ParentNodeConstructor {
         if (schemaType != null) {
             out.emitAttribute("type", schemaType.getStructuredQName());
         }
+        String schemaRole = getRetainedStaticContext().getImportedSchemaRoleName();
+        if (!schemaRole.isEmpty()) {
+            out.emitAttribute("schemaRole", schemaRole);
+        }
         getContentExpression().export(out);
         out.endElement();
     }

@@ -249,8 +249,12 @@ public final class EvaluateInstr extends Expression {
         if (!SequenceType.ANY_SEQUENCE.equals(requiredType)) {
             out.emitAttribute("as", requiredType.toAlphaCode());
         }
-        if(defaultXPathNamespace != null) {
+        if (defaultXPathNamespace != null) {
             out.emitAttribute("dxns", defaultXPathNamespace.toString());
+        }
+        String schemaRole = getRetainedStaticContext().getImportedSchemaRoleName();
+        if (!schemaRole.isEmpty()) {
+            out.emitAttribute("schemaRole", schemaRole);
         }
         out.setChildRole("xpath");
         getXpath().export(out);

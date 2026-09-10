@@ -471,6 +471,10 @@ public class ComputedElement extends ElementCreator {
             out.setChildRole("namespace");
             getNamespaceExp().export(out);
         }
+        String schemaRole = getRetainedStaticContext().getImportedSchemaRoleName();
+        if (!schemaRole.isEmpty()) {
+            out.emitAttribute("schemaRole", schemaRole);
+        }
         out.setChildRole("content");
         getContentExpression().export(out);
         out.endElement();

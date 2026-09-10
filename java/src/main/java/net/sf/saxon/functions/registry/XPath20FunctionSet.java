@@ -372,10 +372,6 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
 
         register("normalize-space", 0, e -> e.populate(() -> new ContextItemAccessorFunction.StringAccessor(), BuiltInAtomicType.STRING, ONE, CITEM | LATE));
 
-
-        //register("normalize-space", 1, NormalizeSpace_1.class, BuiltInAtomicType.STRING, ONE, 0)
-          //      .arg(0, BuiltInAtomicType.STRING, OPT, null);
-
         register("normalize-space", 1, e -> e.populate(NormalizeSpace_1::new, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null));
 
