@@ -190,7 +190,7 @@ public class XSLSourceDocument extends StyleElement {
         }
         parseOptions = parseOptions.withApplicableAccumulators(accumulators);
         Expression action = compileSequenceConstructor(exec, decl, false);
-        if (action == null) {
+        if (action == null || Literal.isEmptySequence(action))  {
             // body of xsl:source-document is empty: it's a no-op.
             return Literal.makeEmptySequence();
         }
