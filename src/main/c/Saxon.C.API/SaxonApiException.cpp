@@ -73,7 +73,6 @@ SaxonApiException::SaxonApiException(const char * m){
         lineNumber = linenumber;
 
         if (ec != nullptr) {
-            //errorCode = (char *)ec;
             size_t destination_size = strlen(ec);
             errorCode = (char *)malloc(sizeof(char)*destination_size);
             snprintf(errorCode, destination_size, "%s", ec);
@@ -84,8 +83,7 @@ SaxonApiException::SaxonApiException(const char * m){
         }
 
         if(sysId != nullptr) {
-            //systemId = (char *)sysId;
-            size_t destination_size = strlen(ec);
+            size_t destination_size = strlen(sysId);
             systemId = (char *)malloc(sizeof(char)*destination_size);
             snprintf(systemId, destination_size, "%s", sysId);
         } else {
