@@ -295,7 +295,8 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
                 Expression select = sourceBinding.getSelectExpression();
                 inst.setBody(select);
 
-                if (compilation.getCompilerInfo().getCodeInjector() != null) {
+                if (compilation.getCompilerInfo().getCodeInjector() != null && select != null) {
+                    // select==null happens when the variable is abstract: bug 6378
                     compilation.getCompilerInfo().getCodeInjector().process(inst);
                 }
             }
