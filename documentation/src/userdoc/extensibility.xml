@@ -911,9 +911,11 @@ for $i in 1 to 10 return eg:shift-left(2, $i)]]></code></pre>
     { double:MAX_VALUE() } 
 </a>]]></code></pre>
 
-      <p>This will output the value of the static field <code>java.lang.Double#MAX_VALUE</code>. (In
-        practice, it is better to declare the namespace in the query prolog, because it will then
-        not be copied to the result tree.)</p>
+      <p>This will output the value of the static field <code>java.lang.Double#MAX_VALUE</code>.</p>
+        
+        <p>It is possible to avoid the namespace declaration by writing the function call as
+          <code>Q{java:java.lang.Math}sqrt($arg)</code>. This avoids the problem of declared namespaces
+        appearing in the result tree.</p>
 
       <p>A static Java method called as an extension function may have an extra first argument of
         class <a class="javalink" href="net.sf.saxon.expr.XPathContext"
