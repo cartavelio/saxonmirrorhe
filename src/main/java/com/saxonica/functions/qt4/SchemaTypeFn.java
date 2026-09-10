@@ -125,6 +125,12 @@ public class SchemaTypeFn extends SystemFunction {
         }
         result.initialPut("variety", new StringValue(variety));  // TODO: should be an enum type
 
+        if (st.isComplexType() && ((ComplexType) st).isSimpleContent()) {
+            SimpleLazyFunction fn = new SimpleLazyFunction(() -> makeSchemaRecord(((ComplexType) st).getSimpleContentType()),
+                                                           SequenceType.one(schemaTypeRecord));
+            result.initialPut("simple-content-type", fn);
+        }
+
         if (st.isAtomicType() && !st.isSameType(BuiltInAtomicType.ANY_ATOMIC)) {
             AtomicType prim = ((AtomicType) st).getPrimitiveAtomicType();
             // This might not be truly primitive, for example it might be xs:integer
