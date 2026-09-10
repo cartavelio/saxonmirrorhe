@@ -18,7 +18,7 @@ import net.sf.saxon.value.Cardinality;
 
 import java.util.List;
 
-public class VariableReferenceAdjunct extends StreamingAdjunct {
+public class VariableReferenceAdjunct extends CopyOfAdjunct {
 
     /**
      * Convert this expression to a streaming pattern (a pattern used internally to match nodes during
