@@ -349,7 +349,7 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
             return new SimpleStepExpression(getSelect(), getAction());
         }
 
-        // Rewrite (1 to $N) ! (. + $M) as ($N to $N + $M)
+        // Rewrite (1 to $N) ! (. + $M) as (1 + $M to $N + $M)
         if (getSelect() instanceof RangeExpression && isSimpleArithmeticShift(getAction())) {
             ArithmeticExpression arith = (ArithmeticExpression) getAction();
 
@@ -367,7 +367,7 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
         }
 
 
-        // Rewrite (1 to 1000) ! (. + $N) as ($N to 1000 + $N)
+        // Rewrite (1 to 1000) ! (. + $N) as (1 + $N to 1000 + $N)
         if (getSelect() instanceof Literal
                 && ((Literal)getSelect()).getGroundedValue() instanceof IntegerRange
                 &&  isSimpleArithmeticShift(getAction())
@@ -417,6 +417,9 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
             return false;
         }
         if (!(arith.getRhsExpression() instanceof Literal || arith.getRhsExpression() instanceof VariableReference)) {
+            return false;
+        }
+        if (arith.getRhsExpression().getItemType() != BuiltInAtomicType.INTEGER) {
             return false;
         }
         return true;
