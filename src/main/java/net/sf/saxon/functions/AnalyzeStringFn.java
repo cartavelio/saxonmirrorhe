@@ -106,6 +106,9 @@ public class AnalyzeStringFn extends RegexFunction {
             init(context.getConfiguration(), schemaAware);
         }
         //#endif
+        //#if EE==false
+        init(context.getConfiguration(), false);
+        //#endif
 
         final Builder builder = context.getController().makeBuilder();
         final ComplexContentOutputter out = new ComplexContentOutputter(builder);
