@@ -24,14 +24,19 @@ namespace Saxon.Impl.Helpers {
 
         public static byte[] encode(string s, string encodingName) {
             Encoding encoding;
-            if (stringEqualsIgnoreCase(encodingName, "utf-16")) {
-                // .NET interprets utf-16 as little-endian by default. And we have to add the BOM by hand
-                s = BOM + s;
-                encoding  = System.Text.Encoding.GetEncoding("UTF-16BE", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
-                ;
+            try {
+                if (stringEqualsIgnoreCase(encodingName, "utf-16")) {
+                    // .NET interprets utf-16 as little-endian by default. And we have to add the BOM by hand
+                    s = BOM + s;
+                    encoding  = Encoding.GetEncoding("UTF-16BE", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
+                    ;
+                }
+                else {
+                    encoding = Encoding.GetEncoding(encodingName, EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
+                }
             }
-            else {
-                encoding = System.Text.Encoding.GetEncoding(encodingName, EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
+            catch (System.ArgumentException e) {
+                throw new XPathException("Unsupported encoding " + encodingName, e);
             }
             try {
                 return encoding.GetBytes(s);
