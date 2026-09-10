@@ -117,6 +117,10 @@ namespace Saxon.Impl.Dom {
             return node.Name;
         }
 
+        NamespaceUri NodeInfo.getNamespaceUri() {
+            return getNodeKind() == Type.ELEMENT ? NamespaceUri.XHTML : NamespaceUri.NULL;
+        }
+
         public override string getURI() {
             return getNodeKind() == Type.ELEMENT ? NamespaceConstant.XHTML : "";
         }
