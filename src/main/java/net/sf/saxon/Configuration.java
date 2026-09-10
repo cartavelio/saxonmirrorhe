@@ -191,9 +191,7 @@ public class Configuration implements SourceResolver, NotationSet {
     private final TypeChecker typeChecker = new TypeChecker();
     private final TypeChecker10 typeChecker10 = new TypeChecker10();
 
-    //#if CSHARP==false
     private transient CommonResourceResolver commonResolver;
-    //#endif
     private transient URIResolver uriResolver;
     protected FunctionLibraryList builtInExtensionLibraryList;
     protected int xsdVersion = XSD11;
@@ -388,10 +386,8 @@ public class Configuration implements SourceResolver, NotationSet {
         // There's a temptation to be lazy about instantiating the catalog resolver, but we want
         // to make sure that if someone subsequently overrides, for example, the URIResolver,
         // that their override wins.
-        
-        //#if CSHARP==false
+
         commonResolver = new CatalogResourceResolver();
-        //#endif
         defaultXsltCompilerInfo = makeCompilerInfo();
         systemURIResolver = new StandardURIResolver(this);
         standardModuleURIResolver = Version.platform.makeStandardModuleURIResolver(this);
@@ -748,7 +744,7 @@ public class Configuration implements SourceResolver, NotationSet {
         return this.allowedUriTest;
     }
 
-    //#if CSHARP==false
+
     /**
      * Set the resource resolver to be used in this configuration. Setting the resource
      * resolver automatically makes it the URI resolver for this configuration and the default
@@ -759,7 +755,9 @@ public class Configuration implements SourceResolver, NotationSet {
     public void setCommonResourceResolver(CommonResourceResolver resolver) {
         commonResolver = resolver;
         defaultXsltCompilerInfo.setCommonResourceResolver(resolver);
+        //#if CSHARP==false
         setURIResolver(commonResolver);
+        //#endif
     }
 
     /**
@@ -775,7 +773,6 @@ public class Configuration implements SourceResolver, NotationSet {
         }
         return commonResolver;
     }
-    //#endif
 
     /**
      * Get the URIResolver used in this configuration

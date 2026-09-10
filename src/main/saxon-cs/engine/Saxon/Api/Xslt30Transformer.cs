@@ -561,7 +561,9 @@ namespace Saxon.Api {
         /// invocation uses any initial mode set using <see cref="InitialMode"/>,
         /// and any template parameters set using <see cref="SetInitialTemplateParameters"/>.
         /// </summary>
-        /// <param name="input">The source document, encapsulated by an <c>XmlReader</c>.</param>
+        /// <param name="input">The source document, encapsulated by an <c>XmlReader</c>.
+        /// Saxon will not change any property settings on the <c>XmlReader</c> (for example,
+        /// it will not reset its <c>XmlResolver</c> property.)</param>
         /// <param name="destination">The destination of the result document produced by wrapping the result 
         /// of the apply-templates call in a document node.  If the destination is a <see cref="Serializer"/>, 
         /// then the serialization parameters set in the serializer are combined with those defined in the 
@@ -579,7 +581,9 @@ namespace Saxon.Api {
         /// invocation uses any initial mode set using <see cref="InitialMode"/>,
         /// and any template parameters set using <see cref="SetInitialTemplateParameters"/>.
         /// </summary>
-        /// <param name="input">The source document, encapsulated by an <c>XmlReader</c>.</param>
+        /// <param name="input">The source document, encapsulated by an <c>XmlReader</c>.
+        /// Saxon will not change any property settings on the <c>XmlReader</c> (for example,
+        /// it will not reset its <c>XmlResolver</c> property.)</param>
         /// <returns>the raw result of applying templates to the supplied selection value, without wrapping in
         /// a document node or serializing the result. If there is more than one item in the selection, the result
         /// is the concatenation of the results of applying templates to each item in turn.</returns>

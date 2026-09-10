@@ -399,13 +399,15 @@ namespace Saxon.Impl.Helpers {
                 // }
                 //Console.WriteLine("Parsing " + source.getSystemId());
                 
-                XmlReaderSettings settings = new XmlReaderSettings();
-                settings.DtdProcessing = DtdProcessing.Parse;
-                settings.MaxCharactersFromEntities = 100000; // TODO: configurable entity expansion limit
-                if (source.getSystemId() != null) {
-                    settings.XmlResolver =
-                        new TracingXmlResolver(new Uri(source.getSystemId(), UriKind.RelativeOrAbsolute));
-                }
+                XmlReaderSettings settings = new XmlReaderSettings() {
+                    DtdProcessing = DtdProcessing.Parse,
+                    MaxCharactersFromEntities = 100000,
+                    XmlResolver = config.getCommonResourceResolver()
+                };
+                // if (source.getSystemId() != null) {
+                //     settings.XmlResolver =
+                //         new TracingXmlResolver(new Uri(source.getSystemId(), UriKind.RelativeOrAbsolute));
+                // }
 
                 XmlReader xmlReader = null;
                 if (inputStream != null) {
@@ -449,14 +451,19 @@ namespace Saxon.Impl.Helpers {
                     }
                     else {
                         Uri uri = new Uri(sysId);
-                        URIResolver ur = config.getURIResolver();
-                        if (ur is StandardURIResolver) {
-                            XmlResolver xr = ((StandardURIResolver) ur).getXmlResolver();
-                            object o = xr.GetEntity(uri, "xml", typeof(Stream));
-                            if (o is Stream) {
-                                xmlReader = XmlReader.Create((Stream) o, settings);
-                            }
+                        CommonResourceResolver crr = config.getCommonResourceResolver();
+                        object o = crr.GetEntity(uri, "xml", typeof(Stream));
+                        if (o is Stream) {
+                            xmlReader = XmlReader.Create((Stream) o, settings);
                         }
+                        // URIResolver ur = config.getURIResolver();
+                        // if (ur is StandardURIResolver) {
+                        //     XmlResolver xr = ((StandardURIResolver) ur).getXmlResolver();
+                        //     object o = xr.GetEntity(uri, "xml", typeof(Stream));
+                        //     if (o is Stream) {
+                        //         xmlReader = XmlReader.Create((Stream) o, settings);
+                        //     }
+                        // }
                     }
                     
                 }

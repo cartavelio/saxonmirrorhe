@@ -96,10 +96,9 @@ public class Transform {
         //#if CSHARP==false
         options.addRecognizedOption("a", CommandLineOptions.TYPE_BOOLEAN,
                                     "Use <?xml-stylesheet?> processing instruction to identify stylesheet");
-
+        //#endif
         options.addRecognizedOption("catalog", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Use specified catalog file to resolve URIs");
-        //#endif
         options.addRecognizedOption("config", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Use specified configuration file");
         //#if CSHARP==false
@@ -543,11 +542,13 @@ public class Transform {
                 }
             }
 
+            //#if CSHARP==false
             value = options.getOptionValue("TB");
             if (value != null) {
                 // Trace hotspot byte code generation and produce a report.
                 config.setBooleanProperty(Feature.MONITOR_HOT_SPOT_BYTE_CODE, true);
             }
+            //#endif
 
             //#if CSHARP==false
             value = options.getOptionValue("TP");

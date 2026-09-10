@@ -37,9 +37,7 @@ public class CompilerInfo {
 
     private Configuration config;
     private URIResolver uriResolver;
-    //#if CSHARP==false
     private CommonResourceResolver commonResourceResolver;
-    //#endif
     private ErrorReporter errorReporter = new StandardErrorReporter();
     private CodeInjector codeInjector;
     private int recoveryPolicy = Mode.RECOVER_WITH_WARNINGS;
@@ -170,7 +168,6 @@ public class CompilerInfo {
         uriResolver = resolver;
     }
 
-    //#if CSHARP==false
     /**
      * Set the resource resolver to be used when resolving external identifiers and URIs.
      *
@@ -182,7 +179,6 @@ public class CompilerInfo {
     public void setCommonResourceResolver(CommonResourceResolver resolver) {
         commonResourceResolver = resolver;
     }
-    //#endif
 
     /**
      * Set the value of a stylesheet parameter. Static (compile-time) parameters must be provided using
