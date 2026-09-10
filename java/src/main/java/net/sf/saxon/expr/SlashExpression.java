@@ -33,12 +33,14 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.coercion.JNodeSequenceConverter;
 import net.sf.saxon.type.coercion.SequenceCoercer;
 import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.type.gnode.NodeKindType;
+import net.sf.saxon.type.gnode.XNodeType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
@@ -1197,6 +1199,15 @@ public class SlashExpression extends BinaryExpression
             if (expr.contextFree && expr.getStep() instanceof AxisExpression step) {
                 return context -> MappingIterator.map(select.iterate(context), item -> step.iterate((GNode) item));
             }
+            if (expr.getStart().getItemType() instanceof XNodeType) {
+                PullEvaluator action = expr.getStep().makeElaborator().elaborateForPull();
+                ContextMappingFunction mapper = CSharp.methodRef(action::iterate);
+                return context -> {
+                    XPathContextMinor c2 = context.newMinorContext();
+                    c2.trackFocus(select.iterate(context));
+                    return new ContextMappingIterator(mapper, c2);
+                };
+            }
             if (ExpressionTool.dependsOnFocus(expr.getStep())) {
                 PullEvaluator action = expr.getStep().makeElaborator().elaborateForPull();
                 boolean isNavigational = expr.getStep().isNavigational();
@@ -1277,6 +1288,7 @@ public class SlashExpression extends BinaryExpression
                     return null;
                 };
             } else {
+                // TODO: handle semantics for JNodes
                 return (out, context) -> {
                     XPathContextMinor c2 = context.newMinorContext();
                     FocusIterator iter = c2.trackFocus(select.iterate(context));
