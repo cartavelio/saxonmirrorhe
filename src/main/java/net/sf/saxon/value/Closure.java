@@ -12,7 +12,6 @@ import net.sf.saxon.expr.elab.LearningEvaluator;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.om.*;
-import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ManualIterator;
@@ -78,7 +77,7 @@ public abstract class Closure implements Sequence, ContextOriginator {
 
         // We only copy the local variables if the expression has dependencies on local variables.
         // What's more, we only copy those variables that the expression actually depends on.
-        Instrumentation.count("Closure.saveContext()");
+        //Instrumentation.count("Closure.saveContext()");
         if ((expression.getDependencies() & StaticProperty.DEPENDS_ON_LOCAL_VARIABLES) != 0) {
             StackFrame localStackFrame = context.getStackFrame();
             Sequence[] local = localStackFrame.getStackFrameValues();

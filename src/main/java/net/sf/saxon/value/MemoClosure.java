@@ -13,7 +13,6 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.om.*;
-import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.GroundedIterator;
@@ -58,7 +57,7 @@ public class MemoClosure extends Closure implements ContextOriginator {
 
 
     public MemoClosure(Expression expr, PullEvaluator inputEvaluator, XPathContext context) throws XPathException {
-        Instrumentation.count("MemoClosure(X)");
+        //Instrumentation.count("MemoClosure(X)");
         setInputEvaluator(inputEvaluator);
         XPathContextMajor c2 = context.newContext();
         c2.setOrigin(this);
@@ -67,7 +66,7 @@ public class MemoClosure extends Closure implements ContextOriginator {
     }
 
     public MemoClosure(Expression expr, XPathContext context) throws XPathException {
-        Instrumentation.count("MemoClosure(X)");
+        //Instrumentation.count("MemoClosure(X)");
         setInputEvaluator(expr.makeElaborator().elaborateForPull());
         XPathContextMajor c2 = context.newContext();
         c2.setOrigin(this);
