@@ -417,6 +417,8 @@
             designed (like the <code>saxon:do</code> instruction) for evaluating expressions that have side-effects,
             such as functions in the EXPath file module.</p></li>
             <li><p>The new <code>fn:all()</code> function is renamed <code>fn:every()</code>.</p></li>
+            <li><p>The <code>fn:transitive-closure()</code> function is completely redesigned according
+            to the latest draft specification.</p></li>
             <li><p>The new <code>map:of()</code> function is renamed <code>map:of-pairs()</code>.</p></li>
             <li><p>The new <code>array:of()</code> function is renamed <code>array:of-members()</code>.</p></li>
             <li><p>Implemented <code>array:split()</code>, and <code>map:pair()</code>.</p></li>
