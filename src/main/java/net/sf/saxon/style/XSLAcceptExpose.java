@@ -39,7 +39,7 @@ public abstract class XSLAcceptExpose extends StyleElement {
         return explicitComponentTests;
     }
 
-    public Set<ComponentTest> getWildcardComponentTests() throws XPathException {
+    public Set<ComponentTest> getWildcardComponentTests() {
         prepareAttributes();
         return wildcardComponentTests;
     }
