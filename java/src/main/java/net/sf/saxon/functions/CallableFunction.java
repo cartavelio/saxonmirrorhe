@@ -28,7 +28,7 @@ public class CallableFunction extends AbstractFunction {
 
     private final CallableDelegate.Lambda callable;
     private final SymbolicName.F name;
-    private FunctionItemType type;
+    private final FunctionItemType type;
     private AnnotationList annotations;
     private String description;
 
@@ -56,21 +56,6 @@ public class CallableFunction extends AbstractFunction {
      */
     @Override
     public FunctionItemType getFunctionItemType() {
-//        if (type == AnyFunctionType.getInstance() && callable instanceof XQueryFunctionLibrary.UnresolvedCallable) {
-//            UserFunction uf = ((XQueryFunctionLibrary.UnresolvedCallable) callable).getFunction();
-//            if (uf != null) {
-//                // the previously unresolved function reference is now resolved
-//                if (uf.isVariadic()) {
-//                    SequenceType[] argTypes = new SequenceType[getArity()];
-//                    int last = uf.getArity() - 1;
-//                    System.arraycopy(uf.getFunctionItemType().getArgumentTypes(), 0, argTypes, 0, last);
-//                    SequenceType lastArgType = uf.getFunctionItemType().getArgumentTypes()[last];
-//                    Arrays.fill(argTypes, last, argTypes.length, lastArgType);
-//                    return new SpecificFunctionType(argTypes, uf.getResultType());
-//                }
-//                type = uf.getFunctionItemType();
-//            }
-//        }
         return type;
     }
 
