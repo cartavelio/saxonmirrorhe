@@ -260,13 +260,18 @@ public class JavaPlatform implements Platform {
     @Override
     public XMLReader loadParser() {
         XMLReader parser;
+        if (saxParserFactory == null) {
+            saxParserFactory = SAXParserFactory.newInstance();
+        }
         try {
-            parser = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
+            parser = saxParserFactory.newSAXParser().getXMLReader();
         } catch (ParserConfigurationException | SAXException err) {
             throw new TransformerFactoryConfigurationError(err);
         }
         return parser;
     }
+
+    private static SAXParserFactory saxParserFactory;
 
     /**
      * Get a parser suitable for parsing XML fragments
