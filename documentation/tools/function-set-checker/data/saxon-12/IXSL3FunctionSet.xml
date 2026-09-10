@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<registry id="com.saxonica.ee.extfn.js.IXSL3FunctionSet"
+          pulled="2026-04-23T21:37:00+01:00"
+          name="IXSL 3.0 Function Set"
+          catalog="saxon">
+   <function prefix="ixsl"
+             local-name="abort-controller"
+             name="ixsl:abort-controller"/>
+   <function prefix="ixsl" local-name="all" name="ixsl:all"/>
+   <function prefix="ixsl" local-name="all-settled" name="ixsl:all-settled"/>
+   <function prefix="ixsl" local-name="any" name="ixsl:any"/>
+   <function prefix="ixsl" local-name="apply" name="ixsl:apply"/>
+   <function prefix="ixsl" local-name="call" name="ixsl:call"/>
+   <function prefix="ixsl" local-name="catch" name="ixsl:catch"/>
+   <function prefix="ixsl" local-name="doc" name="ixsl:doc"/>
+   <function prefix="ixsl" local-name="doc-fetched" name="ixsl:doc-fetched"/>
+   <function prefix="ixsl" local-name="eval" name="ixsl:eval"/>
+   <function prefix="ixsl" local-name="finally" name="ixsl:finally"/>
+   <function prefix="ixsl" local-name="get" name="ixsl:get"/>
+   <function prefix="ixsl" local-name="http-request" name="ixsl:http-request"/>
+   <function prefix="ixsl" local-name="json-doc" name="ixsl:json-doc"/>
+   <function prefix="ixsl" local-name="json-parse" name="ixsl:json-parse"/>
+   <function prefix="ixsl" local-name="new" name="ixsl:new"/>
+   <function prefix="ixsl" local-name="race" name="ixsl:race"/>
+   <function prefix="ixsl" local-name="resolve" name="ixsl:resolve"/>
+   <function prefix="ixsl" local-name="set-property" name="ixsl:set-property"/>
+   <function prefix="ixsl" local-name="sleep" name="ixsl:sleep"/>
+   <function prefix="ixsl" local-name="then" name="ixsl:then"/>
+   <function prefix="ixsl" local-name="unparsed-text" name="ixsl:unparsed-text"/>
+   <function prefix="ixsl"
+             local-name="unparsed-text-fetched"
+             name="ixsl:unparsed-text-fetched"/>
+</registry>

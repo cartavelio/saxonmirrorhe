@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="../../schemas/simplified_catalog.rnc" type="application/relax-ng-compact-syntax" ?>
+<catalog spec="saxon" version="13.0" maintained-by="Saxonica" />

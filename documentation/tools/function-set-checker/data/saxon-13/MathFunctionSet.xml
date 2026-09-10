@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<registry id="net.sf.saxon.functions.MathFunctionSet"
+          pulled="2026-04-23T22:15:00+01:00"
+          name="Math Function Set"
+          catalog="xpath">
+   <function prefix="math" local-name="pi" name="math:pi"/>
+   <function prefix="math" local-name="sin" name="math:sin"/>
+   <function prefix="math" local-name="cos" name="math:cos"/>
+   <function prefix="math" local-name="tan" name="math:tan"/>
+   <function prefix="math" local-name="asin" name="math:asin"/>
+   <function prefix="math" local-name="acos" name="math:acos"/>
+   <function prefix="math" local-name="atan" name="math:atan"/>
+   <function prefix="math" local-name="sqrt" name="math:sqrt"/>
+   <function prefix="math" local-name="log" name="math:log"/>
+   <function prefix="math" local-name="log10" name="math:log10"/>
+   <function prefix="math" local-name="exp" name="math:exp"/>
+   <function prefix="math" local-name="exp10" name="math:exp10"/>
+   <function prefix="math" local-name="pow" name="math:pow"/>
+   <function prefix="math" local-name="atan2" name="math:atan2"/>
+   <function prefix="math" local-name="e" name="math:e"/>
+   <function prefix="math" local-name="sinh" name="math:sinh"/>
+   <function prefix="math" local-name="cosh" name="math:cosh"/>
+   <function prefix="math" local-name="tanh" name="math:tanh"/>
+</registry>

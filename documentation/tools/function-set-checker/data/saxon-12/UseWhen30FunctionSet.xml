@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<registry id="net.sf.saxon.functions.registry.UseWhen30FunctionSet"
+          pulled="2026-04-23T21:37:00+01:00"
+          name="Use When 3.0 Function Set"
+          catalog="xpath">
+   <function prefix="fn"
+             local-name="available-system-properties"
+             name="fn:available-system-properties"/>
+   <function prefix="fn"
+             local-name="element-available"
+             name="fn:element-available"/>
+   <function prefix="fn"
+             local-name="function-available"
+             name="fn:function-available"/>
+   <function prefix="fn" local-name="system-property" name="fn:system-property"/>
+   <function prefix="fn" local-name="type-available" name="fn:type-available"/>
+</registry>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<registry id="com.saxonica.ee.extfn.VendorFunctionSetEE"
+          pulled="2026-04-23T22:15:00+01:00"
+          name="EE Vendor Function Set"
+          catalog="saxon">
+   <function prefix="saxon" local-name="schema" name="saxon:schema"/>
+   <function prefix="saxon" local-name="stream" name="saxon:stream"/>
+   <function prefix="saxon" local-name="validate" name="saxon:validate"/>
+   <function prefix="saxon" local-name="type" name="saxon:type"/>
+   <function prefix="saxon"
+             local-name="compile-XPath"
+             name="saxon:compile-XPath"/>
+   <function prefix="saxon" local-name="marshal-type" name="saxon:marshal-type"/>
+   <function prefix="saxon"
+             local-name="parse-sequence-type"
+             name="saxon:parse-sequence-type"/>
+</registry>

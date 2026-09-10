@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="../../schemas/simplified_catalog.rnc" type="application/relax-ng-compact-syntax" ?>
+<catalog spec="xslt" version="4.0" maintained-by="QT4 CG">
+   <function prefix="fn" local-name="apply-templates" name="fn:apply-templates">
+      <signature>
+         <args total="2" required="0" default="1"/>
+      </signature>
+   </function>
+   <function prefix="fn" local-name="current" name="fn:current">
+      <signature>
+         <args total="0" required="0" default="1"/>
+      </signature>
+   </function>
+   <function prefix="fn" local-name="current-group" name="fn:current-group">
+      <signature>
+         <args total="0" required="0" default="1"/>
+      </signature>
+   </function>
+   <function prefix="fn"
+             local-name="current-grouping-key"
+             name="fn:current-grouping-key">
+      <signature>
+         <args total="0" required="0" default="1"/>
+      </signature>
+   </function>
+   <function prefix="fn"
+             local-name="current-merge-group"
+             name="fn:current-merge-group">
+      <signature>
+         <args total="1" required="0" default="1"/>
+      </signature>
+   </function>
+   <function prefix="fn"
+             local-name="current-merge-key-array"
+             name="fn:current-merge-key-array">
+      <signature>
+         <args total="0" required="0" default="1"/>
+      </signature>
+   </function>
+   <function prefix="fn"
+             local-name="current-merge-key"
+             name="fn:current-merge-key">
+      <signature>
+         <args total="0" required="0" default="1"/>
+      </signature>
+   </function>
+   <function prefix="fn"
+             local-name="current-output-uri"
+             name="fn:current-output-uri">
+      <signature>
+         <args total="0" required="0" default="1"/>
+      </signature>
+   </function>
+   <function prefix="fn" local-name="regex-groups" name="fn:regex-groups">
+      <signature>
+         <args total="0" required="0" default="1"/>
+      </signature>
+   </function>
+   <function prefix="fn" local-name="regex-group" name="fn:regex-group">
+      <signature>
+         <args total="1" required="1" default="1"/>
+      </signature>
+   </function>
+   <function prefix="fn" local-name="copy-of" name="fn:copy-of">
+      <signature>
+         <args total="1" required="0" default="1"/>
+      </signature>
+   </function>
+   <function prefix="fn" local-name="snapshot" name="fn:snapshot">
+      <signature>
+         <args total="1" required="0" default="1"/>
+      </signature>
+   </function>
+   <function prefix="fn" local-name="document" name="fn:document">
+      <signature>
+         <args total="2" required="0" default="1"/>
+      </signature>
+   </function>
+   <function prefix="fn"
+             local-name="unparsed-entity-uri"
+             name="fn:unparsed-entity-uri">
+      <signature>
+         <args total="2" required="2" default="1"/>
+      </signature>
+   </function>
+   <function prefix="fn"
+             local-name="unparsed-entity-public-id"
+             name="fn:unparsed-entity-public-id">
+      <signature>
+         <args total="2" required="2" default="1"/>
+      </signature>
+   </function>
+   <function prefix="fn" local-name="key" name="fn:key">
+      <signature>
+         <args total="3" required="2" default="1"/>
+      </signature>
+   </function>
+   <function prefix="fn" local-name="map-for-key" name="fn:map-for-key">
+      <signature>
+         <args total="2" required="2" default="1"/>
+      </signature>
+   </function>
+   <function prefix="fn" local-name="character-map" name="fn:character-map">
+      <signature>
+         <args total="1" required="1" default="1"/>
+      </signature>
+   </function>
+   <function prefix="fn" local-name="system-property" name="fn:system-property">
+      <signature>
+         <args total="1" required="1" default="1"/>
+      </signature>
+   </function>
+   <function prefix="fn"
+             local-name="available-system-properties"
+             name="fn:available-system-properties">
+      <signature>
+         <args total="0" required="0" default="1"/>
+      </signature>
+   </function>
+   <function prefix="fn"
+             local-name="function-available"
+             name="fn:function-available">
+      <signature>
+         <args total="2" required="1" default="1"/>
+      </signature>
+   </function>
+   <function prefix="fn"
+             local-name="element-available"
+             name="fn:element-available">
+      <signature>
+         <args total="1" required="1" default="1"/>
+      </signature>
+   </function>
+   <function prefix="fn" local-name="type-available" name="fn:type-available">
+      <signature>
+         <args total="1" required="1" default="1"/>
+      </signature>
+   </function>
+   <function prefix="fn"
+             local-name="stream-available"
+             name="fn:stream-available">
+      <signature>
+         <args total="1" required="0" default="1"/>
+      </signature>
+   </function>
+   <function prefix="fn"
+             local-name="accumulator-before"
+             name="fn:accumulator-before">
+      <signature>
+         <args total="1" required="1" default="1"/>
+      </signature>
+   </function>
+   <function prefix="fn"
+             local-name="accumulator-after"
+             name="fn:accumulator-after">
+      <signature>
+         <args total="1" required="1" default="1"/>
+      </signature>
+   </function>
+</catalog>

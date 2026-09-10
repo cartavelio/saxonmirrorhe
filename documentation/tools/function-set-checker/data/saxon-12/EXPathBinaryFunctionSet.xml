@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<registry id="com.saxonica.functions.extfn.EXPathBinaryFunctionSet"
+          pulled="2026-04-23T21:37:00+01:00"
+          name="EXPath Binary Function Set"
+          catalog="binary">
+   <function prefix="bin" local-name="and" name="bin:and"/>
+   <function prefix="bin" local-name="bin" name="bin:bin"/>
+   <function prefix="bin" local-name="decode-string" name="bin:decode-string"/>
+   <function prefix="bin" local-name="encode-string" name="bin:encode-string"/>
+   <function prefix="bin" local-name="find" name="bin:find"/>
+   <function prefix="bin" local-name="from-octets" name="bin:from-octets"/>
+   <function prefix="bin" local-name="hex" name="bin:hex"/>
+   <function prefix="bin" local-name="insert-before" name="bin:insert-before"/>
+   <function prefix="bin" local-name="join" name="bin:join"/>
+   <function prefix="bin" local-name="length" name="bin:length"/>
+   <function prefix="bin" local-name="not" name="bin:not"/>
+   <function prefix="bin" local-name="octal" name="bin:octal"/>
+   <function prefix="bin" local-name="or" name="bin:or"/>
+   <function prefix="bin" local-name="pack-double" name="bin:pack-double"/>
+   <function prefix="bin" local-name="pack-float" name="bin:pack-float"/>
+   <function prefix="bin" local-name="pack-integer" name="bin:pack-integer"/>
+   <function prefix="bin" local-name="pad-left" name="bin:pad-left"/>
+   <function prefix="bin" local-name="pad-right" name="bin:pad-right"/>
+   <function prefix="bin" local-name="part" name="bin:part"/>
+   <function prefix="bin" local-name="shift" name="bin:shift"/>
+   <function prefix="bin" local-name="to-octets" name="bin:to-octets"/>
+   <function prefix="bin" local-name="unpack-double" name="bin:unpack-double"/>
+   <function prefix="bin" local-name="unpack-float" name="bin:unpack-float"/>
+   <function prefix="bin" local-name="unpack-integer" name="bin:unpack-integer"/>
+   <function prefix="bin"
+             local-name="unpack-unsigned-integer"
+             name="bin:unpack-unsigned-integer"/>
+   <function prefix="bin" local-name="version" name="bin:version"/>
+   <function prefix="bin" local-name="xor" name="bin:xor"/>
+</registry>

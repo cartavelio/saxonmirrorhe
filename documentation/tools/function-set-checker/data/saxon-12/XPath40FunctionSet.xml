@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<registry id="com.saxonica.functions.registry.XPath40FunctionSet"
+          pulled="2026-04-23T21:37:00+01:00"
+          name="XPath 4.0 Function Set"
+          catalog="xpath">
+   <function prefix="fn" local-name="all" name="fn:all"/>
+   <function prefix="fn" local-name="all-equal" name="fn:all-equal"/>
+   <function prefix="fn" local-name="all-different" name="fn:all-different"/>
+   <function prefix="fn" local-name="atomic-equal" name="fn:atomic-equal"/>
+   <function prefix="fn" local-name="build-uri" name="fn:build-uri"/>
+   <function prefix="fn" local-name="char" name="fn:char"/>
+   <function prefix="fn" local-name="characters" name="fn:characters"/>
+   <function prefix="fn"
+             local-name="codepoints-to-string"
+             name="fn:codepoints-to-string"/>
+   <function prefix="fn" local-name="collation-key" name="fn:collation-key"/>
+   <function prefix="fn" local-name="compare" name="fn:compare"/>
+   <function prefix="fn" local-name="concat" name="fn:concat"/>
+   <function prefix="fn" local-name="contains" name="fn:contains"/>
+   <function prefix="fn"
+             local-name="contains-sequence"
+             name="fn:contains-sequence"/>
+   <function prefix="fn" local-name="contains-token" name="fn:contains-token"/>
+   <function prefix="fn" local-name="decode-from-uri" name="fn:decode-from-uri"/>
+   <function prefix="fn" local-name="distinct-values" name="fn:distinct-values"/>
+   <function prefix="fn"
+             local-name="duplicate-values"
+             name="fn:duplicate-values"/>
+   <function prefix="fn" local-name="ends-with" name="fn:ends-with"/>
+   <function prefix="fn"
+             local-name="ends-with-sequence"
+             name="fn:ends-with-sequence"/>
+   <function prefix="fn" local-name="error" name="fn:error"/>
+   <function prefix="fn" local-name="every" name="fn:every"/>
+   <function prefix="fn" local-name="expanded-QName" name="fn:expanded-QName"/>
+   <function prefix="fn" local-name="foot" name="fn:foot"/>
+   <function prefix="fn" local-name="highest" name="fn:highest"/>
+   <function prefix="fn" local-name="identity" name="fn:identity"/>
+   <function prefix="fn" local-name="index-of" name="fn:index-of"/>
+   <function prefix="fn" local-name="index-where" name="fn:index-where"/>
+   <function prefix="fn"
+             local-name="in-scope-namespaces"
+             name="fn:in-scope-namespaces"/>
+   <function prefix="fn" local-name="intersperse" name="fn:intersperse"/>
+   <function prefix="fn" local-name="is-NaN" name="fn:is-NaN"/>
+   <function prefix="fn" local-name="items-after" name="fn:items-after"/>
+   <function prefix="fn" local-name="items-at" name="fn:items-at"/>
+   <function prefix="fn" local-name="items-before" name="fn:items-before"/>
+   <function prefix="fn"
+             local-name="items-ending-where"
+             name="fn:items-ending-where"/>
+   <function prefix="fn"
+             local-name="items-starting-where"
+             name="fn:items-starting-where"/>
+   <function prefix="fn" local-name="iterate-while" name="fn:iterate-while"/>
+   <function prefix="fn" local-name="lowest" name="fn:lowest"/>
+   <function prefix="fn" local-name="matches" name="fn:matches"/>
+   <function prefix="fn" local-name="max" name="fn:max"/>
+   <function prefix="fn" local-name="min" name="fn:min"/>
+   <function prefix="fn" local-name="op" name="fn:op"/>
+   <function prefix="fn" local-name="parcel" name="fn:parcel"/>
+   <function prefix="fn" local-name="parse-html" name="fn:parse-html"/>
+   <function prefix="fn" local-name="parse-integer" name="fn:parse-integer"/>
+   <function prefix="fn" local-name="parse-uri" name="fn:parse-uri"/>
+   <function prefix="fn" local-name="partition" name="fn:partition"/>
+   <function prefix="fn" local-name="parts" name="fn:parts"/>
+   <function prefix="fn" local-name="parse-QName" name="fn:parse-QName"/>
+   <function prefix="fn" local-name="remove" name="fn:remove"/>
+   <function prefix="fn" local-name="replace" name="fn:replace"/>
+   <function prefix="fn" local-name="replicate" name="fn:replicate"/>
+   <function prefix="fn" local-name="resolve-uri" name="fn:resolve-uri"/>
+   <function prefix="fn" local-name="round" name="fn:round"/>
+   <function prefix="fn"
+             local-name="round-half-to-even"
+             name="fn:round-half-to-even"/>
+   <function prefix="fn" local-name="slice" name="fn:slice"/>
+   <function prefix="fn" local-name="some" name="fn:some"/>
+   <function prefix="fn" local-name="starts-with" name="fn:starts-with"/>
+   <function prefix="fn"
+             local-name="starts-with-sequence"
+             name="fn:starts-with-sequence"/>
+   <function prefix="fn" local-name="subsequence" name="fn:subsequence"/>
+   <function prefix="fn" local-name="substring-after" name="fn:substring-after"/>
+   <function prefix="fn"
+             local-name="substring-before"
+             name="fn:substring-before"/>
+   <function prefix="fn" local-name="tokenize" name="fn:tokenize"/>
+   <function prefix="fn" local-name="trace" name="fn:trace"/>
+   <function prefix="fn"
+             local-name="transitive-closure"
+             name="fn:transitive-closure"/>
+   <function prefix="fn" local-name="trunk" name="fn:trunk"/>
+   <function prefix="fn" local-name="unparcel" name="fn:unparcel"/>
+   <function prefix="fn" local-name="unparsed-text" name="fn:unparsed-text"/>
+   <function prefix="fn"
+             local-name="unparsed-text-available"
+             name="fn:unparsed-text-available"/>
+   <function prefix="fn"
+             local-name="unparsed-text-lines"
+             name="fn:unparsed-text-lines"/>
+   <function prefix="fn" local-name="void" name="fn:void"/>
+   <function prefix="fn" local-name="xdm-to-json" name="fn:xdm-to-json"/>
+</registry>

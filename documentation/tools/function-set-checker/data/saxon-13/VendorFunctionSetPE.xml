@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<registry id="com.saxonica.functions.extfn.VendorFunctionSetPE"
+          pulled="2026-04-23T22:15:00+01:00"
+          name="PE Vendor Function Set"
+          catalog="saxon">
+   <function prefix="saxon"
+             local-name="adjust-to-civil-time"
+             name="saxon:adjust-to-civil-time"/>
+   <function prefix="saxon" local-name="array-member" name="saxon:array-member"/>
+   <function prefix="saxon"
+             local-name="base64Binary-to-octets"
+             name="saxon:base64Binary-to-octets"/>
+   <function prefix="saxon"
+             local-name="base64Binary-to-string"
+             name="saxon:base64Binary-to-string"/>
+   <function prefix="saxon" local-name="characters" name="saxon:characters"/>
+   <function prefix="saxon"
+             local-name="column-number"
+             name="saxon:column-number"/>
+   <function prefix="saxon"
+             local-name="compile-query"
+             name="saxon:compile-query"/>
+   <function prefix="saxon"
+             local-name="compile-stylesheet"
+             name="saxon:compile-stylesheet"/>
+   <function prefix="saxon"
+             local-name="configuration"
+             name="saxon:configuration"/>
+   <function prefix="saxon" local-name="context" name="saxon:context"/>
+   <function prefix="saxon" local-name="controller" name="saxon:controller"/>
+   <function prefix="saxon"
+             local-name="current-mode-name"
+             name="saxon:current-mode-name"/>
+   <function prefix="saxon" local-name="deep-equal" name="saxon:deep-equal"/>
+   <function prefix="saxon"
+             local-name="decimal-divide"
+             name="saxon:decimal-divide"/>
+   <function prefix="saxon"
+             local-name="discard-document"
+             name="saxon:discard-document"/>
+   <function prefix="saxon" local-name="EQName" name="saxon:EQName"/>
+   <function prefix="saxon"
+             local-name="escape-NCName"
+             name="saxon:escape-NCName"/>
+   <function prefix="saxon" local-name="eval" name="saxon:eval"/>
+   <function prefix="saxon" local-name="evaluate" name="saxon:evaluate"/>
+   <function prefix="saxon" local-name="expression" name="saxon:expression"/>
+   <function prefix="saxon"
+             local-name="function-annotations"
+             name="saxon:function-annotations"/>
+   <function prefix="saxon"
+             local-name="generate-sequence"
+             name="saxon:generate-sequence"/>
+   <function prefix="saxon" local-name="get-context" name="saxon:get-context"/>
+   <function prefix="saxon"
+             local-name="get-pseudo-attribute"
+             name="saxon:get-pseudo-attribute"/>
+   <function prefix="saxon"
+             local-name="group-starting"
+             name="saxon:group-starting"/>
+   <function prefix="saxon"
+             local-name="has-same-nodes"
+             name="saxon:has-same-nodes"/>
+   <function prefix="saxon"
+             local-name="hexBinary-to-octets"
+             name="saxon:hexBinary-to-octets"/>
+   <function prefix="saxon"
+             local-name="hexBinary-to-string"
+             name="saxon:hexBinary-to-string"/>
+   <function prefix="saxon" local-name="highest" name="saxon:highest"/>
+   <function prefix="saxon" local-name="index" name="saxon:index"/>
+   <function prefix="saxon" local-name="index-where" name="saxon:index-where"/>
+   <function prefix="saxon"
+             local-name="in-scope-namespaces"
+             name="saxon:in-scope-namespaces"/>
+   <function prefix="saxon"
+             local-name="in-summer-time"
+             name="saxon:in-summer-time"/>
+   <function prefix="saxon" local-name="is-defaulted" name="saxon:is-defaulted"/>
+   <function prefix="saxon" local-name="items-after" name="saxon:items-after"/>
+   <function prefix="saxon" local-name="items-from" name="saxon:items-from"/>
+   <function prefix="saxon" local-name="items-before" name="saxon:items-before"/>
+   <function prefix="saxon" local-name="items-until" name="saxon:items-until"/>
+   <function prefix="saxon" local-name="key-map" name="saxon:key-map"/>
+   <function prefix="saxon"
+             local-name="last-modified"
+             name="saxon:last-modified"/>
+   <function prefix="saxon" local-name="leading" name="saxon:leading"/>
+   <function prefix="saxon" local-name="line-number" name="saxon:line-number"/>
+   <function prefix="saxon" local-name="lowest" name="saxon:lowest"/>
+   <function prefix="saxon" local-name="map-search" name="saxon:map-search"/>
+   <function prefix="saxon"
+             local-name="message-count"
+             name="saxon:message-count"/>
+   <function prefix="saxon"
+             local-name="namespace-node"
+             name="saxon:namespace-node"/>
+   <function prefix="saxon"
+             local-name="new-attribute"
+             name="saxon:new-attribute"/>
+   <function prefix="saxon" local-name="new-comment" name="saxon:new-comment"/>
+   <function prefix="saxon" local-name="new-document" name="saxon:new-document"/>
+   <function prefix="saxon" local-name="new-element" name="saxon:new-element"/>
+   <function prefix="saxon"
+             local-name="new-namespace"
+             name="saxon:new-namespace"/>
+   <function prefix="saxon"
+             local-name="new-processing-instruction"
+             name="saxon:new-processing-instruction"/>
+   <function prefix="saxon" local-name="new-text" name="saxon:new-text"/>
+   <function prefix="saxon" local-name="object-map" name="saxon:object-map"/>
+   <function prefix="saxon"
+             local-name="octets-to-base64Binary"
+             name="saxon:octets-to-base64Binary"/>
+   <function prefix="saxon"
+             local-name="octets-to-hexBinary"
+             name="saxon:octets-to-hexBinary"/>
+   <function prefix="saxon" local-name="parse" name="saxon:parse"/>
+   <function prefix="saxon"
+             local-name="parse-dateTime"
+             name="saxon:parse-dateTime"/>
+   <function prefix="saxon" local-name="parse-html" name="saxon:parse-html"/>
+   <function prefix="saxon" local-name="parse-XPath" name="saxon:parse-XPath"/>
+   <function prefix="saxon" local-name="print-stack" name="saxon:print-stack"/>
+   <function prefix="saxon" local-name="query" name="saxon:query"/>
+   <function prefix="saxon"
+             local-name="read-binary-resource"
+             name="saxon:read-binary-resource"/>
+   <function prefix="saxon" local-name="replace-with" name="saxon:replace-with"/>
+   <function prefix="saxon" local-name="send-mail" name="saxon:send-mail"/>
+   <function prefix="saxon" local-name="serialize" name="saxon:serialize"/>
+   <function prefix="saxon" local-name="slice" name="saxon:slice"/>
+   <function prefix="saxon"
+             local-name="string-to-hexBinary"
+             name="saxon:string-to-hexBinary"/>
+   <function prefix="saxon"
+             local-name="string-to-base64Binary"
+             name="saxon:string-to-base64Binary"/>
+   <function prefix="saxon"
+             local-name="string-to-utf8"
+             name="saxon:string-to-utf8"/>
+   <function prefix="saxon" local-name="system-id" name="saxon:system-id"/>
+   <function prefix="saxon" local-name="timestamp" name="saxon:timestamp"/>
+   <function prefix="saxon" local-name="transform" name="saxon:transform"/>
+   <function prefix="saxon"
+             local-name="tunnel-params"
+             name="saxon:tunnel-params"/>
+   <function prefix="saxon"
+             local-name="type-annotation"
+             name="saxon:type-annotation"/>
+   <function prefix="saxon"
+             local-name="unescape-NCName"
+             name="saxon:unescape-NCName"/>
+   <function prefix="saxon" local-name="unindexed" name="saxon:unindexed"/>
+   <function prefix="saxon"
+             local-name="unparsed-entities"
+             name="saxon:unparsed-entities"/>
+   <function prefix="saxon"
+             local-name="valid-character"
+             name="saxon:valid-character"/>
+   <function prefix="saxon" local-name="xquery" name="saxon:xquery"/>
+</registry>

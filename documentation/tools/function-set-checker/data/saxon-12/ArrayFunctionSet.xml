@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<registry id="net.sf.saxon.ma.arrays.ArrayFunctionSet"
+          pulled="2026-04-23T21:37:00+01:00"
+          name="Array Function Set"
+          catalog="xpath">
+   <function prefix="array" local-name="append" name="array:append"/>
+   <function prefix="array" local-name="build" name="array:build"/>
+   <function prefix="array" local-name="filter" name="array:filter"/>
+   <function prefix="array" local-name="flatten" name="array:flatten"/>
+   <function prefix="array" local-name="fold-left" name="array:fold-left"/>
+   <function prefix="array" local-name="fold-right" name="array:fold-right"/>
+   <function prefix="array" local-name="for-each" name="array:for-each"/>
+   <function prefix="array"
+             local-name="for-each-pair"
+             name="array:for-each-pair"/>
+   <function prefix="array" local-name="get" name="array:get"/>
+   <function prefix="array" local-name="head" name="array:head"/>
+   <function prefix="array"
+             local-name="insert-before"
+             name="array:insert-before"/>
+   <function prefix="array" local-name="join" name="array:join"/>
+   <function prefix="array" local-name="put" name="array:put"/>
+   <function prefix="array" local-name="remove" name="array:remove"/>
+   <function prefix="array" local-name="reverse" name="array:reverse"/>
+   <function prefix="array" local-name="size" name="array:size"/>
+   <function prefix="array" local-name="sort" name="array:sort"/>
+   <function prefix="array" local-name="subarray" name="array:subarray"/>
+   <function prefix="array" local-name="tail" name="array:tail"/>
+   <function prefix="array" local-name="_to-sequence" name="array:_to-sequence"/>
+   <function prefix="array"
+             local-name="_from-sequence"
+             name="array:_from-sequence"/>
+   <function prefix="array" local-name="empty" name="array:empty"/>
+   <function prefix="array" local-name="exists" name="array:exists"/>
+   <function prefix="array" local-name="foot" name="array:foot"/>
+   <function prefix="array" local-name="index-where" name="array:index-where"/>
+   <function prefix="array" local-name="slice" name="array:slice"/>
+   <function prefix="array" local-name="split" name="array:split"/>
+   <function prefix="array" local-name="replace" name="array:replace"/>
+   <function prefix="array" local-name="trunk" name="array:trunk"/>
+   <function prefix="array" local-name="of-members" name="array:of-members"/>
+   <function prefix="array" local-name="members" name="array:members"/>
+</registry>

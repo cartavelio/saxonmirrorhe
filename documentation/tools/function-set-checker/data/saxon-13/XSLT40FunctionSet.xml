@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<registry id="com.saxonica.functions.registry.XSLT40FunctionSet"
+          pulled="2026-04-23T22:15:00+01:00"
+          name="XSLT 4.0 Function Set"
+          catalog="xslt">
+   <function prefix="fn" local-name="apply-templates" name="fn:apply-templates"/>
+   <function prefix="fn" local-name="character-map" name="fn:character-map"/>
+   <function prefix="fn"
+             local-name="current-merge-group"
+             name="fn:current-merge-group"/>
+   <function prefix="fn"
+             local-name="current-merge-key-array"
+             name="fn:current-merge-key-array"/>
+   <function prefix="fn" local-name="document" name="fn:document"/>
+   <function prefix="fn"
+             local-name="function-available"
+             name="fn:function-available"/>
+</registry>

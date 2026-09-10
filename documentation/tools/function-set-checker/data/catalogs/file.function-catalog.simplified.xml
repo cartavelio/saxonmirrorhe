@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="../../schemas/simplified_catalog.rnc" type="application/relax-ng-compact-syntax" ?>
+<catalog spec="file" version="4.0" maintained-by="QT4 CG">
+   <function prefix="file" local-name="exists" name="file:exists">
+      <signature>
+         <args total="1" required="1" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file" local-name="is-dir" name="file:is-dir">
+      <signature>
+         <args total="1" required="1" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file" local-name="is-file" name="file:is-file">
+      <signature>
+         <args total="1" required="1" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file" local-name="is-absolute" name="file:is-absolute">
+      <signature>
+         <args total="1" required="1" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file" local-name="last-modified" name="file:last-modified">
+      <signature>
+         <args total="1" required="1" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file" local-name="size" name="file:size">
+      <signature>
+         <args total="2" required="1" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file" local-name="append" name="file:append">
+      <signature>
+         <args total="3" required="1" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file" local-name="append-binary" name="file:append-binary">
+      <signature>
+         <args total="2" required="2" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file" local-name="append-text" name="file:append-text">
+      <signature>
+         <args total="3" required="2" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file"
+             local-name="append-text-lines"
+             name="file:append-text-lines">
+      <signature>
+         <args total="3" required="1" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file" local-name="copy" name="file:copy">
+      <signature>
+         <args total="2" required="2" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file" local-name="create-dir" name="file:create-dir">
+      <signature>
+         <args total="1" required="1" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file"
+             local-name="create-temp-dir"
+             name="file:create-temp-dir">
+      <signature>
+         <args total="3" required="0" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file"
+             local-name="create-temp-file"
+             name="file:create-temp-file">
+      <signature>
+         <args total="3" required="0" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file" local-name="delete" name="file:delete">
+      <signature>
+         <args total="2" required="1" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file" local-name="list" name="file:list">
+      <signature>
+         <args total="3" required="1" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file" local-name="list-roots" name="file:list-roots">
+      <signature>
+         <args total="0" required="0" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file" local-name="move" name="file:move">
+      <signature>
+         <args total="2" required="2" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file" local-name="read-binary" name="file:read-binary">
+      <signature>
+         <args total="3" required="1" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file" local-name="read-text" name="file:read-text">
+      <signature>
+         <args total="2" required="1" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file"
+             local-name="read-text-lines"
+             name="file:read-text-lines">
+      <signature>
+         <args total="2" required="1" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file" local-name="write" name="file:write">
+      <signature>
+         <args total="3" required="1" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file" local-name="write-binary" name="file:write-binary">
+      <signature>
+         <args total="3" required="2" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file" local-name="write-text" name="file:write-text">
+      <signature>
+         <args total="3" required="2" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file"
+             local-name="write-text-lines"
+             name="file:write-text-lines">
+      <signature>
+         <args total="3" required="1" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file" local-name="name" name="file:name">
+      <signature>
+         <args total="1" required="1" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file" local-name="parent" name="file:parent">
+      <signature>
+         <args total="1" required="1" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file" local-name="children" name="file:children">
+      <signature>
+         <args total="1" required="1" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file" local-name="descendants" name="file:descendants">
+      <signature>
+         <args total="1" required="1" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file"
+             local-name="path-to-native"
+             name="file:path-to-native">
+      <signature>
+         <args total="1" required="1" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file" local-name="path-to-uri" name="file:path-to-uri">
+      <signature>
+         <args total="1" required="1" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file" local-name="resolve-path" name="file:resolve-path">
+      <signature>
+         <args total="2" required="1" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file" local-name="dir-separator" name="file:dir-separator">
+      <signature>
+         <args total="0" required="0" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file"
+             local-name="line-separator"
+             name="file:line-separator">
+      <signature>
+         <args total="0" required="0" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file"
+             local-name="path-separator"
+             name="file:path-separator">
+      <signature>
+         <args total="0" required="0" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file" local-name="temp-dir" name="file:temp-dir">
+      <signature>
+         <args total="0" required="0" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file" local-name="base-dir" name="file:base-dir">
+      <signature>
+         <args total="0" required="0" default="1"/>
+      </signature>
+   </function>
+   <function prefix="file" local-name="current-dir" name="file:current-dir">
+      <signature>
+         <args total="0" required="0" default="1"/>
+      </signature>
+   </function>
+</catalog>

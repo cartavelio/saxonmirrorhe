@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<registry id="com.saxonica.functions.extfn.EXPathFileFunctionSet"
+          pulled="2026-04-23T22:15:00+01:00"
+          name="EXPath File Function Set"
+          catalog="file">
+   <function prefix="file" local-name="append" name="file:append"/>
+   <function prefix="file" local-name="append-binary" name="file:append-binary"/>
+   <function prefix="file" local-name="append-text" name="file:append-text"/>
+   <function prefix="file"
+             local-name="append-text-lines"
+             name="file:append-text-lines"/>
+   <function prefix="file" local-name="base-dir" name="file:base-dir"/>
+   <function prefix="file" local-name="children" name="file:children"/>
+   <function prefix="file" local-name="copy" name="file:copy"/>
+   <function prefix="file" local-name="create-dir" name="file:create-dir"/>
+   <function prefix="file"
+             local-name="create-temp-dir"
+             name="file:create-temp-dir"/>
+   <function prefix="file"
+             local-name="create-temp-file"
+             name="file:create-temp-file"/>
+   <function prefix="file" local-name="current-dir" name="file:current-dir"/>
+   <function prefix="file" local-name="delete" name="file:delete"/>
+   <function prefix="file" local-name="dir-separator" name="file:dir-separator"/>
+   <function prefix="file" local-name="exists" name="file:exists"/>
+   <function prefix="file" local-name="is-dir" name="file:is-dir"/>
+   <function prefix="file" local-name="is-file" name="file:is-file"/>
+   <function prefix="file" local-name="last-modified" name="file:last-modified"/>
+   <function prefix="file"
+             local-name="line-separator"
+             name="file:line-separator"/>
+   <function prefix="file" local-name="list" name="file:list"/>
+   <function prefix="file" local-name="move" name="file:move"/>
+   <function prefix="file" local-name="name" name="file:name"/>
+   <function prefix="file" local-name="parent" name="file:parent"/>
+   <function prefix="file"
+             local-name="path-separator"
+             name="file:path-separator"/>
+   <function prefix="file"
+             local-name="path-to-native"
+             name="file:path-to-native"/>
+   <function prefix="file" local-name="path-to-uri" name="file:path-to-uri"/>
+   <function prefix="file" local-name="read-binary" name="file:read-binary"/>
+   <function prefix="file" local-name="read-text" name="file:read-text"/>
+   <function prefix="file"
+             local-name="read-text-lines"
+             name="file:read-text-lines"/>
+   <function prefix="file" local-name="resolve-path" name="file:resolve-path"/>
+   <function prefix="file" local-name="size" name="file:size"/>
+   <function prefix="file" local-name="temp-dir" name="file:temp-dir"/>
+   <function prefix="file" local-name="write" name="file:write"/>
+   <function prefix="file" local-name="write-binary" name="file:write-binary"/>
+   <function prefix="file" local-name="write-text" name="file:write-text"/>
+   <function prefix="file"
+             local-name="write-text-lines"
+             name="file:write-text-lines"/>
+</registry>

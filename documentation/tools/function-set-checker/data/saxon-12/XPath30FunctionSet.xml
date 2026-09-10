@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<registry id="net.sf.saxon.functions.registry.XPath30FunctionSet"
+          pulled="2026-04-23T21:37:00+01:00"
+          name="XPath 3.0 Function Set"
+          catalog="xpath">
+   <function prefix="fn" local-name="analyze-string" name="fn:analyze-string"/>
+   <function prefix="fn" local-name="apply" name="fn:apply"/>
+   <function prefix="fn"
+             local-name="available-environment-variables"
+             name="fn:available-environment-variables"/>
+   <function prefix="fn" local-name="data" name="fn:data"/>
+   <function prefix="fn" local-name="document-uri" name="fn:document-uri"/>
+   <function prefix="fn" local-name="element-with-id" name="fn:element-with-id"/>
+   <function prefix="fn"
+             local-name="environment-variable"
+             name="fn:environment-variable"/>
+   <function prefix="fn" local-name="filter" name="fn:filter"/>
+   <function prefix="fn" local-name="fold-left" name="fn:fold-left"/>
+   <function prefix="fn" local-name="fold-right" name="fn:fold-right"/>
+   <function prefix="fn" local-name="for-each" name="fn:for-each"/>
+   <function prefix="fn" local-name="for-each-pair" name="fn:for-each-pair"/>
+   <function prefix="fn" local-name="format-date" name="fn:format-date"/>
+   <function prefix="fn" local-name="format-dateTime" name="fn:format-dateTime"/>
+   <function prefix="fn" local-name="format-integer" name="fn:format-integer"/>
+   <function prefix="fn" local-name="format-number" name="fn:format-number"/>
+   <function prefix="fn" local-name="format-time" name="fn:format-time"/>
+   <function prefix="fn" local-name="function-arity" name="fn:function-arity"/>
+   <function prefix="fn" local-name="function-lookup" name="fn:function-lookup"/>
+   <function prefix="fn" local-name="function-name" name="fn:function-name"/>
+   <function prefix="fn" local-name="generate-id" name="fn:generate-id"/>
+   <function prefix="fn" local-name="has-children" name="fn:has-children"/>
+   <function prefix="fn" local-name="head" name="fn:head"/>
+   <function prefix="fn" local-name="innermost" name="fn:innermost"/>
+   <function prefix="fn" local-name="nilled" name="fn:nilled"/>
+   <function prefix="fn" local-name="node-name" name="fn:node-name"/>
+   <function prefix="fn" local-name="outermost" name="fn:outermost"/>
+   <function prefix="fn" local-name="parse-xml" name="fn:parse-xml"/>
+   <function prefix="fn"
+             local-name="parse-xml-fragment"
+             name="fn:parse-xml-fragment"/>
+   <function prefix="fn" local-name="path" name="fn:path"/>
+   <function prefix="fn" local-name="round" name="fn:round"/>
+   <function prefix="fn" local-name="serialize" name="fn:serialize"/>
+   <function prefix="fn" local-name="sort" name="fn:sort"/>
+   <function prefix="fn" local-name="string-join" name="fn:string-join"/>
+   <function prefix="fn" local-name="tail" name="fn:tail"/>
+   <function prefix="fn" local-name="unparsed-text" name="fn:unparsed-text"/>
+   <function prefix="fn"
+             local-name="unparsed-text-available"
+             name="fn:unparsed-text-available"/>
+   <function prefix="fn"
+             local-name="unparsed-text-lines"
+             name="fn:unparsed-text-lines"/>
+   <function prefix="fn" local-name="uri-collection" name="fn:uri-collection"/>
+</registry>

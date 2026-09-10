@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<registry id="net.sf.saxon.functions.registry.ExsltCommonFunctionSet"
+          pulled="2026-04-23T22:15:00+01:00"
+          name="EXSLT Common Function Set"
+          catalog="exslt">
+   <function prefix="exsl" local-name="node-set" name="exsl:node-set"/>
+   <function prefix="exsl" local-name="object-type" name="exsl:object-type"/>
+</registry>

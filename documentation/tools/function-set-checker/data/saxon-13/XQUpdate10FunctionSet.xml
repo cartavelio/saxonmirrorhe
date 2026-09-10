@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<registry id="com.saxonica.functions.registry.XQUpdate10FunctionSet"
+          pulled="2026-04-23T22:15:00+01:00"
+          name="XQuery Update 1.0 Function Set"
+          catalog="xpath">
+   <function prefix="fn" local-name="put" name="fn:put"/>
+</registry>

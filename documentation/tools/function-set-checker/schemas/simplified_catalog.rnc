@@ -1,0 +1,53 @@
+datatypes xs = "http://www.w3.org/2001/XMLSchema-datatypes"
+
+start = catalog
+
+catalog = element catalog { cm.catalog }
+cm.catalog = (
+	attlist.catalog,
+	function*
+)
+attlist.catalog = (
+	att.spec,
+	att.version,
+	att.maintained-by
+)
+
+function = element function { cm.function }
+cm.function = (
+	attlist.function,
+	signature*
+)
+attlist.function = (
+	att.prefix,
+	att.local-name,
+	att.name
+)
+
+signature = element signature { cm.signature }
+cm.signature = (
+	attlist.signature,
+	args*
+)
+attlist.signature = ( empty )
+
+args = element args { cm.args }
+cm.args = (
+	attlist.args,
+	empty 
+)
+attlist.args = (
+	att.total,
+	att.required,
+	att.default?
+)
+
+att.default = attribute \default { xs:int }
+att.local-name = attribute local-name { xs:string }
+att.maintained-by = attribute maintained-by { xs:string }
+att.name = attribute name { xs:string }
+att.prefix = attribute prefix { "fn" | "bin" | "file" | "map" | "array" | "op" | "math" | "exsl" | "" }
+att.required = attribute required { xs:int }
+att.spec = attribute spec { xs:string }
+att.total = attribute total { xs:int }
+att.version = attribute version { xs:decimal }

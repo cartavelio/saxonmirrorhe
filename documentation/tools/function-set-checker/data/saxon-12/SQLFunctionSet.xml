@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<registry id="com.saxonica.functions.sql.SQLFunctionSet"
+          pulled="2026-04-23T21:37:00+01:00"
+          name="SQL Function Set"
+          catalog="saxon">
+   <function prefix="sql" local-name="connect" name="sql:connect"/>
+   <function prefix="sql" local-name="delete" name="sql:delete"/>
+   <function prefix="sql" local-name="execute" name="sql:execute"/>
+   <function prefix="sql" local-name="insert" name="sql:insert"/>
+   <function prefix="sql"
+             local-name="prepared-statement"
+             name="sql:prepared-statement"/>
+   <function prefix="sql" local-name="prepared-query" name="sql:prepared-query"/>
+   <function prefix="sql" local-name="query" name="sql:query"/>
+   <function prefix="sql" local-name="update" name="sql:update"/>
+</registry>

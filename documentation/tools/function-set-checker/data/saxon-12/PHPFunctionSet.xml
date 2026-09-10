@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<registry id="com.saxonica.functions.extfn.cpp.PHPFunctionSet"
+          pulled="2026-04-23T21:37:00+01:00"
+          name="PHP Function Set"
+          catalog="saxon">
+   <function prefix="" local-name="function" name="function"/>
+</registry>

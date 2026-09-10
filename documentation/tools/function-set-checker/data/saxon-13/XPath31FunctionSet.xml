@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<registry id="net.sf.saxon.functions.registry.XPath31FunctionSet"
+          pulled="2026-04-23T22:15:00+01:00"
+          name="XPath 3.1 Function Set"
+          catalog="xpath">
+   <function prefix="fn" local-name="collation-key" name="fn:collation-key"/>
+   <function prefix="fn" local-name="contains-token" name="fn:contains-token"/>
+   <function prefix="fn" local-name="copy-of" name="fn:copy-of"/>
+   <function prefix="fn"
+             local-name="default-language"
+             name="fn:default-language"/>
+   <function prefix="fn" local-name="generate-id" name="fn:generate-id"/>
+   <function prefix="fn" local-name="has-children" name="fn:has-children"/>
+   <function prefix="fn" local-name="head" name="fn:head"/>
+   <function prefix="fn" local-name="json-doc" name="fn:json-doc"/>
+   <function prefix="fn" local-name="json-to-xml" name="fn:json-to-xml"/>
+   <function prefix="fn"
+             local-name="load-xquery-module"
+             name="fn:load-xquery-module"/>
+   <function prefix="fn" local-name="parse-ietf-date" name="fn:parse-ietf-date"/>
+   <function prefix="fn" local-name="parse-json" name="fn:parse-json"/>
+   <function prefix="fn" local-name="parse-xml" name="fn:parse-xml"/>
+   <function prefix="fn"
+             local-name="random-number-generator"
+             name="fn:random-number-generator"/>
+   <function prefix="fn"
+             local-name="parse-xml-fragment"
+             name="fn:parse-xml-fragment"/>
+   <function prefix="fn" local-name="serialize" name="fn:serialize"/>
+   <function prefix="fn" local-name="snapshot" name="fn:snapshot"/>
+   <function prefix="fn" local-name="sort" name="fn:sort"/>
+   <function prefix="fn" local-name="string-join" name="fn:string-join"/>
+   <function prefix="fn" local-name="tokenize" name="fn:tokenize"/>
+   <function prefix="fn" local-name="trace" name="fn:trace"/>
+   <function prefix="fn" local-name="transform" name="fn:transform"/>
+   <function prefix="fn" local-name="xml-to-json" name="fn:xml-to-json"/>
+</registry>

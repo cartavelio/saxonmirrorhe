@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<registry id="net.sf.saxon.functions.registry.VendorFunctionSetHE"
+          pulled="2026-04-23T22:15:00+01:00"
+          name="HE Vendor Function Set"
+          catalog="saxon">
+   <function prefix="saxon"
+             local-name="is-whole-number"
+             name="saxon:is-whole-number"/>
+   <function prefix="saxon"
+             local-name="dynamic-error-info"
+             name="saxon:dynamic-error-info"/>
+   <function prefix="saxon" local-name="doc" name="saxon:doc"/>
+   <function prefix="saxon"
+             local-name="has-local-namespaces"
+             name="saxon:has-local-namespaces"/>
+   <function prefix="saxon"
+             local-name="has-uniform-namespaces"
+             name="saxon:has-uniform-namespaces"/>
+   <function prefix="saxon"
+             local-name="map-untyped-contains"
+             name="saxon:map-untyped-contains"/>
+   <function prefix="saxon"
+             local-name="yes-no-boolean"
+             name="saxon:yes-no-boolean"/>
+   <function prefix="saxon"
+             local-name="concatenate-sequences"
+             name="saxon:concatenate-sequences"/>
+</registry>

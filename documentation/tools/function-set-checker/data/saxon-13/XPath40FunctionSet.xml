@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<registry id="com.saxonica.functions.registry.XPath40FunctionSet"
+          pulled="2026-04-23T22:15:00+01:00"
+          name="XPath 4.0 Function Set"
+          catalog="xpath">
+   <function prefix="fn" local-name="all-equal" name="fn:all-equal"/>
+   <function prefix="fn" local-name="all-different" name="fn:all-different"/>
+   <function prefix="fn" local-name="atomic-equal" name="fn:atomic-equal"/>
+   <function prefix="fn"
+             local-name="atomic-type-annotation"
+             name="fn:atomic-type-annotation"/>
+   <function prefix="fn" local-name="build-dateTime" name="fn:build-dateTime"/>
+   <function prefix="fn" local-name="build-uri" name="fn:build-uri"/>
+   <function prefix="fn" local-name="char" name="fn:char"/>
+   <function prefix="fn" local-name="characters" name="fn:characters"/>
+   <function prefix="fn" local-name="civil-timezone" name="fn:civil-timezone"/>
+   <function prefix="fn"
+             local-name="codepoints-to-string"
+             name="fn:codepoints-to-string"/>
+   <function prefix="fn" local-name="collation" name="fn:collation"/>
+   <function prefix="fn"
+             local-name="collation-available"
+             name="fn:collation-available"/>
+   <function prefix="fn" local-name="collation-key" name="fn:collation-key"/>
+   <function prefix="fn" local-name="compare" name="fn:compare"/>
+   <function prefix="fn" local-name="compose" name="fn:compose"/>
+   <function prefix="fn" local-name="concat" name="fn:concat"/>
+   <function prefix="fn" local-name="contains" name="fn:contains"/>
+   <function prefix="fn"
+             local-name="contains-subsequence"
+             name="fn:contains-subsequence"/>
+   <function prefix="fn" local-name="contains-token" name="fn:contains-token"/>
+   <function prefix="fn" local-name="csv-doc" name="fn:csv-doc"/>
+   <function prefix="fn" local-name="csv-to-arrays" name="fn:csv-to-arrays"/>
+   <function prefix="fn" local-name="csv-to-xml" name="fn:csv-to-xml"/>
+   <function prefix="fn" local-name="dateTime-record" name="fn:dateTime-record"/>
+   <function prefix="fn"
+             local-name="day-from-dateTime"
+             name="fn:day-from-dateTime"/>
+   <function prefix="fn" local-name="deep-equal" name="fn:deep-equal"/>
+   <function prefix="fn" local-name="decode-from-uri" name="fn:decode-from-uri"/>
+   <function prefix="fn"
+             local-name="distinct-ordered-nodes"
+             name="fn:distinct-ordered-nodes"/>
+   <function prefix="fn" local-name="distinct-values" name="fn:distinct-values"/>
+   <function prefix="fn" local-name="divide-decimals" name="fn:divide-decimals"/>
+   <function prefix="fn" local-name="do-until" name="fn:do-until"/>
+   <function prefix="fn" local-name="doc" name="fn:doc"/>
+   <function prefix="fn" local-name="doc-available" name="fn:doc-available"/>
+   <function prefix="fn"
+             local-name="duplicate-values"
+             name="fn:duplicate-values"/>
+   <function prefix="fn" local-name="element-to-map" name="fn:element-to-map"/>
+   <function prefix="fn"
+             local-name="element-to-map-plan"
+             name="fn:element-to-map-plan"/>
+   <function prefix="fn" local-name="ends-with" name="fn:ends-with"/>
+   <function prefix="fn"
+             local-name="ends-with-subsequence"
+             name="fn:ends-with-subsequence"/>
+   <function prefix="fn" local-name="error" name="fn:error"/>
+   <function prefix="fn" local-name="every" name="fn:every"/>
+   <function prefix="fn" local-name="expanded-QName" name="fn:expanded-QName"/>
+   <function prefix="fn" local-name="for-each" name="fn:for-each"/>
+   <function prefix="fn" local-name="for-each-pair" name="fn:for-each-pair"/>
+   <function prefix="fn" local-name="filter" name="fn:filter"/>
+   <function prefix="fn" local-name="fold-left" name="fn:fold-left"/>
+   <function prefix="fn" local-name="fold-right" name="fn:fold-right"/>
+   <function prefix="fn" local-name="foot" name="fn:foot"/>
+   <function prefix="fn" local-name="format-date" name="fn:format-date"/>
+   <function prefix="fn" local-name="format-dateTime" name="fn:format-dateTime"/>
+   <function prefix="fn" local-name="format-number" name="fn:format-number"/>
+   <function prefix="fn" local-name="format-time" name="fn:format-time"/>
+   <function prefix="fn"
+             local-name="function-annotations"
+             name="fn:function-annotations"/>
+   <function prefix="fn"
+             local-name="function-identity"
+             name="fn:function-identity"/>
+   <function prefix="fn" local-name="graphemes" name="fn:graphemes"/>
+   <function prefix="fn" local-name="hash" name="fn:hash"/>
+   <function prefix="fn" local-name="highest" name="fn:highest"/>
+   <function prefix="fn"
+             local-name="hours-from-dateTime"
+             name="fn:hours-from-dateTime"/>
+   <function prefix="fn" local-name="html-doc" name="fn:html-doc"/>
+   <function prefix="fn" local-name="identity" name="fn:identity"/>
+   <function prefix="fn" local-name="index-of" name="fn:index-of"/>
+   <function prefix="fn" local-name="index-where" name="fn:index-where"/>
+   <function prefix="fn"
+             local-name="in-scope-namespaces"
+             name="fn:in-scope-namespaces"/>
+   <function prefix="fn" local-name="innermost" name="fn:innermost"/>
+   <function prefix="fn"
+             local-name="insert-separator"
+             name="fn:insert-separator"/>
+   <function prefix="fn" local-name="jvalue" name="fn:jvalue"/>
+   <function prefix="fn" local-name="jposition" name="fn:jposition"/>
+   <function prefix="fn" local-name="jkey" name="fn:jkey"/>
+   <function prefix="fn" local-name="jtree" name="fn:jtree"/>
+   <function prefix="fn" local-name="path" name="fn:path"/>
+   <function prefix="fn" local-name="invisible-xml" name="fn:invisible-xml"/>
+   <function prefix="fn" local-name="is-NaN" name="fn:is-NaN"/>
+   <function prefix="fn" local-name="items-after" name="fn:items-after"/>
+   <function prefix="fn" local-name="items-at" name="fn:items-at"/>
+   <function prefix="fn" local-name="items-before" name="fn:items-before"/>
+   <function prefix="fn"
+             local-name="items-ending-where"
+             name="fn:items-ending-where"/>
+   <function prefix="fn"
+             local-name="items-starting-where"
+             name="fn:items-starting-where"/>
+   <function prefix="fn" local-name="json-doc" name="fn:json-doc"/>
+   <function prefix="fn" local-name="json-to-xml" name="fn:json-to-xml"/>
+   <function prefix="fn" local-name="label" name="fn:label"/>
+   <function prefix="fn"
+             local-name="load-xquery-module"
+             name="fn:load-xquery-module"/>
+   <function prefix="fn" local-name="lowest" name="fn:lowest"/>
+   <function prefix="fn" local-name="matches" name="fn:matches"/>
+   <function prefix="fn" local-name="max" name="fn:max"/>
+   <function prefix="fn" local-name="message" name="fn:message"/>
+   <function prefix="fn" local-name="min" name="fn:min"/>
+   <function prefix="fn"
+             local-name="minutes-from-dateTime"
+             name="fn:minutes-from-dateTime"/>
+   <function prefix="fn"
+             local-name="month-from-dateTime"
+             name="fn:month-from-dateTime"/>
+   <function prefix="fn" local-name="normalize-space" name="fn:normalize-space"/>
+   <function prefix="fn" local-name="outermost" name="fn:outermost"/>
+   <function prefix="fn" local-name="partial-apply" name="fn:partial-apply"/>
+   <function prefix="fn"
+             local-name="parts-of-dateTime"
+             name="fn:parts-of-dateTime"/>
+   <function prefix="fn" local-name="root" name="fn:root"/>
+   <function prefix="fn" local-name="type-of" name="fn:type-of"/>
+   <function prefix="fn"
+             local-name="node-type-annotation"
+             name="fn:node-type-annotation"/>
+   <function prefix="fn"
+             local-name="normalize-unicode"
+             name="fn:normalize-unicode"/>
+   <function prefix="fn" local-name="op" name="fn:op"/>
+   <function prefix="fn" local-name="parcel" name="fn:parcel"/>
+   <function prefix="fn" local-name="parse-csv" name="fn:parse-csv"/>
+   <function prefix="fn" local-name="parse-html" name="fn:parse-html"/>
+   <function prefix="fn" local-name="parse-integer" name="fn:parse-integer"/>
+   <function prefix="fn" local-name="parse-json" name="fn:parse-json"/>
+   <function prefix="fn" local-name="parse-uri" name="fn:parse-uri"/>
+   <function prefix="fn" local-name="parse-xml" name="fn:parse-xml"/>
+   <function prefix="fn"
+             local-name="parse-xml-fragment"
+             name="fn:parse-xml-fragment"/>
+   <function prefix="fn" local-name="partition" name="fn:partition"/>
+   <function prefix="fn" local-name="parse-QName" name="fn:parse-QName"/>
+   <function prefix="fn" local-name="pin" name="fn:pin"/>
+   <function prefix="fn"
+             local-name="random-number-generator"
+             name="fn:random-number-generator"/>
+   <function prefix="fn" local-name="remove" name="fn:remove"/>
+   <function prefix="fn" local-name="replace" name="fn:replace"/>
+   <function prefix="fn" local-name="replicate" name="fn:replicate"/>
+   <function prefix="fn" local-name="resolve-uri" name="fn:resolve-uri"/>
+   <function prefix="fn" local-name="round" name="fn:round"/>
+   <function prefix="fn"
+             local-name="round-half-to-even"
+             name="fn:round-half-to-even"/>
+   <function prefix="fn" local-name="schema-type" name="fn:schema-type"/>
+   <function prefix="fn" local-name="seconds" name="fn:seconds"/>
+   <function prefix="fn"
+             local-name="seconds-from-dateTime"
+             name="fn:seconds-from-dateTime"/>
+   <function prefix="fn" local-name="siblings" name="fn:siblings"/>
+   <function prefix="fn" local-name="slice" name="fn:slice"/>
+   <function prefix="fn" local-name="some" name="fn:some"/>
+   <function prefix="fn" local-name="sort" name="fn:sort"/>
+   <function prefix="fn" local-name="sort-by" name="fn:sort-by"/>
+   <function prefix="fn" local-name="sort-with" name="fn:sort-with"/>
+   <function prefix="fn" local-name="starts-with" name="fn:starts-with"/>
+   <function prefix="fn"
+             local-name="starts-with-subsequence"
+             name="fn:starts-with-subsequence"/>
+   <function prefix="fn" local-name="string-join" name="fn:string-join"/>
+   <function prefix="fn" local-name="string-length" name="fn:string-length"/>
+   <function prefix="fn" local-name="subsequence" name="fn:subsequence"/>
+   <function prefix="fn"
+             local-name="subsequence-where"
+             name="fn:subsequence-where"/>
+   <function prefix="fn" local-name="substring-after" name="fn:substring-after"/>
+   <function prefix="fn"
+             local-name="substring-before"
+             name="fn:substring-before"/>
+   <function prefix="fn" local-name="take-while" name="fn:take-while"/>
+   <function prefix="fn"
+             local-name="timezone-from-dateTime"
+             name="fn:timezone-from-dateTime"/>
+   <function prefix="fn" local-name="tokenize" name="fn:tokenize"/>
+   <function prefix="fn" local-name="trace" name="fn:trace"/>
+   <function prefix="fn"
+             local-name="transitive-closure"
+             name="fn:transitive-closure"/>
+   <function prefix="fn" local-name="trunk" name="fn:trunk"/>
+   <function prefix="fn" local-name="unix-dateTime" name="fn:unix-dateTime"/>
+   <function prefix="fn" local-name="unparcel" name="fn:unparcel"/>
+   <function prefix="fn" local-name="unparsed-binary" name="fn:unparsed-binary"/>
+   <function prefix="fn" local-name="unparsed-text" name="fn:unparsed-text"/>
+   <function prefix="fn"
+             local-name="unparsed-text-available"
+             name="fn:unparsed-text-available"/>
+   <function prefix="fn"
+             local-name="unparsed-text-lines"
+             name="fn:unparsed-text-lines"/>
+   <function prefix="fn" local-name="void" name="fn:void"/>
+   <function prefix="fn" local-name="while-do" name="fn:while-do"/>
+   <function prefix="fn" local-name="xml-to-json" name="fn:xml-to-json"/>
+   <function prefix="fn" local-name="xsd-validator" name="fn:xsd-validator"/>
+   <function prefix="fn"
+             local-name="year-from-dateTime"
+             name="fn:year-from-dateTime"/>
+</registry>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<function-sets>
+	<function-set location="com/saxonica/ee/extfn/js/IXSL3FunctionSet.java" id="com.saxonica.ee.extfn.js.IXSL3FunctionSet" name="IXSL 3.0 Function Set" prefix="ixsl" catalog="saxon" />
+	<function-set location="com/saxonica/ee/extfn/js/IXSLFunctionSet.java" id="com.saxonica.ee.extfn.js.IXSLFunctionSet" name="IXSL 1.0 Function Set" prefix="ixsl" catalog="saxon" />
+	<function-set location="com/saxonica/functions/extfn/cpp/CPPFunctionSet.java" id="com.saxonica.functions.registry.extfn.cpp.CPPFunctionSet" name="CPP Function Set" prefix="" catalog="saxon" />
+	<function-set location="com/saxonica/functions/extfn/cpp/PHPFunctionSet.java" id="com.saxonica.functions.registry.extfn.cpp.PHPFunctionSet" name="PHP Function Set" prefix="" catalog="saxon" />
+	<function-set location="com/saxonica/functions/extfn/EXPathBinaryFunctionSet.java" id="com.saxonica.functions.registry.extfn.EXPathBinaryFunctionSet" name="EXPath Binary Function Set" prefix="bin" catalog="binary" />
+	<function-set location="com/saxonica/functions/extfn/EXPathFileFunctionSet.java" id="com.saxonica.functions.registry.extfn.EXPathFileFunctionSet" name="EXPath File Function Set" prefix="file" catalog="file" />
+	<function-set location="com/saxonica/ee/extfn/VendorFunctionSetEE.java" id="com.saxonica.ee.extfn.VendorFunctionSetEE" name="EE Vendor Function Set" prefix="saxon" catalog="saxon" />
+	<function-set location="com/saxonica/functions/extfn/VendorFunctionSetPE.java" id="com.saxonica.functions.extfn.VendorFunctionSetPE" name="PE Vendor Function Set" prefix="saxon" catalog="saxon" />
+	<function-set location="com/saxonica/functions/registry/XPath40FunctionSet.java" id="com.saxonica.functions.registry.XPath40FunctionSet" name="XPath 4.0 Function Set" prefix="fn" catalog="xpath" />
+	<function-set location="com/saxonica/functions/registry/XQUpdate10FunctionSet.java" id="com.saxonica.functions.registry.XQUpdate10FunctionSet" name="XQuery Update 1.0 Function Set" prefix="fn" catalog="xpath" />
+	<function-set location="com/saxonica/functions/registry/XSLT40FunctionSet.java" id="com.saxonica.functions.registry.XSLT40FunctionSet" name="XSLT 4.0 Function Set" prefix="fn" catalog="xslt" />
+	<function-set location="com/saxonica/functions/sql/SQLFunctionSet.java" id="com.saxonica.functions.sql.SQLFunctionSet" name="SQL Function Set" prefix="sql" catalog="saxon" />	
+	<function-set location="net/sf/saxon/functions/registry/ExsltCommonFunctionSet.java" id="net.sf.saxon.functions.registry.ExsltCommonFunctionSet" name="EXSLT Common Function Set" prefix="exsl" catalog="exslt" />
+	<function-set location="net/sf/saxon/functions/registry/UseWhen30FunctionSet.java" id="net.sf.saxon.functions.registry.UseWhen30FunctionSet" name="Use When 3.0 Function Set" prefix="fn" catalog="xpath" />
+	<function-set location="net/sf/saxon/functions/registry/VendorFunctionSetHE.java" id="net.sf.saxon.functions.registry.VendorFunctionSetHE" name="HE Vendor Function Set" prefix="saxon" catalog="saxon" />
+	<function-set location="net/sf/saxon/functions/registry/XPath20FunctionSet.java" id="net.sf.saxon.functions.registry.XPath20FunctionSet" name="XPath 2.0 Function Set" prefix="fn" catalog="xpath" />
+	<function-set location="net/sf/saxon/functions/registry/XPath30FunctionSet.java" id="net.sf.saxon.functions.registry.XPath30FunctionSet" name="XPath 3.0 Function Set" prefix="fn" catalog="xpath" />
+	<function-set location="net/sf/saxon/functions/registry/XPath31FunctionSet.java" id="net.sf.saxon.functions.registry.XPath31FunctionSet" name="XPath 3.1 Function Set" prefix="fn" catalog="xpath" />
+	<function-set location="net/sf/saxon/functions/registry/XSLT30FunctionSet.java" id="net.sf.saxon.functions.registry.XSLT30FunctionSet" name="XSLT 3.0 Function Set" prefix="fn" catalog="xslt" />
+	<function-set location="net/sf/saxon/functions/MathFunctionSet.java" id="net.sf.saxon.functions.MathFunctionSet" name="Math Function Set" prefix="math" catalog="xpath" />
+	<function-set location="net/sf/saxon/ma/arrays/ArrayFunctionSet.java" id="net.sf.saxon.ma.arrays.ArrayFunctionSet" name="Array Function Set" prefix="array" catalog="xpath" />
+	<function-set location="net/sf/saxon/ma/map/MapFunctionSet.java" id="net.sf.saxon.ma.map.MapFunctionSet" name="Map Function Set" prefix="map" catalog="xpath" />
+</function-sets>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<registry id="com.saxonica.functions.extfn.cpp.CPPFunctionSet"
+          pulled="2026-04-23T21:37:00+01:00"
+          name="CPP Function Set"
+          catalog="saxon">
+   <function prefix="" local-name="native" name="native"/>
+</registry>
