@@ -31,18 +31,6 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
     }
 
 
-    public Expression makeLookupExpression(Configuration config, Expression lhs, LookupExpression.Modifier modifier, Expression rhs, boolean deep, boolean allow40) {
-        if (allow40) {
-            if (deep) {
-                return new DeepLookupExpression(lhs, modifier, rhs);
-            } else {
-                return new com.saxonica.expr.LookupExpression40(lhs, modifier, rhs);
-            }
-        } else {
-            return new LookupExpression(lhs, modifier, rhs);
-        }
-    }
-
     /**
      * Supporting code for lookup expressions (A?B) where B is the wildcard "*"
      *

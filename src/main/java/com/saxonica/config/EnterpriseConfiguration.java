@@ -2104,6 +2104,18 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         }
     }
 
+    public Expression makeLookupExpression(Expression lhs, LookupExpression.Modifier modifier, Expression rhs, boolean deep, boolean allow40) {
+        if (allow40) {
+            if (deep) {
+                return new DeepLookupExpression(lhs, modifier, rhs);
+            } else {
+                return new com.saxonica.expr.LookupExpression40(lhs, modifier, rhs);
+            }
+        } else {
+            return new LookupExpression(lhs, modifier, rhs);
+        }
+    }
+
     /**
      * Factory method to create a Template Rule
      *
