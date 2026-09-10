@@ -384,7 +384,7 @@
    
    <xsl:template match="*[@nodeType='MethodDeclaration']">
       <xsl:param name="indent" tunnel="yes" as="xs:integer"/>
-      <xsl:param name="expanding-defaults" select="false()" tunnel="yes" as="xs:boolean"/>
+      <xsl:param name="expandingDefaults" select="false()" tunnel="yes" as="xs:boolean"/>
       <xsl:call-template name="indent"/>
       <xsl:variable name="full-name" select="f:full-method-name(.)"/>
       <!--<xsl:message>Method {name/@identifier} = {$full-name}</xsl:message>-->
@@ -407,7 +407,7 @@
             </xsl:if>
          </xsl:when>
          <xsl:otherwise>
-            <xsl:if test="body and $expanding-defaults and not(modifiers/modifier/@keyword[. = 'PUBLIC'])">public </xsl:if>
+            <xsl:if test="body and $expandingDefaults and not(modifiers/modifier/@keyword[. = 'PUBLIC'])">public </xsl:if>
             <xsl:call-template name="modifiers">
                <xsl:with-param name="digestMethod" select="$digestMethod"/>
             </xsl:call-template>
@@ -420,7 +420,7 @@
          <xsl:when test="f:isIteratorType(string(type/@RESOLVED_TYPE))">
             <xsl:text>System.Collections.Generic.IEnumerator&lt;{f:extract-type-arguments(type/@RESOLVED_TYPE)}&gt;</xsl:text>
          </xsl:when>
-         <xsl:when test="$digestMethod/@csReturns">{f:escapeDottedName(f:renameType($digestMethod/@csReturns))}</xsl:when>
+         <xsl:when test="string($digestMethod/@csReturns)">{f:escapeDottedName(f:renameType($digestMethod/@csReturns))}</xsl:when>
          <xsl:otherwise>
             <xsl:apply-templates select="type"/> <!-- TODO: take return type from digest? -->
          </xsl:otherwise>
@@ -489,7 +489,7 @@
             <xsl:call-template name="indent"/>
             <xsl:text>}}}}{$NL}</xsl:text>
          </xsl:when>
-         <xsl:when test="body and ($expanding-defaults or not(modifiers/modifier/@keyword[. = 'DEFAULT']))">
+         <xsl:when test="body and ($expandingDefaults or not(modifiers/modifier/@keyword[. = 'DEFAULT']))">
             <xsl:text> {{{$NL}</xsl:text>
             <xsl:apply-templates select="body/statements">
                <xsl:with-param name="indent" select="$indent + 1" tunnel="yes"/>
@@ -1135,6 +1135,8 @@
    <xsl:template name="modifiers">
       <xsl:param name="digestMethod" as="element(method)?" select="()"/>
       <xsl:param name="isConstant" as="xs:boolean" select="false()"/>
+      <xsl:param name="expandingDefaults" as="xs:boolean" select="false()" tunnel="true"/>
+      <xsl:param name="classIsFinal" as="xs:boolean" select="false()" tunnel="true"/>
       <xsl:choose>
          <xsl:when test="empty(modifiers) and not(../..[@isInterface='true'])">
             <xsl:text>internal </xsl:text>
@@ -1146,9 +1148,13 @@
       <!--<xsl:if test="(annotations/annotation/name/@identifier = 'Override' 
          or (../../name/@identifier = ('equals', 'hashCode', 'toString'))) 
          and not(f:isInterfaceMember(.))">override </xsl:if>-->
+      <xsl:if test="$expandingDefaults">
+         <xsl:text> /* modifiers = {modifiers/modifier/@keyword}, class modifiers = {ancestor::type[1]/modifiers/modifier/@keyword} */</xsl:text>
+      </xsl:if>
       <xsl:choose>
          <xsl:when test="$digestMethod/@override='1'">override </xsl:when>
-         <xsl:when test="$digestMethod[@virtual='1' and not(@abstract='1')]">virtual </xsl:when>
+         <xsl:when test="($digestMethod[@virtual='1' and not(@abstract='1')] or $expandingDefaults)
+            and not($classIsFinal)">virtual </xsl:when>
       </xsl:choose>
       
     
@@ -1745,6 +1751,7 @@
    <xsl:template name="expand-defaulted-methods">
       <xsl:param name="indent" as="xs:integer" tunnel="yes" select="0"/>
       <xsl:assert test="@nodeType='ClassOrInterfaceDeclaration'"/>
+      <xsl:variable name="thisClass" select="."/>
       <xsl:variable name="thisClassName" as="xs:string" select="f:fullClassName(.)"/>
       <!--<xsl:variable name="thisClassName" as="xs:string" 
          select="string-join((f:qualifiedName(ancestor::root/packageDeclaration/name), ancestor-or-self::*[@nodeType='ClassOrInterfaceDeclaration']/name/@identifier), '.')"/>
@@ -1770,7 +1777,8 @@
                   <xsl:call-template name="indent-extra"/>
                   <xsl:text>/* Expanding default method {@name} from interface {current-group()[last()]/../@name} */{$NL}</xsl:text>
                   <xsl:apply-templates select="current-group()[last()]/default/*">
-                     <xsl:with-param name="expanding-defaults" as="xs:boolean" select="true()" tunnel="yes"/>
+                     <xsl:with-param name="expandingDefaults" as="xs:boolean" select="true()" tunnel="yes"/>
+                     <xsl:with-param name="classIsFinal" as="xs:boolean" select="$thisClass/modifiers/modifier/@keyword='FINAL'" tunnel="yes"/>
                      <xsl:with-param name="indent" select="$indent+1" tunnel="yes"/>
                   </xsl:apply-templates>
                </xsl:if>        

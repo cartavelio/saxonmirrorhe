@@ -10,6 +10,7 @@ package net.sf.saxon.ma.arrays;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.z.IntSet;
@@ -77,6 +78,7 @@ public abstract class ArrayItem implements Function {
      * @return true if and only if the size of the array is zero
      */
 
+    @CSharpModifiers(code={"public", "virtual"})
     public boolean isEmpty() {
         return arrayLength() == 0;
     }
