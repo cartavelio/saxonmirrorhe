@@ -139,11 +139,11 @@ public class GMonthDayValue extends GDateValue {
      * @param day - number of a day within the specified month
      * @param tz - number of minutes to adjust by for the timezone
      */
-    public GMonthDayValue(byte month, byte day, int tz) {
+    public GMonthDayValue(int month, int day, int tz) {
         this(month, day, tz, BuiltInAtomicType.G_MONTH_DAY);
     }
 
-    public GMonthDayValue(byte month, byte day, int tz, AtomicType type) {
+    public GMonthDayValue(int month, int day, int tz, AtomicType type) {
         this(new MutableGDateValue(2000, month, day, false, tz, type));
     }
 

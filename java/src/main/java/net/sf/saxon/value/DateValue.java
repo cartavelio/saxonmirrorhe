@@ -51,7 +51,7 @@ public class DateValue extends GDateValue implements XPathComparable {
      * @param day   The day, 1-31
      */
 
-    public DateValue(int year, byte month, byte day) {
+    public DateValue(int year, int month, int day) {
         this(new MutableGDateValue(year, month, day, true,NO_TIMEZONE, BuiltInAtomicType.DATE));
     }
 
@@ -66,7 +66,7 @@ public class DateValue extends GDateValue implements XPathComparable {
      *              makes no difference to dates later than 1AD.
      */
 
-    public DateValue(int year, byte month, byte day, boolean xsd10) {
+    public DateValue(int year, int month, int day, boolean xsd10) {
         this(new MutableGDateValue(year, month, day, xsd10, NO_TIMEZONE, BuiltInAtomicType.DATE));
     }
 
@@ -83,7 +83,7 @@ public class DateValue extends GDateValue implements XPathComparable {
      *              makes no difference to dates later than 1AD.
      */
 
-    public DateValue(int year, byte month, byte day, int tz, boolean xsd10) {
+    public DateValue(int year, int month, int day, int tz, boolean xsd10) {
         // Method is called by generated Java code.
         this(new MutableGDateValue(year, month, day, xsd10, tz, BuiltInAtomicType.DATE));
     }
@@ -246,7 +246,7 @@ public class DateValue extends GDateValue implements XPathComparable {
      * @return a new DateValue with no timezone information
      */
 
-    public static DateValue tomorrow(int year, byte month, byte day) {
+    public static DateValue tomorrow(int year, int month, int day) {
         if (DateValue.isValidDate(year, month, day + 1)) {
             return new DateValue(year, month, (byte) (day + 1), true);
         } else if (month < 12) {
@@ -265,17 +265,17 @@ public class DateValue extends GDateValue implements XPathComparable {
      * @return a new DateValue with no timezone information
      */
 
-    public static DateValue yesterday(int year, byte month, byte day) {
+    public static DateValue yesterday(int year, int month, int day) {
         if (day > 1) {
-            return new DateValue(year, month, (byte) (day - 1), true);
+            return new DateValue(year, month, (day - 1), true);
         } else if (month > 1) {
             if (month == 3 && isLeapYear(year)) {
-                return new DateValue(year, (byte) 2, (byte) 29, true);
+                return new DateValue(year, 2, 29, true);
             } else {
-                return new DateValue(year, (byte) (month - 1), daysPerMonth[month - 2], true);
+                return new DateValue(year, (month - 1), daysPerMonth[month - 2], true);
             }
         } else {
-            return new DateValue(year - 1, (byte) 12, (byte) 31, true);
+            return new DateValue(year - 1, 12, 31, true);
         }
     }
 

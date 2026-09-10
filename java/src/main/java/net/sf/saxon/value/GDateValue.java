@@ -27,11 +27,11 @@ import java.util.*;
  */
 public abstract class GDateValue extends CalendarValue {
     protected final int year;         // unlike the lexical representation, includes a year zero
-    protected final byte month;
-    protected final byte day;
+    protected final int month;
+    protected final int day;
     protected final boolean hasNoYearZero;
 
-    public GDateValue(int year, byte month, byte day, boolean hasNoYearZero, int tzMinutes, AtomicType typeLabel) {
+    public GDateValue(int year, int month, int day, boolean hasNoYearZero, int tzMinutes, AtomicType typeLabel) {
         super(typeLabel, tzMinutes);
         this.year = year;
         this.month = month;
@@ -62,8 +62,8 @@ public abstract class GDateValue extends CalendarValue {
     protected MutableGDateValue makeMutableCopy() {
         MutableGDateValue m = new MutableGDateValue();
         m.year = year;
-        m.month = month;
-        m.day = day;
+        m.month = (byte)month;
+        m.day = (byte)day;
         m.hasNoYearZero = hasNoYearZero;
         m.tzMinutes = getTimezoneInMinutes();
         m.typeLabel = getItemType();
@@ -113,7 +113,7 @@ public abstract class GDateValue extends CalendarValue {
      * @return the month component (1-12)
      */
 
-    public byte getMonth() {
+    public int getMonth() {
         return month;
     }
 
@@ -123,7 +123,7 @@ public abstract class GDateValue extends CalendarValue {
      * @return the day component (1-31)
      */
 
-    public byte getDay() {
+    public int getDay() {
         return day;
     }
 
@@ -474,8 +474,7 @@ public abstract class GDateValue extends CalendarValue {
      */
 
     public boolean equals(Object o) {
-        if (o instanceof GDateValue) {
-            GDateValue gdv = (GDateValue) o;
+        if (o instanceof GDateValue gdv) {
             return getPrimitiveType() == gdv.getPrimitiveType() && toDateTime().equals(gdv.toDateTime());
         } else {
             return false;

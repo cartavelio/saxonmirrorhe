@@ -118,11 +118,11 @@ public class GDayValue extends GDateValue {
      * @param tz - number of minutes to adjust by for the timezone
      * @return - an instance of GDayValue
      */
-    public GDayValue(byte day, int tz) {
+    public GDayValue(int day, int tz) {
         this(day, tz, BuiltInAtomicType.G_DAY);
     }
 
-    public GDayValue(byte day, int tz, AtomicType type) {
+    public GDayValue(int day, int tz, AtomicType type) {
         this(new MutableGDateValue(2000, 1, day, false, tz, type));
     }
 
@@ -202,7 +202,7 @@ public class GDayValue extends GDateValue {
 
     @Override
     public CalendarValue adjustTimezone(int tz) {
-        DateTimeValue dt = (DateTimeValue) toDateTime().adjustTimezone(tz);
+        DateTimeValue dt = toDateTime().adjustTimezone(tz);
         return new GDayValue(dt.getDay(), dt.getTimezoneInMinutes());
     }
 }

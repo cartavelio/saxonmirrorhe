@@ -66,15 +66,15 @@ public final class DateTimeValue extends CalendarValue
 {
 
     private final int year;       // the year as written, +1 for BC years
-    private final byte month;     // the month as written, range 1-12
-    private final byte day;       // the day as written, range 1-31
-    private final byte hour;      // the hour as written (except for midnight), range 0-23
-    private final byte minute;    // the minutes as written, range 0-59
-    private final byte second;    // the seconds as written, range 0-59 (no leap seconds)
+    private final int month;     // the month as written, range 1-12
+    private final int day;       // the day as written, range 1-31
+    private final int hour;      // the hour as written (except for midnight), range 0-23
+    private final int minute;    // the minutes as written, range 0-59
+    private final int second;    // the seconds as written, range 0-59 (no leap seconds)
     private final int nanosecond; // the number of nanoseconds within the current second
     private final boolean hasNoYearZero;  // true if XSD 1.0 rules apply for negative years
 
-    public DateTimeValue(int year, byte month, byte day, byte hour, byte minute, byte second,
+    public DateTimeValue(int year, int month, int day, int hour, int minute, int second,
                          int nanosecond, boolean hasNoYearZero, int tzMinutes, AtomicMetadata typeLabel) {
         super(typeLabel, tzMinutes);
         this.year = year;
@@ -101,11 +101,11 @@ public final class DateTimeValue extends CalendarValue
 
     public static class MutableDateTimeValue {
         public int year;       // the year as written, +1 for BC years
-        public byte month;     // the month as written, range 1-12
-        public byte day;       // the day as written, range 1-31
-        public byte hour;      // the hour as written (except for midnight), range 0-23
-        public byte minute;    // the minutes as written, range 0-59
-        public byte second;    // the seconds as written, range 0-59 (no leap seconds)
+        public int month;     // the month as written, range 1-12
+        public int day;       // the day as written, range 1-31
+        public int hour;      // the hour as written (except for midnight), range 0-23
+        public int minute;    // the minutes as written, range 0-59
+        public int second;    // the seconds as written, range 0-59 (no leap seconds)
         public int nanosecond; // the number of nanoseconds within the current second
         public boolean hasNoYearZero;  // true if XSD 1.0 rules apply for negative years
         public int tzMinutes = NO_TIMEZONE;
@@ -654,8 +654,8 @@ public final class DateTimeValue extends CalendarValue
         if (midnight) {
             DateValue t = DateValue.tomorrow(dt.year, dt.month, dt.day);
             dt.year = t.getYear();
-            dt.month = t.getMonth();
-            dt.day = t.getDay();
+            dt.month = (byte)t.getMonth();
+            dt.day = (byte)t.getDay();
         }
 
         dt.typeLabel = BuiltInAtomicType.DATE_TIME;
@@ -737,8 +737,8 @@ public final class DateTimeValue extends CalendarValue
             DateValue tomorrow = DateValue.tomorrow(m.year, m.month, m.day); // Includes a check that new date is valid
             m.hour = (byte) 0;
             m.year = tomorrow.getYear();
-            m.month = tomorrow.getMonth();
-            m.day = tomorrow.getDay();
+            m.month = (byte)tomorrow.getMonth();
+            m.day = (byte)tomorrow.getDay();
         }
     }
 
@@ -804,8 +804,8 @@ public final class DateTimeValue extends CalendarValue
      *                    {@link CalendarValue#NO_TIMEZONE} if there is no timezone component.
      */
 
-    public DateTimeValue(int year, byte month, byte day,
-                         byte hour, byte minute, byte second, int nanosecond, int tz) {
+    public DateTimeValue(int year, int month, int day,
+                         int hour, int minute, int second, int nanosecond, int tz) {
         this(year, month, day, hour, minute, second, nanosecond, false, tz, BuiltInAtomicType.DATE_TIME);
     }
 
@@ -832,8 +832,8 @@ public final class DateTimeValue extends CalendarValue
      *                    with a year of -1, and {@link #getYear() will return -1}
      */
 
-    public DateTimeValue(int year, byte month, byte day,
-                         byte hour, byte minute, byte second, int microsecond, int tz, boolean hasNoYearZero) {
+    public DateTimeValue(int year, int month, int day,
+                         int hour, int minute, int second, int microsecond, int tz, boolean hasNoYearZero) {
         this(year, month, day, hour, minute, second, microsecond * 1000, hasNoYearZero, tz, BuiltInAtomicType.DATE_TIME);
     }
 
@@ -866,7 +866,7 @@ public final class DateTimeValue extends CalendarValue
      * @return the month component
      */
 
-    public byte getMonth() {
+    public int getMonth() {
         return month;
     }
 
@@ -876,7 +876,7 @@ public final class DateTimeValue extends CalendarValue
      * @return the day component
      */
 
-    public byte getDay() {
+    public int getDay() {
         return day;
     }
 
@@ -886,7 +886,7 @@ public final class DateTimeValue extends CalendarValue
      * @return the hour component (never 24, even if the input was specified as 24:00:00)
      */
 
-    public byte getHour() {
+    public int getHour() {
         return hour;
     }
 
@@ -896,7 +896,7 @@ public final class DateTimeValue extends CalendarValue
      * @return the minute component
      */
 
-    public byte getMinute() {
+    public int getMinute() {
         return minute;
     }
 
@@ -906,18 +906,8 @@ public final class DateTimeValue extends CalendarValue
      * @return the second component
      */
 
-    public byte getSecond() {
+    public int getSecond() {
         return second;
-    }
-
-    /**
-     * Get the microsecond component, 0-999999
-     *
-     * @return the nanosecond component divided by 1000, rounded towards zero
-     */
-
-    public int getMicrosecond() {
-        return nanosecond / 1000;
     }
 
     /**
@@ -1395,7 +1385,7 @@ public final class DateTimeValue extends CalendarValue
                 return Int64Value.makeIntegerValue(minute);
             case SECONDS:
                 BigDecimal d = BigDecimal.valueOf(nanosecond);
-                d = d.divide(BigDecimalValue.ONE_BILLION, 6, RoundingMode.HALF_UP);
+                d = d.divide(BigDecimalValue.ONE_BILLION, 9, RoundingMode.DOWN);
                 d = d.add(BigDecimal.valueOf(second));
                 return new BigDecimalValue(d);
             case WHOLE_SECONDS: //(internal use only)
@@ -1552,11 +1542,10 @@ public final class DateTimeValue extends CalendarValue
      */
 
     @Override
-    public int compareTo(/*@NotNull*/ CalendarValue other, int implicitTimezone) throws NoDynamicContextException {
-        if (!(other instanceof DateTimeValue)) {
+    public int compareTo(CalendarValue other, int implicitTimezone) throws NoDynamicContextException {
+        if (!(other instanceof DateTimeValue v2)) {
             throw new ClassCastException("DateTime values are not comparable to " + other.getClass());
         }
-        DateTimeValue v2 = (DateTimeValue) other;
         if (getTimezoneInMinutes() == v2.getTimezoneInMinutes()) {
             // both values are in the same timezone (explicitly or implicitly)
             if (year != v2.year) {
@@ -1713,7 +1702,7 @@ public final class DateTimeValue extends CalendarValue
         return computeHashCode(year, month, day, hour, minute, second, nanosecond, getTimezoneInMinutes());
     }
 
-    public static int computeHashCode(int year, byte month, byte day, byte hour, byte minute, byte second, int nanosecond, int tzMinutes) {
+    public static int computeHashCode(int year, int month, int day, int hour, int minute, int second, int nanosecond, int tzMinutes) {
         int tz = tzMinutes == CalendarValue.NO_TIMEZONE ? 0 : -tzMinutes;
         int h = hour;
         int mi = minute;

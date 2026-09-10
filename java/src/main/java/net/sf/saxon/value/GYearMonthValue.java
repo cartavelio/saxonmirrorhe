@@ -59,6 +59,21 @@ public class GYearMonthValue extends GDateValue {
         return new GYearMonthValue(g);
     }
 
+//    /**
+//     * Creates an instance of GYearMonthValue.  Includes validation
+//     * checks.  If a validation error is detected, an instance of
+//     * ValidationFailure will be returned instead.
+//     *
+//     * @param year - number of a year in the Gregorian calendar
+//     * @param month - number of a month within the specified year
+//     * @param timezoneInMinutes - number of minutes to adjust by for the timezone
+//     * @param allowYearZero - true if the year '0000' is allowed (per XSD 1.1), false if it is not (per XSD 1.0)
+//     */
+//
+//    public GYearMonthValue(int year, int month, int timezoneInMinutes, boolean allowYearZero) {
+//        super(year, month, 1, timezoneInMinutes, allowYearZero, BuiltInAtomicType.G_YEAR_MONTH);
+//    }
+
     /**
      * Creates an instance of GYearMonthValue.  Includes validation
      * checks.  If a validation error is detected, an instance of
@@ -122,11 +137,11 @@ public class GYearMonthValue extends GDateValue {
      * @param tz - number of minutes to adjust by for the timezone
      * @param xsd10 - false if the year '0000' is allowed (per XSD 1.1), true if it is not (per XSD 1.0)
      */
-    public GYearMonthValue(int year, byte month, int tz, boolean xsd10) {
+    public GYearMonthValue(int year, int month, int tz, boolean xsd10) {
         this(new MutableGDateValue(year, month, 1, xsd10, tz, BuiltInAtomicType.G_YEAR_MONTH));
     }
 
-    public GYearMonthValue(int year, byte month, int tz, AtomicType type) {
+    public GYearMonthValue(int year, int month, int tz, AtomicType type) {
         this(new MutableGDateValue(year, month, 1,false, tz, type));
     }
 

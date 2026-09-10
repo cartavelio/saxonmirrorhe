@@ -10,7 +10,6 @@ package net.sf.saxon.value;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.AccessorFn;
-import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.str.TwineBuilder;
 import net.sf.saxon.str.UnicodeString;
@@ -29,9 +28,9 @@ import java.util.*;
 
 public final class TimeValue extends CalendarValue implements XPathComparable {
 
-    private final byte hour;
-    private final byte minute;
-    private final byte second;
+    private final int hour;
+    private final int minute;
+    private final int second;
     private final int nanosecond;
 
 
@@ -45,7 +44,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
      * @param microsecond the number of microseconds, 0-999999
      * @param tzMinutes   the timezone displacement in minutes from UTC. Supply the value
      *                    {@link CalendarValue#NO_TIMEZONE} if there is no timezone component.
-     * @deprecated since 10.0: use the constructor {@link #TimeValue(byte, byte, byte, int, int, AtomicType)}
+     * @deprecated since 10.0: use the constructor {@link #TimeValue(int, int, int, int, int, AtomicType)}
      * that accepts nanosecond precision
      */
 
@@ -71,7 +70,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
      * @param typeLabel   the type annotation (must be a subtype of xs:time)
      */
 
-    public TimeValue(byte hour, byte minute, byte second, int nanosecond, int tzMinutes, AtomicType typeLabel) {
+    public TimeValue(int hour, int minute, int second, int nanosecond, int tzMinutes, AtomicType typeLabel) {
         super(typeLabel, tzMinutes);
         this.hour = hour;
         this.minute = minute;
@@ -410,7 +409,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
      * @return the hour
      */
 
-    public byte getHour() {
+    public int getHour() {
         return hour;
     }
 
@@ -420,7 +419,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
      * @return the minute
      */
 
-    public byte getMinute() {
+    public int getMinute() {
         return minute;
     }
 
@@ -430,18 +429,8 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
      * @return the second
      */
 
-    public byte getSecond() {
+    public int getSecond() {
         return second;
-    }
-
-    /**
-     * Get the microsecond component, 0-999_999
-     *
-     * @return the nanoseconds component divided by 1000, rounded towards zero
-     */
-
-    public int getMicrosecond() {
-        return nanosecond / 1000;
     }
 
     /**
@@ -580,8 +569,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
     }
 
     /**
-     * Get a component of the value. Returns null if the timezone component is
-     * requested and is not present.
+     * Get a component of the value. Returns null if the requested component is not present.
      * @param component the required component
      */
 
@@ -595,7 +583,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
                 return Int64Value.makeIntegerValue(minute);
             case SECONDS:
                 BigDecimal d = BigDecimal.valueOf(nanosecond);
-                d = d.divide(BigDecimalValue.ONE_BILLION, 6, RoundingMode.HALF_UP);
+                d = d.divide(BigDecimalValue.ONE_BILLION, 9, RoundingMode.DOWN);
                 d = d.add(BigDecimal.valueOf(second));
                 return new BigDecimalValue(d);
             case WHOLE_SECONDS: //(internal use only)
@@ -735,7 +723,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
 
     public int hashCode() {
         return DateTimeValue.computeHashCode(
-                1951, (byte) 10, (byte) 11, hour, minute, second, nanosecond, getTimezoneInMinutes());
+                1951, 10, 11, hour, minute, second, nanosecond, getTimezoneInMinutes());
     }
 
     /**

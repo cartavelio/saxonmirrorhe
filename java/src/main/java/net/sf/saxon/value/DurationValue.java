@@ -269,7 +269,14 @@ public class DurationValue extends AtomicValue implements XPathComparable, Atomi
 
     @Override
     public AtomicValue withMetadata(AtomicMetadata metadata) {
-        return new DurationValue(_months, _seconds, metadata.getType());
+        BuiltInAtomicType req = metadata.getType().getPrimitiveAtomicType();
+        if (req == BuiltInAtomicType.DAY_TIME_DURATION) {
+            return new DayTimeDurationValue(_seconds);
+        } else if (req == BuiltInAtomicType.YEAR_MONTH_DURATION) {
+            return new YearMonthDurationValue(_months, BuiltInAtomicType.YEAR_MONTH_DURATION);
+        } else {
+            return new DurationValue(_months, _seconds, metadata.getType());
+        }
     }
 
     /**
