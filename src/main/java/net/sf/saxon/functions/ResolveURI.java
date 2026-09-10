@@ -277,7 +277,25 @@ public class ResolveURI extends SystemFunction {
             } else if (base.startsWith("classpath:")) {
                 absoluteURI = new URI(relativeURI);
                 if (!absoluteURI.isAbsolute()) {
-                    absoluteURI = new URI("classpath:" + relativeURI);
+                    // URIs in the classpath: scheme are a bit of a mess. Given "classpath:/path/to/thing",
+                    // if you attempt to use ClassLoader.getSystemResourceAsStream("/path/to/thing"), it
+                    // will fail because the leading slash is a problem. Conversely, if you have
+                    // "classpath:path/to/thing" and you try to resolve "otherthing" against it,
+                    // you'll get "classpath:otherthing" which is almost certainly wrong. The only
+                    // way around it seems to be to fake the scheme long enough to get correct
+                    // resolution.
+                    String path = base.substring(10);
+                    URI fakeURI;
+                    if (path.startsWith("/")) {
+                        fakeURI = URI.create("file://" + path).resolve(relativeURI);
+                    } else {
+                        fakeURI = URI.create("file:///" + path).resolve(relativeURI);
+                    }
+                    String cpath = fakeURI.getPath().substring(1);
+                    if (cpath.startsWith("../")) {
+                        throw new IllegalArgumentException("Attempt to navigate above root: classpath:" + cpath);
+                    }
+                    absoluteURI = URI.create("classpath:" + cpath);
                 }
             } else {
                 URI baseURI;
