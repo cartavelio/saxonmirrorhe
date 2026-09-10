@@ -112,6 +112,9 @@ abstract public class URIFunctions extends SystemFunction {
     protected void checkOptions(Sequence[] arguments) throws XPathException {
         if (getArity() == 2) {
             MapItem options = (MapItem) arguments[1].head();
+            if (options == null) {
+                options = new DictionaryMap();
+            }
             if (options.get(PATH_SEPARATOR) != null) {
                 String str = options.get(PATH_SEPARATOR).getStringValue();
                 if (str.length() != 1) {
