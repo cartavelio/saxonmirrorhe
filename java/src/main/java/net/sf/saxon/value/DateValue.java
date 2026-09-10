@@ -38,6 +38,10 @@ public class DateValue extends GDateValue implements XPathComparable {
         super(m);
     }
 
+    private DateValue(DateTimeValue.MutableDateTimeValue m) {
+        super(m);
+    }
+
     /**
      * Constructor given a year, month, and day. Performs no validation.
      *
@@ -193,22 +197,32 @@ public class DateValue extends GDateValue implements XPathComparable {
         return new DateValue(g);
     }
 
-    public static ConversionResult makeDateValue(int year, int month, int day, int timezoneInMinutes, ConversionRules rules) {
-        GDateValue.MutableGDateValue g = new GDateValue.MutableGDateValue();
+    /**
+     * Creates an instance of DateValue.  Includes validation
+     * checks.  If a validation error is detected, an instance of
+     * ValidationFailure will be returned instead.
+     *
+     * @param year - number of a year in the Gregorian calendar
+     * @param month - number of a month within the specified year
+     * @param day - number of a day within the specified month
+     * @param timezoneInMinutes - number of minutes to adjust by for the timezone
+     * @param allowYearZero - true if the year '0000' is allowed (per XSD 1.1), false if it is not (per XSD 1.0)
+     * @return an instance of GYearMonthValue or ValidationFailure
+     */
+    public static ConversionResult makeDateValue(int year, int month, int day, int timezoneInMinutes, boolean allowYearZero) {
+        DateTimeValue.MutableDateTimeValue g = new DateTimeValue.MutableDateTimeValue();
         g.typeLabel = BuiltInAtomicType.DATE;
-        if (timezoneInMinutes == CalendarValue.NO_TIMEZONE) {
-            setLexicalValue(g, year, month, day, rules.isAllowYearZero());
+        if (g.tzMinutes != timezoneInMinutes) {
+            GDateValue.setValues(g, year, month, day, timezoneInMinutes, allowYearZero);
         } else {
-            setLexicalValue(g, year, month, day, timezoneInMinutes, rules.isAllowYearZero());
+            GDateValue.setValues(g, year, month, day, allowYearZero);
         }
-        if (g.error != null) {
-            return g.error;
-        }
+        if (g.error != null) return g.error;
         return new DateValue(g);
     }
 
-    public static ConversionResult makeDateValue(int year, int month, int day, ConversionRules rules) {
-        return DateValue.makeDateValue(year, month, day, CalendarValue.NO_TIMEZONE, rules);
+    public static ConversionResult makeDateValue(int year, int month, int day, boolean allowYearZero) {
+        return DateValue.makeDateValue(year, month, day, CalendarValue.NO_TIMEZONE, allowYearZero);
     }
 
     /**

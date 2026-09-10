@@ -9,7 +9,6 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.AccessorFn;
-import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.TwineBuilder;
@@ -32,6 +31,10 @@ public class GMonthDayValue extends GDateValue {
             Pattern.compile("--([0-9][0-9]-[0-9][0-9])(Z|[+-][0-9][0-9]:[0-9][0-9])?");
 
     private GMonthDayValue(MutableGDateValue m) {
+        super(m);
+    }
+
+    private GMonthDayValue(DateTimeValue.MutableDateTimeValue m) {
         super(m);
     }
 
@@ -58,24 +61,29 @@ public class GMonthDayValue extends GDateValue {
     }
 
     /**
-     * Creates an instance of GDMonthDayValue.  Includes validation
+     * Creates an instance of GMonthDayValue.  Includes validation
      * checks.  If a validation error is detected, an instance of
      * ValidationFailure will be returned instead.
      *
      * @param month - number of a month within an arbitrary year
      * @param day - number of a day within the specified month
      * @param timezoneInMinutes - number of minutes to adjust by for the timezone
-     * @param rules - configuration rules relevant to converting between datatypes
-     * @return - an instance of GMonthDayValue
+     * @return - an instance of GMonthDayValue or ValidationFailure
      */
-    public static ConversionResult makeGMonthDayValue(int month, int day, int timezoneInMinutes, ConversionRules rules) {
-        MutableGDateValue g = new MutableGDateValue();
+    public static ConversionResult makeGMonthDayValue(int month, int day, int timezoneInMinutes) {
+        DateTimeValue.MutableDateTimeValue g = new DateTimeValue.MutableDateTimeValue();
         g.typeLabel = BuiltInAtomicType.G_MONTH_DAY;
-        GMonthDayValue.setLexicalValue(g, month, day, timezoneInMinutes);
-        if (g.error != null) {
-            return g.error;
+        if (g.tzMinutes != timezoneInMinutes) {
+            GMonthDayValue.setValues(g, month, day, timezoneInMinutes);
+        } else {
+            GMonthDayValue.setValues(g, month, day);
         }
+        if (g.error != null) return g.error;
         return new GMonthDayValue(g);
+    }
+
+    public static ConversionResult makeGMonthDayValue(int month, int day) {
+        return GMonthDayValue.makeGMonthDayValue(month, day, CalendarValue.NO_TIMEZONE);
     }
 
     /**
@@ -87,28 +95,24 @@ public class GMonthDayValue extends GDateValue {
      * If an error is found, the details will be assigned to the
      * error attribute of the input instance of MutableGDateValue.
      *
+     * @param m - a mutable placeholder for storing the instance values during validation checks
      * @param month - number of a month within an arbitrary year
      * @param day - number of a day within the specified month
      * @param timezoneInMinutes - number of minutes to adjust by for the timezone
      * @return the input instance of MutableGDateValue, updated with the values supplied
      */
-    protected static void setLexicalValue(MutableGDateValue m, int month, int day, int timezoneInMinutes) {
-        GMonthDayValue.setLexicalValue(m, month, day);
-        if (m.error != null) {
-            return;
-        }
-        m.tzMinutes = timezoneInMinutes;
+    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int month, int day, int timezoneInMinutes) {
+        GMonthDayValue.setValues(m, month, day);
+        if (m.error != null) return;
+        DateTimeValue.setTimezoneInMinutes(m, timezoneInMinutes);
     }
 
-    protected static void setLexicalValue(MutableGDateValue m, int month, int day) {
-        GMonthValue.setLexicalValue(m, month); // Includes check that month is between 1-12 (inc)
-        if (m.error != null) {
-            return;
-        }
-        GDayValue.setLexicalValue(m, day); // Includes check that day is between 1-31 (inc)
-        if (m.error != null) {
-            return;
-        }
+    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int month, int day) {
+        GMonthValue.setValues(m, month); // Includes check that month is between 1-12 (inc)
+        if (m.error != null) return;
+
+        GDayValue.setValues(m, day); // Includes check that day is between 1-31 (inc)
+        if (m.error != null) return;
 
         switch (month) {
             case 2: // Feb, the day must be no more than 29
@@ -123,10 +127,18 @@ public class GMonthDayValue extends GDateValue {
                 if (day > 30) {
                     m.error = badDateComponent("Day must be no more than 30 when the month is " + month + ".", day, "FODT0006");
                 }
+                break; // C# needs final case to be clearly terminated
         }
-
     }
 
+    /**
+     * Constructs an instance of GMonthDayValue without any validation
+     * of the input values.
+     *
+     * @param month - number of a month within an arbitrary year
+     * @param day - number of a day within the specified month
+     * @param tz - number of minutes to adjust by for the timezone
+     */
     public GMonthDayValue(byte month, byte day, int tz) {
         this(month, day, tz, BuiltInAtomicType.G_MONTH_DAY);
     }

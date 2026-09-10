@@ -17,7 +17,6 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.*;
 
 import java.math.BigDecimal;
@@ -310,24 +309,22 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
      * @param second - second within the minute specified
      * @param nanosecond - nanosecond within the second specified
      * @param timezoneInMinutes - number of minutes to adjust by for the timezone
-     * @return - an instance of TimeValue
+     * @return - an instance of TimeValue or ValidationFailure
      */
-    public static ConversionResult makeTimeValue(int hour, int minute, int second, int nanosecond, int timezoneInMinutes, ConversionRules rules) {
+    public static ConversionResult makeTimeValue(int hour, int minute, int second, int nanosecond, int timezoneInMinutes) {
         DateTimeValue.MutableDateTimeValue g = new DateTimeValue.MutableDateTimeValue();
         g.typeLabel = BuiltInAtomicType.TIME;
-        if (timezoneInMinutes == CalendarValue.NO_TIMEZONE) {
-            TimeValue.setLexicalValue(g, hour, minute, second, nanosecond);
+        if (g.tzMinutes != timezoneInMinutes) {
+            TimeValue.setValues(g, hour, minute, second, nanosecond, timezoneInMinutes);
         } else {
-            TimeValue.setLexicalValue(g, hour, minute, second, nanosecond, timezoneInMinutes);
+            TimeValue.setValues(g, hour, minute, second, nanosecond);
         }
-        if (g.error != null) {
-            return g.error;
-        }
+        if (g.error != null) return g.error;
         return new TimeValue(g);
     }
 
-    public static ConversionResult makeTimeValue(int hour, int minute, int second, int nanosecond, ConversionRules rules) {
-        return TimeValue.makeTimeValue(hour, minute, second, nanosecond, CalendarValue.NO_TIMEZONE, rules);
+    public static ConversionResult makeTimeValue(int hour, int minute, int second, int nanosecond) {
+        return TimeValue.makeTimeValue(hour, minute, second, nanosecond, CalendarValue.NO_TIMEZONE);
     }
 
     /**
@@ -339,6 +336,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
      * If an error is found, the details will be assigned to the
      * error attribute of the input instance of MutableGDateValue.
      *
+     * @param m - a mutable placeholder for storing the instance values during validation checks
      * @param hour - hour number within an arbitrary day
      * @param minute - minute within the hour specified
      * @param second - second within the minute specified
@@ -346,12 +344,13 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
      * @param timezoneInMinutes - number of minutes to adjust by for the timezone
      * @return the input instance of MutableTimeValue, with the attributes set to their corresponding input values
      */
-    protected static void setLexicalValue(DateTimeValue.MutableDateTimeValue m, int hour, int minute, int second, int nanosecond, int timezoneInMinutes) {
-        TimeValue.setLexicalValue(m, hour, minute, second, nanosecond);
-        m.tzMinutes = timezoneInMinutes;
+    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int hour, int minute, int second, int nanosecond, int timezoneInMinutes) {
+        TimeValue.setValues(m, hour, minute, second, nanosecond);
+        if (m.error != null) return;
+        DateTimeValue.setTimezoneInMinutes(m, timezoneInMinutes);
     }
 
-    protected static void setLexicalValue(DateTimeValue.MutableDateTimeValue m, int hour, int minute, int second, int nanosecond) {
+    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int hour, int minute, int second, int nanosecond) {
         // XSD 1.0 stated that "24" was an invalid hour
         // but XSD 1.1 equates "24" to "00",
         // so the hour must be less than 25
@@ -387,7 +386,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
 
     protected static ValidationFailure badTimeComponent(String msg, int value, String errorCode) {
         ValidationFailure err = new ValidationFailure(
-                "Invalid time component: " + Err.wrap(String.valueOf(value), Err.VALUE) + " (" + msg + ")");
+                "Invalid time component: " + Err.wrap(value + "", Err.VALUE) + " (" + msg + ")");
         err.setErrorCode(errorCode);
         return err;
     }

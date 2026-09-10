@@ -9,7 +9,6 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.AccessorFn;
-import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.str.*;
 import net.sf.saxon.trans.NoDynamicContextException;
@@ -35,6 +34,10 @@ public class GMonthValue extends GDateValue {
         super(m);
     }
 
+    private GMonthValue(DateTimeValue.MutableDateTimeValue m) {
+        super(m);
+    }
+
     protected EnumSet<AccessorFn.Component> getDefinedComponents() {
         return EnumSet.of(AccessorFn.Component.MONTH);
     }
@@ -57,22 +60,51 @@ public class GMonthValue extends GDateValue {
         return new GMonthValue(g);
     }
 
-    public static ConversionResult makeGMonthValue(int month, int timezoneInMinutes, ConversionRules rules) {
-        MutableGDateValue g = new MutableGDateValue();
+    /**
+     * Creates an instance of GDMonthValue.  Includes validation
+     * checks.  If a validation error is detected, an instance of
+     * ValidationFailure will be returned instead.
+     *
+     * @param month - number of a month within an arbitrary year
+     * @param timezoneInMinutes - number of minutes to adjust by for the timezone
+     * @return - an instance of GMonthValue or ValidationFailure
+     */
+    public static ConversionResult makeGMonthValue(int month, int timezoneInMinutes) {
+        DateTimeValue.MutableDateTimeValue g = new DateTimeValue.MutableDateTimeValue();
         g.typeLabel = BuiltInAtomicType.G_MONTH;
-        GMonthValue.setLexicalValue(g, month, timezoneInMinutes);
-        if (g.error != null) {
-            return g.error;
+        if (g.tzMinutes != timezoneInMinutes) {
+            GMonthValue.setValues(g, month, timezoneInMinutes);
+        } else {
+            GMonthValue.setValues(g, month);
         }
+        if (g.error != null) return g.error;
         return new GMonthValue(g);
     }
 
-    protected static void setLexicalValue(MutableGDateValue m, int month, int timezoneInMinutes) {
-        GMonthValue.setLexicalValue(m, month);
-        m.tzMinutes = timezoneInMinutes;
+    public static ConversionResult makeGMonthValue(int month) {
+        return GMonthValue.makeGMonthValue(month, CalendarValue.NO_TIMEZONE);
     }
 
-    protected static void setLexicalValue(MutableGDateValue m, int month) {
+    /**
+     * Checks whether the component parts of a gMonth value, in an
+     * arbitrary year, are valid per the rules specified in XPath and
+     * XQuery Functions and Operators 4.0.
+     * If the input values are valid, they will be assigned to their
+     * corresponding attributes in the input instance of MutableGDateValue.
+     * If an error is found, the details will be assigned to the
+     * error attribute of the input instance of MutableGDateValue.
+     *
+     * @param m - a mutable placeholder for storing the instance values during validation checks
+     * @param month - number of a month within an arbitrary year
+     * @param timezoneInMinutes - number of minutes to adjust by for the timezone
+     */
+    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int month, int timezoneInMinutes) {
+        GMonthValue.setValues(m, month);
+        if (m.error != null) return;
+        DateTimeValue.setTimezoneInMinutes(m, timezoneInMinutes);
+    }
+
+    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int month) {
         if (month < 1 || month > 12) {
             m.error = badDateComponent("Month must be between 1 and 12 (inclusive)", month, "FODT0006");
             return;
@@ -80,6 +112,13 @@ public class GMonthValue extends GDateValue {
         m.month = (byte) month;
     }
 
+    /**
+     * Constructs an instance of GMonthValue without any validation
+     * of the input values.
+     *
+     * @param month - number of a month within an arbitrary year
+     * @param tz - number of minutes to adjust by for the timezone
+     */
     public GMonthValue(byte month, int tz) {
         this(month, tz, BuiltInAtomicType.G_MONTH);
     }

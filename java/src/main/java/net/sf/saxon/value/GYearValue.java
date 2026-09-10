@@ -33,6 +33,10 @@ public class GYearValue extends GDateValue {
         super(m);
     }
 
+    private GYearValue(DateTimeValue.MutableDateTimeValue m) {
+        super(m);
+    }
+
     public static ConversionResult makeGYearValue(UnicodeString value, ConversionRules rules) {
         MutableGDateValue g = new MutableGDateValue();
         final UnicodeString trimmed = Whitespace.trim(value);
@@ -51,23 +55,53 @@ public class GYearValue extends GDateValue {
         return new GYearValue(g);
     }
 
-    public static ConversionResult makeGYearValue(int year, int timezoneInMinutes, ConversionRules rules) {
-        MutableGDateValue g = new MutableGDateValue();
+    /**
+     * Creates an instance of GYearValue.  Includes validation
+     * checks.  If a validation error is detected, an instance of
+     * ValidationFailure will be returned instead.
+     *
+     * @param year - number of a year in the Gregorian calendar
+     * @param timezoneInMinutes - number of minutes to adjust by for the timezone
+     * @param allowYearZero - true if the year '0000' is allowed (per XSD 1.1), false if it is not (per XSD 1.0)
+     * @return an instance of GYearValue or ValidationFailure
+     */
+    public static ConversionResult makeGYearValue(int year, int timezoneInMinutes, boolean allowYearZero) {
+        DateTimeValue.MutableDateTimeValue g = new DateTimeValue.MutableDateTimeValue();
         g.typeLabel = BuiltInAtomicType.G_YEAR;
-        setLexicalValue(g, year, timezoneInMinutes, rules.isAllowYearZero());
-        if (g.error != null) {
-            return g.error;
+        if (g.tzMinutes != timezoneInMinutes) {
+            GYearValue.setValues(g, year, timezoneInMinutes, allowYearZero);
+        } else {
+            GYearValue.setValues(g, year, allowYearZero);
         }
+        if (g.error != null) return g.error;
         return new GYearValue(g);
     }
 
-
-    protected static void setLexicalValue(GDateValue.MutableGDateValue m, int year, int timezoneInMinutes, boolean allowYearZero) {
-        GYearValue.setLexicalValue(m, year, allowYearZero);
-        m.tzMinutes = timezoneInMinutes;
+    public static ConversionResult makeGYearValue(int year, boolean allowYearZero) {
+        return GYearValue.makeGYearValue(year, CalendarValue.NO_TIMEZONE, allowYearZero);
     }
 
-    protected static void setLexicalValue(GDateValue.MutableGDateValue m, int year, boolean allowYearZero) {
+    /**
+     * Checks whether the component parts of a gYear value
+     * are valid per the rules specified in XPath and XQuery Functions
+     * and Operators 4.0.
+     * If the input values are valid, they will be assigned to their
+     * corresponding attributes in the input instance of MutableGDateValue.
+     * If an error is found, the details will be assigned to the
+     * error attribute of the input instance of MutableGDateValue.
+     *
+     * @param m - a mutable placeholder for storing the instance values during validation checks
+     * @param year - number of a year in the Gregorian calendar
+     * @param timezoneInMinutes - number of minutes to adjust by for the timezone
+     * @param allowYearZero - true if the year '0000' is allowed (per XSD 1.1), false if it is not (per XSD 1.0)
+     */
+    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int year, int timezoneInMinutes, boolean allowYearZero) {
+        GYearValue.setValues(m, year, allowYearZero);
+        if (m.error != null) return;
+        DateTimeValue.setTimezoneInMinutes(m, timezoneInMinutes);
+    }
+
+    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int year, boolean allowYearZero) {
         m.hasNoYearZero = !allowYearZero;
 
         // "0000" is an illegal year value per XSD 1.0 (https://www.w3.org/TR/xmlschema-2/#truncatedformats)
@@ -82,6 +116,14 @@ public class GYearValue extends GDateValue {
     }
 
 
+    /**
+     * Constructs an instance of GYearValue without any validation
+     * of the input values.
+     *
+     * @param year - number of a year in the Gregorian calendar
+     * @param tz - number of minutes to adjust by for the timezone
+     * @param xsd10 - false if the year '0000' is allowed (per XSD 1.1), true if it is not (per XSD 1.0)
+     */
     public GYearValue(int year, int tz, boolean xsd10) {
         this(new MutableGDateValue(year, 1, 1, xsd10,tz, BuiltInAtomicType.G_YEAR));
     }

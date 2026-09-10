@@ -9,7 +9,6 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.AccessorFn;
-import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.str.*;
 import net.sf.saxon.trans.NoDynamicContextException;
@@ -29,7 +28,11 @@ public class GDayValue extends GDateValue {
     private static final Pattern regex =
             Pattern.compile("---([0-9][0-9])(Z|[+-][0-9][0-9]:[0-9][0-9])?");
 
-    protected GDayValue(MutableGDateValue m) {
+    private GDayValue(MutableGDateValue m) {
+        super(m);
+    }
+
+    private GDayValue(DateTimeValue.MutableDateTimeValue m) {
         super(m);
     }
 
@@ -62,17 +65,22 @@ public class GDayValue extends GDateValue {
      *
      * @param day - number of a day within an arbitrary month
      * @param timezoneInMinutes - number of minutes to adjust by for the timezone
-     * @param rules - configuration rules relevant to converting between datatypes
      * @return - an instance of GDayValue
      */
-    public static ConversionResult makeGDayValue(int day, int timezoneInMinutes, ConversionRules rules) {
-        MutableGDateValue g = new MutableGDateValue();
+    public static ConversionResult makeGDayValue(int day, int timezoneInMinutes) {
+        DateTimeValue.MutableDateTimeValue g = new DateTimeValue.MutableDateTimeValue();
         g.typeLabel = BuiltInAtomicType.G_DAY;
-        GDayValue.setLexicalValue(g, day, timezoneInMinutes);
-        if (g.error != null) {
-            return g.error;
+        if (g.tzMinutes != timezoneInMinutes) {
+            GDayValue.setValues(g, day, timezoneInMinutes);
+        } else {
+            GDayValue.setValues(g, day);
         }
+        if (g.error != null) return g.error;
         return new GDayValue(g);
+    }
+
+    public static ConversionResult makeGDayValue(int day) {
+        return GDayValue.makeGDayValue(day, CalendarValue.NO_TIMEZONE);
     }
 
     /**
@@ -88,12 +96,13 @@ public class GDayValue extends GDateValue {
      * @param timezoneInMinutes - number of minutes to adjust by for the timezone
      * @return the input instance of MutableDGateValue, with the day attribute set to the input day number
      */
-    protected static void setLexicalValue(MutableGDateValue m, int day, int timezoneInMinutes) {
-        GDayValue.setLexicalValue(m, day);
-        m.tzMinutes = timezoneInMinutes;
+    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int day, int timezoneInMinutes) {
+        GDayValue.setValues(m, day);
+        if (m.error != null) return;
+        DateTimeValue.setTimezoneInMinutes(m, timezoneInMinutes);
     }
 
-    protected static void setLexicalValue(MutableGDateValue m, int day) {
+    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int day) {
         if (day < 1 || day > 31) {
             m.error = badDateComponent("Day must be between 1 and 31 (inclusive).", day, "FODT0006");
             return;
@@ -101,7 +110,14 @@ public class GDayValue extends GDateValue {
         m.day = (byte) day;
     }
 
-
+    /**
+     * Constructs an instance of GDayValue without any validation
+     * of the input values.
+     *
+     * @param day - number of a day within an arbitrary month
+     * @param tz - number of minutes to adjust by for the timezone
+     * @return - an instance of GDayValue
+     */
     public GDayValue(byte day, int tz) {
         this(day, tz, BuiltInAtomicType.G_DAY);
     }

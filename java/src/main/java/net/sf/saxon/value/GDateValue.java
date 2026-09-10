@@ -78,6 +78,14 @@ public abstract class GDateValue extends CalendarValue {
         this.hasNoYearZero = m.hasNoYearZero;
     }
 
+    protected GDateValue(DateTimeValue.MutableDateTimeValue m) {
+        super(m.typeLabel, m.tzMinutes);
+        this.year = m.year;
+        this.month = m.month;
+        this.day = m.day;
+        this.hasNoYearZero = m.hasNoYearZero;
+    }
+
     protected EnumSet<AccessorFn.Component> getDefinedComponents() {
         return EnumSet.of(AccessorFn.Component.YEAR, AccessorFn.Component.MONTH, AccessorFn.Component.DAY);
     }
@@ -355,20 +363,34 @@ public abstract class GDateValue extends CalendarValue {
     }
 
 
-    protected static void setLexicalValue(MutableGDateValue m, int year, int month, int day, int timezoneInMinutes, boolean allowYearZero) {
-        GDateValue.setLexicalValue(m, year, month, day, allowYearZero);
-        m.tzMinutes = timezoneInMinutes;
+    /**
+     * Checks whether the component parts of a gDate value
+     * are valid per the rules specified in XPath and XQuery Functions
+     * and Operators 4.0.
+     * If the input values are valid, they will be assigned to their
+     * corresponding attributes in the input instance of MutableGDateValue.
+     * If an error is found, the details will be assigned to the
+     * error attribute of the input instance of MutableGDateValue.
+     *
+     * @param m - a mutable placeholder for storing the instance values during validation checks
+     * @param year - number of a year in the Gregorian calendar
+     * @param month - number of a month within the specified year
+     * @param day - number of a day within the specified month
+     * @param timezoneInMinutes - number of minutes to adjust by for the timezone
+     * @param allowYearZero - true if the year '0000' is allowed (per XSD 1.1), false if it is not (per XSD 1.0)
+     */
+    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int year, int month, int day, int timezoneInMinutes, boolean allowYearZero) {
+        GDateValue.setValues(m, year, month, day, allowYearZero);
+        if (m.error != null) return;
+        DateTimeValue.setTimezoneInMinutes(m, timezoneInMinutes);
     }
 
-    protected static void setLexicalValue(MutableGDateValue m, int year, int month, int day, boolean allowYearZero) {
-        GYearValue.setLexicalValue(m, year, allowYearZero);
-        if (m.error != null) {
-            return;
-        }
-        GMonthDayValue.setLexicalValue(m, month, day);
-        if (m.error != null) {
-            return;
-        }
+    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int year, int month, int day, boolean allowYearZero) {
+        GYearValue.setValues(m, year, allowYearZero);
+        if (m.error != null) return;
+
+        GMonthDayValue.setValues(m, month, day); // Includes checks that month is between 1-12 (inc) and  day is between 1-31 (inc)
+        if (m.error != null) return;
 
         if (month == 2 && day > 28 && !(GDateValue.isLeapYear(year))) {
             m.error = badDateComponent("There are only 28 days in February " + year + ", as it is not a leap year.", day, "FODT0006");
@@ -392,7 +414,7 @@ public abstract class GDateValue extends CalendarValue {
 
     protected static ValidationFailure badDateComponent(String msg, int value, String errorCode) {
         ValidationFailure err = new ValidationFailure(
-                "Invalid date component: " + Err.wrap(String.valueOf(value), Err.VALUE) + " (" + msg + ")");
+                "Invalid date component: " + Err.wrap(value + "", Err.VALUE) + " (" + msg + ")");
         err.setErrorCode(errorCode);
         return err;
     }
