@@ -307,17 +307,17 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("json-doc", 2, e -> e.populate(JsonDoc::new, AnyItemType.getInstance(), OPT, LATE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
-                .setOptionDetails(ParseJsonFn.OPTION_DETAILS));
+                .setOptionDetails(ParseJsonFn.makeOptionsParameter(40)));
 
         register("json-to-xml", 2, e -> e.populate(JsonToXMLFn::new, AnyItemType.getInstance(), OPT, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
-                .setOptionDetails(JsonToXMLFn.OPTION_DETAILS));
+                .setOptionDetails(JsonToXMLFn.makeOptionsParameter(40)));
 
         register("load-xquery-module", 2, e -> e.populate(LoadXqueryModule::new, MapType.ANY_MAP_TYPE, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null) // null or EMPTY?
                 .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
-                .setOptionDetails(LoadXqueryModule.makeOptionsParameter()));
+                .setOptionDetails(LoadXqueryModule.makeOptionsParameter(40)));
 
         register("lowest", 1, e -> e.populate(HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null));
@@ -385,7 +385,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("parse-json", 2, e -> e.populate(ParseJsonFn::new, AnyItemType.getInstance(), OPT, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY)
                 .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
-                .setOptionDetails(ParseJsonFn.OPTION_DETAILS));
+                .setOptionDetails(ParseJsonFn.makeOptionsParameter(40)));
 
         //#if EE==true || PE==true
         register("parse-uri", 1, 2, e -> e.populate(ParseURI::new, MapType.ANY_MAP_TYPE, ONE, 0)
@@ -547,7 +547,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                                                    OPT, LATE)
                 .arg(0, AnyNodeTest.getInstance(), OPT | ABS, EMPTY)
                 .arg(1, MapType.ANY_MAP_TYPE, OPT | ABS, null)
-                .setOptionDetails(XMLToJsonFn.makeOptionsParameter()));
+                .setOptionDetails(XMLToJsonFn.makeOptionsParameter(40)));
 
 
     }

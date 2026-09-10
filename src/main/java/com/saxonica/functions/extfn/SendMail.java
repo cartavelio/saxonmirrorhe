@@ -46,7 +46,7 @@ public class SendMail extends SystemFunction {
     public static OptionsParameter OPTION_DETAILS;
 
     static {
-        OptionsParameter options = new OptionsParameter();
+        OptionsParameter options = new OptionsParameter(40);
         options.addRequiredOption("smtp-server", SequenceType.SINGLE_STRING);
         options.addRequiredOption("to", SequenceType.STRING_SEQUENCE);
         options.addAllowedOption("cc", SequenceType.STRING_SEQUENCE, EmptyAtomicSequence.getInstance());

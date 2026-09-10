@@ -43,7 +43,7 @@ public class XdmToJsonFn extends SystemFunction {
                     StaticProperty.ALLOWS_ONE);
 
     static {
-        OptionsParameter parseJsonOptions = new OptionsParameter();
+        OptionsParameter parseJsonOptions = new OptionsParameter(40);
         parseJsonOptions.addAllowedOption("indent", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         parseJsonOptions.addAllowedOption("uniform", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         parseJsonOptions.addAllowedOption("escape-solidus", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);

@@ -13,15 +13,13 @@ import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.AnyItemType;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.JavaExternalObjectType;
-import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
 import net.sf.saxon.value.SequenceType;
 
 import java.lang.reflect.*;
+import java.lang.reflect.Type;
 import java.util.function.Supplier;
 
 
@@ -912,7 +910,8 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
     /**
      * Utility method available for use in called extension functions to check that
      * a supplied argument conforms to a required type, and perform conversion
-     * using the function conversion rules if not
+     * using the function conversion rules if not. The conversion rules applied
+     * are those of the XPath 3.1 specification.
      * @param suppliedValue the value supplied by the caller
      * @param requiredType the type required for the argument
      * @param functionName the name of the function (for diagnostics)
@@ -928,11 +927,10 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
             Sequence suppliedValue, SequenceType requiredType,
             StructuredQName functionName, int argPosition, XPathContext context)
     throws XPathException {
-        TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
         Supplier<RoleDiagnostic> role =
                 () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, functionName.getDisplayName(), argPosition);
-        return th.applyFunctionConversionRules(
-                suppliedValue.materialize(), requiredType, role, Loc.NONE);
+        return CoercionRules.forVersion(31).coerce(
+                suppliedValue.materialize(), requiredType, context.getConfiguration(), role, Loc.NONE);
     }
 
     /**

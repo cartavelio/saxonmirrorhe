@@ -372,7 +372,7 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
         register("parse", 2, e -> e.populate( Parse::new, NodeKindTest.DOCUMENT, ONE, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, EMPTY)
-                .setOptionDetails(Doc_2.makeOptionsParameter()));
+                .setOptionDetails(Doc_2.makeOptionsParameter(40)));
 
         //#if CSHARP==false
         register("parse-dateTime", 2, e -> e.populate( ParseDateTime::new, BuiltInAtomicType.ANY_ATOMIC, ONE, 0)

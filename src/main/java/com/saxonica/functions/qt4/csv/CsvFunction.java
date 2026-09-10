@@ -1,8 +1,5 @@
 package com.saxonica.functions.qt4.csv;
 
-import java.util.HashSet;
-import java.util.List;
-
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.OptionsParameter;
@@ -19,6 +16,8 @@ import net.sf.saxon.value.SequenceExtent;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -34,7 +33,7 @@ public abstract class CsvFunction extends SystemFunction {
      * @return an OptionsParameter instance with the core options already added.
      */
     static OptionsParameter coreOptions() {
-        OptionsParameter opts = new OptionsParameter();
+        OptionsParameter opts = new OptionsParameter(40);
         List<StringValue> defaultRowDelimiter = Stream.of("\r\n", "\n", "\r").map(StringValue::new).collect(Collectors.toList());
         opts.addAllowedOption("trim-whitespace", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         opts.addAllowedOption("quote-character", SequenceType.SINGLE_STRING, new StringValue("\""));
