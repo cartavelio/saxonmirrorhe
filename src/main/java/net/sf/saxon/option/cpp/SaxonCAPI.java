@@ -123,7 +123,7 @@ public class SaxonCAPI {
         return handle.rawValue();
     }
 
-    @CEntryPoint(name = "j_handles_destroy", exceptionHandler = SaxonCExceptionHandler.class)
+    @CEntryPoint(name = "j_handles_destroy")
    	public static void destroy(IsolateThread thread, ObjectHandle handle) {
    		objectHandles.destroy(handle);
    	}
@@ -302,8 +302,8 @@ public class SaxonCAPI {
     }
 
 
-    @CEntryPoint(name = "j_applyToConfiguration", exceptionHandler = SaxonCExceptionHandler.class)
-    public static synchronized void applyToConfiguration(IsolateThread thread, ObjectHandle processorRef, ObjectHandle processorDataRef) throws SaxonApiException {
+    @CEntryPoint(name = "j_applyToConfiguration")
+    public static synchronized void applyToConfiguration(IsolateThread thread, ObjectHandle processorRef, ObjectHandle processorDataRef){
 
         Processor processor = objectHandles.get(processorRef);
         if (debug) {
@@ -383,11 +383,7 @@ public class SaxonCAPI {
             } else if (name.equals("xsiloc")) {
                 processor.setConfigurationProperty(Feature.USE_XSI_SCHEMA_LOCATION, "on".equals(value));
             } else if (name.startsWith("http://saxon.sf.net/feature/")) {
-                try {
-                    processor.setConfigurationProperty(name, value);
-                } catch (IllegalArgumentException err) {
-                    throw new SaxonApiException(err.getMessage());
-                }
+                processor.setConfigurationProperty(name, value);
             }
         }
 
