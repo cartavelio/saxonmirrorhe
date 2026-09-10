@@ -68,9 +68,13 @@
             <xsl:variable name="MyProto" select="."/>
             
             <p class="fn-sig">
-                <xsl:value-of
-                    select="concat(../../name,'(',string-join(for $arg in arg return concat('$',$arg/@name, ' as ', $arg/@type), ', ') ,')', ' &#x2794;  ',@return-type)"
-                />
+              <xsl:sequence select="concat(../../name, '(')"/>
+              <xsl:for-each select="arg">
+                <xsl:if test="position() gt 1">, </xsl:if>
+                <xsl:value-of select="concat('$', @name, ' as ', @type, 
+                                             (if (@default) then ':=' || @default else ''))"/>
+              </xsl:for-each>
+              <xsl:sequence select="concat(')', ' &#x2794;  ',@return-type)"/>
             </p>
             <xsl:apply-templates select="description" mode="f"/>
             <xsl:if test="$output-spec-references">
@@ -78,9 +82,9 @@
                     <xsl:value-of select="fc:specs(in-spec)"/>
                 </aside>
             </xsl:if>
-            <table class="fn-prototype" style="margin-bottom:10px;">
+            <table class="fn-prototype" style="margin-bottom:10px;width:100%;">
                 <tr>
-                    <td width="470" align="left" colspan="4" style="border-top:solid 1px;">
+                    <td width="470" align="left" colspan="5" style="border-top:solid 1px;">
                         <p>
                             <i>
                                 <xsl:value-of select="if (exists(arg)) then 'Arguments' else 'There are no arguments'"/>
@@ -101,6 +105,12 @@
                                 <xsl:value-of select="@type"/>
                             </p>
                         </td>
+                        <td valign="top" width="150">
+                            <p>
+                              <xsl:if test="@default">:= </xsl:if>
+                              <xsl:value-of select="@default"/>
+                            </p>
+                        </td>
                         <td valign="top" width="200">
                             <p>
                                 <xsl:value-of select="@desc"/>
@@ -115,7 +125,7 @@
                         </p>
                     </td>
                     
-                    <td style="border-top:solid 1px #3D5B96; border-bottom:solid 1px;" colspan="2">
+                    <td style="border-top:solid 1px #3D5B96; border-bottom:solid 1px;" colspan="3">
                         <p>
                             <xsl:value-of select="$MyProto/@return-type"/>
                         </p>

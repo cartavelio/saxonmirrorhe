@@ -130,6 +130,7 @@
   <span class="flink" data-href="{fc:name}" data-ns="{fc:namespace-ref(fc:name/@namespace)}"
    data-platform="{(.//fc:saxon-edition/@platform, $default.platform, 'ALL')[1]}">
    <xsl:value-of select="fc:name"/>
+   <xsl:if test="(.//text() ! contains(., 'FIXME:')) = true()">***</xsl:if>
   </span>
   <br/>
  </xsl:template>

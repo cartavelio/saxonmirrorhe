@@ -58,13 +58,13 @@ dependencies {
                               "configuration" to "doxygenOutput")))
 
   // N.B. the gen_doc_icu_uca task depends on using the current build!
-  documentation(project(":java", "runtimeElements"))
+  documentation("com.saxonica:Saxon-EE:12.9")
 
   // We need a license to build SEFs
   documentation(files(saxonBuild.saxonLicenseDir))
 
   // The documentationx configuration doesn't have a license file
-  documentationx(project(":java", "runtimeElements"))
+  documentationx("net.sf.saxon:Saxon-HE:12.9")
 
   implementation("xom:xom:1.3.5")
   implementation("org.jdom:jdom:1.1.3")
