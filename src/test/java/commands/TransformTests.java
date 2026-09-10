@@ -483,11 +483,11 @@ public class TransformTests {
     public static class RequireStreaming implements Initializer {
         @Override
         public void initialize(Configuration config) {
-            config.setSourceResolver((source, config1) -> {
+            config.setSourceResolver((source, options, config1) -> {
                 if (source instanceof NodeInfo && source.getSystemId().endsWith("caffo/Input.xml")) {
                     fail("Source tree for caffo/Input.xml has been built in memory");
                 }
-                return config1.resolveSource(source, config1);
+                return config1.resolveSource(source, options, config1);
             });
         }
     }
