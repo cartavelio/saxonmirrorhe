@@ -31,7 +31,7 @@
     <spec name="XSLT 3.0" level="Recommendation" date="08 June 2017"
       link="https://www.w3.org/TR/xslt-30/"/>
     <details link="conformance/xslt30" name="XSLT 3.0 conformance"/>
-    <details JSlink="conformance/xslt30" JSname="XSLT 3.0 and XPath 3.1 Conformance"/>
+    <details JSlink="conformance/xslt30" JSname="XSLT 3.0 and XPath 3.1 conformance"/>
     <products>
       <product J="HE" CS="HE" C="HE" JS="HE"/>
     </products>
@@ -63,7 +63,7 @@
     <spec name="XSLT 3.0" level="Recommendation" date="08 June 2017"
       link="https://www.w3.org/TR/xslt-30/"/>
     <details link="conformance/xslt30" name="XSLT 3.0 conformance"/>
-    <details JSlink="conformance/xslt30" JSname="XSLT 3.0 and XPath 3.1 Conformance"/>
+    <details JSlink="conformance/xslt30" JSname="XSLT 3.0 and XPath 3.1 conformance"/>
     <products>
       <product J="HE" CS="HE" C="HE" JS="HE"/>
     </products>
@@ -79,7 +79,7 @@
     <spec name="XSLT 3.0" level="Recommendation" date="08 June 2017"
       link="https://www.w3.org/TR/xslt-30/"/>
     <details link="conformance/xslt30" name="XSLT 3.0 conformance"/>
-    <details JSlink="conformance/xslt30" JSname="XSLT 3.0 and XPath 3.1 Conformance"/>
+    <details JSlink="conformance/xslt30" JSname="XSLT 3.0 and XPath 3.1 conformance"/>
     <products>
       <product J="HE" CS="HE" C="HE" JS="HE"/>
     </products>
@@ -108,7 +108,7 @@
     <spec name="XSLT 3.0" level="Recommendation" date="08 June 2017"
       link="https://www.w3.org/TR/xslt-30/"/>
     <details link="conformance/xslt30" name="XSLT 3.0 conformance"/>
-    <details JSlink="conformance/xslt30" JSname="XSLT 3.0 and XPath 3.1 Conformance"/>
+    <details JSlink="conformance/xslt30" JSname="XSLT 3.0 and XPath 3.1 conformance"/>
     <products>
       <product J="HE" CS="HE" C="HE" JS="HE"/>
     </products>
@@ -124,7 +124,7 @@
     <spec name="XSLT 3.0" level="Recommendation" date="08 June 2017"
       link="https://www.w3.org/TR/xslt-30/"/>
     <details link="conformance/xslt30" name="XSLT 3.0 conformance"/>
-    <details JSlink="conformance/xslt30" JSname="XSLT 3.0 and XPath 3.1 Conformance"/>
+    <details JSlink="conformance/xslt30" JSname="XSLT 3.0 and XPath 3.1 conformance"/>
     <products>
       <product J="HE" CS="HE" C="HE" JS="HE"/>
     </products>
@@ -140,7 +140,7 @@
     <spec name="XSLT 3.0" level="Recommendation" date="08 June 2017"
       link="https://www.w3.org/TR/xslt-30/"/>
     <details link="conformance/xslt30" name="XSLT 3.0 conformance"/>
-    <details JSlink="conformance/xslt30" JSname="XSLT 3.0 and XPath 3.1 Conformance"/>
+    <details JSlink="conformance/xslt30" JSname="XSLT 3.0 and XPath 3.1 conformance"/>
     <products>
       <product J="HE" CS="HE" C="PE" JS="HE"/>
     </products>
@@ -160,7 +160,7 @@
     <spec name="XPath 3.1" level="Recommendation" date="21 March 2017"
       link="https://www.w3.org/TR/xpath-31/"/>
     <details link="conformance/xpath31" name="XPath 3.1 conformance"/>
-    <details JSlink="conformance/xslt30" JSname="XSLT 3.0 and XPath 3.1 Conformance"/>
+    <details JSlink="conformance/xslt30" JSname="XSLT 3.0 and XPath 3.1 conformance"/>
     <products>
       <product J="HE" CS="HE" C="HE" JS="HE"/>
     </products>
@@ -191,7 +191,7 @@
     <spec name="XPath 3.1" level="Recommendation" date="21 March 2017"
       link="https://www.w3.org/TR/xpath-31/"/>
     <details link="conformance/xpath31" name="XPath 3.1 conformance"/>
-    <details JSlink="conformance/xslt30" JSname="XSLT 3.0 and XPath 3.1 Conformance"/>
+    <details JSlink="conformance/xslt30" JSname="XSLT 3.0 and XPath 3.1 conformance"/>
     <products>
       <product J="HE" CS="HE" C="PE" JS="HE"/>
     </products>
@@ -370,8 +370,8 @@
       <p>Allows hot-spot code generation for XSLT, XQuery, XPath, and XML Schema, typically giving a
         25% performance boost.</p>
     </description>
-    <details link="using-xsl/compiling" name="Compiling a Stylesheet"/>
-    <details link="using-xquery/querycompilation" name="Compiling Queries"/>
+    <details link="using-xsl/compiling" name="Compiling a stylesheet"/>
+    <details link="using-xquery/querycompilation" name="Compiling queries"/>
     <products>
       <product J="EEV"/>
     </products>
@@ -399,8 +399,8 @@
         gives much faster loading of frequently used stylesheets, and also enables in-browser
         execution using SaxonJS.</p>
     </description>
-    <details link="using-xsl/compiling" name="Compiling a Stylesheet" />
-    <details JSlink="starting/export" JSname="Exporting stylesheets for Saxon-JS"/>
+    <details link="using-xsl/compiling" name="Compiling a stylesheet" />
+    <details JSlink="starting/export" JSname="Exporting stylesheets for SaxonJS"/>
     <products>
       <product J="EET" CS="EET" C="EET" JS="HE"/>
     </products>
@@ -417,8 +417,8 @@
         provided the package only uses features available in that edition. Note that this edition
         does not provide the ability to create compiled stylesheet packages.</p>
     </alt-description>
-    <details link="using-xsl/compiling" name="Compiling a Stylesheet"/>
-    <details JSlink="starting/export" JSname="Exporting stylesheets for Saxon-JS"/>
+    <details link="using-xsl/compiling" name="Compiling a stylesheet"/>
+    <details JSlink="starting/export" JSname="Exporting stylesheets for SaxonJS"/>
     <products>
       <product J="HE" CS="HE" C="HE" JS="HE"/>
     </products>
@@ -493,7 +493,7 @@
       <p>Provides <code>saxon:stream()</code>, an extension function to allow large documents to be
         processed without holding the whole document in memory.</p>
     </description>
-    <details link="sourcedocs/streaming" name="Streaming of Large Documents" subpages="has-subpages"/>
+    <details link="streaming" name="Streaming XML documents" subpages="has-subpages"/>
     <products>
       <product J="EEV" CS="EEV" C="EEV"/>
     </products>
@@ -505,7 +505,7 @@
       <p>Allows large documents to be processed without holding the whole document in memory.
         Provides the streaming features of the XSLT 3.0 specification.</p>
     </description>
-    <details link="sourcedocs/streaming" name="Streaming of Large Documents" subpages="has-subpages"/>
+    <details link="streaming" name="Streaming XML documents" subpages="has-subpages"/>
     <products>
       <product J="EET" CS="EET" C="EET"/>
     </products>
@@ -649,7 +649,7 @@
   
   <feature class="Localization">
     <shortName>Formatting numbers in English</shortName>
-    <details link="localization/number-formatting" name="Formatting Numbers"/>
+    <details link="localization/number-formatting" name="Formatting numbers"/>
     <description>
       <p>Numbers can be formatted as words in English.</p>
     </description>
@@ -662,7 +662,7 @@
   
   <feature class="Localization">
     <shortName>Formatting dates in English</shortName>
-    <details link="localization/date-formatting" name="Formatting Dates"/>
+    <details link="localization/date-formatting" name="Formatting dates"/>
     <description>
       <p>Dates can be formatted as words in English.</p>
     </description>
@@ -702,7 +702,7 @@
   
   <feature class="Localization" id="ICU-numbers">
     <shortName>Formatting numbers using ICU</shortName>
-    <details link="localization/ICU-numbers-and-dates" name="Numbers and Dates from ICU" subpages="has-subpages"/>
+    <details link="localization/ICU-numbers-and-dates" name="Numbers and dates from ICU" subpages="has-subpages"/>
     <description>
       <p>Full support for formatting numbers as words in different languages is provided using the <a
         href="http://site.icu-project.org/" class="bodylink">ICU4J library</a>.</p>
@@ -714,7 +714,7 @@
   
   <feature class="Localization" id="ICU-dates">
     <shortName>Formatting dates using ICU</shortName>
-    <details link="localization/ICU-numbers-and-dates" name="Numbers and Dates from ICU" subpages="has-subpages"/>
+    <details link="localization/ICU-numbers-and-dates" name="Numbers and dates from ICU" subpages="has-subpages"/>
     <description>
       <p>Full support for formatting dates as words in different languages is provided using the <a
         href="http://site.icu-project.org/" class="bodylink">ICU library</a> for the relevant platform (ICU4J
@@ -735,7 +735,7 @@
   
   <feature class="Localization">
     <shortName>Sorting and collations using JDK locales</shortName>
-    <details link="localization/sorting-and-collations" name="Sorting and Collations"/>
+    <details link="localization/sorting-and-collations" name="Sorting and collations"/>
     <description>
       <p>Support for sorting and comparison of strings using the Unicode Collation Algorithm uses the
         collation facilities available directly from the JDK.</p>
@@ -890,7 +890,7 @@
     <description>
       <p>Indexing of a supplied DOM tree to provide fast navigation (the Domino Model).</p>
     </description>
-    <details link="sourcedocs/domino" name="Domino Tree Model"/>
+    <details link="sourcedocs/domino" name="Domino tree model"/>
     <products>
       <product J="EEV"/>
     </products>
