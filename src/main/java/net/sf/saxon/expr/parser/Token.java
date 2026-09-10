@@ -330,69 +330,77 @@ public abstract class Token {
      */
     public static final int FOR_SLIDING = 74;
     /**
-     * "for member" (XQuery 4.0)
+     * "for member" (XPath/XQuery 4.0)
      */
     public static final int FOR_MEMBER = 75;
+    /**
+     * "for key" (XPath/XQuery 4.0)
+     */
+    public static final int FOR_KEY = 76;
+    /**
+     * "for value" (XPath/XQuery 4.0)
+     */
+    public static final int FOR_VALUE = 77;
 
     // map colon key-entry separator
     /**
      * ":" (XPath 3.0 maps)
      */
-    public static final int COLON = 76;
+    public static final int COLON = 86;
     /**
      * Arrow operator "=&gt;" (XQuery 3.1)
      */
-    public static final int FAT_ARROW = 77;
+    public static final int FAT_ARROW = 87;
     /**
      * First part of a string template. Token value includes all the text from ``[ up to the first `{
      */
-    public static final int STRING_CONSTRUCTOR_INITIAL = 78;
+    public static final int STRING_CONSTRUCTOR_INITIAL = 88;
     /**
      * "otherwise" (Saxon extension)
      */
-    public static final int OTHERWISE = 79;
+    public static final int OTHERWISE = 89;
     /**
      * "andAlso" (Saxon extension)
      */
-    public static final int AND_ALSO = 80;
+    public static final int AND_ALSO = 90;
     /**
      * "orElse" (Saxon extension)
      */
-    public static final int OR_ELSE = 81;
+    public static final int OR_ELSE = 91;
 
     /**
      * Keyword "while"
      */
-    public static final int WHILE = 82;
+    public static final int WHILE = 92;
 
     /**
      * Thin arrow operator "-&gt;" (XQuery 4.0)
      */
-    public static final int THIN_ARROW = 83;
+    public static final int THIN_ARROW = 93;
 
     /**
      * Mathematical multiply operator "×"
      */
 
-    public static final int MATH_MULT = 84;
+    public static final int MATH_MULT = 94;
 
     /**
      * Mathematical divide operator "÷"
      */
 
-    public static final int MATH_DIVIDE = 85;
+    public static final int MATH_DIVIDE = 95;
 
     /**
      * Arrow operator "=&gt;" (XQuery 3.1)
      */
-    public static final int MAPPING_ARROW = 86;
+    public static final int MAPPING_ARROW = 96;
 
     /**
      * Keyword "replace" as used in 4.0 "update map|array EXPR replace EXPR with EXPR"; needs
      * disambiguating from its use in XQuery Update
      */
 
-    public static final int REPLACE = 87;
+    public static final int REPLACE = 97;
 
 
     // The following tokens are used only in the query prolog. They are categorized
@@ -403,163 +411,163 @@ public abstract class Token {
     /**
      * "xquery version"
      */
-    public static final int XQUERY_VERSION = 88;
+    public static final int XQUERY_VERSION = 108;
     /**
      * "xquery encoding"
      */
-    public static final int XQUERY_ENCODING = 89;
+    public static final int XQUERY_ENCODING = 109;
     /**
      * "declare namespace"
      */
-    public static final int DECLARE_NAMESPACE = 90;
+    public static final int DECLARE_NAMESPACE = 110;
     /**
      * "declare default"
      */
-    public static final int DECLARE_DEFAULT = 91;
+    public static final int DECLARE_DEFAULT = 111;
     /**
      * "declare fixed"
      */
-    public static final int DECLARE_FIXED = 92;
+    public static final int DECLARE_FIXED = 112;
     /**
      * "declare construction"
      */
-    public static final int DECLARE_CONSTRUCTION = 98;
+    public static final int DECLARE_CONSTRUCTION = 118;
     /**
      * "declare base-uri"
      */
-    public static final int DECLARE_BASEURI = 99;
+    public static final int DECLARE_BASEURI = 119;
     /**
      * "declare boundary-space"
      */
-    public static final int DECLARE_BOUNDARY_SPACE = 101;
+    public static final int DECLARE_BOUNDARY_SPACE = 121;
     /**
      * "declare decimal-format"
      */
-    public static final int DECLARE_DECIMAL_FORMAT = 103;
+    public static final int DECLARE_DECIMAL_FORMAT = 123;
     /**
      * "import schema"
      */
-    public static final int IMPORT_SCHEMA = 105;
+    public static final int IMPORT_SCHEMA = 125;
     /**
      * "import module"
      */
-    public static final int IMPORT_MODULE = 107;
+    public static final int IMPORT_MODULE = 127;
     /**
      * "declare variable"
      */
-    public static final int DECLARE_VARIABLE = 108;
+    public static final int DECLARE_VARIABLE = 128;
     /**
      * "declare context"
      */
-    public static final int DECLARE_CONTEXT = 109;
+    public static final int DECLARE_CONTEXT = 129;
     /**
      * "declare function"
      */
-    public static final int DECLARE_FUNCTION = 110;
+    public static final int DECLARE_FUNCTION = 130;
     /**
      * "module namespace"
      */
-    public static final int MODULE_NAMESPACE = 111;
+    public static final int MODULE_NAMESPACE = 131;
     /**
      * Various compound symbols supporting XQuery validation expression
      */
-    public static final int VALIDATE = 112;
-    public static final int VALIDATE_STRICT = 113;
-    public static final int VALIDATE_LAX = 114;
-    public static final int VALIDATE_TYPE = 115;
+    public static final int VALIDATE = 132;
+    public static final int VALIDATE_STRICT = 133;
+    public static final int VALIDATE_LAX = 134;
+    public static final int VALIDATE_TYPE = 135;
     /**
      * percent sign '%'
      */
-    public static final int PERCENT = 116;
+    public static final int PERCENT = 136;
 
     /**
      * "declare xmlspace"
      */
-    public static final int DECLARE_ORDERING = 117;
+    public static final int DECLARE_ORDERING = 137;
 
     /**
      * "declare copy-namespaces"
      */
-    public static final int DECLARE_COPY_NAMESPACES = 118;
+    public static final int DECLARE_COPY_NAMESPACES = 138;
     /**
      * "declare option"
      */
-    public static final int DECLARE_OPTION = 119;
+    public static final int DECLARE_OPTION = 139;
     /**
      * "declare revalidation"
      */
-    public static final int DECLARE_REVALIDATION = 124;
+    public static final int DECLARE_REVALIDATION = 144;
     /**
      * "insert node/nodes"
      */
-    public static final int INSERT_NODE = 125;
+    public static final int INSERT_NODE = 145;
     /**
      * "delete node/nodes"
      */
-    public static final int DELETE_NODE = 126;
+    public static final int DELETE_NODE = 146;
     /**
      * "replace node/nodes"
      */
-    public static final int REPLACE_NODE = 127;
+    public static final int REPLACE_NODE = 147;
     /**
      * "replace value"
      */
-    public static final int REPLACE_VALUE = 128;
+    public static final int REPLACE_VALUE = 148;
     /**
      * "rename node"
      */
-    public static final int RENAME_NODE = 130;
+    public static final int RENAME_NODE = 150;
     /**
      * "first into"
      */
-    public static final int FIRST_INTO = 131;
+    public static final int FIRST_INTO = 151;
     /**
      * "last into"
      */
-    public static final int LAST_INTO = 132;
+    public static final int LAST_INTO = 152;
     /**
      * "after"
      */
-    public static final int AFTER = 133;
+    public static final int AFTER = 153;
     /**
      * "before"
      */
-    public static final int BEFORE = 134;
+    public static final int BEFORE = 154;
     /**
      * "into"
      */
-    public static final int INTO = 135;
+    public static final int INTO = 155;
     /**
      * "with"
      */
-    public static final int WITH = 136;
+    public static final int WITH = 156;
     /**
      * "declare updating [function]"
      */
-    public static final int DECLARE_UPDATING = 138;
+    public static final int DECLARE_UPDATING = 158;
     /**
      * declare %
      */
-    public static final int DECLARE_ANNOTATED = 140;
+    public static final int DECLARE_ANNOTATED = 160;
     /**
      * Saxon extension: declare type
      */
-    public static final int DECLARE_ITEM_TYPE = 144;
-    public static final int SWITCH_CASE = 145;
+    public static final int DECLARE_ITEM_TYPE = 164;
+    public static final int SWITCH_CASE = 165;
 
-    public static final int UPDATE_MAP = 146;
-    public static final int UPDATE_ARRAY = 147;
+    public static final int UPDATE_MAP = 166;
+    public static final int UPDATE_ARRAY = 167;
 
     /**
      * semicolon separator
      */
-    public static final int SEMICOLON = 149;
+    public static final int SEMICOLON = 169;
 
 
     /**
      * Constant identifying the token number of the last token to be classified as an operator
      */
-    public static final int LAST_OPERATOR = 150;
+    public static final int LAST_OPERATOR = 180;
 
     // Tokens that set "operator" context, so an immediately following "div" is recognized
     // as an operator, not as an element name
@@ -832,6 +840,8 @@ public abstract class Token {
         mapDouble("for tumbling", FOR_TUMBLING);
         mapDouble("for sliding", FOR_SLIDING);
         mapDouble("for member", FOR_MEMBER);
+        mapDouble("for key", FOR_KEY);
+        mapDouble("for value", FOR_VALUE);
         mapDouble("xquery version", XQUERY_VERSION);
         mapDouble("xquery encoding", XQUERY_ENCODING);
         mapDouble("declare namespace", DECLARE_NAMESPACE);

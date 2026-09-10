@@ -59,7 +59,9 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         return version >= 40 ? instance40 : instance31;
     }
 
-
+    public static final RecordTest KVP_TYPE_INEXTENSIBLE = RecordTest.nonExtensible(
+            field("key", SequenceType.SINGLE_ATOMIC, false),
+            field("value", SequenceType.ANY_SEQUENCE, false));
 
     private void init(int version) {
 
@@ -78,9 +80,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 field("key", SequenceType.SINGLE_ATOMIC, false),
                 field("value", SequenceType.ANY_SEQUENCE, false));
 
-        RecordTest KVP_TYPE_INEXTENSIBLE = RecordTest.nonExtensible(
-                field("key", SequenceType.SINGLE_ATOMIC, false),
-                field("value", SequenceType.ANY_SEQUENCE, false));
+
 
         OptionsParameter mergeOptionDetails = new OptionsParameter(version);
         mergeOptionDetails.addAllowedOption("duplicates", SequenceType.SINGLE_STRING, StringValue.bmp("use-first"));

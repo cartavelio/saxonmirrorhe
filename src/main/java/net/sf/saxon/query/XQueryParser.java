@@ -18,6 +18,7 @@ import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
+import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.QNameTest;
@@ -2346,7 +2347,12 @@ public class XQueryParser extends XPathParser {
         List<Clause> clauseList = new ArrayList<>(4);
         while (true) {
             int offset = t.currentTokenStartOffset;
-            if (t.currentToken == Token.FOR || t.currentToken == Token.FOR_MEMBER) {
+            if (t.currentToken == Token.FOR) {
+                parseForClause(flwor, clauseList);
+            } else if (t.currentToken == Token.FOR_MEMBER || t.currentToken == Token.FOR_KEY || t.currentToken == Token.FOR_VALUE) {
+                if (!allowXPath40Syntax) {
+                    grumble("The 'for member/key/value' clause requires XQuery 4.0 to be enabled");
+                }
                 parseForClause(flwor, clauseList);
             } else if (t.currentToken == Token.LET) {
                 parseLetClause(flwor, clauseList);
@@ -2487,25 +2493,34 @@ public class XQueryParser extends XPathParser {
      */
     private void parseForClause(FLWORExpression flwor, List<Clause> clauseList) throws XPathException {
         boolean first = true;
-        boolean forMember = t.currentToken == Token.FOR_MEMBER;
+        int iterand = t.currentToken;
 
-        // "for member $x as T in $array"
-        // compiles to
+        // "for member $x as T in $array" compiles to
         // "for $temp in array:members($array) let $x as T := $temp?value"
+
+        // "for key $k as T value $v as U in $map" compiles to
+        // "for $temp in map:pairs($array) let $k as T := $temp?key, $v as U := $temp?value"
+
         do {
 
             nextToken();
             if (!first) {
                 if (isKeyword("member")) {
-                    forMember = true;
+                    iterand = Token.FOR_MEMBER;
+                    nextToken();
+                } else if (isKeyword("key")) {
+                    iterand = Token.FOR_KEY;
+                    nextToken();
+                } else if (isKeyword("value")) {
+                    iterand = Token.FOR_VALUE;
                     nextToken();
                 } else {
-                    forMember = false;
+                    iterand = Token.FOR;
                 }
             }
 
-            if (forMember && !allowXPath40Syntax) {
-                grumble("The 'for member' syntax requires XQuery 4.0 to be enabled");
+            if (iterand != Token.FOR && !allowXPath40Syntax) {
+                grumble("The 'for member/key/value' syntax requires XQuery 4.0 to be enabled");
             }
 
             int offset = t.currentTokenStartOffset;
@@ -2522,29 +2537,36 @@ public class XQueryParser extends XPathParser {
             expect(Token.NAME);
             StructuredQName explicitQName = makeStructuredQName(t.currentTokenValue, NamespaceUri.NULL);
             StructuredQName iterationQName = explicitQName;
-            if (forMember) {
+            if (iterand != Token.FOR) {
                 iterationQName =
                         new StructuredQName("vv", NamespaceUri.SAXON_GENERATED_VARIABLE, "fm" + clause.hashCode());
             }
-            SequenceType type = forMember ? SequenceType.ANY_SEQUENCE : SequenceType.SINGLE_ITEM;
+            SequenceType iterandType;
+            if (iterand == Token.FOR_MEMBER || iterand == Token.FOR_VALUE) {
+                iterandType = SequenceType.ANY_SEQUENCE;
+            } else if (iterand == Token.FOR_KEY) {
+                iterandType = SequenceType.SINGLE_ATOMIC;
+            } else {
+                iterandType = SequenceType.SINGLE_ITEM;
+            }
             nextToken();
 
             boolean explicitType = false;
             if (t.currentToken == Token.AS) {
                 explicitType = true;
                 nextToken();
-                type = parseSequenceType();
+                iterandType = parseSequenceType();
             }
 
             boolean allowingEmpty = false;
             if (isKeyword("allowing")) {
-                if (forMember) {
-                    grumble("'allowing empty' cannot appear in a 'for member' clause");
+                if (iterand != Token.FOR) {
+                    grumble("'allowing empty' cannot appear in a 'for member/key/value' clause");
                 }
                 allowingEmpty = true;
                 clause.setAllowingEmpty(true);
                 if (!explicitType) {
-                    type = forMember ? SequenceType.ANY_SEQUENCE : SequenceType.OPTIONAL_ITEM;
+                    iterandType = SequenceType.OPTIONAL_ITEM;
                 }
                 nextToken();
                 if (!isKeyword("empty")) {
@@ -2553,14 +2575,41 @@ public class XQueryParser extends XPathParser {
                 nextToken();
             }
 
-            if (explicitType && !allowingEmpty && !forMember && type.getCardinality() != StaticProperty.EXACTLY_ONE) {
+            if (explicitType && !allowingEmpty
+                    && (iterand == Token.FOR || iterand == Token.FOR_KEY)
+                    && iterandType.getCardinality() != StaticProperty.EXACTLY_ONE) {
                 warning("Occurrence indicator on singleton range variable has no effect", SaxonErrorCode.SXWN9039);
-                type = SequenceType.makeSequenceType(type.getPrimaryType(), StaticProperty.EXACTLY_ONE);
+                iterandType = SequenceType.makeSequenceType(iterandType.getPrimaryType(), StaticProperty.EXACTLY_ONE);
             }
 
+            SequenceType memberType = iterandType;
+            if (iterand == Token.FOR_MEMBER) {
+                memberType = SequenceType.ANY_SEQUENCE;
+            } else if (iterand == Token.FOR_KEY || iterand == Token.FOR_VALUE) {
+                memberType = SequenceType.makeSequenceType(MapFunctionSet.KVP_TYPE_INEXTENSIBLE, StaticProperty.EXACTLY_ONE);
+            }
             LocalVariableBinding binding =
-                    new LocalVariableBinding(iterationQName, forMember ? SequenceType.ANY_SEQUENCE : type);
+                    new LocalVariableBinding(iterationQName, memberType);
             clause.setRangeVariable(binding);
+
+            StructuredQName explicitQName2 = null;
+            SequenceType explicitType2 = null;
+
+            if (iterand == Token.FOR_KEY && isKeyword("value")) {
+                nextToken();
+                expect(Token.DOLLAR);
+                nextToken();
+                expect(Token.NAME);
+                explicitQName2 = makeStructuredQName(t.currentTokenValue, NamespaceUri.NULL);
+                if (!scanOnly && explicitQName2.equals(explicitQName)) {
+                    grumble("Multiple variables declared in a single 'for' clause must have different names", "XQST0089");
+                }
+                nextToken();
+                if (t.currentToken == Token.AS) {
+                    nextToken();
+                    explicitType2 = parseSequenceType();
+                }
+            }
 
             if (isKeyword("at")) {
                 nextToken();
@@ -2581,27 +2630,50 @@ public class XQueryParser extends XPathParser {
             expect(Token.IN);
             nextToken();
             Expression collection = parseExprSingle();
-            if (forMember) {
+            if (iterand == Token.FOR_MEMBER) {
                 collection = ArrayFunctionSet.getInstance(40).makeFunction("members", 1).makeFunctionCall(collection);
+            } else if (iterand == Token.FOR_KEY || iterand == Token.FOR_VALUE) {
+                collection = MapFunctionSet.getInstance(40).makeFunction("pairs", 1).makeFunctionCall(collection);
             }
             clause.initSequence(flwor, collection);
-            declareRangeVariable(binding /*clause.getRangeVariable()*/);
+            declareRangeVariable(binding);
             if (clause.getPositionVariable() != null) {
                 declareRangeVariable(clause.getPositionVariable());
             }
             if (allowingEmpty) {
                 checkForClauseAllowingEmpty(flwor, clause);
             }
-            if (forMember) {
+            if (iterand == Token.FOR_MEMBER || iterand == Token.FOR_VALUE) {
                 // Generate "let $x as T := $temp?value"
                 LetClause letClause = new LetClause();
-                final LocalVariableBinding letBinding = new LocalVariableBinding(explicitQName, type);
+                final LocalVariableBinding letBinding = new LocalVariableBinding(explicitQName, iterandType);
                 letClause.setRangeVariable(letBinding);
                 LocalVariableReference tempRef = new LocalVariableReference(clause.getRangeVariable());
                 LookupExpression lookup = new LookupExpression(tempRef, LookupExpression.Modifier.CONTENT, new StringLiteral("value"));
                 letClause.initSequence(flwor, lookup);
                 declareRangeVariable(letBinding);
                 clauseList.add(letClause);
+            } else if (iterand == Token.FOR_KEY) {
+                // Generate "let $x as T := $temp?key"
+                LetClause letClause = new LetClause();
+                final LocalVariableBinding letBinding = new LocalVariableBinding(explicitQName, iterandType);
+                letClause.setRangeVariable(letBinding);
+                LocalVariableReference tempRef = new LocalVariableReference(clause.getRangeVariable());
+                LookupExpression lookup = new LookupExpression(tempRef, LookupExpression.Modifier.CONTENT, new StringLiteral("key"));
+                letClause.initSequence(flwor, lookup);
+                declareRangeVariable(letBinding);
+                clauseList.add(letClause);
+                if (explicitQName2 != null) {
+                    LetClause letClause2 = new LetClause();
+                    final LocalVariableBinding letBinding2 =
+                            new LocalVariableBinding(explicitQName2, explicitType2 == null ? SequenceType.ANY_SEQUENCE : explicitType2);
+                    letClause2.setRangeVariable(letBinding2);
+                    LocalVariableReference tempRef2 = new LocalVariableReference(clause.getRangeVariable());
+                    LookupExpression lookup2 = new LookupExpression(tempRef2, LookupExpression.Modifier.CONTENT, new StringLiteral("value"));
+                    letClause2.initSequence(flwor, lookup2);
+                    declareRangeVariable(letBinding2);
+                    clauseList.add(letClause2);
+                }
             }
         } while (t.currentToken == Token.COMMA);
     }
