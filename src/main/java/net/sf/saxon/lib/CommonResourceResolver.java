@@ -110,49 +110,76 @@ public abstract class CommonResourceResolver implements EntityResolver, EntityRe
     /**
      * Chains an <code>EntityResolver</code> to this resolver.
      *
+     * <p>Returns a new CommonResourceResolver that shares the underlying configuration of the current
+     * resolver. The new resolver will chain requests to resolve an entity through the specified
+     * EntityResolver if resolution otherwise failed.</p>
+     *
      * @param resolver the fallback resolver. If the fallback resolver is an instance of <code>EntityResolver2</code>,
      *                 it will be used as the fallback for that interface as well.
      * @return this
      */
     public CommonResourceResolver chain(EntityResolver resolver) {
-        nextEntityResolver = resolver;
+        CommonResourceResolver copy = newInstance();
+        copy.copyFrom(this);
+        copy.nextEntityResolver = resolver;
         if (resolver instanceof EntityResolver2) {
-            nextEntityResolver2 = (EntityResolver2) resolver;
+            copy.nextEntityResolver2 = (EntityResolver2) resolver;
         }
-        return this;
+        return copy;
     }
 
     /**
      * Chains an <code>EntityResolver2</code> to this resolver.
      *
+     * <p>Returns a new CommonResourceResolver that shares the underlying configuration of the current
+     * resolver. The new resolver will chain requests to resolve an entity through the specified
+     * EntityResolver2 if resolution otherwise failed.</p>
+     *
+     * <p>An EntityResolver2 is an extension of the EntityResolver class; this method sets
+     * both resolvers to use the EntityResolver2 passed in.</p>
+     *
      * @param resolver the fallback resolver.
      * @return this
      */
     public CommonResourceResolver chain(EntityResolver2 resolver) {
-        nextEntityResolver = resolver;
-        nextEntityResolver2 = resolver;
-        return this;
+        CommonResourceResolver copy = newInstance();
+        copy.copyFrom(this);
+        copy.nextEntityResolver = resolver;
+        copy.nextEntityResolver2 = resolver;
+        return copy;
     };
 
     /**
      * Chains a <code>URIResolver</code> to this resolver.
      *
+     * <p>Returns a new CommonResourceResolver that shares the underlying configuration of the current
+     * resolver. The new resolver will chain requests to resolve URIs through the specified
+     * URIResolver if resolution otherwise failed.</p>
+     *
      * @param resolver the fallback resolver.
      * @return this
      */
     public CommonResourceResolver chain(URIResolver resolver) {
-        nextURIResolver = resolver;
-        return this;
+        CommonResourceResolver copy = newInstance();
+        copy.copyFrom(this);
+        copy.nextURIResolver = resolver;
+        return copy;
     }
 
     /**
      * Chains a <code>NamespaceResolver</code> to this resolver.
      *
+     * <p>Returns a new CommonResourceResolver that shares the underlying configuration of the current
+     * resolver. The new resolver will chain requests to resolve namespaces through the specified
+     * NamespaceResolver if resolution otherwise failed.</p>
+     *
      * @param resolver the fallback resolver.
      * @return this
      */
     public CommonResourceResolver chain(NamespaceResolver resolver) {
-        nextNamespaceResolver = resolver;
-        return this;
+        CommonResourceResolver copy = newInstance();
+        copy.copyFrom(this);
+        copy.nextNamespaceResolver = resolver;
+        return copy;
     }
 }

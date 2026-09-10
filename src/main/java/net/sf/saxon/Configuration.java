@@ -2724,7 +2724,7 @@ public class Configuration implements SourceResolver, NotationSet {
             parser = loadParser();
         }
 
-        CommonResourceResolver resolver = getCommonResourceResolver().newInstance().chain(parser.getEntityResolver());
+        CommonResourceResolver resolver = getCommonResourceResolver().chain(parser.getEntityResolver());
         parser.setEntityResolver(resolver);
 
         return parser;
@@ -2758,7 +2758,7 @@ public class Configuration implements SourceResolver, NotationSet {
             parser = loadParser();
         }
 
-        CommonResourceResolver resolver = getCommonResourceResolver().newInstance().chain(parser.getEntityResolver());
+        CommonResourceResolver resolver = getCommonResourceResolver().chain(parser.getEntityResolver());
         parser.setEntityResolver(resolver);
 
         if (isTiming()) {
@@ -2864,7 +2864,7 @@ public class Configuration implements SourceResolver, NotationSet {
             parser = loadParser();
         }
 
-        CommonResourceResolver resolver = getCommonResourceResolver().newInstance().chain(parser.getEntityResolver());
+        CommonResourceResolver resolver = getCommonResourceResolver().chain(parser.getEntityResolver());
         parser.setEntityResolver(resolver);
 
         try {
