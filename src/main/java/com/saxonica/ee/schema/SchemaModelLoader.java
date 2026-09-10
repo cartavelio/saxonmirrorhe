@@ -48,7 +48,6 @@ public class SchemaModelLoader extends ProxyReceiver {
     private final HashSet<SchemaComponent> anonComponents = new HashSet<>(100);
     private final List<Fixup> fixups = new ArrayList<>();
     private final Stack<SCMNodeHandler> handlerStack = new Stack<>();
-    private NamespaceResolver namespaceResolver;
     private NodeName elementName;
     private final List<PendingEdge> pendingEdges = new ArrayList<>();
     private String dmk = null;
@@ -84,10 +83,8 @@ public class SchemaModelLoader extends ProxyReceiver {
         PipelineConfiguration pipe = config.makePipelineConfiguration();
         pipe.setParseOptions(config.getParseOptions().withSchemaValidationMode(Validation.SKIP));
         pipe.setHostLanguage(HostLanguage.XML_SCHEMA);
-        NamespaceReducer reducer = new NamespaceReducer(this);
-        namespaceResolver = reducer;
         compiler = config.newSchemaCompiler();
-        CheckSumFilter filter = new CheckSumFilter(reducer);
+        CheckSumFilter filter = new CheckSumFilter(this);
         filter.setCheckExistingChecksum(true);
         Sender.send(source, filter, null);
         if (!filter.isChecksumCorrect()) {
@@ -176,7 +173,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         handler.setSchemaModelLoader(this);
         handlerStack.push(handler);
         try {
-            handler.processElementStart(elementName.getLocalPart(), attributes);
+            handler.processElementStart(elementName.getLocalPart(), attributes, namespaces);
         } catch (SchemaException e) {
             throw new XPathException(e);
         }
@@ -223,10 +220,11 @@ public class SchemaModelLoader extends ProxyReceiver {
          *
          * @param localName  the name of the element to be processed
          * @param attributes the attributes of the element being processed
+         * @param namespaces the in scope namespaces of the element being processed
          * @throws SchemaException if the data is invalid
          */
 
-        public abstract void processElementStart(String localName, AttributeMap attributes) throws SchemaException;
+        public abstract void processElementStart(String localName, AttributeMap attributes, NamespaceMap namespaces) throws SchemaException;
 
         /**
          * Handle a child element of the element currently being processed.
@@ -252,7 +250,7 @@ public class SchemaModelLoader extends ProxyReceiver {
     private static class SchemaHandler extends SCMNodeHandler {
 
         @Override
-        public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
+        public void processElementStart(String localName, AttributeMap attributes, NamespaceMap namespaces) throws SchemaException {
             String xsdVersion = attributes.getValue(NamespaceUri.NULL, "xsdVersion");
             if (xsdVersion != null &&
                     xsdVersion.compareTo(loader.config.getConfigurationProperty(Feature.XSD_VERSION)) > 0) {
@@ -325,7 +323,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         }
 
         @Override
-        public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
+        public void processElementStart(String localName, AttributeMap attributes, NamespaceMap namespaces) throws SchemaException {
             EnterpriseConfiguration config = loader.config;
             String id = attributes.getValue(NamespaceUri.NULL, "id");
             String name = attributes.getValue(NamespaceUri.NULL, "name");
@@ -402,7 +400,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         }
 
         @Override
-        public void processElementStart(String localName, AttributeMap attributes) {
+        public void processElementStart(String localName, AttributeMap attributes, NamespaceMap namespaces) {
             String head = attributes.getValue(NamespaceUri.NULL, "ref");
             if (head != null) {
                 loader.fixups.add(new Fixup(elementDecl, head, FIXUP_ELEMENT_SUBSTITUTION_GROUP));
@@ -438,7 +436,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         }
 
         @Override
-        public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
+        public void processElementStart(String localName, AttributeMap attributes, NamespaceMap namespaces) throws SchemaException {
             EnterpriseConfiguration config = loader.config;
             String xpathText = attributes.getValue(NamespaceUri.NULL, "test");
             String xmlBase = attributes.getValue(NamespaceUri.XML, "base");
@@ -494,7 +492,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         }
 
         @Override
-        public void processElementStart(String localName, AttributeMap attributes) {
+        public void processElementStart(String localName, AttributeMap attributes, NamespaceMap namespaces) {
 
             String ref = attributes.getValue(NamespaceUri.NULL, "ref");
 
@@ -538,7 +536,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         }
 
         @Override
-        public void processElementStart(String localName, AttributeMap attributes) {
+        public void processElementStart(String localName, AttributeMap attributes, NamespaceMap namespaces) {
             String id = attributes.getValue(NamespaceUri.NULL, "id");
             String name = attributes.getValue(NamespaceUri.NULL, "name");
             String namespace = attributes.getValue(NamespaceUri.NULL, "targetNamespace");
@@ -600,7 +598,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         }
 
         @Override
-        public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
+        public void processElementStart(String localName, AttributeMap attributes, NamespaceMap namespaces) throws SchemaException {
             String xpath = attributes.getValue(NamespaceUri.NULL, "xpath");
             boolean isField = localName.equals("field");
             String defaultNamespace = attributes.getValue(NamespaceUri.NULL, "defaultNamespace");
@@ -620,13 +618,13 @@ public class SchemaModelLoader extends ProxyReceiver {
             if (isField) {
                 IdentityField idf = new IdentityField(xpath);
                 idf.setSelection(selector);
-                idf.setNamespaceContext(NamespaceMap.fromNamespaceResolver(loader.namespaceResolver));
+                idf.setNamespaceContext(namespaces);
                 idf.setXPathDefaultNamespace(defaultNamespaceUri);
                 identityConstraint.addField(idf);
             } else {
                 IdentitySelector ids = new IdentitySelector(xpath);
                 ids.setSelection(selector);
-                ids.setNamespaceContext(NamespaceMap.fromNamespaceResolver(loader.namespaceResolver));
+                ids.setNamespaceContext(namespaces);
                 ids.setXPathDefaultNamespace(defaultNamespaceUri);
                 identityConstraint.setSelector(ids);
             }
@@ -656,7 +654,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         }
 
         @Override
-        public void processElementStart(String localName, AttributeMap attributes) {
+        public void processElementStart(String localName, AttributeMap attributes, NamespaceMap namespaces) {
             String id = attributes.getValue(NamespaceUri.NULL, "id");
             String name = attributes.getValue(NamespaceUri.NULL, "name");
             NamespaceUri namespace = NamespaceUri.of(attributes.getValue(NamespaceUri.NULL, "targetNamespace"));
@@ -736,7 +734,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         }
 
         @Override
-        public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
+        public void processElementStart(String localName, AttributeMap attributes, NamespaceMap namespaces) throws SchemaException {
             EnterpriseConfiguration config = loader.config;
             String id = attributes.getValue(NamespaceUri.NULL, "id");
             String name = attributes.getValue(NamespaceUri.NULL, "name");
@@ -840,7 +838,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         }
 
         @Override
-        public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
+        public void processElementStart(String localName, AttributeMap attributes, NamespaceMap namespaces) throws SchemaException {
             EnterpriseConfiguration config = loader.config;
             String id = attributes.getValue(NamespaceUri.NULL, "id");
             String name = attributes.getValue(NamespaceUri.NULL, "name");
@@ -946,7 +944,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         }
 
         @Override
-        public void processElementStart(String localName, AttributeMap attributes) {
+        public void processElementStart(String localName, AttributeMap attributes, NamespaceMap namespaces) {
             String id = attributes.getValue(NamespaceUri.NULL, "id");
             String name = attributes.getValue(NamespaceUri.NULL, "name");
             String namespace = attributes.getValue(NamespaceUri.NULL, "targetNamespace");
@@ -978,7 +976,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         }
 
         @Override
-        public void processElementStart(String localName, AttributeMap attributes) {
+        public void processElementStart(String localName, AttributeMap attributes, NamespaceMap namespaces) {
             Notation notation = new Notation(loader.config, null);
             String id = attributes.getValue(NamespaceUri.NULL, "id");
             String name = attributes.getValue(NamespaceUri.NULL, "name");
@@ -1012,7 +1010,7 @@ public class SchemaModelLoader extends ProxyReceiver {
     private static class ModelGroupDefinitionHandler extends ModelGroupHandler {
 
         @Override
-        public void processElementStart(String localName, AttributeMap attributes) {
+        public void processElementStart(String localName, AttributeMap attributes, NamespaceMap namespaces) {
             String id = attributes.getValue(NamespaceUri.NULL, "id");
             String name = attributes.getValue(NamespaceUri.NULL, "name");
             String namespace = attributes.getValue(NamespaceUri.NULL, "targetNamespace");
@@ -1054,7 +1052,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         }
 
         @Override
-        public void processElementStart(String localName, AttributeMap attributes) {
+        public void processElementStart(String localName, AttributeMap attributes, NamespaceMap namespaces) {
 
             boolean required = toBoolean(attributes.getValue(NamespaceUri.NULL, "required"));
             boolean isInheritable = toBoolean(attributes.getValue(NamespaceUri.NULL, "inheritable"));
@@ -1105,15 +1103,10 @@ public class SchemaModelLoader extends ProxyReceiver {
         }
 
         @Override
-        public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
+        public void processElementStart(String localName, AttributeMap attributes, NamespaceMap namespaces) throws SchemaException {
             if (!localName.equals("assert")) {
                 String value = attributes.getValue(NamespaceUri.NULL, "value");
-                boolean namespaceSensitive = toBoolean(attributes.getValue(NamespaceUri.NULL, "namespaceSensitive"));
-                NamespaceResolver resolver = null;
-                if (namespaceSensitive) {
-                    resolver = NamespaceMap.fromNamespaceResolver(loader.namespaceResolver);
-                }
-                Facet facet = Facet.makeFacet(localName, value, loader.config, resolver);
+                Facet facet = Facet.makeFacet(localName, value, loader.config, namespaces);
                 String fixed = attributes.getValue(NamespaceUri.NULL, "fixed");
                 if (fixed != null) {
                     facet.setFixed(toBoolean(fixed));
@@ -1159,7 +1152,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         }
 
         @Override
-        public void processElementStart(String localName, AttributeMap attributes) {
+        public void processElementStart(String localName, AttributeMap attributes, NamespaceMap namespaces) {
 
             String fixed = attributes.getValue(NamespaceUri.NULL, "fixed");
             if (fixed != null) {
@@ -1204,7 +1197,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         }
 
         @Override
-        public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
+        public void processElementStart(String localName, AttributeMap attributes, NamespaceMap namespaces) throws SchemaException {
             EnterpriseConfiguration config = loader.config;
             switch (localName) {
                 case "elementParticle":
@@ -1299,7 +1292,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         }
 
         @Override
-        public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
+        public void processElementStart(String localName, AttributeMap attributes, NamespaceMap namespaces) throws SchemaException {
             switch (localName) {
                 case "sequence":
                     group = new SequenceModelGroup();
@@ -1343,7 +1336,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         }
 
         @Override
-        public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
+        public void processElementStart(String localName, AttributeMap attributes, NamespaceMap namespaces) throws SchemaException {
             String xpathText = attributes.getValue(NamespaceUri.NULL, "test");
             String xmlBase = attributes.getValue(NamespaceUri.XML, "base");
             String defaultNamespace = attributes.getValue(NamespaceUri.NULL, "defaultNamespace");
@@ -1426,7 +1419,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         }
 
         @Override
-        public void processElementStart(String localName, AttributeMap attributes) {
+        public void processElementStart(String localName, AttributeMap attributes, NamespaceMap namespaces) {
             String mode = attributes.getValue(NamespaceUri.NULL, "mode");
             String wildcardRef = attributes.getValue(NamespaceUri.NULL, "wildcard");
             if (mode.equals("suffix")) {
@@ -1459,7 +1452,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         }
 
         @Override
-        public void processElementStart(String localName, AttributeMap attributes) {
+        public void processElementStart(String localName, AttributeMap attributes, NamespaceMap namespaces) {
             AttributeWildcard awc = new AttributeWildcard((EnterpriseConfiguration) loader.getConfiguration());
             if (container instanceof AttributeGroupDecl) {
                 ((AttributeGroupDecl) container).setAnyAttribute(awc);
@@ -1503,7 +1496,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         }
 
         @Override
-        public void processElementStart(String localName, AttributeMap attributes) {
+        public void processElementStart(String localName, AttributeMap attributes, NamespaceMap namespaces) {
             lexicalForm = attributes.getValue(NamespaceUri.NULL, "lexicalForm");
         }
 
@@ -1546,7 +1539,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         }
 
         @Override
-        public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
+        public void processElementStart(String localName, AttributeMap attributes, NamespaceMap namespaces) throws SchemaException {
             String type = attributes.getValue(NamespaceUri.NULL, "type");
             BuiltInAtomicType t = (BuiltInAtomicType) loader.config.getSchemaType(
                 new StructuredQName("", NamespaceUri.SCHEMA, type.substring(1)));
@@ -1594,7 +1587,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         }
 
         @Override
-        public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
+        public void processElementStart(String localName, AttributeMap attributes, NamespaceMap namespaces) throws SchemaException {
 
             Wildcard wildcard = new Wildcard();
             wildcard.setConfiguration((EnterpriseConfiguration) loader.getConfiguration());
@@ -1683,7 +1676,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         }
 
         @Override
-        public void processElementStart(String localName, AttributeMap attributes) {
+        public void processElementStart(String localName, AttributeMap attributes, NamespaceMap namespaces) {
             //
         }
 
@@ -1720,7 +1713,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         }
 
         @Override
-        public void processElementStart(String localName, AttributeMap attributes) {
+        public void processElementStart(String localName, AttributeMap attributes, NamespaceMap namespaces) {
             String stateNumber = attributes.getValue(NamespaceUri.NULL, "nr");
             FiniteStateMachine fsm = fsmHandler.getFiniteStateMachine();
             if (stateNumber.equals("0")) {
@@ -1771,7 +1764,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         }
 
         @Override
-        public void processElementStart(String localName, AttributeMap attributes) {
+        public void processElementStart(String localName, AttributeMap attributes, NamespaceMap namespaces) {
             String term = attributes.getValue(NamespaceUri.NULL, "term");
             int targetState = Integer.parseInt(attributes.getValue(NamespaceUri.NULL, "to"));
             PendingEdge pe = new PendingEdge();

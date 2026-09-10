@@ -27,7 +27,7 @@ public class EnumerationFacet extends Facet {
 
     /**
      * The enumeration value may be a QName. But we don't necessarily know this at the time we encounter
-     * it. So we have to keep the namespace context just in case its a QName.
+     * it. So we have to keep the namespace context just in case it's a QName.
      */
     NamespaceResolver namespaceContext = null;
 
