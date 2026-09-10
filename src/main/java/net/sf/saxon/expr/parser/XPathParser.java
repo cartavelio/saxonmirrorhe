@@ -2945,6 +2945,9 @@ public class XPathParser {
                         break;
                 }
                 break;
+            case Token.LCURLY:
+                checkLanguageVersion40();
+                return parseMapExpression();
 
             case Token.KEYWORD_CURLY:
                 switch (t.currentTokenValue) {
@@ -3832,9 +3835,9 @@ public class XPathParser {
     }
 
     /**
-     * Parse a map expression. Requires XPath/XQuery 3.0
-     * Provisional syntax
-     * map { expr : expr (, expr : expr )*} }
+     * Parse a map expression. Syntax
+     * 3.0/3.1:  map { expr : expr (, expr : expr )*} }
+     * 4.0:      { expr : expr (, expr : expr )*} }
      *
      * @return the map expression
      * @throws XPathException if parsing fails
@@ -3844,7 +3847,7 @@ public class XPathParser {
     protected Expression parseMapExpression() throws XPathException {
         checkMapExtensions();
 
-        // have read the "map {"
+        // have read the "map {" or bare "{"
         Tokenizer t = getTokenizer();
         int offset = t.currentTokenStartOffset;
         List<Expression> entries = new ArrayList<>();
