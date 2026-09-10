@@ -73,21 +73,6 @@ public class CharFn extends SystemFunction {
                     default:
                         return invalid(uName);
                 }
-            } else if (lead == '#' && uName.length() >= 2) {
-                try {
-                    int cp;
-                    if (uName.codePointAt(1) == 'x') {
-                        cp = Integer.parseInt(uName.substring(2).toString(), 16);
-                    } else {
-                        cp = Integer.parseInt(uName.substring(1).toString(), 10);
-                    }
-                    if (!context.getConfiguration().getValidCharacterChecker().test(cp)) {
-                        throw new XPathException("Character supplied to fn:char is not a valid XML character: " + uName, "FOCH0005");
-                    }
-                    return new StringValue(new UnicodeChar(cp));
-                } catch (NumberFormatException e) {
-                    invalid(uName);
-                }
             } else {
                 return new StringValue(readEntity(uName));
             }

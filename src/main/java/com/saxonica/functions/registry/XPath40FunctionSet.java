@@ -59,7 +59,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         SpecificFunctionType compareFnType = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_ITEM},
-                SequenceType.ANY_SEQUENCE);
+                SequenceType.SINGLE_BOOLEAN);
 
         SpecificFunctionType ft = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_ITEM},
