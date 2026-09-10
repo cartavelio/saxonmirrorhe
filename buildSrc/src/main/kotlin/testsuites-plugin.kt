@@ -102,6 +102,7 @@ abstract class TestSuitesExtension
       "expath" -> submodulesDir.dir("expath/tests/qt3")
       "xslt30" -> submodulesDir.dir("xslt30")
       "xslt30extra" -> submodulesDir.dir("extra/suites/xslt30")
+      "xsltfromqt4" -> submodulesDir.dir("extra/suites/xsltfromqt4")
       "qt4" -> submodulesDir.dir("qt4")
       "xslt40" -> submodulesDir.dir("xslt40")
       "xsd" -> submodulesDir.dir("xsd")
@@ -110,13 +111,30 @@ abstract class TestSuitesExtension
     }
   }
 
-  fun exceptions(suite: String): Provider<RegularFile> {
+  fun exceptions(suite: String, impl: String = "java"): Provider<RegularFile> {
+    if (impl == "csharp") {
+      return when (suite) {
+        "qt3" -> exceptionsDir.file("qt3cs.xml")
+        "qt3extra" -> exceptionsDir.file("qt3extra-cs.xml")
+        "expath" -> exceptionsDir.file("expath-cs.xml")
+        "xslt30" -> exceptionsDir.file("xslt30.xml")
+        "xslt30extra" -> exceptionsDir.file("xslt30extra-cs.xml")
+        "xsltfromqt4" -> exceptionsDir.file("qt4-xslt.xml")
+        "qt4" -> exceptionsDir.file("qt4.xml")
+        "xslt40" -> exceptionsDir.file("xslt40cs.xml")
+        "xsd" -> exceptionsDir.file("xsd11cs.xml")
+        "xsdextra" -> exceptionsDir.file("xsd-extra.xml")
+        else -> throw GradleException("Unknown exceptions for test suite: ${suite}")
+      }
+    }
+
     return when (suite) {
       "qt3" -> exceptionsDir.file("qt3.xml")
       "qt3extra" -> exceptionsDir.file("qt3extra.xml")
       "expath" -> exceptionsDir.file("expath.xml")
       "xslt30" -> exceptionsDir.file("xslt30.xml")
       "xslt30extra" -> exceptionsDir.file("xslt30extra.xml")
+      "xsltfromqt4" -> exceptionsDir.file("qt4-xslt.xml")
       "qt4" -> exceptionsDir.file("qt4.xml")
       "xslt40" -> exceptionsDir.file("xslt40.xml")
       "xsd" -> exceptionsDir.file("xsd11.xml")
@@ -237,7 +255,7 @@ abstract class TestSuitesExtension
       this.dotnetBuildType = plugin.dotnetBuildType
       this.platform = plugin.platform
       this.testargs = testargs
-      exceptionsFile = exceptions(suite)
+      exceptionsFile = exceptions(suite, "csharp")
       reportingRootDir = layout.buildDirectory.dir("test-results")
     }
 
@@ -264,7 +282,7 @@ abstract class TestSuitesExtension
     val xsdVersion = "11"
 
     val directory = suiteDir(suite)
-    val exceptionsFile = exceptions(suite)
+    val exceptionsFile = exceptions(suite, "csharp")
 
     val reportDir = layout.buildDirectory.file("test-results/${suite}/${dateStamp}").get()
 

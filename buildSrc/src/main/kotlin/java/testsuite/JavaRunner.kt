@@ -60,6 +60,7 @@ abstract class JavaRunner @Inject constructor(private val ex: ExecOperations): D
       "expath" -> "${driverPackage}.QT3TestDriver${EDITION}"
       "xslt30" -> "${driverPackage}.Xslt30TestSuiteDriver${EDITION}"
       "xslt30extra" -> "${driverPackage}.Xslt30TestSuiteDriver${EDITION}"
+      "xsltfromqt4" -> "${driverPackage}.Xslt30TestSuiteDriver${EDITION}"
       "qt4" -> "${driverPackage}.QT3TestDriver${EDITION}"
       "xslt40" -> "${driverPackage}.Xslt30TestSuiteDriver${EDITION}"
       else -> throw GradleException("Unknown test driver class for test suite: ${suite}")
