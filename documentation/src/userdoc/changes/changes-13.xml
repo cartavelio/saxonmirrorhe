@@ -793,6 +793,7 @@ TODO: rethink redefines and override
             <li><p>PR1676 - collation-available (TODO a version is implemented, but check conformance to latest spec)</p></li>
             <li><p>PR1674 - composite sort keys in xsl:sort</p></li>
             <li><p>PR1622 - XSLT <code>fn:map-for-key</code> function</p></li>
+            <li><p>XSLT <code>fn:regex-groups</code> function</p></li>
             <li><p>JNode patterns in XSLT (syntax <code>jnode(key, type)</code>) -- syntax now recognized, not well tested</p></li>
             <li><p>PR2051 - merge-when attribute for xsl:for-each-group</p></li>
             <li><p>PR2259 - canonical JSON output is implemented, but does not always produce the correct canonical output for numeric values</p></li>
