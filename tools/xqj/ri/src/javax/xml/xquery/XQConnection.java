@@ -3,6 +3,7 @@
  */
 
 package javax.xml.xquery;
+import java.io.*;
 
 /**
  * A connection (session) with a specific XQuery engine. Connections are

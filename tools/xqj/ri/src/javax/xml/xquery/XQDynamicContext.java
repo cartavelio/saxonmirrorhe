@@ -6,6 +6,7 @@ package javax.xml.xquery;
 import org.w3c.dom.Node;
 
 import javax.xml.namespace.QName;
+import java.io.*;
 
 /**  
  * <code>XQDynamicContext</code> provides access to the dynamic context as defined in
