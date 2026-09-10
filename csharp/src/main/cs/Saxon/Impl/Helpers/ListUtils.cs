@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using SysCollGen = System.Collections.Generic;
 using System.Linq;
 using Saxon.Ejava.lang;
+using Saxon.Hej.trans;
 
 namespace Saxon.Impl.Helpers {
     public class ListUtils {
@@ -25,8 +26,8 @@ namespace Saxon.Impl.Helpers {
             try {
                 input.Sort(comparator);
             }
-            catch (System.InvalidOperationException e) {
-                throw new System.InvalidCastException();
+            catch (System.InvalidOperationException e) { 
+                throw new Saxon.Hej.trans.UncheckedXPathException(e);
             }
         }
         
