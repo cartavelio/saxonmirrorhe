@@ -3970,7 +3970,7 @@ public class Configuration implements SourceResolver {
      * @throws UnsupportedOperationException if called when using Saxon-HE
      */
 
-    public PendingUpdateList newPendingUpdateList() {
+    public PendingUpdateList newPendingUpdateList(Schema schema) {
         throw new UnsupportedOperationException("XQuery update is supported only in Saxon-EE");
     }
 
