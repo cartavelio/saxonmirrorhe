@@ -52,6 +52,14 @@ public:
    */
   XdmItem(const XdmItem &item);
 
+ XdmItem& operator=(const XdmItem &d) {
+  std::cerr << "XdmItem::operator=(" << std::endl;
+  value = d.value;
+  stringValue = d.stringValue;
+  itemToString = d.itemToString;
+  return *this;
+ }
+
   //! Destructor.
   /**
    * Destructor for XdmItem

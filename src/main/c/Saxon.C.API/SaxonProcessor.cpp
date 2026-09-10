@@ -413,12 +413,10 @@ void SaxonProcessor::registerUserFunctionWithProcessor(void * python_procPtr, co
 
     if(signatureValue == nullptr) {
         throw new SaxonApiException("Failed to create function signature from JSON");
-        return;
     }
 
     if(functionName == nullptr) {
         throw new SaxonApiException("User Function name is NULL");
-        return;
     }
 
     allocFn alloc = operator new;
@@ -427,7 +425,67 @@ void SaxonProcessor::registerUserFunctionWithProcessor(void * python_procPtr, co
                          std::cerr<<"useNativeTypes is True in C++"<<std::endl;
                      }
 
-    long status = j_registerFunctionDefinition(SaxonProcessor::sxn_environ->thread,(void *)procRef, (char *) ns1, (char *)functionName,
+  XdmItem * item = signatureValue->getHead();
+  XdmValue *signatureMap = nullptr;
+
+  XdmMap *xdmMap = nullptr;
+  XdmValue * returnValue = nullptr;
+
+  const char * functionNamei = nullptr;
+  if(item->isMap()) {
+    xdmMap = dynamic_cast<XdmMap *>(item);
+    XdmAtomicValue ** keys = xdmMap->keys();
+    std::cerr<<"mapSize C++="<<xdmMap->mapSize()<<std::endl;
+
+    if(keys == nullptr) {
+      std::cerr<<"keys is null in C++"<<std::endl;
+    } else {
+      functionNamei = keys[0]->getStringValue();
+      std::cerr<<" C++ functionNamei = "<<functionNamei<<std::endl;
+    }
+
+    std::cerr<<"Map ="<<xdmMap->toString()<<std::endl;
+    signatureMap = xdmMap->get(functionName);
+
+    if(signatureMap != nullptr) {
+      std::cerr<<"signature is not null in C++"<<std::endl;
+      std::cerr<<"signature ="<<signatureMap->toString()<<std::endl;
+    }
+
+
+
+
+    if (getenv("SAXONC_DEBUG_FLAG") && functionNamei != nullptr) {
+      std::cerr << "C++ userFunction name= " << functionNamei<< std::endl;
+    }
+    signatureMap = xdmMap->get(functionName);
+
+    int64_t returnIntValue = j_getReturnTypeFromSignature(SaxonProcessor::sxn_environ->thread,
+                                                              (void *) signatureMap->getUnderlyingValue());
+
+    if (returnIntValue == SXN_EXCEPTION) {
+
+      throw SaxonApiException();
+    } else {
+      returnValue = new XdmValue(returnIntValue, false);
+      // userFunctionDescriptor1->returnType = returnValue;
+
+      if (getenv("SAXONC_DEBUG_FLAG")) {
+        std::cerr << "C++ returnValue for userFunction = " << (returnValue->toString())<< std::endl;
+      }
+
+    }
+
+    if(signatureMap == nullptr) {
+      throw SaxonApiException("Signature Map is NULL");
+    }
+
+    if(functionNamei == nullptr) {
+      throw SaxonApiException("Function name is NULL");
+    }
+  }
+
+    long status = j_registerFunctionDefinition(SaxonProcessor::sxn_environ->thread,(void *)procRef, (char *) ns1, (char *)functionNamei,
                                                (void *)signatureValue->getUnderlyingValue(), (void *)python_procPtr, (void *) func, (void *) alloc, (int)useNativeTypes);
 
 
@@ -436,16 +494,10 @@ void SaxonProcessor::registerUserFunctionWithProcessor(void * python_procPtr, co
     }
 
     XdmValue * argValue = nullptr;
-    XdmValue * returnValue = nullptr;
 
-    XdmItem * item = signatureValue->getHead();
+
+
     if(item->isMap()) {
-        XdmMap *xdmMap = (XdmMap *) item;
-        XdmValue *signatureMap = xdmMap->get(functionName);
-
-        if(signatureMap == nullptr) {
-              throw SaxonApiException("Signature Map is NULL");
-        }
 
         //TODO this might not be needed
         /*int64_t paramValues = j_getArgumentTypesFromSignature(SaxonProcessor::sxn_environ->thread,
@@ -929,11 +981,14 @@ XdmValue *SaxonProcessor::parseJsonFromString(const char *source,
   int64_t xdmValueRef = parseJsonString(sxn_environ->thread, (void *)procRef,
                                         (char *)source, (char *)encoding);
 
-  if (xdmValueRef >= 0) {
-    XdmValue *value = new XdmValue(xdmValueRef);
 
+  if (xdmValueRef >= 0) {
+    XdmValue * value = makeXdmValueFromRef(xdmValueRef);
     return value;
-  } else if (xdmValueRef == SXN_EXCEPTION) {
+
+  }
+
+  if (xdmValueRef == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
   return nullptr;
@@ -949,10 +1004,11 @@ XdmValue *SaxonProcessor::parseJsonFromFile(const char *source) {
   int64_t xdmValueRef = parseJsonFile(sxn_environ->thread, (void *)procRef,
                                       (char *)cwd.c_str(), (char *)source);
   if (xdmValueRef >= 0) {
-    XdmValue *value = new XdmValue(xdmValueRef);
+    XdmValue * value = makeXdmValueFromRef(xdmValueRef);
 
     return value;
-  } else if (xdmValueRef == SXN_EXCEPTION) {
+  }
+  if (xdmValueRef == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
   return nullptr;

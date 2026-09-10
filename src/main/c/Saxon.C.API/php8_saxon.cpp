@@ -10,15 +10,6 @@ ZEND_GET_MODULE(saxon)
 }
 #endif
 
-/* JNINativeMethod phpMethods[] =
-{
-    {
-         "_phpCall",
-         "(Ljava/lang/String;[Ljava/lang/Object;[Ljava/lang/String;)Ljava/lang/Object;",
-         (void *)&phpNativeCall
-    }
-};*/
-
 zend_object_handlers saxonProcessor_object_handlers;
 
 zend_object_handlers xdmValue_object_handlers;
@@ -1718,7 +1709,7 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
 
           zend_avobj = Z_OBJ_P(&params[i]);
           aavobj = (xdmMap_object *)((char *)zend_avobj - XtOffsetOf(xdmMap_object, std));
-          assert (vobj != NULL);
+          assert (aavobj != NULL);
 
           aavobj->xdmMap = mapxdmItem;
 
@@ -1740,7 +1731,7 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
           //MAKE_STD_ZVAL(php_argv[i]._val);
           zend_avobj = Z_OBJ_P(&params[i]);
           aavobj = (xdmArray_object *)((char *)zend_avobj - XtOffsetOf(xdmArray_object, std));
-          assert (vobj != NULL);
+          assert (aavobj != NULL);
 
           aavobj->xdmArray = arrxdmItem;
 
@@ -1759,7 +1750,7 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
 
           zend_avobj = Z_OBJ_P(&params[i]);
           aavobj = (xdmFunctionItem_object *)((char *)zend_avobj - XtOffsetOf(xdmFunctionItem_object, std));
-          assert (vobj != NULL);
+          assert (aavobj != NULL);
 
           aavobj->xdmFunctionItem = funcxdmItem;
 
@@ -1767,7 +1758,25 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
           // Empty Sequence detected.
 
 
-          return nullptr;
+          //return nullptr;
+
+        } else if (xdm_type == XDM_VALUE) {
+          XdmValue * valuei = (XdmValue *)((arguments[i]));
+
+          struct xdmValue_object* vvobj;
+          zend_object* zend_vvobj;
+
+          if (object_init_ex(&params[i], xdmValue_ce) != SUCCESS) {
+            //error
+
+            zend_throw_exception(zend_ce_exception, "Error found in converting user function argument to XdmValue", 0);
+          }
+
+          zend_vvobj = Z_OBJ_P(&params[i]);
+          vvobj = (xdmValue_object *)((char *)zend_vvobj - XtOffsetOf(xdmValue_object, std));
+          assert (vvobj != NULL);
+
+          vvobj->xdmValue = valuei;
 
         } else {
           zend_throw_exception(zend_ce_exception, "Internal Error: Cannot create XdmItem from reference", 0);
@@ -1802,10 +1811,21 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
 
         XdmValue * resultValue = nullptr;
 
+        xdmNode_object* nooth = NULL;
+        xdmAtomicValue_object* aooth = NULL;
+        xdmValue_object* vooth = NULL;
+        xdmArray_object* arrooth = NULL;
+        xdmMap_object* mooth = NULL;
+        xdmFunctionItem_object* f_ooth = NULL;
+
         char * sVal = NULL;
         int len = 0;
 
+        zend_object* zend_vobj2;
 
+        if (getenv("SAXONC_DEBUG_FLAG")) {
+          std::cerr<<"PHP internal: call_user_function returnType value = "<<((int)(Z_TYPE_P(&retval)))<< std::endl;
+        }
 
         switch (Z_TYPE_P(&retval)) {
             case IS_FALSE:
@@ -1832,22 +1852,77 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
                 break;
 
             case IS_ARRAY:
-                //break;
+              if (getenv("SAXONC_DEBUG_FLAG")) {
+                std::cerr<<"PHP internal: call_user_function return is an array"<< std::endl;
+              }
+              break;
             case IS_OBJECT:
 
                 objName =ZSTR_VAL(Z_OBJCE_P(&retval)->name);
 
-            /*
+                if(objName == NULL) {
+                  zend_throw_exception(zend_ce_exception, "Unknown type specified in extension function", 0);
+                }
+
+                if (getenv("SAXONC_DEBUG_FLAG")) {
+                  std::cerr<<"PHP internal: call_user_function returnType obj = "<<objName<< std::endl;
+                }
+
                 if(strcmp(objName, "Saxon\\XdmNode")==0) {
 
                     zend_vobj2 =  Z_OBJ_P(&retval);
-                    ooth = (xdmNode_object *)((char *)zend_vobj2 -
+                    nooth = (xdmNode_object *)((char *)zend_vobj2 -
                                               XtOffsetOf(xdmNode_object, std));
 
-                    if(ooth != NULL) {
-                        obj = ooth->xdmNode->getUnderlyingValue();
+                    if(nooth != NULL) {
+                        resultValue = nooth->xdmNode;
                     }
-                } */
+                } else if(strcmp(objName, "Saxon\\XdmAtomicValue")==0) {
+
+                  zend_vobj2 =  Z_OBJ_P(&retval);
+                  aooth = (xdmAtomicValue_object *)((char *)zend_vobj2 -
+                                            XtOffsetOf(xdmAtomicValue_object, std));
+
+                  if(aooth != NULL) {
+                    resultValue = aooth->xdmAtomicValue;
+                  }
+                } else if(strcmp(objName, "Saxon\\XdmMap")==0) {
+
+                  zend_vobj2 =  Z_OBJ_P(&retval);
+                  mooth = (xdmMap_object *)((char *)zend_vobj2 -
+                                            XtOffsetOf(xdmMap_object, std));
+
+                  if(mooth != NULL) {
+                    resultValue = mooth->xdmMap;
+                  }
+                } else if(strcmp(objName, "Saxon\\XdmArray")==0) {
+
+                  zend_vobj2 =  Z_OBJ_P(&retval);
+                  arrooth = (xdmArray_object *)((char *)zend_vobj2 -
+                                            XtOffsetOf(xdmArray_object, std));
+
+                  if(arrooth != NULL) {
+                    resultValue = arrooth->xdmArray;
+                  }
+                } else if(strcmp(objName, "Saxon\\XdmFunctionItem")==0) {
+
+                  zend_vobj2 =  Z_OBJ_P(&retval);
+                  f_ooth = (xdmFunctionItem_object *)((char *)zend_vobj2 -
+                                            XtOffsetOf(xdmFunctionItem_object, std));
+
+                  if(f_ooth != NULL) {
+                    resultValue = f_ooth->xdmFunctionItem;
+                  }
+                } else if(strcmp(objName, "Saxon\\XdmValue")==0) {
+
+                  zend_vobj2 =  Z_OBJ_P(&retval);
+                  vooth = (xdmValue_object *)((char *)zend_vobj2 -
+                                            XtOffsetOf(xdmValue_object, std));
+
+                  if(vooth != NULL) {
+                    resultValue = vooth->xdmValue;
+                  }
+                }
                 break;
             default:
                 zend_throw_exception(zend_ce_exception, "Unknown type specified in extension function", 0);

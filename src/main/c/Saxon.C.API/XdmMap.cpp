@@ -6,11 +6,9 @@
 #define new new (__FILE__, __LINE__)
 #endif
 
-XdmMap::XdmMap() : XdmFunctionItem() { map_size = 1; }
+XdmMap::XdmMap() : XdmFunctionItem() { map_size = -1; }
 
 XdmMap::XdmMap(const XdmMap &d) {
-  arity = d.arity;
-  data = d.data; // TODO check if copy works
   map_size = d.map_size;
 }
 
@@ -24,11 +22,10 @@ const char *XdmMap::toString() {
   return str;
 }
 
+
+
 int XdmMap::mapSize() {
-  if (map_size == -1) {
-    return j_xdmMap_size(SaxonProcessor::sxn_environ->thread, (void *)value);
-  }
-  return map_size;
+  return j_xdmMap_size(SaxonProcessor::sxn_environ->thread, (void *)value);
 }
 
 XdmValue *XdmMap::get(XdmAtomicValue *key) {

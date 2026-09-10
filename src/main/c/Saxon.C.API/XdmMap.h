@@ -10,6 +10,8 @@
 #ifndef SAXON_XDM_MAP_h
 #define SAXON_XDM_MAP_h
 
+#include <map>
+
 #include "XdmArray.h"
 #include "XdmFunctionItem.h"
 #include <string>
@@ -40,6 +42,14 @@ public:
    * Copy constructor for XdmMap
    */
   XdmMap(const XdmMap &d);
+
+
+ XdmMap& operator=(const XdmMap &d) {
+  std::cerr << "XdmMap::operator=" << std::endl;
+   XdmItem::operator=(d);
+   map_size = -1;
+   return *this;
+ }
 
   //! Destructor.
   /**
@@ -266,12 +276,7 @@ public:
    */
   const char *toString();
 
-private:
-  std::map<XdmAtomicValue *, XdmValue *>
-      data;  /*!< Cached XdmMap represented internally as an std::map. This can
-                also be represented as an JNI object */
-  int arity; /*!< The arity of this function  */
-  int map_size; /*!< Cached size of the map if  represented as a JNI object*/
+
 };
 
 #endif

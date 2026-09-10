@@ -30,6 +30,18 @@ function sumASequence($arr){
 
 }
 
+function simpleUserFunction2($input){
+  echo("simpleUserFunction2 called\n");
+  return $input;
+
+}
+
+function twoSequenceParam2($arr1, $arr2){
+  echo("twoSequenceParam called\n");
+
+    return $arr2;
+}
+
 function implode_all($arr) {
     for ($i=0; $i<count($arr); $i++) {
         if (@is_array($arr[$i]))
@@ -77,7 +89,19 @@ function sequenceOfArraysParamB($arr1){
     throw new Exception('$arr argument is not an array type');
   }
     return False;
+}
 
+
+function sequenceOfArraysParamC($arr1){
+  echo("sequenceOfArraysParamC called\n");
+  if(is_array($arr1)){
+    $out1 = implode_all($arr1);
+    echo $out1."\n";
+    return $arr1;
+  } else {
+    throw new Exception('$arr argument is not an array type');
+  }
+    return $arr1;
 }
 
 function sequenceOfMapParam($map1, $map2){
@@ -113,6 +137,20 @@ function nodeParam($input){
   return $input != NULL && ($input instanceof Saxon\XdmNode) && $input->getNodeKind() >= 1 && $input->getNodeKind() <= 13;
 }
 
+function nodeParam2($input){
+  echo("nodeParam called\n");
+  if(($input instanceof Saxon\XdmNode) && $input->getNodeKind() >= 1 && $input->getNodeKind() <= 13){
+    echo("nodeParam child\n");
+    $child = $input->getChildNode(0);
+    if($child == null) {
+           echo("nodeParam child is null\n");
+    }
+    return $child;
+  }else {
+        return null;
+  }
+}
+
 
 function testSequence($saxonProc) {
          $saxonProc->registerUserFunction("http://www.example.com", "sumASequence", "{ \"sumASequence\": {".
@@ -124,6 +162,15 @@ function testSequence($saxonProc) {
                                                         "    }".
                                                         "}", True);
 
+         $saxonProc->registerUserFunction("http://www.example.com", "simpleUserFunction2", "{ \"simpleUserFunction2\": {".
+                                                        "      \"as\": \"xs:integer?\"," .
+                                                        "      \"param\": [" .
+                                                        "        \"xs:integer\"" .
+                                                        "      ],".
+                                                        "      \"arity\": [1]" .
+                                                        "    }".
+                                                        "}", False);
+
          $xpath = $saxonProc->newXPathProcessor();
 
 
@@ -134,6 +181,12 @@ function testSequence($saxonProc) {
              if($result != null) {
                 $value = $result->getAtomicValue()->getLongValue();
                 echo 'Correct Result='.$value;
+             }
+
+             $result2 = $xpath->evaluateSingle("dy:simpleUserFunction2(1)");
+             if($result2 != null) {
+                $value = $result2->getAtomicValue()->getLongValue();
+                echo 'Correct Result2='.$value;
              }
          } catch (Exception $e) {
              echo 'Caught exception: ', $e->getMessage(), "\n";
@@ -179,6 +232,15 @@ function testTwoSequence($saxonProc) {
                                                         "    }".
                                                         "}", True);
 
+         $saxonProc->registerUserFunction("http://www.example.com", "twoSequenceParam2", "{ \"twoSequenceParam2\": {".
+                                                        "      \"as\": \"xs:integer*\"," .
+                                                        "      \"param\": [" .
+                                                        "        \"xs:string*\", \"xs:integer*\"" .
+                                                        "      ],".
+                                                        "      \"arity\": [1]" .
+                                                        "    }".
+                                                        "}", False);
+
          $xpath = $saxonProc->newXPathProcessor();
 
 
@@ -189,6 +251,13 @@ function testTwoSequence($saxonProc) {
              if($result != null) {
                 $value = $result->getAtomicValue()->getBooleanValue();
                 echo 'Correct Result='.$value;
+             }
+
+             $result2 = $xpath->evaluate("ms:twoSequenceParam2(('a','b','c'), (1,2,3))");
+             if($result2 != null) {
+                $size = $result2->size();
+                $value = $result2->itemAt(0)->getStringValue();
+                echo 'Output size='.$size." Result for 1st item = ".$value;
              }
          } catch (Exception $e) {
              echo 'Caught exception: ', $e->getMessage(), "\n";
@@ -208,6 +277,15 @@ function commonSamplesForSequences($saxonProc) {
 
          $saxonProc->registerUserFunction("http://www.example.com", "sequenceOfArraysParamB", "{ \"sequenceOfArraysParamB\": {".
                                                         "      \"as\": \"xs:boolean\"," .
+                                                        "      \"param\": [" .
+                                                        "        \"array(*)*\"" .
+                                                        "      ],".
+                                                        "      \"arity\": [1]" .
+                                                        "    }".
+                                                        "}", True);
+
+         $saxonProc->registerUserFunction("http://www.example.com", "sequenceOfArraysParamC", "{ \"sequenceOfArraysParamC\": {".
+                                                        "      \"as\": \"array(*)*\"," .
                                                         "      \"param\": [" .
                                                         "        \"array(*)*\"" .
                                                         "      ],".
@@ -241,6 +319,21 @@ function commonSamplesForSequences($saxonProc) {
                 $value = $result1->getAtomicValue()->getBooleanValue();
                 echo 'Correct Result='.$value;
              }
+
+             $result1a = $xpath->evaluateSingle("ms:sequenceOfArraysParamC((array{1,2,3}, array{'a',2,3}))");
+             if($result1a != null) {
+                if($result1a instanceof Saxon\XdmValue) {
+                    echo 'Test sequenceOfArraysParamC: XdmValue found';
+                    $value1 = $result1a->getHead();
+                    if($value1 instanceof Saxon\XdmArray) {
+                        echo 'Test sequenceOfArraysParamC: XdmArray found item0';
+                    }
+
+                }
+                if($result1a instanceof Saxon\XdmArray) {
+                    echo 'Error: Test sequenceOfArraysParamC: XdmArray found';
+                }
+            }
 
              $result2 = $xpath->evaluateSingle("ms:sequenceOfMapParam(map{'a':1,'b':2},map{'c':3,'d':'four'})");
              if($result1 != null) {
@@ -290,6 +383,15 @@ function handlingXdmNodes($saxonProc) {
                                                         "    }".
                                                         "}", True);
 
+         $saxonProc->registerUserFunction("http://www.example.com", "nodeParam2", "{ \"nodeParam2\": {".
+                                                        "      \"as\": \"node()\"," .
+                                                        "      \"param\": [" .
+                                                        "        \"node()\"" .
+                                                        "      ],".
+                                                        "      \"arity\": [1]" .
+                                                        "    }".
+                                                        "}", False);
+
          $xpath = $saxonProc->newXPathProcessor();
 
 
@@ -318,6 +420,12 @@ function handlingXdmNodes($saxonProc) {
              if($result3 != null) {
                 $value = $result3->getAtomicValue()->getBooleanValue();
                 echo 'Correct Result='.$value;
+             }
+
+             $result4 = $xpath->evaluateSingle("ms:nodeParam2(parse-xml('<doc><elem>text</elem></doc>')/node())");
+             if($result4 != null && $result4->isNode()) {
+                $value = $result4->getNodeValue();
+                echo 'Correct Result='.$value->getStringValue();
              }
          } catch (Exception $e) {
              echo 'Caught exception: ', $e->getMessage(), "\n";

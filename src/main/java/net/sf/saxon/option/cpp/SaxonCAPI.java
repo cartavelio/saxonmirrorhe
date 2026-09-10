@@ -1213,7 +1213,7 @@ public class SaxonCAPI {
 
 
     /**
-     * Utility method when XdmValues retrieved as objects from C++ to convert a object to an XmdValue.
+     * Utility method when XdmValues retrieved as objects from C++ to convert object to an XmdValue.
      *
      * @param value - object to be converted
      * @return XdmValue
