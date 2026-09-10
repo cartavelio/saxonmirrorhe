@@ -72,7 +72,7 @@ namespace Saxon.Impl.Dom {
         }
         
         public override Saxon.Hej.str.UnicodeString getUnicodeStringValue() {
-            return StringView.wrap(htmlAttribute.Value);
+            return StringView.tidy(htmlAttribute.Value);
         }
 
         public override string getLocalPart() {

@@ -1057,10 +1057,10 @@ public class ExpressionTool {
 
     public static void resetPropertiesWithinSubtree(Expression exp) {
         exp.resetLocalStaticProperties();
-        if (exp instanceof LocalVariableReference ref) {
-            Binding binding = ref.getBinding();
+        if (exp instanceof LocalVariableReference varRef) {
+            Binding binding = varRef.getBinding();
             if (binding instanceof Assignation) {
-                binding.addReference(ref, ref.isInLoop());
+                binding.addReference(varRef, varRef.isInLoop());
             }
         }
         for (Operand o : exp.operands()) {

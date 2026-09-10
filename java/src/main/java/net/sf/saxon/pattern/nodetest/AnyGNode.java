@@ -19,7 +19,7 @@ public final class AnyGNode implements NodePredicate, NodeVectorMatchMaker {
 
     private AnyGNode(){};
 
-    public static AnyGNode TEST = new AnyGNode();
+    public static NodePredicate TEST = new AnyGNode();
 
     @Override
     public boolean test(GNode node) {

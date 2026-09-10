@@ -25,9 +25,9 @@ public class SegmentedString extends UnicodeString {
 
     private final UnicodeString[] segments;
 
-    private final static long LOCAL_BITS = 16;  // segments of fixed size 2^16 = 65536 codepoints
+    private final static int LOCAL_BITS = 16;  // segments of fixed size 2^16 = 65536 codepoints
     public final static int SEGMENT_LENGTH = 1<<LOCAL_BITS;
-    private final static long INNER_MASK = SEGMENT_LENGTH - 1;
+    private final static int INNER_MASK = SEGMENT_LENGTH - 1;
 
     /**
      * Private constructor creating an empty SegmentedString (containing an empty list of segments)
@@ -218,12 +218,8 @@ public class SegmentedString extends UnicodeString {
      */
     @Override
     public int codePointAt(long index) {
-        try {
-            UnicodeString segment = segments[(int) (index >> LOCAL_BITS)];
-            return segment.codePointAt(index & INNER_MASK);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        UnicodeString segment = segments[(int) (index >> LOCAL_BITS)];
+        return segment.codePointAt(index & INNER_MASK);
     }
 
     /**

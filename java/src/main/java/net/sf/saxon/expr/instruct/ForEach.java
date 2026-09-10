@@ -368,17 +368,17 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
 
         // Rewrite (1 to 1000) ! (. + $N) as (1 + $N to 1000 + $N)
         if (getSelect() instanceof Literal lit
-                && lit.getGroundedValue() instanceof IntegerRange range
+                && lit.getGroundedValue() instanceof IntegerRange intRange
                 &&  isSimpleArithmeticShift(getAction())
                 && getSeparatorExpression() == null) {
             ArithmeticExpression arith = (ArithmeticExpression) getAction();
             Expression shift = arith.getRhsExpression();
             Expression newStart = new ArithmeticExpression(
-                    Literal.makeLiteral(new Int64Value(range.start), this),
+                    Literal.makeLiteral(new Int64Value(intRange.getStart()), this),
                     arith.getOperator(),
                     shift.copy(new RebindingMap()));
             Expression newEnd = new ArithmeticExpression(
-                    Literal.makeLiteral(new Int64Value(range.end), this),
+                    Literal.makeLiteral(new Int64Value(intRange.getEnd()), this),
                     arith.getOperator(),
                     shift.copy(new RebindingMap()));
 
