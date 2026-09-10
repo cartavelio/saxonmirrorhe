@@ -70,6 +70,32 @@ task graal_ee_home(
   }
 }
 
+private String findPyenv() {
+  if (pyenvex != null || pyenvsearch) {
+    return
+  }
+  pyenvsearch = true
+
+  def spath = System.getenv("PATH").split(System.getProperty("path.separator"))
+  spath.each { dir ->
+    if (pyenvex == null) {
+      def fn = new File(dir + "/pyenv")
+      if (fn.exists() && fn.canExecute()) {
+        pyenvex = fn.toString()
+      } else {
+        fn = new File(dir + "/pyenv.bat")     // ???
+        if (fn.exists() && fn.canExecute()) {
+          pyenvex = fn.toString()
+        }
+      }
+    }
+  }
+
+  if (pyenvex == null) {
+    println("WARNING: Failed to find pyenv[.bat]!")
+  }
+}
+
 // ============================================================
 
 def saxonApiDir = "${buildDir}/../src/main/c/Saxon.C.API"
@@ -1249,13 +1275,22 @@ task saxonc_build_wheels(
 // Tasks for running the Python test suites
 
 task pyenvEnvironment(
-  type: Exec,
   dependsOn: ['record_branch'],
   description: "Determine which pyenv virtualenv is in use"
 ) {
   def recordVersion = new ByteArrayOutputStream();
-  commandLine "pyenv", "version"
-  standardOutput = recordVersion
+
+  doFirst {
+    findPyenv()
+    if (pyenvex == null) {
+      throw new GradleException("Python tests require pyenv")
+    }
+    exec {
+      commandLine pyenvex, "version"
+      standardOutput = recordVersion
+    }
+  }
+
   doLast {
     BufferedReader branch = new BufferedReader(new FileReader(new File("${project.buildDir}/built-branch")))
     def currentBranch = branch.readLine()

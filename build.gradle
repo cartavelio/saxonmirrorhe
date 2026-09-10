@@ -99,6 +99,8 @@ ext {
   c_documentation = "saxonicadocs"
   dotnetex = null
   awscli = null
+  pyenvsearch = false
+  pyenvex = null
   csver = null
   csrid = null
   csbuildarch = null
