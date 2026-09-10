@@ -182,13 +182,16 @@ public class SlashExpression extends BinaryExpression
             return getStart();
         }
 
+        int version = visitor.getStaticContext().getXPathVersion();
+
         // The first operand must be of type gnode()*
 
         Configuration config = visitor.getConfiguration();
         TypeChecker tc = config.getTypeChecker(false);
         Supplier<RoleDiagnostic> roleSupplier =
                 () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "/", 0, "XPTY0019");
-        setStart(tc.staticTypeCheck(getStart(), SequenceType.GNODE_SEQUENCE, roleSupplier, visitor));
+        SequenceType lhsType = version >= 40 ? SequenceType.GNODE_SEQUENCE : SequenceType.NODE_SEQUENCE;
+        setStart(tc.staticTypeCheck(getStart(), lhsType, roleSupplier, visitor));
 
 //        if (visitor.getStaticContext().getXPathVersion() >= 40
 //                && !(getStart().getItemType() instanceof GNodeType)) {
