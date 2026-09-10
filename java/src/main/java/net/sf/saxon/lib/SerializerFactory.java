@@ -708,13 +708,17 @@ public class SerializerFactory {
 
     protected SequenceReceiver createXMLSerializer(
             XMLEmitter emitter, SerializationProperties params) throws XPathException {
-        Receiver target;
+        Receiver target = emitter;
         Properties props = params.getProperties();
         boolean canonical = "yes".equals(props.getProperty(SaxonOutputKeys.CANONICAL));
         if ("yes".equals(props.getProperty(OutputKeys.INDENT)) || canonical) {
             target = newXMLIndenter(emitter, props);
-        } else {
-            target = emitter;
+        }
+        String lineEnding = props.getProperty(SaxonOutputKeys.LINE_ENDING);
+        if (lineEnding != null && !lineEnding.equals("\n")) {
+            // Note, if indenting, the indenter takes care of newline adjustment in indent text,
+            // but not in existing content
+            target = newNewlineAdjuster(target, lineEnding);
         }
         target = new NamespaceDifferencer(target, props);
         if ("1.0".equals(props.getProperty(OutputKeys.VERSION)) &&
@@ -901,6 +905,18 @@ public class SerializerFactory {
         XMLIndenter r = new XMLIndenter(next);
         r.setOutputProperties(outputProperties);
         return r;
+    }
+
+    /**
+     * Create a Newline adjuster. This method exists so that it can be overridden in a subclass.
+     *
+     * @param next             the next receiver in the pipeline
+     * @param lineEnding       the string to be used to represent end of line
+     * @return the newly created NewLineAdjuster.
+     */
+
+    protected ProxyReceiver newNewlineAdjuster(Receiver next, String lineEnding) {
+        return new NewlineAdjuster(next, lineEnding);
     }
 
     /**
@@ -1126,30 +1142,25 @@ public class SerializerFactory {
     public String checkOutputProperty(String key, String value) throws XPathException {
         if (!key.startsWith("{")) {
             switch (key) {
-                case SaxonOutputKeys.ALLOW_DUPLICATE_NAMES:
                 case SaxonOutputKeys.ESCAPE_URI_ATTRIBUTES:
                 case SaxonOutputKeys.INCLUDE_CONTENT_TYPE:
-                case SaxonOutputKeys.JSON_LINES:
                 case OutputKeys.INDENT:
                 case OutputKeys.OMIT_XML_DECLARATION:
-
                 case SaxonOutputKeys.UNDECLARE_PREFIXES:
-                    if (value != null) {
-                        value = checkYesOrNo(key, value);
-                    }
-                    break;
                 case SaxonOutputKeys.BUILD_TREE:
-                    if (value != null) {
-                        value = checkYesOrNo(key, value);
-                    }
-                    break;
                 case SaxonOutputKeys.BYTE_ORDER_MARK:
                     if (value != null) {
                         value = checkYesOrNo(key, value);
                     }
                     break;
+
+                case SaxonOutputKeys.ALLOW_DUPLICATE_NAMES:
                 case SaxonOutputKeys.CANONICAL:
+                case SaxonOutputKeys.ESCAPE_SOLIDUS:
+                case SaxonOutputKeys.JSON_LINES:
+                case SaxonOutputKeys.INDENT_ATTRIBUTES:
                     if (value != null) {
+                        checkExtensions(key);
                         value = checkYesOrNo(key, value);
                     }
                     break;
@@ -1160,6 +1171,7 @@ public class SerializerFactory {
                         value = checkListOfEQNames(key, value);
                     }
                     break;
+
                 case OutputKeys.DOCTYPE_PUBLIC:
                     if (value != null) {
                         checkPublicIdentifier(value);
@@ -1170,14 +1182,7 @@ public class SerializerFactory {
                         checkSystemIdentifier(value);
                     }
                     break;
-                case OutputKeys.ENCODING:
-                    // no constraints
-                    break;
-                case SaxonOutputKeys.ESCAPE_SOLIDUS:
-                    if (value != null) {
-                        value = checkYesOrNo(key, value);
-                    }
-                    break;
+
                 case SaxonOutputKeys.HTML_VERSION:
                     if (value != null) {
                         checkDecimal(key, value);
@@ -1193,17 +1198,34 @@ public class SerializerFactory {
                         value = checkMethod(key, value);
                     }
                     break;
-                case OutputKeys.MEDIA_TYPE:
-                    // no constraints
-                    break;
+
                 case SaxonOutputKeys.NORMALIZATION_FORM:
                     if (value != null) {
                         checkNormalizationForm(value);
                     }
                     break;
+
+                case SaxonOutputKeys.INDENT_UNIT:
+                    if (value != null) {
+                        checkExtensions(key);
+                        checkIndentUnit(value);
+                    }
+                    break;
+
+                case SaxonOutputKeys.LINE_ENDING:
+                    if (value != null) {
+                        checkExtensions(key);
+                        checkLineEnding(value);
+                    }
+                    break;
+
+                case OutputKeys.MEDIA_TYPE:
                 case SaxonOutputKeys.PARAMETER_DOCUMENT:
+                case OutputKeys.VERSION:
+                case OutputKeys.ENCODING:
                     // no checking
                     break;
+
                 case OutputKeys.STANDALONE:
                     if (value != null && !value.equals("omit")) {
                         try {
@@ -1212,9 +1234,6 @@ public class SerializerFactory {
                             throw new XPathException("Serialization parameter {standalone} must have the value yes|no, true|false, 1|0, or 'omit'", "SEPM0016");
                         }
                     }
-                    break;
-                case OutputKeys.VERSION:
-                    // no constraints
                     break;
                 default:
                     throw new XPathException("Unknown serialization parameter " + Err.wrap(key), "XQST0109");
@@ -1284,9 +1303,24 @@ public class SerializerFactory {
         }
     }
 
+    private static void checkIndentUnit(String value) throws XPathException {
+        if (!value.matches(" *|\\t+|\\\\t+")) {
+            throw new XPathException("Invalid value for indent-unit: " +
+                                             "must be a sequence of tabs or spaces", "SEPM0016");
+        }
+    }
+
+    private static void checkLineEnding(String value) throws XPathException {
+        value = value.replace("\\r", "\r").replace("\\n", "\n");
+        if (!(value.equals("\n") || value.equals("\r") || value.equals("\r\n"))) {
+            throw new XPathException("Invalid value for line-ending: " +
+                                             "must be LF, CR, or CRLF", "SEPM0016");
+        }
+    }
+
     private static boolean isValidEQName(String value) {
         Objects.requireNonNull(value);
-        if (value.isEmpty() || !value.startsWith("Q{")) {
+        if (!value.startsWith("Q{")) {
             return false;
         }
         int closer = value.indexOf('}', 2);

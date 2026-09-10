@@ -18,6 +18,7 @@ import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.IndentWhitespace;
+import net.sf.saxon.str.Twine8;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
@@ -279,19 +280,7 @@ public class HTMLIndenter extends ProxyReceiver {
 
     private void indent() throws XPathException {
         int spaces = level * getIndentation();
-//        if (spaces + 1 >= indentChars.length) {
-//            int increment = 5 * getIndentation();
-//            if (spaces + 1 > indentChars.length + increment) {
-//                increment += spaces + 1;
-//            }
-//            char[] c2 = new char[indentChars.length + increment];
-//            System.arraycopy(indentChars, 0, c2, 0, indentChars.length);
-//            Arrays.fill(c2, indentChars.length, c2.length, ' ');
-//            indentChars = c2;
-//        }
-//        nextReceiver.characters(new Twine16(indentChars, 0, spaces + 1),
-//                                Loc.NONE, ReceiverOption.NONE);
-        nextReceiver.characters(IndentWhitespace.of(1, spaces),
+        nextReceiver.characters(IndentWhitespace.of(new Twine8("\n"), spaces, ' '),
                                 Loc.NONE, ReceiverOption.NONE);
         sameLine = false;
     }

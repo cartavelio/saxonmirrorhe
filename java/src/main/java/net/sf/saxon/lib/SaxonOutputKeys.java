@@ -27,7 +27,7 @@ import java.util.StringTokenizer;
  * output properties from a Transformer or Templates object.
  * <p>These keys are private Saxon keys that supplement the standard keys
  * defined in javax.xml.transform.OutputKeys. As well as Saxon extension
- * attributes, the list includes new attributes defined in XSLT 2.0 which
+ * attributes, the list includes new attributes defined in XSLT 2.0 and later which
  * are not yet supported in JAXP</p>
  *
  * <p>Note that for JAXP compatibility, the names of properties use Clark format,
@@ -49,60 +49,60 @@ public class SaxonOutputKeys {
      * String constant representing the saxon:xquery output method name
      */
 
-    /*@NotNull*/ public static final String SAXON_XQUERY_METHOD = "Q{http://saxon.sf.net/}xquery";
+    public static final String SAXON_XQUERY_METHOD = "Q{http://saxon.sf.net/}xquery";
 
     /**
      * String constant representing the saxon:base64Binary output method name
      */
 
-    /*@NotNull*/ public static final String SAXON_BASE64_BINARY_METHOD = "Q{http://saxon.sf.net/}base64Binary";
+    public static final String SAXON_BASE64_BINARY_METHOD = "Q{http://saxon.sf.net/}base64Binary";
 
     /**
      * String constant representing the saxon:hexBinary output method name
      */
 
-    /*@NotNull*/ public static final String SAXON_HEX_BINARY_METHOD = "Q{http://saxon.sf.net/}hexBinary";
+    public static final String SAXON_HEX_BINARY_METHOD = "Q{http://saxon.sf.net/}hexBinary";
 
     /**
      * String constant representing the saxon:xml-to-json output method name
      */
 
-    /*@NotNull*/ public static final String SAXON_XML_TO_JSON_METHOD = "Q{http://saxon.sf.net/}xml-to-json";
+    public static final String SAXON_XML_TO_JSON_METHOD = "Q{http://saxon.sf.net/}xml-to-json";
 
     /**
      * allow-duplicate-names = yes|no.
      * <p>Defines whether duplicate keys are allowed in a JSON map (new in 3.1)</p>
      */
 
-    /*@NotNull*/ public static final String ALLOW_DUPLICATE_NAMES = "allow-duplicate-names";
+    public static final String ALLOW_DUPLICATE_NAMES = "allow-duplicate-names";
 
     /**
      * escape-solidus = yes|no.
      * <p>Defines whether forward slash is escaped by the JSON output method</p>
      */
 
-    /*@NotNull*/ public static final String ESCAPE_SOLIDUS = "escape-solidus";
+    public static final String ESCAPE_SOLIDUS = "escape-solidus";
 
     /**
      * build-tree = yes|no.
      * <p>Defines whether the raw output is used to build an XML document tree</p>
      */
 
-    /*@NotNull*/ public static final String BUILD_TREE = "build-tree";
+    public static final String BUILD_TREE = "build-tree";
 
     /**
      * saxon:indent-spaces = integer.
      * <p>Defines the number of spaces used for indentation of output</p>
      */
 
-    /*@NotNull*/ public static final String INDENT_SPACES = "{http://saxon.sf.net/}indent-spaces";
+    public static final String INDENT_SPACES = "{http://saxon.sf.net/}indent-spaces";
 
     /**
      * saxon:internal-dtd-subset = string.
      * <p>Contains the internal subset of the DTD, which is output as-is by the serializer</p>
      */
 
-    /*@NotNull*/ public static final String INTERNAL_DTD_SUBSET = "{http://saxon.sf.net/}internal-dtd-subset";
+    public static final String INTERNAL_DTD_SUBSET = "{http://saxon.sf.net/}internal-dtd-subset";
 
 
     /**
@@ -110,14 +110,14 @@ public class SaxonOutputKeys {
      * <p>Defines the desired maximum line length used when indenting output</p>
      */
 
-    /*@NotNull*/ public static final String LINE_LENGTH = "{http://saxon.sf.net/}line-length";
+    public static final String LINE_LENGTH = "{http://saxon.sf.net/}line-length";
 
     /**
      * saxon:single-quotes = boolean.
      * <p>Indicates that attributes should be delimited by apostrophes rather than quotation marks</p>
      */
 
-    /*@NotNull*/ public static final String SINGLE_QUOTES = "{http://saxon.sf.net/}single-quotes";
+    public static final String SINGLE_QUOTES = "{http://saxon.sf.net/}single-quotes";
 
 
     /**
@@ -125,7 +125,7 @@ public class SaxonOutputKeys {
      * <p>Defines elements within which no indentation will occur</p>
      */
 
-    /*@NotNull*/ public static final String SUPPRESS_INDENTATION = "suppress-indentation";
+    public static final String SUPPRESS_INDENTATION = "suppress-indentation";
 
     /**
      * html-version = decimal
@@ -149,14 +149,14 @@ public class SaxonOutputKeys {
      * <p>Defines whether forward slash is escaped by the JSON output method</p>
      */
 
-    /*@NotNull*/ public static final String JSON_LINES = "json-lines";
+    public static final String JSON_LINES = "json-lines";
 
     /**
      * json-node-output-method = method-name
      * <p>Defines the serialization method for nodes encountered while serializing as JSON</p>
      */
 
-    /*@NotNull*/ public static final String JSON_NODE_OUTPUT_METHOD = "json-node-output-method";
+    public static final String JSON_NODE_OUTPUT_METHOD = "json-node-output-method";
 
 
     /**
@@ -166,7 +166,7 @@ public class SaxonOutputKeys {
      * then by local name.</p>
      */
 
-    /*@NotNull*/ public static final String ATTRIBUTE_ORDER = "{http://saxon.sf.net/}attribute-order";
+    public static final String ATTRIBUTE_ORDER = "{http://saxon.sf.net/}attribute-order";
 
     /**
      * saxon:canonical = yes/no or canonical = yes/no
@@ -177,7 +177,7 @@ public class SaxonOutputKeys {
      * @since 9.9
      */
 
-    /*@NotNull*/ public static final String CANONICAL = "canonical";
+    public static final String CANONICAL = "canonical";
 
     /**
      * saxon:property-order = list of strings
@@ -185,7 +185,7 @@ public class SaxonOutputKeys {
      * will appear correctly ordered according to the list; other attributes will be ordered by name.</p>
      */
 
-    /*@NotNull*/ public static final String PROPERTY_ORDER = "{http://saxon.sf.net/}property-order";
+    public static final String PROPERTY_ORDER = "{http://saxon.sf.net/}property-order";
 
     /**
      * saxon:double-space = list of element names
@@ -193,7 +193,7 @@ public class SaxonOutputKeys {
      * to normal indentation</p>
      */
 
-    /*@NotNull*/ public static final String DOUBLE_SPACE = "{http://saxon.sf.net/}double-space";
+    public static final String DOUBLE_SPACE = "{http://saxon.sf.net/}double-space";
 
     /**
      * saxon:newline = string
@@ -201,7 +201,7 @@ public class SaxonOutputKeys {
      * output method</p>
      */
 
-    /*@NotNull*/ public static final String NEWLINE = "{http://saxon.sf.net/}newline";
+    public static final String NEWLINE = "{http://saxon.sf.net/}newline";
 
     /**
      * spec-version. This serialization parameter controls which version of the serialization
@@ -211,7 +211,7 @@ public class SaxonOutputKeys {
      * <p>In earlier Saxon releases this parameter was named "stylesheet version".</p>
      */
 
-    /*@NotNull*/ public static final String SPEC_VERSION = "{http://saxon.sf.net/}spec-version";
+    public static final String SPEC_VERSION = "{http://saxon.sf.net/}spec-version";
 
     /**
      * use-character-map = list-of-qnames.
@@ -219,7 +219,7 @@ public class SaxonOutputKeys {
      * are represented in EQName notation as Q{uri}local-name.</p>
      */
 
-    /*@NotNull*/ public static final String USE_CHARACTER_MAPS = "use-character-maps";
+    public static final String USE_CHARACTER_MAPS = "use-character-maps";
 
 
     /**
@@ -227,21 +227,41 @@ public class SaxonOutputKeys {
      * <p>Indicates whether the META tag is to be added to HTML output</p>
      */
 
-    /*@NotNull*/ public static final String INCLUDE_CONTENT_TYPE = "include-content-type";
+    public static final String INCLUDE_CONTENT_TYPE = "include-content-type";
 
     /**
      * undeclare-prefixes = "yes" | "no". This attribute is defined in XSLT 2.0
      * <p>Indicates XML 1.1 namespace undeclarations are to be output when required</p>
      */
 
-    /*@NotNull*/ public static final String UNDECLARE_PREFIXES = "undeclare-prefixes";
+    public static final String UNDECLARE_PREFIXES = "undeclare-prefixes";
 
     /**
      * escape-uri-attributes = "yes" | "no". This attribute is defined in XSLT 2.0
      * <p>Indicates whether HTML attributes of type URI are to be URI-escaped</p>
      */
 
-    /*@NotNull*/ public static final String ESCAPE_URI_ATTRIBUTES = "escape-uri-attributes";
+    public static final String ESCAPE_URI_ATTRIBUTES = "escape-uri-attributes";
+
+    /**
+     * indent-unit. Introduced in 4.0, defines a sequence of spaces or tabs to be
+     * used for indentation.
+     */
+    
+    public static final String INDENT_UNIT = "indent-unit";
+
+    /**
+     * line-ending. Introduced in 4.0, defines a sequence of spaces or tabs to be
+     * used for indentation.
+     */
+
+    public static final String LINE_ENDING = "line-ending";
+
+    /**
+     * indent-attributes. Introduced in 4.0, indicates whether attributes should be indented.
+     */
+
+    public static final String INDENT_ATTRIBUTES = "indent-attributes";
 
     /**
      * representation = rep1[;rep2].
@@ -249,7 +269,7 @@ public class SaxonOutputKeys {
      * and XML output. rep1 is for characters in the range 128-256, rep2 for those
      * above 256.</p>
      */
-    /*@NotNull*/ public static final String CHARACTER_REPRESENTATION = "{http://saxon.sf.net/}character-representation";
+    public static final String CHARACTER_REPRESENTATION = "{http://saxon.sf.net/}character-representation";
 
     /**
      * saxon:next-in-chain = URI.
@@ -257,8 +277,8 @@ public class SaxonOutputKeys {
      * to perform another transformation. The auxiliary property NEXT_IN_CHAIN_BASE_URI
      * records the base URI of the stylesheet element where this attribute was found.</p>
      */
-    /*@NotNull*/ public static final String NEXT_IN_CHAIN = "{http://saxon.sf.net/}next-in-chain";
-    /*@NotNull*/ public static final String NEXT_IN_CHAIN_BASE_URI = "{http://saxon.sf.net/}next-in-chain-base-uri";
+    public static final String NEXT_IN_CHAIN = "{http://saxon.sf.net/}next-in-chain";
+    public static final String NEXT_IN_CHAIN_BASE_URI = "{http://saxon.sf.net/}next-in-chain-base-uri";
 
     /**
      * parameter-document = URI.
@@ -266,8 +286,8 @@ public class SaxonOutputKeys {
      * to perform another transformation. The auxiliary property NEXT_IN_CHAIN_BASE_URI
      * records the base URI of the stylesheet element where this attribute was found.</p>
      */
-    /*@NotNull*/ public static final String PARAMETER_DOCUMENT = "parameter-document";
-    /*@NotNull*/ public static final String PARAMETER_DOCUMENT_BASE_URI = "{http://saxon.sf.net/}parameter-document-base-uri";
+    public static final String PARAMETER_DOCUMENT = "parameter-document";
+    public static final String PARAMETER_DOCUMENT_BASE_URI = "{http://saxon.sf.net/}parameter-document-base-uri";
 
 
     /**
@@ -276,14 +296,14 @@ public class SaxonOutputKeys {
      * default is "no"
      */
 
-    /*@NotNull*/ public static final String BYTE_ORDER_MARK = "byte-order-mark";
+    public static final String BYTE_ORDER_MARK = "byte-order-mark";
 
     /**
      * normalization-form = NFC|NFD|NFKC|NFKD|non.
      * <p>Indicates that a given Unicode normalization form (or no normalization) is required.
      */
 
-    /*@NotNull*/ public static final String NORMALIZATION_FORM = "normalization-form";
+    public static final String NORMALIZATION_FORM = "normalization-form";
 
     /**
      * recognize-binary = yes|no.
@@ -294,7 +314,7 @@ public class SaxonOutputKeys {
      * that they represent valid XML strings.</p>
      */
 
-    /*@NotNull*/ public static final String RECOGNIZE_BINARY = "{http://saxon.sf.net/}recognize-binary";
+    public static final String RECOGNIZE_BINARY = "{http://saxon.sf.net/}recognize-binary";
 
     /**
      * saxon:require-well-formed = yes|no.
@@ -303,7 +323,7 @@ public class SaxonOutputKeys {
      * The default is "no".</p>
      */
 
-    /*@NotNull*/ public static final String REQUIRE_WELL_FORMED = "{http://saxon.sf.net/}require-well-formed";
+    public static final String REQUIRE_WELL_FORMED = "{http://saxon.sf.net/}require-well-formed";
 
     /**
      * supply-source-locator = yes|no.
@@ -312,7 +332,7 @@ public class SaxonOutputKeys {
      * location of the context node in the source document as well as the location in the stylesheet or query.</p>
      */
 
-    /*@NotNull*/ public static final String SUPPLY_SOURCE_LOCATOR = "{http://saxon.sf.net/}supply-source-locator";
+    public static final String SUPPLY_SOURCE_LOCATOR = "{http://saxon.sf.net/}supply-source-locator";
 
     /**
      * wrap="yes"|"no".
@@ -322,7 +342,7 @@ public class SaxonOutputKeys {
      * including for example sequences consisting of parentless attribute nodes.</p>
      */
 
-    /*@NotNull*/ public static final String WRAP = "{http://saxon.sf.net/}wrap-result-sequence";
+    public static final String WRAP = "{http://saxon.sf.net/}wrap-result-sequence";
 
     /**
      * Property saxon:conditional-cdata indicates that CDATA, if requested for a particular
@@ -402,13 +422,15 @@ public class SaxonOutputKeys {
      * <p>XQuery output declarations follow the rules for parameter documents</p>
      * <p>Pragmatically, it makes sense to be consistent. Including whitespace in doctype-system,
      *    doctype-public, encoding, version, or media-type is never useful. So we apply
-     *    whitespace-stripping to all properties other than item-separator.</p>
+     *    whitespace-stripping to all properties other than item-separator
+     *    and a few others that can contain whitespace.</p>
      *
      * @param key the property name, in Clark notation
      * @return true if the property is retained as written without whitespace stripping
      */
     public static boolean isUnstrippedProperty(String key) {
-        return ITEM_SEPARATOR.equals(key) || NEWLINE.equals(key);
+        return ITEM_SEPARATOR.equals(key) || NEWLINE.equals(key) ||
+                LINE_ENDING.equals(key) || INDENT_UNIT.equals(key);
     }
 
     /**

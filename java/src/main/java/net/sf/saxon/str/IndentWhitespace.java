@@ -24,24 +24,26 @@ import java.util.Arrays;
 
 public class IndentWhitespace extends WhitespaceString {
 
-    private final int newlines;
-    private final int spaces;
+    private final Twine8 lineEnding;
+    private final int charCount;
+    private final char indentChar;
 
-    private IndentWhitespace(int newlines, int spaces) {
-        this.newlines = newlines;
-        this.spaces = spaces;
+    private IndentWhitespace(Twine8 lineEnding, int charCount, char indentChar) {
+        this.lineEnding = lineEnding;
+        this.charCount = charCount;
+        this.indentChar = indentChar;
     }
 
     /**
      * Create an IndentWhitespace object
-     * @param newlines the number of newlines at the start
+     * @param lineEnding the end-of-line sequence
      * @param spaces the number of spaces following the newlines
      * @return the constructed (or potentially cached) IndentWhitespace object
      */
 
-    public static IndentWhitespace of(int newlines, int spaces) {
+    public static IndentWhitespace of(Twine8 lineEnding, int spaces, char indentChar) {
         // Uses a factory method to permit pooling, not currently implemented
-        return new IndentWhitespace(newlines, spaces);
+        return new IndentWhitespace(lineEnding, spaces, indentChar);
     }
 
     /**
@@ -51,38 +53,29 @@ public class IndentWhitespace extends WhitespaceString {
 
     @Override
     public UnicodeString uncompress() {
-        byte[] bytes = new byte[newlines + spaces];
-        Arrays.fill(bytes, 0, newlines, (byte)0x0a);
-        Arrays.fill(bytes, newlines, newlines + spaces, (byte)0x20);
+        byte[] nl = lineEnding.getByteArray();
+        byte[] bytes = Arrays.copyOf(nl, nl.length + charCount);
+        Arrays.fill(bytes, nl.length, bytes.length, (byte)indentChar);
         return new Twine8(bytes);
     }
 
     @Override
     public long length() {
-        return newlines + spaces;
+        return lineEnding.length32() + charCount;
     }
 
     @Override
     public int length32() {
-        return newlines + spaces;
+        return lineEnding.length32() + charCount;
     }
 
     /**
-     * Get the number of newlines at the start
-     * @return the number of newline characters
+     * Get the number of spaces or tabs following the newlines
+     * @return the number of space or tab characters
      */
 
-    public int getNewlines() {
-        return newlines;
-    }
-
-    /**
-     * Get the number of spaces following the newlines
-     * @return the number of space characters
-     */
-
-    public int getSpaces() {
-        return spaces;
+    public int getCharCount() {
+        return charCount;
     }
 
     /**
@@ -98,10 +91,10 @@ public class IndentWhitespace extends WhitespaceString {
      */
     @Override
     public int codePointAt(long index) {
-        if (index >= 0 && index < newlines) {
+        if (index >= 0 && index < lineEnding.length32()) {
             return 0x0A;
-        } else if (index <= newlines + spaces) {
-            return 0x20;
+        } else if (index <= lineEnding.length32() + charCount) {
+            return indentChar;
         } else {
             throw new IndexOutOfBoundsException();
         }
@@ -111,18 +104,15 @@ public class IndentWhitespace extends WhitespaceString {
     @Override
     public IntIterator codePoints() {
         return new ConcatenatingIntIterator(
-                new IntRepeatIterator(10, newlines),
-                () -> new IntRepeatIterator(32, spaces));
+                lineEnding.codePoints(),
+                () -> new IntRepeatIterator(indentChar, charCount));
     }
 
     /**
      * Returns a string representation of the object.
      */
     public String toString() {
-        char[] chars = new char[newlines + spaces];
-        Arrays.fill(chars, 0, newlines, '\n');
-        Arrays.fill(chars, newlines, newlines + spaces, ' ');
-        return new String(chars);
+        return uncompress().toString();
     }
 
     /**
@@ -134,11 +124,9 @@ public class IndentWhitespace extends WhitespaceString {
 
     @Override
     public void write(/*@NotNull*/ UnicodeWriter writer) throws java.io.IOException {
-        if (newlines > 0) {
-            writer.writeRepeatedAscii((byte) 0x0A, newlines);
-        }
-        if (spaces > 0) {
-            writer.writeRepeatedAscii((byte) 0x20, spaces);
+        writer.writeAscii(lineEnding.getByteArray());
+        if (charCount > 0) {
+            writer.writeRepeatedAscii((byte) indentChar, charCount);
         }
     }
 
@@ -152,14 +140,8 @@ public class IndentWhitespace extends WhitespaceString {
 
     @Override
     public void writeEscape(boolean[] specialChars, UnicodeWriter writer) throws java.io.IOException {
-        if (specialChars[0x0A]) {
-            for (int i=0; i<newlines; i++) {
-                writer.writeAscii(StringConstants.ESCAPE_NL);
-            }
-        } else {
-            writer.writeRepeatedAscii((byte) 0x0A, newlines);
-        }
-        writer.writeRepeatedAscii((byte) 0x20, spaces);
+        writer.writeAscii(lineEnding.getByteArray());
+        writer.writeRepeatedAscii((byte) indentChar, charCount);
     }
 }
 

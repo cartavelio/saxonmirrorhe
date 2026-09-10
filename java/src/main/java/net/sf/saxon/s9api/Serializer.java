@@ -167,6 +167,16 @@ public class Serializer extends AbstractDestination {
         INDENT(OutputKeys.INDENT),
 
         /**
+         * Set to "yes" or "no" to indicate whether attributes should be indented
+         */
+        INDENT_ATTRIBUTES(SaxonOutputKeys.INDENT_ATTRIBUTES),
+
+        /**
+         * Set to the sequence of spaces or tabs to be used for indentation
+         */
+        INDENT_UNIT(SaxonOutputKeys.INDENT_UNIT),
+
+        /**
          * Set to a string that will be used to separate adjacent items in an XQuery result sequence
          */
         ITEM_SEPARATOR(SaxonOutputKeys.ITEM_SEPARATOR),
@@ -180,6 +190,11 @@ public class Serializer extends AbstractDestination {
          * Output method to be used when nodes are embedded in maps or arrays output using the JSON output method
          */
         JSON_NODE_OUTPUT_METHOD(SaxonOutputKeys.JSON_NODE_OUTPUT_METHOD),
+
+        /**
+         * Set to a string that will be used for line endings
+         */
+        LINE_ENDING(SaxonOutputKeys.LINE_ENDING),
 
         /**
          * Set to indicate the media type (MIME type) of the output
@@ -297,7 +312,7 @@ public class Serializer extends AbstractDestination {
          */
         SAXON_LINE_LENGTH(SaxonOutputKeys.LINE_LENGTH),
 
-          /**
+        /**
          * Saxon extension: set to any string. Indicates the sequence of characters used to represent
          * a newline in the text output method, and in newlines used for indentation in any output
          * methods that use indentation.

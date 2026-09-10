@@ -177,9 +177,6 @@ public class XMLEmitter extends Emitter {
 
     protected void openDocument() throws XPathException {
         assert writer != null;
-//        if (writer == null) {
-//            makeWriter();
-//        }
         if (characterSet == null) {
             characterSet = UTF8CharacterSet.getInstance();
         }
@@ -293,7 +290,7 @@ public class XMLEmitter extends Emitter {
             }
 
             String systemId = outputProperties.getProperty(OutputKeys.DOCTYPE_SYSTEM);
-            if (systemId != null && !"".equals(systemId)) {
+            if (systemId != null && !systemId.isEmpty()) {
                 requireWellFormed = true;
             }
 
@@ -327,8 +324,6 @@ public class XMLEmitter extends Emitter {
     private static final byte[] XML_DECL_VERSION = StringConstants.bytes("<?xml version=");
     private static final byte[] XML_DECL_ENCODING = StringConstants.bytes("encoding=");
     private static final byte[] XML_DECL_STANDALONE = StringConstants.bytes(" standalone=");
-    private static final UnicodeChar RIGHT_ANGLE_BRACKET = new UnicodeChar('>');
-    private static final UnicodeString NL = StringConstants.NEWLINE;
     protected static final byte[] DOCTYPE = StringConstants.bytes("<!DOCTYPE ");
     private static final byte[] SYSTEM = StringConstants.bytes("  SYSTEM ");
     private static final byte[] PUBLIC = StringConstants.bytes("  PUBLIC ");

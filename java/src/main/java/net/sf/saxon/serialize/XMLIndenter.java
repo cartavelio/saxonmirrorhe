@@ -15,7 +15,7 @@ import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.IndentWhitespace;
-import net.sf.saxon.str.StringConstants;
+import net.sf.saxon.str.Twine8;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyType;
@@ -166,7 +166,7 @@ public class XMLIndenter extends ProxyReceiver {
                         + 4 + (prefix.isEmpty() ? 4 : prefix.length() + 5);
             }
             if (len > getLineLength()) {
-                int indent = (level - 1) * getIndentation() + 2;
+                int indent = (level - 1) * getIndentCharCount() + 2;
                 emitter.setIndentForNextAttribute(indent);
             }
         }
@@ -238,6 +238,42 @@ public class XMLIndenter extends ProxyReceiver {
             emitter.characters(chars, locationId, properties);
             afterStartTag = false;
             afterEndTag = false;
+//            flushPendingWhitespace();
+//            if (chars.indexOf('\n') >= 0) {
+//                if (getLineEnding().equals(StringConstants.NEWLINE)) {
+//                    IntIterator iter = chars.codePoints();
+//                    while (iter.hasNext()) {
+//                        int c = iter.next();
+//                        if (c == '\n') {
+//                            sameline = false;
+//                            line++;
+//                            column = 0;
+//                        }
+//                        column++;
+//                    }
+//                } else {
+//                    TwineBuilder builder = TwineBuilder.make(chars.length32());
+//                    IntIterator iter = chars.codePoints();
+//                    while (iter.hasNext()) {
+//                        int c = iter.next();
+//                        if (c == '\n') {
+//                            sameline = false;
+//                            line++;
+//                            column = 0;
+//                            builder.append(getLineEnding());
+//                        } else {
+//                            builder.append(c);
+//                        }
+//                        column++;
+//                    }
+//                    chars = builder.toUnicodeString();
+//                }
+//            } else {
+//                column += chars.length32();
+//            }
+//            emitter.characters(chars, locationId, properties);
+//            afterStartTag = false;
+//            afterEndTag = false;
         }
     }
 
@@ -284,14 +320,15 @@ public class XMLIndenter extends ProxyReceiver {
             return;
         }
         pendingWhitespace = null; // if we're adding new whitespace, we're allowed to discard existing whitespace
-        int spaces = level * getIndentation();
+        int spaces = level * getIndentCharCount();
         if (line > 0) {
             spaces -= column;
             if (spaces <= 0) {
                 return;     // there's already enough white space, don't add more
             }
         }
-        emitter.characters(IndentWhitespace.of(line == 0 ? (doubleSpace ? 2 : 1) : 0, spaces),
+        Twine8 nl = doubleSpace ? getDoubleLineEnding() : getLineEnding();
+        emitter.characters(IndentWhitespace.of(line == 0 ? nl : new Twine8(""), spaces, getIndentChar()),
                            Loc.NONE, ReceiverOption.NO_SPECIAL_CHARS);
         sameline = false;
     }
@@ -306,19 +343,28 @@ public class XMLIndenter extends ProxyReceiver {
     @Override
     public void endDocument() throws XPathException {
         if (afterEndTag) {
-            emitter.characters(StringConstants.NEWLINE, Loc.NONE, ReceiverOption.NONE);  // if permitted, output a trailing newline, for tidier console output
+            emitter.characters(IndentWhitespace.of(getLineEnding(), 0, ' '), Loc.NONE, ReceiverOption.NONE);
+            // if permitted, output a trailing newline, for tidier console output
         }
         super.endDocument();
     }
 
     /**
-     * Get the number of spaces to be used for indentation
+     * Get the number of spaces or tabs to be used for indentation
      *
-     * @return the number of spaces to be added to the indentation for each level
+     * @return the number of spaces or tabs to be added to the indentation at each level
      */
 
-    protected int getIndentation() {
+    protected int getIndentCharCount() {
         return 3;
+    }
+
+    /**
+     * Get the character to be used for indentation: space or tab
+     */
+
+    protected char getIndentChar() {
+        return ' ';
     }
 
     /**
@@ -340,6 +386,23 @@ public class XMLIndenter extends ProxyReceiver {
 
     protected int getLineLength() {
         return 80;
+    }
+
+    /**
+     * Get the line ending sequence (CR, LF, or CRLF)
+     * @return the line ending
+     */
+    protected Twine8 getLineEnding() {
+        return new Twine8("\n");
+    }
+
+    /**
+     * Get the line ending for double-spaced output
+     *
+     * @return the line ending for double-spaced output
+     */
+    protected Twine8 getDoubleLineEnding() {
+        return new Twine8("\n\n");
     }
 }
 

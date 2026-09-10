@@ -327,6 +327,12 @@ public class Serialize extends SystemFunction implements Callable {
         if ((seqVal = map.get("indent")) != null) {
             props.setProperty("indent", toYesNoTypeString(seqVal));
         }
+        if ((seqVal = map.get("indent-attributes")) != null) {
+            props.setProperty("indent-attributes", toYesNoTypeString(seqVal));
+        }
+        if ((seqVal = map.get("indent-unit")) != null) {
+            props.setProperty("indent-unit", seqVal.head().getStringValue());
+        }
         if ((seqVal = map.get("item-separator")) != null) {
             props.setProperty("item-separator", seqVal.head().getStringValue());
         }
@@ -335,6 +341,9 @@ public class Serialize extends SystemFunction implements Callable {
         }
         if ((seqVal = map.get("json-node-output-method")) != null) {
             props.setProperty("json-node-output-method", toMethodTypeString(seqVal));
+        }
+        if ((seqVal = map.get(sx("line-ending"))) != null) {
+            props.setProperty("line-ending", seqVal.head().getStringValue());
         }
         if ((seqVal = map.get("media-type")) != null) {
             props.setProperty("media-type", seqVal.head().getStringValue());
