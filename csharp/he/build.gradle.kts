@@ -6,7 +6,6 @@ plugins {
   id("saxon-build")
   id("com.saxonica.build.saxoncs")
   id("com.saxonica.build.testsuites")
-  id("com.saxonica.build.samples")
 }
 
 repositories {
@@ -708,20 +707,24 @@ tasks.register<Exec>("hecsTest") {
 
 // ============================================================
 
-samples {
-  // Irrelevant in C#, but must be initialized. :-(
-  runclasspath = sampleSources
-  debugclasspath = sampleSources
-
-  sources = sampleSources
-  product = "csharp"
-  edition = "he"
+val copySampleResources = tasks.register<Copy>("copy_sample_sources") {
+    into(layout.buildDirectory.dir("samples/resources"))
+    from(sampleSources)
 }
 
-samples.csSample("Shakespeare_1", "othello.xml", "play.xsl",
-                 listOf("dir=file:${layout.buildDirectory.file("sample_results/playhtml").get()}"),
-                 layout.buildDirectory.file("sample_results/playhtml/play.html").get().asFile)
+tasks.register<Exec>("samples") {
+  dependsOn("dotnetBuild")
+  dependsOn(copySampleResources)
 
+  val arch = saxonCS.arch.get()
+  val rel = saxonCS.release.get()
+  val plat = saxonCS.platform.get()
+
+  commandLine = listOf("python", "../../tools/run-samples.py",
+                       "--edition", "ee",
+                       "--platform", "csharp",
+                       "--csexec", "build/${arch}/SaxonCS/bin/${rel}/net8.0/${plat}-${arch}/SaxonCS")
+}
 
 // ============================================================
 
