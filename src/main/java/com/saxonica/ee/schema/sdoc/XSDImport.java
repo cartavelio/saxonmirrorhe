@@ -150,7 +150,7 @@ public class XSDImport extends AnnotationParent {
             if (schemaLocation != null) {
                 String message = "The schema document at " + schemaLocation +
                         " is not being read because schema components for this namespace are already available";
-                if (!namespace.equals(NamespaceConstant.XML)) {
+                if (!targetNamespace.equals(NamespaceUri.XML)) {
                     message += ". To force the schema document to be read, set --multipleSchemaImports:on";
                 }
                 warning(message);

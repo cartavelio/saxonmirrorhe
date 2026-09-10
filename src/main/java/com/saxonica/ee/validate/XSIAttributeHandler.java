@@ -86,6 +86,7 @@ public class XSIAttributeHandler extends ValidatingFilter {
         AttributeMap attMap2 = attributes;
 
         if (hasXsiAttributes) {
+            String xsiTypeValue = null;
             List<AttributeInfo> list = new ArrayList<>(attributes.size());
             for (AttributeInfo att : attributes) {
                 NodeName attName = att.getNodeName();
@@ -106,7 +107,7 @@ public class XSIAttributeHandler extends ValidatingFilter {
                         }
                     } else if (fp == StandardNames.XSI_TYPE) {
                         attType = BuiltInAtomicType.QNAME;
-                        xsiType = processXsiType(value, namespaces);
+                        xsiTypeValue = value;            // Bug 6148
                     } else if (fp == StandardNames.XSI_NIL) {
                         attType = BuiltInAtomicType.BOOLEAN;
                         nilled = processXsiNil(value);
@@ -116,7 +117,10 @@ public class XSIAttributeHandler extends ValidatingFilter {
                 } else {
                     list.add(att);
                 }
+            }
 
+            if (xsiTypeValue != null) {
+                xsiType = processXsiType(xsiTypeValue, namespaces);
             }
             attMap2 = SequenceTool.attributeMapFromList(list);
         }
