@@ -866,6 +866,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
                 case NODE:
                 default:
                     decomposeNodeOrDefault(item, locationId, copyNamespaces);
+                    break;
             }
         }
     }

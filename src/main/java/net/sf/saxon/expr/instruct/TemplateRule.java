@@ -19,12 +19,12 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trace.Locksmith;
 import net.sf.saxon.trace.TraceableComponent;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.trans.rules.RuleTarget;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
@@ -373,8 +373,6 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
      *                        the template
      */
 
-    private AtomicReference<PushEvaluator> atomicBodyEvaluator = new AtomicReference<>(null);
-
     public TailCall applyLeavingTail(Outputter output, XPathContext context) throws XPathException {
         //initialize();
         TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
@@ -394,11 +392,7 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
         }
 
         try {
-            if (bodyEvaluator == null)
-            {
-                bodyEvaluator = atomicBodyEvaluator.updateAndGet(bodyEvaluator -> bodyEvaluator == null ? body.makeElaborator().elaborateForPush() : bodyEvaluator);
-            }
-            
+            ensureBodyEvaluatorExists();
             return bodyEvaluator.processLeavingTail(output, context);
         } catch (UncheckedXPathException e) {
             XPathException xe = e.getXPathException();
@@ -417,6 +411,25 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
             throw new RuntimeException(message, e2);
         }
     }
+
+    @CSharpReplaceBody(code="ensureBodyEvaluatorExistsCS();")
+    private void ensureBodyEvaluatorExists() {
+        if (bodyEvaluator == null) {
+            bodyEvaluator = atomicBodyEvaluator.updateAndGet(bodyEvaluator -> bodyEvaluator == null ? body.makeElaborator().elaborateForPush() : bodyEvaluator);
+        }
+    }
+
+    //#if CSHARP==false
+    private AtomicReference<PushEvaluator> atomicBodyEvaluator = new AtomicReference<>(null);
+    //#endif
+
+    //#if CSHARP==true
+    private synchronized void ensureBodyEvaluatorExistsCS() {
+        if (bodyEvaluator == null) {
+            bodyEvaluator = body.makeElaborator().elaborateForPush();
+        }
+    }
+    //#endif
 
     /**
      * Output diagnostic explanation to an ExpressionPresenter
