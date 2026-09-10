@@ -74,6 +74,12 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE, null));
 
+        //#if EE==true || PE==true
+        register("build-uri", 1, 2, e -> e.populate(BuildURI::new, BuiltInAtomicType.STRING, ONE, LATE | NEW)
+                .arg(0, MapType.ANY_MAP_TYPE, ONE, null)
+                .arg(1, MapType.ANY_MAP_TYPE, ONE, null));
+        //#endif
+
         register("characters", 1, e -> e.populate(CharactersFn::new, BuiltInAtomicType.STRING, STAR, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null));
 
@@ -199,6 +205,12 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         //#if EE==true || PE==true
         register("parse-html", 1, e -> e.populate(ParseHtml::new, NodeKindTest.DOCUMENT, ONE, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null));
+        //#endif
+
+        //#if EE==true || PE==true
+        register("parse-uri", 1, 2, e -> e.populate(ParseURI::new, MapType.ANY_MAP_TYPE, ONE, LATE | NEW)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null)
+                .arg(1, MapType.ANY_MAP_TYPE, ONE, null));
         //#endif
 
         register("parts", 1, e -> e.populate(Parts::new, new MapType(BuiltInAtomicType.STRING, SequenceType.ANY_SEQUENCE), ONE, 0)
