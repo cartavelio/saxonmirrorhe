@@ -10,6 +10,7 @@ XdmItem::XdmItem(): XdmValue(){
         value = other.value;
 	    xdmSize =1;
 	    refCount = other.refCount;
+	    stringValue = other.stringValue;
     }
 
 
@@ -36,7 +37,9 @@ bool XdmItem::isFunction(){
 }
 
 
-XdmItem * XdmItem::getHead(){ return this;}
+XdmItem * XdmItem::getHead(){
+     std::cerr<<std::endl<<"XdmItem-getHead:"<<std::endl;
+return this;}
 
   XdmItem * XdmItem::itemAt(int n){
 	if (n < 0 || n >= size()) {

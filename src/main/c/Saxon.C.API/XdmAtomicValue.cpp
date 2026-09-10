@@ -10,7 +10,9 @@
 
     }
 
-   
+    XdmItem * XdmAtomicValue::getHead(){
+         std::cerr<<std::endl<<"XdmAtomic-getHead:"<<std::endl;
+    return this;}
 	
 
     XdmAtomicValue::XdmAtomicValue(jobject obj):XdmItem(obj){

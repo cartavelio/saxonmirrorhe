@@ -86,6 +86,8 @@ public:
      */
 	const char * getMessage();
 
+	std::string getMessageStr();
+
 	/**
 	* Get the URI of the module associated with the exception, if known.
 	*/

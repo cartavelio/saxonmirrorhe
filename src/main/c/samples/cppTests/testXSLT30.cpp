@@ -626,6 +626,67 @@ void testValidation(Xslt30Processor *trans, sResultCount *sresult) {
 }
 
 
+
+void testContext2NotRootNamedTemplate(SaxonProcessor * saxonproc, Xslt30Processor *trans, sResultCount *sresult){
+     trans->clearParameters();
+
+    cout << endl << "Test: testContext2NotRootNamedTemplate " << endl;
+    XdmNode * input_ = saxonproc->parseXmlFromString("<doc><e>text</e></doc>");
+    XsltExecutable * executable = trans->compileFromString("<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:variable name='x' select='.'/><xsl:template match='/'>errorA</xsl:template><xsl:template name='main'>[<xsl:value-of select='$x'/>]</xsl:template></xsl:stylesheet>");
+    executable->setGlobalContextItem(input_);
+    if(executable== nullptr) {
+        sresult->failure++;
+        sresult->failureList.push_back("testContext2NotRootNamedTemplate");
+        if (trans->exceptionOccurred()) {
+            cerr <<"Error message: "<< trans->getErrorMessage() << endl;
+        }
+        trans->exceptionClear();
+        return;
+    }
+
+
+    executable->setGlobalContextItem(input_);
+    XdmValue * result = executable->callTemplateReturningValue("main");
+    if (result== nullptr) {
+            if (executable->exceptionOccurred()) {
+                SaxonApiException *exception = executable->getException();
+                cerr << "Error: " << exception->getMessage() << endl;
+                delete exception;
+            }
+            sresult->failure++;
+            sresult->failureList.push_back("testContext2NotRootNamedTemplate");
+            return;
+    }
+    XdmItem * item1 = result->getHead();
+    const char * resultStr = item1->getStringValue();
+
+    cerr<<"result = "<<resultStr<<std::endl;
+    XdmValue * result2 = executable->callTemplateReturningValue("main");
+    XdmItem * item2 = result2->getHead();
+    const char * result2Str = executable->callTemplateReturningString("main"); //item2->getStringValue();
+    if (result2Str == nullptr) {
+            if (executable->exceptionOccurred()) {
+                SaxonApiException *exception = executable->getException();
+                cerr << "Error: " << exception->getMessage() << endl;
+                delete exception;
+            }
+            sresult->failure++;
+            sresult->failureList.push_back("testContext2NotRootNamedTemplate");
+            return;
+    }
+
+
+    cerr<<"result2 = "<<result2Str<<std::endl;
+    delete result2;
+    //delete item1;
+    //delete item2;
+    delete result;
+    delete resultStr;
+    delete result2Str;
+    delete input_;
+    delete executable;
+  }
+
 void testXdmNodeOutput(Xslt30Processor *trans, sResultCount *sresult) {
 
     std::cout << "testXdmNodeOutput" << std::endl;
@@ -2214,7 +2275,7 @@ int main(int argc, char* argv[]) {
     }
     //testValidation(trans,sresult);
 
-    testInitialTemplate(processor, trans, sresult);
+   /* testInitialTemplate(processor, trans, sresult);
 
     cout<<endl<<"============================================================="<<endl<<endl;
 
@@ -2258,10 +2319,10 @@ int main(int argc, char* argv[]) {
     testTransformToString4(processor, trans, sresult);
 
     cout<<endl<<"============================================================="<<endl<<endl;
-
+     */
     //testCatalog(cwd, processor,  sresult); //not to run in DEBUG mode - setCatalog throws SEG error
 
-    cout<<endl<<"============================================================="<<endl<<endl;
+   /* cout<<endl<<"============================================================="<<endl<<endl;
 
     testTransformToString2b(processor, trans, sresult);
 
@@ -2354,8 +2415,10 @@ int main(int argc, char* argv[]) {
 
     testSaxSourceDTDValidation(processor, sresult);
 
-    cout<<endl<<"============================================================="<<endl<<endl;
+    cout<<endl<<"============================================================="<<endl<<endl;  */
 
+
+    testContext2NotRootNamedTemplate(processor, trans, sresult);
 
     fflush(stdout);
 

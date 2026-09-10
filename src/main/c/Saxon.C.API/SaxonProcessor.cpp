@@ -798,7 +798,7 @@ XdmNode *SaxonProcessor::parseXmlFromString(const char *source, SchemaValidator 
 
     jobject xdmNodei = SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(saxonCAPIClass, mID,
                                                                                 SaxonProcessor::sxn_environ->env->NewStringUTF(
-                                                                                        cwd.c_str()), proc, nullptr, (validator != nullptr ? validator->getUnderlyingValidator(): nullptr),
+                                                                                        cwd.c_str()), proc, nullptr, (validator != nullptr ? validator->getUnderlyingValidator(): NULL),
                                                                                 SaxonProcessor::sxn_environ->env->NewStringUTF(
                                                                                         source));
     if (xdmNodei) {

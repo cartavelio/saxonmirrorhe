@@ -461,6 +461,13 @@ public:
     */
     SaxonApiException* getException();
 
+     //! Get the error message if there are any error
+    /**
+     * A transformation may have a number of errors reported against it.
+     * @return char* - The message of the exception
+    */
+    const char * getErrorMessage();
+
 
      //! Clear any exception thrown
     void exceptionClear();

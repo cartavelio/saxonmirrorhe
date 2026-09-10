@@ -823,7 +823,16 @@ public class Xslt30Processor extends SaxonCAPI {
 
 
         transformer.callTemplate(qname, serializer);
-        return bStream.toByteArray();
+        byte [] result = bStream.toByteArray();
+        if(SaxonCAPI.debug) {
+            System.err.println("Java callTemplateReturningString output = " + new String(result) + " len=" + result.length);
+            for (int j=0; j<result.length; j++) {
+                  System.err.format("0x%02X", result[j]);
+               }
+            System.out.println();
+        }
+
+        return result;
     }
 
     /**
@@ -1273,113 +1282,17 @@ public class Xslt30Processor extends SaxonCAPI {
         String stylesheet12 = "xslt/overzicht-resultaten.xslt";//"cadenaoriginal_3_2.xslt";//""saxon_php3/q8.xsl";//"test.xsl";
         String outfile = "outfile.html";
         Processor processor = new Processor(true);
-        Xslt30Processor cpp = new Xslt30Processor(processor);
-        //cpp.compileFromFile(cwd2, "xsl/foo.xsl");
-        /*cpp.compileFromFileAndSave(cwd2, "xsl/foo.xsl", "xsl/foo.xslp");
-        String resultStr = new String(cpp.transformToString(cwd2, cpp, null,"xml/foo.xml", "xsl/foo.xslp", null, null));
-        System.out.println(resultStr);
-          */
-        try {
-            String resultStr4 = new String(cpp.transformToString(cwd2, cpp,null,"xml/foo.xml", "xsl/fooExFunc.xsl", null, null));
-            System.out.println("Result String 4 = " + resultStr4);
-        } catch (SaxonApiException ex) {
-            System.out.println("Error in transformation Message: " + ex.getMessage());
-        }
-
-
-        /*XsltExecutable executable1 = cpp.compileFromFile(cwd2, "xsl/fooExFunc.xsl", false, null, null);
-        XdmValue resultV = cpp.callFunctionReturningValue(cwd2, executable1, "{http://www.saxonica.com/myfunction}is-licensed-EE", null, null, null);
-        String resultCF = new String(cpp.callFunctionReturningString(cwd2, executable1,  "{http://www.saxonica.com/myfunction}is-licensed-EE", null, new String[]{"!omit-xml-declaration"}, new Object[]{"yes"}));
-
-        System.out.println("Running callFunction is-licensed-EE= " + resultV.toString());
-        System.out.println("Running callFunction is-licensed-EE= " + resultCF);
-
-        String resultStr3 = new String(cpp.transformToString(cwd2, cpp,null,"xml/foo.xml", "xsl/foo4.xsl", null, null));
-        System.out.println("Using initial-template: " + resultStr3);
-
-        XdmNode node2 = cpp.parseXmlFile("/Users/ond1/work/development/campos", "ORP0301177AA__EE__30954_sinsello.xml");
-        String[] paramsx = {"node"};
-        Object[] valuesx = {node2};
-        String result2 = new String(cpp.transformToString("/Users/ond1/work/development/campos", cpp,null, "ORP0301177AA__EE__30954_sinsello.xml", "campos.xsl", paramsx, valuesx));
-        Object[] arrValues = {2, "test"};
-
-        String[] params1 = {"resources", "param:test1", "node", "m", "xmlversion"};
-        Object[] values1 = {"/Users/ond1/work/development/tests/jeroen/data", arrValues, node2, "m", "1.1"};
-        XsltExecutable executable2 = cpp.compileFromFile(cwd, stylesheet12, false, null, null);
-        String outputdoc = new String(cpp.transformToString(cwd, cpp, executable2, null, null, params1, values1));
-        // System.out.println(outputdoc);
-        // System.exit(0);
-        // Processor processor = cpp.getProcessor();
-        // XsltTransformer transformer = cpp.xsltParseStylesheetFile(args[0]).load();
-        //XdmNode sourceNode = cpp.xmlParseFile(cwd, "xml/foo.xml");
-        XdmNode sourceNode2 = SaxonCAPI.parseXmlString(null, processor, null, "<result><assert-xml file=\"type-0501.out\"/></result>");
-        XdmValue node1 = (XdmValue) cpp.createXdmAtomicItem("string", "textXXXXX");
-
-        XdmValue resultNode2 = cpp.parseXmlString("<?xml version=\"1.0\" encoding=\"UTF-8\"?><html><head><title>Untitled</title></head><body leftmargin=\"100\"></body></html>");
-
-        XdmValue value1 = SaxonCAPI.createXdmAtomicItem("string", "good bye");
-        String[] params2 = {"o"};
-        Object[] values2 = {"output_test.xml"};
-        String[] params3 = {"node", "!indent", "output_test.xml", "xmlversion"};
-        String[] param4 = {"s", "param:a-param"};
-        Object[] values4 = {"xml/foo.xml", value1};
-        Object[] values3 = {sourceNode2, "yes", "o", "1.0"};
-        cpp.compileFromFile(cwd, stylesheet12, false,null, null);
-
-                */
-        String result = "";
-        int repeat = 1;
-        try {
-            XsltExecutable executable3 = cpp.compileFromString("samples", "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"\n" +
-                    "    version=\"2.0\" xmlns:pf=\"http://example.com\">\n" +
-                    "<xsl:param name=\"pf:param-name\"  />" +
-                    "<xsl:param name=\"test1\"  />" +
-
-                    "    \n" +
-                    "    \n" +
-                    "    <xsl:template match=\"/\" >\n" +
-                    "   <xsl:message>test messages</xsl:message>" +
-                    "        <xsl:copy-of select=\".\"/>\n" +
-                    "       XXXXXX <xsl:value-of select=\"$pf:param-name\"/>\n" +
-                    "    </xsl:template>\n" +
-                    "    \n" +
-                    "   \n" +
-                    "</xsl:stylesheet>", false, null, null);
-
-            byte[] resultByte = cpp.applyTemplatesReturningString(cwd, executable3, null, new String[]{"s"}, new Object[]{"eror.xml"});
-
-            if(resultByte == null) {
-                System.err.println("file not found");
-
-            }
-            String valueStr = new String(cpp.transformToString(cwd, cpp, executable3, "categories.xml", null, null, null));
-            if (valueStr != null) {
-                System.out.println("Output = " + valueStr);
-            } else {
-                System.out.println("valueSt is null");
-            }
-
-
-          //  String resultStr2 = new String(cpp.transformToString(cwd2, cpp, executable3, null, null, param4, values4));
-
-           /* cpp.transformToFile(cwd, "categories.xml", stylesheet12, "outputTest.txt", null, null);
-            long startTime = System.currentTimeMillis();
-            for (int i = 0; i < repeat; i++) {
-                //result = cpp.xsltApplyStylesheet(cwd, null, "xsl/foo.xsl", params3, values3);
-                result = cpp.transformToString(cwd, null, null, params1, values1);
-
-            }
-            long endTime = System.currentTimeMillis();
-            //  System.out.println("output:" + result + " Time:" + ((endTime - startTime) / 5));
-
-            System.out.println("output:" + result2); */
-        } catch (Exception ex) {
-            System.out.println("Error found=" + ex.getMessage());
-        }
-        //SaxonCException[] exceptionForCpps = cpp.getExceptions();
-
-        //System.out.println("xslMessage output:" + cpp.getXslMessages().length);
+        SaxonCAPI.debug = true;
+        net.sf.saxon.option.cpp.Xslt30Processor cpp = new net.sf.saxon.option.cpp.Xslt30Processor(processor);
+        XdmNode node = cpp.parseXmlString("<doc><e>text</e></doc>");
+        String [] pname =  {"node"};
+        Object [] pObj = {node};
+        String style = "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:output omit-xml-declaration=\"true\" /><xsl:variable name='x' select='.'/><xsl:template match='/'>errorA</xsl:template><xsl:template name='main'>[<xsl:value-of select='name($x)'/>]</xsl:template></xsl:stylesheet>";
+        XsltExecutable executable = cpp.compileFromString(null, style, false, null, null);
+        String result = new String(net.sf.saxon.option.cpp.Xslt30Processor.callTemplateReturningString(null,executable, "main", pname, pObj));
+        System.out.println("Result = "+ result);
 
     }
+
     
 }
