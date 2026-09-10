@@ -83,8 +83,10 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// Create an XdmValue that wraps a GroundedValue. This method is intended primarily for internal use.
+        /// Create an <c>XdmValue</c> that wraps a <c>GroundedValue</c>. This method is intended primarily for internal use.
         /// </summary>
+        /// <param name="groundedValue">A <c>GroundedValue</c>
+        /// </param>
         
         public XdmValue(GroundedValue groundedValue) {
             this.value = groundedValue;

@@ -35,10 +35,9 @@ namespace Saxon.Api {
             return true;
         }
         
-        // <summary>
-        // Get the string representation of this item type, specifically, "item()"
-        // </summary>
-
+        /// <summary>
+        /// Get the string representation of this item type, specifically, "item()".
+        /// </summary>
         public override string ToString() {
             return "item()";
         }

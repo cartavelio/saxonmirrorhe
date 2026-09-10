@@ -178,8 +178,8 @@ namespace Saxon.Api {
 
         /// <summary>
         /// This property indicates whether XPath expressions compiled using this <c>XPathCompiler</c> are
-        /// schema-aware. They will automatically be schema-aware if the method
-        /// <see cref="ImportSchemaNamespace"/> is called. An XPath expression
+        /// schema-aware. They will automatically be schema-aware if the <see cref="Schema"/> property has
+        /// been set to use a specific <c>XsdSchema</c>. An XPath expression
         /// must be marked as schema-aware if it is to handle typed (validated)
         /// input documents.
         /// </summary>
