@@ -720,7 +720,7 @@ public class XdmUtils {
     /**
      * make an XdmArray from a C pointer array of strings
      * @param thread  - Graalvm runtime data structure for the thread
-     * @param ccharPointer - the C pointer array to strings
+     * @param ccharPointerPointer - the C pointer array to strings
      * @param length - the number of items in the pointer array
      * @return long value as reference to the created XdmArray object held in the ObjectHandle's pool
      * Exceptions are handled and returned to the C program as null pointer

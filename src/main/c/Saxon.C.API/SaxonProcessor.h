@@ -328,10 +328,10 @@ public:
   XdmAtomicValue *makeAtomicValue(const char *type, const char *value);
 
   /**
-   * Make an XdmArray whose members are from string representation.
+   * Make an XdmArray whose members are xs:string values.
    * @param input - the input array of strings
    * @param length - the number of items in the array
-   * @return Pointer to an XdmArray whose members are xs:boolean values corresponding
+   * @return Pointer to an XdmArray whose members are xs:string values corresponding
    * one-to-one with the input. The caller is responsible for deallocation of memory using `delete`.
    */
   XdmArray *makeArray(char **input, int length);
