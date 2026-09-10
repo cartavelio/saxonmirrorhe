@@ -151,7 +151,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns>a string representation of the type</returns>
         public override string ToString() {
-            return underlyingType.ToString();
+            return underlyingType.ToString().Replace("Q{http://www.w3.org/2001/XMLSchema}", "xs:");
         }
 
         public override bool Equals(object other) {
