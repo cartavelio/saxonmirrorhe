@@ -9,6 +9,7 @@ package net.sf.saxon.pattern.qname;
 
 import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.type.Affinity;
 
 /**
@@ -58,5 +59,11 @@ public interface QNameTest {
      */
 
     Affinity relationship(QNameTest other);
+
+    /**
+     * Make a node test that combines this QName test with a test for a specific node kind
+     */
+
+    NodeTest makeNodeTest(int nodeKind);
 
 }

@@ -2289,6 +2289,9 @@ public class XPathParser {
             }
         }
         readToken(Token.RPAREN);
+        if (memberTypes.size() == 1) {
+            return memberTypes.get(0);
+        }
         return ChoiceItemType.makeChoiceItemType(memberTypes);
     }
 

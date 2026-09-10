@@ -9,7 +9,7 @@ package net.sf.saxon.pattern;
 
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.qname.QNameTest;
+import net.sf.saxon.pattern.qname.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.tiny.NodeVectorTree;

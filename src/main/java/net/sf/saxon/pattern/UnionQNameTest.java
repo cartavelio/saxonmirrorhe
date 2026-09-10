@@ -132,6 +132,11 @@ public class UnionQNameTest implements QNameTest {
         return Affinity.OVERLAPS;
     }
 
+    @Override
+    public NodeTest makeNodeTest(int nodeKind) {
+        return new NameTestUnion(this, nodeKind);
+    }
+
     private static boolean samePredicates(UnionQNameTest lhs, UnionQNameTest rhs) {
         return lhs.tests.equals(rhs.tests);
     }

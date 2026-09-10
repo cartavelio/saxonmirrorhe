@@ -2,6 +2,8 @@ package net.sf.saxon.pattern.qname;
 
 import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.type.Affinity;
 
 public class AnyQNameTest implements QNameTest {
@@ -32,6 +34,11 @@ public class AnyQNameTest implements QNameTest {
     @Override
     public Affinity relationship(QNameTest other) {
         return other instanceof AnyQNameTest ? Affinity.SAME_TYPE : Affinity.SUBSUMES;
+    }
+
+    @Override
+    public NodeTest makeNodeTest(int nodeKind) {
+        return NodeKindTest.makeNodeKindTest(nodeKind);
     }
 }
 

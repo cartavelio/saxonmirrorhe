@@ -2,6 +2,8 @@ package net.sf.saxon.pattern.qname;
 
 import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.pattern.LocalNameTest;
+import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.pattern.UnionQNameTest;
 import net.sf.saxon.type.Affinity;
 
@@ -43,6 +45,11 @@ public class LocalQNameTest implements QNameTest {
         } else {
             throw new IllegalArgumentException();
         }
+    }
+
+    @Override
+    public NodeTest makeNodeTest(int nodeKind) {
+        return new LocalNameTest(nodeKind, localName);
     }
 
     @Override

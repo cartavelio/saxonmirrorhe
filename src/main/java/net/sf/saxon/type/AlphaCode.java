@@ -32,8 +32,8 @@ import java.util.Set;
  * <p>An AlphaCode is a compact, context-independent string representation of a SequenceType</p>
  *
  * <p>The syntax actually handles ItemTypes as well as SequenceTypes; and in addition, it can handle the two examples
- * of NodeTests that are not item types, namely *:local and uri:*. It can therefore be used in the SEF
- * wherever a SequenceType, ItemType, or NodeTest is required.</p>
+ * of NodeTests that are not item types, namely *:local and uri:*. (These become legal item types in 4.0).
+ * It can therefore be used in the SEF wherever a SequenceType, ItemType, or NodeTest is required.</p>
  *
  * <p>The first character of an alphacode is the occurrence indicator. This is one of: * (zero or more),
  * + (one or more), ? (zero or one), 0 (exactly zero), 1 (exactly one). If the first character is
@@ -114,6 +114,8 @@ import java.util.Set;
  *
  * <li>E: xs:error </li>
  *
+ * <li>U: union (choice) of the alternatives listed in the 'm' property</li></l>
+ *
  * <li>X: external (wrapped) object </li>
  * <li>XJ: external Java object </li>
  * <li>XN: external .NET object </li>
@@ -165,7 +167,8 @@ import java.util.Set;
  *
  * <li><p>m - Member types of an anonymous union type. The value is an array of alphacodes for the member
  * types (these will always be atomic types), enclosed in square brackets and comma-separated. The basic code
- * in this case will be "A", indicating xs:anyAtomicType. This is not used for the built-in union type
+ * in this case will be "A", indicating xs:anyAtomicType or "U" indicating a general choice type (not necessarily
+ * atomic). This is not used for the built-in union type
  * xs:numeric, nor for user-defined atomic types defined in a schema; it is used only for anonymous union types
  * defined using the Saxon extension syntax "union(a, b, c)".</p></li>
  *
@@ -458,7 +461,7 @@ public class AlphaCode {
             int indicator = nextChar();
             if (indicator < 0) {
                 callBack.setStringProperty(container, "o", "1");
-            } else if (("*+1?0\u00B0".indexOf((char) indicator) >= 0)) {      // TODO: \u00B0 is obsolescent
+            } else if (("*+1?0".indexOf((char) indicator) >= 0)) {
                 if (indicator == 0xB0) {
                     indicator = '0';
                 }
@@ -817,7 +820,7 @@ public class AlphaCode {
                     }
                 }
                 if (partialNameTest != null) {
-                    itemType = (NodeTest) partialNameTest;
+                    itemType = partialNameTest.makeNodeTest(kind);
                 } else {
                     StructuredQName qName = name == null ? null : StructuredQName.fromEQName(name);
                     switch (principal) {
@@ -969,6 +972,26 @@ public class AlphaCode {
                     itemType = new SpecificFunctionType(a, r);
                 }
             }
+        } else if (principal.equals("U")) {
+            // general choice item type introduced in 4.0
+            List<ItemType> members = new ArrayList<>();
+            boolean allAtomic = true;
+            for (AlphaCodeTree m : tree.members) {
+                SequenceType st = sequenceTypeFromTree(m, config);
+                if (st.getPrimaryType().isAtomicType()) {
+                    final ItemType primaryType = st.getPrimaryType();
+                    members.add(primaryType);
+                    if (!primaryType.isAtomicType()) {
+                        allAtomic = false;
+                    }
+                }
+            }
+            if (allAtomic) {
+                itemType = new LocalUnionType(members);
+            } else {
+                itemType = new ChoiceItemType(members);
+            }
+
         } else if (principal.startsWith("X")) {
             Class<?> theClass = Object.class;
             //#if CSHARP==false
@@ -1021,7 +1044,12 @@ public class AlphaCode {
             } else {
                 result.name = name.getEQName();
             }
-
+        } else if (primary instanceof ChoiceItemType) {
+            List<AlphaCodeTree> memberMaps = new ArrayList<>();
+            for (ItemType pt : ((ChoiceItemType) primary).getAlternatives()) {
+                memberMaps.add(makeTree(pt));
+            }
+            result.members = memberMaps;
         } else if (primary instanceof NameTest) {
             StructuredQName name = ((NameTest) primary).getMatchingNodeName();
             result.name = name.getEQName();
