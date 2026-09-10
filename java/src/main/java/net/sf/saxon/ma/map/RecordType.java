@@ -155,6 +155,7 @@ public class RecordType implements FunctionItemType {
     public void setDetails(boolean extensible, Field... fields) {
         this._extensible = extensible;
         for (Field field : fields) {
+            fieldNamesInOrder.add(field.name);
             fieldTypes.put(field.name, field.type);
             if (field.optional) {
                 optionalFields.add(field.name);
