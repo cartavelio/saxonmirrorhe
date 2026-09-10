@@ -52,6 +52,7 @@ public class SerializerFactoryPE extends SerializerFactory {
                 emitter.setUnicodeWriter(((UnicodeWriterResult)result).getUnicodeWriter());
             } else {
                 emitter.setUnicodeWriter(expandedResult.obtainUnicodeWriter());
+                emitter.setMustClose(expandedResult.isMustCloseAfterUse());
             }
             props.setProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
             emitter.setOutputProperties(props);
@@ -77,6 +78,7 @@ public class SerializerFactoryPE extends SerializerFactory {
                 emitter.setUnicodeWriter(((UnicodeWriterResult)result).getUnicodeWriter());
             } else {
                 emitter.setUnicodeWriter(expandedResult.obtainUnicodeWriter());
+                emitter.setMustClose(expandedResult.isMustCloseAfterUse());
             }
             props.setProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
             emitter.setOutputProperties(props);
