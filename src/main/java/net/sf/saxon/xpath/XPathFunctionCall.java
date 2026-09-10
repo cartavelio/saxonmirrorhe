@@ -36,6 +36,8 @@ public class XPathFunctionCall extends FunctionCall implements Callable {
 
     /**
      * Default constructor
+     * @param name the qualified name of the function
+     * @param function the target function
      */
 
     public XPathFunctionCall(StructuredQName name, XPathFunction function) {
@@ -115,7 +117,7 @@ public class XPathFunctionCall extends FunctionCall implements Callable {
      * calling expression.</p>
      *
      * @param pathMap        the PathMap to which the expression should be added
-     * @param pathMapNodeSet
+     * @param pathMapNodeSet the PathMapNodeSet to which the paths embodied in this expression should be added
      * @return the pathMapNode representing the focus established by this expression, in the case where this
      *         expression is the first operand of a path expression or filter expression. For an expression that does
      *         navigation, it represents the end of the arc in the path map that describes the navigation route. For other

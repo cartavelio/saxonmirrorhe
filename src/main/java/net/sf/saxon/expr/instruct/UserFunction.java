@@ -600,7 +600,7 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
      * Create a context for evaluating this function
      *
      * @param oldContext the existing context of the caller
-     * @param originator
+     * @param originator identifies the location of the caller for diagnostics
      * @return a new context which should be supplied to the call() method.
      */
 

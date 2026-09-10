@@ -18,6 +18,10 @@ public class Message {
     /**
      * Construct a Message. This constructor is used internally by the <code>xsl:message</code>
      * instruction.
+     * @param content the content of the message
+     * @param errorCode the error code associated with the message
+     * @param terminate true if <code>terminate="yes"</code> was specified on the xsl:message
+     * @param location the location of the xsl:message instruction
      */
 
     public Message(XdmNode content, QName errorCode, boolean terminate, Location location) {

@@ -38,7 +38,7 @@ public class RawDestination extends AbstractDestination {
      * @param pipe The Saxon configuration. This is supplied so that the destination can
      *               use information from the configuration (for example, a reference to the name pool)
      *               to construct or configure the returned Receiver.
-     * @param params
+     * @param params the serialization properties
      * @return the Receiver to which events are to be sent.
      */
 

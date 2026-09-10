@@ -215,6 +215,7 @@ public abstract class AbstractXsltTransformer {
     /**
      * Set a callback that will be used when reporting a dynamic error or warning. This is relevant primarily
      * for non-fatal errors
+     * @param reporter the callback
      */
 
     public void setErrorReporter(ErrorReporter reporter) {
@@ -223,6 +224,7 @@ public abstract class AbstractXsltTransformer {
 
     /**
      * Get the callback that will be used when reporting a dynamic error or warning
+     * @return the callback
      */
 
     public ErrorReporter getErrorReporter() {
@@ -526,6 +528,7 @@ public abstract class AbstractXsltTransformer {
 
     /**
      * Get a Receiver corresponding to the chosen Destination for the transformation
+     * @param controller the Controller for the transformation
      * @param destination the destination for the results of this transformation
      * @return a receiver that sends the results to this destination
      * @throws SaxonApiException if anything goes wrong
@@ -568,6 +571,9 @@ public abstract class AbstractXsltTransformer {
      * <code>XsltTransformer</code> implements <code>Destination</code>, allowing one transformation
      * to receive the results of another in a pipeline.</p>
      *
+     * @param controller the Controller for the transformation
+     * @param parameters the global parameters
+     * @param finalDestination the destination for the results of this transformation
      * @return the Receiver to which events are to be sent.
      * @throws SaxonApiException     if the Receiver cannot be created
      * @throws IllegalStateException if no Destination has been supplied

@@ -95,6 +95,8 @@ public class XdmMap extends XdmFunctionItem {
     /**
      * Create a new map containing an additional (key, value) pair.
      * If there is an existing entry with the same key, it is removed
+     * @param key   the key
+     * @param value the value
      * @return a new map containing the additional entry. The original map is unchanged.
      */
 
@@ -108,7 +110,7 @@ public class XdmMap extends XdmFunctionItem {
      * Create a new map in which the entry for a given key has been removed.
      * If there is no entry with the same key, the new map has the same content as the old (it may or may not
      * be the same Java object)
-     *
+     * @param key the key
      * @return a map without the specified entry. The original map is unchanged.
      */
 

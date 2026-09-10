@@ -241,6 +241,7 @@ public class Processor implements Configuration.ApiProvider {
      * application to construct events (such as {@code startElement()}, {@code text()},
      * and {@code endElement()}) and send them to a specified {@link Destination}.
      *
+     * @param destination the destination
      * @return a new recipient of {@link Push} events.
      * @throws SaxonApiException if the {@link Destination} is not able to handle the request.
      */

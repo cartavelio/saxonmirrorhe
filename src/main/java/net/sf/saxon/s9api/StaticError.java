@@ -116,6 +116,7 @@ public interface StaticError {
      * too many errors have been signalled. There is no absolute guarantee that setting this
      * property will cause execution to be abandoned. If a dynamic error is marked as fatal, it
      * will generally not be caught by any try/catch mechanism within the stylesheet or query.
+     * @param message the message
      */
 
     void setTerminationMessage(String message);

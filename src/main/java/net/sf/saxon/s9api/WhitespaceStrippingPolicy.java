@@ -63,6 +63,7 @@ public class WhitespaceStrippingPolicy {
      * <p>Changed in 9.9 to use the standard Java 8 Predicate class in place of Saxon's version.</p>
      * @param elementTest a predicate applied to element names, which should return true if whitespace-only
      *                    text node children of the element are to be stripped, false if they are to be retained.
+     * @return the whitespace stripping policy
      */
 
     @CSharpInnerClass(outer=false, extra="System.Predicate<Saxon.Hej.s9api.QName> elementTest")

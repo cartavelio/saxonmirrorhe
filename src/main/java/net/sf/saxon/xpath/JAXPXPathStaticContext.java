@@ -61,6 +61,7 @@ public class JAXPXPathStaticContext extends AbstractStaticContext
 
     /**
      * Supply the NamespaceContext used to resolve namespaces.
+     * @param context the namespace context
      */
 
     public void setNamespaceContext(NamespaceContext context) {
@@ -69,6 +70,7 @@ public class JAXPXPathStaticContext extends AbstractStaticContext
 
     /**
      * Get the NamespaceContext that was set using {@link #setNamespaceContext}
+     * @return the namespace context
      */
 
     public NamespaceContext getNamespaceContext() {
@@ -78,6 +80,7 @@ public class JAXPXPathStaticContext extends AbstractStaticContext
     /**
      * Get the stack frame map containing the slot number allocations for the variables declared
      * in this static context
+     * @return the stack frame map
      */
 
     public SlotManager getStackFrameMap() {
@@ -97,6 +100,7 @@ public class JAXPXPathStaticContext extends AbstractStaticContext
 
     /**
      * Get the XPathVariableResolver
+     * @return the XPathVariableResolver
      */
 
     public XPathVariableResolver getXPathVariableResolver() {

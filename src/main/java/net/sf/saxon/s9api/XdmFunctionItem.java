@@ -72,6 +72,9 @@ public class XdmFunctionItem extends XdmItem {
      * Get a system function. This can be any function defined in XPath 3.1 functions and operators,
      * including functions in the math, map, and array namespaces. It can also be a Saxon extension
      * function, provided a licensed Processor is used.
+     * @param processor the processor
+     * @param name      the name of the requested function
+     * @param arity     the arity of the requested function
      * @return the requested function, or null if there is no such function. Note that some functions
      * (those with particular context dependencies) may be unsuitable for dynamic calling.
      * @throws SaxonApiException No longer thrown, but remains in the method signature for backwards compatibility
@@ -86,6 +89,7 @@ public class XdmFunctionItem extends XdmItem {
     /**
      * Get an equivalent Java Function object representing this XdmFunction.
      * This is possible only for arity-1 functions.
+     * @param processor the processor
      * @return a Java Function. This takes an XdmValue
      * as its argument, and returns the function result in the form of an XdmValue.
      * The Function throws an unchecked exception if evaluation fails
@@ -111,6 +115,7 @@ public class XdmFunctionItem extends XdmItem {
      * Get an equivalent Step object representing this XdmFunction.
      * This is possible only for arity-1 functions.
      *
+     * @param processor the processor
      * @return a Step. This takes an XdmItem
      * as its argument, and returns the function result in the form of an XdmStream.
      * The Function throws an unchecked exception if evaluation fails

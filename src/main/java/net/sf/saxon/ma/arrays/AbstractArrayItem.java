@@ -126,7 +126,7 @@ public abstract class AbstractArrayItem extends ArrayItem {
      * Prepare an XPathContext object for evaluating the function
      *
      * @param callingContext the XPathContext of the function calling expression
-     * @param originator
+     * @param originator identifies the location of the caller for diagnostics
      * @return a suitable context for evaluating the function (which may or may
      * not be the same as the caller's context)
      */
@@ -249,7 +249,7 @@ public abstract class AbstractArrayItem extends ArrayItem {
 
     /**
      * Get the lowest common item type of the members of the array
-     *
+     * @param th the type hierarchy
      * @return the most specific type to which all the members belong.
      */
 

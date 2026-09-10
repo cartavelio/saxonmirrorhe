@@ -814,6 +814,7 @@ public class Serializer extends AbstractDestination {
      * will be in the same format as JAXP interfaces such as
      * {@link javax.xml.transform.Transformer#getOutputProperties()}
      *
+     * @param defaultOutputProperties the default properties
      * @return a newly-constructed Properties object holding the declared serialization properties. Specifically,
      * it holds the properties defined explicitly on this Serializer object, backed by the properties defined
      * in unnamed xsl:output declarations in the stylesheet, or output declarations in XQuery.
@@ -864,6 +865,7 @@ public class Serializer extends AbstractDestination {
     /**
      * Get the JAXP StreamResult object representing the output destination
      * of this serializer
+     * @return the JAXP StreamResult object
      */
 
     protected Result getResult() {
