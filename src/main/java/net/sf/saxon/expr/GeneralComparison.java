@@ -357,12 +357,12 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
     }
 
 
-    private static Expression makeMinOrMax(Expression exp, String function) {
+    private static Expression makeMinOrMax(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo,
+                                           Expression exp, String function) throws XPathException {
         if (Cardinality.allowsMany(exp.getCardinality())) {
-            Expression fn = SystemFunction.makeCall(function, exp.getRetainedStaticContext(), exp);
-            assert fn != null;
-            ((Minimax) ((SystemFunctionCall) fn).getTargetFunction()).setIgnoreNaN(true);
-            return fn;
+            SystemFunction fn = SystemFunction.makeFunction(function, exp.getRetainedStaticContext(), 1);
+            ((Minimax)fn).setIgnoreNaN(true);
+            return fn.makeOptimizedFunctionCall(visitor, contextInfo, exp);
         } else {
             return exp;
         }
@@ -542,17 +542,17 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
             switch (operator) {
                 case Token.LT:
                 case Token.LE:
-                    vc = new ValueComparison(makeMinOrMax(getLhsExpression(), "min"),
+                    vc = new ValueComparison(makeMinOrMax(visitor, contextInfo, getLhsExpression(), "min"),
                             singletonOperator,
-                            makeMinOrMax(getRhsExpression(), "max"));
+                            makeMinOrMax(visitor, contextInfo, getRhsExpression(), "max"));
                     vc.setResultWhenEmpty(BooleanValue.FALSE);
                     vc.setAtomicComparer(comparer);
                     break;
                 case Token.GT:
                 case Token.GE:
-                    vc = new ValueComparison(makeMinOrMax(getLhsExpression(), "max"),
+                    vc = new ValueComparison(makeMinOrMax(visitor, contextInfo, getLhsExpression(), "max"),
                             singletonOperator,
-                            makeMinOrMax(getRhsExpression(), "min"));
+                            makeMinOrMax(visitor, contextInfo, getRhsExpression(), "min"));
                     vc.setResultWhenEmpty(BooleanValue.FALSE);
                     vc.setAtomicComparer(comparer);
                     break;
