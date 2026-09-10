@@ -3141,11 +3141,13 @@ void testThreads(SaxonProcessor *processor, Xslt30Processor *trans,
   try {
 
   for (int i = 0; i < s.size(); i++) {
-
+    cerr << endl << "testThreads before XsltExecutable cp0" << endl;
     XsltExecutable *executable = trans->compileFromFile(CppTestUtils::concat(2, dataDir->c_str(), "/q12.xsl").c_str());
+    cerr << endl << "testThreads after XsltExecutable cp1" << endl;
     if (executable == nullptr) {
       continue;
     }
+    cerr << endl << "testThreads after XsltExecutable cp2" << endl;
     threads.push_back(std::thread(RunThread, executable, i, s[i]));
   }
 

@@ -356,6 +356,7 @@ const char *XsltExecutable::getProperty(const char *name) {
 
 
 void XsltExecutable::clearParameters(bool delValues) {
+  SaxonProcessor::attachCurrentThread();
     if (delValues) {
         for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
              itr != parameters.end(); itr++) {

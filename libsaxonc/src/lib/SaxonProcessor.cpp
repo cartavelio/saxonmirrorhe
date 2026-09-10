@@ -417,7 +417,7 @@ bool SaxonProcessor::isLicensed() {
 
 const char * SaxonProcessor::getSaxonEdition() {
   SaxonProcessor::attachCurrentThread();
-  return SAXONC_EDITION;
+  return j_c_getSaxonEdition(SaxonProcessor::sxn_environ->thread, (void *)procRef);
 }
 
 void SaxonProcessor::registerUserFunctionWithProcessor(void * python_procPtr, const char * ns1, void * func, const char * signature, bool useNativeTypes) {
@@ -617,8 +617,8 @@ int64_t SaxonProcessor::createJArray(XdmValue **values, int length) {
 int64_t SaxonProcessor::createParameterJArray(
     std::map<std::string, XdmValue *> parameters,
     std::map<std::string, std::string> properties, int additions) {
-
-  int size = parameters.size() + properties.size() + additions;
+  SaxonProcessor::attachCurrentThread();
+  int size = (int) parameters.size() + properties.size() + additions;
 #ifdef DEBUG
   if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr << "Properties size: " << properties.size() << std::endl;
@@ -685,8 +685,8 @@ int64_t SaxonProcessor::createParameterJArray(
 
 int64_t SaxonProcessor::createParameterJArray2(
     std::map<std::string, XdmValue *> parameters) {
-
-  int size = (int)parameters.size();
+  SaxonProcessor::attachCurrentThread();
+  int size = (int) parameters.size();
   int64_t processorDataRef = createProcessorDataWithCapacity(
       SaxonProcessor::sxn_environ->thread, size);
 
