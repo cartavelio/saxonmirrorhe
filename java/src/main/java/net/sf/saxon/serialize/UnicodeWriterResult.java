@@ -8,7 +8,6 @@
 package net.sf.saxon.serialize;
 
 import net.sf.saxon.str.UnicodeWriter;
-import net.sf.saxon.trans.XPathException;
 
 import javax.xml.transform.Result;
 
@@ -21,7 +20,7 @@ public class UnicodeWriterResult implements Result {
     private final UnicodeWriter unicodeWriter;
     private String systemId;
 
-    public UnicodeWriterResult(UnicodeWriter unicodeWriter, String systemId) throws XPathException {
+    public UnicodeWriterResult(UnicodeWriter unicodeWriter, String systemId) {
         this.systemId = systemId;
         this.unicodeWriter = unicodeWriter;
     }
