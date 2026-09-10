@@ -2578,7 +2578,6 @@ public class PackageLoaderHE implements IPackageLoader {
                 ic.setNamespaceResolver(rsc);
                 ic.setBackwardsCompatibilityMode(rsc.isBackwardsCompatibility());
                 ic.setDefaultCollationName(rsc.getDefaultCollationName());
-                ic.setDefaultFunctionNamespace(rsc.getDefaultFunctionNamespace());
                 ic.setDecimalFormatManager(rsc.getDecimalFormatManager());
                 List<String> reasons = new ArrayList<>();
                 exp = loader.config.getIntegratedFunctionLibrary().bind(sName, args, null, ic, reasons);

@@ -41,7 +41,6 @@ public class RetainedStaticContext implements NamespaceResolver {
     private String staticBaseUriString;
     private String defaultCollationName;
     private NamespaceResolver namespaces;  // Normally a NamespaceMap, except for the JAXP case
-    private NamespaceUri defaultFunctionNamespace = NamespaceUri.FN;
     private NamespaceUri defaultElementNamespace;
     private DecimalFormatManager decimalFormatManager;
     private boolean backwardsCompatibility;
@@ -69,7 +68,6 @@ public class RetainedStaticContext implements NamespaceResolver {
         this.defaultCollationName = sc.getDefaultCollationName();
         this.decimalFormatManager = sc.getDecimalFormatManager();
         this.defaultElementNamespace = sc.getDefaultElementNamespace();
-        defaultFunctionNamespace = sc.getDefaultFunctionNamespace();
         backwardsCompatibility = sc.isInBackwardsCompatibleMode();
         if (!Version.platform.JAXPStaticContextCheck(this, sc)) {
             namespaces = sc.getNamespaceResolver();
@@ -172,26 +170,6 @@ public class RetainedStaticContext implements NamespaceResolver {
 
     public void setDefaultCollationName(String defaultCollationName) {
         this.defaultCollationName = defaultCollationName;
-    }
-
-    /**
-     * Get the default namespace for functions
-     *
-     * @return the default namespace for functions
-     */
-
-    public NamespaceUri getDefaultFunctionNamespace() {
-        return defaultFunctionNamespace;
-    }
-
-    /**
-     * Set the default namespace for functions
-     *
-     * @param defaultFunctionNamespace the default namespace for functions
-     */
-
-    public void setDefaultFunctionNamespace(NamespaceUri defaultFunctionNamespace) {
-        this.defaultFunctionNamespace = defaultFunctionNamespace;
     }
 
     /**
@@ -312,7 +290,6 @@ public class RetainedStaticContext implements NamespaceResolver {
             h ^= staticBaseUriString.hashCode();
         }
         h ^= defaultCollationName.hashCode();
-        h ^= defaultFunctionNamespace.hashCode();
         h ^= namespaces.hashCode();
         return h;
     }
@@ -325,7 +302,6 @@ public class RetainedStaticContext implements NamespaceResolver {
         RetainedStaticContext r = (RetainedStaticContext) other;
         return ExpressionTool.equalOrNull(staticBaseUriString, r.staticBaseUriString)
                 && defaultCollationName.equals(r.defaultCollationName)
-                && defaultFunctionNamespace.equals(r.defaultFunctionNamespace)
                 && namespaces.equals(r.namespaces)
                 && importedSchema == r.getImportedSchema();
     }

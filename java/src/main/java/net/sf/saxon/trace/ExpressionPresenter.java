@@ -351,10 +351,6 @@ public class ExpressionPresenter {
                     (parentSC == null || !sc.getDefaultElementNamespace().equals(parentSC.getDefaultElementNamespace()))) {
                 emitAttribute("defaultElementNS", sc.getDefaultElementNamespace().toString());
             }
-            String defaultFnNs = sc.getDefaultFunctionNamespace().toString();
-            if (!NamespaceConstant.FN.equals(defaultFnNs)) {
-                emitAttribute("defaultFunctionNS", defaultFnNs);
-            }
             if (!options.suppressStaticContext && (parentSC == null || !sc.declaresSameNamespaces(parentSC))) {
                 boolean includeXmlNamespace = "JS".equals(getOptions().target) && getOptions().targetVersion >= 2;
                 emitAttribute("ns", getNamespacesAsString(sc.getNamespaceMap(), includeXmlNamespace));
