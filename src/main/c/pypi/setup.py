@@ -19,7 +19,7 @@ extra_link_args = []
 if system() == 'Darwin':
     extra_link_args.append('-Llibs/darwin')
 elif system() == 'Windows':
-    extra_link_args.append('libs\\win\\libsaxon-@@edition@@c-@@VERSION@@.lib')
+    extra_link_args.append('build\\@@edition@@c_pypi\\libs\\win\\libsaxon-@@edition@@c-@@VERSION@@.lib')
 else:
     extra_link_args.append('-Llibs/nix')
 

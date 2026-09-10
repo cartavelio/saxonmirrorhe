@@ -625,7 +625,6 @@ task graal_eec_jar(
   ) {
     inputs.files fileTree(dir: "${projectDir}/src/main/c")
     outputs.files fileTree(dir: saxoncReleaseDir, exclude: "dist/**")
-    
 
     doLast {
       copy {
@@ -645,9 +644,10 @@ task graal_eec_jar(
       copy {
         from "${projectDir}/src/main/c"
         into "${saxoncReleaseDir}"
+        exclude "Dockerfile"
+        exclude "pypi/**"
       }
     }
-
 
     doLast {
       copy {
@@ -691,7 +691,6 @@ task graal_eec_jar(
         }
       }
     }
-
 
     doLast {
       copy {
@@ -752,9 +751,26 @@ task graal_eec_jar(
       }
     }
 
+    doLast {
+      copy {
+        into "${saxoncReleaseDir}/notices"
+        from "${projectDir}/src/docs/notices"
+        include "JAMESCLARK.txt"
+        include "JLINE2.txt"
+        include "LICENSE.txt"
+      }
+    }
 
+    if (edition == "pe" || edition == "ee") {
+      doLast {
+        copy {
+          into "${saxoncReleaseDir}/notices"
+          from "${projectDir}/src/docs/notices"
+          include "ICU-J.txt"
+        }
+      }
+    }
   }
-
 
   task "buildCPP_${edition}"(
           dependsOn: ["setup_${edition}c_release"]
@@ -818,7 +834,7 @@ task graal_eec_jar(
                      + 'build = "*"\n'
                      + 'archs = ["AMD64"]\n'
                      + 'skip = ["*-win32", "cp36*", "cp37*", "pp37*", "cp*musl*"]\n')
-    libpath = 'libs\\\\win\\\\'
+    libpath = "${buildDir}\\\\${edition}c_pypi\\\\libs\\\\win\\\\"
   }
 
   task "setup_${edition}c_pypi"(
@@ -846,7 +862,7 @@ task graal_eec_jar(
                        ? "${pypiDir}/libs/darwin"
                        : (systemOs.isLinux()
                           ? "${pypiDir}/libs/nix"
-                          : "libs/win"))
+                          : "${pypiDir}/libs/win"))
 
     doLast {
       if (SAXONC_HOME == null) {
@@ -945,14 +961,12 @@ task graal_eec_jar(
       }
     }
 
-    doLast {
-      exec {
-        workingDir "${buildDir}/${edition}c_pypi"
-        if(systemOs.isMacOsX() || systemOs.isLinux()) {
+    if(systemOs.isMacOsX() || systemOs.isLinux()) {
+      doLast {
+        exec {
+          workingDir "${buildDir}/${edition}c_pypi"
           commandLine "python3", "setup.py", "bdist_wheel"
-        } else {
-          commandLine "python", "-mpip", "install", "-r", "requirements.txt"
-        }
+	}
       }
     }
   }
