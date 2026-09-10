@@ -446,16 +446,17 @@ public class UcaCollatorUsingIcu implements SubstringMatcher {
                 if (!keys.contains(tokens[0])) {
                     unknownKeys.add(tokens[0]);
                 }
-                props.setProperty(tokens[0], tokens[1]);
+                String value = tokens.length >= 2 ? tokens[1] : "";
+                props.setProperty(tokens[0], value);
             }
         }
         String fallback = props.getProperty("fallback");
         if (fallback != null && fallback.equals("no") && !unknownKeys.isEmpty()) {
-            String message = unknownKeys.size() > 1 ? "unknown parameters:" : "unknown parameter:";
+            StringBuilder message = new StringBuilder(unknownKeys.size() > 1 ? "unknown parameters:" : "unknown parameter:");
             for (String u : unknownKeys) {
-                message += u + " ";
+                message.append(u).append(" ");
             }
-            error(message);
+            error(message.toString());
         }
         return props;
     }
