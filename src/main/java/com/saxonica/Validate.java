@@ -314,7 +314,7 @@ public class Validate {
                     request.baseUri = cwd.toString();
                     request.uri = cwd.resolve(schemaFileName).toString();
                     request.nature = ResourceRequest.XSD_NATURE;
-                    request.purpose = "schema validation";
+                    request.purpose = ResourceRequest.VALIDATION_PURPOSE;
                     schemaSource = request.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
                 } else if (schemaFileName.equals("-")) {
                     // take input from stdin
@@ -602,7 +602,7 @@ public class Validate {
             request.baseUri = cwd.toString();
             request.uri = cwd.resolve(sourceFileName).toString();
             request.nature = ResourceRequest.XML_NATURE;
-            request.purpose = "source document";
+            request.purpose = ResourceRequest.ANY_PURPOSE;
             sourceInput = request.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
         } else if (sourceFileName.equals("-")) {
             //#if CSHARP==false

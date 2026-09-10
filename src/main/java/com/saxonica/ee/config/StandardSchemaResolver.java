@@ -20,9 +20,6 @@ import java.util.ArrayList;
  * The default schema resolver used when no other is requested
  */
 public class StandardSchemaResolver implements SchemaURIResolver {
-    public static final String SCHEMA_NATURE = "http://www.w3.org/2001/XMLSchema";
-    public static final String VALIDATION_PURPOSE = "http://www.rddl.org/purposes#validation";
-
     private EnterpriseConfiguration config;
     private static final StreamSource[] EMPTY_SOURCE_ARRAY = new StreamSource[0];
     private ResourceResolver resourceResolver;
@@ -151,7 +148,7 @@ public class StandardSchemaResolver implements SchemaURIResolver {
         rr.relativeUri = location;
         rr.baseUri = baseURI;
         rr.nature = ResourceRequest.XSD_NATURE;
-        rr.purpose = "schema module";
+        rr.purpose = ResourceRequest.VALIDATION_PURPOSE;
         try {
             rr.uri = ResolveURI.makeAbsolute(location, baseURI).toString();
         } catch (URISyntaxException err) {
@@ -168,7 +165,7 @@ public class StandardSchemaResolver implements SchemaURIResolver {
         rr.baseUri = baseURI;
         rr.uriIsNamespace = true;
         rr.nature = ResourceRequest.XSD_NATURE;
-        rr.purpose = "schema module";
+        rr.purpose = ResourceRequest.VALIDATION_PURPOSE;
         try {
             return rr.resolve(config.getResourceResolver());
         } catch (TransformerException ex) {
