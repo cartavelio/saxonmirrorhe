@@ -518,7 +518,7 @@ public class ReceivingContentHandler
             throw new SAXException("Parser configuration problem: namespace reporting is not enabled");
         }
 
-        // Following code maintains a local cache to remember all the element names that have been
+        // Following code maintains a local cache to remember all the elemen/attribute names that have been
         // allocated, which reduces contention on the NamePool. It also avoids parsing the lexical QName
         // when the same name is used repeatedly. We also get a tiny improvement by avoiding the first hash
         // table lookup for names in the null namespace.

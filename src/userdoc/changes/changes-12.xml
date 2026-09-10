@@ -117,6 +117,20 @@
     
     <category name="spi">
         
+        <p>In a number of internal interfaces, namespace URIs are now represented using the class <code>NamespaceUri</code> rather
+        than <code>String</code>. <code>NamespaceUri</code> objects are pooled (so the same namespace is always represented by
+        the same object), leading to fewer object allocations (and therefore less overhead in the garbage collector), and allowing
+        more efficient comparison - equality testing is the dominant operation on namespace URIs.</p>
+        
+        <p>Interfaces affected include <code>NodeInfo</code>, <code>Receiver</code>, <code>StructuredQName</code>,
+        <code>NodeName</code>, <code>XPathStaticContext</code>, <code>AttributeMap</code>, and <code>NamespaceMap</code>.</p>
+        
+        <p>The change may affect the handling of namespace URIs containing spaces (this is an area that has never been
+        well defined in the W3C specifications, and is best avoided).</p>
+        
+        <p>To convert a <code>String</code> to a <code>NamespaceUri</code>, use the static method <code>NamespaceUri.of(String)</code>.
+        For the reverse, use <code>namespaceUri.toString()</code>.</p>
+        
    
     </category>
 
