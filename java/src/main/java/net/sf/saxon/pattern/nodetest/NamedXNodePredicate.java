@@ -14,7 +14,7 @@ public interface NamedXNodePredicate extends NodePredicate {
 
     /**
      * Get the kind of nodes that this node predicate matches
-     * @return the kind of nodes, for example {@link net.sf.saxon.type.Type.ELEMENT} or {@code Type.ATTRIBUTE}
+     * @return the kind of nodes, for example {@link net.sf.saxon.type.Type#ELEMENT} or {@code net.sf.saxon.type.Type#ATTRIBUTE}
      */
 
     int getNodeKind();

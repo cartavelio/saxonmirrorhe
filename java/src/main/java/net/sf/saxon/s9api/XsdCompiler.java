@@ -38,7 +38,7 @@ import java.io.File;
  * one or more schema documents into a schema. The schema can be used to validate instance documents using
  * the method {@link XsdSchema#newValidator()}, and it can be added to the static context of XQuery queries
  * and XSLT stylesheets using the methods {@link XQueryCompiler#useSchema(XsdSchema)} and
- * {@link XsltCompiler#useSchema(XsdSchema)}.</p>
+ * {@link XsltCompiler#useSchema(String, XsdSchema)}.</p>
  *
  * @since 13.0
  */

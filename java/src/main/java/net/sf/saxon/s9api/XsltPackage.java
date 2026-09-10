@@ -125,7 +125,7 @@ public class XsltPackage {
 
     /**
      * Get the schema used as the static context of this package in the stylesheet. This will typically
-     * include schema components preloaded using {@link XsltCompiler#useSchema(XsdSchema)}, plus schema components
+     * include schema components preloaded using {@link XsltCompiler#useSchema(String, XsdSchema)}, plus schema components
      * loaded using <code>xsl:import-schema</code> declarations within the stylesheet itself.
      *
      * <p>This schema can usefully be used for validating source documents that are to be supplied as input to
