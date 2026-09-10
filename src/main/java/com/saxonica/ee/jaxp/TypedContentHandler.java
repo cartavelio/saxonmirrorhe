@@ -12,6 +12,7 @@ import net.sf.saxon.type.AnyType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
 import org.w3c.dom.TypeInfo;
+import org.xml.sax.ContentHandler;
 
 import javax.xml.validation.TypeInfoProvider;
 
@@ -25,6 +26,10 @@ import javax.xml.validation.TypeInfoProvider;
 public class TypedContentHandler extends ContentHandlerProxy {
     private SchemaType pendingElementTypeCode = null;
     private AttributeMap pendingAttributes = null;
+
+    public TypedContentHandler(ContentHandler handler) {
+        super(handler);
+    }
 
     /**
      * Get a TypeInfoProvider to provide type information for the current element or attribute

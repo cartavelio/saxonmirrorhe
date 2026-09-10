@@ -402,10 +402,9 @@ public class ValidatingReader implements XMLReader {
         if (contentHandler == null) {
             output = new Sink(pipe);
         } else {
-            ContentHandlerProxy chp = new ContentHandlerProxy();
-            chp.setUnderlyingContentHandler(contentHandler);
+            ContentHandlerProxy chp = new ContentHandlerProxy(contentHandler);
             chp.setPipelineConfiguration(pipe);
-            output = chp;
+            output = new NamespaceDifferencer(chp);
         }
 
         ParseOptions options = pipe.getParseOptions()

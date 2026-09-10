@@ -70,10 +70,9 @@ public class SchemaReference extends Schema {
         PipelineConfiguration pipe = config.makePipelineConfiguration();
         pipe.setHostLanguage(HostLanguage.XML_SCHEMA);
 
-        TypedContentHandler proxy = new TypedContentHandler();
-        proxy.setPipelineConfiguration(pipe);
         // create a sink destination until such time as the user supplies his own
-        proxy.setUnderlyingContentHandler(new XMLFilterImpl());
+        TypedContentHandler proxy = new TypedContentHandler(new XMLFilterImpl());
+        proxy.setPipelineConfiguration(pipe);
 
         ParseOptions options = new ParseOptions()
                 .withSchemaValidationMode(Validation.STRICT)
