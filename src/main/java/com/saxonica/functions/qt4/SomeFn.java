@@ -32,7 +32,7 @@ public class SomeFn extends SystemFunction {
         SequenceIterator iter = arguments[0].iterate();
         FunctionItem predicate = arguments.length > 1
                 ? (FunctionItem) arguments[1].head()
-                : new CoercedFunction(SystemFunction.makeFunction("identity", getRetainedStaticContext(), 1),
+                : new CoercedFunction(SystemFunction.makeFunction40("identity", getRetainedStaticContext(), 1),
                                       new SpecificFunctionType(
                                             new SequenceType[]{SequenceType.SINGLE_ITEM},
                                             SequenceType.SINGLE_BOOLEAN), false);
