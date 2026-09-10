@@ -188,6 +188,15 @@ task copy_samples(
     }
 }
 
+def String pathToURI(String path) {
+  def uristr = path.replace("\\", "/")
+  if (uristr.length() > 1 && uristr.charAt(1) == ':') {
+    return "file:/" + uristr
+  } else {
+    return "file://" + uristr
+  }
+}
+
 task gen_config_schema(
         type: JavaExec,
         dependsOn: ["hej_featureKeys"],
@@ -203,7 +212,7 @@ task gen_config_schema(
             "-it:main",
             "FeatureKeys=FeatureKeys.xml",
             "AdditionalFeatures=AdditionalFeatures.xml",
-            "ConfigSchema=${projectDir}/src/samples/config/config-raw.xsd"
+            "ConfigSchema=${pathToURI(projectDir.toString() + '/src/samples/config/config-raw.xsd')}"
 }
 
 task samples_j_src(
