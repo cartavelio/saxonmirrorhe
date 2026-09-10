@@ -106,7 +106,7 @@ public class AnchorPattern extends Pattern {
 
     @Override
     public ItemType getItemType() {
-        return AnyNodeTest.getInstance();
+        return AnyXNodeTest.getInstance();
     }
 
     @Override

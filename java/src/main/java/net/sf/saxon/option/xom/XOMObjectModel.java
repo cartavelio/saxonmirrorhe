@@ -17,7 +17,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.ExternalObjectModel;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.AnyXNodeTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.wrapper.VirtualNode;
 import net.sf.saxon.type.ItemType;
@@ -113,7 +113,7 @@ public class XOMObjectModel extends TreeModel implements ExternalObjectModel {
 
                 @Override
                 public ItemType getItemType() {
-                    return AnyNodeTest.getInstance();
+                    return AnyXNodeTest.getInstance();
                 }
             };
         } else {

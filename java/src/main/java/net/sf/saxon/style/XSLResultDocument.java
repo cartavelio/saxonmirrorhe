@@ -242,7 +242,7 @@ public class XSLResultDocument extends StyleElement {
         // XTDE1480 at run-time. Doing this static check improves our chances, though it won't catch all cases.
         AxisIterator ai = iterateAxis(AxisInfo.ANCESTOR);
         NodeInfo node;
-        while ((node = ai.next()) != null) {
+        while ((node = (NodeInfo)ai.next()) != null) {
             if (node instanceof XSLGeneralVariable || (node instanceof XSLFunction && !((XSLFunction) node).isUpdating())) {
                 issueWarning("An xsl:result-document instruction inside " + node.getDisplayName() +
                         " will always fail at run-time", "XTDE1480");
@@ -271,7 +271,7 @@ public class XSLResultDocument extends StyleElement {
                 globalProps.getProperty("method") == null &&
                 serializationAttributes.get(METHOD) == null) {
             AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-            NodeInfo first = kids.next();
+            NodeInfo first = (NodeInfo)kids.next();
             if (first instanceof LiteralResultElement) {
                 if (first.getNamespaceUri().equals(NamespaceUri.XHTML) && first.getLocalPart().equals("html")) {
                     method = "xhtml";

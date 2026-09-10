@@ -67,7 +67,7 @@ public class XSLNextIteration extends XSLBreakOrContinue {
             AxisIterator formalParams = xslIterate.iterateAxis(AxisInfo.CHILD);
             boolean ok = false;
             NodeInfo param;
-            while ((param = formalParams.next()) != null) {
+            while ((param = (NodeInfo)formalParams.next()) != null) {
                 if (param instanceof XSLLocalParam &&
                         ((XSLLocalParam) param).getVariableQName().equals(withParam.getVariableQName())) {
                     ok = true;
@@ -108,7 +108,7 @@ public class XSLNextIteration extends XSLBreakOrContinue {
         if (xslIterate != null) {
             AxisIterator declaredParams = xslIterate.iterateAxis(AxisInfo.CHILD);
             NodeInfo param;
-            while ((param = declaredParams.next()) != null) {
+            while ((param = (NodeInfo)declaredParams.next()) != null) {
                 if (param instanceof XSLLocalParam) {
                     XSLLocalParam pdecl = (XSLLocalParam) param;
                     StructuredQName paramName = pdecl.getVariableQName();

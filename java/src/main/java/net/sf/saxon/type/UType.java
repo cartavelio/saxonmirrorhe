@@ -10,7 +10,7 @@ package net.sf.saxon.type;
 
 import net.sf.saxon.ma.jnode.JNode;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.AnyXNodeTest;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.value.AtomicValue;
 
@@ -72,11 +72,12 @@ public class UType {
     public static final UType CHILD_NODE_KINDS = ELEMENT.union(TEXT).union(COMMENT).union(PI);
     public static final UType PARENT_NODE_KINDS = DOCUMENT.union(ELEMENT);
     public static final UType ELEMENT_OR_ATTRIBUTE = ELEMENT.union(ATTRIBUTE);
-    public static final UType ANY_NODE = CHILD_NODE_KINDS.union(DOCUMENT).union(ATTRIBUTE).union(NAMESPACE);
+    public static final UType XNODE = CHILD_NODE_KINDS.union(DOCUMENT).union(ATTRIBUTE).union(NAMESPACE);
+    public static final UType GNODE = XNODE.union(JNODE);
 
     public static final UType ANY_ATOMIC = new UType(0x0FFFFF00);
 
-    public static final UType ANY = ANY_NODE.union(JNODE).union(ANY_ATOMIC).union(FUNCTION).union(EXTENSION);
+    public static final UType ANY = XNODE.union(JNODE).union(ANY_ATOMIC).union(FUNCTION).union(EXTENSION);
 
     
     private final int bits;
@@ -135,8 +136,8 @@ public class UType {
 
     public static UType fromTypeCode(int code) {
         switch (code) {
-            case Type.NODE:
-                return ANY_NODE;
+            case Type.XNODE:
+                return XNODE;
             case Type.ELEMENT:
                 return ELEMENT;
             case Type.ATTRIBUTE:
@@ -152,6 +153,11 @@ public class UType {
                 return PI;
             case Type.NAMESPACE:
                 return NAMESPACE;
+
+            case Type.GNODE:
+                return GNODE;
+            case Type.JNODE:
+                return JNODE;
 
             case Type.FUNCTION:
                 return FUNCTION;
@@ -316,8 +322,8 @@ public class UType {
         } else if (p.size() == 1) {
             Iterator<PrimitiveUType> iter = p.iterator();
             return iter.hasNext() ? iter.next().toItemType() : null;
-        } else if (ANY_NODE.subsumes(this)) {
-            return AnyNodeTest.getInstance();
+        } else if (XNODE.subsumes(this)) {
+            return AnyXNodeTest.getInstance();
         } else if (equals(NUMERIC)) {
             return NumericType.getInstance();
         } else if (ANY_ATOMIC.subsumes(this)) {

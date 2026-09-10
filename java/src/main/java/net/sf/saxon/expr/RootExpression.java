@@ -15,7 +15,7 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.AnyXNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTestPattern;
 import net.sf.saxon.pattern.Pattern;
@@ -66,7 +66,7 @@ public class RootExpression extends Expression {
             return cie;
         }
 
-        Affinity relation = th.relationship(contextInfo.getItemType(), AnyNodeTest.getInstance());
+        Affinity relation = th.relationship(contextInfo.getItemType(), AnyXNodeTest.getInstance());
         if (relation == Affinity.DISJOINT) {
             throw new XPathException(noContextMessage() + ": the context item is not a node")
                     .withErrorCode("XPTY0020")

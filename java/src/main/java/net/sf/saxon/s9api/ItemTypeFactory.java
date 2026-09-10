@@ -468,7 +468,7 @@ public class ItemTypeFactory {
      */
 
     public ItemType getAttributeTest(QName name, QName schemaTypeName) throws SaxonApiException {
-        NodeTest nameTest = AnyNodeTest.getInstance();
+        NodeTest nameTest = AnyXNodeTest.getInstance();
         SchemaType schemaType = null;
         ContentTypeTest contentTest = null;
         if (name != null) {

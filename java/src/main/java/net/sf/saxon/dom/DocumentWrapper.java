@@ -132,7 +132,7 @@ public class DocumentWrapper extends GenericTreeInfo {
                 idIndex = new HashMap<>();
                 AxisIterator iter = getRootNode().iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
                 NodeInfo e;
-                while ((e = iter.next()) != null) {
+                while ((e = (NodeInfo)iter.next()) != null) {
                     String xmlId = e.getAttributeValue(NamespaceUri.XML, "id");
                     if (xmlId != null) {
                         idIndex.put(xmlId, e);

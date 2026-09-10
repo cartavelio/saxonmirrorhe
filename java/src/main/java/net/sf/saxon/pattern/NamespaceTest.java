@@ -119,7 +119,7 @@ public final class NamespaceTest extends NodeTest {
      */
 
     @Override
-    public boolean test(NodeInfo node) {
+    public boolean test(GNode node) {
         return node.getNodeKind() == nodeKind && node.getNamespaceUri().equals(uri);
     }
 

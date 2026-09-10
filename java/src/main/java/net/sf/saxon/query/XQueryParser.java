@@ -4891,7 +4891,7 @@ public class XQueryParser extends XPathParser {
                     Expression previousComponent = components.get(components.size() - 1);
                     boolean previousComponentIsNodeTest = true;
                     UType previousItemType = previousComponent.getStaticUType(UType.ANY);
-                    previousComponentIsNodeTest = UType.ANY_NODE.subsumes(previousItemType);
+                    previousComponentIsNodeTest = UType.XNODE.subsumes(previousItemType);
                     if (!previousComponentIsNodeTest) {
                         // Add a zero-length text node, to prevent {"a"}{"b"} generating an intervening space
                         // See tests (qxmp132, qxmp261)

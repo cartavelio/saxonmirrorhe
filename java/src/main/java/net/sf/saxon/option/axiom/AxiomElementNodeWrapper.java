@@ -11,7 +11,7 @@ import net.sf.saxon.om.NamespaceBinding;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.AnyXNodeTest;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
@@ -220,14 +220,14 @@ public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {
     @Override
     protected AxisIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
         if (forwards) {
-            if (nodeTest instanceof AnyNodeTest) {
+            if (nodeTest instanceof AnyXNodeTest) {
                 return new AxiomDocument.FollowingSiblingIterator((OMElement) node, parent, docWrapper);
             } else {
                 return new Navigator.AxisFilter(
                         new AxiomDocument.FollowingSiblingIterator((OMElement) node, parent, docWrapper), nodeTest);
             }
         } else {
-            if (nodeTest instanceof AnyNodeTest) {
+            if (nodeTest instanceof AnyXNodeTest) {
                 return new AxiomDocument.PrecedingSiblingIterator((OMElement) node, parent, docWrapper);
             } else {
                 return new Navigator.AxisFilter(
@@ -346,7 +346,7 @@ public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {
 
         public AttributeAxisIterator(AxiomElementNodeWrapper element, NodeTest test) {
             this.element = element;
-            if (test == AnyNodeTest.getInstance() || test == NodeKindTest.ATTRIBUTE) {
+            if (test == AnyXNodeTest.getInstance() || test == NodeKindTest.ATTRIBUTE) {
                 test = null;
             }
             base = ((OMElement) element.node).getAllAttributes();

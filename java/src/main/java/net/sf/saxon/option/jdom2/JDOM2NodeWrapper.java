@@ -8,7 +8,7 @@
 package net.sf.saxon.option.jdom2;
 
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.AnyXNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.str.EmptyUnicodeString;
@@ -421,7 +421,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
                     return index;
             }
             while (true) {
-                NodeInfo n = iter.next();
+                GNode n = iter.next();
                 if (n == null) {
                     break;
                 }
@@ -443,7 +443,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     @Override
     protected AxisIterator iterateAttributes(NodeTest nodeTest) {
         AxisIterator base = new AttributeEnumeration(this);
-        if (nodeTest == AnyNodeTest.getInstance()) {
+        if (nodeTest == AnyXNodeTest.getInstance()) {
             return base;
         } else {
             return new Navigator.AxisFilter(base, nodeTest);
@@ -454,7 +454,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     protected AxisIterator iterateChildren(NodeTest nodeTest) {
         if (hasChildNodes()) {
             AxisIterator base = new ChildEnumeration(this, true, true);
-            if (nodeTest == AnyNodeTest.getInstance()) {
+            if (nodeTest == AnyXNodeTest.getInstance()) {
                 return base;
             } else {
                 return new Navigator.AxisFilter(base, nodeTest);
@@ -466,7 +466,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 
     @Override
     protected AxisIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
-        if (nodeTest == AnyNodeTest.getInstance()) {
+        if (nodeTest == AnyXNodeTest.getInstance()) {
             return new ChildEnumeration(this, false, forwards);
         } else {
             return new Navigator.AxisFilter(
@@ -484,7 +484,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
             // to achieve this is by using the recursive implementation of the descendant axis available
             // in the Navigator class, which works in terms of the child axis only. See bug #5348.
             AxisIterator allDescendants = new Navigator.DescendantIterator(this, includeSelf, true);
-            if (nodeTest == AnyNodeTest.getInstance()) {
+            if (nodeTest == AnyXNodeTest.getInstance()) {
                 return allDescendants;
             } else {
                 return new Navigator.AxisFilter(allDescendants, nodeTest);
@@ -507,7 +507,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
             wrappedDescendants = new PrependAxisIterator(this, wrappedDescendants);
         }
 
-        if (nodeTest instanceof AnyNodeTest || (nodeTest instanceof NodeKindTest && ((NodeKindTest) nodeTest).getNodeKind() == Type.ELEMENT)) {
+        if (nodeTest instanceof AnyXNodeTest || (nodeTest instanceof NodeKindTest && ((NodeKindTest) nodeTest).getNodeKind() == Type.ELEMENT)) {
             return wrappedDescendants;
         } else {
             return new Navigator.AxisFilter(wrappedDescendants, nodeTest);

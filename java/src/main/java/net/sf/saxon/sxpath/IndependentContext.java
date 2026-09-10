@@ -221,7 +221,7 @@ public class IndependentContext extends AbstractStaticContext
 
         AxisIterator iter = node.iterateAxis(AxisInfo.NAMESPACE);
         while (true) {
-            NodeInfo ns = iter.next();
+            NodeInfo ns = (NodeInfo)iter.next();
             if (ns == null) {
                 return;
             }

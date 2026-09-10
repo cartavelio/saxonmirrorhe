@@ -268,7 +268,7 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
     @Override
     public SchemaType getSchemaType() {
         AxisIterator children = iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
-        NodeInfo node = children.next();
+        NodeInfo node = (NodeInfo)children.next();
         if (node == null || node.getSchemaType() == Untyped.getInstance()) {
             return Untyped.getInstance();
         } else {

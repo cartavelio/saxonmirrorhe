@@ -200,7 +200,7 @@ public class LoopLifter {
         // bug 3465: expressions returning streamed nodes cannot be loop-lifted,
         // because such nodes must not be bound to a variable
         // TODO: attempt a more rigorous analysis - see bug 3465
-        return streaming && !exp.getItemType().getUType().intersection(UType.ANY_NODE).equals(UType.VOID);
+        return streaming && !exp.getItemType().getUType().intersection(UType.XNODE).equals(UType.VOID);
     }
 
     /**

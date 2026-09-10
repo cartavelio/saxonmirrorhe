@@ -7,10 +7,7 @@
 
 package net.sf.saxon.pattern;
 
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.qname.NoQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.trans.Err;
@@ -84,8 +81,8 @@ public class DocumentNodeTest extends NodeTest {
      */
 
     @Override
-    public boolean test(NodeInfo node) {
-        if (node.getNodeKind() != Type.DOCUMENT) {
+    public boolean test(GNode node) {
+        if (!(node instanceof NodeInfo) || ((NodeInfo)node).getNodeKind() != Type.DOCUMENT) {
             return false;
         }
         AxisIterator iter = node.iterateAxis(AxisInfo.CHILD);
@@ -93,7 +90,7 @@ public class DocumentNodeTest extends NodeTest {
         // children, and the element node matches the element test.
         boolean found = false;
         NodeInfo n;
-        while ((n = iter.next()) != null) {
+        while ((n = (NodeInfo)iter.next()) != null) {
             int kind = n.getNodeKind();
             if (kind == Type.TEXT) {
                 return false;
@@ -184,7 +181,7 @@ public class DocumentNodeTest extends NodeTest {
         // children, and the element node matches the element test.
         boolean found = false;
         NodeInfo n;
-        while ((n = iter.next()) != null) {
+        while ((n = (NodeInfo)iter.next()) != null) {
             int kind = n.getNodeKind();
             if (kind == Type.TEXT) {
                 return Optional.of("The supplied document node has text node children");

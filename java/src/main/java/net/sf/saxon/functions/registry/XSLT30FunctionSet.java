@@ -68,12 +68,12 @@ public class XSLT30FunctionSet extends BuiltInFunctionSet {
 
         register("current-output-uri", 0, e -> e.populate( CurrentOutputUri::new, BuiltInAtomicType.ANY_URI, OPT, LATE));
 
-        register("document", 1, e -> e.populate( DocumentFn::new, Type.NODE_TYPE, STAR, BASE | LATE | UO)
+        register("document", 1, e -> e.populate(DocumentFn::new, Type.XNODE_TYPE, STAR, BASE | LATE | UO)
                 .arg(0, Type.ITEM_TYPE, STAR, null));
 
-        register("document", 2, e -> e.populate( DocumentFn::new, Type.NODE_TYPE, STAR, BASE | LATE | UO)
+        register("document", 2, e -> e.populate(DocumentFn::new, Type.XNODE_TYPE, STAR, BASE | LATE | UO)
                 .arg(0, Type.ITEM_TYPE, STAR, null)
-                .arg(1, Type.NODE_TYPE, ONE, null));
+                .arg(1, Type.XNODE_TYPE, ONE, null));
 
         register("element-available", 1, e -> e.populate( ElementAvailable::new, BuiltInAtomicType.BOOLEAN, ONE, NS)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null));
@@ -85,14 +85,14 @@ public class XSLT30FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null));
 
-        register("key", 2, e -> e.populate( KeyFn::new, Type.NODE_TYPE, STAR, CDOC | NS | LATE)
+        register("key", 2, e -> e.populate(KeyFn::new, Type.XNODE_TYPE, STAR, CDOC | NS | LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY));
 
-        register("key", 3, e -> e.populate( KeyFn::new, Type.NODE_TYPE, STAR, NS | LATE)
+        register("key", 3, e -> e.populate(KeyFn::new, Type.XNODE_TYPE, STAR, NS | LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY)
-                .arg(2, Type.NODE_TYPE, ONE, null));
+                .arg(2, Type.XNODE_TYPE, ONE, null));
 
         register("regex-group", 1, e -> e.populate( RegexGroup::new, BuiltInAtomicType.STRING, ONE, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.INTEGER, ONE, null));
@@ -113,14 +113,14 @@ public class XSLT30FunctionSet extends BuiltInFunctionSet {
 
         register("unparsed-entity-public-id", 2, e -> e.populate( UnparsedEntity.UnparsedEntityPublicId::new, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, Type.NODE_TYPE, ONE, null));
+                .arg(1, Type.XNODE_TYPE, ONE, null));
 
         register("unparsed-entity-uri", 1, e -> e.populate( UnparsedEntity.UnparsedEntityUri::new, BuiltInAtomicType.ANY_URI, ONE, CDOC | LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
         register("unparsed-entity-uri", 2, e -> e.populate( UnparsedEntity.UnparsedEntityUri::new, BuiltInAtomicType.ANY_URI, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, Type.NODE_TYPE, ONE, null));
+                .arg(1, Type.XNODE_TYPE, ONE, null));
 
 
     }

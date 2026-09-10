@@ -783,7 +783,7 @@ public class AlphaCode {
                     itemType = new MultipleNodeKindTest(u);
                 }
             } else {
-                int kind = Type.NODE;
+                int kind = Type.XNODE;
                 if (principal.length() >= 2) {
                     switch (principal.substring(0, 2)) {
                         case "NT":
@@ -826,7 +826,7 @@ public class AlphaCode {
                     StructuredQName qName = name == null ? null : StructuredQName.fromEQName(name);
                     switch (principal) {
                         case "N":
-                            itemType = AnyNodeTest.getInstance();
+                            itemType = AnyXNodeTest.getInstance();
                             break;
                         case "NT":
                             itemType = NodeKindTest.TEXT;
@@ -919,7 +919,7 @@ public class AlphaCode {
                             break;
                         }
                         default:
-                            itemType = AnyNodeTest.getInstance();
+                            itemType = AnyXNodeTest.getInstance();
                             break;
                     }
                 }

@@ -408,10 +408,10 @@ public class SaxonDeepEqual extends SystemFunction {
                 }
                 NodeInfo att1;
                 a1 = n1.iterateAxis(AxisInfo.ATTRIBUTE);
-                while ((att1 = a1.next()) != null) {
+                while ((att1 = (NodeInfo)a1.next()) != null) {
                     AxisIterator a2iter = n2.iterateAxis(AxisInfo.ATTRIBUTE,
                                                          new SameNameTest(att1));
-                    NodeInfo att2 = a2iter.next();
+                    NodeInfo att2 = (NodeInfo)a2iter.next();
 
                     if (att2 == null) {
                         final String reason = "one element has an attribute " +
@@ -502,13 +502,13 @@ public class SaxonDeepEqual extends SystemFunction {
                 AxisIterator c1 = n1.iterateAxis(AxisInfo.CHILD);
                 AxisIterator c2 = n2.iterateAxis(AxisInfo.CHILD);
                 while (true) {
-                    NodeInfo d1 = c1.next();
+                    NodeInfo d1 = (NodeInfo)c1.next();
                     while (d1 != null && isIgnorable(d1, flags)) {
-                        d1 = c1.next();
+                        d1 = (NodeInfo)c1.next();
                     }
-                    NodeInfo d2 = c2.next();
+                    NodeInfo d2 = (NodeInfo)c2.next();
                     while (d2 != null && isIgnorable(d2, flags)) {
-                        d2 = c2.next();
+                        d2 = (NodeInfo)c2.next();
                     }
                     if (d1 == null || d2 == null) {
                         boolean r = d1 == d2;

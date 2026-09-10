@@ -13,7 +13,7 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.ExtensionFunctionCall;
 import net.sf.saxon.lib.ExtensionFunctionDefinition;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.AnyXNodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
@@ -321,7 +321,7 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
                      return item;
                  }), true);
             }
-            if (th.relationship(type, AnyNodeTest.getInstance()) != Affinity.DISJOINT) {
+            if (th.relationship(type, AnyXNodeTest.getInstance()) != Affinity.DISJOINT) {
                 result = new ItemMappingIterator(
                         result,
                         new ConfigurationCheckingFunction(context.getConfiguration()), true);

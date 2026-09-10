@@ -81,12 +81,15 @@ public abstract class Type {
     public static final short TEXTUAL_ELEMENT = 17; // Chosen so kind & 0x0f = Type.ELEMENT
 
     /**
-     * An item type that matches any node
+     * An item type that matches any XNode
      */
 
-    public static final short NODE = 0;
+    public static final short XNODE = 0;
 
-    public static final ItemType NODE_TYPE = AnyNodeTest.getInstance();
+    public static final ItemType XNODE_TYPE = AnyXNodeTest.getInstance();
+
+    public static final int GNODE = 22;
+    public static final int JNODE = 23;
 
     /**
      * An item type that matches any item
@@ -440,7 +443,7 @@ public abstract class Type {
             return BuiltInAtomicType.ANY_ATOMIC;
         }
         if (t1 instanceof NodeTest && t2 instanceof NodeTest) {
-            return AnyNodeTest.getInstance();
+            return AnyXNodeTest.getInstance();
         }
         //#if CSHARP==false
         if (t1 instanceof JavaExternalObjectType && t2 instanceof JavaExternalObjectType) {

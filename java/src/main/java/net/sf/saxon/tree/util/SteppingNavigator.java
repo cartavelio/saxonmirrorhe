@@ -220,7 +220,7 @@ public abstract class SteppingNavigator {
                 current = start;
             }
 
-            if (test == null || test == AnyNodeTest.getInstance()) {
+            if (test == null || test == AnyXNodeTest.getInstance()) {
                 stepper = new FollowingNodeStepper(start);
             } else if (test instanceof NameTest) {
                 if (((NameTest)test).getPrimitiveType() == Type.ELEMENT) {

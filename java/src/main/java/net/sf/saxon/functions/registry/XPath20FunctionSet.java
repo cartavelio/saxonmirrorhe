@@ -68,7 +68,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
         register("base-uri", 0, e -> e.populate(ContextItemAccessorFunction::new, BuiltInAtomicType.ANY_URI, OPT, CITEM | BASE | LATE));
 
         register("base-uri", 1, e -> e.populate(BaseUri_1::new, BuiltInAtomicType.ANY_URI, OPT, BASE)
-                .arg(0, Type.NODE_TYPE, OPT | INS, EMPTY));
+                .arg(0, Type.XNODE_TYPE, OPT | INS, EMPTY));
 
         register("boolean", 1, e -> e.populate(BooleanFn::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, Type.ITEM_TYPE, STAR | INS, null));
@@ -169,14 +169,14 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.STRING, OPT, BooleanValue.FALSE));
 
         register("document-uri", 1, e -> e.populate(DocumentUri_1::new, BuiltInAtomicType.ANY_URI, OPT, LATE)
-                .arg(0, Type.NODE_TYPE, OPT | INS, EMPTY));
+                .arg(0, Type.XNODE_TYPE, OPT | INS, EMPTY));
 
         register("element-with-id", 1, e -> e.populate(() -> new SuperId.ElementWithId(), NodeKindTest.ELEMENT, STAR, CDOC | LATE | UO)
                 .arg(0, BuiltInAtomicType.STRING, STAR, EMPTY));
 
         register("element-with-id", 2, e -> e.populate(() -> new SuperId.ElementWithId(), NodeKindTest.ELEMENT, STAR, UO)
                 .arg(0, BuiltInAtomicType.STRING, STAR, EMPTY)
-                .arg(1, Type.NODE_TYPE, ONE, null));
+                .arg(1, Type.XNODE_TYPE, ONE, null));
 
         register("empty", 1, e -> e.populate(Empty::new, BuiltInAtomicType.BOOLEAN, ONE, UO)
                 .arg(0, Type.ITEM_TYPE, STAR | INS, BooleanValue.TRUE));
@@ -241,14 +241,14 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
 
         register("id", 2, e -> e.populate(() -> new SuperId.Id(), NodeKindTest.ELEMENT, STAR, LATE | UO)
                 .arg(0, BuiltInAtomicType.STRING, STAR, EMPTY)
-                .arg(1, Type.NODE_TYPE, ONE | NAV, null));
+                .arg(1, Type.XNODE_TYPE, ONE | NAV, null));
 
-        register("idref", 1, e -> e.populate(Idref::new, Type.NODE_TYPE, STAR, CDOC | LATE)
+        register("idref", 1, e -> e.populate(Idref::new, Type.XNODE_TYPE, STAR, CDOC | LATE)
                 .arg(0, BuiltInAtomicType.STRING, STAR, EMPTY));
 
-        register("idref", 2, e -> e.populate(Idref::new, Type.NODE_TYPE, STAR, LATE)
+        register("idref", 2, e -> e.populate(Idref::new, Type.XNODE_TYPE, STAR, LATE)
                 .arg(0, BuiltInAtomicType.STRING, STAR, EMPTY)
-                .arg(1, Type.NODE_TYPE, ONE | NAV, null));
+                .arg(1, Type.XNODE_TYPE, ONE | NAV, null));
 
         register("implicit-timezone", 0, e -> e.populate(() -> new DynamicContextAccessor.ImplicitTimezone(), BuiltInAtomicType.DAY_TIME_DURATION, ONE, LATE));
 
@@ -277,14 +277,14 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
 
         register("lang", 2, e -> e.populate(Lang::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
-                .arg(1, Type.NODE_TYPE, ONE | INS, null));
+                .arg(1, Type.XNODE_TYPE, ONE | INS, null));
 
         register("last", 0, e -> e.populate(() -> new PositionAndLast.Last(), BuiltInAtomicType.INTEGER, ONE, LAST | LATE));
 
         register("local-name", 0, e -> e.populate(ContextItemAccessorFunction::new, BuiltInAtomicType.STRING, ONE, CITEM | LATE));
 
         register("local-name", 1, e -> e.populate(LocalName_1::new, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, Type.NODE_TYPE, OPT | INS, StringValue.EMPTY_STRING));
+                .arg(0, Type.XNODE_TYPE, OPT | INS, StringValue.EMPTY_STRING));
 
         register("local-name-from-QName", 1, e -> e.populate(() -> new AccessorFn.LocalNameFromQName(),
                  BuiltInAtomicType.NCNAME, OPT, 0)
@@ -343,7 +343,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
         register("name", 0, e -> e.populate(ContextItemAccessorFunction::new, BuiltInAtomicType.STRING, ONE, CITEM | LATE));
 
         register("name", 1, e -> e.populate(Name_1::new, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, Type.NODE_TYPE, OPT | INS, StringValue.EMPTY_STRING));
+                .arg(0, Type.XNODE_TYPE, OPT | INS, StringValue.EMPTY_STRING));
 
         register("namespace-uri", 0, e -> e.populate(ContextItemAccessorFunction::new, BuiltInAtomicType.ANY_URI, ONE, CITEM | LATE));
 
@@ -351,7 +351,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
                 .arg(0, Type.NODE_TYPE, OPT | INS, StringValue.EMPTY_STRING); */
 
         register("namespace-uri", 1, e -> e.populate(NamespaceUriFn_1::new, BuiltInAtomicType.ANY_URI, ONE, 0)
-                .arg(0, Type.NODE_TYPE, OPT | INS, StringValue.EMPTY_STRING));
+                .arg(0, Type.XNODE_TYPE, OPT | INS, StringValue.EMPTY_STRING));
 
         register("namespace-uri-for-prefix", 2, e -> e.populate(NamespaceForPrefix::new, BuiltInAtomicType.ANY_URI, OPT, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
@@ -361,10 +361,10 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.QNAME, OPT, EMPTY));
 
         register("nilled", 1, e -> e.populate(Nilled_1::new, BuiltInAtomicType.BOOLEAN, OPT, 0)
-                .arg(0, Type.NODE_TYPE, OPT | INS, EMPTY));
+                .arg(0, Type.XNODE_TYPE, OPT | INS, EMPTY));
 
         register("node-name", 1, e -> e.populate(NodeName_1::new, BuiltInAtomicType.QNAME, OPT, 0)
-                .arg(0, Type.NODE_TYPE, OPT | INS, EMPTY));
+                .arg(0, Type.XNODE_TYPE, OPT | INS, EMPTY));
 
         register("not", 1, e -> e.populate(NotFn::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, Type.ITEM_TYPE, STAR | INS, BooleanValue.TRUE));
@@ -432,10 +432,10 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
         register("reverse", 1, e -> e.populate(Reverse::new, Type.ITEM_TYPE, STAR, AS_ARG0 | FILTER)
                 .arg(0, Type.ITEM_TYPE, STAR | NAV, EMPTY));
 
-        register("root", 0, e -> e.populate(ContextItemAccessorFunction::new, Type.NODE_TYPE, ONE, CITEM | LATE));
+        register("root", 0, e -> e.populate(ContextItemAccessorFunction::new, Type.XNODE_TYPE, ONE, CITEM | LATE));
 
-        register("root", 1, e -> e.populate(Root_1::new, Type.NODE_TYPE, OPT, CARD0)
-                .arg(0, Type.NODE_TYPE, OPT | NAV, EMPTY));
+        register("root", 1, e -> e.populate(Root_1::new, Type.XNODE_TYPE, OPT, CARD0)
+                .arg(0, Type.XNODE_TYPE, OPT | NAV, EMPTY));
 
         register("round", 1, e -> e.populate(Round::new, NumericType.getInstance(), OPT, AS_NUM_ARG0)
                 .arg(0, NumericType.getInstance(), OPT, EMPTY));

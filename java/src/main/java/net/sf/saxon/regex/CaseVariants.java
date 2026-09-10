@@ -75,7 +75,7 @@ public class CaseVariants {
 
         AxisIterator iter = doc.iterateAxis(AxisInfo.DESCENDANT, new NameTest(Type.ELEMENT, NamespaceUri.NULL, "c", config.getNamePool()));
         while (true) {
-            NodeInfo item = iter.next();
+            NodeInfo item = (NodeInfo)iter.next();
             if (item == null) {
                 break;
             }

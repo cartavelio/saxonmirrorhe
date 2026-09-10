@@ -1,20 +1,24 @@
-package net.sf.saxon.tree.iter;public interface AxisIterator {
+package net.sf.saxon.tree.iter;
+
+import net.sf.saxon.om.GNode;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.trans.UncheckedXPathException;
+
+public interface AxisIterator extends SequenceIterator {
+
+    /**
+     * Get the next item in the sequence. This method changes the state of the
+     * iterator.
+     *
+     * @return the next item, or null if there are no more items. Once a call
+     * on next() has returned null, no further calls should be made. The preferred
+     * action for an iterator if subsequent calls on next() are made is to return
+     * null again, and all implementations within Saxon follow this rule.
+     * @throws UncheckedXPathException if an error occurs retrieving the next item
+     * @since 8.4. Changed in 11 so it no longer throws a checked exception;
+     * instead, any error that occurs is thrown as an unchecked exception.
+     */
+    @Override
+    GNode next();
 }
 
-//
-// The contents of this file are subject to the Mozilla Public License Version 1.0 (the "License");
-// you may not use this file except in compliance with the License. You may obtain a copy of the
-// License at http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied.
-// See the License for the specific language governing rights and limitations under the License.
-//
-// The Original Code is: all this file.
-//
-// The Initial Developer of the Original Code is Saxonica Limited
-//
-// Portions created by (your name) are Copyright (C) (your legal entity). All Rights Reserved.
-//
-// Contributor(s): none.
-//

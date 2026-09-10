@@ -160,7 +160,7 @@ public class PatternParser extends XPathParser {
             ExpressionVisitor visitor = ExpressionVisitor.make(env);
             visitor.setOptimizeForPatternMatching(true);
             ContextItemStaticInfo cit = visitor.getConfiguration().makeContextItemStaticInfo(
-                    AnyNodeTest.getInstance(), Optionality.OPTIONAL);
+                    AnyXNodeTest.getInstance(), Optionality.OPTIONAL);
             Pattern pat;
             try {
                 pat = PatternMaker.fromExpression(exp.simplify().typeCheck(visitor, cit), env.getConfiguration(), true);

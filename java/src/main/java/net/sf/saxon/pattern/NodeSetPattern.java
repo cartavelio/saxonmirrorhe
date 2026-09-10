@@ -228,7 +228,7 @@ public class NodeSetPattern extends Pattern {
         if (itemType instanceof NodeTest) {
             return itemType;
         } else {
-            return AnyNodeTest.getInstance();
+            return AnyXNodeTest.getInstance();
         }
     }
 

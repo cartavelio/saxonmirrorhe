@@ -175,7 +175,7 @@ public class CatalogCollection extends AbstractResourceCollection {
 
         AxisIterator iter =
                 catalog.getRootNode().iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
-        NodeInfo top = iter.next();
+        NodeInfo top = (NodeInfo)iter.next();
         if (top == null || !("collection".equals(top.getLocalPart()) && top.getNamespaceUri() == NamespaceUri.NULL)) {
             String message;
             if (top == null) {
@@ -207,7 +207,7 @@ public class CatalogCollection extends AbstractResourceCollection {
         AxisIterator documents = top.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
         List<String> result = new ArrayList<>();
         NodeInfo item;
-        while ((item = documents.next()) != null) {
+        while ((item = (NodeInfo)documents.next()) != null) {
 
             if (!("doc".equals(item.getLocalPart()) &&
                           item.getNamespaceUri() == NamespaceUri.NULL)) {

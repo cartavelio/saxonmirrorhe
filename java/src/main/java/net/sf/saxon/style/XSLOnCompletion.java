@@ -72,7 +72,7 @@ public class XSLOnCompletion extends StyleElement {
         }
         AxisIterator iter = iterateAxis(AxisInfo.PRECEDING_SIBLING, NodeKindTest.ELEMENT);
         NodeInfo sib;
-        while ((sib = iter.next()) != null) {
+        while ((sib = (NodeInfo)iter.next()) != null) {
             if (!(sib instanceof XSLFallback || sib instanceof XSLLocalParam)) {
                 compileError("xsl:on-completion must be the first child of xsl:iterate after the xsl:param elements", "XTSE0010");
             }

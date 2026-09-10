@@ -100,7 +100,7 @@ public final class AxisExpression extends Expression {
         if (e2 != this) {
             return e2;
         }
-        if ((test == null || test == AnyNodeTest.getInstance()) &&
+        if ((test == null || test == AnyXNodeTest.getInstance()) &&
                 (axis == AxisInfo.PARENT || axis == AxisInfo.ANCESTOR)) {
             // get more precise type information for parent/ancestor nodes
             test = MultipleNodeKindTest.PARENT_NODE;
@@ -139,7 +139,7 @@ public final class AxisExpression extends Expression {
 
         if (contextItemType.getGenre() != Genre.XNODE) {
             TypeHierarchy th = config.getTypeHierarchy();
-            Affinity relation = th.relationship(contextItemType, AnyNodeTest.getInstance());
+            Affinity relation = th.relationship(contextItemType, AnyXNodeTest.getInstance());
             if (relation == Affinity.DISJOINT) {
                 throw new XPathException("Axis step " + this +
                                                                 " cannot be used here: the context item is not a node")
@@ -156,7 +156,7 @@ public final class AxisExpression extends Expression {
                 ExpressionTool.copyLocationInfo(this, exp);
                 Supplier<RoleDiagnostic> role =
                         () -> new RoleDiagnostic(RoleDiagnostic.AXIS_STEP, "", axis, "XPTY0020");
-                ItemChecker checker = new ItemChecker(exp, AnyNodeTest.getInstance(), role);
+                ItemChecker checker = new ItemChecker(exp, AnyXNodeTest.getInstance(), role);
                 ExpressionTool.copyLocationInfo(this, checker);
                 SimpleStepExpression step = new SimpleStepExpression(checker, thisExp);
                 ExpressionTool.copyLocationInfo(this, step);
@@ -178,13 +178,13 @@ public final class AxisExpression extends Expression {
         ItemType contextType = contextInfo.getItemType();
 
         if (!(contextType instanceof NodeTest)) {
-            contextType = AnyNodeTest.getInstance();
+            contextType = AnyXNodeTest.getInstance();
         }
 
         // New code in terms of UTypes
 
         // Test whether the requested nodetest is consistent with the requested axis
-        if (test != null && !AxisInfo.getTargetUType(UType.ANY_NODE, axis).overlaps(test.getUType())) {
+        if (test != null && !AxisInfo.getTargetUType(UType.XNODE, axis).overlaps(test.getUType())) {
             if (warnings) {
                 visitor.issueWarning("The " + AxisInfo.axisName[axis] + " axis will never select " +
                                              test.getUType().toStringWithIndefiniteArticle(),
@@ -204,7 +204,7 @@ public final class AxisExpression extends Expression {
         // Test whether the axis ever selects anything, when starting at this context node
         UType originUType = contextType.getUType();
         UType targetUType = AxisInfo.getTargetUType(originUType, axis);
-        UType testUType = test == null ? UType.ANY_NODE : test.getUType();
+        UType testUType = test == null ? UType.XNODE : test.getUType();
         if (targetUType.equals(UType.VOID)) {
             if (warnings) {
                 visitor.issueWarning("The " + AxisInfo.axisName[axis] + " axis starting at " +
@@ -235,7 +235,7 @@ public final class AxisExpression extends Expression {
 
         // For an X-or-self axis, if X never selects anything, then substitute the self axis.
         int nonSelf = AxisInfo.excludeSelfAxis[axis];
-        UType kind = test == null ? UType.ANY_NODE : test.getUType();
+        UType kind = test == null ? UType.XNODE : test.getUType();
         if (axis != nonSelf) {
             UType nonSelfTarget = AxisInfo.getTargetUType(originUType, nonSelf);
             if (!nonSelfTarget.overlaps(testUType)) {
@@ -245,9 +245,9 @@ public final class AxisExpression extends Expression {
         }
 
         ItemType target = targetUType.toItemType();
-        if (test == null || test instanceof AnyNodeTest) {
+        if (test == null || test instanceof AnyXNodeTest) {
             itemType = target;
-        } else if (target instanceof AnyNodeTest || targetUType.subsumes(test.getUType())) {
+        } else if (target instanceof AnyXNodeTest || targetUType.subsumes(test.getUType())) {
             itemType = test;
         } else {
             itemType = new CombinedNodeTest((NodeTest) target, OperatorSymbol.INTERSECT, test);
@@ -499,7 +499,7 @@ public final class AxisExpression extends Expression {
                 return NodeKindTest.makeNodeKindTest(p);
             default:
                 if (test == null) {
-                    return AnyNodeTest.getInstance();
+                    return AnyXNodeTest.getInstance();
                 } else {
                     return test;
                 }
@@ -552,7 +552,7 @@ public final class AxisExpression extends Expression {
         if (contextItemType instanceof NodeTest) {
             originNodeType = (NodeTest) contextItemType;
         } else if (contextItemType instanceof AnyItemType) {
-            originNodeType = AnyNodeTest.getInstance();
+            originNodeType = AnyXNodeTest.getInstance();
         } else {
             // context item not a node - we'll report a type error somewhere along the line
             return StaticProperty.ALLOWS_ZERO_OR_MORE;
@@ -665,16 +665,16 @@ public final class AxisExpression extends Expression {
         Pattern pat;
 
         if (test == null) {
-            test = AnyNodeTest.getInstance();
+            test = AnyXNodeTest.getInstance();
         }
-        if (test instanceof AnyNodeTest && (axis == AxisInfo.CHILD || axis == AxisInfo.DESCENDANT || axis == AxisInfo.SELF)) {
+        if (test instanceof AnyXNodeTest && (axis == AxisInfo.CHILD || axis == AxisInfo.DESCENDANT || axis == AxisInfo.SELF)) {
             test = MultipleNodeKindTest.CHILD_NODE;
         }
         int kind = test.getPrimitiveType();
         if (axis == AxisInfo.SELF) {
             pat = new NodeTestPattern(test);
         } else if (axis == AxisInfo.ATTRIBUTE) {
-            if (kind == Type.NODE) {
+            if (kind == Type.XNODE) {
                 // attribute::node() matches any attribute, and only an attribute
                 pat = new NodeTestPattern(NodeKindTest.ATTRIBUTE);
             } else if (!AxisInfo.containsNodeKind(axis, kind)) {
@@ -684,13 +684,13 @@ public final class AxisExpression extends Expression {
                 pat = new NodeTestPattern(test);
             }
         } else if (axis == AxisInfo.CHILD || axis == AxisInfo.DESCENDANT || axis == AxisInfo.DESCENDANT_OR_SELF) {
-            if (kind != Type.NODE && !AxisInfo.containsNodeKind(axis, kind)) {
+            if (kind != Type.XNODE && !AxisInfo.containsNodeKind(axis, kind)) {
                 pat = new NodeTestPattern(ErrorType.getInstance());
             } else {
                 pat = new NodeTestPattern(test);
             }
         } else if (axis == AxisInfo.NAMESPACE) {
-            if (kind == Type.NODE) {
+            if (kind == Type.XNODE) {
                 // namespace::node() matches any attribute, and only an attribute
                 pat = new NodeTestPattern(NodeKindTest.NAMESPACE);
             } else if (!AxisInfo.containsNodeKind(axis, kind)) {
@@ -778,7 +778,7 @@ public final class AxisExpression extends Expression {
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("axis", this);
         destination.emitAttribute("name", AxisInfo.axisName[axis]);
-        destination.emitAttribute("nodeTest", AlphaCode.fromItemType(test == null ? AnyNodeTest.getInstance() : test));
+        destination.emitAttribute("nodeTest", AlphaCode.fromItemType(test == null ? AnyXNodeTest.getInstance() : test));
         destination.endElement();
     }
 
@@ -891,7 +891,7 @@ public final class AxisExpression extends Expression {
             // that aren't needed because the condition cannot occur
             boolean checkContextItemExists = axisExpression.isContextPossiblyUndefined();
             boolean checkContextItemIsNode = axisExpression.getContextItemType().getGenre() != Genre.XNODE;
-            if (test == null || test instanceof AnyNodeTest) {
+            if (test == null || test instanceof AnyXNodeTest) {
                 return context -> {
                     Item item = context.getContextItem();
                     if (checkContextItemExists && item == null) {

@@ -3891,7 +3891,7 @@ public class XPathParser {
         switch (kind) {
             case "node":
                 if (empty) {
-                    return AnyNodeTest.getInstance();
+                    return AnyXNodeTest.getInstance();
                 } else {
                     grumble("Expected ')': no arguments are allowed in node()");
                     return null;

@@ -574,11 +574,11 @@ public class Gizmo {
         Set<String> names = new HashSet<>();
         NodeInfo element;
         AxisIterator allElements = currentDoc.iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
-        while ((element = allElements.next()) != null) {
+        while ((element = (NodeInfo)allElements.next()) != null) {
             names.add(element.getLocalPart());
             NodeInfo att;
             AxisIterator allAtts = element.iterateAxis(AxisInfo.ATTRIBUTE);
-            while ((att = allAtts.next()) != null) {
+            while ((att = (NodeInfo)allAtts.next()) != null) {
                 names.add("@" + att.getLocalPart());
             }
         }
@@ -788,7 +788,7 @@ public class Gizmo {
 
                     for (NodeInfo att : replacementAtts) {
                         final NodeName attName = NameOfNode.makeName(att);
-                        NodeInfo existing = target.iterateAxis(AxisInfo.ATTRIBUTE,
+                        NodeInfo existing = (NodeInfo)target.iterateAxis(AxisInfo.ATTRIBUTE,
                                                                new NameTest(Type.ATTRIBUTE, attName, config.getNamePool())).next();
                         if (existing != null) {
                             target.removeAttribute(existing);

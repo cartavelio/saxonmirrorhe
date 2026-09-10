@@ -74,7 +74,7 @@ public class Error extends SystemFunction implements Callable {
                 if ((root instanceof NodeInfo) && ((NodeInfo) root).getNodeKind() == Type.DOCUMENT) {
                     AxisIterator iter = ((NodeInfo) root).iterateAxis(AxisInfo.CHILD,
                             new NameTest(Type.ELEMENT, NamespaceUri.NULL, "error", context.getConfiguration().getNamePool()));
-                    NodeInfo errorElement = iter.next();
+                    NodeInfo errorElement = (NodeInfo)iter.next();
                     if (errorElement != null) {
                         String module = errorElement.getAttributeValue(NamespaceUri.NULL, "module");
                         String lineVal = errorElement.getAttributeValue(NamespaceUri.NULL, "line");

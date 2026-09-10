@@ -94,7 +94,7 @@ class DOMAttributeMap implements NamedNodeMap {
         } else {
             AxisIterator atts = element.iterateAxis(AxisInfo.ATTRIBUTE);
             NodeInfo att;
-            while ((att = atts.next()) != null) {
+            while ((att = (NodeInfo)atts.next()) != null) {
                 if (att.getDisplayName().equals(name)) {
                     return NodeOverNodeInfo.wrap(att);
                 }
@@ -126,7 +126,7 @@ class DOMAttributeMap implements NamedNodeMap {
         int attNr = index - namespaces.length;
         AxisIterator atts = element.iterateAxis(AxisInfo.ATTRIBUTE);
         NodeInfo att;
-        while ((att = atts.next()) != null) {
+        while ((att = (NodeInfo)atts.next()) != null) {
             if (pos == attNr) {
                 return NodeOverNodeInfo.wrap(att);
             }
@@ -199,7 +199,7 @@ class DOMAttributeMap implements NamedNodeMap {
         }
         AxisIterator atts = element.iterateAxis(AxisInfo.ATTRIBUTE);
         while (true) {
-            NodeInfo att = atts.next();
+            NodeInfo att = (NodeInfo)atts.next();
             if (att == null) {
                 return null;
             }

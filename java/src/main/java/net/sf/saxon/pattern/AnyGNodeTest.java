@@ -7,7 +7,7 @@
 
 package net.sf.saxon.pattern;
 
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.pattern.qname.AnyQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
@@ -23,16 +23,16 @@ import net.sf.saxon.z.IntPredicateProxy;
  * name and type. An AnyNodeTest matches any node.
  */
 
-public final class AnyNodeTest extends NodeTest {
+public final class AnyGNodeTest extends NodeTest {
 
-    private static final AnyNodeTest THE_INSTANCE = new AnyNodeTest();
+    private static final AnyGNodeTest THE_INSTANCE = new AnyGNodeTest();
 
     /**
      * Get an instance of AnyNodeTest
      * @return the singleton instance of this class
      */
 
-    public static AnyNodeTest getInstance() {
+    public static AnyGNodeTest getInstance() {
         return THE_INSTANCE;
     }
 
@@ -40,18 +40,18 @@ public final class AnyNodeTest extends NodeTest {
      * Private constructor
      */
 
-    private AnyNodeTest() {
+    private AnyGNodeTest() {
     }
 
     /**
-     * Get the corresponding {@link net.sf.saxon.type.UType}. A UType is a union of primitive item
+     * Get the corresponding {@link UType}. A UType is a union of primitive item
      * types.
      *
      * @return the smallest UType that subsumes this item type
      */
     @Override
     public UType getUType() {
-        return UType.ANY_NODE;
+        return UType.GNODE;
     }
 
     /**
@@ -89,7 +89,7 @@ public final class AnyNodeTest extends NodeTest {
      */
 
     @Override
-    public boolean test(NodeInfo node) {
+    public boolean test(GNode node) {
         return true;
     }
 

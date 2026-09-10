@@ -12,7 +12,7 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.AnyXNodeTest;
 import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
@@ -265,7 +265,7 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
                             // Use the child axis recursively, for efficiency
                             AxisIterator iter = new Navigator.DescendantIterator(
                                 this, axisNumber == AxisInfo.DESCENDANT_OR_SELF, true);
-                            if (!(nodeTest instanceof AnyNodeTest)) {
+                            if (!(nodeTest instanceof AnyXNodeTest)) {
                                 iter = new Navigator.AxisFilter(iter, nodeTest);
                             }
                             return iter;

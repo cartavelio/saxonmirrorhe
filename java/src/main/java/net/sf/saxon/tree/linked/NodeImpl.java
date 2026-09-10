@@ -10,7 +10,7 @@ package net.sf.saxon.tree.linked;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.AnyXNodeTest;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.pattern.NodeTest;
@@ -516,7 +516,7 @@ public abstract class NodeImpl
                 return EmptyIterator.ofNodes();
             }
         } else {
-            return iterateAxis(axisNumber, AnyNodeTest.getInstance());
+            return iterateAxis(axisNumber, AnyXNodeTest.getInstance());
         }
     }
 

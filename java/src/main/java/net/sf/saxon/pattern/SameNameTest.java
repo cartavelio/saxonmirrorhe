@@ -137,7 +137,7 @@ public class SameNameTest extends NodeTest {
      */
 
     @Override
-    public boolean test(NodeInfo node) {
+    public boolean test(GNode node) {
         return node == origin ||
             (node.getNodeKind() == origin.getNodeKind() && Navigator.haveSameName(node, origin));
     }

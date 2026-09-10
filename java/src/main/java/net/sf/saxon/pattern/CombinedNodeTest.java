@@ -9,10 +9,7 @@ package net.sf.saxon.pattern;
 
 import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.ma.map.StringMapBuilder;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.NodeName;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.qname.AnyQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.str.Twine8;
@@ -131,7 +128,7 @@ public class CombinedNodeTest extends NodeTest {
      */
 
     @Override
-    public boolean test(/*@NotNull*/ NodeInfo node) {
+    public boolean test(GNode node) {
         switch (operator) {
             case UNION:
                 return nodetest1 == null ||
@@ -262,7 +259,7 @@ public class CombinedNodeTest extends NodeTest {
         if (mask.equals(UType.DOCUMENT)) {
             return Type.DOCUMENT;
         }
-        return Type.NODE;
+        return Type.XNODE;
     }
 
     /**

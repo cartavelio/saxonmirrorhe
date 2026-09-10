@@ -122,7 +122,7 @@ public final class Navigator {
 
     /*@Nullable*/
     public static NodeInfo getOutermostElement(/*@NotNull*/ TreeInfo doc) {
-        return doc.getRootNode().iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT).next();
+        return (NodeInfo)doc.getRootNode().iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT).next();
     }
 
     /**
@@ -356,7 +356,7 @@ public final class Navigator {
 
         int i = 1;
         while (true) {
-            NodeInfo prev = preceding.next();
+            NodeInfo prev = (NodeInfo)preceding.next();
             if (prev == null) {
                 break;
             }
@@ -534,7 +534,7 @@ public final class Navigator {
         } else if (from.getUType() == UType.ELEMENT && count.getUType() == UType.ELEMENT) {
             filter = NodeKindTest.ELEMENT;
         } else {
-            filter = AnyNodeTest.getInstance();
+            filter = AnyXNodeTest.getInstance();
         }
 
         if (from != null && from.matchesItem(node, context)) {
@@ -635,8 +635,8 @@ public final class Navigator {
         ItemType type = pattern.getItemType();
         if (type instanceof NodeTest) {
             return (NodeTest) type;
-        } else if (pattern.getUType().overlaps(UType.ANY_NODE)) {
-            return AnyNodeTest.getInstance();
+        } else if (pattern.getUType().overlaps(UType.XNODE)) {
+            return AnyXNodeTest.getInstance();
         } else {
             return ErrorType.getInstance();
         }
@@ -1196,7 +1196,7 @@ public final class Navigator {
      */
 
     public static int getSiblingPosition(NodeInfo node, NodeTest nodeTest, int max) {
-        if (node instanceof SiblingCountingNode && nodeTest instanceof AnyNodeTest) {
+        if (node instanceof SiblingCountingNode && nodeTest instanceof AnyXNodeTest) {
             return ((SiblingCountingNode)node).getSiblingPosition();
         }
         AxisIterator prev = node.iterateAxis(AxisInfo.PRECEDING_SIBLING, nodeTest);
@@ -1266,7 +1266,7 @@ public final class Navigator {
         @Override
         public NodeInfo next() {
             while (true) {
-                NodeInfo next = base.next();
+                NodeInfo next = (NodeInfo)base.next();
                 if (next == null) {
                     return null;
                 }
@@ -1301,7 +1301,7 @@ public final class Navigator {
         @Override
         public NodeInfo next() {
             while (true) {
-                NodeInfo next = base.next();
+                NodeInfo next = (NodeInfo)base.next();
                 if (next == null) {
                     return null;
                 }
@@ -1362,7 +1362,7 @@ public final class Navigator {
 
         private SequenceIterator children = null;
         private AxisIterator descendants = null;
-        private final NodeInfo start;
+        private final GNode start;
         private final boolean includeSelf;
         private final boolean forwards;
         private boolean atEnd = false;
@@ -1375,7 +1375,7 @@ public final class Navigator {
          * @param forwards    true for a forwards iteration, false for reverse order
          */
 
-        public DescendantIterator(NodeInfo start,
+        public DescendantIterator(GNode start,
                                   boolean includeSelf, boolean forwards) {
             this.start = start;
             this.includeSelf = includeSelf;
@@ -1383,9 +1383,9 @@ public final class Navigator {
         }
 
          @Override
-         public final NodeInfo next() {
+         public GNode next() {
             if (descendants != null) {
-                NodeInfo nextd = descendants.next();
+                GNode nextd = descendants.next();
                 if (nextd != null) {
                     return nextd;
                 } else {
@@ -1393,7 +1393,7 @@ public final class Navigator {
                 }
             }
             if (children != null) {
-                NodeInfo n = (NodeInfo)children.next();
+                GNode n = (GNode)children.next();
                 if (n != null) {
                     if (n.hasChildNodes()) {
                         if (forwards) {
@@ -1489,7 +1489,7 @@ public final class Navigator {
         @Override
         public final NodeInfo next() {
             if (descendEnum != null) {
-                NodeInfo nextd = descendEnum.next();
+                NodeInfo nextd = (NodeInfo)descendEnum.next();
                 if (nextd != null) {
                     return nextd;
                 } else {
@@ -1497,7 +1497,7 @@ public final class Navigator {
                 }
             }
             if (siblingEnum != null) {
-                NodeInfo nexts = siblingEnum.next();
+                NodeInfo nexts = (NodeInfo)siblingEnum.next();
                 if (nexts != null) {
                     if (nexts.hasChildNodes()) {
                         descendEnum = new DescendantIterator(nexts, false, true);
@@ -1510,7 +1510,7 @@ public final class Navigator {
                     siblingEnum = null;
                 }
             }
-            NodeInfo nexta = ancestorEnum.next();
+            NodeInfo nexta = (NodeInfo)ancestorEnum.next();
             if (nexta != null) {
                 if (nexta.getNodeKind() == Type.DOCUMENT) {
                     siblingEnum = EmptyIterator.ofNodes();
@@ -1568,7 +1568,7 @@ public final class Navigator {
         @Override
         public final NodeInfo next() {
             if (descendEnum != null) {
-                NodeInfo nextd = descendEnum.next();
+                NodeInfo nextd = (NodeInfo)descendEnum.next();
                 if (nextd != null) {
                     return nextd;
                 } else {
@@ -1576,7 +1576,7 @@ public final class Navigator {
                 }
             }
             if (siblingEnum != null) {
-                NodeInfo nexts = siblingEnum.next();
+                NodeInfo nexts = (NodeInfo)siblingEnum.next();
                 if (nexts != null) {
                     if (nexts.hasChildNodes()) {
                         descendEnum = new DescendantIterator(nexts, true, false);
@@ -1590,7 +1590,7 @@ public final class Navigator {
                     siblingEnum = null;
                 }
             }
-            NodeInfo nexta = ancestorEnum.next();
+            NodeInfo nexta = (NodeInfo)ancestorEnum.next();
             if (nexta != null) {
                 if (nexta.getNodeKind() == Type.DOCUMENT) {
                     siblingEnum = EmptyIterator.ofNodes();

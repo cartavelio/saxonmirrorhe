@@ -9,7 +9,7 @@ package net.sf.saxon.tree.wrapper;
 
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.AnyXNodeTest;
 import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
@@ -252,7 +252,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
     @Override
     @CSharpModifiers(code={"public", "virtual"})
     public AxisIterator iterateAxis(int axisNumber) {
-        return iterateAxis(axisNumber, AnyNodeTest.getInstance());
+        return iterateAxis(axisNumber, AnyXNodeTest.getInstance());
     }
 
     /**
@@ -419,7 +419,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
     @CSharpModifiers(code={"protected", "virtual"})
     protected AxisIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
         AxisIterator iter = new Navigator.DescendantIterator(this, includeSelf, true);
-        if (!(nodeTest instanceof AnyNodeTest)) {
+        if (!(nodeTest instanceof AnyXNodeTest)) {
             iter = new Navigator.AxisFilter(iter, nodeTest);
         }
         return iter;

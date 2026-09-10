@@ -374,7 +374,7 @@ public class SimpleMode extends Mode {
 
         if (pattern instanceof NodeTestPattern) {
             ItemType test = pattern.getItemType();
-            if (test instanceof AnyNodeTest) {
+            if (test instanceof AnyXNodeTest) {
                 newRule.setAlwaysMatches(true);
             } else if (test instanceof NodeKindTest) {
                 newRule.setAlwaysMatches(true);

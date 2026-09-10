@@ -8,6 +8,7 @@
 package net.sf.saxon.pattern;
 
 import net.sf.saxon.om.GNode;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.pattern.qname.AnyQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
@@ -20,19 +21,19 @@ import net.sf.saxon.z.IntPredicateProxy;
 
 /**
  * NodeTest is an interface that enables a test of whether a node has a particular
- * name and type. An AnyNodeTest matches any node.
+ * name and type. An AnyXNodeTest corresponds to the item type {@code node()}, which matches any XNode.
  */
 
-public final class AnyNodeTest extends NodeTest {
+public final class AnyXNodeTest extends NodeTest {
 
-    private static final AnyNodeTest THE_INSTANCE = new AnyNodeTest();
+    private static final AnyXNodeTest THE_INSTANCE = new AnyXNodeTest();
 
     /**
      * Get an instance of AnyNodeTest
      * @return the singleton instance of this class
      */
 
-    public static AnyNodeTest getInstance() {
+    public static AnyXNodeTest getInstance() {
         return THE_INSTANCE;
     }
 
@@ -40,7 +41,7 @@ public final class AnyNodeTest extends NodeTest {
      * Private constructor
      */
 
-    private AnyNodeTest() {
+    private AnyXNodeTest() {
     }
 
     /**
@@ -51,7 +52,7 @@ public final class AnyNodeTest extends NodeTest {
      */
     @Override
     public UType getUType() {
-        return UType.ANY_NODE;
+        return UType.XNODE;
     }
 
     /**
@@ -90,32 +91,8 @@ public final class AnyNodeTest extends NodeTest {
 
     @Override
     public boolean test(GNode node) {
-        return true;
+        return node instanceof NodeInfo;
     }
-
-//    /**
-//     * Test whether this QNameTest matches a given QName
-//     *
-//     * @param qname the QName to be matched
-//     * @return true if the name matches, false if not
-//     */
-//
-//    @Override
-//    public boolean matches(StructuredQName qname) {
-//        return true;
-//    }
-//
-//    /**
-//     * Test whether the QNameTest matches a given fingerprint
-//     *
-//     * @param namePool
-//     * @param fp       the fingerprint of the QName to be matched
-//     * @return true if the name matches, false if not
-//     */
-//    @Override
-//    public boolean matchesFingerprint(NamePool namePool, int fp) {
-//        return true;
-//    }
 
     /**
      * Determine the default priority of this node test when used on its own as a Pattern

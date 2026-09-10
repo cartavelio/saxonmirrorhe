@@ -165,7 +165,7 @@ public class NameTest extends NodeTest {
      */
 
     @Override
-    public boolean test(NodeInfo node) {
+    public boolean test(GNode node) {
         if (node.getNodeKind() != nodeKind) {
             return false;
         }

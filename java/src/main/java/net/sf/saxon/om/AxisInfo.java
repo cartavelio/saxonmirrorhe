@@ -403,7 +403,7 @@ public final class AxisInfo {
      */
 
     public static boolean containsNodeKind(int axis, int nodeKind) {
-        return nodeKind == Type.NODE || (nodeKindTable[axis] & (1 << nodeKind)) != 0;
+        return nodeKind == Type.XNODE || (nodeKindTable[axis] & (1 << nodeKind)) != 0;
     }
 
     /**
@@ -477,7 +477,7 @@ public final class AxisInfo {
 
     public static UType getTargetUType(UType origin, int axis) {
         UType resultType = UType.VOID;
-        Set<PrimitiveUType> origins = origin.intersection(UType.ANY_NODE).decompose();
+        Set<PrimitiveUType> origins = origin.intersection(UType.XNODE).decompose();
         for (PrimitiveUType u : origins) {
             UType r = axisTransitions.get(makeKey(u, axis));
             if (r == null) {

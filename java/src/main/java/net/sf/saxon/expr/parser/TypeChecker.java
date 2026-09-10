@@ -492,7 +492,7 @@ public class TypeChecker {
             .union(UType.ANY_URI)
             .union(UType.UNTYPED_ATOMIC)
             .union(UType.NUMERIC)
-            .union(UType.ANY_NODE)
+            .union(UType.XNODE)
             .union(UType.EXTENSION);
 
     private static Expression makePromoter(Expression exp, Converter converter, BuiltInAtomicType type) {

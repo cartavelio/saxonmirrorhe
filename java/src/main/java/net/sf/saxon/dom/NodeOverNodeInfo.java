@@ -263,7 +263,7 @@ public abstract class NodeOverNodeInfo implements Node {
 
     @Override
     public Node getPreviousSibling() {
-        return wrap(node.iterateAxis(AxisInfo.PRECEDING_SIBLING).next());
+        return wrap((NodeInfo)node.iterateAxis(AxisInfo.PRECEDING_SIBLING).next());
     }
 
     /**
@@ -275,7 +275,7 @@ public abstract class NodeOverNodeInfo implements Node {
 
     @Override
     public Node getNextSibling() {
-        return wrap(node.iterateAxis(AxisInfo.FOLLOWING_SIBLING).next());
+        return wrap((NodeInfo)node.iterateAxis(AxisInfo.FOLLOWING_SIBLING).next());
     }
 
     /**
@@ -286,7 +286,7 @@ public abstract class NodeOverNodeInfo implements Node {
 
     @Override
     public Node getFirstChild() {
-        return wrap(node.iterateAxis(AxisInfo.CHILD).next());
+        return wrap((NodeInfo)node.iterateAxis(AxisInfo.CHILD).next());
     }
 
     /**
@@ -300,7 +300,7 @@ public abstract class NodeOverNodeInfo implements Node {
         AxisIterator children = node.iterateAxis(AxisInfo.CHILD);
         NodeInfo last = null;
         while (true) {
-            NodeInfo next = children.next();
+            NodeInfo next = (NodeInfo)children.next();
             if (next == null) {
                 return wrap(last);
             } else {
@@ -647,7 +647,7 @@ public abstract class NodeOverNodeInfo implements Node {
         } else if (node.getNodeKind() == Type.ELEMENT) {
             AxisIterator iter = node.iterateAxis(AxisInfo.NAMESPACE);
             NodeInfo ns;
-            while ((ns = iter.next()) != null) {
+            while ((ns = (NodeInfo)iter.next()) != null) {
                 if (ns.getUnicodeStringValue().equals(namespaceURI)) {
                     return ns.getLocalPart();
                 }
@@ -686,7 +686,7 @@ public abstract class NodeOverNodeInfo implements Node {
         } else if (node.getNodeKind() == Type.ELEMENT) {
             AxisIterator iter = node.iterateAxis(AxisInfo.NAMESPACE);
             NodeInfo ns;
-            while ((ns = iter.next()) != null) {
+            while ((ns = (NodeInfo)iter.next()) != null) {
                 if (ns.getLocalPart().equals(prefix)) {
                     return ns.getStringValue();
                 }

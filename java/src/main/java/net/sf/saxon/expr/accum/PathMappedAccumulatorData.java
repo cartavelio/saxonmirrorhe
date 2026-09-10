@@ -10,7 +10,7 @@ package net.sf.saxon.expr.accum;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.AnyXNodeTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.tiny.TinyNodeImpl;
@@ -54,7 +54,7 @@ public class PathMappedAccumulatorData implements IAccumulatorData {
             Stack<Integer> path = new Stack<Integer>();
             NodeInfo ancestor = node;
             while (ancestor != null) {
-                path.push(Navigator.getSiblingPosition(ancestor, AnyNodeTest.getInstance(), Integer.MAX_VALUE));
+                path.push(Navigator.getSiblingPosition(ancestor, AnyXNodeTest.getInstance(), Integer.MAX_VALUE));
                 ancestor = ancestor.getParent();
             }
             NodeInfo target = origin;
@@ -62,7 +62,7 @@ public class PathMappedAccumulatorData implements IAccumulatorData {
                 int pos = path.pop();
                 AxisIterator kids = target.iterateAxis(AxisInfo.CHILD);
                 while (pos-- > 0) {
-                    target = kids.next();
+                    target = (NodeInfo)kids.next();
                     assert (target != null);
                 }
             }

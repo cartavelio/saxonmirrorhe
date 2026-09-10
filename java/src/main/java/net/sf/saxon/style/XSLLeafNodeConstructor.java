@@ -93,7 +93,7 @@ public abstract class XSLLeafNodeConstructor extends StyleElement {
             compileError("An " + getDisplayName() + " element with a select attribute must be empty", errorCode);
         }
         AxisIterator kids = iterateAxis(AxisInfo.CHILD);
-        NodeInfo first = kids.next();
+        NodeInfo first = (NodeInfo)kids.next();
         if (select == null) {
             if (first == null) {
                 // there are no child nodes and no select attribute

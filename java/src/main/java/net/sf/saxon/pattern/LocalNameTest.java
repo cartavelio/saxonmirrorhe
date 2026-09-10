@@ -7,10 +7,7 @@
 
 package net.sf.saxon.pattern;
 
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NamePool;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.qname.LocalQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
@@ -132,7 +129,7 @@ public final class LocalNameTest extends NodeTest {
      */
 
     @Override
-    public boolean test(NodeInfo node) {
+    public boolean test(GNode node) {
         return localName.equals(node.getLocalPart()) && nodeKind == node.getNodeKind();
     }
 

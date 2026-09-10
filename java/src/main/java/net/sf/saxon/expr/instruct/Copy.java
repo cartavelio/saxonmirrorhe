@@ -255,7 +255,7 @@ public class Copy extends ElementCreator {
             if (a == Affinity.SAME_TYPE || a == Affinity.SUBSUMED_BY) {
                 return new ContentTypeTest(Type.ATTRIBUTE, AnyQNameTest.getInstance(), getSchemaType(), false, config);
             }
-            return AnyNodeTest.getInstance();
+            return AnyXNodeTest.getInstance();
         } else {
             switch (getValidationAction()) {
                 case Validation.PRESERVE:
@@ -271,7 +271,7 @@ public class Copy extends ElementCreator {
                     }
                     if (e != Affinity.DISJOINT || a != Affinity.DISJOINT) {
                         // it might be an element or attribute
-                        return AnyNodeTest.getInstance();
+                        return AnyXNodeTest.getInstance();
                     } else {
                         // it can't be an element or attribute, so stripping type annotations can't affect it
                         return selectItemType;
@@ -322,7 +322,7 @@ public class Copy extends ElementCreator {
                                 return NodeKindTest.ATTRIBUTE;
                             }
                         }
-                        return AnyNodeTest.getInstance();
+                        return AnyXNodeTest.getInstance();
                     } else if (selectItemType instanceof AtomicType) {
                         return selectItemType;
                     } else {

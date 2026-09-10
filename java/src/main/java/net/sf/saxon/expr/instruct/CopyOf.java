@@ -17,7 +17,7 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.AnyXNodeTest;
 import net.sf.saxon.pattern.ContentTypeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
@@ -311,7 +311,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                     if (e != Affinity.DISJOINT || a != Affinity.DISJOINT) {
                         // it might be an element or attribute
                         if (in instanceof NodeTest) {
-                            return AnyNodeTest.getInstance();
+                            return AnyXNodeTest.getInstance();
                         } else {
                             return AnyItemType.getInstance();
                         }
@@ -366,7 +366,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                                 return NodeKindTest.ATTRIBUTE;
                             }
                         }
-                        return AnyNodeTest.getInstance();
+                        return AnyXNodeTest.getInstance();
                     } else if (in instanceof AtomicType) {
                         return in;
                     } else {

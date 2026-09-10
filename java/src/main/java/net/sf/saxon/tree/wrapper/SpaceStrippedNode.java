@@ -230,7 +230,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
                 AxisIterator iter = iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.makeNodeKindTest(Type.TEXT));
                 UnicodeBuilder sb = new UnicodeBuilder();
                 NodeInfo it;
-                while ((it = iter.next()) != null) {
+                while ((it = (NodeInfo)iter.next()) != null) {
                     sb.accept(it.getUnicodeStringValue());
                 }
                 return sb.toUnicodeString();
@@ -369,7 +369,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
         public NodeInfo next() {
             NodeInfo nextRealNode;
             do {
-                nextRealNode = base.next();
+                nextRealNode = (NodeInfo)base.next();
                 if (nextRealNode == null) {
                     return null;
                 }

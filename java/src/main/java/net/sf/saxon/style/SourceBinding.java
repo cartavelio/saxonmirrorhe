@@ -355,7 +355,7 @@ public class SourceBinding {
 
         if (select == null && !hasProperty(BindingProperty.DISALLOWS_CONTENT) && visibility != Visibility.ABSTRACT) {
             AxisIterator kids = sourceElement.iterateAxis(AxisInfo.CHILD);
-            NodeInfo first = kids.next();
+            NodeInfo first = (NodeInfo)kids.next();
             if (first == null) {
                 if (declaredType == null) {
                     select = new StringLiteral(StringValue.EMPTY_STRING);

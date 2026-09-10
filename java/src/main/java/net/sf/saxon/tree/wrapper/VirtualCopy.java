@@ -147,7 +147,7 @@ public class VirtualCopy implements NodeInfo {
                 }
                 AxisIterator iter = original.iterateAxis(AxisInfo.ATTRIBUTE);
                 NodeInfo att;
-                while ((att = iter.next()) != null) {
+                while ((att = (NodeInfo)iter.next()) != null) {
                     if (!att.getNamespaceUri().isEmpty()) {
                         nsMap = nsMap.put(att.getPrefix(), att.getNamespaceUri());
                     }
@@ -759,7 +759,7 @@ public class VirtualCopy implements NodeInfo {
         /*@Nullable*/
         @Override
         public NodeInfo next() {
-            NodeInfo next = base.next();
+            NodeInfo next = (NodeInfo)base.next();
             if (next != null) {
                 if (testInclusion && !node.isIncludedInCopy(next)) {
                     // we're only interested in nodes within the subtree that was copied.

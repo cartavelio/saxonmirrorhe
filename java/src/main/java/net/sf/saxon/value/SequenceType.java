@@ -13,7 +13,7 @@ import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.AnyXNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.type.*;
 
@@ -346,14 +346,14 @@ public final class SequenceType {
      */
 
     public static final SequenceType OPTIONAL_NODE =
-            AnyNodeTest.getInstance().zeroOrOne();
+            AnyXNodeTest.getInstance().zeroOrOne();
 
     /**
      * A type that allows a single node
      */
 
     public static final SequenceType SINGLE_NODE =
-            AnyNodeTest.getInstance().one();
+            AnyXNodeTest.getInstance().one();
 
     /**
      * A type that allows a single document node
@@ -367,7 +367,7 @@ public final class SequenceType {
      */
 
     public static final SequenceType NODE_SEQUENCE =
-            AnyNodeTest.getInstance().zeroOrMore();
+            AnyXNodeTest.getInstance().zeroOrMore();
 
     /**
      * A type that allows a sequence of zero or more string values

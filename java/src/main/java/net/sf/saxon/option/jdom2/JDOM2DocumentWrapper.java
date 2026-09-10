@@ -12,6 +12,7 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.lib.ActiveSource;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.GenericTreeInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.NodeKindTest;
@@ -87,7 +88,7 @@ public class JDOM2DocumentWrapper extends GenericTreeInfo implements ActiveSourc
         if (idIndex == null) {
             idIndex = new HashMap<String, Element>(100);
             AxisIterator iter = getRootNode().iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
-            NodeInfo node;
+            GNode node;
             while ((node = iter.next()) != null) {
                 Element element = (Element) ((JDOM2NodeWrapper) node).node;
                 for (Attribute att : element.getAttributes()) {

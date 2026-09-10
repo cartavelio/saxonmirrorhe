@@ -148,7 +148,7 @@ public class Categories {
         int fp_t = config.getNamePool().allocateFingerprint(NamespaceUri.NULL, "t");
 
         AxisIterator iter = doc.iterateAxis(AxisInfo.DESCENDANT, new NameTest(Type.ELEMENT, NamespaceUri.NULL, "cat", config.getNamePool()));
-        for (NodeInfo item; (item = iter.next()) != null; ) {
+        for (NodeInfo item; (item = (NodeInfo)iter.next()) != null; ) {
             String cat = ((TinyElementImpl)item).getAttributeValue(fp_name);
             IntRangeSet irs = new IntRangeSet();
             for (NodeInfo r : item.children(NodeKindTest.ELEMENT)) {

@@ -264,7 +264,7 @@ public class Compilation {
         if (root != null) {
             if (root.getNodeKind() == Type.DOCUMENT) {
                 document = root;
-                outermost = document.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT).next();
+                outermost = (NodeInfo)document.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT).next();
             } else if (root.getNodeKind() == Type.ELEMENT) {
                 document = root.getRoot();
                 outermost = root;
@@ -273,7 +273,7 @@ public class Compilation {
 
         if (!(outermost instanceof XSLPackage)) {
             document = StylesheetModule.loadStylesheetModule(source, true, this, NestedIntegerValue.TWO);
-            outermost = document.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT).next();
+            outermost = (NodeInfo)document.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT).next();
         }
         if (outermost == null) {
             throw new XPathException("No stylesheet element found at " + source.getSystemId(), "XPST0010");
@@ -281,7 +281,7 @@ public class Compilation {
 
         if (outermost instanceof LiteralResultElement) {
             document = ((LiteralResultElement) outermost).makeStylesheet(true);
-            outermost = document.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT).next();
+            outermost = (NodeInfo)document.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT).next();
         }
 
         XSLPackage xslpackage;

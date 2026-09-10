@@ -284,7 +284,7 @@ public class SlashExpression extends BinaryExpression
 
 
         NodeTest test = mid.getNodeTest();
-        if (!(test == null || test instanceof AnyNodeTest)) {
+        if (!(test == null || test instanceof AnyXNodeTest)) {
             return null;
         }
 
@@ -813,7 +813,7 @@ public class SlashExpression extends BinaryExpression
             if (start.getActionExpression() instanceof AxisExpression) {
                 AxisExpression mid = (AxisExpression) start.getActionExpression();
                 if (mid.getAxis() == AxisInfo.DESCENDANT_OR_SELF &&
-                        (mid.getNodeTest() == null || mid.getNodeTest() instanceof AnyNodeTest)) {
+                        (mid.getNodeTest() == null || mid.getNodeTest() instanceof AnyXNodeTest)) {
                     axis = AxisInfo.ANCESTOR;
                     headPattern = start.getSelectExpression().toPattern(config, false);
                 }
@@ -1105,7 +1105,7 @@ public class SlashExpression extends BinaryExpression
                     SequenceIterator outer = select.iterate(context);
                     for (Item a; (a = outer.next()) != null; ) {
                         AxisIterator inner = step.iterate((NodeInfo)a);
-                        for (NodeInfo b; (b = inner.next()) != null;) {
+                        for (NodeInfo b; (b = (NodeInfo)inner.next()) != null;) {
                            out.append(b, expr.getLocation(), ReceiverOption.ALL_NAMESPACES);
                         }
                     }

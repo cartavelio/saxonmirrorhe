@@ -10,7 +10,7 @@ package net.sf.saxon.option.axiom;
 import net.sf.saxon.om.NamespaceBinding;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.AnyXNodeTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
@@ -285,14 +285,14 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
     @Override
     protected AxisIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
         if (forwards) {
-            if (nodeTest instanceof AnyNodeTest) {
+            if (nodeTest instanceof AnyXNodeTest) {
                 return new AxiomDocument.FollowingSiblingIterator(node, parent, docWrapper);
             } else {
                 return new Navigator.AxisFilter(
                         new AxiomDocument.FollowingSiblingIterator(node, parent, docWrapper), nodeTest);
             }
         } else {
-            if (nodeTest instanceof AnyNodeTest) {
+            if (nodeTest instanceof AnyXNodeTest) {
                 return new AxiomDocument.PrecedingSiblingIterator(node, parent, docWrapper);
             } else {
                 return new Navigator.AxisFilter(

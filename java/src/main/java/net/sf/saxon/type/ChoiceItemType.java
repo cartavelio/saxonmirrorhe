@@ -76,7 +76,7 @@ public class ChoiceItemType implements ItemType, ChoiceType {
         UType uType = getUType();
         if (UType.ANY_ATOMIC.subsumes(uType)) {
             return Genre.ATOMIC;
-        } else if (UType.ANY_NODE.subsumes(uType)) {
+        } else if (UType.XNODE.subsumes(uType)) {
             return Genre.XNODE;
         } else if (UType.FUNCTION.subsumes(uType)) {
             return Genre.FUNCTION;

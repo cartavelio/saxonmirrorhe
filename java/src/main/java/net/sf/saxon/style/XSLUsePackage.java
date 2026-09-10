@@ -234,11 +234,11 @@ public class XSLUsePackage extends StyleElement {
         Set<SymbolicName> overrides = new HashSet<>();
         AxisIterator kids = iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
         NodeInfo override;
-        while ((override = kids.next()) != null) {
+        while ((override = (NodeInfo)kids.next()) != null) {
             if (override instanceof XSLOverride) {
                 AxisIterator overridings = override.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
                 NodeInfo overridingDeclaration;
-                while ((overridingDeclaration = overridings.next()) != null) {
+                while ((overridingDeclaration = (NodeInfo)overridings.next()) != null) {
                     if (overridingDeclaration instanceof StylesheetComponent) {
                         SymbolicName name = ((StylesheetComponent) overridingDeclaration).getSymbolicName();
                         if (name != null) {
@@ -273,11 +273,11 @@ public class XSLUsePackage extends StyleElement {
 
         // Process all template rules within xsl:override elements
         NodeInfo override;
-        while ((override = kids.next()) != null) {
+        while ((override = (NodeInfo)kids.next()) != null) {
             if (override instanceof XSLOverride) {
                 AxisIterator overridings = override.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
                 NodeInfo overridingDeclaration;
-                while ((overridingDeclaration = overridings.next()) != null) {
+                while ((overridingDeclaration = (NodeInfo)overridings.next()) != null) {
                     if (overridingDeclaration instanceof XSLTemplate &&
                             overridingDeclaration.getAttributeValue(NamespaceUri.NULL, "match") != null) {
                         StructuredQName[] modeNames = ((XSLTemplate) overridingDeclaration).getModeNames();

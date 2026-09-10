@@ -7,6 +7,7 @@
 
 package net.sf.saxon.pattern;
 
+import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
@@ -97,8 +98,8 @@ public class NodeKindTest extends NodeTest {
                 return PROCESSING_INSTRUCTION;
             case Type.NAMESPACE:
                 return NAMESPACE;
-            case Type.NODE:
-                return AnyNodeTest.getInstance();
+            case Type.XNODE:
+                return AnyXNodeTest.getInstance();
             default:
                 throw new IllegalArgumentException("Unknown node kind " + kind + " in NodeKindTest");
         }
@@ -151,7 +152,7 @@ public class NodeKindTest extends NodeTest {
      */
 
     @Override
-    public boolean test(NodeInfo node) {
+    public boolean test(GNode node) {
         return node.getNodeKind() == kind;
     }
 

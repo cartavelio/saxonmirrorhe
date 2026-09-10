@@ -9,7 +9,7 @@ package net.sf.saxon.dom;
 
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.AnyXNodeTest;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.str.*;
@@ -557,7 +557,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
                         ix = 0;
                         AxisIterator iter = parent.iterateAxis(AxisInfo.ATTRIBUTE);
                         while (true) {
-                            NodeInfo n = iter.next();
+                            NodeInfo n = (NodeInfo)iter.next();
                             if (n == null || Navigator.haveSameName(this, n)) {
                                 index = ix;
                                 return ix;
@@ -569,7 +569,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
                         ix = 0;
                         iter = parent.iterateAxis(AxisInfo.NAMESPACE);
                         while (true) {
-                            NodeInfo n = iter.next();
+                            NodeInfo n = (NodeInfo)iter.next();
                             if (n == null || Navigator.haveSameName(this, n)) {
                                 index = ix;
                                 return ix;
@@ -588,7 +588,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     @Override
     protected AxisIterator iterateAttributes(NodeTest nodeTest) {
         AxisIterator iter = new AttributeEnumeration(this);
-        if (nodeTest != AnyNodeTest.getInstance()) {
+        if (nodeTest != AnyXNodeTest.getInstance()) {
             iter = new Navigator.AxisFilter(iter, nodeTest);
         }
         return iter;
@@ -603,7 +603,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
         boolean elementOnly = isElementOnly(nodeTest);
         AxisIterator iter = new Navigator.EmptyTextFilter(
                 new ChildEnumeration(this, true, true, elementOnly));
-        if (nodeTest != AnyNodeTest.getInstance()) {
+        if (nodeTest != AnyXNodeTest.getInstance()) {
             iter = new Navigator.AxisFilter(iter, nodeTest);
         }
         return iter;
@@ -614,7 +614,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
         boolean elementOnly = isElementOnly(nodeTest);
         AxisIterator iter = new Navigator.EmptyTextFilter(
                 new ChildEnumeration(this, false, forwards, elementOnly));
-        if (nodeTest != AnyNodeTest.getInstance()) {
+        if (nodeTest != AnyXNodeTest.getInstance()) {
             iter = new Navigator.AxisFilter(iter, nodeTest);
         }
         return iter;
@@ -639,7 +639,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     public String getAttributeValue(/*@NotNull*/ NamespaceUri uri, /*@NotNull*/ String local) {
         NameTest test = new NameTest(Type.ATTRIBUTE, uri, local, getNamePool());
         AxisIterator iterator = iterateAxis(AxisInfo.ATTRIBUTE, test);
-        NodeInfo attribute = iterator.next();
+        NodeInfo attribute = (NodeInfo)iterator.next();
         if (attribute == null) {
             return null;
         } else {

@@ -8,10 +8,7 @@
 package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.expr.LastPositionFinder;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.om.*;
 
 
 /**
@@ -21,7 +18,7 @@ import net.sf.saxon.om.SequenceTool;
 public class SingleNodeIterator implements AxisIterator,
         ReversibleIterator, LastPositionFinder, GroundedIterator, LookaheadIterator {
 
-    private final NodeInfo item;
+    private final GNode item;
     private int position = 0;
 
     /**
@@ -30,7 +27,7 @@ public class SingleNodeIterator implements AxisIterator,
      * @param value the item to iterate over
      */
 
-    private SingleNodeIterator(NodeInfo value) {
+    private SingleNodeIterator(GNode value) {
         this.item = value;
     }
 
@@ -43,7 +40,7 @@ public class SingleNodeIterator implements AxisIterator,
      */
 
     /*@NotNull*/
-    public static AxisIterator makeIterator(/*@Nullable*/ NodeInfo item) {
+    public static AxisIterator makeIterator(GNode item) {
         if (item == null) {
             return EmptyIterator.ofNodes();
         } else {
@@ -73,7 +70,7 @@ public class SingleNodeIterator implements AxisIterator,
 
     /*@Nullable*/
     @Override
-    public NodeInfo next() {
+    public GNode next() {
         if (position == 0) {
             position = 1;
             return item;
@@ -105,7 +102,7 @@ public class SingleNodeIterator implements AxisIterator,
         return true;
     }
 
-    public NodeInfo getValue() {
+    public GNode getValue() {
         return item;
     }
 

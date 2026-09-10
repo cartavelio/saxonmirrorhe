@@ -142,7 +142,7 @@ public class SpaceStrippedDocument extends GenericTreeInfo {
         } else {
             AxisIterator iter = doc.getRootNode().iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
             NodeInfo node;
-            while ((node = iter.next()) != null) {
+            while ((node = (NodeInfo)iter.next()) != null) {
                 String val = node.getAttributeValue(NamespaceUri.XML, "space");
                 if ("preserve".equals(val)) {
                     return true;
@@ -164,7 +164,7 @@ public class SpaceStrippedDocument extends GenericTreeInfo {
         if (doc.isTyped()) {
             AxisIterator iter = doc.getRootNode().iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
             while (true) {
-                NodeInfo node = iter.next();
+                NodeInfo node = (NodeInfo)iter.next();
                 if (node == null) {
                     return false;
                 }

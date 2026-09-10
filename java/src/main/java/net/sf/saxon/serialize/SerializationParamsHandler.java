@@ -78,7 +78,7 @@ public class SerializationParamsHandler {
         Set<NodeName> nodeNames = new HashSet<>();
         AxisIterator kids = node.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
         NodeInfo child;
-        while ((child = kids.next()) != null) {
+        while ((child = (NodeInfo)kids.next()) != null) {
             if (!nodeNames.add(NameOfNode.makeName(child))) {
                 throw new XPathException("Duplicated serialization parameter " + child.getDisplayName(), "SEPM0019");
             }
@@ -95,7 +95,7 @@ public class SerializationParamsHandler {
                 AxisIterator gKids = child.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
                 NodeInfo gChild;
                 IntHashMap<String> map = new IntHashMap<>();
-                while ((gChild = gKids.next()) != null) {
+                while ((gChild = (NodeInfo)gKids.next()) != null) {
                     restrictAttributes(gChild, "character", "map-string");
                     if (!(gChild.getNamespaceUri().equals(NAMESPACE) && gChild.getLocalPart().equals("character-map"))) {
                         if (gChild.getNamespaceUri().equals(NAMESPACE) || gChild.getNamespaceUri().isEmpty()) {

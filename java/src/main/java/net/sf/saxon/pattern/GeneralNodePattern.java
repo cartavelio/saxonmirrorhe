@@ -122,7 +122,7 @@ public final class GeneralNodePattern extends Pattern {
 
     @Override
     public Pattern typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
-        ContextItemStaticInfo cit = new ContextItemStaticInfo(AnyNodeTest.getInstance());
+        ContextItemStaticInfo cit = new ContextItemStaticInfo(AnyXNodeTest.getInstance());
         equivalentExpr = equivalentExpr.typeCheck(visitor, cit);
         makeTopNodeEquivalent();
         return this;
@@ -228,7 +228,7 @@ public final class GeneralNodePattern extends Pattern {
         AxisIterator anc = ((NodeInfo) item).iterateAxis(AxisInfo.ANCESTOR_OR_SELF);
         NodeInfo top = (NodeInfo)item;
         while (true) {
-            NodeInfo a = anc.next();
+            NodeInfo a = (NodeInfo)anc.next();
             if (a == null) {
                 // The first step in a pattern, if it uses the child axis, is interpreted as "child-or-top" (test case match-274)
                 if (topNodeEquivalent != null && UType.CHILD_NODE_KINDS.matches(top)) {
@@ -270,7 +270,7 @@ public final class GeneralNodePattern extends Pattern {
         if (anchor == null) {
             AxisIterator ancestors = node.iterateAxis(AxisInfo.ANCESTOR_OR_SELF);
             while (true) {
-                NodeInfo ancestor = ancestors.next();
+                NodeInfo ancestor = (NodeInfo)ancestors.next();
                 if (ancestor == null) {
                     return false;
                 }

@@ -7,7 +7,7 @@
 
 package net.sf.saxon.tree.iter;
 
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.GNode;
 
 /**
  * This class implements an AxisIterator by providing a start item, and a function
@@ -18,8 +18,8 @@ public class IncrementalIterator implements AxisIterator {
 
     // Note: used in SaxonCS
 
-    private java.util.function.Function<NodeInfo, NodeInfo> stepper;
-    private NodeInfo nextItem;
+    private final java.util.function.Function<GNode, GNode> stepper;
+    private GNode nextItem;
 
     /**
      * Create an IncrementalIterator
@@ -28,7 +28,7 @@ public class IncrementalIterator implements AxisIterator {
      * @param stepper a function that computes the next item, given the current item, or returns
      *                null at the end of the sequence.
      */
-    public IncrementalIterator(NodeInfo start, java.util.function.Function<NodeInfo, NodeInfo> stepper) {
+    public IncrementalIterator(GNode start, java.util.function.Function<GNode, GNode> stepper) {
         this.stepper = stepper;
         this.nextItem = stepper.apply(start);
     }
@@ -38,8 +38,8 @@ public class IncrementalIterator implements AxisIterator {
      *
      * @return the next item, or null if there are no more items to be returned.
      */
-    public NodeInfo next() {
-        NodeInfo current = nextItem;
+    public GNode next() {
+        GNode current = nextItem;
         if (current != null) {
             nextItem = stepper.apply(current);
         }

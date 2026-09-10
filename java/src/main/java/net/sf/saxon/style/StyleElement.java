@@ -737,7 +737,7 @@ public abstract class StyleElement extends ElementImpl {
             err.maybeSetErrorCode("XTSE0340");
             XPathException err2 = err.replacingErrorCode("XPST0003", "XTSE0340");
             compileError(err2);
-            NodeTestPattern nsp = new NodeTestPattern(AnyNodeTest.getInstance());
+            NodeTestPattern nsp = new NodeTestPattern(AnyXNodeTest.getInstance());
             nsp.setLocation(allocateLocation());
             return nsp;
         }
@@ -2118,7 +2118,7 @@ public abstract class StyleElement extends ElementImpl {
                 } else {
                     // handle literal text nodes by generating an xsl:value-of instruction, unless expand-text is enabled
                     AxisIterator lookahead = node.iterateAxis(AxisInfo.FOLLOWING_SIBLING);
-                    NodeInfo sibling = lookahead.next();
+                    NodeInfo sibling = (NodeInfo)lookahead.next();
                     if (!(sibling instanceof XSLLocalParam || sibling instanceof XSLSort
                                   || sibling instanceof XSLContextItem || sibling instanceof XSLOnCompletion)) {
                         // The test for XSLParam and XSLSort is to eliminate whitespace nodes that have been retained
@@ -2688,7 +2688,7 @@ public abstract class StyleElement extends ElementImpl {
             }
             AxisIterator preceding = curr.iterateAxis(AxisInfo.PRECEDING_SIBLING);
             while (true) {
-                curr = preceding.next();
+                curr = (NodeInfo)preceding.next();
                 while (curr == null) {
                     curr = prev.getParent();
                     if (curr instanceof StyleElement) {
@@ -2706,7 +2706,7 @@ public abstract class StyleElement extends ElementImpl {
                         break;   // top level
                     }
                     preceding = curr.iterateAxis(AxisInfo.PRECEDING_SIBLING);
-                    curr = preceding.next();
+                    curr = (NodeInfo)preceding.next();
                 }
                 if (curr.getParent() instanceof XSLModuleRoot) {
                     break;

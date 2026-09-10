@@ -45,7 +45,7 @@ public class WrappingIterator implements AxisIterator {
     /*@Nullable*/
     @Override
     public NodeInfo next() {
-        NodeInfo n = base.next();
+        NodeInfo n = (NodeInfo)base.next();
         if (n == null) {
             return _current = null;
         }

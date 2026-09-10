@@ -36,7 +36,7 @@ public class MemoFunction extends UserFunction {
     public void setParameterDefinitions(UserFunctionParameter[] params) {
         super.setParameterDefinitions(params);
         for (UserFunctionParameter param : params) {
-            if (param.getRequiredType().getPrimaryType().getUType().overlaps(UType.ANY_NODE)) {
+            if (param.getRequiredType().getPrimaryType().getUType().overlaps(UType.XNODE)) {
                 lookForNodes = true;
             }
         }

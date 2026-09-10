@@ -199,14 +199,14 @@ public class DocumentOverNodeInfo extends NodeOverNodeInfo implements Document {
         }
         AxisIterator children =
                 root.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
-        return (Element) wrap(children.next());
+        return (Element) wrap((NodeInfo)children.next());
     }
 
     protected static NodeList getElementsByTagName(NodeInfo node, String tagname) {
         AxisIterator allElements = node.iterateAxis(AxisInfo.DESCENDANT);
         List<Node> nodes = new ArrayList<>(100);
         while (true) {
-            NodeInfo next = allElements.next();
+            NodeInfo next = (NodeInfo)allElements.next();
             if (next == null) {
                 break;
             }
@@ -296,7 +296,7 @@ public class DocumentOverNodeInfo extends NodeOverNodeInfo implements Document {
         AxisIterator allElements = node.iterateAxis(AxisInfo.DESCENDANT);
         List<Node> nodes = new ArrayList<>(100);
         while (true) {
-            NodeInfo next = allElements.next();
+            NodeInfo next = (NodeInfo)allElements.next();
             if (next == null) {
                 break;
             }

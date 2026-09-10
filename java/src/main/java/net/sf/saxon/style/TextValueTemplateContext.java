@@ -56,7 +56,7 @@ public class TextValueTemplateContext extends ExpressionContext {
         // first search for a local variable declaration
 
         AxisIterator preceding = curr.iterateAxis(AxisInfo.PRECEDING_SIBLING);
-        while ((curr = preceding.next()) != null) {
+        while ((curr = (NodeInfo)preceding.next()) != null) {
             if (curr instanceof XSLGeneralVariable) {
                 SourceBinding sourceBinding = ((XSLGeneralVariable) curr).getBindingInformation(qName);
                 if (sourceBinding != null) {

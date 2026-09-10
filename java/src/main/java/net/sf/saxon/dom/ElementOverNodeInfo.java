@@ -106,7 +106,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
         }
         AxisIterator atts = node.iterateAxis(AxisInfo.ATTRIBUTE);
         while (true) {
-            NodeInfo att = atts.next();
+            NodeInfo att = (NodeInfo)atts.next();
             if (att == null) {
                 return "";
             }
@@ -136,7 +136,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
     public Attr getAttributeNode(String name) {
         AxisIterator atts = node.iterateAxis(AxisInfo.ATTRIBUTE);
         while (true) {
-            NodeInfo att = atts.next();
+            NodeInfo att = (NodeInfo)atts.next();
             if (att == null) {
                 return null;
             }
@@ -272,7 +272,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
         NamePool pool = node.getConfiguration().getNamePool();
         NameTest test = new NameTest(Type.ATTRIBUTE, NamespaceUri.of(namespaceURI), localName, pool);
         AxisIterator atts = node.iterateAxis(AxisInfo.ATTRIBUTE, test);
-        return (Attr) wrap(atts.next());
+        return (Attr) wrap((NodeInfo)atts.next());
     }
 
     /**
@@ -314,7 +314,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
         }
         AxisIterator atts = node.iterateAxis(AxisInfo.ATTRIBUTE);
         while (true) {
-            NodeInfo att = atts.next();
+            NodeInfo att = (NodeInfo)atts.next();
             if (att == null) {
                 return false;
             }

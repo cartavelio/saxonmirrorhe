@@ -92,8 +92,8 @@ public abstract class NodeTest implements NodePredicate, ItemTypeWithSequenceTyp
     @Override
     public ItemType getPrimitiveItemType() {
         int p = getPrimitiveType();
-        if (p == Type.NODE) {
-            return AnyNodeTest.getInstance();
+        if (p == Type.XNODE) {
+            return AnyXNodeTest.getInstance();
         } else {
             return NodeKindTest.makeNodeKindTest(p);
         }
@@ -108,7 +108,7 @@ public abstract class NodeTest implements NodePredicate, ItemTypeWithSequenceTyp
 
     @Override
     public int getPrimitiveType() {
-        return Type.NODE;
+        return Type.XNODE;
     }
 
     /**
@@ -139,7 +139,7 @@ public abstract class NodeTest implements NodePredicate, ItemTypeWithSequenceTyp
     @Override
     public String getBasicAlphaCode() {
         switch (getPrimitiveType()) {
-            case Type.NODE:
+            case Type.XNODE:
                 return "N";
             case Type.ELEMENT:
                 return "NE";
@@ -252,8 +252,12 @@ public abstract class NodeTest implements NodePredicate, ItemTypeWithSequenceTyp
      * @return true if the node test is satisfied by the supplied node, false otherwise
      */
     
-    public boolean test(/*@NotNull*/ NodeInfo node) {
-        return matches(node.getNodeKind(), NameOfNode.makeName(node), node.getSchemaType());
+    public boolean test(GNode node) {
+        if (node instanceof NodeInfo) {
+            NodeInfo n = (NodeInfo)node;
+            return matches(n.getNodeKind(), NameOfNode.makeName(n), n.getSchemaType());
+        }
+        return false;
     }
 
     /**

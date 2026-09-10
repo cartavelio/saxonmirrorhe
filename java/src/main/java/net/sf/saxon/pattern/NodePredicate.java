@@ -7,10 +7,8 @@
 
 package net.sf.saxon.pattern;
 
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.GNode;
 import net.sf.saxon.transpile.CSharpDelegate;
-
-import java.util.function.Predicate;
 
 /**
  * Interface representing a predicate applied to a node.
@@ -21,6 +19,6 @@ import java.util.function.Predicate;
 @FunctionalInterface
 @CSharpDelegate(false)
 public interface NodePredicate {
-    boolean test(NodeInfo node);
+    boolean test(GNode node);
 }
 

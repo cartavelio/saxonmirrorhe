@@ -124,7 +124,7 @@ public class Path_1 extends SystemFunction {
         AxisIterator iter = node.iterateAxis(AxisInfo.ANCESTOR_OR_SELF);
         NodeInfo n;
         boolean first = true;
-        while ((n = iter.next()) != null) {
+        while ((n = (NodeInfo)iter.next()) != null) {
             if (origin != null && n.isSameNodeInfo(origin) && !first) {
                 String path = fsb.toString();
                 if (path.startsWith("/")) {

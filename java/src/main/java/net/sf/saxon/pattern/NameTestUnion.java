@@ -117,7 +117,7 @@ public class NameTestUnion extends NodeTest {
      */
 
     @Override
-    public boolean test(NodeInfo node) {
+    public boolean test(GNode node) {
         return matches(node.getNodeKind(), NameOfNode.makeName(node), node.getSchemaType());
     }
 

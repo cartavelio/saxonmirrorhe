@@ -1481,7 +1481,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
         }
         NodeInfo child;
         AxisIterator kids = element.iterateAxis(AxisInfo.CHILD);
-        while ((child = kids.next()) != null) {
+        while ((child = (NodeInfo)kids.next()) != null) {
             if (child instanceof StyleElement) {
                 registerImplicitModes((StyleElement) child, manager);
             }

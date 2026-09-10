@@ -622,10 +622,10 @@ public class DeepEqual extends CollatingFunctionFixed {
                 }
                 NodeInfo att1;
                 a1 = n1.iterateAxis(AxisInfo.ATTRIBUTE);
-                while ((att1 = a1.next()) != null) {
+                while ((att1 = ((NodeInfo)a1.next())) != null) {
                     AxisIterator a2iter = n2.iterateAxis(AxisInfo.ATTRIBUTE,
                                                          new SameNameTest(att1));
-                    NodeInfo att2 = a2iter.next();
+                    NodeInfo att2 = (NodeInfo)a2iter.next();
 
                     if (att2 == null) {
                         final String reason = "one element has an attribute " +

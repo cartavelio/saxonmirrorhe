@@ -153,18 +153,23 @@ public class ContentTypeTest extends NodeTest {
      */
 
     @Override
-    public boolean test(NodeInfo node) {
-        if (node.getNodeKind() != kind) {
-            return false;
-        }
-        if (node.hasFingerprint() && nameTest instanceof NameTest) {
-            return ((NameTest)nameTest).getFingerprint() == node.getFingerprint() &&
-                    matchesAnnotation(node.getSchemaType())
-                    && (nillable || !Nilled_1.isNilled(node));
+    public boolean test(GNode node) {
+        if (node instanceof NodeInfo) {
+            NodeInfo n = (NodeInfo) node;
+            if (n.getNodeKind() != kind) {
+                return false;
+            }
+            if (n.hasFingerprint() && nameTest instanceof NameTest) {
+                return ((NameTest) nameTest).getFingerprint() == n.getFingerprint() &&
+                        matchesAnnotation(n.getSchemaType())
+                        && (nillable || !Nilled_1.isNilled(n));
+            } else {
+                return nameTest.matches(n.getQName()) &&
+                        matchesAnnotation(n.getSchemaType())
+                        && (nillable || !Nilled_1.isNilled(n));
+            }
         } else {
-            return nameTest.matches(node.getQName()) &&
-                    matchesAnnotation(node.getSchemaType())
-                    && (nillable || !Nilled_1.isNilled(node));
+            return false;
         }
     }
 

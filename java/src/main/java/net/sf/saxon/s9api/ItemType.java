@@ -18,7 +18,7 @@ import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.AnyXNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.streams.Step;
@@ -166,7 +166,7 @@ public abstract class ItemType implements Predicate<XdmItem> {
      * ItemType representing the type node(), that is, any node
      */
 
-    public static final ItemType ANY_NODE = new ItemType(AnyNodeTest.getInstance()) {
+    public static final ItemType ANY_NODE = new ItemType(AnyXNodeTest.getInstance()) {
 
         @Override
         public boolean matches(XdmItem item) {

@@ -174,7 +174,7 @@ public class XPathEvaluator {
         Executable exec = new Executable(config);
         Pattern pat = Pattern.make(pattern, staticContext, new PackageData(config));
         ExpressionVisitor visitor = ExpressionVisitor.make(staticContext);
-        pat.typeCheck(visitor, config.makeContextItemStaticInfo(Type.NODE_TYPE, Optionality.OPTIONAL));
+        pat.typeCheck(visitor, config.makeContextItemStaticInfo(Type.XNODE_TYPE, Optionality.OPTIONAL));
         SlotManager map = staticContext.getStackFrameMap();
         int slots = map.getNumberOfVariables();
         slots = pat.allocateSlots(map, slots);

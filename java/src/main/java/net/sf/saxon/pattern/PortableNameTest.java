@@ -109,7 +109,7 @@ public class PortableNameTest extends NodeTest {
      */
 
     @Override
-    public boolean test(NodeInfo node) {
+    public boolean test(GNode node) {
         return node.getNodeKind() == this.nodeKind
                 && node.getNamespaceUri() == uri
                 && node.getLocalPart().equals(localName);

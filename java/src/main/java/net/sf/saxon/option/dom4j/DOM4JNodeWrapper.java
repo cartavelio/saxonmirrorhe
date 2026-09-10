@@ -377,7 +377,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
                     return index;
             }
             while (true) {
-                NodeInfo n = iter.next();
+                GNode n = iter.next();
                 if (n == null) {
                     break;
                 }

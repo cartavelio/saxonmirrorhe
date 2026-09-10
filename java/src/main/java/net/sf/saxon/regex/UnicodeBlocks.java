@@ -102,7 +102,7 @@ public class UnicodeBlocks {
         AxisIterator iter = doc.getRootNode().iterateAxis(AxisInfo.DESCENDANT,
                                                           new NameTest(Type.ELEMENT, NamespaceUri.NULL, "block", config.getNamePool()));
         while (true) {
-            NodeInfo item = iter.next();
+            NodeInfo item = (NodeInfo)iter.next();
             if (item == null) {
                 break;
             }

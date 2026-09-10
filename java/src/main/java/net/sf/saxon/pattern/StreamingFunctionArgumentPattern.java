@@ -42,7 +42,7 @@ public class StreamingFunctionArgumentPattern extends Pattern {
      */
     @Override
     public UType getUType() {
-        return UType.ANY_NODE;
+        return UType.XNODE;
     }
 
     /**
@@ -90,7 +90,7 @@ public class StreamingFunctionArgumentPattern extends Pattern {
 
     @Override
     public ItemType getItemType() {
-        return AnyNodeTest.getInstance();
+        return AnyXNodeTest.getInstance();
     }
 
     @Override

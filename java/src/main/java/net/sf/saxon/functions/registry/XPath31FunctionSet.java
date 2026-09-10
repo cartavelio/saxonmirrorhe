@@ -16,7 +16,7 @@ import net.sf.saxon.ma.json.JsonToXMLFn;
 import net.sf.saxon.ma.json.ParseJsonFn;
 import net.sf.saxon.ma.json.XMLToJsonFn;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.AnyXNodeTest;
 import net.sf.saxon.pattern.DocumentNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.type.AnyItemType;
@@ -82,22 +82,22 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
         register("generate-id", 0, e -> e.populate( ContextItemAccessorFunction::new, BuiltInAtomicType.STRING, ONE, CITEM | LATE));
 
         register("generate-id", 1, e -> e.populate( GenerateId_1::new, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, Type.NODE_TYPE, OPT | INS, StringValue.EMPTY_STRING));
+                .arg(0, Type.XNODE_TYPE, OPT | INS, StringValue.EMPTY_STRING));
 
         register("has-children", 0, e -> e.populate( ContextItemAccessorFunction::new, BuiltInAtomicType.BOOLEAN,
                  ONE, CITEM | LATE));
 
         register("has-children", 1, e -> e.populate( HasChildren_1::new, BuiltInAtomicType.BOOLEAN,
                  ONE, 0)
-                .arg(0, AnyNodeTest.getInstance(), OPT | INS, null));
+                .arg(0, AnyXNodeTest.getInstance(), OPT | INS, null));
 
         register("head", 1, e -> e.populate( HeadFn::new, AnyItemType.getInstance(),
                  OPT, FILTER)
                 .arg(0, AnyItemType.getInstance(), STAR | TRA, null));
 
-        register("innermost", 1, e -> e.populate( Innermost::new, AnyNodeTest.getInstance(),
-                 STAR, 0)
-                .arg(0, AnyNodeTest.getInstance(), STAR | NAV, null));
+        register("innermost", 1, e -> e.populate(Innermost::new, AnyXNodeTest.getInstance(),
+                                                 STAR, 0)
+                .arg(0, AnyXNodeTest.getInstance(), STAR | NAV, null));
 
         register("json-doc", 1, e -> e.populate( JsonDoc::new, AnyItemType.getInstance(),
                  OPT, LATE)
@@ -159,8 +159,8 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
 
         register("snapshot", 0, e -> e.populate( ContextItemAccessorFunction::new, AnyItemType.getInstance(), STAR, CITEM | LATE | NEW));
 
-        register("snapshot", 1, e -> e.populate( SnapshotFn::new, AnyNodeTest.getInstance(),
-                 STAR, NEW)
+        register("snapshot", 1, e -> e.populate(SnapshotFn::new, AnyXNodeTest.getInstance(),
+                                                STAR, NEW)
                 .arg(0, AnyItemType.getInstance(), STAR | ABS, EMPTY));
 
         register("sort", 1, e -> e.populate(Sort::new, AnyItemType.getInstance(), STAR, 0)
@@ -200,11 +200,11 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
 
         register("xml-to-json", 1, e -> e.populate( XMLToJsonFn::new, BuiltInAtomicType.STRING,
                  OPT, LATE)
-                .arg(0, AnyNodeTest.getInstance(), OPT | ABS, EMPTY));
+                .arg(0, AnyXNodeTest.getInstance(), OPT | ABS, EMPTY));
 
         register("xml-to-json", 2, e -> e.populate( XMLToJsonFn::new, BuiltInAtomicType.STRING,
                  OPT, LATE)
-                .arg(0, AnyNodeTest.getInstance(), OPT | ABS, EMPTY)
+                .arg(0, AnyXNodeTest.getInstance(), OPT | ABS, EMPTY)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE | ABS, null)
                 .setOptionDetails(XMLToJsonFn.makeOptionsParameter(31)));
 
