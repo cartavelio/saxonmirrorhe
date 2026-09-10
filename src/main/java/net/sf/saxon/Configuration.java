@@ -808,7 +808,7 @@ public class Configuration implements SourceResolver {
      * <p>The <code>ResourceResolver</code> may return null to indicate that the URI is to
      * be resolved by the fallback {@link DirectResourceResolver}. It is possible
      * to suppress the use of a {@link CatalogResourceResolver} by calling
-     * <code>setResourceResolver(request -> null)</code>, which delegates all
+     * <code>setResourceResolver(request -&gt; null)</code>, which delegates all
      * resource requests to the {@link DirectResourceResolver}.</p>
      *
      * @param resolver The ResourceResolver to be used.
