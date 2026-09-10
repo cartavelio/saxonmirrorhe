@@ -9,10 +9,14 @@ package net.sf.saxon.type;
 
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.nodetest.NodeTest;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.coercion.CoercionPlan;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.Stack;
 
 
 /**
@@ -220,6 +224,18 @@ public interface ItemType {
      */
 
     Optional<String> explainMismatch(Item item, TypeHierarchy th);
+
+    /**
+     * Resolve any item type aliases within this item type, recursively
+     *
+     * @param aliases map from QNames of named item types to their definitions
+     * @param path stack of names being resolved, used to detect cycles
+     * @return the item type after resolving any item type name references
+     */
+
+    default ItemType resolveAliases(Map<StructuredQName, ItemType> aliases, Stack<StructuredQName> path) throws XPathException {
+        return this;
+    }
 
 }
 

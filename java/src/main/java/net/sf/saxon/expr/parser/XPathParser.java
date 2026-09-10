@@ -2016,32 +2016,37 @@ public class XPathParser {
         } else if (uri.equals(NamespaceUri.DOT_NET_TYPE)) {
             return Version.platform.getExternalObjectType(config, uri, local);
         } else {
+            SchemaType st = env.getImportedSchema().getSchemaType(sq);
+            if (st != null) {
+                if (st.isAtomicType()) {
+                    return (AtomicType) st;
+                } else if (st instanceof ItemType && ((ItemType) st).isPlainType() && languageVersion >= 30) {
+                    return (ItemType) st;
+                } else if (st.isComplexType()) {
+                    grumble("Type (" + qname + ") is a complex type", "XPST0051");
+                    return BuiltInAtomicType.ANY_ATOMIC;
+                } else if (((SimpleType) st).isListType()) {
+                    grumble("Type (" + qname + ") is a list type", "XPST0051");
+                    return BuiltInAtomicType.ANY_ATOMIC;
+                } else if (languageVersion >= 30) {
+                    grumble("Type (" + qname + ") is a union type that cannot be used as an item type", "XPST0051");
+                    return BuiltInAtomicType.ANY_ATOMIC;
+                } else {
+                    grumble("The union type (" + qname + ") cannot be used as an item type unless XPath 3.0 is enabled", "XPST0051");
+                    return BuiltInAtomicType.ANY_ATOMIC;
+                }
+            }
             if (languageVersion >= 40) {
                 ItemType it = env.resolveTypeAlias(sq);
                 if (it != null) {
                     return it;
+                } else if (this instanceof XQueryParser qp) {
+                    // In XQuery, it might be a forwards reference
+                    return qp.newDraftItemType(sq);
                 }
             }
-            SchemaType st = env.getImportedSchema().getSchemaType(sq);
-            if (st == null) {
-                grumble("Unknown simple type " + qname, "XPST0051");
-            } else if (st.isAtomicType()) {
-                return (AtomicType) st;
-            } else if (st instanceof ItemType && ((ItemType) st).isPlainType() && languageVersion >= 30) {
-                return (ItemType) st;
-            } else if (st.isComplexType()) {
-                grumble("Type (" + qname + ") is a complex type", "XPST0051");
-                return BuiltInAtomicType.ANY_ATOMIC;
-            } else if (((SimpleType) st).isListType()) {
-                grumble("Type (" + qname + ") is a list type", "XPST0051");
-                return BuiltInAtomicType.ANY_ATOMIC;
-            } else if (languageVersion >= 30) {
-                grumble("Type (" + qname + ") is a union type that cannot be used as an item type", "XPST0051");
-                return BuiltInAtomicType.ANY_ATOMIC;
-            } else {
-                grumble("The union type (" + qname + ") cannot be used as an item type unless XPath 3.0 is enabled", "XPST0051");
-                return BuiltInAtomicType.ANY_ATOMIC;
-            }
+            grumble("Unknown item type " + qname, "XPST0051");
+
         }
         grumble("Unknown atomic type " + qname, "XPST0051");
         return BuiltInAtomicType.ANY_ATOMIC;
@@ -2503,7 +2508,7 @@ public class XPathParser {
             SequenceType valueType = parseSequenceType();
             readToken(Token.RPAREN);
             if (!(keyType instanceof PlainType)) {
-                grumble("Key type of a map must be an atomic or pure union type: found " + keyType);
+                grumble("Key type of a map must be an atomic or pure union type: found " + keyType, "XPST0152");
                 return null;
             }
             return new MapType((PlainType) keyType, valueType);

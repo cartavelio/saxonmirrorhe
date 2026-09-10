@@ -153,6 +153,12 @@ public class XSLItemType extends StyleElement {
         return null;
     }
 
+    /**
+     * A <code>TypeAliasContext</code> is a static context used solely
+     * when parsing an item type appearing within the {@code as} attribute
+     * of an {@code xsl:item-type} declaration
+     */
+
     private static class TypeAliasContext extends ExpressionContext {
 
         public TypeAliasContext(XSLItemType declaration) {
@@ -160,9 +166,13 @@ public class XSLItemType extends StyleElement {
         }
 
         /**
-         * Get type alias. This is a Saxon extension. A type alias is a QName which can
-         * be used as a shorthand for an itemtype, using the syntax ~typename anywhere that
-         * an item type is permitted.
+         * Get type alias. A type alias is a QName which can
+         * be used as a shorthand for an item type, anywhere that
+         * an item type is permitted. It is declared using <code>xsl:item-type</code> in XSLT,
+         * or <code>declare type</code> in XQuery.
+         *
+         * <p>This method overrides the base method by marking the type as unresolved if
+         * it contains references that cannot immediately be resolved.</p>
          *
          * @param typeName the name of the type alias
          * @return the corresponding item type, if the name is recognised; otherwise null.

@@ -11,16 +11,16 @@ import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.str.StringTool;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.coercion.CoercionPlan;
 import net.sf.saxon.type.coercion.EnumUnionCoercionPlan;
 import net.sf.saxon.value.StringValue;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class EnumerationUnionType extends LocalUnionType {
 
@@ -194,6 +194,11 @@ public class EnumerationUnionType extends LocalUnionType {
     @Override
     public CoercionPlan getCoercionPlan(int version) {
         return EnumUnionCoercionPlan.INSTANCE;
+    }
+
+    @Override
+    public ItemType resolveAliases(Map<StructuredQName, ItemType> aliases, Stack<StructuredQName> path) throws XPathException {
+        return this;
     }
 
     @Override

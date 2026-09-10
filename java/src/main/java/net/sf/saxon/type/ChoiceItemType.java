@@ -10,7 +10,9 @@ package net.sf.saxon.type;
 import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.MultipleNodeKindTest;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.coercion.ChoiceCoercionPlan;
 import net.sf.saxon.type.coercion.CoercionPlan;
 import net.sf.saxon.type.gnode.AnyXNodeType;
@@ -465,6 +467,23 @@ public class ChoiceItemType implements ItemType, ChoiceType {
     @Override
     public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
         return Optional.empty();
+    }
+
+    @Override
+    public ItemType resolveAliases(Map<StructuredQName, ItemType> aliases, Stack<StructuredQName> path) throws XPathException {
+        List<ItemType> members = new ArrayList<>(memberTypes);
+        boolean changed = false;
+        for (ItemType member : memberTypes) {
+            ItemType m2 = member.resolveAliases(aliases, path);
+            if (m2 != null) {
+                changed = true;
+            }
+        }
+        if (changed) {
+            return new ChoiceItemType(members);
+        } else {
+            return this;
+        }
     }
 
     public final static ChoiceItemType CHOICE_OF_ANY = ChoiceItemType.of(

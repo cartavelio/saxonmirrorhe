@@ -12,7 +12,9 @@ import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.coercion.CoercionPlan;
@@ -20,7 +22,9 @@ import net.sf.saxon.type.coercion.MapCoercionPlan;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.Stack;
 import java.util.function.Supplier;
 
 /**
@@ -368,6 +372,21 @@ public class MapType extends AnyFunctionType {
     @Override
     public Expression makeFunctionSequenceCoercer(Expression exp, Supplier<RoleDiagnostic> role, boolean allow40) {
         return new SpecificFunctionType(getArgumentTypes(), getResultType()).makeFunctionSequenceCoercer(exp, role, false);
+    }
+
+
+    @Override
+    public ItemType resolveAliases(Map<StructuredQName, ItemType> aliases, Stack<StructuredQName> path) throws XPathException {
+        ItemType k2 = keyType.resolveAliases(aliases, path);
+        if (!k2.isPlainType()) {
+            throw new XPathException("Key type " + keyType + " must be an atomic or pure union type: found " + keyType, "XPST0152");
+        }
+        SequenceType v2 = valueType.resolveAliases(aliases, path);
+        if (k2 != keyType || v2 != valueType) {
+            return new MapType((PlainType)k2, v2);
+        }
+        return this;
+
     }
 
 }

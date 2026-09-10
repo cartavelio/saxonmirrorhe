@@ -184,10 +184,11 @@ public interface AtomicType extends SimpleType, PlainType, CastingTarget, Atomic
     /**
      * An atomic type can be used directly as the metadata associated with an atomic value.
      * In this case the atomic value has no label.
-     */
+     */                                                                       
 
     default MapItem getLabel() {
         return null;
     }
+
 }
 

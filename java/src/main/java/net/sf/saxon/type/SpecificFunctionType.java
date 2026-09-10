@@ -20,17 +20,17 @@ import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.coercion.CoercionPlan;
 import net.sf.saxon.type.coercion.FunctionItemCoercionPlan;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Supplier;
 
 /**
@@ -537,5 +537,15 @@ public class SpecificFunctionType extends AnyFunctionType {
     @Override
     public CoercionPlan getCoercionPlan(int version) {
         return FunctionItemCoercionPlan.getInstance(version);
+    }
+
+    @Override
+    public ItemType resolveAliases(Map<StructuredQName, ItemType> aliases, Stack<StructuredQName> path) throws XPathException {
+        SequenceType[] a2 = new SequenceType[argTypes.length];
+        for (int i = 0; i < a2.length; i++) {
+            a2[i] = argTypes[i].resolveAliases(aliases, path);
+        }
+        SequenceType r2 = resultType.resolveAliases(aliases, path);
+        return new SpecificFunctionType(a2, r2,annotations);
     }
 }

@@ -7,6 +7,8 @@
 
 package net.sf.saxon.expr;
 
+import net.sf.saxon.expr.parser.ContextItemStaticInfo;
+import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -43,6 +45,11 @@ public abstract class CastingExpression extends UnaryExpression {
         targetType = target;
         // Cast needed for C#
         targetPrimitiveType = (AtomicType)target.getPrimitiveItemType();
+    }
+
+    @Override
+    public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
+        return super.typeCheck(visitor, contextInfo);
     }
 
     /**

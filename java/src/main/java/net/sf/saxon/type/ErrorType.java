@@ -34,14 +34,14 @@ import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
  * This class has a singleton instance which represents the XML Schema 1.1 built-in type xs:error.
  */
 
-public final class ErrorType extends GNodeType implements AtomicType, UnionType, PlainType {
+public class ErrorType extends GNodeType implements AtomicType, UnionType, PlainType {
 
     /*@NotNull*/ private static final ErrorType theInstance = new ErrorType();
 
     /**
      * Private constructor
      */
-    private ErrorType() {
+    protected ErrorType() {
     }
 
     @Override

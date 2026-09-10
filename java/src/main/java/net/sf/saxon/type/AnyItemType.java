@@ -265,7 +265,5 @@ public enum AnyItemType implements ItemTypeWithSequenceTypeCache {
 
 
 
-
-
 }
 

@@ -85,6 +85,7 @@ public class XQueryParser extends XPathParser {
     private final Set<StructuredQName> outputPropertiesSeen = new HashSet<>(4);
     private Properties parameterDocProperties;
 
+    private final List<DraftItemType> draftItemTypes = new ArrayList<>(5);
 
 
 
@@ -110,6 +111,12 @@ public class XQueryParser extends XPathParser {
         qp.setLanguage(language, languageVersion);
         qp.setParserExtension(parserExtension);
         return qp;
+    }
+
+    public ItemType newDraftItemType(StructuredQName qname) {
+        DraftItemType dt = new DraftItemType(qname);
+        draftItemTypes.add(dt);
+        return dt;
     }
 
     /**
@@ -178,6 +185,30 @@ public class XQueryParser extends XPathParser {
 
             if (streaming) {
                 env.getConfiguration().checkLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XQUERY, "streaming", -1);
+            }
+
+            // Replace every declared item type by its full expansion
+
+            TypeAliasManager typeAliasManager = env.getPackageData().obtainTypeAliasManager();
+            Map<StructuredQName, ItemType> resolvedItemTypes = typeAliasManager.getTypeAliases();
+            Map<StructuredQName, ItemType> expandedItemTypes =  new HashMap<>(resolvedItemTypes);
+            for (Map.Entry<StructuredQName, ItemType> entry : resolvedItemTypes.entrySet()) {
+                Stack<StructuredQName> stack = new Stack<>();
+                ItemType expandedItemType = entry.getValue().resolveAliases(resolvedItemTypes, stack);
+                expandedItemTypes.put(entry.getKey(), expandedItemType);
+            }
+            typeAliasManager.setTypeAliases(expandedItemTypes);
+
+            for (GlobalVariable var : env.getPackageData().getGlobalVariableList()) {
+                if (languageVersion >= 40 && var.getRequiredType() != SequenceType.ANY_SEQUENCE) {
+                    // TODO: Is this necessary? Doesn't it happen later anyway?
+                    var.setRequiredType(var.getRequiredType().resolveAliases(expandedItemTypes, new Stack<>()));
+                    TypeChecker checker = env.getConfiguration().getTypeChecker(false);
+                    ExpressionVisitor visitor = ExpressionVisitor.make(env);
+                    Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, var.getVariableQName().getDisplayName(), 0);
+                    Expression body = checker.staticTypeCheck(var.getBody(), var.getRequiredType(), role, visitor);
+                    var.setBody(body);
+                }
             }
 
             exec.fixupQueryModules(mainModule);
@@ -608,6 +639,7 @@ public class XQueryParser extends XPathParser {
                             annotationList.check(env.getConfiguration(), "DV");
                             parseVariableDeclaration(annotationList);
                         } else if (tryKeyword("type")) {
+                            checkSyntaxExtensions("declare type");
                             annotationList.check(env.getConfiguration(), "DI");
                             parseItemTypeDeclaration(annotationList);
                         } else {
@@ -1595,12 +1627,12 @@ public class XQueryParser extends XPathParser {
                                 + " is referenced within its own declaration", "XPST0008");
             }
             exp = makeTracer(exp, varQName);
-            if (languageVersion >= 40 && requiredType != SequenceType.ANY_SEQUENCE) {
-                TypeChecker checker = env.getConfiguration().getTypeChecker(false);
-                ExpressionVisitor visitor = ExpressionVisitor.make(env);
-                Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, varQName.getDisplayName(), 0);
-                exp = checker.staticTypeCheck(exp, requiredType, role, visitor);
-            }
+//            if (languageVersion >= 40 && requiredType != SequenceType.ANY_SEQUENCE) {
+//                TypeChecker checker = env.getConfiguration().getTypeChecker(false);
+//                ExpressionVisitor visitor = ExpressionVisitor.make(env);
+//                Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, varQName.getDisplayName(), 0);
+//                exp = checker.staticTypeCheck(exp, requiredType, role, visitor);
+//            }
             var.setBody(exp);
         } else if (t.currentToken instanceof Token.NameToken) {
             if (isKeyword("external")) {
@@ -1650,7 +1682,6 @@ public class XQueryParser extends XPathParser {
             grumble(e.getMessage(), e.getErrorCodeQName(), -1);
         }
     }
-
 
     /**
      * Parse a context item or value declaration.
@@ -1927,7 +1958,16 @@ public class XQueryParser extends XPathParser {
      */
 
     protected void parseItemTypeDeclaration(AnnotationList annotations) throws XPathException {
-        parserExtension.parseItemTypeDeclaration(this);
+        String name = readName();
+        StructuredQName typeName = makeStructuredQName(name, NamespaceUri.NULL);
+        readKeyword("as");
+        ItemType typeDef = parseItemType();
+        SchemaType st = env.getImportedSchema().getSchemaType(typeName);
+        if (st != null) {
+            grumble("Item type alias duplicates an existing type name in the static context: "
+                            + typeName.getEQName(), "XQST0146");
+        }
+        getStaticContext().getPackageData().obtainTypeAliasManager().registerTypeAlias(typeName, typeDef);
     }
 
     /**

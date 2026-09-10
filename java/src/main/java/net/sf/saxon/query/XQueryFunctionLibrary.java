@@ -10,6 +10,7 @@ package net.sf.saxon.query;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.UserFunction;
+import net.sf.saxon.expr.instruct.UserFunctionParameter;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
@@ -29,6 +30,7 @@ import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
+import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
@@ -36,6 +38,7 @@ import net.sf.saxon.value.SequenceType;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -386,6 +389,19 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
         ExpressionVisitor visitor = ExpressionVisitor.make(env);
         processAllFunctions(fn -> {
             try {
+                Map<StructuredQName, ItemType> aliases = env.getPackageData().obtainTypeAliasManager().getTypeAliases();
+                for (int i = 0; i < fn.getNumberOfParameters(); i++) {
+                    UserFunctionParameter p = fn.getParameterDefinitions()[i];
+                    p.setRequiredType(p.getRequiredType().resolveAliases(aliases, new Stack<>()));
+                    Supplier<Expression> init = fn.getDefaultValueExpression(i);
+                    if (init != null) {
+                        Expression initExp = init.get();
+                        Expression init2 = initExp.simplify();
+                        if (init2 != initExp) {
+                            fn.setDefaultValueExpression(i, init2);
+                        }
+                    }
+                }
                 fn.compile();
                 Expression body = fn.getBody();
                 Expression e2 = body.simplify();
@@ -393,16 +409,8 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
                     ExpressionTool.copyLocationInfo(body, e2);
                     fn.setBody(e2);
                 }
-                for (int i=0; i<fn.getNumberOfParameters(); i++) {
-                    Supplier<Expression> init = fn.getDefaultValueExpression(i);
-                    if (init != null) {
-                        Expression initExp = init.get();
-                        e2 = initExp.simplify();
-                        if (e2 != initExp) {
-                            fn.setDefaultValueExpression(i, e2);
-                        }
-                    }
-                }
+
+                fn.setResultType(fn.getResultType().resolveAliases(aliases, new Stack<>()));
             } catch (XPathException err) {
                 throw new UncheckedXPathException(err);
             }

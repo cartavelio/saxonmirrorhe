@@ -84,6 +84,10 @@ public class ParserExtension {
         return null;
     }
 
+    /**
+     * TemporaryXSLTVariableBinding is used when an inline function expression references
+     * local variables declared at the XSLT level.
+     */
 
     public static class TemporaryXSLTVariableBinding implements LocalBinding {
         SourceBinding declaration;
@@ -138,16 +142,6 @@ public class ParserExtension {
         }
     }
 
-    /**
-     * Parse a type alias declaration. Allowed only in Saxon-PE and higher
-     *
-     * @param p the XPath parser
-     * @throws XPathException if parsing fails
-     */
-
-    public void parseItemTypeDeclaration(XQueryParser p) throws XPathException {
-        needExtension(p, "Item type declarations");
-    }
 
     /**
      * Parse the "declare revalidation" declaration.

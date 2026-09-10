@@ -8,13 +8,19 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.om.*;
+import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 /**
  * Assignation is an abstract superclass for the kinds of expression
@@ -524,6 +530,19 @@ public abstract class Assignation extends Expression implements LocalBinding {
     @Override
     public void setIndexedVariable() {
         indexedVariable = true;
+    }
+
+    /**
+     * In XQuery 4.0 the type may be a forwards reference that needs resolving
+     */
+
+    protected void resolveRequiredType(ExpressionVisitor visitor) throws XPathException {
+        PackageData pack = visitor.getStaticContext().getPackageData();
+        if (pack.getHostLanguage() == HostLanguage.XQUERY && pack.getHostLanguageVersion() >= 40) {
+            requiredType = requiredType.resolveAliases(
+                    visitor.getStaticContext().getPackageData().obtainTypeAliasManager().getTypeAliases(),
+                    new Stack<>());
+        }
     }
 }
 

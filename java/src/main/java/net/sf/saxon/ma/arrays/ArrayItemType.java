@@ -12,14 +12,18 @@ import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.coercion.ArrayCoercionPlan;
 import net.sf.saxon.type.coercion.CoercionPlan;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.Stack;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -321,6 +325,14 @@ public class ArrayItemType extends AnyFunctionType {
         return Optional.empty();
     }
 
+    @Override
+    public ItemType resolveAliases(Map<StructuredQName, ItemType> aliases, Stack<StructuredQName> path) throws XPathException {
+        SequenceType m2  = memberType.resolveAliases(aliases, path);
+        if (m2 != memberType) {
+            return new ArrayItemType(m2);
+        }
+        return this;
+    }
 }
 
 // Copyright (c) 2015-2026 Saxonica Limited

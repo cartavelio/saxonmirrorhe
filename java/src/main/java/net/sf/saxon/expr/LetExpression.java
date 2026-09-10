@@ -161,6 +161,10 @@ public class LetExpression extends Assignation {
     @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
 
+        // In XQuery 4.0 the type may be a forwards reference that needs resolving
+
+        resolveRequiredType(visitor);
+
         // The order of events is critical here. First we ensure that the type of the
         // sequence expression is established. This is used to establish the type of the variable,
         // which in turn is required when type-checking the action part.

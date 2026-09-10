@@ -13,12 +13,16 @@ import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.type.gnode.NodeKindType;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.Stack;
 
 /**
  * SequenceType: a sequence type consists of a primary type, which indicates the type of item,
@@ -695,6 +699,22 @@ public final class SequenceType {
 
     public boolean isSameType(SequenceType other, TypeHierarchy th) {
         return cardinality == other.cardinality && th.relationship(primaryType, other.primaryType) == Affinity.SAME_TYPE;
+    }
+
+    /**
+     * Resolve any item type aliases within this sequence type, recursively
+     * @param aliases map from QNames of named item types to their definitions
+     * @param path the stack of names being expanded, used to detect cycles
+     * @return the sequence type after resolving any item type name references
+     * @throws XPathException if an alias cannot be resolved
+     */
+
+    public SequenceType resolveAliases(Map<StructuredQName, ItemType> aliases, Stack<StructuredQName> path) throws XPathException {
+        ItemType it2 = primaryType.resolveAliases(aliases, path);
+        if (it2 != primaryType) {
+            return new SequenceType(it2, cardinality);
+        }
+        return this;
     }
 
 
