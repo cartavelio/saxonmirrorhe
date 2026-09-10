@@ -5,7 +5,6 @@ import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.GeneralComparison;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StringCollator;
@@ -14,7 +13,10 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.*;
+import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.NumericValue;
+import net.sf.saxon.value.StringItem;
 import net.sf.saxon.z.IntHashMap;
 import net.sf.saxon.z.IntIterator;
 
@@ -29,24 +31,21 @@ import java.util.Set;
  */
 
 
-public class GeneralComparisonFeed extends AtomicItemFeed {
+public class GeneralComparisonEqualityFeed extends AtomicItemFeed {
 
     private final StringCollator collator;
-    /*@Nullable*/ private IntHashMap<Set<AtomicMatchKey>> lookupTable;
+    // A set of lookup tables, one for each primitive atomic type that has been encountered
+    private IntHashMap<Set<AtomicMatchKey>> lookupTable;
+    // All untyped atomic values that have been encountered
     private List<StringItem> untypedValues;
-    private int operator;
     private boolean done = false;
     private final Expression pullOperand;
     private final int implicitTimezone;
 
-    public GeneralComparisonFeed(Expression expr, int pushedArg, ItemFeed result, XPathContext context) {
+    public GeneralComparisonEqualityFeed(Expression expr, int pushedArg, ItemFeed result, XPathContext context) {
         super(expr, result, context);
         final GeneralComparison gc = (GeneralComparison) getExpression();
         collator = gc.getAtomicComparer().getCollator();
-        operator = gc.getSingletonOperator();
-        if (pushedArg == 1) {
-            operator = Token.inverse(operator);
-        }
         pullOperand = pushedArg==0 ? gc.getRhsExpression() : gc.getLhsExpression();
         implicitTimezone = context.getImplicitTimezone();
     }
@@ -73,14 +72,11 @@ public class GeneralComparisonFeed extends AtomicItemFeed {
             // If we haven't already reported a result of true
             XPathContext context = getContext();
             ConversionRules rules = context.getConfiguration().getConversionRules();
-            boolean ordered = operator != Token.FEQ && operator != Token.FNE;
             AtomicValue next = (AtomicValue) item;
-            AtomicMatchKey k1 = next.getXPathComparable(ordered, collator, implicitTimezone);
+            AtomicMatchKey k1 = next.getXPathMatchKey(collator, implicitTimezone);
             BuiltInAtomicType matchType;
             if (next instanceof NumericValue) {
                 matchType = BuiltInAtomicType.DOUBLE;
-//            } else if (next instanceof UntypedAtomicValue) {
-//                matchType = BuiltInAtomicType.STRING;
             } else {
                 matchType = ((AtomicValue) item).getPrimitiveType();
             }
@@ -99,12 +95,12 @@ public class GeneralComparisonFeed extends AtomicItemFeed {
                 while ((val = (AtomicValue) comparand.next()) != null) {
                     if (val.isUntypedAtomic()) {
                         untypedValues.add((StringItem)val);
-                        strings.add(((StringItem)val).getXPathComparable(ordered, collator, implicitTimezone));
+                        strings.add(((StringItem)val).getXPathMatchKey(collator, implicitTimezone));
                         if (typed != null) {
                             AtomicValue cval = Converter.convert(val, matchType, rules);
-                            typed.add(cval.getXPathComparable(ordered, collator, implicitTimezone));
+                            typed.add(cval.getXPathMatchKey(collator, implicitTimezone));
                             if (matchType != BuiltInAtomicType.UNTYPED_ATOMIC) {
-                                strings.add(val.getXPathComparable(ordered, collator, implicitTimezone));
+                                strings.add(val.getXPathMatchKey(collator, implicitTimezone));
                             }
                         }
                     } else {
@@ -119,7 +115,7 @@ public class GeneralComparisonFeed extends AtomicItemFeed {
                             keys = new HashSet<>(10);
                             lookupTable.put(prim.getFingerprint(), keys);
                         }
-                        keys.add(val.getXPathComparable(ordered, collator, implicitTimezone));
+                        keys.add(val.getXPathMatchKey(collator, implicitTimezone));
                     }
                 }
                 for (StringItem untypedVal : untypedValues) {
@@ -129,19 +125,27 @@ public class GeneralComparisonFeed extends AtomicItemFeed {
                         Set<AtomicMatchKey> keys = lookupTable.get(type);
                         BuiltInAtomicType atomicType = (BuiltInAtomicType)BuiltInType.getSchemaType(type);
                         keys.add(Converter.convert(untypedVal, atomicType, rules)
-                                .getXPathComparable(ordered, collator, implicitTimezone));
+                                .getXPathMatchKey(collator, implicitTimezone));
                     }
+                }
+                if (lookupTable.size() == 0 && untypedValues.isEmpty()) {
+                    Outputter out = getNextOutputter();
+                    done = true;
+                    out.append(BooleanValue.FALSE);
+                    out.close();
+                    lookupTable = null;
+                    getTerminator().terminate();
                 }
             } else {
                 Set<AtomicMatchKey> typed = lookupTable.get(matchType.getFingerprint());
                 if (typed == null) {
                     // This is the first value of this type found in the stream; convert all the untyped
                     // values from the other operand
-                    typed = new HashSet<AtomicMatchKey>(10);
+                    typed = new HashSet<>(10);
                     lookupTable.put(matchType.getFingerprint(), typed);
                     for (StringItem val : untypedValues) {
                         AtomicValue cval = Converter.convert(val, matchType, rules);
-                        typed.add(cval.getXPathComparable(ordered, collator, implicitTimezone));
+                        typed.add(cval.getXPathMatchKey(collator, implicitTimezone));
                     }
                 }
             }
@@ -153,7 +157,7 @@ public class GeneralComparisonFeed extends AtomicItemFeed {
                     AtomicValue converted = Converter.convert(next, (AtomicType)BuiltInType.getSchemaType(t), rules);
                     lookup = lookupTable.get(t);
                     if (lookup != null) {
-                        testValue(lookup, converted.getXPathComparable(ordered, collator, implicitTimezone));
+                        testValue(lookup, converted.getXPathMatchKey(collator, implicitTimezone));
                     }
                 }
             } else {
@@ -162,7 +166,7 @@ public class GeneralComparisonFeed extends AtomicItemFeed {
                     int t = types.next();
                     if (t != StandardNames.XS_UNTYPED_ATOMIC) {
                         BuiltInAtomicType u = (BuiltInAtomicType)BuiltInType.getSchemaType(t);
-                        if (matchType != u && !Type.isGuaranteedComparable(matchType, u, ordered)) {
+                        if (matchType != u && !Type.isGuaranteedComparable(matchType, u, false)) {
                             throw new XPathException("Comparison between " + matchType.getDisplayName() +
                                 " and " + u.getDisplayName() + " is not allowed", "XPTY0004", getExpression().getLocation());
                         }
@@ -175,52 +179,13 @@ public class GeneralComparisonFeed extends AtomicItemFeed {
 
     private void testValue(Set<AtomicMatchKey> lookup, AtomicMatchKey k) throws XPathException {
         Outputter out = getNextOutputter();
-        if (operator == Token.FEQ) {
-            if (lookup.contains(k)) {
-                //System.err.println("Matched on " + k);
-                done = true;
-                out.append(BooleanValue.TRUE);
-                out.close();
-                lookupTable = null;
-                getTerminator().terminate();
-            }
-        } else if (operator == Token.FNE) {
-            if (lookup.size() > 1 || !lookup.contains(k)) {
-                done = true;
-                out.append(BooleanValue.TRUE);
-                out.close();
-                lookupTable = null;
-                getTerminator().terminate();
-            }
-        } else {
-            for (AtomicMatchKey k2 : lookup) {
-                int c = ((Comparable) k).compareTo(k2);
-                boolean result;
-                switch (operator) {
-                    case Token.FLE:
-                        result = c <= 0;
-                        break;
-                    case Token.FLT:
-                        result = c < 0;
-                        break;
-                    case Token.FGE:
-                        result = c >= 0;
-                        break;
-                    case Token.FGT:
-                        result = c > 0;
-                        break;
-                    default:
-                        result = false;
-                }
-                if (result) {
-                    done = true;
-                    out.append(BooleanValue.TRUE);
-                    out.close();
-                    lookupTable = null;
-                    getTerminator().terminate();
-                    break;
-                }
-            }
+        if (lookup.contains(k)) {
+            //System.err.println("Matched on " + k);
+            done = true;
+            out.append(BooleanValue.TRUE);
+            out.close();
+            lookupTable = null;
+            getTerminator().terminate();
         }
     }
 

@@ -157,7 +157,7 @@ public class JavaLocalizerFactory extends LocalizerFactory {
                 className = "net.sf.saxon.expr.number.Numberer_en";
             }
             try {
-                numberer = (Numberer) config.getInstance(className, null);
+                numberer = (Numberer) config.getInstance(className);
             } catch (XPathException err) {
                 numberer = new Numberer_en();
             }

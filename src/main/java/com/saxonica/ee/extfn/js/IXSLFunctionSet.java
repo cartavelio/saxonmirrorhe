@@ -253,7 +253,7 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
                     SequenceIterator converted = convertFromJavaScript(val).iterate();
                     converted.forEachOrFail(items::add);
                 }
-                return new SequenceExtent(items);
+                return new SequenceExtent.Of<>(items);
             } else {
                 return EmptySequence.getInstance();
             }

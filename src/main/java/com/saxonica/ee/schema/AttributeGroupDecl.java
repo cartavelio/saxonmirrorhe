@@ -1,6 +1,7 @@
 package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
+import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Callable;
@@ -587,7 +588,7 @@ public final class AttributeGroupDecl extends SchemaStructure
                     }
                     AtomicSequence attFixed = att.getUnderlyingFixedValue();
                     if (attFixed != null &&
-                            !attFixed.getSchemaComparable().equals(baseFixed.getSchemaComparable())) {
+                            !SimpleTypeComparison.getInstance().equal(attFixed, baseFixed)) {
                         compiler.error("Invalid restriction: attribute " + Err.wrap(att.getDisplayName(), Err.ATTRIBUTE) +
                                 " has a fixed value different from that of the base attribute", this);
                         result = false;

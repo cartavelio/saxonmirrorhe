@@ -2,6 +2,7 @@ package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.sdoc.SimpleTypeDefinition;
+import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.functions.CallableFunction;
@@ -113,9 +114,7 @@ public abstract class ValueRangeFacet extends Facet {
 
             Facet baseFacet = ubase.getFacet(getClass());
             if (baseFacet != null && baseFacet.isFixed()) {
-                int relation = requiredValue.getSchemaComparable().compareTo(
-                        ((ValueRangeFacet) baseFacet).requiredValue.getSchemaComparable());
-                if (relation != 0) {
+                if (!SimpleTypeComparison.getInstance().equal(requiredValue, ((ValueRangeFacet) baseFacet).requiredValue)) {
                     throw new SchemaException("The " + getName() + " facet is fixed in the base type and cannot be varied");
                 }
             }
@@ -130,9 +129,7 @@ public abstract class ValueRangeFacet extends Facet {
                 if (getName().endsWith("Exclusive")) {
                     if (baseFacet != null) {
                         ((ValueRangeFacet) baseFacet).convertToTargetType(base, config);
-                        int relation = requiredValue.getSchemaComparable().compareTo(
-                                ((ValueRangeFacet) baseFacet).requiredValue.getSchemaComparable());
-                        if (relation == 0) {
+                        if (SimpleTypeComparison.getInstance().equal(requiredValue, ((ValueRangeFacet) baseFacet).requiredValue)) {
                             // suppress the error
                             err = null;
                         }
@@ -191,14 +188,11 @@ public abstract class ValueRangeFacet extends Facet {
         if (!isConverted) {
             throw new AssertionError("Value used in facet has not been converted to required type");
         }
-        Comparable supplied = value.getSchemaComparable();
-        Comparable req = requiredValue.getSchemaComparable();
-
-        if (supplied == null || req == null) {
+        if (value == null || requiredValue == null) {
             return false;
         }
 
-        int c = supplied.compareTo(req);
+        int c = SimpleTypeComparison.getInstance().compareItems(value, requiredValue);
         return c != SequenceTool.INDETERMINATE_ORDERING && testComparisonOK(c);
     }
 

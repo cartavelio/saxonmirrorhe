@@ -25,7 +25,7 @@ public class ParseHtml extends Parse {
 
     @Override
     protected void setXMLReader(Configuration config, ParseOptions options) throws XPathException {
-        Object parser = config.getInstance("org.ccil.cowan.tagsoup.Parser", null);
+        Object parser = config.getInstance("org.ccil.cowan.tagsoup.Parser");
         if (!(parser instanceof XMLReader)) {
             throw new XPathException("Loaded org.ccil.cowan.tagsoup.Parser, but it is not an XMLReader");
         }

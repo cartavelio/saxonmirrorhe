@@ -315,7 +315,7 @@ public class GeneralComparisonEE extends GeneralComparison {
                     }
                 }
                 if (t1 == hashTableType) {
-                    AtomicMatchKey k1 = v1.getXPathComparable(false, collator, implicitTimezone);
+                    AtomicMatchKey k1 = v1.getXPathMatchKey(collator, implicitTimezone);
                     if (set2 != null && set2.contains(k1)) {
                         iter1.close();
                         iter2.close();
@@ -401,7 +401,7 @@ public class GeneralComparisonEE extends GeneralComparison {
                     }
                 }
                 if (t2 == hashTableType) {
-                    AtomicMatchKey k2 = v2.getXPathComparable(false, collator, implicitTimezone);
+                    AtomicMatchKey k2 = v2.getXPathMatchKey(collator, implicitTimezone);
                     if (set1.contains(k2)) {
                         iter1.close();
                         iter2.close();

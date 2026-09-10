@@ -996,7 +996,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
                 if (q > 0) {
                     path = path.substring(0, q);
                 }
-                c = config.getClass(path, debug, null);
+                c = config.getClass(path, debug);
 
             } else if (uri.equals(NamespaceConstant.JAVA_TYPE)) {
 
@@ -1009,7 +1009,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
                 }
                 String typename = localName.substring(0, lastDot);
                 String className = JavaExternalObjectType.localNameToClassName(typename);
-                c = config.getClass(className, debug, null);
+                c = config.getClass(className, debug);
 
             } else if (strictUriFormat) {
                 c = null;
@@ -1021,11 +1021,11 @@ public class JavaExtensionLibrary implements FunctionLibrary {
 
                 int slash = uri.lastIndexOf('/');
                 if (slash < 0) {
-                    c = config.getClass(uri, debug, null);
+                    c = config.getClass(uri, debug);
                 } else if (slash == uri.length() - 1) {
                     c = null;
                 } else {
-                    c = config.getClass(uri.substring(slash + 1), debug, null);
+                    c = config.getClass(uri.substring(slash + 1), debug);
                 }
                 if (c != null) {
                     declareJavaClass(uri, c);

@@ -107,7 +107,7 @@ public class ForEachGroupParallelAction extends ForEachAction {
         SequenceIterator iter = groupingKey.iterate(populationContext);
         AtomicArray key = new AtomicArray(iter);
         for (AtomicValue val : key) {
-            comparisonKey.add(val.getXPathComparable(false, collator, implicitTimezone));
+            comparisonKey.add(val.getXPathMatchKey(collator, implicitTimezone));
         }
         return key;
     }

@@ -1,6 +1,7 @@
 package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
+import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.StaticProperty;
@@ -409,7 +410,7 @@ public final class AttributeUse extends SimpleComponentReference
             }
             AtomicSequence thisFixedValue = getFixedValue();
             if (thisFixedValue != null &&
-                    !thisFixedValue.getSchemaComparable().equals(fixedVal.getSchemaComparable())) {
+                    !SimpleTypeComparison.getInstance().equal(thisFixedValue, fixedVal)) {
                 String err = "The attribute reference " + Err.wrap(getDisplayName(), Err.ATTRIBUTE) +
                         " and the corresponding declaration have different fixed values";
                 compiler.error(err, this);

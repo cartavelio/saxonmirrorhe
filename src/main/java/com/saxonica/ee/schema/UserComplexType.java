@@ -4,6 +4,7 @@ import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.fsa.*;
 import com.saxonica.ee.schema.sdoc.SimpleTypeDefinition;
 import com.saxonica.ee.stream.Sweep;
+import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Block;
@@ -2685,7 +2686,7 @@ public class UserComplexType extends UserDefinedType
                 return "Element " + eName(base) + " in base type has a fixed value, but element " + eName(sub) +
                         " in derived type does not";
             }
-            if (!sub.getFixedValue().getSchemaComparable().equals(base.getFixedValue().getSchemaComparable())) {
+            if (!SimpleTypeComparison.getInstance().equal(sub.getFixedValue(), base.getFixedValue())) {
                 return "Element " + eName(sub) + " in derived type has a different fixed value from element "
                         + eName(base) + " in base type";
             }
@@ -2718,7 +2719,7 @@ public class UserComplexType extends UserDefinedType
 
         // (d) If B has a fixed value constraint, D must have a fixed value constraint with the same value
         if (base.getFixedValue() != null &&
-                !base.getFixedValue().getSchemaComparable().equals(sub.getFixedValue().getSchemaComparable())) {
+                !SimpleTypeComparison.getInstance().equal(base.getFixedValue(), sub.getFixedValue())) {
             return "The fixed value of element " + eName(sub) + " in the base content model is not reflected in the corresponding " +
                     "element " + eName(sub) + " of the restricted content model";
         }

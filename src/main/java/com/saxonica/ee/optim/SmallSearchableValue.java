@@ -79,7 +79,7 @@ class SmallSearchableValue extends SearchableValue {
             }
         }
 
-        return new ListIterator(selected);
+        return new ListIterator.Of<>(selected);
 
 
     }

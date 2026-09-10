@@ -1,6 +1,8 @@
 package com.saxonica.ee.schema;
 
+import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.sort.CustomMap;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.om.AtomicArray;
@@ -15,7 +17,6 @@ import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.*;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -28,7 +29,8 @@ public class EnumerationFacetSet extends Facet {
      * The set of allowed values, indexed by the result of calling getSchemaComparable()
      */
 
-    private final HashMap<Comparable, AtomicSequence> typedValues = new HashMap<>(20);
+    private final CustomMap<AtomicSequence, AtomicSequence> typedValues =
+            new CustomMap<>(SimpleTypeComparison.getInstance());
 
     /**
      * The allowed values, as strings
@@ -67,7 +69,7 @@ public class EnumerationFacetSet extends Facet {
         if (val instanceof StringItem) {
             val = new StringItem(val.getUnicodeStringValue().economize());
         }
-        typedValues.put(val.getSchemaComparable(), val);
+        typedValues.put(val, val);
         stringValues.add(stringValue);
 
     }
@@ -81,13 +83,13 @@ public class EnumerationFacetSet extends Facet {
     public UnicodeString getValue() {
         UnicodeBuilder sb = new UnicodeBuilder();
         boolean first = true;
-        for (AtomicSequence v : typedValues.values()) {
+        for (String s : stringValues) {
             if (first) {
                 first = false;
             } else {
                 sb.appendLatin(", ");
             }
-            sb.accept(v.getUnicodeStringValue());
+            sb.append(s);
         }
         return sb.toUnicodeString();
     }
@@ -114,7 +116,7 @@ public class EnumerationFacetSet extends Facet {
 
     @Override
     public boolean testAtomicValue(AtomicValue value) {
-        return typedValues.containsKey(value.getSchemaComparable());
+        return typedValues.containsKey(value);
     }
 
     /**
@@ -127,7 +129,7 @@ public class EnumerationFacetSet extends Facet {
 
     @Override
     public boolean testListValue(AtomicSequence value) {
-        return typedValues.containsKey(value.getSchemaComparable());
+        return typedValues.containsKey(value);
     }
 
     /**
@@ -156,7 +158,7 @@ public class EnumerationFacetSet extends Facet {
      */
 
     public AtomicSequence getSharedInstance(AtomicSequence value) {
-        return typedValues.get(value.getSchemaComparable());
+        return typedValues.get(value);
     }
 
 

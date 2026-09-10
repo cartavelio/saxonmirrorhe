@@ -1,5 +1,6 @@
 package com.saxonica.ee.schema;
 
+import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.AtomicSequence;
@@ -99,22 +100,20 @@ public class OrderFacet extends Facet {
      */
     @Override
     public boolean testListValue(AtomicSequence value) {
-        Comparable latest = null;
+        AtomicValue latest = null;
         if (ascending) {
             for (AtomicValue atom : value) {
-                Comparable current = atom.getSchemaComparable();
-                if (latest != null && latest.compareTo(current) > 0) {
+                if (latest != null && SimpleTypeComparison.getInstance().compareItems(latest, atom) > 0) {
                     return false;
                 }
-                latest = current;
+                latest = atom;
             }
         } else {
             for (AtomicValue atom : value) {
-                Comparable current = atom.getSchemaComparable();
-                if (latest != null && latest.compareTo(current) < 0) {
+                if (latest != null && SimpleTypeComparison.getInstance().compareItems(latest, atom) < 0) {
                     return false;
                 }
-                latest = current;
+                latest = atom;
             }
         }
         return true;

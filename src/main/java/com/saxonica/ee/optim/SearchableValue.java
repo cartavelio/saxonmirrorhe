@@ -75,7 +75,7 @@ public abstract class SearchableValue implements GroundedValue {
     /*@NotNull*/
     @Override
     public UnfailingIterator iterate() {
-        return new ArrayIterator(value, 0, end);
+        return new ArrayIterator.Of<>(value, 0, end);
     }
 
     /**
@@ -142,7 +142,7 @@ public abstract class SearchableValue implements GroundedValue {
         if (length > end) {
             length = end;
         }
-        return new SequenceExtent(Arrays.asList(value).subList(start, start + length));
+        return new SequenceExtent.Of<>(Arrays.asList(value).subList(start, start + length));
     }
 
     @Override

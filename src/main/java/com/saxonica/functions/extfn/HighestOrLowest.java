@@ -124,7 +124,7 @@ public class HighestOrLowest extends SystemFunction {
                 }
             }
         }
-        return new SequenceExtent(highestSoFar);
+        return new SequenceExtent.Of<>(highestSoFar);
     }
 
 

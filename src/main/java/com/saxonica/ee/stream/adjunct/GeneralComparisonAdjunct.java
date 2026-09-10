@@ -1,10 +1,10 @@
 package com.saxonica.ee.stream.adjunct;
 
-import com.saxonica.ee.stream.feed.FeedMaker;
-import com.saxonica.ee.stream.feed.GeneralComparisonFeed;
-import com.saxonica.ee.stream.feed.ItemFeed;
+import com.saxonica.ee.stream.feed.*;
 import com.saxonica.ee.stream.watch.WatchManager;
+import net.sf.saxon.expr.GeneralComparison;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.trans.XPathException;
 
 
@@ -13,12 +13,23 @@ import net.sf.saxon.trans.XPathException;
  */
 public class GeneralComparisonAdjunct extends StreamingAdjunct {
 
+    /**
+     * @param streamedArg 0 if the LHS operand is streamed, 1 if the RHS operand is streamed
+     * @return a feed factory
+     */
     @Override
-    public FeedMaker getFeedMaker(final int arg) {
+    public FeedMaker getFeedMaker(final int streamedArg) {
         return new FeedMaker() {
             @Override
             public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
-                return new GeneralComparisonFeed(getExpression(), arg, out, context);
+                int op = ((GeneralComparison)getExpression()).getSingletonOperator();
+                if (op == Token.FEQ) {
+                    return new GeneralComparisonEqualityFeed(getExpression(), streamedArg, out, context);
+                } else if (op == Token.FNE) {
+                    return new GeneralComparisonInequalityFeed(getExpression(), streamedArg, out, context);
+                } else {
+                    return new GeneralComparisonMinimaxFeed(getExpression(), streamedArg, out, context);
+                }
             }
         };
     }

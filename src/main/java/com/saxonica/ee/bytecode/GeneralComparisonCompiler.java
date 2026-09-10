@@ -485,7 +485,7 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
         }
 
         int op = comparison.getSingletonOperator();
-        if (comparison.getAtomicComparer() instanceof ComparableAtomicValueComparer) {
+        if (comparison.getAtomicComparer() instanceof ContextFreeAtomicComparer) {
             switch (op) {
                 case Token.FEQ:
                 case Token.FNE:

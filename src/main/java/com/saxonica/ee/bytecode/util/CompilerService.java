@@ -158,7 +158,7 @@ public class CompilerService implements ICompilerService {
         ExpressionCompiler ec = expressionCompilers.get(name);
         if (ec == null) {
             try {
-                ec = (ExpressionCompiler) config.getInstance("com.saxonica.ee.bytecode." + name, null);
+                ec = (ExpressionCompiler) config.getInstance("com.saxonica.ee.bytecode." + name);
                 expressionCompilers.put(name, ec);
             } catch (XPathException e) {
                 throw new AssertionError(e);

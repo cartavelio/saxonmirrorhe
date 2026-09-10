@@ -1,5 +1,6 @@
 package com.saxonica.ee.schema;
 
+import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.functions.CallableFunction;
@@ -12,10 +13,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.value.StringItem;
-import net.sf.saxon.value.UntypedAtomicValue;
-import net.sf.saxon.value.Whitespace;
+import net.sf.saxon.value.*;
 
 import static com.saxonica.ee.schema.ValueConstraint.Variety.FIXED;
 
@@ -48,7 +46,7 @@ public class ValueConstraint {
     /**
      * A value that can be used in comparisons to test whether this value is equal to another
      */
-    private Comparable comparisonKey;
+    private int comparisonHashCode;
 
     /**
      * Constructor; supplies the lexical form of the value as a string. The typed value will initially
@@ -96,7 +94,7 @@ public class ValueConstraint {
     }
 
     /**
-     * Gets the value as a typed value.
+     * Gets the value of the constraint as a typed value.
      *
      * @return the value. This will initially be saved as an UntypedAtomicValue; later, when the type
      * is known, it will be converted to the correct type
@@ -114,17 +112,16 @@ public class ValueConstraint {
      */
     void setValue(AtomicSequence value) {
         this.typedValue = value;
-        this.comparisonKey = value.getSchemaComparable();
+        this.comparisonHashCode = SimpleTypeComparison.getInstance().hash(value);
     }
 
     /**
-     * Get a comparison key that can be used for comparing values
-     * @return a comparison key
+     * Test whether a suplied value matches the constraint
      */
-    public Comparable getComparisonKey() {
-        return comparisonKey;
+    public boolean matches(AtomicSequence supplied) {
+        SimpleTypeComparison comp = SimpleTypeComparison.getInstance();
+        return comp.hash(supplied) == this.comparisonHashCode && comp.equal(this.typedValue, supplied);
     }
-
     /**
      * For use with the saxon:schema extension function, return the value constraint in the form
      * of a function
@@ -211,7 +208,8 @@ public class ValueConstraint {
             return true;
         }
         AtomicSequence actual = type.getTypedValue(value, resolver, config.getConversionRules());
-        return actual.getSchemaComparable().equals(getComparisonKey());
+        SimpleTypeComparison comp = SimpleTypeComparison.getInstance();
+        return comp.hash(actual) == comparisonHashCode && comp.equal(actual, getValue());
 
     }
 

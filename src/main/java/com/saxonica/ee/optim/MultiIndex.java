@@ -128,7 +128,7 @@ public class MultiIndex {
 
                 // calculate the comparison key, and add the position of this item in the
                 // population to the index entry for this comparison key
-                AtomicMatchKey x = val2.getXPathComparable(false, collator, implicitTimezone);
+                AtomicMatchKey x = val2.getXPathMatchKey(collator, implicitTimezone);
                 MonotonicIntSet list = index.get(x);
                 if (list == null) {
                     list = new MonotonicIntSet();
@@ -295,7 +295,7 @@ public class MultiIndex {
 
                     // look up the index to find the positions of items with this "use" value,
                     // and combine it with the result found for other values being sought at the same time
-                    IntSet list = vi.index.get(conv.getXPathComparable(false, collator, implicitTimezone));
+                    IntSet list = vi.index.get(conv.getXPathMatchKey(collator, implicitTimezone));
                     if (list != null) {
                         if (selectedItems == null) {
                             selectedItems = list.copy();
@@ -309,7 +309,7 @@ public class MultiIndex {
                 // The value being sought is not untyped atomic.
                 // Look up the index to find the positions of items with this "use" value,
                 // and combine it with the result found for other values being sought at the same time
-                IntSet list = vi.index.get(value.getXPathComparable(false, collator, implicitTimezone));
+                IntSet list = vi.index.get(value.getXPathMatchKey(collator, implicitTimezone));
                 if (list != null) {
                     if (selectedItems == null) {
                         selectedItems = list.copy();

@@ -97,6 +97,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
         return lax;
     }
 
+    //#if CSHARP==false
     /**
      * Set the ErrorListener to be used while validating instance documents.
      *
@@ -129,6 +130,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
         }
         return null;
     }
+    //#endif
 
     /**
      * Setup Validation Reporting feature which saves the validation errors in an XML file

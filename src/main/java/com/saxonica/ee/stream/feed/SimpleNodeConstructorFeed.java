@@ -7,12 +7,13 @@ import net.sf.saxon.expr.instruct.SimpleNodeConstructor;
 import net.sf.saxon.expr.instruct.ValueOf;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.str.AbstractUniStringConsumer;
 import net.sf.saxon.str.CodePoints;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.str.UniStringConsumer;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.str.UnicodeBuilder;
 
 /**
  * This class is used when a streaming template requests evaluation of a simple content constructor
@@ -68,7 +69,7 @@ public class SimpleNodeConstructorFeed extends ItemFeed {
     @Override
     public UniStringConsumer getStringReceiver(boolean asTextNode) {
         if (isSimpleText) {
-            return new UniStringConsumer() {
+            return new AbstractUniStringConsumer() {
                 @Override
                 public UniStringConsumer accept(CodePoints chars) throws XPathException {
                     try {

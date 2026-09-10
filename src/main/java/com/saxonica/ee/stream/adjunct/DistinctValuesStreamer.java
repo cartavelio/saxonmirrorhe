@@ -78,7 +78,7 @@ public class DistinctValuesStreamer
         public void append(Item item) throws XPathException {
             if (!hasFailed()) {
                 AtomicValue next = (AtomicValue) item;
-                AtomicMatchKey key = next.getXPathComparable(false, collator, implicitTimezone);
+                AtomicMatchKey key = next.getXPathMatchKey(collator, implicitTimezone);
                 if (lookup.add(key)) {
                     // returns true if newly added
                     getNextOutputter().append(item);

@@ -421,7 +421,7 @@ public class RunJSTransform {
                 e.printStackTrace();
             }
         }
-        SequenceExtent extent = new SequenceExtent(items);
+        SequenceExtent extent = new SequenceExtent.Of<>(items);
         return XdmValue.wrap(extent);
     }
 

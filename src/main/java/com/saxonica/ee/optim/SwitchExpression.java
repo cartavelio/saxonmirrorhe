@@ -323,7 +323,7 @@ public class SwitchExpression extends Expression implements TailCallReturner, Co
         if (subjectValue == null) {
             return getOtherwiseExpression().evaluateItem(context);
         }
-        AtomicMatchKey key = subjectValue.getXPathComparable(false, collation, context.getImplicitTimezone());
+        AtomicMatchKey key = subjectValue.getXPathMatchKey(collation, context.getImplicitTimezone());
         Integer selection = map.get(key);
         if (selection == null) {
             return getOtherwiseExpression().evaluateItem(context);
@@ -354,7 +354,7 @@ public class SwitchExpression extends Expression implements TailCallReturner, Co
         if (subjectValue == null) {
             return getOtherwiseExpression().iterate(context);
         }
-        AtomicMatchKey key = subjectValue.getXPathComparable(false, collation, context.getImplicitTimezone());
+        AtomicMatchKey key = subjectValue.getXPathMatchKey(collation, context.getImplicitTimezone());
         Integer selection = map.get(key);
         if (selection == null) {
             return getOtherwiseExpression().iterate(context);
@@ -377,7 +377,7 @@ public class SwitchExpression extends Expression implements TailCallReturner, Co
             getOtherwiseExpression().process(output, context);
             return;
         }
-        AtomicMatchKey key = subjectValue.getXPathComparable(false, collation, context.getImplicitTimezone());
+        AtomicMatchKey key = subjectValue.getXPathMatchKey(collation, context.getImplicitTimezone());
         Integer selection = map.get(key);
         if (selection == null) {
             getOtherwiseExpression().process(output, context);
@@ -392,7 +392,7 @@ public class SwitchExpression extends Expression implements TailCallReturner, Co
         if (subjectValue == null) {
             return doTailCall(getOtherwiseExpression(), output, context);
         }
-        AtomicMatchKey key = subjectValue.getXPathComparable(false, collation, context.getImplicitTimezone());
+        AtomicMatchKey key = subjectValue.getXPathMatchKey(collation, context.getImplicitTimezone());
         Integer selection = map.get(key);
         if (selection == null) {
             return doTailCall(getOtherwiseExpression(), output, context);
@@ -452,8 +452,8 @@ public class SwitchExpression extends Expression implements TailCallReturner, Co
                 AtomicValue value = values.get(i);
                 Expression action = actions.get(i);
                 try {
-                    AtomicMatchKey key = value.getXPathComparable(
-                        false, collation, CalendarValue.MISSING_TIMEZONE);
+                    AtomicMatchKey key = value.getXPathMatchKey(
+                            collation, CalendarValue.MISSING_TIMEZONE);
                     if (key == null) {
                         return false;
                     } else if (index.get(key) == null) {

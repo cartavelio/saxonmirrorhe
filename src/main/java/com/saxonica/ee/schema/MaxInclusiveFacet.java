@@ -1,5 +1,6 @@
 package com.saxonica.ee.schema;
 
+import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.ValidationException;
@@ -25,16 +26,14 @@ public class MaxInclusiveFacet extends ValueRangeFacet {
         ValueRangeFacet min = (ValueRangeFacet) type.getFacet(MinExclusiveFacet.class);
         if (min != null) {
             min.convertToTargetType(base, type.getConfiguration());
-            if (requiredValue.getSchemaComparable().compareTo(
-                    min.requiredValue.getSchemaComparable()) <= 0) {
+            if (SimpleTypeComparison.getInstance().compareItems(requiredValue, min.requiredValue) <= 0) {
                 throw new SchemaException("maxInclusive facet is less than or equal to minExclusive");
             }
         }
         min = (ValueRangeFacet) type.getFacet(MinInclusiveFacet.class);
         if (min != null) {
             min.convertToTargetType(base, type.getConfiguration());
-            if (requiredValue.getSchemaComparable().compareTo(
-                    min.requiredValue.getSchemaComparable()) < 0) {
+            if (SimpleTypeComparison.getInstance().compareItems(requiredValue, min.requiredValue) < 0) {
                 throw new SchemaException("maxInclusive facet is less than or equal to minInclusive");
             }
         }

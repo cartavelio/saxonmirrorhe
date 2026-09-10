@@ -2,17 +2,14 @@ package com.saxonica.ee.validate;
 
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.SingleAtomicIterator;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.SchemaComparable;
 import net.sf.saxon.value.StringItem;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -22,7 +19,7 @@ import java.util.Iterator;
  * designed to economize on space.
  * @since 9.6
  */
-public class CompactStringValue implements AtomicSequence, SchemaComparable {
+public class CompactStringValue implements AtomicSequence {
 
     char[] value;
 
@@ -61,19 +58,19 @@ public class CompactStringValue implements AtomicSequence, SchemaComparable {
         return getUnicodeStringValue();
     }
 
-    @Override
-    public SchemaComparable getSchemaComparable() {
-        return this;
-    }
-
-    @Override
-    public int compareTo(@NotNull SchemaComparable o) {
-        if (o instanceof CompactStringValue) {
-            return new String(value).compareTo(new String(((CompactStringValue)o).value));
-        } else {
-            return SequenceTool.INDETERMINATE_ORDERING;
-        }
-    }
+//    @Override
+//    public SchemaComparable getSchemaComparable() {
+//        return this;
+//    }
+//
+//    @Override
+//    public int compareTo(@NotNull SchemaComparable o) {
+//        if (o instanceof CompactStringValue) {
+//            return new String(value).compareTo(new String(((CompactStringValue)o).value));
+//        } else {
+//            return SequenceTool.INDETERMINATE_ORDERING;
+//        }
+//    }
 
     @Override
     public boolean equals(Object obj) {

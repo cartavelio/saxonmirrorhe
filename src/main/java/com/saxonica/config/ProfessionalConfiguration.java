@@ -29,10 +29,7 @@ import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.MathFunctionSet;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.*;
-import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.FeatureKeys;
-import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.lib.StaticQueryContextFactory;
+import net.sf.saxon.lib.*;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.ma.map.MapItem;
@@ -138,7 +135,7 @@ public class ProfessionalConfiguration extends Configuration {
                 return new StaticQueryContextPE(ProfessionalConfiguration.this, copyFromDefault);
             }
         });
-        internalSetBooleanProperty(Feature.DISABLE_XSL_EVALUATE, false);
+        internalSetBooleanProperty(FeatureCode.DISABLE_XSL_EVALUATE, FeatureKeys.DISABLE_XSL_EVALUATE, false);
     }
 
 
@@ -239,14 +236,12 @@ public class ProfessionalConfiguration extends Configuration {
      */
 
     @Override
-    @SuppressWarnings("unchecked")
     public void setConfigurationProperty(String name, Object value) {
         if (name.equals("http://saxonica.com/oem-data")) {
             supplyLicenseKey(new BufferedReader(new StringReader((String) value)));
         } else {
-            Feature f = Feature.byName(name);
-            if (f != null) {
-                setConfigurationProperty(f, value);
+            if (FeatureIndex.exists(name)) {
+                setFeature(FeatureIndex.getData(name), value);
             } else if (name.startsWith(FeatureKeys.XML_PARSER_FEATURE) || name.startsWith(FeatureKeys.XML_PARSER_PROPERTY)) {
                 super.setConfigurationProperty(name, value);
             } else {
@@ -258,8 +253,8 @@ public class ProfessionalConfiguration extends Configuration {
     @Override
     public <T> void setConfigurationProperty(Feature<T> feature, T value) {
         if (feature == Feature.ALLOW_OLD_JAVA_URI_FORMAT) {
-            internalSetBooleanProperty(Feature.ALLOW_OLD_JAVA_URI_FORMAT, value);
-            boolean b = requireBoolean(feature.name, value);
+            internalSetBooleanProperty(FeatureCode.ALLOW_OLD_JAVA_URI_FORMAT, FeatureKeys.ALLOW_OLD_JAVA_URI_FORMAT, value);
+            boolean b = requireBoolean(FeatureKeys.ALLOW_OLD_JAVA_URI_FORMAT, value);
             ((JavaExtensionLibrary) getExtensionBinder("java")).setStrictJavaUriFormat(!b);
         } else if (feature == Feature.LICENSE_FILE_LOCATION) {
             synchronized(verifier) {
@@ -821,7 +816,7 @@ public class ProfessionalConfiguration extends Configuration {
             xsltExtensionElementNamespaceMap = new HashMap<>(4);
         }
         try {
-            ExtensionElementFactory factory = (ExtensionElementFactory) getInstance(className, null);
+            ExtensionElementFactory factory = (ExtensionElementFactory) getInstance(className);
             xsltExtensionElementNamespaceMap.put(namespace, factory);
         } catch (ClassCastException e) {
             throw new XPathException("Class " + className + " is not an ExtensionElementFactory");

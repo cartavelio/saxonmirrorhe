@@ -1139,7 +1139,7 @@ public class DotNetExtensionFunctionCall extends FunctionCall {
             for (int i = 0; i < array.length; i++) {
                 values[i] = (Item) convertFromDotNet(array[i], elementType, context);
             }
-            return new SequenceExtent(values);
+            return new SequenceExtent.Of<>(values);
         } else if (CLI_IENUMERABLE.IsAssignableFrom(returnType)) {
             // the difference here is we don't know the expected type of the elements
             IEnumerator enumerator = ((IEnumerable) result).GetEnumerator();
@@ -1148,7 +1148,7 @@ public class DotNetExtensionFunctionCall extends FunctionCall {
                 Sequence v = convertFromDotNet(enumerator.get_Current(), CLI_OBJECT, context);
                 v.iterate().forEachOrFail(values::add);
             }
-            return new SequenceExtent(values);
+            return new SequenceExtent.Of<>(values);
         } else {
             return new DotNetObjectValue(result);
         }

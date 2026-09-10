@@ -123,8 +123,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     public EnterpriseConfiguration() {
         super();
         setDynamicLoader(new DynamicLoaderEE());
-        internalSetBooleanProperty(Feature.ALLOW_MULTITHREADING, true);
-        internalSetBooleanProperty(Feature.GENERATE_BYTE_CODE, true);
+        internalSetBooleanProperty(FeatureCode.ALLOW_MULTITHREADING, FeatureKeys.ALLOW_MULTITHREADING, true);
+        internalSetBooleanProperty(FeatureCode.GENERATE_BYTE_CODE, FeatureKeys.GENERATE_BYTE_CODE, true);
         setStaticQueryContextFactory(new StaticQueryContextFactory() {
             @Override
             public StaticQueryContext newStaticQueryContext(Configuration config, boolean copyFromDefault) {
@@ -169,35 +169,38 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
     @Override
     public <T> void setConfigurationProperty(Feature<T> feature, T value) {
+        int code = feature.code;
+        FeatureData featureData = FeatureIndex.getData(code);
+        String name = featureData.uri;
         switch (feature.code) {
             case FeatureCode.GENERATE_BYTE_CODE: {
                 if (value instanceof Boolean) {
-                    internalSetBooleanProperty(Feature.GENERATE_BYTE_CODE, value);
+                    internalSetBooleanProperty(code, name, value);
                 } else if ("true".equals(value) || "on".equals(value) || "yes".equals(value) || "1".equals(value)) {
-                    internalSetBooleanProperty(Feature.GENERATE_BYTE_CODE, Boolean.TRUE);
+                    internalSetBooleanProperty(code, name, true);
                     byteCodeThreshold = 0;
                 } else if ("false".equals(value) || "off".equals(value) || "no".equals(value) || "0".equals(value)) {
-                    internalSetBooleanProperty(Feature.GENERATE_BYTE_CODE, Boolean.FALSE);
+                    internalSetBooleanProperty(code, name, false);
                 } else if (value instanceof Integer) {
-                    internalSetBooleanProperty(Feature.GENERATE_BYTE_CODE, Boolean.TRUE);
+                    internalSetBooleanProperty(code, name, true);
                     byteCodeThreshold = (Integer) value;
                 } else {
-                    internalSetBooleanProperty(Feature.GENERATE_BYTE_CODE, Boolean.TRUE);
+                    internalSetBooleanProperty(code, name, true);
                     try {
                         byteCodeThreshold = Integer.parseInt(value.toString());
                     } catch (NumberFormatException e) {
-                        throw new IllegalArgumentException("Value of " + feature.name + " must be a boolean or an integer");
+                        throw new IllegalArgumentException("Value of " + name + " must be a boolean or an integer");
                     }
                 }
                 break;
             }
             case FeatureCode.THRESHOLD_FOR_HOTSPOT_BYTE_CODE: {
 
-                int val = requireInteger(feature.name, value);
+                int val = requireInteger(name, value);
                 if (val <= 0) {
-                    internalSetBooleanProperty(Feature.GENERATE_BYTE_CODE, Boolean.FALSE);
+                    internalSetBooleanProperty(code, name, false);
                 } else {
-                    internalSetBooleanProperty(Feature.GENERATE_BYTE_CODE, Boolean.TRUE);
+                    internalSetBooleanProperty(code, name, true);
                     byteCodeThreshold = val;
                 }
                 break;
@@ -210,14 +213,14 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
                 int comma = val.indexOf(',');
                 if (comma < 1) {
                     throw new IllegalArgumentException(
-                            "Value of " + FeatureKeys.OCCURRENCE_LIMITS + "must be two integers, comma-separated");
+                            "Value of " + name + "must be two integers, comma-separated");
                 }
                 int min = Integer.parseInt(val.substring(0, comma));
                 int max = Integer.parseInt(val.substring(comma + 1));
                 setOccurrenceLimits(min, max);
                 break;
             case FeatureCode.RESULT_DOCUMENT_THREADS:
-                resultDocumentThreadsLimit = requireInteger(feature.name, value);
+                resultDocumentThreadsLimit = requireInteger(name, value);
                 break;
             case FeatureCode.SCHEMA_URI_RESOLVER:
                 if (!(value instanceof SchemaURIResolver)) {
@@ -228,10 +231,10 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
                 break;
             case FeatureCode.SCHEMA_URI_RESOLVER_CLASS:
                 setSchemaURIResolver(
-                        (SchemaURIResolver) instantiateClassName(feature.name, value, SchemaURIResolver.class));
+                        (SchemaURIResolver) instantiateClassName(name, value, SchemaURIResolver.class));
                 break;
             case FeatureCode.STREAMABILITY: {
-                String s = requireString(feature.name, value);
+                String s = requireString(name, value);
                 switch (s) {
                     case "off":
                         setStreamabilityEnabled(false);
@@ -249,13 +252,13 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
                 break;
             }
             case FeatureCode.THRESHOLD_FOR_COMPILING_TYPES:
-                thresholdForCompilingTypes = requireInteger(feature.name, value);
+                thresholdForCompilingTypes = requireInteger(name, value);
                 break;
             case FeatureCode.THRESHOLD_FOR_FUNCTION_INLINING:
-                thresholdForInliningFunctions = requireInteger(feature.name, value);
+                thresholdForInliningFunctions = requireInteger(name, value);
                 break;
             case FeatureCode.MAX_COMPILED_CLASSES:
-                maxCompiledClasses = requireInteger(feature.name, value);
+                maxCompiledClasses = requireInteger(name, value);
                 break;
             default:
                 super.setConfigurationProperty(feature, value);
@@ -288,10 +291,11 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getConfigurationProperty(Feature<T> feature) {
-        if (booleanFeatures.contains(feature)) {
+        int code = feature.code;
+        if (booleanFeatures.contains(code)) {
             return (T) Boolean.valueOf(getBooleanProperty((Feature<Boolean>)feature));
         }
-        switch (feature.code) {
+        switch (code) {
 
             case FeatureCode.DEBUG_BYTE_CODE_DIR:
                 return (T) debugByteCodeDirectory;

@@ -38,7 +38,7 @@ public class SimpleContentValidator extends AttributeValidator {
     // The canonical lexical representation of the fixed value, if any
     private UnicodeString fixedValueLexicalForm = null;
     // The Comparable corresponding to the fixed value, if any
-    private Comparable fixedValueComparable = null;
+    //private Comparable fixedValueComparable = null;
     // The default value, if any
     private ValueConstraint defaultValue = null;
     // Flag indicating that the fixed/default value needs to be validated
@@ -64,7 +64,6 @@ public class SimpleContentValidator extends AttributeValidator {
             fixedValue = declaration.getFixedValueConstraint();
             if (fixedValue != null) {
                 fixedValueLexicalForm = fixedValue.getLexicalForm();
-                fixedValueComparable = fixedValue.getComparisonKey();
             }
             setNillability(declaration.isNillable() ? Nillability.ALLOWED : Nillability.DISALLOWED);
             needToValidateConstraint = type != declaration.getType();
@@ -228,7 +227,7 @@ public class SimpleContentValidator extends AttributeValidator {
                     // if a value was supplied check that it matches the fixed value
                     AtomicSequence actual =
                         simpleType.getTypedValue(buffer.toUnicodeString(), getNamespaceResolver(), getConfiguration().getConversionRules());
-                    if (!actual.getSchemaComparable().equals(fixedValueComparable)) {
+                    if (!fixedValue.matches(actual)) {
                         String message = "The content " + Err.wrap(buffer.toString(), Err.VALUE) + " of " +
                             getContainingElementName() + " does not match the fixed value " +
                             Err.wrap(fixedValueLexicalForm, Err.VALUE);

@@ -332,21 +332,6 @@ public class ElementDecl extends SchemaStructure
     }
 
     /**
-     * Return the Comparable that can be used to compare the "fixed" value against other values using
-     * XML Schema comparison semantics.
-     *
-     * @return the Comparable for the fixed value, or null if there is no fixed value
-     */
-
-    public Comparable getFixedValueComparisonKey() {
-        if (getValueConstraint() != null) {
-            return getValueConstraint().getComparisonKey();
-        } else {
-            return null;
-        }
-    }
-
-    /**
      * Returns a list of the identity constraints defined within
      * this element definition. This corresponds to the {identity-constraint definitions}
      * property in the schema component model.

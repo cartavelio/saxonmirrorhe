@@ -55,6 +55,7 @@ public class SchemaManagerImpl extends SchemaManager {
         return processor.getUnderlyingConfiguration().getXsdVersion() == Configuration.XSD10 ? "1.0" : "1.1";
     }
 
+    //#if CSHARP==false
     /**
      * Set the ErrorListener to be used while loading and validating schema documents
      *
@@ -83,6 +84,7 @@ public class SchemaManagerImpl extends SchemaManager {
             return null;
         }
     }
+    //#endif
 
     @Override
     public void setErrorReporter(ErrorReporter reporter) {

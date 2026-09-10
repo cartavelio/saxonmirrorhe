@@ -7,7 +7,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.CodepointCollatingComparer;
-import net.sf.saxon.expr.sort.ComparableAtomicValueComparer;
+import net.sf.saxon.expr.sort.ContextFreeAtomicComparer;
 import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
@@ -299,7 +299,7 @@ public class ValueComparisonCompiler extends ToBooleanCompiler {
             /* try block*/
             methodInfo.placeLabel(L0);
             visitLineNumber(compiler, ga, expression);
-            if (comparer instanceof ComparableAtomicValueComparer) {
+            if (comparer instanceof ContextFreeAtomicComparer) {
                 switch (op) {
                     case Token.FEQ:
                     case Token.FNE:

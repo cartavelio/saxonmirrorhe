@@ -342,7 +342,7 @@ public class InsertExpression extends BasicUpdatingExpression {
 
             NodeInfo root = builder.getCurrentRoot();
             AxisIterator top = root.iterateAxis(AxisInfo.CHILD);
-            SequenceExtent extent = new SequenceExtent(top);
+            SequenceExtent extent = SequenceExtent.from(top);
             int len = extent.getLength();
             NodeInfo[] array = new NodeInfo[len];
             for (int i = 0; i < len; i++) {

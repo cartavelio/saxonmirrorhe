@@ -50,7 +50,7 @@ public class GroupAdjacentTester extends GroupBoundaryTester {
         SequenceIterator iter = groupingKey.iterate(getLocalContext());
         AtomicArray key = new AtomicArray(iter);
         for (AtomicValue val : key) {
-            comparisonKey.add(val.getXPathComparable(false, collator, implicitTimezone));
+            comparisonKey.add(val.getXPathMatchKey(collator, implicitTimezone));
         }
         boolean isNewGroup = currentGroupingComparisonKey == null || !currentGroupingComparisonKey.equals(comparisonKey);
         currentGroupingComparisonKey = comparisonKey;

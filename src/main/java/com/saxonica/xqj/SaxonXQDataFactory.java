@@ -210,7 +210,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
             String className = JavaExternalObjectType.localNameToClassName(typename.getLocalPart());
             Configuration config = getConfiguration();
             try {
-                Class javaClass = config.getClass(className, false, null);
+                Class<?> javaClass = config.getClass(className, false);
                 return new SaxonXQItemType(config.getJavaExternalObjectType(javaClass), config);
             } catch (XPathException e) {
                 throw new XQException(e.getMessage());
@@ -982,7 +982,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
             }
             list.add(((SaxonXQItem) item).getSaxonItem());
         }
-        SequenceExtent extent = new SequenceExtent(list);
+        SequenceExtent extent = new SequenceExtent.Of<>(list);
         return new SaxonXQSequence(extent, this);
     }
 

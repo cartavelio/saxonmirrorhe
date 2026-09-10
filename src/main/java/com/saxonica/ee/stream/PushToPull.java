@@ -7,10 +7,12 @@ import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.SequenceWriter;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.om.AbstractSequenceIterator;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.QuitParsingException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.value.StringItem;
 
 import java.util.concurrent.ArrayBlockingQueue;
@@ -136,11 +138,12 @@ public class PushToPull {
         EnterpriseConfiguration config = (EnterpriseConfiguration)context.getConfiguration();
         final Thread provider = config.getMultithreadingFactory().makeThread(new Provider());
         provider.start();
-        return new SequenceIterator() {
+        return new AbstractSequenceIterator() {
 
             boolean allDone = false;
 
             @Override
+            @CSharpModifiers(code = {"public", "override"})
             public Item next() throws XPathException {
                 //System.err.println("Consumer.read()");
                 if (allDone) {
@@ -173,6 +176,7 @@ public class PushToPull {
              */
 
             @Override
+            @CSharpModifiers(code = {"public", "override"})
             public void close() {
                 allDone = true;
                 provider.interrupt();

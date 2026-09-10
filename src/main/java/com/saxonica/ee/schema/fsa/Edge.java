@@ -1,6 +1,7 @@
 package com.saxonica.ee.schema.fsa;
 
 import com.saxonica.ee.schema.*;
+import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.jiter.MonoIterator;
@@ -188,7 +189,7 @@ public class Edge implements Iterable<Edge> {
                 if (sub.getFixedValue() == null) {
                     return "The element in the base type has a fixed value, but the corresponding element in derived type does not";
                 }
-                if (!sub.getFixedValue().getSchemaComparable().equals(base.getFixedValue().getSchemaComparable())) {
+                if (!SimpleTypeComparison.getInstance().equal(sub.getFixedValue(), base.getFixedValue())) {
                     return "The element in the derived type has a different fixed value from the corresponding element in the base type";
                 }
             }
@@ -222,7 +223,7 @@ public class Edge implements Iterable<Edge> {
 
             // (d) If B has a fixed value constraint, D must have a fixed value constraint with the same value
             if (base.getFixedValue() != null &&
-                    !base.getFixedValue().getSchemaComparable().equals(sub.getFixedValue().getSchemaComparable())) {
+                    !SimpleTypeComparison.getInstance().equal(base.getFixedValue(), sub.getFixedValue())) {
                 return "The fixed value of the element in the base content model is not reflected in the corresponding " +
                         "element of the restricted content model";
             }

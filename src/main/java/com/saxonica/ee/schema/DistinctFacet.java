@@ -1,6 +1,8 @@
 package com.saxonica.ee.schema;
 
+import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.sort.CustomSet;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.Function;
@@ -10,9 +12,6 @@ import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.*;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * The saxon:distinct facet on a list type can be used to constrain the list to contain distinct values.
@@ -83,9 +82,9 @@ public class DistinctFacet extends Facet {
      */
     @Override
     public boolean testListValue(AtomicSequence value) {
-        Set<Comparable> values = new HashSet<>();
+        CustomSet<AtomicSequence> values = new CustomSet<>(SimpleTypeComparison.getInstance());
         for (AtomicValue atom : value) {
-            if (!values.add(atom.getSchemaComparable())) {
+            if (!values.add(atom)) {
                 return false;
             }
         }

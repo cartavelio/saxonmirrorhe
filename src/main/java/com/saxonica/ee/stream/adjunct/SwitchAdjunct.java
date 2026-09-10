@@ -58,7 +58,7 @@ public class SwitchAdjunct extends TransmissionAdjunct {
             if (subjectValue == null) {
                 selected = exp.getOtherwiseOperand();
             } else {
-                AtomicMatchKey key = subjectValue.getXPathComparable(false, exp.getCollation(), context.getImplicitTimezone());
+                AtomicMatchKey key = subjectValue.getXPathMatchKey(exp.getCollation(), context.getImplicitTimezone());
                 Integer index = exp.getCaseMap().get(key);
                 if (index == null) {
                     selected = exp.getOtherwiseOperand();

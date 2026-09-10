@@ -6,15 +6,15 @@ import com.saxonica.ee.stream.watch.PatternWatch;
 import com.saxonica.ee.stream.watch.WatchManager;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.s9api.Location;
+import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.lib.InvalidityHandler;
 import net.sf.saxon.lib.InvalidityHandlerWrappingErrorReporter;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
-
 import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.type.ValidationFailure;
 import net.sf.saxon.value.StringItem;
@@ -306,9 +306,7 @@ public abstract class SelectorWatch extends PatternWatch {
             throw new AssertionError();
         }
         for (int i = 0; i < s1.length; i++) {
-            Comparable c1 = s1[i].getSchemaComparable();
-            Comparable c2 = s2[i].getSchemaComparable();
-            int c = c1.compareTo(c2);
+            int c = SimpleTypeComparison.getInstance().compareSequences(s1[i], s2[i]);
             if (c != 0) {
                 return identityConstraint.getFields().get(i).isAscending() ? c < 0 : c > 0;
             }
@@ -347,7 +345,7 @@ public abstract class SelectorWatch extends PatternWatch {
             if (val0 == null) {
                 return val1 == null;
             } else {
-                return val1 != null && val0.getSchemaComparable().equals(val1.getSchemaComparable());
+                return val1 != null && SimpleTypeComparison.getInstance().equal(val0, val1);
             }
         }
 
@@ -381,7 +379,7 @@ public abstract class SelectorWatch extends PatternWatch {
         abstract AtomicSequence[] getValues();
 
         protected int hash(AtomicSequence value) {
-            return value == null ? 0 : value.getSchemaComparable().hashCode();
+            return value == null ? 0 : SimpleTypeComparison.getInstance().hash(value);
         }
     }
 
