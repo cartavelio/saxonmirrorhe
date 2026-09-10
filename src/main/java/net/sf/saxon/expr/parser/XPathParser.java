@@ -2718,46 +2718,9 @@ public class XPathParser {
             case Token.DOLLAR:
                 int offset = t.currentTokenStartOffset;
                 StructuredQName variableName = parseVariableName();
-//                if (allowXPath40Syntax && t.currentToken == Token.THIN_ARROW) {
-//                    // This is a single-argument lambda expression, $x -> {EXPR}
-//                    List<UserFunctionParameter> params = new ArrayList<>(1);
-//                    UserFunctionParameter arg = new UserFunctionParameter();
-//                    arg.setRequiredType(SequenceType.ANY_SEQUENCE);
-//                    arg.setVariableQName(variableName);
-//                    arg.setSlotNumber(0);
-//                    params.add(arg);
-//                    nextToken();
-//                    return parseInlineFunctionBody(AnnotationList.EMPTY, params, SequenceType.ANY_SEQUENCE);
-//                } else {
-                    // This is a variable reference
-                    return resolveVariableReference(offset, variableName);
-//                }
+                return resolveVariableReference(offset, variableName);
 
             case Token.LPAR:
-                if (allowXPath40Syntax
-                        && t.thereMightBeAnArrowAhead()
-                        && (t.peekAhead() == Token.DOLLAR || t.peekAhead() == Token.RPAR)) {
-                    // Possible lambda expression.
-                    Tokenizer checkpoint = new Tokenizer();
-                    t.copyTo(checkpoint);
-                    List<StructuredQName> lambdaParams = parseLambdaParams();
-                    if (lambdaParams == null) {
-                        // backtrack and resume a normal parse
-                        checkpoint.copyTo(t);
-                    } else {
-                        //nextToken();
-                        List<UserFunctionParameter> params = new ArrayList<>(lambdaParams.size());
-                        int slotNumber = 0;
-                        for (StructuredQName paramName : lambdaParams) {
-                            UserFunctionParameter arg = new UserFunctionParameter();
-                            arg.setRequiredType(SequenceType.ANY_SEQUENCE);
-                            arg.setVariableQName(paramName);
-                            arg.setSlotNumber(slotNumber++);
-                            params.add(arg);
-                        }
-                        return parseInlineFunctionBody(AnnotationList.EMPTY, params, SequenceType.ANY_SEQUENCE);
-                    }
-                }
                 return parseParenthesizedExpression();
 
             case Token.LSQB:
@@ -2960,52 +2923,6 @@ public class XPathParser {
         expect(Token.RPAR);
         nextToken();
         return seq;
-    }
-
-    /**
-     * Attempt to parse the parameter list of a lambda expression. No errors are thrown, except for
-     * unresolvable QNames. If the grammar isn't matched, return null, so the caller can backtrack.
-     * @return either a list of parameter names, or null.
-     * @throws XPathException only for low-level errors like failure to tokenize, or failure to
-     * resolve a QName.
-     */
-    public List<StructuredQName> parseLambdaParams() throws XPathException {
-        List<StructuredQName> result = new ArrayList<>(4);
-        nextToken();
-        if (t.currentToken == Token.RPAR) {
-            nextToken();
-            if (t.currentToken == Token.THIN_ARROW) {
-                nextToken();
-                return result;
-            } else {
-                return null;
-            }
-        }
-        while (true) {
-            if (t.currentToken != Token.DOLLAR) {
-                return null;
-            }
-            nextToken();
-            if (t.currentToken == Token.NAME) {
-                result.add(makeStructuredQName(t.currentTokenValue, NamespaceUri.NULL));
-            } else {
-                return null;
-            }
-            nextToken();
-            if (t.currentToken == Token.COMMA) {
-                nextToken();
-            } else if (t.currentToken == Token.RPAR) {
-                nextToken();
-                if (t.currentToken == Token.THIN_ARROW) {
-                    nextToken();
-                    return result;
-                } else {
-                    return null;
-                }
-            } else {
-                return null;
-            }
-        }
     }
 
     protected void testPermittedAxis(int axis, String errorCode) throws XPathException {
