@@ -42,6 +42,7 @@ import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntArraySet;
 import net.sf.saxon.z.IntPredicateProxy;
 import net.sf.saxon.z.IntSet;
+import net.sf.saxon.z.IntToIntHashMap;
 
 import java.util.*;
 
@@ -100,6 +101,12 @@ public class XPathParser {
     protected int languageVersion = 20;
     protected int catchDepth = 0;
 
+    private final static IntToIntHashMap operatorPrecedenceTable = new IntToIntHashMap(30);
+
+    static {
+        initializeOperatorPrecedenceTable();
+    }
+
     public static class InlineFunctionDetails {
         public IndexedStack<LocalBinding> outerVariables;    // Local variables defined in the immediate outer scope (the father scope)
         public List<LocalBinding> outerVariablesUsed; // Local variables from the outer scope that are actually used
@@ -128,6 +135,65 @@ public class XPathParser {
      */
 
     public XPathParser() {
+    }
+
+    /**
+     * Initialize the static operator precedence table
+     */
+
+    private static void initializeOperatorPrecedenceTable() {
+        operatorPrecedenceTable.setDefaultValue(-1);
+        IntToIntHashMap m = operatorPrecedenceTable;
+        m.put(Token.QMARK_QMARK, 3);
+        m.put(Token.BANG_BANG, 3);
+        m.put(Token.OR, 4);
+        m.put(Token.OR_ELSE, 4);
+        m.put(Token.AND, 5);
+        m.put(Token.AND_ALSO, 5);
+        m.put(Token.FEQ, 6);
+        m.put(Token.FNE, 6);
+        m.put(Token.FLT, 6);
+        m.put(Token.FGT, 6);
+        m.put(Token.FLE, 6);
+        m.put(Token.FGE, 6);
+        m.put(Token.EQUALS, 6);
+        m.put(Token.NE, 6);
+        m.put(Token.LT, 6);
+        m.put(Token.LE, 6);
+        m.put(Token.GT, 6);
+        m.put(Token.GE, 6);
+        m.put(Token.IS, 6);
+        m.put(Token.PRECEDES, 6);
+        m.put(Token.FOLLOWS, 6);
+        m.put(Token.CONCAT, 7);
+        m.put(Token.BY, 8);
+        m.put(Token.TO, 9);
+        m.put(Token.PLUS, 10);
+        m.put(Token.MINUS, 10);
+        m.put(Token.MULT, 11);
+        m.put(Token.DIV, 11);
+        m.put(Token.IDIV, 11);
+        m.put(Token.MOD, 11);
+        m.put(Token.OTHERWISE, 12);
+        m.put(Token.UNION, 13);
+        m.put(Token.INTERSECT, 14);
+        m.put(Token.EXCEPT, 14);
+        m.put(Token.INSTANCE_OF, 15);
+        m.put(Token.TREAT_AS, 16);
+        m.put(Token.CASTABLE_AS, 17);
+        m.put(Token.CAST_AS, 18);
+        m.put(Token.FAT_ARROW, 19);
+
+                // remainder commented out because not used in precedence parsing (but perhaps they could be)
+//            case Token.BANG:
+//                return 20;
+//            case Token.SLASH:
+//                return 21;
+//            case Token.SLASH_SLASH:
+//                return 22;
+//            case Token.QMARK:
+//                return 23;
+
     }
 
     /**
@@ -920,92 +986,10 @@ public class XPathParser {
      */
 
     public static int operatorPrecedence(int operator) {
-        switch (operator) {
-            case Token.QMARK_QMARK://48
-            case Token.BANG_BANG://49
-                return 3;
-            case Token.OR://9
-                return 4;
-            case Token.AND://10
-                return 5;
-            case Token.FEQ://50
-            case Token.FNE://51
-            case Token.FLE://55
-            case Token.FLT://53
-            case Token.FGE://54
-            case Token.FGT://52
-            case Token.EQUALS://6
-            case Token.NE://22
-            case Token.LE://14
-            case Token.LT://12
-            case Token.GE://13
-            case Token.GT://11
-            case Token.IS://20
-            case Token.PRECEDES://38
-            case Token.FOLLOWS://39
-                return 6;
-            case Token.CONCAT://30
-                return 7;
-            case Token.TO://29
-                return 9;
-            case Token.PLUS://15
-            case Token.MINUS://16
-                return 10;
-            case Token.MULT://17
-            case Token.DIV://18
-            case Token.IDIV://56
-            case Token.MOD://19
-                return 11;
-
-            case Token.UNION://1
-                return 13;
-            case Token.INTERSECT://23
-            case Token.EXCEPT://24
-                return 14;
-            case Token.INSTANCE_OF://45
-                return 15;
-            case Token.TREAT_AS://47
-                return 16;
-            case Token.CASTABLE_AS://57
-                return 17;
-            case Token.CAST_AS://46
-                return 18;
-
-            // remainder commented out because not used in precedence parsing (but perhaps they could be)
-//            case Token.BANG:
-//                return 20;
-//            case Token.SLASH:
-//                return 21;
-//            case Token.SLASH_SLASH:
-//                return 22;
-//            case Token.QMARK:
-//                return 23;
-            default:
-                return operatorPrecedence2(operator);
-        }
+        return operatorPrecedenceTable.get(operator);
     }
 
-    private static int operatorPrecedence2(int operator) {
-        switch(operator)
-        {
-        case Token.OR_ELSE://81
-            return 4;
-        case Token.AND_ALSO://80
-            return 5;
-        case Token.BY://82
-            // parse (A BY B TO C) as (A BY (B TO C)) though this doesn't reflect the semantics
-            return 8;
-        case Token.FAT_ARROW://77
-            return 19;
-        case Token.OTHERWISE://79
-            return 12;
-        default:
-            return -1;
-        }
-    }
-
-
-        /*@NotNull*/
+    /*@NotNull*/
     private Expression makeBinaryExpression(Expression lhs, int operator, Expression rhs) throws XPathException {
         switch (operator) {
             case Token.OR:
@@ -1548,7 +1532,7 @@ public class XPathParser {
             }
 //#if CSHARP==false
         } else if (uri.equals(NamespaceUri.JAVA_TYPE)) {
-            Class theClass;
+            Class<?> theClass;
             try {
                 String className = JavaExternalObjectType.localNameToClassName(local);
                 theClass = config.getClass(className, false);
