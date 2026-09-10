@@ -1,9 +1,10 @@
 using System;
+using Saxon.Ejava.lang;
 using Saxon.Hej.expr;
-using Saxon.Hej.s9api;
 using Saxon.Hej.type;
 using ItemType = Saxon.Hej.type.ItemType;
 using SequenceType = Saxon.Hej.value.SequenceType;
+using Saxon.Hej.value;
 
 namespace Saxon.Api {
     /// <summary>
@@ -17,8 +18,7 @@ namespace Saxon.Api {
     public class XdmSequenceType
     {
         private readonly XdmItemType itemType;
-        private readonly char occurrenceIn;
-        private readonly int occurrence;
+        private readonly Saxon.Hej.s9api.OccurrenceIndicator occurrences;
 
         /// <summary>
         /// Occurrence indicator denoting a sequence of any length (zero or more items)
@@ -51,24 +51,21 @@ namespace Saxon.Api {
         /// Create an <c>XdmSequenceType</c> corresponding to a given <c>XdmItemType</c> and occurrence indicator
         /// </summary>
         /// <param name="itemType">The item type</param>
-        /// <param name="occurrenceIndicator">The occurrence indicator, one of '?' (zero-or-one), 
+        /// <param name="indicator">The occurrence indicator, one of '?' (zero-or-one), 
         /// '*' (zero-or-more), '+' (one-or-more), ' ' (a single space) (exactly one),
         /// or '0' (exactly zero). The type <c>empty-sequence()</c>
         /// can be represented by an occurrence indicator of 'º' with any item type.</param>
 
-        public XdmSequenceType(XdmItemType itemType, char occurrenceIndicator)
-        {
-            int occ = occurrenceIndicator switch {
-                ZERO_OR_MORE => StaticProperty.ALLOWS_ZERO_OR_MORE,
-                ONE_OR_MORE => StaticProperty.ALLOWS_ONE_OR_MORE,
-                ZERO_OR_ONE => StaticProperty.ALLOWS_ZERO_OR_ONE,
-                ONE => StaticProperty.EXACTLY_ONE,
-                ZERO => StaticProperty.ALLOWS_ZERO,
+        public XdmSequenceType(XdmItemType itemType, char indicator) {
+            this.occurrences = indicator switch {
+                ZERO_OR_MORE => Saxon.Hej.s9api.OccurrenceIndicator.ZERO_OR_MORE,
+                ONE_OR_MORE => Saxon.Hej.s9api.OccurrenceIndicator.ONE_OR_MORE,
+                ZERO_OR_ONE => Saxon.Hej.s9api.OccurrenceIndicator.ZERO_OR_ONE,
+                ONE => Saxon.Hej.s9api.OccurrenceIndicator.ONE,
+                ZERO => Saxon.Hej.s9api.OccurrenceIndicator.ZERO,
                 _ => throw new ArgumentException("Unknown occurrence indicator")
             };
             this.itemType = itemType;
-            this.occurrence = occ;
-            this.occurrenceIn = occurrenceIndicator;
         }
 
         internal static XdmSequenceType FromSequenceType(SequenceType seqType)
@@ -111,11 +108,26 @@ namespace Saxon.Api {
         /// The occurrence indicator. One of "?", "*", "+", or " " (single space) meaning exactly 1,
         /// or "0" meaning exactly zero.
         /// </summary>
-        public char OccurrenceIndicator => occurrenceIn;
+        public char OccurrenceIndicator => 
+            (occurrences) switch {
+                Saxon.Hej.s9api.OccurrenceIndicator.ONE => ' ',
+                Saxon.Hej.s9api.OccurrenceIndicator.ONE_OR_MORE => '+',
+                Saxon.Hej.s9api.OccurrenceIndicator.ZERO => '0',
+                Saxon.Hej.s9api.OccurrenceIndicator.ZERO_OR_MORE => '*',
+                Saxon.Hej.s9api.OccurrenceIndicator.ZERO_OR_ONE => '?',
+                _ => '@'
+            };
 
         internal SequenceType ToSequenceType() {
             ItemType jit = itemType.Unwrap();
-            return SequenceType.makeSequenceType(jit, occurrence);
+            return (occurrences) switch {
+                Saxon.Hej.s9api.OccurrenceIndicator.ONE => SequenceType.one(jit),
+                Saxon.Hej.s9api.OccurrenceIndicator.ONE_OR_MORE => SequenceType.oneOrMore(jit),
+                Saxon.Hej.s9api.OccurrenceIndicator.ZERO => SequenceType.EMPTY_SEQUENCE,
+                Saxon.Hej.s9api.OccurrenceIndicator.ZERO_OR_MORE => SequenceType.zeroOrMore(jit),
+                Saxon.Hej.s9api.OccurrenceIndicator.ZERO_OR_ONE => SequenceType.optional(jit),
+                _ => throw new IllegalArgumentException()
+            };
         }
         
         /// <summary>
@@ -125,8 +137,7 @@ namespace Saxon.Api {
         /// <returns>true if the supplied value conforms to this SequenceType</returns>
 
         public bool Matches(XdmValue value) {
-            OccurrenceIndicator indicator = Saxon.Hej.s9api.OccurrenceIndicator.getOccurrenceIndicator(occurrence);
-            if (!indicator.allows(value.Count)) {
+            if (!Cardinality.allows((int)occurrences, value.Count)) {
                 return false;
             }
 
@@ -138,7 +149,8 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns>the string representation of the item type, followed by an occurrence indicator</returns>
         public override string ToString() {
-            return (itemType.ToString() + occurrenceIn).Trim();
+            return (itemType + Cardinality.getOccurrenceIndicator(
+                Cardinality.staticPropertyFromOccurrenceIndicator(occurrences))).Trim();
         }
 
         /// <summary>
@@ -148,7 +160,7 @@ namespace Saxon.Api {
         /// <returns>The result of the equality comparison.</returns>
         public override bool Equals(object obj) {
             if (obj is XdmSequenceType other) {
-                return itemType.Equals(other.itemType) && occurrence == other.occurrence;
+                return itemType.Equals(other.itemType) && occurrences == other.occurrences;
             }
 
             return false;
@@ -159,7 +171,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns>A suitable hash code</returns>
         public override int GetHashCode() {
-            return itemType.GetHashCode() ^ (occurrence<<3);
+            return itemType.GetHashCode() ^ ((int)occurrences<<3);
         }
     }
 }

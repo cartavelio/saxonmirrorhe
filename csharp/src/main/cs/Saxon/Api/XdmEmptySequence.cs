@@ -19,7 +19,7 @@ namespace Saxon.Api {
 
         public static readonly XdmEmptySequence Instance = new ();
 
-        private XdmEmptySequence() : base(EmptySequence.getInstance())
+        private XdmEmptySequence() : base(EmptySequence.INSTANCE)
         { }
     }
 }
