@@ -269,6 +269,9 @@
                 href="https://qt4cg.org/">QT4CG Specifications</a>, and documentation about the Saxon
             implementations at <a class="bodylink" href="/v4extensions">Experimental 4.0 extensions</a>.</p>
         
+        <p><code>saxon:parse-html()</code> is now a synonym for <code>fn:parse-html()</code>, a new function
+        proposed for 4.0.</p>
+        
         <!--<h2>Changes to Extension Functions</h2>-->
         
         <h2>New Extension Functions</h2>
@@ -279,7 +282,8 @@
             <code>fn:expanded-QName()</code>, <code>fn:foot()</code>, <code>fn:highest()</code>, <code>fn:identity()</code>, <code>fn:index-where()</code>, 
             <code>fn:in-scope-namespaces()</code>, <code>fn:intersperse()</code>, <code>fn:is-NaN()</code>, 
             <code>fn:items-after()</code>, <code>fn:items-at()</code>, <code>fn:items-before()</code>, <code>fn:items-ending-where()</code>, <code>fn:items-starting-where()</code>, 
-            <code>fn:iterate-while()</code>, <code>fn:lowest()</code>, <code>fn:op()</code>, <code>fn:parcel()*</code>, <code>fn:parse-QName()</code>, <code>fn:parts()*</code>, 
+            <code>fn:iterate-while()</code>, <code>fn:lowest()</code>, <code>fn:op()</code>, <code>fn:parcel()*</code>, 
+            <code>fn:parse-html()</code>, <code>fn:parse-QName()</code>, <code>fn:parts()*</code>, 
             <code>fn:replicate()</code>, <code>fn:slice()*</code>, <code>fn:some()</code>, <code>fn:starts-with-sequence()</code>,
             <code>fn:trunk()</code>, and <code>fn:unparcel()*</code>. Specifications of these functions
             can be found in the <a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html">QT4CG draft specification</a>.</p>
@@ -305,6 +309,14 @@
         <p>The Saxon extension function <a class="bodylink code" href="/functions/saxon/in-scope-namespaces">saxon:in-scope-namespaces()</a> has been
             aligned with the proposed 4.0 function <code>fn:in-scope-namespaces()</code> in that the returned map now always includes an entry for the
             XML namespace.</p>
+        
+        <p>The extension function <code>saxon:parse-html()</code> (which is now also available as
+        <code>fn:parse-html()</code> if 4.0 is enabled) has been reimplemented on SaxonJ to use
+        the <code>validator.nu</code> library in place of <code>TagSoup</code>. As a result, it conforms
+        much more closely to the HTML5 parsing algorithm; it has also been much more thoroughly tested.
+        However, around 30 of the 1300 new tests are currently giving unexplained results
+        (some of these may turn out to be correct), so it remains work in progress.
+        </p>
         
         
         <!--<h2>Extension Instructions</h2>-->

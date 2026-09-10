@@ -658,6 +658,14 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       useful because they enable an array to be treated as a sequence of items, by wrapping each member of the
       array as a parcel.</p>
       
+      <kbd>fn:parse-html($input as xs:string) as document-node</kbd>
+      
+      <p>Parses an HTML5 document (supplied as a string) using the HTML5 parsing algorithm, returning
+      the result as an XDM document. In SaxonJ this is implemented using <code>validator.nu</code>
+      and appears to have a high level of conformance to the published algorithm; in SaxonCS the
+      implementation uses <code>HtmlAgilityPack</code>, which has a much lower level of
+      conformance.</p>
+      
       <kbd>fn:parse-QName(
          $eqname	as xs:string	
          ) as xs:QName</kbd>
