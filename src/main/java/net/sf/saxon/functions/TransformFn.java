@@ -75,38 +75,40 @@ public class TransformFn extends SystemFunction implements Callable {
 
     public static OptionsParameter makeOptionsParameter(int version) {
         OptionsParameter op = new OptionsParameter(version);
-        op.addAllowedOption("xslt-version", SequenceType.SINGLE_DECIMAL);
-        op.addAllowedOption("stylesheet-location", SequenceType.SINGLE_STRING);
-        op.addAllowedOption("stylesheet-node", SequenceType.SINGLE_NODE);
-        op.addAllowedOption("stylesheet-text", SequenceType.SINGLE_STRING);
-        op.addAllowedOption("stylesheet-base-uri", SequenceType.SINGLE_STRING);
         op.addAllowedOption("base-output-uri", SequenceType.SINGLE_STRING);
-        op.addAllowedOption("stylesheet-params", SequenceType.SINGLE_MAP);
-        op.addAllowedOption("source-node", SequenceType.SINGLE_NODE);
-        op.addAllowedOption("source-location", SequenceType.SINGLE_STRING); // Saxon extension (feature 3619)
-        op.addAllowedOption("initial-mode", SequenceType.SINGLE_QNAME);
-        op.addAllowedOption("initial-match-selection", SequenceType.ANY_SEQUENCE);
-        op.addAllowedOption("initial-template", SequenceType.SINGLE_QNAME);
-        op.addAllowedOption("delivery-format", SequenceType.SINGLE_STRING);
-        op.addAllowedOption("serialization-params", SequenceType.SINGLE_MAP);
-        op.addAllowedOption("vendor-options", SequenceType.SINGLE_MAP);
         op.addAllowedOption("cache", SequenceType.SINGLE_BOOLEAN);
-        op.addAllowedOption("package-name", SequenceType.SINGLE_STRING);
-        op.addAllowedOption("package-version", SequenceType.SINGLE_STRING);
-        op.addAllowedOption("package-node", SequenceType.SINGLE_NODE);
-        op.addAllowedOption("package-location", SequenceType.SINGLE_STRING);
-        op.addAllowedOption("static-params", SequenceType.SINGLE_MAP);
-        op.addAllowedOption("global-context-item", SequenceType.SINGLE_ITEM);
-        op.addAllowedOption("template-params", SequenceType.SINGLE_MAP);
-        op.addAllowedOption("tunnel-params", SequenceType.SINGLE_MAP);
-        op.addAllowedOption("initial-function", SequenceType.SINGLE_QNAME);
+        op.addAllowedOption("delivery-format", SequenceType.SINGLE_STRING);
+        op.addAllowedOption("enable-assertions", SequenceType.SINGLE_BOOLEAN);
+        op.addAllowedOption("enable-messages", SequenceType.SINGLE_BOOLEAN);
+        op.addAllowedOption("enable-trace", SequenceType.SINGLE_BOOLEAN);
         op.addAllowedOption("function-params", ArrayItemType.SINGLE_ARRAY);
-        op.addAllowedOption("requested-properties", SequenceType.SINGLE_MAP);
+        op.addAllowedOption("global-context-item", SequenceType.SINGLE_ITEM);
+        op.addAllowedOption("initial-function", SequenceType.SINGLE_QNAME);
+        op.addAllowedOption("initial-match-selection", SequenceType.ANY_SEQUENCE);
+        op.addAllowedOption("initial-mode", SequenceType.SINGLE_QNAME);
+        op.addAllowedOption("initial-template", SequenceType.SINGLE_QNAME);
+        op.addAllowedOption("package-location", SequenceType.SINGLE_STRING);
+        op.addAllowedOption("package-name", SequenceType.SINGLE_STRING);
+        op.addAllowedOption("package-node", SequenceType.SINGLE_NODE);
+        op.addAllowedOption("package-version", SequenceType.SINGLE_STRING);
         op.addAllowedOption("post-process", SequenceType.one(
                 new SpecificFunctionType(
                         new SequenceType[]{SequenceType.SINGLE_STRING, SequenceType.ANY_SEQUENCE},
                         SequenceType.ANY_SEQUENCE)));
-                // function(xs:string, item()*) as item()*
+        op.addAllowedOption("requested-properties", SequenceType.SINGLE_MAP);
+        op.addAllowedOption("serialization-params", SequenceType.SINGLE_MAP);
+        op.addAllowedOption("source-location", SequenceType.SINGLE_STRING); // Saxon extension (feature 3619)
+        op.addAllowedOption("source-node", SequenceType.SINGLE_NODE);
+        op.addAllowedOption("static-params", SequenceType.SINGLE_MAP);
+        op.addAllowedOption("stylesheet-base-uri", SequenceType.SINGLE_STRING);
+        op.addAllowedOption("stylesheet-location", SequenceType.SINGLE_STRING);
+        op.addAllowedOption("stylesheet-node", SequenceType.SINGLE_NODE);
+        op.addAllowedOption("stylesheet-params", SequenceType.SINGLE_MAP);
+        op.addAllowedOption("stylesheet-text", SequenceType.SINGLE_STRING);
+        op.addAllowedOption("template-params", SequenceType.SINGLE_MAP);
+        op.addAllowedOption("tunnel-params", SequenceType.SINGLE_MAP);
+        op.addAllowedOption("vendor-options", SequenceType.SINGLE_MAP);
+        op.addAllowedOption("xslt-version", SequenceType.SINGLE_DECIMAL);
         return op;
     }
 
@@ -597,6 +599,8 @@ public class TransformFn extends SystemFunction implements Callable {
         String invocationOption;
         String invocationName = "invocation";
         String styleOption;
+        boolean enableAssertions = false;
+        boolean enableMessages = true;
 
         invocationOption = checkInvocationMutualExclusion30(options);
         // if invocation option is not initial-function or initial-template then check for source-node
@@ -636,6 +640,11 @@ public class TransformFn extends SystemFunction implements Callable {
             setStaticParams(options, xsltCompiler, allowTypedNodes);
         }
 
+        if (options.get("enable-assertions") != null) {
+            enableAssertions = options.get("enable-assertions").effectiveBooleanValue();
+            xsltCompiler.setAssertionsEnabled(enableAssertions);
+        }
+
         XsltExecutable sheet = getStylesheet(options, xsltCompiler, styleOption, context);
         Xslt30Transformer transformer = sheet.load30();
         transformer.setErrorReporter(context.getErrorReporter());
@@ -657,6 +666,7 @@ public class TransformFn extends SystemFunction implements Callable {
         XdmValue[] functionParams = null;
         FunctionItem postProcessor = null;
         String principalResultKey = "output";
+
 
         for (String name : options.keySet()) {
             Sequence value = options.get(name);
@@ -736,6 +746,12 @@ public class TransformFn extends SystemFunction implements Callable {
                 case "post-process":
                     postProcessor = (FunctionItem) head;
                     break;
+                case "enable-assertions":
+                    enableAssertions = head.effectiveBooleanValue();
+                    break;
+                case "enable-messages":
+                    enableMessages = head.effectiveBooleanValue();
+                    break;
             }
         }
 
@@ -784,6 +800,16 @@ public class TransformFn extends SystemFunction implements Callable {
             transformer.setInitialTemplateParameters(templateParams, false);
             transformer.setInitialTemplateParameters(tunnelParams, true);
             transformer.setResourceResolver(context.getResourceResolver());
+            transformer.setAssertionsEnabled(enableAssertions);
+
+            if (controller instanceof XsltController) {
+                if (enableMessages) {
+                    transformer.setMessageHandler(((XsltController) controller).getMessageHandler());
+                } else {
+                    transformer.setMessageHandler(msg -> {
+                    });
+                }
+            }
 
             if (schemaValidation == Validation.STRICT || schemaValidation == Validation.LAX) {
                 if (sourceNode != null) {

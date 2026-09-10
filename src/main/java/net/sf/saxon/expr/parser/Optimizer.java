@@ -121,7 +121,24 @@ public class Optimizer {
         return vc;
     }
 
-    private Expression optimizePositionVsLast(Expression lhs, Expression rhs, OperatorSymbol operator) {
+    /**
+     * Perform schema-aware type checking of an axis expression
+     *
+     * @param expr        the expression
+     * @param visitor     the expression visitor
+     * @param contextInfo static context information regarding the axis expression
+     * @param warnings    true if warnings are to be issued
+     * @return the axis expression, perhaps modified
+     * @throws XPathException if things go wrong
+     */
+
+    public Expression checkAxisExprAgainstSchema(AxisExpression expr, ExpressionVisitor visitor,
+                                                         ContextItemStaticInfo contextInfo, boolean warnings) throws XPathException {
+        return expr;
+    }
+
+
+        private Expression optimizePositionVsLast(Expression lhs, Expression rhs, OperatorSymbol operator) {
 
         // optimise [position()=last()] etc
 

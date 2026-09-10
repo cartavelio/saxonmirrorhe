@@ -10,7 +10,6 @@ package net.sf.saxon.s9api;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.SchemaURIResolver;
-import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.Schema;
 
 import javax.xml.transform.Source;
@@ -43,7 +42,7 @@ import java.io.File;
  * @since 13.0
  */
 
-@CSharpModifiers(code = {"abstract", "internal"})
+//@CSharpModifiers(code = {"internal"})
 public class XsdCompiler {
 
     public XsdCompiler() {

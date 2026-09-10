@@ -317,16 +317,6 @@ public abstract class AbstractXsltTransformer {
     }
 
     /**
-     * Set a message handler to be notified of {@code xsl:message} and {@code xsl:assert} output.
-     * @param messageHandler the message handler to be notified
-     * @since 11
-     */
-
-    public void setMessageHandler(Consumer<Message> messageHandler) {
-        controller.setMessageHandler(messageHandler);
-    }
-
-    /**
      * Get the MessageListener2 to be notified whenever the stylesheet evaluates an
      * <code>xsl:message</code> instruction. If no MessageListener2 has been nominated,
      * return null
@@ -341,6 +331,29 @@ public abstract class AbstractXsltTransformer {
     }
 
     //#endif
+
+    /**
+     * Set a message handler to be notified of {@code xsl:message} and {@code xsl:assert} output.
+     * @param messageHandler the message handler to be notified
+     * @since 11
+     */
+
+    public void setMessageHandler(Consumer<Message> messageHandler) {
+        controller.setMessageHandler(messageHandler);
+    }
+
+    /**
+     * Get the message handler to be notified of {@code xsl:message} and {@code xsl:assert} output.
+     *
+     * @return the message handler to be notified
+     * @since 13
+     */
+
+    public Consumer<Message> getMessageHandler(Consumer<Message> messageHandler) {
+        return controller.getMessageHandler();
+    }
+
+
 
     /**
      * Say whether assertions (xsl:assert instructions) should be enabled at run time. By default
