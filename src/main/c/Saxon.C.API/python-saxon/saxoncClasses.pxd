@@ -91,7 +91,7 @@ cdef extern from "../SaxonProcessor.h":
 
         XdmMap *makeMap3(XdmAtomicValue ** keys, XdmValue ** values, int len_)
 
-        void setCatalog(const char * filename, bool isTracing)
+        void setCatalog(const char * filename)
 
         const char * getStringValue(XdmItem * item)
 

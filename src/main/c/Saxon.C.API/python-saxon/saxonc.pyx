@@ -595,22 +595,20 @@ cdef class PySaxonProcessor:
         return newMap_
         
 
-    def set_catalog(self, str file_name, is_tracing=False):
+    def set_catalog(self, str file_name):
         """
         set_ctalog(self, name, value)
         Set the XML catalog to be used in Saxon
 
         Args:
             file_name (str): The file name for the XML catalog
-            is_tracing (bool):Customize the resolver to write messages to the Saxon logging destination
         """
         cdef const char * c_filename_string = NULL
         '''make_c_str(file_name)'''
         py_name_string = file_name.encode('UTF-8') if file_name is not None else None
         c_filename_string = py_name_string if file_name is not None else ""
-        cdef bool isTracing = is_tracing
         if c_filename_string is not NULL:
-            self.thisptr.setCatalog(c_filename_string, isTracing)
+            self.thisptr.setCatalog(c_filename_string)
 
 
     def get_string_value(self, PyXdmItem item):
