@@ -9,11 +9,11 @@ namespace TestDriver
 {
     class FotsResultsDocument: ResultsDocument
     {
-
-        public FotsResultsDocument(string rdir, Spec sp)
-            : base(rdir, sp)
+  
+        public FotsResultsDocument(string rdir, Spec sp, string filename)
+            : base(rdir, sp, filename)
         {
-            
+
         }
 
         public override void writeResultFilePreamble(Processor processor, XdmNode catalog) { 

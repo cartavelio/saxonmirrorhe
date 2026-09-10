@@ -66,7 +66,7 @@ namespace TestDriver {
                     "The specific language must be one of the following: XP20, XP30, XQ10, XQ30 or XQ31");
             }
 
-            resultsDoc = new FotsResultsDocument(this.getResultsDir(), requestedSpec);
+            resultsDoc = new FotsResultsDocument(this.getResultsDir(), requestedSpec, reportFilename);
         }
         
         public static void MainQT(string[] args) {
