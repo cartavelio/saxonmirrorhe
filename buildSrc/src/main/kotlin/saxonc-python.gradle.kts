@@ -300,13 +300,22 @@ val packageSamples = tasks.register<Copy>("package_samples_for_release") {
     }
 }
 
+val inputSrcDir = layout.projectDirectory.dir("../saxonc/src")
 val releasableSrcDir = layout.buildDirectory.dir("releasable-src")
 val sourceFilesForRelease = tasks.register<Sync>("source_files_for_release") {
     into(releasableSrcDir)
-    from(layout.projectDirectory.dir("../saxonc/src")) {
+    from(inputSrcDir) {
         exclude("saxonc/readme.txt")
         filter<ReplaceTokens>("tokens" to mapOf("edition" to extension.edition.get(), "VERSION" to saxonBuild.version.get()))
     }
+}
+
+val venvTask = venv
+val sphinxDocTask = tasks.register<SphinxDoc>("sphinxdoc") {
+    venv = venvTask
+    docSrcDir = layout.projectDirectory.dir("../saxonc/doc")
+    docBuildDir = layout.buildDirectory.dir("doc")
+    wheelInstaller(installDevWheel)
 }
 
 val packagedSamples by configurations.consumable("packagedSamples")
