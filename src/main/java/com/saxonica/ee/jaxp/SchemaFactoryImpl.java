@@ -241,7 +241,7 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
      * this method. Also, after an error is reported to a handler, the callee is allowed
      * to abort the further processing by throwing it. If an error handler is not set,
      * the callee will throw the first error it finds in the sources.</p>
-     * <h2>W3C XML Schema 1.0</h2>
+     * <h4>W3C XML Schema 1.0</h4>
      * <p>The resulting schema contains components from the specified sources.
      * The same result would be achieved if all these sources were
      * imported, using appropriate values for schemaLocation and namespace,
@@ -257,7 +257,7 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
      * <p>If the parsed set of schemas includes error(s) as
      * specified in the section 5.1 of the XML Schema spec, then
      * the error must be reported to the {@link ErrorHandler}.</p>
-     * <h2>RELAX NG</h2>
+     * <h4>RELAX NG</h4>
      * <p>The Saxon implementation does not support RELAX NG.</p>
      *
      * @param sources inputs to be parsed as schema documents. The Saxon implementation recognizes not only
