@@ -1175,7 +1175,7 @@ namespace SaxonCS_NUnit {
                 processor.SchemaManager.Compile(new Uri(ConfigTest.DATA_DIR + "books.xsd"));
 
                 Serializer serializer = processor.NewSerializer();
-                serializer.OutputFile = ConfigTest.DATA_DIR + "out/validationWarnings.xml";
+                serializer.OutputFile = ConfigTest.SANDPIT_DIR + "validationWarnings.xml";
 
                 XsltCompiler compiler = processor.NewXsltCompiler();
                 compiler.SchemaAware = true;
