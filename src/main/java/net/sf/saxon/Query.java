@@ -466,11 +466,12 @@ public class Query {
                     }
                 }
 
+                long endTime = System.nanoTime();
+
+                if (r >= 3) {
+                    totalTime += endTime - startTime;
+                }
                 if (showTime) {
-                    long endTime = System.nanoTime();
-                    if (r >= 3) {
-                        totalTime += endTime - startTime;
-                    }
                     if (repeat < 100) {
                         config.getLogger().info("Execution time: " + Timer.showExecutionTimeNano(endTime - startTime));
                         config.getLogger().info(Timer.showMemoryUsed());
