@@ -122,13 +122,6 @@
       <reason>Canonical XHTML serialization not yet implemented</reason>
    </exception>
    
-   <exception test-set="fn-serialize" 
-      test-case="serialize-json-340 serialize-json-341 serialize-json-342" 
-      run="false" report="n/a">
-      <created by="Michael Kay" on="2026-01-20"/>
-      <reason>PR2372 not yet implemented (JSON representation of INF and NaN)</reason>
-   </exception>
-   
    <exception test-set="fn-unparsed-text" 
       test-case="fn-unparsed-text-054a" 
       run="false" report="n/a">
@@ -165,6 +158,16 @@
       <created by="Michael Kay" on="2026-01-06"/>
       <reason>Spec unclear: see issue 2359</reason>
    </exception>
+
+    <!--<exception test-case="same-key-023"  run="false" report="n/a">
+        <created by="O'Neil Delpratt" on="2026-01-16"/>
+        <reason>Temporary test taking too long</reason>
+    </exception>
+
+    <exception test-case="same-key-024"  run="false" report="n/a">
+        <created by="O'Neil Delpratt" on="2026-01-16"/>
+        <reason>Temporary test taking too long</reason>
+    </exception>-->
 
 
 </exceptions>
