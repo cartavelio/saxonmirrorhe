@@ -12,6 +12,7 @@ import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.functions.DeepEqual;
+import net.sf.saxon.ma.map.HashTrieMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
@@ -103,12 +104,23 @@ public class DeepEqualStreamer extends StreamingAdjunct implements FeedMaker {
             String collationName = collationVal == null
                     ? call.getRetainedStaticContext().getDefaultCollationName()
                     : collationVal.getStringValue();
-            Expression optionsArg = exp.getArg(3);
-            MapItem suppliedOptions = (MapItem)optionsArg.evaluateItem(context);
-            try {
-                options = new DeepEqual.DeepEqualOptions(suppliedOptions, collationName, context, 31);
-            } catch (XPathException e) {
-                dynamicError(e);
+            if (exp.getArity() > 3) {
+                Expression optionsArg = exp.getArg(3);
+                MapItem suppliedOptions = (MapItem) optionsArg.evaluateItem(context);
+                if (suppliedOptions != null) {
+                    try {
+                        options = new DeepEqual.DeepEqualOptions(suppliedOptions, collationName, context, 31);
+                    } catch (XPathException e) {
+                        dynamicError(e);
+                    }
+                }
+            }
+            if (options == null) {
+                try {
+                    options = new DeepEqual.DeepEqualOptions(new HashTrieMap(), collationName, context, 31);
+                } catch (XPathException e2) {
+                    dynamicError(e2);
+                }
             }
             //comparer = function.getAtomicComparer(getContext());
         }

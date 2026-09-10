@@ -70,22 +70,22 @@ public class TakeWhile extends SystemFunction {
             if (item != null) {
                 position++;
                 try {
-                    boolean matches;
+                    BooleanValue matches;
                     switch (whileArity) {
                         case 0:
-                            matches = ((BooleanValue)whileCondition.call(context, new Sequence[]{}).head()).getBooleanValue();
+                            matches = ((BooleanValue)whileCondition.call(context, new Sequence[]{}).head());
                             break;
                         case 1:
-                            matches = ((BooleanValue) whileCondition.call(context, new Sequence[]{item}).head()).getBooleanValue();
+                            matches = ((BooleanValue) whileCondition.call(context, new Sequence[]{item}).head());
                             break;
                         case 2:
                         default:
                             final Int64Value pos = Int64Value.makeIntegerValue(position);
                             matches = ((BooleanValue) whileCondition.call(context,
-                                                                          new Sequence[]{item, pos}).head()).getBooleanValue();
+                                                                          new Sequence[]{item, pos}).head());
                             break;
                     }
-                    if (matches) {
+                    if (matches != null && matches.getBooleanValue()) {
                         return item;
                     } else {
                         position = -1;

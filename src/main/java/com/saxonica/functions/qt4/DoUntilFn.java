@@ -54,8 +54,8 @@ public class DoUntilFn extends SystemFunction {
                     predicateParams[1] = new Int64Value(pos);
                 }
             }
-            boolean condition = ((BooleanValue) dynamicCall(predicate, context, predicateParams).head()).getBooleanValue();
-            if (condition) {
+            BooleanValue condition = ((BooleanValue) dynamicCall(predicate, context, predicateParams).head());
+            if (condition != null && condition.getBooleanValue()) {
                 return input;
             }
         }

@@ -52,11 +52,11 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         SpecificFunctionType predicate2 = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER},
-                SequenceType.SINGLE_BOOLEAN).withAcceptReducedArity();
+                SequenceType.OPTIONAL_BOOLEAN).withAcceptReducedArity();
 
         SpecificFunctionType compareFnType = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_ITEM},
-                SequenceType.SINGLE_BOOLEAN);
+                SequenceType.OPTIONAL_BOOLEAN);
 
         SpecificFunctionType ft = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_ITEM},
@@ -187,7 +187,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         SpecificFunctionType valuePredicate = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER},
-                SequenceType.SINGLE_BOOLEAN).withAcceptReducedArity();
+                SequenceType.OPTIONAL_BOOLEAN).withAcceptReducedArity();
         SpecificFunctionType valueAction = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER},
                 SequenceType.ANY_SEQUENCE).withAcceptReducedArity();
@@ -469,7 +469,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         ItemType partitionFunctionType = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER},
-                SequenceType.SINGLE_BOOLEAN);
+                SequenceType.OPTIONAL_BOOLEAN);
 
         register("partition", 2, e -> e.populate(Partition::new, new ArrayItemType(SequenceType.SINGLE_ITEM), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR | INS, null)

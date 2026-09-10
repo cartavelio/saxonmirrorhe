@@ -66,8 +66,8 @@ public class SomeFn extends SystemFunction {
         } else {
             int pos = 0;
             for (Item item; (item = iter.next()) != null; ) {
-                boolean condition = ((BooleanValue)dynamicCall(predicate, context, item, Int64Value.makeIntegerValue(++pos)).head()).getBooleanValue();
-                if (condition) {
+                BooleanValue condition = ((BooleanValue)dynamicCall(predicate, context, item, Int64Value.makeIntegerValue(++pos)).head());
+                if (condition != null && condition.getBooleanValue()) {
                     iter.close();
                     return BooleanValue.TRUE;
                 }

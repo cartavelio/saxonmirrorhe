@@ -10,7 +10,7 @@ import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.Int64Value;
 
 /**
- * This class implements the function fn:iterate-while(), which is a proposed function for XPath 4.0
+ * This class implements the function fn:while-do(), which is a proposed function for XPath 4.0
  */
 
 public class WhileDoFn extends SystemFunction {
@@ -45,8 +45,8 @@ public class WhileDoFn extends SystemFunction {
                     predicateParams[1] = new Int64Value(pos);
                 }
             }
-            boolean condition = ((BooleanValue) dynamicCall(predicate, context, predicateParams).head()).getBooleanValue();
-            if (condition) {
+            BooleanValue condition = ((BooleanValue) dynamicCall(predicate, context, predicateParams).head());
+            if (condition != null && condition.getBooleanValue()) {
                 if (actionArity > 0) {
                     actionParams[0] = input;
                     if (actionArity > 1) {

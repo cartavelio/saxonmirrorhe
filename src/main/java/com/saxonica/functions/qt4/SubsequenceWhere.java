@@ -99,7 +99,7 @@ public class SubsequenceWhere extends SystemFunction {
                             matchesStart = (BooleanValue) start.call(context, new Sequence[]{item, new Int64Value(position)}).head();
                             break;
                     }
-                    if (matchesStart.getBooleanValue()) {
+                    if (matchesStart != null && matchesStart.getBooleanValue()) {
                         started = true;
                         if (end != null) {
                             ended = isMatchesEnd(item, position);
@@ -128,7 +128,7 @@ public class SubsequenceWhere extends SystemFunction {
                         matchesEnd = (BooleanValue) end.call(context, new Sequence[]{item, new Int64Value(position)}).head();
                         break;
                 }
-                return matchesEnd.getBooleanValue();
+                return matchesEnd != null && matchesEnd.getBooleanValue();
             } catch (XPathException e) {
                 throw new UncheckedXPathException(e);
             }
