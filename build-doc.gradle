@@ -848,21 +848,24 @@ task copy_prod_desc_pdf(
 // ============================================================
 
 task saxonc_documentation(
+  type: Copy,
   dependsOn: ["copy_saxonc_doc", "copy_saxonc_css", "saxonc_doc_sef",
               "saxonc_api_doc"],
   description: "Build the SaxonC documentation for website"
 ) {
-  // Just a place to hang dependencies
+    into "${buildDir}/website/saxon-c"
+    from ("${buildDir}/saxonc-doc") {
+        exclude "documentation11/*.css"
+    }
 }
 
 task copy_saxonc_doc(
   type: Copy,
   description: "Copy the SaxonC documentation source"
 ) {
-  into "${buildDir}/website/saxon-c/documentation11"
+  into "${buildDir}/saxonc-doc/documentation11"
   from ("${projectDir}/src/docs/saxonc-doc") {
     exclude "xsl/*.xsl"
-    exclude "*.css"
   }
 }
 
@@ -884,11 +887,11 @@ task saxonc_doc_sef(
   description: "Compile the viewer_app stylesheet for the SaxonC documentation"
 ) {
   inputs.files fileTree(dir: "${projectDir}/src/docs/saxonc-doc/xsl")
-  outputs.file "${buildDir}/website/saxon-c/documentation11/xsl/jstree.sef.json"
+  outputs.file "${buildDir}/saxonc-doc/documentation11/xsl/jstree.sef.json"
   classpath = configurations.documentation
   main = "com.saxonica.Transform"
   args "-xsl:${projectDir}/src/docs/saxonc-doc/xsl/jstree.xsl",
-          "-export:${buildDir}/website/saxon-c/documentation11/xsl/jstree.sef.json",
+          "-export:${buildDir}/saxonc-doc/documentation11/xsl/jstree.sef.json",
           "-target:JS", "-nogo", "-relocate:on", "-ns:##html5",
           "--generateByteCode:off"
 }
@@ -905,7 +908,7 @@ task copy_saxonc_api_doc(
   dependsOn: ["saxonc_doxygen"],
   description: "Copy generated SaxonC API documentation"
 ) {
-  into "${buildDir}/website/saxon-c/doc11"
+  into "${buildDir}/saxonc-doc/doc11"
   from "${buildDir}/docbuild/documentation"
 }
 
@@ -914,7 +917,7 @@ task copy_saxonc_python_api_doc(
   dependsOn: ["saxonc_pydoc3"],
   description: "Copy generated SaxonC python API documentation"
 ) {
-  into "${buildDir}/website/saxon-c/doc11/html"
+  into "${buildDir}/saxonc-doc/doc11/html"
   from "${buildDir}/docbuild/Saxon.C.API/python-saxon/saxonc.html"
 }
 

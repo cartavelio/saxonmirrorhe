@@ -57,6 +57,14 @@ browsers do not allow SaxonJS to run from a local file system, so the documentat
 not work directly. It is recommended that the HTTP protocol is used to access the resource files, so
 it may be necessary to host this directory on a localhost web-server.
 
+7. saxonc-userdoc
+-----------------
+Provided as a zip. Unzip to access the SaxonC documentation in directory saxonc-userdoc/documentation11.
+
+Like the main Saxon documentation in source-userdoc above, the SaxonC documentation supplied in this resources
+download runs as an interactive application driven by SaxonJS in the browser, which requires use of a
+localhost web-server.
+
 
 </xsl:variable>
    
