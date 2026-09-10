@@ -2,6 +2,7 @@ package com.saxonica.functions.extfn;
 
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntIterator;
@@ -230,7 +231,7 @@ public class EXPathBinary {
     public static ZeroOrMore<IntegerValue> toOctets(One<Base64BinaryValue> value) {
         List<IntegerValue> result = new ArrayList<IntegerValue>();
         for (byte b : value.head().getBinaryValue()) {
-            result.add(new Int64Value(b & 0xFF));
+            result.add(new Int64Value(b & 0xFF, BuiltInAtomicType.UNSIGNED_BYTE));
         }
         return new ZeroOrMore(result);
     }
