@@ -11,6 +11,7 @@ using System.Linq;
 using System.Threading;
 using Saxon.Ejava.util;
 using Saxon.Ejavax.xml.transform.stream;
+using Saxon.Hej.value;
 using TestRunner;
 
 namespace TestDriver {
@@ -44,6 +45,7 @@ namespace TestDriver {
         protected bool useXslt30Transformer = true; // Temporary for controlling test processor
         protected bool strict = false;
         protected bool jitFlag = false;
+        protected int threads = 1;
         protected HashSet<string> exceptionPredicates = new();
 #if EE        
         public string edition = "EE";
@@ -196,6 +198,10 @@ namespace TestDriver {
 
                     if (args[i].StartsWith("-debug")) {
                         debug = true;
+                    }
+                    
+                    if (args[i].StartsWith("-threads:")) {
+                        threads = int.Parse(args[i].Substring("-threads:".Length));
                     }
 
                     if (args[i].Equals("-unfolded")) {

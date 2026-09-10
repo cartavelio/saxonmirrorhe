@@ -11,12 +11,15 @@ using JVersion = Saxon.Hej.Version;
 using JResult = Saxon.Ejavax.xml.transform.Result;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
+using Saxon.Ejava.lang;
 using Saxon.Ejavax.xml.transform.stream;
 using Saxon.Hej.lib;
 using Saxon.Hej.om;
 using Saxon.Hej.trans;
 using static Saxon.Api.Steps;
 using static Saxon.Api.Predicates;
+using Exception = System.Exception;
 using NamespaceConstant = Saxon.Api.NamespaceConstant;
 
 namespace TestDriver {
@@ -59,6 +62,7 @@ namespace TestDriver {
                         return ("yes" == attVal || "1" == attVal || "true" == attVal);
                     }
                 }
+
                 return false;
             };
         }
@@ -151,6 +155,18 @@ namespace TestDriver {
             //buildDependencyMap(driverProc, environment);
         }
 
+        protected class InitialTransformDetails {
+            public string xsltLanguageVersion;
+            public XdmItem contextItem;
+            public XdmNode initialMode;
+            public XdmNode initialFunction;
+            public XdmNode initialTemplate;
+            public QName initialModeName;
+            public XdmValue initialMatchSelection;
+            public QName initialTemplateName;
+            public string baseOutputUri;
+        }
+
         /**
          * Return a set of named parameters as a map
          *
@@ -168,8 +184,8 @@ namespace TestDriver {
             string staticTest = getStatic ? "@static=('yes','true','1')" : "not(@static=('yes','true','1'))";
             foreach (XdmItem parami in xpath.Evaluate("param[" + staticTest + "]", node)) {
                 QName name = GetQNameAttribute(xpath, parami, "@name");
-                string select = ((XdmNode) parami).GetAttributeValue(new QName("select"));
-                string tunnelled = ((XdmNode) parami).GetAttributeValue(new QName("tunnel"));
+                string select = ((XdmNode)parami).GetAttributeValue(new QName("select"));
+                string tunnelled = ((XdmNode)parami).GetAttributeValue(new QName("tunnel"));
                 bool required = tunnel == (tunnelled != null && tunnelled.Equals("yes"));
                 XdmValue value;
                 if (name == null) {
@@ -200,7 +216,7 @@ namespace TestDriver {
 
             int i = 1;
             foreach (XdmItem param in xpath.Evaluate("param[not(@static='yes')]", node)) {
-                string select = ((XdmNode) param).GetAttributeValue(new QName("select"));
+                string select = ((XdmNode)param).GetAttributeValue(new QName("select"));
                 XdmValue value;
                 try {
                     value = xpath.Evaluate(select, null);
@@ -226,7 +242,7 @@ namespace TestDriver {
                          " xs:string($att)";
             XdmAtomicValue qname = null;
             try {
-                qname = (XdmAtomicValue) xpath.EvaluateSingle(exp, contextItem);
+                qname = (XdmAtomicValue)xpath.EvaluateSingle(exp, contextItem);
             }
             catch (Exception ex) {
                 Trace.WriteLine("Error in GetQNameAttribute : " + ex.Message);
@@ -252,7 +268,7 @@ namespace TestDriver {
             }
 
             if (qnameStr.Contains(":")) {
-                QName qqname = new QName(qnameStr, (XdmNode) contextItem);
+                QName qqname = new QName(qnameStr, (XdmNode)contextItem);
                 return qqname;
             }
 
@@ -312,7 +328,7 @@ namespace TestDriver {
             XdmNode lastSpecValue = allDependencies.Select(Path("spec", "@value")).FirstOrDefault();
             string specAtt = lastSpecValue != null ? lastSpecValue.StringValue : "XSLT10+";
             foreach (XdmNode dep in allDependencies.Select(Child(IsElement()))) {
-                if (!EnsureDependencySatisfied((XdmNode) dep, env)) {
+                if (!EnsureDependencySatisfied((XdmNode)dep, env)) {
                     notrun++;
                     string type = dep.NodeName.LocalName;
                     string value = dep.GetAttributeValue("value");
@@ -359,7 +375,6 @@ namespace TestDriver {
             XdmNode stylesheet = testInput
                 .Select(Child("stylesheet").Where(Not(AttributeEq("role", "secondary"))))
                 .FirstOrDefault();
-            XdmNode postureAndSweep = testInput.Select(Child("posture-and-sweep")).FirstOrDefault();
             XdmNode principalPackage = testInput
                 .Select(Child("package").Where(AttributeEq("role", "principal"))).FirstOrDefault();
             SysCollGen.IEnumerable<XdmNode> usedPackages =
@@ -375,11 +390,13 @@ namespace TestDriver {
             }
 
             // If a static error is expected, suppress JIT compilation so we catch it eagerly
-            bool IsStaticError(XdmItem item) => item.StringValue.StartsWith("XTSE") 
+            bool IsStaticError(XdmItem item) => item.StringValue.StartsWith("XTSE")
                                                 || item.StringValue.StartsWith("XPST")
-                                                || item.StringValue.StartsWith("XTDE0700"); // special case for missing static params
+                                                || item.StringValue
+                                                    .StartsWith("XTDE0700"); // special case for missing static params
+
             bool expectStaticError = testCase.Select(
-                Steps.Path("result", "//", "error", "@code").Where((Predicate<XdmItem>) IsStaticError)).Any();
+                Steps.Path("result", "//", "error", "@code").Where((Predicate<XdmItem>)IsStaticError)).Any();
             if (expectStaticError) {
                 bool saved = env.xsltCompiler.JustInTimeCompilation;
                 env.xsltCompiler.JustInTimeCompilation = false;
@@ -397,8 +414,8 @@ namespace TestDriver {
                         string code = err.ErrorCode == null ? "(no error code)" : err.ErrorCode.LocalName;
                         Location loc = err.Location;
                         try {
-                            Console.Error.WriteLine("*** WARNING: " + code + " at " + 
-                                                    loc.SystemId + "#" + loc.LineNumber + 
+                            Console.Error.WriteLine("*** WARNING: " + code + " at " +
+                                                    loc.SystemId + "#" + loc.LineNumber +
                                                     "\n   " + err.Message);
                         }
                         catch (Exception) {
@@ -433,6 +450,7 @@ namespace TestDriver {
                     recordFailure(testSetName, testName);
                     throw;
                 }
+
                 // compiler.XsltLanguageVersion =
                 //     (specAtt.Contains("XSLT30") || specAtt.Contains("XSLT20+") ? "3.0" : "2.0");
                 compiler.ClearParameters();
@@ -548,16 +566,24 @@ namespace TestDriver {
             }
 
             if (sheet != null) {
-                XdmItem contextItem = env.contextItem;
-                XdmValue initialMatchSelection = null;
-                XdmNode initialMode = (XdmNode) xpath.EvaluateSingle("initial-mode", testInput);
-                XdmNode initialFunction = (XdmNode) xpath.EvaluateSingle("initial-function", testInput);
-                XdmNode initialTemplate = (XdmNode) xpath.EvaluateSingle("initial-template", testInput);
 
-                QName initialModeName = initialMode == null ? null : GetQNameAttribute(xpath, initialMode, "@name");
-                QName initialTemplateName =
-                    initialTemplate == null ? null : GetQNameAttribute(xpath, initialTemplate, "@name");
-                string baseOutputURI = new System.Uri(System.IO.Path.GetFullPath(resultsDir + "/results/output.xml")).AbsoluteUri;
+                InitialTransformDetails ini = new();
+                ini.contextItem = env.contextItem;
+                //ini.xsltLanguageVersion = requestedSpec.;
+                ini.initialMode = (XdmNode)xpath.EvaluateSingle("initial-mode", testInput);
+                ini.initialFunction = (XdmNode)xpath.EvaluateSingle("initial-function", testInput);
+                ini.initialTemplate = (XdmNode)xpath.EvaluateSingle("initial-template", testInput);
+                ini.initialModeName =
+                    ini.initialMode == null ? null : GetQNameAttribute(xpath, ini.initialMode, "@name");
+                ini.initialTemplateName = ini.initialTemplate == null
+                    ? null
+                    : GetQNameAttribute(xpath, ini.initialTemplate, "@name");
+                ini.baseOutputUri = new System.Uri(System.IO.Path.GetFullPath(resultsDir + "/results/output.xml"))
+                    .AbsoluteUri;
+
+
+                string baseOutputURI = new System.Uri(System.IO.Path.GetFullPath(resultsDir + "/results/output.xml"))
+                    .AbsoluteUri;
                 XdmNode outputNode = testInput.Select(Steps.Path("output", "@file")).FirstOrDefault();
                 string outputUri = (outputNode != null ? outputNode.StringValue : null);
 
@@ -574,343 +600,76 @@ namespace TestDriver {
                         return;
                     }
 
-                    baseOutputURI = (new XmlUrlResolver()).ResolveUri(new Uri(baseOutputURI), outputUri).AbsolutePath;
+                    //ini.baseOutputURI = (new XmlUrlResolver()).ResolveUri(new Uri(baseOutputURI), outputUri).AbsolutePath;
                 }
 
                 outcome.BaseOutputUri = new Uri(baseOutputURI);
 
-                if (initialMode != null) {
-                    XdmItem select = xpath.EvaluateSingle("@select", initialMode);
+                if (ini.initialMode != null) {
+                    XdmItem select = xpath.EvaluateSingle("@select", ini.initialMode);
                     if (select != null) {
-                        initialMatchSelection = env.xpathCompiler.Evaluate(@select.StringValue, null);
+                        ini.initialMatchSelection = env.xpathCompiler.Evaluate(@select.StringValue, null);
                     }
                 }
 
-                if (useXslt30Transformer) {
-                    try {
-                        bool assertsSerial =
-                            xpath.Evaluate(
-                                "result//(assert-serialization|assert-serialization-error|serialization-matches)",
-                                testCase).Count > 0;
-                        bool resultAsTree = env.outputTree;
-                        bool serializationDeclared = env.outputSerialize;
-                        XdmNode needsTree = (XdmNode) xpath.EvaluateSingle("output/@tree", testInput);
-                        if (needsTree != null) {
-                            resultAsTree = needsTree.StringValue.Equals("yes");
-                        }
-
-                        XdmNode needsSerialization = (XdmNode) xpath.EvaluateSingle("output/@serialize", testInput);
-                        if (needsSerialization != null) {
-                            serializationDeclared = needsSerialization.StringValue.Equals("yes");
-                        }
-
-                        bool resultSerialized = serializationDeclared || assertsSerial;
-
-                        if (assertsSerial) {
-                            string comment = outcome.GetComment();
-                            comment = (comment == null ? "" : comment) + "*Serialization " +
-                                      (serializationDeclared ? "declared* " : "required* ");
-                            outcome.SetComment(comment);
-                        }
-
-
-                        Xslt30Transformer transformer = sheet.Load30();
-                        transformer.XmlDocumentResolver = env.GetXmlDocumentResolver();
-                        if (env.unparsedTextResolver != null) {
-                            transformer.TextResolver = env.unparsedTextResolver;
-                        }
-
-                        SysCollGen.Dictionary<QName, XdmValue> caseGlobalParams =
-                            GetNamedParameters(xpath, testInput, false, false);
-                        SysCollGen.Dictionary<QName, XdmValue> caseStaticParams =
-                            GetNamedParameters(xpath, testInput, true, false);
-                        SysCollGen.Dictionary<QName, XdmValue> globalParams =
-                            new SysCollGen.Dictionary<QName, XdmValue>(env.params1);
-
-                        foreach (SysCollGen.KeyValuePair<QName, XdmValue> entry in caseGlobalParams) {
-                            globalParams.Add(entry.Key, entry.Value);
-                        }
-
-                        transformer.SetStylesheetParameters(globalParams);
-
-                        if (contextItem != null) {
-                            transformer.GlobalContextItem = contextItem;
-                        }
-
-                        transformer.BaseOutputURI = baseOutputURI;
-
-                        transformer.MessageListener = msg => {
-                            outcome.AddXslMessage(msg.Content);
-                            Console.Error.WriteLine(msg.Content);
-                        };
-
-                        XdmValue result = null;
-
-                        TextWriter sw = new StringWriter();
-
-                        Serializer serializer = env.processor.NewSerializer();
-                        serializer.OutputWriter = sw;
-
-                        IDestination dest = null;
-                        if (resultAsTree && !resultSerialized) {
-                            // If we want non-serialized, we need to accumulate any result documents as trees too
-                            ResultDocumentHandler rdh = new (env.processor, outcome, baseOutputURI, false);
-                            transformer.ResultDocumentHandler = rdh.HandleResultDocument;
-                            dest = new XdmDestination();
-                        } else {
-                            ResultDocumentHandler rdh = new (env.processor, outcome, baseOutputURI, true);
-                            transformer.ResultDocumentHandler = rdh.HandleResultDocument;
-                            if (resultSerialized) {
-                                dest = serializer;
-                            }
-                        }
-
-
-                        Stream src = null;
-                        Uri srcBaseUri = new Uri("http://uri");
-                        XdmItem srcItem = null;
-                        DocumentBuilder builder2 = env.processor.NewDocumentBuilder();
-
-                        if (env.streamedPath != null) {
-                            src = new FileStream(env.streamedPath, FileMode.Open, FileAccess.Read);
-                            srcBaseUri = new Uri(env.streamedPath);
-                        }
-                        else if (env.streamedContent != null) {
-                            byte[] byteArray = Encoding.UTF8.GetBytes(env.streamedContent);
-                            src = new MemoryStream(byteArray); //, "inlineDoc");
-                            builder2.BaseUri = new Uri("http://uri");
-                        }
-                        else if (initialTemplate == null && contextItem != null) {
-                            srcItem = contextItem;
-                        }
-
-                        SchemaValidator validator = null;
-                        if (src != null && !"skip".Equals(env.streamedInputValidation)) {
-                            validator = env.schema.NewValidator();
-                        }
-
-                        if (initialMode != null) {
-                            QName name = GetQNameAttribute(xpath, initialMode, "@name");
-                            try {
-                                if (name != null) {
-                                    transformer.InitialMode = name;
-                                }
-                            }
-                            catch (Exception e) {
-                                if (e.InnerException is Saxon.Hej.trans.XPathException) {
-                                    Console.WriteLine(e.Message);
-                                    outcome.SetException(e);
-                                    //throw new SaxonApiException(e.getCause());
-                                }
-                                else {
-                                    throw;
-                                }
-                            }
-                        }
-
-                        if (src == null && srcItem == null && initialFunction == null && initialTemplateName == null &&
-                            initialModeName == null) {
-                            initialTemplateName = new QName("xsl", NamespaceConstant.XSLT, "initial-template");
-                        }
-
-                        if (initialMode != null || initialTemplate != null) {
-                            XdmNode init = (XdmNode) (initialMode == null ? initialTemplate : initialMode);
-                            SysCollGen.Dictionary<QName, XdmValue> params1 =
-                                GetNamedParameters(xpath, init, false, false);
-                            SysCollGen.Dictionary<QName, XdmValue> tunnelledParams =
-                                GetNamedParameters(xpath, init, false, true);
-                            if (env.xsltCompiler.XsltLanguageVersion.Equals("2.0")) {
-                                if (!(params1.Count == 0 && tunnelledParams.Count == 0)) {
-                                    Console.WriteLine("*** Initial template parameters ignored for XSLT 2.0");
-                                }
-                            }
-                            else {
-                                transformer.SetInitialTemplateParameters(params1, false);
-                                transformer.SetInitialTemplateParameters(tunnelledParams, true);
-                            }
-                        }
-
-                        if (initialTemplateName != null) {
-                            transformer.GlobalContextItem = contextItem;
-                            if (dest == null) {
-                                result = transformer.CallTemplate(initialTemplateName);
-                            }
-                            else {
-                                transformer.CallTemplate(initialTemplateName, dest);
-                            }
-                        }
-                        else if (initialFunction != null) {
-                            QName name = GetQNameAttribute(xpath, initialFunction, "@name");
-                            XdmValue[] params2 = getParameters(xpath, initialFunction);
-                            if (dest == null) {
-                                result = transformer.CallFunction(name, params2);
-                            }
-                            else {
-                                transformer.CallFunction(name, params2, dest);
-                            }
-                        }
-                        else if (initialMatchSelection != null) {
-                            if (dest == null) {
-                                result = transformer.ApplyTemplates(initialMatchSelection);
-                            }
-                            else {
-                                transformer.ApplyTemplates(initialMatchSelection, dest);
-                            }
-                        }
-                        else {
-                            if (dest == null) {
-                                if (src != null) {
-                                    result = transformer.ApplyTemplates(src, srcBaseUri);
-                                }
-                                else {
-                                    result = transformer.ApplyTemplates(srcItem);
-                                }
-                            }
-                            else {
-                                if (validator != null) {
-                                    validator.SetDestination(transformer.AsDocumentDestination(dest));
-                                    validator.Validate(src, srcBaseUri);
-                                } else if (src != null) {
-                                    transformer.ApplyTemplates(src, srcBaseUri, dest);
-                                } else if (srcItem != null) {
-                                    transformer.ApplyTemplates(srcItem, dest);
-                                }
-                                else {
-                                    throw new SaxonApiException(new XPathException("(In test driver) No Source supplied", "XTDE0044"));
-                                }
-                            }
-                        }
-
-                        if (resultAsTree && !resultSerialized) {
-                            result = ((XdmDestination) (dest)).XdmNode;
-                        }
-
-                        if (resultSerialized) {
-                            outcome.SetPrincipalSerializedResult(sw.ToString());
-                        }
-
-                        outcome.SetPrincipalResult(result);
-
-                        if (saveResults) {
-                            String s = sw.ToString();
-                            // If a transform result is entirely xsl:result-document, then result will be null
-                            if (!resultSerialized && result != null) {
-                                StringWriter sw2 = new StringWriter();
-                                Serializer se = env.processor.NewSerializer(sw2);
-                                se.SetOutputProperty(Serializer.OMIT_XML_DECLARATION, "yes");
-                                env.processor.WriteXdmValue(result, se);
-                                se.Close();
-                                s = sw2.ToString();
-                            }
-
-                            // currently, only save the principal result file in the result directory
-                            saveResultsToFile(s, resultsDir + "/results/" + testSetName + "/" + testName + ".out");
-                            SysCollGen.Dictionary<Uri, TestOutcome.SingleResultDoc> xslResultDocuments =
-                                outcome.GetSecondaryResultDocuments();
-                            foreach (SysCollGen.KeyValuePair<Uri, TestOutcome.SingleResultDoc> entry in
-                                xslResultDocuments) {
-                                Uri key = entry.Key;
-                                string path = key.AbsolutePath;
-                                string serialization = outcome.Serialize(env.processor, entry.Value);
-
-                                saveResultsToFile(serialization, path);
-                            }
-                        }
-                    }
-                    catch (Exception err) {
-                        outcome.SetException(err);
+                if (threads == 1) {
+                    bool failure = executeStylesheet(testCase, xpath, env, testInput, outcome, ini, sheet);
+                    if (failure) {
+                        return;
                     }
                 }
                 else {
-                    try {
-                        XsltTransformer transformer = sheet.Load();
-
-                        //transformer.SetURIResolver(env); //TODO
-                        // if (env.unparsedTextResolver != null) {
-                        //     transformer.TextResolver = env.unparsedTextResolver;
-                        // }
-
-                        if (initialTemplate != null) {
-                            transformer.InitialTemplate = initialTemplateName;
+                    bool[] threadFailures = new bool[threads];
+                    Parallel.ForEach(Enumerable.Range(0, threads), i => {
+                        TestOutcome thisOutcome = i == 0 ? outcome : new TestOutcome(this);
+                        bool failure = executeStylesheet(testCase, xpath, env, testInput, thisOutcome, ini, sheet);
+                        threadFailures[i] = failure;
+                    });
+                    int passed = 0, failed = 0;
+                    for (int i = 0; i < threads; i++) {
+                        if (threadFailures[i]) {
+                            failed++;
                         }
-
-                        if (initialMode != null) {
-                            transformer.InitialMode = initialModeName;
+                        else {
+                            passed++;
                         }
-
-                        foreach (XdmItem param in xpath.Evaluate("param", testInput)) {
-                            string name = ((XdmNode) param).GetAttributeValue(new QName("name"));
-                            string select = ((XdmNode) param).GetAttributeValue(new QName("select"));
-                            XdmValue value = xpath.Evaluate(select, null);
-                            transformer.SetParameter(new QName(name), value);
-                        }
-
-                        if (contextItem != null) {
-                            transformer.InitialContextNode = (XdmNode) contextItem;
-                        }
-
-                        if (env.streamedPath != null) {
-                            transformer.SetInputStream(new FileStream(env.streamedPath, FileMode.Open, FileAccess.Read),
-                                testCase.BaseUri);
-                        }
-
-                        foreach (QName varName in env.params1.Keys) {
-                            transformer.SetParameter(varName, env.params1[varName]);
-                        }
-
-                        transformer.BaseOutputUri = new Uri(resultsDir + "/results/output.xml");
-
-                        // Run the transformation twice, once for serialized results, once for a tree.
-                        // TODO: we could be smarter about this and capture both
-
-                        // run with serialization
-                        StringWriter sw = new StringWriter();
-                        Serializer serializer = env.processor.NewSerializer(sw);
-                        ResultDocumentHandler rdh = new (env.processor, outcome, testCase.BaseUri.AbsolutePath, true);
-                        transformer.ResultDocumentHandler = rdh.HandleResultDocument;
-                        transformer.Run(serializer);
-
-                        outcome.SetPrincipalSerializedResult(sw.ToString());
-                        if (saveResults) {
-                            // currently, only save the principal result file
-                            saveResultsToFile(sw.ToString(),
-                                resultsDir + "/results/" + testSetName + "/" + testName + ".out");
-                            SysCollGen.Dictionary<Uri, TestOutcome.SingleResultDoc> xslResultDocument =
-                                outcome.GetSecondaryResultDocuments();
-
-                            foreach (SysCollGen.KeyValuePair<Uri, TestOutcome.SingleResultDoc> entry in
-                                xslResultDocument) {
-                                Uri key = entry.Key;
-                                if (key != null) {
-                                    String path = entry.Key.AbsolutePath;
-                                    String serialization = outcome.Serialize(env.processor, entry.Value);
-                                    saveResultsToFile(serialization, path);
-                                }
-                            }
-                        }
-
-                        transformer.MessageListener = msg => outcome.AddXslMessage(msg.Content);
-
-                        // run without serialization
-                        if (env.streamedPath != null) {
-                            transformer.SetInputStream(new FileStream(env.streamedPath, FileMode.Open, FileAccess.Read),
-                                testCase.BaseUri);
-                        }
-
-                        XdmDestination destination = new XdmDestination();
-                        ResultDocumentHandler rdh2 = new (env.processor, outcome, testCase.BaseUri.AbsolutePath, false);
-                        transformer.ResultDocumentHandler = rdh2.HandleResultDocument;
-                        transformer.Run(destination);
-                        outcome.SetPrincipalResult(destination.XdmNode);
                     }
-                    catch (SaxonApiException err) {
-                        outcome.SetException(err);
+
+                    if (passed == 0) {
+                        return;
                     }
-                    catch (Exception err) {
-                        outcome.SetException(err);
-                        Console.Error.WriteLine(err);
+
+                    if (failed != 0) {
+                        Console.WriteLine("THREADS: Failed " + failed + " " + "Passed " + passed);
+                        resultsDoc.writeTestcaseElement(testName, "bug", "Inconsistent threading results");
+                        recordFailure(testSetName, testName);
                     }
+
+
                 }
+            }
+        }
+
+        private bool executeStylesheet(XdmNode testCase, XPathCompiler xpath, Environment env, XdmNode testInput,
+                        TestOutcome outcome, InitialTransformDetails ini, XsltExecutable sheet) {
+            string testName = testCase.GetAttributeValue("name");
+            string testSetName = testCase.Parent.GetAttributeValue("name");
+            bool failure;
+            try {
+                if (useXslt30Transformer) {
+                    failure = runWithXslt30Transformer(testCase, xpath, outcome, env, testInput, sheet, ini);
+                }
+                else {
+                    failure = runWithXsltTransformer(testCase, xpath, outcome, env, testInput, sheet, ini);
+                }
+
+                if (failure) {
+                    return true;
+                }
+            }
+            catch (Throwable e) {
+                Console.WriteLine(e.StackTrace);
+                // and continue
             }
             
             if (env.resetActions != null) {
@@ -925,7 +684,7 @@ namespace TestDriver {
             if (assertion == null) {
                 recordFailure(testSetName, testName);
                 resultsDoc.writeTestcaseElement(testName, "fail", "No test assertions found");
-                return;
+                return true;
             }
 
             XPathCompiler assertionXPath = env.processor.NewXPathCompiler();
@@ -953,7 +712,360 @@ namespace TestDriver {
                 recordFailure(testSetName, testName);
                 resultsDoc.writeTestcaseElement(testName, "fail", outcome.GetComment());
             }
+
+            return true;
         }
+
+
+        protected bool runWithXslt30Transformer(XdmNode testCase, XPathCompiler xpath, TestOutcome outcome,
+                Environment env, XdmNode testInput, XsltExecutable sheet, InitialTransformDetails ini) {
+            
+            string testName = testCase.GetAttributeValue("name");
+            string testSetName = testCase.Parent.GetAttributeValue("name");
+
+
+            try {
+                bool assertsSerial =
+                    xpath.Evaluate(
+                        "result//(assert-serialization|assert-serialization-error|serialization-matches)",
+                        testCase).Count > 0;
+                bool resultAsTree = env.outputTree;
+                bool serializationDeclared = env.outputSerialize;
+                XdmNode needsTree = (XdmNode)xpath.EvaluateSingle("output/@tree", testInput);
+                if (needsTree != null) {
+                    resultAsTree = needsTree.StringValue.Equals("yes");
+                }
+
+                XdmNode needsSerialization = (XdmNode)xpath.EvaluateSingle("output/@serialize", testInput);
+                if (needsSerialization != null) {
+                    serializationDeclared = needsSerialization.StringValue.Equals("yes");
+                }
+
+                bool resultSerialized = serializationDeclared || assertsSerial;
+
+                if (assertsSerial) {
+                    string comment = outcome.GetComment();
+                    comment = (comment == null ? "" : comment) + "*Serialization " +
+                              (serializationDeclared ? "declared* " : "required* ");
+                    outcome.SetComment(comment);
+                }
+
+
+                Xslt30Transformer transformer = sheet.Load30();
+                transformer.XmlDocumentResolver = env.GetXmlDocumentResolver();
+                if (env.unparsedTextResolver != null) {
+                    transformer.TextResolver = env.unparsedTextResolver;
+                }
+
+                SysCollGen.Dictionary<QName, XdmValue> caseGlobalParams =
+                    GetNamedParameters(xpath, testInput, false, false);
+                SysCollGen.Dictionary<QName, XdmValue> caseStaticParams =
+                    GetNamedParameters(xpath, testInput, true, false);
+                SysCollGen.Dictionary<QName, XdmValue> globalParams =
+                    new SysCollGen.Dictionary<QName, XdmValue>(env.params1);
+
+                foreach (SysCollGen.KeyValuePair<QName, XdmValue> entry in caseGlobalParams) {
+                    globalParams.Add(entry.Key, entry.Value);
+                }
+
+                transformer.SetStylesheetParameters(globalParams);
+
+                if (ini.contextItem != null) {
+                    transformer.GlobalContextItem = ini.contextItem;
+                }
+
+                transformer.BaseOutputURI = ini.baseOutputUri;
+
+                transformer.MessageListener = msg => {
+                    outcome.AddXslMessage(msg.Content);
+                    Console.Error.WriteLine(msg.Content);
+                };
+
+                XdmValue result = null;
+
+                TextWriter sw = new StringWriter();
+
+                Serializer serializer = env.processor.NewSerializer();
+                serializer.OutputWriter = sw;
+
+                IDestination dest = null;
+                if (resultAsTree && !resultSerialized) {
+                    // If we want non-serialized, we need to accumulate any result documents as trees too
+                    ResultDocumentHandler rdh = new(env.processor, outcome, ini.baseOutputUri, false);
+                    transformer.ResultDocumentHandler = rdh.HandleResultDocument;
+                    dest = new XdmDestination();
+                }
+                else {
+                    ResultDocumentHandler rdh = new(env.processor, outcome, ini.baseOutputUri, true);
+                    transformer.ResultDocumentHandler = rdh.HandleResultDocument;
+                    if (resultSerialized) {
+                        dest = serializer;
+                    }
+                }
+
+
+                Stream src = null;
+                Uri srcBaseUri = new Uri("http://uri");
+                XdmItem srcItem = null;
+                DocumentBuilder builder2 = env.processor.NewDocumentBuilder();
+
+                if (env.streamedPath != null) {
+                    src = new FileStream(env.streamedPath, FileMode.Open, FileAccess.Read);
+                    srcBaseUri = new Uri(env.streamedPath);
+                }
+                else if (env.streamedContent != null) {
+                    byte[] byteArray = Encoding.UTF8.GetBytes(env.streamedContent);
+                    src = new MemoryStream(byteArray); //, "inlineDoc");
+                    builder2.BaseUri = new Uri("http://uri");
+                }
+                else if (ini.initialTemplate == null && ini.contextItem != null) {
+                    srcItem = ini.contextItem;
+                }
+
+                SchemaValidator validator = null;
+                if (src != null && !"skip".Equals(env.streamedInputValidation)) {
+                    validator = env.schema.NewValidator();
+                }
+
+                if (ini.initialMode != null) {
+                    QName name = GetQNameAttribute(xpath, ini.initialMode, "@name");
+                    try {
+                        if (name != null) {
+                            transformer.InitialMode = name;
+                        }
+                    }
+                    catch (Exception e) {
+                        if (e.InnerException is Saxon.Hej.trans.XPathException) {
+                            Console.WriteLine(e.Message);
+                            outcome.SetException(e);
+                            //throw new SaxonApiException(e.getCause());
+                        }
+                        else {
+                            throw;
+                        }
+                    }
+                }
+
+                if (src == null && srcItem == null && ini.initialFunction == null && ini.initialTemplateName == null &&
+                    ini.initialModeName == null) {
+                    ini.initialTemplateName = new QName("xsl", NamespaceConstant.XSLT, "initial-template");
+                }
+
+                if (ini.initialMode != null || ini.initialTemplate != null) {
+                    XdmNode init = (XdmNode)(ini.initialMode == null ? ini.initialTemplate : ini.initialMode);
+                    SysCollGen.Dictionary<QName, XdmValue> params1 =
+                        GetNamedParameters(xpath, init, false, false);
+                    SysCollGen.Dictionary<QName, XdmValue> tunnelledParams =
+                        GetNamedParameters(xpath, init, false, true);
+                    if (env.xsltCompiler.XsltLanguageVersion.Equals("2.0")) {
+                        if (!(params1.Count == 0 && tunnelledParams.Count == 0)) {
+                            Console.WriteLine("*** Initial template parameters ignored for XSLT 2.0");
+                        }
+                    }
+                    else {
+                        transformer.SetInitialTemplateParameters(params1, false);
+                        transformer.SetInitialTemplateParameters(tunnelledParams, true);
+                    }
+                }
+
+                if (ini.initialTemplateName != null) {
+                    transformer.GlobalContextItem = ini.contextItem;
+                    if (dest == null) {
+                        result = transformer.CallTemplate(ini.initialTemplateName);
+                    }
+                    else {
+                        transformer.CallTemplate(ini.initialTemplateName, dest);
+                    }
+                }
+                else if (ini.initialFunction != null) {
+                    QName name = GetQNameAttribute(xpath, ini.initialFunction, "@name");
+                    XdmValue[] params2 = getParameters(xpath, ini.initialFunction);
+                    if (dest == null) {
+                        result = transformer.CallFunction(name, params2);
+                    }
+                    else {
+                        transformer.CallFunction(name, params2, dest);
+                    }
+                }
+                else if (ini.initialMatchSelection != null) {
+                    if (dest == null) {
+                        result = transformer.ApplyTemplates(ini.initialMatchSelection);
+                    }
+                    else {
+                        transformer.ApplyTemplates(ini.initialMatchSelection, dest);
+                    }
+                }
+                else {
+                    if (dest == null) {
+                        if (src != null) {
+                            result = transformer.ApplyTemplates(src, srcBaseUri);
+                        }
+                        else {
+                            result = transformer.ApplyTemplates(srcItem);
+                        }
+                    }
+                    else {
+                        if (validator != null) {
+                            validator.SetDestination(transformer.AsDocumentDestination(dest));
+                            validator.Validate(src, srcBaseUri);
+                        }
+                        else if (src != null) {
+                            transformer.ApplyTemplates(src, srcBaseUri, dest);
+                        }
+                        else if (srcItem != null) {
+                            transformer.ApplyTemplates(srcItem, dest);
+                        }
+                        else {
+                            throw new SaxonApiException(new XPathException("(In test driver) No Source supplied",
+                                "XTDE0044"));
+                        }
+                    }
+                }
+
+                if (resultAsTree && !resultSerialized) {
+                    result = ((XdmDestination)(dest)).XdmNode;
+                }
+
+                if (resultSerialized) {
+                    outcome.SetPrincipalSerializedResult(sw.ToString());
+                }
+
+                outcome.SetPrincipalResult(result);
+
+                if (saveResults) {
+                    String s = sw.ToString();
+                    // If a transform result is entirely xsl:result-document, then result will be null
+                    if (!resultSerialized && result != null) {
+                        StringWriter sw2 = new StringWriter();
+                        Serializer se = env.processor.NewSerializer(sw2);
+                        se.SetOutputProperty(Serializer.OMIT_XML_DECLARATION, "yes");
+                        env.processor.WriteXdmValue(result, se);
+                        se.Close();
+                        s = sw2.ToString();
+                    }
+
+                    // currently, only save the principal result file in the result directory
+                    saveResultsToFile(s, resultsDir + "/results/" + testSetName + "/" + testName + ".out");
+                    SysCollGen.Dictionary<Uri, TestOutcome.SingleResultDoc> xslResultDocuments =
+                        outcome.GetSecondaryResultDocuments();
+                    foreach (SysCollGen.KeyValuePair<Uri, TestOutcome.SingleResultDoc> entry in
+                             xslResultDocuments) {
+                        Uri key = entry.Key;
+                        string path = key.AbsolutePath;
+                        string serialization = outcome.Serialize(env.processor, entry.Value);
+
+                        saveResultsToFile(serialization, path);
+                    }
+                }
+            }
+            catch (Exception err) {
+                outcome.SetException(err);
+            }
+
+            return true;
+        }
+
+
+        private bool runWithXsltTransformer(XdmNode testCase, XPathCompiler xpath, TestOutcome outcome,
+                        Environment env, XdmNode testInput, XsltExecutable sheet, InitialTransformDetails ini) {
+
+            string testName = testCase.GetAttributeValue("name");
+            string testSetName = testCase.Parent.GetAttributeValue("name");
+            try {
+                XsltTransformer transformer = sheet.Load();
+
+                //transformer.SetURIResolver(env); //TODO
+                // if (env.unparsedTextResolver != null) {
+                //     transformer.TextResolver = env.unparsedTextResolver;
+                // }
+
+                if (ini.initialTemplate != null) {
+                    transformer.InitialTemplate = ini.initialTemplateName;
+                }
+
+                if (ini.initialMode != null) {
+                    transformer.InitialMode = ini.initialModeName;
+                }
+
+                foreach (XdmItem param in xpath.Evaluate("param", testInput)) {
+                    string name = ((XdmNode)param).GetAttributeValue(new QName("name"));
+                    string select = ((XdmNode)param).GetAttributeValue(new QName("select"));
+                    XdmValue value = xpath.Evaluate(select, null);
+                    transformer.SetParameter(new QName(name), value);
+                }
+
+                if (ini.contextItem != null) {
+                    transformer.InitialContextNode = (XdmNode)ini.contextItem;
+                }
+
+                if (env.streamedPath != null) {
+                    transformer.SetInputStream(new FileStream(env.streamedPath, FileMode.Open, FileAccess.Read),
+                        testCase.BaseUri);
+                }
+
+                foreach (QName varName in env.params1.Keys) {
+                    transformer.SetParameter(varName, env.params1[varName]);
+                }
+
+                transformer.BaseOutputUri = new Uri(resultsDir + "/results/output.xml");
+
+                // Run the transformation twice, once for serialized results, once for a tree.
+                // TODO: we could be smarter about this and capture both
+
+                // run with serialization
+                StringWriter sw = new StringWriter();
+                Serializer serializer = env.processor.NewSerializer(sw);
+                ResultDocumentHandler rdh = new(env.processor, outcome, testCase.BaseUri.AbsolutePath, true);
+                transformer.ResultDocumentHandler = rdh.HandleResultDocument;
+                transformer.Run(serializer);
+
+                outcome.SetPrincipalSerializedResult(sw.ToString());
+                if (saveResults) {
+                    // currently, only save the principal result file
+                    saveResultsToFile(sw.ToString(),
+                        resultsDir + "/results/" + testSetName + "/" + testName + ".out");
+                    SysCollGen.Dictionary<Uri, TestOutcome.SingleResultDoc> xslResultDocument =
+                        outcome.GetSecondaryResultDocuments();
+
+                    foreach (SysCollGen.KeyValuePair<Uri, TestOutcome.SingleResultDoc> entry in
+                             xslResultDocument) {
+                        Uri key = entry.Key;
+                        if (key != null) {
+                            String path = entry.Key.AbsolutePath;
+                            String serialization = outcome.Serialize(env.processor, entry.Value);
+                            saveResultsToFile(serialization, path);
+                        }
+                    }
+                }
+
+                transformer.MessageListener = msg => outcome.AddXslMessage(msg.Content);
+
+                // run without serialization
+                if (env.streamedPath != null) {
+                    transformer.SetInputStream(new FileStream(env.streamedPath, FileMode.Open, FileAccess.Read),
+                        testCase.BaseUri);
+                }
+
+                XdmDestination destination = new ();
+                ResultDocumentHandler rdh2 = new(env.processor, outcome, testCase.BaseUri.AbsolutePath, false);
+                transformer.ResultDocumentHandler = rdh2.HandleResultDocument;
+                transformer.Run(destination);
+                outcome.SetPrincipalResult(destination.XdmNode);
+                return false;
+            }
+            catch (SaxonApiException err) {
+                outcome.SetException(err);
+            }
+            catch (Exception err) {
+                outcome.SetException(err);
+                Console.Error.WriteLine(err);
+            }
+
+            return true;
+        }
+
+
+
 
         private bool AssertOptimization(XsltExecutable stylesheet, string assertion) {
             XdmDestination builder = new XdmDestination();
@@ -995,23 +1107,14 @@ namespace TestDriver {
 
         private XsltExecutable ExportStylesheet(string testName, string testSetName, XsltCompiler compiler,
             XsltExecutable sheet, Stream styleSource) {
-            try {
-                Uri fileUri = new Uri(resultsDir + "/export/" + testSetName + "/" + testName + ".sef");
-                Stream exportFile = FileStreamCreate(fileUri.AbsolutePath, FileMode.Create, FileAccess.Write);
+            Uri fileUri = new Uri(resultsDir + "/export/" + testSetName + "/" + testName + ".sef");
+            Stream exportFile = FileStreamCreate(fileUri.AbsolutePath, FileMode.Create, FileAccess.Write);
 
-                XsltPackage compiledPack = compiler.CompilePackage(styleSource);
-                compiledPack.Save(exportFile);
+            XsltPackage compiledPack = compiler.CompilePackage(styleSource);
+            compiledPack.Save(exportFile);
 
-                sheet = ReloadExportedStylesheet(compiler, fileUri);
-            }
-            catch (Exception e) {
-                // compiler.GetErrorList().Add(new StaticError(e));
-                //System.err.println(e.getMessage());
-                //e.printStackTrace();  //temporary, for debugging
-                throw;
-            }
-
-            return sheet;
+            return ReloadExportedStylesheet(compiler, fileUri);
+        
         }
 
         private XsltExecutable ReloadExportedStylesheet(XsltCompiler compiler, Uri exportFile) {
@@ -1061,8 +1164,6 @@ namespace TestDriver {
         }
 
         public class EnvironmentVariableResolver : Saxon.Hej.lib.EnvironmentVariableResolver {
-            public EnvironmentVariableResolver() {
-            }
 
             public SysCollGen.ISet<string> getAvailableEnvironmentVariables() {
                 SysCollGen.HashSet<string> strings = new SysCollGen.HashSet<string>();
