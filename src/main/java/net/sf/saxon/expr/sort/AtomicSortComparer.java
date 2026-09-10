@@ -176,8 +176,10 @@ public class AtomicSortComparer implements AtomicComparer {
                 try {
                     return ac.compareTo(bc);
                 } catch (ClassCastException e) {
-                    String message = "Cannot compare " + a.getPrimitiveType().getDisplayName() +
-                            " with " + b.getPrimitiveType().getDisplayName();
+                    String message = e.getMessage().startsWith("Cannot compare")
+                            ? e.getMessage()
+                            : "Cannot compare " + a.getPrimitiveType().getDisplayName() +
+                                " with " + b.getPrimitiveType().getDisplayName();
                     // Direct users to bug 3450 which explains a 2017 bug fix that may cause previously
                     // working applications to fail
                     if (a.isUntypedAtomic() || b.isUntypedAtomic()) {

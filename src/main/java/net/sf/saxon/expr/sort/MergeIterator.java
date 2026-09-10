@@ -80,10 +80,17 @@ public class MergeIterator implements
                 ItemWithMergeKeys i2 = nextItem2.getObject();
                 GroundedValue a1 = i1.sortKeyValues.get(0);
                 GroundedValue a2 = i2.sortKeyValues.get(0);
-                XPathException err = new XPathException("Merge key values are of non-comparable types ("
-                        + Type.displayTypeName(a1.itemAt(0))
-                        + " and " + Type.displayTypeName(a2.itemAt(0)) + ")", "XTTE2230");
-                err.setIsTypeError(true);
+                String message;
+                if (e.getMessage().startsWith("Cannot compare")) {
+                    message = "Merge keys are non-comparable. " + e.getMessage();
+                } else {
+                    message = "Merge key values are of non-comparable types ("
+                            + Type.displayTypeName(a1.itemAt(0))
+                            + " and " + Type.displayTypeName(a2.itemAt(0)) + ")";
+                }
+                XPathException err = new XPathException(message)
+                        .withErrorCode("XTTE2230")
+                        .asTypeError();
                 throw new UncheckedXPathException(err);
             }
             if (c <= 0) {
