@@ -1,6 +1,9 @@
 import com.saxonica.build.LifecycleTasks
+import com.saxonica.build.TemplatedDocTask
+import com.saxonica.build.doc.SaxonCPhpReadme
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.kotlin.dsl.filter
+import org.gradle.kotlin.dsl.register
 
 plugins {
   base
@@ -143,10 +146,29 @@ tasks.named(LifecycleBasePlugin.CLEAN_TASK_NAME) {
   dependsOn(phpizeCleanTask, makeCleanTask)
 }
 
+val readmeDir = layout.buildDirectory.dir("release-readme")
+val editionReadmeTemplateDir = layout.projectDirectory.dir("README.in")
+
+val readmeTask = tasks.register<TemplatedDocTask>("readme") {
+  group = LifecycleTasks.DOCUMENTATION_GROUP
+  templateRoot = layout.projectDirectory.dir("../README.in")
+  if (editionReadmeTemplateDir.asFile.exists()) {
+    editionTemplateRoot = editionReadmeTemplateDir
+  }
+  template = "README.md.peb"
+  renderedDoc = readmeDir.map { it.file("README.md") }
+  model = SaxonCPhpReadme(
+    productVersion = saxonBuild.version.get(),
+    majorProductVersion = saxonBuild.majorVersion.get(),
+    edition = extension.edition.get(),
+    host = saxonBuild.targetHost.get(),
+  )
+}
+
 val releaseFolderTask = tasks.register<Copy>("release_folder") {
   into(releaseBuildFolder)
 
-  from(project.layout.projectDirectory.dir("../")) {
+  from(readmeTask) {
     include("README.md")
   }
 

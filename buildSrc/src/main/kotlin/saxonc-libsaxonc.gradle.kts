@@ -307,6 +307,7 @@ val readmeTask = tasks.register<TemplatedDocTask>("readme") {
     renderedDoc = readmeDir.map { it.file("README.md") }
     model = SaxonCReadme(
         productVersion = saxonBuild.version.get(),
+        majorProductVersion = saxonBuild.majorVersion.get(),
         edition = extension.edition.get(),
         host = saxonBuild.targetHost.get(),
         releaseDirName = extension.package_file_name.get(),
