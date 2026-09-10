@@ -36,26 +36,26 @@ public final class GlobalOrderComparer implements Comparator<GNode> {
     }
 
     @Override
-    public int compare(GNode a, GNode b) {
-        if (a == b) {
+    public int compare(GNode g1, GNode g2) {
+        if (g1 == g2) {
             return 0;
         }
-        if (a instanceof NodeInfo && b instanceof NodeInfo) {
-            long d1 = ((NodeInfo) a).getTreeInfo().getDocumentNumber();
-            long d2 = ((NodeInfo) b).getTreeInfo().getDocumentNumber();
+        if (g1 instanceof NodeInfo x1 && g2 instanceof NodeInfo x2) {
+            long d1 = x1.getTreeInfo().getDocumentNumber();
+            long d2 = x2.getTreeInfo().getDocumentNumber();
             if (d1 == d2) {
-                return ((NodeInfo) a).compareOrder(((NodeInfo) b));
+                return x1.compareOrder(x2);
             }
             return (int) Long.signum(d1 - d2);
-        } else if (a instanceof JNode && b instanceof JNode) {
-            RootJNode rootA = ((JNode) a).getRoot();
-            RootJNode rootB = ((JNode) b).getRoot();
+        } else if (g1 instanceof JNode j1 && g2 instanceof JNode j2) {
+            RootJNode rootA = j1.getRoot();
+            RootJNode rootB = j2.getRoot();
             if (rootA == rootB) {
-                return a.compareOrder(b);
+                return j1.compareOrder(j2);
             } else {
-                return System.identityHashCode(a) - System.identityHashCode(b);
+                return rootA.compareOrder(rootB)    ;
             }
-        } else return a instanceof NodeInfo ? -1 : +1;
+        } else return g1 instanceof NodeInfo ? -1 : +1;
     }
 }
 
