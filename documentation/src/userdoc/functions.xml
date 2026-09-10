@@ -10,12 +10,12 @@
       <signatures>
 <proto return-type="xs:numeric?">
 <arg name="value" type="xs:numeric?" desc="The input value"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -66,63 +66,63 @@
 <proto return-type="xs:date?">
 <arg name="value" type="xs:date?" desc="The input date"/>
 <arg name="timezone" type="xs:dayTimeDuration?" default="fn:implicit-timezone()" desc="The new time zone, as an offset from UTC, or () to denote the implicit timezone"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
-<description>
-            <p>Returns a date value equivalent to the original date, but with the timezone
-              removed.</p>
-          </description>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
-    </function>
+    <description>
+            <p>Returns a date value equivalent to the original date, but with the timezone
+              removed.</p>
+          </description>
+</function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">adjust-dateTime-to-timezone</name>
       <signatures>
 <proto return-type="xs:dateTime?">
 <arg name="value" type="xs:dateTime?" desc="The input date/time"/>
 <arg name="timezone" type="xs:dayTimeDuration?" default="fn:implicit-timezone()" desc="The new time zone, as an offset from UTC, or () to denote the implicit timezone"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
-<description>
-            <p>Returns a dateTime value equivalent to the original dateTime, but with the timezone
-              removed.</p>
-          </description>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
-    </function>
+    <description>
+            <p>Returns a dateTime value equivalent to the original dateTime, but with the timezone
+              removed.</p>
+          </description>
+</function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">adjust-time-to-timezone</name>
       <signatures>
 <proto return-type="xs:time?">
 <arg name="value" type="xs:time?" desc="The input time"/>
 <arg name="timezone" type="xs:dayTimeDuration?" default="fn:implicit-timezone()" desc="The new time zone, as an offset from UTC, or () to denote the implicit timezone"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
-<description>
-            <p>Returns a time value equivalent to the original time, but with the timezone
-              removed.</p>
-          </description>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
-    </function>
+    <description>
+            <p>Returns a time value equivalent to the original time, but with the timezone
+              removed.</p>
+          </description>
+</function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">all-different</name><signatures>
          <proto return-type="xs:boolean">
 <arg name="values" type="xs:anyAtomicType*" desc="FIXME:"/>
@@ -148,10 +148,10 @@
 <arg name="value" type="xs:string?" desc="The input string"/>
 <arg name="pattern" type="xs:string" desc="A regular expression"/>
 <arg name="flags" type="xs:string?" default="&#34;&#34;" desc="Flags controlling the interpretation of the regular expression"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -174,8 +174,8 @@
 <proto return-type="item()*">
 <arg name="function" type="fn(*)" desc="The function to be applied"/>
 <arg name="arguments" type="array(*)" desc="Array whose members are to be used as arguments to the function"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -217,10 +217,10 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">available-environment-variables</name>
       <signatures>
 <proto return-type="xs:string*">
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -256,12 +256,12 @@
       <signatures>
 <proto return-type="xs:anyAtomicType?">
 <arg name="values" type="xs:anyAtomicType*" desc="The input sequence of numbers or durations"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -275,15 +275,12 @@
       <signatures>
 <proto return-type="xs:anyURI?">
 <arg name="node" type="node()?" default="." desc="The node whose base URI is required"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
-<description>
-            <p>Returns the base URI of the context node.</p>
-          </description>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -308,18 +305,21 @@
         is needed that requires a base URI, for example using the base URI as an argument of
           <a class="bodylink code" href="/functions/fn/resolve-uri">resolve-uri()</a>.</p>
       </details>
-    </function>
+    <description>
+            <p>Returns the base URI of the context node.</p>
+          </description>
+</function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">boolean</name>
       <signatures>
 <proto return-type="xs:boolean">
 <arg name="input" type="item()*" desc="The sequence whose effective boolean value is required"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -347,12 +347,12 @@
       <signatures>
 <proto return-type="xs:numeric?">
 <arg name="value" type="xs:numeric?" desc="The supplied number"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -400,12 +400,12 @@
 <proto return-type="xs:boolean?">
 <arg name="value1" type="xs:string?" desc="The first value to be compared"/>
 <arg name="value2" type="xs:string?" desc="The second value to be compared"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -419,12 +419,12 @@
       <signatures>
 <proto return-type="xs:string">
 <arg name="values" type="xs:integer*" desc="A sequence of Unicode codepoint values"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -462,9 +462,9 @@
 <proto return-type="xs:base64Binary">
 <arg name="value" type="xs:string" desc="A string whose collation key is required"/>
 <arg name="collation" type="xs:string?" default="fn:default-collation()" desc="A collation URI"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -485,15 +485,12 @@
       <signatures>
 <proto return-type="item()*">
 <arg name="source" type="xs:string?" default="()" desc="The supplied collection URI"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
-<description>
-            <p>Returns a sequence of items making up the default collection.</p>
-          </description>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -514,7 +511,10 @@
           unpredictable.</p>
       </status>
       <saxon-edition>ALL</saxon-edition>
-    </function>
+    <description>
+            <p>Returns a sequence of items making up the default collection.</p>
+          </description>
+</function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">compare</name>
       <signatures>
@@ -522,31 +522,31 @@
 <arg name="value1" type="xs:anyAtomicType?" desc="The first string to be compared"/>
 <arg name="value2" type="xs:anyAtomicType?" desc="The second string to be compared"/>
 <arg name="collation" type="xs:string?" default="fn:default-collation()" desc="The collation to be used for the comparison"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
-<description>
-            <p>Compares two strings using the default collation.</p>
-          </description>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
-    </function>
+    <description>
+            <p>Compares two strings using the default collation.</p>
+          </description>
+</function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">concat</name>
       <signatures>
 <proto return-type="xs:string">
 <arg name="values" type="xs:anyAtomicType*" default="()" desc="The first string"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -563,12 +563,12 @@
 <arg name="value" type="xs:string?" desc="The containing string"/>
 <arg name="substring" type="xs:string?" desc="The contained string"/>
 <arg name="collation" type="xs:string?" default="fn:default-collation()" desc="The collation to be used for comparing the strings"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -594,8 +594,8 @@
 <arg name="value" type="xs:string*" desc="The input string"/>
 <arg name="token" type="xs:string" desc="The token"/>
 <arg name="collation" type="xs:string?" default="fn:default-collation()" desc="The collation"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -636,12 +636,12 @@
       <signatures>
 <proto return-type="xs:integer">
 <arg name="input" type="item()*" desc="The sequence whose items are to be counted"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -698,12 +698,12 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">current-date</name>
       <signatures>
 <proto return-type="xs:date">
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -716,12 +716,12 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">current-dateTime</name>
       <signatures>
 <proto return-type="xs:dateTimeStamp">
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -835,12 +835,12 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">current-time</name>
       <signatures>
 <proto return-type="xs:time">
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -855,13 +855,10 @@
       <signatures>
 <proto return-type="xs:anyAtomicType*">
 <arg name="input" type="item()*" default="." desc="The value to be atomized"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
-<description>
-            <p>Returns the result of atomizing the context item.</p>
-          </description>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -869,19 +866,22 @@
           3.0 support is enabled.</p>
       </status>
       <saxon-edition>ALL</saxon-edition>
-    </function>
+    <description>
+            <p>Returns the result of atomizing the context item.</p>
+          </description>
+</function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">dateTime</name>
       <signatures>
 <proto return-type="xs:dateTime?">
 <arg name="date" type="xs:date?" desc="The supplied date"/>
 <arg name="time" type="xs:time?" desc="The supplied time"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -899,12 +899,12 @@
       <signatures>
 <proto return-type="xs:integer?">
 <arg name="value" type="xs:date?" desc="The supplied date"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -918,12 +918,12 @@
       <signatures>
 <proto return-type="xs:integer?">
 <arg name="value" type="(xs:dateTime | xs:date | xs:time | xs:gYear | xs:gYearMonth | xs:gMonth | xs:gMonthDay | xs:gDay)?" desc="The supplied dateTime"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -937,12 +937,12 @@
       <signatures>
 <proto return-type="xs:integer?">
 <arg name="value" type="xs:duration?" desc="The supplied dateTime"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -966,12 +966,12 @@
 <arg name="input1" type="item()*" desc="The first value to be compared"/>
 <arg name="input2" type="item()*" desc="The second value to be compared"/>
 <arg name="options" type="(xs:string | map(*))?" default="{}" desc="The collation to be used whenever strings are compared"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -991,12 +991,12 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">default-collation</name>
       <signatures>
 <proto return-type="xs:string">
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -1014,8 +1014,8 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">default-language</name>
       <signatures>
 <proto return-type="xs:language">
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -1040,12 +1040,12 @@
 <proto return-type="xs:anyAtomicType*">
 <arg name="values" type="xs:anyAtomicType*" desc="The sequence to be de-duplicated"/>
 <arg name="collation" type="xs:string?" default="fn:default-collation()" desc="The collation used for comparing strings"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -1085,12 +1085,12 @@
 <proto return-type="document-node()?">
 <arg name="source" type="xs:string?" desc="The URI of the required document (relative to the static base URI)"/>
 <arg name="options" type="map(*)?" default="{}"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -1150,12 +1150,12 @@
 <proto return-type="xs:boolean">
 <arg name="source" type="xs:string?" desc="The URI of the required document (relative to the static base URI)"/>
 <arg name="options" type="map(*)?" default="{}"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -1204,10 +1204,10 @@
       <signatures>
 <proto return-type="xs:anyURI?">
 <arg name="node" type="node()?" default="." desc="The node whose document URI is required"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -1258,9 +1258,9 @@
       <signatures>
 <proto return-type="xs:boolean">
 <arg name="name" type="(xs:string | xs:QName)" desc="The name of the extension element (a lexical QName)"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -1309,10 +1309,10 @@
 <proto return-type="element()*">
 <arg name="values" type="xs:string*" desc="The ID value being sought, within the document containing the context node"/>
 <arg name="node" type="node()" default="." desc="A node (typically the root) of the document being searched"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -1327,12 +1327,12 @@
       <signatures>
 <proto return-type="xs:boolean">
 <arg name="input" type="item()*" desc="The supplied sequence"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -1346,12 +1346,12 @@
       <signatures>
 <proto return-type="xs:string">
 <arg name="value" type="xs:string?" desc="The string to be encoded for inclusion in a URI"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -1368,12 +1368,12 @@
 <arg name="value" type="xs:string?" desc="The containing string"/>
 <arg name="substring" type="xs:string?" desc="The supposed ending of the string"/>
 <arg name="collation" type="xs:string?" default="fn:default-collation()" desc="The collation to be used for comparing characters"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -1397,10 +1397,10 @@
       <signatures>
 <proto return-type="xs:string?">
 <arg name="name" type="xs:string" desc="The name of the required environment variable"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -1422,12 +1422,12 @@
 <arg name="code" type="xs:QName?" default="()" desc="The error code to be returned"/>
 <arg name="description" type="xs:string?" default="()" desc="An error message"/>
 <arg name="value" type="item()*" default="." desc="An object or value associated with the error"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -1450,12 +1450,12 @@
       <signatures>
 <proto return-type="xs:string">
 <arg name="value" type="xs:string?" desc="The uri to be escaped"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -1480,12 +1480,12 @@
       <signatures>
 <proto return-type="item()">
 <arg name="input" type="item()*" desc="The sequence to be tested"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -1500,12 +1500,12 @@
       <signatures>
 <proto return-type="xs:boolean">
 <arg name="input" type="item()*" desc="The input sequence"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -1526,12 +1526,12 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">false</name>
       <signatures>
 <proto return-type="xs:boolean">
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -1546,10 +1546,10 @@
 <proto return-type="item()*">
 <arg name="input" type="item()*" desc="The sequence to be filtered"/>
 <arg name="predicate" type="fn(item(), xs:integer) as xs:boolean?" desc="The filtering function (used to test each item in the sequence)"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -1574,12 +1574,12 @@
       <signatures>
 <proto return-type="xs:numeric?">
 <arg name="value" type="xs:numeric?" desc="The input number"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -1595,10 +1595,10 @@
 <arg name="input" type="item()*" desc="The input sequence"/>
 <arg name="init" type="item()*" desc="The initial value (the value to be returned if the sequence is empty)"/>
 <arg name="action" type="fn(item()*, item()) as item()*" desc="The function to be applied to each item in the sequence"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -1618,10 +1618,10 @@
 <arg name="input" type="item()*" desc="The input sequence"/>
 <arg name="init" type="item()*" desc="The initial value (the value to be returned if the sequence is empty)"/>
 <arg name="action" type="fn(item(), item()*) as item()*" desc="The function to be applied to each item in the sequence"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -1648,10 +1648,10 @@
 <proto return-type="item()*">
 <arg name="input" type="item()*" desc="The input sequence: the supplied function will be applied to each item in this sequence"/>
 <arg name="action" type="fn(item(), xs:integer) as item()*" desc="The function item to be invoked on each member of the supplied sequence"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -1671,10 +1671,10 @@
 <arg name="input1" type="item()*" desc="The first sequence"/>
 <arg name="input2" type="item()*" desc="The second sequence"/>
 <arg name="action" type="fn(item(), item(), xs:integer) as item()*" desc="The function which will be applied to each pair of items from the two sequences"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -1696,16 +1696,11 @@
 <arg name="language" type="xs:string?" default="()" desc="The language for the output"/>
 <arg name="calendar" type="xs:string?" default="()" desc="The calendar for the output"/>
 <arg name="place" type="xs:string?" default="()" desc="The country or Olson timezone associated with the event"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
-<description>
-            <p>Formats a date, using a format controlled by the picture string. The result is
-              equivalent to the 5-argument form of the function, with the third, fourth, and fifth
-              arguments set to an empty sequence.</p>
-          </description>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -1713,7 +1708,12 @@
       </status>
       <saxon-edition>ALL</saxon-edition>
       <see-also name="format-dateTime" namespace="http://www.w3.org/2005/xpath-functions"/>
-    </function>
+    <description>
+            <p>Formats a date, using a format controlled by the picture string. The result is
+              equivalent to the 5-argument form of the function, with the third, fourth, and fifth
+              arguments set to an empty sequence.</p>
+          </description>
+</function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">format-dateTime</name>
       <signatures>
@@ -1723,16 +1723,11 @@
 <arg name="language" type="xs:string?" default="()" desc="The language for the output"/>
 <arg name="calendar" type="xs:string?" default="()" desc="The calendar for the output"/>
 <arg name="place" type="xs:string?" default="()" desc="The country or Olson timezone where the event took place"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
-<description>
-            <p>Formats a dateTime, using a format controlled by the picture string. The result is
-              equivalent to the 5-argument form of the function, with the third, fourth, and fifth
-              arguments set to an empty sequence.</p>
-          </description>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -1802,7 +1797,12 @@
         </p>
       </status>
       <saxon-edition>ALL</saxon-edition>
-    </function>
+    <description>
+            <p>Formats a dateTime, using a format controlled by the picture string. The result is
+              equivalent to the 5-argument form of the function, with the third, fourth, and fifth
+              arguments set to an empty sequence.</p>
+          </description>
+</function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">format-integer</name>
       <signatures>
@@ -1810,10 +1810,10 @@
 <arg name="value" type="xs:integer?" desc="The integer to be formatted"/>
 <arg name="picture" type="xs:string" desc="Picture showing how the integer is to be formatted"/>
 <arg name="language" type="xs:string?" default="()" desc="Language used for the output"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -1834,15 +1834,11 @@
 <arg name="value" type="xs:numeric?" desc="The number to be formatted"/>
 <arg name="picture" type="xs:string" desc="Picture showing how the number is to be formatted"/>
 <arg name="options" type="(xs:string | map(*))?" default="()" desc="Name of a decimal format definition defined in the context"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
-<description>
-            <p>Formats a number as specified by a picture string, using the default decimal
-              format.</p>
-          </description>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -1855,7 +1851,11 @@
         </p>
       </status>
       <saxon-edition>ALL</saxon-edition>
-    </function>
+    <description>
+            <p>Formats a number as specified by a picture string, using the default decimal
+              format.</p>
+          </description>
+</function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">format-time</name>
       <signatures>
@@ -1865,11 +1865,11 @@
 <arg name="language" type="xs:string?" default="()" desc="The language for the output"/>
 <arg name="calendar" type="xs:string?" default="()" desc="The calendar for the output"/>
 <arg name="place" type="xs:string?" default="()" desc="The country or Olsen timezone where the event took place"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -1894,10 +1894,10 @@
       <signatures>
 <proto return-type="xs:integer">
 <arg name="function" type="fn(*)" desc="The function item whose arity is required"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -1914,13 +1914,9 @@
 <proto return-type="xs:boolean">
 <arg name="name" type="(xs:string | xs:QName)" desc="The name of the requested function, as a lexical QName"/>
 <arg name="arity" type="xs:integer?" default="()" desc="The arity of the requested function (number of arguments)"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
-<description>
-            <p>Determines whether a function with a given name (regardless of arity) is available in
-              the context.</p>
-          </description>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -1931,7 +1927,11 @@
       </status>
       <saxon-edition>ALL</saxon-edition>
       <see-also name="function-lookup" namespace="http://www.w3.org/2005/xpath-functions"/>
-    </function>
+    <description>
+            <p>Determines whether a function with a given name (regardless of arity) is available in
+              the context.</p>
+          </description>
+</function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">function-identity</name><signatures>
 	     <proto return-type="xs:string">
 <arg name="function" type="fn(*)" desc="FIXME:"/>
@@ -1946,9 +1946,9 @@
 <proto return-type="fn(*)?">
 <arg name="name" type="xs:QName" desc="The name of the requested function"/>
 <arg name="arity" type="xs:integer" desc="The arity of the requested function (number of arguments)"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <description>
@@ -1968,10 +1968,10 @@
       <signatures>
 <proto return-type="xs:QName?">
 <arg name="function" type="fn(*)" desc="The function item whose name is required"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -1987,14 +1987,11 @@
       <signatures>
 <proto return-type="xs:string">
 <arg name="node" type="gnode()?" default="." desc="The node for which a generated identifier is required"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
-<description>
-            <p>Returns a generated unique ASCII identifier for the context node.</p>
-          </description>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -2002,7 +1999,10 @@
           provided that XPath 3.0 is enabled.</p>
       </status>
       <saxon-edition>ALL</saxon-edition>
-    </function>
+    <description>
+            <p>Returns a generated unique ASCII identifier for the context node.</p>
+          </description>
+</function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">graphemes</name><signatures>
          <proto return-type="xs:string*">
 <arg name="value" type="xs:string?" desc="FIXME:"/>
@@ -2016,9 +2016,9 @@
       <signatures>
 <proto return-type="xs:boolean">
 <arg name="node" type="gnode()?" default="." desc="The input node"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -2049,10 +2049,10 @@
       <signatures>
 <proto return-type="item()?">
 <arg name="input" type="item()*" desc="The sequence whose first item is required"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -2079,12 +2079,12 @@
       <signatures>
 <proto return-type="xs:integer?">
 <arg name="value" type="(xs:dateTime | xs:date | xs:time | xs:gYear | xs:gYearMonth | xs:gMonth | xs:gMonthDay | xs:gDay)?" desc="The dateTime value whose hour component is required"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -2098,12 +2098,12 @@
       <signatures>
 <proto return-type="xs:integer?">
 <arg name="value" type="xs:duration?" desc="The duration value whose hours component is required"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -2117,12 +2117,12 @@
       <signatures>
 <proto return-type="xs:integer?">
 <arg name="value" type="xs:time?" desc="The time value whose hours component is required"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -2148,12 +2148,12 @@
 <proto return-type="element()*">
 <arg name="values" type="xs:string*" desc="The ID value being sought"/>
 <arg name="node" type="node()" default="." desc="The document in which the search takes place"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -2176,12 +2176,12 @@
 <proto return-type="node()*">
 <arg name="values" type="xs:string*" desc="The ID value being sought"/>
 <arg name="node" type="node()" default="." desc="The document in which the search takes place"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -2200,12 +2200,12 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">implicit-timezone</name>
       <signatures>
 <proto return-type="xs:dayTimeDuration">
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -2230,12 +2230,12 @@
       <signatures>
 <proto return-type="xs:string*">
 <arg name="element" type="element()" desc="The element node whose in-scope namespace prefixes are required"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -2253,12 +2253,12 @@
 <arg name="input" type="xs:anyAtomicType*" desc="The sequence being searched"/>
 <arg name="target" type="xs:anyAtomicType" desc="The value being sought"/>
 <arg name="collation" type="xs:string?" default="fn:default-collation()" desc="The collation to be used for comparing strings"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -2281,10 +2281,10 @@
       <signatures>
 <proto return-type="gnode()*">
 <arg name="nodes" type="gnode()*" desc="The input sequence"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -2303,12 +2303,12 @@
 <arg name="input" type="item()*" desc="Input sequence, into which new values are inserted"/>
 <arg name="position" type="xs:integer" desc="The position of the item before which the new values are inserted"/>
 <arg name="insert" type="item()*" desc="The values to be inserted into the sequence"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -2331,12 +2331,12 @@
       <signatures>
 <proto return-type="xs:string">
 <arg name="value" type="xs:string?" desc="The supplied IRI which will be escaped to form a valid URI"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -2394,8 +2394,8 @@
 <proto return-type="item()?">
 <arg name="source" type="xs:string?" desc="The URI of the JSON file to be read"/>
 <arg name="options" type="map(*)?" default="{}" desc="Parsing options"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -2429,8 +2429,8 @@
 <proto return-type="document-node(fn:*)?">
 <arg name="value" type="xs:string?" desc="The JSON input text"/>
 <arg name="options" type="map(*)?" default="{}" desc="Used to control the way in which parsing takes place"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -2498,31 +2498,31 @@
 <proto return-type="xs:boolean">
 <arg name="language" type="xs:string?" desc="The language being tested for"/>
 <arg name="node" type="node()" default="." desc="The node being tested"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
-<description>
-            <p>Returns true if the <code>xml:lang</code> value for the context node matches the
-              given language.</p>
-          </description>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
-    </function>
+    <description>
+            <p>Returns true if the <code>xml:lang</code> value for the context node matches the
+              given language.</p>
+          </description>
+</function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">last</name>
       <signatures>
 <proto return-type="xs:integer">
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -2538,8 +2538,8 @@
 <proto>
 <arg name="module-uri" type="xs:string" desc="The namespace of the target library module"/>
 <arg name="options" type="map(*)?" default="{}" desc="Used to control the way in which the function operates"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -2558,31 +2558,31 @@
       <signatures>
 <proto return-type="xs:string">
 <arg name="node" type="node()?" default="." desc="The node whose local name is required"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
-<description>
-            <p>Returns the local part of the name of the context node.</p>
-          </description>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
-    </function>
+    <description>
+            <p>Returns the local part of the name of the context node.</p>
+          </description>
+</function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">local-name-from-QName</name>
       <signatures>
 <proto return-type="xs:NCName?">
 <arg name="value" type="xs:QName?" desc="The QName whose local part is required"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -2596,12 +2596,12 @@
       <signatures>
 <proto return-type="xs:string">
 <arg name="value" type="xs:string?" desc="The string to be converted to lower-case"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -2637,12 +2637,12 @@
 <arg name="value" type="xs:string?" desc="The string to be matched against a regular expression"/>
 <arg name="pattern" type="xs:string" desc="The regular expression"/>
 <arg name="flags" type="xs:string?" default="&#34;&#34;" desc="Flags that control the interpretation of the regular expression"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -2728,12 +2728,12 @@
 <proto return-type="xs:anyAtomicType?">
 <arg name="values" type="xs:anyAtomicType*" desc="The input sequence"/>
 <arg name="collation" type="xs:string?" default="fn:default-collation()" desc="The collation to be used when comparing strings"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -2760,12 +2760,12 @@
 <proto return-type="xs:anyAtomicType?">
 <arg name="values" type="xs:anyAtomicType*" desc="The input sequence"/>
 <arg name="collation" type="xs:string?" default="fn:default-collation()" desc="The collation to be used when comparing strings"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -2782,12 +2782,12 @@
       <signatures>
 <proto return-type="xs:integer?">
 <arg name="value" type="(xs:dateTime | xs:date | xs:time | xs:gYear | xs:gYearMonth | xs:gMonth | xs:gMonthDay | xs:gDay)?" desc="The supplied dateTime value"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -2801,12 +2801,12 @@
       <signatures>
 <proto return-type="xs:integer?">
 <arg name="value" type="xs:duration?" desc="The supplied duration value"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -2820,12 +2820,12 @@
       <signatures>
 <proto return-type="xs:integer?">
 <arg name="value" type="xs:time?" desc="The supplied time value"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -2839,12 +2839,12 @@
       <signatures>
 <proto return-type="xs:integer?">
 <arg name="value" type="xs:date?" desc="The supplied date value"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -2858,12 +2858,12 @@
       <signatures>
 <proto return-type="xs:integer?">
 <arg name="value" type="(xs:dateTime | xs:date | xs:time | xs:gYear | xs:gYearMonth | xs:gMonth | xs:gMonthDay | xs:gDay)?" desc="The supplied dateTime value"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -2877,12 +2877,12 @@
       <signatures>
 <proto return-type="xs:integer?">
 <arg name="value" type="xs:duration?" desc="The supplied duration value"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -2896,51 +2896,51 @@
       <signatures>
 <proto return-type="xs:string">
 <arg name="node" type="node()?" default="." desc="The node whose name is required"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
-<description>
-            <p>Returns the name of the context node, as a string in the lexical form of a QName.</p>
-          </description>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
-    </function>
+    <description>
+            <p>Returns the name of the context node, as a string in the lexical form of a QName.</p>
+          </description>
+</function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">namespace-uri</name>
       <signatures>
 <proto return-type="xs:anyURI">
 <arg name="node" type="node()?" default="." desc="The node whose namespace URI is required"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
-<description>
-            <p>Returns the namespace URI of the name of the context node.</p>
-          </description>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
-    </function>
+    <description>
+            <p>Returns the namespace URI of the name of the context node.</p>
+          </description>
+</function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">namespace-uri-for-prefix</name>
       <signatures>
 <proto return-type="xs:anyURI?">
 <arg name="value" type="(xs:NCName | enum(''))?" desc="The supplied prefix"/>
 <arg name="element" type="element()" desc="The element node whose in-scope namespaces are to be examined"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -2955,12 +2955,12 @@
       <signatures>
 <proto return-type="xs:anyURI?">
 <arg name="value" type="xs:QName?" desc="The QName value whose URI component is required"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -2974,12 +2974,12 @@
       <signatures>
 <proto return-type="xs:boolean?">
 <arg name="node" type="node()?" default="." desc="The node (typically an element) to be examined to see if it is nilled"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -2999,14 +2999,10 @@
       <signatures>
 <proto return-type="xs:QName?">
 <arg name="node" type="node()?" default="." desc="The node whose name is required"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
-<description>
-            <p>Returns the name of the context node, as a QName value (that is, a namespace URI plus
-              local name).</p>
-          </description>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -3014,7 +3010,11 @@
           implemented in Saxon 9.3, provided that support for XPath 3.0 is enabled.</p>
       </status>
       <saxon-edition>ALL</saxon-edition>
-    </function>
+    <description>
+            <p>Returns the name of the context node, as a QName value (that is, a namespace URI plus
+              local name).</p>
+          </description>
+</function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">node-type-annotation</name><signatures>
          <proto>
 <arg name="node" type="(element() | attribute())" desc="FIXME:"/>
@@ -3028,54 +3028,54 @@
       <signatures>
 <proto return-type="xs:string">
 <arg name="value" type="xs:anyAtomicType?" default="string(.)" desc="The string to be normalized"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
-<description>
-            <p>Eliminates redundant spaces from the string value of the context item.</p>
-          </description>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
-    </function>
+    <description>
+            <p>Eliminates redundant spaces from the string value of the context item.</p>
+          </description>
+</function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">normalize-unicode</name>
       <signatures>
 <proto return-type="xs:string">
 <arg name="value" type="xs:string?" desc="The string to be normalized"/>
 <arg name="form" type="xs:string?" default="&#34;NFC&#34;" desc="The Unicode normalization form to apply"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
-<description>
-            <p>Converts a string to Unicode normalization form NFC by modifying the way in which
-              combining characters are represented.</p>
-          </description>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
         <p>Saxon supports normalization forms NFC, NFD, NFKC, and NFKD.</p>
       </status>
       <saxon-edition>ALL</saxon-edition>
-    </function>
+    <description>
+            <p>Converts a string to Unicode normalization form NFC by modifying the way in which
+              combining characters are represented.</p>
+          </description>
+</function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">not</name>
       <signatures>
 <proto return-type="xs:boolean">
 <arg name="input" type="item()*" desc="FIXME:"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -3089,32 +3089,32 @@
       <signatures>
 <proto return-type="xs:double">
 <arg name="value" type="xs:anyAtomicType?" default="." desc="FIXME:"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
-<description>
-            <p>Equivalent to <code>number(.)</code>; converts the value of the context item to a
-              double.</p>
-          </description>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
-    </function>
+    <description>
+            <p>Equivalent to <code>number(.)</code>; converts the value of the context item to a
+              double.</p>
+          </description>
+</function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">one-or-more</name>
       <signatures>
 <proto return-type="item()+">
 <arg name="input" type="item()*" desc="The sequence to be tested"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -3137,10 +3137,10 @@
       <signatures>
 <proto return-type="gnode()*">
 <arg name="nodes" type="gnode()*" desc="The input sequence"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -3177,8 +3177,8 @@
       <signatures>
 <proto return-type="xs:dateTime?">
 <arg name="value" type="xs:string?" desc="The input string"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -3205,8 +3205,8 @@
 <proto return-type="item()?">
 <arg name="value" type="xs:string?" desc="The JSON input to be parsed"/>
 <arg name="options" type="map(*)?" default="{}" desc="Parsing options"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -3262,10 +3262,10 @@
 <proto return-type="document-node(*)?">
 <arg name="value" type="(xs:string | xs:hexBinary | xs:base64Binary)?" desc="The lexical XML string to be parsed as a document"/>
 <arg name="options" type="map(*)?" default="{}"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -3291,10 +3291,10 @@
 <proto return-type="document-node()?">
 <arg name="value" type="(xs:string | xs:hexBinary | xs:base64Binary)?" desc="The lexical XML string to be parsed as a document fragment"/>
 <arg name="options" type="map(*)?" default="{}"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -3333,10 +3333,10 @@
 <proto return-type="xs:string?">
 <arg name="node" type="gnode()?" default="." desc="The node whose path is to be determined"/>
 <arg name="options" type="map(*)?" default="{}"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -3356,12 +3356,12 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">position</name>
       <signatures>
 <proto return-type="xs:integer">
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -3376,12 +3376,12 @@
       <signatures>
 <proto return-type="xs:NCName?">
 <arg name="value" type="xs:QName?" desc="The QName whose prefix component is required"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -3397,12 +3397,12 @@
 <proto return-type="xs:QName">
 <arg name="uri" type="xs:string?" desc="The namespace URI component of the constructed QName"/>
 <arg name="qname" type="xs:string" desc="A lexical QName that supplies the local name component of the constructed QName, and optionally the prefix"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -3418,8 +3418,8 @@
       <signatures>
 <proto>
 <arg name="seed" type="xs:anyAtomicType?" default="()" desc="The supplied seed"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -3461,12 +3461,12 @@
 <proto return-type="item()*">
 <arg name="input" type="item()*" desc="The input sequence, from which an item is to be removed"/>
 <arg name="positions" type="xs:integer*" desc="The position of the item to be removed"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -3483,12 +3483,12 @@
 <arg name="pattern" type="xs:string" desc="The regular expression matching parts of the string that are to be replaced"/>
 <arg name="replacement" type="(xs:string | fn(xs:untypedAtomic, xs:untypedAtomic*) as item()?)?" default="()" desc="The replacement string"/>
 <arg name="flags" type="xs:string?" default="''" desc="Flags controlling how the regular expression is interpreted"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -3518,12 +3518,12 @@
 <proto return-type="xs:QName?">
 <arg name="value" type="xs:string?" desc="The lexical QName to be expanded"/>
 <arg name="element" type="element()" desc="The element whose in-scope namespaces determine how the QName is expanded"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -3538,15 +3538,12 @@
 <proto return-type="xs:anyURI?">
 <arg name="href" type="xs:string?" desc="A relative URI reference to be resolved against the static base URI from the context"/>
 <arg name="base" type="xs:string?" default="()" desc="The base URI used for resolving the relative reference"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
-<description>
-            <p>Resolves a relative URI against the base URI from the static context.</p>
-          </description>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -3557,18 +3554,21 @@
         <p>Saxon does NOT, however, accept Windows file names as URIs.</p>
       </status>
       <saxon-edition>ALL</saxon-edition>
-    </function>
+    <description>
+            <p>Resolves a relative URI against the base URI from the static context.</p>
+          </description>
+</function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">reverse</name>
       <signatures>
 <proto return-type="item()*">
 <arg name="input" type="item()*" desc="The sequence whose items are to be reversed in order"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -3582,21 +3582,21 @@
       <signatures>
 <proto return-type="gnode()?">
 <arg name="node" type="gnode()?" default="." desc="A node in the tree whose root is required"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
-<description>
-            <p>Returns the root node (typically but not necessarily a document node) of the tree
-              containing the context node.</p>
-          </description>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
-    </function>
+    <description>
+            <p>Returns the root node (typically but not necessarily a document node) of the tree
+              containing the context node.</p>
+          </description>
+</function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">round</name>
       <signatures>
@@ -3604,16 +3604,12 @@
 <arg name="value" type="xs:numeric?" desc="The value to be rounded to the nearest whole number"/>
 <arg name="precision" type="xs:integer?" default="0" desc="The number of decimal places required"/>
 <arg name="mode" type="enum('floor',&#xA; 'ceiling',&#xA;                 'toward-zero',&#xA; 'away-from-zero',&#xA; 'half-to-floor',&#xA;                 'half-to-ceiling',&#xA; 'half-toward-zero',&#xA; 'half-away-from-zero',&#xA; 'half-to-even')?" default="'half-to-ceiling'"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
-<description>
-            <p>Rounds a numeric value to the nearest whole number, rounding x.5 towards positive
-              infinity.</p>
-          </description>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -3627,28 +3623,32 @@
         the XPath 4.0 specification.</p>
       </status>
       <saxon-edition>ALL</saxon-edition>
-    </function>
+    <description>
+            <p>Rounds a numeric value to the nearest whole number, rounding x.5 towards positive
+              infinity.</p>
+          </description>
+</function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">round-half-to-even</name>
       <signatures>
 <proto return-type="xs:numeric?">
 <arg name="value" type="xs:numeric?" desc="The value to be rounded to the nearest whole number"/>
 <arg name="precision" type="xs:integer?" default="0" desc="The number of decimal places required"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
-<description>
-            <p>Rounds a numeric value to the nearest whole number, rounding x.5 towards the nearest
-              even number.</p>
-          </description>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
-    </function>
+    <description>
+            <p>Rounds a numeric value to the nearest whole number, rounding x.5 towards the nearest
+              even number.</p>
+          </description>
+</function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">scan-left</name><signatures>
          <proto return-type="array(*)*">
 <arg name="input" type="item()*" desc="FIXME:"/>
@@ -3692,12 +3692,12 @@
       <signatures>
 <proto return-type="xs:decimal?">
 <arg name="value" type="(xs:dateTime | xs:date | xs:time | xs:gYear | xs:gYearMonth | xs:gMonth | xs:gMonthDay | xs:gDay)?" desc="The input dateTime value"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -3711,12 +3711,12 @@
       <signatures>
 <proto return-type="xs:decimal?">
 <arg name="value" type="xs:duration?" desc="The input duration value"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -3730,12 +3730,12 @@
       <signatures>
 <proto return-type="xs:decimal?">
 <arg name="value" type="xs:time?" desc="The input time value"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -3759,10 +3759,10 @@
 <proto return-type="xs:string">
 <arg name="input" type="item()*" desc="The input (typically a document or element node) to be serialized"/>
 <arg name="options" type="(element(output:serialization-parameters) | map(*))?" default="()" desc="Serialization parameters"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -3841,8 +3841,8 @@
 <arg name="input" type="item()*" desc="The input sequence to be sorted"/>
 <arg name="collation" type="xs:string?" default="fn:default-collation()" desc="The collation"/>
 <arg name="key" type="fn(item()) as xs:anyAtomicType*" default="fn:data#1" desc="The sort key"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -3885,12 +3885,12 @@
 <arg name="value" type="xs:string?" desc="The containing string"/>
 <arg name="substring" type="xs:string?" desc="The supposed initial part of the string"/>
 <arg name="collation" type="xs:string?" default="fn:default-collation()" desc="The collation to be used for comparing characters"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -3913,12 +3913,12 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">static-base-uri</name>
       <signatures>
 <proto return-type="xs:anyURI?">
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -3932,8 +3932,8 @@
       <signatures>
 <proto return-type="xs:boolean">
 <arg name="uri" type="xs:string?" desc="The URI of the document"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -3950,34 +3950,30 @@
       <signatures>
 <proto return-type="xs:string">
 <arg name="value" type="item()?" default="." desc="A node whose string value is required, or an atomic value to be converted to a string"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
-<description>
-            <p>Returns the string value of the context node.</p>
-          </description>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
-    </function>
+    <description>
+            <p>Returns the string value of the context node.</p>
+          </description>
+</function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">string-join</name>
       <signatures>
 <proto return-type="xs:string">
 <arg name="values" type="xs:anyAtomicType*" desc="A sequence of strings to be joined into one"/>
 <arg name="separator" type="xs:string?" default="&#34;&#34;" desc="The separator to be used between adjacent strings"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
-<description>
-            <p>Returns a string created by concatenating all the items in the given sequence
-              (casting each item to a string), with no separator.</p>
-          </description>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -3986,37 +3982,41 @@
           zero-length string, not a single space.</p>
       </status>
       <saxon-edition>ALL</saxon-edition>
-    </function>
+    <description>
+            <p>Returns a string created by concatenating all the items in the given sequence
+              (casting each item to a string), with no separator.</p>
+          </description>
+</function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">string-length</name>
       <signatures>
 <proto return-type="xs:integer">
 <arg name="value" type="xs:anyAtomicType?" default="fn:string(.)" desc="The input string"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
-<description>
-            <p>Returns the number of characters in the string value of the context item.</p>
-          </description>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
-    </function>
+    <description>
+            <p>Returns the number of characters in the string value of the context item.</p>
+          </description>
+</function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">string-to-codepoints</name>
       <signatures>
 <proto return-type="xs:integer*">
 <arg name="value" type="xs:string?" desc="The input string"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -4033,21 +4033,21 @@
 <arg name="input" type="item()*" desc="The input sequence"/>
 <arg name="start" type="xs:double" desc="The position of the first item from the input sequence to be included in the result"/>
 <arg name="length" type="xs:double?" default="()" desc="The number of items to be included in the result"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
-<description>
-            <p>Returns those items in the given sequence from the given starting position to the end
-              of the sequence.</p>
-          </description>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
-    </function>
+    <description>
+            <p>Returns those items in the given sequence from the given starting position to the end
+              of the sequence.</p>
+          </description>
+</function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">subsequence-where</name><signatures>
          <proto return-type="item()*">
 <arg name="input" type="item()*" desc="FIXME:"/>
@@ -4066,21 +4066,21 @@
 <arg name="value" type="xs:string?" desc="The input string"/>
 <arg name="start" type="xs:double" desc="The position of the first character of the input string to be included in the result"/>
 <arg name="length" type="xs:double?" default="()" desc="The number of characters to be included in the result"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
-<description>
-            <p>Returns a substring of a given string starting at the given starting position and
-              continuing to the end of the string.</p>
-          </description>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
-    </function>
+    <description>
+            <p>Returns a substring of a given string starting at the given starting position and
+              continuing to the end of the string.</p>
+          </description>
+</function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">substring-after</name>
       <signatures>
@@ -4088,12 +4088,12 @@
 <arg name="value" type="xs:string?" desc="The input string"/>
 <arg name="substring" type="xs:string?" desc="A substring of the input string; the function returns the rest of the input string after this substring"/>
 <arg name="collation" type="xs:string?" default="fn:default-collation()" desc="The collation to be used for comparing characters"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -4110,12 +4110,12 @@
 <arg name="value" type="xs:string?" desc="The input string"/>
 <arg name="substring" type="xs:string?" desc="A substring of the input string; the function returns the part of the input string before this substring"/>
 <arg name="collation" type="xs:string?" default="fn:default-collation()" desc="The collation to be used for comparing characters"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -4131,12 +4131,12 @@
 <proto return-type="xs:anyAtomicType?">
 <arg name="values" type="xs:anyAtomicType*" desc="The sequence of values to be totalled"/>
 <arg name="zero" type="xs:anyAtomicType?" default="0" desc="The value to return if the input sequence is empty (default integer zero)"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -4199,10 +4199,10 @@
       <signatures>
 <proto return-type="item()*">
 <arg name="input" type="item()*" desc="The sequence whose tail is required"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -4227,12 +4227,12 @@
       <signatures>
 <proto return-type="xs:dayTimeDuration?">
 <arg name="value" type="xs:date?" desc="The supplied xs:date value"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -4246,12 +4246,12 @@
       <signatures>
 <proto return-type="xs:dayTimeDuration?">
 <arg name="value" type="(xs:dateTime | xs:date | xs:time | xs:gYear | xs:gYearMonth | xs:gMonth | xs:gMonthDay | xs:gDay)?" desc="The supplied xs:dateTime value"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -4265,12 +4265,12 @@
       <signatures>
 <proto return-type="xs:dayTimeDuration?">
 <arg name="value" type="xs:time?" desc="The supplied xs:time value"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -4286,8 +4286,8 @@
 <arg name="value" type="xs:string?" desc="The input string to be tokenized"/>
 <arg name="pattern" type="xs:string?" default="()" desc="Regular expression matching the separators between tokens"/>
 <arg name="flags" type="xs:string?" default="&#34;&#34;" desc="Flags controlling how the regular expression is interpreted"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -4311,8 +4311,8 @@
 <proto return-type="item()*">
 <arg name="input" type="item()*" desc="The value to be traced, and to be returned as the function result"/>
 <arg name="label" type="xs:string?" default="()" desc="Label to be included in the trace output"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -4341,8 +4341,8 @@
       <signatures>
 <proto return-type="map(*)">
 <arg name="options" type="map(*)" desc="The input options for the transformation"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -4419,12 +4419,12 @@
 <arg name="value" type="xs:string?" desc="The string to be translated"/>
 <arg name="replace" type="xs:string" desc="Characters to be replaced if they appear in the input string"/>
 <arg name="with" type="xs:string" desc="Characters to be used as the replacement for corresponding characters in the second argument"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -4439,12 +4439,12 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">true</name>
       <signatures>
 <proto return-type="xs:boolean">
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -4466,9 +4466,9 @@
       <signatures>
 <proto return-type="xs:boolean">
 <arg name="name" type="(xs:string | xs:QName)" desc="The name of the required type, as a lexical QName"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -4506,12 +4506,12 @@
       <signatures>
 <proto return-type="item()*">
 <arg name="input" type="item()*" desc="The input sequence"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -4574,11 +4574,11 @@
 <proto return-type="xs:string?">
 <arg name="source" type="xs:string?" desc="The URI of the text file to be read"/>
 <arg name="options" type="(xs:string | map(*))?" default="()" desc="The encoding to be assumed for the text file"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -4601,11 +4601,11 @@
 <proto return-type="xs:boolean">
 <arg name="source" type="xs:string?" desc="The URI of the text file to be read"/>
 <arg name="options" type="(xs:string | map(*))?" default="()" desc="The encoding to be assumed for the text file"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -4632,11 +4632,11 @@
 <proto return-type="xs:string*">
 <arg name="source" type="xs:string?" desc="The uri of the text file to be read"/>
 <arg name="options" type="(xs:string | map(*))?" default="()" desc="The encoding to be assumed for the text file"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -4659,12 +4659,12 @@
       <signatures>
 <proto return-type="xs:string">
 <arg name="value" type="xs:string?" desc="The string to be converted to upper-case"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -4678,10 +4678,10 @@
       <signatures>
 <proto return-type="xs:anyURI*">
 <arg name="source" type="xs:string?" default="()" desc="The collection URI"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -4721,8 +4721,8 @@
 <proto return-type="xs:string?">
 <arg name="node" type="node()?" desc="The input XML tree"/>
 <arg name="options" type="map(*)?" default="{}" desc="Used to control the way in which the conversion takes place"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -4750,12 +4750,12 @@
       <signatures>
 <proto return-type="xs:integer?">
 <arg name="value" type="xs:date?" desc="The input date value"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -4769,12 +4769,12 @@
       <signatures>
 <proto return-type="xs:integer?">
 <arg name="value" type="(xs:dateTime | xs:date | xs:time | xs:gYear | xs:gYearMonth | xs:gMonth | xs:gMonthDay | xs:gDay)?" desc="The input dateTime value"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -4788,12 +4788,12 @@
       <signatures>
 <proto return-type="xs:integer?">
 <arg name="value" type="xs:duration?" desc="The input duration value"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -4807,12 +4807,12 @@
       <signatures>
 <proto return-type="item()?">
 <arg name="input" type="item()*" desc="The input sequence to be tested"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath20</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status-ok/>
@@ -4833,10 +4833,10 @@
       <signatures>
 <proto return-type="xs:double?">
 <arg name="value" type="xs:double?" desc="The supplied angle in radians"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -4855,10 +4855,10 @@
       <signatures>
 <proto return-type="xs:double?">
 <arg name="value" type="xs:double?" desc="The supplied angle in radians"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -4877,10 +4877,10 @@
       <signatures>
 <proto return-type="xs:double?">
 <arg name="value" type="xs:double?" desc="The supplied angle in radians"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -4900,10 +4900,10 @@
 <proto return-type="xs:double">
 <arg name="y" type="xs:double" desc="The supplied angle in radians"/>
 <arg name="x" type="xs:double" desc="The supplied angle in radians"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -4925,10 +4925,10 @@
       <signatures>
 <proto return-type="xs:double?">
 <arg name="radians" type="xs:double?" desc="The supplied angle, in radians"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -4961,9 +4961,9 @@
       <signatures>
 <proto return-type="xs:double?">
 <arg name="value" type="xs:double?" desc="The input number"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -4981,9 +4981,9 @@
       <signatures>
 <proto return-type="xs:double?">
 <arg name="value" type="xs:double?" desc="The input number"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -4999,9 +4999,9 @@
       <signatures>
 <proto return-type="xs:double?">
 <arg name="value" type="xs:double?" desc="The input number"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5019,9 +5019,9 @@
       <signatures>
 <proto return-type="xs:double?">
 <arg name="value" type="xs:double?" desc="The input number"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5036,10 +5036,10 @@
       <name namespace="http://www.w3.org/2005/xpath-functions/math">pi</name>
       <signatures>
 <proto return-type="xs:double">
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5056,9 +5056,9 @@
 <proto return-type="xs:double?">
 <arg name="x" type="xs:double?" desc="The input number"/>
 <arg name="y" type="xs:numeric" desc="The power to which the number is to be raised"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5076,10 +5076,10 @@
       <signatures>
 <proto return-type="xs:double?">
 <arg name="radians" type="xs:double?" desc="FIXME:"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5105,10 +5105,10 @@
       <signatures>
 <proto return-type="xs:double?">
 <arg name="value" type="xs:double?" desc="FIXME:"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5126,10 +5126,10 @@
       <signatures>
 <proto return-type="xs:double?">
 <arg name="radians" type="xs:double?" desc="The input angle in radians"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5175,9 +5175,9 @@
 <proto return-type="xs:boolean">
 <arg name="map" type="map(*)" desc="The input map"/>
 <arg name="key" type="xs:anyAtomicType" desc="The candidate key"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5215,9 +5215,9 @@
 <proto return-type="map(*)">
 <arg name="key" type="xs:anyAtomicType" desc="The key"/>
 <arg name="value" type="item()*" desc="The corresponding value"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5247,9 +5247,9 @@
 <proto return-type="array(*)">
 <arg name="input" type="item()*" desc="The input sequence"/>
 <arg name="key" type="xs:anyAtomicType" desc="The key"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5267,9 +5267,9 @@
 <proto return-type="item()*">
 <arg name="map" type="map(*)" desc="The input map"/>
 <arg name="action" type="fn($key as xs:anyAtomicType, $value as item()*, $position as xs:integer) as item()*" desc="The function to be applied"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5291,9 +5291,9 @@
 <arg name="map" type="map(*)" desc="The input map"/>
 <arg name="key" type="xs:anyAtomicType" desc="The candidate key"/>
 <arg name="default" type="item()*" default="()"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5319,9 +5319,9 @@
       <signatures>
 <proto return-type="xs:anyAtomicType*">
 <arg name="map" type="map(*)" desc="The map whose keys are required"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5358,9 +5358,9 @@
 <proto return-type="map(*)">
 <arg name="maps" type="map(*)*" desc="The input maps"/>
 <arg name="options" type="map(*)?" default="{}" desc="Used to control the way in which merging takes place"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5403,9 +5403,9 @@
 <arg name="map" type="map(*)" desc="The input map"/>
 <arg name="key" type="xs:anyAtomicType" desc="The key to be added or replaced"/>
 <arg name="value" type="item()*" desc="The new associated value for the specified key"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5434,9 +5434,9 @@
 <proto return-type="map(*)">
 <arg name="map" type="map(*)" desc="The input map"/>
 <arg name="keys" type="xs:anyAtomicType*" desc="The keys to be removed"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5456,9 +5456,9 @@
       <signatures>
 <proto return-type="xs:integer">
 <arg name="map" type="map(*)" desc="The input map"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5482,8 +5482,8 @@
 <proto return-type="array(*)">
 <arg name="array" type="array(*)" desc="The input array"/>
 <arg name="member" type="item()*" desc="The new member"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5518,8 +5518,8 @@
 <proto return-type="array(*)">
 <arg name="array" type="array(*)" desc="The input array"/>
 <arg name="predicate" type="fn(item()*, xs:integer) as xs:boolean?" desc="The function used to filter the input array"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5536,8 +5536,8 @@
       <signatures>
 <proto return-type="item()*">
 <arg name="input" type="item()*" desc="The input sequence"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5556,8 +5556,8 @@
 <arg name="array" type="array(*)" desc="The input array"/>
 <arg name="init" type="item()*" desc="The zero for the function"/>
 <arg name="action" type="fn(item()*, item()*) as item()*" desc="The function to be applied to each member of the input array"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5576,8 +5576,8 @@
 <arg name="array" type="array(*)" desc="The input array"/>
 <arg name="init" type="item()*" desc="The zero for the function"/>
 <arg name="action" type="fn(item()*, item()*) as item()*" desc="The function to be applied to each member of the input array"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5604,8 +5604,8 @@
 <proto return-type="array(*)">
 <arg name="array" type="array(*)" desc="The input array"/>
 <arg name="action" type="fn(item()*, xs:integer) as item()*" desc="The function to be applied to each member of the input array"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5624,8 +5624,8 @@
 <arg name="array1" type="array(*)" desc="The input array"/>
 <arg name="array2" type="array(*)" desc="The input array"/>
 <arg name="action" type="fn(item()*, item()*, xs:integer) as item()*" desc="The function to be applied to each member of the input array"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5642,15 +5642,15 @@
 <proto return-type="item()*">
 <arg name="array" type="array(*)" desc="The input array"/>
 <arg name="position" type="xs:integer" desc="The specified position"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 <proto return-type="item()*">
 <arg name="array" type="array(*)" desc="The input array"/>
 <arg name="position" type="xs:integer" desc="The specified position"/>
 <arg name="default" type="item()*"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5666,8 +5666,8 @@
       <signatures>
 <proto return-type="item()*">
 <arg name="array" type="array(*)" desc="The input array"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5706,8 +5706,8 @@
 <arg name="array" type="array(*)" desc="The input array"/>
 <arg name="position" type="xs:integer" desc="The position for the new member"/>
 <arg name="member" type="item()*" desc="The new member"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5732,8 +5732,8 @@
 <proto return-type="array(*)">
 <arg name="arrays" type="array(*)*" desc="The input arrays"/>
 <arg name="separator" type="array(*)?" default="()"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5768,8 +5768,8 @@
 <arg name="array" type="array(*)" desc="The input array"/>
 <arg name="position" type="xs:integer" desc="The position of the member to be replaced"/>
 <arg name="member" type="item()*" desc="The new member"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5787,8 +5787,8 @@
 <proto return-type="array(*)">
 <arg name="array" type="array(*)" desc="The input array"/>
 <arg name="positions" type="xs:integer*" desc="The positions of the members to be removed"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5807,8 +5807,8 @@
       <signatures>
 <proto return-type="array(*)">
 <arg name="array" type="array(*)" desc="The input array"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5824,8 +5824,8 @@
       <signatures>
 <proto return-type="xs:integer">
 <arg name="array" type="array(*)" desc="The input array"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5855,8 +5855,8 @@
 <arg name="array" type="array(*)" desc="The input array"/>
 <arg name="collation" type="xs:string?" default="fn:default-collation()" desc="The collation"/>
 <arg name="key" type="fn(item()*) as xs:anyAtomicType*" default="fn:data#1" desc="The sort key"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5903,8 +5903,8 @@
 <arg name="array" type="array(*)" desc="The input array"/>
 <arg name="start" type="xs:integer" desc="The starting position"/>
 <arg name="length" type="xs:integer?" default="()" desc="The specified length"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>
@@ -5920,8 +5920,8 @@
       <signatures>
 <proto return-type="array(*)">
 <arg name="array" type="array(*)" desc="The input array"/>
-<in-spec>xpath40</in-spec>
 <in-spec>xpath31</in-spec>
+<in-spec>xpath40</in-spec>
 </proto>
 </signatures>
       <status>

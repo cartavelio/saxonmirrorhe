@@ -84,7 +84,13 @@
 </xsl:template>
 
 <xsl:template match="sfn:function">
-  <xsl:next-match/>
+  <xsl:copy>
+    <xsl:apply-templates select="@*,node()"/>
+    <xsl:if test="sfn:signatures/sfn:proto/sfn:description">
+      <xsl:apply-templates select="(sfn:signatures/sfn:proto/sfn:description)[1]"/>
+      <xsl:text>&#10;</xsl:text>
+    </xsl:if>
+  </xsl:copy>
   <xsl:text>&#10;</xsl:text>
 </xsl:template>
 
@@ -97,8 +103,14 @@
       <xsl:copy>
         <xsl:sequence select="@*"/>
         <xsl:text>&#10;</xsl:text>
-        <!--<xsl:message select="'Update: ' || $prefix || ':' || $name"/>-->
-        <xsl:apply-templates select="$qtf/fos:signatures/fos:proto" mode="proto">
+
+        <xsl:variable name="proto" select="$qtf/fos:signatures/fos:proto"/>
+
+        <xsl:if test="count($proto) gt 1">
+          <xsl:message
+              select="'Update: ' || $prefix || ':' || $name || ' ' || count($proto)"/>
+        </xsl:if>
+        <xsl:apply-templates select="$proto" mode="proto">
           <xsl:with-param name="protos" select="sfn:proto" tunnel="yes"/>
         </xsl:apply-templates>
       </xsl:copy>
@@ -114,6 +126,12 @@
 <xsl:template match="fos:signatures" mode="proto">
   <signatures xmlns="http://www.saxonica.com/ns/doc/functions">
     <xsl:sequence select="@*"/>
+
+    <xsl:if test="count(fos:proto) gt 1">
+      <xsl:message
+          select="'New   : ' || ../@name/string() || ' ' || count(fos:proto)"/>
+    </xsl:if>
+
     <xsl:apply-templates mode="proto"/>
   </signatures>
 </xsl:template>
@@ -127,12 +145,15 @@
     <xsl:sequence select="@return-type"/>
     <xsl:text>&#10;</xsl:text>
     <xsl:apply-templates select="fos:arg" mode="proto"/>
-    <in-spec xmlns="http://www.saxonica.com/ns/doc/functions">xpath40</in-spec>
-    <xsl:text>&#10;</xsl:text>
-    <xsl:for-each select="$protos[1]/sfn:in-spec|$protos[$num]/sfn:description">
+    <xsl:for-each select="$protos[1]/sfn:in-spec">
       <xsl:sequence select="."/>
       <xsl:text>&#10;</xsl:text>
     </xsl:for-each>
+    <in-spec xmlns="http://www.saxonica.com/ns/doc/functions">xpath40</in-spec>
+    <xsl:text>&#10;</xsl:text>
+    <xsl:if test="count(../fos:proto) gt 1">
+      <xsl:apply-templates select="$protos[$num]/sfn:description"/>
+    </xsl:if>
   </proto>
   <xsl:text>&#10;</xsl:text>
 </xsl:template>
