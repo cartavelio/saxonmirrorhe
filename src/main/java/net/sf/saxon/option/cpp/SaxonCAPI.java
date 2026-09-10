@@ -582,7 +582,7 @@ public class SaxonCAPI {
 
 
         try {
-            return XdmValue.wrap(converter.convert(new StringValue(valueStr)).asAtomic());
+            return XdmValue.wrap(converter.convert(new StringItem(valueStr)).asAtomic());
         } catch (ValidationException e) {
             throw new SaxonApiException(e);
         }
@@ -609,7 +609,7 @@ public class SaxonCAPI {
         } else if (value instanceof Long) {
             valueForCpp = XdmValue.wrap(Int64Value.makeIntegerValue((((Long) value).longValue())));
         } else if (value instanceof String) {
-            valueForCpp = XdmValue.wrap(StringValue.makeStringValue(((String) value)));
+            valueForCpp = XdmValue.wrap(StringItem.makeStringValue(((String) value)));
         }
         return valueForCpp;
     }
