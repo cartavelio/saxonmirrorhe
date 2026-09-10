@@ -3352,6 +3352,27 @@ public class XQueryParser extends XPathParser {
         }
     }
 
+    protected boolean isMaybeNamedConstructor() {
+        String kind = t.currentName();
+        Token ahead = t.peekAhead();
+        if (!(ahead instanceof Token.NameToken)) {
+            return false;
+        }
+        String qname = ((Token.NameToken) ahead).getValue();
+
+        switch (kind) {
+            case "element":
+            case "attribute":
+            case "processing-instruction":
+            case "namespace":
+                return !(isAllowXPath40Syntax() && reservedNames.contains(qname));
+            case "update":
+                return isAllowXPath40Syntax() &&
+                        (qname.equals("map") || qname.equals("array"));
+        }
+        return false;
+    }
+
     /**
      * Parse a node constructor. This is allowed only in XQuery. This method handles
      * the XQuery-based "computed" constructors, not the XML-style "direct" constructors.
@@ -3394,9 +3415,10 @@ public class XQueryParser extends XPathParser {
                     return null;
             }
         } else {
-            String name;
-            if (t.currentToken instanceof Token.StringLiteral && allowXPath40Syntax) {
-                name = Whitespace.trim(((Token.StringLiteral) t.currentToken).getValue());
+            String name = null;
+            StructuredQName qName = null;
+            if (t.currentToken == Token.HASH_BEFORE_NAME && allowXPath40Syntax) {
+                qName = parseEQName();
             } else {
                 name = expectName();
                 if (allowXPath40Syntax) {
@@ -3405,9 +3427,9 @@ public class XQueryParser extends XPathParser {
             }
             switch (nodeKind) {
                 case "element":
-                    return parseNamedElementConstructor(name, offset);
+                    return parseNamedElementConstructor(name, qName, offset);
                 case "attribute":
-                    return parseNamedAttributeConstructor(name, offset);
+                    return parseNamedAttributeConstructor(name, qName, offset);
                 case "namespace":
                     return parseNamedNamespaceConstructor(name, offset);
                 case "processing-instruction":
@@ -3614,17 +3636,26 @@ public class XQueryParser extends XPathParser {
 
     /**
      * Parse an element constructor of the form
-     * element qname { expr }
-     *
+     * <code>element name { expr }</code> or <code>element #qName { expr }</code>.
+     * Either {@code name} or {@code qName}
+     * must be supplied.
+     * @param name the lexical QName of the element
+     * @param qName the structured QName of the element
      * @param offset the position in the source query
      * @return the compiled instruction
      * @throws XPathException if parsing fails
      */
 
-    private Expression parseNamedElementConstructor(String name, int offset) throws XPathException {
-        NodeName nodeName = makeNodeName(name, true);
+    private Expression parseNamedElementConstructor(
+            String name, StructuredQName qName, int offset) throws XPathException {
+        NodeName nodeName;
+        if (qName == null) {
+            nodeName = makeNodeName(name, true);
+            nextToken();
+        } else {
+            nodeName = new FingerprintedQName(qName, env.getConfiguration().getNamePool());
+        }
         Expression content = null;
-        nextToken();
         readToken(Token.LCURLY);
         if (t.currentToken != Token.RCURLY) {
             content = parseExpression();
@@ -3728,25 +3759,38 @@ public class XQueryParser extends XPathParser {
 
     /**
      * Parse an attribute constructor of the form
-     * attribute name {expr}
-     *
+     * <code>attribute name { expr }</code> or <code>attribute #qName { expr }</code>.
+     * Either {@code name} or {@code qName}
+     * must be supplied.
+     * @param attName the lexical QName of the attribute
+     * @param qName the structured QName of the attribute
      * @param offset position of the expression in the source
      * @return the parsed expression
      * @throws XPathException if a static error is found
      */
 
-    private Expression parseNamedAttributeConstructor(String attName, int offset) throws XPathException {
+    private Expression parseNamedAttributeConstructor(
+            String attName, StructuredQName qName, int offset) throws XPathException {
         String warningMessage = null;
-        if (attName.equals("xmlns") || attName.startsWith("xmlns:")) {
-            warningMessage = "Cannot create a namespace declaration using an attribute constructor";
+        NodeName attributeName;
+        if (qName == null) {
+            if (attName.equals("xmlns") || attName.startsWith("xmlns:")) {
+                warningMessage = "Cannot create a namespace declaration using an attribute constructor";
+            }
+            attributeName = makeNodeName(attName, false);
+            nextToken();
+        } else {
+            attributeName = new FingerprintedQName(qName, env.getConfiguration().getNamePool());
         }
-        NodeName attributeName = makeNodeName(attName, false);
+
         if (!attributeName.hasURI(NamespaceUri.NULL) && attributeName.getPrefix().isEmpty()) {
             // This must be because the name was given as Q{uri}local. Invent a prefix.
-            attributeName = new FingerprintedQName("_", attributeName.getNamespaceUri(), attributeName.getLocalPart());
+            attributeName = new FingerprintedQName(
+                    attributeName.hasURI(NamespaceUri.XML) ? "xml" : "_",
+                    attributeName.getNamespaceUri(),
+                    attributeName.getLocalPart());
         }
         Expression attContent = null;
-        nextToken();
         readToken(Token.LCURLY);
         if (t.currentToken != Token.RCURLY) {
             attContent = parseExpression();

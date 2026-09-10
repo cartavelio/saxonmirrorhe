@@ -2300,7 +2300,7 @@ public class XPathParser {
             while (t.currentToken != Token.RPAREN) {
                 if (t.currentToken == Token.DOLLAR && allowXPath40Syntax) {
                     // Optional parameter names are allowed (and ignored) in 4.0
-                    StructuredQName varName = parseVariableName();
+                    StructuredQName varName = parseEQName();
                     if (paramNames == null) {
                         paramNames = new HashSet<>();
                     }
@@ -2767,7 +2767,7 @@ public class XPathParser {
         }
         if (token == Token.DOLLAR) {
             int offset = t.currentTokenStartOffset;
-            StructuredQName varName = parseVariableName();
+            StructuredQName varName = parseEQName();
             Expression var = resolveVariableReference(offset, varName);
             expect(Token.LPAREN);
             return parseDynamicFunctionCall(var, lhs);
@@ -2976,8 +2976,12 @@ public class XPathParser {
                         
                 }
 
+            } else if (t.peekAhead() == Token.HASH_BEFORE_NAME) {
+                return parseComputedNodeConstructor();
+
             } else if (t.peekAhead() == Token.HASH) {
                 return parseNamedFunctionReference();
+                
             } else if (t.peekAhead() == Token.COLON_COLON) {
                 int axis;
                 try {
@@ -2995,7 +2999,7 @@ public class XPathParser {
                 setLocation(ae);
                 return ae;
 
-            } else if (t.peekAhead() instanceof Token.NameToken) {
+            } else if (isMaybeNamedConstructor()) {
                 String kind = t.currentName();
                 String qname = ((Token.NameToken)t.peekAhead()).getValue();
                 // See K2-ForExprWithout-15: "for $n in $arg/element return $n". We need to check that
@@ -3061,7 +3065,7 @@ public class XPathParser {
 
         } else if (token == Token.DOLLAR) {
             int offset = t.currentTokenStartOffset;
-            StructuredQName variableName = parseVariableName();
+            StructuredQName variableName = parseEQName();
             return resolveVariableReference(offset, variableName);
 
         } else if (token == Token.DOT_DOT) {
@@ -3114,7 +3118,7 @@ public class XPathParser {
             }
 
         } else if (token == Token.HASH_BEFORE_NAME && isAllowXPath40Syntax()) {
-            StructuredQName qn = parseVariableName();  // it does the job...
+            StructuredQName qn = parseEQName();
             return Literal.makeLiteral(new QNameValue(qn,BuiltInAtomicType.QNAME));
 
         } else if (token instanceof Token.StringTemplate) {
@@ -3146,6 +3150,10 @@ public class XPathParser {
         }
 
 
+    }
+
+    protected boolean isMaybeNamedConstructor() {
+        return false;
     }
 
     /**
@@ -3319,7 +3327,7 @@ public class XPathParser {
         return result;
     }
 
-    public StructuredQName parseVariableName() throws XPathException {
+    public StructuredQName parseEQName() throws XPathException {
         nextToken();
         String var = readName();
         if (scanOnly) {
@@ -3582,7 +3590,7 @@ public class XPathParser {
         } else if (token == Token.DOLLAR) {
             checkLanguageVersion40("a variable reference directly after `?`");
             offset = t.currentTokenStartOffset;
-            StructuredQName varName = parseVariableName();
+            StructuredQName varName = parseEQName();
             result = makeLookupExpression(env.getConfiguration(), lhs, modifier, resolveVariableReference(offset, varName), deep);
         } else {
             grumble("Unexpected " + token + " after '?'");

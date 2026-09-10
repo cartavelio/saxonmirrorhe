@@ -404,7 +404,7 @@ public class PatternParser extends XPathParser {
             Token tok = t.currentToken;
             if (tok == Token.DOLLAR) {
                 int offset = t.currentTokenStartOffset;
-                StructuredQName variableName = parseVariableName();
+                StructuredQName variableName = parseEQName();
                 return resolveVariableReference(offset, variableName);
             } else if (tok instanceof Token.StringLiteral) {
                 return parseStringLiteral(true);
