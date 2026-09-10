@@ -85,38 +85,38 @@ public final class Int64Value extends IntegerValue {
      */
 
     public Int64Value(long value) {
+        super(BuiltInAtomicType.INTEGER);
         this.value = value;
-        typeLabel = BuiltInAtomicType.INTEGER;
     }
 
     /**
      * Constructor supplying a long, with a specific type annotation
      * @param value the value of the IntegerValue
-     * @param type the type annotation (trusted to be correct)
+     * @param typeLabel the type annotation (trusted to be correct)
      */
 
-    public Int64Value(long value, AtomicType type) {
+    public Int64Value(long value, AtomicType typeLabel) {
+        super(typeLabel);
         this.value = value;
-        this.typeLabel = type;
     }
 
     /**
      * Constructor for a subtype, supplying a long and a type label.
      *
      * @param val   The supplied value, as an integer
-     * @param type  the required item type, a subtype of xs:integer
+     * @param typeLabel  the required item type, a subtype of xs:integer
      * @param check Set to true if the method is required to check that the value is in range;
      *              false if the caller can guarantee that the value has already been checked.
      * @throws XPathException if the supplied value is out of range for the
      *                        target type
      */
 
-    public Int64Value(long val, /*@NotNull*/ BuiltInAtomicType type, boolean check) throws XPathException {
+    public Int64Value(long val, /*@NotNull*/ BuiltInAtomicType typeLabel, boolean check) throws XPathException {
+        super(typeLabel);
         value = val;
-        typeLabel = type;
-        if (check && !checkRange(value, type)) {
+        if (check && !checkRange(value, typeLabel)) {
             XPathException err = new XPathException("Integer value " + val +
-                    " is out of range for the requested type " + type.getDescription());
+                    " is out of range for the requested type " + typeLabel.getDescription());
             err.setErrorCode("XPTY0004");
             err.setIsTypeError(true);
             throw err;
@@ -151,9 +151,7 @@ public final class Int64Value extends IntegerValue {
 
     /*@NotNull*/
     public static Int64Value makeDerived(long val, AtomicType type) {
-        Int64Value v = new Int64Value(val);
-        v.typeLabel = type;
-        return v;
+        return new Int64Value(val, type);
     }
 
     /**
@@ -198,36 +196,9 @@ public final class Int64Value extends IntegerValue {
     @Override
     public AtomicValue copyAsSubType(/*@NotNull*/ AtomicType typeLabel) {
         if (typeLabel.getPrimitiveType() == StandardNames.XS_INTEGER) {
-            Int64Value v = new Int64Value(value);
-            v.typeLabel = typeLabel;
-            return v;
+            return new Int64Value(value, typeLabel);
         } else {
-            return new BigDecimalValue(value);
-        }
-    }
-
-    /**
-     * Convert the value to a subtype of xs:integer
-     *
-     * @param subtype  the target subtype
-     * @param validate true if validation is required; false if the caller already knows that the value is valid
-     * @return null if the conversion succeeds; a ValidationFailure describing the failure if it fails. Note
-     *         that the exception is returned, not thrown.
-     */
-
-    /*@Nullable*/
-    @Override
-    public ValidationFailure convertToSubType(/*@NotNull*/ BuiltInAtomicType subtype, boolean validate) {
-        if (!validate) {
-            setSubType(subtype);
-            return null;
-        } else if (checkRange(subtype)) {
-            return null;
-        } else {
-            ValidationFailure err = new ValidationFailure("String " + value +
-                    " cannot be converted to integer subtype " + subtype.getDescription());
-            err.setErrorCode("FORG0001");
-            return err;
+            return new BigDecimalValue(value).copyAsSubType(typeLabel);
         }
     }
 
@@ -251,29 +222,6 @@ public final class Int64Value extends IntegerValue {
             err.setErrorCode("FORG0001");
             return err;
         }
-    }
-
-    /**
-     * This class allows subtypes of xs:integer to be held, as well as xs:integer values.
-     * This method sets the required type label. It is the caller's responsibility to check that
-     * the value is within range.
-     *
-     * @param type the type label to be assigned
-     */
-    public void setSubType(AtomicType type) {
-        typeLabel = type;
-    }
-
-    /**
-     * This class allows subtypes of xs:integer to be held, as well as xs:integer values.
-     * This method checks that the value is within range, and also sets the type label.
-     *
-     * @param type the subtype of integer required
-     * @return true if successful, false if value is out of range for the subtype
-     */
-    public boolean checkRange(BuiltInAtomicType type) {
-        typeLabel = type;
-        return checkRange(value, type);
     }
 
     /**

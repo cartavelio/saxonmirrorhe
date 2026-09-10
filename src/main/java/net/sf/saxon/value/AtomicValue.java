@@ -28,6 +28,7 @@ import net.sf.saxon.tree.jiter.MonoIterator;
 import net.sf.saxon.type.*;
 
 import java.util.Iterator;
+import java.util.Objects;
 
 
 /**
@@ -44,7 +45,12 @@ import java.util.Iterator;
 public abstract class AtomicValue
         implements Item, AtomicSequence, ConversionResult, IdentityComparable {
 
-    protected AtomicType typeLabel;
+    protected final AtomicType typeLabel;
+
+    public AtomicValue(AtomicType typeLabel) {
+        Objects.requireNonNull(typeLabel);
+        this.typeLabel = typeLabel;
+    }
 
     /**
      * Atomize the item.
@@ -79,29 +85,6 @@ public abstract class AtomicValue
     @Override
     public int getLength() {
         return 1;
-    }
-
-//    /**
-//     * To implement {@link net.sf.saxon.om.Sequence}, this method returns a singleton iterator
-//     * that delivers this item in the form of a sequence
-//     *
-//     * @return a singleton iterator that returns this item
-//     */
-//
-//    public final SingleAtomicIterator iterate() {
-//        return new SingleAtomicIterator(this);
-//    }
-
-    /**
-     * Set the type label on this atomic value. Note that this modifies the value, so it must only called
-     * if the caller is confident that the value is not shared. In other cases,
-     * use {@link #copyAsSubType(net.sf.saxon.type.AtomicType)}
-     *
-     * @param type the type label to be set
-     */
-
-    public void setTypeLabel(AtomicType type) {
-        typeLabel = type;
     }
 
     /**

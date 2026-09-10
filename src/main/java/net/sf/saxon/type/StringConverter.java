@@ -583,8 +583,7 @@ public abstract class StringConverter extends Converter {
             } else if (iv instanceof BigIntegerValue) {
                 boolean ok = IntegerValue.checkBigRange(((BigIntegerValue) iv).asBigInteger(), targetType);
                 if (ok) {
-                    ((BigIntegerValue) iv).setTypeLabel(targetType);
-                    return iv;
+                    return ((BigIntegerValue) iv).copyAsSubType(targetType);
                 } else {
                     return new ValidationFailure("Integer value is out of range for type " + targetType);
                 }
@@ -668,7 +667,7 @@ public abstract class StringConverter extends Converter {
                 if (!((DateTimeValue) val).hasTimezone()) {
                     return new ValidationFailure("Supplied DateTimeStamp value " + input + " has no time zone");
                 } else {
-                    ((DateTimeValue) val).setTypeLabel(BuiltInAtomicType.DATE_TIME_STAMP);
+                    val = ((DateTimeValue) val).copyAsSubType(BuiltInAtomicType.DATE_TIME_STAMP);
                 }
             }
             return val;

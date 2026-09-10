@@ -41,8 +41,8 @@ public final class AnyURIValue extends StringValue {
      */
 
     public AnyURIValue(UnicodeString value) {
-        super(value == null ? (UnicodeString) EmptyUnicodeString.getInstance() : Whitespace.collapseWhitespace(value));
-        typeLabel = BuiltInAtomicType.ANY_URI;
+        super(value == null ? (UnicodeString) EmptyUnicodeString.getInstance() : Whitespace.collapseWhitespace(value),
+              BuiltInAtomicType.ANY_URI);
     }
 
     public AnyURIValue(String value) {
@@ -73,9 +73,7 @@ public final class AnyURIValue extends StringValue {
     /*@NotNull*/
     @Override
     public AnyURIValue copyAsSubType(AtomicType typeLabel) {
-        AnyURIValue v = new AnyURIValue(this.getUnicodeStringValue());
-        v.typeLabel = typeLabel;
-        return v;
+        return new AnyURIValue(this.getUnicodeStringValue(), typeLabel);
     }
 
     public StringValue convertToString() {

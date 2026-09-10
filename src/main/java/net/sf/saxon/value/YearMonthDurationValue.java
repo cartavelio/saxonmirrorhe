@@ -23,7 +23,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 /**
- * A value of type xs:yearMonthDuration.
+ * A value of type xs:yearMonthDuration (or a subtype thereof).
  * <p>The state retained by this class is essentially a signed 32-bit integer representing the number
  * of months: that is, {@code year*12 + month}; plus a type label allowing subtypes of {@code xs:yearMonthDuration}
  * to be represented.</p>
@@ -31,12 +31,8 @@ import java.math.RoundingMode;
 
 public final class YearMonthDurationValue extends DurationValue implements XPathComparable, ContextFreeAtomicValue {
 
-    /**
-     * Private constructor for internal use
-     */
-
-    private YearMonthDurationValue() {
-        typeLabel = BuiltInAtomicType.YEAR_MONTH_DURATION;
+    public YearMonthDurationValue(int months, AtomicType typeLabel) {
+        super(0, months, 0, 0, 0, 0, 0, typeLabel);
     }
 
     /**
@@ -67,9 +63,7 @@ public final class YearMonthDurationValue extends DurationValue implements XPath
     /*@NotNull*/
     @Override
     public AtomicValue copyAsSubType(AtomicType typeLabel) {
-        YearMonthDurationValue v = YearMonthDurationValue.fromMonths(getLengthInMonths());
-        v.typeLabel = typeLabel;
-        return v;
+        return new YearMonthDurationValue(getLengthInMonths(), typeLabel);
     }
 
     /**
@@ -131,12 +125,7 @@ public final class YearMonthDurationValue extends DurationValue implements XPath
      */
 
     public static YearMonthDurationValue fromMonths(int months) {
-        YearMonthDurationValue mdv = new YearMonthDurationValue();
-        mdv._negative = months < 0;
-        mdv._months = months < 0 ? -months : months;
-        mdv._seconds = 0;
-        mdv._nanoseconds = 0;
-        return mdv;
+        return new YearMonthDurationValue(months, BuiltInAtomicType.YEAR_MONTH_DURATION);
     }
 
     /**

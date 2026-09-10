@@ -13,7 +13,6 @@ import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
@@ -22,7 +21,6 @@ import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ConversionResult;
@@ -70,20 +68,59 @@ public final class DateTimeValue extends CalendarValue
         //#endif
 {
 
-    private int year;       // the year as written, +1 for BC years
-    private byte month;     // the month as written, range 1-12
-    private byte day;       // the day as written, range 1-31
-    private byte hour;      // the hour as written (except for midnight), range 0-23
-    private byte minute;    // the minutes as written, range 0-59
-    private byte second;    // the seconds as written, range 0-59 (no leap seconds)
-    private int nanosecond; // the number of nanoseconds within the current second
-    private boolean hasNoYearZero;  // true if XSD 1.0 rules apply for negative years
+    private final int year;       // the year as written, +1 for BC years
+    private final byte month;     // the month as written, range 1-12
+    private final byte day;       // the day as written, range 1-31
+    private final byte hour;      // the hour as written (except for midnight), range 0-23
+    private final byte minute;    // the minutes as written, range 0-59
+    private final byte second;    // the seconds as written, range 0-59 (no leap seconds)
+    private final int nanosecond; // the number of nanoseconds within the current second
+    private final boolean hasNoYearZero;  // true if XSD 1.0 rules apply for negative years
 
-    /**
-     * Private default constructor
-     */
+    public DateTimeValue(int year, byte month, byte day, byte hour, byte minute, byte second,
+                         int nanosecond, boolean hasNoYearZero, int tzMinutes, AtomicType typeLabel) {
+        super(typeLabel, tzMinutes);
+        this.year = year;
+        this.month = month;
+        this.day = day;
+        this.hour = hour;
+        this.minute = minute;
+        this.second = second;
+        this.nanosecond = nanosecond;
+        this.hasNoYearZero = hasNoYearZero;
+    }
 
-    private DateTimeValue() {
+    protected static class MutableDateTimeValue {
+        public int year;       // the year as written, +1 for BC years
+        public byte month;     // the month as written, range 1-12
+        public byte day;       // the day as written, range 1-31
+        public byte hour;      // the hour as written (except for midnight), range 0-23
+        public byte minute;    // the minutes as written, range 0-59
+        public byte second;    // the seconds as written, range 0-59 (no leap seconds)
+        public int nanosecond; // the number of nanoseconds within the current second
+        public boolean hasNoYearZero;  // true if XSD 1.0 rules apply for negative years
+        public int tzMinutes = NO_TIMEZONE;
+        public AtomicType typeLabel = BuiltInAtomicType.DATE_TIME;
+    }
+
+    private MutableDateTimeValue makeMutableCopy() {
+        MutableDateTimeValue m = new MutableDateTimeValue();
+        m.year = year;
+        m.month = month;
+        m.day = day;
+        m.hour = hour;
+        m.minute = minute;
+        m.second = second;
+        m.nanosecond = nanosecond;
+        m.hasNoYearZero = hasNoYearZero;
+        m.tzMinutes = getTimezoneInMinutes();
+        m.typeLabel = typeLabel;
+        return m;
+    }
+
+    private static DateTimeValue fromMutableCopy(MutableDateTimeValue m) {
+        return new DateTimeValue(m.year, m.month, m.day, m.hour, m.minute, m.second,
+                                 m.nanosecond, m.hasNoYearZero, m.tzMinutes, m.typeLabel);
     }
 
     /**
@@ -128,25 +165,26 @@ public final class DateTimeValue extends CalendarValue
      * @param tzSpecified indicates whether the timezone is specified
      */
 
-    public DateTimeValue(/*@NotNull*/ Calendar calendar, boolean tzSpecified) {
+    public static DateTimeValue fromCalendar(/*@NotNull*/ Calendar calendar, boolean tzSpecified) {
+        MutableDateTimeValue m = new MutableDateTimeValue();
         int era = calendar.get(GregorianCalendar.ERA);
-        year = calendar.get(Calendar.YEAR);
+        m.year = calendar.get(Calendar.YEAR);
         if (era == GregorianCalendar.BC) {
-            year = 1 - year;
+            m.year = 1 - m.year;
         }
-        month = (byte) (calendar.get(Calendar.MONTH) + 1);
-        day = (byte) calendar.get(Calendar.DATE);
-        hour = (byte) calendar.get(Calendar.HOUR_OF_DAY);
-        minute = (byte) calendar.get(Calendar.MINUTE);
-        second = (byte) calendar.get(Calendar.SECOND);
-        nanosecond = calendar.get(Calendar.MILLISECOND) * 1_000_000;
+        m.month = (byte) (calendar.get(Calendar.MONTH) + 1);
+        m.day = (byte) calendar.get(Calendar.DATE);
+        m.hour = (byte) calendar.get(Calendar.HOUR_OF_DAY);
+        m.minute = (byte) calendar.get(Calendar.MINUTE);
+        m.second = (byte) calendar.get(Calendar.SECOND);
+        m.nanosecond = calendar.get(Calendar.MILLISECOND) * 1_000_000;
         if (tzSpecified) {
-            int tz = (calendar.get(Calendar.ZONE_OFFSET) +
+            m.tzMinutes = (calendar.get(Calendar.ZONE_OFFSET) +
                     calendar.get(Calendar.DST_OFFSET)) / 60_000;
-            setTimezoneInMinutes(tz);
         }
-        typeLabel = BuiltInAtomicType.DATE_TIME;
-        hasNoYearZero = true;
+        m.typeLabel = BuiltInAtomicType.DATE_TIME;
+        m.hasNoYearZero = true;
+        return fromMutableCopy(m);
     }
 
 
@@ -249,12 +287,9 @@ public final class DateTimeValue extends CalendarValue
         LocalDateTime ldt = offsetDateTime.toLocalDateTime();
         ZoneOffset zo = offsetDateTime.getOffset();
         int tz = zo.getTotalSeconds() / 60;
-        DateTimeValue dtv = new DateTimeValue(ldt.getYear(), (byte) ldt.getMonthValue(), (byte) ldt.getDayOfMonth(),
+        return new DateTimeValue(ldt.getYear(), (byte) ldt.getMonthValue(), (byte) ldt.getDayOfMonth(),
                                               (byte) ldt.getHour(), (byte) ldt.getMinute(), (byte) ldt.getSecond(),
-                                              ldt.getNano(), tz);
-        dtv.typeLabel = BuiltInAtomicType.DATE_TIME_STAMP;
-        dtv.hasNoYearZero = false;
-        return dtv;
+                                              ldt.getNano(), false, tz, BuiltInAtomicType.DATE_TIME_STAMP);
     }
 
     /**
@@ -268,11 +303,9 @@ public final class DateTimeValue extends CalendarValue
 
     /*@NotNull*/
     public static DateTimeValue fromLocalDateTime(LocalDateTime localDateTime) {
-        DateTimeValue dtv = new DateTimeValue(localDateTime.getYear(), (byte) localDateTime.getMonthValue(), (byte) localDateTime.getDayOfMonth(),
+        return new DateTimeValue(localDateTime.getYear(), (byte) localDateTime.getMonthValue(), (byte) localDateTime.getDayOfMonth(),
                                  (byte) localDateTime.getHour(), (byte) localDateTime.getMinute(), (byte) localDateTime.getSecond(),
-                                 localDateTime.getNano(), NO_TIMEZONE);
-        dtv.hasNoYearZero = false;
-        return dtv;
+                                 localDateTime.getNano(), false, NO_TIMEZONE, BuiltInAtomicType.DATE_TIME);
     }
     //#endif
 
@@ -307,15 +340,15 @@ public final class DateTimeValue extends CalendarValue
             throw err;
         }
 
-        DateTimeValue v = date.toDateTime();
+        MutableDateTimeValue v = date.toDateTime().makeMutableCopy();
         v.hour = time.getHour();
         v.minute = time.getMinute();
         v.second = time.getSecond();
         v.nanosecond = time.getNanosecond();
-        v.setTimezoneInMinutes(Math.max(tz1, tz2));
+        v.tzMinutes = Math.max(tz1, tz2);
         v.typeLabel = BuiltInAtomicType.DATE_TIME;
         v.hasNoYearZero = date.hasNoYearZero;
-        return v;
+        return fromMutableCopy(v);
     }
 
     /**
@@ -337,7 +370,7 @@ public final class DateTimeValue extends CalendarValue
     /*@NotNull*/
     public static ConversionResult makeDateTimeValue(UnicodeString s, /*@NotNull*/ ConversionRules rules) {
         // input must have format [-]yyyy-mm-ddThh:mm:ss[.fff*][([+|-]hh:mm | Z)]
-        DateTimeValue dt = new DateTimeValue();
+        MutableDateTimeValue dt = new MutableDateTimeValue();
         dt.hasNoYearZero = !rules.isAllowYearZero();
         StringTokenizer tok = new StringTokenizer(Whitespace.trim(s).toString(), "-:.+TZ", true);
 
@@ -536,7 +569,7 @@ public final class DateTimeValue extends CalendarValue
                 }
                 tz = 0;
                 state = 9;  // we've finished
-                dt.setTimezoneInMinutes(0);
+                dt.tzMinutes = 0;
             } else if ("+".equals(delim) || "-".equals(delim)) {
                 if (state > 1) {
                     return badDate(delim + " cannot occur here", s);
@@ -587,7 +620,7 @@ public final class DateTimeValue extends CalendarValue
                 if (negativeTz) {
                     tz = -tz;
                 }
-                dt.setTimezoneInMinutes(tz);
+                dt.tzMinutes = tz;
             } else {
                 return badDate("Timezone format is incorrect", s);
             }
@@ -616,9 +649,8 @@ public final class DateTimeValue extends CalendarValue
             dt.day = t.getDay();
         }
 
-
         dt.typeLabel = BuiltInAtomicType.DATE_TIME;
-        return dt;
+        return fromMutableCopy(dt);
     }
 
     /**
@@ -676,17 +708,7 @@ public final class DateTimeValue extends CalendarValue
 
     public DateTimeValue(int year, byte month, byte day,
                          byte hour, byte minute, byte second, int nanosecond, int tz) {
-
-        this.hasNoYearZero = false;
-        this.year = year;
-        this.month = month;
-        this.day = day;
-        this.hour = hour;
-        this.minute = minute;
-        this.second = second;
-        this.nanosecond = nanosecond;
-        setTimezoneInMinutes(tz);
-        typeLabel = BuiltInAtomicType.DATE_TIME;
+        this(year, month, day, hour, minute, second, nanosecond, false, tz, BuiltInAtomicType.DATE_TIME);
     }
 
     /**
@@ -714,25 +736,8 @@ public final class DateTimeValue extends CalendarValue
 
     public DateTimeValue(int year, byte month, byte day,
                          byte hour, byte minute, byte second, int microsecond, int tz, boolean hasNoYearZero) {
-
-        this.hasNoYearZero = hasNoYearZero;
-        this.year = year;
-        this.month = month;
-        this.day = day;
-        this.hour = hour;
-        this.minute = minute;
-        this.second = second;
-        this.nanosecond = microsecond*1000;
-        setTimezoneInMinutes(tz);
-        typeLabel = BuiltInAtomicType.DATE_TIME;
+        this(year, month, day, hour, minute, second, microsecond * 1000, hasNoYearZero, tz, BuiltInAtomicType.DATE_TIME);
     }
-
-    /**
-     * Create a DateTime value equivalent to this value, except for a possible change to
-     * the {@code hasNoYearZero} property. The internal representation is unchanged (year 0 is the
-     * year before year 1), but if the property {@code hasNoYearZero} is set, then a value
-     * with
-     */
 
     /**
      * Determine the primitive type of the value. This delivers the same answer as
@@ -883,9 +888,9 @@ public final class DateTimeValue extends CalendarValue
             if (implicitTimezone == CalendarValue.MISSING_TIMEZONE || implicitTimezone == CalendarValue.NO_TIMEZONE) {
                 throw new NoDynamicContextException("DateTime operation needs access to implicit timezone");
             }
-            DateTimeValue dt = copyAsSubType(null);
-            dt.setTimezoneInMinutes(implicitTimezone);
-            return dt.adjustTimezone(0);
+            MutableDateTimeValue m = makeMutableCopy();
+            m.tzMinutes = implicitTimezone;
+            return fromMutableCopy(m).adjustTimezone(0);
         }
     }
 
@@ -1115,7 +1120,7 @@ public final class DateTimeValue extends CalendarValue
 
     /*@NotNull*/
     public TimeValue toTimeValue() {
-        return new TimeValue(hour, minute, second, nanosecond, getTimezoneInMinutes(), "");
+        return new TimeValue(hour, minute, second, nanosecond, getTimezoneInMinutes(), BuiltInAtomicType.TIME);
     }
 
 
@@ -1146,11 +1151,9 @@ public final class DateTimeValue extends CalendarValue
     /*@NotNull*/
     @Override
     public DateTimeValue copyAsSubType(AtomicType typeLabel) {
-        DateTimeValue v = new DateTimeValue(year, month, day,
-                hour, minute, second, nanosecond, getTimezoneInMinutes());
-        v.hasNoYearZero = hasNoYearZero;
+        MutableDateTimeValue v = makeMutableCopy();
         v.typeLabel = typeLabel;
-        return v;
+        return fromMutableCopy(v);
     }
 
     /**
@@ -1165,10 +1168,10 @@ public final class DateTimeValue extends CalendarValue
     /*@NotNull*/
     @Override
     public DateTimeValue adjustTimezone(int timezone) {
-        if (!hasTimezone()) {
-            DateTimeValue in = copyAsSubType(typeLabel);
-            in.setTimezoneInMinutes(timezone);
-            return in;
+        if (!hasTimezone() || timezone == NO_TIMEZONE) {
+            MutableDateTimeValue m = makeMutableCopy();
+            m.tzMinutes = timezone;
+            return fromMutableCopy(m);
         }
         int oldtz = getTimezoneInMinutes();
         if (oldtz == timezone) {
@@ -1184,9 +1187,9 @@ public final class DateTimeValue extends CalendarValue
         }
 
         if (h >= 0 && h < 24) {
-            DateTimeValue d2 = new DateTimeValue(year, month, day, (byte) h, (byte) mi, second, nanosecond, timezone);
-            d2.hasNoYearZero = hasNoYearZero;
-            return d2;
+            return new DateTimeValue(year, month, day,
+                                                 (byte) h, (byte) mi, second, nanosecond,
+                                                 hasNoYearZero, timezone, BuiltInAtomicType.DATE_TIME);
         }
 
         // Following code is designed to handle the corner case of adjusting from -14:00 to +14:00 or
@@ -1196,15 +1199,15 @@ public final class DateTimeValue extends CalendarValue
             h += 24;
             DateValue t = DateValue.yesterday(dt.getYear(), dt.getMonth(), dt.getDay());
             dt = new DateTimeValue(t.getYear(), t.getMonth(), t.getDay(),
-                    (byte) h, (byte) mi, second, nanosecond, timezone);
-            dt.hasNoYearZero = hasNoYearZero;
+                    (byte) h, (byte) mi, second, nanosecond,
+                                   hasNoYearZero, timezone, BuiltInAtomicType.DATE_TIME);
         }
         if (h > 23) {
             h -= 24;
             DateValue t = DateValue.tomorrow(year, month, day);
             dt = new DateTimeValue(t.getYear(), t.getMonth(), t.getDay(),
-                    (byte) h, (byte) mi, second, nanosecond, timezone);
-            dt.hasNoYearZero = hasNoYearZero;
+                                   (byte) h, (byte) mi, second, nanosecond,
+                                   hasNoYearZero, timezone, BuiltInAtomicType.DATE_TIME);
         }
         return dt;
     }
@@ -1226,10 +1229,10 @@ public final class DateTimeValue extends CalendarValue
             BigDecimal seconds = duration.getTotalSeconds();
             BigDecimal julian = toJulianInstant();
             julian = julian.add(seconds);
-            DateTimeValue dt = fromJulianInstant(julian);
-            dt.setTimezoneInMinutes(getTimezoneInMinutes());
+            MutableDateTimeValue dt = fromJulianInstant(julian).makeMutableCopy();
+            dt.tzMinutes = getTimezoneInMinutes();
             dt.hasNoYearZero = this.hasNoYearZero;
-            return dt;
+            return fromMutableCopy(dt);
         } else if (duration instanceof YearMonthDurationValue) {
             int months = ((YearMonthDurationValue) duration).getLengthInMonths();
             int m = (month - 1) + months;
@@ -1244,10 +1247,8 @@ public final class DateTimeValue extends CalendarValue
             while (!DateValue.isValidDate(y, m, d)) {
                 d -= 1;
             }
-            DateTimeValue dtv = new DateTimeValue(y, (byte) m, (byte) d,
-                    hour, minute, second, nanosecond, getTimezoneInMinutes());
-            dtv.hasNoYearZero = hasNoYearZero;
-            return dtv;
+            return new DateTimeValue(y, (byte) m, (byte) d,
+                    hour, minute, second, nanosecond, hasNoYearZero, getTimezoneInMinutes(), BuiltInAtomicType.DATE_TIME);
         } else {
             XPathException err = new XPathException("DateTime arithmetic is not supported on xs:duration, only on its subtypes");
             err.setErrorCode("XPTY0004");
@@ -1332,10 +1333,6 @@ public final class DateTimeValue extends CalendarValue
             default:
                 throw new IllegalArgumentException("Unknown component for dateTime: " + component);
         }
-    }
-
-    private SequenceIterator oneInt(long value) {
-        return SingletonIterator.makeIterator(Int64Value.makeIntegerValue(value));
     }
 
     //#if CSHARP==false

@@ -16,10 +16,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.type.AtomicType;
-import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.ConversionResult;
-import net.sf.saxon.type.ValidationException;
+import net.sf.saxon.type.*;
 
 import java.time.LocalDate;
 import java.time.temporal.WeekFields;
@@ -36,7 +33,8 @@ public class DateValue extends GDateValue implements XPathComparable {
      * Private constructor of a skeletal DateValue
      */
 
-    private DateValue() {
+    private DateValue(MutableGDateValue m) {
+        super(m);
     }
 
     /**
@@ -49,11 +47,7 @@ public class DateValue extends GDateValue implements XPathComparable {
      */
 
     public DateValue(int year, byte month, byte day) {
-        this.hasNoYearZero = true;
-        this.year = year;
-        this.month = month;
-        this.day = day;
-        typeLabel = BuiltInAtomicType.DATE;
+        this(new MutableGDateValue(year, month, day, true,NO_TIMEZONE, BuiltInAtomicType.DATE));
     }
 
     /**
@@ -68,11 +62,7 @@ public class DateValue extends GDateValue implements XPathComparable {
      */
 
     public DateValue(int year, byte month, byte day, boolean xsd10) {
-        this.hasNoYearZero = xsd10;
-        this.year = year;
-        this.month = month;
-        this.day = day;
-        typeLabel = BuiltInAtomicType.DATE;
+        this(new MutableGDateValue(year, month, day, xsd10, NO_TIMEZONE, BuiltInAtomicType.DATE));
     }
 
     /**
@@ -90,12 +80,7 @@ public class DateValue extends GDateValue implements XPathComparable {
 
     public DateValue(int year, byte month, byte day, int tz, boolean xsd10) {
         // Method is called by generated Java code.
-        this.hasNoYearZero = xsd10;
-        this.year = year;
-        this.month = month;
-        this.day = day;
-        setTimezoneInMinutes(tz);
-        typeLabel = BuiltInAtomicType.DATE;
+        this(new MutableGDateValue(year, month, day, xsd10, tz, BuiltInAtomicType.DATE));
     }
 
     /**
@@ -112,11 +97,7 @@ public class DateValue extends GDateValue implements XPathComparable {
      */
 
     public DateValue(int year, byte month, byte day, int tz, AtomicType type) {
-        this.year = year;
-        this.month = month;
-        this.day = day;
-        setTimezoneInMinutes(tz);
-        typeLabel = type;
+        this(new MutableGDateValue(year, month, day, false, tz, type));
     }
 
     /**
@@ -140,8 +121,17 @@ public class DateValue extends GDateValue implements XPathComparable {
      * @throws ValidationException if the supplied string is not a valid date
      */
     public DateValue(UnicodeString s, ConversionRules rules) throws ValidationException {
-        setLexicalValue(this, s, rules.isAllowYearZero()).asAtomic();
-        typeLabel = BuiltInAtomicType.DATE;
+        this(fromUnicodeString(s, rules));
+    }
+
+    private static MutableGDateValue fromUnicodeString(UnicodeString s, ConversionRules rules) throws ValidationException {
+        MutableGDateValue m = new MutableGDateValue();
+        setLexicalValue(m, s, rules.isAllowYearZero());
+        if (m.error == null) {
+            return m;
+        } else {
+            throw m.error.makeException();
+        }
     }
 
     //#if CSHARP==false
@@ -163,16 +153,22 @@ public class DateValue extends GDateValue implements XPathComparable {
      *                 value NO_TIMEZONE indicating that the value is not in a timezone
      */
     public DateValue(GregorianCalendar calendar, int tz) {
+        this(fromGregorianCalendar(calendar, tz));
+    }
+
+    private static MutableGDateValue fromGregorianCalendar(GregorianCalendar calendar, int tz) {
         // Note: this constructor is not used by Saxon itself, but might be used by applications
+        MutableGDateValue g = new MutableGDateValue();
         int era = calendar.get(GregorianCalendar.ERA);
-        year = calendar.get(Calendar.YEAR);
+        g.year = calendar.get(Calendar.YEAR);
         if (era == GregorianCalendar.BC) {
-            year = 1 - year;
+            g.year = 1 - g.year;
         }
-        month = (byte) (calendar.get(Calendar.MONTH) + 1);
-        day = (byte) calendar.get(Calendar.DATE);
-        setTimezoneInMinutes(tz);
-        typeLabel = BuiltInAtomicType.DATE;
+        g.month = (byte) (calendar.get(Calendar.MONTH) + 1);
+        g.day = (byte) calendar.get(Calendar.DATE);
+        g.tzMinutes = tz;
+        g.typeLabel = BuiltInAtomicType.DATE;
+        return g;
     }
 
     //#endif
@@ -187,31 +183,11 @@ public class DateValue extends GDateValue implements XPathComparable {
      */
 
     public static ConversionResult makeDateValue(UnicodeString in, ConversionRules rules) {
-        DateValue d = new DateValue();
-        d.typeLabel = BuiltInAtomicType.DATE;
-        return setLexicalValue(d, in, rules.isAllowYearZero());
+        MutableGDateValue g = new MutableGDateValue();
+        g.typeLabel = BuiltInAtomicType.DATE;
+        setLexicalValue(g, in, rules.isAllowYearZero());
+        return g.error == null ? new DateValue(g) : g.error;
     }
-
-//    /**
-//     * Factory method: create an xs:date value from a supplied string, in ISO 8601 format, allowing
-//     * a year value of 0 to represent the year before year 1 (that is, following the XSD 1.1 rules).
-//     * <p>The {@code hasNoYearZero} property in the result is set to false.</p>
-//     *
-//     * @param s a string in the lexical space of xs:date
-//     * @return a DateValue representing the xs:date supplied, including a timezone offset if
-//     * present in the lexical representation
-//     * @throws DateTimeParseException if the format of the supplied string is invalid.
-//     * @since 9.9
-//     */
-//
-//    public static DateValue parse(UnicodeString s) throws DateTimeParseException {
-//        ConversionResult result = makeDateValue(s, ConversionRules.DEFAULT);
-//        if (result instanceof ValidationFailure) {
-//            throw new DateTimeParseException(((ValidationFailure) result).getMessage(), s.toString(), 0);
-//        } else {
-//            return (DateValue) result;
-//        }
-//    }
 
     /**
      * Determine the primitive type of the value. This delivers the same answer as
@@ -330,9 +306,9 @@ public class DateValue extends GDateValue implements XPathComparable {
     /*@NotNull*/
     @Override
     public AtomicValue copyAsSubType(AtomicType typeLabel) {
-        DateValue v = new DateValue(year, month, day, getTimezoneInMinutes(), hasNoYearZero);
-        v.typeLabel = typeLabel;
-        return v;
+        MutableGDateValue m = makeMutableCopy();
+        m.typeLabel = typeLabel;
+        return new DateValue(m);
     }
 
     /**
@@ -369,15 +345,15 @@ public class DateValue extends GDateValue implements XPathComparable {
             int days = (int) Math.floor((double) microseconds / (1000000L * 60L * 60L * 24L));
             boolean partDay = (microseconds % (1000000L * 60L * 60L * 24L)) > 0;
             int julian = getJulianDayNumber();
-            DateValue d = dateFromJulianDayNumber(julian + (negative ? -days : days));
+            MutableGDateValue d = mutableDateFromJulianDayNumber(julian + (negative ? -days : days));
             if (partDay) {
                 if (negative) {
-                    d = yesterday(d.year, d.month, d.day);
+                    d = yesterday(d.year, d.month, d.day).makeMutableCopy();
                 }
             }
-            d.setTimezoneInMinutes(getTimezoneInMinutes());
+            d.tzMinutes = getTimezoneInMinutes();
             d.hasNoYearZero = this.hasNoYearZero;
-            return d;
+            return new DateValue(d);
         } else if (duration instanceof YearMonthDurationValue) {
             int months = ((YearMonthDurationValue) duration).getLengthInMonths();
             int m = (month - 1) + months;
@@ -503,6 +479,10 @@ public class DateValue extends GDateValue implements XPathComparable {
      */
 
     public static DateValue dateFromJulianDayNumber(int julianDayNumber) {
+        return new DateValue(mutableDateFromJulianDayNumber(julianDayNumber));
+    }
+
+    private static MutableGDateValue mutableDateFromJulianDayNumber(int julianDayNumber) {
         if (julianDayNumber >= 0) {
             int L = julianDayNumber + 68569 + 1;    // +1 adjustment for days starting at noon
             int n = (4 * L) / 146097;
@@ -514,10 +494,10 @@ public class DateValue extends GDateValue implements XPathComparable {
             L = j / 11;
             int m = j + 2 - (12 * L);
             int y = 100 * (n - 49) + i + L;
-            return new DateValue(y, (byte) m, (byte) d, true);
+            return new MutableGDateValue(y, m, d, true, NO_TIMEZONE, BuiltInAtomicType.DATE);
         } else {
             // add 12000 years and subtract them again...
-            DateValue dt = dateFromJulianDayNumber(julianDayNumber +
+            MutableGDateValue dt = mutableDateFromJulianDayNumber(julianDayNumber +
                                                            365 * 12000 + 12000 / 4 - 12000 / 100 + 12000 / 400);
             dt.year -= 12000;
             return dt;

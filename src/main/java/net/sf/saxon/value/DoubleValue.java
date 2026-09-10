@@ -40,8 +40,8 @@ public final class DoubleValue extends NumericValue {
      */
 
     public DoubleValue(double value) {
+        super(BuiltInAtomicType.DOUBLE);
         this.value = value;
-        typeLabel = BuiltInAtomicType.DOUBLE;
     }
 
     /**
@@ -51,13 +51,13 @@ public final class DoubleValue extends NumericValue {
      * to the supplied type.
      *
      * @param value the value of the NumericValue
-     * @param type  the type of the value. This must be a subtype of xs:double, and the
-     *              value must conform to this type. The methosd does not check these conditions.
+     * @param typeLabel  the type of the value. This must be a subtype of xs:double, and the
+     *              value must conform to this type. The method does not check these conditions.
      */
 
-    public DoubleValue(double value, AtomicType type) {
+    public DoubleValue(double value, AtomicType typeLabel) {
+        super(typeLabel);
         this.value = value;
-        typeLabel = type;
     }
 
     /**
@@ -81,9 +81,7 @@ public final class DoubleValue extends NumericValue {
     /*@NotNull*/
     @Override
     public AtomicValue copyAsSubType(AtomicType typeLabel) {
-        DoubleValue v = new DoubleValue(value);
-        v.typeLabel = typeLabel;
-        return v;
+        return new DoubleValue(value, typeLabel);
     }
 
     /**

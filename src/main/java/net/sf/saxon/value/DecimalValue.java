@@ -8,6 +8,8 @@
 
 package net.sf.saxon.value;
 
+import net.sf.saxon.type.AtomicType;
+
 import java.math.BigDecimal;
 
 /**
@@ -20,6 +22,10 @@ import java.math.BigDecimal;
  */
 
 public abstract class DecimalValue extends NumericValue {
+
+    public DecimalValue(AtomicType typeLabel) {
+        super(typeLabel);
+    }
     /**
      * Implementations of Decimal value don't throw an exception when converted to BigDecimal
      * @return the BigDecimal representation of the value

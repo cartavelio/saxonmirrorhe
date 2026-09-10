@@ -13,6 +13,7 @@ import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceException;
+import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.ConversionResult;
 import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.type.ValidationFailure;
@@ -26,6 +27,10 @@ import java.math.BigDecimal;
 
 public abstract class NumericValue extends AtomicValue
         implements XPathComparable, AtomicMatchKey, ContextFreeAtomicValue {
+
+    public NumericValue(AtomicType typeLabel) {
+        super(typeLabel);
+    }
 
     /**
      * Get a numeric value by parsing a string; the type of numeric value depends

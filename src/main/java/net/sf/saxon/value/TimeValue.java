@@ -31,13 +31,11 @@ import java.util.*;
 
 public final class TimeValue extends CalendarValue implements XPathComparable {
 
-    private byte hour;
-    private byte minute;
-    private byte second;
-    private int nanosecond;
+    private final byte hour;
+    private final byte minute;
+    private final byte second;
+    private final int nanosecond;
 
-    private TimeValue() {
-    }
 
     /**
      * Construct a time value given the hour, minute, second, and microsecond components.
@@ -47,20 +45,19 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
      * @param minute      the minutes value, 0-59
      * @param second      the seconds value, 0-59
      * @param microsecond the number of microseconds, 0-999999
-     * @param tz          the timezone displacement in minutes from UTC. Supply the value
+     * @param tzMinutes   the timezone displacement in minutes from UTC. Supply the value
      *                    {@link CalendarValue#NO_TIMEZONE} if there is no timezone component.
-     * @deprecated since 10.0: use the constructor {@link #TimeValue(byte, byte, byte, int, int, String)}
+     * @deprecated since 10.0: use the constructor {@link #TimeValue(byte, byte, byte, int, int, AtomicType)}
      * that accepts nanosecond precision
      */
 
     @Deprecated
-    public TimeValue(byte hour, byte minute, byte second, int microsecond, int tz) {
+    public TimeValue(byte hour, byte minute, byte second, int microsecond, int tzMinutes) {
+        super(BuiltInAtomicType.TIME, tzMinutes);
         this.hour = hour;
         this.minute = minute;
         this.second = second;
         this.nanosecond = microsecond * 1000;
-        setTimezoneInMinutes(tz);
-        typeLabel = BuiltInAtomicType.TIME;
     }
 
     /**
@@ -71,21 +68,17 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
      * @param minute      the minutes value, 0-59
      * @param second      the seconds value, 0-59
      * @param nanosecond  the number of microseconds, 0-999999
-     * @param tz          the timezone displacement in minutes from UTC. Supply the value
+     * @param tzMinutes   the timezone displacement in minutes from UTC. Supply the value
      *                    {@link CalendarValue#NO_TIMEZONE} if there is no timezone component.
-     * @param flag        used to disambiguate this constructor. Must be set to "".
+     * @param typeLabel   the type annotation (must be a subtype of xs:time)
      */
 
-    public TimeValue(byte hour, byte minute, byte second, int nanosecond, int tz, String flag) {
-        if (!flag.isEmpty()) {
-            throw new IllegalArgumentException();
-        }
+    public TimeValue(byte hour, byte minute, byte second, int nanosecond, int tzMinutes, AtomicType typeLabel) {
+        super(typeLabel, tzMinutes);
         this.hour = hour;
         this.minute = minute;
         this.second = second;
         this.nanosecond = nanosecond;
-        setTimezoneInMinutes(tz);
-        typeLabel = BuiltInAtomicType.TIME;
     }
 
     /**
@@ -102,7 +95,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
      */
 
     public TimeValue makeTimeValue(byte hour, byte minute, byte second, int nanosecond, int tz) {
-        return new TimeValue(hour, minute, second, nanosecond, tz, "");
+        return new TimeValue(hour, minute, second, nanosecond, tz, BuiltInAtomicType.TIME);
     }
 
     //#if CSHARP==false
@@ -114,12 +107,11 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
      */
 
     public TimeValue(/*@NotNull*/ GregorianCalendar calendar, int tz) {
+        super(BuiltInAtomicType.TIME, tz);
         hour = (byte) calendar.get(Calendar.HOUR_OF_DAY);
         minute = (byte) calendar.get(Calendar.MINUTE);
         second = (byte) calendar.get(Calendar.SECOND);
         nanosecond = calendar.get(Calendar.MILLISECOND) * 1_000_000;
-        setTimezoneInMinutes(tz);
-        typeLabel = BuiltInAtomicType.TIME;
     }
     //#endif
 
@@ -136,12 +128,11 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
     /*@NotNull*/
     public static ConversionResult makeTimeValue(UnicodeString s) {
         // input must have format hh:mm:ss[.fff*][([+|-]hh:mm | Z)]
-        TimeValue tv = new TimeValue();
         StringTokenizer tok = new StringTokenizer(Whitespace.trim(s).toString(), "-:.+Z", true);
         if (!tok.hasMoreTokens()) {
             return badTime("too short", s);
         }
-        String part = (String) tok.nextToken();
+        String part = tok.nextToken();
 
         if (part.length() != 2) {
             return badTime("hour must be two digits", s);
@@ -150,8 +141,8 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
         if (value < 0) {
             return badTime("Non-numeric hour component", s);
         }
-        tv.hour = (byte) value;
-        if (tv.hour > 24) {
+        byte hour = (byte) value;
+        if (hour > 24) {
             return badTime("hour is out of range", s);
         }
         if (!tok.hasMoreTokens()) {
@@ -164,7 +155,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
         if (!tok.hasMoreTokens()) {
             return badTime("too short", s);
         }
-        part = (String) tok.nextToken();
+        part = tok.nextToken();
         if (part.length() != 2) {
             return badTime("minute must be two digits", s);
         }
@@ -172,11 +163,11 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
         if (value < 0) {
             return badTime("Non-numeric minute component", s);
         }
-        tv.minute = (byte) value;
-        if (tv.minute > 59) {
+        byte minute = (byte) value;
+        if (minute > 59) {
             return badTime("minute is out of range", s);
         }
-        if (tv.hour == 24 && tv.minute != 0) {
+        if (hour == 24 && minute != 0) {
             return badTime("If hour is 24, minute must be 00", s);
         }
         if (!tok.hasMoreTokens()) {
@@ -189,7 +180,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
         if (!tok.hasMoreTokens()) {
             return badTime("too short", s);
         }
-        part = (String) tok.nextToken();
+        part = tok.nextToken();
         if (part.length() != 2) {
             return badTime("second must be two digits", s);
         }
@@ -197,22 +188,23 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
         if (value < 0) {
             return badTime("Non-numeric second component", s);
         }
-        tv.second = (byte) value;
-        if (tv.second > 59) {
+        byte second = (byte) value;
+        if (second > 59) {
             return badTime("second is out of range", s);
         }
-        if (tv.hour == 24 && tv.second != 0) {
+        if (hour == 24 && second != 0) {
             return badTime("If hour is 24, second must be 00", s);
         }
 
-        int tz = 0;
+        int tz = NO_TIMEZONE;
         boolean negativeTz = false;
         int state = 0;
+        int nanosecond = 0;
         while (tok.hasMoreTokens()) {
             if (state == 9) {
                 return badTime("characters after the end", s);
             }
-            String delim = (String) tok.nextToken();
+            String delim = tok.nextToken();
             if (".".equals(delim)) {
                 if (state != 0) {
                     return badTime("decimal separator occurs twice", s);
@@ -220,7 +212,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
                 if (!tok.hasMoreTokens()) {
                     return badTime("decimal point must be followed by digits", s);
                 }
-                part = (String) tok.nextToken();
+                part = tok.nextToken();
                 if (part.length() > 9 && part.matches("^[0-9]+$")) {
                     part = part.substring(0, 9);
                 }
@@ -229,8 +221,8 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
                     return badTime("Non-numeric fractional seconds component", s);
                 }
                 double fractionalSeconds = Double.parseDouble('.' + part);
-                tv.nanosecond = (int) Math.round(fractionalSeconds * 1_000_000_000);
-                if (tv.hour == 24 && tv.nanosecond != 0) {
+                nanosecond = (int) Math.round(fractionalSeconds * 1_000_000_000);
+                if (hour == 24 && nanosecond != 0) {
                     return badTime("If hour is 24, fractional seconds must be 0", s);
                 }
                 state = 1;
@@ -240,7 +232,6 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
                 }
                 tz = 0;
                 state = 9;  // we've finished
-                tv.setTimezoneInMinutes(0);
             } else if ("+".equals(delim) || "-".equals(delim)) {
                 if (state > 1) {
                     return badTime(delim + " cannot occur here", s);
@@ -249,7 +240,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
                 if (!tok.hasMoreTokens()) {
                     return badTime("missing timezone", s);
                 }
-                part = (String) tok.nextToken();
+                part = tok.nextToken();
                 if (part.length() != 2) {
                     return badTime("timezone hour must be two digits", s);
                 }
@@ -269,7 +260,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
                     return badTime("colon cannot occur here", s);
                 }
                 state = 9;
-                part = (String) tok.nextToken();
+                part = tok.nextToken();
                 value = DurationValue.simpleInteger(part);
                 if (value < 0) {
                     return badTime("Non-numeric timezone minute component", s);
@@ -286,7 +277,6 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
                 if (negativeTz) {
                     tz = -tz;
                 }
-                tv.setTimezoneInMinutes(tz);
             } else {
                 return badTime("timezone format is incorrect", s);
             }
@@ -296,12 +286,11 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
             return badTime("timezone incomplete", s);
         }
 
-        if (tv.hour == 24) {
-            tv.hour = 0;
+        if (hour == 24) {
+            hour = 0;
         }
 
-        tv.typeLabel = BuiltInAtomicType.TIME;
-        return tv;
+        return new TimeValue(hour, minute, second, nanosecond, tz, BuiltInAtomicType.TIME);
     }
 
     /*@NotNull*/
@@ -482,9 +471,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
     /*@NotNull*/
     @Override
     public AtomicValue copyAsSubType(AtomicType typeLabel) {
-        TimeValue v = new TimeValue(hour, minute, second, nanosecond, getTimezoneInMinutes(), "");
-        v.typeLabel = typeLabel;
-        return v;
+        return new TimeValue(hour, minute, second, nanosecond, getTimezoneInMinutes(), typeLabel);
     }
 
     /**
@@ -501,7 +488,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
     public TimeValue adjustTimezone(int timezone) {
         DateTimeValue dt = toDateTime().adjustTimezone(timezone);
         return new TimeValue(dt.getHour(), dt.getMinute(), dt.getSecond(),
-                dt.getNanosecond(), dt.getTimezoneInMinutes(), "");
+                dt.getNanosecond(), dt.getTimezoneInMinutes(), BuiltInAtomicType.TIME);
     }
 
     /**
@@ -675,7 +662,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
         if (duration instanceof DayTimeDurationValue) {
             DateTimeValue dt = toDateTime().add(duration);
             return new TimeValue(dt.getHour(), dt.getMinute(), dt.getSecond(),
-                    dt.getNanosecond(), getTimezoneInMinutes(), "");
+                    dt.getNanosecond(), getTimezoneInMinutes(), BuiltInAtomicType.TIME);
         } else {
             XPathException err = new XPathException("Time+Duration arithmetic is supported only for xs:dayTimeDuration");
             err.setErrorCode("XPTY0004");

@@ -25,6 +25,17 @@ import net.sf.saxon.type.BuiltInAtomicType;
 
 public class QNameValue extends QualifiedNameValue {
 
+    /**
+     * Constructor
+     *
+     * @param qName     the name as a StructuredQName
+     * @param typeLabel idenfies a subtype of xs:QName
+     */
+
+    public QNameValue(/*@Nullable*/ StructuredQName qName, /*@Nullable*/ AtomicType typeLabel) {
+        super(qName, typeLabel);
+    }
+
 
     /**
      * Constructor for a QName that is known to be valid. No validation takes place.
@@ -51,12 +62,8 @@ public class QNameValue extends QualifiedNameValue {
      * @param type      The type label, xs:QName or a subtype of xs:QName
      */
 
-    public QNameValue(String prefix, String uri, String localName, /*@Nullable*/ AtomicType type) {
-        qName = new StructuredQName(prefix, uri, localName);
-        if (type == null) {
-            type = BuiltInAtomicType.QNAME;
-        }
-        typeLabel = type;
+    public QNameValue(String prefix, String uri, String localName, AtomicType type) {
+        super(new StructuredQName(prefix, uri, localName), type);
     }
 
     /**
@@ -78,7 +85,11 @@ public class QNameValue extends QualifiedNameValue {
      */
 
     public QNameValue(String prefix, String uri, String localName, AtomicType type, boolean check) throws XPathException {
-        if (!NameChecker.isValidNCName(localName)) {
+        this(buildStructuredQName(prefix, uri, localName, check), type);
+    }
+
+    private static StructuredQName buildStructuredQName(String prefix, String uri, String localName, boolean check) throws XPathException {
+        if (check && !NameChecker.isValidNCName(localName)) {
             XPathException err = new XPathException("Malformed local name in QName: '" + localName + '\'');
             err.setErrorCode("FORG0001");
             throw err;
@@ -90,27 +101,10 @@ public class QNameValue extends QualifiedNameValue {
             err.setErrorCode("FOCA0002");
             throw err;
         }
-        qName = new StructuredQName(prefix, uri, localName);
-        typeLabel = type;
+        return new StructuredQName(prefix, uri, localName);
     }
 
-    /**
-     * Constructor
-     *
-     * @param qName     the name as a StructuredQName
-     * @param typeLabel idenfies a subtype of xs:QName
-     */
 
-    public QNameValue(/*@Nullable*/ StructuredQName qName, /*@Nullable*/ AtomicType typeLabel) {
-        if (qName == null) {
-            throw new NullPointerException("qName");
-        }
-        if (typeLabel == null) {
-            throw new NullPointerException("typeLabel");
-        }
-        this.qName = qName;
-        this.typeLabel = typeLabel;
-    }
 
     /**
      * Create a copy of this atomic value, with a different type label

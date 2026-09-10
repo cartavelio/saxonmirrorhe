@@ -35,6 +35,7 @@ public final class NotationValue extends QualifiedNameValue {
      */
 
     public NotationValue(String prefix, String uri, String localName, boolean check) throws XPathException {
+        super(new StructuredQName(prefix, uri, localName), BuiltInAtomicType.NOTATION);
         if (check && !NameChecker.isValidNCName(localName)) {
             XPathException err = new XPathException("Malformed local name in NOTATION: '" + localName + '\'');
             err.setErrorCode("FORG0001");
@@ -47,8 +48,6 @@ public final class NotationValue extends QualifiedNameValue {
             err.setErrorCode("FOCA0002");
             throw err;
         }
-        qName = new StructuredQName(prefix, uri, localName);
-        typeLabel = BuiltInAtomicType.NOTATION;
     }
 
     /**
@@ -61,8 +60,7 @@ public final class NotationValue extends QualifiedNameValue {
      */
 
     public NotationValue(String prefix, String uri, String localName) {
-        qName = new StructuredQName(prefix, uri, localName);
-        typeLabel = BuiltInAtomicType.NOTATION;
+        super(new StructuredQName(prefix, uri, localName), BuiltInAtomicType.NOTATION);
     }
 
     /**
@@ -76,8 +74,7 @@ public final class NotationValue extends QualifiedNameValue {
      */
 
     public NotationValue(String prefix, String uri, String localName, AtomicType typeLabel) {
-        qName = new StructuredQName(prefix, uri, localName);
-        this.typeLabel = typeLabel;
+        super(new StructuredQName(prefix, uri, localName), typeLabel);
     }
 
     /**
@@ -88,14 +85,7 @@ public final class NotationValue extends QualifiedNameValue {
      */
 
     public NotationValue(/*@Nullable*/ StructuredQName qName, /*@Nullable*/ AtomicType typeLabel) {
-        if (qName == null) {
-            throw new NullPointerException("qName");
-        }
-        if (typeLabel == null) {
-            throw new NullPointerException("typeLabel");
-        }
-        this.qName = qName;
-        this.typeLabel = typeLabel;
+        super(qName, typeLabel);
     }
 
 
@@ -109,9 +99,7 @@ public final class NotationValue extends QualifiedNameValue {
     /*@NotNull*/
     @Override
     public AtomicValue copyAsSubType(AtomicType typeLabel) {
-        NotationValue v = new NotationValue(getPrefix(), getNamespaceURI(), getLocalName());
-        v.typeLabel = typeLabel;
-        return v;
+        return new NotationValue(getStructuredQName(), typeLabel);
     }
 
     /**

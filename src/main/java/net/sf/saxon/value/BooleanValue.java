@@ -42,8 +42,8 @@ public final class BooleanValue extends AtomicValue implements XPathComparable, 
      */
 
     private BooleanValue(boolean value) {
+        super(BuiltInAtomicType.BOOLEAN);
         this.value = value;
-        typeLabel = BuiltInAtomicType.BOOLEAN;
     }
 
     /**
@@ -67,8 +67,8 @@ public final class BooleanValue extends AtomicValue implements XPathComparable, 
      */
 
     public BooleanValue(boolean value, AtomicType typeLabel) {
+        super(typeLabel);
         this.value = value;
-        this.typeLabel = typeLabel;
     }
 
     /**
@@ -80,9 +80,7 @@ public final class BooleanValue extends AtomicValue implements XPathComparable, 
 
     @Override
     public AtomicValue copyAsSubType(AtomicType typeLabel) {
-        BooleanValue v = new BooleanValue(value);
-        v.typeLabel = typeLabel;
-        return v;
+        return new BooleanValue(value, typeLabel);
     }
 
     /**

@@ -42,8 +42,8 @@ public final class FloatValue extends NumericValue {
      */
 
     public FloatValue(float value) {
+        super(BuiltInAtomicType.FLOAT);
         this.value = value;
-        typeLabel = BuiltInAtomicType.FLOAT;
     }
 
     /**
@@ -64,13 +64,13 @@ public final class FloatValue extends NumericValue {
      * to the supplied type.
      *
      * @param value the value of the NumericValue
-     * @param type  the type of the value. This must be a subtype of xs:float, and the
+     * @param typeLabel  the type of the value. This must be a subtype of xs:float, and the
      *              value must conform to this type. The method does not check these conditions.
      */
 
-    public FloatValue(float value, AtomicType type) {
+    public FloatValue(float value, AtomicType typeLabel) {
+        super(typeLabel);
         this.value = value;
-        typeLabel = type;
     }
 
     /**
@@ -82,9 +82,7 @@ public final class FloatValue extends NumericValue {
 
     @Override
     public AtomicValue copyAsSubType(AtomicType typeLabel) {
-        FloatValue v = new FloatValue(value);
-        v.typeLabel = typeLabel;
-        return v;
+        return new FloatValue(value, typeLabel);
     }
 
     /**

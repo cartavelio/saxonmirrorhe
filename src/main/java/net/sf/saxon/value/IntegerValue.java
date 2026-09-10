@@ -13,6 +13,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ConversionResult;
 import net.sf.saxon.type.ValidationFailure;
@@ -58,6 +59,10 @@ public abstract class IntegerValue extends DecimalValue {
             StandardNames.XS_UNSIGNED_SHORT, 0, 65535,
             StandardNames.XS_UNSIGNED_BYTE, 0, 255};
 
+    public IntegerValue(AtomicType typeLabel) {
+        super(typeLabel);
+    }
+
     /**
      * Factory method: makes either an Int64Value or a BigIntegerValue depending on the value supplied
      *
@@ -100,19 +105,6 @@ public abstract class IntegerValue extends DecimalValue {
         }
         return Int64Value.makeIntegerValue((long) value);
     }
-
-    /**
-     * This class allows subtypes of xs:integer to be held, as well as xs:integer values.
-     * This method sets the required type label. Note that this method modifies the value in situ.
-     *
-     * @param type     the subtype of integer required
-     * @param validate true if validation is required, false if the caller warrants that the value
-     *                 is valid for the subtype
-     * @return null if the operation succeeds, or a ValidationException if the value is out of range
-     */
-
-    /*@Nullable*/
-    public abstract ValidationFailure convertToSubType(BuiltInAtomicType type, boolean validate);
 
     /**
      * This class allows subtypes of xs:integer to be held, as well as xs:integer values.

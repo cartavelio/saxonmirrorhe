@@ -32,17 +32,11 @@ import java.util.StringTokenizer;
 
 public class DurationValue extends AtomicValue implements AtomicMatchKey {
 
-    protected boolean _negative = false;
-    protected int _months = 0;
-    protected long _seconds = 0;
-    protected int _nanoseconds = 0;
-
-    /**
-     * Private constructor for internal use
-     */
-
-    protected DurationValue() {
-    }
+    protected final boolean _negative;
+    protected final int _months;
+    protected final long _seconds;
+    protected final int _nanoseconds;
+    
 
     /**
      * Constructor for xs:duration taking the components of the duration. There is no requirement
@@ -89,7 +83,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      * @param minutes      the number of minutes
      * @param seconds      the number of seconds (long to allow copying)
      * @param microseconds the number of microseconds
-     * @param type         the user-defined subtype of xs:duration. Note that this constructor cannot
+     * @param typeLabel    the user-defined subtype of xs:duration. Note that this constructor cannot
      *                     be used to create an instance of xs:dayTimeDuration or xs:yearMonthDuration.
      * @throws IllegalArgumentException if the size of the duration exceeds implementation-defined
      *                                  limits: specifically, if the total number of months exceeds 2^31, or if the total number
@@ -97,8 +91,8 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      */
 
     public DurationValue(boolean positive, int years, int months, int days,
-                         int hours, int minutes, long seconds, int microseconds, AtomicType type) {
-        this._negative = !positive;
+                         int hours, int minutes, long seconds, int microseconds, AtomicType typeLabel) {
+        super(typeLabel);
         if (years < 0 || months < 0 || days < 0 || hours < 0 || minutes < 0 || seconds < 0 || microseconds < 0) {
             throw new IllegalArgumentException("Negative component value");
         }
@@ -114,8 +108,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
         long m = h * 60L + minutes;
         this._seconds = m * 60L + seconds;
         this._nanoseconds = microseconds * 1000;
-        normalizeZeroDuration();
-        typeLabel = type;
+        this._negative = isNegativeDuration(!positive);
     }
 
     /**
@@ -133,7 +126,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      * @param minutes      the number of minutes
      * @param seconds      the number of seconds (long to allow copying)
      * @param nanoseconds  the number of nanoseconds
-     * @param type         the user-defined subtype of xs:duration. Note that this constructor cannot
+     * @param typeLabel    the user-defined subtype of xs:duration. Note that this constructor cannot
      *                     be used to create an instance of xs:dayTimeDuration or xs:yearMonthDuration.
      * @throws IllegalArgumentException if the size of the duration exceeds implementation-defined
      *                                  limits: specifically, if the total number of months exceeds 2^31, or if the total number
@@ -141,7 +134,8 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      */
 
     public DurationValue(int years, int months, int days,
-                         int hours, int minutes, long seconds, int nanoseconds, AtomicType type) {
+                         int hours, int minutes, long seconds, int nanoseconds, AtomicType typeLabel) {
+        super(typeLabel);
         boolean somePositive = years > 0 || months > 0 || days > 0 || hours > 0 || minutes > 0 || seconds > 0 || nanoseconds > 0;
         boolean someNegative = years < 0 || months < 0 || days < 0 || hours < 0 || minutes < 0 || seconds < 0 || nanoseconds < 0;
         if (somePositive && someNegative) {
@@ -168,9 +162,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
         long m = h * 60L + minutes;
         this._seconds = m * 60L + seconds;
         this._nanoseconds = nanoseconds;
-        _negative = someNegative;
-        normalizeZeroDuration();
-        typeLabel = type;
+        this._negative = someNegative;
     }
 
     protected static void formatFractionalSeconds(UnicodeBuilder sb, int seconds, long nanosecs) {
@@ -194,9 +186,11 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      * Ensure that a zero duration is considered positive
      */
 
-    protected void normalizeZeroDuration() {
+    protected boolean isNegativeDuration(boolean nonPositive) {
         if (_months == 0 && _seconds == 0L && _nanoseconds == 0) {
-            _negative = false;
+            return false;
+        } else {
+            return nonPositive;
         }
     }
 

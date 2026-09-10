@@ -12,6 +12,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.*;
 
 import java.util.ArrayList;
@@ -254,7 +255,7 @@ public class ParseIetfDate extends SystemFunction implements Callable {
         TimeValue time = timeValue.get(0);
         if (time.getHour() == 24) {
             date = DateValue.tomorrow(date.getYear(), date.getMonth(), date.getDay());
-            time = new TimeValue((byte) 0, (byte) 0, (byte) 0, 0, time.getTimezoneInMinutes(), "");
+            time = new TimeValue((byte) 0, (byte) 0, (byte) 0, 0, time.getTimezoneInMinutes(), BuiltInAtomicType.TIME);
         }
         return DateTimeValue.makeDateTimeValue(date, time);
     }
@@ -454,7 +455,7 @@ public class ParseIetfDate extends SystemFunction implements Callable {
         if (!isValidTime(hour, minute, second, microsecond, tz)) {
             badDate("Time/timezone is not valid", input);
         }
-        TimeValue timeValue = new TimeValue(hour, minute, second, microsecond*1000, tz, "");
+        TimeValue timeValue = new TimeValue(hour, minute, second, microsecond*1000, tz, BuiltInAtomicType.TIME);
         result.add(timeValue);
         return n;
     }
