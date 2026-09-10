@@ -74,6 +74,7 @@ public class StreamingAdjunct {
         map("CallTemplate", () -> new CallTemplateAdjunct());
         map("CardinalityChecker", () -> new CardinalityCheckerAdjunct());
         map("Choose", () -> new ChooseAdjunct());
+        map("Coercer", () -> new CoercerAdjunct());
         map("ConditionalBlock", () -> new ConditionalBlockAdjunct());
         map("ContextItemExpr", () -> new ContextItemExprAdjunct());
         map("Copy", () -> new CopyAdjunct());
