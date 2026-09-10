@@ -172,7 +172,7 @@ public class PathFn extends SystemFunction implements IContextAccessorFunction {
             if (n.getParent() == null) {
                 if (origin != null) {
                     throw new XPathException(
-                            "In fn:path, the origin node must be an ancestor of the target node", "FOAP0001");
+                            "In fn:path, the origin node must be an ancestor of the target node", "FOPA0001");
                 }
                 if (n.getNodeKind() == Type.DOCUMENT) {
                     return new StringValue(fsb.toString());
@@ -304,7 +304,7 @@ public class PathFn extends SystemFunction implements IContextAccessorFunction {
             if (n instanceof RootJNode) {
                 if (!foundOrigin) {
                     throw new XPathException(
-                            "In fn:path, the origin node must be an ancestor of the target node", "FOAP0001");
+                            "In fn:path, the origin node must be an ancestor of the target node", "FOPA0001");
                 }
                 return new StringValue(buffer);
             }
@@ -342,7 +342,7 @@ public class PathFn extends SystemFunction implements IContextAccessorFunction {
         if (n.getParent() == null) {
             if (origin != null) {
                 throw new XPathException(
-                        "In fn:path, the origin node must be an ancestor of the target node", "FOAP0001");
+                        "In fn:path, the origin node must be an ancestor of the target node", "FOPA0001");
             }
         }
         return new StringValue(buffer);
