@@ -331,6 +331,8 @@ val transpile = tasks.register<JavaExec>("transpile") {
        "-h:${layout.buildDirectory.dir("src/main/java").get()}",
        "-src:${layout.buildDirectory.dir("src/main/java").get()}",
        "-ee:${javaEe.get().map { it }.get(0)}",
+       "-vavr:${jarFinder.find("vavr-champ-${findProperty("vavrVersion")}.jar")}",
+       "-vavrMatch:${jarFinder.find("vavr-match-${findProperty("vavrVersion")}.jar")}",
        "-icu4j:${jarFinder.find("icu4j-${findProperty("icu4jVersion")}.jar")}")
 
   doLast {
@@ -371,6 +373,8 @@ val generateCode = tasks.register<JavaExec>("generateCode") {
        "-repo:${layout.projectDirectory}/../transpiler/",
        "-digest:${layout.buildDirectory.file("digest.xml").get()}",
        "-ee:${javaEe.get().map { it }.get(0)}",
+       "-vavr:${jarFinder.find("vavr-champ-${findProperty("vavrVersion")}.jar")}",
+       "-vavrMatch:${jarFinder.find("vavr-match-${findProperty("vavrVersion")}.jar")}",
        "-icu4j:${jarFinder.find("icu4j-${findProperty("icu4jVersion")}.jar")}",
        "-debug")
 

@@ -53,8 +53,12 @@ public class ToXml {
     
     private static File repoDir = null;
     private static String repoDirName = null;
-    private static String eeJar = null;
+    private static String jarVersion = null;
+
+    private static String edition = null;
     private static String icu4jJar = null; // The location of the icu4j jar to read
+    private static String vavrJar = null; // The location of the VAVR jar to read
+    private static String vavrMatchJar = null;
     private File singleInputFile = null;
     private File historicInputDir = null; // directory holding the Java prior to preprocessing
     private File inputDir = null;
@@ -64,7 +68,7 @@ public class ToXml {
     private File csDir = null;
     private boolean forceRebuild = false;
 
-    private net.sf.saxon.s9api.Processor processor = new Processor(true);
+    private net.sf.saxon.s9api.Processor processor = new Processor(false);
     private XsltCompiler compiler = processor.newXsltCompiler();
 
     private void go(String[] args) throws Exception {
@@ -118,9 +122,19 @@ public class ToXml {
                     throw new IllegalArgumentException(xmlDir + " is not a directory");
                 }
             } else if (arg.startsWith("-ee:")) {
-                eeJar = arg.substring(4);
+                edition = "ee";
+                jarVersion = arg.substring(4);
+            } else if (arg.startsWith("-he:")) {
+                edition = "he";
+                jarVersion = arg.substring(4);
             } else if (arg.startsWith("-icu4j:")) {
                 icu4jJar = arg.substring(7);
+            } else if (arg.startsWith("-vavr:")) {
+                vavrJar = arg.substring(6);
+                System.err.println("vavrJar = " + vavrJar);
+            } else if (arg.startsWith("-vavrMatch:")) {
+                vavrMatchJar = arg.substring(11);
+                System.err.println("vavrMatchJar = " + vavrMatchJar);
             } else if (arg.equals("-debug")) {
                 DEBUG = true;
                 compiler.setCompileWithTracing(true);
@@ -132,8 +146,8 @@ public class ToXml {
             }
         }
 
-        if (eeJar == null) {
-            throw new IllegalArgumentException("You must specify the path to the EE jar");
+        if (jarVersion == null) {
+            throw new IllegalArgumentException("You must specify the EE jar version: -ee:11.2 for example");
         }
 
 
@@ -187,7 +201,7 @@ public class ToXml {
 
     public void processSingleFile(File filename, File digest, JavaSymbolSolver symbolSolver) throws Exception {
 
-        xmlToCSharp = compiler.compile(new StreamSource(new File("tools/xslt/xml-to-cs.xsl")));
+        xmlToCSharp = compiler.compile(new StreamSource(new File("tools/transpiler/xslt/xml-to-cs.xsl")));
 
 //        // Generate XML representation
 //        CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
@@ -208,6 +222,10 @@ public class ToXml {
 
         CompilationUnit cu = StaticJavaParser.parse(filename);
         System.err.println("Processing " + filename);
+        /*List<NameExpr>  nes = cu.findAll(NameExpr .class);
+        nes.forEach(ne -> {
+            System.out.println(( ne.calculateResolvedType().describe()));
+        }); */
 
         XmlPrinterMHK printer = new XmlPrinterMHK(symbolSolver, true);
         //System.err.println(printer.output(cu));
@@ -299,13 +317,18 @@ public class ToXml {
                 // Note: using new ReflectionTypeSolver(false) includes the Saxon JAR file in the reflection search,
                 // which is a problem if it's not the latest Saxon.
                 protected boolean filterName(String name) {
-                    return super.filterName(name) || name.startsWith("org.");
+                    return super.filterName(name) || name.startsWith("org.") || name.startsWith("io.");
                 }
             });
 
             // This tells the JavaParser to use the Saxon 10.3 JAR file to resolve references to classes and methods
-            combinedTypeSolver.add(new JarTypeSolver(eeJar));
+            //combinedTypeSolver.add(new JarTypeSolver(String.format("%s/build/libs/saxon-%s-%s.jar", repoDirName, edition, jarVersion)));
+            combinedTypeSolver.add(new JarTypeSolver(jarVersion));
             combinedTypeSolver.add(new JarTypeSolver(icu4jJar));
+            // The gradle script is currently supplying locations for the VAVR jar files in $repo/lib, as using
+            // the versions in .gradle cache didn't work for some reason
+            combinedTypeSolver.add(new JarTypeSolver(vavrJar));
+            combinedTypeSolver.add(new JarTypeSolver(vavrMatchJar));
             JavaSymbolSolver symbolSolver = new JavaSymbolSolver(combinedTypeSolver);
             StaticJavaParser.getConfiguration().setSymbolResolver(symbolSolver);
             StaticJavaParser.getConfiguration().setAttributeComments(false);
@@ -316,7 +339,7 @@ public class ToXml {
     }
 
     public void processXmlToDigest(File xmlDir, File digest) throws Exception {
-        XsltExecutable digester = compiler.compile(new StreamSource(new File(repoDir, "tools/xslt/xml-to-digest.xsl")));
+        XsltExecutable digester = compiler.compile(new StreamSource(new File(repoDir, "tools/transpiler/xslt/xml-to-digest.xsl")));
         Xslt30Transformer trans = digester.load30();
         Map<QName, XdmValue> params = new HashMap<>();
         params.put(new QName("xmlDir"), new XdmAtomicValue(xmlDir.toURI()));
@@ -328,12 +351,18 @@ public class ToXml {
     public void processXmlDirToCSharp(File xmlDir, File digestFile, File csDir) throws Exception {
         XdmNode digest = parseDigest(digestFile);
         xmlToCSharp = compiler.compile(new StreamSource(new File(repoDir, "tools/xslt/xml-to-cs.xsl")));
-        File xmlDirEE = new File(new File(xmlDir, "com"), "saxonica");
-        File csDirEE = new File(new File(csDir, "Saxon"), "Eej");
-        processXmlSubDirectoryToCSharp(xmlDirEE, csDirEE, digest, xmlToCSharp);
-        File xmlDirHE = new File(new File(new File(xmlDir, "net"), "sf"), "saxon");
-        File csDirHE = new File(new File(csDir, "Saxon"), "Hej");
-        processXmlSubDirectoryToCSharp(xmlDirHE, csDirHE, digest, xmlToCSharp);
+        if(edition.equals("ee")) {
+            File xmlDirEE = new File(new File(xmlDir, "com"), "saxonica");
+            File csDirEE = new File(new File(csDir, "Saxon"), "Eej");
+            processXmlSubDirectoryToCSharp(xmlDirEE, csDirEE, digest, xmlToCSharp);
+            File xmlDirHE = new File(new File(new File(xmlDir, "net"), "sf"), "saxon");
+            File csDirHE = new File(new File(csDir, "Saxon"), "Hej");
+            processXmlSubDirectoryToCSharp(xmlDirHE, csDirHE, digest, xmlToCSharp);
+        } else {
+            File xmlDirHE = new File(new File(new File(xmlDir, "net"), "sf"), "saxon");
+            File csDirHE = new File(new File(csDir, "Saxon"), "Hej");
+            processXmlSubDirectoryToCSharp(xmlDirHE, csDirHE, digest, xmlToCSharp);
+        }
     }
 
     public void processXmlSubDirectoryToCSharp(File xmlDir, File csDir, XdmNode digest, XsltExecutable xmlToCSharp) throws Exception {

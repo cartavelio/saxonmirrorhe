@@ -17,6 +17,6 @@ dependencies {
   tcompiler(project(":java", "runtimeElements"))
   implementation("com.saxonica:Saxon-EE:12.4")
   implementation("com.ibm.icu:icu4j:${findProperty("icu4jVersion")}")
-  implementation("com.github.javaparser:javaparser-symbol-solver-core:3.17.0")
-  implementation("com.github.javaparser:javaparser-core:3.17.0")
+  implementation("com.github.javaparser:javaparser-symbol-solver-core:3.25.9")
+  implementation("com.github.javaparser:javaparser-core:3.25.9")
 }
