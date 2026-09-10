@@ -32,11 +32,12 @@ public class XmlResource implements Resource {
     //    private Source source;
 //    private ParseOptions options;
     private NodeInfo doc;
+    private final XPathContext context;
     private final Configuration config;
     private AbstractResourceCollection.InputDetails details;
     //private int onError = URIQueryParameters.ON_ERROR_FAIL;
 
-    public final static ResourceFactory FACTORY = (config, details) -> new XmlResource(config, details);
+    public final static ResourceFactory FACTORY = (context, details) -> new XmlResource(context, details);
 
     /**
      * Create an XML resource using a specific node
@@ -46,27 +47,29 @@ public class XmlResource implements Resource {
 
     public XmlResource(NodeInfo doc) {
         this.config = doc.getConfiguration();
+        this.context = this.config.getConversionContext();
         this.doc = doc;
     }
 
     /**
      * Create an XML resource using a specific node. (Method retained for backwards compatibility).
-     *
-     * @param config the Saxon Configuration. This must be the configuration to which the node
+     *  @param context the Saxon evaluation context. This must belong to the configuration to which the node
      *               belongs.
      * @param doc    the node in question (usually but not necessarily a document node)
      */
 
-    public XmlResource(Configuration config, NodeInfo doc) {
-        this.config = config;
+    public XmlResource(XPathContext context, NodeInfo doc) {
+        this.context = context;
+        this.config = context.getConfiguration();
         this.doc = doc;
         if (config != doc.getConfiguration()) {
             throw new IllegalArgumentException("Supplied node belongs to wrong configuration");
         }
     }
 
-    public XmlResource(Configuration config, AbstractResourceCollection.InputDetails details) {
-        this.config = config;
+    public XmlResource(XPathContext context, AbstractResourceCollection.InputDetails details) {
+        this.config = context.getConfiguration();
+        this.context = context;
         this.details = details;
     }
 
@@ -100,13 +103,12 @@ public class XmlResource implements Resource {
     /**
      * Get an item representing the resource: in this case a document node for the XML document.
      *
-     * @param context the XPath evaluation context
      * @return the document; or null if there is an error and the error is to be ignored
      * @throws XPathException if (for example) XML parsing fails
      */
 
     @Override
-    public Item getItem(XPathContext context) throws XPathException {
+    public Item getItem() throws XPathException {
         if (doc == null) {
             String resourceURI = details.resourceUri;
             ParseOptions options = details.parseOptions;

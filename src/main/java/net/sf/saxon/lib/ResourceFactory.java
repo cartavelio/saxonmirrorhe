@@ -7,7 +7,7 @@
 
 package net.sf.saxon.lib;
 
-import net.sf.saxon.Configuration;
+import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.resource.AbstractResourceCollection;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpDelegate;
@@ -21,12 +21,12 @@ import net.sf.saxon.transpile.CSharpDelegate;
 public interface ResourceFactory {
     /**
      * Create a Resource with given content
-     * @param config the Saxon configuration
+     * @param context the Saxon evaluation context
      * @param details the stream of bytes making up the binary content of the resource
      * @return the resource
      * @throws XPathException if a failure occurs creating the resource
      */
-    Resource makeResource(Configuration config, AbstractResourceCollection.InputDetails details)
+    Resource makeResource(XPathContext context, AbstractResourceCollection.InputDetails details)
         throws XPathException;
 }
 

@@ -95,7 +95,7 @@ public class CatalogCollection extends AbstractResourceCollection {
                 if (uri.startsWith("data:")) {
                     try {
                         Resource basicResource = DataURIScheme.decode(new URI(uri));
-                        return makeTypedResource(context.getConfiguration(), basicResource);
+                        return makeTypedResource(context, basicResource);
                     } catch (URISyntaxException | IllegalArgumentException e) {
                         throw new XPathException(e);
                     }
@@ -104,7 +104,7 @@ public class CatalogCollection extends AbstractResourceCollection {
                     id.parseOptions = new ParseOptions(context.getConfiguration().getParseOptions());
                     id.parseOptions.setSpaceStrippingRule(whitespaceRules);
                     id.resourceUri = uri;
-                    return makeResource(context.getConfiguration(), id);
+                    return makeResource(context, id);
                 }
             } catch (XPathException e) {
                 Optional<Integer> onError = Optional.of(URIQueryParameters.ON_ERROR_FAIL);

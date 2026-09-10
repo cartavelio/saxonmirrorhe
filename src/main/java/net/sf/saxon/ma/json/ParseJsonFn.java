@@ -79,7 +79,7 @@ public class ParseJsonFn extends JsonToXMLFn {
         JsonParser parser = new JsonParser();
         int flags = 0;
         if (options != null) {
-            flags = JsonParser.getFlags(options, context, false);
+            flags = JsonParser.getFlags(options, false, false);
         }
         JsonHandlerMap handler = new JsonHandlerMap(context, flags);
         if ((flags & JsonParser.DUPLICATES_RETAINED) != 0) {

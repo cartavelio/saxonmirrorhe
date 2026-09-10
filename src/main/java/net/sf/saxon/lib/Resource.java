@@ -8,7 +8,6 @@
 package net.sf.saxon.lib;
 
 
-import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
 
@@ -33,7 +32,6 @@ public interface Resource {
 
     /**
      * Get an XDM Item holding the contents of this resource.
-     * @param context the XPath evaluation context
      * @return an item holding the contents of the resource. The type of item will
      * reflect the type of the resource: a document node for XML resources, a string
      * for text resources, a map or array for JSON resources, a base64Binary value
@@ -43,7 +41,7 @@ public interface Resource {
      * are to be treated as fatal
      */
 
-    Item getItem(XPathContext context) throws XPathException;
+    Item getItem() throws XPathException;
 
     /**
      * Get the media type (MIME type) of the resource if known

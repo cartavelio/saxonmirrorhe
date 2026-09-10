@@ -7,7 +7,6 @@
 
 package net.sf.saxon.resource;
 
-import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.Resource;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
@@ -55,14 +54,13 @@ public class FailedResource implements Resource {
      * Get an XDM Item holding the contents of this resource.  This method always
      * throws the error associated with the resource.
      *
-     * @param context the XPath evaluation context
      * @return an item holding the contents of the resource. This version of the method
      * never returns an item; it always throws an error
      * @throws XPathException if a failure occurs materializing the resource
      */
 
     @Override
-    public Item getItem(XPathContext context) throws XPathException {
+    public Item getItem() throws XPathException {
         throw error;
     }
 

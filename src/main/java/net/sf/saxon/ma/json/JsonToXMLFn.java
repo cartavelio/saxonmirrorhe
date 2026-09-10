@@ -84,7 +84,7 @@ public class JsonToXMLFn extends SystemFunction {
         Map<String, Sequence> checkedOptions = null;
         if (options != null) {
             checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
-            flags = JsonParser.getFlags(checkedOptions, context, true);
+            flags = JsonParser.getFlags(checkedOptions, true, context.getController().getExecutable().isSchemaAware());
             if ((flags & JsonParser.DUPLICATES_LAST) != 0) {
                 throw new XPathException("json-to-xml: duplicates=use-last is not allowed", "FOJS0005");
             }

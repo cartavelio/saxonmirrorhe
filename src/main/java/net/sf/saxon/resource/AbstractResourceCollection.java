@@ -413,36 +413,36 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
      * making decisions about the type of resource. This method can be overridden in a user-defined
      * subclass.
      *
-     * @param config  The Saxon configuration
+     * @param context  The Saxon configuration
      * @param details Details of the input.
      * @return a newly created Resource representing the content of this entry in the ZIP or JAR file
      */
 
-    public Resource makeResource(Configuration config, InputDetails details) throws XPathException {
+    public Resource makeResource(XPathContext context, InputDetails details) throws XPathException {
 
         ResourceFactory factory = null;
         String contentType = details.contentType;
         if (contentType != null) {
-            factory = config.getResourceFactoryForMediaType(contentType);
+            factory = context.getConfiguration().getResourceFactoryForMediaType(contentType);
         }
         if (factory == null) {
             factory = BinaryResource.FACTORY;
         }
 
-        return factory.makeResource(config, details);
+        return factory.makeResource(context, details);
     }
 
     /**
      * Given a resource whose type may be unknown, create a Resource of a specific type,
      * for example an XML or JSON resource
      *
-     * @param config        the Saxon Configuration
+     * @param context        the evaluation context
      * @param basicResource the resource, whose type may be unknown
      * @return a Resource of a specific type
      * @throws XPathException if a failure occurs (for example an XML or JSON parsing failure)
      */
 
-    public Resource makeTypedResource(Configuration config, Resource basicResource) throws XPathException {
+    public Resource makeTypedResource(XPathContext context, Resource basicResource) throws XPathException {
 
         String mediaType = basicResource.getContentType();
         ResourceFactory factory = config.getResourceFactoryForMediaType(mediaType);
@@ -454,13 +454,13 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
             details.binaryContent = ((BinaryResource) basicResource).getData();
             details.contentType = mediaType;
             details.resourceUri = basicResource.getResourceURI();
-            return factory.makeResource(config, details);
+            return factory.makeResource(context, details);
         } else if (basicResource instanceof UnparsedTextResource) {
             InputDetails details = new InputDetails();
             details.characterContent = ((UnparsedTextResource) basicResource).getContent();
             details.contentType = mediaType;
             details.resourceUri = basicResource.getResourceURI();
-            return factory.makeResource(config, details);
+            return factory.makeResource(context, details);
         } else {
             return basicResource;
         }
@@ -474,9 +474,9 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
      * @return the corresponding resource
      */
 
-    public Resource makeResource(Configuration config, String resourceURI) throws XPathException {
+    public Resource makeResource(XPathContext context, String resourceURI) throws XPathException {
         InputDetails details = getInputDetails(resourceURI);
-        return makeResource(config, details);
+        return makeResource(context, details);
     }
 
     /**
