@@ -333,6 +333,8 @@ repository root, check out the public W3C catalogs where Gradle expects them:
 ```sh
 git clone https://github.com/w3c/qt3tests.git submodules/qt3
 git clone https://github.com/w3c/xslt30-test.git submodules/xslt30
+git -C submodules/qt3 checkout 201a6e466940cdfc727f4babfedcde5332b9f578
+git -C submodules/xslt30 checkout fddf1cf920087e791f13315d68dfbe874d97dc56
 ```
 
 Select the same catalog commits when comparing builds. Run the XPath 3.1,
@@ -347,6 +349,27 @@ XQuery 3.1, and XSLT 3.0 tasks with the Gradle wrapper:
 For a quick check, append `-Ptd_s=fn-abs` to either QT3 task or
 `-Ptd_s=higher-order-functions` to the XSLT task. Read the case outcomes in
 `java/he/build/test-results/{qt3,xslt30}/`.
+
+The **W3C conformance** CI job runs all three modes on pull requests and pushes
+to `main`. It checks every case in the pinned catalogs and uploads the XML
+reports as the `w3c-conformance` artifact. The baseline in `java/he/ci/w3c/`
+comes from the full HE run after PR #8. Unlisted cases must pass. Each TSV row
+records a different expected outcome for a named case or a whole test set
+(`*`). A missing case, a newly skipped case that used to run, or any other
+unexpected non-pass outcome fails the check. A newly passing case is reported
+as an improvement.
+
+To check a local report, supply the XML file from the run you want to compare:
+
+```sh
+java java/he/ci/w3c/Conformance.java check XP31 submodules/qt3/catalog.xml \
+  java/he/build/test-results/qt3/YYYYMMDD/hej_qt3_XP31.xml java/he/ci/w3c/XP31.tsv
+```
+
+Use `record` in place of `check` to update a baseline after reviewing the
+changes. Commit improvements so CI protects the newly passing cases. When
+updating a catalog, change the pinned revision and review the baseline diff
+in the same PR.
 
 ## Building With Rider
 
