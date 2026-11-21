@@ -297,7 +297,7 @@ public class SaplingElement extends SaplingNode {
         return builder.getCurrentRoot();
     }
 
-//#ifdef CSHARP == false
+//#if CSHARP == false
     /**
      * Convert the sapling element to a regular element node, returning the {@link XdmNode} object
      * representing the parentless element node at the root of the resulting tree
