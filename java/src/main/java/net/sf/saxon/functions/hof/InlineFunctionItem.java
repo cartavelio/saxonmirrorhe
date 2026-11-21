@@ -181,6 +181,7 @@ public class InlineFunctionItem extends AbstractFunction {
         }
 
         XPathContextMajor c2 = context.newCleanContext();
+        c2.setCurrentComponent(context.getCurrentComponent());
         c2.setStackFrame(stackFrameMap, arguments);
         Sequence result;
         try {

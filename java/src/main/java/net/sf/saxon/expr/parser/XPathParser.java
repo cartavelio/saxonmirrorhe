@@ -5802,6 +5802,16 @@ public class XPathParser {
         }
     }
 
+    private Expression inlineFunctionReference(InlineFunctionItem function) {
+        FunctionLiteral literal = new FunctionLiteral(function);
+        if (ExpressionContext.getXsltExpressionContext(getStaticContext()) != null
+                && ExpressionTool.contains(function.getBody(), false, e -> e instanceof ComponentInvocation
+                        || (e.getIntrinsicDependencies() & StaticProperty.DEPENDS_ON_RUNTIME_ENVIRONMENT) != 0)) {
+            return new InlineFunctionReference(literal);
+        }
+        return literal;
+    }
+
     public static Expression makeInlineFunctionValue(
             XPathParser p, AnnotationList annotations,
             InlineFunctionDetails details, List<UserFunctionParameter> params,
@@ -5818,7 +5828,7 @@ public class XPathParser {
 //                qm.registerInlineFunctionItem(ifi);
 //            }
             p.inlineFunctions.add(ifi);
-            return new FunctionLiteral(ifi);
+            return p.inlineFunctionReference(ifi);
 
         } else {
 
@@ -5860,7 +5870,7 @@ public class XPathParser {
                 ufp.setRequiredType(binding.getRequiredType());
                 partialArgs[ip + arity] = var;
             }
-            return new DynamicPartialApply(new FunctionLiteral(ifi), partialArgs);
+            return new DynamicPartialApply(p.inlineFunctionReference(ifi), partialArgs);
 //
 //            if (uf.getPackageData() instanceof StylesheetPackage) {
 //                // Note: inline functions in XSLT are registered as components; but not if they

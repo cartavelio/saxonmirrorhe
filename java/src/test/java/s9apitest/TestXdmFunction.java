@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
 import java.math.BigDecimal;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -253,7 +254,7 @@ public class TestXdmFunction {
         try {
             Processor proc = new Processor(true);
             XsltCompiler comp = proc.newXsltCompiler();
-            comp.setSchemaAware(true);
+            comp.setSchemaAware(proc.isSchemaAware());
             StringReader sr = new StringReader(
                     "<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:f='f' xmlns:xs='http://www.w3.org/2001/XMLSchema'>" +
                             "<xsl:template name='main'><xsl:sequence select='let $q:=23 return function($p){$p+$q+$offset}'/></xsl:template> \n" +
@@ -270,6 +271,27 @@ public class TestXdmFunction {
             fail(e.getMessage());
         }
 
+    }
+
+    @Test
+    public void testReturnedInlineFunctionReadsGlobalsOnDemand() throws SaxonApiException {
+        Processor processor = new Processor(false);
+        String stylesheet = "<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>"
+                + "<xsl:param name='bad' select='error()'/>"
+                + "<xsl:param name='value'/>"
+                + "<xsl:template name='main'><xsl:sequence select='function($useBad) {"
+                + "if ($useBad) then $bad else $value }'/></xsl:template></xsl:stylesheet>";
+        XsltExecutable executable = processor.newXsltCompiler().compile(new StreamSource(new StringReader(stylesheet)));
+        XdmFunctionItem[] functions = new XdmFunctionItem[2];
+        for (int i = 0; i < functions.length; i++) {
+            Xslt30Transformer transformer = executable.load30();
+            transformer.setStylesheetParameters(Map.of(new QName("value"), new XdmAtomicValue(i)));
+            functions[i] = (XdmFunctionItem) transformer.callTemplate(new QName("main"));
+        }
+        for (int i = 0; i < functions.length; i++) {
+            XdmValue value = functions[i].call(processor, new XdmAtomicValue(false));
+            assertEquals(i, ((XdmAtomicValue) value).getLongValue());
+        }
     }
 
     @Test
