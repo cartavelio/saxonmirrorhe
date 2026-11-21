@@ -278,12 +278,9 @@ public class TestXdmFunction {
     @Test
     public void testReturnedInlineFunctionReadsGlobalsOnDemand() throws SaxonApiException {
         Processor processor = new Processor(false);
-        String stylesheet = "<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>"
-                + "<xsl:param name='bad' select='error()'/>"
-                + "<xsl:param name='value'/>"
-                + "<xsl:template name='main'><xsl:sequence select='function($useBad) {"
-                + "if ($useBad) then $bad else $value }'/></xsl:template></xsl:stylesheet>";
-        XsltExecutable executable = processor.newXsltCompiler().compile(new StreamSource(new StringReader(stylesheet)));
+        var stylesheet = TestXdmFunction.class.getResource("returned-inline-function.xsl");
+        assertNotNull(stylesheet, "Missing returned-inline-function.xsl test fixture");
+        XsltExecutable executable = processor.newXsltCompiler().compile(new StreamSource(stylesheet.toExternalForm()));
         XdmFunctionItem[] functions = new XdmFunctionItem[2];
         for (int i = 0; i < functions.length; i++) {
             Xslt30Transformer transformer = executable.load30();
