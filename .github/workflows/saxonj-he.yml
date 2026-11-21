@@ -19,8 +19,8 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: gradle
-      - name: Build the HE runtime
-        run: ./gradlew --console=plain --configure-on-demand :java:he:stageHeRuntime
+      - name: Build the HE runtime and test driver
+        run: ./gradlew --console=plain --configure-on-demand :java:he:stageHeRuntime :java:testdriver:download-he-jar
       - name: Run XSLT source and compiled stylesheet tests
         run: java/he/ci/smoke.sh java/he/build/he-runtime
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

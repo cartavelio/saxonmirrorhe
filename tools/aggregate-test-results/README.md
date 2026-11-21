@@ -15,7 +15,7 @@ __Status:__ works for Sheila (2026-05-20)
 
 ## Summary <a id="summary"></a>
 
-An XProc pipeline that runs one or more gradle test tasks and generates an HTML report summarising the aggregated results, for example: all official XPath and XQuery tests for all editions of SaxonJ. 
+An XProc pipeline that runs one or more gradle test tasks and generates an HTML report summarising the aggregated results, for example: all official XPath and XQuery tests for SaxonJ-HE.
 
 
 ## Usage Guide <a id="usage"></a>
@@ -59,8 +59,6 @@ _Not yet tested with Morgana_
 By default, this pipeline will:
 
 * run the following gradle tasks:
-    * `java:aggregated-test-results`
-    * `java:pe:aggregated-test-results`
     * `java:he:aggregated-test-results`  
 * store the results in `tools/aggreagate-test-results/out/YYYYMMDD/`
 

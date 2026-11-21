@@ -107,21 +107,13 @@ val resources = tasks.register<Zip>("resources") {
   into("/")
 }
 
-val stageTestDriverSources = tasks.register<Copy>("stageTestDriverSources") {
+val stageTestDriver = tasks.register<Sync>("stageTestDriver") {
   group = "Internal"
-  from(testdriverSources)
   into(layout.buildDirectory.dir("stage/drivers/java"))
-  include("net/sf/saxon/testdriver/**")
-  include("com/saxonica/testdriver/**")
+  from(testdriverSources) { include("net/sf/saxon/testdriver/**") }
+  from(testDriverClasses) { into("classes") }
 }
-resources { dependsOn(stageTestDriverSources) }
-
-val stageTestDriverClasses = tasks.register<Copy>("stageTestDriverClasses") {
-  group = "Internal"
-  from(testDriverClasses)
-  into(layout.buildDirectory.dir("stage/drivers/java/classes"))
-}
-resources { dependsOn(stageTestDriverClasses) }
+resources { dependsOn(stageTestDriver) }
 
 val stageSaxoncApiDocZip = tasks.register<Zip>("stageSaxoncApiDoc") {
   group = "Internal"

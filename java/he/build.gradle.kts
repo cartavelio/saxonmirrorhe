@@ -188,6 +188,7 @@ dependencies {
   xqjMavenJarBucket(project(path = ":java", configuration = "xqjMavenJarArtifact"))
   xqjSourceMavenJarBucket(project(path = ":java", configuration = "xqjSourceMavenJarArtifact"))
 
+  testImplementation(project(path = ":java:testdriver", configuration = "mavenHEJar"))
   testImplementation("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}")
   testImplementation("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}:data")
   testImplementation("javax.mail:javax.mail-api:${findProperty("mailVersion")}")
@@ -195,9 +196,18 @@ dependencies {
   testImplementation("nu.validator:htmlparser:${findProperty("htmlparserVersion")}")
 }
 
-configurations {
-  testImplementation { extendsFrom(testdriverJar) }
+val downloadDriver = configurations.dependencyScope("downloadDriver")
+val mavenDriver = configurations.dependencyScope("mavenDriver")
+dependencies {
+  add(downloadDriver.name, project(path = ":java:testdriver", configuration = "downloadHEJar"))
+  add(mavenDriver.name, project(path = ":java:testdriver", configuration = "mavenHEJar"))
+  add(mavenDriver.name, project(path = ":java:testdriver", configuration = "mavenHESourcesJar"))
 }
+
+val downloadDriverFiles = configurations.resolvable("downloadDriverFiles") { extendsFrom(downloadDriver.get()) }
+val mavenDriverFiles = configurations.resolvable("mavenDriverFiles") { extendsFrom(mavenDriver.get()) }
+tasks.named<Sync>("signingDownloadJars") { from(downloadDriverFiles) }
+tasks.named<Sync>("signingMavenJars") { from(mavenDriverFiles) }
 
 tasks.named<Test>("editionTest") {
   workingDir(rootProject.file("java"))
@@ -327,9 +337,8 @@ tasks.register<Exec>("samples") {
 
 // ============================================================
 
-val testdriverJar = configurations.named("testdriverJar")
-val testSuitesClasspath = files(sourceSets["edition"].output)
-    .from(testdriverJar)
+val testSuitesClasspath = files(tasks.named<Jar>("editionDownloadJar").flatMap { it.archiveFile })
+    .from(configurations.named("downloadReleaseBundled"))
     .from(testsuiteExtra)
 testSuites {
   product = "java"

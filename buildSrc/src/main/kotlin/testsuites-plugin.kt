@@ -13,7 +13,6 @@ import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.Exec
-import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.register
@@ -87,11 +86,7 @@ abstract class TestSuitesExtension
     }
 
     return when (product.get()) {
-      "java" -> if (suite.startsWith("xsd")) {
-        configureJavaXsd(suite, language, testargs, name)
-      } else {
-        configureJava(suite, language, testargs, name)
-      }
+      "java" -> configureJava(suite, language, testargs, name)
 
       "csharp" -> if (suite.startsWith("xsd")) {
         configureCsharpXsd(suite, language, testargs, name)
@@ -185,63 +180,6 @@ abstract class TestSuitesExtension
 //    tasks.named(LifecycleTasks.ACCEPTANCE_JAVA_TEST_TASK_NAME) {
 //      dependsOn(thisSuite)
 //    }   
-    @Suppress("UNCHECKED_CAST")
-    return thisSuite as TaskProvider<DefaultTask>
-  }
-
-  fun configureJavaXsd(suite: String,
-                       language: String,
-                       testargs: List<String>,
-                       taskName: String): TaskProvider<DefaultTask> {
-    val dateStamp = SimpleDateFormat("yyyyMMdd").format(Date()).toString()
-
-    val xsdVersion = "1.1"
-
-    val driverClass = "com.saxonica.testdriver.ee.SchemaTestSuiteDriver"
-
-    val directory = suiteDir(suite)
-    val exceptionsFile = exceptions(suite, language)
-
-    val catalog = "catalog.xml"
-
-    // The format expected by the regression report generator
-    val reportFn = "${edition.get()}j_${suite}_${language}.xml"
-    val errorFn = "${edition.get()}j_${suite}_${language}-errors.xml"
-
-    val reportDir = layout.buildDirectory.file("test-results/${suite}/${dateStamp}").get()
-
-    val summarizeResults = submodulesDir.file("extra/tools/summarize-results.xsl").get()
-
-    val driverargs = mutableListOf<String>("${directory.get()}",
-                                           "${catalog}",
-                                           "-exceptions:${exceptionsFile.get()}",
-                                           "-reportfilename:${reportFn}",
-                                           "-errorfilename:${errorFn}",
-                                           "-local:${reportDir}",
-                                           "-summarizeresults:${summarizeResults}",
-                                           "-v:${xsdVersion}")
-    driverargs.addAll(testargs)
-
-    val thisSuite = tasks.register<JavaExec>(taskName) {
-      outputs.upToDateWhen { false }
-      group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
-      mainClass.set(driverClass)
-      workingDir = directory.get().asFile
-      classpath = testclasspath.get()
-      args(driverargs)
-
-      doFirst {
-        Files.createDirectories(Paths.get(reportDir.toString()))
-      }
-    }
-
-    tasks.named(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME) {
-      dependsOn(thisSuite)
-    }
-//    tasks.named(LifecycleTasks.ACCEPTANCE_JAVA_TEST_TASK_NAME) {
-//      dependsOn(thisSuite)
-//    }
-
     @Suppress("UNCHECKED_CAST")
     return thisSuite as TaskProvider<DefaultTask>
   }
