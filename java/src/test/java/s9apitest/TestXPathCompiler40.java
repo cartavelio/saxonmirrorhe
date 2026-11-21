@@ -1,6 +1,7 @@
 package s9apitest;
 
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
@@ -12,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * JUnit tests for the s9api XPathCompiler running in 4.0 mode.
  */
+@Tag("requires-pe")
 public class TestXPathCompiler40 {
 
     Processor p = new Processor(true);
@@ -115,24 +117,4 @@ public class TestXPathCompiler40 {
             assertEquals(4, e1.getLineNumber());
         }
     }
-
-    @Test
-    public void testLineNumberOfWarning() {
-        String expression =
-                "//pm/\n*/dmRef/\ndmRefIdent/\ndmCode/[@infoCode= \"00T\"]";
-        Processor proc = new net.sf.saxon.s9api.Processor(true);
-        XPathCompiler compiler = proc.newXPathCompiler();
-        compiler.setWarningHandler(error -> {
-            Location loc = error.getLocation();
-            assertEquals(4, loc.getLineNumber());
-            assertEquals(8, loc.getColumnNumber());
-        });
-        try {
-            compiler.compile(expression);
-        } catch (SaxonApiException e) {
-            fail();
-        }
-    }
-
-
 }

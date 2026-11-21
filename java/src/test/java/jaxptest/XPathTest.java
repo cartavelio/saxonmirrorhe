@@ -11,6 +11,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.xpath.XPathFactoryImpl;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -39,6 +40,7 @@ public class XPathTest {
         assertEquals(2, 2);
     }
 
+    @Tag("requires-pe")
     @Test
     public void testXOMXPath() {
         try {
@@ -181,6 +183,8 @@ public class XPathTest {
         }
     }
 
+    // This assertion inspects the compiled plan after constant folding.
+    @Tag("requires-ee")
     @Test
     public void testBug5361() {
         try {

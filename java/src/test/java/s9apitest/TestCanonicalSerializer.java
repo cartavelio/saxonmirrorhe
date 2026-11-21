@@ -4,6 +4,7 @@ import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.option.xom.XOMObjectModel;
 import net.sf.saxon.s9api.*;
 import nu.xom.Document;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -20,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * <p>
  * The effect is tested by comparing the results with the XOM Canonicalizer.
  */
+@Tag("requires-pe")
 public class TestCanonicalSerializer {
     private void compareCanonical(File input) {
         try {

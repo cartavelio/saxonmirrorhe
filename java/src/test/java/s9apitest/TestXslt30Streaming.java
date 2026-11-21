@@ -18,6 +18,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.option.jdom2.JDOM2ObjectModel;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trace.Traceable;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.Source;
@@ -37,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * JUnit tests for the s9api Xslt30Transformer in streaming mode
  *
  */
+@Tag("requires-ee")
 public class TestXslt30Streaming {
     /**
      * Simple test
@@ -297,40 +299,6 @@ public class TestXslt30Streaming {
         }
     }
 
-    /**
-     * Test that the base URI of the result document is the base output URI
-     */
-
-    @Test
-    public void testOutputBaseUri() {
-        try {
-            Processor processor = new Processor(false);
-
-            DocumentBuilder builder = processor.newDocumentBuilder();
-            builder.setDTDValidation(false);
-            builder.setLineNumbering(true);
-
-            Source document = new StreamSource(Testdata.file("caffo/Input.xml"));
-            XdmNode stylesheet = builder.build(Testdata.file("caffo/Transform2Streamable.xslt"));
-
-            XsltCompiler compiler = processor.newXsltCompiler();
-            compiler.setSchemaAware(processor.isSchemaAware());
-            XsltExecutable exec = compiler.compile(stylesheet.asSource());
-            Xslt30Transformer transformer = exec.load30();
-
-            XdmDestination result = new XdmDestination();
-            transformer.setBaseOutputURI("file://tmp/out.xml");
-
-            transformer.setSchemaValidationMode(ValidationMode.DEFAULT);
-            transformer.applyTemplates(document, result);
-
-            XdmNode xformed = result.getXdmNode();
-            assertEquals("file://tmp/out.xml", xformed.getBaseURI().toString(), "output base uri");
-        } catch (SaxonApiException e) {
-            System.err.println(e.getMessage());
-            fail();
-        }
-    }
 
 
     /**

@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.Source;
+import java.io.File;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -34,9 +35,10 @@ public class DocumentFnTest {
         Controller controller = new Controller(processor.getUnderlyingConfiguration());
         XPathContext context = new XPathContextMajor(controller);
         try {
-            Source source = DocumentFn.resolveURI("/path/to/sample.xml", "jar:file:lib/app.jar!/style.xsl" , "file:///fail", context);
+            String jar = "jar:" + new File("src/test/resources/classpath-testing.jar").toURI() + "!/";
+            Source source = DocumentFn.resolveURI("/classpath-testing/doc.xml", jar + "classpath-testing/path/a.xsl", "file:///fail", context);
             Assertions.assertNotNull(source);
-            Assertions.assertEquals("jar:file:lib/app.jar!/path/to/sample.xml", source.getSystemId());
+            Assertions.assertEquals(jar + "classpath-testing/doc.xml", source.getSystemId());
         } catch (XPathException ex) {
             fail(ex);
         }

@@ -38,7 +38,7 @@ public class TestXMLParserOptions {
                     "<!DOCTYPE saxonica [\n" +
                     "  <!ELEMENT saxonica (#PCDATA)>\n" +
                     "  <!ENTITY welcome PUBLIC \"-//W3C//TEXT copyright//EN\"\n" +
-                    "    \"https://www.saxonica.com/welcome/welcome.xml\">\n" +
+                    "    \"" + Testdata.fileUriString("collectionTests/welcome.xml") + "\">\n" +
                     "]>\n" +
                     "<saxonica>&welcome;</saxonica>");
             Source source = new SAXSource(new InputSource(sr));
@@ -102,7 +102,7 @@ public class TestXMLParserOptions {
                     "<!DOCTYPE saxonica [\n" +
                     "  <!ELEMENT saxonica (#PCDATA)>\n" +
                     "  <!ENTITY welcome PUBLIC \"-//W3C//TEXT copyright//EN\"\n" +
-                    "    \"http://www.saxonica.com/welcome/welcome.xml\">\n" +
+                    "    \"" + Testdata.fileUriString("collectionTests/welcome.xml") + "\">\n" +
                     "]>\n" +
                     "<saxonica>&welcome;</saxonica>");
             Source source = new SAXSource(new InputSource(sr));
@@ -129,7 +129,7 @@ public class TestXMLParserOptions {
                     "<!DOCTYPE saxonica [\n" +
                     "  <!ELEMENT saxonica (#PCDATA)>\n" +
                     "  <!ENTITY welcome PUBLIC \"-//W3C//TEXT copyright//EN\"\n" +
-                    "    \"http://www.saxonica.com/welcome/welcome.xml\">\n" +
+                    "    \"" + Testdata.fileUriString("collectionTests/welcome.xml") + "\">\n" +
                     "]>\n" +
                     "<saxonica>&welcome;</saxonica>");
             SAXSource source = new SAXSource(new InputSource(sr));
@@ -155,7 +155,7 @@ public class TestXMLParserOptions {
                     "<!DOCTYPE saxonica [\n" +
                     "  <!ELEMENT saxonica (#PCDATA)>\n" +
                     "  <!ENTITY welcome PUBLIC \"-//W3C//TEXT copyright//EN\"\n" +
-                    "    \"https://www.saxonica.com/welcome/welcome.xml\">\n" +
+                    "    \"" + Testdata.fileUriString("collectionTests/welcome.xml") + "\">\n" +
                     "]>\n" +
                     "<saxonica>&welcome;</saxonica>");
             SAXSource source = new SAXSource(new InputSource(sr));
@@ -219,7 +219,7 @@ public class TestXMLParserOptions {
         processor.setConfigurationProperty(FeatureKeys.XML_PARSER_FEATURE + "http://xml.org/sax/features/validation", false);
         processor.setConfigurationProperty(FeatureKeys.XML_PARSER_FEATURE + "http://apache.org/xml/features/validation/schema", true);
         processor.setConfigurationProperty(FeatureKeys.XML_PARSER_PROPERTY + "http://apache.org/xml/properties/schema/external-schemaLocation",
-                                           "http://www.w3.org/2010/09/qt-fots-catalog http://dev.w3.org/2011/QT3-test-suite/catalog-schema.xsd");
+                                           "http://www.w3.org/2010/09/qt-fots-catalog " + Testdata.fileUriString("catalog-schema.xsd"));
         StringReader sr = new StringReader("<catalogg xmlns=\"http://www.w3.org/2010/09/qt-fots-catalog\" \n" +
                 "    test-suite=\"FOTS\" version=\"0.6\" banana='republic'>\n" +
                 "    <environmentalism name=\"empty\">\n" +
@@ -257,7 +257,7 @@ public class TestXMLParserOptions {
                     "<!DOCTYPE saxonica [\n" +
                     "  <!ELEMENT saxonica (#PCDATA)>\n" +
                     "  <!ENTITY welcome PUBLIC \"-//W3C//TEXT copyright//EN\"\n" +
-                    "    \"https://www.saxonica.com/welcome/welcome.xml\">\n" +
+                    "    \"" + Testdata.fileUriString("collectionTests/welcome.xml") + "\">\n" +
                     "]>\n" +
                     "<saxonica>&welcome;</saxonica>");
             SAXSource source = new SAXSource(new InputSource(sr));
@@ -284,7 +284,7 @@ public class TestXMLParserOptions {
                     "<!DOCTYPE saxonica [\n" +
                     "  <!ELEMENT saxonica (#PCDATA)>\n" +
                     "  <!ENTITY welcome PUBLIC \"-//W3C//TEXT copyright//EN\"\n" +
-                    "    \"https://www.saxonica.com/welcome/welcome.xml\">\n" +
+                    "    \"" + Testdata.fileUriString("collectionTests/welcome.xml") + "\">\n" +
                     "]>\n" +
                     "<saxonica>&welcome;</saxonica>");
             SAXSource source = new SAXSource(new InputSource(sr));
@@ -308,7 +308,7 @@ public class TestXMLParserOptions {
 
         StringReader sr = new StringReader("\n" +
                 "<saxonica xmlns:xi=\"http://www.w3.org/2001/XInclude\">\n" +
-                "  <xi:include href=\"https://www.saxonica.com/welcome/welcome.xml\"/>\n" +
+                "  <xi:include href=\"" + Testdata.fileUriString("collectionTests/welcome.xml") + "\"/>\n" +
                 "</saxonica>");
 
         SAXSource source = new SAXSource(new InputSource(sr));
@@ -335,7 +335,7 @@ public class TestXMLParserOptions {
 
         StringReader sr = new StringReader("\n" +
                 "<saxonica xmlns:xi=\"http://www.w3.org/2001/XInclude\">\n" +
-                "  <xi:include href=\"http://www.saxonica.com/welcome/welcome.xml\"/>\n" +
+                "  <xi:include href=\"" + Testdata.fileUriString("collectionTests/welcome.xml") + "\"/>\n" +
                 "</saxonica>");
 
         SAXSource source = new SAXSource(new InputSource(sr));

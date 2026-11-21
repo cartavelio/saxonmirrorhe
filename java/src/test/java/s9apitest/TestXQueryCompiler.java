@@ -7,6 +7,7 @@ import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.ErrorListener;
@@ -191,6 +192,7 @@ public class TestXQueryCompiler {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testSeparateCompilation() {
         try {
@@ -210,6 +212,7 @@ public class TestXQueryCompiler {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testSeparateCompilationMultiple() {  // Bug 6394
         try {
@@ -238,6 +241,7 @@ public class TestXQueryCompiler {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testSeparateCompilationMemory() {  // Bug 6395
         try {
@@ -259,6 +263,7 @@ public class TestXQueryCompiler {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testSeparateCompilationNested() {
         try {
@@ -282,6 +287,7 @@ public class TestXQueryCompiler {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testSeparateCompilationBug6394() {
         try {
@@ -305,6 +311,7 @@ public class TestXQueryCompiler {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testSeparateCompilationBug6394b() {
         try {
@@ -330,6 +337,7 @@ public class TestXQueryCompiler {
     }
 
 
+    @Tag("requires-ee")
     @Test
     public void testSeparateCompilationImportFromNonSeparatelyCompiledLibraryModule() {
         try {
@@ -365,6 +373,7 @@ public class TestXQueryCompiler {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testSeparateCompilationDiamond() {
         try {
@@ -412,6 +421,7 @@ public class TestXQueryCompiler {
     }
 
 
+    @Tag("requires-ee")
     @Test
     public void testSeparateCompilationDiamondWithVariables() {
         try {
@@ -449,6 +459,7 @@ public class TestXQueryCompiler {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testSeparateCompilationForwardsRef() {
         try {
@@ -575,6 +586,7 @@ public class TestXQueryCompiler {
 
     }
 
+    @Tag("requires-ee")
     @Test
     public void testAbleToCompileWithCompileLibraryMethod() throws SaxonApiException {
         // See bug 2429
@@ -696,6 +708,7 @@ public class TestXQueryCompiler {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testXQueryValidationErrorReporting() {
         // Bug 3123

@@ -3,6 +3,7 @@ package s9apitest;
 import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.xml.sax.InputSource;
 
 import javax.xml.transform.Source;
@@ -65,27 +66,34 @@ public class TestChecksums {
                     "</xsl:template>\n" +
                     "</xsl:stylesheet>";
 
+    @TempDir
+    File scratch;
+
+    private File compiledFixture(Processor processor) throws Exception {
+        if (!"EE".equals(processor.getSaxonEdition())) {
+            return Testdata.file("compiled-stylesheet/labels.sef");
+        }
+        XsltCompiler compiler = processor.newXsltCompiler();
+        compiler.setJustInTimeCompilation(false);
+        XsltExecutable stylesheet = compiler.compile(new StreamSource(new StringReader(patchPI)));
+        File file = new File(scratch, "export.sef");
+        try (FileOutputStream stream = new FileOutputStream(file)) {
+            stylesheet.export(stream, "HE");
+        }
+        return file;
+    }
+
     @Test
     public void testExportChecksum() {
         try {
             Processor proc = new Processor(true);
 
-            // Compile the stylesheet into an SEF
-            XsltCompiler comp = proc.newXsltCompiler();
-            comp.setJustInTimeCompilation(false);
-            StringReader sr = new StringReader(patchPI);
-            XsltExecutable exec = comp.compile(new StreamSource(sr));
-            File exportFile = Testdata.file("sandpit/export.sef");
-            exec.export(new FileOutputStream(exportFile), "HE");
-
-            // N.B. It would be nice to check if the checksum and hash are correct,
-            // but the values contain hashed timestamps, so there's no way to precompute
-            // what the correct values are...
+            File exportFile = compiledFixture(proc);
 
             // Transform the SEF, breaking its Σ checksum
-            comp = proc.newXsltCompiler();
-            sr = new StringReader(patchPI);
-            exec = comp.compile(new StreamSource(sr));
+            XsltCompiler comp = proc.newXsltCompiler();
+            StringReader sr = new StringReader(patchPI);
+            XsltExecutable exec = comp.compile(new StreamSource(sr));
 
             XdmDestination destination = new XdmDestination();
 
@@ -119,22 +127,12 @@ public class TestChecksums {
         try {
             Processor proc = new Processor(true);
 
-            // Compile the stylesheet into an SEF
-            XsltCompiler comp = proc.newXsltCompiler();
-            comp.setJustInTimeCompilation(false);
-            StringReader sr = new StringReader(patchPI);
-            XsltExecutable exec = comp.compile(new StreamSource(sr));
-            File exportFile = Testdata.file("sandpit/export.sef");
-            exec.export(new FileOutputStream(exportFile), "HE");
-
-            // N.B. It would be nice to check if the checksum and hash are correct,
-            // but the values contain hashed timestamps, so there's no way to precompute
-            // what the correct values are...
+            File exportFile = compiledFixture(proc);
 
             // Transform the SEF, breaking its Σ2 checksum
-            comp = proc.newXsltCompiler();
-            sr = new StringReader(patchPI);
-            exec = comp.compile(new StreamSource(sr));
+            XsltCompiler comp = proc.newXsltCompiler();
+            StringReader sr = new StringReader(patchPI);
+            XsltExecutable exec = comp.compile(new StreamSource(sr));
 
             XdmDestination destination = new XdmDestination();
 
@@ -168,22 +166,12 @@ public class TestChecksums {
         try {
             Processor proc = new Processor(true);
 
-            // Compile the stylesheet into an SEF
-            XsltCompiler comp = proc.newXsltCompiler();
-            comp.setJustInTimeCompilation(false);
-            StringReader sr = new StringReader(patchPI);
-            XsltExecutable exec = comp.compile(new StreamSource(sr));
-            File exportFile = Testdata.file("sandpit/export.sef");
-            exec.export(new FileOutputStream(exportFile), "HE");
-
-            // N.B. It would be nice to check if the checksum and hash are correct,
-            // but the values contain hashed timestamps, so there's no way to precompute
-            // what the correct values are...
+            File exportFile = compiledFixture(proc);
 
             // Remove the Σ2 checksum, breaking the SEF
-            comp = proc.newXsltCompiler();
-            sr = new StringReader(patchPI);
-            exec = comp.compile(new StreamSource(sr));
+            XsltCompiler comp = proc.newXsltCompiler();
+            StringReader sr = new StringReader(patchPI);
+            XsltExecutable exec = comp.compile(new StreamSource(sr));
 
             XdmDestination destination = new XdmDestination();
 
@@ -216,22 +204,12 @@ public class TestChecksums {
         try {
             Processor proc = new Processor(true);
 
-            // Compile the stylesheet into an SEF
-            XsltCompiler comp = proc.newXsltCompiler();
-            comp.setJustInTimeCompilation(false);
-            StringReader sr = new StringReader(patchPI);
-            XsltExecutable exec = comp.compile(new StreamSource(sr));
-            File exportFile = Testdata.file("sandpit/export.sef");
-            exec.export(new FileOutputStream(exportFile), "HE");
-
-            // N.B. It would be nice to check if the checksum and hash are correct,
-            // but the values contain hashed timestamps, so there's no way to precompute
-            // what the correct values are...
+            File exportFile = compiledFixture(proc);
 
             // Read the Σ2 checksum...
-            comp = proc.newXsltCompiler();
-            sr = new StringReader(readPI);
-            exec = comp.compile(new StreamSource(sr));
+            XsltCompiler comp = proc.newXsltCompiler();
+            StringReader sr = new StringReader(readPI);
+            XsltExecutable exec = comp.compile(new StreamSource(sr));
             XdmDestination destination = new XdmDestination();
             Source source = new SAXSource(new InputSource(exportFile.toURI().toString()));
             Xslt30Transformer transformer = exec.load30();

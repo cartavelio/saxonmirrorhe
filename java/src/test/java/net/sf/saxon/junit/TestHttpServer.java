@@ -66,6 +66,8 @@ public class TestHttpServer {
 
     public void route(Consumer<Service> definition) {
         http = ignite();
+        http.ipAddress("127.0.0.1");
+        http.port(0);
 
         definition.accept(http);
         // wait for Spark to start up

@@ -10,6 +10,7 @@ import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.TypeHierarchy;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,6 +40,7 @@ public class SubtypingTest {
         assertEquals(Affinity.DISJOINT, th.relationship(NodeKindType.ELEMENT, NodeKindType.ATTRIBUTE));
     }
 
+    @Tag("requires-pe")
     @Test
     public void testElementNameTests() {
         try {
@@ -68,6 +70,7 @@ public class SubtypingTest {
         }
     }
 
+    @Tag("requires-pe")
     @Test
     public void testAttributeNameTests() {
         try {
@@ -97,6 +100,7 @@ public class SubtypingTest {
         }
     }
 
+    @Tag("requires-pe")
     @Test
     public void testElementContentTests() {
         try {
@@ -115,6 +119,7 @@ public class SubtypingTest {
         }
     }
 
+    @Tag("requires-pe")
     @Test
     public void testElementUnionNameTests() {
         try {

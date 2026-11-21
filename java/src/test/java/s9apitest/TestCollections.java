@@ -20,6 +20,7 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.DateTimeValue;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
@@ -193,6 +194,7 @@ public class TestCollections {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testParallelSpeed() {
         try {
@@ -399,6 +401,23 @@ public class TestCollections {
         }
     }
 
+    private XdmAtomicValue mixedHttpCollection(boolean includeBinary) {
+        testHttp.route(http -> {
+            http.get("/welcome.xml", testHttp.file("welcome.xml", "application/xml"));
+            http.get("/sample.bin", (request, response) -> {
+                response.type("application/octet-stream");
+                return new byte[]{0, 1, 2};
+            });
+            http.get("/mixed.xml", (request, response) -> {
+                response.type("application/xml");
+                return "<collection stable='true'><doc href='" + Testdata.fileUriString("sample.json")
+                        + "'/><doc href='welcome.xml'/>"
+                        + (includeBinary ? "<doc href='sample.bin'/>" : "") + "</collection>";
+            });
+        });
+        return new XdmAtomicValue(testHttp.url("/mixed.xml"));
+    }
+
     @Test
     public void testMixedWithHttpCollection() {
         try {
@@ -407,11 +426,13 @@ public class TestCollections {
             XQueryExecutable exec = c.compile("for $X in (collection(.))" +
                 "return if ($X instance of node()) then name($X/*) else $X('id')");
             XQueryEvaluator eval = exec.load();
-            eval.setContextItem(composeURI("collection2.xml", ""));
+            eval.setContextItem(mixedHttpCollection(false));
             XdmValue val = eval.evaluate();
             assertEquals("1.0e0\n\"html\"", val.toString());
         } catch (SaxonApiException e) {
             fail(e.getMessage());
+        } finally {
+            testHttp.stop();
         }
     }
 
@@ -422,11 +443,13 @@ public class TestCollections {
             XQueryCompiler c = p.newXQueryCompiler();
             XQueryExecutable exec = c.compile("count(collection(.))");
             XQueryEvaluator eval = exec.load();
-            eval.setContextItem(composeURI("collection3.xml", ""));
+            eval.setContextItem(mixedHttpCollection(true));
             XdmValue val = eval.evaluate();
             assertEquals(3, Integer.parseInt(val.toString()));
         } catch (SaxonApiException e) {
             fail(e.getMessage());
+        } finally {
+            testHttp.stop();
         }
     }
 
@@ -451,11 +474,11 @@ public class TestCollections {
         try {
             Processor p = new Processor(true);
             XQueryCompiler c = p.newXQueryCompiler();
-            XQueryExecutable exec = c.compile("for $c at $p in collection(.) return ($p || ' ' || local-name-from-QName(saxon:type-annotation($c)))");
+            XQueryExecutable exec = c.compile("collection(.)[34] instance of xs:base64Binary");
             XQueryEvaluator eval = exec.load();
             eval.setContextItem(composeURI("collection3/saxon9-test.jar", ""));
             XdmValue val = eval.evaluate();
-            assertTrue(val.toString().contains("34 base64Binary"));
+            assertTrue(((XdmAtomicValue) val.itemAt(0)).getBooleanValue());
         } catch (SaxonApiException e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -649,7 +672,7 @@ public class TestCollections {
     public void testMediaTypeConfigFile() {
         try {
             String cf = "<configuration xmlns='http://saxon.sf.net/ns/configuration'\n" +
-                    "               edition='EE'\n" +
+                    "               edition='" + new Processor(true).getSaxonEdition() + "'\n" +
                     "               label='Some label'>\n" +
                     "          <resources>\n" +
                     "            <fileExtension extension='xq' mediaType='text/plain'/>" +
@@ -734,7 +757,7 @@ public class TestCollections {
     public void testCollectionFinderConfigFile() {
         try {
             String cf = "<configuration xmlns='http://saxon.sf.net/ns/configuration'\n" +
-                    "               edition='EE'\n" +
+                    "               edition='" + new Processor(true).getSaxonEdition() + "'\n" +
                     "               label='Some label'>\n" +
                     "          <global collectionFinder='s9apitest.TestCollections$Finder'/>\n" +
                     "    </configuration>";

@@ -522,6 +522,7 @@ public class TestXslt30Transformer {
      * Send output to a XOM tree
      */
 
+    @Tag("requires-pe")
     @Test
     public void testXOMDestination() {
         try {
@@ -549,6 +550,7 @@ public class TestXslt30Transformer {
      * Send output to a JDOM2 tree
      */
 
+    @Tag("requires-pe")
     @Test
     public void testJDOM2Destination() {
         try {
@@ -690,6 +692,7 @@ public class TestXslt30Transformer {
      * Test location information for run-time errors when stylesheet built as an XdmNode
      */
 
+    @Tag("requires-pe")
     @Test
     public void testErrorNotificationFromSaxonParse() {
         final List<TransformerException> warnings = new ArrayList<TransformerException>(4);
@@ -752,6 +755,7 @@ public class TestXslt30Transformer {
      * Test option to treat validation failures as non-fatal
      */
 
+    @Tag("requires-ee")
     @Test
     public void testValidationWarnings() {
         try {
@@ -793,9 +797,37 @@ public class TestXslt30Transformer {
         }
     }
 
-    /**
-     * Test that the base URI of the result document is the base output URI
-     */
+    /** Verify the base output URI when HE runs a stylesheet that requests streaming. */
+    @Test
+    public void testOutputBaseUriWithStreamableStylesheetInHE() {
+        try {
+            Processor processor = new Processor(false);
+
+            DocumentBuilder builder = processor.newDocumentBuilder();
+            builder.setDTDValidation(false);
+            builder.setLineNumbering(true);
+
+            Source document = new StreamSource(Testdata.file("caffo/Input.xml"));
+            XdmNode stylesheet = builder.build(Testdata.file("caffo/Transform2Streamable.xslt"));
+
+            XsltCompiler compiler = processor.newXsltCompiler();
+            compiler.setSchemaAware(processor.isSchemaAware());
+            XsltExecutable exec = compiler.compile(stylesheet.asSource());
+            Xslt30Transformer transformer = exec.load30();
+
+            XdmDestination result = new XdmDestination();
+            transformer.setBaseOutputURI("file://tmp/out.xml");
+
+            transformer.setSchemaValidationMode(ValidationMode.DEFAULT);
+            transformer.applyTemplates(document, result);
+
+            XdmNode xformed = result.getXdmNode();
+            assertEquals("file://tmp/out.xml", xformed.getBaseURI().toString(), "output base uri");
+        } catch (SaxonApiException e) {
+            System.err.println(e.getMessage());
+            fail();
+        }
+    }
 
     @Test
     public void testOutputBaseUri() throws SaxonApiException {
@@ -1212,6 +1244,7 @@ public class TestXslt30Transformer {
      * Test calling a stylesheet with an initial template rule with parameters
      */
 
+    @Tag("requires-ee")
     @Test
     public void testCallTemplateWithResultValidation() {
         try {
@@ -1277,6 +1310,7 @@ public class TestXslt30Transformer {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testCallTemplateWithResultValidationAndItemSeparator() throws SaxonApiException {
         // The presence of the item separator in the output makes the document invalid
@@ -1312,6 +1346,7 @@ public class TestXslt30Transformer {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testCallTemplateWithSecondaryResultValidationAndItemSeparator() throws SaxonApiException {
         // The presence of the item separator in the output makes the document invalid
@@ -1577,6 +1612,7 @@ public class TestXslt30Transformer {
      * Test Strip-type-annotations with ApplyTemplates
      */
 
+    @Tag("requires-ee")
     @Test
     public void testStripTypeAnnotations() {
         try {
@@ -1704,6 +1740,7 @@ public class TestXslt30Transformer {
      * Test saxon:next-in-chain
      */
 
+    @Tag("requires-pe")
     @Test
     public void testNextInChain() {
         // Create a Processor instance.
@@ -2007,7 +2044,7 @@ public class TestXslt30Transformer {
         try {
             Processor proc = new Processor(true);
             XsltCompiler comp = proc.newXsltCompiler();
-            comp.setSchemaAware(true);
+            comp.setSchemaAware(proc.isSchemaAware());
             StringReader sr = new StringReader(
                     "<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:f='f' xmlns:xs='http://www.w3.org/2001/XMLSchema'>" +
                             "<xsl:template name='main'><xsl:sequence select='f:f#1'/></xsl:template> \n" +

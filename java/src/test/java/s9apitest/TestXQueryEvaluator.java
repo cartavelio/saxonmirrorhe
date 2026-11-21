@@ -19,6 +19,7 @@ import net.sf.saxon.s9api.*;
 import net.sf.saxon.trace.Traceable;
 import net.sf.saxon.trans.SimpleMode;
 import net.sf.saxon.type.Type;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.helpers.XMLFilterImpl;
 
@@ -63,6 +64,7 @@ public class TestXQueryEvaluator {
         }
     }
 
+    @Tag("requires-pe")
     @Test
     public void testXQueryLineNumber() {
         try {
@@ -285,6 +287,7 @@ public class TestXQueryEvaluator {
     }
 
 
+    @Tag("requires-ee")
     @Test
     public void testSeparateCompilationFromFile() {
         try {
@@ -446,6 +449,7 @@ public class TestXQueryEvaluator {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testDirectFunctionInLibraryModule() {
         try {
@@ -482,6 +486,7 @@ public class TestXQueryEvaluator {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testDirectFunctionInLibraryModule2() {
         try {
@@ -884,6 +889,7 @@ public class TestXQueryEvaluator {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testStreaming() {
         try {
@@ -904,6 +910,7 @@ public class TestXQueryEvaluator {
     }
 
 
+    @Tag("requires-ee")
     @Test
     public void testStreamingFailure() {
         try {
@@ -943,11 +950,10 @@ public class TestXQueryEvaluator {
             Processor p = new Processor(false);
             XQueryCompiler c = p.newXQueryCompiler();
             XQueryExecutable q = c.compile(query);
-            XdmValue result = q.load().evaluateSingle();
-            System.err.println(result.toString());
-            assertTrue(result.toString().contains("code=\"err:FODC0006\""));
-            assertTrue(result.toString().contains("The element type &#34;para&#34; must " +
-                                                          "be terminated by the matching end-tag &#34;&lt;/para&gt;&#34;"));
+            XdmNode error = (XdmNode) q.load().evaluateSingle();
+            assertEquals("err:FODC0006", error.attribute("code"));
+            assertTrue(error.attribute("desc").contains(
+                    "The element type \"para\" must be terminated by the matching end-tag \"</para>\""));
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
