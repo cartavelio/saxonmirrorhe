@@ -102,7 +102,7 @@ public class Saplings {
         return new SaplingElement(qName);
     }
 
-//#ifdef CSHARP == false
+//#if CSHARP == false
     /**
      * Create a sapling element node, in no namespace, which is passed to the DSL lambda
      * @param name the local name of the element node. This must be a valid NCName, but the
