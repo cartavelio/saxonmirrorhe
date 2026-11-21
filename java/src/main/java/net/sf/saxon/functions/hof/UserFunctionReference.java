@@ -504,7 +504,8 @@ public class UserFunctionReference extends Expression
 
         @Override
         public Sequence call(XPathContext context, Sequence[] args) throws XPathException {
-            XPathContext c2 = function.makeNewContext(context, this);
+            // Higher-order functions can call directly with their own transformation's context.
+            XPathContext c2 = makeNewContext(context, this);
             if (c2 instanceof XPathContextMajor && component != null) {
                 ((XPathContextMajor) c2).setCurrentComponent(component);
             }
