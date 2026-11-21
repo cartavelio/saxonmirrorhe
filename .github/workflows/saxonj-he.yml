@@ -3,7 +3,7 @@ name: SaxonJ-HE
 on:
   pull_request:
   push:
-    branches: [saxon13]
+    branches: [main]
 
 permissions:
   contents: read
