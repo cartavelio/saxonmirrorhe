@@ -357,7 +357,7 @@ comes from the full HE run after PR #8. Unlisted cases must pass. Each TSV row
 records a different expected outcome for a named case or a whole test set
 (`*`). A missing case, a newly skipped case that used to run, or any other
 unexpected non-pass outcome fails the check. A newly passing case is reported
-as an improvement.
+as an improvement and requires a baseline update in the same PR.
 
 To check a local report, supply the XML file from the run you want to compare:
 

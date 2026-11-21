@@ -144,6 +144,7 @@ class Conformance {
         }
         System.out.println(mode + " " + totals + ", improvements=" + improvements + ", errors=" + errors);
         if (errors != 0) throw new IllegalStateException(mode + " conformance check failed");
+        if (improvements != 0) throw new IllegalStateException(mode + " has newly passing cases. Review and record the baseline update.");
         if (record) Files.write(file, lines);
     }
 }
