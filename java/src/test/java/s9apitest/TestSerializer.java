@@ -13,6 +13,7 @@ import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.CharacterMapIndex;
 import net.sf.saxon.stax.XMLStreamWriterDestination;
 import net.sf.saxon.z.IntHashMap;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
@@ -338,6 +339,7 @@ public class TestSerializer {
         }
     }
 
+    @Tag("requires-pe")
     @Test
     public void test3631() {
         try {
@@ -365,6 +367,7 @@ public class TestSerializer {
         }
     }
 
+    @Tag("requires-pe")
     @Test
     public void testBase64BinarySerialization() { // bug 4794
         String xslt =
@@ -400,6 +403,7 @@ public class TestSerializer {
     }
 
 
+    @Tag("requires-pe")
     @Test
     public void testHexBinarySerialization() { // bug 4794
         String xslt =
@@ -432,6 +436,7 @@ public class TestSerializer {
         assertEquals(4, x.length);
     }
 
+    @Tag("requires-pe")
     @Test
     public void testXQuerySerializationMethod() {
         String xslt =
@@ -493,6 +498,7 @@ public class TestSerializer {
         }
     }
 
+    @Tag("requires-pe")
     @Test
     public void testXQueryVersion40Serialization() {
         try {
@@ -680,7 +686,10 @@ public class TestSerializer {
             serializer.setOutputProperty(Serializer.Property.INDENT, "no");
             serializer.setOutputProperty(Serializer.Property.METHOD, "xml");
             serializer.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "no");
-            serializer.setOutputProperty(Serializer.Property.SAXON_INDENT_SPACES, "2");
+            boolean extendedProperties = !"HE".equals(proc.getSaxonEdition());
+            if (extendedProperties) {
+                serializer.setOutputProperty(Serializer.Property.SAXON_INDENT_SPACES, "2");
+            }
 
             serializer.setSerializationListener(event -> {
                 assertEquals("xml", event.properties().getProperty("method"));
@@ -689,9 +698,11 @@ public class TestSerializer {
                 assertEquals("no", event.properties().getProperty("omit-xml-declaration"));
                 assertEquals("utf-8", event.properties().getProperty("encoding"));
                 assertEquals("Q{}e", event.properties().getProperty("cdata-section-elements").trim());
-                assertEquals("2", event.properties().getProperty("{http://saxon.sf.net/}indent-spaces"));
                 assertTrue(event.properties().getPropertyNames().contains("cdata-section-elements"));
-                assertTrue(event.properties().getPropertyNames().contains("{http://saxon.sf.net/}indent-spaces"));
+                if (extendedProperties) {
+                    assertEquals("2", event.properties().getProperty("{http://saxon.sf.net/}indent-spaces"));
+                    assertTrue(event.properties().getPropertyNames().contains("{http://saxon.sf.net/}indent-spaces"));
+                }
                 assertNull(event.outputURI());
             });
 

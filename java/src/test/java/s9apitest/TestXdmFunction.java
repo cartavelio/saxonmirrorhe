@@ -4,6 +4,7 @@ import net.sf.saxon.lib.ExtensionFunctionDefinition;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
@@ -66,6 +67,7 @@ public class TestXdmFunction {
         }
     }
 
+    @Tag("requires-pe")
     @Test
     public void testCallSystemFunctionSaxon() {
         try {
@@ -177,7 +179,7 @@ public class TestXdmFunction {
         try {
             Processor proc = new Processor(true);
             XsltCompiler comp = proc.newXsltCompiler();
-            comp.setSchemaAware(true);
+            comp.setSchemaAware(proc.isSchemaAware());
             StringReader sr = new StringReader(
                     "<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:f='f' xmlns:xs='http://www.w3.org/2001/XMLSchema'>" +
                             "<xsl:template name='main'><xsl:sequence select='f:f#1'/></xsl:template> \n" +
@@ -201,7 +203,7 @@ public class TestXdmFunction {
         try {
             Processor proc = new Processor(true);
             XsltCompiler comp = proc.newXsltCompiler();
-            comp.setSchemaAware(true);
+            comp.setSchemaAware(proc.isSchemaAware());
             StringReader sr = new StringReader(
                     "<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:f='f' xmlns:xs='http://www.w3.org/2001/XMLSchema'>" +
                             "<xsl:template name='main'><xsl:sequence select='f:f#1'/></xsl:template> \n" +
@@ -226,7 +228,7 @@ public class TestXdmFunction {
         try {
             Processor proc = new Processor(true);
             XsltCompiler comp = proc.newXsltCompiler();
-            comp.setSchemaAware(true);
+            comp.setSchemaAware(proc.isSchemaAware());
             StringReader sr = new StringReader(
                     "<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:f='f' xmlns:xs='http://www.w3.org/2001/XMLSchema'>" +
                             "<xsl:template name='main'><xsl:sequence select='f:f#1'/></xsl:template> \n" +
@@ -328,7 +330,7 @@ public class TestXdmFunction {
         try {
             Processor proc = new Processor(true);
             XsltCompiler comp = proc.newXsltCompiler();
-            comp.setSchemaAware(true);
+            comp.setSchemaAware(proc.isSchemaAware());
             StringReader sr = new StringReader(
                     "<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:f='f' xmlns:xs='http://www.w3.org/2001/XMLSchema'>" +
                             "<xsl:template name='main'><xsl:sequence select=\"function-lookup(QName('f', 'f'), 1)\"/></xsl:template> \n" +
@@ -393,7 +395,7 @@ public class TestXdmFunction {
             Processor proc = new Processor(true);
             proc.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, false);
             XQueryCompiler comp = proc.newXQueryCompiler();
-            comp.setSchemaAware(true);
+            comp.setSchemaAware(proc.isSchemaAware());
             String query = "declare variable $offset as xs:integer external;"
                     + "declare function local:f($p) as xs:integer {$p + $offset};"
                     + "local:f#1";

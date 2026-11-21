@@ -1,0 +1,76 @@
+<?xml version='1.0' encoding='utf-8'?>
+<package xmlns='http://ns.saxonica.com/xslt/export'
+         saxonVersion='13.1'
+         version='30'
+         packageVersion='1'
+         implicit='true'>
+   <co id='0' binds='1'>
+      <mode onNo='TC' flags='dW' patternSlots='0'>
+         <templateRule prec='0'
+                       prio='-0.5'
+                       seq='0'
+                       rank='0'
+                       minImp='0'
+                       slots='0'
+                       matches='ND'
+                       flags='s'
+                       line='3'
+                       module='file:/build/labels.xsl'>
+            <p.nodeTest role='match' test='ND' flags='t'/>
+            <callT role='action'
+                   baseUri='file:/build/labels.xsl'
+                   ns='xsl=~'
+                   line='4'
+                   name='Q{}label'
+                   bSlot='0'
+                   flags='t'>
+               <withParam name='Q{}value' flags='c' as='1AS'>
+                  <fn line='5' name='string'>
+                     <check card='?' diag='0|0||fn:string'>
+                        <slash simple='2'>
+                           <axis name='child' nodeTest='NE nQ{}record'/>
+                           <axis name='attribute' nodeTest='NA nQ{}name'/>
+                        </slash>
+                     </check>
+                  </fn>
+               </withParam>
+            </callT>
+         </templateRule>
+      </mode>
+   </co>
+   <co id='1' binds=''>
+      <template name='Q{}label'
+                flags='os'
+                line='8'
+                module='file:/build/labels.xsl'
+                slots='1'>
+         <sequence role='body'
+                   baseUri='file:/build/labels.xsl'
+                   ns='xsl=~'
+                   line='9'>
+            <param name='Q{}value' slot='0' flags='r'>
+               <str role='select' val=''/>
+               <supplied role='conversion' slot='0'/>
+            </param>
+            <valueOf line='10'>
+               <fn role='select' name='concat'>
+                  <str val='['/>
+                  <fn name='upper-case'>
+                     <coercer type='?AS' diag='0|0||fn:upper-case'>
+                        <varRef name='Q{}value' slot='0'/>
+                     </coercer>
+                  </fn>
+                  <str val=']'/>
+               </fn>
+            </valueOf>
+         </sequence>
+      </template>
+   </co>
+   <output>
+      <property name='encoding' value='UTF-8'/>
+      <property name='method' value='text'/>
+      <property name='{http://saxon.sf.net/}spec-version' value='30'/>
+   </output>
+</package>
+<?Σ f5b4af80?>
+<?Σ2 48e2b32cce3852b13e413b2338001477440b64e9095bb06a7b53236d053ed325?>

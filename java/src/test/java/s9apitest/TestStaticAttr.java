@@ -84,10 +84,7 @@ public class TestStaticAttr {
             trans.transform();
             fail("Unexpected success");
         } catch (SaxonApiException e) {
-            assertTrue(
-                    e.getMessage().contains("Failed to compile stylesheet") ||
-                    e.getMessage().contains("The required item type of the value of variable $abc is xs:string") ||
-                    e.getMessage().contains("Failed to convert the supplied value for variable $abc: Cannot convert 2 to xs:string"));
+            assertEquals("XPTY0004", e.getErrorCode().getLocalName(), e.getMessage());
         }
     }
 

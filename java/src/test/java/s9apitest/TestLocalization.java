@@ -1,6 +1,7 @@
 package s9apitest;
 
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -65,6 +66,7 @@ public class TestLocalization {
         }
     }
 
+    @Tag("requires-pe")
     @Test
     public void testCollationDecompositionUsingIcu() {
         collationDecomposition(true);
@@ -140,6 +142,7 @@ public class TestLocalization {
         }
     }
 
+    @Tag("requires-pe")
     @Test
     public void testHyphenationOrdinalICU() {
         // Changes in Saxon 13 to use hyphens consistently

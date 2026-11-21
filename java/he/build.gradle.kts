@@ -199,6 +199,30 @@ configurations {
   testImplementation { extendsFrom(testdriverJar) }
 }
 
+tasks.named<Test>("editionTest") {
+  workingDir(rootProject.file("java"))
+  environment("SAXON_BUGS_DATA", rootProject.file("src/test/bugs").absolutePath)
+  useJUnitPlatform { excludeTags("requires-pe", "requires-ee") }
+
+  testLogging {
+    events("failed")
+    exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+  }
+
+  addTestListener(object : TestListener {
+    override fun afterSuite(suite: TestDescriptor, result: TestResult) {
+      if (suite.parent != null) return
+      val counts = "${result.successfulTestCount} passed · ${result.failedTestCount} failed · ${result.skippedTestCount} skipped"
+      logger.lifecycle("HE test results: $counts (${result.testCount} tests)")
+      System.getenv("GITHUB_STEP_SUMMARY")?.let {
+        File(it).appendText("### HE test results\n\n$counts (${result.testCount} tests)\n")
+      }
+      val executed = result.testCount > result.skippedTestCount
+      System.getenv("GITHUB_OUTPUT")?.let { File(it).appendText("executed=$executed\n") }
+    }
+  })
+}
+
 tasks.named("compileJava") {
   onlyIf { false }
 }
@@ -234,6 +258,14 @@ tasks.named<Jar>("editionDownloadJar") {
 }
 tasks.named<Jar>("editionMavenJar") {
   exclude("net/sf/saxon/option")
+}
+
+tasks.register<Sync>("stageHeRuntime") {
+  description = "Stage the runnable HE JAR with its runtime dependencies and notices"
+  into(layout.buildDirectory.dir("he-runtime"))
+  from(tasks.named<Jar>("editionDownloadJar").flatMap { it.archiveFile })
+  into("lib") { from(configurations.named("downloadReleaseBundled")) }
+  into("notices") { from(rootProject.file("src/main/notices")) }
 }
 
 tasks.register<Zip>("source-code-release") {

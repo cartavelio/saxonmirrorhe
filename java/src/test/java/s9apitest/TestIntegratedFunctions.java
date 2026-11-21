@@ -17,6 +17,7 @@ import net.sf.saxon.value.DoubleValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.StringValue;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
@@ -106,7 +107,10 @@ public class TestIntegratedFunctions {
                     "</xsl:function>" +
                     "</xsl:stylesheet>";
 
-    private static void testOverrideFunctionXslt(String xsl, boolean override) {
+    @TempDir
+    File scratch;
+
+    private void testOverrideFunctionXslt(String xsl, boolean override) {
         // Bug #4111
         try {
             Processor proc = new Processor(true);
@@ -118,9 +122,13 @@ public class TestIntegratedFunctions {
             XsltExecutable exec1 = comp.compile(new StreamSource(sr));
             List<XsltExecutable> execs = new ArrayList<>();
             execs.add(exec1);
-            exec1.export(new FileOutputStream(Testdata.file("sandpit/export.sef")));
-            XsltExecutable exec2 = comp.loadExecutablePackage(Testdata.file("sandpit/export.sef").toURI());
-            execs.add(exec2);
+            if ("EE".equals(proc.getSaxonEdition())) {
+                File exportFile = new File(scratch, "override-function.sef");
+                try (FileOutputStream stream = new FileOutputStream(exportFile)) {
+                    exec1.export(stream);
+                }
+                execs.add(comp.loadExecutablePackage(exportFile.toURI()));
+            }
             for (XsltExecutable exec : execs) {
                 XsltTransformer trans = exec.load();
                 trans.setInitialTemplate(new QName("go"));

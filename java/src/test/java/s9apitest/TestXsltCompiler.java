@@ -13,6 +13,7 @@ import net.sf.saxon.lib.ChainedResourceResolver;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -159,6 +160,7 @@ public class TestXsltCompiler {
         xpathVersionTest("L", "all-different((3,2,1))", 31, false);
     }
 
+    @Tag("requires-pe")
     @Test
     public void testXPathVersion40() {
         xpathVersionTest("A", "'b'||'c'", 40, true);
@@ -384,6 +386,7 @@ public class TestXsltCompiler {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testJITStaticErrors() {
         // Show how static errors can be detected at run-time using JIT
@@ -452,6 +455,7 @@ public class TestXsltCompiler {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testJitTemplateTypeCheck() {
         // Bug 6532
@@ -1032,6 +1036,7 @@ public class TestXsltCompiler {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testBug5556() {
         // This concerns the result of element-available('xsl:import-schema') under different conditions

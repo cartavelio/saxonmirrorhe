@@ -22,6 +22,7 @@ import net.sf.saxon.option.xom.XOMObjectModel;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trace.Traceable;
 import net.sf.saxon.trans.XPathException;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
@@ -474,6 +475,7 @@ public class TestXslt30TransformerDebug {
      * Send output to a XOM tree
      */
 
+    @Tag("requires-pe")
     @Test
     public void testXOMDestination() {
         try {
@@ -502,6 +504,7 @@ public class TestXslt30TransformerDebug {
      * Send output to a JDOM2 tree
      */
 
+    @Tag("requires-pe")
     @Test
     public void testJDOM2Destination() {
         try {
@@ -578,6 +581,7 @@ public class TestXslt30TransformerDebug {
      * Test notification of errors from a call on saxon:parse()
      */
 
+    @Tag("requires-pe")
     @Test
     public void testErrorNotificationFromSaxonParse() {
         final List<TransformerException> warnings = new ArrayList<>(4);
@@ -638,6 +642,7 @@ public class TestXslt30TransformerDebug {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testValidationWarnings() {
         try {
@@ -1216,6 +1221,7 @@ public class TestXslt30TransformerDebug {
      * Test Strip-type-annotations with ApplyTemplates
      */
 
+    @Tag("requires-ee")
     @Test
     public void testStripTypeAnnotations() {
         try {

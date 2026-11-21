@@ -17,6 +17,7 @@ import net.sf.saxon.s9api.*;
 import net.sf.saxon.trace.XSLTTraceListener;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.StringValue;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
@@ -198,6 +199,7 @@ public class TestXsltTransformer {
     }
 
 
+    @Tag("requires-pe")
     @Test
      public void testKeyMapFunction() {
         Processor processor = new Processor(true);
@@ -480,6 +482,7 @@ public class TestXsltTransformer {
      * Send output to a XOM tree
      */
 
+    @Tag("requires-pe")
     @Test
     public void testXOMDestination() {
         try {
@@ -510,6 +513,7 @@ public class TestXsltTransformer {
      * Send output to a JDOM2 tree
      */
 
+    @Tag("requires-pe")
     @Test
     public void testJDOM2Destination() {
         try {
@@ -602,6 +606,7 @@ public class TestXsltTransformer {
      * Test location information for run-time errors when stylesheet built as an XdmNode
      */
 
+    @Tag("requires-pe")
     @Test
     public void testErrorNotificationFromSaxonParse() {
         final List<TransformerException> warnings = new ArrayList<TransformerException>(4);
@@ -661,6 +666,7 @@ public class TestXsltTransformer {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testValidationWarnings() {
         try {
@@ -780,6 +786,7 @@ public class TestXsltTransformer {
      * @throws SaxonApiException
      */
 
+    @Tag("requires-pe")
     @Test
     public void testDebuggerAccessToGlobalVariables() throws SaxonApiException, UnsupportedEncodingException {
         Configuration configuration = Configuration.newConfiguration();
@@ -826,6 +833,7 @@ public class TestXsltTransformer {
         return StringValue.makeStringValue("done");
     }
 
+    @Tag("requires-pe")
     @Test
     public void testNextInChain() {
         // Create a Processor instance.

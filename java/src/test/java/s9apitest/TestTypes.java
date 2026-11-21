@@ -9,6 +9,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.IntegerValue;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
@@ -255,6 +256,7 @@ public class TestTypes {
         }
     }
 
+    @Tag("requires-pe")
     @Test
     public void testParseRecordType() {
         try {
@@ -279,6 +281,7 @@ public class TestTypes {
         }
     }
 
+    @Tag("requires-pe")
     @Test
     public void testParseUnionType() {
         try {
@@ -301,7 +304,6 @@ public class TestTypes {
     public void testParseError() {
         try {
             Processor p = new Processor(true);
-            p.setConfigurationProperty(Feature.XQUERY_VERSION, "4.0");
             ItemTypeFactory itf = new ItemTypeFactory(p);
             ItemType it1 = itf.parseItemType("onion(xs:double, xs:string)");
             fail("Error not detected");

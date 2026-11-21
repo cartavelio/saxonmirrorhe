@@ -19,6 +19,7 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.DateTimeValue;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
@@ -47,6 +48,7 @@ public class TestCollectionsEE {
         return new XdmAtomicValue(Testdata.file(additional).toURI() + query);
     }
 
+    @Tag("requires-ee")
     @Test
     public void testStrictValidation() {
         try {
