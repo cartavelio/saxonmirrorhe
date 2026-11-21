@@ -4,7 +4,6 @@ import org.gradle.kotlin.dsl.register
 
 plugins {
   id("saxon-build")
-  id("com.saxonica.build.testsuites")
   id("saxonj")
   id("maven-publish")
   id("signing")
@@ -36,10 +35,6 @@ sourceSets.named("editionTest") {
     exclude("net/sf/saxon/option/cpp/**")
     exclude("s9apitest/TestXMarkProjection.java")
   }
-}
-
-val testsuiteExtra by configurations.resolvable("testsuiteExtraConfiguration") {
-  extendsFrom(configurations["testImplementation"])
 }
 
 val downloadReleaseBundled by configurations.getting
@@ -114,11 +109,6 @@ dependencies {
   downloadReleaseBundled("com.ibm.icu:icu4j:${findProperty("icu4jVersion")}")
 
   junit4("junit:junit:4.13.2")
-}
-
-val testdriverJar = configurations.named("testdriverJar")
-configurations {
-  testImplementation { extendsFrom(testdriverJar) }
 }
 
 tasks.filteredSources {
@@ -302,123 +292,6 @@ if (project.findProperty("xmark") == "true") {
 // ============================================================
 
 
-val testSuitesClasspath = files(sourceSets["edition"].output)
-    .from(testdriverJar)
-    .from(testsuiteExtra)
-testSuites {
-  product = "java"
-  edition = "ee"
-  testclasspath = testSuitesClasspath
-  submodulesDir = layout.projectDirectory.dir("../submodules")
-  exceptionsDir = layout.projectDirectory.dir("src/test/exceptions")
-}
-
-testSuites.configure("expath", "XP31")
-testSuites.configure("expath", "XP31", mapOf("unfolded" to "on"))
-testSuites.configure("expath", "XQ31")
-testSuites.configure("expath", "XQ40")
-
-testSuites.configure("qt3", "XP20")
-testSuites.configure("qt3", "XP31")
-testSuites.configure("qt3", "XP31", mapOf("opt" to "0"))
-testSuites.configure("qt3", "XP31", mapOf("tree" to "DOM"))
-testSuites.configure("qt3", "XP31", mapOf("tree" to "DOM4J"))
-testSuites.configure("qt3", "XP31", mapOf("tree" to "JDOM2"))
-testSuites.configure("qt3", "XP31", mapOf("tree" to "XOM"))
-testSuites.configure("qt3", "XP31", mapOf("tree" to "Axiom"))
-testSuites.configure("qt3", "XP31", mapOf("tree" to "Domino"))
-
-testSuites.configure("qt3", "XP31", mapOf("unfolded" to "on"))
-
-testSuites.configure("qt3", "XQ31")
-testSuites.configure("qt3", "XQ31", mapOf("unfolded" to "on"))
-
-testSuites.configure("qt3extra", "XP31")
-testSuites.configure("qt3extra", "XP40")
-testSuites.configure("qt3extra", "XQ31")
-testSuites.configure("qt3extra", "XQ40")
-
-testSuites.configure("qt4", "XP20")
-testSuites.configure("qt4", "XP31")
-
-testSuites.configure("qt4", "XQ31")
-testSuites.configure("qt4", "XQ31", mapOf("opt" to "0"))
-testSuites.configure("qt4", "XQ31", mapOf("unfolded" to "on"))
-
-testSuites.configure("qt4", "XQ40")
-testSuites.configure("qt4", "XQ40", mapOf("opt" to "0"))
-testSuites.configure("qt4", "XQ40", mapOf("tree" to "DOM"))
-testSuites.configure("qt4", "XQ40", mapOf("tree" to "DOM4J"))
-testSuites.configure("qt4", "XQ40", mapOf("tree" to "JDOM2"))
-testSuites.configure("qt4", "XQ40", mapOf("tree" to "XOM"))
-testSuites.configure("qt4", "XQ40", mapOf("tree" to "Axiom"))
-testSuites.configure("qt4", "XQ40", mapOf("tree" to "Domino"))
-testSuites.configure("qt4", "XQ40", mapOf("unfolded" to "on"))
-
-testSuites.configure("qt4", "XP40")
-testSuites.configure("qt4", "XP40", mapOf("opt" to "0"))
-testSuites.configure("qt4", "XP40", mapOf("tree" to "DOM"))
-testSuites.configure("qt4", "XP40", mapOf("tree" to "DOM4J"))
-testSuites.configure("qt4", "XP40", mapOf("tree" to "JDOM2"))
-testSuites.configure("qt4", "XP40", mapOf("tree" to "XOM"))
-testSuites.configure("qt4", "XP40", mapOf("tree" to "Axiom"))
-testSuites.configure("qt4", "XP40", mapOf("tree" to "Domino"))
-testSuites.configure("qt4", "XP40", mapOf("unfolded" to "on"))
-
-testSuites.configure("xslt30", "XT30")
-testSuites.configure("xslt30", "XT30", mapOf("opt" to "0"))
-testSuites.configure("xslt30", "XT30", mapOf("tree" to "DOM"))
-testSuites.configure("xslt30", "XT30", mapOf("tree" to "DOM4J"))
-testSuites.configure("xslt30", "XT30", mapOf("tree" to "JDOM2"))
-testSuites.configure("xslt30", "XT30", mapOf("tree" to "XOM"))
-testSuites.configure("xslt30", "XT30", mapOf("tree" to "Axiom"))
-testSuites.configure("xslt30", "XT30", mapOf("tree" to "Domino"))
-testSuites.configure("xslt30", "XT30", mapOf("export" to "on"))
-testSuites.configure("xslt30", "XT30", mapOf("strict" to "on"))
-testSuites.configure("xslt30", "XT30", mapOf("threads" to "5"))
-
-testSuites.configure("xslt30extra", "XT30")
-testSuites.configure("xslt30extra", "XT30", mapOf("export" to "on"))
-testSuites.configure("xslt30extra", "XT30", mapOf("strict" to "on"))
-testSuites.configure("xslt30extra", "XT40")
-testSuites.configure("xslt30extra", "XT40", mapOf("export" to "on"))
-testSuites.configure("xslt30extra", "XT40", mapOf("strict" to "on"))
-testSuites.configure("xslt30extra", "XT40", mapOf("jit" to "on"))
-
-testSuites.configure("xsltfromqt4", "XT40")
-testSuites.configure("xsltfromqt4", "XT40", mapOf("opt" to "0"))
-testSuites.configure("xsltfromqt4", "XT40", mapOf("export" to "on"))
-
-testSuites.configure("xslt40", "XT40")
-testSuites.configure("xslt40", "XT40", mapOf("opt" to "0"))
-testSuites.configure("xslt40", "XT40", mapOf("tree" to "DOM"))
-testSuites.configure("xslt40", "XT40", mapOf("tree" to "DOM4J"))
-testSuites.configure("xslt40", "XT40", mapOf("tree" to "JDOM2"))
-testSuites.configure("xslt40", "XT40", mapOf("tree" to "XOM"))
-testSuites.configure("xslt40", "XT40", mapOf("tree" to "Axiom"))
-testSuites.configure("xslt40", "XT40", mapOf("tree" to "Domino"))
-testSuites.configure("xslt40", "XT40", mapOf("export" to "on"))
-testSuites.configure("xslt40", "XT40", mapOf("strict" to "on"))
-testSuites.configure("xslt40", "XT40", mapOf("jit" to "on"))
-testSuites.configure("xslt40", "XT40", mapOf("threads" to "5"))
-
-testSuites.configure("xsd", "XSD11")
-testSuites.configure("xsdextra", "XSD11")
-
-tasks.register("aggregated-test-results") {
-  inputs.files(tasks.named("test_suite_qt3_XP31"))
-  inputs.files(tasks.named("test_suite_qt3_XQ31"))
-  inputs.files(tasks.named("test_suite_qt4_XP31"))
-  inputs.files(tasks.named("test_suite_qt4_XQ31"))
-  inputs.files(tasks.named("test_suite_qt4_XP40"))
-  inputs.files(tasks.named("test_suite_qt4_XQ40"))
-
-  doLast {
-    println(inputs.files.files)
-  }
-}
-
-
 tasks.named<Sync>("signingDownloadJars") {
   into(layout.buildDirectory.dir("signing/download"))
   from(downloadSqlJar)
@@ -470,12 +343,6 @@ publishing {
       }
       artifact(signTask.map { layout.buildDirectory.file("${signRootName}-sql-sources.jar") }) {
         classifier = "sql-sources"
-      }
-      artifact(signTask.map { layout.buildDirectory.file("${signRootName}-test.jar") }) {
-        classifier = "test"
-      }
-      artifact(signTask.map { layout.buildDirectory.file("${signRootName}-test-sources.jar") }) {
-        classifier = "test-sources"
       }
     }
   }
