@@ -452,6 +452,9 @@ public class DeepEqual extends CollatingFunctionFixed {
                 }
 
                 if (item1 instanceof FunctionItem || item2 instanceof FunctionItem) {
+                    if (options.version < 40 && (item1.getGenre() == Genre.FUNCTION || item2.getGenre() == Genre.FUNCTION)) {
+                        throw new XPathException("Cannot compare function items using deep-equal()", "FOTY0015").asTypeError();
+                    }
                     if (!(item1 instanceof FunctionItem && item2 instanceof FunctionItem)) {
                         reason = "if one item is a function then both must be functions (position " + pos1 + ")";
                         result = false;

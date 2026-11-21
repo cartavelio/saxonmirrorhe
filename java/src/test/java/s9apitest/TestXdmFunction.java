@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -23,6 +24,21 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Test XdmFunctionItem class, representing an XPath function item
  */
 public class TestXdmFunction {
+
+    @Test
+    public void testDeepEqualRejectsNamedFunctions() throws SaxonApiException {
+        Processor processor = new Processor(false);
+        var stylesheet = TestXdmFunction.class.getResource("deep-equal-functions.xsl");
+        assertNotNull(stylesheet);
+        XsltExecutable executable = processor.newXsltCompiler().compile(new StreamSource(stylesheet.toExternalForm()));
+        for (String template : new String[]{"function-pair", "function-first", "function-last", "nested-functions"}) {
+            SaxonApiException error = assertThrows(SaxonApiException.class,
+                    () -> executable.load30().callTemplate(new QName(template)), template);
+            assertEquals(new QName("http://www.w3.org/2005/xqt-errors", "FOTY0015"), error.getErrorCode(), template);
+        }
+        XdmAtomicValue equal = (XdmAtomicValue) executable.load30().callTemplate(new QName("equal-containers"));
+        assertTrue(equal.getBooleanValue());
+    }
 
     @Test
     public void testCallSystemFunction() {
