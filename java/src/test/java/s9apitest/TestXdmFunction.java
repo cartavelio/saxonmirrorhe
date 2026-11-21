@@ -288,9 +288,20 @@ public class TestXdmFunction {
             transformer.setStylesheetParameters(Map.of(new QName("value"), new XdmAtomicValue(i)));
             functions[i] = (XdmFunctionItem) transformer.callTemplate(new QName("main"));
         }
+        QName callback = new QName("callback");
+        XPathCompiler xpath = processor.newXPathCompiler();
+        xpath.declareVariable(callback);
+        XPathExecutable callViaFunctions = xpath.compile("(for-each(false(), $callback), apply($callback, [false()]))");
         for (int i = 0; i < functions.length; i++) {
             XdmValue value = functions[i].call(processor, new XdmAtomicValue(false));
             assertEquals(i, ((XdmAtomicValue) value).getLongValue());
+
+            XPathSelector selector = callViaFunctions.load();
+            selector.setVariable(callback, functions[i]);
+            XdmValue results = selector.evaluate();
+            assertEquals(2, results.size());
+            assertEquals(i, ((XdmAtomicValue) results.itemAt(0)).getLongValue());
+            assertEquals(i, ((XdmAtomicValue) results.itemAt(1)).getLongValue());
         }
     }
 
