@@ -2591,39 +2591,44 @@ public class PackageLoaderHE implements IPackageLoader {
         });
 
         eMap.put("fnRef", (loader, element) -> {
-            loader.needsPELicense("higher order functions");
             String name = element.getAttributeValue(NamespaceUri.NULL, "name");
+            StructuredQName qName = name.startsWith("Q{")
+                    ? StructuredQName.fromEQName40(name)
+                    : NamespaceUri.FN.qName(name);
             int arity = loader.getIntegerAttribute(element, "arity");
             RetainedStaticContext rsc = loader.makeRetainedStaticContext(element);
+            Configuration config = rsc.getConfiguration();
+            if (config.isDisabledFunction(qName)) {
+                throw new XPathException("Function " + name + " has been disabled", "XPST0017");
+            }
+            NamespaceUri uri = qName.getNamespaceUri();
+            String localName = qName.getLocalPart();
+            int languageVersion = rsc.getPackageData().getHostLanguageVersion();
+            int xpathVersion = languageVersion <= 31 ? 31 : 40;
             SystemFunction f = null;
-            if (name.startsWith("Q{")) {
-                StructuredQName qName = StructuredQName.fromEQName40((name));
-                if (rsc.getConfiguration().isDisabledFunction(qName)) {
-                    throw new XPathException("Function " + name + " has been disabled", "XPST0017");
-                }
-                NamespaceUri uri = qName.getNamespaceUri();
-                if (uri == NamespaceUri.MATH) {
-                    f = MathFunctionSet.getInstance(40).makeFunction(qName.getLocalPart(), arity);
-                } else if (uri == NamespaceUri.MAP_FUNCTIONS) {
-                    f = MapFunctionSet.getInstance(40).makeFunction(qName.getLocalPart(), arity);
-                } else if (uri == NamespaceUri.ARRAY_FUNCTIONS) {
-                    f = ArrayFunctionSet.getInstance(40).makeFunction(qName.getLocalPart(), arity);
-                } else if (uri == NamespaceUri.SAXON) {
-                    f = loader.getConfiguration().bindSaxonExtensionFunction(qName.getLocalPart(), arity);
+            if (uri == NamespaceUri.FN) {
+                f = config.makeSystemFunction(localName, arity, languageVersion);
+            } else if (uri == NamespaceUri.MATH) {
+                f = MathFunctionSet.getInstance(xpathVersion).makeFunction(localName, arity);
+            } else if (uri == NamespaceUri.MAP_FUNCTIONS) {
+                f = MapFunctionSet.getInstance(xpathVersion).makeFunction(localName, arity);
+            } else if (uri == NamespaceUri.ARRAY_FUNCTIONS) {
+                f = ArrayFunctionSet.getInstance(xpathVersion).makeFunction(localName, arity);
+            } else {
+                // Standard XPath function items are available in HE. Extension functions retain their license check.
+                loader.needsPELicense("higher order functions");
+                if (uri == NamespaceUri.SAXON) {
+                    f = config.bindSaxonExtensionFunction(localName, arity);
                 } else if (uri == NamespaceUri.EXPATH_BINARY) {
                     f = loader.makeEXPathBinaryFunction(qName, arity);
                 } else if (uri == NamespaceUri.EXPATH_FILE) {
                     f = loader.makeEXPathFileFunction(qName, arity);
                 }
-                if (f != null) {
-                    f.setRetainedStaticContext(rsc);
-                }
-            } else {
-                f = SystemFunction.makeFunction(name, rsc, arity);
             }
             if (f == null) {
                 throw new XPathException("Unknown system function " + name + "#" + arity, SaxonErrorCode.SXPK0002);
             }
+            f.setRetainedStaticContext(rsc);
             return new FunctionLiteral(f);
         });
 
