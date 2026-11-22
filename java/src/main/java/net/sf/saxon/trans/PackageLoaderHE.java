@@ -28,6 +28,7 @@ import net.sf.saxon.expr.sort.*;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.hof.*;
 import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
+import net.sf.saxon.functions.registry.ExsltCommonFunctionSet;
 import net.sf.saxon.functions.registry.XPath30FunctionSet;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.ma.MapOrArray;
@@ -38,6 +39,7 @@ import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.ma.jnode.RootJNode;
 import net.sf.saxon.ma.map.AbstractFixedMap;
 import net.sf.saxon.ma.map.GeneralMapBuilder;
+import net.sf.saxon.ma.map.MapConstructor;
 import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
@@ -46,6 +48,7 @@ import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.nodetest.NodeTestStar;
 import net.sf.saxon.pattern.qname.*;
+import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.query.XQueryFunctionLibrary;
 import net.sf.saxon.regex.ARegularExpression;
 import net.sf.saxon.s9api.HostLanguage;
@@ -321,12 +324,10 @@ public class PackageLoaderHE implements IPackageLoader {
         int xpathVersion = (xsltVersion <= 31 ? 31 : 40);
         xsltVersion = (xsltVersion < 40 ? 30 : 40);
         functionLibrary.addFunctionLibrary(config.getXSLTFunctionSet(xsltVersion));
-        addVendorFunctionLibrary(functionLibrary, config);
-        functionLibrary.addFunctionLibrary(MapFunctionSet.getInstance(xpathVersion));
-        functionLibrary.addFunctionLibrary(ArrayFunctionSet.getInstance(xpathVersion));
-        functionLibrary.addFunctionLibrary(MathFunctionSet.getInstance(xpathVersion));
         //functionLibrary.addFunctionLibrary(overriding);
         functionLibrary.addFunctionLibrary(new StylesheetFunctionLibrary(pack, true));
+        addVendorFunctionLibrary(functionLibrary, config);
+        functionLibrary.addFunctionLibrary(config.getBuiltInExtensionLibraryList(xpathVersion));
 
         functionLibrary.addFunctionLibrary(new ConstructorFunctionLibrary(config));
 
@@ -755,6 +756,31 @@ public class PackageLoaderHE implements IPackageLoader {
 
     protected UserFunction makeFunction(String flags) {
         return new UserFunction();
+    }
+
+    private Expression readInlineFunctionItem(NodeInfo element) throws XPathException {
+        Stack<LocalBinding> enclosingBindings = localBindings;
+        localBindings = new Stack<>();
+        try {
+            List<UserFunctionParameter> params = new ArrayList<>();
+            for (NodeInfo argElement : element.children(NodePredicateLambda.of(n ->
+                    ((NodeInfo) n).getLocalPart().equals("arg")))) {
+                UserFunctionParameter arg = new UserFunctionParameter();
+                arg.setVariableQName(getQNameAttribute(argElement, "name"));
+                arg.setRequiredType(parseAlphaCode(argElement, "as"));
+                arg.setSlotNumber(params.size());
+                params.add(arg);
+                localBindings.push(arg);
+            }
+            Expression body = getExpressionWithRole(element, "body");
+            if (body == null) {
+                throw new XPathException("Missing body of inline function in SEF", SaxonErrorCode.SXPK0002);
+            }
+            return new FunctionLiteral(new InlineFunctionItem(AnnotationList.EMPTY,
+                    params.toArray(new UserFunctionParameter[0]), parseAlphaCode(element, "as"), body));
+        } finally {
+            localBindings = enclosingBindings;
+        }
     }
 
     private AttributeSet readAttributeSet(NodeInfo aSetElement) throws XPathException {
@@ -2616,16 +2642,14 @@ public class PackageLoaderHE implements IPackageLoader {
                 f = MapFunctionSet.getInstance(xpathVersion).makeFunction(localName, arity);
             } else if (uri == NamespaceUri.ARRAY_FUNCTIONS) {
                 f = ArrayFunctionSet.getInstance(xpathVersion).makeFunction(localName, arity);
-            } else {
-                // Standard XPath function items are available in HE. Extension functions retain their license check.
-                loader.needsPELicense("higher order functions");
-                if (uri == NamespaceUri.SAXON) {
-                    f = config.bindSaxonExtensionFunction(localName, arity);
-                } else if (uri == NamespaceUri.EXPATH_BINARY) {
-                    f = loader.makeEXPathBinaryFunction(qName, arity);
-                } else if (uri == NamespaceUri.EXPATH_FILE) {
-                    f = loader.makeEXPathFileFunction(qName, arity);
-                }
+            } else if (uri == NamespaceUri.SAXON) {
+                f = config.getVendorFunctionSet().makeFunction(localName, arity);
+            } else if (uri == NamespaceUri.EXSLT_COMMON) {
+                f = ExsltCommonFunctionSet.getInstance().makeFunction(localName, arity);
+            } else if (uri == NamespaceUri.EXPATH_BINARY) {
+                f = loader.makeEXPathBinaryFunction(qName, arity);
+            } else if (uri == NamespaceUri.EXPATH_FILE) {
+                f = loader.makeEXPathFileFunction(qName, arity);
             }
             if (f == null) {
                 throw new XPathException("Unknown system function " + name + "#" + arity, SaxonErrorCode.SXPK0002);
@@ -2868,6 +2892,16 @@ public class PackageLoaderHE implements IPackageLoader {
             return new UserFunctionReference(uf);
         });
 
+        eMap.put("inlineFnItem", PackageLoaderHE::readInlineFunctionItem);
+
+        eMap.put("boundInlineFn", (loader, element) -> {
+            Expression child = loader.getFirstChildExpression(element);
+            if (child instanceof FunctionLiteral literal && literal.getGroundedValue() instanceof InlineFunctionItem) {
+                return new InlineFunctionReference(literal);
+            }
+            throw new XPathException("Expected an inline function item in SEF", SaxonErrorCode.SXPK0002);
+        });
+
         eMap.put("instance", (loader, element) -> {
             Expression body = loader.getFirstChildExpression(element);
             SequenceType type = loader.parseAlphaCode(element, "of");
@@ -2998,6 +3032,8 @@ public class PackageLoaderHE implements IPackageLoader {
             }
             return Literal.makeLiteral(map.getCompletedMap());
         });
+
+        eMap.put("mapC", (loader, element) -> new MapConstructor(getChildExpressionList(loader, element)));
 
         eMap.put("merge", (loader, element) -> {
             final MergeInstr inst = new MergeInstr();
@@ -3699,13 +3735,17 @@ public class PackageLoaderHE implements IPackageLoader {
     }
 
     protected SystemFunction makeEXPathBinaryFunction(StructuredQName qName, int arity) throws XPathException {
-        throw new XPathException("Cannot reload SEF file: EXPath Binary functions require Saxon-PE/EE");
+        throw unavailableFunctionReference(qName, arity);
     }
 
     protected SystemFunction makeEXPathFileFunction(StructuredQName qName, int arity) throws XPathException {
-        throw new XPathException("Cannot reload SEF file: EXPath File functions require Saxon-PE/EE");
+        throw unavailableFunctionReference(qName, arity);
     }
 
+    private static XPathException unavailableFunctionReference(StructuredQName name, int arity) {
+        return new XPathException("This build cannot load a compiled reference to " + name.getEQName() + "#" + arity,
+                SaxonErrorCode.SXPK0002);
+    }
 
     private static int getLevelCode(String levelAtt) {
         if (levelAtt == null) {
