@@ -14,6 +14,7 @@ import net.sf.saxon.expr.instruct.GlobalParam;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.MinimalSchema;
@@ -153,6 +154,8 @@ public class XsltExecutable {
             preparedStylesheet.explain(new ExpressionPresenter(config, out));
         } catch (XPathException e) {
             throw new SaxonApiException(e);
+        } catch (UncheckedXPathException e) {
+            throw new SaxonApiException(e);
         }
     }
 
@@ -202,14 +205,18 @@ public class XsltExecutable {
             }
             ExpressionPresenter presenter = config.newExpressionExporter(target, destination, topLevelPackage);
             presenter.getOptions().relocatable = topLevelPackage.isRelocatable();
-            topLevelPackage.export(presenter);
-        } catch (XPathException e) {
+            try (destination) {
+                topLevelPackage.export(presenter);
+            }
+        } catch (XPathException | IOException e) {
             throw new SaxonApiException(e);
-        }
-        try {
-            destination.close();
-        } catch (IOException e) {
+        } catch (UncheckedXPathException e) {
+            if (e.getXPathException().getCause() instanceof IOException io) {
+                throw new SaxonApiException("Cannot write compiled stylesheet: " + io.getMessage(), io);
+            }
             throw new SaxonApiException(e);
+        } catch (UnsupportedOperationException e) {
+            throw new SaxonApiException("Cannot export compiled stylesheet: " + e.getMessage(), e);
         }
     }
 

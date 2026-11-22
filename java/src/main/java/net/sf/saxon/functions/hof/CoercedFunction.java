@@ -71,9 +71,13 @@ public class CoercedFunction extends AbstractFunction {
      */
 
     public CoercedFunction(SpecificFunctionType requiredType) {
+        this(requiredType, false, false);
+    }
+
+    public CoercedFunction(SpecificFunctionType requiredType, boolean allow40, boolean acceptReducedArity) {
         this.requiredType = requiredType;
-        this.allow40 = false;
-        this.acceptReducedArity = false;
+        this.allow40 = allow40;
+        this.acceptReducedArity = acceptReducedArity;
     }
 
     /**
@@ -239,6 +243,7 @@ public class CoercedFunction extends AbstractFunction {
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("coercedFn");
         out.emitAttribute("type", requiredType.toExportString());
+        out.emitAttribute("flags", (allow40 ? "4" : "") + (acceptReducedArity ? "r" : ""));
         new FunctionLiteral(targetFunction).export(out);
         out.endElement();
     }

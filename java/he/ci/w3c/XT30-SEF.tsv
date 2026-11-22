@@ -1,0 +1,2 @@
+# Test set	Test case	Round-trip result	Reason
+transform	transform-004	export	Cannot export a package containing a reference to a user-defined function (f:negative#1) that is not present in the package being exported

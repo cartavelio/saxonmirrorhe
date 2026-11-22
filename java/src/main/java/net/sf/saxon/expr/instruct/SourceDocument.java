@@ -253,7 +253,7 @@ public class SourceDocument extends Instruction {
             flags += "i";
         }
         out.emitAttribute("flags", flags);
-        if (accumulators != null && !accumulators.isEmpty()) {
+        if (accumulators != null) {
             StringBuilder fsb = new StringBuilder(256);
             for (Accumulator acc : accumulators) {
                 if (fsb.length() != 0) {

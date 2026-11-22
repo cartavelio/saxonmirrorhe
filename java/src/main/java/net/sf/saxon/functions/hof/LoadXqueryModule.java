@@ -42,7 +42,8 @@ import java.util.List;
 
 /**
  * This class implements the function load-xquery-module(), which is a standard function in XPath 3.1.
- * It is classified as a higher-order function and therefore requires Saxon-PE or higher.
+ * Calling it requires access to Saxon's licensed XQuery module compiler.
+ * A configuration without that compiler reports FOQM0006.
  */
 public class LoadXqueryModule extends SystemFunction implements Callable {
 

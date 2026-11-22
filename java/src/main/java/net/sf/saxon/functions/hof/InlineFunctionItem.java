@@ -24,6 +24,7 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.query.QueryModule;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.FunctionItemType;
@@ -166,6 +167,21 @@ public class InlineFunctionItem extends AbstractFunction {
     @Override
     public String toString() {
         return getDescription();
+    }
+
+    @Override
+    public synchronized void export(ExpressionPresenter out) throws XPathException {
+        out.startElement("inlineFnItem");
+        out.emitAttribute("as", declaredResultType.toAlphaCode());
+        for (UserFunctionParameter parameter : parameters) {
+            out.startElement("arg");
+            out.emitAttribute("name", parameter.getVariableQName());
+            out.emitAttribute("as", parameter.getRequiredType().toAlphaCode());
+            out.endElement();
+        }
+        out.setChildRole("body");
+        body.export(out);
+        out.endElement();
     }
 
     @Override
