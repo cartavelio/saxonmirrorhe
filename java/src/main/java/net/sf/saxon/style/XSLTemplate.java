@@ -1003,16 +1003,15 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
      */
 
     public void allocatePatternSlotNumbers() {
-        if (match != null) {
-            for (TemplateRule templateRule : compiledTemplateRules) {
-                // In the case of a union pattern, allocate slots separately for each branch
-                Pattern match = templateRule.getMatchPattern();
+        for (TemplateRule templateRule : compiledTemplateRules) {
+            // The mode tests these registered patterns, one per branch of a split union.
+            for (Rule rule : templateRule.getRules()) {
+                Pattern match = rule.getPattern();
                 // first slot in pattern is reserved for current()
                 int nextFree = 0;
                 if ((match.getDependencies() & StaticProperty.DEPENDS_ON_CURRENT_ITEM) != 0) {
                     nextFree = 1;
                 }
-                //System.err.println("Allocate slots to " + match + " -- " + System.identityHashCode(match) + " in " + templateRule);
                 int slots = match.allocateSlots(getSlotManager(), nextFree);
                 // if the pattern calls user-defined functions, allocate at least one slot,
                 // to force a new context to be created for evaluating patterns (bug 3706)
