@@ -63,6 +63,8 @@ public final class InlineFunctionReference extends Expression {
 
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
+        out.startElement("boundInlineFn", this);
         literal.getChildExpression().export(out);
+        out.endElement();
     }
 }
