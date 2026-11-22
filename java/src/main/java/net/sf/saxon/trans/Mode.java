@@ -33,6 +33,7 @@ import net.sf.saxon.value.SequenceType;
 
 import java.util.Collections;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.function.Predicate;
 
 /**
@@ -726,7 +727,15 @@ public abstract class Mode extends Actor {
         }
     }
 
-    protected void exportUseAccumulators(ExpressionPresenter presenter){}
+    protected void exportUseAccumulators(ExpressionPresenter presenter) {
+        StringJoiner names = new StringJoiner(" ");
+        for (Accumulator accumulator : getAccumulators()) {
+            names.add(accumulator.getAccumulatorName().getEQName());
+        }
+        if (names.length() != 0) {
+            presenter.emitAttribute("useAcc", names.toString());
+        }
+    }
 
     public boolean isMustBeTyped() {
         return mustBeTyped;

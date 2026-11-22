@@ -1117,16 +1117,6 @@ public class StylesheetPackage extends PackageData {
         if (isSchemaAware()) {
             throw new XPathException("Saxon-HE cannot export a schema-aware stylesheet");
         }
-        DecimalFormatManager decimalFormats = getDecimalFormatManager();
-        if (stripsWhitespace || stripsTypeAnnotations || globalContextRequirement != null ||
-                !namedOutputProperties.isEmpty() || (characterMapIndex != null && !characterMapIndex.isEmpty()) ||
-                getKeyManager().getNumberOfKeyDefinitions() > 1 ||
-                getAccumulatorRegistry().getAllAccumulators().iterator().hasNext() ||
-                decimalFormats.getDecimalFormatNames().iterator().hasNext() ||
-                Arrays.stream(DecimalSymbols.Property.values()).anyMatch(
-                        property -> !decimalFormats.getDefaultDecimalFormat().hasDefaultValue(property))) {
-            throw new XPathException("Saxon-HE cannot yet export this stylesheet's package declarations");
-        }
         ExpressionPresenter.ExportOptions options = presenter.getOptions();
         presenter.startElement("package");
         presenter.emitAttribute("saxonVersion", Version.getProductVersion());
@@ -1140,21 +1130,54 @@ public class StylesheetPackage extends PackageData {
         if (declaredModes) {
             presenter.emitAttribute("declaredModes", "1");
         }
+        if (stripsTypeAnnotations) {
+            presenter.emitAttribute("stripType", "1");
+        }
+        if (globalContextRequirement != null) {
+            globalContextRequirement.export(presenter);
+        }
+        getKeyManager().exportKeys(presenter, options.componentMap);
         for (Component component : componentIndex.values()) {
             component.export(presenter, options.componentMap, options.packageMap);
         }
+        for (var accumulator : getAccumulatorRegistry().getAllAccumulators()) {
+            accumulator.export(presenter, options.componentMap);
+        }
         if (defaultOutputProperties != null) {
-            presenter.startElement("output");
-            for (String name : defaultOutputProperties.stringPropertyNames()) {
-                presenter.startElement("property");
-                presenter.emitAttribute("name", name);
-                presenter.emitAttribute("value", defaultOutputProperties.getProperty(name));
-                presenter.endElement();
+            exportOutputProperties(presenter, null, defaultOutputProperties);
+        }
+        for (Map.Entry<StructuredQName, Properties> entry : namedOutputProperties.entrySet()) {
+            exportOutputProperties(presenter, entry.getKey(), entry.getValue());
+        }
+        if (characterMapIndex != null) {
+            for (CharacterMap characterMap : characterMapIndex) {
+                characterMap.export(presenter);
             }
-            presenter.endElement();
+        }
+        if (stripperRules != null) {
+            stripperRules.export(presenter);
+        }
+        DecimalFormatManager decimalFormats = getDecimalFormatManager();
+        decimalFormats.getDefaultDecimalFormat().export(null, presenter);
+        for (StructuredQName name : decimalFormats.getDecimalFormatNames()) {
+            decimalFormats.getNamedDecimalFormat(name).export(name, presenter);
         }
         presenter.endElement();
         presenter.close();
+    }
+
+    private static void exportOutputProperties(ExpressionPresenter presenter, StructuredQName name, Properties properties) {
+        presenter.startElement("output");
+        if (name != null) {
+            presenter.emitAttribute("name", name);
+        }
+        for (String property : properties.stringPropertyNames()) {
+            presenter.startElement("property");
+            presenter.emitAttribute("name", property);
+            presenter.emitAttribute("value", properties.getProperty(property));
+            presenter.endElement();
+        }
+        presenter.endElement();
     }
 
     public void checkForAbstractComponents() throws XPathException {
