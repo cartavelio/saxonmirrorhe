@@ -116,6 +116,7 @@ public class PackageLoaderHE implements IPackageLoader {
     private final Map<String, IntHashMap<Location>> locationMap = new HashMap<>();
     private final Map<Integer, Component> componentIdMap = new HashMap<>();
     private final Map<Component, String> externalReferences = new HashMap<>();
+    private final Map<Component, List<ComponentInvocation>> componentInvocations = new IdentityHashMap<>();
     private String relocatableBase = null;
     private NestedIntegerValue originalVersion = null;
     private Map<String, Schema> usedSchemata = null;
@@ -217,31 +218,28 @@ public class PackageLoaderHE implements IPackageLoader {
     @Override
     public StylesheetPackage loadPackageDoc(NodeInfo doc) throws XPathException {
 
-        StylesheetPackage pack = config.makeStylesheetPackage();
-        pack.setRuleManager(new RuleManager(pack));
-        pack.setCharacterMapIndex(new CharacterMapIndex());
-        pack.setJustInTimeCompilation(false);
-        pack.setImportedSchema("", config.emptySchema());
+        StylesheetPackage pack = makePackage();
         if (packStack.isEmpty()) {
             topLevelPackage = pack;
         }
         packStack.push(pack);
         NodeInfo packageElement = (NodeInfo) doc.iterateChildAxis(NodeKindType.ELEMENT).next();
-        if (packageElement.getNamespaceUri() != NamespaceUri.SAXON_XSLT_EXPORT) {
+        if (packageElement == null || packageElement.getNamespaceUri() != NamespaceUri.SAXON_XSLT_EXPORT) {
             throw new XPathException("Incorrect namespace for XSLT export file", SaxonErrorCode.SXPK0002);
         }
         if (!packageElement.getLocalPart().equals("package")) {
             throw new XPathException("Outermost element of XSLT export file must be 'package'", SaxonErrorCode.SXPK0002);
         }
-        String versionAtt = packageElement.getAttributeValue(NamespaceUri.NULL, "version");
-        if (versionAtt != null) {
-            pack.setHostLanguage(HostLanguage.XSLT, Integer.parseInt(versionAtt));
-        }
         String saxonVersionAtt = packageElement.getAttributeValue(NamespaceUri.NULL, "saxonVersion");
         if (saxonVersionAtt == null) {
             saxonVersionAtt = "9.8.0.1"; //Arbitrarily; older SEF files do not have this attribute
         }
-        originalVersion = NestedIntegerValue.parse(saxonVersionAtt);
+        try {
+            originalVersion = NestedIntegerValue.parse(saxonVersionAtt);
+        } catch (XPathException e) {
+            throw new XPathException("Invalid Saxon version in stylesheet export: " + saxonVersionAtt,
+                    SaxonErrorCode.SXPK0002);
+        }
         String dmk = packageElement.getAttributeValue(NamespaceUri.NULL, "dmk");
         if (dmk != null) {
             int licenseId = config.registerLocalLicense(dmk);
@@ -252,21 +250,71 @@ public class PackageLoaderHE implements IPackageLoader {
 
         for (Map.Entry<Component, String> entry : externalReferences.entrySet()) {
             Component comp = entry.getKey();
-            StringTokenizer tokenizer = new StringTokenizer(entry.getValue());
+            StringTokenizer tokenizer = new StringTokenizer(entry.getValue() == null ? "" : entry.getValue());
             while (tokenizer.hasMoreTokens()) {
                 String token = tokenizer.nextToken();
-                int target = Integer.parseInt(token);
+                int target;
+                try {
+                    target = Integer.parseInt(token);
+                } catch (NumberFormatException e) {
+                    throw new XPathException("Invalid component binding '" + token + "' in " +
+                            comp.getActor().getSymbolicName(), SaxonErrorCode.SXPK0005);
+                }
                 Component targetComponent = componentIdMap.get(target);
                 if (targetComponent == null) {
-                    throw new XPathException("Unresolved reference to component " + target, SaxonErrorCode.SXPK0005);
+                    throw new XPathException("Unresolved reference to component " + target + " in " +
+                            comp.getActor().getSymbolicName(), SaxonErrorCode.SXPK0005);
                 }
                 comp.getComponentBindings().add(new ComponentBinding(targetComponent.getActor().getSymbolicName(), targetComponent));
             }
+        }
+        validateComponentBindings();
+        for (Action action : completionActions) {
+            action.doAction();
         }
         return pack;
 
     }
 
+    private void recordComponentInvocations(NodeInfo element, Component component, int firstFixup) {
+        if (getInheritedAttribute(element, "sefVersion") != null) {
+            List<ComponentInvocation> invocations = new ArrayList<>();
+            if (component.getBaseComponent() != null) {
+                invocations.addAll(componentInvocations.getOrDefault(component.getBaseComponent(), Collections.emptyList()));
+            }
+            List<ComponentInvocation> pending = fixups.peek();
+            invocations.addAll(pending.subList(firstFixup, pending.size()));
+            componentInvocations.put(component, invocations);
+        }
+    }
+
+    private void validateComponentBindings() throws XPathException {
+        for (Map.Entry<Component, List<ComponentInvocation>> entry : componentInvocations.entrySet()) {
+            Component component = entry.getKey();
+            List<ComponentBinding> bindings = component.getComponentBindings();
+            for (ComponentInvocation invocation : entry.getValue()) {
+                int slot = invocation.getBindingSlot();
+                if (slot < 0) {
+                    continue;
+                }
+                if (slot >= bindings.size() || invocation.getSymbolicName().getComponentKind() !=
+                        bindings.get(slot).getTarget().getComponentKind()) {
+                    throw new XPathException("Invalid binding slot " + slot + " for " +
+                            invocation.getSymbolicName() + " in " + component.getActor().getSymbolicName(),
+                            SaxonErrorCode.SXPK0005);
+                }
+            }
+        }
+    }
+
+    private StylesheetPackage makePackage() throws XPathException {
+        StylesheetPackage pack = config.makeStylesheetPackage();
+        pack.setRuleManager(new RuleManager(pack));
+        pack.setCharacterMapIndex(new CharacterMapIndex());
+        pack.setJustInTimeCompilation(false);
+        pack.setImportedSchema("", config.emptySchema());
+        return pack;
+    }
 
     public void needsPELicense(String name) {
         int localLicenseId = getTopLevelPackage().getLocalLicenseId();
@@ -281,17 +329,32 @@ public class PackageLoaderHE implements IPackageLoader {
     public void loadPackageElement(NodeInfo packageElement, StylesheetPackage pack) throws XPathException {
 
         fixups.push(new ArrayList<>());
+        String sefVersion = packageElement.getAttributeValue(NamespaceUri.NULL, "sefVersion");
+        if (sefVersion != null && !StylesheetPackage.HE_SEF_VERSION.equals(sefVersion)) {
+            throw new XPathException("Unsupported HE stylesheet export version: " + sefVersion,
+                    SaxonErrorCode.SXPK0002);
+        }
         String packageName = packageElement.getAttributeValue(NamespaceUri.NULL, "name");
         String packageId = packageElement.getAttributeValue(NamespaceUri.NULL, "id");
         String packageKey = packageId == null ? packageName : packageId; // for backwards compatibility with 9.8
         boolean relocatable = "true".equals(packageElement.getAttributeValue(NamespaceUri.NULL, "relocatable"));
+        pack.setRelocatable(relocatable);
         if (packageName != null) {
             pack.setPackageName(packageName);
-            allPackages.put(packageKey, pack);
+        }
+        if (packageKey != null && allPackages.putIfAbsent(packageKey, pack) != null) {
+            throw new XPathException("Duplicate stylesheet package identifier " + packageKey, SaxonErrorCode.SXPK0002);
         }
         pack.setPackageVersion(
                 new PackageVersion(packageElement.getAttributeValue(NamespaceUri.NULL, "packageVersion")));
         int xsltVersion = getIntegerAttribute(packageElement, "version");
+        if (xsltVersion == Integer.MIN_VALUE && sefVersion == null) {
+            xsltVersion = 30;
+        } else if (xsltVersion != 20 && xsltVersion != 30 && xsltVersion != 31 &&
+                xsltVersion != 40 && xsltVersion != 305) {
+            throw new XPathException("Unsupported XSLT version in stylesheet export: " +
+                    packageElement.getAttributeValue(NamespaceUri.NULL, "version"), SaxonErrorCode.SXPK0002);
+        }
         pack.setLanguageVersion(xsltVersion);
         pack.setSchemaAware("1".equals(packageElement.getAttributeValue(NamespaceUri.NULL, "schemaAware")));
         if (pack.isSchemaAware()) {
@@ -309,21 +372,32 @@ public class PackageLoaderHE implements IPackageLoader {
         pack.setStripsTypeAnnotations("1".equals(packageElement.getAttributeValue(NamespaceUri.NULL, "stripType")));
         pack.setKeyManager(new KeyManager(pack.getConfiguration(), pack));
         pack.setDeclaredModes("1".equals(packageElement.getAttributeValue(NamespaceUri.NULL, "declaredModes")));
-        for (NodeInfo usePack : packageElement.children(NodePredicateLambda.of(n -> ((NodeInfo) n).getLocalPart().equals("package")))) {
-            StylesheetPackage subPack = config.makeStylesheetPackage();
-            subPack.setRuleManager(new RuleManager(pack));
-            subPack.setCharacterMapIndex(new CharacterMapIndex());
-            subPack.setJustInTimeCompilation(false);
-            packStack.push(subPack);
-            loadPackageElement(usePack, subPack);
-            packStack.pop();
-            pack.addUsedPackage(subPack);
+        for (NodeInfo child : packageElement.children(NodeKindType.ELEMENT)) {
+            if (child.getLocalPart().equals("package")) {
+                StylesheetPackage subPack = makePackage();
+                packStack.push(subPack);
+                loadPackageElement(child, subPack);
+                packStack.pop();
+                pack.addUsedPackage(subPack);
+            } else if (child.getLocalPart().equals("packageRef")) {
+                String id = child.getAttributeValue(NamespaceUri.NULL, "id");
+                StylesheetPackage subPack = allPackages.get(id);
+                if (subPack == null || packStack.contains(subPack)) {
+                    throw new XPathException("Unresolved or cyclic stylesheet package reference " + id,
+                            SaxonErrorCode.SXPK0002);
+                }
+                pack.addUsedPackage(subPack);
+            }
         }
 
         FunctionLibraryList functionLibrary = new FunctionLibraryList();
         int xpathVersion = (xsltVersion <= 31 ? 31 : 40);
         xsltVersion = (xsltVersion < 40 ? 30 : 40);
-        functionLibrary.addFunctionLibrary(config.getXSLTFunctionSet(xsltVersion));
+        try {
+            functionLibrary.addFunctionLibrary(config.getXSLTFunctionSet(xsltVersion));
+        } catch (IllegalArgumentException e) {
+            throw new XPathException("Cannot load stylesheet package: " + e.getMessage(), SaxonErrorCode.SXPK0002);
+        }
         //functionLibrary.addFunctionLibrary(overriding);
         functionLibrary.addFunctionLibrary(new StylesheetFunctionLibrary(pack, true));
         addVendorFunctionLibrary(functionLibrary, config);
@@ -341,6 +415,8 @@ public class PackageLoaderHE implements IPackageLoader {
         pack.setFunctionLibraryDetails(functionLibrary, overriding, underriding);
 
         RetainedStaticContext rsc = new RetainedStaticContext(config, pack);
+        String savedRelocatableBase = relocatableBase;
+        relocatableBase = null;
         if (relocatable) {
             // For a relocatable package, take the base URI from the location of the SEF file
             relocatableBase = packageElement.getBaseURI();
@@ -360,6 +436,15 @@ public class PackageLoaderHE implements IPackageLoader {
                 NamedXNodeType.make(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "overridden", config)).next();
         if (overridden != null) {
             readComponents(overridden, true);
+            for (NodeInfo ref : overridden.children(
+                    NamedXNodeType.make(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "coRef", config))) {
+                int id = getIntegerAttribute(ref, "id");
+                Component component = componentIdMap.get(id);
+                if (component == null || component.getContainingPackage() != pack) {
+                    throw new XPathException("Unresolved overridden component " + id, SaxonErrorCode.SXPK0005);
+                }
+                pack.addOverriddenComponent(component);
+            }
         }
         readAccumulators(packageElement);
         readOutputProperties(packageElement);
@@ -368,12 +453,11 @@ public class PackageLoaderHE implements IPackageLoader {
         readDecimalFormats(packageElement);
         resolveFixups();
         fixups.pop();
-        for (Action a : completionActions) {
-            a.doAction();
-        }
 
         StructuredQName defaultModeName = getQNameAttribute(packageElement, "defaultMode");
         pack.setDefaultMode(defaultModeName == null ? Mode.UNNAMED_MODE_NAME : defaultModeName);
+        contextStack.pop();
+        relocatableBase = savedRelocatableBase;
     }
 
     protected void addVendorFunctionLibrary(FunctionLibraryList targetList, Configuration config) {
@@ -417,6 +501,7 @@ public class PackageLoaderHE implements IPackageLoader {
         SequenceIterator iterator = packageElement.iterateChildAxis(
                 NamedXNodeType.make(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "key", config));
         while ((keyElement = (NodeInfo) iterator.next()) != null) {
+            int firstFixup = fixups.peek().size();
             StructuredQName keyName = getQNameAttribute(keyElement, "name");
             SymbolicName symbol = new SymbolicName(StandardNames.XSL_KEY, keyName);
 
@@ -442,6 +527,7 @@ public class PackageLoaderHE implements IPackageLoader {
             String binds = keyElement.getAttributeValue(NamespaceUri.NULL, "binds");
             Component keyComponent = keyDefinition.makeDeclaringComponent(Visibility.PRIVATE, pack);
             externalReferences.put(keyComponent, binds);
+            recordComponentInvocations(keyElement, keyComponent, firstFixup);
             if (backwards) {
                 keyDefinition.setBackwardsCompatible(true);
             }
@@ -465,9 +551,20 @@ public class PackageLoaderHE implements IPackageLoader {
         SequenceIterator iterator = packageElement.iterateChildAxis(
                 NamedXNodeType.make(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "co", config));
         while ((child = (NodeInfo) iterator.next()) != null) {
+            int firstFixup = fixups.peek().size();
             int id = getIntegerAttribute(child, "id");
+            if (id < 0 || componentIdMap.containsKey(id)) {
+                throw new XPathException("Missing, invalid or duplicate component identifier " + id,
+                        SaxonErrorCode.SXPK0005);
+            }
             String visAtt = child.getAttributeValue(NamespaceUri.NULL, "vis");
-            Visibility vis = visAtt == null ? Visibility.PRIVATE : Visibility.valueOf(visAtt.toUpperCase());
+            Visibility vis;
+            try {
+                vis = visAtt == null ? Visibility.PRIVATE : Visibility.valueOf(visAtt.toUpperCase(Locale.ROOT));
+            } catch (IllegalArgumentException e) {
+                throw new XPathException("Invalid visibility '" + visAtt + "' for component " + id,
+                        SaxonErrorCode.SXPK0005);
+            }
             VisibilityProvenance provenance = visAtt == null ? VisibilityProvenance.DEFAULTED : VisibilityProvenance.EXPLICIT;
             String binds = child.getAttributeValue(NamespaceUri.NULL, "binds");
             String dPackKey = child.getAttributeValue(NamespaceUri.NULL, "dpack");
@@ -477,43 +574,58 @@ public class PackageLoaderHE implements IPackageLoader {
             } else if (allPackages.containsKey(dPackKey)) {
                 declaringPackage = allPackages.get(dPackKey);
             } else {
+                if (getInheritedAttribute(child, "sefVersion") != null) {
+                    throw new XPathException("Unresolved declaring package " + dPackKey + " for component " + id,
+                            SaxonErrorCode.SXPK0005);
+                }
                 declaringPackage = config.makeStylesheetPackage();
                 declaringPackage.setPackageName(dPackKey);
                 declaringPackage.setTargetEdition(config.getEditionCode());
                 declaringPackage.setJustInTimeCompilation(false);
             }
-            Component component;
             int base = getIntegerAttribute(child, "base");
-            if (base != Integer.MIN_VALUE) {
-                // Note, this cannot be a forwards reference
-                Component baseComponent = componentIdMap.get(base);
+            Component baseComponent = componentIdMap.get(base);
+            if (base != Integer.MIN_VALUE && baseComponent == null) {
+                throw new XPathException("Unresolved base component " + base + " for component " + id,
+                        SaxonErrorCode.SXPK0005);
+            }
+            NodeInfo grandchild = (NodeInfo) child.iterateChildAxis(NodeKindType.ELEMENT).next();
+            Actor actor;
+            if (grandchild == null) {
                 if (baseComponent == null) {
-                    throw new AssertionError(base + "");
+                    throw new XPathException("Missing implementation for component " + id, SaxonErrorCode.SXPK0005);
                 }
-                component = Component.makeComponent(baseComponent.getActor(), vis, provenance, pack, declaringPackage);
-                component.setBaseComponent(baseComponent);
-                if (component instanceof Component.M) {
-                    // Create the mode even if there are no mode children: test case override-v-015
-                    pack.getRuleManager().obtainMode(baseComponent.getActor().getComponentName(), true);
-                }
+                actor = baseComponent.getActor();
             } else {
-                NodeInfo grandchild = (NodeInfo) child.iterateChildAxis(NodeKindType.ELEMENT).next();
-                Actor cc;
                 String kind = grandchild.getLocalPart();
-                cc = switch (kind) {
+                actor = switch (kind) {
                     case "template" -> readNamedTemplate(grandchild);
                     case "globalVariable" -> readGlobalVariable(grandchild);
                     case "globalParam" -> readGlobalParam(grandchild);
                     case "function" -> readGlobalFunction(grandchild);
                     case "mode" -> readMode(grandchild);
                     case "attributeSet" -> readAttributeSet(grandchild);
-                    default -> throw new XPathException("unknown component kind " + kind);
+                    default -> throw new XPathException("Unknown component kind " + kind, SaxonErrorCode.SXPK0005);
                 };
-                component = Component.makeComponent(cc, vis, provenance, pack, declaringPackage);
-                cc.setDeclaringComponent(component);
-                cc.setDeclaredVisibility(vis);
+                if (baseComponent != null && baseComponent.getActor() instanceof Mode baseMode &&
+                        actor instanceof SimpleMode overrides) {
+                    if (!baseMode.getModeName().equals(overrides.getModeName())) {
+                        throw new XPathException("Component " + id + " overrides a different mode", SaxonErrorCode.SXPK0005);
+                    }
+                    actor = new CompoundMode(baseMode, overrides);
+                }
+            }
+            Component component = Component.makeComponent(actor, vis, provenance, pack, declaringPackage);
+            component.setBaseComponent(baseComponent);
+            if (grandchild != null) {
+                actor.setDeclaringComponent(component);
+                actor.setDeclaredVisibility(vis);
+            }
+            if (!overridden && vis != Visibility.HIDDEN && actor instanceof Mode mode && !mode.isUnnamedMode()) {
+                pack.getRuleManager().registerMode(mode);
             }
             externalReferences.put(component, binds);
+            recordComponentInvocations(child, component, firstFixup);
             componentIdMap.put(id, component);
             if (overridden) {
                 pack.addOverriddenComponent(component);
@@ -929,6 +1041,7 @@ public class PackageLoaderHE implements IPackageLoader {
         SequenceIterator iterator = packageElement.iterateChildAxis(
                 NamedXNodeType.make(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "accumulator", config));
         while ((accElement = (NodeInfo) iterator.next()) != null) {
+            int firstFixup = fixups.peek().size();
             StructuredQName accName = getQNameAttribute(accElement, "name");
             Accumulator acc = new Accumulator();
             Component component = Component.makeComponent(acc, Visibility.PRIVATE, VisibilityProvenance.DEFAULTED, pack, pack);
@@ -950,6 +1063,7 @@ public class PackageLoaderHE implements IPackageLoader {
             NodeInfo post = getChild(accElement, 2);
             readAccumulatorRules(acc, post);
             pack.getAccumulatorRegistry().addAccumulator(acc);
+            recordComponentInvocations(accElement, component, firstFixup);
         }
 
     }
@@ -1811,12 +1925,7 @@ public class PackageLoaderHE implements IPackageLoader {
             StylesheetPackage pack = loader.packStack.peek();
             Expression select = loader.getFirstChildExpression(element);
             StructuredQName modeAtt = loader.getQNameAttribute(element, "mode");
-            SimpleMode mode;
-            if (modeAtt != null) {
-                mode = (SimpleMode) pack.getRuleManager().obtainMode(modeAtt, true);
-            } else {
-                mode = (SimpleMode) pack.getRuleManager().obtainMode(null, true);
-            }
+            Mode mode = pack.getRuleManager().obtainMode(modeAtt, true);
             String flags = element.getAttributeValue(NamespaceUri.NULL, "flags");
             if (flags == null) {
                 flags = "";
@@ -3953,7 +4062,7 @@ public class PackageLoaderHE implements IPackageLoader {
         } else if (call instanceof UseAttributeSet) {
             ((UseAttributeSet) call).setTarget((AttributeSet) c.getActor());
         } else if (call instanceof ApplyTemplates) {
-            ((ApplyTemplates) call).setMode((SimpleMode) c.getActor());
+            ((ApplyTemplates) call).setMode((Mode) c.getActor());
         } else {
             throw new XPathException("Unknown component reference " + call.getClass());
         }
