@@ -17,11 +17,11 @@ The W3C job retains the existing source XSLT and QT3 comparisons. It runs the sa
 
 The comparison considers cases that passed from source. Successful round trips satisfy the same W3C result or error assertions after reload. The focused HE tests additionally compare exact serialized results, including `[ADA]`, and error codes for selected cases. Source failures, unavailable catalog features, and cases that pass without producing an executable, such as static error tests, are counted as exclusions.
 
-Of 14,601 catalog cases, all 5,966 eligible cases passed after export and reload. The source run did not pass 6,449 cases, and 2,186 source-passing cases produced no executable.
+Of 14,601 catalog cases, all 5,984 eligible cases passed after export and reload. The source run did not pass 6,414 cases, and 2,203 source-passing cases produced no executable.
 
 The `transform-004` case covers a user function returned by static `fn:transform()`. The SEF embeds the separately compiled stylesheet and identifies the function by its component ID in that package. The focused API regression also calls the function after reload and re-export with the source modules removed. It verifies that the function retains its supplied stylesheet parameters and global context item.
 
-`XT30-SEF.tsv` records any expected divergences. CI requires every eligible case to match its expected status and reports additions, status changes, and newly passing cases for review.
+`XT30-SEF.tsv` records any expected divergences and currently has no entries. CI requires every eligible case to match its expected status and reports additions, status changes, and newly passing cases for review.
 
 ## Compatibility
 
