@@ -108,6 +108,7 @@ jobs:
           mkdir -p "$(dirname "$log")"
           ./gradlew --console=plain --configure-on-demand \
             :java:he:test_suite_qt3_XP31 :java:he:test_suite_qt3_XQ31 :java:he:test_suite_xslt30_XT30 \
+            :java:he:test_suite_xslt30_XT30_sef \
             > "$log" 2>&1 || { tail -n 100 "$log" >&2; exit 1; }
       - name: Compare the case results
         run: |
@@ -118,6 +119,12 @@ jobs:
             java java/he/ci/w3c/Conformance.java check "$mode" "submodules/$suite/catalog.xml" \
               java/he/build/test-results/"$suite"/*/"hej_${suite}_${mode}.xml" "java/he/ci/w3c/$mode.tsv" || status=1
           done
+          java java/he/ci/w3c/Conformance.java sef-check \
+            java/he/build/test-results/xslt30/*/hej_xslt30_XT30.xml \
+            java/he/build/test-results/xslt30/*/sef-source.tsv \
+            java/he/build/test-results-sef/xslt30/*/hej_xslt30_XT30_sef.xml \
+            java/he/build/test-results-sef/xslt30/*/sef-roundtrip.tsv \
+            java/he/ci/w3c/XT30-SEF.tsv || status=1
           exit "$status"
       - name: Upload case-level reports
         if: ${{ !cancelled() }}
@@ -128,4 +135,7 @@ jobs:
             java/he/build/test-results/w3c-gradle.log
             java/he/build/test-results/qt3/*/hej_qt3_*.xml
             java/he/build/test-results/xslt30/*/hej_xslt30_*.xml
+            java/he/build/test-results/xslt30/*/sef-source.tsv
+            java/he/build/test-results-sef/xslt30/*/hej_xslt30_XT30_sef.xml
+            java/he/build/test-results-sef/xslt30/*/sef-roundtrip.tsv
           if-no-files-found: error

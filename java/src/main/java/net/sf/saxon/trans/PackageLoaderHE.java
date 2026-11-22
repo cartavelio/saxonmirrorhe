@@ -792,7 +792,6 @@ public class PackageLoaderHE implements IPackageLoader {
         } else if (flags.contains("d")) {
             function.setDeterminism(UserFunction.Determinism.DETERMINISTIC);
         }
-        // Ignore the "m" flag - handled in subclass for Saxon-PE
 
         boolean streaming = false;
         if (flags.contains("U")) {
@@ -867,7 +866,7 @@ public class PackageLoaderHE implements IPackageLoader {
     }
 
     protected UserFunction makeFunction(String flags) {
-        return new UserFunction();
+        return config.newUserFunction(flags.contains("m"), FunctionStreamability.UNCLASSIFIED);
     }
 
     private Expression readInlineFunctionItem(NodeInfo element) throws XPathException {
@@ -1571,7 +1570,10 @@ public class PackageLoaderHE implements IPackageLoader {
     private IndependentContext makeStaticContext(NodeInfo element) {
         StylesheetPackage pack = packStack.peek();
         IndependentContext env = new IndependentContext(config);
-        final NamespaceResolver resolver = element.getAllNamespaces();
+        NamespaceMap resolver = element.getAllNamespaces();
+        if (resolver.getURIForPrefix("xs", false) == null) {
+            resolver = resolver.put("xs", NamespaceUri.SCHEMA);
+        }
         env.setNamespaceResolver(resolver);
         env.setXPathLanguageLevel(pack.getHostLanguageVersion());
         env.setImportedSchema(pack.getImportedSchema(""));
@@ -2221,16 +2223,19 @@ public class PackageLoaderHE implements IPackageLoader {
         eMap.put("coercedFn", (loader, element) -> {
             ItemType type = loader.parseItemTypeAttribute(element, "type");
             Expression target = loader.getFirstChildExpression(element);
+            String flags = element.getAttributeValue(NamespaceUri.NULL, "flags");
+            boolean allow40 = flags == null ? target instanceof Literal : flags.contains("4");
+            boolean acceptReducedArity = flags != null && flags.contains("r");
             FunctionItem targetFn;
             CoercedFunction coercedFn;
             if (target instanceof UserFunctionReference) {
-                coercedFn = new CoercedFunction((SpecificFunctionType) type);
+                coercedFn = new CoercedFunction((SpecificFunctionType) type, allow40, acceptReducedArity);
                 final CoercedFunction coercedFn2 = coercedFn;
                 final SymbolicName name = ((UserFunctionReference) target).getSymbolicName();
                 loader.addCompletionAction(() -> coercedFn2.setTargetFunction(loader.getUserFunction((SymbolicName.F) name)));
             } else if (target instanceof Literal) {
                 targetFn = (FunctionItem) ((Literal) target).getGroundedValue();
-                coercedFn = new CoercedFunction(targetFn, (SpecificFunctionType) type, true, false);
+                coercedFn = new CoercedFunction(targetFn, (SpecificFunctionType) type, allow40, acceptReducedArity);
             } else {
                 throw new AssertionError();
             }
@@ -2711,7 +2716,11 @@ public class PackageLoaderHE implements IPackageLoader {
                     props.setProperty(att.getLocalPart(), att.getStringValue());
                 }
                 fn.importAttributes(props);
-                loader.addCompletionAction(() -> fn.fixArguments(((SystemFunctionCall) e).getArguments()));
+                // These optimizations can raise dynamic errors while inspecting constant arguments.
+                // Both functions resolve and validate the arguments when the call is evaluated.
+                if (!(fn instanceof KeyFn || fn instanceof FormatNumber)) {
+                    loader.addCompletionAction(() -> fn.fixArguments(((SystemFunctionCall) e).getArguments()));
+                }
             }
             loader.contextStack.pop();
             return e;
@@ -2933,27 +2942,17 @@ public class PackageLoaderHE implements IPackageLoader {
                 throw new XPathException("Function " + name.getEQName() + " has been disabled", "XPST0017");
             }
             Expression exp = null;
-            if (name.hasURI(NamespaceUri.MATH)) {
-                exp = MathFunctionSet.getInstance(40).makeFunction(name.getLocalPart(), args.length).makeFunctionCall(args);
-            } else if (name.hasURI(NamespaceUri.MAP_FUNCTIONS)) {
-                exp = MapFunctionSet.getInstance(40).makeFunction(name.getLocalPart(), args.length).makeFunctionCall(args);
-            } else if (name.hasURI(NamespaceUri.ARRAY_FUNCTIONS)) {
-                exp = ArrayFunctionSet.getInstance(40).makeFunction(name.getLocalPart(), args.length).makeFunctionCall(args);
-            } else if (name.hasURI(NamespaceUri.SAXON)) {
-                if (name.getLocalPart().equals("apply")) {
-                    // legacy saxon:apply function for dynamic function calls: generate fn:apply
-                    exp = XPath30FunctionSet.getInstance().makeFunction("apply", 2).makeFunctionCall(args);
-                    exp.setRetainedStaticContext(loader.makeRetainedStaticContext(element));
-                } else {
-                    loader.needsPELicense("Saxon extension functions");
-                }
+            if (name.hasURI(NamespaceUri.SAXON) && name.getLocalPart().equals("apply")) {
+                // Legacy saxon:apply function for dynamic function calls.
+                exp = XPath30FunctionSet.getInstance().makeFunction("apply", 2).makeFunctionCall(args);
+                exp.setRetainedStaticContext(loader.makeRetainedStaticContext(element));
             }
             if (exp == null) {
                 SymbolicName.F sName = new SymbolicName.F(name, args.length);
                 SequenceType type = loader.parseAlphaCode(element, "type");
                 IndependentContext ic = new IndependentContext(loader.config);
                 RetainedStaticContext rsc = loader.makeRetainedStaticContext(element);
-                int vn = loader.getTopLevelPackage().getHostLanguageVersion();
+                int vn = rsc.getPackageData().getHostLanguageVersion() >= 40 ? 40 : 31;
                 ic.setBaseURI(rsc.getStaticBaseUriString());
                 ic.setPackageData(rsc.getPackageData());
                 ic.setXPathLanguageLevel(vn);
@@ -2963,9 +2962,9 @@ public class PackageLoaderHE implements IPackageLoader {
                 ic.setDefaultCollationName(rsc.getDefaultCollationName());
                 ic.setDecimalFormatManager(rsc.getDecimalFormatManager());
                 List<String> reasons = new ArrayList<>();
-                exp = loader.config.getIntegratedFunctionLibrary().bind(sName, args, null, ic, reasons);
+                exp = loader.config.getBuiltInExtensionLibraryList(vn).bind(sName, args, null, ic, reasons);
                 if (exp == null) {
-                    exp = loader.config.getBuiltInExtensionLibraryList(vn).bind(sName, args, null, ic, reasons);
+                    exp = loader.config.getIntegratedFunctionLibrary().bind(sName, args, null, ic, reasons);
                 }
                 if (exp instanceof SystemFunctionCall) {
                     SystemFunction fn = ((SystemFunctionCall) exp).getTargetFunction();
@@ -3653,7 +3652,8 @@ public class PackageLoaderHE implements IPackageLoader {
             final SourceDocument inst = new SourceDocument(href, body, options);
 
             if (flags != null && flags.contains("s")) {
-                loader.addCompletionAction(() -> inst.setSpaceStrippingRule(loader.getTopLevelPackage().getSpaceStrippingRule()));
+                StylesheetPackage pack = loader.packStack.peek();
+                loader.addCompletionAction(() -> inst.setSpaceStrippingRule(pack.getSpaceStrippingRule()));
             }
             String accumulatorNames = element.getAttributeValue(NamespaceUri.NULL, "accum");
             processAccumulatorList(loader, inst, accumulatorNames);

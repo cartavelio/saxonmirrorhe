@@ -11,10 +11,15 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -82,6 +87,64 @@ class TestSefExport {
 
         assertEquals("Unsupported stylesheet export target in Saxon-HE: JS", error.getMessage());
         assertEquals(0, buffer.size());
+    }
+
+    @Test
+    void reportWriteAndCloseFailures() throws Exception {
+        XsltExecutable source = compile(new Processor(false), """
+                <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"/>
+                """);
+        var destination = new FailingOutputStream();
+        SaxonApiException writeFailure = assertThrows(SaxonApiException.class, () -> source.export(destination));
+        assertTrue(writeFailure.getMessage().contains("destination stopped accepting bytes"), writeFailure::getMessage);
+        assertEquals(32, destination.bytes.size());
+        assertTrue(destination.closed);
+
+        var cannotClose = new ByteArrayOutputStream() {
+            @Override
+            public void close() throws IOException {
+                throw new IOException("destination could not close");
+            }
+        };
+        SaxonApiException closeFailure = assertThrows(SaxonApiException.class, () -> source.export(cannotClose));
+        assertEquals("destination could not close", closeFailure.getMessage());
+    }
+
+    @Test
+    void concurrentExportsUseIndependentState() throws Exception {
+        XsltExecutable source = compile(new Processor(false), """
+                <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                                xmlns:f="urn:concurrent">
+                  <xsl:param name="value" required="yes"/>
+                  <xsl:variable name="label" select="f:label($value)"/>
+                  <xsl:function name="f:label">
+                    <xsl:param name="value"/>
+                    <xsl:sequence select="upper-case($value)"/>
+                  </xsl:function>
+                  <xsl:template name="main">
+                    <xsl:sequence select="function($suffix) { concat($label, $suffix) }('!')"/>
+                  </xsl:template>
+                </xsl:stylesheet>
+                """);
+        var tasks = new ArrayList<Callable<String>>();
+        for (int i = 0; i < 16; i++) {
+            int number = i;
+            tasks.add(() -> {
+                Processor target = new Processor(false);
+                var transformation = roundTrip(target, source).load30();
+                transformation.setStylesheetParameters(Map.of(new QName("value"), new XdmAtomicValue("label" + number)));
+                return transformation.callTemplate(new QName("main")).itemAt(0).getStringValue();
+            });
+        }
+        var executor = Executors.newFixedThreadPool(4);
+        try {
+            var completed = executor.invokeAll(tasks);
+            for (int i = 0; i < completed.size(); i++) {
+                assertEquals("LABEL" + i + "!", completed.get(i).get());
+            }
+        } finally {
+            executor.shutdownNow();
+        }
     }
 
     @Test
@@ -295,6 +358,24 @@ class TestSefExport {
 
     private static final class TrackingOutputStream extends ByteArrayOutputStream {
         private boolean closed;
+
+        @Override
+        public void close() {
+            closed = true;
+        }
+    }
+
+    private static final class FailingOutputStream extends OutputStream {
+        private final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        private boolean closed;
+
+        @Override
+        public void write(int value) throws IOException {
+            if (bytes.size() == 32) {
+                throw new IOException("destination stopped accepting bytes");
+            }
+            bytes.write(value);
+        }
 
         @Override
         public void close() {

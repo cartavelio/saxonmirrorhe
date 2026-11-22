@@ -1,4 +1,5 @@
 import com.saxonica.build.java.PomGenerator
+import com.saxonica.build.java.testsuite.JavaRunner
 
 plugins {
   id("saxon-build")
@@ -352,6 +353,10 @@ testSuites.configure("qt3", "XP31")
 testSuites.configure("qt3", "XQ31")
 
 testSuites.configure("xslt30", "XT30")
+testSuites.configure("xslt30", "XT30", mapOf("sef-roundtrip" to ""), taskName = "xslt30_XT30_sef")
+tasks.named<JavaRunner>("test_suite_xslt30_XT30_sef") {
+  reportingRootDir = layout.buildDirectory.dir("test-results-sef")
+}
 
 testSuites.configure("xslt30extra", "XT30")
 

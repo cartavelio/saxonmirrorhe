@@ -218,6 +218,9 @@ class TestSefPackages {
                 () -> reload(corrupted.getBytes(StandardCharsets.UTF_8)));
         assertEquals("SXPK0002", error.getErrorCode().getLocalName());
         assertTrue(error.getMessage().contains("incorrect checksum"));
+        String withoutDigest = original.replaceAll("<\\?Σ2 [^?]*\\?>", "");
+        assertNotEquals(original, withoutDigest);
+        assertLoadError(withoutDigest.getBytes(StandardCharsets.UTF_8), "SXPK0002", "incorrect checksum");
     }
 
     @Test
@@ -232,6 +235,25 @@ class TestSefPackages {
                 "Unresolved reference to component 42");
         assertLoadError(bindingFixture("1", "30", "1", "4"), "SXPK0005",
                 "Invalid binding slot 4");
+    }
+
+    @Test
+    void failedSavePreservesExistingPackage() throws Exception {
+        var compiler = new Processor(false).newXsltCompiler();
+        var original = compiler.compilePackage(source("""
+                <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+                  <xsl:template name="main"><xsl:sequence select="'original'"/></xsl:template>
+                </xsl:stylesheet>
+                """));
+        Path file = directory.resolve("compiled.sef");
+        original.save(file.toFile());
+
+        SaxonApiException error = assertThrows(SaxonApiException.class, () -> original.save(file.toFile(), "JS"));
+        assertTrue(error.getMessage().contains("Unsupported stylesheet export target"));
+        assertEquals("original", callMain(new Processor(false).newXsltCompiler().loadExecutablePackage(file.toUri())));
+        try (var paths = Files.list(directory)) {
+            assertEquals(1, paths.count());
+        }
     }
 
     private static void assertLoadError(byte[] sef, String code, String message) {
