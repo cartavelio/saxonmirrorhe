@@ -4,7 +4,14 @@
 
 Saxon Home Edition (Saxon-HE) is the open-source XSLT, XQuery, and XPath processor developed by Saxonica and its contributors. Cartavelio maintains this fork of [Saxonica’s upstream Saxon-HE source repository](https://saxonica.plan.io/projects/saxonmirrorhe/repository).
 
-Development happens on `main`, based on Saxon 13. The fork restores the Java Sapling builder overloads and fixes an XSLT issue where an inline function returned to Java could lose access to the stylesheet’s global parameters. [Sapling fix](https://github.com/cartavelio/saxonmirrorhe/pull/2) · [XSLT fix](https://github.com/cartavelio/saxonmirrorhe/pull/3)
+Development happens on `main`, based on Saxon 13.
+
+## Differences from upstream
+
+- **Building XML in Java.** The HE build restores the `Saplings.elem` overloads that accept a Java lambda and the `toXdmNode(Processor)` method. Java applications can use these methods to build an XML element and pass it directly to an XPath query or XSLT transformation. [PR #2](https://github.com/cartavelio/saxonmirrorhe/pull/2)
+- **Calling XSLT functions from Java.** When a stylesheet returns an inline function to Java, the function keeps access to the global parameters of the transformation that created it. Two runs of the same stylesheet can return functions that each see their own parameter values when called later. [PR #3](https://github.com/cartavelio/saxonmirrorhe/pull/3)
+- **Comparing values that contain functions.** XPath 3.1 requires `deep-equal()` to raise `FOTY0015` when it compares ordinary function items, even two references to the same function. The fork reports that error consistently, including when the comparison reaches a function nested in a map or array. [PR #8](https://github.com/cartavelio/saxonmirrorhe/pull/8)
+- **Running compiled stylesheets in HE.** SaxonJ-HE can load an existing stylesheet export file (SEF) that contains standard XPath function references such as `abs#1` or `map:size#1`. Those references previously triggered a Professional Edition license check when the stylesheet was loaded. [PR #10](https://github.com/cartavelio/saxonmirrorhe/pull/10)
 
 ## Build and test SaxonJ-HE
 
