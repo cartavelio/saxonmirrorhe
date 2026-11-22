@@ -99,6 +99,10 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
      */
 
     public void setMode(SimpleMode target) {
+        setMode((Mode) target);
+    }
+
+    public void setMode(Mode target) {
         this.mode = target;
     }
 

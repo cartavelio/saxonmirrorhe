@@ -46,6 +46,8 @@ import static net.sf.saxon.trans.Visibility.PRIVATE;
  */
 public class StylesheetPackage extends PackageData {
 
+    public static final String HE_SEF_VERSION = "1";
+
     private final static boolean TRACING = false;
 
     private PackageVersion packageVersion = null;
@@ -1108,22 +1110,27 @@ public class StylesheetPackage extends PackageData {
      */
 
     public void export(ExpressionPresenter presenter) throws XPathException {
-        if (!usedPackages.isEmpty()) {
-            throw new XPathException("Saxon-HE cannot yet export a stylesheet with used packages");
-        }
-        if (isRelocatable()) {
-            throw new XPathException("Saxon-HE cannot yet export a relocatable stylesheet");
-        }
+        exportPackage(presenter);
+        presenter.close();
+    }
+
+    private void exportPackage(ExpressionPresenter presenter) throws XPathException {
         if (isSchemaAware()) {
             throw new XPathException("Saxon-HE cannot export a schema-aware stylesheet");
         }
         ExpressionPresenter.ExportOptions options = presenter.getOptions();
+        options.relocatable = isRelocatable();
         presenter.startElement("package");
         presenter.emitAttribute("saxonVersion", Version.getProductVersion());
+        presenter.emitAttribute("sefVersion", HE_SEF_VERSION);
         presenter.emitAttribute("version", Integer.toString(getHostLanguageVersion()));
         presenter.emitAttribute("name", getPackageName());
+        presenter.emitAttribute("id", Integer.toString(options.packageMap.get(this)));
         presenter.emitAttribute("packageVersion", getPackageVersion().toString());
         presenter.emitAttribute("implicit", Boolean.toString(isImplicitPackage()));
+        if (isRelocatable()) {
+            presenter.emitAttribute("relocatable", "true");
+        }
         if (defaultMode != null && !Mode.UNNAMED_MODE_NAME.equals(defaultMode)) {
             presenter.emitAttribute("defaultMode", defaultMode);
         }
@@ -1133,13 +1140,23 @@ public class StylesheetPackage extends PackageData {
         if (stripsTypeAnnotations) {
             presenter.emitAttribute("stripType", "1");
         }
+        for (StylesheetPackage used : usedPackages) {
+            Integer id = options.packageMap.get(used);
+            if (id == null) {
+                options.packageMap.put(used, options.packageMap.size());
+                used.exportPackage(presenter);
+                options.relocatable = isRelocatable();
+            } else {
+                presenter.startElement("packageRef");
+                presenter.emitAttribute("id", Integer.toString(id));
+                presenter.endElement();
+            }
+        }
         if (globalContextRequirement != null) {
             globalContextRequirement.export(presenter);
         }
         getKeyManager().exportKeys(presenter, options.componentMap);
-        for (Component component : componentIndex.values()) {
-            component.export(presenter, options.componentMap, options.packageMap);
-        }
+        exportComponents(presenter);
         for (var accumulator : getAccumulatorRegistry().getAllAccumulators()) {
             accumulator.export(presenter, options.componentMap);
         }
@@ -1163,7 +1180,28 @@ public class StylesheetPackage extends PackageData {
             decimalFormats.getNamedDecimalFormat(name).export(name, presenter);
         }
         presenter.endElement();
-        presenter.close();
+    }
+
+    private void exportComponents(ExpressionPresenter presenter) throws XPathException {
+        ExpressionPresenter.ExportOptions options = presenter.getOptions();
+        Set<Component> components = new LinkedHashSet<>(componentIndex.values());
+        components.addAll(hiddenComponents);
+        for (Component component : components) {
+            component.export(presenter, options.componentMap, options.packageMap);
+        }
+        if (!overriddenComponents.isEmpty()) {
+            presenter.startElement("overridden");
+            for (Component component : overriddenComponents.values()) {
+                if (components.contains(component)) {
+                    presenter.startElement("coRef");
+                    presenter.emitAttribute("id", Integer.toString(options.componentMap.get(component)));
+                    presenter.endElement();
+                } else {
+                    component.export(presenter, options.componentMap, options.packageMap);
+                }
+            }
+            presenter.endElement();
+        }
     }
 
     private static void exportOutputProperties(ExpressionPresenter presenter, StructuredQName name, Properties properties) {
