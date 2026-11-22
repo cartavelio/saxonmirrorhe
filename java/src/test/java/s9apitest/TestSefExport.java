@@ -206,6 +206,29 @@ class TestSefExport {
     }
 
     @Test
+    void preserveDuplicateKeyErrorFromMapInstructions() throws Exception {
+        Processor sourceProcessor = new Processor(false);
+        XsltExecutable source = compile(sourceProcessor, """
+                <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+                  <xsl:template match="/">
+                    <xsl:map>
+                      <xsl:for-each select="root/entry">
+                        <xsl:map-entry key="string(@key)" select="string(.)"/>
+                      </xsl:for-each>
+                    </xsl:map>
+                  </xsl:template>
+                </xsl:stylesheet>
+                """);
+        String input = "<root><entry key='x'>one</entry><entry key='x'>two</entry></root>";
+        Processor target = new Processor(false);
+        XsltExecutable reloaded = roundTrip(target, source);
+        assertEquals("XTDE3365", assertThrows(SaxonApiException.class,
+                () -> transform(sourceProcessor, source, input)).getErrorCode().getLocalName());
+        assertEquals("XTDE3365", assertThrows(SaxonApiException.class,
+                () -> transform(target, reloaded, input)).getErrorCode().getLocalName());
+    }
+
+    @Test
     void preserveWhitespaceRulesAndKeys() throws Exception {
         Processor processor = new Processor(false);
         XsltExecutable source = compile(processor, """

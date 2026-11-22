@@ -86,6 +86,25 @@ class TestSefFunctionReferences {
     }
 
     @Test
+    void preserveQNameConstructorContext() throws Exception {
+        Processor sourceProcessor = new Processor(false);
+        XsltExecutable source = compile(sourceProcessor, """
+                <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                                xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:p="urn:constructor">
+                  <xsl:template name="main"><xsl:sequence select="xs:QName#1"/></xsl:template>
+                </xsl:stylesheet>
+                """);
+        Processor target = new Processor(false);
+        XsltExecutable reloaded = target.newXsltCompiler().loadExecutablePackage(export(source));
+        XdmAtomicValue input = new XdmAtomicValue("p:local");
+        XdmFunctionItem originalFunction = (XdmFunctionItem) source.load30().callTemplate(new QName("main"));
+        XdmFunctionItem reloadedFunction = (XdmFunctionItem) reloaded.load30().callTemplate(new QName("main"));
+        QName expected = new QName("urn:constructor", "local");
+        assertEquals(expected, ((XdmAtomicValue) originalFunction.call(sourceProcessor, input).itemAt(0)).getQNameValue());
+        assertEquals(expected, ((XdmAtomicValue) reloadedFunction.call(target, input).itemAt(0)).getQNameValue());
+    }
+
+    @Test
     void reloadHeExtensionFunctionReferences() throws Exception {
         Processor processor = new Processor(false);
         XsltExecutable executable = processor.newXsltCompiler().loadExecutablePackage(exportFixture());

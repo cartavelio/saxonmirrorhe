@@ -942,7 +942,17 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             if (call.getArity() == 1) {
                 HashTrieMap options = new HashTrieMap();
                 options.initialPut(StringValue.bmp("duplicates"), new StringValue(duplicates));
-                options.initialPut(StringValue.bmp("duplicates-error-code"), new StringValue(duplicatesErrorCode));
+                options.initialPut(new QNameValue("", NamespaceUri.SAXON, "duplicates-error-code"),
+                        new StringValue(duplicatesErrorCode));
+                if (onDuplicates != null) {
+                    options.initialPut(new QNameValue("", NamespaceUri.SAXON, "on-duplicates"), onDuplicates);
+                }
+                if (allStringKeys) {
+                    options.initialPut(new QNameValue("", NamespaceUri.SAXON, "key-type"), StringValue.bmp("string"));
+                }
+                if (treatAsFinal) {
+                    options.initialPut(new QNameValue("", NamespaceUri.SAXON, "final"), BooleanValue.TRUE);
+                }
                 Literal.exportValue(options, out);
             }
         }

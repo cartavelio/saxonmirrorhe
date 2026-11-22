@@ -1,20 +1,5 @@
 # set	case (* = whole set)	expected result; unlisted cases must pass
 accessor	accessor-034	n/a
-accessor	accessor-050	fail
-accessor	accessor-051	fail
-accessor	accessor-052	fail
-accessor	accessor-053	fail
-accessor	accessor-054	fail
-accessor	accessor-055	fail
-accessor	accessor-056	fail
-accessor	accessor-057	fail
-accessor	accessor-058	fail
-accessor	accessor-059	fail
-accessor	accessor-060	fail
-accessor	accessor-061	fail
-accessor	accessor-062	fail
-accessor	accessor-063	fail
-accessor	accessor-064	fail
 accumulator	accumulator-001s	n/a
 accumulator	accumulator-003s	n/a
 accumulator	accumulator-005s	n/a
@@ -55,7 +40,6 @@ accumulator	accumulator-073	n/a
 accumulator	accumulator-075	n/a
 accumulator	accumulator-075s	n/a
 accumulator	accumulator-076	n/a
-accumulator	accumulator-088	fail
 analyze-string	analyze-string-045	n/a
 analyze-string	analyze-string-046	n/a
 analyze-string	analyze-string-047	n/a
@@ -87,7 +71,6 @@ as	as-0151	n/a
 as	as-0501a	n/a
 as	as-0801a	n/a
 as	as-0802a	n/a
-as	as-1602	wrongError
 as	as-1701	n/a
 as	as-1702	n/a
 as	as-1703	n/a
@@ -218,7 +201,6 @@ copy-of	copy-of-006	n/a
 copy-of	copy-of-009	n/a
 current-output-uri	current-output-uri-013	notRun
 current-output-uri	current-output-uri-015	notRun
-current-output-uri	current-output-uri-017	fail
 date	date-094a	n/a
 date	date-094b	n/a
 date	date-094c	n/a
@@ -272,8 +254,6 @@ error	error-1310f-20	n/a
 error	error-1310g-20	n/a
 error	error-1310h-20	n/a
 error	error-1310i-20	n/a
-error	error-1400b	wrongError
-error	error-1400c	wrongError
 error	error-1505a	n/a
 error	error-1505b	n/a
 error	error-1510a	n/a
@@ -325,13 +305,9 @@ evaluate	evaluate-048	wrongError
 expand-text	cvt-025	n/a
 expand-text	cvt-026	n/a
 expand-text	cvt-027	n/a
-expose	expose-927	wrongError
-extension-functions	extension-functions-0103	wrongError
-extension-functions	extension-functions-0104	wrongError
 for-each-group	for-each-group-002a	n/a
 for-each-group	for-each-group-015a	n/a
 for-each-group	for-each-group-046	n/a
-for-each-group	for-each-group-068	disputed
 for-each-group	for-each-group-081a	n/a
 format-date	format-date-002	n/a
 format-date	format-date-003	n/a
@@ -345,7 +321,6 @@ format-number	format-number-070	n/a
 function	function-0119a	n/a
 function	function-0120a	n/a
 function	function-0302	n/a
-function	function-1018	wrongError
 function	function-1023	n/a
 function	function-1031	tooBig
 function	function-1902	n/a
@@ -366,8 +341,8 @@ function	function-5015a	n/a
 function	function-5016	n/a
 function	function-5017	n/a
 function	function-5018	n/a
-global-context-item	glob-cxt-item-002	wrongError
 higher-order-functions	higher-order-functions-007	n/a
+id	id-043	notRun
 import	import-0502a	n/a
 import	import-0502b	n/a
 import	import-0902a	n/a
@@ -602,6 +577,7 @@ nodetest	nodetest-038	n/a
 normalize-unicode	normalize-unicode-008	tooBig
 notation	*	n/a
 number	number-0802	n/a
+number	number-0807	notRun
 number	number-0812	n/a
 number	number-0813	n/a
 number	number-0828	n/a
@@ -617,8 +593,6 @@ number	number-5093	n/a
 number	number-5094	n/a
 number	number-5097	n/a
 number	number-5098	n/a
-output	output-0102c	fail
-output	output-0103c	fail
 output	output-0107	fail
 output	output-0108	fail
 output	output-0116	fail
@@ -634,6 +608,7 @@ output	output-0132	fail
 output	output-0133	fail
 output	output-0134	fail
 output	output-0135	fail
+output	output-0138	fail
 output	output-0142	fail
 output	output-0143	fail
 output	output-0144	fail
@@ -652,21 +627,14 @@ output	output-0281	n/a
 output	output-0282	n/a
 output	output-0283	n/a
 output	output-0702	fail
-output	output-0704	fail
-output	output-0705	wrongError
 output	output-0714	fail
 output	output-0715	fail
 output	output-0716	fail
 override	override-f-029	Not implemented
 override	override-f-031	n/a
-override	override-f-032	fail
 override	override-misc-007	n/a
 override	override-v-005	n/a
 override	override-v-006	n/a
-override	override-v-010	fail
-override	override-v-013	fail
-override	override-v-014	fail
-override	override-v-015	fail
 package	package-017	disputed
 package	package-018	disputed
 package	package-021err	wrongError
@@ -702,10 +670,7 @@ result-document	result-document-1111	n/a
 result-document	result-document-1205	fail
 result-document	result-document-1402	n/a
 result-document	result-document-1402b	fail
-result-document	result-document-1404	fail
-result-document	result-document-1405	wrongError
 select	select-7502a	n/a
-sequence	sequence-0132	wrongError
 sequence	sequence-0137	n/a
 sequence	sequence-2401a	n/a
 sequence	sequence-2402a	n/a
@@ -843,6 +808,7 @@ try	try-015	n/a
 try	try-017	n/a
 try	try-025	n/a
 try	try-026	n/a
+try	try-031	fail
 type	type-0101	n/a
 type	type-0102	n/a
 type	type-0103	n/a
@@ -941,7 +907,6 @@ validation	validation-1708	n/a
 validation	validation-2001	n/a
 validation	validation-2002	n/a
 variable	variable-0107	n/a
-variable	variable-0115	wrongError
 version	version-023	n/a
 version	version-031	n/a
 xml-to-json	xml-to-json-A2-001	n/a

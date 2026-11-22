@@ -449,21 +449,24 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 compiler.setParameter(new QName(name), value);
             });
 
-            for (XdmNode pack : usedPackages) {
-                String fileName = pack.attribute("file");
-                Source styleSource = new StreamSource(testCase.getBaseURI().resolve(fileName).toString());
-                XsltPackage xpack = compiler.compilePackage(styleSource);
-                compiler.importPackage(xpack);
-            }
             String fileName = principalPackage.get().attribute("file");
             Source styleSource = new StreamSource(testCase.getBaseURI().resolve(fileName).toString());
 
             try {
+                for (XdmNode pack : usedPackages) {
+                    String dependencyFile = pack.attribute("file");
+                    Source dependency = new StreamSource(testCase.getBaseURI().resolve(dependencyFile).toString());
+                    compiler.importPackage(compiler.compilePackage(dependency));
+                }
                 XsltPackage xpack = compiler.compilePackage(styleSource);
                 sheet = xpack.link();
             } catch (SaxonApiException err) {
                 System.err.println(err.getMessage());
-                outcome.setException(err.getErrorCode());
+                QName code = err.getErrorCode();
+                if (code == null && collector.lastError != null) {
+                    code = collector.lastError.getErrorCode();
+                }
+                outcome.setException(code);
                 outcome.setErrorsReported(collector.getErrorCodes());
                 collector.checkLocationInfo(err);
             } catch (Exception err) {
@@ -473,8 +476,9 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 outcome.setErrorsReported(collector.getErrorCodes());
             }
 
-            sheet = exportImport(testName, testSetName, outcome, compiler, sheet, collector, styleSource);
-
+            if (sheet != null) {
+                sheet = exportImport(testName, testSetName, outcome, compiler, sheet, collector, styleSource);
+            }
         }
         if (runWithJS && !outcome.isException()) {
             /* TODO - add case where expecting a static error but compiled OK */

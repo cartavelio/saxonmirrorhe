@@ -11,6 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.AbstractFunction;
+import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
@@ -121,6 +122,10 @@ public class AtomicConstructorFunction extends AbstractFunction {
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("acFnRef");
         out.emitAttribute("name", targetType.getTypeName());
+        if (targetType.isNamespaceSensitive() && nsResolver != null) {
+            NamespaceMap namespaces = NamespaceMap.fromNamespaceResolver(nsResolver);
+            out.emitAttribute("ns", ExpressionPresenter.getNamespacesAsString(namespaces, false));
+        }
         out.endElement();
     }
 

@@ -1676,7 +1676,6 @@ public class PackageLoaderHE implements IPackageLoader {
         licensableConstructs.put("stream", "EE");
         licensableConstructs.put("switch", "EE");
 
-        licensableConstructs.put("acFnRef", "PE");
         licensableConstructs.put("assign", "PE");
         licensableConstructs.put("do", "PE");
         licensableConstructs.put("javaCall", "PE");
@@ -1684,6 +1683,17 @@ public class PackageLoaderHE implements IPackageLoader {
     }
 
     static {
+        eMap.put("acFnRef", (loader, element) -> {
+            SchemaType type = loader.getTypeAttribute(element, "name");
+            if (!(type instanceof AtomicType)) {
+                throw new XPathException("Unknown atomic constructor type in SEF", SaxonErrorCode.SXPK0002);
+            }
+            AtomicType atomic = (AtomicType) type;
+            NamespaceResolver resolver = atomic.isNamespaceSensitive()
+                    ? loader.makeRetainedStaticContext(element).getNamespaceMap()
+                    : null;
+            return new FunctionLiteral(new AtomicConstructorFunction(atomic, resolver));
+        });
 
         eMap.put("among", (loader, element) -> {
             Expression lhs = loader.getFirstChildExpression(element);
