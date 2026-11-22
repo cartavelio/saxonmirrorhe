@@ -9,6 +9,7 @@ package net.sf.saxon.style;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.PreparedStylesheet;
+import net.sf.saxon.Version;
 import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.ComponentBinding;
 import net.sf.saxon.expr.PackageData;
@@ -1100,14 +1101,60 @@ public class StylesheetPackage extends PackageData {
     }
 
     /**
-     * Output the abstract expression tree to the supplied destination.
+     * Write the compiled stylesheet in the SEF format understood by the package loader.
      *
      * @param presenter the expression presenter used to display the structure
-     * @throws XPathException if exporting fails or is not permitted (it requires Saxon-EE)
+     * @throws XPathException if the package cannot be exported
      */
 
     public void export(ExpressionPresenter presenter) throws XPathException {
-        throw new XPathException("Exporting a stylesheet requires Saxon-EE");
+        if (!usedPackages.isEmpty()) {
+            throw new XPathException("Saxon-HE cannot yet export a stylesheet with used packages");
+        }
+        if (isRelocatable()) {
+            throw new XPathException("Saxon-HE cannot yet export a relocatable stylesheet");
+        }
+        if (isSchemaAware()) {
+            throw new XPathException("Saxon-HE cannot export a schema-aware stylesheet");
+        }
+        DecimalFormatManager decimalFormats = getDecimalFormatManager();
+        if (stripsWhitespace || stripsTypeAnnotations || globalContextRequirement != null ||
+                !namedOutputProperties.isEmpty() || (characterMapIndex != null && !characterMapIndex.isEmpty()) ||
+                getKeyManager().getNumberOfKeyDefinitions() > 1 ||
+                getAccumulatorRegistry().getAllAccumulators().iterator().hasNext() ||
+                decimalFormats.getDecimalFormatNames().iterator().hasNext() ||
+                Arrays.stream(DecimalSymbols.Property.values()).anyMatch(
+                        property -> !decimalFormats.getDefaultDecimalFormat().hasDefaultValue(property))) {
+            throw new XPathException("Saxon-HE cannot yet export this stylesheet's package declarations");
+        }
+        ExpressionPresenter.ExportOptions options = presenter.getOptions();
+        presenter.startElement("package");
+        presenter.emitAttribute("saxonVersion", Version.getProductVersion());
+        presenter.emitAttribute("version", Integer.toString(getHostLanguageVersion()));
+        presenter.emitAttribute("name", getPackageName());
+        presenter.emitAttribute("packageVersion", getPackageVersion().toString());
+        presenter.emitAttribute("implicit", Boolean.toString(isImplicitPackage()));
+        if (defaultMode != null && !Mode.UNNAMED_MODE_NAME.equals(defaultMode)) {
+            presenter.emitAttribute("defaultMode", defaultMode);
+        }
+        if (declaredModes) {
+            presenter.emitAttribute("declaredModes", "1");
+        }
+        for (Component component : componentIndex.values()) {
+            component.export(presenter, options.componentMap, options.packageMap);
+        }
+        if (defaultOutputProperties != null) {
+            presenter.startElement("output");
+            for (String name : defaultOutputProperties.stringPropertyNames()) {
+                presenter.startElement("property");
+                presenter.emitAttribute("name", name);
+                presenter.emitAttribute("value", defaultOutputProperties.getProperty(name));
+                presenter.endElement();
+            }
+            presenter.endElement();
+        }
+        presenter.endElement();
+        presenter.close();
     }
 
     public void checkForAbstractComponents() throws XPathException {

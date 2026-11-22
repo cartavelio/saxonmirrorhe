@@ -1,6 +1,5 @@
 package s9apitest;
 
-import net.sf.saxon.Version;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
@@ -66,22 +65,9 @@ class TestSefFunctionReferences {
                     <xsl:template name="array-size"><xsl:sequence select="array:size#1"/></xsl:template>
                 </xsl:stylesheet>
                 """), "urn:test:sef-function-references");
-        var compiled = processor.newXsltCompiler().compile(stylesheet).getUnderlyingCompiledStylesheet();
-        var pkg = compiled.getTopLevelPackage();
+        var compiled = processor.newXsltCompiler().compile(stylesheet);
         var buffer = new ByteArrayOutputStream();
-
-        var out = processor.getUnderlyingConfiguration().newExpressionExporter("HE", buffer, pkg);
-        var options = out.getOptions();
-        out.startElement("package");
-        out.emitAttribute("saxonVersion", Version.getProductVersion());
-        out.emitAttribute("version", Integer.toString(pkg.getHostLanguageVersion()));
-        out.emitAttribute("packageVersion", pkg.getPackageVersion().toString());
-        out.emitAttribute("implicit", "true");
-        for (var component : pkg.getComponentIndex().values()) {
-            component.export(out, options.componentMap, options.packageMap);
-        }
-        out.endElement();
-        out.close();
+        compiled.export(buffer);
         return new StreamSource(new ByteArrayInputStream(buffer.toByteArray()));
     }
 }
