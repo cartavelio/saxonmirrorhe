@@ -16,6 +16,15 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class TestSapling {
 
     @Test
+    public void testElementDslCanBeEvaluated() throws SaxonApiException {
+        Processor processor = new Processor(false);
+        XdmNode node = elem(new QName("root"), builder -> builder.text("data")).toXdmNode(processor);
+        XPathSelector selector = processor.newXPathCompiler().compile("string(.)").load();
+        selector.setContextItem(node);
+        assertEquals("data", selector.evaluateSingle().getStringValue());
+    }
+
+    @Test
     public void testSimpleBuild() {
         try {
             Processor processor = new Processor(false);

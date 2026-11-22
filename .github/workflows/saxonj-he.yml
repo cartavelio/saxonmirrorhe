@@ -1,0 +1,141 @@
+name: SaxonJ-HE
+
+on:
+  pull_request:
+  push:
+    branches: [saxon12]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build and smoke-test
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+      - name: Build the HE runtime and test driver
+        run: ./gradlew --console=plain --configure-on-demand :java:he:stageHeRuntime :java:testdriver:download-he-jar
+      - name: Run XSLT source and compiled stylesheet tests
+        run: java/he/ci/smoke.sh java/he/build/he-runtime
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: saxonj-he-runtime
+          path: java/he/build/he-runtime/
+          if-no-files-found: error
+
+      - name: Upload Gradle problems report
+        id: problems
+        if: ${{ !cancelled() && hashFiles('build/reports/problems/problems-report.html') != '' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: he-build-problems
+          path: build/reports/problems/problems-report.html
+          if-no-files-found: error
+      - name: Link build diagnostics
+        if: ${{ !cancelled() && steps.problems.outputs.artifact-url != '' }}
+        env:
+          REPORT_URL: ${{ steps.problems.outputs.artifact-url }}
+        run: echo "[Download the Gradle problems report]($REPORT_URL)" >> "$GITHUB_STEP_SUMMARY"
+
+  tests:
+    name: HE test suite
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+      - name: Run HE tests
+        id: suite
+        # Gradle logs test events on stdout. Send this step's console output to stderr.
+        run: ./gradlew --console=plain --configure-on-demand :java:he:editionTest 1>&2
+      - name: Verify that HE tests ran
+        if: ${{ success() && steps.suite.outputs.executed != 'true' }}
+        run: |
+          echo "Gradle completed without executing any HE tests." >&2
+          exit 1
+      - name: Upload test and Gradle HTML reports
+        id: reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: he-test-report
+          path: |
+            java/he/build/reports/tests/editionTest/
+            build/reports/problems/problems-report.html
+          if-no-files-found: ignore
+      - name: Link test diagnostics
+        if: ${{ !cancelled() && steps.reports.outputs.artifact-url != '' }}
+        env:
+          REPORT_URL: ${{ steps.reports.outputs.artifact-url }}
+        run: echo "[Download the HTML reports]($REPORT_URL)" >> "$GITHUB_STEP_SUMMARY"
+
+  conformance:
+    name: W3C conformance
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Check out the W3C XPath and XQuery catalog
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: w3c/qt3tests
+          ref: 201a6e466940cdfc727f4babfedcde5332b9f578
+          path: submodules/qt3
+          persist-credentials: false
+      - name: Check out the W3C XSLT catalog
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: w3c/xslt30-test
+          ref: fddf1cf920087e791f13315d68dfbe874d97dc56
+          path: submodules/xslt30
+          persist-credentials: false
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+      - name: Run the HE conformance suites
+        run: |
+          log=java/he/build/test-results/w3c-gradle.log
+          mkdir -p "$(dirname "$log")"
+          ./gradlew --console=plain --configure-on-demand \
+            :java:he:test_suite_qt3_XP31 :java:he:test_suite_qt3_XQ31 :java:he:test_suite_xslt30_XT30 \
+            :java:he:test_suite_xslt30_XT30_sef \
+            > "$log" 2>&1 || { tail -n 100 "$log" >&2; exit 1; }
+      - name: Compare the case results
+        run: |
+          status=0
+          for mode in XP31 XQ31 XT30; do
+            suite=qt3
+            if [[ $mode == XT30 ]]; then suite=xslt30; fi
+            java java/he/ci/w3c/Conformance.java check "$mode" "submodules/$suite/catalog.xml" \
+              java/he/build/test-results/"$suite"/*/"hej_${suite}_${mode}.xml" "java/he/ci/w3c/$mode.tsv" || status=1
+          done
+          java java/he/ci/w3c/Conformance.java sef-check \
+            java/he/build/test-results/xslt30/*/hej_xslt30_XT30.xml \
+            java/he/build/test-results/xslt30/*/sef-source.tsv \
+            java/he/build/test-results-sef/xslt30/*/hej_xslt30_XT30_sef.xml \
+            java/he/build/test-results-sef/xslt30/*/sef-roundtrip.tsv \
+            java/he/ci/w3c/XT30-SEF.tsv || status=1
+          exit "$status"
+      - name: Upload case-level reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: w3c-conformance
+          path: |
+            java/he/build/test-results/w3c-gradle.log
+            java/he/build/test-results/qt3/*/hej_qt3_*.xml
+            java/he/build/test-results/xslt30/*/hej_xslt30_*.xml
+            java/he/build/test-results/xslt30/*/sef-source.tsv
+            java/he/build/test-results-sef/xslt30/*/hej_xslt30_XT30_sef.xml
+            java/he/build/test-results-sef/xslt30/*/sef-roundtrip.tsv
+          if-no-files-found: error

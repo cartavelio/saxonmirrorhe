@@ -9,18 +9,22 @@ package net.sf.saxon.s9api;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.PreparedStylesheet;
-import net.sf.saxon.Query;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.PackageVersion;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.CompilerInfo;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 /**
  * An XsltPackage object represents the result of compiling an XSLT 3.0 package, as
@@ -153,14 +157,49 @@ public class XsltPackage {
      */
     @Deprecated
     public void save(File file, String target) throws SaxonApiException {
+        if (stylesheetPackage.isJustInTimeCompilation()) {
+            throw new SaxonApiException("Cannot export a stylesheet compiled with just-in-time compilation enabled");
+        }
+        Path output = file.toPath().toAbsolutePath();
+        Path temporary = null;
         try {
-            Query.createFileIfNecessary(file);
-            ExpressionPresenter presenter = getProcessor().getUnderlyingConfiguration()
-                    .newExpressionExporter(target, new FileOutputStream(file), stylesheetPackage);
-            presenter.getOptions().relocatable = stylesheetPackage.isRelocatable();
-            stylesheetPackage.export(presenter);
+            Path parent = Files.createDirectories(output.getParent());
+            temporary = Files.createTempFile(parent, ".saxon-sef-", ".tmp");
+            try (OutputStream destination = Files.newOutputStream(temporary)) {
+                ExpressionPresenter presenter = getProcessor().getUnderlyingConfiguration()
+                        .newExpressionExporter(target, destination, stylesheetPackage);
+                presenter.getOptions().relocatable = stylesheetPackage.isRelocatable();
+                stylesheetPackage.export(presenter);
+            }
+            try {
+                Files.move(temporary, output, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            } catch (AtomicMoveNotSupportedException e) {
+                Files.move(temporary, output, StandardCopyOption.REPLACE_EXISTING);
+            }
         } catch (XPathException | IOException e) {
+            discardTemporaryExport(temporary, e);
             throw new SaxonApiException(e);
+        } catch (UncheckedXPathException e) {
+            discardTemporaryExport(temporary, e.getXPathException());
+            if (e.getXPathException().getCause() instanceof IOException) {
+                IOException io = (IOException) e.getXPathException().getCause();
+                throw new SaxonApiException("Cannot write compiled stylesheet " + file + ": " + io.getMessage(),
+                        e.getXPathException());
+            }
+            throw new SaxonApiException(e);
+        } catch (RuntimeException e) {
+            discardTemporaryExport(temporary, e);
+            throw new SaxonApiException("Cannot save compiled stylesheet: " + e.getMessage(), e);
+        }
+    }
+
+    private static void discardTemporaryExport(Path temporary, Throwable error) {
+        if (temporary != null) {
+            try {
+                Files.deleteIfExists(temporary);
+            } catch (IOException e) {
+                error.addSuppressed(e);
+            }
         }
     }
 

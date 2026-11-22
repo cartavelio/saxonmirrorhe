@@ -8,6 +8,7 @@
 package net.sf.saxon.functions.hof;
 
 import net.sf.saxon.Controller;
+import net.sf.saxon.PreparedStylesheet;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.ItemElaborator;
@@ -30,7 +31,11 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
+import java.util.List;
 
 /**
  * A UserFunctionReference is an expression in the form local:f#1 where local:f is a user-defined function.
@@ -485,7 +490,8 @@ public class UserFunctionReference extends Expression
 
         @Override
         public Sequence call(XPathContext context, Sequence[] args) throws XPathException {
-            XPathContext c2 = function.makeNewContext(context, this);
+            // Higher-order functions can call directly with their own transformation's context.
+            XPathContext c2 = makeNewContext(context, this);
             if (c2 instanceof XPathContextMajor && component != null) {
                 ((XPathContextMajor) c2).setCurrentComponent(component);
             }
@@ -532,7 +538,56 @@ public class UserFunctionReference extends Expression
 
         @Override
         public void export(ExpressionPresenter out) throws XPathException {
-            agent.export(out);
+            ExpressionPresenter.ExportOptions options = out.getOptions();
+            if ("HE".equals(options.target) && options.rootPackage != null && component != null
+                    && function instanceof UserFunction
+                    && controller.getExecutable() instanceof PreparedStylesheet
+                    && component.getContainingPackage() != options.rootPackage
+                    && !options.rootPackage.contains(component.getContainingPackage())) {
+                exportCapturedFunction(out, (PreparedStylesheet) controller.getExecutable());
+            } else {
+                agent.export(out);
+            }
+        }
+
+        private void exportCapturedFunction(ExpressionPresenter out, PreparedStylesheet executable) throws XPathException {
+            StylesheetPackage capturedPackage = executable.getTopLevelPackage();
+            ExpressionPresenter.ExportOptions options = out.getOptions();
+            List<StylesheetPackage> enclosingPackages = new ArrayList<>(options.enclosingExportPackages);
+            enclosingPackages.add(options.rootPackage);
+            if (enclosingPackages.contains(capturedPackage)) {
+                throw new XPathException("Cannot export a cyclic captured stylesheet function " + getDescription());
+            }
+
+            // Keep the captured stylesheet's component IDs and name resolution separate from the caller's.
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            ExpressionPresenter nested = out.getConfiguration().newExpressionExporter("HE", buffer, capturedPackage);
+            nested.getOptions().enclosingExportPackages = enclosingPackages;
+            capturedPackage.export(nested);
+            Integer id = nested.getOptions().componentMap.get(component);
+            if (id == null) {
+                throw new XPathException("Cannot export the captured stylesheet component for " + getDescription());
+            }
+
+            out.startElement("capturedUserFn");
+            out.emitAttribute("sef", Base64.getEncoder().encodeToString(buffer.toByteArray()));
+            out.emitAttribute("component", id.toString());
+            out.emitAttribute("arity", Integer.toString(arity));
+            for (StructuredQName name : executable.getGlobalParameters().keySet()) {
+                Sequence value = controller.getParameter(name);
+                if (value != null) {
+                    out.startElement("param");
+                    out.emitAttribute("name", name);
+                    Literal.exportValue(value.materialize(), out);
+                    out.endElement();
+                }
+            }
+            Item context = controller.getGlobalContextItem();
+            if (context != null) {
+                out.setChildRole("globalContext");
+                Literal.exportValue(context, out);
+            }
+            out.endElement();
         }
     }
 

@@ -9,6 +9,7 @@ package net.sf.saxon.style;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.PreparedStylesheet;
+import net.sf.saxon.Version;
 import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.ComponentBinding;
 import net.sf.saxon.expr.PackageData;
@@ -44,6 +45,8 @@ import static net.sf.saxon.trans.Visibility.PRIVATE;
  * or by loading a saved package from disk. It therefore has no references to source XSLT documents.
  */
 public class StylesheetPackage extends PackageData {
+
+    public static final String HE_SEF_VERSION = "12.1";
 
     private final static boolean TRACING = false;
 
@@ -1095,14 +1098,119 @@ public class StylesheetPackage extends PackageData {
     }
 
     /**
-     * Output the abstract expression tree to the supplied destination.
+     * Write the compiled stylesheet in the SEF format understood by the package loader.
      *
      * @param presenter the expression presenter used to display the structure
-     * @throws XPathException if exporting fails or is not permitted (it requires Saxon-EE)
+     * @throws XPathException if the package cannot be exported
      */
 
     public void export(ExpressionPresenter presenter) throws XPathException {
-        throw new XPathException("Exporting a stylesheet requires Saxon-EE");
+        exportPackage(presenter);
+        presenter.close();
+    }
+
+    private void exportPackage(ExpressionPresenter presenter) throws XPathException {
+        if (isSchemaAware()) {
+            throw new XPathException("Saxon-HE cannot export a schema-aware stylesheet");
+        }
+        ExpressionPresenter.ExportOptions options = presenter.getOptions();
+        options.relocatable = isRelocatable();
+        presenter.startElement("package");
+        presenter.emitAttribute("saxonVersion", Version.getProductVersion());
+        presenter.emitAttribute("sefVersion", HE_SEF_VERSION);
+        presenter.emitAttribute("version", Integer.toString(getHostLanguageVersion()));
+        presenter.emitAttribute("name", getPackageName());
+        presenter.emitAttribute("id", Integer.toString(options.packageMap.get(this)));
+        presenter.emitAttribute("packageVersion", getPackageVersion().toString());
+        presenter.emitAttribute("implicit", Boolean.toString(isImplicitPackage()));
+        if (isRelocatable()) {
+            presenter.emitAttribute("relocatable", "true");
+        }
+        if (defaultMode != null && !Mode.UNNAMED_MODE_NAME.equals(defaultMode)) {
+            presenter.emitAttribute("defaultMode", defaultMode);
+        }
+        if (declaredModes) {
+            presenter.emitAttribute("declaredModes", "1");
+        }
+        if (stripsTypeAnnotations) {
+            presenter.emitAttribute("stripType", "1");
+        }
+        for (StylesheetPackage used : usedPackages) {
+            Integer id = options.packageMap.get(used);
+            if (id == null) {
+                options.packageMap.put(used, options.packageMap.size());
+                used.exportPackage(presenter);
+                options.relocatable = isRelocatable();
+            } else {
+                presenter.startElement("packageRef");
+                presenter.emitAttribute("id", Integer.toString(id));
+                presenter.endElement();
+            }
+        }
+        if (globalContextRequirement != null) {
+            globalContextRequirement.export(presenter);
+        }
+        getKeyManager().exportKeys(presenter, options.componentMap);
+        exportComponents(presenter);
+        for (net.sf.saxon.expr.accum.Accumulator accumulator : getAccumulatorRegistry().getAllAccumulators()) {
+            accumulator.export(presenter, options.componentMap);
+        }
+        if (defaultOutputProperties != null) {
+            exportOutputProperties(presenter, null, defaultOutputProperties);
+        }
+        for (Map.Entry<StructuredQName, Properties> entry : namedOutputProperties.entrySet()) {
+            exportOutputProperties(presenter, entry.getKey(), entry.getValue());
+        }
+        if (characterMapIndex != null) {
+            for (CharacterMap characterMap : characterMapIndex) {
+                characterMap.export(presenter);
+            }
+        }
+        if (stripperRules != null) {
+            stripperRules.export(presenter);
+        }
+        DecimalFormatManager decimalFormats = getDecimalFormatManager();
+        decimalFormats.getDefaultDecimalFormat().export(null, presenter);
+        for (StructuredQName name : decimalFormats.getDecimalFormatNames()) {
+            decimalFormats.getNamedDecimalFormat(name).export(name, presenter);
+        }
+        presenter.endElement();
+    }
+
+    private void exportComponents(ExpressionPresenter presenter) throws XPathException {
+        ExpressionPresenter.ExportOptions options = presenter.getOptions();
+        Set<Component> components = new LinkedHashSet<>(componentIndex.values());
+        components.addAll(hiddenComponents);
+        for (Component component : components) {
+            component.export(presenter, options.componentMap, options.packageMap);
+        }
+        if (!overriddenComponents.isEmpty()) {
+            presenter.startElement("overridden");
+            for (Component component : overriddenComponents.values()) {
+                if (components.contains(component)) {
+                    presenter.startElement("coRef");
+                    presenter.emitAttribute("id", Integer.toString(options.componentMap.get(component)));
+                    presenter.endElement();
+                } else {
+                    component.export(presenter, options.componentMap, options.packageMap);
+                }
+            }
+            presenter.endElement();
+        }
+    }
+
+    private static void exportOutputProperties(ExpressionPresenter presenter, StructuredQName name, Properties properties) {
+        presenter.startElement("output");
+        if (name != null) {
+            presenter.emitAttribute("name", name);
+        }
+        for (String property : properties.stringPropertyNames()) {
+            presenter.startElement("property");
+            presenter.emitAttribute("name", property);
+            presenter.emitAttribute("value", properties.getProperty(property));
+            presenter.endElement();
+        }
+        presenter.endElement();
     }
 
     public void checkForAbstractComponents() throws XPathException {

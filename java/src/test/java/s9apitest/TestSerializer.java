@@ -15,6 +15,7 @@ import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.CharacterMapIndex;
 import net.sf.saxon.stax.XMLStreamWriterDestination;
 import net.sf.saxon.z.IntHashMap;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
@@ -337,6 +338,7 @@ public class TestSerializer {
         }
     }
 
+    @Tag("requires-pe")
     @Test
     public void test3631() {
         try {
@@ -364,6 +366,7 @@ public class TestSerializer {
         }
     }
 
+    @Tag("requires-pe")
     @Test
     public void testBase64BinarySerialization() { // bug 4794
         String xslt =
@@ -399,6 +402,7 @@ public class TestSerializer {
     }
 
 
+    @Tag("requires-pe")
     @Test
     public void testHexBinarySerialization() { // bug 4794
         String xslt =
@@ -431,6 +435,7 @@ public class TestSerializer {
         assertEquals(4, x.length);
     }
 
+    @Tag("requires-pe")
     @Test
     public void testXQuerySerializationMethod() {
         String xslt =

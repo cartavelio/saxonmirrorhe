@@ -7,6 +7,7 @@ import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.SchemaValidator;
 import net.sf.saxon.trans.XPathException;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
@@ -18,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * JUnit tests on s9api operations on QName class
  */
+@Tag("requires-ee")
 public class TestInvalidityHandler {
 
     /**

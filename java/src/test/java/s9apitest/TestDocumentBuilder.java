@@ -14,6 +14,7 @@ import net.sf.saxon.option.xom.XOMDocumentWrapper;
 import net.sf.saxon.option.xom.XOMObjectModel;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
@@ -148,6 +149,7 @@ public class TestDocumentBuilder {
         }
     }
 
+    @Tag("requires-pe")
     @Test
     public void testXomBuilder() {
         try {
@@ -165,6 +167,7 @@ public class TestDocumentBuilder {
         }
     }
 
+    @Tag("requires-pe")
     @Test
     public void testJdom2Builder() {
         try {
@@ -182,6 +185,7 @@ public class TestDocumentBuilder {
         }
     }
 
+    @Tag("requires-pe")
     @Test
     public void testDom4JBuilder() {
         try {
@@ -277,6 +281,7 @@ public class TestDocumentBuilder {
      */
 
     @Test
+    @Tag("requires-ee")
     public void testProjection001() {
         try {
             Processor processor = new Processor(true);
@@ -428,6 +433,7 @@ public class TestDocumentBuilder {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testWhitespacePolicySchemaTyped() {
         String s;
@@ -562,6 +568,7 @@ public class TestDocumentBuilder {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testValidationErrors() {
         List<Invalidity> report = new ArrayList<>();

@@ -11,6 +11,7 @@ import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.query.DynamicQueryContext;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -190,6 +191,7 @@ public class TestXQueryCompiler {
 
 
 
+    @Tag("requires-ee")
     @Test
     public void testSeparateCompilation() {
         try {
@@ -209,6 +211,7 @@ public class TestXQueryCompiler {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testSeparateCompilationMultiple() {  // Bug 6394
         try {
@@ -237,6 +240,7 @@ public class TestXQueryCompiler {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testSeparateCompilationNested() {
         try {
@@ -260,6 +264,7 @@ public class TestXQueryCompiler {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testSeparateCompilationBug6394() {
         try {
@@ -283,6 +288,7 @@ public class TestXQueryCompiler {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testSeparateCompilationBug6394b() {
         try {
@@ -308,6 +314,7 @@ public class TestXQueryCompiler {
     }
 
 
+    @Tag("requires-ee")
     @Test
     public void testSeparateCompilationImportFromNonSeparatelyCompiledLibraryModule() {
         try {
@@ -343,6 +350,7 @@ public class TestXQueryCompiler {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testSeparateCompilationDiamond() {
         try {
@@ -390,6 +398,7 @@ public class TestXQueryCompiler {
     }
 
 
+    @Tag("requires-ee")
     @Test
     public void testSeparateCompilationDiamondWithVariables() {
         try {
@@ -427,6 +436,7 @@ public class TestXQueryCompiler {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testSeparateCompilationForwardsRef() {
         try {
@@ -553,6 +563,7 @@ public class TestXQueryCompiler {
 
     }
 
+    @Tag("requires-ee")
     @Test
     public void testAbleToCompileWithCompileLibraryMethod() throws SaxonApiException {
         // See bug 2429
@@ -674,6 +685,7 @@ public class TestXQueryCompiler {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testXQueryValidationErrorReporting() {
         // Bug 3123

@@ -43,13 +43,9 @@
 	<p:input port="source">
 		<p:inline>
 			<products>
-				<product name="SaxonJ-EE" test-command="java:aggregated-test-results" results-dir="java/build/test-results/" />
-				<product name="SaxonJ-PE" test-command="java:pe:aggregated-test-results" results-dir="java/pe/build/test-results/" />
 				<product name="SaxonJ-HE" test-command="java:he:aggregated-test-results" results-dir="java/he/build/test-results/" />
 			</products>
 			<!-- products>
-				<product name="SaxonJ-EE" test-command="java:testSuites" results-dir="java/build/test-results/" />
-				<product name="SaxonJ-PE" test-command="java:pe:testSuites" results-dir="java/pe/build/test-results/" />
 				<product name="SaxonJ-HE" test-command="java:he:testSuites" results-dir="java/he/build/test-results/" />
 			</products -->
 		</p:inline>

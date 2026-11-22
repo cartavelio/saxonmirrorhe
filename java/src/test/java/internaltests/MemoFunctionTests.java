@@ -20,58 +20,41 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class MemoFunctionTests {
 
-    /**
-     * General-purpose framework for testing arity-1 memo function. We do this by having a function that actually
-     * produces different results if invoked twice with the same arguments (it calls saxon:time-stamp) so we can
-     * distinguish whether the function value has been retrieved from cache or re-calculated.
-     * @return an XsltExecutable
-     */
-
+    // Each evaluation constructs a fresh node. Equal memo keys must return that same node.
     private XsltExecutable prepareArity1() {
         try {
             String xsl = "<x:transform xmlns:x='http://www.w3.org/1999/XSL/Transform' xmlns:f='f' version='3.0'>" +
-                    "<x:function name='f:memo' cache='yes'><x:param name='p'/>"
-                    + "<x:sequence select='substring(string(sum(count($p) to 1000000)), 1, 1)||Q{http://saxon.sf.net/}timestamp()'/>"
+                    "<x:function name='f:memo' cache='yes' as='element()'><x:param name='p'/>"
+                    + "<value count='{count($p)}'/>"
                     + "</x:function>" +
                     "<x:param name='p'/><x:param name='q'/>" +
-                    "<x:template name='x:initial-template'><x:sequence select='deep-equal(f:memo($p), f:memo($q))'/></x:template>" +
+                    "<x:template name='x:initial-template'><x:sequence select='f:memo($p) is f:memo($q)'/></x:template>" +
                     "</x:transform>";
             Processor proc = new Processor(true);
             return proc.newXsltCompiler().compile(new StreamSource(new StringReader(xsl)));
         } catch (SaxonApiException e) {
-            fail();
-            throw new RuntimeException(e);
+            return fail(e);
         }
     }
-
-    /**
-     * General-purpose framework for testing arity-2 memo function
-     * @return an XsltExecutable
-     */
 
     private XsltExecutable prepareArity2() {
         try {
             String xsl = "<x:transform xmlns:x='http://www.w3.org/1999/XSL/Transform' xmlns:f='f' version='3.0'>" +
-                    "<x:function name='f:memo' cache='yes'><x:param name='x'/><x:param name='y'/>"
-                    + "<x:sequence select='substring(string(sum(count($x) to 1000000)), 1, 1)||count($y)||Q{http://saxon.sf.net/}timestamp()'/>"
+                    "<x:function name='f:memo' cache='yes' as='element()'><x:param name='x'/><x:param name='y'/>"
+                    + "<value x='{count($x)}' y='{count($y)}'/>"
                     + "</x:function>" +
                     "<x:param name='p'/><x:param name='q'/>" +
                     "<x:param name='r'/><x:param name='s'/>" +
-                    "<x:template name='x:initial-template'><x:sequence select='deep-equal(f:memo($p, $q), f:memo($r, $s))'/></x:template>" +
+                    "<x:template name='x:initial-template'><x:sequence select='f:memo($p, $q) is f:memo($r, $s)'/></x:template>" +
                     "</x:transform>";
             Processor proc = new Processor(true);
             return proc.newXsltCompiler().compile(new StreamSource(new StringReader(xsl)));
         } catch (SaxonApiException e) {
-            fail();
-            throw new RuntimeException(e);
+            return fail(e);
         }
     }
 
     private void testArity1(XsltExecutable exec, XdmValue p, XdmValue q, boolean expected) {
-        // Test whether two argument values are considered "the same value"; if they are,
-        // the cached value will be returned for the second call. To determine whether the second
-        // call gets the answer from cache, we call saxon:timestamp(), which (hopefully) produces different
-        // answers each time it is called.
         try {
             Xslt30Transformer trans = exec.load30();
             Map<QName, XdmValue> params = new HashMap<>();
@@ -88,10 +71,6 @@ public class MemoFunctionTests {
     }
 
     private void testArity2(XsltExecutable exec, XdmValue p, XdmValue q, XdmValue r, XdmValue s, boolean expected) {
-        // Test whether two argument values are considered "the same value"; if they are,
-        // the cached value will be returned for the second call. To determine whether the second
-        // call gets the answer from cache, we call saxon:timestamp(), which (hopefully) produces different
-        // answers each time it is called.
         try {
             Xslt30Transformer trans = exec.load30();
             Map<QName, XdmValue> params = new HashMap<>();

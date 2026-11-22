@@ -559,6 +559,7 @@ public class TestXslt30TransformerDebug {
      * Send output to a XOM tree
      */
 
+    @Tag("requires-pe")
     @Test
     public void testXOMDestination() {
         try {
@@ -587,6 +588,7 @@ public class TestXslt30TransformerDebug {
      * Send output to a JDOM2 tree
      */
 
+    @Tag("requires-pe")
     @Test
     public void testJDOM2Destination() {
         try {
@@ -717,6 +719,7 @@ public class TestXslt30TransformerDebug {
      * Test notification of errors from a call on saxon:parse()
      */
 
+    @Tag("requires-pe")
     @Test
     public void testErrorNotificationFromSaxonParse() {
         final List<TransformerException> warnings = new ArrayList<>(4);
@@ -777,6 +780,7 @@ public class TestXslt30TransformerDebug {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testSchemaAware11() {
         // Create a Processor instance.
@@ -1389,6 +1393,7 @@ public class TestXslt30TransformerDebug {
      * Test Strip-type-annotations with ApplyTemplates
      */
 
+    @Tag("requires-ee")
     @Test
     public void testStripTypeAnnotations() {
         try {

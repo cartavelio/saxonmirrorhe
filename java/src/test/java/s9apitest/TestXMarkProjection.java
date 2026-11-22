@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * Test the XMark queries with and without document projection, comparing the results
  */
+@Tag("requires-ee")
 public class TestXMarkProjection {
     private void doTest(String query) {
         try {

@@ -8,6 +8,9 @@
 package net.sf.saxon.sapling;
 
 import net.sf.saxon.s9api.QName;
+//#if CSHARP == false
+import net.sf.saxon.sapling.dsl.ElementBuilder;
+//#endif
 
 /**
  * This is a non-instantiable class holding a number of convenience methods for creating
@@ -61,6 +64,39 @@ public class Saplings {
     public static SaplingElement elem(QName qName) {
         return new SaplingElement(qName);
     }
+
+//#if CSHARP == false
+    /**
+     * Create a sapling element node, in no namespace, which is passed to the DSL lambda
+     * @param name the local name of the element node. This must be a valid NCName, but the
+     *             current implementation does not check this.
+     * @param definition a lambda which will be invoked to allow the creation of child nodes and text content
+     *                   for this element
+     * @return the new node
+     */
+
+    public static SaplingElement elem(String name, net.sf.saxon.sapling.dsl.ElementDsl definition) {
+        SaplingElement element =  new SaplingElement(name);
+        ElementBuilder builder = new ElementBuilder(element);
+        definition.buildWith(builder);
+        return builder.getResult();
+    }
+
+    /**
+     * Create a sapling element node, which may or may not be in a namespace, which is passed to the DSL lambda
+     * @param qName the qualified name of the element. The current implementation does not check that the
+     *              parts of the qualified name are syntactically valid.
+     * @param definition a lambda which will be invoked to allow the creation of child nodes and text content
+     *                   for this element
+     * @return the new node     */
+
+    public static SaplingElement elem(QName qName, net.sf.saxon.sapling.dsl.ElementDsl definition) {
+        SaplingElement element =  new SaplingElement(qName);
+        ElementBuilder builder = new ElementBuilder(element);
+        definition.buildWith(builder);
+        return builder.getResult();
+    }
+//#endif
 
     /**
      * Create a sapling text node, with a given string value
