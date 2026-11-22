@@ -16,6 +16,7 @@ import net.sf.saxon.query.QueryModule;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trace.Traceable;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
@@ -38,6 +39,17 @@ import static org.junit.jupiter.api.Assertions.fail;
  * JUnit tests for the s9api XPathCompiler
  */
 public class TestXPathCompiler {
+    @Test
+    public void testLineNumberOfWarning() throws SaxonApiException {
+        XPathCompiler compiler = new Processor(false).newXPathCompiler();
+        List<Location> warnings = new ArrayList<>();
+        compiler.setWarningHandler(warning -> warnings.add(warning.getLocation()));
+        compiler.compile("//pm/\n*/dmRef/\ndmRefIdent/\ndmCode/[@infoCode= \"00T\"]");
+        assertEquals(1, warnings.size());
+        assertEquals(4, warnings.get(0).getLineNumber());
+        assertEquals(8, warnings.get(0).getColumnNumber());
+    }
+
     @Test
     public void testSimple() {
         try {
@@ -673,6 +685,7 @@ public class TestXPathCompiler {
         }
     }
 
+    @Tag("requires-pe")
     @Test
     public void testReflexiveExtension() {
         try {
@@ -718,6 +731,7 @@ public class TestXPathCompiler {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testSchemaAwareEqualityGood() {
         try {
@@ -729,6 +743,7 @@ public class TestXPathCompiler {
         }
     }
 
+    @Tag("requires-ee")
     @Test
     public void testSchemaAwareEqualityBad() {
         try {

@@ -44,25 +44,13 @@ abstract class JavaRunner @Inject constructor(private val ex: ExecOperations): D
   abstract val testargs: ListProperty<String>
 
   @get:Internal
-  val EDITION: String by lazy { edition.get().uppercase() }
-  @get:Internal
   val dateStamp = SimpleDateFormat("yyyyMMdd").format(Date()).toString()
-
-  @get:Internal
-  val driverPackage: String
-    get() = if (edition.get() == "he") "net.sf.saxon.testdriver" else "com.saxonica.testdriver"
 
   @get:Internal
   val driverClass: String
     get() = when (suite.get()) {
-      "qt3" -> "${driverPackage}.QT3TestDriver${EDITION}"
-      "qt3extra" -> "${driverPackage}.QT3TestDriver${EDITION}"
-      "expath" -> "${driverPackage}.QT3TestDriver${EDITION}"
-      "xslt30" -> "${driverPackage}.Xslt30TestSuiteDriver${EDITION}"
-      "xslt30extra" -> "${driverPackage}.Xslt30TestSuiteDriver${EDITION}"
-      "xsltfromqt4" -> "${driverPackage}.Xslt30TestSuiteDriver${EDITION}"
-      "qt4" -> "${driverPackage}.QT3TestDriver${EDITION}"
-      "xslt40" -> "${driverPackage}.Xslt30TestSuiteDriver${EDITION}"
+      "qt3", "qt3extra", "expath", "qt4" -> "net.sf.saxon.testdriver.QT3TestDriverHE"
+      "xslt30", "xslt30extra", "xsltfromqt4", "xslt40" -> "net.sf.saxon.testdriver.Xslt30TestSuiteDriverHE"
       else -> throw GradleException("Unknown test driver class for test suite: ${suite}")
     }
 

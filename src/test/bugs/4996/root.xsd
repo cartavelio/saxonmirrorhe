@@ -1,0 +1,8 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:t="http://com.deltaxml.test/namespace">
+  <xs:import namespace="http://com.deltaxml.test/namespace" schemaLocation="attribute.xsd"/>
+  <xs:element name="root">
+    <xs:complexType>
+      <xs:attribute ref="t:test" default="yes"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

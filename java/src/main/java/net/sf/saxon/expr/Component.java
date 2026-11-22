@@ -15,6 +15,7 @@ import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.CompoundMode;
 import net.sf.saxon.trans.Mode;
 import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.VisibilityProvenance;
@@ -204,10 +205,21 @@ public class Component {
         }
         String refs = listComponentReferences(componentIdMap);
         out.emitAttribute("binds", refs);
-        if (baseComponent != null && getActor() == baseComponent.getActor()) {
+        if (baseComponent != null) {
             int baseId = obtainComponentId(baseComponent, componentIdMap);
             out.emitAttribute("base", ""+baseId);
-            out.emitAttribute("dpack", packageIdMap.get(declaringPackage)+"");
+            Integer packageId = packageIdMap.get(declaringPackage);
+            if (packageId == null) {
+                throw new XPathException("Cannot export component from an unavailable declaring package: " +
+                        actor.getSymbolicName());
+            }
+            out.emitAttribute("dpack", Integer.toString(packageId));
+            if (actor instanceof CompoundMode && actor != baseComponent.getActor()) {
+                CompoundMode mode = (CompoundMode) actor;
+                mode.getActivePart().export(out);
+            } else if (actor != baseComponent.getActor()) {
+                actor.export(out);
+            }
         } else {
             actor.export(out);
         }

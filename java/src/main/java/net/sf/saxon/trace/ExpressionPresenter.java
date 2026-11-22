@@ -21,6 +21,7 @@ import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.str.*;
 import net.sf.saxon.style.StylesheetPackage;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -31,6 +32,7 @@ import net.sf.saxon.value.Whitespace;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.stream.StreamResult;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
@@ -128,16 +130,14 @@ public class ExpressionPresenter {
             }
             cco = new ComplexContentOutputter(receiver);
         } catch (XPathException err) {
-            err.printStackTrace();
-            throw new InternalError(err.getMessage());
+            throw new UncheckedXPathException(err);
         }
         this.config = config;
         try {
             cco.open();
             cco.startDocument(ReceiverOption.NONE);
         } catch (XPathException err) {
-            err.printStackTrace();
-            throw new InternalError(err.getMessage());
+            throw new UncheckedXPathException(err);
         }
     }
 
@@ -163,8 +163,7 @@ public class ExpressionPresenter {
             cco.open();
             cco.startDocument(ReceiverOption.NONE);
         } catch (XPathException err) {
-            err.printStackTrace();
-            throw new InternalError(err.getMessage());
+            throw new UncheckedXPathException(err);
         }
     }
 
@@ -196,8 +195,7 @@ public class ExpressionPresenter {
             cco.open();
             cco.startDocument(ReceiverOption.NONE);
         } catch (XPathException err) {
-            err.printStackTrace();
-            throw new InternalError(err.getMessage());
+            throw new UncheckedXPathException(err);
         }
     }
 
@@ -424,8 +422,7 @@ public class ExpressionPresenter {
                 nextRole = null;
             }
         } catch (XPathException err) {
-            err.printStackTrace();
-            throw new InternalError(err.getMessage());
+            throw new UncheckedXPathException(err);
         }
         inStartTag = true;
         return depth++;
@@ -457,8 +454,7 @@ public class ExpressionPresenter {
                 cco.attribute(new NoNamespaceName(name), BuiltInAtomicType.UNTYPED_ATOMIC, value,
                               Loc.NONE, ReceiverOption.NONE);
             } catch (XPathException err) {
-                err.printStackTrace();
-                throw new InternalError(err.getMessage());
+                throw new UncheckedXPathException(err);
             }
         }
     }
@@ -476,8 +472,7 @@ public class ExpressionPresenter {
             cco.attribute(new NoNamespaceName(name), BuiltInAtomicType.UNTYPED_ATOMIC,
                           attVal, Loc.NONE, ReceiverOption.NONE);
         } catch (XPathException err) {
-            err.printStackTrace();
-            throw new InternalError(err.getMessage());
+            throw new UncheckedXPathException(err);
         }
     }
 
@@ -492,8 +487,7 @@ public class ExpressionPresenter {
         try {
             cco.namespace(prefix, uri, ReceiverOption.NONE);
         } catch (XPathException e) {
-            e.printStackTrace();
-            throw new InternalError(e.getMessage());
+            throw new UncheckedXPathException(e);
         }
     }
 
@@ -513,8 +507,7 @@ public class ExpressionPresenter {
             }
             cco.endElement();
         } catch (XPathException err) {
-            err.printStackTrace();
-            throw new InternalError(err.getMessage());
+            throw new UncheckedXPathException(err);
         }
         String name = nameStack.pop();
         if (name.startsWith("*")) {
@@ -558,8 +551,7 @@ public class ExpressionPresenter {
             cco.endDocument();
             cco.close();
         } catch (XPathException err) {
-            err.printStackTrace();
-            throw new InternalError(err.getMessage());
+            throw new UncheckedXPathException(err);
         }
     }
 
@@ -650,6 +642,7 @@ public class ExpressionPresenter {
         public int targetVersion = 0;
         public boolean relocatable = false;
         public StylesheetPackage rootPackage;
+        public List<StylesheetPackage> enclosingExportPackages = java.util.Collections.emptyList();
         public Map<Component, Integer> componentMap;
         public Map<StylesheetPackage, Integer> packageMap;
         public boolean explaining;

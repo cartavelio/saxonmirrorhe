@@ -102,6 +102,7 @@ public class DeepEqual extends CollatingFunctionFixed {
     // TODO: confine options param to 4.0.
 
     public static class DeepEqualOptions {
+        private int version = 31;
         public boolean baseUriSignificant = false;
         public boolean commentsSignificant = false;
         public boolean debug = false;
@@ -286,6 +287,9 @@ public class DeepEqual extends CollatingFunctionFixed {
                 }
 
                 if (item1 instanceof FunctionItem || item2 instanceof FunctionItem) {
+                    if (options.version < 40 && (item1.getGenre() == Genre.FUNCTION || item2.getGenre() == Genre.FUNCTION)) {
+                        throw new XPathException("Cannot compare function items using deep-equal()", "FOTY0015").asTypeError();
+                    }
                     if (!(item1 instanceof FunctionItem && item2 instanceof FunctionItem)) {
                         reason = "if one item is a function then both must be functions (position " + pos1 + ")";
                         return false;
@@ -887,6 +891,7 @@ public class DeepEqual extends CollatingFunctionFixed {
         }
         //GenericAtomicComparer comparer = new GenericAtomicComparer(getStringCollator(), context);
         DeepEqualOptions eqOptions = new DeepEqualOptions(options, collationName, context);
+        eqOptions.version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
         boolean b = deepEqual(arguments[0].iterate(), arguments[1].iterate(), context, eqOptions);
         return BooleanValue.get(b);
     }

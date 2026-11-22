@@ -6,6 +6,7 @@ import net.sf.saxon.s9api.XsltCompiler;
 import net.sf.saxon.s9api.XsltExecutable;
 import net.sf.saxon.trans.CompilerInfo;
 import net.sf.saxon.trans.XPathException;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
@@ -18,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * Tests SEF generation of a stylesheet with calls to extension functions defined by stubs
  */
+@Tag("requires-ee")
 public class StubLoaderTest {
 
     @Test

@@ -1,0 +1,80 @@
+<?xml version='1.0' encoding='utf-8'?>
+<package xmlns='http://ns.saxonica.com/xslt/export'
+         saxonVersion='12.10'
+         sefVersion='12.1'
+         version='30'
+         id='0'
+         packageVersion='1'
+         implicit='true'
+         relocatable='true'>
+   <co id='0' binds=''>
+      <template name='Q{}label'
+                flags='os'
+                line='8'
+                module='labels.xsl'
+                slots='1'>
+         <sequence role='body' ns='xsl=~' line='9'>
+            <param name='Q{}value' slot='0' flags='r'>
+               <str role='select' val=''/>
+               <supplied role='conversion' slot='0'/>
+            </param>
+            <valueOf line='10'>
+               <fn name='concat'>
+                  <str val='['/>
+                  <fn name='upper-case'>
+                     <check card='?' diag='0|0||fn:upper-case'>
+                        <convert from='A' to='AS' flags='p' diag='0|0||fn:upper-case'>
+                           <data diag='0|0||fn:upper-case'>
+                              <varRef name='Q{}value' slot='0'/>
+                           </data>
+                        </convert>
+                     </check>
+                  </fn>
+                  <str val=']'/>
+               </fn>
+            </valueOf>
+         </sequence>
+      </template>
+   </co>
+   <co id='1' binds='0'>
+      <mode onNo='TC' flags='dW' patternSlots='0'>
+         <templateRule prec='0'
+                       prio='-0.5'
+                       seq='0'
+                       rank='0'
+                       minImp='0'
+                       slots='0'
+                       matches='ND'
+                       flags='s'
+                       line='3'
+                       module='labels.xsl'>
+            <p.nodeTest role='match' test='ND'/>
+            <callT role='action'
+                   ns='xsl=~'
+                   line='4'
+                   name='Q{}label'
+                   bSlot='0'
+                   flags='t'>
+               <withParam name='Q{}value' flags='c' as='1AS'>
+                  <fn line='5' name='string'>
+                     <check card='?' diag='0|0||fn:string'>
+                        <slash simple='2'>
+                           <axis name='child' nodeTest='NE nQ{}record'/>
+                           <axis name='attribute' nodeTest='NA nQ{}name'/>
+                        </slash>
+                     </check>
+                  </fn>
+               </withParam>
+            </callT>
+         </templateRule>
+      </mode>
+   </co>
+   <output>
+      <property name='method' value='text'/>
+      <property name='encoding' value='UTF-8'/>
+      <property name='{http://saxon.sf.net/}stylesheet-version' value='30'/>
+   </output>
+   <decimalFormat/>
+</package>
+<?Σ 54b3b900?>
+<?Σ2 6a4960775425a63adb5dd386fe29546f35307f09226d1ced5f053919de30a947?>

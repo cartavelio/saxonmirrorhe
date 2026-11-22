@@ -327,14 +327,49 @@ example, Saxon/java/ee/Tasks/build/release will build a Java EE release.
 
 ### Running test suites
 
-This part is a work in progress; you can make Run/Debug configurations to run
-the test suites. 
+The Java conformance driver builds against the local SaxonJ-HE JAR. From the
+repository root, check out the public W3C catalogs where Gradle expects them:
 
-1. Open the Gradle sidebar; from the sidebar navigate to the test set you want
-   to run. For example, Saxon/java/ee/Tasks/testsuite/test_suite_expath_XP31
-2. Clicking on that test suite will run it.
-3. To specify a set or test, edit the configuration and add -Ptd_s and/or -Ptd_t
-   to the run: `test_suite_xpath_XP31 -Ptd_s=expath-archive -Ptd_t=EXPath-archive-delete-002`
+```sh
+git clone https://github.com/w3c/qt3tests.git submodules/qt3
+git clone https://github.com/w3c/xslt30-test.git submodules/xslt30
+git -C submodules/qt3 checkout 201a6e466940cdfc727f4babfedcde5332b9f578
+git -C submodules/xslt30 checkout fddf1cf920087e791f13315d68dfbe874d97dc56
+```
+
+Select the same catalog commits when comparing builds. Run the XPath 3.1,
+XQuery 3.1, and XSLT 3.0 tasks with the Gradle wrapper:
+
+```sh
+./gradlew --configure-on-demand :java:he:test_suite_qt3_XP31
+./gradlew --configure-on-demand :java:he:test_suite_qt3_XQ31
+./gradlew --configure-on-demand :java:he:test_suite_xslt30_XT30
+```
+
+For a quick check, append `-Ptd_s=fn-abs` to either QT3 task or
+`-Ptd_s=higher-order-functions` to the XSLT task. Read the case outcomes in
+`java/he/build/test-results/{qt3,xslt30}/`.
+
+The **W3C conformance** CI job runs all three modes on pull requests and pushes
+to `main`. It checks every case in the pinned catalogs and uploads the XML
+reports as the `w3c-conformance` artifact. The baseline in `java/he/ci/w3c/`
+comes from the full HE run after PR #8. Unlisted cases must pass. Each TSV row
+records a different expected outcome for a named case or a whole test set
+(`*`). A missing case, a newly skipped case that used to run, or any other
+unexpected non-pass outcome fails the check. A newly passing case is reported
+as an improvement and requires a baseline update in the same PR.
+
+To check a local report, supply the XML file from the run you want to compare:
+
+```sh
+java java/he/ci/w3c/Conformance.java check XP31 submodules/qt3/catalog.xml \
+  java/he/build/test-results/qt3/YYYYMMDD/hej_qt3_XP31.xml java/he/ci/w3c/XP31.tsv
+```
+
+Use `record` in place of `check` to update a baseline after reviewing the
+changes. Commit improvements so CI protects the newly passing cases. When
+updating a catalog, change the pinned revision and review the baseline diff
+in the same PR.
 
 ## Building With Rider
 
@@ -368,16 +403,13 @@ optional in the list below, leave it out for EE.
 - `:java:{edition}:clean`, clean out the build files
 - `:java:{edition}:downloadRelease`, make the release zip
 - `:java:{edition}:javadocDownloadJar`, to make the JavaDoc jar
-- `:java:{edition}:testDriversDownloadJar`, to make the test drivers jar
+- `:java:testdriver:download-he-jar`, to make the HE test driver JAR
 - `:java:{edition}:javadoc`, to make the (HTML) JavaDoc
 - `:java:{edition}:xmljavadoc`, to make the XML JavaDoc
 
 ### Testsuite tasks
 
-Not all of these are configured yet.
-
-- `:java:{edition}:test_suite_{suite}_{language}`
-- `:java:{edition}:all_test_suites`, run all the test suites
+See [Running test suites](#running-test-suites) for the SaxonJ-HE conformance tasks.
 
 ## C#
 

@@ -2,7 +2,6 @@ import com.saxonica.build.java.PomGenerator
 
 plugins {
   id("saxon-build")
-  id("com.saxonica.build.testsuites")
   id("saxonj")
   id("maven-publish")
   id("signing")
@@ -196,10 +195,6 @@ sourceSets.named("editionTest") {
 
 val downloadReleaseBundled by configurations.getting
 
-val testsuiteExtra by configurations.resolvable("testsuiteExtraConfiguration") {
-  extendsFrom(configurations["testImplementation"])
-}
-
 val samplesConfiguration by configurations.resolvable("samplesConfiguration") {
   extendsFrom(configurations["testImplementation"])
 }
@@ -226,11 +221,6 @@ dependencies {
   testImplementation("javax.mail:javax.mail-api:${findProperty("mailVersion")}")
   testImplementation("com.sun.mail:javax.mail:${findProperty("mailVersion")}")
   testImplementation("nu.validator:htmlparser:${findProperty("htmlparserVersion")}")
-}
-
-val testdriverJar = configurations.named("testdriverJar")
-configurations {
-  testImplementation { extendsFrom(testdriverJar) }
 }
 
 tasks.named("compileJava") {
@@ -330,17 +320,6 @@ tasks.named<Sync>("signingMavenJars") {
   from(mavenSqlSourceJar)
 }
 
-val testSuitesClasspath = files(sourceSets["edition"].output)
-    .from(testdriverJar)
-    .from(testsuiteExtra)
-testSuites {
-  product = "java"
-  edition = "pe"
-  testclasspath = testSuitesClasspath
-  submodulesDir = layout.projectDirectory.dir("../../submodules")
-  exceptionsDir = layout.projectDirectory.dir("../src/test/exceptions")
-}
-
 val downloadRelease = tasks.named<Zip>("downloadRelease") {
   into("notices") {
     from(layout.projectDirectory.dir("../../src/main/notices"))
@@ -397,36 +376,6 @@ tasks.register<JavaExec>("pe_run_test") {
   mainClass = "net.sf.saxon.Transform"
 }
 
-testSuites.configure("expath", "XP31")
-testSuites.configure("expath", "XQ31")
-
-testSuites.configure("qt3", "XP20")
-testSuites.configure("qt3", "XP31")
-testSuites.configure("qt3", "XQ31")
-
-testSuites.configure("qt3extra", "XP31")
-testSuites.configure("qt3extra", "XQ31")
-
-testSuites.configure("xslt30", "XT30")
-testSuites.configure("xslt30", "XT30", mapOf("strict" to "on"))
-
-testSuites.configure("xslt30extra", "XT30")
-
-tasks.register("aggregated-test-results") {
-  inputs.files(tasks.named("test_suite_expath_XP31"))
-  inputs.files(tasks.named("test_suite_expath_XQ31"))
-  inputs.files(tasks.named("test_suite_qt3_XP31"))
-  inputs.files(tasks.named("test_suite_qt3_XQ31"))
-  inputs.files(tasks.named("test_suite_qt3extra_XP31"))
-  inputs.files(tasks.named("test_suite_qt3extra_XQ31"))
-  inputs.files(tasks.named("test_suite_xslt30_XT30"))
-  inputs.files(tasks.named("test_suite_xslt30_XT30_strict"))
-  inputs.files(tasks.named("test_suite_xslt30extra_XT30"))
-  doLast {
-    println(inputs.files.files)
-  }
-}
-
 val signTask = tasks.named("downloadSignedMavenJars")
 val mavenArtifactId = "Saxon-PE"
 val mavenVersion = saxonBuild.publishVersion.get()
@@ -456,12 +405,6 @@ publishing {
       }
       artifact(signTask.map { layout.buildDirectory.file("${signRootName}-sql-sources.jar") }) {
         classifier = "sql-sources"
-      }
-      artifact(signTask.map { layout.buildDirectory.file("${signRootName}-test.jar") }) {
-        classifier = "test"
-      }
-      artifact(signTask.map { layout.buildDirectory.file("${signRootName}-test-sources.jar") }) {
-        classifier = "test-sources"
       }
     }
   }

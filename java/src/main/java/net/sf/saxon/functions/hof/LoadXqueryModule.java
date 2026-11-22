@@ -22,6 +22,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.query.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
+import net.sf.saxon.trans.LicenseException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -37,7 +38,8 @@ import java.util.Map;
 
 /**
  * This class implements the function load-xquery-module(), which is a standard function in XPath 3.1.
- * It is classified as a higher-order function and therefore requires Saxon-PE or higher.
+ * Calling it requires access to Saxon's licensed XQuery module compiler.
+ * A configuration without that compiler reports FOQM0006.
  */
 public class LoadXqueryModule extends SystemFunction implements Callable {
 
@@ -76,6 +78,13 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
 
     @Override
     public MapItem call(XPathContext context, Sequence[] args) throws XPathException {
+        try {
+            context.getConfiguration().checkLicensedFeature(
+                    Configuration.LicenseFeature.ENTERPRISE_XQUERY, "fn:load-xquery-module", -1);
+        } catch (LicenseException e) {
+            throw new XPathException(e.getMessage(), "FOQM0006");
+        }
+
         Sequence xqueryVersionOption = null;
         Sequence locationHintsOption = null;
         Sequence variablesOption = null;

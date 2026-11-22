@@ -1,4 +1,5 @@
 import com.saxonica.build.java.PomGenerator
+import com.saxonica.build.java.testsuite.JavaRunner
 
 plugins {
   id("saxon-build")
@@ -16,6 +17,12 @@ saxonj {
   manifestMainClass = "net.sf.saxon.Transform"
   sourceRoot = layout.projectDirectory.dir("../src")
   testDataDir = layout.projectDirectory.dir("../../src/test/testdata")
+}
+
+// Tests run on JDK 21. Keep the distributed HE classes compatible with Java 8.
+tasks.named<JavaCompile>("compileEditionTestJava") {
+  sourceCompatibility = "17"
+  targetCompatibility = "17"
 }
 
 val saxonBuild = the<SaxonBuildExtension>()
@@ -195,6 +202,7 @@ dependencies {
   xqjMavenJarBucket(project(path = ":java", configuration = "xqjMavenJarArtifact"))
   xqjSourceMavenJarBucket(project(path = ":java", configuration = "xqjSourceMavenJarArtifact"))
 
+  testImplementation(project(path = ":java:testdriver", configuration = "mavenHEJar"))
   testImplementation("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}")
   testImplementation("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}:data")
   testImplementation("javax.mail:javax.mail-api:${findProperty("mailVersion")}")
@@ -202,8 +210,41 @@ dependencies {
   testImplementation("nu.validator:htmlparser:${findProperty("htmlparserVersion")}")
 }
 
-configurations {
-  testImplementation { extendsFrom(testdriverJar) }
+val downloadDriver = configurations.dependencyScope("downloadDriver")
+val mavenDriver = configurations.dependencyScope("mavenDriver")
+dependencies {
+  add(downloadDriver.name, project(path = ":java:testdriver", configuration = "downloadHEJar"))
+  add(mavenDriver.name, project(path = ":java:testdriver", configuration = "mavenHEJar"))
+  add(mavenDriver.name, project(path = ":java:testdriver", configuration = "mavenHESourcesJar"))
+}
+
+val downloadDriverFiles = configurations.resolvable("downloadDriverFiles") { extendsFrom(downloadDriver.get()) }
+val mavenDriverFiles = configurations.resolvable("mavenDriverFiles") { extendsFrom(mavenDriver.get()) }
+tasks.named<Sync>("signingDownloadJars") { from(downloadDriverFiles) }
+tasks.named<Sync>("signingMavenJars") { from(mavenDriverFiles) }
+
+tasks.named<Test>("editionTest") {
+  workingDir(rootProject.file("java"))
+  environment("SAXON_BUGS_DATA", rootProject.file("src/test/bugs").absolutePath)
+  useJUnitPlatform { excludeTags("requires-pe", "requires-ee") }
+
+  testLogging {
+    events("failed")
+    exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+  }
+
+  addTestListener(object : TestListener {
+    override fun afterSuite(suite: TestDescriptor, result: TestResult) {
+      if (suite.parent != null) return
+      val counts = "${result.successfulTestCount} passed · ${result.failedTestCount} failed · ${result.skippedTestCount} skipped"
+      logger.lifecycle("HE test results: $counts (${result.testCount} tests)")
+      System.getenv("GITHUB_STEP_SUMMARY")?.let {
+        File(it).appendText("### HE test results\n\n$counts (${result.testCount} tests)\n")
+      }
+      val executed = result.testCount > result.skippedTestCount
+      System.getenv("GITHUB_OUTPUT")?.let { File(it).appendText("executed=$executed\n") }
+    }
+  })
 }
 
 tasks.named("compileJava") {
@@ -241,6 +282,14 @@ tasks.named<Jar>("editionDownloadJar") {
 }
 tasks.named<Jar>("editionMavenJar") {
   exclude("net/sf/saxon/option")
+}
+
+tasks.register<Sync>("stageHeRuntime") {
+  description = "Stage the runnable HE JAR with its runtime dependencies and notices"
+  into(layout.buildDirectory.dir("he-runtime"))
+  from(tasks.named<Jar>("editionDownloadJar").flatMap { it.archiveFile })
+  into("lib") { from(configurations.named("downloadReleaseBundled")) }
+  into("notices") { from(rootProject.file("src/main/notices")) }
 }
 
 tasks.register<Zip>("source-code-release") {
@@ -302,9 +351,8 @@ tasks.register<Exec>("samples") {
 
 // ============================================================
 
-val testdriverJar = configurations.named("testdriverJar")
-val testSuitesClasspath = files(sourceSets["edition"].output)
-    .from(testdriverJar)
+val testSuitesClasspath = files(tasks.named<Jar>("editionDownloadJar").flatMap { it.archiveFile })
+    .from(configurations.named("downloadReleaseBundled"))
     .from(testsuiteExtra)
 testSuites {
   product = "java"
@@ -319,6 +367,10 @@ testSuites.configure("qt3", "XP31")
 testSuites.configure("qt3", "XQ31")
 
 testSuites.configure("xslt30", "XT30")
+testSuites.configure("xslt30", "XT30", mapOf("sef-roundtrip" to ""), taskName = "xslt30_XT30_sef")
+tasks.named<JavaRunner>("test_suite_xslt30_XT30_sef") {
+  reportingRootDir = layout.buildDirectory.dir("test-results-sef")
+}
 
 testSuites.configure("xslt30extra", "XT30")
 

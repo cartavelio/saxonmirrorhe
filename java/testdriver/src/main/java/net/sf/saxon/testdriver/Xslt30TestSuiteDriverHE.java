@@ -28,6 +28,7 @@ import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.QNameValue;
 
+import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamResult;
@@ -35,6 +36,8 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -52,6 +55,8 @@ import static net.sf.saxon.s9api.streams.Steps.root;
  */
 public class Xslt30TestSuiteDriverHE extends TestDriver {
 
+    private boolean sefRoundTrip;
+    private final List<String> roundTripResults = new ArrayList<>();
 
     public Xslt30TestSuiteDriverHE() {
         spec = Spec.XT30;
@@ -67,9 +72,26 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
     }
 
     protected static void usage() {
-        System.err.println("java com.saxonica.testdriver.Xslt30TestSuiteDriver[HE] testsuiteDir catalog [-o:resultsdir] [-s:testSetName]" +
-                " [-t:testNamePattern] [-export] [-tree] [-lang] [-save] [-streaming:off|std|ext]" +
-                " [-xt30:on] [-T] [-js] [-XX:compiler-location]");
+        System.err.println("java net.sf.saxon.testdriver.Xslt30TestSuiteDriverHE testsuiteDir catalog [-o:resultsdir] [-s:testSetName]" +
+                " [-t:testNamePattern] [-lang:XT30] [-threads:N] [-T] [-sef-roundtrip]");
+    }
+
+    @Override
+    public void go(String[] args) throws Exception {
+        sefRoundTrip = Arrays.asList(args).contains("-sef-roundtrip");
+        super.go(args);
+    }
+
+    @Override
+    protected void writeResultFilePostamble() throws XMLStreamException {
+        super.writeResultFilePostamble();
+        if (!export && spec == Spec.XT30) {
+            try {
+                Files.write(Path.of(resultsDir, sefRoundTrip ? "sef-roundtrip.tsv" : "sef-source.tsv"), roundTripResults);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
     }
 
     @Override
@@ -427,21 +449,24 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 compiler.setParameter(new QName(name), value);
             });
 
-            for (XdmNode pack : usedPackages) {
-                String fileName = pack.attribute("file");
-                Source styleSource = new StreamSource(testCase.getBaseURI().resolve(fileName).toString());
-                XsltPackage xpack = compiler.compilePackage(styleSource);
-                compiler.importPackage(xpack);
-            }
             String fileName = principalPackage.get().attribute("file");
             Source styleSource = new StreamSource(testCase.getBaseURI().resolve(fileName).toString());
 
             try {
+                for (XdmNode pack : usedPackages) {
+                    String dependencyFile = pack.attribute("file");
+                    Source dependency = new StreamSource(testCase.getBaseURI().resolve(dependencyFile).toString());
+                    compiler.importPackage(compiler.compilePackage(dependency));
+                }
                 XsltPackage xpack = compiler.compilePackage(styleSource);
                 sheet = xpack.link();
             } catch (SaxonApiException err) {
                 System.err.println(err.getMessage());
-                outcome.setException(err.getErrorCode());
+                QName code = err.getErrorCode();
+                if (code == null && collector.lastError != null) {
+                    code = collector.lastError.getErrorCode();
+                }
+                outcome.setException(code);
                 outcome.setErrorsReported(collector.getErrorCodes());
                 collector.checkLocationInfo(err);
             } catch (Exception err) {
@@ -451,8 +476,9 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 outcome.setErrorsReported(collector.getErrorCodes());
             }
 
-            sheet = exportImport(testName, testSetName, outcome, compiler, sheet, collector, styleSource);
-
+            if (sheet != null) {
+                sheet = exportImport(testName, testSetName, outcome, compiler, sheet, collector, styleSource);
+            }
         }
         if (runWithJS && !outcome.isException()) {
             /* TODO - add case where expecting a static error but compiled OK */
@@ -993,13 +1019,28 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
 
     protected XsltExecutable exportImport(String testName, String testSetName, TestOutcome outcome, XsltCompiler compiler,
                                           XsltExecutable sheet, ErrorCollector collector, Source styleSource) {
+        String phase = null;
         try {
-            if (export && isExportable(testName)) {
+            if (sefRoundTrip) {
+                XsltExecutable original = sheet == null ? compiler.compile(styleSource) : sheet;
+                sheet = null;
+                phase = "export";
+                ByteArrayOutputStream sef = new ByteArrayOutputStream();
+                original.export(sef);
+                phase = "load";
+                XsltCompiler loader = freshRoundTripCompiler(compiler);
+                sheet = loader.loadExecutablePackage(new StreamSource(new ByteArrayInputStream(sef.toByteArray())));
+                recordRoundTrip(testSetName, testName, "reloaded", "");
+            } else if (export && isExportable(testName) /*&& !compiler.isSchemaAware() */) {
                 sheet = exportStylesheet(testName, testSetName, compiler, sheet, styleSource);
             } else if (sheet == null) {
                 sheet = compiler.compile(styleSource);
             }
         } catch (SaxonApiException err) {
+            if (phase != null) {
+                recordRoundTrip(testSetName, testName, phase,
+                        err.getErrorCode() == null ? err.getMessage() : err.getErrorCode() + " " + err.getMessage());
+            }
             outcome.setException(err.getErrorCode());
             collector.checkLocationInfo(err);
             if (err.getErrorCode() != null) {
@@ -1007,13 +1048,56 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             }
             outcome.setErrorsReported(collector.getErrorCodes());
         } catch (Exception err) {
+            if (phase != null) {
+                recordRoundTrip(testSetName, testName, phase, err.getClass().getSimpleName() + " " + err.getMessage());
+            }
             err.printStackTrace();
             System.err.println(err.getMessage());
             outcome.setException(new QName(err.getClass().getName()));
             collector.checkLocationInfo(err);
             outcome.setErrorsReported(collector.getErrorCodes());
         }
+        if (sheet != null && !sefRoundTrip && !export && spec == Spec.XT30) {
+            recordRoundTrip(testSetName, testName, "compiled", "");
+        }
         return sheet;
+    }
+
+    private XsltCompiler freshRoundTripCompiler(XsltCompiler compiler)
+            throws IOException, XPathException, SaxonApiException {
+        Processor processor = new Processor(false);
+        Configuration original = compiler.getProcessor().getUnderlyingConfiguration();
+        Configuration config = processor.getUnderlyingConfiguration();
+        // Catalog inputs have already been built. Share only their node identity infrastructure
+        // and the environment's resource access, so the loaded executable has a fresh configuration.
+        config.setNamePool(original.getNamePool());
+        config.setDocumentNumberAllocator(original.getDocumentNumberAllocator());
+        config.setResourceResolver(original.getResourceResolver());
+        config.setCollectionFinder(original.getCollectionFinder());
+        config.setDefaultCollection(original.getDefaultCollection());
+        config.setUnparsedTextURIResolver(original.getUnparsedTextURIResolver());
+        config.setXMLVersion(original.getXMLVersion());
+        processor.setConfigurationProperty(Feature.XSD_VERSION, original.getXsdVersion() == Configuration.XSD10 ? "1.0" : "1.1");
+        XsltCompiler loader = processor.newXsltCompiler();
+        XsltCompiler runtimeCompiler = compiler.getProcessor().newXsltCompiler();
+        for (var registered : original.getDefaultXsltCompilerInfo().getPackageLibrary().getPackages()) {
+            XsltPackage dependency = runtimeCompiler.obtainPackage(registered.getPackageName(),
+                    registered.getPackageVersion().toString());
+            Path file = Files.createTempFile(Path.of(resultsDir), "library-", ".sef");
+            try {
+                dependency.save(file.toFile());
+                XsltPackage reloaded = loader.loadLibraryPackage(file.toUri());
+                config.getDefaultXsltCompilerInfo().getPackageLibrary().addPackage(reloaded.getUnderlyingPreparedPackage());
+            } finally {
+                Files.deleteIfExists(file);
+            }
+        }
+        return loader;
+    }
+
+    private void recordRoundTrip(String set, String test, String phase, String detail) {
+        String message = detail == null ? "" : detail.replace('\t', ' ').replace('\n', ' ').replace('\r', ' ');
+        roundTripResults.add(String.join("\t", set, test, phase, message));
     }
 
     private boolean isExportable(String testName) {

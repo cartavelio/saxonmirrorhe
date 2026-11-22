@@ -124,8 +124,8 @@ public class QT3TestDriverHE extends TestDriver {
     }
 
     public static void usage() {
-        System.err.println("java net.sf.saxon.testdriver.QT3TestSuiteDriverHE testsuiteDir catalog [-o:resultsdir] [-s:testSetName]" +
-                " [-t:testNamePattern] [-unfolded] [-tree] [-lang:XP20|XP30|XQ10|XQ30]");
+        System.err.println("java net.sf.saxon.testdriver.QT3TestDriverHE testsuiteDir catalog [-o:resultsdir] [-s:testSetName]" +
+                " [-t:testNamePattern] [-unfolded] [-tree] [-lang:XP20|XP30|XP31|XQ10|XQ30|XQ31]");
 
     }
 

@@ -4,16 +4,19 @@ import net.sf.saxon.lib.ExtensionFunctionDefinition;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
 import java.math.BigDecimal;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -21,6 +24,21 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Test XdmFunctionItem class, representing an XPath function item
  */
 public class TestXdmFunction {
+
+    @Test
+    public void testDeepEqualRejectsNamedFunctions() throws SaxonApiException {
+        Processor processor = new Processor(false);
+        var stylesheet = TestXdmFunction.class.getResource("deep-equal-functions.xsl");
+        assertNotNull(stylesheet);
+        XsltExecutable executable = processor.newXsltCompiler().compile(new StreamSource(stylesheet.toExternalForm()));
+        for (String template : new String[]{"function-pair", "function-first", "function-last", "nested-functions"}) {
+            SaxonApiException error = assertThrows(SaxonApiException.class,
+                    () -> executable.load30().callTemplate(new QName(template)), template);
+            assertEquals(new QName("http://www.w3.org/2005/xqt-errors", "FOTY0015"), error.getErrorCode(), template);
+        }
+        XdmAtomicValue equal = (XdmAtomicValue) executable.load30().callTemplate(new QName("equal-containers"));
+        assertTrue(equal.getBooleanValue());
+    }
 
     @Test
     public void testCallSystemFunction() {
@@ -65,6 +83,7 @@ public class TestXdmFunction {
         }
     }
 
+    @Tag("requires-pe")
     @Test
     public void testCallSystemFunctionSaxon() {
         try {
@@ -176,7 +195,7 @@ public class TestXdmFunction {
         try {
             Processor proc = new Processor(true);
             XsltCompiler comp = proc.newXsltCompiler();
-            comp.setSchemaAware(true);
+            comp.setSchemaAware(proc.isSchemaAware());
             StringReader sr = new StringReader(
                     "<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:f='f' xmlns:xs='http://www.w3.org/2001/XMLSchema'>" +
                             "<xsl:template name='main'><xsl:sequence select='f:f#1'/></xsl:template> \n" +
@@ -200,7 +219,7 @@ public class TestXdmFunction {
         try {
             Processor proc = new Processor(true);
             XsltCompiler comp = proc.newXsltCompiler();
-            comp.setSchemaAware(true);
+            comp.setSchemaAware(proc.isSchemaAware());
             StringReader sr = new StringReader(
                     "<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:f='f' xmlns:xs='http://www.w3.org/2001/XMLSchema'>" +
                             "<xsl:template name='main'><xsl:sequence select='f:f#1'/></xsl:template> \n" +
@@ -225,7 +244,7 @@ public class TestXdmFunction {
         try {
             Processor proc = new Processor(true);
             XsltCompiler comp = proc.newXsltCompiler();
-            comp.setSchemaAware(true);
+            comp.setSchemaAware(proc.isSchemaAware());
             StringReader sr = new StringReader(
                     "<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:f='f' xmlns:xs='http://www.w3.org/2001/XMLSchema'>" +
                             "<xsl:template name='main'><xsl:sequence select='f:f#1'/></xsl:template> \n" +
@@ -253,7 +272,7 @@ public class TestXdmFunction {
         try {
             Processor proc = new Processor(true);
             XsltCompiler comp = proc.newXsltCompiler();
-            comp.setSchemaAware(true);
+            comp.setSchemaAware(proc.isSchemaAware());
             StringReader sr = new StringReader(
                     "<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:f='f' xmlns:xs='http://www.w3.org/2001/XMLSchema'>" +
                             "<xsl:template name='main'><xsl:sequence select='let $q:=23 return function($p){$p+$q+$offset}'/></xsl:template> \n" +
@@ -270,6 +289,35 @@ public class TestXdmFunction {
             fail(e.getMessage());
         }
 
+    }
+
+    @Test
+    public void testReturnedInlineFunctionReadsGlobalsOnDemand() throws SaxonApiException {
+        Processor processor = new Processor(false);
+        var stylesheet = TestXdmFunction.class.getResource("returned-inline-function.xsl");
+        assertNotNull(stylesheet, "Missing returned-inline-function.xsl test fixture");
+        XsltExecutable executable = processor.newXsltCompiler().compile(new StreamSource(stylesheet.toExternalForm()));
+        XdmFunctionItem[] functions = new XdmFunctionItem[2];
+        for (int i = 0; i < functions.length; i++) {
+            Xslt30Transformer transformer = executable.load30();
+            transformer.setStylesheetParameters(Map.of(new QName("value"), new XdmAtomicValue(i)));
+            functions[i] = (XdmFunctionItem) transformer.callTemplate(new QName("main"));
+        }
+        QName callback = new QName("callback");
+        XPathCompiler xpath = processor.newXPathCompiler();
+        xpath.declareVariable(callback);
+        XPathExecutable callViaFunctions = xpath.compile("(for-each(false(), $callback), apply($callback, [false()]))");
+        for (int i = 0; i < functions.length; i++) {
+            XdmValue value = functions[i].call(processor, new XdmAtomicValue(false));
+            assertEquals(i, ((XdmAtomicValue) value).getLongValue());
+
+            XPathSelector selector = callViaFunctions.load();
+            selector.setVariable(callback, functions[i]);
+            XdmValue results = selector.evaluate();
+            assertEquals(2, results.size());
+            assertEquals(i, ((XdmAtomicValue) results.itemAt(0)).getLongValue());
+            assertEquals(i, ((XdmAtomicValue) results.itemAt(1)).getLongValue());
+        }
     }
 
     @Test
@@ -295,7 +343,7 @@ public class TestXdmFunction {
         try {
             Processor proc = new Processor(true);
             XsltCompiler comp = proc.newXsltCompiler();
-            comp.setSchemaAware(true);
+            comp.setSchemaAware(proc.isSchemaAware());
             StringReader sr = new StringReader(
                     "<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:f='f' xmlns:xs='http://www.w3.org/2001/XMLSchema'>" +
                             "<xsl:template name='main'><xsl:sequence select=\"function-lookup(QName('f', 'f'), 1)\"/></xsl:template> \n" +
@@ -360,7 +408,7 @@ public class TestXdmFunction {
             Processor proc = new Processor(true);
             proc.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, false);
             XQueryCompiler comp = proc.newXQueryCompiler();
-            comp.setSchemaAware(true);
+            comp.setSchemaAware(proc.isSchemaAware());
             String query = "declare variable $offset as xs:integer external;"
                     + "declare function local:f($p) as xs:integer {$p + $offset};"
                     + "local:f#1";

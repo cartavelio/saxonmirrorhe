@@ -15,13 +15,8 @@ repositories {
 }
 
 val saxonBuild = the<SaxonBuildExtension>()
-val testSuites = the<TestSuitesExtension>()
 
 val extension = project.extensions.create<SaxonJExtension>("saxonj")
-
-configure<TestSuitesExtension> {
-    edition = extension.edition
-}
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -55,11 +50,6 @@ val javaSourcesBucket by configurations.dependencyScope("javaSourcesBucket")
 val javaFeatureKeysBucket by configurations.dependencyScope("javaFeatureKeysBucket")
 val featureKeysBucket by configurations.dependencyScope("featureKeysBucket")
 val configXsdBucket by configurations.dependencyScope("configXsdBucket")
-val testdriverDownloadEditionJarBucket by configurations.dependencyScope("testdriverDownloadEditionJarBucket")
-val testdriverDownloadEditionSourcesJarBucket by configurations.dependencyScope("testdriverDownloadEditionSourcesJarBucket")
-val testdriverMavenEditionJarBucket by configurations.dependencyScope("testdriverMavenEditionJarBucket")
-val testdriverMavenEditionSourcesJarBucket by configurations.dependencyScope("testdriverMavenEditionSourcesJarBucket")
-val testdriverJarBucket by configurations.dependencyScope("testdriverJarBucket")
 val sourceArtifacts by configurations.consumable("sourceArtifacts")
 val resources by configurations.consumable("resources")
 val filteredSourcesDir by configurations.consumable("filteredSourcesDir")
@@ -113,22 +103,6 @@ val testImplementationResolvable by configurations.resolvable("testImplementatio
   extendsFrom(testImplementation)
 }
 
-val testdriverJar = configurations.resolvable("testdriverJar") {
-  extendsFrom(testdriverJarBucket)
-}
-val testdriverDownloadEditionJar by configurations.resolvable("testdriverDownloadEditionJar") {
-    extendsFrom(testdriverDownloadEditionJarBucket)
-}
-val testdriverDownloadEditionSourcesJar by configurations.resolvable("testdriverDownloadEditionSourcesJar") {
-    extendsFrom(testdriverDownloadEditionSourcesJarBucket)
-}
-val testdriverMavenEditionJar by configurations.resolvable("testdriverMavenEditionJar") {
-    extendsFrom(testdriverMavenEditionJarBucket)
-}
-val testdriverMavenEditionSourcesJar by configurations.resolvable("testdriverMavenEditionSourcesJar") {
-    extendsFrom(testdriverMavenEditionSourcesJarBucket)
-}
-
 configurations.configureEach {
   exclude("net.sf.saxon", "Saxon-HE")
   exclude("com.saxonica", "Saxon-EE")
@@ -175,19 +149,6 @@ dependencies {
     preprocessor("net.sf.saxon:Saxon-HE:12.4")
     preprocessor(files(saxonBuild.saxonLicenseDir.get()))
 
-    testdriverDownloadEditionJarBucket(extension.edition.map { edition ->
-        project(path = ":java:testdriver", configuration = "download${edition.uppercase()}Jar")
-    })
-    testdriverDownloadEditionSourcesJarBucket(extension.edition.map { edition ->
-        project(path = ":java:testdriver", configuration = "download${edition.uppercase()}SourcesJar")
-    })
-    testdriverMavenEditionJarBucket(extension.edition.map { edition ->
-        project(path = ":java:testdriver", configuration = "maven${edition.uppercase()}Jar")
-    })
-    testdriverMavenEditionSourcesJarBucket(extension.edition.map { edition ->
-        project(path = ":java:testdriver", configuration = "maven${edition.uppercase()}SourcesJar")
-    })
-    testdriverJarBucket(project(":java:testdriver"))
 }
 
 val javaSources = configurations.resolvable("javaSources") {
@@ -455,15 +416,6 @@ val (editionDownloadSourceJarTask, editionMavenSourceJarTask) = jarTaskBuilder("
     }
 }
 
-val (_, testdriverMavenSourcesJarTask) = jarTaskBuilder("testDriversSource") {
-    jarClassifier = "test-sources"
-    common {
-        from(preprocessJava) {
-            include("net/sf/saxon/testdriver/**.java")
-        }
-    }
-}
-
 val (_, javadocMavenJarTask) = jarTaskBuilder("javadoc") {
     common {
         from(editionJavadoc)
@@ -476,7 +428,6 @@ val signingDownloadJars = tasks.register<Sync>("signingDownloadJars") {
     duplicatesStrategy = DuplicatesStrategy.WARN
     into(layout.buildDirectory.dir("signing/download"))
     from(editionDownloadJarTask)
-    from(testdriverDownloadEditionJar)
 }
 
 val signingMavenJars = tasks.register<Sync>("signingMavenJars") {
@@ -484,8 +435,6 @@ val signingMavenJars = tasks.register<Sync>("signingMavenJars") {
     into(layout.buildDirectory.dir("signing/mavendownload"))
     from(editionMavenJarTask)
     from(javadocMavenJarTask)
-    from(testdriverMavenEditionJar)
-    from(testdriverMavenEditionSourcesJar)
     if (extension.edition.get().uppercase() == "HE") {
       from(editionMavenSourceJarTask)
     }

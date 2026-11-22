@@ -68,6 +68,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.*;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.net.URISyntaxException;
@@ -3528,11 +3529,22 @@ public class Configuration implements SourceResolver, NotationSet {
      * @param destination the destination for the output file
      * @param rootPackage the root package of the export
      * @return a suitable Expression Presenter
-     * @throws XPathException if none is available (e.g. because this is not Saxon-EE)
+     * @throws XPathException if no exporter is available for the requested target
      */
 
     public ExpressionPresenter newExpressionExporter(String target, OutputStream destination, StylesheetPackage rootPackage) throws XPathException {
-        throw new XPathException("Exporting a stylesheet requires Saxon-EE");
+        if (!"HE".equals(target)) {
+            throw new XPathException("Unsupported stylesheet export target in Saxon-HE: " + target);
+        }
+        ExpressionPresenter presenter = new ExpressionPresenter(this, new StreamResult(destination), true);
+        presenter.setDefaultNamespace(NamespaceUri.SAXON_XSLT_EXPORT);
+        ExpressionPresenter.ExportOptions options = presenter.getOptions();
+        options.target = target;
+        options.rootPackage = rootPackage;
+        options.componentMap = new IdentityHashMap<>();
+        options.packageMap = new IdentityHashMap<>();
+        options.packageMap.put(rootPackage, 0);
+        return presenter;
     }
 
     /**
