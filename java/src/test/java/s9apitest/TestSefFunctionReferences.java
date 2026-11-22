@@ -3,15 +3,13 @@ package s9apitest;
 import net.sf.saxon.Version;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.s9api.*;
-import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.Test;
 
-import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
-import java.util.IdentityHashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -38,6 +36,17 @@ class TestSefFunctionReferences {
         assertEquals("XPST0017", error.getErrorCode().getLocalName());
     }
 
+    @Test
+    void rejectUnsupportedExportTargetBeforeWriting() throws Exception {
+        Processor processor = new Processor(false);
+        var config = processor.getUnderlyingConfiguration();
+        var pkg = config.makeStylesheetPackage();
+        var buffer = new ByteArrayOutputStream();
+
+        assertThrows(XPathException.class, () -> config.newExpressionExporter("JS", buffer, pkg));
+        assertEquals(0, buffer.size());
+    }
+
     private static String call(Processor processor, XsltExecutable executable,
                                String template, XdmItem argument) throws SaxonApiException {
         XdmFunctionItem function = (XdmFunctionItem) executable.load30().callTemplate(new QName(template));
@@ -61,15 +70,8 @@ class TestSefFunctionReferences {
         var pkg = compiled.getTopLevelPackage();
         var buffer = new ByteArrayOutputStream();
 
-        // Write the fixture with the HE component writer and a checksum.
-        var out = new ExpressionPresenter(processor.getUnderlyingConfiguration(), new StreamResult(buffer), true);
-        out.setDefaultNamespace(NamespaceUri.SAXON_XSLT_EXPORT);
+        var out = processor.getUnderlyingConfiguration().newExpressionExporter("HE", buffer, pkg);
         var options = out.getOptions();
-        options.target = "HE";
-        options.rootPackage = pkg;
-        options.componentMap = new IdentityHashMap<>();
-        options.packageMap = new IdentityHashMap<>();
-        options.packageMap.put(pkg, 0);
         out.startElement("package");
         out.emitAttribute("saxonVersion", Version.getProductVersion());
         out.emitAttribute("version", Integer.toString(pkg.getHostLanguageVersion()));
