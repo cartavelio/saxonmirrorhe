@@ -210,7 +210,14 @@ public final class GeneralNodePattern extends Pattern {
 
     @Override
     public int allocateSlots(SlotManager slotManager, int nextFree) {
-        return ExpressionTool.allocateSlots(equivalentExpr, nextFree, slotManager);
+        int slots = ExpressionTool.allocateSlots(equivalentExpr, nextFree, slotManager);
+        if (precondition != null) {
+            slots = Math.max(slots, precondition.allocateSlots(slotManager, nextFree));
+        }
+        if (topNodeEquivalent != null) {
+            slots = Math.max(slots, ExpressionTool.allocateSlots(topNodeEquivalent, nextFree, slotManager));
+        }
+        return slots;
     }
 
     /**
