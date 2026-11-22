@@ -4054,7 +4054,7 @@ public class PackageLoaderHE implements IPackageLoader {
         });
 
         pMap.put("p.simPos", (loader, element) -> {
-            NodeTest test = (NodeTest) loader.parseAlphaCodeForItemType(element, "test");
+            NodeTest test = loader.parseAlphaCodeForNodeTest(element, "test", AxisInfo.CHILD);
             int pos = loader.getIntegerAttribute(element, "pos");
             return new SimplePositionalPattern(test, pos);
         });

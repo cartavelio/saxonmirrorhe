@@ -148,6 +148,64 @@ class TestSefExport {
     }
 
     @Test
+    void exportConditionalsWithUnreachableComparisons() throws Exception {
+        Processor sourceProcessor = new Processor(false);
+        XsltExecutable source = compile(sourceProcessor, """
+                <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+                  <xsl:output method="text"/>
+                  <xsl:variable name="include-anchors" select="false()"/>
+                  <xsl:template match="/">
+                    <xsl:variable name="anchor" as="element(anchor)?"
+                                  select="if ($include-anchors)
+                                          then root/anchor[not(@role = ('start', 'end'))][1]
+                                          else ()"/>
+                    <xsl:value-of select="($anchor/@id, 'kept')"/>
+                    <xsl:choose>
+                      <xsl:when test="root/@enabled = 'yes'">|active</xsl:when>
+                      <xsl:when test="true()">|fallback</xsl:when>
+                      <xsl:otherwise>
+                        <xsl:value-of select="root/anchor[not(@role = ('start', 'end'))]/@id"/>
+                      </xsl:otherwise>
+                    </xsl:choose>
+                  </xsl:template>
+                </xsl:stylesheet>
+                """);
+        String active = "<root enabled='yes'><anchor id='hidden'/></root>";
+        String fallback = "<root><anchor id='hidden'/></root>";
+        assertEquals("kept|active", transform(sourceProcessor, source, active));
+        assertEquals("kept|fallback", transform(sourceProcessor, source, fallback));
+
+        Processor target = new Processor(false);
+        XsltExecutable reloaded = roundTrip(target, source);
+        assertEquals("kept|active", transform(target, reloaded, active));
+        assertEquals("kept|fallback", transform(target, reloaded, fallback));
+    }
+
+    @Test
+    void preservePositionalPatternAcrossNodeKinds() throws Exception {
+        Processor sourceProcessor = new Processor(false);
+        XsltExecutable source = compile(sourceProcessor, """
+                <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+                  <xsl:output method="text"/>
+                  <xsl:template match="/">
+                    <xsl:apply-templates select="root/anchor"/>
+                  </xsl:template>
+                  <xsl:template match="root/node()[1][self::anchor]">first</xsl:template>
+                  <xsl:template match="anchor">later</xsl:template>
+                </xsl:stylesheet>
+                """);
+        String first = "<root><anchor/><!-- after --></root>";
+        String later = "<root><!-- before --><anchor/></root>";
+        assertEquals("first", transform(sourceProcessor, source, first));
+        assertEquals("later", transform(sourceProcessor, source, later));
+
+        Processor target = new Processor(false);
+        XsltExecutable reloaded = roundTrip(target, source);
+        assertEquals("first", transform(target, reloaded, first));
+        assertEquals("later", transform(target, reloaded, later));
+    }
+
+    @Test
     void preserveWhitespaceRulesAndKeys() throws Exception {
         Processor processor = new Processor(false);
         XsltExecutable source = compile(processor, """
