@@ -233,7 +233,7 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
         destination.emitAttribute("diag", roleSupplier.get().save());
         String flags = "" + (allow40 ? "4" : "") + (acceptReducedArity ? "r" : "");
         if (!flags.isEmpty()) {
-            destination.emitAttribute("flags", "4");
+            destination.emitAttribute("flags", flags);
         }
         getBaseExpression().export(destination);
         destination.endElement();
