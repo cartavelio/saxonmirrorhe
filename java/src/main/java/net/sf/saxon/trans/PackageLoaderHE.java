@@ -95,6 +95,7 @@ import java.util.function.Supplier;
 public class PackageLoaderHE implements IPackageLoader {
 
     private final static NestedIntegerValue SAXON9911 = new NestedIntegerValue(new int[]{9, 9, 1, 1});
+    private static final NestedIntegerValue SAXON13 = new NestedIntegerValue(new int[]{13});
 
     private final Configuration config;
     //private Schema importedSchema;
@@ -1049,6 +1050,7 @@ public class PackageLoaderHE implements IPackageLoader {
     private void readDecimalFormats(NodeInfo packageElement) throws XPathException {
         NodeInfo formatElement;
         DecimalFormatManager decimalFormatManager = packStack.peek().getDecimalFormatManager();
+        boolean legacyCharacterCodes = originalVersion.compareTo(SAXON13) < 0;
         SequenceIterator iterator = packageElement.iterateChildAxis(
                 NamedXNodeType.make(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "decimalFormat", config));
 
@@ -1063,17 +1065,17 @@ public class PackageLoaderHE implements IPackageLoader {
             SequenceIterator attributeIter = formatElement.iterateAttributeAxis(AnyGNode.TEST);
             NodeInfo att;
             while ((att = (NodeInfo) attributeIter.next()) != null) {
-                if (DecimalSymbols.isValidPropertyName(att.getLocalPart())) {
+                String property = att.getLocalPart();
+                if (DecimalSymbols.isValidPropertyName(property)) {
                     // In releases before 13.x, single-character properties were output as a decimal codepoint.
                     UnicodeString val = att.getUnicodeStringValue();
-                    if (val.length() >= 2 && allNumeric.matches(val)) {
+                    if (legacyCharacterCodes && !property.equals("NaN") && !property.equals("infinity") &&
+                            val.length() >= 2 && allNumeric.matches(val)) {
                         val = new UnicodeChar(Integer.parseInt(val.toString()));
                     }
-                    symbols.setProperty(att.getLocalPart(), val);
+                    symbols.setProperty(property, val);
                 }
             }
-            symbols.setHostLanguage(HostLanguage.XSLT, 31);
-
         }
     }
 

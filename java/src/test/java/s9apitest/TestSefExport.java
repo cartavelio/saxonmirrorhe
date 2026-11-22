@@ -85,17 +85,182 @@ class TestSefExport {
     }
 
     @Test
-    void rejectWhitespaceDeclarationsUntilTheyCanBePreserved() throws Exception {
+    void preserveWhitespaceRulesAndKeys() throws Exception {
         Processor processor = new Processor(false);
         XsltExecutable source = compile(processor, """
                 <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+                  <xsl:output method="text"/>
                   <xsl:strip-space elements="*"/>
+                  <xsl:preserve-space elements="keep"/>
+                  <xsl:key name="entry" match="item" use="@id"/>
+                  <xsl:template match="/">
+                    <xsl:value-of select="count(root/text()), count(root/keep/text()), key('entry', 'a')"
+                                  separator="|"/>
+                  </xsl:template>
                 </xsl:stylesheet>
                 """);
-        var buffer = new ByteArrayOutputStream();
+        String xml = "<root>  <item id='a'>found</item>  <keep> </keep>  </root>";
+        Processor target = new Processor(false);
 
-        assertThrows(SaxonApiException.class, () -> source.export(buffer));
-        assertEquals(0, buffer.size());
+        assertEquals("0|1|found", transform(processor, source, xml));
+        assertEquals("0|1|found", transform(target, roundTrip(target, source), xml));
+    }
+
+    @Test
+    void preserveNamedOutputCharacterMapsAndDecimalFormats() throws Exception {
+        Processor processor = new Processor(false);
+        XsltExecutable source = compile(processor, """
+                <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                                xmlns:f="urn:formats" exclude-result-prefixes="f">
+                  <xsl:output method="text"/>
+                  <xsl:output name="f:secondary" method="text" use-character-maps="f:map"/>
+                  <xsl:character-map name="f:map">
+                    <xsl:output-character character="@" string="[at]"/>
+                  </xsl:character-map>
+                  <xsl:decimal-format decimal-separator="," grouping-separator="." NaN="123"/>
+                  <xsl:decimal-format name="f:format" decimal-separator=":"/>
+                  <xsl:template match="/">
+                    <xsl:value-of select="format-number(xs:decimal(record/@number), '0,0')"
+                                  xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+                    <xsl:text>|</xsl:text>
+                    <xsl:value-of select="format-number(number(record/@nan), '0,0')"/>
+                    <xsl:result-document href="secondary.txt" format="{record/@format}">
+                      <xsl:text>@</xsl:text>
+                      <xsl:value-of select="format-number(xs:decimal(record/@number), '0:0', record/@decimal)"
+                                    xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+                    </xsl:result-document>
+                  </xsl:template>
+                </xsl:stylesheet>
+                """);
+        String xml = "<record number='1.5' nan='NaN' format='f:secondary' decimal='f:format'/>";
+        Processor target = new Processor(false);
+
+        assertEquals(Map.of("primary", "1,5|123", "secondary", "[at]1:5"),
+                captureResults(processor, source, xml));
+        assertEquals(Map.of("primary", "1,5|123", "secondary", "[at]1:5"),
+                captureResults(target, roundTrip(target, source), xml));
+    }
+
+    @Test
+    void preserveAccumulatorModeAssociationAndBindings() throws Exception {
+        Processor processor = new Processor(false);
+        XsltExecutable source = compile(processor, """
+                <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                                xmlns:f="urn:accumulators" default-mode="f:count">
+                  <xsl:output method="text"/>
+                  <xsl:param name="step" select="2"/>
+                  <xsl:mode name="f:count" use-accumulators="f:count"/>
+                  <xsl:accumulator name="f:count" initial-value="0"
+                                   as="xs:integer" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+                    <xsl:accumulator-rule match="item" select="$value + $step"/>
+                  </xsl:accumulator>
+                  <xsl:template match="/" mode="f:count">
+                    <xsl:value-of select="accumulator-after('f:count')"/>
+                  </xsl:template>
+                </xsl:stylesheet>
+                """);
+        String xml = "<root><item/><item/><item/></root>";
+        Processor target = new Processor(false);
+
+        assertEquals("6", transform(processor, source, xml));
+        assertEquals("6", transform(target, roundTrip(target, source), xml));
+    }
+
+    @Test
+    void preserveRequiredGlobalContextAndLazyGlobals() throws Exception {
+        Processor processor = new Processor(false);
+        XsltExecutable source = compile(processor, """
+                <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+                  <xsl:global-context-item as="document-node()" use="required"/>
+                  <xsl:param name="use" select="false()"/>
+                  <xsl:variable name="bad" select="error(QName('', 'TEST001'))"/>
+                  <xsl:template name="entry">
+                    <xsl:sequence select="if ($use) then $bad else string(/record/@name)"/>
+                  </xsl:template>
+                </xsl:stylesheet>
+                """);
+        Processor target = new Processor(false);
+        checkGlobalContextAndGlobals(processor, source);
+        checkGlobalContextAndGlobals(target, roundTrip(target, source));
+    }
+
+    @Test
+    void preserveMissingGlobalParameterError() throws Exception {
+        Processor processor = new Processor(false);
+        XsltExecutable source = compile(processor, """
+                <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+                  <xsl:param name="required" required="yes"/>
+                  <xsl:template name="entry"><xsl:sequence select="$required"/></xsl:template>
+                </xsl:stylesheet>
+                """);
+        QName entry = new QName("entry");
+        SaxonApiException sourceError = assertThrows(SaxonApiException.class,
+                () -> source.load30().callTemplate(entry));
+        XsltExecutable reloaded = roundTrip(new Processor(false), source);
+        SaxonApiException reloadedError = assertThrows(SaxonApiException.class,
+                () -> reloaded.load30().callTemplate(entry));
+
+        assertEquals("XTDE0050", sourceError.getErrorCode().getLocalName());
+        assertEquals(sourceError.getErrorCode(), reloadedError.getErrorCode());
+    }
+
+    @Test
+    void preserveStaticBaseUriNamespacesAndCollation() throws Exception {
+        Processor processor = new Processor(false);
+        String stylesheet = """
+                <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                    xmlns:f="urn:retained" default-collation="http://www.w3.org/2005/xpath-functions/collation/html-ascii-case-insensitive">
+                  <xsl:output method="text"/>
+                  <xsl:template match="/">
+                    <xsl:value-of select="resolve-uri(record/@relative), namespace-uri-from-QName(xs:QName(record/@name)),
+                                          compare(record/@first, record/@second)" separator="|"
+                                  xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+                    <xsl:text>|</xsl:text>
+                    <xsl:value-of select="compare(record/@first, record/@second)"
+                                  default-collation="http://www.w3.org/2005/xpath-functions/collation/codepoint"/>
+                  </xsl:template>
+                </xsl:stylesheet>
+                """;
+        XsltExecutable source = processor.newXsltCompiler().compile(new StreamSource(
+                new StringReader(stylesheet), "file:/original/styles/stylesheet.xsl"));
+        String xml = "<record relative='../data.xml' name='f:local' first='Ada' second='ADA'/>";
+        Processor target = new Processor(false);
+
+        assertEquals("file:/original/data.xml|urn:retained|0|1", transform(processor, source, xml));
+        assertEquals("file:/original/data.xml|urn:retained|0|1", transform(target, roundTrip(target, source), xml));
+    }
+
+    private static Map<String, String> captureResults(Processor processor, XsltExecutable executable, String xml)
+            throws SaxonApiException {
+        var transformer = executable.load30();
+        StringWriter primary = new StringWriter();
+        StringWriter secondary = new StringWriter();
+        transformer.setBaseOutputURI("file:/output/primary.txt");
+        transformer.setResultDocumentHandler(uri -> {
+            assertEquals("file:/output/secondary.txt", uri.toString());
+            return processor.newSerializer(secondary);
+        });
+        transformer.applyTemplates(new StreamSource(new StringReader(xml)), processor.newSerializer(primary));
+        return Map.of("primary", primary.toString(), "secondary", secondary.toString());
+    }
+
+    private static void checkGlobalContextAndGlobals(Processor processor, XsltExecutable executable)
+            throws SaxonApiException {
+        QName entry = new QName("entry");
+        SaxonApiException missingContext = assertThrows(SaxonApiException.class,
+                () -> executable.load30().callTemplate(entry));
+        assertEquals("XTDE3086", missingContext.getErrorCode().getLocalName());
+
+        var transformer = executable.load30();
+        var doc = processor.newDocumentBuilder().build(input());
+        transformer.setGlobalContextItem(doc);
+        assertEquals("Ada", transformer.callTemplate(entry).itemAt(0).getStringValue());
+
+        var failing = executable.load30();
+        failing.setGlobalContextItem(doc);
+        failing.setStylesheetParameters(Map.of(new QName("use"), new XdmAtomicValue(true)));
+        SaxonApiException badGlobal = assertThrows(SaxonApiException.class, () -> failing.callTemplate(entry));
+        assertEquals("TEST001", badGlobal.getErrorCode().getLocalName());
     }
 
     private static XsltExecutable compile(Processor processor, String stylesheet) throws SaxonApiException {
@@ -108,13 +273,23 @@ class TestSefExport {
                 new StreamSource(new ByteArrayInputStream(buffer.toByteArray())));
     }
 
+    private static XsltExecutable roundTrip(Processor processor, XsltExecutable executable) throws SaxonApiException {
+        var buffer = new ByteArrayOutputStream();
+        executable.export(buffer);
+        return reload(processor, buffer);
+    }
+
     private static StreamSource input() {
         return new StreamSource(new StringReader("<record name='Ada'/>"));
     }
 
     private static String transform(Processor processor, XsltExecutable executable) throws SaxonApiException {
+        return transform(processor, executable, "<record name='Ada'/>");
+    }
+
+    private static String transform(Processor processor, XsltExecutable executable, String xml) throws SaxonApiException {
         StringWriter result = new StringWriter();
-        executable.load30().applyTemplates(input(), processor.newSerializer(result));
+        executable.load30().applyTemplates(new StreamSource(new StringReader(xml)), processor.newSerializer(result));
         return result.toString();
     }
 
