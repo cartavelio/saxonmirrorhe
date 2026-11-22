@@ -10,6 +10,7 @@ package net.sf.saxon.trans;
 //import com.saxonica.trans.XSLRecord;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.PreparedStylesheet;
 import net.sf.saxon.event.CheckSumFilter;
 import net.sf.saxon.event.FilterFactory;
 import net.sf.saxon.event.ProxyReceiver;
@@ -55,6 +56,7 @@ import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.CharacterMapIndex;
+import net.sf.saxon.style.Compilation;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeChar;
 import net.sf.saxon.str.UnicodeString;
@@ -84,6 +86,7 @@ import net.sf.saxon.z.IntHashMap;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.StringReader;
@@ -286,6 +289,56 @@ public class PackageLoaderHE implements IPackageLoader {
             invocations.addAll(pending.subList(firstFixup, pending.size()));
             componentInvocations.put(component, invocations);
         }
+    }
+
+    private Expression readCapturedUserFunction(NodeInfo element) throws XPathException {
+        String sef = element.getAttributeValue(NamespaceUri.NULL, "sef");
+        byte[] bytes;
+        try {
+            bytes = Base64.getDecoder().decode(sef == null ? "" : sef);
+        } catch (IllegalArgumentException e) {
+            throw new XPathException("Invalid captured stylesheet in SEF", SaxonErrorCode.SXPK0002);
+        }
+        if (bytes.length == 0) {
+            throw new XPathException("Missing captured stylesheet in SEF", SaxonErrorCode.SXPK0002);
+        }
+
+        PackageLoaderHE nested = new PackageLoaderHE(config);
+        StylesheetPackage pack = nested.loadPackage(new StreamSource(new ByteArrayInputStream(bytes)), usedSchemata);
+        Component component = nested.componentIdMap.get(getIntegerAttribute(element, "component"));
+        int arity = getIntegerAttribute(element, "arity");
+        if (component == null || !(component.getActor() instanceof UserFunction function)
+                || arity < function.getMinimumArity() || arity > function.getArity()) {
+            throw new XPathException("Invalid captured user function component or arity in SEF", SaxonErrorCode.SXPK0005);
+        }
+
+        Compilation compilation = new Compilation(config, new CompilerInfo(config.getDefaultXsltCompilerInfo()));
+        compilation.setPackageData(pack);
+        pack.checkForAbstractComponents();
+        PreparedStylesheet executable = new PreparedStylesheet(compilation);
+        pack.updatePreparedStylesheet(executable);
+        executable.addPackage(pack);
+        XsltController controller = executable.newController();
+
+        GlobalParameterSet params = new GlobalParameterSet();
+        for (NodeInfo param : element.children(NamedXNodeType.make(
+                Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "param", config))) {
+            StructuredQName name = getQNameAttribute(param, "name");
+            if (name == null || !(getFirstChildExpression(param) instanceof Literal literal)) {
+                throw new XPathException("Invalid captured stylesheet parameter in SEF", SaxonErrorCode.SXPK0002);
+            }
+            params.put(name, literal.getGroundedValue());
+        }
+        Expression context = getExpressionWithRole(element, "globalContext");
+        if (context != null) {
+            if (!(context instanceof Literal literal) || !(literal.getGroundedValue() instanceof Item item)) {
+                throw new XPathException("Invalid captured global context item in SEF", SaxonErrorCode.SXPK0002);
+            }
+            controller.setGlobalContextItem(item, true);
+        }
+        controller.initializeController(params);
+        return new FunctionLiteral(new UserFunctionReference.BoundUserFunction(
+                function, arity, component, new UserFunctionReference(function), controller));
     }
 
     private void validateComponentBindings() throws XPathException {
@@ -3758,6 +3811,8 @@ public class PackageLoaderHE implements IPackageLoader {
             loader.addComponentFixup(call);
             return call;
         });
+
+        eMap.put("capturedUserFn", PackageLoaderHE::readCapturedUserFunction);
 
         eMap.put("union", (loader, element) -> {
             Expression lhs = loader.getFirstChildExpression(element);
