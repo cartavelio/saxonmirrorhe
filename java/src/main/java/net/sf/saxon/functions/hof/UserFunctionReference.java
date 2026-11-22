@@ -8,6 +8,7 @@
 package net.sf.saxon.functions.hof;
 
 import net.sf.saxon.Controller;
+import net.sf.saxon.PreparedStylesheet;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.ItemElaborator;
@@ -29,7 +30,10 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 
 /**
  * A UserFunctionReference is an expression in the form local:f#1 where local:f is a user-defined function.
@@ -552,7 +556,56 @@ public class UserFunctionReference extends Expression
 
         @Override
         public void export(ExpressionPresenter out) throws XPathException {
-            agent.export(out);
+            var options = out.getOptions();
+            if ("HE".equals(options.target) && options.rootPackage != null && component != null
+                    && function instanceof UserFunction
+                    && controller.getExecutable() instanceof PreparedStylesheet executable
+                    && component.getContainingPackage() != options.rootPackage
+                    && !options.rootPackage.contains(component.getContainingPackage())) {
+                exportCapturedFunction(out, executable);
+            } else {
+                agent.export(out);
+            }
+        }
+
+        private void exportCapturedFunction(ExpressionPresenter out, PreparedStylesheet executable) throws XPathException {
+            StylesheetPackage capturedPackage = executable.getTopLevelPackage();
+            var options = out.getOptions();
+            var enclosingPackages = new ArrayList<>(options.enclosingExportPackages);
+            enclosingPackages.add(options.rootPackage);
+            if (enclosingPackages.contains(capturedPackage)) {
+                throw new XPathException("Cannot export a cyclic captured stylesheet function " + getDescription());
+            }
+
+            // Keep the captured stylesheet's component IDs and name resolution separate from the caller's.
+            var buffer = new ByteArrayOutputStream();
+            var nested = out.getConfiguration().newExpressionExporter("HE", buffer, capturedPackage);
+            nested.getOptions().enclosingExportPackages = enclosingPackages;
+            capturedPackage.export(nested);
+            Integer id = nested.getOptions().componentMap.get(component);
+            if (id == null) {
+                throw new XPathException("Cannot export the captured stylesheet component for " + getDescription());
+            }
+
+            out.startElement("capturedUserFn");
+            out.emitAttribute("sef", Base64.getEncoder().encodeToString(buffer.toByteArray()));
+            out.emitAttribute("component", id.toString());
+            out.emitAttribute("arity", Integer.toString(arity));
+            for (StructuredQName name : executable.getGlobalParameters().keySet()) {
+                Sequence value = controller.getParameter(name);
+                if (value != null) {
+                    out.startElement("param");
+                    out.emitAttribute("name", name);
+                    Literal.exportValue(value.materialize(), out);
+                    out.endElement();
+                }
+            }
+            Item context = controller.getGlobalContextItem();
+            if (context != null) {
+                out.setChildRole("globalContext");
+                Literal.exportValue(context, out);
+            }
+            out.endElement();
         }
 
         @Override

@@ -34,6 +34,7 @@ import net.sf.saxon.value.Whitespace;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.stream.StreamResult;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
@@ -692,6 +693,7 @@ public class ExpressionPresenter {
         public int targetVersion = 0;
         public boolean relocatable = false;
         public StylesheetPackage rootPackage;
+        public List<StylesheetPackage> enclosingExportPackages = List.of();
         public Map<Component, Integer> componentMap;
         public Map<StylesheetPackage, Integer> packageMap;
         public boolean explaining;

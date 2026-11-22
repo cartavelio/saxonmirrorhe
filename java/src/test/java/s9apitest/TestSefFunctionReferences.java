@@ -6,11 +6,14 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -18,6 +21,60 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TestSefFunctionReferences {
+    @Test
+    void reloadFunctionReturnedByStaticTransform(@TempDir Path directory) throws Exception {
+        Path secondary = Files.writeString(directory.resolve("secondary.xsl"), """
+                <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                    xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:f="urn:functions">
+                  <xsl:param name="prefix" as="xs:string" required="yes"/>
+                  <xsl:variable name="unused" select="error()"/>
+                  <xsl:variable name="context" select="string(.)"/>
+                  <xsl:function name="f:label" as="xs:string">
+                    <xsl:param name="value" as="xs:string"/>
+                    <xsl:sequence select="if ($value = '') then $unused else concat($prefix, $context, $value)"/>
+                  </xsl:function>
+                  <xsl:template name="get-function">
+                    <xsl:sequence select="f:label#1"/>
+                  </xsl:template>
+                </xsl:stylesheet>
+                """);
+        Path primary = Files.writeString(directory.resolve("primary.xsl"), """
+                <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                    xmlns:f="urn:functions">
+                  <xsl:function name="f:label">
+                    <xsl:param name="value"/>
+                    <xsl:sequence select="'outer'"/>
+                  </xsl:function>
+                  <xsl:variable name="label" static="yes" select="transform(map {
+                    'stylesheet-location': 'secondary.xsl',
+                    'initial-template': QName('', 'get-function'),
+                    'stylesheet-params': map {QName('', 'prefix'): 'captured:'},
+                    'global-context-item': 'context:',
+                    'delivery-format': 'raw'
+                  })?output"/>
+                  <xsl:template name="main"><xsl:sequence select="$label"/></xsl:template>
+                  <xsl:template name="outer"><xsl:sequence select="f:label('Ada')"/></xsl:template>
+                </xsl:stylesheet>
+                """);
+        var sourceProcessor = new Processor(false);
+        var original = sourceProcessor.newXsltCompiler().compile(new StreamSource(primary.toFile()));
+        var argument = new XdmAtomicValue("Ada");
+        assertEquals("captured:context:Ada", call(sourceProcessor, original, "main", argument));
+
+        StreamSource sef = export(original);
+        Files.delete(primary);
+        Files.delete(secondary);
+        var targetProcessor = new Processor(false);
+        var reloaded = targetProcessor.newXsltCompiler().loadExecutablePackage(sef);
+        assertEquals("captured:context:Ada", call(targetProcessor, reloaded, "main", argument));
+        assertEquals("outer", reloaded.load30().callTemplate(new QName("outer")).itemAt(0).getStringValue());
+        var reexportProcessor = new Processor(false);
+        var reexported = reexportProcessor.newXsltCompiler().loadExecutablePackage(export(reloaded));
+        assertEquals("captured:context:Ada", call(reexportProcessor, reexported, "main", argument));
+        assertEquals("FOER0000", assertThrows(SaxonApiException.class,
+                () -> call(targetProcessor, reloaded, "main", new XdmAtomicValue(""))).getErrorCode().getLocalName());
+    }
+
     @Test
     void reloadStandardFunctionReferencesInHe() throws Exception {
         Processor processor = new Processor(false);
