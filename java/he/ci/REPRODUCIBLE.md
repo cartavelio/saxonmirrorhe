@@ -33,14 +33,17 @@ the Java conventions also consult Maven Local, Maven Central, and Saxonica;
 build logic consults Maven Central, the plugin portal, and JitPack. A later
 immutable acquisition must preserve and verify the entire resolved closure,
 including plugin/buildSrc artifacts and metadata, and isolate Maven Local.
-The probe below records coordinate/cache paths and SHA-256 values for the
-resolved closure in each `dependencies.json`. These inventories record the
-bytes fetched; they do not independently authenticate their publishers or
-prevent repositories from replacing them. Gradle's existing
+The probe below records relative paths and SHA-256 values for files in each
+build's Gradle `caches/modules-2/files-2.1` directory in `dependencies.json`.
+These inventories cover that cache, not a guaranteed complete resolved closure;
+they do not independently authenticate publishers or prevent repositories from
+replacing files. Gradle's existing
 `--write-verification-metadata sha256` mechanism can bootstrap an audited
 verification policy, but generated checksums alone are not such an audit.
 
-Run the focused build tests from the repository root with JDK 21 and .NET 8:
+Run the focused build tests from the repository root with Python 3.12 or newer,
+JDK 21, and .NET 8. Choose a new output directory outside the repository for the
+reproducibility probe:
 
 ```sh
 python3 java/he/ci/release-date.py
