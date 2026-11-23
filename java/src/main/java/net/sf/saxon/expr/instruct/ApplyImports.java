@@ -127,11 +127,13 @@ public class ApplyImports extends ApplyNextMatchingTemplate implements ITemplate
                 Item currentItem = context.getCurrentIterator().current();
 
                 Mode mode = modeComponent.getActor();
-                Rule rule = mode.getRule(currentItem, min, max, context);
+                // A named template can call apply-imports. Bind the rule search to the current mode.
+                XPathContextMajor c2 = context.newContext();
+                c2.setCurrentComponent(modeComponent);
+                Rule rule = mode.getRule(currentItem, min, max, c2);
                 if (rule == null) {             // use the default action for the node
-                    mode.getBuiltInRuleSet().process(currentItem, params, tunnels, output, context, loc);
+                    mode.getBuiltInRuleSet().process(currentItem, params, tunnels, output, c2, loc);
                 } else {
-                    XPathContextMajor c2 = context.newContext();
                     TemplateRule nh = (TemplateRule) rule.getAction();
                     nh.initialize();
                     c2.setOrigin(expr);
@@ -139,7 +141,6 @@ public class ApplyImports extends ApplyNextMatchingTemplate implements ITemplate
                     c2.setTunnelParameters(tunnels);
                     c2.openStackFrame(nh.getStackFrameMap());
                     c2.setCurrentTemplateRule(rule);
-                    c2.setCurrentComponent(modeComponent);
                     c2.setCurrentMergeGroupIterator(null);
                     if (mode.isModeTracing()) {
                         TemplateRuleTraceListener tracer = ((XsltController) controller).getTemplateRuleTraceListener();

@@ -152,8 +152,7 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
      * Get the match pattern used with this template
      *
      * @return the match pattern, or null if this is a named template with no match pattern. In the case of
-     * a template rule whose pattern is a union pattern, this will be the original union pattern; the individual
-     * Rule objects contain the branches of the union pattern.
+     * a union pattern split into separate template rules, this is the branch registered for this rule.
      */
 
     public Pattern getMatchPattern() {
@@ -215,7 +214,7 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
 
     /**
      * Get the rules that use this template. For a template with no match pattern, this will be
-     * an empty list. For a union pattern, there will be one rule for each branch of the union.
+     * an empty list. Split branches of a union are registered with separate template rules.
      *
      * @return the rules corresponding to this template.
      */
