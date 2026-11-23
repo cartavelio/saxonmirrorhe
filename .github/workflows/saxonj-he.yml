@@ -9,6 +9,32 @@ permissions:
   contents: read
 
 jobs:
+  reproducible:
+    name: Reproducible HE artifacts
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Check the shared build prerequisite
+        run: dotnet --list-sdks | grep '^8\.'
+      - name: Exercise release date inputs
+        run: python3 java/he/ci/release-date.py
+      - name: Compare two clean normal HE builds
+        run: python3 java/he/ci/reproducible.py "$RUNNER_TEMP/he-reproducible" --targeted-tests
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ !cancelled() }}
+        with:
+          name: he-reproducibility
+          path: |
+            ${{ runner.temp }}/he-reproducible/receipt.json
+            ${{ runner.temp }}/he-reproducible/*/build.log
+            ${{ runner.temp }}/he-reproducible/*/entries.json
+            ${{ runner.temp }}/he-reproducible/*/dependencies.json
+          if-no-files-found: ignore
+
   build:
     name: Build and smoke-test
     runs-on: ubuntu-24.04

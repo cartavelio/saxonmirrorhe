@@ -4,6 +4,8 @@ import com.saxonica.build.TargetHost
 import com.saxonica.build.java.testsuite.JavaRunner
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.time.LocalDate
+import java.time.format.DateTimeParseException
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.*
 
@@ -27,6 +29,19 @@ extension.saxonLicenseDir.set(project.findProperty("saxonLicenseDir")?.toString(
   ?: (System.getenv("SAXON_LICENSE_DIR")
     ?: System.getenv("HOME") + "/java"))
 extension.dateStamp.set(SimpleDateFormat("yyyyMMdd").format(Date()).toString())
+val releaseDate = providers.gradleProperty("saxonReleaseDate")
+  .orElse(providers.provider { SimpleDateFormat("yyyy-MM-dd").format(Date()) })
+  .map { value ->
+    try {
+      require(value.matches(Regex("[0-9]{4}-[0-9]{2}-[0-9]{2}")))
+      LocalDate.parse(value).toString()
+    } catch (ex: IllegalArgumentException) {
+      throw GradleException("saxonReleaseDate must be a valid date in YYYY-MM-DD format: $value", ex)
+    } catch (ex: DateTimeParseException) {
+      throw GradleException("saxonReleaseDate must be a valid date in YYYY-MM-DD format: $value", ex)
+    }
+  }
+extension.releaseDate.set(releaseDate)
 extension.pathSeparator.set(System.getProperty("path.separator") ?: ":")
 extension.fileSeparator.set(System.getProperty("file.separator") ?: "/")
 

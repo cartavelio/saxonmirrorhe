@@ -27,6 +27,11 @@ tasks.named<JavaCompile>("compileEditionTestJava") {
 
 val saxonBuild = the<SaxonBuildExtension>()
 
+// Keep normal HE artifacts independent of checkout and generated-file mtimes.
+tasks.withType<AbstractArchiveTask>().configureEach {
+  isPreserveFileTimestamps = false
+}
+
 sourceSets.named("editionTest") {
   java {
     // Exclude everything that won't build in HE...

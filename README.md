@@ -25,6 +25,10 @@ java/he/ci/smoke.sh java/he/build/he-runtime
 
 The runnable JAR and its dependencies are in `java/he/build/he-runtime/`. The smoke test checks that a source stylesheet and its saved compiled form (SEF) produce the expected output for the same inputs.
 
+For maintained deterministic HE artifacts, use an explicit release date with the
+normal JAR task; see [reproducible HE builds](java/he/ci/REPRODUCIBLE.md) for the
+date contract, clean-build probe, and dependency verification limits.
+
 GitHub Actions runs these checks on pull requests and pushes to `saxon12`. To use a CI build, open a successful workflow run and download the `saxonj-he-runtime` artifact. The HE test report is available as `he-test-report`. [Workflow runs](https://github.com/cartavelio/saxonmirrorhe/actions/workflows/saxonj-he.yml)
 
 ## Save and load a compiled stylesheet
