@@ -922,8 +922,17 @@ public class Choose extends Instruction implements ConditionalInstruction {
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("choose", this);
         for (int i = 0; i < size(); i++) {
-            getCondition(i).export(out);
-            getAction(i).export(out);
+            Expression condition = getCondition(i);
+            condition.export(out);
+            // Type checking can leave unreachable actions unchecked.
+            if (Literal.hasEffectiveBooleanValue(condition, false)) {
+                Literal.makeEmptySequence().export(out);
+            } else {
+                getAction(i).export(out);
+                if (Literal.hasEffectiveBooleanValue(condition, true)) {
+                    break;
+                }
+            }
         }
         out.endElement();
     }
