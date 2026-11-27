@@ -29,7 +29,6 @@ import java.io.FileInputStream
 import java.io.InputStreamReader
 import java.io.PrintStream
 import java.nio.file.Path
-import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
 import kotlin.collections.component1
@@ -48,6 +47,7 @@ interface SaxonBuildExtension {
     abstract val releaseBuild: Property<Boolean>
     abstract val saxonLicenseDir: Property<String>
     abstract val dateStamp: Property<String>
+    abstract val releaseDate: Property<String>
     abstract val pathSeparator: Property<String>
     abstract val fileSeparator: Property<String>
     abstract val systemOs: Property<OperatingSystem>
@@ -145,7 +145,7 @@ interface SaxonBuildExtension {
 
     fun patchReleaseInfo(src: File, saxonVersion: String, majorDate: String) {
         val (saxonMajor, saxonMinor, saxonPatch) = saxonVersion.split(".")
-        val minorDate = SimpleDateFormat("yyyy-MM-dd").format(Date())
+        val minorDate = releaseDate.get()
 
         // Trim to 7 digits so that it will always fit in an int.
         val hash = BranchInfo.currentCommitHash(src.parentFile).substring(0, 7)

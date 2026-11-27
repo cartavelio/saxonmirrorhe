@@ -183,6 +183,8 @@ val bundledFilteredSources = tasks.register<Sync>("bundleFilteredSources") {
 filteredSourcesDir.outgoing.artifact(bundledFilteredSources.map { it.destinationDir }) { builtBy(bundledFilteredSources) }
 
 val preprocessJava = tasks.register<PreprocessSourcesTask>("preprocessJava") {
+    inputs.property("saxonReleaseDate", saxonBuild.releaseDate)
+    inputs.property("saxonSourceRevision", provider { BranchInfo.currentCommitHash(project.projectDir) })
     classpath.from(configurations.named("preprocessor"))
     sources = bundledFilteredSources.map { it.destinationDir }
 
