@@ -17,6 +17,7 @@ import net.sf.saxon.expr.sort.GlobalOrderComparer;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -429,7 +430,7 @@ public class DocumentFn extends SystemFunction implements Callable {
 //#if CSHARP == false
                         // Use URIUtils (not URI.resolve) because URIUtils handles jar:file: URIs correctly.
                         // Supply UTF-8 escapes: URIUtils otherwise escapes UTF-16 code units as if they were bytes.
-                        request.uri = URIUtils.resolve(new URI(baseURI), new URI(href).toASCIIString()).toString();
+                        request.uri = URIUtils.resolve(new URI(baseURI), IriToUri.iriToUri(StringView.tidy(href)).toString()).toString();
 //#else
                         // But we don't need to worry about that in C#
                         request.uri = new URI(baseURI).resolve(href).toString();

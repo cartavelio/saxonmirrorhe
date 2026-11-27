@@ -20,20 +20,28 @@ public class DocumentIriTest {
     public Path directory;
 
     private Path input(String folder) throws Exception {
+        return input(folder, "α β");
+    }
+
+    private Path input(String folder, String text) throws Exception {
         Path file = directory.resolve(folder).resolve("input.xml");
         Files.createDirectories(file.getParent());
-        Files.write(file, XML.getBytes(StandardCharsets.UTF_8));
+        Files.write(file, ("<probe>" + text + "</probe>").getBytes(StandardCharsets.UTF_8));
         return file;
     }
 
     private void read(String href, URI base) throws Exception {
+        read(href, base, "α β");
+    }
+
+    private void read(String href, URI base, String expected) throws Exception {
         XQueryCompiler compiler = new Processor(false).newXQueryCompiler();
         compiler.setBaseURI(base);
         String literal = href.replace("&", "&amp;").replace("'", "''");
         String result = compiler.compile("doc('" + literal + "')/probe/string()")
                 .load().evaluateSingle().getStringValue();
-        if (!"α β".equals(result)) {
-            throw new AssertionError("Expected fixture text α β, got " + result);
+        if (!expected.equals(result)) {
+            throw new AssertionError("Expected fixture text " + expected + ", got " + result);
         }
     }
 
@@ -94,6 +102,41 @@ public class DocumentIriTest {
         read("child/input.xml", URI.create("jar:" + jar.toUri().toASCIIString() + "!/nested/query.xq"));
     }
 
+    private void readNormalizationForms(String prefix, URI base) throws Exception {
+        read(prefix + "\u03B1\u0301/input.xml", base, "decomposed");
+        read(prefix + "%CE%B1%CC%81/input.xml", base, "decomposed");
+        read(prefix + "\u03AC/input.xml", base, "composed");
+        read(prefix + "%CE%AC/input.xml", base, "composed");
+    }
+
+    @Test
+    public void distinctNormalizationFormsAbsolute() throws Exception {
+        input("\u03B1\u0301", "decomposed");
+        input("\u03AC", "composed");
+        readNormalizationForms(directory.toUri().toASCIIString(), directory.toUri());
+    }
+
+    @Test
+    public void distinctNormalizationFormsRelative() throws Exception {
+        input("\u03B1\u0301", "decomposed");
+        input("\u03AC", "composed");
+        readNormalizationForms("", directory.toUri());
+    }
+
+    @Test
+    public void distinctNormalizationFormsInJar() throws Exception {
+        Path jar = directory.resolve("normalization.jar");
+        try (ZipOutputStream zip = new ZipOutputStream(Files.newOutputStream(jar))) {
+            zip.putNextEntry(new ZipEntry("nested/\u03B1\u0301/input.xml"));
+            zip.write("<probe>decomposed</probe>".getBytes(StandardCharsets.UTF_8));
+            zip.closeEntry();
+            zip.putNextEntry(new ZipEntry("nested/\u03AC/input.xml"));
+            zip.write("<probe>composed</probe>".getBytes(StandardCharsets.UTF_8));
+            zip.closeEntry();
+        }
+        readNormalizationForms("", URI.create("jar:" + jar.toUri().toASCIIString() + "!/nested/query.xq"));
+    }
+
     private interface Check { void run() throws Exception; }
 
     private static int check(String name, Check test) {
@@ -124,7 +167,10 @@ public class DocumentIriTest {
                     + check("supplementaryCodepoint", test::supplementaryCodepoint)
                     + check("unicodeBaseWithAsciiReference", test::unicodeBaseWithAsciiReference)
                     + check("reservedCharactersAndExistingEscapes", test::reservedCharactersAndExistingEscapes)
-                    + check("relativeDocumentInJar", test::relativeDocumentInJar);
+                    + check("relativeDocumentInJar", test::relativeDocumentInJar)
+                    + check("distinctNormalizationFormsAbsolute", test::distinctNormalizationFormsAbsolute)
+                    + check("distinctNormalizationFormsRelative", test::distinctNormalizationFormsRelative)
+                    + check("distinctNormalizationFormsInJar", test::distinctNormalizationFormsInJar);
         } finally {
             try (java.util.stream.Stream<Path> paths = Files.walk(test.directory)) {
                 for (Path path : (Iterable<Path>) paths.sorted(Comparator.reverseOrder())::iterator) {

@@ -34,7 +34,8 @@ For the document IRI regression, run
 The [resolver call](java/src/main/java/net/sf/saxon/functions/DocumentFn.java) is
 covered by [real document retrieval tests](java/src/test/java/internaltests/DocumentIriTest.java)
 for raw Greek IRIs, UTF-8 encoded controls, spaces, supplementary characters,
-reserved characters, and relative JAR references. After the normal build above,
+reserved characters, relative JAR references, and distinct Unicode normalization
+forms. After the normal build above,
 run the identical cases against the packaged runtime with Java 17 on `PATH`:
 
 ```sh
