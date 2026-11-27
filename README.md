@@ -11,6 +11,7 @@ This branch backports the fork’s Java HE improvements to Saxon 12.10. Developm
 - **Building XML in Java.** The HE build restores the `Saplings.elem` overloads that accept a Java lambda and the `toXdmNode(Processor)` method. Java applications can use these methods to build an XML element and pass it directly to an XPath query or XSLT transformation. [PR #2](https://github.com/cartavelio/saxonmirrorhe/pull/2)
 - **Calling XSLT functions from Java.** When a stylesheet returns an inline function to Java, the function keeps access to the global parameters of the transformation that created it. Two runs of the same stylesheet can return functions that each see their own parameter values when called later. [PR #3](https://github.com/cartavelio/saxonmirrorhe/pull/3)
 - **Comparing values that contain functions.** XPath 3.1 requires `deep-equal()` to raise `FOTY0015` when it compares ordinary function items, even two references to the same function. The fork reports that error consistently, including when the comparison reaches a function nested in a map or array. [PR #8](https://github.com/cartavelio/saxonmirrorhe/pull/8)
+- **Retrieving documents with Unicode paths.** SaxonJ's `doc()` and `document()` encode raw Unicode references as UTF-8 before resolving them, preserving existing percent escapes and Unicode normalization forms. Relative references within JAR files remain supported.
 - **Running compiled stylesheets in HE.** A Professional Edition (PE) check used to reject existing stylesheet export files (SEFs) containing standard XPath function references such as `abs#1` or `map:size#1`, even though HE already supports these functions. The fork loads those references using only the open-source HE implementations. [PR #10](https://github.com/cartavelio/saxonmirrorhe/pull/10) · [Saxonica’s HE feature list](https://www.saxonica.com/html/documentation13/conformance/xslt30.html)
 
 ## Build and test SaxonJ-HE
@@ -28,6 +29,22 @@ The runnable JAR and its dependencies are in `java/he/build/he-runtime/`. The sm
 For maintained deterministic HE artifacts, use an explicit release date with the
 normal JAR task; see [reproducible HE builds](java/he/ci/REPRODUCIBLE.md) for the
 date contract, clean-build probe, and dependency verification limits.
+
+For the document IRI regression, run
+`./gradlew --configure-on-demand :java:he:editionTest --tests internaltests.DocumentIriTest`.
+The [resolver call](java/src/main/java/net/sf/saxon/functions/DocumentFn.java) is
+covered by [real document retrieval tests](java/src/test/java/internaltests/DocumentIriTest.java)
+for raw Greek IRIs, UTF-8 encoded controls, spaces, supplementary characters,
+reserved characters, relative JAR references, and distinct Unicode normalization
+forms. After the normal build above,
+run the identical cases against the packaged runtime with Java 17 on `PATH`:
+
+```sh
+java -cp 'java/he/build/classes/java/editionTest:java/he/build/he-runtime/*:java/he/build/he-runtime/lib/*' internaltests.DocumentIriTest
+```
+
+CI runs both the full HE suite on JDK 21 and this packaged-runtime probe on
+JDK 17. Use `git diff --check` to check whitespace; no formatter is configured.
 
 GitHub Actions runs these checks on pull requests and pushes to `saxon12`. To use a CI build, open a successful workflow run and download the `saxonj-he-runtime` artifact. The HE test report is available as `he-test-report`. [Workflow runs](https://github.com/cartavelio/saxonmirrorhe/actions/workflows/saxonj-he.yml)
 

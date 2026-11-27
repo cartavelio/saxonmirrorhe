@@ -82,12 +82,20 @@ jobs:
       - name: Run HE tests
         id: suite
         # Gradle logs test events on stdout. Send this step's console output to stderr.
-        run: ./gradlew --console=plain --configure-on-demand :java:he:editionTest 1>&2
+        run: ./gradlew --console=plain --configure-on-demand :java:he:stageHeRuntime :java:he:editionTest 1>&2
       - name: Verify that HE tests ran
         if: ${{ success() && steps.suite.outputs.executed != 'true' }}
         run: |
           echo "Gradle completed without executing any HE tests." >&2
           exit 1
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Retrieve documents with Unicode IRIs on Java 17
+        run: >-
+          java -cp 'java/he/build/classes/java/editionTest:java/he/build/he-runtime/*:java/he/build/he-runtime/lib/*'
+          internaltests.DocumentIriTest
       - name: Upload test and Gradle HTML reports
         id: reports
         if: ${{ !cancelled() }}
