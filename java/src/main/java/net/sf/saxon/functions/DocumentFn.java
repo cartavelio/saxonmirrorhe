@@ -428,7 +428,8 @@ public class DocumentFn extends SystemFunction implements Callable {
                     } else {
 //#if CSHARP == false
                         // Use URIUtils (not URI.resolve) because URIUtils handles jar:file: URIs correctly.
-                        request.uri = URIUtils.resolve(new URI(baseURI), href).toString();
+                        // Supply UTF-8 escapes: URIUtils otherwise escapes UTF-16 code units as if they were bytes.
+                        request.uri = URIUtils.resolve(new URI(baseURI), new URI(href).toASCIIString()).toString();
 //#else
                         // But we don't need to worry about that in C#
                         request.uri = new URI(baseURI).resolve(href).toString();
