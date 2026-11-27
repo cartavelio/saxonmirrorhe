@@ -29,6 +29,21 @@ For maintained deterministic HE artifacts, use an explicit release date with the
 normal JAR task; see [reproducible HE builds](java/he/ci/REPRODUCIBLE.md) for the
 date contract, clean-build probe, and dependency verification limits.
 
+For the document IRI regression, run
+`./gradlew --configure-on-demand :java:he:editionTest --tests internaltests.DocumentIriTest`.
+The [resolver call](java/src/main/java/net/sf/saxon/functions/DocumentFn.java) is
+covered by [real document retrieval tests](java/src/test/java/internaltests/DocumentIriTest.java)
+for raw Greek IRIs, UTF-8 encoded controls, spaces, supplementary characters,
+reserved characters, and relative JAR references. After the normal build above,
+run the identical cases against the packaged runtime with Java 17 on `PATH`:
+
+```sh
+java -cp 'java/he/build/classes/java/editionTest:java/he/build/he-runtime/*:java/he/build/he-runtime/lib/*' internaltests.DocumentIriTest
+```
+
+CI runs both the full HE suite on JDK 21 and this packaged-runtime probe on
+JDK 17. Use `git diff --check` to check whitespace; no formatter is configured.
+
 GitHub Actions runs these checks on pull requests and pushes to `saxon12`. To use a CI build, open a successful workflow run and download the `saxonj-he-runtime` artifact. The HE test report is available as `he-test-report`. [Workflow runs](https://github.com/cartavelio/saxonmirrorhe/actions/workflows/saxonj-he.yml)
 
 ## Save and load a compiled stylesheet

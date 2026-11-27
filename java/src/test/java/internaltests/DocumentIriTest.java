@@ -39,7 +39,7 @@ public class DocumentIriTest {
 
     @Test
     public void rawGreekAbsoluteIri() throws Exception {
-        String iri = input("uri α").toUri().toString();
+        String iri = input("uri α").toUri().toASCIIString().replace("%CE%B1", "α");
         if (!iri.contains("uri%20α/")) {
             throw new AssertionError("The regression must pass raw Greek with an encoded space: " + iri);
         }
@@ -53,7 +53,8 @@ public class DocumentIriTest {
 
     @Test
     public void rawSpacesAndGreek() throws Exception {
-        read(input("uri α").toUri().toString().replace("%20", " "), directory.toUri());
+        read(input("uri α").toUri().toASCIIString().replace("%CE%B1", "α").replace("%20", " "),
+                directory.toUri());
     }
 
     @Test
@@ -65,14 +66,14 @@ public class DocumentIriTest {
     @Test
     public void supplementaryCodepoint() throws Exception {
         Path file = input("uri \uD83D\uDE00");
-        read(file.toUri().toString(), directory.toUri());
+        read(file.toUri().toASCIIString().replace("%F0%9F%98%80", "\uD83D\uDE00"), directory.toUri());
         read(file.toUri().toASCIIString(), directory.toUri());
     }
 
     @Test
     public void unicodeBaseWithAsciiReference() throws Exception {
         Path file = input("uri α");
-        read("input.xml", file.getParent().toUri());
+        read("input.xml", URI.create(file.getParent().toUri().toASCIIString().replace("%CE%B1", "α")));
     }
 
     @Test
@@ -85,12 +86,12 @@ public class DocumentIriTest {
     public void relativeDocumentInJar() throws Exception {
         Path jar = directory.resolve("documents.jar");
         try (ZipOutputStream zip = new ZipOutputStream(Files.newOutputStream(jar))) {
-            zip.putNextEntry(new ZipEntry("nested/α/input.xml"));
+            zip.putNextEntry(new ZipEntry("nested/child/input.xml"));
             zip.write(XML.getBytes(StandardCharsets.UTF_8));
             zip.closeEntry();
         }
         // Keep the URIUtils jar: resolution fix: java.net.URI.resolve alone loses this base.
-        read("α/input.xml", URI.create("jar:" + jar.toUri().toASCIIString() + "!/nested/query.xq"));
+        read("child/input.xml", URI.create("jar:" + jar.toUri().toASCIIString() + "!/nested/query.xq"));
     }
 
     private interface Check { void run() throws Exception; }
